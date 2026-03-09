@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { setView } from '../store/slices/uiSlice';
+import { AppView } from '../types';
 
 const AdminDashboard = () => {
+  const dispatch = useDispatch();
+  const handleSetView = (view) => dispatch(setView(view));
   const [activeTab, setActiveTab] = useState('overview');
   const [activeModal, setActiveModal] = useState(null);
   const [showToast, setShowToast] = useState(null);
@@ -76,7 +81,7 @@ const AdminDashboard = () => {
       {/* Sidebar */}
       <aside className={`w-72 bg-slate-950 border-r border-slate-800 flex flex-col fixed h-full z-50 transition-transform duration-300 lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="p-10">
-          <div className="flex items-center gap-3 mb-16 shrink-0 cursor-pointer" onClick={() => setView?.(AppView.PUBLIC_HOME)}>
+          <div className="flex items-center gap-3 mb-16 shrink-0 cursor-pointer" onClick={() => handleSetView(AppView.PUBLIC_HOME)}>
             <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center font-black text-white">V</div>
             <span className="text-xl font-black font-poppins tracking-tighter whitespace-nowrap">VirtualCitySchool</span>
           </div>

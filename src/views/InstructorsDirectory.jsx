@@ -1,7 +1,11 @@
 import React from 'react';
+import { useDispatch } from 'react-redux';
+import { setView } from '../store/slices/uiSlice';
 import { AppView } from '../types';
 
-const InstructorsDirectory = ({ setView }) => {
+const InstructorsDirectory = () => {
+  const dispatch = useDispatch();
+  const handleSetView = (view) => dispatch(setView(view));
   const teachers = [
     { name: "Dr. Samuel Okoro", sub: "Physics Master", bio: "Ph.D. from Cambridge. 12+ years experience.", rat: 4.9, img: "samuel_okoro" },
     { name: "Dr. Sarah Miller", sub: "CS Specialist", bio: "Former Senior Architect at Google.", rat: 4.8, img: "sarah_miller" },
@@ -12,16 +16,16 @@ const InstructorsDirectory = ({ setView }) => {
       <nav className="w-full bg-slate-950 border-b border-slate-800 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex justify-between items-center">
           <div className="flex items-center gap-4 sm:gap-10 overflow-hidden">
-            <div className="flex items-center gap-2 sm:gap-3 group cursor-pointer shrink-0" onClick={() => setView?.(AppView.PUBLIC_HOME)}>
+            <div className="flex items-center gap-2 sm:gap-3 group cursor-pointer shrink-0" onClick={() => handleSetView(AppView.PUBLIC_HOME)}>
               <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center font-black text-white group-hover:rotate-12 transition">V</div>
               <span className="font-black text-[10px] sm:text-sm tracking-tighter whitespace-nowrap">VirtualCitySchool</span>
             </div>
             <div className="flex items-center gap-3 sm:gap-6 overflow-x-auto custom-scrollbar whitespace-nowrap py-2 no-scrollbar font-bold">
-              <button onClick={() => setView?.(AppView.PUBLIC_HOME)} className="text-slate-400 text-xs sm:text-sm hover:text-white transition">Home</button>
-              <button onClick={() => setView?.(AppView.FEED)} className="text-slate-400 text-xs sm:text-sm hover:text-white transition">Feed</button>
-              <button onClick={() => setView?.(AppView.STUDENT)} className="text-slate-400 text-xs sm:text-sm hover:text-white transition">Dashboard</button>
+              <button onClick={() => handleSetView(AppView.PUBLIC_HOME)} className="text-slate-400 text-xs sm:text-sm hover:text-white transition">Home</button>
+              <button onClick={() => handleSetView(AppView.FEED)} className="text-slate-400 text-xs sm:text-sm hover:text-white transition">Feed</button>
+              <button onClick={() => handleSetView(AppView.STUDENT)} className="text-slate-400 text-xs sm:text-sm hover:text-white transition">Dashboard</button>
               <button className="bg-slate-800 text-white px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm cursor-default">Instructors</button>
-              <button onClick={() => setView?.(AppView.MARKETPLACE)} className="text-slate-400 text-xs sm:text-sm hover:text-white transition">Catalog</button>
+              <button onClick={() => handleSetView(AppView.MARKETPLACE)} className="text-slate-400 text-xs sm:text-sm hover:text-white transition">Catalog</button>
             </div>
           </div>
           <div className="flex items-center gap-3 sm:gap-5 shrink-0 ml-4">
@@ -47,7 +51,7 @@ const InstructorsDirectory = ({ setView }) => {
               <p className="text-indigo-400 font-bold uppercase tracking-widest text-[10px] mb-4">{t.sub}</p>
               <p className="text-slate-500 text-sm mb-8 line-clamp-2">{t.bio}</p>
               <button 
-                onClick={() => setView?.(AppView.TEACHER_PROFILE)}
+                onClick={() => handleSetView(AppView.TEACHER_PROFILE)}
                 className="w-full py-4 bg-slate-800 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-indigo-600 transition shadow-lg"
               >
                 View Profile

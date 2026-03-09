@@ -1,12 +1,9 @@
-
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { useSelector } from 'react-redux';
 import { askLearningAssistant } from '../services/gemini';
 
-// interface AIChatProps {
-//   currentView: AppView;
-// }
-
-const AIChat = ({ currentView }) => {
+const AIChat = () => {
+  const { currentView } = useSelector((state) => state.ui);
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([{ role: 'user', text: '' }, { role: 'ai', text: '' }]);
   const [input, setInput] = useState('');

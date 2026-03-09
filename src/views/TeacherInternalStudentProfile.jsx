@@ -1,15 +1,17 @@
-
-import React from 'react';
+import { useDispatch } from 'react-redux';
+import { setView } from '../store/slices/uiSlice';
 import { AppView } from '../types';
 
-const TeacherInternalStudentProfile = ({ setView }) => {
+const TeacherInternalStudentProfile = () => {
+  const dispatch = useDispatch();
+  const handleSetView = (view) => dispatch(setView(view));
   return (
     <section id="student-risk-view" className="min-h-screen bg-[#0f172a] text-white font-inter p-4 md:p-8">
       {/* Navigation Header */}
       <header className="max-w-7xl mx-auto mb-10 flex items-center justify-between border-b border-slate-800 pb-6">
         <div className="flex items-center gap-6">
           <button 
-            onClick={() => setView?.(AppView.TEACHER)}
+            onClick={() => handleSetView(AppView.TEACHER)}
             className="flex items-center gap-2 text-slate-400 hover:text-white transition group font-bold text-sm"
           >
             <i className="fas fa-arrow-left transition group-hover:-translate-x-1"></i>

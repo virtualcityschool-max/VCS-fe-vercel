@@ -1,20 +1,24 @@
 import React from 'react';
+import { useDispatch } from 'react-redux';
+import { setView } from '../store/slices/uiSlice';
 import { AppView } from '../types';
 
-const ParentPortal = ({ setView }) => {
+const ParentPortal = () => {
+  const dispatch = useDispatch();
+  const handleSetView = (view) => dispatch(setView(view));
   return (
     <section id="parent-view" className="min-h-screen bg-[#0f172a] text-white font-inter">
       {/* Navigation Bar */}
       <nav className="w-full bg-[#0f172a] border-b border-slate-800 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 h-16 flex justify-between items-center">
           <div className="flex items-center gap-10">
-            <div className="flex items-center gap-2 sm:gap-3 group cursor-pointer shrink-0" onClick={() => setView?.(AppView.PUBLIC_HOME)}>
+            <div className="flex items-center gap-2 sm:gap-3 group cursor-pointer shrink-0" onClick={() => handleSetView(AppView.PUBLIC_HOME)}>
               <div className="w-8 h-8 bg-indigo-600 rounded flex items-center justify-center font-black text-white group-hover:rotate-12 transition">V</div>
               <span className="text-[10px] sm:text-sm font-black font-poppins text-white tracking-tight whitespace-nowrap">VirtualCitySchool</span>
             </div>
             <div className="flex items-center gap-6">
               <button 
-                onClick={() => setView?.(AppView.PUBLIC_HOME)}
+                onClick={() => handleSetView(AppView.PUBLIC_HOME)}
                 className="text-slate-400 font-medium text-sm hover:text-white transition cursor-pointer"
               >
                 Home

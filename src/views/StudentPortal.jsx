@@ -1,44 +1,48 @@
 import React from 'react';
+import { useDispatch } from 'react-redux';
+import { setView } from '../store/slices/uiSlice';
 import { AppView } from '../types';
 
-const StudentPortal = ({ setView }) => {
+const StudentPortal = () => {
+  const dispatch = useDispatch();
+  const handleSetView = (view) => dispatch(setView(view));
   return (
     <section id="student-view" className="min-h-screen bg-[#0f172a] text-white font-inter">
       {/* 1. Global Navigation Bar */}
       <nav className="w-full bg-[#0f172a] border-b border-slate-800 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex justify-between items-center">
           <div className="flex items-center gap-4 sm:gap-10 overflow-hidden">
-            <div className="flex items-center gap-2 sm:gap-3 group cursor-pointer shrink-0" onClick={() => setView?.(AppView.PUBLIC_HOME)}>
+            <div className="flex items-center gap-2 sm:gap-3 group cursor-pointer shrink-0" onClick={() => handleSetView(AppView.PUBLIC_HOME)}>
               <div className="w-8 h-8 bg-indigo-600 rounded flex items-center justify-center font-black text-white group-hover:rotate-12 transition">V</div>
               <span className="text-[10px] sm:text-sm font-black font-poppins text-white tracking-tight whitespace-nowrap">VirtualCitySchool</span>
             </div>
             <div className="flex items-center gap-3 sm:gap-6 overflow-x-auto custom-scrollbar whitespace-nowrap py-2 no-scrollbar">
               <button 
-                onClick={() => setView?.(AppView.PUBLIC_HOME)}
+                onClick={() => handleSetView(AppView.PUBLIC_HOME)}
                 className="text-slate-400 font-medium text-xs sm:text-sm hover:text-white transition cursor-pointer"
               >
                 Home
               </button>
               <button 
-                onClick={() => setView?.(AppView.FEED)}
+                onClick={() => handleSetView(AppView.FEED)}
                 className="text-slate-400 font-medium text-xs sm:text-sm hover:text-white transition cursor-pointer"
               >
                 Feed
               </button>
               <button 
-                onClick={() => setView?.(AppView.STUDENT)}
+                onClick={() => handleSetView(AppView.STUDENT)}
                 className="bg-slate-800 text-white px-3 sm:px-4 py-1.5 rounded-lg font-medium text-xs sm:text-sm cursor-default"
               >
                 Dashboard
               </button>
               <button 
-                onClick={() => setView?.(AppView.INSTRUCTORS_DIRECTORY)}
+                onClick={() => handleSetView(AppView.INSTRUCTORS_DIRECTORY)}
                 className="text-slate-400 font-medium text-xs sm:text-sm hover:text-white transition cursor-pointer"
               >
                 Instructors
               </button>
               <button 
-                onClick={() => setView?.(AppView.MARKETPLACE)}
+                onClick={() => handleSetView(AppView.MARKETPLACE)}
                 className="text-slate-400 font-medium text-xs sm:text-sm hover:text-white transition cursor-pointer"
               >
                 Catalog
@@ -107,7 +111,7 @@ const StudentPortal = ({ setView }) => {
                       </div>
                     </div>
                   </div>
-                  <button onClick={() => setView?.(AppView.CLASSROOM)} className="w-full md:w-auto bg-blue-600 hover:bg-blue-500 text-white px-8 py-4 rounded-2xl font-bold text-sm shadow-lg shadow-blue-900/40 transition active:scale-95">
+                  <button onClick={() => handleSetView(AppView.CLASSROOM)} className="w-full md:w-auto bg-blue-600 hover:bg-blue-500 text-white px-8 py-4 rounded-2xl font-bold text-sm shadow-lg shadow-blue-900/40 transition active:scale-95">
                     Join Live Room
                   </button>
                 </div>

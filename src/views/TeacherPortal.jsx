@@ -1,8 +1,12 @@
 
 import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { setView } from '../store/slices/uiSlice';
 import { AppView } from '../types';
 
-const TeacherPortal = ({ setView }) => {
+const TeacherPortal = () => {
+  const dispatch = useDispatch();
+  const handleSetView = (view) => dispatch(setView(view));
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -22,7 +26,7 @@ const TeacherPortal = ({ setView }) => {
       {/* Sidebar */}
       <aside className={`w-72 bg-slate-950 border-r border-slate-800 flex flex-col fixed h-full z-50 transition-transform duration-300 lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="p-10">
-          <div className="flex items-center gap-3 mb-16 cursor-pointer shrink-0" onClick={() => setView?.(AppView.PUBLIC_HOME)}>
+          <div className="flex items-center gap-3 mb-16 cursor-pointer shrink-0" onClick={() => handleSetView(AppView.PUBLIC_HOME)}>
             <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center font-black">V</div>
             <span className="text-lg font-black tracking-tighter whitespace-nowrap">VirtualCitySchool</span>
           </div>
@@ -77,7 +81,7 @@ const TeacherPortal = ({ setView }) => {
             <h3 className="text-xl font-bold font-poppins text-rose-500">Risk Alerts</h3>
             <div className="bg-rose-500/5 border border-rose-500/20 p-8 rounded-5xl space-y-6 shadow-2xl">
               {[
-                { name: 'Kevin Wu', status: 'Plagiarism Alert', action: () => setView?.(AppView.INTERNAL_STUDENT_PROFILE) },
+                { name: 'Kevin Wu', status: 'Plagiarism Alert', action: () => handleSetView(AppView.INTERNAL_STUDENT_PROFILE) },
                 { name: 'Sarah Ahmed', status: 'Attendance Drop', action: () => {} },
               ].map((risk, i) => (
                 <div key={i} onClick={risk.action} className="flex items-center justify-between p-4 bg-slate-900 rounded-2xl border border-rose-500/20 cursor-pointer hover:bg-rose-500/10 transition group">
