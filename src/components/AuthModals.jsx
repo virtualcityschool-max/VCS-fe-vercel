@@ -1,77 +1,237 @@
 import React, { useState } from "react";
+import toast from "react-hot-toast";
 import { useSelector, useDispatch } from "react-redux";
-import { setAuthModal } from "../store/slices/uiSlice";
-import { loginSuccess } from "../store/slices/authSlice";
-import { setView } from "../store/slices/uiSlice";
+import { setAuthModal, setView } from "../store/slices/uiSlice";
+import {
+  loginUser,
+  registerUser,
+  clearAuthError,
+  verifyOtp,
+} from "../store/slices/authSlice";
 import { AppView } from "../types";
+
+const emptyErrors = {
+  email: "",
+  username: "",
+  password: "",
+  confirmPassword: "",
+  role: "",
+};
 
 const AuthModals = () => {
   const [activeRoleTab, setActiveRoleTab] = useState("student");
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [registrationSuccess, setRegistrationSuccess] = useState(false);
+  const [error, setError] = useState(emptyErrors);
+  const [backendErrors, setBackendErrors] = useState({});
+  const [registrationStep, setRegistrationStep] = useState("form"); // form | sending | otp | success
+  const [otp, setOtp] = useState("");
+  const [userId, setUserId] = useState(null);
+  const [otpError, setOtpError] = useState("");
+
+  // Registration form state
+  const [username, setUsername] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [role, setRole] = useState("");
 
   const dispatch = useDispatch();
   const { authModal } = useSelector((state) => state.ui);
+  const { isLoading, error: authError } = useSelector((state) => state.auth);
+
   const isOpen = authModal.type;
   const intendedRole = authModal.intendedRole;
-  
+
+  const hasLocalErrors = Object.values(error).some((value) => value !== "");
+
   const onClose = () => dispatch(setAuthModal(null));
 
   React.useEffect(() => {
     if (isOpen && intendedRole) {
       setActiveRoleTab(intendedRole);
     }
-  }, [isOpen, intendedRole]);
+
+    if (isOpen) {
+      setBackendErrors({});
+      dispatch(clearAuthError());
+      setError({ ...emptyErrors });
+      // Reset OTP states
+      setRegistrationStep("form");
+      setOtp("");
+      setUserId(null);
+      setOtpError("");
+    }
+  }, [isOpen, intendedRole, dispatch]);
 
   if (!isOpen) return null;
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    setError("");
+    dispatch(clearAuthError());
 
-    const valid =
-      username.toLowerCase() === activeRoleTab &&
-      password.toLowerCase() === activeRoleTab;
+    const newErrors = { ...emptyErrors };
 
-    if (valid) {
-      const names = {
-        student: "Sarah Khan",
-        teacher: "Dr. Elena Petrova",
-        admin: "Root Admin",
-        parent: "Mr. Khan",
-      };
+    if (!email.trim()) {
+      newErrors.email = "Email is required";
+    }
 
-      dispatch(
-        loginSuccess({
+    if (!password.trim()) {
+      newErrors.password = "Password is required";
+    }
+
+    const hasErrors = Object.values(newErrors).some((value) => value);
+
+    if (hasErrors) {
+      setError(newErrors);
+      return;
+    }
+
+    setError({ ...emptyErrors });
+
+    try {
+      const user = await dispatch(
+        loginUser({
+          email,
+          password,
           role: activeRoleTab,
-          username: names[activeRoleTab] || "User",
-        })
-      );
+        }),
+      ).unwrap();
 
-      // Role-based redirects
-      if (activeRoleTab === "student") {
+      if (user.role === "student") {
         dispatch(setView(AppView.FEED));
-      } else if (activeRoleTab === "teacher") {
+      } else if (user.role === "teacher") {
         dispatch(setView(AppView.TEACHER));
-      } else if (activeRoleTab === "admin") {
+      } else if (user.role === "admin") {
         dispatch(setView(AppView.ADMIN));
-      } else if (activeRoleTab === "parent") {
+      } else if (user.role === "parent") {
         dispatch(setView(AppView.PARENT));
       }
 
       onClose();
-      setUsername("");
+      setEmail("");
       setPassword("");
-    } else {
-      setError("Invalid Credentials. Please try again.");
+      setError({ ...emptyErrors });
+    } catch (err) {
+      // Show toast for login errors
+      if (typeof err === "object" && err !== null) {
+        Object.entries(err).forEach(([field, messages]) => {
+          const errorText = Array.isArray(messages)
+            ? messages.join(", ")
+            : messages;
+          toast.error(`${field}: ${errorText}`);
+        });
+      } else {
+        toast.error(err || "Login failed");
+      }
     }
   };
 
-  const handleRegister = (e) => {
+  const handleRegisterSubmit = async (e) => {
     e.preventDefault();
-    setRegistrationSuccess(true);
+    dispatch(clearAuthError());
+
+    const newErrors = { ...emptyErrors };
+
+    // Email validation
+    if (!email) newErrors.email = "Email is required";
+    else if (!/\S+@\S+\.\S+/.test(email)) newErrors.email = "Email is invalid";
+
+    // Username validation
+    if (!username) newErrors.username = "Username is required";
+    else if (username.length < 3)
+      newErrors.username = "Username must be at least 3 characters";
+
+    // Password validation
+    if (!password) newErrors.password = "Password is required";
+    else if (password.length < 6)
+      newErrors.password = "Password must be at least 6 characters";
+
+    // Confirm password validation
+    if (!confirmPassword)
+      newErrors.confirmPassword = "Please confirm your password";
+    else if (password !== confirmPassword)
+      newErrors.confirmPassword = "Passwords do not match";
+
+    // Role validation
+    if (!role) newErrors.role = "Please select a role";
+
+    const hasErrors = Object.values(newErrors).some((value) => value);
+
+    if (hasErrors) {
+      setError(newErrors);
+      return;
+    }
+
+    setError({ ...emptyErrors });
+
+    try {
+      const response = await dispatch(
+        registerUser({
+          email,
+          username,
+          password,
+          confirmPassword,
+          role,
+        }),
+      ).unwrap();
+
+      // Move to OTP step instead of showing success
+      setRegistrationStep("otp");
+      console.log("Registration Response:", response);
+      setUserId(response.user_id || response.user?.id); // Adjust based on backend response
+      // Don't clear form fields yet
+    } catch (err) {
+      // Error is already in Redux state, handle field errors here
+      if (typeof err === "object" && err !== null) {
+        setBackendErrors(err);
+
+        // Show toast for backend field errors
+        Object.entries(err).forEach(([field, messages]) => {
+          const errorText = Array.isArray(messages)
+            ? messages.join(", ")
+            : messages;
+          toast.error(`${field}: ${errorText}`);
+        });
+      }
+    }
+  };
+
+  const handleOtpVerification = async (e) => {
+    e.preventDefault();
+
+    if (!otp.trim()) {
+      setOtpError("OTP is required");
+      return;
+    }
+
+    setOtpError("");
+
+    try {
+      await dispatch(verifyOtp({ userId, otp })).unwrap();
+
+      // Registration successful - reset everything
+      setRegistrationStep("success");
+      setTimeout(() => {
+        onClose();
+        // Reset all states
+        setEmail("");
+        setUsername("");
+        setPassword("");
+        setConfirmPassword("");
+        setRole("student");
+        setError({ ...emptyErrors });
+        setRegistrationStep("form");
+        setOtp("");
+        setUserId(null);
+        setOtpError("");
+      }, 2000);
+    } catch (err) {
+      // Handle OTP verification errors
+      if (typeof err === "object" && err !== null) {
+        setOtpError(err.otp?.[0] || err.message || "Invalid OTP");
+      } else {
+        setOtpError(err || "OTP verification failed");
+      }
+    }
   };
 
   return (
@@ -94,20 +254,24 @@ const AuthModals = () => {
             </p>
 
             <div className="flex bg-slate-950 p-1.5 rounded-2xl border border-white/5 mb-8">
-              {["student", "teacher", "parent", "admin"].map((role) => (
+              {["student", "teacher", "parent", "admin"].map((roleOption) => (
                 <button
-                  key={role}
+                  key={roleOption}
+                  type="button"
                   onClick={() => {
-                    setActiveRoleTab(role);
-                    setError("");
+                    setActiveRoleTab(roleOption);
+                    setError({ ...emptyErrors });
+                    setEmail("");
+                    setPassword("");
+                    dispatch(clearAuthError());
                   }}
                   className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
-                    activeRoleTab === role
+                    activeRoleTab === roleOption
                       ? "bg-indigo-600 text-white shadow-lg"
                       : "text-slate-500 hover:text-slate-300"
                   }`}
                 >
-                  {role}
+                  {roleOption}
                 </button>
               ))}
             </div>
@@ -115,16 +279,27 @@ const AuthModals = () => {
             <form onSubmit={handleLogin} className="space-y-5">
               <div>
                 <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block">
-                  Username
+                  Email
                 </label>
                 <input
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder={`e.g. ${activeRoleTab}`}
+                  type="email"
+                  value={email}
+                  onChange={(e) => {
+                    toast.dismiss();
+                    setEmail(e.target.value);
+                    setError((prev) => ({ ...prev, email: "" }));
+                    dispatch(clearAuthError());
+                  }}
+                  placeholder="e.g. user@email.com"
                   className="w-full bg-slate-950 border border-white/5 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
                 />
+                {error.email && (
+                  <p className="text-red-500 text-xs mt-2 animate-shake">
+                    {error.email}
+                  </p>
+                )}
               </div>
+
               <div>
                 <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block">
                   Password
@@ -132,59 +307,359 @@ const AuthModals = () => {
                 <input
                   type="password"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => {
+                    toast.dismiss();
+                    setPassword(e.target.value);
+                    setError((prev) => ({ ...prev, password: "" }));
+                    dispatch(clearAuthError());
+                  }}
                   placeholder="••••••••"
                   className="w-full bg-slate-950 border border-white/5 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
                 />
+                {error.password && (
+                  <p className="text-red-500 text-xs mt-2 animate-shake">
+                    {error.password}
+                  </p>
+                )}
+                {backendErrors.password && (
+                  <div className="text-red-500 text-xs mt-2 space-y-1">
+                    {Array.isArray(backendErrors.password) ? (
+                      backendErrors.password.map((msg, idx) => (
+                        <p key={idx} className="animate-shake">
+                          {msg}
+                        </p>
+                      ))
+                    ) : (
+                      <p className="animate-shake">{backendErrors.password}</p>
+                    )}
+                  </div>
+                )}
               </div>
-              {error && (
+
+              {authError && !hasLocalErrors && (
                 <p className="text-red-500 text-xs font-bold animate-shake text-center">
-                  {error}
+                  {typeof authError === "string"
+                    ? authError
+                    : "Registration failed"}
                 </p>
               )}
+
               <button
                 type="submit"
-                className="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all shadow-xl active:scale-95"
+                disabled={isLoading}
+                className={`w-full text-white py-5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all shadow-xl active:scale-95 flex items-center justify-center gap-3 ${
+                  isLoading
+                    ? "bg-indigo-400 cursor-not-allowed"
+                    : "bg-indigo-600 hover:bg-indigo-500"
+                }`}
               >
-                Launch VirtualCity Terminal
+                {isLoading ? (
+                  <>
+                    <i className="fas fa-circle-notch fa-spin"></i>
+                    Authenticating...
+                  </>
+                ) : (
+                  "Launch VirtualCity Terminal"
+                )}
               </button>
             </form>
           </div>
         ) : (
           <div className="p-6 sm:p-10">
-            {registrationSuccess ? (
+            {registrationStep === "form" && (
+              <form onSubmit={handleRegisterSubmit} className="space-y-5">
+                {/* Your existing registration form fields */}
+                <div>
+                  <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => {
+                      toast.dismiss();
+                      setEmail(e.target.value);
+                      setError((prev) => ({ ...prev, email: "" }));
+                      dispatch(clearAuthError());
+                      setBackendErrors((prev) => ({
+                        ...prev,
+                        email: undefined,
+                      }));
+                    }}
+                    placeholder="example@example.com"
+                    className="w-full bg-slate-950 border border-white/5 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
+                  />
+                  {error.email && (
+                    <p className="text-red-500 text-xs mt-2 animate-shake">
+                      {error.email}
+                    </p>
+                  )}
+                  {backendErrors.email && (
+                    <div className="text-red-500 text-xs mt-2 space-y-1">
+                      {Array.isArray(backendErrors.email) ? (
+                        backendErrors.email.map((msg, idx) => (
+                          <p key={idx} className="animate-shake">
+                            {msg}
+                          </p>
+                        ))
+                      ) : (
+                        <p className="animate-shake">{backendErrors.email}</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Add all other form fields (username, password, confirmPassword, role) */}
+                <div>
+                  <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block">
+                    Username
+                  </label>
+                  <input
+                    type="text"
+                    value={username}
+                    onChange={(e) => {
+                      toast.dismiss();
+                      setUsername(e.target.value);
+                      setError((prev) => ({ ...prev, username: "" }));
+                      dispatch(clearAuthError());
+                    }}
+                    placeholder="JohnDoe"
+                    className="w-full bg-slate-950 border border-white/5 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
+                  />
+                  {error.username && (
+                    <p className="text-red-500 text-xs mt-2 animate-shake">
+                      {error.username}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block">
+                    Password
+                  </label>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => {
+                      toast.dismiss();
+                      setPassword(e.target.value);
+                      setError((prev) => ({ ...prev, password: "" }));
+                      dispatch(clearAuthError());
+                      setBackendErrors((prev) => ({
+                        ...prev,
+                        password: undefined,
+                      }));
+                    }}
+                    placeholder="••••••••"
+                    className="w-full bg-slate-950 border border-white/5 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
+                  />
+                  {error.password && (
+                    <p className="text-red-500 text-xs mt-2 animate-shake">
+                      {error.password}
+                    </p>
+                  )}
+                  {backendErrors.password && (
+                    <div className="text-red-500 text-xs mt-2 space-y-1">
+                      {Array.isArray(backendErrors.password) ? (
+                        backendErrors.password.map((msg, idx) => (
+                          <p key={idx} className="animate-shake">
+                            {msg}
+                          </p>
+                        ))
+                      ) : (
+                        <p className="animate-shake">
+                          {backendErrors.password}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block">
+                    Confirm Password
+                  </label>
+                  <input
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => {
+                      toast.dismiss();
+                      setConfirmPassword(e.target.value);
+                      setError((prev) => ({
+                        ...prev,
+                        confirmPassword: "",
+                      }));
+                      dispatch(clearAuthError());
+                    }}
+                    placeholder="••••••••"
+                    className="w-full bg-slate-950 border border-white/5 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
+                  />
+                  {error.confirmPassword && (
+                    <p className="text-red-500 text-xs mt-2 animate-shake">
+                      {error.confirmPassword}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block">
+                    Role
+                  </label>
+                  <select
+                    value={role}
+                    onChange={(e) => {
+                      toast.dismiss();
+                      setRole(e.target.value);
+                      setError((prev) => ({ ...prev, role: "" }));
+                      dispatch(clearAuthError());
+                    }}
+                    className="w-full bg-slate-950 border border-white/5 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
+                  >
+                    <option value="">Select Role</option>
+                    <option value="admin">Admin</option>
+                    <option value="teacher">Teacher</option>
+                    <option value="student">Student</option>
+                    <option value="parent">Parent</option>
+                  </select>
+                  {error.role && (
+                    <p className="text-red-500 text-xs mt-2 animate-shake">
+                      {error.role}
+                    </p>
+                  )}
+                </div>
+
+                {authError && !hasLocalErrors && (
+                  <p className="text-red-500 text-xs font-bold animate-shake text-center">
+                    {typeof authError === "string"
+                      ? authError
+                      : "Registration failed"}
+                  </p>
+                )}
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className={`w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold ${
+                    isLoading
+                      ? "bg-indigo-400 cursor-not-allowed"
+                      : "hover:bg-indigo-500"
+                  }`}
+                >
+                  {isLoading ? (
+                    <>
+                      <i className="fas fa-circle-notch fa-spin"></i>
+                      Registering...
+                    </>
+                  ) : (
+                    "Register Now"
+                  )}
+                </button>
+              </form>
+            )}
+
+            {registrationStep === "sending" && (
+              <div className="text-center py-10">
+                <div className="w-20 h-20 bg-indigo-500/20 text-indigo-500 rounded-3xl flex items-center justify-center text-3xl mx-auto mb-6">
+                  <i className="fas fa-envelope fa-pulse"></i>
+                </div>
+                <h2 className="text-2xl font-black font-poppins text-white mb-4">
+                  Sending OTP...
+                </h2>
+                <p className="text-slate-400 text-sm leading-relaxed">
+                  Please wait while we send the verification code to your email.
+                </p>
+              </div>
+            )}
+
+            {registrationStep === "otp" && (
+              <form onSubmit={handleOtpVerification} className="space-y-5">
+                <div className="text-center mb-8">
+                  <div className="w-20 h-20 bg-emerald-500/20 text-emerald-500 rounded-3xl flex items-center justify-center text-3xl mx-auto mb-6">
+                    <i className="fas fa-envelope-open-text"></i>
+                  </div>
+                  <h2 className="text-2xl font-black font-poppins text-white mb-4">
+                    Check Your Email
+                  </h2>
+                  <p className="text-slate-400 text-sm leading-relaxed">
+                    We've sent a 6-digit verification code to{" "}
+                    <strong>{email}</strong>
+                  </p>
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block text-center">
+                    Enter OTP Code
+                  </label>
+                  <input
+                    type="text"
+                    value={otp}
+                    onChange={(e) => {
+                      setOtp(e.target.value.replace(/\D/g, "").slice(0, 6));
+                      setOtpError("");
+                    }}
+                    placeholder="000000"
+                    maxLength={6}
+                    className="w-full bg-slate-950 border border-white/5 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-center text-2xl font-mono"
+                  />
+                  {otpError && (
+                    <p className="text-red-500 text-xs mt-2 animate-shake text-center">
+                      {otpError}
+                    </p>
+                  )}
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isLoading || otp.length !== 6}
+                  className={`w-full bg-emerald-600 text-white py-4 rounded-2xl font-bold ${
+                    isLoading || otp.length !== 6
+                      ? "bg-emerald-400 cursor-not-allowed"
+                      : "hover:bg-emerald-500"
+                  }`}
+                >
+                  {isLoading ? (
+                    <>
+                      <i className="fas fa-circle-notch fa-spin"></i>
+                      Verifying...
+                    </>
+                  ) : (
+                    "Verify OTP"
+                  )}
+                </button>
+
+                <div className="text-center">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      // Handle resend OTP
+                      toast.success("OTP resent to your email");
+                    }}
+                    className="text-slate-400 hover:text-white text-sm transition"
+                  >
+                    Didn't receive code? Resend OTP
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {registrationStep === "success" && (
               <div className="text-center py-10 animate-fadeIn">
                 <div className="w-20 h-20 bg-emerald-500/20 text-emerald-500 rounded-3xl flex items-center justify-center text-3xl mx-auto mb-6">
                   <i className="fas fa-check-circle"></i>
                 </div>
                 <h2 className="text-2xl font-black font-poppins text-white mb-4">
-                  Registration Submitted!
+                  Registration Successful!
                 </h2>
                 <p className="text-slate-400 text-sm leading-relaxed mb-8">
-                  Your application to join VirtualCitySchool is now under
-                  review.
+                  Your account has been created and verified successfully.
                 </p>
                 <button
-                  onClick={onClose}
+                  onClick={() => {
+                    onClose();
+                    setRegistrationStep("form");
+                  }}
                   className="w-full bg-slate-800 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-700 transition"
                 >
-                  Return to Home
-                </button>
-              </div>
-            ) : (
-              <div>
-                <h2 className="text-2xl sm:text-3xl font-black font-poppins text-white mb-2 text-center">
-                  Join the Academy
-                </h2>
-                <p className="text-slate-500 text-xs sm:text-sm mb-8 text-center">
-                  Apply for enrollment at VirtualCitySchool.
-                </p>
-                <button
-                  type="button"
-                  onClick={() => setRegistrationSuccess(true)}
-                  className="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold"
-                >
-                  Apply Now
+                  Go to Login
                 </button>
               </div>
             )}

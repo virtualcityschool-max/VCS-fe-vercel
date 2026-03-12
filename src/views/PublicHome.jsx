@@ -1,6 +1,6 @@
 import { useSelector, useDispatch } from 'react-redux';
 import { setAuthModal, setView } from '../store/slices/uiSlice';
-import { logout } from '../store/slices/authSlice';
+import { logoutUser } from '../store/slices/authSlice';
 import { AppView } from '../types';
 
 const PublicHome = () => {
@@ -8,8 +8,7 @@ const PublicHome = () => {
   const auth = useSelector((state) => state.auth);
 
   const onLogout = () => {
-    dispatch(logout());
-    dispatch(setView(AppView.PUBLIC_HOME));
+    dispatch(logoutUser());
   };
 
   const handleSetView = (view) => dispatch(setView(view));

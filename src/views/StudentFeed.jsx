@@ -1,5 +1,5 @@
 import { useSelector, useDispatch } from 'react-redux';
-import { logout } from '../store/slices/authSlice';
+import { logoutUser } from '../store/slices/authSlice';
 import { setView } from '../store/slices/uiSlice';
 import { AppView } from '../types';
 
@@ -7,8 +7,7 @@ const StudentFeed = () => {
   const dispatch = useDispatch();
   const auth = useSelector((state) => state.auth);
   const onLogout = () => {
-    dispatch(logout());
-    dispatch(setView(AppView.PUBLIC_HOME));
+    dispatch(logoutUser());
   };
 
   const handleSetView = (view) => dispatch(setView(view));

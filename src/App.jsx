@@ -1,6 +1,6 @@
-import { useSelector, useDispatch } from "react-redux";
-import { navigateTo } from "./store/slices/uiSlice";
+import { useSelector } from "react-redux";
 import { AppView } from "./types";
+import { Toaster } from "react-hot-toast";
 
 // Components
 import SimulatorBar from "./components/SimulatorBar";
@@ -21,7 +21,6 @@ import TeacherInternalStudentProfile from "./views/TeacherInternalStudentProfile
 import InstructorsDirectory from "./views/InstructorsDirectory";
 
 const App = () => {
-  const dispatch = useDispatch();
   const { currentView } = useSelector((state) => state.ui);
 
   const renderView = () => {
@@ -47,6 +46,7 @@ const App = () => {
       <AuthModals />
       <AIChat />
       <SimulatorBar />
+      <Toaster position="top-center" />
     </div>
   );
 };
