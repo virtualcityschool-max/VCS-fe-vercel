@@ -64,6 +64,26 @@ const SimulatorBar = () => {
     },
   ];
 
+  // Filter buttons based on authentication status and role
+  const getVisibleButtons = () => {
+    if (!isLoggedIn) {
+      // Show all buttons when not logged in (on home page or any public page)
+      return buttons;
+    }
+
+    // When logged in, only show buttons that are public or match the user's role
+    return buttons.filter((button) => {
+      // Show public buttons
+      if (button.public) return true;
+
+      // Show buttons that match the user's role
+      if (button.roles && button.roles.includes(role)) return true;
+
+      // Hide buttons that don't match the user's role
+      return false;
+    });
+  };
+
   const handleNavigation = (button) => {
     if (button.roles && !isLoggedIn) {
       const intendedRole = button.roles[0];
@@ -88,7 +108,7 @@ const SimulatorBar = () => {
         Global Simulator Bar
       </div>
 
-      {buttons.map((btn) => (
+      {getVisibleButtons().map((btn) => (
         <button
           key={btn.id}
           onClick={() => handleNavigation(btn)}
