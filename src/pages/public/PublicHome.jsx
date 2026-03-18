@@ -1,7 +1,9 @@
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 const PublicHome = () => {
   const auth = useSelector((state) => state.auth);
+  const navigate = useNavigate();
 
   return (
     <section
@@ -45,7 +47,7 @@ const PublicHome = () => {
               />
             </div>
             <button
-              onClick={() => handleSetView(AppView.MARKETPLACE)}
+              onClick={() => navigate("/courses")}
               className="bg-indigo-600 hover:bg-indigo-500 text-white px-10 py-4 rounded-4xl font-black text-xs uppercase tracking-widest transition shadow-xl shadow-indigo-900/20"
             >
               Search Catalog
@@ -55,14 +57,14 @@ const PublicHome = () => {
 
         <div className="flex flex-col sm:flex-row gap-6 justify-center">
           <button
-            onClick={() => handleSetView(AppView.MARKETPLACE)}
+            onClick={() => navigate("/courses")}
             className="group flex items-center justify-center gap-3 bg-white text-slate-950 px-6 sm:px-10 py-4 sm:py-5 rounded-4xl font-black text-[10px] sm:text-xs uppercase tracking-widest transition-all hover:scale-105 shadow-2xl shadow-white/5"
           >
             Explore Course Catalog
             <i className="fas fa-arrow-right group-hover:translate-x-1 transition"></i>
           </button>
           <button
-            onClick={() => handleSetView(AppView.INSTRUCTORS_DIRECTORY)}
+            onClick={() => navigate("/instructors")}
             className="group flex items-center justify-center gap-3 border border-white/10 hover:border-white/20 bg-white/5 hover:bg-white/10 text-white px-6 sm:px-10 py-4 sm:py-5 rounded-4xl font-black text-[10px] sm:text-xs uppercase tracking-widest transition-all hover:scale-105"
           >
             Find a Private Tutor
@@ -82,7 +84,7 @@ const PublicHome = () => {
             </h2>
           </div>
           <button
-            onClick={() => handleSetView(AppView.MARKETPLACE)}
+            onClick={() => navigate("/courses")}
             className="text-indigo-400 font-black text-[10px] uppercase tracking-widest hover:text-white transition flex items-center gap-3"
           >
             View all 50+ Courses <i className="fas fa-chevron-right"></i>
@@ -112,7 +114,7 @@ const PublicHome = () => {
           ].map((course, i) => (
             <div
               key={i}
-              onClick={() => handleSetView(AppView.MARKETPLACE)}
+              onClick={() => navigate("/courses")}
               className="bg-slate-900/50 border border-white/10 rounded-[2.5rem] overflow-hidden group cursor-pointer hover:border-indigo-500/50 transition-all shadow-xl flex flex-col"
             >
               <div className="h-56 relative overflow-hidden">

@@ -1,0 +1,12 @@
+// Layout Components
+export { default as Navbar } from './layout/Navbar';
+
+// Form Components  
+export { default as AuthModals } from './forms/AuthModals';
+
+// Common Components
+export { default as AIChat } from './common/AIChat';
+export { default as SimulatorBar } from './common/SimulatorBar';
+
+// UI Components (when available)
+// export { Button, Card, Input, Footer } from './ui';

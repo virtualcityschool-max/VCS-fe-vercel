@@ -40,7 +40,7 @@ const TeacherPortal = () => {
         <div className="p-10">
           <div
             className="flex items-center gap-3 mb-16 cursor-pointer shrink-0"
-            onClick={() => handleSetView(AppView.PUBLIC_HOME)}
+            onClick={() => navigate("/")}
           >
             <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center font-black">
               V
@@ -143,7 +143,7 @@ const TeacherPortal = () => {
                 {
                   name: "Kevin Wu",
                   status: "Plagiarism Alert",
-                  action: () => handleSetView(AppView.INTERNAL_STUDENT_PROFILE),
+                  action: () => navigate("/student/kevin-wu"),
                 },
                 {
                   name: "Sarah Ahmed",

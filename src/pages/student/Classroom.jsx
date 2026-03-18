@@ -45,7 +45,7 @@ const Classroom = () => {
             </div>
           </div>
           <button
-            onClick={() => handleSetView(AppView.STUDENT)}
+            onClick={() => navigate("/student")}
             className="bg-red-600 hover:bg-red-700 text-white px-4 sm:px-6 py-2 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition shadow-lg shadow-red-900/40 active:scale-95"
           >
             Leave

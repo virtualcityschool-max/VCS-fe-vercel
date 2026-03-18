@@ -3,23 +3,22 @@ import { useSelector } from "react-redux";
 import { Toaster } from "react-hot-toast";
 
 // Components
-import SimulatorBar from "./components/SimulatorBar";
-import AIChat from "./components/AIChat";
-import AuthModals from "./components/AuthModals";
-import Navbar from "./components/Navbar";
+import { SimulatorBar, AIChat, AuthModals, Navbar } from "./components";
 
-// Views
-import PublicHome from "./views/PublicHome";
-import AdminDashboard from "./views/AdminDashboard";
-import StudentPortal from "./views/StudentPortal";
-import TeacherPortal from "./views/TeacherPortal";
-import ParentPortal from "./views/ParentPortal";
-import Classroom from "./views/Classroom";
-import StudentFeed from "./views/StudentFeed";
-import Marketplace from "./views/Marketplace";
-import PublicTeacherProfile from "./views/PublicTeacherProfile";
-import TeacherInternalStudentProfile from "./views/TeacherInternalStudentProfile";
-import InstructorsDirectory from "./views/InstructorsDirectory";
+// Pages
+import {
+  PublicHome,
+  AdminDashboard,
+  StudentPortal,
+  TeacherPortal,
+  ParentPortal,
+  Classroom,
+  StudentFeed,
+  Marketplace,
+  PublicTeacherProfile,
+  TeacherInternalStudentProfile,
+  InstructorsDirectory,
+} from "./pages";
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {

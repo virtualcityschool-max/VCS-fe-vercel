@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import toast from "react-hot-toast";
 import { useSelector, useDispatch } from "react-redux";
-import { setAuthModal } from "../store/slices/uiSlice";
+import { setAuthModal } from "../../store/slices/uiSlice";
 import {
   loginUser,
   registerUser,
   clearAuthError,
   verifyOtp,
-} from "../store/slices/authSlice";
+} from "../../store/slices/authSlice";
 
 const emptyErrors = {
   email: "",

@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 const AdminDashboard = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("overview");
   const [activeModal, setActiveModal] = useState(null);
   const [showToast, setShowToast] = useState(null);
@@ -166,7 +168,7 @@ const AdminDashboard = () => {
         <div className="p-10">
           <div
             className="flex items-center gap-3 mb-16 shrink-0 cursor-pointer"
-            onClick={() => handleSetView(AppView.PUBLIC_HOME)}
+            onClick={() => navigate("/")}
           >
             <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center font-black text-white">
               V

@@ -1,4 +1,8 @@
+import React from "react";
+import { useNavigate } from "react-router-dom";
+
 const StudentPortal = () => {
+  const navigate = useNavigate();
   return (
     <section
       id="student-view"
@@ -84,7 +88,7 @@ const StudentPortal = () => {
                     </div>
                   </div>
                   <button
-                    onClick={() => handleSetView(AppView.CLASSROOM)}
+                    onClick={() => navigate("/classroom")}
                     className="w-full md:w-auto bg-blue-600 hover:bg-blue-500 text-white px-8 py-4 rounded-2xl font-bold text-sm shadow-lg shadow-blue-900/40 transition active:scale-95"
                   >
                     Join Live Room

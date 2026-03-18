@@ -1,8 +1,9 @@
 import React from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
-import { setAuthModal } from "../store/slices/uiSlice";
-import { logoutUser } from "../store/slices/authSlice";
+import { setAuthModal } from "../../store/slices/uiSlice";
+import { logoutUser } from "../../store/slices/authSlice";
+import { ROLES, ROUTES } from "../../constants";
 
 const Navbar = ({ variant = "default" }) => {
   const navigate = useNavigate();
@@ -17,24 +18,24 @@ const Navbar = ({ variant = "default" }) => {
   const handleSetAuthModal = (modal) => dispatch(setAuthModal(modal));
 
   const getAvatarUrl = () => {
-    if (auth.role === "teacher") return "https://i.pravatar.cc/150?u=elena";
-    if (auth.role === "admin") return "https://i.pravatar.cc/150?u=admin";
-    if (auth.role === "parent") return "https://i.pravatar.cc/150?u=parent";
+    if (auth.role === ROLES.TEACHER) return "https://i.pravatar.cc/150?u=elena";
+    if (auth.role === ROLES.ADMIN) return "https://i.pravatar.cc/150?u=admin";
+    if (auth.role === ROLES.PARENT) return "https://i.pravatar.cc/150?u=parent";
     return "https://i.pravatar.cc/150?u=sarah_j";
   };
 
   const getRoleLabel = () => {
     switch (auth.role) {
-      case "admin":
+      case ROLES.ADMIN:
         return "Administrator";
-      case "teacher":
+      case ROLES.TEACHER:
         return "Instructor";
-      case "student":
+      case ROLES.STUDENT:
         return "Student";
-      case "parent":
+      case ROLES.PARENT:
         return "Parent";
       default:
-        return "";
+        return "User";
     }
   };
 
@@ -97,10 +98,14 @@ const Navbar = ({ variant = "default" }) => {
                 <div
                   className="flex items-center gap-4 group cursor-pointer"
                   onClick={() => {
-                    if (auth.role === "student") navigate("/student");
-                    if (auth.role === "teacher") navigate("/teacher");
-                    if (auth.role === "admin") navigate("/admin");
-                    if (auth.role === "parent") navigate("/parent");
+                    if (auth.role === ROLES.STUDENT)
+                      navigate(ROUTES.PROTECTED.STUDENT);
+                    if (auth.role === ROLES.TEACHER)
+                      navigate(ROUTES.PROTECTED.TEACHER);
+                    if (auth.role === ROLES.ADMIN)
+                      navigate(ROUTES.PROTECTED.ADMIN);
+                    if (auth.role === ROLES.PARENT)
+                      navigate(ROUTES.PROTECTED.PARENT);
                   }}
                 >
                   <div className="text-right">

@@ -1,4 +1,4 @@
-import axiosInstance from "../utility/axiosInstance";
+import axiosInstance from "../utils/axiosInstance";
 
 export const authService = {
   // Login
