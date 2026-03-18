@@ -1,7 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { authService } from "../../services/authService";
-import { setView } from "./uiSlice";
-import { AppView } from "../../types";
 
 export const loginUser = createAsyncThunk(
   "auth/loginUser",
@@ -20,9 +18,6 @@ export const logoutUser = createAsyncThunk(
   async (_, { dispatch }) => {
     // Clear localStorage
     localStorage.removeItem("vcs_auth_state");
-
-    // Redirect to public home
-    dispatch(setView(AppView.PUBLIC_HOME));
 
     // Return success to trigger state update
     return { success: true };
@@ -72,8 +67,8 @@ const authSlice = createSlice({
       state.role = null;
       state.username = null;
       state.token = null;
+      state.isLoading = false;
       state.error = null;
-      // Clear localStorage
       localStorage.removeItem("vcs_auth_state");
     },
     clearAuthError: (state) => {

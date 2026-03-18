@@ -1,11 +1,12 @@
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { AppView } from "./types";
 import { Toaster } from "react-hot-toast";
 
 // Components
 import SimulatorBar from "./components/SimulatorBar";
 import AIChat from "./components/AIChat";
 import AuthModals from "./components/AuthModals";
+import Navbar from "./components/Navbar";
 
 // Views
 import PublicHome from "./views/PublicHome";
@@ -20,34 +21,61 @@ import PublicTeacherProfile from "./views/PublicTeacherProfile";
 import TeacherInternalStudentProfile from "./views/TeacherInternalStudentProfile";
 import InstructorsDirectory from "./views/InstructorsDirectory";
 
-const App = () => {
-  const { currentView } = useSelector((state) => state.ui);
+// Protected Route Component
+const ProtectedRoute = ({ children }) => {
+  const { isLoggedIn } = useSelector((state) => state.auth);
 
-  const renderView = () => {
-    switch (currentView) {
-      case AppView.ADMIN: return <AdminDashboard />;
-      case AppView.STUDENT: return <StudentPortal />;
-      case AppView.TEACHER: return <TeacherPortal />;
-      case AppView.PARENT: return <ParentPortal />;
-      case AppView.CLASSROOM: return <Classroom />;
-      case AppView.FEED: return <StudentFeed />;
-      case AppView.MARKETPLACE: return <Marketplace />;
-      case AppView.TEACHER_PROFILE: return <PublicTeacherProfile />;
-      case AppView.INTERNAL_STUDENT_PROFILE: return <TeacherInternalStudentProfile />;
-      case AppView.INSTRUCTORS_DIRECTORY: return <InstructorsDirectory />;
-      case AppView.PUBLIC_HOME:
-      default: return <PublicHome />;
-    }
-  };
+  if (!isLoggedIn) {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
+};
+
+const App = () => {
+  const { isLoggedIn } = useSelector((state) => state.auth);
 
   return (
-    <div className="min-h-screen bg-slate-950 selection:bg-indigo-500/30 overflow-x-hidden">
-      <main className="pb-32 sm:pb-24">{renderView()}</main>
-      <AuthModals />
-      <AIChat />
-      <SimulatorBar />
-      <Toaster position="top-center" />
-    </div>
+    <BrowserRouter>
+      <div className="min-h-screen bg-slate-950 selection:bg-indigo-500/30 overflow-x-hidden">
+        {/* Show Navbar with appropriate variant */}
+        {isLoggedIn ? (
+          <Navbar variant="default" />
+        ) : (
+          <Navbar variant="public" />
+        )}
+
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<PublicHome />} />
+          <Route path="/courses" element={<Marketplace />} />
+          <Route path="/instructors" element={<InstructorsDirectory />} />
+          <Route path="/teacher/:id" element={<PublicTeacherProfile />} />
+
+          {/* Protected Routes */}
+          <Route element={<ProtectedRoute />}>
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/student" element={<StudentPortal />} />
+            <Route path="/teacher" element={<TeacherPortal />} />
+            <Route path="/parent" element={<ParentPortal />} />
+            <Route path="/classroom" element={<Classroom />} />
+            <Route path="/feed" element={<StudentFeed />} />
+            <Route
+              path="/student/:id"
+              element={<TeacherInternalStudentProfile />}
+            />
+          </Route>
+
+          {/* Catch all route */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+
+        <AuthModals />
+        <AIChat />
+        <SimulatorBar />
+        <Toaster position="top-center" />
+      </div>
+    </BrowserRouter>
   );
 };
 

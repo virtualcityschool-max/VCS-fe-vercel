@@ -1,14 +1,13 @@
 import React, { useState } from "react";
 import toast from "react-hot-toast";
 import { useSelector, useDispatch } from "react-redux";
-import { setAuthModal, setView } from "../store/slices/uiSlice";
+import { setAuthModal } from "../store/slices/uiSlice";
 import {
   loginUser,
   registerUser,
   clearAuthError,
   verifyOtp,
 } from "../store/slices/authSlice";
-import { AppView } from "../types";
 
 const emptyErrors = {
   email: "",
@@ -96,16 +95,7 @@ const AuthModals = () => {
         }),
       ).unwrap();
 
-      if (user.role === "student") {
-        dispatch(setView(AppView.FEED));
-      } else if (user.role === "teacher") {
-        dispatch(setView(AppView.TEACHER));
-      } else if (user.role === "admin") {
-        dispatch(setView(AppView.ADMIN));
-      } else if (user.role === "parent") {
-        dispatch(setView(AppView.PARENT));
-      }
-
+      // Navigation will be handled by React Router ProtectedRoute
       onClose();
       setEmail("");
       setPassword("");
