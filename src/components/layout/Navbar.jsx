@@ -2,8 +2,7 @@ import React from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import { setAuthModal } from "../../store/slices/uiSlice";
-import { logoutUser } from "../../store/slices/authSlice";
-import { ROLES, ROUTES } from "../../constants";
+import UserProfileDropdown from "./UserProfileDropdown";
 
 const Navbar = ({ variant = "default" }) => {
   const navigate = useNavigate();
@@ -11,33 +10,7 @@ const Navbar = ({ variant = "default" }) => {
   const dispatch = useDispatch();
   const auth = useSelector((state) => state.auth);
 
-  const onLogout = () => {
-    dispatch(logoutUser());
-  };
-
   const handleSetAuthModal = (modal) => dispatch(setAuthModal(modal));
-
-  const getAvatarUrl = () => {
-    if (auth.role === ROLES.TEACHER) return "https://i.pravatar.cc/150?u=elena";
-    if (auth.role === ROLES.ADMIN) return "https://i.pravatar.cc/150?u=admin";
-    if (auth.role === ROLES.PARENT) return "https://i.pravatar.cc/150?u=parent";
-    return "https://i.pravatar.cc/150?u=sarah_j";
-  };
-
-  const getRoleLabel = () => {
-    switch (auth.role) {
-      case ROLES.ADMIN:
-        return "Administrator";
-      case ROLES.TEACHER:
-        return "Instructor";
-      case ROLES.STUDENT:
-        return "Student";
-      case ROLES.PARENT:
-        return "Parent";
-      default:
-        return "User";
-    }
-  };
 
   const isActivePath = (path) => location.pathname === path;
 
@@ -91,44 +64,8 @@ const Navbar = ({ variant = "default" }) => {
                 </button>
               </div>
             ) : (
-              <div
-                id="nav-user"
-                className="flex items-center gap-6 animate-fadeIn"
-              >
-                <div
-                  className="flex items-center gap-4 group cursor-pointer"
-                  onClick={() => {
-                    if (auth.role === ROLES.STUDENT)
-                      navigate(ROUTES.PROTECTED.STUDENT);
-                    if (auth.role === ROLES.TEACHER)
-                      navigate(ROUTES.PROTECTED.TEACHER);
-                    if (auth.role === ROLES.ADMIN)
-                      navigate(ROUTES.PROTECTED.ADMIN);
-                    if (auth.role === ROLES.PARENT)
-                      navigate(ROUTES.PROTECTED.PARENT);
-                  }}
-                >
-                  <div className="text-right">
-                    <p className="text-sm font-black font-poppins text-white leading-none mb-1">
-                      {auth.username}
-                    </p>
-                    <p className="text-[9px] text-indigo-400 font-black uppercase tracking-widest leading-none">
-                      {getRoleLabel()}
-                    </p>
-                  </div>
-                  <img
-                    src={getAvatarUrl()}
-                    className="w-10 h-10 rounded-xl border-2 border-white/10 group-hover:border-indigo-500 transition duration-500 shadow-xl"
-                    alt="User Avatar"
-                  />
-                </div>
-                <div className="w-px h-8 bg-white/10 mx-2"></div>
-                <button
-                  onClick={onLogout}
-                  className="text-[10px] font-black uppercase tracking-widest text-rose-500 hover:text-rose-400 transition"
-                >
-                  Sign Out
-                </button>
+              <div className="flex items-center gap-4 animate-fadeIn">
+                <UserProfileDropdown />
               </div>
             )}
           </div>
@@ -206,21 +143,44 @@ const Navbar = ({ variant = "default" }) => {
             </button>
           </div>
         </div>
-        <div className="flex items-center gap-3 sm:gap-5 shrink-0 ml-4">
-          <button className="relative text-slate-400 hover:text-white transition text-base sm:text-lg">
-            <i className="far fa-bell"></i>
+        <div className="flex items-center gap-2 sm:gap-4 shrink-0 ml-4">
+          {/* Notification Bell */}
+          <button className="relative p-2 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-lg transition-all duration-200 group">
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+              />
+            </svg>
+            <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
           </button>
-          <div className="h-6 w-px bg-white/10 mx-2"></div>
-          <button className="relative text-slate-400 hover:text-white transition text-base sm:text-lg">
-            <i className="fas fa-th-large"></i>
+
+          {/* Apps Grid */}
+          <button className="relative p-2 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-lg transition-all duration-200 group">
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
+              />
+            </svg>
           </button>
-          <div className="h-6 w-px bg-white/10 mx-2"></div>
-          <button
-            onClick={onLogout}
-            className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-rose-500 hover:text-rose-400 transition"
-          >
-            Sign Out
-          </button>
+
+          {/* User Profile Dropdown */}
+          <UserProfileDropdown />
         </div>
       </div>
     </nav>
