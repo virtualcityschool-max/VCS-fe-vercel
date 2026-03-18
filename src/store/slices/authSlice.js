@@ -1,12 +1,38 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { authService } from "../../services/authService";
+import { authStorage } from "../../utils/authStorage";
+
+// Bootstrap auth state from localStorage
+const getInitialAuthState = () => {
+  const storedAuthState = authStorage.getAuthState();
+  return {
+    isLoggedIn: storedAuthState.isLoggedIn,
+    role: storedAuthState.role,
+    username: storedAuthState.username,
+    token: storedAuthState.token,
+    user: storedAuthState.user,
+    isLoading: false,
+    error: null,
+  };
+};
 
 export const loginUser = createAsyncThunk(
   "auth/loginUser",
   async (credentials, { rejectWithValue }) => {
     try {
       const response = await authService.login(credentials);
-      return response.user;
+
+      // Prepare user data
+      const user = {
+        username: response.user.username,
+        email: response.user.email,
+        role: response.user.role,
+      };
+
+      return {
+        ...response.user,
+        user,
+      };
     } catch (err) {
       // Convert Error objects to serializable format
       if (err instanceof Error) {
@@ -24,10 +50,8 @@ export const loginUser = createAsyncThunk(
 export const logoutUser = createAsyncThunk(
   "auth/logoutUser",
   async (_, { dispatch }) => {
-    // Clear localStorage
-    localStorage.removeItem("vcs_auth_state");
-
     // Return success to trigger state update
+    // Store will handle localStorage cleanup via subscription
     return { success: true };
   },
 );
@@ -77,6 +101,7 @@ const initialState = {
   role: null,
   username: null,
   token: null,
+  user: null,
   isLoading: false,
   error: null,
 };
@@ -90,9 +115,9 @@ const authSlice = createSlice({
       state.role = null;
       state.username = null;
       state.token = null;
+      state.user = null;
       state.isLoading = false;
       state.error = null;
-      localStorage.removeItem("vcs_auth_state");
     },
     clearAuthError: (state) => {
       state.error = null;
@@ -111,6 +136,8 @@ const authSlice = createSlice({
         state.role = action.payload.role;
         state.username = action.payload.username;
         state.token = action.payload.token;
+        state.user = action.payload.user;
+        state.error = null;
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.isLoading = false;
@@ -122,6 +149,7 @@ const authSlice = createSlice({
         state.role = null;
         state.username = null;
         state.token = null;
+        state.user = null;
         state.error = null;
       })
       // Register User

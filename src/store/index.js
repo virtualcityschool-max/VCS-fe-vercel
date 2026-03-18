@@ -1,48 +1,47 @@
 import { configureStore } from "@reduxjs/toolkit";
 import uiReducer from "./slices/uiSlice";
 import authReducer, { logout } from "./slices/authSlice";
+import studentDashboardReducer from "./slices/studentDashboardSlice";
+import { authStorage } from "../utils/authStorage";
 
-const AUTH_STORAGE_KEY = "vcs_auth_state";
-
-// Load auth state from localStorage
+// Load auth state from localStorage using authStorage utilities
 const loadAuthState = () => {
   try {
-    const serializedState = localStorage.getItem(AUTH_STORAGE_KEY);
-
-    if (!serializedState) {
-      return undefined;
-    }
-
-    const parsedState = JSON.parse(serializedState);
+    const authState = authStorage.getAuthState();
 
     // Only restore valid auth state
-    if (parsedState?.isLoggedIn && parsedState?.token) {
-      return parsedState;
+    if (authState?.isLoggedIn && authState?.token) {
+      console.log(
+        "🔄 Store: Bootstrapping auth state from localStorage:",
+        authState,
+      );
+      return authState;
     }
 
-    localStorage.removeItem(AUTH_STORAGE_KEY);
+    console.log("🔄 Store: No valid auth state found in localStorage");
     return undefined;
   } catch (error) {
     console.error("Could not load auth state:", error);
-    localStorage.removeItem(AUTH_STORAGE_KEY);
+    authStorage.clearAuthStorage();
     return undefined;
   }
 };
 
-// Save only the required auth fields
+// Save auth state using authStorage utilities
 const saveAuthState = (authState) => {
   try {
     if (authState?.isLoggedIn && authState?.token) {
-      const persistedAuth = {
-        isLoggedIn: authState.isLoggedIn,
-        role: authState.role,
+      const user = {
         username: authState.username,
-        token: authState.token,
+        email: authState.user?.email,
+        role: authState.role,
       };
 
-      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(persistedAuth));
+      authStorage.setAuthState(authState.token, user);
+      console.log("💾 Store: Saved auth state to localStorage");
     } else {
-      localStorage.removeItem(AUTH_STORAGE_KEY);
+      authStorage.clearAuthStorage();
+      console.log("💾 Store: Cleared auth state from localStorage");
     }
   } catch (error) {
     console.error("Could not save auth state:", error);
@@ -55,6 +54,7 @@ export const store = configureStore({
   reducer: {
     ui: uiReducer,
     auth: authReducer,
+    studentDashboard: studentDashboardReducer,
   },
   preloadedState: preloadedAuthState ? { auth: preloadedAuthState } : undefined,
 });
@@ -65,15 +65,14 @@ store.subscribe(() => {
   saveAuthState(auth);
 });
 
-// Sync logout across tabs
+// Sync logout across tabs using authStorage
 window.addEventListener("storage", (e) => {
-  if (e.key === AUTH_STORAGE_KEY) {
-    const currentAuth = store.getState().auth;
+  const currentAuth = store.getState().auth;
 
-    // If auth was removed in another tab, log out here too
-    if (!e.newValue && currentAuth.isLoggedIn) {
-      store.dispatch(logout());
-    }
+  // Check if token was removed in another tab
+  if (e.key === "vcs_access_token" && !e.newValue && currentAuth.isLoggedIn) {
+    console.log("🔄 Store: Token removed in another tab, logging out...");
+    store.dispatch(logout());
   }
 });
 

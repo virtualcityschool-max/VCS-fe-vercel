@@ -1,7 +1,9 @@
 import axios from "axios";
+import { authStorage } from "./authStorage";
 
 const baseURL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api";
+  import.meta.env.VITE_API_BASE_URL ||
+  "https://virtualschool.grayphite.com/api/v1";
 
 console.log("🔧 Axios Instance Base URL:", baseURL);
 console.log(
@@ -17,15 +19,26 @@ const axiosInstance = axios.create({
   },
 });
 
-// Add request interceptor for debugging
+// Add request interceptor for authentication and debugging
 axiosInstance.interceptors.request.use(
   (config) => {
+    // Add Authorization header if token exists
+    const token = authStorage.getAccessToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
     console.log("🚀 Request:", {
       method: config.method?.toUpperCase(),
       url: config.url,
       baseURL: config.baseURL,
       fullURL: `${config.baseURL}${config.url}`,
-      headers: config.headers,
+      headers: {
+        ...config.headers,
+        Authorization: config.headers.Authorization
+          ? "[TOKEN_HIDDEN]"
+          : undefined,
+      },
       // Only log data for non-sensitive endpoints
       data:
         config.url?.includes("register") || config.url?.includes("login")

@@ -28,6 +28,11 @@ const AuthModals = () => {
   const [userId, setUserId] = useState(null);
   const [otpError, setOtpError] = useState("");
 
+  // Password visibility states
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+  const [showRegisterPassword, setShowRegisterPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   // Registration form state
   const [username, setUsername] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -42,22 +47,52 @@ const AuthModals = () => {
 
   const hasLocalErrors = Object.values(error).some((value) => value !== "");
 
-  const onClose = () => dispatch(setAuthModal(null));
+  // Comprehensive reset function
+  const resetAllStates = () => {
+    // Reset form inputs
+    setEmail("");
+    setPassword("");
+    setUsername("");
+    setConfirmPassword("");
+    setRole("");
+
+    // Reset role tab to default
+    setActiveRoleTab("student");
+
+    // Reset error states
+    setError({ ...emptyErrors });
+    setBackendErrors({});
+    setOtpError("");
+
+    // Reset OTP states
+    setRegistrationStep("form");
+    setOtp("");
+    setUserId(null);
+
+    // Reset password visibility states
+    setShowLoginPassword(false);
+    setShowRegisterPassword(false);
+    setShowConfirmPassword(false);
+
+    // Clear Redux auth error
+    dispatch(clearAuthError());
+  };
+
+  const onClose = () => {
+    resetAllStates();
+    dispatch(setAuthModal(null));
+  };
 
   React.useEffect(() => {
     if (isOpen && intendedRole) {
+      // Only set the intended role, don't reset everything
       setActiveRoleTab(intendedRole);
     }
 
     if (isOpen) {
+      // Clear backend errors and Redux error when opening
       setBackendErrors({});
       dispatch(clearAuthError());
-      setError({ ...emptyErrors });
-      // Reset OTP states
-      setRegistrationStep("form");
-      setOtp("");
-      setUserId(null);
-      setOtpError("");
     }
   }, [isOpen, intendedRole, dispatch]);
 
@@ -96,10 +131,7 @@ const AuthModals = () => {
       ).unwrap();
 
       // Navigation will be handled by React Router ProtectedRoute
-      onClose();
-      setEmail("");
-      setPassword("");
-      setError({ ...emptyErrors });
+      onClose(); // This will reset all states automatically
     } catch (err) {
       // Show toast for login errors
       if (typeof err === "object" && err !== null) {
@@ -254,18 +286,7 @@ const AuthModals = () => {
       // Registration successful - reset everything
       setRegistrationStep("success");
       setTimeout(() => {
-        onClose();
-        // Reset all states
-        setEmail("");
-        setUsername("");
-        setPassword("");
-        setConfirmPassword("");
-        setRole("student");
-        setError({ ...emptyErrors });
-        setRegistrationStep("form");
-        setOtp("");
-        setUserId(null);
-        setOtpError("");
+        onClose(); // This will reset all states automatically
       }, 2000);
     } catch (err) {
       console.error("OTP verification failed:", err);
@@ -308,11 +329,15 @@ const AuthModals = () => {
                   key={roleOption}
                   type="button"
                   onClick={() => {
-                    setActiveRoleTab(roleOption);
-                    setError({ ...emptyErrors });
+                    // Reset form states but keep the selected role
                     setEmail("");
                     setPassword("");
+                    setShowLoginPassword(false);
+                    setError({ ...emptyErrors });
+                    setBackendErrors({});
                     dispatch(clearAuthError());
+                    // Set the new role
+                    setActiveRoleTab(roleOption);
                   }}
                   className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
                     activeRoleTab === roleOption
@@ -353,18 +378,30 @@ const AuthModals = () => {
                 <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block">
                   Password
                 </label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => {
-                    toast.dismiss();
-                    setPassword(e.target.value);
-                    setError((prev) => ({ ...prev, password: "" }));
-                    dispatch(clearAuthError());
-                  }}
-                  placeholder="••••••••"
-                  className="w-full bg-slate-950 border border-white/5 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
-                />
+                <div className="relative">
+                  <input
+                    type={showLoginPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => {
+                      toast.dismiss();
+                      setPassword(e.target.value);
+                      setError((prev) => ({ ...prev, password: "" }));
+                      dispatch(clearAuthError());
+                    }}
+                    placeholder="••••••••"
+                    className="w-full bg-slate-950 border border-white/5 rounded-2xl px-6 py-4 pr-12 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowLoginPassword(!showLoginPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors"
+                    tabIndex="-1"
+                  >
+                    <i
+                      className={`fas ${showLoginPassword ? "fa-eye-slash" : "fa-eye"} text-sm`}
+                    ></i>
+                  </button>
+                </div>
                 {error.password && (
                   <p className="text-red-500 text-xs mt-2 animate-shake">
                     {error.password}
@@ -486,22 +523,36 @@ const AuthModals = () => {
                   <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block">
                     Password
                   </label>
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => {
-                      toast.dismiss();
-                      setPassword(e.target.value);
-                      setError((prev) => ({ ...prev, password: "" }));
-                      dispatch(clearAuthError());
-                      setBackendErrors((prev) => ({
-                        ...prev,
-                        password: undefined,
-                      }));
-                    }}
-                    placeholder="••••••••"
-                    className="w-full bg-slate-950 border border-white/5 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
-                  />
+                  <div className="relative">
+                    <input
+                      type={showRegisterPassword ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => {
+                        toast.dismiss();
+                        setPassword(e.target.value);
+                        setError((prev) => ({ ...prev, password: "" }));
+                        dispatch(clearAuthError());
+                        setBackendErrors((prev) => ({
+                          ...prev,
+                          password: undefined,
+                        }));
+                      }}
+                      placeholder="••••••••"
+                      className="w-full bg-slate-950 border border-white/5 rounded-2xl px-6 py-4 pr-12 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setShowRegisterPassword(!showRegisterPassword)
+                      }
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors"
+                      tabIndex="-1"
+                    >
+                      <i
+                        className={`fas ${showRegisterPassword ? "fa-eye-slash" : "fa-eye"} text-sm`}
+                      ></i>
+                    </button>
+                  </div>
                   {error.password && (
                     <p className="text-red-500 text-xs mt-2 animate-shake">
                       {error.password}
@@ -528,21 +579,35 @@ const AuthModals = () => {
                   <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block">
                     Confirm Password
                   </label>
-                  <input
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => {
-                      toast.dismiss();
-                      setConfirmPassword(e.target.value);
-                      setError((prev) => ({
-                        ...prev,
-                        confirmPassword: "",
-                      }));
-                      dispatch(clearAuthError());
-                    }}
-                    placeholder="••••••••"
-                    className="w-full bg-slate-950 border border-white/5 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
-                  />
+                  <div className="relative">
+                    <input
+                      type={showConfirmPassword ? "text" : "password"}
+                      value={confirmPassword}
+                      onChange={(e) => {
+                        toast.dismiss();
+                        setConfirmPassword(e.target.value);
+                        setError((prev) => ({
+                          ...prev,
+                          confirmPassword: "",
+                        }));
+                        dispatch(clearAuthError());
+                      }}
+                      placeholder="••••••••"
+                      className="w-full bg-slate-950 border border-white/5 rounded-2xl px-6 py-4 pr-12 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors"
+                      tabIndex="-1"
+                    >
+                      <i
+                        className={`fas ${showConfirmPassword ? "fa-eye-slash" : "fa-eye"} text-sm`}
+                      ></i>
+                    </button>
+                  </div>
                   {error.confirmPassword && (
                     <p className="text-red-500 text-xs mt-2 animate-shake">
                       {error.confirmPassword}

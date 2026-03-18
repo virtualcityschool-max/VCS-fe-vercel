@@ -1,3 +1,4 @@
+import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { Toaster } from "react-hot-toast";
@@ -32,7 +33,12 @@ const ProtectedRoute = ({ children }) => {
 };
 
 const App = () => {
-  const { isLoggedIn } = useSelector((state) => state.auth);
+  const { isLoggedIn, role } = useSelector((state) => state.auth);
+
+  // Debug authentication state
+  React.useEffect(() => {
+    console.log("🔐 App: Auth state updated:", { isLoggedIn, role });
+  }, [isLoggedIn, role]);
 
   return (
     <BrowserRouter>
