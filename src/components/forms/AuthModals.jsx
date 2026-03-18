@@ -167,20 +167,61 @@ const AuthModals = () => {
       // Move to OTP step instead of showing success
       setRegistrationStep("otp");
       console.log("Registration Response:", response);
-      setUserId(response.user_id || response.user?.id); // Adjust based on backend response
+
+      // Extract userId with better debugging - backend should return user_id as number
+      // Based on API spec, successful registration returns user_id
+      const extractedUserId =
+        response.user_id || response.user?.id || response.id || response.userId;
+
+      console.log(
+        "Extracted userId:",
+        extractedUserId,
+        "from response:",
+        response,
+      );
+      console.log("Available response keys:", Object.keys(response));
+
+      if (!extractedUserId) {
+        console.error(
+          "No userId found in registration response. Response structure:",
+          response,
+        );
+        setOtpError(
+          "Registration succeeded but no user ID received. Please try registering again.",
+        );
+        setRegistrationStep("form");
+        return;
+      }
+
+      setUserId(extractedUserId);
       // Don't clear form fields yet
     } catch (err) {
       // Error is already in Redux state, handle field errors here
-      if (typeof err === "object" && err !== null) {
-        setBackendErrors(err);
+      console.log("Registration error details:", err);
 
-        // Show toast for backend field errors
-        Object.entries(err).forEach(([field, messages]) => {
-          const errorText = Array.isArray(messages)
-            ? messages.join(", ")
-            : messages;
-          toast.error(`${field}: ${errorText}`);
-        });
+      if (typeof err === "object" && err !== null) {
+        // Handle field-specific errors
+        if (err.field) {
+          // Set field-specific error
+          setError({
+            [err.field]: err.error,
+          });
+        } else {
+          // Set general backend errors
+          setBackendErrors(err);
+        }
+
+        // Show toast for non-field errors
+        if (!err.field) {
+          Object.entries(err).forEach(([field, messages]) => {
+            const errorText = Array.isArray(messages)
+              ? messages.join(", ")
+              : messages;
+            toast.error(errorText);
+          });
+        }
+      } else {
+        toast.error(err || "Registration failed. Please try again.");
       }
     }
   };
@@ -190,6 +231,18 @@ const AuthModals = () => {
 
     if (!otp.trim()) {
       setOtpError("OTP is required");
+      return;
+    }
+
+    // Validate userId exists before attempting OTP verification
+    if (!userId) {
+      setOtpError("User session expired. Please register again.");
+      console.error("OTP verification attempted without userId");
+      // Reset to registration form
+      setTimeout(() => {
+        setRegistrationStep("form");
+        setOtpError("");
+      }, 2000);
       return;
     }
 
@@ -215,11 +268,17 @@ const AuthModals = () => {
         setOtpError("");
       }, 2000);
     } catch (err) {
-      // Handle OTP verification errors
+      console.error("OTP verification failed:", err);
+
       if (typeof err === "object" && err !== null) {
-        setOtpError(err.otp?.[0] || err.message || "Invalid OTP");
+        // Handle 500 errors specifically
+        if (err.status === 500) {
+          setOtpError(`${err.error || "Server error"} ${err.suggestion || ""}`);
+        } else {
+          setOtpError(err.error || err.message || "OTP verification failed");
+        }
       } else {
-        setOtpError(err || "OTP verification failed");
+        setOtpError("OTP verification failed. Please try again.");
       }
     }
   };

@@ -8,7 +8,15 @@ export const loginUser = createAsyncThunk(
       const response = await authService.login(credentials);
       return response.user;
     } catch (err) {
-      return rejectWithValue(err.message);
+      // Convert Error objects to serializable format
+      if (err instanceof Error) {
+        return rejectWithValue(err.message);
+      }
+      // Handle structured error objects
+      if (typeof err === "object" && err !== null) {
+        return rejectWithValue(err);
+      }
+      return rejectWithValue(String(err));
     }
   },
 );
@@ -31,8 +39,15 @@ export const registerUser = createAsyncThunk(
       const response = await authService.register(userData);
       return response;
     } catch (err) {
-      // err is now the structured error object from authService
-      return rejectWithValue(err);
+      // Convert Error objects to serializable format
+      if (err instanceof Error) {
+        return rejectWithValue(err.message);
+      }
+      // Handle structured error objects
+      if (typeof err === "object" && err !== null) {
+        return rejectWithValue(err);
+      }
+      return rejectWithValue(String(err));
     }
   },
 );
@@ -44,7 +59,15 @@ export const verifyOtp = createAsyncThunk(
       const response = await authService.verifyOtp(userId, otp);
       return response;
     } catch (err) {
-      return rejectWithValue(err);
+      // Convert Error objects to serializable format
+      if (err instanceof Error) {
+        return rejectWithValue(err.message);
+      }
+      // Handle structured error objects
+      if (typeof err === "object" && err !== null) {
+        return rejectWithValue(err);
+      }
+      return rejectWithValue(String(err));
     }
   },
 );
