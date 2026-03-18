@@ -161,12 +161,16 @@ const StudentPortal = () => {
     >
       <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
         {/* Dashboard Header */}
-        <DashboardHeader />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
+          <DashboardHeader />
+          <NextSessionCard />
+          <OverdueAssignmentsCard />
+        </div>
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-10 gap-8">
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 lg:gap-8">
           {/* Left Column - Main Content */}
-          <div className="lg:col-span-7 space-y-12">
+          <div className="xl:col-span-8 space-y-6 lg:space-y-8">
             {/* Live Schedule */}
             <LiveScheduleList />
 
@@ -175,10 +179,7 @@ const StudentPortal = () => {
           </div>
 
           {/* Right Column - Sidebar */}
-          <div className="lg:col-span-3 space-y-8">
-            {/* Overdue Assignments */}
-            <OverdueAssignmentsCard />
-
+          <div className="xl:col-span-4 space-y-6 lg:space-y-8">
             {/* Assignment Overview */}
             <AssignmentOverviewList />
           </div>

@@ -1,6 +1,6 @@
 // Centralized localStorage management for authentication
-const ACCESS_TOKEN_KEY = 'vcs_access_token';
-const AUTH_USER_KEY = 'vcs_auth_user';
+const ACCESS_TOKEN_KEY = "vcs_access_token";
+const AUTH_USER_KEY = "vcs_auth_user";
 
 export const authStorage = {
   // Token management
@@ -8,7 +8,7 @@ export const authStorage = {
     try {
       return localStorage.getItem(ACCESS_TOKEN_KEY);
     } catch (error) {
-      console.error('Error accessing access token from localStorage:', error);
+      console.error("Error accessing access token from localStorage:", error);
       return null;
     }
   },
@@ -21,7 +21,7 @@ export const authStorage = {
         localStorage.removeItem(ACCESS_TOKEN_KEY);
       }
     } catch (error) {
-      console.error('Error setting access token in localStorage:', error);
+      console.error("Error setting access token in localStorage:", error);
     }
   },
 
@@ -29,7 +29,7 @@ export const authStorage = {
     try {
       localStorage.removeItem(ACCESS_TOKEN_KEY);
     } catch (error) {
-      console.error('Error removing access token from localStorage:', error);
+      console.error("Error removing access token from localStorage:", error);
     }
   },
 
@@ -39,7 +39,7 @@ export const authStorage = {
       const userStr = localStorage.getItem(AUTH_USER_KEY);
       return userStr ? JSON.parse(userStr) : null;
     } catch (error) {
-      console.error('Error parsing stored auth user:', error);
+      console.error("Error parsing stored auth user:", error);
       return null;
     }
   },
@@ -52,7 +52,7 @@ export const authStorage = {
         localStorage.removeItem(AUTH_USER_KEY);
       }
     } catch (error) {
-      console.error('Error setting stored auth user in localStorage:', error);
+      console.error("Error setting stored auth user in localStorage:", error);
     }
   },
 
@@ -60,7 +60,10 @@ export const authStorage = {
     try {
       localStorage.removeItem(AUTH_USER_KEY);
     } catch (error) {
-      console.error('Error removing stored auth user from localStorage:', error);
+      console.error(
+        "Error removing stored auth user from localStorage:",
+        error,
+      );
     }
   },
 
@@ -70,7 +73,7 @@ export const authStorage = {
       localStorage.removeItem(ACCESS_TOKEN_KEY);
       localStorage.removeItem(AUTH_USER_KEY);
     } catch (error) {
-      console.error('Error clearing auth storage:', error);
+      console.error("Error clearing auth storage:", error);
     }
   },
 
@@ -84,7 +87,7 @@ export const authStorage = {
   getAuthState: () => {
     const token = authStorage.getAccessToken();
     const user = authStorage.getStoredAuthUser();
-    
+
     return {
       isLoggedIn: !!token,
       token,

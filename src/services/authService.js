@@ -1,6 +1,21 @@
 import axiosInstance from "../utils/axiosInstance";
 
 export const authService = {
+  // Get current user profile
+  getMe: async () => {
+    try {
+      const response = await axiosInstance.get(`/auth/me/`);
+      return response.data;
+    } catch (error) {
+      console.error("Get profile error:", {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+      });
+      throw error;
+    }
+  },
+
   // Login
   login: async (credentials) => {
     try {
@@ -23,8 +38,9 @@ export const authService = {
             response.data.user?.name || response.data.user?.email || "User",
           email: response.data.user?.email,
           role: response.data.user?.role || credentials.role,
-          token: response.data.access || response.data.token,
+          token: response.data.access, // Backend returns 'access' field
         },
+        refresh_token: response.data.refresh, // Backend returns 'refresh' field
       };
     } catch (error) {
       console.error("Login error details:", {
@@ -323,6 +339,43 @@ export const authService = {
         throw error.response.data;
       }
       throw new Error(error.message || "OTP verification failed");
+    }
+  },
+
+  // Token refresh
+  refreshToken: async () => {
+    try {
+      const refreshToken = localStorage.getItem("vcs_refresh_token");
+      if (!refreshToken) {
+        throw new Error("No refresh token available");
+      }
+
+      const response = await axiosInstance.post(`/auth/token/refresh/`, {
+        refresh: refreshToken,
+      });
+
+      return {
+        access: response.data.access,
+        refresh: response.data.refresh || refreshToken,
+      };
+    } catch (error) {
+      console.error("Token refresh error:", error);
+      throw error;
+    }
+  },
+
+  // Logout
+  logout: async () => {
+    try {
+      const refreshToken = localStorage.getItem("vcs_refresh_token");
+      if (refreshToken) {
+        await axiosInstance.post(`/auth/logout/`, {
+          refresh: refreshToken,
+        });
+      }
+    } catch (error) {
+      console.error("Logout error:", error);
+      // Continue with local cleanup even if server call fails
     }
   },
 };

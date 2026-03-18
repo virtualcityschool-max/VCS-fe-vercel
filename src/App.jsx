@@ -1,7 +1,14 @@
 import React from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  Outlet,
+} from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
 import { Toaster } from "react-hot-toast";
+import { initializeAuth, logoutUser } from "./store/slices/authSlice";
 
 // Components
 import { SimulatorBar, AIChat, AuthModals, Navbar } from "./components";
@@ -22,23 +29,76 @@ import {
 } from "./pages";
 
 // Protected Route Component
-const ProtectedRoute = ({ children }) => {
-  const { isLoggedIn } = useSelector((state) => state.auth);
+const ProtectedRoute = () => {
+  const { isLoggedIn, isInitialized } = useSelector((state) => state.auth);
 
+  // Show loading while auth is initializing
+  if (!isInitialized) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-blue-600/20 rounded-full flex items-center justify-center mx-auto mb-4 animate-spin">
+            <i className="fas fa-spinner text-blue-500 text-2xl"></i>
+          </div>
+          <p className="text-white text-lg">Initializing...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Redirect to home if not authenticated
   if (!isLoggedIn) {
     return <Navigate to="/" replace />;
   }
 
-  return children;
+  // CRITICAL: Must return Outlet for nested routes to render
+  return <Outlet />;
 };
 
 const App = () => {
-  const { isLoggedIn, role } = useSelector((state) => state.auth);
+  const { isLoggedIn, role, isInitialized } = useSelector(
+    (state) => state.auth,
+  );
+  const dispatch = useDispatch();
+
+  // Initialize auth on app startup
+  React.useEffect(() => {
+    if (!isInitialized) {
+      dispatch(initializeAuth());
+    }
+  }, [dispatch, isInitialized]);
+
+  // Handle token refresh events from axiosInstance
+  React.useEffect(() => {
+    const handleTokenRefreshed = (event) => {
+      const { token } = event.detail;
+      console.log("🔄 App: Token refreshed via event");
+      // Update Redux store with new token
+      dispatch({ type: "auth/updateToken", payload: token });
+    };
+
+    const handleAuthLogout = () => {
+      console.log("🔄 App: Logout via event");
+      dispatch(logoutUser());
+    };
+
+    window.addEventListener("token-refreshed", handleTokenRefreshed);
+    window.addEventListener("auth-logout", handleAuthLogout);
+
+    return () => {
+      window.removeEventListener("token-refreshed", handleTokenRefreshed);
+      window.removeEventListener("auth-logout", handleAuthLogout);
+    };
+  }, [dispatch]);
 
   // Debug authentication state
   React.useEffect(() => {
-    console.log("🔐 App: Auth state updated:", { isLoggedIn, role });
-  }, [isLoggedIn, role]);
+    console.log("🔐 App: Auth state updated:", {
+      isLoggedIn,
+      role,
+      isInitialized,
+    });
+  }, [isLoggedIn, role, isInitialized]);
 
   return (
     <BrowserRouter>
