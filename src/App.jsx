@@ -103,42 +103,46 @@ const App = () => {
   return (
     <BrowserRouter>
       <div className="min-h-screen bg-slate-950 selection:bg-indigo-500/30 overflow-x-hidden">
-        {/* Show Navbar with appropriate variant */}
-        {isLoggedIn ? (
-          <Navbar variant="default" />
-        ) : (
-          <Navbar variant="public" />
-        )}
+        {/* Header with Navigation */}
+        <header className="relative z-50">
+          <Navbar variant={isLoggedIn ? "default" : "public"} />
+        </header>
 
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<PublicHome />} />
-          <Route path="/courses" element={<Marketplace />} />
-          <Route path="/instructors" element={<InstructorsDirectory />} />
-          <Route path="/teacher/:id" element={<PublicTeacherProfile />} />
+        {/* Main Content Area */}
+        <main className="relative z-10">
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={<PublicHome />} />
+            <Route path="/courses" element={<Marketplace />} />
+            <Route path="/instructors" element={<InstructorsDirectory />} />
+            <Route path="/teacher/:id" element={<PublicTeacherProfile />} />
 
-          {/* Protected Routes */}
-          <Route element={<ProtectedRoute />}>
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/student" element={<StudentPortal />} />
-            <Route path="/teacher" element={<TeacherPortal />} />
-            <Route path="/parent" element={<ParentPortal />} />
-            <Route path="/classroom" element={<Classroom />} />
-            <Route path="/feed" element={<StudentFeed />} />
-            <Route
-              path="/student/:id"
-              element={<TeacherInternalStudentProfile />}
-            />
-          </Route>
+            {/* Protected Routes */}
+            <Route element={<ProtectedRoute />}>
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/student" element={<StudentPortal />} />
+              <Route path="/teacher" element={<TeacherPortal />} />
+              <Route path="/parent" element={<ParentPortal />} />
+              <Route path="/classroom" element={<Classroom />} />
+              <Route path="/feed" element={<StudentFeed />} />
+              <Route
+                path="/student/:id"
+                element={<TeacherInternalStudentProfile />}
+              />
+            </Route>
 
-          {/* Catch all route */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+            {/* Catch all route */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </main>
 
-        <AuthModals />
-        <AIChat />
-        <SimulatorBar />
-        <Toaster position="top-center" />
+        {/* Global Overlays and Modals */}
+        <section className="relative z-50">
+          <AuthModals />
+          <AIChat />
+          <SimulatorBar />
+          <Toaster position="top-center" />
+        </section>
       </div>
     </BrowserRouter>
   );

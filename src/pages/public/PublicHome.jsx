@@ -6,19 +6,19 @@ const PublicHome = () => {
   const navigate = useNavigate();
 
   return (
-    <section
+    <main
       id="public-home"
       className="min-h-screen bg-[#020617] text-white selection:bg-indigo-500/30 overflow-x-hidden"
     >
-      {/* 1. Aurora Background Tints */}
+      {/* Aurora Background Tints */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
         <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-indigo-600/10 blur-[120px] rounded-full"></div>
         <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-purple-600/10 blur-[150px] rounded-full"></div>
         <div className="absolute top-[20%] right-[5%] w-[40%] h-[40%] bg-teal-600/5 blur-[100px] rounded-full"></div>
       </div>
 
-      {/* 3. Hero Section */}
-      <div className="relative z-10 max-w-7xl mx-auto px-6 pt-32 pb-40 text-center">
+      {/* Hero Section */}
+      <section className="relative z-10 max-w-7xl mx-auto px-6 pt-32 pb-40 text-center">
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-xs font-black uppercase tracking-widest text-indigo-400 mb-8 animate-fadeIn">
           <i className="fas fa-sparkles"></i>
           Next-Gen Learning Experience
@@ -37,22 +37,23 @@ const PublicHome = () => {
 
         <div className="max-w-3xl mx-auto relative mb-16 group">
           <div className="absolute inset-0 bg-indigo-600/20 blur-2xl group-hover:bg-indigo-600/30 transition duration-500 rounded-full"></div>
-          <div className="relative flex flex-col md:flex-row gap-4 p-2 bg-slate-900/80 backdrop-blur-2xl border border-white/10 rounded-4xl shadow-2xl">
+          <form className="relative flex flex-col md:flex-row gap-4 p-2 bg-slate-900/80 backdrop-blur-2xl border border-white/10 rounded-4xl shadow-2xl">
             <div className="flex-1 flex items-center px-6">
               <i className="fas fa-search text-slate-500 mr-4"></i>
               <input
-                type="text"
+                type="search"
                 placeholder="What do you want to learn today?"
                 className="w-full bg-transparent outline-none text-white placeholder-slate-600 py-4 font-medium"
               />
             </div>
             <button
+              type="submit"
               onClick={() => navigate("/courses")}
               className="bg-indigo-600 hover:bg-indigo-500 text-white px-10 py-4 rounded-4xl font-black text-xs uppercase tracking-widest transition shadow-xl shadow-indigo-900/20"
             >
               Search Catalog
             </button>
-          </div>
+          </form>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-6 justify-center">
@@ -71,7 +72,7 @@ const PublicHome = () => {
             <i className="fas fa-user-graduate group-hover:rotate-12 transition"></i>
           </button>
         </div>
-      </div>
+      </section>
 
       <section className="relative z-10 max-w-7xl mx-auto px-6 py-32 border-t border-white/5">
         <div className="flex justify-between items-end mb-16">
@@ -153,10 +154,10 @@ const PublicHome = () => {
       {/* Footer Teaser */}
       <footer className="relative z-10 max-w-7xl mx-auto px-6 py-20 text-center border-t border-white/5 opacity-40">
         <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">
-          &copy; 2025 VirtualCitySchool Ecosystem. All Rights Reserved.
+          &copy; {new Date().getFullYear()} VirtualCitySchool Ecosystem. All Rights Reserved.
         </p>
       </footer>
-    </section>
+    </main>
   );
 };
 

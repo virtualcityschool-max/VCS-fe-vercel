@@ -1,18 +1,16 @@
 import React from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import { setAuthModal } from "../../store/slices/uiSlice";
+import { useAuth, useNavigation } from "../../hooks";
+import Button from "../ui/Button";
 import UserProfileDropdown from "./UserProfileDropdown";
 
 const Navbar = ({ variant = "default" }) => {
-  const navigate = useNavigate();
-  const location = useLocation();
   const dispatch = useDispatch();
-  const auth = useSelector((state) => state.auth);
+  const { isLoggedIn, role } = useAuth();
+  const { navigate, isActivePath } = useNavigation();
 
   const handleSetAuthModal = (modal) => dispatch(setAuthModal(modal));
-
-  const isActivePath = (path) => location.pathname === path;
 
   // Public variant (for PublicHome)
   if (variant === "public") {
@@ -27,7 +25,7 @@ const Navbar = ({ variant = "default" }) => {
               <div className="w-8 h-8 sm:w-10 sm:h-10 bg-indigo-600 rounded-xl flex items-center justify-center font-black text-white shadow-xl shadow-indigo-900/40 group-hover:rotate-12 transition-all">
                 V
               </div>
-              <span className="text-[10px] xs:text-base sm:text-xl font-black font-poppins tracking-tighter whitespace-nowrap">
+              <span className="text-sm xs:text-lg sm:text-2xl font-black font-poppins tracking-tighter whitespace-nowrap">
                 VirtualCitySchool
               </span>
             </div>
@@ -48,20 +46,23 @@ const Navbar = ({ variant = "default" }) => {
           </div>
 
           <div className="flex items-center gap-2 sm:gap-6 shrink-0">
-            {!auth.isLoggedIn ? (
+            {!isLoggedIn ? (
               <div id="nav-guest" className="flex items-center gap-3 sm:gap-6">
-                <button
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => handleSetAuthModal("login")}
-                  className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-slate-500 hover:text-white transition whitespace-nowrap"
                 >
                   Login
-                </button>
-                <button
+                </Button>
+                <Button
+                  variant="primary"
+                  size="sm"
                   onClick={() => handleSetAuthModal("register")}
-                  className="bg-linear-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white px-4 sm:px-8 py-2.5 sm:py-3 rounded-2xl font-bold text-xs sm:text-sm shadow-lg shadow-indigo-900/30 transition active:scale-95 whitespace-nowrap"
+                  className="bg-linear-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white px-4 sm:px-8 py-2.5 sm:py-3 rounded-2xl font-bold text-xs sm:text-sm shadow-lg shadow-indigo-900/30 active:scale-95 whitespace-nowrap"
                 >
                   Register Now
-                </button>
+                </Button>
               </div>
             ) : (
               <div className="flex items-center gap-4 animate-fadeIn">
@@ -86,7 +87,7 @@ const Navbar = ({ variant = "default" }) => {
             <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center font-black text-white group-hover:rotate-12 transition">
               V
             </div>
-            <span className="font-black text-[10px] sm:text-sm tracking-tighter whitespace-nowrap">
+            <span className="font-black text-sm sm:text-base lg:text-lg tracking-tighter whitespace-nowrap">
               VirtualCitySchool
             </span>
           </div>
