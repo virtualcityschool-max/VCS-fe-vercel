@@ -30,7 +30,10 @@ export const submitAssignment = createAsyncThunk(
   "studentDashboard/submitAssignment",
   async ({ assignmentId, submissionData }, { rejectWithValue }) => {
     try {
-      const response = await studentService.submitAssignment(assignmentId, submissionData);
+      const response = await studentService.submitAssignment(
+        assignmentId,
+        submissionData,
+      );
       return { assignmentId, response };
     } catch (error) {
       return rejectWithValue(error.message);
@@ -50,6 +53,66 @@ export const enrollInCourse = createAsyncThunk(
   },
 );
 
+export const fetchStudentAssignments = createAsyncThunk(
+  "studentDashboard/fetchAssignments",
+  async (params = {}, { rejectWithValue }) => {
+    try {
+      const assignments = await studentService.getAssignments(params);
+      return assignments;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  },
+);
+
+export const fetchStudentGrades = createAsyncThunk(
+  "studentDashboard/fetchGrades",
+  async (params = {}, { rejectWithValue }) => {
+    try {
+      const grades = await studentService.getMyGrades(params);
+      return grades;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  },
+);
+
+export const fetchStudentSubmission = createAsyncThunk(
+  "studentDashboard/fetchSubmission",
+  async (assignmentId, { rejectWithValue }) => {
+    try {
+      const submission = await studentService.getMySubmission(assignmentId);
+      return { assignmentId, submission };
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  },
+);
+
+export const fetchStudentSessions = createAsyncThunk(
+  "studentDashboard/fetchSessions",
+  async (params = {}, { rejectWithValue }) => {
+    try {
+      const sessions = await studentService.getStudentSessions(params);
+      return sessions;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  },
+);
+
+export const fetchSessionAttendance = createAsyncThunk(
+  "studentDashboard/fetchAttendance",
+  async (sessionId, { rejectWithValue }) => {
+    try {
+      const attendance = await studentService.getSessionAttendance(sessionId);
+      return { sessionId, attendance };
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  },
+);
+
 // Initial state
 const initialState = {
   // Dashboard data
@@ -59,12 +122,21 @@ const initialState = {
   liveSchedule: [],
   enrolledCourses: [],
   assignments: [],
+  grades: [],
+  submissions: {},
+  sessions: [],
+  attendance: {},
 
   // UI state
   isLoading: false,
   isJoiningSession: false,
   isSubmittingAssignment: false,
   isEnrollingCourse: false,
+  isFetchingAssignments: false,
+  isFetchingGrades: false,
+  isFetchingSubmissions: false,
+  isFetchingSessions: false,
+  isFetchingAttendance: false,
   error: null,
   lastFetched: null,
 
@@ -105,7 +177,9 @@ const studentDashboardSlice = createSlice({
     // Update specific sections (for optimistic updates)
     updateLiveSessionStatus: (state, action) => {
       const { sessionId, status } = action.payload;
-      const session = state.liveSchedule.find(s => s.session_id === sessionId);
+      const session = state.liveSchedule.find(
+        (s) => s.session_id === sessionId,
+      );
       if (session) {
         session.status = status;
       }
@@ -113,7 +187,7 @@ const studentDashboardSlice = createSlice({
 
     updateAssignmentStatus: (state, action) => {
       const { assignmentId, status } = action.payload;
-      const assignment = state.assignments.find(a => a.id === assignmentId);
+      const assignment = state.assignments.find((a) => a.id === assignmentId);
       if (assignment) {
         assignment.status = status;
       }
@@ -121,7 +195,7 @@ const studentDashboardSlice = createSlice({
 
     updateCourseProgress: (state, action) => {
       const { courseId, progressPercent, progressLabel } = action.payload;
-      const course = state.enrolledCourses.find(c => c.id === courseId);
+      const course = state.enrolledCourses.find((c) => c.id === courseId);
       if (course) {
         course.progress_percent = progressPercent;
         course.progress_label = progressLabel;
@@ -161,7 +235,9 @@ const studentDashboardSlice = createSlice({
         state.error = null;
         // Update session status optimistically
         const { sessionId } = action.payload;
-        const session = state.liveSchedule.find(s => s.session_id === sessionId);
+        const session = state.liveSchedule.find(
+          (s) => s.session_id === sessionId,
+        );
         if (session) {
           session.status = "joined";
         }
@@ -181,7 +257,7 @@ const studentDashboardSlice = createSlice({
         state.error = null;
         // Update assignment status optimistically
         const { assignmentId } = action.payload;
-        const assignment = state.assignments.find(a => a.id === assignmentId);
+        const assignment = state.assignments.find((a) => a.id === assignmentId);
         if (assignment) {
           assignment.status = "submitted";
         }
@@ -204,6 +280,83 @@ const studentDashboardSlice = createSlice({
       .addCase(enrollInCourse.rejected, (state, action) => {
         state.isEnrollingCourse = false;
         state.error = action.payload;
+      })
+
+      // Fetch Student Assignments
+      .addCase(fetchStudentAssignments.pending, (state) => {
+        state.isFetchingAssignments = true;
+        state.error = null;
+      })
+      .addCase(fetchStudentAssignments.fulfilled, (state, action) => {
+        state.isFetchingAssignments = false;
+        state.error = null;
+        state.assignments = action.payload.results || action.payload;
+      })
+      .addCase(fetchStudentAssignments.rejected, (state, action) => {
+        state.isFetchingAssignments = false;
+        state.error = action.payload;
+      })
+
+      // Fetch Student Grades
+      .addCase(fetchStudentGrades.pending, (state) => {
+        state.isFetchingGrades = true;
+        state.error = null;
+      })
+      .addCase(fetchStudentGrades.fulfilled, (state, action) => {
+        state.isFetchingGrades = false;
+        state.error = null;
+        state.grades = action.payload.results || action.payload;
+      })
+      .addCase(fetchStudentGrades.rejected, (state, action) => {
+        state.isFetchingGrades = false;
+        state.error = action.payload;
+      })
+
+      // Fetch Student Submission
+      .addCase(fetchStudentSubmission.pending, (state) => {
+        state.isFetchingSubmissions = true;
+        state.error = null;
+      })
+      .addCase(fetchStudentSubmission.fulfilled, (state, action) => {
+        state.isFetchingSubmissions = false;
+        state.error = null;
+        const { assignmentId, submission } = action.payload;
+        state.submissions[assignmentId] = submission;
+      })
+      .addCase(fetchStudentSubmission.rejected, (state, action) => {
+        state.isFetchingSubmissions = false;
+        state.error = action.payload;
+      })
+
+      // Fetch Student Sessions
+      .addCase(fetchStudentSessions.pending, (state) => {
+        state.isFetchingSessions = true;
+        state.error = null;
+      })
+      .addCase(fetchStudentSessions.fulfilled, (state, action) => {
+        state.isFetchingSessions = false;
+        state.error = null;
+        state.sessions = action.payload.results || action.payload;
+      })
+      .addCase(fetchStudentSessions.rejected, (state, action) => {
+        state.isFetchingSessions = false;
+        state.error = action.payload;
+      })
+
+      // Fetch Session Attendance
+      .addCase(fetchSessionAttendance.pending, (state) => {
+        state.isFetchingAttendance = true;
+        state.error = null;
+      })
+      .addCase(fetchSessionAttendance.fulfilled, (state, action) => {
+        state.isFetchingAttendance = false;
+        state.error = null;
+        const { sessionId, attendance } = action.payload;
+        state.attendance[sessionId] = attendance;
+      })
+      .addCase(fetchSessionAttendance.rejected, (state, action) => {
+        state.isFetchingAttendance = false;
+        state.error = action.payload;
       });
   },
 });
@@ -212,31 +365,57 @@ const studentDashboardSlice = createSlice({
 export const selectStudentDashboard = (state) => state.studentDashboard;
 export const selectStudent = (state) => state.studentDashboard.student;
 export const selectNextSession = (state) => state.studentDashboard.nextSession;
-export const selectOverdueAssignments = (state) => state.studentDashboard.overdueAssignments;
-export const selectLiveSchedule = (state) => state.studentDashboard.liveSchedule;
-export const selectEnrolledCourses = (state) => state.studentDashboard.enrolledCourses;
+export const selectOverdueAssignments = (state) =>
+  state.studentDashboard.overdueAssignments;
+export const selectLiveSchedule = (state) =>
+  state.studentDashboard.liveSchedule;
+export const selectEnrolledCourses = (state) =>
+  state.studentDashboard.enrolledCourses;
 export const selectAssignments = (state) => state.studentDashboard.assignments;
-export const selectDashboardLoading = (state) => state.studentDashboard.isLoading;
+export const selectGrades = (state) => state.studentDashboard.grades;
+export const selectSubmissions = (state) => state.studentDashboard.submissions;
+export const selectSessions = (state) => state.studentDashboard.sessions;
+export const selectAttendance = (state) => state.studentDashboard.attendance;
+export const selectDashboardLoading = (state) =>
+  state.studentDashboard.isLoading;
 export const selectDashboardError = (state) => state.studentDashboard.error;
+
+// Loading selectors
+export const selectAssignmentsLoading = (state) =>
+  state.studentDashboard.isFetchingAssignments;
+export const selectGradesLoading = (state) =>
+  state.studentDashboard.isFetchingGrades;
+export const selectSubmissionsLoading = (state) =>
+  state.studentDashboard.isFetchingSubmissions;
+export const selectSessionsLoading = (state) =>
+  state.studentDashboard.isFetchingSessions;
+export const selectAttendanceLoading = (state) =>
+  state.studentDashboard.isFetchingAttendance;
 
 // Filtered selectors
 export const selectFilteredAssignments = (state) => {
   const { assignments, filters } = state.studentDashboard;
   if (filters.status === "all") return assignments;
-  return assignments.filter(assignment => assignment.status === filters.status);
+  return assignments.filter(
+    (assignment) => assignment.status === filters.status,
+  );
 };
 
 export const selectOverdueAssignmentsCount = (state) => {
-  return state.studentDashboard.assignments.filter(a => a.status === "overdue").length;
+  return state.studentDashboard.assignments.filter(
+    (a) => a.status === "overdue",
+  ).length;
 };
 
 export const selectPendingAssignmentsCount = (state) => {
-  return state.studentDashboard.assignments.filter(a => a.status === "pending").length;
+  return state.studentDashboard.assignments.filter(
+    (a) => a.status === "pending",
+  ).length;
 };
 
 export const selectUpcomingLiveSessions = (state) => {
-  return state.studentDashboard.liveSchedule.filter(session => 
-    session.status === "scheduled" && session.can_join
+  return state.studentDashboard.liveSchedule.filter(
+    (session) => session.status === "scheduled" && session.can_join,
   );
 };
 
@@ -244,9 +423,12 @@ export const selectDashboardStats = (state) => {
   const { enrolledCourses, assignments, liveSchedule } = state.studentDashboard;
   return {
     enrolledCoursesCount: enrolledCourses.length,
-    overdueAssignmentsCount: assignments.filter(a => a.status === "overdue").length,
-    pendingAssignmentsCount: assignments.filter(a => a.status === "pending").length,
-    liveSessionsCount: liveSchedule.filter(s => s.status === "scheduled").length,
+    overdueAssignmentsCount: assignments.filter((a) => a.status === "overdue")
+      .length,
+    pendingAssignmentsCount: assignments.filter((a) => a.status === "pending")
+      .length,
+    liveSessionsCount: liveSchedule.filter((s) => s.status === "scheduled")
+      .length,
   };
 };
 

@@ -378,4 +378,175 @@ export const authService = {
       // Continue with local cleanup even if server call fails
     }
   },
+
+  // Resend OTP
+  resendOtp: async (email) => {
+    try {
+      console.log("Resending OTP for email:", email);
+
+      const requestData = {
+        email: email,
+      };
+
+      console.log("Resend OTP Request data:", requestData);
+
+      const response = await axiosInstance.post(
+        `/auth/resend-otp/`,
+        requestData,
+      );
+
+      console.log("Resend OTP Response:", response.data);
+
+      return {
+        success: true,
+        message: response.data.message || "OTP resent successfully",
+        user_id: response.data.user_id, // For OTP verification
+      };
+    } catch (error) {
+      console.error("Resend OTP Error:", {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+        email: email,
+      });
+
+      // Handle specific backend error responses
+      if (error.response?.status === 400) {
+        const backendError = error.response?.data;
+
+        if (backendError?.error?.includes("User not found")) {
+          const errorDetails = {
+            error:
+              "No account found with this email address. Please register first.",
+            status: 400,
+          };
+          throw errorDetails;
+        }
+
+        if (backendError?.error?.includes("Too many requests")) {
+          const errorDetails = {
+            error:
+              "Too many OTP requests. Please wait a few minutes before trying again.",
+            status: 400,
+          };
+          throw errorDetails;
+        }
+
+        // Generic 400 error
+        const errorDetails = {
+          error:
+            backendError?.error || "Failed to resend OTP. Please try again.",
+          status: 400,
+        };
+        throw errorDetails;
+      }
+
+      // Handle 404 specifically - user not found
+      if (error.response?.status === 404) {
+        const errorDetails = {
+          error:
+            "No account found with this email address. Please register first.",
+          status: 404,
+        };
+        throw errorDetails;
+      }
+
+      // Handle 500 specifically - backend server error
+      if (error.response?.status === 500) {
+        const errorDetails = {
+          error: "Backend server error while resending OTP.",
+          status: 500,
+          suggestion: "Please try again in a few minutes or contact support.",
+        };
+        throw errorDetails;
+      }
+
+      // Preserve structured error objects
+      if (error.response?.data) {
+        throw error.response.data;
+      }
+      throw new Error(error.message || "Failed to resend OTP");
+    }
+  },
+
+  // Update Profile
+  updateProfile: async (profileData) => {
+    try {
+      console.log("Updating profile:", profileData);
+
+      const response = await axiosInstance.patch(`/auth/me/`, profileData);
+
+      console.log("Profile Update Response:", response.data);
+
+      return {
+        success: true,
+        user: response.data,
+        message: "Profile updated successfully",
+      };
+    } catch (error) {
+      console.error("Profile Update Error:", {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+      });
+
+      if (error.response?.status === 400) {
+        const backendError = error.response?.data;
+        const errorDetails = {
+          error:
+            backendError?.error ||
+            "Invalid profile data. Please check your information.",
+          status: 400,
+        };
+        throw errorDetails;
+      }
+
+      if (error.response?.status === 401) {
+        const errorDetails = {
+          error: "Unauthorized. Please log in again.",
+          status: 401,
+        };
+        throw errorDetails;
+      }
+
+      throw new Error(error.message || "Failed to update profile");
+    }
+  },
+
+  // Update Student Profile
+  updateStudentProfile: async (studentData) => {
+    try {
+      console.log("Updating student profile:", studentData);
+
+      const response = await axiosInstance.patch(
+        `/auth/me/profile/student/`,
+        studentData,
+      );
+
+      console.log("Student Profile Update Response:", response.data);
+
+      return {
+        success: true,
+        user: response.data,
+        message: "Student profile updated successfully",
+      };
+    } catch (error) {
+      console.error("Student Profile Update Error:", {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+      });
+
+      if (error.response?.status === 400) {
+        const backendError = error.response?.data;
+        const errorDetails = {
+          error: backendError?.error || "Invalid student profile data.",
+          status: 400,
+        };
+        throw errorDetails;
+      }
+
+      throw new Error(error.message || "Failed to update student profile");
+    }
+  },
 };

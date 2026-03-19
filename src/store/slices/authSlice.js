@@ -74,10 +74,23 @@ export const loginUser = createAsyncThunk(
       const accessToken = response.user.token;
       const refreshToken = response.refresh_token; // Extract from response
 
+      console.log("🔐 Storing tokens:", {
+        hasAccessToken: !!accessToken,
+        hasRefreshToken: !!refreshToken,
+        tokenLength: accessToken?.length,
+      });
+
       authStorage.setAccessToken(accessToken);
       if (refreshToken) {
         localStorage.setItem("vcs_refresh_token", refreshToken);
       }
+
+      // Verify token is stored
+      const storedToken = authStorage.getAccessToken();
+      console.log("🔍 Token verification:", {
+        storedToken: !!storedToken,
+        matchesOriginal: storedToken === accessToken,
+      });
 
       // Prepare user data
       const user = {
@@ -89,9 +102,14 @@ export const loginUser = createAsyncThunk(
       // Store user data
       authStorage.setStoredAuthUser(user);
 
+      // Small delay to ensure token is set in axios interceptor
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
       // Fetch complete profile after login
       try {
-        const profile = await dispatch(fetchUserProfile()).unwrap();
+        console.log("👤 Fetching user profile after login...");
+        const profile = await authService.getMe(); // Direct call instead of dispatch
+        console.log("✅ Profile fetched successfully:", profile);
         return {
           ...response.user,
           user,
@@ -99,25 +117,19 @@ export const loginUser = createAsyncThunk(
         };
       } catch (profileError) {
         console.warn(
-          "Profile fetch failed after login, using login data:",
+          "⚠️ Profile fetch failed after login, using basic user data:",
           profileError,
         );
+        // Return login data even if profile fetch fails
         return {
           ...response.user,
           user,
           profile: null,
         };
       }
-    } catch (err) {
-      // Convert Error objects to serializable format
-      if (err instanceof Error) {
-        return rejectWithValue(err.message);
-      }
-      // Handle structured error objects
-      if (typeof err === "object" && err !== null) {
-        return rejectWithValue(err);
-      }
-      return rejectWithValue(String(err));
+    } catch (error) {
+      console.error("❌ Login error:", error);
+      return rejectWithValue(error.message || "Login failed");
     }
   },
 );

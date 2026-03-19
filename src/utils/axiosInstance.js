@@ -42,6 +42,19 @@ axiosInstance.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
+    // Enhanced debugging for auth endpoints
+    if (config.url?.includes("auth/me")) {
+      console.log("🔍 AUTH DEBUG - Request to /auth/me:", {
+        hasToken: !!token,
+        tokenLength: token?.length,
+        tokenPreview: token ? `${token.substring(0, 20)}...` : null,
+        authorizationHeader: config.headers.Authorization
+          ? "[SET]"
+          : "[NOT_SET]",
+        fullURL: `${config.baseURL}${config.url}`,
+      });
+    }
+
     console.log("🚀 Request:", {
       method: config.method?.toUpperCase(),
       url: config.url,
