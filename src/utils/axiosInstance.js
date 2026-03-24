@@ -1,13 +1,11 @@
 import axios from "axios";
+import { API_BASE_URL } from "../constants";
 import { authStorage } from "./authStorage";
 
-const baseURL = import.meta.env.VITE_API_BASE_URL || "/api/v1"; // Use relative URL for development proxy
+const baseURL = API_BASE_URL;
 
 console.log("🔧 Axios Instance Base URL:", baseURL);
-console.log(
-  "🔧 Environment VITE_API_BASE_URL:",
-  import.meta.env.VITE_API_BASE_URL,
-);
+console.log("🔧 Environment API_BASE_URL:", API_BASE_URL);
 
 const axiosInstance = axios.create({
   baseURL: baseURL,
@@ -129,7 +127,7 @@ axiosInstance.interceptors.response.use(
           throw new Error("No refresh token available");
         }
 
-        const response = await axios.post(`${baseURL}/auth/token/refresh/`, {
+        const response = await axiosInstance.post("/auth/token/refresh/", {
           refresh: refreshToken,
         });
 

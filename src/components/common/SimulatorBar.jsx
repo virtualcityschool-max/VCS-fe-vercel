@@ -39,18 +39,6 @@ const SimulatorBar = () => {
       roles: ["student", "teacher", "admin"],
     },
     {
-      id: "/feed",
-      label: "Student Feed",
-      icon: "fa-rss",
-      roles: ["student"],
-    },
-    {
-      id: "/courses",
-      label: "Courses",
-      icon: "fa-shopping-cart",
-      public: true,
-    },
-    {
       id: "/teacher/123",
       label: "T-Profile",
       icon: "fa-id-card",
@@ -60,7 +48,7 @@ const SimulatorBar = () => {
       id: "/student/456",
       label: "S-Risk",
       icon: "fa-exclamation-triangle",
-      roles: ["teacher", "admin"],
+      roles: ["teacher"],
     },
   ];
 

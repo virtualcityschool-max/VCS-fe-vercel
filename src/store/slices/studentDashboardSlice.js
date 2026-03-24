@@ -1,4 +1,8 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import {
+  createSlice,
+  createAsyncThunk,
+  createSelector,
+} from "@reduxjs/toolkit";
 import { studentService } from "../../services/studentService";
 
 // Async thunks
@@ -393,13 +397,18 @@ export const selectAttendanceLoading = (state) =>
   state.studentDashboard.isFetchingAttendance;
 
 // Filtered selectors
-export const selectFilteredAssignments = (state) => {
-  const { assignments, filters } = state.studentDashboard;
-  if (filters.status === "all") return assignments;
-  return assignments.filter(
-    (assignment) => assignment.status === filters.status,
-  );
-};
+export const selectFilteredAssignments = createSelector(
+  [
+    (state) => state.studentDashboard.assignments,
+    (state) => state.studentDashboard.filters,
+  ],
+  (assignments, filters) => {
+    if (filters?.status === "all") return assignments || [];
+    return (assignments || []).filter(
+      (assignment) => assignment.status === filters?.status,
+    );
+  },
+);
 
 export const selectOverdueAssignmentsCount = (state) => {
   return state.studentDashboard.assignments.filter(
@@ -413,24 +422,33 @@ export const selectPendingAssignmentsCount = (state) => {
   ).length;
 };
 
-export const selectUpcomingLiveSessions = (state) => {
-  return state.studentDashboard.liveSchedule.filter(
-    (session) => session.status === "scheduled" && session.can_join,
-  );
-};
+export const selectUpcomingLiveSessions = createSelector(
+  [(state) => state.studentDashboard.liveSchedule],
+  (liveSchedule) => {
+    return (liveSchedule || []).filter(
+      (session) => session.status === "scheduled" && session.can_join,
+    );
+  },
+);
 
-export const selectDashboardStats = (state) => {
-  const { enrolledCourses, assignments, liveSchedule } = state.studentDashboard;
-  return {
-    enrolledCoursesCount: enrolledCourses.length,
-    overdueAssignmentsCount: assignments.filter((a) => a.status === "overdue")
-      .length,
-    pendingAssignmentsCount: assignments.filter((a) => a.status === "pending")
-      .length,
-    liveSessionsCount: liveSchedule.filter((s) => s.status === "scheduled")
-      .length,
-  };
-};
+export const selectDashboardStats = createSelector(
+  [
+    (state) => state.studentDashboard.enrolledCourses,
+    (state) => state.studentDashboard.assignments,
+    (state) => state.studentDashboard.liveSchedule,
+  ],
+  (enrolledCourses, assignments, liveSchedule) => {
+    return {
+      enrolledCoursesCount: enrolledCourses?.length || 0,
+      overdueAssignmentsCount:
+        assignments?.filter((a) => a.status === "overdue").length || 0,
+      pendingAssignmentsCount:
+        assignments?.filter((a) => a.status === "pending").length || 0,
+      liveSessionsCount:
+        liveSchedule?.filter((s) => s.status === "scheduled").length || 0,
+    };
+  },
+);
 
 // Actions
 export const {

@@ -28,9 +28,11 @@ import {
   InstructorsDirectory,
 } from "./pages";
 
-// Protected Route Component
-const ProtectedRoute = () => {
-  const { isLoggedIn, isInitialized } = useSelector((state) => state.auth);
+// Protected Route Component with Role-Based Access Control
+const ProtectedRoute = ({ allowedRoles = [] }) => {
+  const { isLoggedIn, isInitialized, role } = useSelector(
+    (state) => state.auth,
+  );
 
   // Show loading while auth is initializing
   if (!isInitialized) {
@@ -49,6 +51,20 @@ const ProtectedRoute = () => {
   // Redirect to home if not authenticated
   if (!isLoggedIn) {
     return <Navigate to="/" replace />;
+  }
+
+  // Check role-based access if roles are specified
+  if (allowedRoles.length > 0 && !allowedRoles.includes(role)) {
+    // Redirect authenticated users to appropriate dashboard based on their role
+    const roleRedirects = {
+      student: "/student",
+      teacher: "/teacher",
+      parent: "/parent",
+      admin: "/admin",
+    };
+
+    const redirectPath = roleRedirects[role] || "/";
+    return <Navigate to={redirectPath} replace />;
   }
 
   // CRITICAL: Must return Outlet for nested routes to render
@@ -117,18 +133,34 @@ const App = () => {
             <Route path="/instructors" element={<InstructorsDirectory />} />
             <Route path="/teacher/:id" element={<PublicTeacherProfile />} />
 
-            {/* Protected Routes */}
-            <Route element={<ProtectedRoute />}>
-              <Route path="/admin" element={<AdminDashboard />} />
+            {/* Student-Only Routes */}
+            <Route element={<ProtectedRoute allowedRoles={["student"]} />}>
               <Route path="/student" element={<StudentPortal />} />
-              <Route path="/teacher" element={<TeacherPortal />} />
-              <Route path="/parent" element={<ParentPortal />} />
-              <Route path="/classroom" element={<Classroom />} />
               <Route path="/feed" element={<StudentFeed />} />
+            </Route>
+
+            {/* Shared Authenticated Routes */}
+            <Route element={<ProtectedRoute />}>
+              <Route path="/classroom" element={<Classroom />} />
+            </Route>
+
+            {/* Teacher-Only Routes */}
+            <Route element={<ProtectedRoute allowedRoles={["teacher"]} />}>
+              <Route path="/teacher" element={<TeacherPortal />} />
               <Route
                 path="/student/:id"
                 element={<TeacherInternalStudentProfile />}
               />
+            </Route>
+
+            {/* Parent-Only Routes */}
+            <Route element={<ProtectedRoute allowedRoles={["parent"]} />}>
+              <Route path="/parent" element={<ParentPortal />} />
+            </Route>
+
+            {/* Admin-Only Routes */}
+            <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
+              <Route path="/admin" element={<AdminDashboard />} />
             </Route>
 
             {/* Catch all route */}

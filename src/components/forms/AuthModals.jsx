@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import toast from "react-hot-toast";
 import { useSelector, useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { setAuthModal } from "../../store/slices/uiSlice";
 import {
   loginUser,
@@ -8,6 +9,7 @@ import {
   clearAuthError,
   verifyOtp,
 } from "../../store/slices/authSlice";
+import { useNavigation } from "../../hooks";
 
 const emptyErrors = {
   email: "",
@@ -41,6 +43,8 @@ const AuthModals = () => {
   const dispatch = useDispatch();
   const { authModal } = useSelector((state) => state.ui);
   const { isLoading, error: authError } = useSelector((state) => state.auth);
+  const { goToDashboard } = useNavigation();
+  const navigate = useNavigate();
 
   const isOpen = authModal.type;
   const intendedRole = authModal.intendedRole;
@@ -130,8 +134,30 @@ const AuthModals = () => {
         }),
       ).unwrap();
 
-      // Navigation will be handled by React Router ProtectedRoute
-      onClose(); // This will reset all states automatically
+      // Navigate to role dashboard after successful login
+      // Use the role from the login response instead of Redux state to avoid timing issues
+      const userRole = user.role || activeRoleTab;
+      switch (userRole) {
+        case "admin":
+          navigate("/admin", { replace: true });
+          break;
+        case "student":
+          navigate("/student", { replace: true });
+          break;
+        case "teacher":
+          navigate("/teacher", { replace: true });
+          break;
+        case "parent":
+          navigate("/parent", { replace: true });
+          break;
+        default:
+          navigate("/", { replace: true });
+      }
+
+      // Close modal after a small delay to allow navigation to start
+      setTimeout(() => {
+        onClose(); // This will reset all states automatically
+      }, 50);
     } catch (err) {
       // Show toast for login errors
       if (typeof err === "object" && err !== null) {
@@ -283,11 +309,8 @@ const AuthModals = () => {
     try {
       await dispatch(verifyOtp({ userId, otp })).unwrap();
 
-      // Registration successful - reset everything
+      // Registration successful - show success state
       setRegistrationStep("success");
-      setTimeout(() => {
-        onClose(); // This will reset all states automatically
-      }, 2000);
     } catch (err) {
       console.error("OTP verification failed:", err);
 
@@ -352,10 +375,15 @@ const AuthModals = () => {
 
             <form onSubmit={handleLogin} className="space-y-5">
               <div>
-                <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block">
+                <label
+                  htmlFor="login-email"
+                  className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block"
+                >
                   Email
                 </label>
                 <input
+                  id="login-email"
+                  name="login-email"
                   type="email"
                   value={email}
                   onChange={(e) => {
@@ -375,11 +403,16 @@ const AuthModals = () => {
               </div>
 
               <div>
-                <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block">
+                <label
+                  htmlFor="login-password"
+                  className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block"
+                >
                   Password
                 </label>
                 <div className="relative">
                   <input
+                    id="login-password"
+                    name="login-password"
                     type={showLoginPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => {
@@ -456,10 +489,15 @@ const AuthModals = () => {
               <form onSubmit={handleRegisterSubmit} className="space-y-5">
                 {/* Your existing registration form fields */}
                 <div>
-                  <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block">
+                  <label
+                    htmlFor="register-email"
+                    className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block"
+                  >
                     Email
                   </label>
                   <input
+                    id="register-email"
+                    name="register-email"
                     type="email"
                     value={email}
                     onChange={(e) => {
@@ -497,10 +535,15 @@ const AuthModals = () => {
 
                 {/* Add all other form fields (username, password, confirmPassword, role) */}
                 <div>
-                  <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block">
+                  <label
+                    htmlFor="register-username"
+                    className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block"
+                  >
                     Username
                   </label>
                   <input
+                    id="register-username"
+                    name="register-username"
                     type="text"
                     value={username}
                     onChange={(e) => {
@@ -520,11 +563,16 @@ const AuthModals = () => {
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block">
+                  <label
+                    htmlFor="register-password"
+                    className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block"
+                  >
                     Password
                   </label>
                   <div className="relative">
                     <input
+                      id="register-password"
+                      name="register-password"
                       type={showRegisterPassword ? "text" : "password"}
                       value={password}
                       onChange={(e) => {
@@ -576,11 +624,16 @@ const AuthModals = () => {
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block">
+                  <label
+                    htmlFor="register-confirm-password"
+                    className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block"
+                  >
                     Confirm Password
                   </label>
                   <div className="relative">
                     <input
+                      id="register-confirm-password"
+                      name="register-confirm-password"
                       type={showConfirmPassword ? "text" : "password"}
                       value={confirmPassword}
                       onChange={(e) => {
@@ -616,10 +669,15 @@ const AuthModals = () => {
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block">
+                  <label
+                    htmlFor="register-role"
+                    className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block"
+                  >
                     Role
                   </label>
                   <select
+                    id="register-role"
+                    name="register-role"
                     value={role}
                     onChange={(e) => {
                       toast.dismiss();
@@ -700,10 +758,15 @@ const AuthModals = () => {
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block text-center">
+                  <label
+                    htmlFor="otp-input"
+                    className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block text-center"
+                  >
                     Enter OTP Code
                   </label>
                   <input
+                    id="otp-input"
+                    name="otp-input"
                     type="text"
                     value={otp}
                     onChange={(e) => {
@@ -768,8 +831,8 @@ const AuthModals = () => {
                 </p>
                 <button
                   onClick={() => {
+                    // Close the modal completely - user can then click Login normally
                     onClose();
-                    setRegistrationStep("form");
                   }}
                   className="w-full bg-slate-800 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-700 transition"
                 >

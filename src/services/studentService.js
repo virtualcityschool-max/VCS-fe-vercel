@@ -36,7 +36,7 @@ export const studentService = {
   // Get student courses
   getCourses: async () => {
     try {
-      const response = await axiosInstance.get("/student/courses/");
+      const response = await axiosInstance.get("/courses/");
       return response.data;
     } catch (error) {
       console.error("Error fetching student courses:", error);
@@ -44,10 +44,21 @@ export const studentService = {
     }
   },
 
+  // Get all enrollments
+  getAllEnrollments: async () => {
+    try {
+      const response = await axiosInstance.get(`/courses/all-enrollments/`);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching enrollments:", error);
+      throw new Error("Failed to load enrollments");
+    }
+  },
+
   // Get student assignments
   getAssignments: async () => {
     try {
-      const response = await axiosInstance.get("/student/assignments/");
+      const response = await axiosInstance.get("/assignments/");
       return response.data;
     } catch (error) {
       console.error("Error fetching student assignments:", error);
@@ -58,7 +69,7 @@ export const studentService = {
   // Get student live sessions
   getLiveSessions: async () => {
     try {
-      const response = await axiosInstance.get("/student/live-sessions/");
+      const response = await axiosInstance.get("/classroom/sessions/");
       return response.data;
     } catch (error) {
       console.error("Error fetching student live sessions:", error);
@@ -69,7 +80,7 @@ export const studentService = {
   // Get student grades
   getGrades: async () => {
     try {
-      const response = await axiosInstance.get("/student/grades/");
+      const response = await axiosInstance.get("/assignments/my-grades/");
       return response.data;
     } catch (error) {
       console.error("Error fetching student grades:", error);
@@ -234,7 +245,7 @@ export const studentService = {
   getAssignmentDetails: async (assignmentId) => {
     try {
       const response = await axiosInstance.get(
-        `/student/assignments/${assignmentId}/`,
+        `/assignments/${assignmentId}/submissions/`,
       );
       return response.data;
     } catch (error) {
@@ -247,7 +258,7 @@ export const studentService = {
   enrollInCourse: async (courseId) => {
     try {
       const response = await axiosInstance.post(
-        `/student/courses/${courseId}/enroll/`,
+        `/courses/${courseId}/assign-instructor/`,
       );
       return response.data;
     } catch (error) {
@@ -259,9 +270,7 @@ export const studentService = {
   // Get course progress
   getCourseProgress: async (courseId) => {
     try {
-      const response = await axiosInstance.get(
-        `/student/courses/${courseId}/progress/`,
-      );
+      const response = await axiosInstance.get(`/courses/stats/`);
       return response.data;
     } catch (error) {
       console.error("Error fetching course progress:", error);

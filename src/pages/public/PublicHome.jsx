@@ -42,6 +42,8 @@ const PublicHome = () => {
               <i className="fas fa-search text-slate-500 mr-4"></i>
               <input
                 type="search"
+                id="home-search"
+                name="home-search"
                 placeholder="What do you want to learn today?"
                 className="w-full bg-transparent outline-none text-white placeholder-slate-600 py-4 font-medium"
               />
@@ -154,7 +156,8 @@ const PublicHome = () => {
       {/* Footer Teaser */}
       <footer className="relative z-10 max-w-7xl mx-auto px-6 py-20 text-center border-t border-white/5 opacity-40">
         <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">
-          &copy; {new Date().getFullYear()} VirtualCitySchool Ecosystem. All Rights Reserved.
+          &copy; {new Date().getFullYear()} VirtualCitySchool Ecosystem. All
+          Rights Reserved.
         </p>
       </footer>
     </main>

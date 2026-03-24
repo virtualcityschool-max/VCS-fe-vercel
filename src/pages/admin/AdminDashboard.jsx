@@ -1,57 +1,107 @@
-import React, { useState } from "react";
-import { useDispatch } from "react-redux";
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import {
+  fetchPendingApprovals,
+  approveUser,
+  rejectUser,
+  clearApprovalsError,
+} from "../../store/slices/approvalsSlice";
 
 const AdminDashboard = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState("approvals");
   const [activeModal, setActiveModal] = useState(null);
   const [showToast, setShowToast] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  const scheduleData = [
-    {
-      day: "Monday",
-      start: 9,
-      end: 11,
-      title: "Physics 101",
-      teacher: "Dr. Samuel",
-      color: "bg-blue-600",
-    },
-    {
-      day: "Monday",
-      start: 13,
-      end: 15,
-      title: "Calculus",
-      teacher: "Dr. Okoro",
-      color: "bg-indigo-600",
-    },
-    {
-      day: "Tuesday",
-      start: 14,
-      end: 15.5,
-      title: "Urdu Lit",
-      teacher: "Mr. Iqbal",
-      color: "bg-emerald-600",
-    },
-    {
-      day: "Wednesday",
-      start: 10,
-      end: 12,
-      title: "Bio Science",
-      teacher: "Dr. Sarah",
-      color: "bg-teal-600",
-    },
-    {
-      day: "Friday",
-      start: 20,
-      end: 22,
-      title: "AI Ethics",
-      teacher: "Lab TA",
-      color: "bg-rose-600",
-    },
-  ];
+  // Get approvals data from Redux store
+  const {
+    pendingApprovals,
+    isLoading: approvalsLoading,
+    error: approvalsError,
+    isProcessing,
+  } = useSelector((state) => state.approvals);
+
+  // Fetch pending approvals when component mounts or when approvals tab is active
+  useEffect(() => {
+    if (activeTab === "approvals") {
+      dispatch(fetchPendingApprovals());
+    }
+  }, [dispatch, activeTab]);
+
+  // Handle approval actions
+  const handleApprove = async (userId) => {
+    try {
+      await dispatch(approveUser(userId)).unwrap();
+      setShowToast("User approved successfully");
+    } catch (error) {
+      setShowToast(error || "Failed to approve user");
+    }
+  };
+
+  const handleReject = async (userId) => {
+    try {
+      await dispatch(rejectUser(userId)).unwrap();
+      setShowToast("User rejected successfully");
+    } catch (error) {
+      setShowToast(error || "Failed to reject user");
+    }
+  };
+
+  // Clear error when switching tabs
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    if (approvalsError) {
+      dispatch(clearApprovalsError());
+    }
+    setIsSidebarOpen(false);
+  };
+
+  // Mock schedule data - DISABLED until backend integration
+  // const scheduleData = [
+  //   {
+  //     day: "Monday",
+  //     start: 9,
+  //     end: 11,
+  //     title: "Physics 101",
+  //     teacher: "Dr. Samuel",
+  //     color: "bg-blue-600",
+  //   },
+  //   {
+  //     day: "Monday",
+  //     start: 13,
+  //     end: 15,
+  //     title: "Calculus",
+  //     teacher: "Dr. Okoro",
+  //     color: "bg-indigo-600",
+  //   },
+  //   {
+  //     day: "Tuesday",
+  //     start: 14,
+  //     end: 15.5,
+  //     title: "Urdu Lit",
+  //     teacher: "Mr. Iqbal",
+  //     color: "bg-emerald-600",
+  //   },
+  //   {
+  //     day: "Wednesday",
+  //     start: 10,
+  //     end: 12,
+  //     title: "Bio Science",
+  //     teacher: "Dr. Sarah",
+  //     color: "bg-teal-600",
+  //   },
+  //   {
+  //     day: "Friday",
+  //     start: 20,
+  //     end: 22,
+  //     title: "AI Ethics",
+  //     teacher: "Lab TA",
+  //     color: "bg-rose-600",
+  //   },
+  // ];
 
   const triggerToast = (msg) => {
     setShowToast(msg);
@@ -59,79 +109,19 @@ const AdminDashboard = () => {
   };
 
   const renderScheduler = () => {
-    const hours = Array.from({ length: 13 }, (_, i) => i * 2);
-    const days = [
-      "Monday",
-      "Tuesday",
-      "Wednesday",
-      "Thursday",
-      "Friday",
-      "Saturday",
-      "Sunday",
-    ];
-
+    // Scheduler disabled - no backend integration yet
     return (
-      <div className="bg-slate-900 border border-slate-800 rounded-[2.5rem] shadow-2xl overflow-hidden animate-fadeIn">
-        <div className="p-8 border-b border-slate-800 flex justify-between items-center bg-slate-950/40">
-          <h3 className="text-xs font-black uppercase tracking-[0.3em] text-slate-500">
-            24h VirtualCity Master Scheduler
-          </h3>
-          <button
-            onClick={() => setActiveModal("schedule-class")}
-            className="bg-blue-600 text-white px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg active:scale-95 transition"
-          >
-            + Place New Class
-          </button>
+      <div className="bg-slate-900 border border-slate-800 rounded-[2.5rem] shadow-2xl overflow-hidden animate-fadeIn p-16 text-center">
+        <div className="w-16 h-16 bg-slate-700/20 rounded-full flex items-center justify-center mx-auto mb-4">
+          <i className="fas fa-calendar-alt text-slate-400 text-2xl"></i>
         </div>
-        <div className="overflow-x-auto custom-scrollbar">
-          <div className="w-[2000px] p-10 relative">
-            <div className="flex border-b border-slate-800/50 pb-6 mb-10 sticky left-0 z-20">
-              <div className="w-48 shrink-0 text-[10px] font-black uppercase text-slate-600">
-                Timeline
-              </div>
-              <div className="flex-1 flex justify-between px-4">
-                {hours.map((h) => (
-                  <div
-                    key={h}
-                    className="text-[10px] font-black text-slate-500 uppercase tracking-widest"
-                  >
-                    {h}:00
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="space-y-6">
-              {days.map((day) => (
-                <div key={day} className="flex items-center h-20 group">
-                  <div className="w-48 shrink-0 font-black text-slate-500 uppercase tracking-widest text-xs group-hover:text-white transition sticky left-0 z-10 bg-slate-900 pr-4">
-                    {day}
-                  </div>
-                  <div className="flex-1 h-16 bg-slate-950/50 rounded-2xl relative border border-slate-800/30">
-                    {scheduleData
-                      .filter((i) => i.day === day)
-                      .map((cls, idx) => (
-                        <div
-                          key={idx}
-                          style={{
-                            left: `${(cls.start / 24) * 100}%`,
-                            width: `${((cls.end - cls.start) / 24) * 100}%`,
-                          }}
-                          className={`absolute top-2 bottom-2 ${cls.color} rounded-xl p-3 shadow-xl hover:scale-[1.03] transition-transform cursor-pointer overflow-hidden`}
-                        >
-                          <p className="text-[9px] font-black text-white uppercase truncate">
-                            {cls.title}
-                          </p>
-                          <p className="text-[7px] text-white/60 font-black uppercase truncate">
-                            {cls.teacher}
-                          </p>
-                        </div>
-                      ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+        <h3 className="text-white text-lg font-bold mb-2">
+          Scheduler Not Integrated Yet
+        </h3>
+        <p className="text-slate-400 text-sm">
+          Academic scheduling functionality will be available once backend
+          integration is complete
+        </p>
       </div>
     );
   };
@@ -178,13 +168,10 @@ const AdminDashboard = () => {
             </span>
           </div>
           <nav className="space-y-2">
-            {["overview", "users", "academics", "financials"].map((tab) => (
+            {["approvals"].map((tab) => (
               <button
                 key={tab}
-                onClick={() => {
-                  setActiveTab(tab);
-                  setIsSidebarOpen(false);
-                }}
+                onClick={() => handleTabChange(tab)}
                 className={`w-full text-left px-6 py-4 rounded-2xl font-bold text-xs uppercase tracking-widest transition ${activeTab === tab ? "bg-indigo-600 text-white shadow-xl" : "text-slate-500 hover:text-slate-300"}`}
               >
                 {tab}
@@ -217,148 +204,262 @@ const AdminDashboard = () => {
         )}
 
         {activeTab === "overview" && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 animate-fadeIn">
-            {[
-              {
-                label: "Total Learners",
-                value: "12,842",
-                trend: "+12%",
-                icon: "fa-users",
-                color: "text-blue-500",
-              },
-              {
-                label: "Active Sessions",
-                value: "458",
-                trend: "Live Now",
-                icon: "fa-broadcast-tower",
-                color: "text-emerald-500",
-              },
-              {
-                label: "Platform Revenue",
-                value: "$240.5k",
-                trend: "+8.4%",
-                icon: "fa-wallet",
-                color: "text-indigo-500",
-              },
-              {
-                label: "System Uptime",
-                value: "99.98%",
-                trend: "Stable",
-                icon: "fa-server",
-                color: "text-purple-500",
-              },
-            ].map((stat, i) => (
-              <div
-                key={i}
-                className="bg-slate-900/50 border border-slate-800 p-8 rounded-4xl hover:border-slate-700 transition group shadow-xl"
-              >
-                <div className="flex justify-between items-start mb-6">
-                  <div
-                    className={`w-12 h-12 rounded-2xl bg-slate-950 flex items-center justify-center text-xl ${stat.color} shadow-inner`}
-                  >
-                    <i className={`fas ${stat.icon}`}></i>
-                  </div>
-                  <span className="text-[10px] font-black bg-slate-950 px-3 py-1 rounded-full text-slate-500 uppercase tracking-widest">
-                    {stat.trend}
-                  </span>
-                </div>
-                <h4 className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">
-                  {stat.label}
-                </h4>
-                <p className="text-3xl font-black group-hover:text-indigo-400 transition">
-                  {stat.value}
-                </p>
-              </div>
-            ))}
-            <div className="lg:col-span-4 bg-slate-900/50 border border-slate-800 p-10 rounded-[2.5rem] mt-4">
-              <div className="flex justify-between items-center mb-10">
-                <div>
-                  <h3 className="text-xl font-bold font-poppins">
-                    System Performance
-                  </h3>
-                  <p className="text-slate-500 text-sm">
-                    Real-time platform throughput and latency
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  <div className="w-3 h-3 bg-indigo-500 rounded-full animate-pulse"></div>
-                  <span className="text-[10px] font-black uppercase tracking-widest text-indigo-500">
-                    Node Cluster: Online
-                  </span>
-                </div>
-              </div>
-              <div className="h-48 flex items-end gap-2 px-4">
-                {[40, 70, 45, 90, 65, 80, 50, 95, 75, 85, 60, 100].map(
-                  (h, i) => (
-                    <div
-                      key={i}
-                      style={{ height: `${h}%` }}
-                      className="flex-1 bg-indigo-600/20 rounded-t-lg group relative"
-                    >
-                      <div className="absolute inset-0 bg-indigo-500 rounded-t-lg opacity-0 group-hover:opacity-100 transition duration-300"></div>
-                    </div>
-                  ),
-                )}
-              </div>
+          <div className="bg-slate-900 border border-slate-800 rounded-[2.5rem] shadow-2xl overflow-hidden animate-fadeIn p-16 text-center">
+            <div className="w-16 h-16 bg-slate-700/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i className="fas fa-chart-line text-slate-400 text-2xl"></i>
             </div>
+            <h3 className="text-white text-lg font-bold mb-2">
+              Analytics Not Integrated Yet
+            </h3>
+            <p className="text-slate-400 text-sm">
+              Dashboard analytics and overview statistics will be available once
+              backend integration is complete
+            </p>
           </div>
         )}
 
         {activeTab === "academics" && renderScheduler()}
 
-        {activeTab === "users" && (
-          <div className="bg-slate-900 border border-slate-800 rounded-[2.5rem] overflow-hidden shadow-2xl animate-fadeIn">
-            <table className="w-full text-left">
-              <thead className="bg-slate-950/60 border-b border-slate-800">
-                <tr>
-                  <th className="px-8 py-6 text-[10px] font-black uppercase text-slate-500">
-                    Student Identity
-                  </th>
-                  <th className="px-8 py-6 text-[10px] font-black uppercase text-slate-500">
-                    Status
-                  </th>
-                  <th className="px-8 py-6 text-[10px] font-black uppercase text-slate-500 text-right">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800/50">
-                {["Ali Khan", "Zayn Malik", "Sarah Ahmed"].map((name, i) => (
-                  <tr
-                    key={i}
-                    className="hover:bg-slate-800/30 transition group"
+        {activeTab === "approvals" && (
+          <>
+            <div className="bg-slate-900 border border-slate-800 rounded-[2.5rem] overflow-hidden shadow-2xl animate-fadeIn">
+              <div className="p-8 border-b border-slate-800 flex justify-between items-center bg-slate-950/40">
+                <div>
+                  <h3 className="text-xl font-bold font-poppins text-white">
+                    Pending Approvals
+                  </h3>
+                  <p className="text-slate-500 text-sm">
+                    Review and approve user registration requests
+                  </p>
+                </div>
+                <button
+                  onClick={() => dispatch(fetchPendingApprovals())}
+                  className="bg-blue-600 text-white px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg active:scale-95 transition flex items-center gap-2"
+                  disabled={approvalsLoading}
+                >
+                  <i
+                    className={`fas ${approvalsLoading ? "fa-spinner fa-spin" : "fa-refresh"}`}
+                  ></i>
+                  Refresh
+                </button>
+              </div>
+
+              {/* API Not Available State */}
+              {approvalsError && approvalsError.includes("404") && (
+                <div className="p-16 text-center">
+                  <div className="w-16 h-16 bg-amber-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i className="fas fa-exclamation-triangle text-amber-500 text-2xl"></i>
+                  </div>
+                  <h4 className="text-white text-lg font-bold mb-2">
+                    Approvals API Not Available
+                  </h4>
+                  <p className="text-slate-400 text-sm mb-4">
+                    The pending approvals endpoint is not yet implemented on the
+                    backend.
+                  </p>
+                  <div className="bg-slate-800 border border-slate-700 rounded-2xl p-4 text-left max-w-md mx-auto">
+                    <p className="text-slate-300 text-sm font-mono mb-2">
+                      Expected endpoint:
+                    </p>
+                    <p className="text-amber-400 text-xs font-mono">
+                      GET /auth/pending-approvals
+                    </p>
+                    <p className="text-slate-300 text-sm font-mono mt-3 mb-2">
+                      Actions:
+                    </p>
+                    <p className="text-amber-400 text-xs font-mono">
+                      PATCH /auth/approve/{"{id}"}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => dispatch(fetchPendingApprovals())}
+                    className="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-xl text-sm font-bold transition"
                   >
-                    <td className="px-8 py-6 flex items-center gap-4">
-                      <img
-                        src={`https://i.pravatar.cc/150?u=${i}`}
-                        className="w-10 h-10 rounded-xl"
-                      />
-                      <div>
-                        <p className="font-bold text-white group-hover:text-indigo-400 transition">
-                          {name}
-                        </p>
-                        <p className="text-[9px] text-slate-500 uppercase">
-                          #STU-88{i}
-                        </p>
-                      </div>
-                    </td>
-                    <td className="px-8 py-6">
-                      <span className="bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full text-[8px] font-black uppercase border border-emerald-500/20">
-                        Active
-                      </span>
-                    </td>
-                    <td className="px-8 py-6 text-right">
-                      <button
-                        onClick={() => setActiveModal("assign-course")}
-                        className="bg-indigo-600/10 text-indigo-400 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-600 hover:text-white transition"
-                      >
-                        Assign Course
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    Try Again
+                  </button>
+                </div>
+              )}
+
+              {/* Other Error State */}
+              {approvalsError && !approvalsError.includes("404") && (
+                <div className="p-8">
+                  <div className="bg-red-600/10 border border-red-500/20 rounded-2xl p-6 text-center">
+                    <div className="w-12 h-12 bg-red-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <i className="fas fa-exclamation-triangle text-red-500 text-xl"></i>
+                    </div>
+                    <h4 className="text-red-400 font-bold mb-2">
+                      Failed to load approvals
+                    </h4>
+                    <p className="text-slate-400 text-sm mb-4">
+                      {approvalsError}
+                    </p>
+                    <button
+                      onClick={() => dispatch(fetchPendingApprovals())}
+                      className="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-xl text-sm font-bold transition"
+                    >
+                      Try Again
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Loading State */}
+              {approvalsLoading && !approvalsError && (
+                <div className="p-16 text-center">
+                  <div className="w-16 h-16 bg-blue-600/20 rounded-full flex items-center justify-center mx-auto mb-4 animate-spin">
+                    <i className="fas fa-spinner text-blue-500 text-2xl"></i>
+                  </div>
+                  <p className="text-white text-lg">
+                    Loading pending approvals...
+                  </p>
+                </div>
+              )}
+
+              {/* Empty State */}
+              {!approvalsLoading &&
+                !approvalsError &&
+                pendingApprovals.length === 0 && (
+                  <div className="p-16 text-center">
+                    <div className="w-16 h-16 bg-slate-700/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <i className="fas fa-check-circle text-slate-400 text-2xl"></i>
+                    </div>
+                    <h4 className="text-white text-lg font-bold mb-2">
+                      No pending approvals
+                    </h4>
+                    <p className="text-slate-400 text-sm">
+                      All user registrations have been processed
+                    </p>
+                  </div>
+                )}
+
+              {/* Approvals List */}
+              {!approvalsLoading &&
+                !approvalsError &&
+                pendingApprovals.length > 0 && (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left">
+                      <thead className="bg-slate-950/60 border-b border-slate-800">
+                        <tr>
+                          <th className="px-8 py-6 text-[10px] font-black uppercase text-slate-500">
+                            User Information
+                          </th>
+                          <th className="px-8 py-6 text-[10px] font-black uppercase text-slate-500">
+                            Role
+                          </th>
+                          <th className="px-8 py-6 text-[10px] font-black uppercase text-slate-500">
+                            Registration Date
+                          </th>
+                          <th className="px-8 py-6 text-[10px] font-black uppercase text-slate-500 text-right">
+                            Actions
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-800/50">
+                        {pendingApprovals.map((user) => (
+                          <tr
+                            key={user.id}
+                            className="hover:bg-slate-800/30 transition group"
+                          >
+                            <td className="px-8 py-6">
+                              <div className="flex items-center gap-4">
+                                <img
+                                  src={
+                                    user.profile_image ||
+                                    `https://i.pravatar.cc/150?u=${user.email}`
+                                  }
+                                  className="w-10 h-10 rounded-xl border border-slate-700 shadow-md"
+                                  alt={user.username || user.email}
+                                />
+                                <div>
+                                  <p className="font-bold text-white group-hover:text-indigo-400 transition">
+                                    {user.username ||
+                                      user.first_name + " " + user.last_name ||
+                                      "Unknown User"}
+                                  </p>
+                                  <p className="text-[9px] text-slate-500 uppercase">
+                                    {user.email}
+                                  </p>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-8 py-6">
+                              <span className="bg-slate-700/50 text-slate-300 px-3 py-1 rounded-full text-[8px] font-black uppercase border border-slate-600">
+                                {user.role || "user"}
+                              </span>
+                            </td>
+                            <td className="px-8 py-6">
+                              <span className="text-slate-400 text-sm">
+                                {user.date_joined
+                                  ? new Date(
+                                      user.date_joined,
+                                    ).toLocaleDateString()
+                                  : "Unknown"}
+                              </span>
+                            </td>
+                            <td className="px-8 py-6 text-right">
+                              <div className="flex items-center gap-2 justify-end">
+                                <button
+                                  onClick={() => handleApprove(user.id)}
+                                  disabled={
+                                    isProcessing[user.id] === "approving"
+                                  }
+                                  className="bg-emerald-600/10 text-emerald-400 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-600 hover:text-white transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                >
+                                  {isProcessing[user.id] === "approving" ? (
+                                    <>
+                                      <i className="fas fa-spinner fa-spin"></i>
+                                      Approving...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <i className="fas fa-check"></i>
+                                      Approve
+                                    </>
+                                  )}
+                                </button>
+                                <button
+                                  onClick={() => handleReject(user.id)}
+                                  disabled={
+                                    isProcessing[user.id] === "rejecting"
+                                  }
+                                  className="bg-red-600/10 text-red-400 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                >
+                                  {isProcessing[user.id] === "rejecting" ? (
+                                    <>
+                                      <i className="fas fa-spinner fa-spin"></i>
+                                      Rejecting...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <i className="fas fa-times"></i>
+                                      Reject
+                                    </>
+                                  )}
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+            </div>
+          </>
+        )}
+
+        {activeTab === "users" && (
+          <div className="bg-slate-900 border border-slate-800 rounded-[2.5rem] shadow-2xl overflow-hidden animate-fadeIn p-16 text-center">
+            <div className="w-16 h-16 bg-slate-700/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i className="fas fa-users text-slate-400 text-2xl"></i>
+            </div>
+            <h3 className="text-white text-lg font-bold mb-2">
+              User Management Not Integrated Yet
+            </h3>
+            <p className="text-slate-400 text-sm">
+              User management functionality will be available once backend
+              integration is complete
+            </p>
           </div>
         )}
 
@@ -373,10 +474,17 @@ const AdminDashboard = () => {
               </h3>
               <div className="space-y-4">
                 <div>
-                  <label className="text-[10px] font-black uppercase text-slate-500 block mb-2">
+                  <label
+                    htmlFor="target-item"
+                    className="text-[10px] font-black uppercase text-slate-500 block mb-2"
+                  >
                     Target Item
                   </label>
-                  <select className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-5 py-4 text-white outline-none">
+                  <select
+                    id="target-item"
+                    name="target-item"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-5 py-4 text-white outline-none"
+                  >
                     <option>Select Option...</option>
                     <option>Physics Honors</option>
                     <option>Computer Science I</option>

@@ -36,6 +36,8 @@ const InstructorsDirectory = () => {
         <div className="max-w-3xl mx-auto relative mb-16 sm:mb-20 px-4 sm:px-0">
           <input
             type="text"
+            id="instructor-search"
+            name="instructor-search"
             placeholder="Search mentors..."
             className="w-full bg-slate-900 border border-slate-800 rounded-2xl sm:rounded-full px-6 sm:px-10 py-4 sm:py-5 text-sm outline-none focus:ring-4 focus:ring-indigo-500/20 shadow-2xl"
           />

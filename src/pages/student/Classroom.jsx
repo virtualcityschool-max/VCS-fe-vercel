@@ -181,6 +181,8 @@ const Classroom = () => {
             <div className="relative">
               <input
                 type="text"
+                id="class-message"
+                name="class-message"
                 placeholder="Type a message to the class..."
                 className="w-full bg-slate-900 border border-slate-800 rounded-2xl py-4 pl-5 pr-14 text-sm text-white focus:ring-2 focus:ring-indigo-500 outline-none shadow-inner"
               />

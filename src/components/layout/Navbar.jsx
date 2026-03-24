@@ -1,4 +1,3 @@
-import React from "react";
 import { useDispatch } from "react-redux";
 import { setAuthModal } from "../../store/slices/uiSlice";
 import { useAuth, useNavigation } from "../../hooks";
@@ -84,10 +83,10 @@ const Navbar = ({ variant = "default" }) => {
             className="flex items-center gap-2 sm:gap-3 group cursor-pointer shrink-0"
             onClick={() => navigate("/")}
           >
-            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center font-black text-white group-hover:rotate-12 transition">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-indigo-600 rounded-xl flex items-center justify-center font-black text-white shadow-xl shadow-indigo-900/40 group-hover:rotate-12 transition-all">
               V
             </div>
-            <span className="font-black text-sm sm:text-base lg:text-lg tracking-tighter whitespace-nowrap">
+            <span className="text-sm xs:text-lg sm:text-2xl font-black font-poppins tracking-tighter whitespace-nowrap">
               VirtualCitySchool
             </span>
           </div>
@@ -100,20 +99,22 @@ const Navbar = ({ variant = "default" }) => {
             >
               Home
             </button>
-            <button
-              onClick={() => navigate("/feed")}
-              className={`text-slate-400 font-medium text-xs sm:text-sm hover:text-white transition cursor-pointer ${
-                isActivePath("/feed") ? "text-white" : ""
-              }`}
-            >
-              Feed
-            </button>
+            {role === "student" && (
+              <button
+                onClick={() => navigate("/feed")}
+                className={`text-slate-400 font-medium text-xs sm:text-sm hover:text-white transition cursor-pointer ${
+                  isActivePath("/feed") ? "text-white" : ""
+                }`}
+              >
+                Feed
+              </button>
+            )}
             <button
               onClick={() => {
-                if (auth.role === "student") navigate("/student");
-                if (auth.role === "teacher") navigate("/teacher");
-                if (auth.role === "admin") navigate("/admin");
-                if (auth.role === "parent") navigate("/parent");
+                if (role === "student") navigate("/student");
+                if (role === "teacher") navigate("/teacher");
+                if (role === "admin") navigate("/admin");
+                if (role === "parent") navigate("/parent");
               }}
               className={`text-slate-400 font-medium text-xs sm:text-sm hover:text-white transition cursor-pointer ${
                 isActivePath("/student") ||
