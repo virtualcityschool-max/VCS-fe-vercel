@@ -8,6 +8,7 @@ import {
   registerUser,
   clearAuthError,
   verifyOtp,
+  resendOtp,
 } from "../../store/slices/authSlice";
 import { useNavigation } from "../../hooks";
 
@@ -42,7 +43,11 @@ const AuthModals = () => {
 
   const dispatch = useDispatch();
   const { authModal } = useSelector((state) => state.ui);
-  const { isLoading, error: authError } = useSelector((state) => state.auth);
+  const {
+    isLoading,
+    resendOtpLoading,
+    error: authError,
+  } = useSelector((state) => state.auth);
   const { goToDashboard } = useNavigation();
   const navigate = useNavigate();
 
@@ -280,6 +285,26 @@ const AuthModals = () => {
         }
       } else {
         toast.error(err || "Registration failed. Please try again.");
+      }
+    }
+  };
+
+  const handleResendOtp = async () => {
+    if (!email) {
+      toast.error("Email is required to resend OTP");
+      return;
+    }
+
+    try {
+      await dispatch(resendOtp(email)).unwrap();
+      toast.success("OTP resent to your email");
+    } catch (err) {
+      console.error("Resend OTP failed:", err);
+
+      if (typeof err === "object" && err !== null) {
+        toast.error(err.error || err.message || "Failed to resend OTP");
+      } else {
+        toast.error(err || "Failed to resend OTP");
       }
     }
   };
@@ -728,20 +753,6 @@ const AuthModals = () => {
               </form>
             )}
 
-            {registrationStep === "sending" && (
-              <div className="text-center py-10">
-                <div className="w-20 h-20 bg-indigo-500/20 text-indigo-500 rounded-3xl flex items-center justify-center text-3xl mx-auto mb-6">
-                  <i className="fas fa-envelope fa-pulse"></i>
-                </div>
-                <h2 className="text-2xl font-black font-poppins text-white mb-4">
-                  Sending OTP...
-                </h2>
-                <p className="text-slate-400 text-sm leading-relaxed">
-                  Please wait while we send the verification code to your email.
-                </p>
-              </div>
-            )}
-
             {registrationStep === "otp" && (
               <form onSubmit={handleOtpVerification} className="space-y-5">
                 <div className="text-center mb-8">
@@ -806,13 +817,22 @@ const AuthModals = () => {
                 <div className="text-center">
                   <button
                     type="button"
-                    onClick={() => {
-                      // Handle resend OTP
-                      toast.success("OTP resent to your email");
-                    }}
-                    className="text-slate-400 hover:text-white text-sm transition"
+                    onClick={handleResendOtp}
+                    disabled={resendOtpLoading}
+                    className={`text-sm transition ${
+                      resendOtpLoading
+                        ? "text-slate-600 cursor-not-allowed"
+                        : "text-slate-400 hover:text-white"
+                    }`}
                   >
-                    Didn't receive code? Resend OTP
+                    {resendOtpLoading ? (
+                      <>
+                        <i className="fas fa-circle-notch fa-spin mr-2"></i>
+                        Sending...
+                      </>
+                    ) : (
+                      "Didn't receive code? Resend OTP"
+                    )}
                   </button>
                 </div>
               </form>

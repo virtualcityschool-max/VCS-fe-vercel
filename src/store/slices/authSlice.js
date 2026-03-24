@@ -11,7 +11,9 @@ const getInitialAuthState = () => {
     username: storedAuthState.username,
     token: storedAuthState.token,
     user: storedAuthState.user,
+    profile: storedAuthState.user || null,
     isLoading: false,
+    resendOtpLoading: false,
     isInitialized: false,
     error: null,
   };
@@ -47,7 +49,6 @@ export const initializeAuth = createAsyncThunk(
         return { initialized: true, authenticated: false };
       }
 
-      // Token exists, fetch profile
       const profile = await dispatch(fetchUserProfile()).unwrap();
       return {
         initialized: true,
@@ -55,8 +56,8 @@ export const initializeAuth = createAsyncThunk(
         profile,
       };
     } catch (error) {
-      // Token invalid, clear storage
       authStorage.clearAuthStorage();
+      localStorage.removeItem("vcs_refresh_token");
       return rejectWithValue(
         error.response?.data?.message || "Auth initialization failed",
       );
@@ -66,13 +67,12 @@ export const initializeAuth = createAsyncThunk(
 
 export const loginUser = createAsyncThunk(
   "auth/loginUser",
-  async (credentials, { rejectWithValue, dispatch }) => {
+  async (credentials, { rejectWithValue }) => {
     try {
       const response = await authService.login(credentials);
 
-      // Store tokens
       const accessToken = response.user.token;
-      const refreshToken = response.refresh_token; // Extract from response
+      const refreshToken = response.refresh_token;
 
       console.log("🔐 Storing tokens:", {
         hasAccessToken: !!accessToken,
@@ -85,34 +85,34 @@ export const loginUser = createAsyncThunk(
         localStorage.setItem("vcs_refresh_token", refreshToken);
       }
 
-      // Verify token is stored
-      const storedToken = authStorage.getAccessToken();
-      console.log("🔍 Token verification:", {
-        storedToken: !!storedToken,
-        matchesOriginal: storedToken === accessToken,
-      });
-
-      // Prepare user data
       const user = {
         username: response.user.username,
         email: response.user.email,
         role: response.user.role,
       };
 
-      // Store user data
       authStorage.setStoredAuthUser(user);
 
-      // Small delay to ensure token is set in axios interceptor
-      await new Promise((resolve) => setTimeout(resolve, 100));
-
-      // Fetch complete profile after login
       try {
-        console.log("👤 Fetching user profile after login...");
-        const profile = await authService.getMe(); // Direct call instead of dispatch
+        console.log(
+          "👤 Fetching user profile after login with explicit token...",
+        );
+        const profile = await authService.getMe(accessToken);
         console.log("✅ Profile fetched successfully:", profile);
+
+        const normalizedUser = {
+          username: profile.username || user.username,
+          email: profile.email || user.email,
+          role: profile.role || user.role,
+        };
+
+        authStorage.setStoredAuthUser(normalizedUser);
+
         return {
-          ...response.user,
-          user,
+          token: accessToken,
+          role: normalizedUser.role,
+          username: normalizedUser.username,
+          user: normalizedUser,
           profile,
         };
       } catch (profileError) {
@@ -120,9 +120,11 @@ export const loginUser = createAsyncThunk(
           "⚠️ Profile fetch failed after login, using basic user data:",
           profileError,
         );
-        // Return login data even if profile fetch fails
+
         return {
-          ...response.user,
+          token: accessToken,
+          role: user.role,
+          username: user.username,
           user,
           profile: null,
         };
@@ -134,23 +136,18 @@ export const loginUser = createAsyncThunk(
   },
 );
 
-export const logoutUser = createAsyncThunk(
-  "auth/logoutUser",
-  async (_, { dispatch }) => {
-    try {
-      // Call backend logout
-      await authService.logout();
-    } catch (error) {
-      console.warn("Backend logout failed:", error);
-    }
+export const logoutUser = createAsyncThunk("auth/logoutUser", async () => {
+  try {
+    await authService.logout();
+  } catch (error) {
+    console.warn("Backend logout failed:", error);
+  }
 
-    // Always clear local storage
-    authStorage.clearAuthStorage();
-    localStorage.removeItem("vcs_refresh_token");
+  authStorage.clearAuthStorage();
+  localStorage.removeItem("vcs_refresh_token");
 
-    return { success: true };
-  },
-);
+  return { success: true };
+});
 
 export const registerUser = createAsyncThunk(
   "auth/registerUser",
@@ -159,11 +156,9 @@ export const registerUser = createAsyncThunk(
       const response = await authService.register(userData);
       return response;
     } catch (err) {
-      // Convert Error objects to serializable format
       if (err instanceof Error) {
         return rejectWithValue(err.message);
       }
-      // Handle structured error objects
       if (typeof err === "object" && err !== null) {
         return rejectWithValue(err);
       }
@@ -179,11 +174,9 @@ export const verifyOtp = createAsyncThunk(
       const response = await authService.verifyOtp(userId, otp);
       return response;
     } catch (err) {
-      // Convert Error objects to serializable format
       if (err instanceof Error) {
         return rejectWithValue(err.message);
       }
-      // Handle structured error objects
       if (typeof err === "object" && err !== null) {
         return rejectWithValue(err);
       }
@@ -192,17 +185,25 @@ export const verifyOtp = createAsyncThunk(
   },
 );
 
-const initialState = {
-  isLoggedIn: false,
-  role: null,
-  username: null,
-  token: null,
-  user: null,
-  profile: null,
-  isLoading: false,
-  isInitialized: false,
-  error: null,
-};
+export const resendOtp = createAsyncThunk(
+  "auth/resendOtp",
+  async (email, { rejectWithValue }) => {
+    try {
+      const response = await authService.resendOtp(email);
+      return response;
+    } catch (err) {
+      if (err instanceof Error) {
+        return rejectWithValue(err.message);
+      }
+      if (typeof err === "object" && err !== null) {
+        return rejectWithValue(err);
+      }
+      return rejectWithValue(String(err));
+    }
+  },
+);
+
+const initialState = getInitialAuthState();
 
 const authSlice = createSlice({
   name: "auth",
@@ -216,6 +217,7 @@ const authSlice = createSlice({
       state.user = null;
       state.profile = null;
       state.isLoading = false;
+      state.resendOtpLoading = false;
       state.error = null;
       state.isInitialized = true;
     },
@@ -228,7 +230,6 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Initialize Auth
       .addCase(initializeAuth.pending, (state) => {
         state.isLoading = true;
       })
@@ -246,14 +247,26 @@ const authSlice = createSlice({
             email: action.payload.profile.email,
             role: action.payload.profile.role,
           };
+          state.token = authStorage.getAccessToken();
+        } else {
+          state.isLoggedIn = false;
+          state.role = null;
+          state.username = null;
+          state.token = null;
+          state.user = null;
+          state.profile = null;
         }
       })
       .addCase(initializeAuth.rejected, (state) => {
         state.isLoading = false;
         state.isInitialized = true;
         state.isLoggedIn = false;
+        state.role = null;
+        state.username = null;
+        state.token = null;
+        state.user = null;
+        state.profile = null;
       })
-      // Fetch User Profile
       .addCase(fetchUserProfile.pending, (state) => {
         state.isLoading = true;
       })
@@ -272,7 +285,6 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload;
       })
-      // Login User
       .addCase(loginUser.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -280,6 +292,7 @@ const authSlice = createSlice({
       .addCase(loginUser.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isLoggedIn = true;
+        state.isInitialized = true;
         state.role = action.payload.role;
         state.username = action.payload.username;
         state.token = action.payload.token;
@@ -291,7 +304,6 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload;
       })
-      // Logout User
       .addCase(logoutUser.fulfilled, (state) => {
         state.isLoggedIn = false;
         state.role = null;
@@ -302,20 +314,17 @@ const authSlice = createSlice({
         state.error = null;
         state.isInitialized = true;
       })
-      // Register User
       .addCase(registerUser.pending, (state) => {
         state.isLoading = true;
         state.error = null;
       })
       .addCase(registerUser.fulfilled, (state) => {
         state.isLoading = false;
-        // Don't auto-login on registration, just show success
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
       })
-      // Verify OTP
       .addCase(verifyOtp.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -326,9 +335,19 @@ const authSlice = createSlice({
       .addCase(verifyOtp.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
+      })
+      .addCase(resendOtp.pending, (state) => {
+        state.resendOtpLoading = true;
+      })
+      .addCase(resendOtp.fulfilled, (state) => {
+        state.resendOtpLoading = false;
+      })
+      .addCase(resendOtp.rejected, (state, action) => {
+        state.resendOtpLoading = false;
+        state.error = action.payload;
       });
   },
 });
 
-export const { logout, clearAuthError } = authSlice.actions;
+export const { logout, clearAuthError, updateToken } = authSlice.actions;
 export default authSlice.reducer;

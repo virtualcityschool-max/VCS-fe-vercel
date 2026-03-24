@@ -2,9 +2,11 @@ import axiosInstance from "../utils/axiosInstance";
 
 export const authService = {
   // Get current user profile
-  getMe: async () => {
+  getMe: async (token = null) => {
     try {
-      const response = await axiosInstance.get("/auth/me/");
+      const response = await axiosInstance.get("/auth/me/", {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
       return response.data;
     } catch (error) {
       console.error("Get profile error:", {

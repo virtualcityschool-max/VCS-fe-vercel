@@ -244,42 +244,6 @@ const AdminDashboard = () => {
                 </button>
               </div>
 
-              {/* API Not Available State */}
-              {approvalsError && approvalsError.includes("404") && (
-                <div className="p-16 text-center">
-                  <div className="w-16 h-16 bg-amber-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i className="fas fa-exclamation-triangle text-amber-500 text-2xl"></i>
-                  </div>
-                  <h4 className="text-white text-lg font-bold mb-2">
-                    Approvals API Not Available
-                  </h4>
-                  <p className="text-slate-400 text-sm mb-4">
-                    The pending approvals endpoint is not yet implemented on the
-                    backend.
-                  </p>
-                  <div className="bg-slate-800 border border-slate-700 rounded-2xl p-4 text-left max-w-md mx-auto">
-                    <p className="text-slate-300 text-sm font-mono mb-2">
-                      Expected endpoint:
-                    </p>
-                    <p className="text-amber-400 text-xs font-mono">
-                      GET /auth/pending-approvals
-                    </p>
-                    <p className="text-slate-300 text-sm font-mono mt-3 mb-2">
-                      Actions:
-                    </p>
-                    <p className="text-amber-400 text-xs font-mono">
-                      PATCH /auth/approve/{"{id}"}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => dispatch(fetchPendingApprovals())}
-                    className="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-xl text-sm font-bold transition"
-                  >
-                    Try Again
-                  </button>
-                </div>
-              )}
-
               {/* Other Error State */}
               {approvalsError && !approvalsError.includes("404") && (
                 <div className="p-8">
@@ -390,9 +354,16 @@ const AdminDashboard = () => {
                             <td className="px-8 py-6">
                               <span className="text-slate-400 text-sm">
                                 {user.date_joined
-                                  ? new Date(
-                                      user.date_joined,
-                                    ).toLocaleDateString()
+                                  ? new Date(user.date_joined).toLocaleString(
+                                      "en-US",
+                                      {
+                                        year: "numeric",
+                                        month: "short",
+                                        day: "numeric",
+                                        hour: "2-digit",
+                                        minute: "2-digit",
+                                      },
+                                    )
                                   : "Unknown"}
                               </span>
                             </td>
