@@ -31,12 +31,30 @@ export const coursesService = {
     }
   },
 
+  // Create a new course
+  createCourse: async (courseData) => {
+    try {
+      const response = await axiosInstance.post(`/courses/`, courseData);
+      return response.data;
+    } catch (error) {
+      console.error("Create course error:", {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+      });
+      throw error;
+    }
+  },
+
   // Assign instructor to course
   assignInstructor: async (courseId, instructorId) => {
     try {
-      const response = await axiosInstance.patch(`/courses/${courseId}/assign-instructor/`, {
-        instructor_id: instructorId,
-      });
+      const response = await axiosInstance.patch(
+        `/courses/${courseId}/assign-instructor/`,
+        {
+          instructor_id: instructorId,
+        },
+      );
       return response.data;
     } catch (error) {
       console.error("Assign instructor error:", {
