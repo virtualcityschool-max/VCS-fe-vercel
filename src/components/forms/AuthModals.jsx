@@ -503,7 +503,7 @@ const AuthModals = () => {
                     Authenticating...
                   </>
                 ) : (
-                  "Launch VirtualCity Terminal"
+                  "LOGIN"
                 )}
               </button>
             </form>
@@ -747,7 +747,7 @@ const AuthModals = () => {
                       Registering...
                     </>
                   ) : (
-                    "Register Now"
+                    "REGISTER NOW"
                   )}
                 </button>
               </form>

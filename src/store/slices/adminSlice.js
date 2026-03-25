@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { adminService } from "../../services/adminService";
 import { coursesService } from "../../services/coursesService";
+import { handleApiError } from "../../utils/errorHandler";
 
 // Initial state
 const initialState = {
@@ -156,9 +157,18 @@ export const updateCourse = createAsyncThunk(
   async ({ courseId, courseData }, { rejectWithValue }) => {
     try {
       const response = await adminService.updateCourse(courseId, courseData);
-      return response;
+      // Include the courseId in the response for proper state updating
+      return {
+        ...response.data,
+        id: courseId, // Ensure the ID is included
+      };
     } catch (error) {
-      return rejectWithValue(error.message || "Failed to update course");
+      // Use enhanced error handling to preserve backend validation details
+      const processedError = handleApiError(error, {
+        context: "Update Course",
+        logError: true,
+      });
+      return rejectWithValue(processedError.message);
     }
   },
 );
@@ -355,7 +365,8 @@ const adminSlice = createSlice({
       })
       .addCase(fetchCourses.fulfilled, (state, action) => {
         state.courses.loading = false;
-        state.courses.data = action.payload.data || action.payload;
+        state.courses.data =
+          action.payload.data?.data || action.payload.data || action.payload;
         state.courses.pagination =
           action.payload.pagination || initialState.courses.pagination;
       })
@@ -375,13 +386,16 @@ const adminSlice = createSlice({
           state.courses.data[courseIndex].instructor_id = instructorId;
         }
       })
+      .addCase(updateCourse.pending, (state, action) => {
+        // No optimistic update for instructor-related changes to prevent data corruption
+        // Let the refetch handle the state update
+      })
       .addCase(updateCourse.fulfilled, (state, action) => {
-        const index = state.courses.data.findIndex(
-          (course) => course.id === action.payload.id,
-        );
-        if (index !== -1) {
-          state.courses.data[index] = action.payload;
-        }
+        // No local state update - let the refetch handle data synchronization
+        // This prevents instructor object corruption from partial API responses
+      })
+      .addCase(updateCourse.rejected, (state, action) => {
+        // No optimistic update to revert - error handled via toast notification
       })
       .addCase(deleteCourse.fulfilled, (state, action) => {
         state.courses.data = state.courses.data.filter(

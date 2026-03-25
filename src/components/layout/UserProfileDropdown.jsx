@@ -46,16 +46,45 @@ const UserProfileDropdown = () => {
     return "U";
   };
 
+  // const handleSignOut = async () => {
+  //   try {
+  //     setIsDropdownOpen(false);
+  //     toast.success("Signing out...", { duration: 2000 });
+  //     await dispatch(logoutUser()).unwrap();
+  //     navigate("/");
+  //     toast.success("Signed out successfully");
+  //   } catch (error) {
+  //     console.error("Logout error:", error);
+  //     toast.error("Error signing out. Please try again.");
+  //   }
+  // };
+  // const handleSignOut = async () => {
+  //   setIsDropdownOpen(false);
+
+  //   try {
+  //     await toast.promise(dispatch(logoutUser()).unwrap(), {
+  //       loading: "Signing out...",
+  //       success: "Signed out successfully",
+  //       error: "Error signing out. Please try again.",
+  //     });
+
+  //     navigate("/");
+  //   } catch (e) {
+  //     // already handled by toast
+  //   }
+  // };
+
   const handleSignOut = async () => {
+    setIsDropdownOpen(false);
+
+    const toastId = toast.loading("Signing out...");
+
     try {
-      setIsDropdownOpen(false);
-      toast.success("Signing out...", { duration: 2000 });
       await dispatch(logoutUser()).unwrap();
+      toast.dismiss(toastId);
       navigate("/");
-      toast.success("Signed out successfully");
-    } catch (error) {
-      console.error("Logout error:", error);
-      toast.error("Error signing out. Please try again.");
+    } catch (e) {
+      toast.error("Error signing out. Please try again.", { id: toastId });
     }
   };
 

@@ -13,7 +13,11 @@ export const fetchStudentDashboard = createAsyncThunk(
       const dashboardData = await studentService.getDashboard();
       return dashboardData;
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(
+        typeof error === "string"
+          ? error
+          : error?.message || "An error occurred",
+      );
     }
   },
 );
@@ -25,7 +29,11 @@ export const joinLiveSession = createAsyncThunk(
       const response = await studentService.joinLiveSession(sessionId);
       return { sessionId, response };
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(
+        typeof error === "string"
+          ? error
+          : error?.message || "An error occurred",
+      );
     }
   },
 );
@@ -40,7 +48,11 @@ export const submitAssignment = createAsyncThunk(
       );
       return { assignmentId, response };
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(
+        typeof error === "string"
+          ? error
+          : error?.message || "An error occurred",
+      );
     }
   },
 );
@@ -52,7 +64,43 @@ export const enrollInCourse = createAsyncThunk(
       const response = await studentService.enrollInCourse(courseId);
       return { courseId, response };
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(
+        typeof error === "string"
+          ? error
+          : error?.message || "An error occurred",
+      );
+    }
+  },
+);
+
+export const unenrollFromCourse = createAsyncThunk(
+  "studentDashboard/unenrollFromCourse",
+  async (courseId, { rejectWithValue }) => {
+    try {
+      const response = await studentService.unenrollFromCourse(courseId);
+      return { courseId, response };
+    } catch (error) {
+      return rejectWithValue(
+        typeof error === "string"
+          ? error
+          : error?.message || "An error occurred",
+      );
+    }
+  },
+);
+
+export const getCourseProgress = createAsyncThunk(
+  "studentDashboard/getCourseProgress",
+  async (courseId, { rejectWithValue }) => {
+    try {
+      const response = await studentService.getCourseProgress(courseId);
+      return { courseId, response };
+    } catch (error) {
+      return rejectWithValue(
+        typeof error === "string"
+          ? error
+          : error?.message || "An error occurred",
+      );
     }
   },
 );
@@ -64,7 +112,11 @@ export const fetchStudentAssignments = createAsyncThunk(
       const assignments = await studentService.getAssignments(params);
       return assignments;
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(
+        typeof error === "string"
+          ? error
+          : error?.message || "An error occurred",
+      );
     }
   },
 );
@@ -76,7 +128,11 @@ export const fetchStudentGrades = createAsyncThunk(
       const grades = await studentService.getMyGrades(params);
       return grades;
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(
+        typeof error === "string"
+          ? error
+          : error?.message || "An error occurred",
+      );
     }
   },
 );
@@ -88,7 +144,11 @@ export const fetchStudentSubmission = createAsyncThunk(
       const submission = await studentService.getMySubmission(assignmentId);
       return { assignmentId, submission };
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(
+        typeof error === "string"
+          ? error
+          : error?.message || "An error occurred",
+      );
     }
   },
 );
@@ -100,7 +160,11 @@ export const fetchStudentSessions = createAsyncThunk(
       const sessions = await studentService.getStudentSessions(params);
       return sessions;
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(
+        typeof error === "string"
+          ? error
+          : error?.message || "An error occurred",
+      );
     }
   },
 );
@@ -112,7 +176,11 @@ export const fetchSessionAttendance = createAsyncThunk(
       const attendance = await studentService.getSessionAttendance(sessionId);
       return { sessionId, attendance };
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(
+        typeof error === "string"
+          ? error
+          : error?.message || "An error occurred",
+      );
     }
   },
 );
@@ -127,21 +195,13 @@ const initialState = {
   enrolledCourses: [],
   assignments: [],
   grades: [],
-  submissions: {},
+  isLoading: false,
+  error: null,
+  enrollingCourseIds: [],
+  unenrollingCourseIds: [],
   sessions: [],
   attendance: {},
-
-  // UI state
-  isLoading: false,
-  isJoiningSession: false,
-  isSubmittingAssignment: false,
-  isEnrollingCourse: false,
-  isFetchingAssignments: false,
-  isFetchingGrades: false,
-  isFetchingSubmissions: false,
-  isFetchingSessions: false,
   isFetchingAttendance: false,
-  error: null,
   lastFetched: null,
 
   // Pagination and filtering
@@ -272,17 +332,46 @@ const studentDashboardSlice = createSlice({
       })
 
       // Enroll in Course
-      .addCase(enrollInCourse.pending, (state) => {
-        state.isEnrollingCourse = true;
+      .addCase(enrollInCourse.pending, (state, action) => {
+        const courseId = action.meta.arg;
+        state.enrollingCourseIds.push(courseId);
         state.error = null;
       })
       .addCase(enrollInCourse.fulfilled, (state, action) => {
-        state.isEnrollingCourse = false;
+        const courseId = action.meta.arg;
+        state.enrollingCourseIds = state.enrollingCourseIds.filter(
+          (id) => id !== courseId,
+        );
         state.error = null;
-        // Could add course to enrolled list if needed
+        // Refresh dashboard data to show newly enrolled course
+        // This will be handled by the component calling fetchStudentDashboard
       })
       .addCase(enrollInCourse.rejected, (state, action) => {
-        state.isEnrollingCourse = false;
+        const courseId = action.meta.arg;
+        state.enrollingCourseIds = state.enrollingCourseIds.filter(
+          (id) => id !== courseId,
+        );
+        state.error = action.payload;
+      })
+
+      // Unenroll from Course
+      .addCase(unenrollFromCourse.pending, (state, action) => {
+        const courseId = action.meta.arg;
+        state.unenrollingCourseIds.push(courseId);
+        state.error = null;
+      })
+      .addCase(unenrollFromCourse.fulfilled, (state, action) => {
+        const courseId = action.meta.arg;
+        state.unenrollingCourseIds = state.unenrollingCourseIds.filter(
+          (id) => id !== courseId,
+        );
+        state.error = null;
+      })
+      .addCase(unenrollFromCourse.rejected, (state, action) => {
+        const courseId = action.meta.arg;
+        state.unenrollingCourseIds = state.unenrollingCourseIds.filter(
+          (id) => id !== courseId,
+        );
         state.error = action.payload;
       })
 

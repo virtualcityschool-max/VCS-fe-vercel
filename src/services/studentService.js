@@ -257,13 +257,26 @@ export const studentService = {
   // Enroll in course
   enrollInCourse: async (courseId) => {
     try {
-      const response = await axiosInstance.post(
-        `/courses/${courseId}/assign-instructor/`,
-      );
+      const response = await axiosInstance.post(`/courses/enroll/`, {
+        course_id: courseId,
+      });
       return response.data;
     } catch (error) {
       console.error("Error enrolling in course:", error);
       throw new Error("Failed to enroll in course");
+    }
+  },
+
+  // Unenroll from course
+  unenrollFromCourse: async (courseId) => {
+    try {
+      const response = await axiosInstance.delete(
+        `/courses/${courseId}/unenroll/`,
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error unenrolling from course:", error);
+      throw new Error("Failed to unenroll from course");
     }
   },
 

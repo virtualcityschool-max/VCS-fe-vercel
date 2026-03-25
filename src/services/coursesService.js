@@ -81,6 +81,41 @@ export const coursesService = {
     }
   },
 
+  // Update course
+  updateCourse: async (courseId, courseData) => {
+    try {
+      const response = await axiosInstance.patch(
+        `/courses/${courseId}/`,
+        courseData,
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Update course error:", {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+      });
+      throw error;
+    }
+  },
+
+  // Unenroll from course
+  unenrollFromCourse: async (courseId) => {
+    try {
+      const response = await axiosInstance.delete(
+        `/courses/${courseId}/unenroll/`,
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Unenroll from course error:", {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+      });
+      throw error;
+    }
+  },
+
   // Get all enrollments
   getAllEnrollments: async () => {
     try {

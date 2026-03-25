@@ -2,6 +2,12 @@ import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { fetchAllCourses } from "../../store/slices/coursesSlice";
+import {
+  enrollInCourse,
+  unenrollFromCourse,
+  fetchStudentDashboard,
+} from "../../store/slices/studentDashboardSlice";
+import toast from "react-hot-toast";
 
 const Marketplace = () => {
   const dispatch = useDispatch();
@@ -9,13 +15,25 @@ const Marketplace = () => {
   const location = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
 
+  // Get auth state from Redux store
+  const auth = useSelector((state) => state.auth);
+
   // Get courses data from Redux store
   const { courses, isLoading, error } = useSelector((state) => state.courses);
+
+  // Get student dashboard state for enrollment tracking
+  const { enrollingCourseIds, unenrollingCourseIds, enrolledCourses } =
+    useSelector((state) => state.studentDashboard);
 
   // Fetch courses on component mount
   useEffect(() => {
     dispatch(fetchAllCourses());
-  }, [dispatch]);
+
+    // Fetch student dashboard if user is logged in as student
+    if (auth.isLoggedIn && auth.role === "student") {
+      dispatch(fetchStudentDashboard());
+    }
+  }, [dispatch, auth.isLoggedIn, auth.role]);
 
   // Filter courses based on search term
   const filteredCourses =
@@ -28,10 +46,106 @@ const Marketplace = () => {
         course.category?.toLowerCase().includes(searchTerm.toLowerCase()),
     ) || [];
 
+  // Derive enrollment state using both course.is_enrolled and enrolledCourses
+  const isCourseEnrolled = (course) => {
+    // Check if course.is_enrolled is truthy
+    if (course.is_enrolled) {
+      return true;
+    }
+
+    // Check if enrolledCourses contains this course
+    if (enrolledCourses && Array.isArray(enrolledCourses)) {
+      return enrolledCourses.some((enrolled) => enrolled.id === course.id);
+    }
+
+    return false;
+  };
+
   // Handle search
   const handleSearch = (e) => {
     e.preventDefault();
     // Search is handled by the filteredCourses computed above
+  };
+
+  // Handle course enrollment
+  const handleEnrollCourse = async (courseId, courseTitle) => {
+    if (!auth.isLoggedIn) {
+      toast.error("Please log in to enroll in courses");
+      navigate("/");
+      return;
+    }
+
+    if (auth.role !== "student") {
+      toast.error("Only students can enroll in courses");
+      return;
+    }
+
+    try {
+      await dispatch(enrollInCourse(courseId)).unwrap();
+      toast.success(`Successfully enrolled in ${courseTitle}`);
+
+      // Refresh courses to update enrollment status
+      dispatch(fetchAllCourses());
+
+      // Always refresh student dashboard to sync enrollment state
+      if (auth.role === "student") {
+        dispatch(fetchStudentDashboard());
+      }
+    } catch (error) {
+      toast.error(
+        typeof error === "string"
+          ? error
+          : error?.message || "Failed to enroll in course",
+      );
+    }
+  };
+
+  // Handle course unenrollment
+  const handleUnenrollCourse = async (courseId, courseTitle) => {
+    if (!auth.isLoggedIn) {
+      toast.error("Please log in to unenroll from courses");
+      navigate("/");
+      return;
+    }
+
+    if (auth.role !== "student") {
+      toast.error("Only students can unenroll from courses");
+      return;
+    }
+
+    // Show confirmation dialog
+    const confirmed = window.confirm(
+      `Are you sure you want to unenroll from "${courseTitle}"?`,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    console.log("unenroll debug", {
+      courseId,
+      user: auth?.user,
+      enrolledCourses,
+    });
+
+    try {
+      await dispatch(unenrollFromCourse(courseId)).unwrap();
+      toast.success(`Successfully unenrolled from ${courseTitle}`);
+
+      // Refresh courses to update enrollment status
+      dispatch(fetchAllCourses());
+
+      // Always refresh student dashboard to sync enrollment state
+      if (auth.role === "student") {
+        dispatch(fetchStudentDashboard());
+      }
+    } catch (error) {
+      toast.error(
+        typeof error === "string"
+          ? error
+          : error?.message || "Failed to unenroll from course",
+      );
+    }
   };
 
   // Loading state
@@ -63,7 +177,11 @@ const Marketplace = () => {
                 <i className="fas fa-exclamation-triangle text-red-500 text-2xl"></i>
               </div>
               <p className="text-white text-lg mb-4">Unable to load courses</p>
-              <p className="text-slate-400 text-sm mb-6">{error}</p>
+              <p className="text-slate-400 text-sm mb-6">
+                {typeof error === "string"
+                  ? error
+                  : error?.message || "Failed to load courses"}
+              </p>
               <button
                 onClick={() => dispatch(fetchAllCourses())}
                 className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-xl font-bold transition"
@@ -243,9 +361,39 @@ const Marketplace = () => {
                         </span>
                       </div>
                     )}
-                    <button className="w-full mt-auto py-4 bg-slate-900 border border-blue-600/30 text-blue-500 font-black text-xs uppercase tracking-[0.2em] rounded-2xl hover:bg-blue-600 hover:text-white transition-all active:scale-95">
-                      {course.is_enrolled ? "Enrolled" : "Enroll Now"}
-                    </button>
+                    {(() => {
+                      const enrolled = isCourseEnrolled(course);
+                      return (
+                        <button
+                          onClick={() =>
+                            enrolled
+                              ? handleUnenrollCourse(course.id, course.title)
+                              : handleEnrollCourse(course.id, course.title)
+                          }
+                          disabled={
+                            enrollingCourseIds.includes(course.id) ||
+                            unenrollingCourseIds.includes(course.id)
+                          }
+                          className={`w-full mt-auto py-4 font-black text-xs uppercase tracking-[0.2em] rounded-2xl transition-all active:scale-95 ${
+                            enrolled
+                              ? unenrollingCourseIds.includes(course.id)
+                                ? "bg-red-600/50 text-red-400 cursor-not-allowed"
+                                : "bg-red-600/20 border border-red-600/30 text-red-400 hover:bg-red-600 hover:text-white"
+                              : enrollingCourseIds.includes(course.id)
+                                ? "bg-slate-600 text-slate-400 cursor-not-allowed"
+                                : "bg-slate-900 border border-blue-600/30 text-blue-500 hover:bg-blue-600 hover:text-white"
+                          }`}
+                        >
+                          {enrolled
+                            ? unenrollingCourseIds.includes(course.id)
+                              ? "Unenrolling..."
+                              : "Unenroll"
+                            : enrollingCourseIds.includes(course.id)
+                              ? "Enrolling..."
+                              : "Enroll Now"}
+                        </button>
+                      );
+                    })()}
                   </div>
                 </div>
               ))}

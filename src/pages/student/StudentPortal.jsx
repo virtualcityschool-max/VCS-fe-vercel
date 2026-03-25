@@ -129,7 +129,12 @@ const StudentPortal = () => {
             <h2 className="text-2xl font-bold text-white mb-2">
               Failed to Load Dashboard
             </h2>
-            <p className="text-slate-400 mb-6">{error}</p>
+            <p className="text-slate-400 mb-6">
+              {typeof error === "string"
+                ? error
+                : error?.message ||
+                  "An error occurred while loading the dashboard"}
+            </p>
             <div className="flex gap-4 justify-center">
               <button
                 onClick={handleRetry}

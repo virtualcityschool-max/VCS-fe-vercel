@@ -11,10 +11,13 @@ import {
   fetchCourses,
   createCourse,
   assignInstructor,
+  updateCourse,
+  deleteCourse,
   fetchUsers,
   selectCourses,
   selectUsers,
 } from "../../store/slices/adminSlice";
+import { coursesService } from "../../services/coursesService";
 
 const AdminDashboard = () => {
   const dispatch = useDispatch();
@@ -23,6 +26,9 @@ const AdminDashboard = () => {
   const [activeModal, setActiveModal] = useState(null);
   const [showToast, setShowToast] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [editingCourse, setEditingCourse] = useState(null);
+  const [loadingCourseIds, setLoadingCourseIds] = useState(new Set());
+  const [updatingCourseId, setUpdatingCourseId] = useState(null);
 
   // Get approvals data from Redux store
   const {
@@ -57,22 +63,31 @@ const AdminDashboard = () => {
     }
   }, [dispatch, activeTab]);
 
+  // Cleanup toast timeout on component unmount
+  useEffect(() => {
+    return () => {
+      if (triggerToast.timeoutId) {
+        clearTimeout(triggerToast.timeoutId);
+      }
+    };
+  }, []);
+
   // Handle approval actions
   const handleApprove = async (userId) => {
     try {
       await dispatch(approveUser(userId)).unwrap();
-      setShowToast("User approved successfully");
+      triggerToast("User approved successfully");
     } catch (error) {
-      setShowToast(error || "Failed to approve user");
+      triggerToast(error || "Failed to approve user");
     }
   };
 
   const handleReject = async (userId) => {
     try {
       await dispatch(rejectUser(userId)).unwrap();
-      setShowToast("User rejected successfully");
+      triggerToast("User rejected successfully");
     } catch (error) {
-      setShowToast(error || "Failed to reject user");
+      triggerToast(error || "Failed to reject user");
     }
   };
 
@@ -80,10 +95,10 @@ const AdminDashboard = () => {
   const handleCreateCourse = async (courseData) => {
     try {
       await dispatch(createCourse(courseData)).unwrap();
-      setShowToast("Course created successfully");
+      triggerToast("Course created successfully");
       setActiveModal(null);
     } catch (error) {
-      setShowToast(error || "Failed to create course");
+      triggerToast(error || "Failed to create course");
     }
   };
 
@@ -91,10 +106,70 @@ const AdminDashboard = () => {
   const handleAssignInstructor = async (courseId, instructorId) => {
     try {
       await dispatch(assignInstructor({ courseId, instructorId })).unwrap();
-      setShowToast("Instructor assigned successfully");
+      triggerToast("Instructor assigned successfully");
       setActiveModal(null);
+      // Refetch courses to ensure instructor data is synchronized
+      dispatch(fetchCourses());
     } catch (error) {
-      setShowToast(error || "Failed to assign instructor");
+      triggerToast(error || "Failed to assign instructor");
+    }
+  };
+
+  // Handle course update
+  const handleUpdateCourse = async (courseId, courseData) => {
+    setUpdatingCourseId(courseId);
+    try {
+      await dispatch(updateCourse({ courseId, courseData })).unwrap();
+      triggerToast("Course updated successfully");
+      setActiveModal(null);
+      // Refetch courses to ensure instructor data is synchronized
+      dispatch(fetchCourses());
+    } catch (error) {
+      triggerToast(error || "Failed to update course");
+    } finally {
+      setUpdatingCourseId(null);
+    }
+  };
+
+  // Handle course deletion
+  const handleDeleteCourse = async (courseId, courseTitle) => {
+    const confirmed = window.confirm(
+      `Are you sure you want to delete "${courseTitle}"? This action cannot be undone.`,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      await dispatch(deleteCourse(courseId)).unwrap();
+      triggerToast("Course deleted successfully");
+      // Refresh courses to update the list
+      dispatch(fetchCourses());
+    } catch (error) {
+      triggerToast(error || "Failed to delete course");
+    }
+  };
+
+  // Fetch detailed course data for editing
+  const fetchCourseDetailsForEdit = async (courseId) => {
+    setLoadingCourseIds((prev) => new Set(prev).add(courseId));
+    try {
+      const courseDetails = await coursesService.getCourseById(courseId);
+      setEditingCourse(courseDetails);
+      setActiveModal({
+        type: "edit-course",
+        courseId: courseId,
+      });
+    } catch (error) {
+      console.error("Error fetching course details:", error);
+      triggerToast("Failed to load course details");
+    } finally {
+      setLoadingCourseIds((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(courseId);
+        return newSet;
+      });
     }
   };
 
@@ -153,7 +228,20 @@ const AdminDashboard = () => {
 
   const triggerToast = (msg) => {
     setShowToast(msg);
-    setTimeout(() => setShowToast(null), 3000);
+    // Clear any existing timeout to prevent memory leaks
+    if (triggerToast.timeoutId) {
+      clearTimeout(triggerToast.timeoutId);
+    }
+    // Set new timeout to add fade-out class before removing
+    triggerToast.timeoutId = setTimeout(() => {
+      const toastElement = document.querySelector('[data-toast="admin-toast"]');
+      if (toastElement) {
+        toastElement.classList.add("opacity-0", "scale-95");
+        setTimeout(() => setShowToast(null), 300); // Wait for fade-out animation
+      } else {
+        setShowToast(null);
+      }
+    }, 2700); // Start fading out at 2.7s, remove at 3s
   };
 
   const renderScheduler = () => {
@@ -246,7 +334,10 @@ const AdminDashboard = () => {
         </header>
 
         {showToast && (
-          <div className="fixed top-10 left-1/2 -translate-x-1/2 z-200 bg-emerald-600 text-white px-8 py-4 rounded-2xl shadow-2xl font-bold text-sm animate-slideDown flex items-center gap-4">
+          <div
+            data-toast="admin-toast"
+            className="fixed top-20 left-1/2 -translate-x-1/2 z-9999 bg-emerald-600 text-white px-8 py-4 rounded-2xl shadow-2xl font-bold text-sm animate-slideDown flex items-center gap-4 backdrop-blur-sm border border-emerald-500/20 transition-all duration-300 ease-in-out"
+          >
             <i className="fas fa-check-circle"></i> {showToast}
           </div>
         )}
@@ -540,7 +631,7 @@ const AdminDashboard = () => {
                     </p>
                     <button
                       onClick={() => dispatch(fetchCourses())}
-                      className="bg-red-600 hover:bg-red-500 text-white px-6 py-3 rounded-xl text-sm font-bold transition-all duration-200 shadow-lg active:scale-95"
+                      className="bg-red-600 hover:bg-red-500 text-white px-6 py-3 rounded-xl text-sm font-bold transition-all duration-200"
                     >
                       <i className="fas fa-redo mr-2"></i>
                       Try Again
@@ -654,7 +745,7 @@ const AdminDashboard = () => {
                             <td className="px-6 py-6">
                               <div className="flex items-center gap-2">
                                 <span className="text-white font-bold text-lg">
-                                  ${parseFloat(course.price).toFixed(2)}
+                                  PKR {parseFloat(course.price).toFixed(2)}
                                 </span>
                               </div>
                             </td>
@@ -713,6 +804,20 @@ const AdminDashboard = () => {
                               <div className="flex items-center gap-2 justify-end">
                                 <button
                                   onClick={() =>
+                                    fetchCourseDetailsForEdit(course.id)
+                                  }
+                                  disabled={loadingCourseIds.has(course.id)}
+                                  className="bg-blue-600/10 text-blue-400 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 hover:text-white transition flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                  <i
+                                    className={`fas ${loadingCourseIds.has(course.id) ? "fa-spinner fa-spin" : "fa-edit"} mr-2`}
+                                  ></i>
+                                  {loadingCourseIds.has(course.id)
+                                    ? "Loading..."
+                                    : "Edit"}
+                                </button>
+                                <button
+                                  onClick={() =>
                                     setActiveModal({
                                       type: "assign-instructor",
                                       courseId: course.id,
@@ -728,6 +833,15 @@ const AdminDashboard = () => {
                                     className={`fas ${course.instructor ? "fa-user-edit" : "fa-user-plus"} mr-2`}
                                   ></i>
                                   {course.instructor ? "Change" : "Assign"}
+                                </button>
+                                <button
+                                  onClick={() =>
+                                    handleDeleteCourse(course.id, course.title)
+                                  }
+                                  className="bg-red-600/10 text-red-400 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition flex items-center gap-2"
+                                >
+                                  <i className="fas fa-trash mr-2"></i>
+                                  Delete Course
                                 </button>
                               </div>
                             </td>
@@ -849,12 +963,12 @@ const AdminDashboard = () => {
                           htmlFor="price"
                           className="text-[11px] font-black uppercase text-slate-500 mb-2 flex items-center gap-2"
                         >
-                          <i className="fas fa-dollar-sign text-slate-600 text-xs"></i>
+                          <i className="fas fa-rupee-sign text-slate-600 text-xs"></i>
                           Price
                         </label>
                         <div className="relative">
                           <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500">
-                            $
+                            PKR
                           </span>
                           <input
                             type="number"
@@ -863,7 +977,7 @@ const AdminDashboard = () => {
                             required
                             step="0.01"
                             min="0"
-                            className="w-full bg-slate-950 border border-slate-800 rounded-2xl pl-10 pr-5 py-4 text-white placeholder-slate-600 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200"
+                            className="w-full bg-slate-950 border border-slate-800 rounded-2xl pl-14 pr-5 py-4 text-white placeholder-slate-600 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200"
                             placeholder="0.00"
                           />
                         </div>
@@ -929,7 +1043,7 @@ const AdminDashboard = () => {
                       </button>
                       <button
                         type="submit"
-                        className="flex-1 py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl font-bold shadow-lg transition-all duration-200 active:scale-95 flex items-center justify-center gap-2"
+                        className="flex-1 py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl font-bold shadow-lg transition-all duration-200 active:scale-95"
                       >
                         <i className="fas fa-plus"></i>
                         Create Course
@@ -938,6 +1052,203 @@ const AdminDashboard = () => {
                   </form>
                 </>
               )}
+
+              {/* Edit Course Modal */}
+              {typeof activeModal === "object" &&
+                activeModal.type === "edit-course" && (
+                  <>
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="w-10 h-10 bg-blue-600/20 rounded-xl flex items-center justify-center">
+                        <i className="fas fa-edit text-blue-400"></i>
+                      </div>
+                      <h3 className="text-2xl font-black font-poppins text-white">
+                        Edit Course
+                      </h3>
+                    </div>
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        const formData = new FormData(e.target);
+                        const courseData = {
+                          title: formData.get("title"),
+                          description: formData.get("description"),
+                          category: formData.get("category"),
+                          price: formData.get("price"),
+                          status: formData.get("status"),
+                          instructor_id: formData.get("instructor_id") || null,
+                        };
+                        handleUpdateCourse(activeModal.courseId, courseData);
+                      }}
+                      className="space-y-5"
+                    >
+                      {/* Course Title */}
+                      <div>
+                        <label
+                          htmlFor="title"
+                          className="text-[11px] font-black uppercase text-slate-500 mb-2 flex items-center gap-2"
+                        >
+                          <i className="fas fa-heading text-slate-600 text-xs"></i>
+                          Course Title
+                        </label>
+                        <input
+                          type="text"
+                          id="title"
+                          name="title"
+                          required
+                          defaultValue={editingCourse?.title || ""}
+                          className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-5 py-4 text-white placeholder-slate-600 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200"
+                          placeholder="Enter course title"
+                        />
+                      </div>
+
+                      {/* Description */}
+                      <div>
+                        <label
+                          htmlFor="description"
+                          className="text-[11px] font-black uppercase text-slate-500 mb-2 flex items-center gap-2"
+                        >
+                          <i className="fas fa-align-left text-slate-600 text-xs"></i>
+                          Description
+                        </label>
+                        <textarea
+                          id="description"
+                          name="description"
+                          required
+                          rows="3"
+                          defaultValue={editingCourse?.description || ""}
+                          className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-5 py-4 text-white placeholder-slate-600 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 resize-none"
+                          placeholder="Describe what students will learn in this course..."
+                        />
+                      </div>
+
+                      {/* Category and Price Row */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label
+                            htmlFor="category"
+                            className="text-[11px] font-black uppercase text-slate-500 mb-2 flex items-center gap-2"
+                          >
+                            <i className="fas fa-tag text-slate-600 text-xs"></i>
+                            Category
+                          </label>
+                          <input
+                            type="text"
+                            id="category"
+                            name="category"
+                            required
+                            defaultValue={editingCourse?.category || ""}
+                            className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-5 py-4 text-white placeholder-slate-600 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200"
+                            placeholder="e.g., tech, arts, science"
+                          />
+                        </div>
+                        <div>
+                          <label
+                            htmlFor="price"
+                            className="text-[11px] font-black uppercase text-slate-500 mb-2 flex items-center gap-2"
+                          >
+                            <i className="fas fa-dollar-sign text-slate-600 text-xs"></i>
+                            Price
+                          </label>
+                          <div className="relative">
+                            <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500">
+                              $
+                            </span>
+                            <input
+                              type="number"
+                              id="price"
+                              name="price"
+                              required
+                              step="0.01"
+                              min="0"
+                              defaultValue={editingCourse?.price || ""}
+                              className="w-full bg-slate-950 border border-slate-800 rounded-2xl pl-10 pr-5 py-4 text-white placeholder-slate-600 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200"
+                              placeholder="0.00"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Status and Instructor Row */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label
+                            htmlFor="status"
+                            className="text-[11px] font-black uppercase text-slate-500 mb-2 flex items-center gap-2"
+                          >
+                            <i className="fas fa-toggle-on text-slate-600 text-xs"></i>
+                            Status
+                          </label>
+                          <select
+                            id="status"
+                            name="status"
+                            required
+                            defaultValue={editingCourse?.status || "draft"}
+                            className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-5 py-4 text-white outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 appearance-none cursor-pointer"
+                          >
+                            <option value="published">📚 Published</option>
+                            <option value="draft">📝 Draft</option>
+                            <option value="archived">📦 Archived</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label
+                            htmlFor="instructor_id"
+                            className="text-[11px] font-black uppercase text-slate-500 mb-2 flex items-center gap-2"
+                          >
+                            <i className="fas fa-user-tie text-slate-600 text-xs"></i>
+                            Instructor
+                          </label>
+                          <select
+                            id="instructor_id"
+                            name="instructor_id"
+                            defaultValue={
+                              editingCourse?.instructor?.id ||
+                              editingCourse?.instructor_id ||
+                              ""
+                            }
+                            className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-5 py-4 text-white outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 appearance-none cursor-pointer"
+                          >
+                            <option value="">No instructor assigned</option>
+                            {users.data
+                              .filter((user) => user.role === "teacher")
+                              .map((teacher) => (
+                                <option key={teacher.id} value={teacher.id}>
+                                  👩‍🏫{" "}
+                                  {teacher.username ||
+                                    teacher.first_name +
+                                      " " +
+                                      teacher.last_name}
+                                </option>
+                              ))}
+                          </select>
+                        </div>
+                      </div>
+
+                      {/* Form Actions */}
+                      <div className="flex gap-4 pt-6 border-t border-slate-800">
+                        <button
+                          type="button"
+                          onClick={() => setActiveModal(null)}
+                          className="flex-1 py-4 bg-slate-800 hover:bg-slate-700 text-white rounded-2xl font-bold transition-all duration-200 active:scale-95"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="submit"
+                          disabled={updatingCourseId === activeModal.courseId}
+                          className="flex-1 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-bold shadow-lg transition-all duration-200 active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
+                        >
+                          <i
+                            className={`fas ${updatingCourseId === activeModal.courseId ? "fa-spinner fa-spin" : "fa-save"}`}
+                          ></i>
+                          {updatingCourseId === activeModal.courseId
+                            ? "Updating..."
+                            : "Update Course"}
+                        </button>
+                      </div>
+                    </form>
+                  </>
+                )}
 
               {/* Assign Instructor Modal */}
               {typeof activeModal === "object" &&
