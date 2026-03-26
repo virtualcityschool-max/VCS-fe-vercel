@@ -23,6 +23,7 @@ import {
   Classroom,
   StudentFeed,
   Marketplace,
+  CourseDetails,
   PublicTeacherProfile,
   TeacherInternalStudentProfile,
   InstructorsDirectory,
@@ -130,6 +131,7 @@ const App = () => {
             {/* Public Routes */}
             <Route path="/" element={<PublicHome />} />
             <Route path="/courses" element={<Marketplace />} />
+            <Route path="/courses/:courseId" element={<CourseDetails />} />
             <Route path="/instructors" element={<InstructorsDirectory />} />
             <Route path="/teacher/:id" element={<PublicTeacherProfile />} />
 

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { fetchAllCourses } from "../../store/slices/coursesSlice";
 import { useEffect, useState } from "react";
+import { getCourseImage } from "../../utils/courseImageUtils";
 
 const PublicHome = () => {
   const auth = useSelector((state) => state.auth);
@@ -142,10 +143,7 @@ const PublicHome = () => {
                   >
                     <div className="h-56 relative overflow-hidden">
                       <img
-                        src={
-                          course.thumbnail ||
-                          `https://picsum.photos/seed/${course.id}/600/400`
-                        }
+                        src={getCourseImage(course, i)}
                         className="w-full h-full object-cover group-hover:scale-110 transition duration-700 opacity-60 group-hover:opacity-100"
                         alt={course.title}
                       />
@@ -164,7 +162,7 @@ const PublicHome = () => {
                       </p>
                       <div className="mt-8 flex justify-between items-center border-t border-white/5 pt-6">
                         <span className="text-green-400 font-black">
-                          ${course.price || "0.00"}
+                          PKR {course.price || "0.00"}
                         </span>
                         <div className="flex text-yellow-500 text-[10px] gap-0.5">
                           <i className="fas fa-star"></i>
@@ -210,10 +208,7 @@ const PublicHome = () => {
             >
               <div className="h-56 relative overflow-hidden">
                 <img
-                  src={
-                    course.thumbnail ||
-                    `https://picsum.photos/seed/${course.id}/600/400`
-                  }
+                  src={getCourseImage(course, i)}
                   className="w-full h-full object-cover group-hover:scale-110 transition duration-700 opacity-60 group-hover:opacity-100"
                   alt={course.title}
                 />
@@ -232,7 +227,7 @@ const PublicHome = () => {
                 </p>
                 <div className="mt-8 flex justify-between items-center border-t border-white/5 pt-6">
                   <span className="text-indigo-400 font-black">
-                    ${course.price || "19.99"}
+                    PKR {course.price || "19.99"}
                   </span>
                   <div className="flex text-yellow-500 text-[10px] gap-0.5">
                     <i className="fas fa-star"></i>

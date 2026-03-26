@@ -131,7 +131,7 @@ const ParentPortal = () => {
                       Total Outstanding
                     </p>
                     <h3 className="text-2xl font-black font-poppins text-white">
-                      $450.00
+                      PKR 450.00
                     </h3>
                   </div>
                 </div>

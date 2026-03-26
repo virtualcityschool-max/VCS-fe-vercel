@@ -4,6 +4,7 @@ import {
   createSelector,
 } from "@reduxjs/toolkit";
 import { studentService } from "../../services/studentService";
+import { logoutUser } from "./authSlice";
 
 // Async thunks
 export const fetchStudentDashboard = createAsyncThunk(
@@ -450,6 +451,32 @@ const studentDashboardSlice = createSlice({
       .addCase(fetchSessionAttendance.rejected, (state, action) => {
         state.isFetchingAttendance = false;
         state.error = action.payload;
+      })
+
+      // Handle logout - clear all student-specific data
+      .addCase(logoutUser.fulfilled, (state) => {
+        state.student = null;
+        state.nextSession = null;
+        state.overdueAssignments = null;
+        state.liveSchedule = [];
+        state.enrolledCourses = [];
+        state.assignments = [];
+        state.sessions = [];
+        state.grades = [];
+        state.submissions = {};
+        state.attendance = {};
+        state.lastFetched = null;
+        state.error = null;
+        state.isLoading = false;
+        state.isJoiningSession = false;
+        state.isSubmittingAssignment = false;
+        state.isFetchingAssignments = false;
+        state.isFetchingGrades = false;
+        state.isFetchingSubmissions = false;
+        state.isFetchingSessions = false;
+        state.isFetchingAttendance = false;
+        state.enrollingCourseIds = [];
+        state.unenrollingCourseIds = [];
       });
   },
 });

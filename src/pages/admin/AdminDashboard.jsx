@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
@@ -18,6 +18,7 @@ import {
   selectUsers,
 } from "../../store/slices/adminSlice";
 import { coursesService } from "../../services/coursesService";
+import { Button, Input } from "../../components/ui";
 
 const AdminDashboard = () => {
   const dispatch = useDispatch();
@@ -29,6 +30,25 @@ const AdminDashboard = () => {
   const [editingCourse, setEditingCourse] = useState(null);
   const [loadingCourseIds, setLoadingCourseIds] = useState(new Set());
   const [updatingCourseId, setUpdatingCourseId] = useState(null);
+  const [createCourseForm, setCreateCourseForm] = useState({
+    title: "",
+    description: "",
+    category: "",
+    price: "",
+    status: "draft",
+    instructor_id: "",
+  });
+  const [createCourseErrors, setCreateCourseErrors] = useState({});
+
+  // Course filtering state
+  const [courseFilters, setCourseFilters] = useState({
+    search: "",
+    category: "",
+    priceRange: "",
+    status: "",
+    instructor: "",
+  });
+  const [showCourseFilters, setShowCourseFilters] = useState(false);
 
   // Get approvals data from Redux store
   const {
@@ -63,7 +83,155 @@ const AdminDashboard = () => {
     }
   }, [dispatch, activeTab]);
 
-  // Cleanup toast timeout on component unmount
+  // Reset create course form when modal opens/closes
+  useEffect(() => {
+    if (activeModal === "create-course") {
+      setCreateCourseForm({
+        title: "",
+        description: "",
+        category: "",
+        price: "",
+        status: "draft",
+        instructor_id: "",
+      });
+      setCreateCourseErrors({});
+    }
+  }, [activeModal]);
+
+  // Get unique values for course filter options
+  const courseFilterOptions = useMemo(() => {
+    if (!courses.data || courses.data.length === 0) {
+      return {
+        categories: [],
+        instructors: [],
+        statuses: [],
+        priceRanges: [
+          { value: "0-50", label: "Free - PKR 50" },
+          { value: "51-100", label: "PKR 51 - 100" },
+          { value: "101-500", label: "PKR 101 - 500" },
+          { value: "501-1000", label: "PKR 501 - 1000" },
+          { value: "1000+", label: "PKR 1000+" },
+        ],
+      };
+    }
+
+    const categories = [
+      ...new Set(courses.data.map((course) => course.category).filter(Boolean)),
+    ];
+    const instructors = [
+      ...new Set(
+        courses.data
+          .map((course) => course.instructor?.username)
+          .filter(Boolean),
+      ),
+    ];
+    const statuses = [
+      ...new Set(courses.data.map((course) => course.status).filter(Boolean)),
+    ];
+
+    return {
+      categories: categories.sort(),
+      instructors: instructors.sort(),
+      statuses: statuses.sort(),
+      priceRanges: [
+        { value: "0-50", label: "Free - PKR 50" },
+        { value: "51-100", label: "PKR 51 - 100" },
+        { value: "101-500", label: "PKR 101 - 500" },
+        { value: "501-1000", label: "PKR 501 - 1000" },
+        { value: "1000+", label: "PKR 1000+" },
+      ],
+    };
+  }, [courses.data]);
+
+  // Filter courses based on search term and filters
+  const filteredCourses = useMemo(() => {
+    if (!courses.data || courses.data.length === 0) return [];
+
+    return courses.data.filter((course) => {
+      // Search filter (title, instructor, category, description)
+      const matchesSearch =
+        courseFilters.search === "" ||
+        course.title
+          ?.toLowerCase()
+          .includes(courseFilters.search.toLowerCase()) ||
+        course.instructor?.username
+          ?.toLowerCase()
+          .includes(courseFilters.search.toLowerCase()) ||
+        course.category
+          ?.toLowerCase()
+          .includes(courseFilters.search.toLowerCase()) ||
+        course.description
+          ?.toLowerCase()
+          .includes(courseFilters.search.toLowerCase());
+
+      // Category filter
+      const matchesCategory =
+        courseFilters.category === "" ||
+        course.category === courseFilters.category;
+
+      // Price range filter
+      const matchesPrice =
+        courseFilters.priceRange === "" ||
+        (() => {
+          const price = parseFloat(course.price) || 0;
+          switch (courseFilters.priceRange) {
+            case "0-50":
+              return price >= 0 && price <= 50;
+            case "51-100":
+              return price >= 51 && price <= 100;
+            case "101-500":
+              return price >= 101 && price <= 500;
+            case "501-1000":
+              return price >= 501 && price <= 1000;
+            case "1000+":
+              return price >= 1000;
+            default:
+              return true;
+          }
+        })();
+
+      // Status filter
+      const matchesStatus =
+        courseFilters.status === "" || course.status === courseFilters.status;
+
+      // Instructor filter
+      const matchesInstructor =
+        courseFilters.instructor === "" ||
+        course.instructor?.username === courseFilters.instructor;
+
+      return (
+        matchesSearch &&
+        matchesCategory &&
+        matchesPrice &&
+        matchesStatus &&
+        matchesInstructor
+      );
+    });
+  }, [courses.data, courseFilters]);
+
+  // Check if any course filters are active
+  const hasActiveCourseFilters = useMemo(() => {
+    return Object.values(courseFilters).some((value) => value !== "");
+  }, [courseFilters]);
+
+  // Reset all course filters
+  const resetCourseFilters = () => {
+    setCourseFilters({
+      search: "",
+      category: "",
+      priceRange: "",
+      status: "",
+      instructor: "",
+    });
+  };
+
+  // Handle course filter changes
+  const handleCourseFilterChange = (filterName, value) => {
+    setCourseFilters((prev) => ({
+      ...prev,
+      [filterName]: value,
+    }));
+  };
   useEffect(() => {
     return () => {
       if (triggerToast.timeoutId) {
@@ -91,14 +259,116 @@ const AdminDashboard = () => {
     }
   };
 
+  // Validate create course form
+  const validateCreateCourseForm = (formData) => {
+    const errors = {};
+
+    // Title validation
+    if (!formData.title.trim()) {
+      errors.title = "Course title is required";
+    } else if (formData.title.trim().length < 5) {
+      errors.title = "Title must be at least 5 characters";
+    }
+
+    // Description validation
+    if (!formData.description.trim()) {
+      errors.description = "Course description is required";
+    } else if (formData.description.trim().length < 10) {
+      errors.description = "Description must be at least 10 characters";
+    }
+
+    // Category validation
+    if (!formData.category.trim()) {
+      errors.category = "Course category is required";
+    } else if (formData.category.trim().length < 2) {
+      errors.category = "Category must be at least 2 characters";
+    }
+
+    // Price validation
+    if (!formData.price || formData.price <= 0) {
+      errors.price = "Valid price is required";
+    } else if (parseFloat(formData.price) < 100) {
+      errors.price = "Price must be at least PKR 100";
+    }
+
+    // Status validation
+    if (!formData.status) {
+      errors.status = "Course status is required";
+    }
+
+    // Instructor validation (conditional)
+    if (formData.status === "published" && !formData.instructor_id) {
+      errors.instructor_id = "Instructor is required for published courses";
+    }
+
+    return errors;
+  };
+
+  // Extract meaningful backend error message
+  const extractBackendError = (error) => {
+    if (error.response?.data?.details) {
+      // Handle multiple validation errors from backend
+      const details = error.response.data.details;
+      const errors = {};
+
+      // Convert backend errors to frontend format
+      Object.keys(details).forEach((field) => {
+        if (details[field] && details[field].length > 0) {
+          errors[field] = details[field][0]; // Take first error for each field
+        }
+      });
+
+      // Set inline errors and return general message
+      setCreateCourseErrors(errors);
+
+      // Return a summary message for toast
+      const fieldCount = Object.keys(errors).length;
+      if (fieldCount === 1) {
+        return `Please fix the ${Object.keys(errors)[0]} field`;
+      } else {
+        return `Please fix the ${fieldCount} highlighted fields`;
+      }
+    }
+
+    if (error.response?.data?.error) {
+      return error.response.data.error;
+    }
+
+    if (error.response?.data?.message) {
+      return error.response.data.message;
+    }
+
+    return "Failed to create course";
+  };
+
   // Handle course creation
   const handleCreateCourse = async (courseData) => {
+    // Frontend validation
+    const errors = validateCreateCourseForm(courseData);
+    setCreateCourseErrors(errors);
+
+    if (Object.keys(errors).length > 0) {
+      triggerToast("Please fix the highlighted fields");
+      return;
+    }
+
     try {
       await dispatch(createCourse(courseData)).unwrap();
       triggerToast("Course created successfully");
       setActiveModal(null);
+      // Reset form
+      setCreateCourseForm({
+        title: "",
+        description: "",
+        category: "",
+        price: "",
+        status: "draft",
+        instructor_id: "",
+      });
+      setCreateCourseErrors({});
     } catch (error) {
-      triggerToast(error || "Failed to create course");
+      const errorMessage = extractBackendError(error);
+      triggerToast(errorMessage);
     }
   };
 
@@ -575,6 +845,17 @@ const AdminDashboard = () => {
                   </div>
                   <div className="flex flex-col sm:flex-row gap-3 lg:gap-4">
                     <button
+                      onClick={() => setShowCourseFilters(!showCourseFilters)}
+                      className="bg-slate-700 hover:bg-slate-600 text-white px-6 py-3 rounded-xl text-[11px] font-black uppercase tracking-widest shadow-lg active:scale-95 transition-all duration-200 flex items-center justify-center gap-2"
+                    >
+                      <i
+                        className={`fas ${showCourseFilters ? "fa-times" : "fa-filter"} text-sm`}
+                      ></i>
+                      <span>
+                        {showCourseFilters ? "Hide Filters" : "Filters"}
+                      </span>
+                    </button>
+                    <button
                       onClick={() => setActiveModal("create-course")}
                       className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-xl text-[11px] font-black uppercase tracking-widest shadow-lg active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 min-w-35"
                     >
@@ -593,6 +874,130 @@ const AdminDashboard = () => {
                     </button>
                   </div>
                 </div>
+
+                {/* Course Filters */}
+                {showCourseFilters && (
+                  <div className="mt-6 p-6 bg-slate-800/50 rounded-xl border border-slate-700/50">
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="text-sm font-bold text-white">
+                        Course Filters
+                      </h4>
+                      {hasActiveCourseFilters && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={resetCourseFilters}
+                          className="text-xs"
+                        >
+                          <i className="fas fa-times mr-1"></i>
+                          Clear All
+                        </Button>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                      {/* Search Filter */}
+                      <div>
+                        <Input
+                          type="text"
+                          placeholder="Search courses..."
+                          value={courseFilters.search}
+                          onChange={(e) =>
+                            handleCourseFilterChange("search", e.target.value)
+                          }
+                          variant="default"
+                          size="sm"
+                          className="bg-slate-900 border-slate-700 text-white placeholder-slate-500"
+                        />
+                      </div>
+
+                      {/* Category Filter */}
+                      <div>
+                        <select
+                          value={courseFilters.category}
+                          onChange={(e) =>
+                            handleCourseFilterChange("category", e.target.value)
+                          }
+                          className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-indigo-500/20 outline-none focus:border-indigo-500 transition"
+                        >
+                          <option value="">All Categories</option>
+                          {courseFilterOptions.categories.map((category) => (
+                            <option key={category} value={category}>
+                              {category}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* Price Range Filter */}
+                      <div>
+                        <select
+                          value={courseFilters.priceRange}
+                          onChange={(e) =>
+                            handleCourseFilterChange(
+                              "priceRange",
+                              e.target.value,
+                            )
+                          }
+                          className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-indigo-500/20 outline-none focus:border-indigo-500 transition"
+                        >
+                          <option value="">All Prices</option>
+                          {courseFilterOptions.priceRanges.map((range) => (
+                            <option key={range.value} value={range.value}>
+                              {range.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* Status Filter */}
+                      <div>
+                        <select
+                          value={courseFilters.status}
+                          onChange={(e) =>
+                            handleCourseFilterChange("status", e.target.value)
+                          }
+                          className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-indigo-500/20 outline-none focus:border-indigo-500 transition"
+                        >
+                          <option value="">All Statuses</option>
+                          {courseFilterOptions.statuses.map((status) => (
+                            <option key={status} value={status}>
+                              {status.charAt(0).toUpperCase() + status.slice(1)}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* Instructor Filter */}
+                      <div>
+                        <select
+                          value={courseFilters.instructor}
+                          onChange={(e) =>
+                            handleCourseFilterChange(
+                              "instructor",
+                              e.target.value,
+                            )
+                          }
+                          className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-indigo-500/20 outline-none focus:border-indigo-500 transition"
+                        >
+                          <option value="">All Instructors</option>
+                          {courseFilterOptions.instructors.map((instructor) => (
+                            <option key={instructor} value={instructor}>
+                              {instructor}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    {hasActiveCourseFilters && (
+                      <div className="mt-4 text-sm text-slate-400">
+                        Showing {filteredCourses.length} of{" "}
+                        {courses.data.length} courses
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -608,9 +1013,10 @@ const AdminDashboard = () => {
                       All Courses
                     </h4>
                     <p className="text-slate-500 text-sm mt-1">
-                      {courses.data.length > 0
-                        ? `${courses.data.length} course${courses.data.length !== 1 ? "s" : ""} found`
+                      {filteredCourses.length > 0
+                        ? `${filteredCourses.length} of ${courses.data.length} course${filteredCourses.length !== 1 ? "s" : ""} found`
                         : "No courses available"}
+                      {hasActiveCourseFilters && " (filtered)"}
                     </p>
                   </div>
                 </div>
@@ -680,6 +1086,33 @@ const AdminDashboard = () => {
                   </div>
                 )}
 
+              {/* No Filter Results */}
+              {!courses.loading &&
+                !courses.error &&
+                courses.data.length > 0 &&
+                filteredCourses.length === 0 &&
+                hasActiveCourseFilters && (
+                  <div className="p-16 text-center">
+                    <div className="w-20 h-20 bg-slate-700/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                      <i className="fas fa-search text-slate-400 text-3xl"></i>
+                    </div>
+                    <h4 className="text-white text-xl font-bold mb-2">
+                      No Courses Found
+                    </h4>
+                    <p className="text-slate-400 text-sm mb-6 leading-relaxed max-w-md mx-auto">
+                      No courses match your current filter criteria.
+                    </p>
+                    <Button
+                      variant="outline"
+                      size="md"
+                      onClick={resetCourseFilters}
+                    >
+                      <i className="fas fa-redo mr-2"></i>
+                      Clear Filters
+                    </Button>
+                  </div>
+                )}
+
               {/* Courses List */}
               {!courses.loading &&
                 !courses.error &&
@@ -709,7 +1142,7 @@ const AdminDashboard = () => {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-800/30">
-                        {courses.data.map((course) => (
+                        {filteredCourses.map((course) => (
                           <tr
                             key={course.id}
                             className="hover:bg-slate-800/20 transition-all duration-200 group"
@@ -908,16 +1341,39 @@ const AdminDashboard = () => {
                         className="text-[11px] font-black uppercase text-slate-500 mb-2 flex items-center gap-2"
                       >
                         <i className="fas fa-heading text-slate-600 text-xs"></i>
-                        Course Title
+                        Course Title <span className="text-red-400">*</span>
                       </label>
                       <input
                         type="text"
                         id="title"
                         name="title"
-                        required
-                        className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-5 py-4 text-white placeholder-slate-600 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200"
+                        value={createCourseForm.title}
+                        onChange={(e) => {
+                          setCreateCourseForm({
+                            ...createCourseForm,
+                            title: e.target.value,
+                          });
+                          // Clear error for this field when user starts typing
+                          if (createCourseErrors.title) {
+                            setCreateCourseErrors((prev) => ({
+                              ...prev,
+                              title: "",
+                            }));
+                          }
+                        }}
+                        className={`w-full bg-slate-950 border rounded-2xl px-5 py-4 text-white placeholder-slate-600 outline-none focus:ring-2 transition-all duration-200 ${
+                          createCourseErrors.title
+                            ? "border-red-500 focus:ring-red-500/20"
+                            : "border-slate-800 focus:border-indigo-500 focus:ring-indigo-500/20"
+                        }`}
                         placeholder="Enter course title"
                       />
+                      {createCourseErrors.title && (
+                        <p className="mt-2 text-xs text-red-400 flex items-center gap-1">
+                          <i className="fas fa-exclamation-circle text-xs"></i>
+                          {createCourseErrors.title}
+                        </p>
+                      )}
                     </div>
 
                     {/* Description */}
@@ -927,16 +1383,39 @@ const AdminDashboard = () => {
                         className="text-[11px] font-black uppercase text-slate-500 mb-2 flex items-center gap-2"
                       >
                         <i className="fas fa-align-left text-slate-600 text-xs"></i>
-                        Description
+                        Description <span className="text-red-400">*</span>
                       </label>
                       <textarea
                         id="description"
                         name="description"
-                        required
                         rows="3"
-                        className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-5 py-4 text-white placeholder-slate-600 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 resize-none"
+                        value={createCourseForm.description}
+                        onChange={(e) => {
+                          setCreateCourseForm({
+                            ...createCourseForm,
+                            description: e.target.value,
+                          });
+                          // Clear error for this field when user starts typing
+                          if (createCourseErrors.description) {
+                            setCreateCourseErrors((prev) => ({
+                              ...prev,
+                              description: "",
+                            }));
+                          }
+                        }}
+                        className={`w-full bg-slate-950 border rounded-2xl px-5 py-4 text-white placeholder-slate-600 outline-none focus:ring-2 transition-all duration-200 resize-none ${
+                          createCourseErrors.description
+                            ? "border-red-500 focus:ring-red-500/20"
+                            : "border-slate-800 focus:border-indigo-500 focus:ring-indigo-500/20"
+                        }`}
                         placeholder="Describe what students will learn in this course..."
                       />
+                      {createCourseErrors.description && (
+                        <p className="mt-2 text-xs text-red-400 flex items-center gap-1">
+                          <i className="fas fa-exclamation-circle text-xs"></i>
+                          {createCourseErrors.description}
+                        </p>
+                      )}
                     </div>
 
                     {/* Category and Price Row */}
@@ -947,16 +1426,39 @@ const AdminDashboard = () => {
                           className="text-[11px] font-black uppercase text-slate-500 mb-2 flex items-center gap-2"
                         >
                           <i className="fas fa-tag text-slate-600 text-xs"></i>
-                          Category
+                          Category <span className="text-red-400">*</span>
                         </label>
                         <input
                           type="text"
                           id="category"
                           name="category"
-                          required
-                          className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-5 py-4 text-white placeholder-slate-600 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200"
+                          value={createCourseForm.category}
+                          onChange={(e) => {
+                            setCreateCourseForm({
+                              ...createCourseForm,
+                              category: e.target.value,
+                            });
+                            // Clear error for this field when user starts typing
+                            if (createCourseErrors.category) {
+                              setCreateCourseErrors((prev) => ({
+                                ...prev,
+                                category: "",
+                              }));
+                            }
+                          }}
+                          className={`w-full bg-slate-950 border rounded-2xl px-5 py-4 text-white placeholder-slate-600 outline-none focus:ring-2 transition-all duration-200 ${
+                            createCourseErrors.category
+                              ? "border-red-500 focus:ring-red-500/20"
+                              : "border-slate-800 focus:border-indigo-500 focus:ring-indigo-500/20"
+                          }`}
                           placeholder="e.g., tech, arts, science"
                         />
+                        {createCourseErrors.category && (
+                          <p className="mt-2 text-xs text-red-400 flex items-center gap-1">
+                            <i className="fas fa-exclamation-circle text-xs"></i>
+                            {createCourseErrors.category}
+                          </p>
+                        )}
                       </div>
                       <div>
                         <label
@@ -964,7 +1466,7 @@ const AdminDashboard = () => {
                           className="text-[11px] font-black uppercase text-slate-500 mb-2 flex items-center gap-2"
                         >
                           <i className="fas fa-rupee-sign text-slate-600 text-xs"></i>
-                          Price
+                          Price <span className="text-red-400">*</span>
                         </label>
                         <div className="relative">
                           <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500">
@@ -974,13 +1476,36 @@ const AdminDashboard = () => {
                             type="number"
                             id="price"
                             name="price"
-                            required
                             step="0.01"
                             min="0"
-                            className="w-full bg-slate-950 border border-slate-800 rounded-2xl pl-14 pr-5 py-4 text-white placeholder-slate-600 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200"
+                            value={createCourseForm.price}
+                            onChange={(e) => {
+                              setCreateCourseForm({
+                                ...createCourseForm,
+                                price: e.target.value,
+                              });
+                              // Clear error for this field when user starts typing
+                              if (createCourseErrors.price) {
+                                setCreateCourseErrors((prev) => ({
+                                  ...prev,
+                                  price: "",
+                                }));
+                              }
+                            }}
+                            className={`w-full bg-slate-950 border rounded-2xl pl-14 pr-5 py-4 text-white placeholder-slate-600 outline-none focus:ring-2 transition-all duration-200 ${
+                              createCourseErrors.price
+                                ? "border-red-500 focus:ring-red-500/20"
+                                : "border-slate-800 focus:border-indigo-500 focus:ring-indigo-500/20"
+                            }`}
                             placeholder="0.00"
                           />
                         </div>
+                        {createCourseErrors.price && (
+                          <p className="mt-2 text-xs text-red-400 flex items-center gap-1">
+                            <i className="fas fa-exclamation-circle text-xs"></i>
+                            {createCourseErrors.price}
+                          </p>
+                        )}
                       </div>
                     </div>
 
@@ -992,18 +1517,52 @@ const AdminDashboard = () => {
                           className="text-[11px] font-black uppercase text-slate-500 mb-2 flex items-center gap-2"
                         >
                           <i className="fas fa-toggle-on text-slate-600 text-xs"></i>
-                          Status
+                          Status <span className="text-red-400">*</span>
                         </label>
                         <select
                           id="status"
                           name="status"
-                          required
-                          className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-5 py-4 text-white outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 appearance-none cursor-pointer"
+                          value={createCourseForm.status}
+                          onChange={(e) => {
+                            const newStatus = e.target.value;
+                            setCreateCourseForm({
+                              ...createCourseForm,
+                              status: newStatus,
+                            });
+                            // Clear instructor error if switching away from published
+                            if (
+                              newStatus !== "published" &&
+                              createCourseErrors.instructor_id
+                            ) {
+                              setCreateCourseErrors((prev) => ({
+                                ...prev,
+                                instructor_id: "",
+                              }));
+                            }
+                            // Clear status error when user makes selection
+                            if (createCourseErrors.status) {
+                              setCreateCourseErrors((prev) => ({
+                                ...prev,
+                                status: "",
+                              }));
+                            }
+                          }}
+                          className={`w-full bg-slate-950 border rounded-2xl px-5 py-4 text-white outline-none focus:ring-2 transition-all duration-200 appearance-none cursor-pointer ${
+                            createCourseErrors.status
+                              ? "border-red-500 focus:ring-red-500/20"
+                              : "border-slate-800 focus:border-indigo-500 focus:ring-indigo-500/20"
+                          }`}
                         >
                           <option value="published">📚 Published</option>
                           <option value="draft">📝 Draft</option>
                           <option value="archived">📦 Archived</option>
                         </select>
+                        {createCourseErrors.status && (
+                          <p className="mt-2 text-xs text-red-400 flex items-center gap-1">
+                            <i className="fas fa-exclamation-circle text-xs"></i>
+                            {createCourseErrors.status}
+                          </p>
+                        )}
                       </div>
                       <div>
                         <label
@@ -1012,11 +1571,32 @@ const AdminDashboard = () => {
                         >
                           <i className="fas fa-user-tie text-slate-600 text-xs"></i>
                           Instructor
+                          {createCourseForm.status === "published" && (
+                            <span className="text-red-400">*</span>
+                          )}
                         </label>
                         <select
                           id="instructor_id"
                           name="instructor_id"
-                          className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-5 py-4 text-white outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 appearance-none cursor-pointer"
+                          value={createCourseForm.instructor_id}
+                          onChange={(e) => {
+                            setCreateCourseForm({
+                              ...createCourseForm,
+                              instructor_id: e.target.value,
+                            });
+                            // Clear error for this field when user makes selection
+                            if (createCourseErrors.instructor_id) {
+                              setCreateCourseErrors((prev) => ({
+                                ...prev,
+                                instructor_id: "",
+                              }));
+                            }
+                          }}
+                          className={`w-full bg-slate-950 border rounded-2xl px-5 py-4 text-white outline-none focus:ring-2 transition-all duration-200 appearance-none cursor-pointer ${
+                            createCourseErrors.instructor_id
+                              ? "border-red-500 focus:ring-red-500/20"
+                              : "border-slate-800 focus:border-indigo-500 focus:ring-indigo-500/20"
+                          }`}
                         >
                           <option value="">No instructor assigned</option>
                           {users.data
@@ -1029,6 +1609,12 @@ const AdminDashboard = () => {
                               </option>
                             ))}
                         </select>
+                        {createCourseErrors.instructor_id && (
+                          <p className="mt-2 text-xs text-red-400 flex items-center gap-1">
+                            <i className="fas fa-exclamation-circle text-xs"></i>
+                            {createCourseErrors.instructor_id}
+                          </p>
+                        )}
                       </div>
                     </div>
 
@@ -1036,7 +1622,18 @@ const AdminDashboard = () => {
                     <div className="flex gap-4 pt-6 border-t border-slate-800">
                       <button
                         type="button"
-                        onClick={() => setActiveModal(null)}
+                        onClick={() => {
+                          setActiveModal(null);
+                          setCreateCourseForm({
+                            title: "",
+                            description: "",
+                            category: "",
+                            price: "",
+                            status: "draft",
+                            instructor_id: "",
+                          });
+                          setCreateCourseErrors({});
+                        }}
                         className="flex-1 py-4 bg-slate-800 hover:bg-slate-700 text-white rounded-2xl font-bold transition-all duration-200 active:scale-95"
                       >
                         Cancel

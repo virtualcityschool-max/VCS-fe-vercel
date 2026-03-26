@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { fetchAllCourses } from "../../store/slices/coursesSlice";
@@ -7,13 +7,22 @@ import {
   unenrollFromCourse,
   fetchStudentDashboard,
 } from "../../store/slices/studentDashboardSlice";
+import { Button, Input } from "../../components/ui";
 import toast from "react-hot-toast";
+import { getCourseImage } from "../../utils/courseImageUtils";
+import { setAuthModal } from "../../store/slices/uiSlice";
 
 const Marketplace = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
+  const [filters, setFilters] = useState({
+    category: "",
+    priceRange: "",
+    instructor: "",
+  });
+  const [showFilters, setShowFilters] = useState(false);
 
   // Get auth state from Redux store
   const auth = useSelector((state) => state.auth);
@@ -35,16 +44,119 @@ const Marketplace = () => {
     }
   }, [dispatch, auth.isLoggedIn, auth.role]);
 
-  // Filter courses based on search term
-  const filteredCourses =
-    courses?.filter(
-      (course) =>
+  // Get unique values for filter options
+  const filterOptions = useMemo(() => {
+    if (!courses || courses.length === 0) {
+      return {
+        categories: [],
+        instructors: [],
+        priceRanges: [
+          { value: "0-50", label: "Free - PKR 50" },
+          { value: "51-100", label: "PKR 51 - 100" },
+          { value: "101-500", label: "PKR 101 - 500" },
+          { value: "501-1000", label: "PKR 501 - 1000" },
+          { value: "1000+", label: "PKR 1000+" },
+        ],
+      };
+    }
+
+    const categories = [
+      ...new Set(courses.map((course) => course.category).filter(Boolean)),
+    ];
+    const instructors = [
+      ...new Set(
+        courses.map((course) => course.instructor?.username).filter(Boolean),
+      ),
+    ];
+
+    return {
+      categories: categories.sort(),
+      instructors: instructors.sort(),
+      priceRanges: [
+        { value: "0-50", label: "Free - PKR 50" },
+        { value: "51-100", label: "PKR 51 - 100" },
+        { value: "101-500", label: "PKR 101 - 500" },
+        { value: "501-1000", label: "PKR 501 - 1000" },
+        { value: "1000+", label: "PKR 1000+" },
+      ],
+    };
+  }, [courses]);
+
+  // Filter courses based on search term and filters
+  const filteredCourses = useMemo(() => {
+    if (!courses || courses.length === 0) return [];
+
+    return courses.filter((course) => {
+      // Search filter (title, instructor, category, description)
+      const matchesSearch =
+        searchTerm === "" ||
         course.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         course.instructor?.username
           ?.toLowerCase()
           .includes(searchTerm.toLowerCase()) ||
-        course.category?.toLowerCase().includes(searchTerm.toLowerCase()),
-    ) || [];
+        course.category?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        course.description?.toLowerCase().includes(searchTerm.toLowerCase());
+
+      // Category filter
+      const matchesCategory =
+        filters.category === "" || course.category === filters.category;
+
+      // Price range filter
+      const matchesPrice =
+        filters.priceRange === "" ||
+        (() => {
+          const price = parseFloat(course.price) || 0;
+          switch (filters.priceRange) {
+            case "0-50":
+              return price >= 0 && price <= 50;
+            case "51-100":
+              return price >= 51 && price <= 100;
+            case "101-500":
+              return price >= 101 && price <= 500;
+            case "501-1000":
+              return price >= 501 && price <= 1000;
+            case "1000+":
+              return price >= 1000;
+            default:
+              return true;
+          }
+        })();
+
+      // Instructor filter
+      const matchesInstructor =
+        filters.instructor === "" ||
+        course.instructor?.username === filters.instructor;
+
+      return (
+        matchesSearch && matchesCategory && matchesPrice && matchesInstructor
+      );
+    });
+  }, [courses, searchTerm, filters]);
+
+  // Check if any filters are active
+  const hasActiveFilters = useMemo(() => {
+    return (
+      searchTerm !== "" || Object.values(filters).some((value) => value !== "")
+    );
+  }, [searchTerm, filters]);
+
+  // Reset all filters
+  const resetFilters = () => {
+    setSearchTerm("");
+    setFilters({
+      category: "",
+      priceRange: "",
+      instructor: "",
+    });
+  };
+
+  // Handle filter changes
+  const handleFilterChange = (filterName, value) => {
+    setFilters((prev) => ({
+      ...prev,
+      [filterName]: value,
+    }));
+  };
 
   // Derive enrollment state using both course.is_enrolled and enrolledCourses
   const isCourseEnrolled = (course) => {
@@ -70,8 +182,7 @@ const Marketplace = () => {
   // Handle course enrollment
   const handleEnrollCourse = async (courseId, courseTitle) => {
     if (!auth.isLoggedIn) {
-      toast.error("Please log in to enroll in courses");
-      navigate("/");
+      dispatch(setAuthModal("login"));
       return;
     }
 
@@ -103,8 +214,7 @@ const Marketplace = () => {
   // Handle course unenrollment
   const handleUnenrollCourse = async (courseId, courseTitle) => {
     if (!auth.isLoggedIn) {
-      toast.error("Please log in to unenroll from courses");
-      navigate("/");
+      dispatch(setAuthModal("login"));
       return;
     }
 
@@ -257,44 +367,158 @@ const Marketplace = () => {
 
       <div className="max-w-7xl mx-auto px-6 py-20">
         <div className="flex flex-col lg:flex-row gap-16">
-          <aside className="lg:w-80 shrink-0 space-y-12">
-            <div>
-              <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 mb-8 flex items-center justify-between cursor-pointer group">
-                Category
-              </h3>
-              <ul className="space-y-5">
-                {[
-                  "STEM",
-                  "Languages",
-                  "Arts & Design",
-                  "Humanities",
-                  "Test Prep",
-                ].map((cat) => (
-                  <li key={cat}>
-                    <label className="flex items-center gap-4 cursor-pointer group">
-                      <div className="w-6 h-6 rounded-lg bg-slate-800 border border-slate-700 group-hover:border-blue-500 transition shadow-inner"></div>
-                      <span className="text-sm text-slate-400 group-hover:text-slate-100 transition font-medium">
-                        {cat}
-                      </span>
-                    </label>
-                  </li>
-                ))}
-              </ul>
+          <aside className="lg:w-80 shrink-0 space-y-8">
+            {/* Filter Toggle Button (Mobile) */}
+            <div className="lg:hidden">
+              <Button
+                variant="outline"
+                size="md"
+                onClick={() => setShowFilters(!showFilters)}
+                className="w-full flex items-center justify-center gap-2"
+              >
+                <i
+                  className={`fas ${showFilters ? "fa-times" : "fa-filter"}`}
+                ></i>
+                {showFilters ? "Hide Filters" : "Show Filters"}
+              </Button>
+            </div>
+
+            {/* Filters Section */}
+            <div
+              className={`${showFilters ? "block" : "hidden"} lg:block space-y-8`}
+            >
+              {/* Clear Filters */}
+              {hasActiveFilters && (
+                <div className="flex items-center justify-between p-4 bg-slate-800/50 rounded-xl border border-slate-700/50">
+                  <span className="text-sm text-slate-400">
+                    {filteredCourses.length} result
+                    {filteredCourses.length !== 1 ? "s" : ""}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={resetFilters}
+                    className="text-xs"
+                  >
+                    <i className="fas fa-times mr-1"></i>
+                    Clear All
+                  </Button>
+                </div>
+              )}
+
+              {/* Category Filter */}
+              <div>
+                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 mb-4 flex items-center justify-between">
+                  Category
+                  {filters.category && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleFilterChange("category", "")}
+                      className="text-xs p-1"
+                    >
+                      <i className="fas fa-times"></i>
+                    </Button>
+                  )}
+                </h3>
+                <select
+                  value={filters.category}
+                  onChange={(e) =>
+                    handleFilterChange("category", e.target.value)
+                  }
+                  className="w-full bg-slate-800/80 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm focus:ring-2 focus:ring-blue-500/20 outline-none focus:border-blue-500 transition"
+                >
+                  <option value="">All Categories</option>
+                  {filterOptions.categories.map((category) => (
+                    <option key={category} value={category}>
+                      {category}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Price Range Filter */}
+              <div>
+                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 mb-4 flex items-center justify-between">
+                  Price Range
+                  {filters.priceRange && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleFilterChange("priceRange", "")}
+                      className="text-xs p-1"
+                    >
+                      <i className="fas fa-times"></i>
+                    </Button>
+                  )}
+                </h3>
+                <select
+                  value={filters.priceRange}
+                  onChange={(e) =>
+                    handleFilterChange("priceRange", e.target.value)
+                  }
+                  className="w-full bg-slate-800/80 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm focus:ring-2 focus:ring-blue-500/20 outline-none focus:border-blue-500 transition"
+                >
+                  <option value="">All Prices</option>
+                  {filterOptions.priceRanges.map((range) => (
+                    <option key={range.value} value={range.value}>
+                      {range.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Instructor Filter */}
+              <div>
+                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 mb-4 flex items-center justify-between">
+                  Instructor
+                  {filters.instructor && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleFilterChange("instructor", "")}
+                      className="text-xs p-1"
+                    >
+                      <i className="fas fa-times"></i>
+                    </Button>
+                  )}
+                </h3>
+                <select
+                  value={filters.instructor}
+                  onChange={(e) =>
+                    handleFilterChange("instructor", e.target.value)
+                  }
+                  className="w-full bg-slate-800/80 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm focus:ring-2 focus:ring-blue-500/20 outline-none focus:border-blue-500 transition"
+                >
+                  <option value="">All Instructors</option>
+                  {filterOptions.instructors.map((instructor) => (
+                    <option key={instructor} value={instructor}>
+                      {instructor}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
           </aside>
 
           <main className="flex-1">
-            {filteredCourses.length === 0 && searchTerm && (
+            {filteredCourses.length === 0 && hasActiveFilters && (
               <div className="text-center py-12">
-                <p className="text-slate-400 text-lg">
-                  No courses found matching "{searchTerm}"
+                <div className="w-16 h-16 bg-slate-700/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <i className="fas fa-search text-slate-400 text-2xl"></i>
+                </div>
+                <p className="text-slate-400 text-lg mb-4">
+                  No courses found matching your criteria
                 </p>
-                <button
-                  onClick={() => setSearchTerm("")}
-                  className="mt-4 text-blue-400 hover:text-blue-300 transition"
+                <Button
+                  variant="outline"
+                  size="md"
+                  onClick={resetFilters}
+                  className="mt-2"
                 >
-                  Clear search
-                </button>
+                  <i className="fas fa-redo mr-2"></i>
+                  Clear Filters
+                </Button>
               </div>
             )}
 
@@ -305,14 +529,13 @@ const Marketplace = () => {
                   className="bg-slate-800/50 backdrop-blur-md rounded-[2.5rem] overflow-hidden border border-slate-700/50 shadow-2xl group hover:border-blue-500/40 transition-all flex flex-col"
                 >
                   <div className="relative aspect-video overflow-hidden">
-                    <img
-                      src={
-                        course.thumbnail ||
-                        `https://picsum.photos/seed/course_${course.id || idx}/800/450`
-                      }
-                      className="w-full h-full object-cover group-hover:scale-110 transition duration-700 opacity-80 group-hover:opacity-100"
-                      alt={course.title || "Course"}
-                    />
+                    <Link to={`/courses/${course.id}`}>
+                      <img
+                        src={getCourseImage(course, idx)}
+                        className="w-full h-full object-cover group-hover:scale-110 transition duration-700 opacity-80 group-hover:opacity-100"
+                        alt={course.title || "Course"}
+                      />
+                    </Link>
                     {course.status === "published" && (
                       <div className="absolute top-4 right-4 bg-green-600 text-white px-3 py-1 rounded-full text-xs font-bold">
                         Published
@@ -320,9 +543,11 @@ const Marketplace = () => {
                     )}
                   </div>
                   <div className="p-8 flex-1 flex flex-col">
-                    <h3 className="text-xl font-bold font-poppins mb-4 leading-tight group-hover:text-blue-400 transition cursor-pointer min-h-12">
-                      {course.title || "Untitled Course"}
-                    </h3>
+                    <Link to={`/courses/${course.id}`}>
+                      <h3 className="text-xl font-bold font-poppins mb-4 leading-tight group-hover:text-blue-400 transition cursor-pointer min-h-12">
+                        {course.title || "Untitled Course"}
+                      </h3>
+                    </Link>
                     <div className="flex items-center gap-4 mb-4">
                       <img
                         src={
@@ -345,7 +570,7 @@ const Marketplace = () => {
                     )}
                     <div className="flex items-center justify-between mb-4">
                       <span className="text-lg font-bold text-blue-400">
-                        ${course.price || "0.00"}
+                        PKR {course.price || "0.00"}
                       </span>
                       <div className="flex items-center gap-1">
                         <i className="fas fa-star text-yellow-400 text-xs"></i>

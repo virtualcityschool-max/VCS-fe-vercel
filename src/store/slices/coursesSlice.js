@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { coursesService } from "../../services/coursesService";
+import { logoutUser } from "./authSlice";
 
 // Async thunks
 export const fetchAllCourses = createAsyncThunk(
@@ -11,10 +12,10 @@ export const fetchAllCourses = createAsyncThunk(
     } catch (error) {
       console.error("Failed to fetch courses:", error);
       return rejectWithValue(
-        error.response?.data?.message || "Failed to load courses"
+        error.response?.data?.message || "Failed to load courses",
       );
     }
-  }
+  },
 );
 
 export const fetchCourseById = createAsyncThunk(
@@ -26,10 +27,10 @@ export const fetchCourseById = createAsyncThunk(
     } catch (error) {
       console.error("Failed to fetch course:", error);
       return rejectWithValue(
-        error.response?.data?.message || "Failed to load course"
+        error.response?.data?.message || "Failed to load course",
       );
     }
-  }
+  },
 );
 
 const initialState = {
@@ -80,6 +81,21 @@ const coursesSlice = createSlice({
       .addCase(fetchCourseById.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
+      })
+
+      // Handle logout - clear course enrollment flags
+      .addCase(logoutUser.fulfilled, (state) => {
+        // Reset courses to remove any enrollment flags from previous session
+        state.courses = state.courses.map((course) => ({
+          ...course,
+          is_enrolled: false,
+        }));
+        state.currentCourse = state.currentCourse
+          ? {
+              ...state.currentCourse,
+              is_enrolled: false,
+            }
+          : null;
       });
   },
 });

@@ -55,8 +55,16 @@ const SimulatorBar = () => {
   // Filter buttons based on authentication status and role
   const getVisibleButtons = () => {
     if (!isLoggedIn) {
-      // Show all buttons when not logged in (on home page or any public page)
-      return buttons;
+      // Show only public buttons when not logged in, but hide specific items
+      return buttons.filter((button) => {
+        // Hide Classroom, T-Profile, and S-Risk for logged-out users
+        const hiddenWhenLoggedOut = [
+          "/classroom",
+          "/teacher/123",
+          "/student/456",
+        ];
+        return !hiddenWhenLoggedOut.includes(button.id);
+      });
     }
 
     // When logged in, only show buttons that are public or match the user's role
