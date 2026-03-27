@@ -1,7 +1,6 @@
 import React, { useEffect, useCallback, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
 import {
   fetchStudentDashboard,
   selectDashboardLoading,
@@ -26,7 +25,7 @@ const StudentPortal = () => {
 
   // Ensure component has mounted on client
   useEffect(() => {
-    setHasMounted(true);
+    setTimeout(() => setHasMounted(true), 0);
   }, []);
 
   // Fetch dashboard data on component mount
@@ -43,11 +42,6 @@ const StudentPortal = () => {
     dispatch(clearError());
     dispatch(fetchStudentDashboard());
   }, [dispatch]);
-
-  // Handle navigation to courses
-  const handleExploreCourses = useCallback(() => {
-    navigate("/courses");
-  }, [navigate]);
 
   // Show loading state while mounting or loading
   if (!hasMounted || isLoading) {

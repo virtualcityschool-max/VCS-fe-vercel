@@ -1,9 +1,7 @@
 import React, { useState } from "react";
-import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
 const Classroom = () => {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [showChat, setShowChat] = useState(false);
 

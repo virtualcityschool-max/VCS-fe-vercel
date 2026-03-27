@@ -1,12 +1,11 @@
-
 import { GoogleGenAI } from "@google/genai";
 
 export async function askLearningAssistant(prompt, currentView) {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
-  
+  const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_API_KEY || "" });
+
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: "gemini-3-flash-preview",
       contents: prompt,
       config: {
         systemInstruction: `You are the VirtualCitySchool AI Learning Assistant. 

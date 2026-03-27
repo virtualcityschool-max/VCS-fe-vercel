@@ -131,7 +131,8 @@ export const loginUser = createAsyncThunk(
       }
     } catch (error) {
       console.error("❌ Login error:", error);
-      return rejectWithValue(error.message || "Login failed");
+      // Preserve full error object for proper non_field_errors handling
+      return rejectWithValue(error);
     }
   },
 );
@@ -156,13 +157,13 @@ export const registerUser = createAsyncThunk(
       const response = await authService.register(userData);
       return response;
     } catch (err) {
-      if (err instanceof Error) {
-        return rejectWithValue(err.message);
-      }
-      if (typeof err === "object" && err !== null) {
-        return rejectWithValue(err);
-      }
-      return rejectWithValue(String(err));
+      // Extract error message to avoid storing non-serializable AxiosError
+      const errorMessage =
+        err.response?.data?.error ||
+        err.response?.data?.message ||
+        err.message ||
+        "Registration failed";
+      return rejectWithValue(errorMessage);
     }
   },
 );
@@ -174,13 +175,8 @@ export const verifyOtp = createAsyncThunk(
       const response = await authService.verifyOtp(userId, otp);
       return response;
     } catch (err) {
-      if (err instanceof Error) {
-        return rejectWithValue(err.message);
-      }
-      if (typeof err === "object" && err !== null) {
-        return rejectWithValue(err);
-      }
-      return rejectWithValue(String(err));
+      // Preserve full error object for proper normalization
+      return rejectWithValue(err);
     }
   },
 );
@@ -192,13 +188,8 @@ export const resendOtp = createAsyncThunk(
       const response = await authService.resendOtp(email);
       return response;
     } catch (err) {
-      if (err instanceof Error) {
-        return rejectWithValue(err.message);
-      }
-      if (typeof err === "object" && err !== null) {
-        return rejectWithValue(err);
-      }
-      return rejectWithValue(String(err));
+      // Preserve full error object for proper normalization
+      return rejectWithValue(err);
     }
   },
 );

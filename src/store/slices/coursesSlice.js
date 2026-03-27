@@ -11,9 +11,7 @@ export const fetchAllCourses = createAsyncThunk(
       return courses;
     } catch (error) {
       console.error("Failed to fetch courses:", error);
-      return rejectWithValue(
-        error.response?.data?.message || "Failed to load courses",
-      );
+      return rejectWithValue(error); // Preserve full error object
     }
   },
 );
@@ -26,9 +24,7 @@ export const fetchCourseById = createAsyncThunk(
       return course;
     } catch (error) {
       console.error("Failed to fetch course:", error);
-      return rejectWithValue(
-        error.response?.data?.message || "Failed to load course",
-      );
+      return rejectWithValue(error); // Preserve full error object
     }
   },
 );

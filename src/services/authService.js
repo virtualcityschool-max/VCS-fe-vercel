@@ -57,28 +57,8 @@ export const authService = {
         fullError: error,
       });
 
-      let errorMessage = "Login failed. Please try again.";
-
-      if (error.response?.status === 500) {
-        errorMessage = `Server error: ${error.response?.data?.message || "Internal server error. Check backend logs."}`;
-      } else if (
-        error.message.includes("CORS") ||
-        error.message.includes("Network Error")
-      ) {
-        errorMessage =
-          "Network error: Backend may not be running or CORS is not configured. Please check the console.";
-      } else if (error.response?.data?.message) {
-        errorMessage = error.response.data.message;
-      } else if (error.response?.status === 401) {
-        errorMessage =
-          "Invalid credentials. Please check your email and password.";
-      } else if (error.response?.status === 404) {
-        errorMessage = "Login endpoint not found. Please check the API URL.";
-      } else if (error.response?.status === 400) {
-        errorMessage = `Bad request: ${error.response?.data?.message || "Invalid data format"}`;
-      }
-
-      throw new Error(errorMessage);
+      // Preserve full backend error response - DO NOT override messages
+      throw error;
     }
   },
 
@@ -129,98 +109,8 @@ export const authService = {
         error.response?.data || error.message,
       );
 
-      if (error.response?.status === 400) {
-        const backendError = error.response?.data;
-
-        if (backendError?.error?.includes("User already exists")) {
-          throw {
-            error:
-              "An account with this email already exists. Please use a different email or try logging in.",
-            status: 400,
-          };
-        }
-
-        if (backendError?.error?.includes("Validation failed")) {
-          if (backendError?.confirm_password) {
-            throw {
-              error:
-                "Passwords do not match. Please make sure both passwords are identical.",
-              status: 400,
-              field: "confirm_password",
-            };
-          }
-
-          if (backendError?.password) {
-            throw {
-              error:
-                "Password is too weak. Please use a stronger password with at least 8 characters.",
-              status: 400,
-              field: "password",
-            };
-          }
-
-          if (backendError?.email) {
-            throw {
-              error:
-                "Invalid email address. Please enter a valid email address.",
-              status: 400,
-              field: "email",
-            };
-          }
-
-          if (backendError?.username) {
-            throw {
-              error: "Invalid username. Please choose a different username.",
-              status: 400,
-              field: "username",
-            };
-          }
-
-          if (backendError?.role) {
-            throw {
-              error: "Invalid role selected. Please select a valid role.",
-              status: 400,
-              field: "role",
-            };
-          }
-        }
-
-        if (backendError?.error?.includes("No student found with email")) {
-          throw {
-            error:
-              "No student account found with the provided email address. Please check the email and try again.",
-            status: 400,
-          };
-        }
-
-        throw {
-          error:
-            backendError?.error ||
-            "Invalid registration data. Please check your information and try again.",
-          status: 400,
-        };
-      }
-
-      if (error.response?.status === 500) {
-        const backendError = error.response?.data;
-        console.log("Backend 500 error details:", backendError);
-
-        throw {
-          error: "Backend server error during registration.",
-          status: 500,
-          suggestion:
-            "The registration service is experiencing issues. Please try again in a few minutes or contact support.",
-          backendDetails:
-            backendError?.error ||
-            backendError?.message ||
-            "Internal server error",
-        };
-      }
-
-      if (error.response?.data) {
-        throw error.response.data;
-      }
-      throw new Error(error.message || "Registration failed");
+      // Preserve full backend error response - DO NOT override messages
+      throw error;
     }
   },
 
@@ -260,59 +150,8 @@ export const authService = {
         userIdType: typeof userId,
       });
 
-      if (error.response?.status === 400) {
-        const backendError = error.response?.data;
-
-        if (backendError?.error?.includes("Invalid OTP")) {
-          throw {
-            error: "Invalid OTP. Please check your email and try again.",
-            status: 400,
-          };
-        }
-
-        if (backendError?.error?.includes("OTP expired")) {
-          throw {
-            error:
-              "OTP has expired. Please register again to receive a new OTP.",
-            status: 400,
-          };
-        }
-
-        throw {
-          error: backendError?.error || "Invalid OTP request.",
-          status: 400,
-        };
-      }
-
-      if (error.response?.status === 404) {
-        throw {
-          error: "User not found. Please register again.",
-          status: 404,
-          suggestion:
-            "The registration may have failed or expired. Please try registering with the same email.",
-        };
-      }
-
-      if (error.response?.status === 500) {
-        const backendError = error.response?.data;
-        console.log("Backend 500 error details:", backendError);
-
-        throw {
-          error: "Backend server error during OTP verification.",
-          status: 500,
-          suggestion:
-            "The OTP verification service is experiencing issues. Please try again in a few minutes or contact support.",
-          backendDetails:
-            backendError?.error ||
-            backendError?.message ||
-            "Internal server error",
-        };
-      }
-
-      if (error.response?.data) {
-        throw error.response.data;
-      }
-      throw new Error(error.message || "OTP verification failed");
+      // Preserve full backend error response - DO NOT override messages
+      throw error;
     }
   },
 
@@ -383,52 +222,8 @@ export const authService = {
         email: email,
       });
 
-      if (error.response?.status === 400) {
-        const backendError = error.response?.data;
-
-        if (backendError?.error?.includes("User not found")) {
-          throw {
-            error:
-              "No account found with this email address. Please register first.",
-            status: 400,
-          };
-        }
-
-        if (backendError?.error?.includes("Too many requests")) {
-          throw {
-            error:
-              "Too many OTP requests. Please wait a few minutes before trying again.",
-            status: 400,
-          };
-        }
-
-        throw {
-          error:
-            backendError?.error || "Failed to resend OTP. Please try again.",
-          status: 400,
-        };
-      }
-
-      if (error.response?.status === 404) {
-        throw {
-          error:
-            "No account found with this email address. Please register first.",
-          status: 404,
-        };
-      }
-
-      if (error.response?.status === 500) {
-        throw {
-          error: "Backend server error while resending OTP.",
-          status: 500,
-          suggestion: "Please try again in a few minutes or contact support.",
-        };
-      }
-
-      if (error.response?.data) {
-        throw error.response.data;
-      }
-      throw new Error(error.message || "Failed to resend OTP");
+      // Preserve full backend error response - DO NOT override messages
+      throw error;
     }
   },
 

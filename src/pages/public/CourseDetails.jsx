@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchCourseById } from "../../store/slices/coursesSlice";
 import {
@@ -13,7 +13,9 @@ import {
   LoadingSpinner,
   ErrorMessage,
 } from "../../components/ui";
-import toast from "react-hot-toast";
+import { toastManager } from "../../utils/toastManager";
+import { getUserFriendlyMessage } from "../../utils/errorHandler";
+import { useSubmissionGuard } from "../../utils/requestDeduplicator";
 import {
   useDateFormat,
   useNumberFormat,
@@ -24,9 +26,9 @@ import { setAuthModal } from "../../store/slices/uiSlice";
 
 const CourseDetails = () => {
   const { courseId } = useParams();
-  const navigate = useNavigate();
   const dispatch = useDispatch();
   const [imageError, setImageError] = useState(false);
+  const submissionGuard = useSubmissionGuard();
 
   // Get auth state from Redux store
   const auth = useSelector((state) => state.auth);
@@ -57,10 +59,13 @@ const CourseDetails = () => {
     if (auth.isLoggedIn && auth.role === "student") {
       dispatch(fetchStudentDashboard());
     }
-
-    // Reset image error when course changes
-    setImageError(false);
   }, [dispatch, courseId, auth.isLoggedIn, auth.role]);
+
+  // Reset image error when course changes
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setImageError(false);
+  }, [courseId]);
 
   // Normalize course data for safe rendering
   const normalizedCourse = React.useMemo(() => {
@@ -104,28 +109,27 @@ const CourseDetails = () => {
     }
 
     if (auth.role !== "student") {
-      toast.error("Only students can enroll in courses");
+      toastManager.error("Only students can enroll in courses");
       return;
     }
 
-    try {
-      await dispatch(enrollInCourse(courseData.id)).unwrap();
-      toast.success(`Successfully enrolled in ${courseData.title}`);
+    await submissionGuard.guard(async () => {
+      try {
+        await dispatch(enrollInCourse(courseData.id)).unwrap();
+        toastManager.success(`Successfully enrolled in ${courseData.title}`);
 
-      // Refresh course data to update enrollment status
-      dispatch(fetchCourseById(courseData.id));
+        // Refresh course data to update enrollment status
+        dispatch(fetchCourseById(courseData.id));
 
-      // Refresh student dashboard to sync enrollment state
-      if (auth.role === "student") {
-        dispatch(fetchStudentDashboard());
+        // Refresh student dashboard to sync enrollment state
+        if (auth.role === "student") {
+          dispatch(fetchStudentDashboard());
+        }
+      } catch (error) {
+        const errorMessage = getUserFriendlyMessage(error);
+        toastManager.error(errorMessage);
       }
-    } catch (error) {
-      toast.error(
-        typeof error === "string"
-          ? error
-          : error?.message || "Failed to enroll in course",
-      );
-    }
+    });
   };
 
   // Handle course unenrollment
@@ -136,7 +140,7 @@ const CourseDetails = () => {
     }
 
     if (auth.role !== "student") {
-      toast.error("Only students can unenroll from courses");
+      toastManager.error("Only students can unenroll from courses");
       return;
     }
 
@@ -149,24 +153,25 @@ const CourseDetails = () => {
       return;
     }
 
-    try {
-      await dispatch(unenrollFromCourse(courseData.id)).unwrap();
-      toast.success(`Successfully unenrolled from ${courseData.title}`);
+    await submissionGuard.guard(async () => {
+      try {
+        await dispatch(unenrollFromCourse(courseData.id)).unwrap();
+        toastManager.success(
+          `Successfully unenrolled from ${courseData.title}`,
+        );
 
-      // Refresh course data to update enrollment status
-      dispatch(fetchCourseById(courseData.id));
+        // Refresh course data to update enrollment status
+        dispatch(fetchCourseById(courseData.id));
 
-      // Refresh student dashboard to sync enrollment state
-      if (auth.role === "student") {
-        dispatch(fetchStudentDashboard());
+        // Refresh student dashboard to sync enrollment state
+        if (auth.role === "student") {
+          dispatch(fetchStudentDashboard());
+        }
+      } catch (error) {
+        const errorMessage = getUserFriendlyMessage(error);
+        toastManager.error(errorMessage);
       }
-    } catch (error) {
-      toast.error(
-        typeof error === "string"
-          ? error
-          : error?.message || "Failed to unenroll from course",
-      );
-    }
+    });
   };
 
   // Handle image error
@@ -455,7 +460,7 @@ const CourseDetails = () => {
                 <div className="text-center mb-8">
                   <div className="relative inline-block">
                     <div className="absolute inset-0 bg-blue-500/20 blur-xl rounded-full"></div>
-                    <div className="relative text-4xl lg:text-5xl font-black bg-linear-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+                    <div className="relative text-3xl lg:text-4xl font-black bg-linear-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent wrap-break-word max-w-full">
                       {formatCurrency(
                         parseFloat(normalizedCourse.price) || 0,
                         "PKR",
@@ -502,7 +507,7 @@ const CourseDetails = () => {
                     <Button
                       variant="outline"
                       size="lg"
-                      className="w-full"
+                      className="w-full bg-slate-700/50 border-slate-600/50 text-slate-300 hover:bg-slate-600/50 hover:border-slate-500/50 hover:text-white cursor-not-allowed opacity-75"
                       disabled
                     >
                       Enrollment Restricted

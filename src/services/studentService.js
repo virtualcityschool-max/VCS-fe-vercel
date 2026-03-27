@@ -55,17 +55,6 @@ export const studentService = {
     }
   },
 
-  // Get student assignments
-  getAssignments: async () => {
-    try {
-      const response = await axiosInstance.get("/assignments/");
-      return response.data;
-    } catch (error) {
-      console.error("Error fetching student assignments:", error);
-      throw new Error("Failed to load assignments");
-    }
-  },
-
   // Get student live sessions
   getLiveSessions: async () => {
     try {
@@ -281,7 +270,7 @@ export const studentService = {
   },
 
   // Get course progress
-  getCourseProgress: async (courseId) => {
+  getCourseProgress: async () => {
     try {
       const response = await axiosInstance.get(`/courses/stats/`);
       return response.data;

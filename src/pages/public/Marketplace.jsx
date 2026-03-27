@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate, Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { fetchAllCourses } from "../../store/slices/coursesSlice";
 import {
   enrollInCourse,
@@ -8,14 +8,14 @@ import {
   fetchStudentDashboard,
 } from "../../store/slices/studentDashboardSlice";
 import { Button, Input } from "../../components/ui";
-import toast from "react-hot-toast";
+import { toastManager } from "../../utils/toastManager";
+import { getUserFriendlyMessage } from "../../utils/errorHandler";
+import { useSubmissionGuard } from "../../utils/requestDeduplicator";
 import { getCourseImage } from "../../utils/courseImageUtils";
 import { setAuthModal } from "../../store/slices/uiSlice";
 
 const Marketplace = () => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const location = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState({
     category: "",
@@ -23,6 +23,7 @@ const Marketplace = () => {
     instructor: "",
   });
   const [showFilters, setShowFilters] = useState(false);
+  const submissionGuard = useSubmissionGuard();
 
   // Get auth state from Redux store
   const auth = useSelector((state) => state.auth);
@@ -36,12 +37,26 @@ const Marketplace = () => {
 
   // Fetch courses on component mount
   useEffect(() => {
-    dispatch(fetchAllCourses());
+    let isMounted = true;
+
+    // Prevent double fetch in React StrictMode development
+    const fetchCourses = () => {
+      if (isMounted) {
+        dispatch(fetchAllCourses());
+      }
+    };
+
+    // Immediate fetch
+    fetchCourses();
 
     // Fetch student dashboard if user is logged in as student
     if (auth.isLoggedIn && auth.role === "student") {
       dispatch(fetchStudentDashboard());
     }
+
+    return () => {
+      isMounted = false;
+    };
   }, [dispatch, auth.isLoggedIn, auth.role]);
 
   // Get unique values for filter options
@@ -187,28 +202,27 @@ const Marketplace = () => {
     }
 
     if (auth.role !== "student") {
-      toast.error("Only students can enroll in courses");
+      toastManager.error("Only students can enroll in courses");
       return;
     }
 
-    try {
-      await dispatch(enrollInCourse(courseId)).unwrap();
-      toast.success(`Successfully enrolled in ${courseTitle}`);
+    await submissionGuard.guard(async () => {
+      try {
+        await dispatch(enrollInCourse(courseId)).unwrap();
+        toastManager.success(`Successfully enrolled in ${courseTitle}`);
 
-      // Refresh courses to update enrollment status
-      dispatch(fetchAllCourses());
+        // Refresh courses to update enrollment status
+        dispatch(fetchAllCourses());
 
-      // Always refresh student dashboard to sync enrollment state
-      if (auth.role === "student") {
-        dispatch(fetchStudentDashboard());
+        // Always refresh student dashboard to sync enrollment state
+        if (auth.role === "student") {
+          dispatch(fetchStudentDashboard());
+        }
+      } catch (error) {
+        const errorMessage = getUserFriendlyMessage(error);
+        toastManager.error(errorMessage);
       }
-    } catch (error) {
-      toast.error(
-        typeof error === "string"
-          ? error
-          : error?.message || "Failed to enroll in course",
-      );
-    }
+    });
   };
 
   // Handle course unenrollment
@@ -219,7 +233,7 @@ const Marketplace = () => {
     }
 
     if (auth.role !== "student") {
-      toast.error("Only students can unenroll from courses");
+      toastManager.error("Only students can unenroll from courses");
       return;
     }
 
@@ -238,24 +252,23 @@ const Marketplace = () => {
       enrolledCourses,
     });
 
-    try {
-      await dispatch(unenrollFromCourse(courseId)).unwrap();
-      toast.success(`Successfully unenrolled from ${courseTitle}`);
+    await submissionGuard.guard(async () => {
+      try {
+        await dispatch(unenrollFromCourse(courseId)).unwrap();
+        toastManager.success(`Successfully unenrolled from ${courseTitle}`);
 
-      // Refresh courses to update enrollment status
-      dispatch(fetchAllCourses());
+        // Refresh courses to update enrollment status
+        dispatch(fetchAllCourses());
 
-      // Always refresh student dashboard to sync enrollment state
-      if (auth.role === "student") {
-        dispatch(fetchStudentDashboard());
+        // Always refresh student dashboard to sync enrollment state
+        if (auth.role === "student") {
+          dispatch(fetchStudentDashboard());
+        }
+      } catch (error) {
+        const errorMessage = getUserFriendlyMessage(error);
+        toastManager.error(errorMessage);
       }
-    } catch (error) {
-      toast.error(
-        typeof error === "string"
-          ? error
-          : error?.message || "Failed to unenroll from course",
-      );
-    }
+    });
   };
 
   // Loading state

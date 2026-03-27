@@ -12,13 +12,6 @@ const UserProfileDropdown = () => {
   const navigate = useNavigate();
   const auth = useSelector((state) => state.auth);
 
-  const getAvatarUrl = () => {
-    if (auth.role === ROLES.TEACHER) return "https://i.pravatar.cc/150?u=elena";
-    if (auth.role === ROLES.ADMIN) return "https://i.pravatar.cc/150?u=admin";
-    if (auth.role === ROLES.PARENT) return "https://i.pravatar.cc/150?u=parent";
-    return "https://i.pravatar.cc/150?u=sarah_j";
-  };
-
   const getRoleLabel = () => {
     switch (auth.role) {
       case ROLES.ADMIN:
@@ -83,7 +76,7 @@ const UserProfileDropdown = () => {
       await dispatch(logoutUser()).unwrap();
       toast.dismiss(toastId);
       navigate("/");
-    } catch (e) {
+    } catch {
       toast.error("Error signing out. Please try again.", { id: toastId });
     }
   };

@@ -71,7 +71,7 @@ export const fetchUsers = createAsyncThunk(
       const response = await adminService.getUsers(params);
       return response;
     } catch (error) {
-      return rejectWithValue(error.message || "Failed to fetch users");
+      return rejectWithValue(error); // Preserve full error object
     }
   },
 );
@@ -83,7 +83,7 @@ export const createUser = createAsyncThunk(
       const response = await adminService.createUser(userData);
       return response;
     } catch (error) {
-      return rejectWithValue(error.message || "Failed to create user");
+      return rejectWithValue(error); // Preserve full error object
     }
   },
 );
@@ -95,7 +95,7 @@ export const updateUser = createAsyncThunk(
       const response = await adminService.updateUser(userId, userData);
       return response;
     } catch (error) {
-      return rejectWithValue(error.message || "Failed to update user");
+      return rejectWithValue(error); // Preserve full error object
     }
   },
 );
@@ -107,7 +107,7 @@ export const deleteUser = createAsyncThunk(
       await adminService.deleteUser(userId);
       return userId;
     } catch (error) {
-      return rejectWithValue(error.message || "Failed to delete user");
+      return rejectWithValue(error); // Preserve full error object
     }
   },
 );
@@ -115,12 +115,24 @@ export const deleteUser = createAsyncThunk(
 // Course Management Thunks
 export const fetchCourses = createAsyncThunk(
   "admin/fetchCourses",
-  async (params = {}, { rejectWithValue }) => {
+  async (_, { rejectWithValue }) => {
     try {
       const response = await coursesService.getAllCourses();
       return response;
     } catch (error) {
-      return rejectWithValue(error.message || "Failed to fetch courses");
+      return rejectWithValue(error); // Preserve full error object
+    }
+  },
+);
+
+export const fetchAllCourses = createAsyncThunk(
+  "admin/fetchAllCourses",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await coursesService.getAllCourses();
+      return response;
+    } catch (error) {
+      return rejectWithValue(error); // Preserve full error object
     }
   },
 );
@@ -132,7 +144,7 @@ export const createCourse = createAsyncThunk(
       const response = await coursesService.createCourse(courseData);
       return response;
     } catch (error) {
-      return rejectWithValue(error.message || "Failed to create course");
+      return rejectWithValue(error); // Preserve full error object
     }
   },
 );
@@ -147,7 +159,7 @@ export const assignInstructor = createAsyncThunk(
       );
       return { courseId, instructorId, ...response };
     } catch (error) {
-      return rejectWithValue(error.message || "Failed to assign instructor");
+      return rejectWithValue(error); // Preserve full error object
     }
   },
 );
@@ -156,19 +168,14 @@ export const updateCourse = createAsyncThunk(
   "admin/updateCourse",
   async ({ courseId, courseData }, { rejectWithValue }) => {
     try {
-      const response = await adminService.updateCourse(courseId, courseData);
-      // Include the courseId in the response for proper state updating
-      return {
-        ...response.data,
-        id: courseId, // Ensure the ID is included
-      };
+      const response = await coursesService.updateCourse(courseId, courseData);
+      return { courseId, ...response };
     } catch (error) {
-      // Use enhanced error handling to preserve backend validation details
       const processedError = handleApiError(error, {
         context: "Update Course",
         logError: true,
       });
-      return rejectWithValue(processedError.message);
+      return rejectWithValue(processedError);
     }
   },
 );
@@ -180,7 +187,7 @@ export const deleteCourse = createAsyncThunk(
       await adminService.deleteCourse(courseId);
       return courseId;
     } catch (error) {
-      return rejectWithValue(error.message || "Failed to delete course");
+      return rejectWithValue(error); // Preserve full error object
     }
   },
 );
@@ -193,9 +200,7 @@ export const fetchDashboardAnalytics = createAsyncThunk(
       const response = await adminService.getDashboardAnalytics();
       return response;
     } catch (error) {
-      return rejectWithValue(
-        error.message || "Failed to fetch dashboard analytics",
-      );
+      return rejectWithValue(error); // Preserve full error object
     }
   },
 );
@@ -207,7 +212,7 @@ export const fetchUserAnalytics = createAsyncThunk(
       const response = await adminService.getUserAnalytics(params);
       return response;
     } catch (error) {
-      return rejectWithValue(error.message || "Failed to fetch user analytics");
+      return rejectWithValue(error); // Preserve full error object
     }
   },
 );
@@ -219,9 +224,7 @@ export const fetchCourseAnalytics = createAsyncThunk(
       const response = await adminService.getCourseAnalytics(params);
       return response;
     } catch (error) {
-      return rejectWithValue(
-        error.message || "Failed to fetch course analytics",
-      );
+      return rejectWithValue(error); // Preserve full error object
     }
   },
 );
@@ -234,7 +237,7 @@ export const fetchSettings = createAsyncThunk(
       const response = await adminService.getSettings();
       return response;
     } catch (error) {
-      return rejectWithValue(error.message || "Failed to fetch settings");
+      return rejectWithValue(error); // Preserve full error object
     }
   },
 );
@@ -246,7 +249,7 @@ export const updateSettings = createAsyncThunk(
       const response = await adminService.updateSettings(settingsData);
       return response;
     } catch (error) {
-      return rejectWithValue(error.message || "Failed to update settings");
+      return rejectWithValue(error); // Preserve full error object
     }
   },
 );
@@ -386,15 +389,15 @@ const adminSlice = createSlice({
           state.courses.data[courseIndex].instructor_id = instructorId;
         }
       })
-      .addCase(updateCourse.pending, (state, action) => {
+      .addCase(updateCourse.pending, () => {
         // No optimistic update for instructor-related changes to prevent data corruption
         // Let the refetch handle the state update
       })
-      .addCase(updateCourse.fulfilled, (state, action) => {
+      .addCase(updateCourse.fulfilled, () => {
         // No local state update - let the refetch handle data synchronization
         // This prevents instructor object corruption from partial API responses
       })
-      .addCase(updateCourse.rejected, (state, action) => {
+      .addCase(updateCourse.rejected, () => {
         // No optimistic update to revert - error handled via toast notification
       })
       .addCase(deleteCourse.fulfilled, (state, action) => {

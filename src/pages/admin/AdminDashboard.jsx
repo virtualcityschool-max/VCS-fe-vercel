@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
@@ -19,6 +19,8 @@ import {
 } from "../../store/slices/adminSlice";
 import { coursesService } from "../../services/coursesService";
 import { Button, Input } from "../../components/ui";
+import { useFieldErrors } from "../../hooks";
+import { normalizeApiError } from "../../utils/errorHandler";
 
 const AdminDashboard = () => {
   const dispatch = useDispatch();
@@ -30,6 +32,49 @@ const AdminDashboard = () => {
   const [editingCourse, setEditingCourse] = useState(null);
   const [loadingCourseIds, setLoadingCourseIds] = useState(new Set());
   const [updatingCourseId, setUpdatingCourseId] = useState(null);
+  const [editCourseForm, setEditCourseForm] = useState({});
+  const [editCourseErrors, setEditCourseErrors] = useState({});
+
+  // Separate error handling for edit form
+  const handleEditCourseApiError = useCallback(
+    (error, toastFunction = null) => {
+      const normalizedError = normalizeApiError(error);
+
+      // Log full error for debugging
+      console.error("Edit Course API Error:", {
+        normalized: normalizedError,
+        original: error,
+      });
+
+      // Handle field-level errors
+      if (normalizedError.hasFieldErrors && normalizedError.fieldErrors) {
+        setEditCourseErrors(normalizedError.fieldErrors);
+
+        // Return true to indicate field errors were handled
+        return true;
+      }
+
+      // Show toast for non-field validation errors if toast function provided
+      if (toastFunction && normalizedError.shouldShowToast) {
+        toastFunction(normalizedError.message);
+      }
+
+      // Return false to indicate no field errors were handled
+      return false;
+    },
+    [],
+  );
+
+  // Clear edit course field error
+  const clearEditCourseFieldError = useCallback((fieldName) => {
+    setEditCourseErrors((prev) => {
+      const newErrors = { ...prev };
+      delete newErrors[fieldName];
+      return newErrors;
+    });
+  }, []);
+
+  // Create course form state
   const [createCourseForm, setCreateCourseForm] = useState({
     title: "",
     description: "",
@@ -38,7 +83,15 @@ const AdminDashboard = () => {
     status: "draft",
     instructor_id: "",
   });
-  const [createCourseErrors, setCreateCourseErrors] = useState({});
+
+  // Use field errors hook for create course form only
+  const {
+    errors: createCourseErrors,
+    setErrors: setCreateCourseErrors,
+    handleApiError: handleCourseApiError,
+    clearFieldError: clearCreateCourseFieldError,
+    clearAllErrors: clearAllCourseErrors,
+  } = useFieldErrors({});
 
   // Course filtering state
   const [courseFilters, setCourseFilters] = useState({
@@ -94,9 +147,36 @@ const AdminDashboard = () => {
         status: "draft",
         instructor_id: "",
       });
-      setCreateCourseErrors({});
+      clearAllCourseErrors();
     }
-  }, [activeModal]);
+  }, [activeModal, clearAllCourseErrors]);
+
+  // Reset edit course form when edit modal opens/closes
+  useEffect(() => {
+    if (
+      activeModal &&
+      typeof activeModal === "object" &&
+      activeModal.type === "edit-course"
+    ) {
+      // Initialize edit form with course data
+      if (editingCourse) {
+        setEditCourseForm({
+          title: editingCourse.title || "",
+          description: editingCourse.description || "",
+          category: editingCourse.category || "",
+          price: editingCourse.price || "",
+          status: editingCourse.status || "draft",
+          instructor_id:
+            editingCourse.instructor?.id || editingCourse.instructor_id || null,
+        });
+      }
+      setEditCourseErrors({});
+    } else {
+      // Clear edit form when modal closes
+      setEditCourseForm({});
+      setEditCourseErrors({});
+    }
+  }, [activeModal, editingCourse]);
 
   // Get unique values for course filter options
   const courseFilterOptions = useMemo(() => {
@@ -238,7 +318,7 @@ const AdminDashboard = () => {
         clearTimeout(triggerToast.timeoutId);
       }
     };
-  }, []);
+  }, [triggerToast.timeoutId]);
 
   // Handle approval actions
   const handleApprove = async (userId) => {
@@ -304,43 +384,6 @@ const AdminDashboard = () => {
     return errors;
   };
 
-  // Extract meaningful backend error message
-  const extractBackendError = (error) => {
-    if (error.response?.data?.details) {
-      // Handle multiple validation errors from backend
-      const details = error.response.data.details;
-      const errors = {};
-
-      // Convert backend errors to frontend format
-      Object.keys(details).forEach((field) => {
-        if (details[field] && details[field].length > 0) {
-          errors[field] = details[field][0]; // Take first error for each field
-        }
-      });
-
-      // Set inline errors and return general message
-      setCreateCourseErrors(errors);
-
-      // Return a summary message for toast
-      const fieldCount = Object.keys(errors).length;
-      if (fieldCount === 1) {
-        return `Please fix the ${Object.keys(errors)[0]} field`;
-      } else {
-        return `Please fix the ${fieldCount} highlighted fields`;
-      }
-    }
-
-    if (error.response?.data?.error) {
-      return error.response.data.error;
-    }
-
-    if (error.response?.data?.message) {
-      return error.response.data.message;
-    }
-
-    return "Failed to create course";
-  };
-
   // Handle course creation
   const handleCreateCourse = async (courseData) => {
     // Frontend validation
@@ -348,7 +391,7 @@ const AdminDashboard = () => {
     setCreateCourseErrors(errors);
 
     if (Object.keys(errors).length > 0) {
-      triggerToast("Please fix the highlighted fields");
+      triggerToast("Please fix highlighted fields");
       return;
     }
 
@@ -365,10 +408,16 @@ const AdminDashboard = () => {
         status: "draft",
         instructor_id: "",
       });
-      setCreateCourseErrors({});
+      clearAllCourseErrors();
     } catch (error) {
-      const errorMessage = extractBackendError(error);
-      triggerToast(errorMessage);
+      // Use enhanced error handling with field-level support
+      const hadFieldErrors = handleCourseApiError(error, triggerToast);
+
+      // If no field errors were handled, show a generic toast
+      if (!hadFieldErrors) {
+        const normalizedError = normalizeApiError(error);
+        triggerToast(normalizedError.message);
+      }
     }
   };
 
@@ -381,12 +430,73 @@ const AdminDashboard = () => {
       // Refetch courses to ensure instructor data is synchronized
       dispatch(fetchCourses());
     } catch (error) {
-      triggerToast(error || "Failed to assign instructor");
+      // Use enhanced error handling with field-level support
+      const hadFieldErrors = handleCourseApiError(error, triggerToast);
+
+      // If no field errors were handled, show a generic toast
+      if (!hadFieldErrors) {
+        const normalizedError = normalizeApiError(error);
+        triggerToast(normalizedError.message);
+      }
     }
+  };
+
+  // Validate edit course form
+  const validateEditCourseForm = (formData) => {
+    const errors = {};
+
+    // Title validation
+    if (!formData.title?.trim()) {
+      errors.title = "Course title is required";
+    } else if (formData.title.trim().length < 5) {
+      errors.title = "Title must be at least 5 characters";
+    }
+
+    // Description validation
+    if (!formData.description?.trim()) {
+      errors.description = "Course description is required";
+    } else if (formData.description.trim().length < 10) {
+      errors.description = "Description must be at least 10 characters";
+    }
+
+    // Category validation
+    if (!formData.category?.trim()) {
+      errors.category = "Course category is required";
+    } else if (formData.category.trim().length < 2) {
+      errors.category = "Category must be at least 2 characters";
+    }
+
+    // Price validation
+    if (!formData.price || formData.price <= 0) {
+      errors.price = "Valid price is required";
+    } else if (parseFloat(formData.price) < 100) {
+      errors.price = "Price must be at least PKR 100";
+    }
+
+    // Status validation
+    if (!formData.status) {
+      errors.status = "Course status is required";
+    }
+
+    // Instructor validation (conditional) - ONLY for published courses
+    if (formData.status === "published" && !formData.instructor_id) {
+      errors.instructor_id = "Instructor is required for published courses";
+    }
+
+    return errors;
   };
 
   // Handle course update
   const handleUpdateCourse = async (courseId, courseData) => {
+    // Frontend validation
+    const errors = validateEditCourseForm(courseData);
+    setEditCourseErrors(errors);
+
+    if (Object.keys(errors).length > 0) {
+      triggerToast("Please fix highlighted fields");
+      return;
+    }
+
     setUpdatingCourseId(courseId);
     try {
       await dispatch(updateCourse({ courseId, courseData })).unwrap();
@@ -395,7 +505,14 @@ const AdminDashboard = () => {
       // Refetch courses to ensure instructor data is synchronized
       dispatch(fetchCourses());
     } catch (error) {
-      triggerToast(error || "Failed to update course");
+      // Use enhanced error handling with field-level support for edit form
+      const hadFieldErrors = handleEditCourseApiError(error, triggerToast);
+
+      // If no field errors were handled, show a generic toast
+      if (!hadFieldErrors) {
+        const normalizedError = normalizeApiError(error);
+        triggerToast(normalizedError.message);
+      }
     } finally {
       setUpdatingCourseId(null);
     }
@@ -1354,12 +1471,7 @@ const AdminDashboard = () => {
                             title: e.target.value,
                           });
                           // Clear error for this field when user starts typing
-                          if (createCourseErrors.title) {
-                            setCreateCourseErrors((prev) => ({
-                              ...prev,
-                              title: "",
-                            }));
-                          }
+                          clearCreateCourseFieldError("title");
                         }}
                         className={`w-full bg-slate-950 border rounded-2xl px-5 py-4 text-white placeholder-slate-600 outline-none focus:ring-2 transition-all duration-200 ${
                           createCourseErrors.title
@@ -1396,12 +1508,7 @@ const AdminDashboard = () => {
                             description: e.target.value,
                           });
                           // Clear error for this field when user starts typing
-                          if (createCourseErrors.description) {
-                            setCreateCourseErrors((prev) => ({
-                              ...prev,
-                              description: "",
-                            }));
-                          }
+                          clearCreateCourseFieldError("description");
                         }}
                         className={`w-full bg-slate-950 border rounded-2xl px-5 py-4 text-white placeholder-slate-600 outline-none focus:ring-2 transition-all duration-200 resize-none ${
                           createCourseErrors.description
@@ -1428,31 +1535,32 @@ const AdminDashboard = () => {
                           <i className="fas fa-tag text-slate-600 text-xs"></i>
                           Category <span className="text-red-400">*</span>
                         </label>
-                        <input
-                          type="text"
+                        <select
                           id="category"
                           name="category"
+                          required
                           value={createCourseForm.category}
                           onChange={(e) => {
                             setCreateCourseForm({
                               ...createCourseForm,
                               category: e.target.value,
                             });
-                            // Clear error for this field when user starts typing
-                            if (createCourseErrors.category) {
-                              setCreateCourseErrors((prev) => ({
-                                ...prev,
-                                category: "",
-                              }));
-                            }
+                            // Clear error for this field when user makes selection
+                            clearCreateCourseFieldError("category");
                           }}
-                          className={`w-full bg-slate-950 border rounded-2xl px-5 py-4 text-white placeholder-slate-600 outline-none focus:ring-2 transition-all duration-200 ${
+                          className={`w-full bg-slate-950 border rounded-2xl px-5 py-4 text-white outline-none focus:ring-2 transition-all duration-200 appearance-none cursor-pointer ${
                             createCourseErrors.category
                               ? "border-red-500 focus:ring-red-500/20"
                               : "border-slate-800 focus:border-indigo-500 focus:ring-indigo-500/20"
                           }`}
-                          placeholder="e.g., tech, arts, science"
-                        />
+                        >
+                          <option value="">Select category</option>
+                          {courseFilterOptions.categories.map((category) => (
+                            <option key={category} value={category}>
+                              {category}
+                            </option>
+                          ))}
+                        </select>
                         {createCourseErrors.category && (
                           <p className="mt-2 text-xs text-red-400 flex items-center gap-1">
                             <i className="fas fa-exclamation-circle text-xs"></i>
@@ -1485,12 +1593,7 @@ const AdminDashboard = () => {
                                 price: e.target.value,
                               });
                               // Clear error for this field when user starts typing
-                              if (createCourseErrors.price) {
-                                setCreateCourseErrors((prev) => ({
-                                  ...prev,
-                                  price: "",
-                                }));
-                              }
+                              clearCreateCourseFieldError("price");
                             }}
                             className={`w-full bg-slate-950 border rounded-2xl pl-14 pr-5 py-4 text-white placeholder-slate-600 outline-none focus:ring-2 transition-all duration-200 ${
                               createCourseErrors.price
@@ -1534,18 +1637,10 @@ const AdminDashboard = () => {
                               newStatus !== "published" &&
                               createCourseErrors.instructor_id
                             ) {
-                              setCreateCourseErrors((prev) => ({
-                                ...prev,
-                                instructor_id: "",
-                              }));
+                              clearCreateCourseFieldError("instructor_id");
                             }
                             // Clear status error when user makes selection
-                            if (createCourseErrors.status) {
-                              setCreateCourseErrors((prev) => ({
-                                ...prev,
-                                status: "",
-                              }));
-                            }
+                            clearCreateCourseFieldError("status");
                           }}
                           className={`w-full bg-slate-950 border rounded-2xl px-5 py-4 text-white outline-none focus:ring-2 transition-all duration-200 appearance-none cursor-pointer ${
                             createCourseErrors.status
@@ -1585,12 +1680,7 @@ const AdminDashboard = () => {
                               instructor_id: e.target.value,
                             });
                             // Clear error for this field when user makes selection
-                            if (createCourseErrors.instructor_id) {
-                              setCreateCourseErrors((prev) => ({
-                                ...prev,
-                                instructor_id: "",
-                              }));
-                            }
+                            clearCreateCourseFieldError("instructor_id");
                           }}
                           className={`w-full bg-slate-950 border rounded-2xl px-5 py-4 text-white outline-none focus:ring-2 transition-all duration-200 appearance-none cursor-pointer ${
                             createCourseErrors.instructor_id
@@ -1651,7 +1741,8 @@ const AdminDashboard = () => {
               )}
 
               {/* Edit Course Modal */}
-              {typeof activeModal === "object" &&
+              {activeModal &&
+                typeof activeModal === "object" &&
                 activeModal.type === "edit-course" && (
                   <>
                     <div className="flex items-center gap-3 mb-6">
@@ -1692,10 +1783,29 @@ const AdminDashboard = () => {
                           id="title"
                           name="title"
                           required
-                          defaultValue={editingCourse?.title || ""}
-                          className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-5 py-4 text-white placeholder-slate-600 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200"
+                          value={
+                            editCourseForm.title || editingCourse?.title || ""
+                          }
+                          onChange={(e) => {
+                            setEditCourseForm({
+                              ...editCourseForm,
+                              title: e.target.value,
+                            });
+                            clearEditCourseFieldError("title");
+                          }}
+                          className={`w-full bg-slate-950 border rounded-2xl px-5 py-4 text-white placeholder-slate-600 outline-none focus:ring-2 transition-all duration-200 ${
+                            editCourseErrors.title
+                              ? "border-red-500 focus:ring-red-500/20"
+                              : "border-slate-800 focus:border-blue-500 focus:ring-blue-500/20"
+                          }`}
                           placeholder="Enter course title"
                         />
+                        {editCourseErrors.title && (
+                          <p className="mt-2 text-xs text-red-400 flex items-center gap-1">
+                            <i className="fas fa-exclamation-circle text-xs"></i>
+                            {editCourseErrors.title}
+                          </p>
+                        )}
                       </div>
 
                       {/* Description */}
@@ -1712,10 +1822,31 @@ const AdminDashboard = () => {
                           name="description"
                           required
                           rows="3"
-                          defaultValue={editingCourse?.description || ""}
-                          className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-5 py-4 text-white placeholder-slate-600 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 resize-none"
+                          value={
+                            editCourseForm.description ||
+                            editingCourse?.description ||
+                            ""
+                          }
+                          onChange={(e) => {
+                            setEditCourseForm({
+                              ...editCourseForm,
+                              description: e.target.value,
+                            });
+                            clearEditCourseFieldError("description");
+                          }}
+                          className={`w-full bg-slate-950 border rounded-2xl px-5 py-4 text-white placeholder-slate-600 outline-none focus:ring-2 transition-all duration-200 resize-none ${
+                            editCourseErrors.description
+                              ? "border-red-500 focus:ring-red-500/20"
+                              : "border-slate-800 focus:border-blue-500 focus:ring-blue-500/20"
+                          }`}
                           placeholder="Describe what students will learn in this course..."
                         />
+                        {editCourseErrors.description && (
+                          <p className="mt-2 text-xs text-red-400 flex items-center gap-1">
+                            <i className="fas fa-exclamation-circle text-xs"></i>
+                            {editCourseErrors.description}
+                          </p>
+                        )}
                       </div>
 
                       {/* Category and Price Row */}
@@ -1728,15 +1859,41 @@ const AdminDashboard = () => {
                             <i className="fas fa-tag text-slate-600 text-xs"></i>
                             Category
                           </label>
-                          <input
-                            type="text"
+                          <select
                             id="category"
                             name="category"
                             required
-                            defaultValue={editingCourse?.category || ""}
-                            className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-5 py-4 text-white placeholder-slate-600 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200"
-                            placeholder="e.g., tech, arts, science"
-                          />
+                            value={
+                              editCourseForm.category ||
+                              editingCourse?.category ||
+                              ""
+                            }
+                            onChange={(e) => {
+                              setEditCourseForm({
+                                ...editCourseForm,
+                                category: e.target.value,
+                              });
+                              clearEditCourseFieldError("category");
+                            }}
+                            className={`w-full bg-slate-950 border rounded-2xl px-5 py-4 text-white outline-none focus:ring-2 transition-all duration-200 appearance-none cursor-pointer ${
+                              editCourseErrors.category
+                                ? "border-red-500 focus:ring-red-500/20"
+                                : "border-slate-800 focus:border-blue-500 focus:ring-blue-500/20"
+                            }`}
+                          >
+                            <option value="">Select category</option>
+                            {courseFilterOptions.categories.map((category) => (
+                              <option key={category} value={category}>
+                                {category}
+                              </option>
+                            ))}
+                          </select>
+                          {editCourseErrors.category && (
+                            <p className="mt-2 text-xs text-red-400 flex items-center gap-1">
+                              <i className="fas fa-exclamation-circle text-xs"></i>
+                              {editCourseErrors.category}
+                            </p>
+                          )}
                         </div>
                         <div>
                           <label
@@ -1757,11 +1914,32 @@ const AdminDashboard = () => {
                               required
                               step="0.01"
                               min="0"
-                              defaultValue={editingCourse?.price || ""}
-                              className="w-full bg-slate-950 border border-slate-800 rounded-2xl pl-10 pr-5 py-4 text-white placeholder-slate-600 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200"
+                              value={
+                                editCourseForm.price ||
+                                editingCourse?.price ||
+                                ""
+                              }
+                              onChange={(e) => {
+                                setEditCourseForm({
+                                  ...editCourseForm,
+                                  price: e.target.value,
+                                });
+                                clearEditCourseFieldError("price");
+                              }}
+                              className={`w-full bg-slate-950 border rounded-2xl pl-10 pr-5 py-4 text-white placeholder-slate-600 outline-none focus:ring-2 transition-all duration-200 ${
+                                editCourseErrors.price
+                                  ? "border-red-500 focus:ring-red-500/20"
+                                  : "border-slate-800 focus:border-blue-500 focus:ring-blue-500/20"
+                              }`}
                               placeholder="0.00"
                             />
                           </div>
+                          {editCourseErrors.price && (
+                            <p className="mt-2 text-xs text-red-400 flex items-center gap-1">
+                              <i className="fas fa-exclamation-circle text-xs"></i>
+                              {editCourseErrors.price}
+                            </p>
+                          )}
                         </div>
                       </div>
 
@@ -1779,13 +1957,45 @@ const AdminDashboard = () => {
                             id="status"
                             name="status"
                             required
-                            defaultValue={editingCourse?.status || "draft"}
-                            className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-5 py-4 text-white outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 appearance-none cursor-pointer"
+                            value={
+                              editCourseForm.status ||
+                              editingCourse?.status ||
+                              "draft"
+                            }
+                            onChange={(e) => {
+                              const newStatus = e.target.value;
+                              setEditCourseForm({
+                                ...editCourseForm,
+                                status: newStatus,
+                              });
+                              // Clear instructor error if switching away from published
+                              if (
+                                newStatus !== "published" &&
+                                editCourseErrors.instructor_id
+                              ) {
+                                clearEditCourseFieldError("instructor_id");
+                              }
+                              // Clear status error when user makes selection
+                              clearEditCourseFieldError("status");
+                            }}
+                            className={`w-full bg-slate-950 border rounded-2xl px-5 py-4 text-white outline-none focus:ring-2 transition-all duration-200 appearance-none cursor-pointer ${
+                              editCourseErrors.status
+                                ? "border-red-500 focus:ring-red-500/20"
+                                : "border-slate-800 focus:border-blue-500 focus:ring-blue-500/20"
+                            }`}
                           >
                             <option value="published">📚 Published</option>
                             <option value="draft">📝 Draft</option>
                             <option value="archived">📦 Archived</option>
                           </select>
+                          {editCourseErrors.status && (
+                            <p className="mt-2 text-xs text-red-400 flex items-center gap-1">
+                              <i className="fas fa-exclamation-circle text-xs"></i>
+                              {Array.isArray(editCourseErrors.status)
+                                ? editCourseErrors.status[0]
+                                : editCourseErrors.status}
+                            </p>
+                          )}
                         </div>
                         <div>
                           <label
@@ -1794,16 +2004,34 @@ const AdminDashboard = () => {
                           >
                             <i className="fas fa-user-tie text-slate-600 text-xs"></i>
                             Instructor
+                            {(editCourseForm.status === "published" ||
+                              editingCourse?.status === "published") && (
+                              <span className="text-red-400">*</span>
+                            )}
                           </label>
                           <select
                             id="instructor_id"
                             name="instructor_id"
-                            defaultValue={
-                              editingCourse?.instructor?.id ||
-                              editingCourse?.instructor_id ||
-                              ""
+                            value={
+                              editCourseForm.instructor_id !== undefined
+                                ? editCourseForm.instructor_id
+                                : editingCourse?.instructor?.id ||
+                                  editingCourse?.instructor_id ||
+                                  ""
                             }
-                            className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-5 py-4 text-white outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 appearance-none cursor-pointer"
+                            onChange={(e) => {
+                              setEditCourseForm({
+                                ...editCourseForm,
+                                instructor_id: e.target.value,
+                              });
+                              // Clear error for this field when user makes selection
+                              clearEditCourseFieldError("instructor_id");
+                            }}
+                            className={`w-full bg-slate-950 border rounded-2xl px-5 py-4 text-white outline-none focus:ring-2 transition-all duration-200 appearance-none cursor-pointer ${
+                              editCourseErrors.instructor_id
+                                ? "border-red-500 focus:ring-red-500/20"
+                                : "border-slate-800 focus:border-blue-500 focus:ring-blue-500/20"
+                            }`}
                           >
                             <option value="">No instructor assigned</option>
                             {users.data
@@ -1818,6 +2046,14 @@ const AdminDashboard = () => {
                                 </option>
                               ))}
                           </select>
+                          {editCourseErrors.instructor_id && (
+                            <p className="mt-2 text-xs text-red-400 flex items-center gap-1">
+                              <i className="fas fa-exclamation-circle text-xs"></i>
+                              {Array.isArray(editCourseErrors.instructor_id)
+                                ? editCourseErrors.instructor_id[0]
+                                : editCourseErrors.instructor_id}
+                            </p>
+                          )}
                         </div>
                       </div>
 
@@ -1848,7 +2084,8 @@ const AdminDashboard = () => {
                 )}
 
               {/* Assign Instructor Modal */}
-              {typeof activeModal === "object" &&
+              {activeModal &&
+                typeof activeModal === "object" &&
                 activeModal.type === "assign-instructor" && (
                   <>
                     <div className="flex items-center gap-3 mb-6">

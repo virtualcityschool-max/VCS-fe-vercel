@@ -10,7 +10,6 @@ import {
   verifyOtp,
   resendOtp,
 } from "../../store/slices/authSlice";
-import { useNavigation } from "../../hooks";
 
 const emptyErrors = {
   email: "",
@@ -48,7 +47,6 @@ const AuthModals = () => {
     resendOtpLoading,
     error: authError,
   } = useSelector((state) => state.auth);
-  const { goToDashboard } = useNavigation();
   const navigate = useNavigate();
 
   const isOpen = authModal.type;
@@ -276,7 +274,7 @@ const AuthModals = () => {
 
         // Show toast for non-field errors
         if (!err.field) {
-          Object.entries(err).forEach(([field, messages]) => {
+          Object.entries(err).forEach(([, messages]) => {
             const errorText = Array.isArray(messages)
               ? messages.join(", ")
               : messages;
@@ -571,6 +569,7 @@ const AuthModals = () => {
                     name="register-username"
                     type="text"
                     value={username}
+                    maxLength={150}
                     onChange={(e) => {
                       toast.dismiss();
                       setUsername(e.target.value);
@@ -580,6 +579,16 @@ const AuthModals = () => {
                     placeholder="JohnDoe"
                     className="w-full bg-slate-950 border border-white/5 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
                   />
+                  <div className="flex justify-between items-center mt-1">
+                    <span className="text-xs text-slate-500">
+                      3-150 characters
+                    </span>
+                    <span
+                      className={`text-xs ${username.length > 150 ? "text-red-400" : username.length >= 3 ? "text-green-400" : "text-slate-500"}`}
+                    >
+                      {username.length}/150
+                    </span>
+                  </div>
                   {error.username && (
                     <p className="text-red-500 text-xs mt-2 animate-shake">
                       {error.username}
@@ -644,6 +653,57 @@ const AuthModals = () => {
                           {backendErrors.password}
                         </p>
                       )}
+                    </div>
+                  )}
+
+                  {/* Password Strength Indicator */}
+                  {password && (
+                    <div className="mt-4 p-4 bg-slate-800/30 rounded-xl border border-slate-700/50">
+                      <p className="text-xs text-slate-400 mb-3 font-medium">
+                        Password must contain:
+                      </p>
+                      <div className="space-y-2">
+                        <div
+                          className={`flex items-center gap-2 text-xs ${password.length >= 8 ? "text-green-400" : "text-slate-500"}`}
+                        >
+                          <i
+                            className={`fas ${password.length >= 8 ? "fa-check-circle" : "fa-circle"} text-[8px]`}
+                          ></i>
+                          At least 8 characters
+                        </div>
+                        <div
+                          className={`flex items-center gap-2 text-xs ${/[A-Z]/.test(password) ? "text-green-400" : "text-slate-500"}`}
+                        >
+                          <i
+                            className={`fas ${/[A-Z]/.test(password) ? "fa-check-circle" : "fa-circle"} text-[8px]`}
+                          ></i>
+                          One uppercase letter
+                        </div>
+                        <div
+                          className={`flex items-center gap-2 text-xs ${/[a-z]/.test(password) ? "text-green-400" : "text-slate-500"}`}
+                        >
+                          <i
+                            className={`fas ${/[a-z]/.test(password) ? "fa-check-circle" : "fa-circle"} text-[8px]`}
+                          ></i>
+                          One lowercase letter
+                        </div>
+                        <div
+                          className={`flex items-center gap-2 text-xs ${/[0-9]/.test(password) ? "text-green-400" : "text-slate-500"}`}
+                        >
+                          <i
+                            className={`fas ${/[0-9]/.test(password) ? "fa-check-circle" : "fa-circle"} text-[8px]`}
+                          ></i>
+                          One number
+                        </div>
+                        <div
+                          className={`flex items-center gap-2 text-xs ${/[!@#$%^&*()_+=[\]{};':"|,.<>/?]/.test(password) ? "text-green-400" : "text-slate-500"}`}
+                        >
+                          <i
+                            className={`fas ${/[!@#$%^&*()_+=[\]{};':"|,.<>/?]/.test(password) ? "fa-check-circle" : "fa-circle"} text-[8px]`}
+                          ></i>
+                          One special character
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>

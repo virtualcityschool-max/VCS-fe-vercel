@@ -12,7 +12,7 @@ const PublicHome = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
   // Get courses data from Redux store
-  const { courses, isLoading } = useSelector((state) => state.courses);
+  const { courses } = useSelector((state) => state.courses);
 
   // Fetch courses on component mount
   useEffect(() => {

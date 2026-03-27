@@ -9,6 +9,7 @@ import {
 import { useSelector, useDispatch } from "react-redux";
 import { Toaster } from "react-hot-toast";
 import { initializeAuth, logoutUser } from "./store/slices/authSlice";
+import { toastManager } from "./utils/toastManager";
 
 // Components
 import { SimulatorBar, AIChat, AuthModals, Navbar } from "./components";
@@ -99,12 +100,30 @@ const App = () => {
       dispatch(logoutUser());
     };
 
+    const handleAuthExpired = (event) => {
+      const { message } = event.detail;
+      console.log("🔄 App: Session expired via event");
+
+      // Show user-friendly session expired toast
+      toastManager.error(
+        message || "Your session has expired. Please log in again.",
+      );
+
+      // Clear all toasts and redirect after a short delay
+      setTimeout(() => {
+        toastManager.clear();
+        dispatch(logoutUser());
+      }, 2000);
+    };
+
     window.addEventListener("token-refreshed", handleTokenRefreshed);
     window.addEventListener("auth-logout", handleAuthLogout);
+    window.addEventListener("auth-expired", handleAuthExpired);
 
     return () => {
       window.removeEventListener("token-refreshed", handleTokenRefreshed);
       window.removeEventListener("auth-logout", handleAuthLogout);
+      window.removeEventListener("auth-expired", handleAuthExpired);
     };
   }, [dispatch]);
 
