@@ -1,5 +1,5 @@
 import React from "react";
-import toast from "react-hot-toast";
+import { toastManager } from "../utils/toastManager";
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -28,11 +28,25 @@ class ErrorBoundary extends React.Component {
     });
 
     // Show user-friendly toast notification
-    toast.error("Something went wrong. Please refresh the page.");
+    toastManager.error("Something went wrong. Please refresh the page.");
   }
 
   handleReset = () => {
     this.setState({ hasError: false, error: null, errorInfo: null });
+  };
+
+  // Sanitize error message for display to prevent XSS
+  sanitizeErrorMessage = (error) => {
+    if (!error) return "";
+
+    const errorString = error.toString();
+
+    // Remove HTML tags and potentially dangerous content
+    return errorString
+      .replace(/<[^>]*>/g, "") // Remove HTML tags
+      .replace(/javascript:/gi, "") // Remove javascript: protocol
+      .replace(/on\w+\s*=/gi, "") // Remove event handlers
+      .trim();
   };
 
   render() {

@@ -1,10 +1,4 @@
-import React, {
-  useState,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useCallback,
-} from "react";
+import React, { useState, useEffect, useLayoutEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
@@ -28,6 +22,7 @@ import { coursesService } from "../../services/coursesService";
 import { Button, Input } from "../../components/ui";
 import { useFieldErrors } from "../../hooks";
 import { normalizeApiError } from "../../utils/errorHandler";
+import { BACKEND_CATEGORIES, formatCategoryLabel } from "../../constants";
 
 const AdminDashboard = () => {
   const dispatch = useDispatch();
@@ -40,46 +35,14 @@ const AdminDashboard = () => {
   const [loadingCourseIds, setLoadingCourseIds] = useState(new Set());
   const [updatingCourseId, setUpdatingCourseId] = useState(null);
   const [editCourseForm, setEditCourseForm] = useState({});
-  const [editCourseErrors, setEditCourseErrors] = useState({});
 
-  // Separate error handling for edit form
-  const handleEditCourseApiError = useCallback(
-    (error, toastFunction = null) => {
-      const normalizedError = normalizeApiError(error);
-
-      // Log full error for debugging
-      console.error("Edit Course API Error:", {
-        normalized: normalizedError,
-        original: error,
-      });
-
-      // Handle field-level errors
-      if (normalizedError.hasFieldErrors && normalizedError.fieldErrors) {
-        setEditCourseErrors(normalizedError.fieldErrors);
-
-        // Return true to indicate field errors were handled
-        return true;
-      }
-
-      // Show toast for non-field validation errors if toast function provided
-      if (toastFunction && normalizedError.shouldShowToast) {
-        toastFunction(normalizedError.message);
-      }
-
-      // Return false to indicate no field errors were handled
-      return false;
-    },
-    [],
-  );
-
-  // Clear edit course field error
-  const clearEditCourseFieldError = useCallback((fieldName) => {
-    setEditCourseErrors((prev) => {
-      const newErrors = { ...prev };
-      delete newErrors[fieldName];
-      return newErrors;
-    });
-  }, []);
+  // Use field errors hook for edit course form
+  const {
+    errors: editCourseErrors,
+    setErrors: setEditCourseErrors,
+    handleApiError: handleEditCourseApiError,
+    clearFieldError: clearEditCourseFieldError,
+  } = useFieldErrors({});
 
   // Create course form state
   const [createCourseForm, setCreateCourseForm] = useState({
@@ -201,47 +164,45 @@ const AdminDashboard = () => {
       setEditCourseForm({});
       setEditCourseErrors({});
     }
-  }, [activeModal, editingCourse]);
+  }, [activeModal, editingCourse, setEditCourseErrors]);
 
   // Get unique values for course filter options
   const courseFilterOptions = useMemo(() => {
-    if (!courses.data || courses.data.length === 0) {
-      return {
-        categories: [],
-        instructors: [],
-        statuses: [],
-        priceRanges: [
-          { value: "0-50", label: "Free - PKR 50" },
-          { value: "51-100", label: "PKR 51 - 100" },
-          { value: "101-500", label: "PKR 101 - 500" },
-          { value: "501-1000", label: "PKR 501 - 1000" },
-          { value: "1000+", label: "PKR 1000+" },
-        ],
-      };
-    }
+    const instructors =
+      courses.data && courses.data.length > 0
+        ? [
+            ...new Set(
+              courses.data
+                .map((course) => course.instructor?.username)
+                .filter(Boolean),
+            ),
+          ].sort()
+        : [];
 
-    const categories = [
-      ...new Set(courses.data.map((course) => course.category).filter(Boolean)),
-    ];
+    const statuses =
+      courses.data && courses.data.length > 0
+        ? [
+            ...new Set(
+              courses.data.map((course) => course.status).filter(Boolean),
+            ),
+          ].sort()
+        : [];
 
-    // Console log to show categories from backend
-    console.log("Categories from backend courses:", categories);
-    console.log("Raw courses data:", courses.data);
-    const instructors = [
-      ...new Set(
-        courses.data
-          .map((course) => course.instructor?.username)
-          .filter(Boolean),
-      ),
-    ];
-    const statuses = [
-      ...new Set(courses.data.map((course) => course.status).filter(Boolean)),
-    ];
+    // Use backend categories - these are the only valid choices
+    const categories = BACKEND_CATEGORIES;
+
+    console.log("🔍 Backend categories available:", {
+      backendCategories: BACKEND_CATEGORIES,
+      categoriesInUse: courses.data
+        ?.map((course) => course.category)
+        .filter(Boolean),
+      finalCategories: categories,
+    });
 
     return {
-      categories: categories.sort(),
-      instructors: instructors.sort(),
-      statuses: statuses.sort(),
+      categories, // Keep as simple strings for consistency
+      instructors,
+      statuses,
       priceRanges: [
         { value: "0-50", label: "Free - PKR 50" },
         { value: "51-100", label: "PKR 51 - 100" },
@@ -555,7 +516,7 @@ const AdminDashboard = () => {
       // Refetch courses to ensure instructor data is synchronized
       dispatch(fetchCourses());
     } catch (error) {
-      // Use enhanced error handling with field-level support for edit form
+      // Use standardized error handling with field-level support
       const hadFieldErrors = handleEditCourseApiError(error, triggerToast);
 
       // If no field errors were handled, show a generic toast
@@ -620,10 +581,6 @@ const AdminDashboard = () => {
     }
     setIsSidebarOpen(false);
   };
-
-
-
-
 
   return (
     <section
@@ -719,7 +676,6 @@ const AdminDashboard = () => {
             </p>
           </div>
         )}
-
 
         {activeTab === "approvals" && (
           <>
@@ -1019,7 +975,8 @@ const AdminDashboard = () => {
                           <option value="">All Categories</option>
                           {courseFilterOptions.categories.map((category) => (
                             <option key={category} value={category}>
-                              {category}
+                              {category.charAt(0).toUpperCase() +
+                                category.slice(1)}
                             </option>
                           ))}
                         </select>
@@ -1421,14 +1378,13 @@ const AdminDashboard = () => {
                   <form
                     onSubmit={(e) => {
                       e.preventDefault();
-                      const formData = new FormData(e.target);
                       const courseData = {
-                        title: formData.get("title"),
-                        description: formData.get("description"),
-                        category: formData.get("category"),
-                        price: formData.get("price"),
-                        status: formData.get("status"),
-                        instructor_id: formData.get("instructor_id") || "",
+                        title: createCourseForm.title,
+                        description: createCourseForm.description,
+                        category: createCourseForm.category,
+                        price: parseFloat(createCourseForm.price) || 0,
+                        status: createCourseForm.status,
+                        instructor_id: createCourseForm.instructor_id || null,
                       };
                       handleCreateCourse(courseData);
                     }}
@@ -1540,7 +1496,8 @@ const AdminDashboard = () => {
                           <option value="">Select category</option>
                           {courseFilterOptions.categories.map((category) => (
                             <option key={category} value={category}>
-                              {category}
+                              {category.charAt(0).toUpperCase() +
+                                category.slice(1)}
                             </option>
                           ))}
                         </select>
@@ -1739,14 +1696,13 @@ const AdminDashboard = () => {
                     <form
                       onSubmit={(e) => {
                         e.preventDefault();
-                        const formData = new FormData(e.target);
                         const courseData = {
-                          title: formData.get("title"),
-                          description: formData.get("description"),
-                          category: formData.get("category"),
-                          price: formData.get("price"),
-                          status: formData.get("status"),
-                          instructor_id: formData.get("instructor_id") || "",
+                          title: editCourseForm.title,
+                          description: editCourseForm.description,
+                          category: editCourseForm.category,
+                          price: parseFloat(editCourseForm.price) || 0,
+                          status: editCourseForm.status,
+                          instructor_id: editCourseForm.instructor_id || null,
                         };
                         // Safety check: ensure courseId exists
                         const courseId = activeModal?.courseId;
@@ -1877,7 +1833,7 @@ const AdminDashboard = () => {
                             <option value="">Select category</option>
                             {courseFilterOptions.categories.map((category) => (
                               <option key={category} value={category}>
-                                {category}
+                                {formatCategoryLabel(category)}
                               </option>
                             ))}
                           </select>

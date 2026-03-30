@@ -33,9 +33,12 @@ export const toastManager = {
     });
 
     // Clean up old entries after 5 seconds
-    setTimeout(() => {
+    const cleanupTimeout = setTimeout(() => {
       toastDeduplicationMap.delete(key);
     }, 5000);
+
+    // Store cleanup timeout for potential early cleanup
+    toastDeduplicationMap.get(key).cleanupTimeout = cleanupTimeout;
 
     return toastId;
   },
@@ -62,9 +65,12 @@ export const toastManager = {
     });
 
     // Clean up old entries after 7 seconds
-    setTimeout(() => {
+    const cleanupTimeout = setTimeout(() => {
       toastDeduplicationMap.delete(key);
     }, 7000);
+
+    // Store cleanup timeout for potential early cleanup
+    toastDeduplicationMap.get(key).cleanupTimeout = cleanupTimeout;
 
     return toastId;
   },
@@ -85,6 +91,12 @@ export const toastManager = {
   // Clear all toasts and reset deduplication map
   clear: () => {
     toast.dismiss();
+    // Clear all cleanup timeouts
+    toastDeduplicationMap.forEach((entry) => {
+      if (entry.cleanupTimeout) {
+        clearTimeout(entry.cleanupTimeout);
+      }
+    });
     toastDeduplicationMap.clear();
   },
 };

@@ -39,3 +39,6 @@ export const UI_CONSTANTS = {
   TOAST_POSITION: "top-center",
   DEFAULT_AVATAR: "https://i.pravatar.cc/150?u=default",
 };
+
+// Export categories from separate file
+export { BACKEND_CATEGORIES, formatCategoryLabel } from "./categories";

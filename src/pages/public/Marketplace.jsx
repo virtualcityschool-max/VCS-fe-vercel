@@ -9,7 +9,7 @@ import {
 } from "../../store/slices/studentDashboardSlice";
 import { Button, Input } from "../../components/ui";
 import { toastManager } from "../../utils/toastManager";
-import { getUserFriendlyMessage } from "../../utils/errorHandler";
+import { BACKEND_CATEGORIES, formatCategoryLabel } from "../../constants";
 import { useSubmissionGuard } from "../../utils/requestDeduplicator";
 import { getCourseImage } from "../../utils/courseImageUtils";
 import { setAuthModal } from "../../store/slices/uiSlice";
@@ -63,7 +63,7 @@ const Marketplace = () => {
   const filterOptions = useMemo(() => {
     if (!courses || courses.length === 0) {
       return {
-        categories: [],
+        categories: BACKEND_CATEGORIES,
         instructors: [],
         priceRanges: [
           { value: "0-50", label: "Free - PKR 50" },
@@ -75,9 +75,9 @@ const Marketplace = () => {
       };
     }
 
-    const categories = [
-      ...new Set(courses.map((course) => course.category).filter(Boolean)),
-    ];
+    // Use backend categories for consistency
+    const categories = BACKEND_CATEGORIES;
+
     const instructors = [
       ...new Set(
         courses.map((course) => course.instructor?.username).filter(Boolean),
@@ -219,7 +219,7 @@ const Marketplace = () => {
           dispatch(fetchStudentDashboard());
         }
       } catch (error) {
-        const errorMessage = getUserFriendlyMessage(error);
+        const errorMessage = error.message || "An error occurred";
         toastManager.error(errorMessage);
       }
     });
@@ -265,7 +265,7 @@ const Marketplace = () => {
           dispatch(fetchStudentDashboard());
         }
       } catch (error) {
-        const errorMessage = getUserFriendlyMessage(error);
+        const errorMessage = error.message || "An error occurred";
         toastManager.error(errorMessage);
       }
     });
@@ -444,7 +444,7 @@ const Marketplace = () => {
                   <option value="">All Categories</option>
                   {filterOptions.categories.map((category) => (
                     <option key={category} value={category}>
-                      {category}
+                      {formatCategoryLabel(category)}
                     </option>
                   ))}
                 </select>

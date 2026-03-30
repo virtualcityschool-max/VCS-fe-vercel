@@ -64,11 +64,6 @@ axiosInstance.interceptors.request.use(
           ? "[TOKEN_HIDDEN]"
           : undefined,
       },
-      // Only log data for non-sensitive endpoints
-      data:
-        config.url?.includes("register") || config.url?.includes("login")
-          ? "[SENSITIVE_DATA_HIDDEN]"
-          : config.data,
     });
     return config;
   },

@@ -20,11 +20,20 @@ export const requestDeduplicator = {
   // Add request to pending queue
   addPending: (method, url, data = null, promise) => {
     const key = generateRequestKey(method, url, data);
+
+    // Check if already pending to avoid duplicates
+    if (pendingRequests.has(key)) {
+      return pendingRequests.get(key);
+    }
+
     pendingRequests.set(key, promise);
 
     // Clean up after request completes (success or failure)
     promise.finally(() => {
-      pendingRequests.delete(key);
+      // Use setTimeout to avoid race condition with immediate subsequent requests
+      setTimeout(() => {
+        pendingRequests.delete(key);
+      }, 0);
     });
 
     return promise;
