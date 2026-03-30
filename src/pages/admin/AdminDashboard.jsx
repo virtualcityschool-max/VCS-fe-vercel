@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, {
+  useState,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useCallback,
+} from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
@@ -6,6 +12,7 @@ import {
   approveUser,
   rejectUser,
   clearApprovalsError,
+  setApprovalsLoading,
 } from "../../store/slices/approvalsSlice";
 import {
   fetchCourses,
@@ -102,7 +109,6 @@ const AdminDashboard = () => {
     instructor: "",
   });
   const [showCourseFilters, setShowCourseFilters] = useState(false);
-
   // Get approvals data from Redux store
   const {
     pendingApprovals,
@@ -111,9 +117,28 @@ const AdminDashboard = () => {
     isProcessing,
   } = useSelector((state) => state.approvals);
 
+  // Debug loading state changes
+  React.useEffect(() => {
+    console.log("🔍 Approvals loading state changed:", {
+      approvalsLoading,
+      pendingApprovalsLength: pendingApprovals?.length || 0,
+      timestamp: new Date().toISOString(),
+    });
+  }, [approvalsLoading, pendingApprovals]);
+
   // Get courses and users data from Redux store
   const courses = useSelector(selectCourses);
   const users = useSelector(selectUsers);
+
+  // Set loading state immediately before first render if approvals tab is active
+  useLayoutEffect(() => {
+    if (activeTab === "approvals") {
+      console.log(
+        "🔍 Hard refresh detection - setting loading state before paint",
+      );
+      dispatch(setApprovalsLoading(true));
+    }
+  }, [dispatch, activeTab]);
 
   // Fetch pending approvals when component mounts or when approvals tab is active
   useEffect(() => {
@@ -167,7 +192,7 @@ const AdminDashboard = () => {
           price: editingCourse.price || "",
           status: editingCourse.status || "draft",
           instructor_id:
-            editingCourse.instructor?.id || editingCourse.instructor_id || null,
+            editingCourse.instructor?.id || editingCourse.instructor_id || "",
         });
       }
       setEditCourseErrors({});
@@ -198,6 +223,10 @@ const AdminDashboard = () => {
     const categories = [
       ...new Set(courses.data.map((course) => course.category).filter(Boolean)),
     ];
+
+    // Console log to show categories from backend
+    console.log("Categories from backend courses:", categories);
+    console.log("Raw courses data:", courses.data);
     const instructors = [
       ...new Set(
         courses.data
@@ -312,6 +341,25 @@ const AdminDashboard = () => {
       [filterName]: value,
     }));
   };
+
+  const triggerToast = (msg) => {
+    setShowToast(msg);
+    // Clear any existing timeout to prevent memory leaks
+    if (triggerToast.timeoutId) {
+      clearTimeout(triggerToast.timeoutId);
+    }
+    // Set new timeout to add fade-out class before removing
+    triggerToast.timeoutId = setTimeout(() => {
+      const toastElement = document.querySelector('[data-toast="admin-toast"]');
+      if (toastElement) {
+        toastElement.classList.add("opacity-0", "scale-95");
+        setTimeout(() => setShowToast(null), 300); // Wait for fade-out animation
+      } else {
+        setShowToast(null);
+      }
+    }, 2700); // Start fading out at 2.7s, remove at 3s
+  };
+
   useEffect(() => {
     return () => {
       if (triggerToast.timeoutId) {
@@ -399,6 +447,8 @@ const AdminDashboard = () => {
       await dispatch(createCourse(courseData)).unwrap();
       triggerToast("Course created successfully");
       setActiveModal(null);
+      // Refresh courses to get complete instructor data
+      dispatch(fetchCourses());
       // Reset form
       setCreateCourseForm({
         title: "",
@@ -520,6 +570,8 @@ const AdminDashboard = () => {
 
   // Handle course deletion
   const handleDeleteCourse = async (courseId, courseTitle) => {
+    console.log("Delete course called with:", { courseId, courseTitle });
+
     const confirmed = window.confirm(
       `Are you sure you want to delete "${courseTitle}"? This action cannot be undone.`,
     );
@@ -569,85 +621,9 @@ const AdminDashboard = () => {
     setIsSidebarOpen(false);
   };
 
-  // Mock schedule data - DISABLED until backend integration
-  // const scheduleData = [
-  //   {
-  //     day: "Monday",
-  //     start: 9,
-  //     end: 11,
-  //     title: "Physics 101",
-  //     teacher: "Dr. Samuel",
-  //     color: "bg-blue-600",
-  //   },
-  //   {
-  //     day: "Monday",
-  //     start: 13,
-  //     end: 15,
-  //     title: "Calculus",
-  //     teacher: "Dr. Okoro",
-  //     color: "bg-indigo-600",
-  //   },
-  //   {
-  //     day: "Tuesday",
-  //     start: 14,
-  //     end: 15.5,
-  //     title: "Urdu Lit",
-  //     teacher: "Mr. Iqbal",
-  //     color: "bg-emerald-600",
-  //   },
-  //   {
-  //     day: "Wednesday",
-  //     start: 10,
-  //     end: 12,
-  //     title: "Bio Science",
-  //     teacher: "Dr. Sarah",
-  //     color: "bg-teal-600",
-  //   },
-  //   {
-  //     day: "Friday",
-  //     start: 20,
-  //     end: 22,
-  //     title: "AI Ethics",
-  //     teacher: "Lab TA",
-  //     color: "bg-rose-600",
-  //   },
-  // ];
 
-  const triggerToast = (msg) => {
-    setShowToast(msg);
-    // Clear any existing timeout to prevent memory leaks
-    if (triggerToast.timeoutId) {
-      clearTimeout(triggerToast.timeoutId);
-    }
-    // Set new timeout to add fade-out class before removing
-    triggerToast.timeoutId = setTimeout(() => {
-      const toastElement = document.querySelector('[data-toast="admin-toast"]');
-      if (toastElement) {
-        toastElement.classList.add("opacity-0", "scale-95");
-        setTimeout(() => setShowToast(null), 300); // Wait for fade-out animation
-      } else {
-        setShowToast(null);
-      }
-    }, 2700); // Start fading out at 2.7s, remove at 3s
-  };
 
-  const renderScheduler = () => {
-    // Scheduler disabled - no backend integration yet
-    return (
-      <div className="bg-slate-900 border border-slate-800 rounded-[2.5rem] shadow-2xl overflow-hidden animate-fadeIn p-16 text-center">
-        <div className="w-16 h-16 bg-slate-700/20 rounded-full flex items-center justify-center mx-auto mb-4">
-          <i className="fas fa-calendar-alt text-slate-400 text-2xl"></i>
-        </div>
-        <h3 className="text-white text-lg font-bold mb-2">
-          Scheduler Not Integrated Yet
-        </h3>
-        <p className="text-slate-400 text-sm">
-          Academic scheduling functionality will be available once backend
-          integration is complete
-        </p>
-      </div>
-    );
-  };
+
 
   return (
     <section
@@ -744,7 +720,6 @@ const AdminDashboard = () => {
           </div>
         )}
 
-        {activeTab === "academics" && renderScheduler()}
 
         {activeTab === "approvals" && (
           <>
@@ -785,9 +760,13 @@ const AdminDashboard = () => {
                     </p>
                     <button
                       onClick={() => dispatch(fetchPendingApprovals())}
-                      className="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-xl text-sm font-bold transition"
+                      disabled={approvalsLoading}
+                      className="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Try Again
+                      <i
+                        className={`fas ${approvalsLoading ? "fa-spinner fa-spin" : "fa-redo"}`}
+                      ></i>
+                      {approvalsLoading ? "Retrying..." : "Try Again"}
                     </button>
                   </div>
                 </div>
@@ -796,8 +775,8 @@ const AdminDashboard = () => {
               {/* Loading State */}
               {approvalsLoading && !approvalsError && (
                 <div className="p-16 text-center">
-                  <div className="w-16 h-16 bg-blue-600/20 rounded-full flex items-center justify-center mx-auto mb-4 animate-spin">
-                    <i className="fas fa-spinner text-blue-500 text-2xl"></i>
+                  <div className="w-16 h-16 bg-blue-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i className="fas fa-spinner text-blue-500 text-2xl animate-spin"></i>
                   </div>
                   <p className="text-white text-lg">
                     Loading pending approvals...
@@ -829,7 +808,7 @@ const AdminDashboard = () => {
                   <div className="overflow-x-auto">
                     <table className="w-full text-left">
                       <thead className="bg-slate-950/60 border-b border-slate-800">
-                        <tr>
+                        <tr key="approvals-header">
                           <th className="px-8 py-6 text-[10px] font-black uppercase text-slate-500">
                             User Information
                           </th>
@@ -1237,7 +1216,7 @@ const AdminDashboard = () => {
                   <div className="overflow-x-auto">
                     <table className="w-full text-left">
                       <thead className="bg-slate-950/60 border-b border-slate-800">
-                        <tr>
+                        <tr key="courses-header">
                           <th className="px-8 py-4 text-[10px] font-black uppercase text-slate-500">
                             Course
                           </th>
@@ -1259,9 +1238,9 @@ const AdminDashboard = () => {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-800/30">
-                        {filteredCourses.map((course) => (
+                        {filteredCourses.map((course, index) => (
                           <tr
-                            key={course.id}
+                            key={course.id || `course-${index}`}
                             className="hover:bg-slate-800/20 transition-all duration-200 group"
                           >
                             <td className="px-8 py-6">
@@ -1385,9 +1364,13 @@ const AdminDashboard = () => {
                                   {course.instructor ? "Change" : "Assign"}
                                 </button>
                                 <button
-                                  onClick={() =>
-                                    handleDeleteCourse(course.id, course.title)
-                                  }
+                                  onClick={() => {
+                                    console.log(
+                                      "Delete button clicked, course data:",
+                                      course,
+                                    );
+                                    handleDeleteCourse(course.id, course.title);
+                                  }}
                                   className="bg-red-600/10 text-red-400 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition flex items-center gap-2"
                                 >
                                   <i className="fas fa-trash mr-2"></i>
@@ -1445,7 +1428,7 @@ const AdminDashboard = () => {
                         category: formData.get("category"),
                         price: formData.get("price"),
                         status: formData.get("status"),
-                        instructor_id: formData.get("instructor_id") || null,
+                        instructor_id: formData.get("instructor_id") || "",
                       };
                       handleCreateCourse(courseData);
                     }}
@@ -1763,9 +1746,19 @@ const AdminDashboard = () => {
                           category: formData.get("category"),
                           price: formData.get("price"),
                           status: formData.get("status"),
-                          instructor_id: formData.get("instructor_id") || null,
+                          instructor_id: formData.get("instructor_id") || "",
                         };
-                        handleUpdateCourse(activeModal.courseId, courseData);
+                        // Safety check: ensure courseId exists
+                        const courseId = activeModal?.courseId;
+                        if (!courseId) {
+                          console.error(
+                            "Edit course error: courseId is undefined",
+                            { activeModal },
+                          );
+                          triggerToast("Error: Course ID is missing");
+                          return;
+                        }
+                        handleUpdateCourse(courseId, courseData);
                       }}
                       className="space-y-5"
                     >

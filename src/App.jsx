@@ -41,8 +41,8 @@ const ProtectedRoute = ({ allowedRoles = [] }) => {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 bg-blue-600/20 rounded-full flex items-center justify-center mx-auto mb-4 animate-spin">
-            <i className="fas fa-spinner text-blue-500 text-2xl"></i>
+          <div className="w-16 h-16 bg-blue-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i className="fas fa-spinner text-blue-500 text-2xl animate-spin"></i>
           </div>
           <p className="text-white text-lg">Initializing...</p>
         </div>

@@ -278,8 +278,8 @@ const Marketplace = () => {
         <div className="max-w-7xl mx-auto px-6 py-20">
           <div className="flex items-center justify-center min-h-[60vh]">
             <div className="text-center">
-              <div className="w-16 h-16 bg-blue-600/20 rounded-full flex items-center justify-center mx-auto mb-4 animate-spin">
-                <i className="fas fa-spinner text-blue-500 text-2xl"></i>
+              <div className="w-16 h-16 bg-blue-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i className="fas fa-spinner text-blue-500 text-2xl animate-spin"></i>
               </div>
               <p className="text-white text-lg">Loading courses...</p>
             </div>

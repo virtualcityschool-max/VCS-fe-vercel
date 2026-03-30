@@ -11,10 +11,10 @@ export const fetchPendingApprovals = createAsyncThunk(
     } catch (error) {
       console.error("Failed to fetch pending approvals:", error);
       return rejectWithValue(
-        error.error || error.message || "Failed to load pending approvals"
+        error.error || error.message || "Failed to load pending approvals",
       );
     }
-  }
+  },
 );
 
 export const approveUser = createAsyncThunk(
@@ -28,10 +28,10 @@ export const approveUser = createAsyncThunk(
     } catch (error) {
       console.error("Failed to approve user:", error);
       return rejectWithValue(
-        error.error || error.message || "Failed to approve user"
+        error.error || error.message || "Failed to approve user",
       );
     }
-  }
+  },
 );
 
 export const rejectUser = createAsyncThunk(
@@ -45,15 +45,15 @@ export const rejectUser = createAsyncThunk(
     } catch (error) {
       console.error("Failed to reject user:", error);
       return rejectWithValue(
-        error.error || error.message || "Failed to reject user"
+        error.error || error.message || "Failed to reject user",
       );
     }
-  }
+  },
 );
 
 const initialState = {
   pendingApprovals: [],
-  isLoading: false,
+  isLoading: false, // Will be set to true in AdminDashboard if approvals tab is active
   isProcessing: {}, // Track individual user processing state
   error: null,
 };
@@ -70,6 +70,9 @@ const approvalsSlice = createSlice({
       if (state.isProcessing[userId]) {
         delete state.isProcessing[userId];
       }
+    },
+    setApprovalsLoading: (state, action) => {
+      state.isLoading = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -91,7 +94,7 @@ const approvalsSlice = createSlice({
       // Approve User
       .addCase(approveUser.pending, (state, action) => {
         const userId = action.meta.arg;
-        state.isProcessing[userId] = 'approving';
+        state.isProcessing[userId] = "approving";
         state.error = null;
       })
       .addCase(approveUser.fulfilled, (state, action) => {
@@ -107,7 +110,7 @@ const approvalsSlice = createSlice({
       // Reject User
       .addCase(rejectUser.pending, (state, action) => {
         const userId = action.meta.arg;
-        state.isProcessing[userId] = 'rejecting';
+        state.isProcessing[userId] = "rejecting";
         state.error = null;
       })
       .addCase(rejectUser.fulfilled, (state, action) => {
@@ -123,12 +126,18 @@ const approvalsSlice = createSlice({
   },
 });
 
-export const { clearApprovalsError, clearProcessingState } = approvalsSlice.actions;
+export const {
+  clearApprovalsError,
+  clearProcessingState,
+  setApprovalsLoading,
+} = approvalsSlice.actions;
 
 // Selectors
-export const selectPendingApprovals = (state) => state.approvals.pendingApprovals;
+export const selectPendingApprovals = (state) =>
+  state.approvals.pendingApprovals;
 export const selectApprovalsLoading = (state) => state.approvals.isLoading;
 export const selectApprovalsError = (state) => state.approvals.error;
-export const selectUserProcessingState = (state, userId) => state.approvals.isProcessing[userId];
+export const selectUserProcessingState = (state, userId) =>
+  state.approvals.isProcessing[userId];
 
 export default approvalsSlice.reducer;

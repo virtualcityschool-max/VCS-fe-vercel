@@ -1,22 +1,25 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: 'Inter', system-ui, sans-serif;
-  --font-poppins: 'Poppins', sans-serif;
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-poppins: "Poppins", sans-serif;
 }
 
 :root {
-  --font-inter: 'Inter', sans-serif;
+  --font-inter: "Inter", sans-serif;
   --bg-dark: #020617;
   --text-white: white;
-  
+
   font-family: var(--font-inter);
   background-color: var(--bg-dark);
   color: var(--text-white);
   margin: 0;
 }
 
-h1, h2, h3, .font-poppins {
+h1,
+h2,
+h3,
+.font-poppins {
   font-family: var(--font-poppins);
 }
 
@@ -45,8 +48,14 @@ h1, h2, h3, .font-poppins {
 }
 
 @keyframes slideDown {
-  from { transform: translateY(-20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 .animate-slideDown {
@@ -54,8 +63,14 @@ h1, h2, h3, .font-poppins {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.98); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .animate-fadeIn {
@@ -69,6 +84,6 @@ h1, h2, h3, .font-poppins {
 
 /* Hide scrollbar for IE, Edge and Firefox */
 .no-scrollbar {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 }

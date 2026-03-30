@@ -200,8 +200,8 @@ const CourseDetails = () => {
           <div className="flex items-center justify-center min-h-[60vh]">
             <div className="text-center">
               <div className="relative">
-                <div className="w-20 h-20 bg-blue-600/20 rounded-full flex items-center justify-center mx-auto mb-6 animate-spin backdrop-blur-sm border border-blue-500/20">
-                  <i className="fas fa-spinner text-blue-400 text-3xl"></i>
+                <div className="w-20 h-20 bg-blue-600/20 rounded-full flex items-center justify-center mx-auto mb-6 backdrop-blur-sm border border-blue-500/20">
+                  <i className="fas fa-spinner text-blue-400 text-3xl animate-spin"></i>
                 </div>
                 <div className="absolute inset-0 w-20 h-20 bg-blue-600/20 rounded-full animate-ping mx-auto"></div>
               </div>

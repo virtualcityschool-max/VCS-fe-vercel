@@ -19,11 +19,73 @@ const emptyErrors = {
   role: "",
 };
 
+// Error normalization utilities
+const normalizeAuthError = (error) => {
+  // Handle axios error with backend response
+  if (error?.response?.data) {
+    const data = error.response.data;
+
+    // Priority 1: non_field_errors (most specific business rule messages)
+    if (data.details?.non_field_errors?.length > 0) {
+      return data.details.non_field_errors[0];
+    }
+
+    // Priority 2: field-specific errors (take first one)
+    if (data.details) {
+      for (const [messages] of Object.entries(data.details)) {
+        if (Array.isArray(messages) && messages.length > 0) {
+          return messages[0];
+        }
+        if (typeof messages === "string" && messages) {
+          return messages;
+        }
+      }
+    }
+
+    // Priority 3: top-level error message
+    if (data.error) {
+      return data.error;
+    }
+
+    // Priority 4: top-level message
+    if (data.message) {
+      return data.message;
+    }
+  }
+
+  // Fallback for network errors or other issues
+  if (
+    error?.code === "ERR_NETWORK" ||
+    error?.message?.includes("Network Error")
+  ) {
+    return "Network error. Please check your connection and try again.";
+  }
+
+  if (error?.code === "ERR_TIMEOUT") {
+    return "Request timed out. Please try again.";
+  }
+
+  // Generic fallback - never show raw technical details
+  return "Authentication failed. Please try again.";
+};
+
+const isNetworkError = (error) => {
+  return (
+    error?.code === "ERR_NETWORK" ||
+    error?.code === "ERR_TIMEOUT" ||
+    error?.message?.includes("Network Error") ||
+    error?.message?.includes("timeout") ||
+    error?.response?.status >= 500
+  );
+};
+
 const AuthModals = () => {
   const [activeRoleTab, setActiveRoleTab] = useState("student");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(emptyErrors);
+  const [loginError, setLoginError] = useState("");
+  const [registrationError, setRegistrationError] = useState("");
   const [backendErrors, setBackendErrors] = useState({});
   const [registrationStep, setRegistrationStep] = useState("form"); // form | sending | otp | success
   const [otp, setOtp] = useState("");
@@ -45,7 +107,6 @@ const AuthModals = () => {
   const {
     isLoading,
     resendOtpLoading,
-    error: authError,
   } = useSelector((state) => state.auth);
   const navigate = useNavigate();
 
@@ -69,6 +130,8 @@ const AuthModals = () => {
     // Reset error states
     setError({ ...emptyErrors });
     setBackendErrors({});
+    setLoginError("");
+    setRegistrationError("");
     setOtpError("");
 
     // Reset OTP states
@@ -97,8 +160,10 @@ const AuthModals = () => {
     }
 
     if (isOpen) {
-      // Clear backend errors and Redux error when opening
+      // Clear backend errors, login/registration errors and Redux error when opening
       setBackendErrors({});
+      setLoginError("");
+      setRegistrationError("");
       dispatch(clearAuthError());
     }
   }, [isOpen, intendedRole, dispatch]);
@@ -127,6 +192,7 @@ const AuthModals = () => {
     }
 
     setError({ ...emptyErrors });
+    setLoginError("");
 
     try {
       const user = await dispatch(
@@ -162,16 +228,13 @@ const AuthModals = () => {
         onClose(); // This will reset all states automatically
       }, 50);
     } catch (err) {
-      // Show toast for login errors
-      if (typeof err === "object" && err !== null) {
-        Object.entries(err).forEach(([field, messages]) => {
-          const errorText = Array.isArray(messages)
-            ? messages.join(", ")
-            : messages;
-          toast.error(`${field}: ${errorText}`);
-        });
-      } else {
-        toast.error(err || "Login failed");
+      // Normalize error and set login-specific error
+      const normalizedError = normalizeAuthError(err);
+      setLoginError(normalizedError);
+
+      // Only show toast for network/server errors, not validation/business rules
+      if (isNetworkError(err)) {
+        toast.error(normalizedError);
       }
     }
   };
@@ -213,6 +276,7 @@ const AuthModals = () => {
     }
 
     setError({ ...emptyErrors });
+    setRegistrationError("");
 
     try {
       const response = await dispatch(
@@ -257,32 +321,32 @@ const AuthModals = () => {
       setUserId(extractedUserId);
       // Don't clear form fields yet
     } catch (err) {
-      // Error is already in Redux state, handle field errors here
-      console.log("Registration error details:", err);
+      // Normalize error and set registration-specific error
+      const normalizedError = normalizeAuthError(err);
+      setRegistrationError(normalizedError);
 
-      if (typeof err === "object" && err !== null) {
-        // Handle field-specific errors
-        if (err.field) {
-          // Set field-specific error
-          setError({
-            [err.field]: err.error,
-          });
-        } else {
-          // Set general backend errors
-          setBackendErrors(err);
-        }
+      // Handle field-specific errors separately
+      if (err?.response?.data?.details) {
+        const details = err.response.data.details;
+        const fieldErrors = {};
 
-        // Show toast for non-field errors
-        if (!err.field) {
-          Object.entries(err).forEach(([, messages]) => {
-            const errorText = Array.isArray(messages)
-              ? messages.join(", ")
+        // Extract field errors for inline display
+        Object.entries(details).forEach(([field, messages]) => {
+          if (field !== "non_field_errors" && messages) {
+            fieldErrors[field] = Array.isArray(messages)
+              ? messages[0]
               : messages;
-            toast.error(errorText);
-          });
+          }
+        });
+
+        if (Object.keys(fieldErrors).length > 0) {
+          setError((prev) => ({ ...prev, ...fieldErrors }));
         }
-      } else {
-        toast.error(err || "Registration failed. Please try again.");
+      }
+
+      // Only show toast for network/server errors, not validation/business rules
+      if (isNetworkError(err)) {
+        toast.error(normalizedError);
       }
     }
   };
@@ -381,6 +445,7 @@ const AuthModals = () => {
                     setShowLoginPassword(false);
                     setError({ ...emptyErrors });
                     setBackendErrors({});
+                    setLoginError("");
                     dispatch(clearAuthError());
                     // Set the new role
                     setActiveRoleTab(roleOption);
@@ -413,6 +478,7 @@ const AuthModals = () => {
                     toast.dismiss();
                     setEmail(e.target.value);
                     setError((prev) => ({ ...prev, email: "" }));
+                    setLoginError("");
                     dispatch(clearAuthError());
                   }}
                   placeholder="e.g. user@email.com"
@@ -442,6 +508,7 @@ const AuthModals = () => {
                       toast.dismiss();
                       setPassword(e.target.value);
                       setError((prev) => ({ ...prev, password: "" }));
+                      setLoginError("");
                       dispatch(clearAuthError());
                     }}
                     placeholder="••••••••"
@@ -478,11 +545,9 @@ const AuthModals = () => {
                 )}
               </div>
 
-              {authError && !hasLocalErrors && (
+              {loginError && !hasLocalErrors && (
                 <p className="text-red-500 text-xs font-bold animate-shake text-center">
-                  {typeof authError === "string"
-                    ? authError
-                    : "Registration failed"}
+                  {loginError}
                 </p>
               )}
 
@@ -527,6 +592,7 @@ const AuthModals = () => {
                       toast.dismiss();
                       setEmail(e.target.value);
                       setError((prev) => ({ ...prev, email: "" }));
+                      setRegistrationError("");
                       dispatch(clearAuthError());
                       setBackendErrors((prev) => ({
                         ...prev,
@@ -574,6 +640,7 @@ const AuthModals = () => {
                       toast.dismiss();
                       setUsername(e.target.value);
                       setError((prev) => ({ ...prev, username: "" }));
+                      setRegistrationError("");
                       dispatch(clearAuthError());
                     }}
                     placeholder="JohnDoe"
@@ -613,6 +680,7 @@ const AuthModals = () => {
                         toast.dismiss();
                         setPassword(e.target.value);
                         setError((prev) => ({ ...prev, password: "" }));
+                        setRegistrationError("");
                         dispatch(clearAuthError());
                         setBackendErrors((prev) => ({
                           ...prev,
@@ -728,6 +796,7 @@ const AuthModals = () => {
                           ...prev,
                           confirmPassword: "",
                         }));
+                        setRegistrationError("");
                         dispatch(clearAuthError());
                       }}
                       placeholder="••••••••"
@@ -768,6 +837,7 @@ const AuthModals = () => {
                       toast.dismiss();
                       setRole(e.target.value);
                       setError((prev) => ({ ...prev, role: "" }));
+                      setRegistrationError("");
                       dispatch(clearAuthError());
                     }}
                     className="w-full bg-slate-950 border border-white/5 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
@@ -785,11 +855,9 @@ const AuthModals = () => {
                   )}
                 </div>
 
-                {authError && !hasLocalErrors && (
+                {registrationError && !hasLocalErrors && (
                   <p className="text-red-500 text-xs font-bold animate-shake text-center">
-                    {typeof authError === "string"
-                      ? authError
-                      : "Registration failed"}
+                    {registrationError}
                   </p>
                 )}
                 <button
