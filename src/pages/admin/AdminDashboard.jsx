@@ -217,7 +217,7 @@ const AdminDashboard = () => {
   const filteredCourses = useMemo(() => {
     if (!courses.data || courses.data.length === 0) return [];
 
-    return courses.data.filter((course) => {
+    const filtered = courses.data.filter((course) => {
       // Search filter (title, instructor, category, description)
       const matchesSearch =
         courseFilters.search === "" ||
@@ -276,6 +276,16 @@ const AdminDashboard = () => {
         matchesStatus &&
         matchesInstructor
       );
+    });
+
+    return filtered.sort((a, b) => {
+      // Prefer created_at if available
+      if (a.created_at && b.created_at) {
+        return new Date(b.created_at) - new Date(a.created_at);
+      }
+
+      // Fallback to id (newer = higher id)
+      return (b.id || 0) - (a.id || 0);
     });
   }, [courses.data, courseFilters]);
 
@@ -374,9 +384,12 @@ const AdminDashboard = () => {
     }
 
     // Price validation
+    const price = parseInt(formData.price, 10);
     if (!formData.price || formData.price <= 0) {
       errors.price = "Valid price is required";
-    } else if (parseFloat(formData.price) < 100) {
+    } else if (isNaN(price)) {
+      errors.price = "Price must be a valid number";
+    } else if (price < 100) {
       errors.price = "Price must be at least PKR 100";
     }
 
@@ -478,9 +491,12 @@ const AdminDashboard = () => {
     }
 
     // Price validation
+    const price = parseInt(formData.price, 10);
     if (!formData.price || formData.price <= 0) {
       errors.price = "Valid price is required";
-    } else if (parseFloat(formData.price) < 100) {
+    } else if (isNaN(price)) {
+      errors.price = "Price must be a valid number";
+    } else if (price < 100) {
       errors.price = "Price must be at least PKR 100";
     }
 
@@ -653,12 +669,32 @@ const AdminDashboard = () => {
           </div> */}
         </header>
 
-        {showToast && (
+        {/* {showToast && (
           <div
             data-toast="admin-toast"
             className="fixed top-20 left-1/2 -translate-x-1/2 z-9999 bg-emerald-600 text-white px-8 py-4 rounded-2xl shadow-2xl font-bold text-sm animate-slideDown flex items-center gap-4 backdrop-blur-sm border border-emerald-500/20 transition-all duration-300 ease-in-out"
           >
             <i className="fas fa-check-circle"></i> {showToast}
+          </div>
+        )} */}
+
+        {showToast && (
+          <div
+            data-toast="admin-toast"
+            className={`fixed top-20 left-1/2 -translate-x-1/2 z-9999 text-white px-8 py-4 rounded-2xl shadow-2xl font-bold text-sm animate-slideDown flex items-center gap-4 backdrop-blur-sm transition-all duration-300 ease-in-out ${
+              showToast === "Please fix highlighted fields"
+                ? "bg-red-600 border border-red-500/20"
+                : "bg-emerald-600 border border-emerald-500/20"
+            }`}
+          >
+            <i
+              className={`fas ${
+                showToast === "Please fix highlighted fields"
+                  ? "fa-exclamation-circle"
+                  : "fa-check-circle"
+              }`}
+            ></i>
+            {showToast}
           </div>
         )}
 
@@ -1382,7 +1418,7 @@ const AdminDashboard = () => {
                         title: createCourseForm.title,
                         description: createCourseForm.description,
                         category: createCourseForm.category,
-                        price: parseFloat(createCourseForm.price) || 0,
+                        price: parseInt(createCourseForm.price, 10) || 0,
                         status: createCourseForm.status,
                         instructor_id: createCourseForm.instructor_id || null,
                       };
@@ -1524,13 +1560,23 @@ const AdminDashboard = () => {
                             type="number"
                             id="price"
                             name="price"
-                            step="0.01"
+                            step="1"
+                            inputMode="numeric"
+                            max="999999"
                             min="0"
                             value={createCourseForm.price}
                             onChange={(e) => {
+                              const value = e.target.value;
+
+                              // Remove decimals
+                              if (value.includes(".")) return;
+
+                              // Limit to 6 digits
+                              if (value.length > 6) return;
+
                               setCreateCourseForm({
                                 ...createCourseForm,
-                                price: e.target.value,
+                                price: value,
                               });
                               // Clear error for this field when user starts typing
                               clearCreateCourseFieldError("price");
@@ -1540,7 +1586,7 @@ const AdminDashboard = () => {
                                 ? "border-red-500 focus:ring-red-500/20"
                                 : "border-slate-800 focus:border-indigo-500 focus:ring-indigo-500/20"
                             }`}
-                            placeholder="0.00"
+                            placeholder="0"
                           />
                         </div>
                         {createCourseErrors.price && (
@@ -1700,7 +1746,7 @@ const AdminDashboard = () => {
                           title: editCourseForm.title,
                           description: editCourseForm.description,
                           category: editCourseForm.category,
-                          price: parseFloat(editCourseForm.price) || 0,
+                          price: parseInt(editCourseForm.price, 10) || 0,
                           status: editCourseForm.status,
                           instructor_id: editCourseForm.instructor_id || null,
                         };
@@ -1861,7 +1907,9 @@ const AdminDashboard = () => {
                               id="price"
                               name="price"
                               required
-                              step="0.01"
+                              step="1"
+                              inputMode="numeric"
+                              max="999999"
                               min="0"
                               value={
                                 editCourseForm.price ||
@@ -1869,9 +1917,17 @@ const AdminDashboard = () => {
                                 ""
                               }
                               onChange={(e) => {
+                                const value = e.target.value;
+
+                                // Remove decimals
+                                if (value.includes(".")) return;
+
+                                // Limit to 6 digits
+                                if (value.length > 6) return;
+
                                 setEditCourseForm({
                                   ...editCourseForm,
-                                  price: e.target.value,
+                                  price: value,
                                 });
                                 clearEditCourseFieldError("price");
                               }}
@@ -1880,7 +1936,7 @@ const AdminDashboard = () => {
                                   ? "border-red-500 focus:ring-red-500/20"
                                   : "border-slate-800 focus:border-blue-500 focus:ring-blue-500/20"
                               }`}
-                              placeholder="0.00"
+                              placeholder="0"
                             />
                           </div>
                           {editCourseErrors.price && (
