@@ -279,12 +279,26 @@ const AdminDashboard = () => {
     });
 
     return filtered.sort((a, b) => {
-      // Prefer created_at if available
+      // Prioritize recently updated courses
+      const aUpdatedAt =
+        a.updated_at || a.modified_at
+          ? new Date(a.updated_at || a.modified_at)
+          : new Date(0);
+      const bUpdatedAt =
+        b.updated_at || b.modified_at
+          ? new Date(b.updated_at || b.modified_at)
+          : new Date(0);
+
+      if (aUpdatedAt.getTime() !== bUpdatedAt.getTime()) {
+        return bUpdatedAt.getTime() - aUpdatedAt.getTime();
+      }
+
+      // If no updated_at/modified_at or same timestamp, fall back to created_at
       if (a.created_at && b.created_at) {
         return new Date(b.created_at) - new Date(a.created_at);
       }
 
-      // Fallback to id (newer = higher id)
+      // Final fallback to id (newer = higher id)
       return (b.id || 0) - (a.id || 0);
     });
   }, [courses.data, courseFilters]);
@@ -385,11 +399,7 @@ const AdminDashboard = () => {
 
     // Price validation
     const price = parseInt(formData.price, 10);
-    if (!formData.price || formData.price <= 0) {
-      errors.price = "Valid price is required";
-    } else if (isNaN(price)) {
-      errors.price = "Price must be a valid number";
-    } else if (price < 100) {
+    if (!formData.price || formData.price <= 0 || isNaN(price) || price < 100) {
       errors.price = "Price must be at least PKR 100";
     }
 
@@ -492,11 +502,7 @@ const AdminDashboard = () => {
 
     // Price validation
     const price = parseInt(formData.price, 10);
-    if (!formData.price || formData.price <= 0) {
-      errors.price = "Valid price is required";
-    } else if (isNaN(price)) {
-      errors.price = "Price must be a valid number";
-    } else if (price < 100) {
+    if (!formData.price || formData.price <= 0 || isNaN(price) || price < 100) {
       errors.price = "Price must be at least PKR 100";
     }
 
@@ -529,8 +535,7 @@ const AdminDashboard = () => {
       await dispatch(updateCourse({ courseId, courseData })).unwrap();
       triggerToast("Course updated successfully");
       setActiveModal(null);
-      // Refetch courses to ensure instructor data is synchronized
-      dispatch(fetchCourses());
+      // No need to refetch - the Redux reducer handles state update and moves course to top
     } catch (error) {
       // Use standardized error handling with field-level support
       const hadFieldErrors = handleEditCourseApiError(error, triggerToast);
@@ -1242,9 +1247,47 @@ const AdminDashboard = () => {
                                   <i className="fas fa-book text-indigo-400 text-sm group-hover:text-indigo-300 transition-colors"></i>
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <h5 className="font-bold text-white text-base mb-1 group-hover:text-indigo-400 transition-colors truncate">
-                                    {course.title}
-                                  </h5>
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <h5 className="font-bold text-white text-base group-hover:text-indigo-400 transition-colors truncate">
+                                      {course.title}
+                                    </h5>
+                                    {(course.updated_at ||
+                                      course.modified_at) &&
+                                      (() => {
+                                        const updatedTime = new Date(
+                                          course.updated_at ||
+                                            course.modified_at,
+                                        );
+                                        const now = new Date();
+                                        const diffInMinutes =
+                                          (now - updatedTime) / (1000 * 60);
+
+                                        // Show "Just Updated" badge for first 5 minutes (with animation)
+                                        if (diffInMinutes <= 5) {
+                                          return (
+                                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[8px] font-bold uppercase bg-blue-600/20 text-blue-400 border border-blue-600/30 animate-pulse">
+                                              <i className="fas fa-clock mr-1"></i>
+                                              {diffInMinutes <= 1
+                                                ? "Just Updated"
+                                                : "Recently Updated"}
+                                            </span>
+                                          );
+                                        }
+
+                                        // Show subtle "Recently Updated" badge after 5 minutes (no animation)
+                                        if (diffInMinutes <= 1440) {
+                                          // Up to 24 hours
+                                          return (
+                                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[8px] font-bold uppercase bg-slate-700/40 text-slate-400 border border-slate-600/50">
+                                              <i className="fas fa-clock mr-1"></i>
+                                              Updated
+                                            </span>
+                                          );
+                                        }
+
+                                        return null;
+                                      })()}
+                                  </div>
                                   <div className="flex items-center gap-3 text-xs text-slate-500">
                                     <span className="font-mono">
                                       ID: {course.id}
@@ -1563,7 +1606,6 @@ const AdminDashboard = () => {
                             step="1"
                             inputMode="numeric"
                             max="999999"
-                            min="0"
                             value={createCourseForm.price}
                             onChange={(e) => {
                               const value = e.target.value;
@@ -1906,11 +1948,9 @@ const AdminDashboard = () => {
                               type="number"
                               id="price"
                               name="price"
-                              required
                               step="1"
                               inputMode="numeric"
                               max="999999"
-                              min="0"
                               value={
                                 editCourseForm.price ||
                                 editingCourse?.price ||

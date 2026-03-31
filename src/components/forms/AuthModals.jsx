@@ -10,86 +10,36 @@ import {
   verifyOtp,
   resendOtp,
 } from "../../store/slices/authSlice";
-
-const emptyErrors = {
-  email: "",
-  username: "",
-  password: "",
-  confirmPassword: "",
-  role: "",
-};
-
-// Error normalization utilities
-const normalizeAuthError = (error) => {
-  // Handle axios error with backend response
-  if (error?.response?.data) {
-    const data = error.response.data;
-
-    // Priority 1: non_field_errors (most specific business rule messages)
-    if (data.details?.non_field_errors?.length > 0) {
-      return data.details.non_field_errors[0];
-    }
-
-    // Priority 2: field-specific errors (take first one)
-    if (data.details) {
-      for (const [messages] of Object.entries(data.details)) {
-        if (Array.isArray(messages) && messages.length > 0) {
-          return messages[0];
-        }
-        if (typeof messages === "string" && messages) {
-          return messages;
-        }
-      }
-    }
-
-    // Priority 3: top-level error message
-    if (data.error) {
-      return data.error;
-    }
-
-    // Priority 4: top-level message
-    if (data.message) {
-      return data.message;
-    }
-  }
-
-  // Fallback for network errors or other issues
-  if (
-    error?.code === "ERR_NETWORK" ||
-    error?.message?.includes("Network Error")
-  ) {
-    return "Network error. Please check your connection and try again.";
-  }
-
-  if (error?.code === "ERR_TIMEOUT") {
-    return "Request timed out. Please try again.";
-  }
-
-  // Generic fallback - never show raw technical details
-  return "Authentication failed. Please try again.";
-};
-
-const isNetworkError = (error) => {
-  return (
-    error?.code === "ERR_NETWORK" ||
-    error?.code === "ERR_TIMEOUT" ||
-    error?.message?.includes("Network Error") ||
-    error?.message?.includes("timeout") ||
-    error?.response?.status >= 500
-  );
-};
+import { normalizeApiError } from "../../utils/errorHandler";
+import { useFieldErrors } from "../../hooks";
 
 const AuthModals = () => {
   const [activeRoleTab, setActiveRoleTab] = useState("student");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState(emptyErrors);
-  const [loginError, setLoginError] = useState("");
-  const [registrationError, setRegistrationError] = useState("");
-  const [backendErrors, setBackendErrors] = useState({});
   const [registrationStep, setRegistrationStep] = useState("form"); // form | sending | otp | success
   const [otp, setOtp] = useState("");
   const [userId, setUserId] = useState(null);
+
+  // Use useFieldErrors hook for consistent error management
+  const {
+    errors: loginErrors,
+    formError: loginFormError,
+    setErrors: setLoginErrors,
+    handleApiError: handleLoginApiError,
+    clearFieldError: clearLoginFieldError,
+    clearAllErrors: clearAllLoginErrors,
+  } = useFieldErrors({});
+
+  const {
+    errors: registrationErrors,
+    formError: registrationFormError,
+    setErrors: setRegistrationErrors,
+    handleApiError: handleRegistrationApiError,
+    clearFieldError: clearRegistrationFieldError,
+    clearAllErrors: clearAllRegistrationErrors,
+  } = useFieldErrors({});
+
   const [otpError, setOtpError] = useState("");
 
   // Password visibility states
@@ -104,16 +54,11 @@ const AuthModals = () => {
 
   const dispatch = useDispatch();
   const { authModal } = useSelector((state) => state.ui);
-  const {
-    isLoading,
-    resendOtpLoading,
-  } = useSelector((state) => state.auth);
+  const { isLoading, resendOtpLoading } = useSelector((state) => state.auth);
   const navigate = useNavigate();
 
   const isOpen = authModal.type;
   const intendedRole = authModal.intendedRole;
-
-  const hasLocalErrors = Object.values(error).some((value) => value !== "");
 
   // Comprehensive reset function
   const resetAllStates = () => {
@@ -127,11 +72,9 @@ const AuthModals = () => {
     // Reset role tab to default
     setActiveRoleTab("student");
 
-    // Reset error states
-    setError({ ...emptyErrors });
-    setBackendErrors({});
-    setLoginError("");
-    setRegistrationError("");
+    // Reset error states using the new hooks
+    clearAllLoginErrors();
+    clearAllRegistrationErrors();
     setOtpError("");
 
     // Reset OTP states
@@ -160,13 +103,19 @@ const AuthModals = () => {
     }
 
     if (isOpen) {
-      // Clear backend errors, login/registration errors and Redux error when opening
-      setBackendErrors({});
-      setLoginError("");
-      setRegistrationError("");
+      // Clear errors using the new hooks
+      clearAllLoginErrors();
+      clearAllRegistrationErrors();
+      setOtpError("");
       dispatch(clearAuthError());
     }
-  }, [isOpen, intendedRole, dispatch]);
+  }, [
+    isOpen,
+    intendedRole,
+    dispatch,
+    clearAllLoginErrors,
+    clearAllRegistrationErrors,
+  ]);
 
   if (!isOpen) return null;
 
@@ -174,25 +123,22 @@ const AuthModals = () => {
     e.preventDefault();
     dispatch(clearAuthError());
 
-    const newErrors = { ...emptyErrors };
+    // Clear previous errors
+    clearAllLoginErrors();
 
+    // Basic validation
+    const newErrors = {};
     if (!email.trim()) {
       newErrors.email = "Email is required";
     }
-
     if (!password.trim()) {
       newErrors.password = "Password is required";
     }
 
-    const hasErrors = Object.values(newErrors).some((value) => value);
-
-    if (hasErrors) {
-      setError(newErrors);
+    if (Object.keys(newErrors).length > 0) {
+      setLoginErrors(newErrors);
       return;
     }
-
-    setError({ ...emptyErrors });
-    setLoginError("");
 
     try {
       const user = await dispatch(
@@ -204,7 +150,6 @@ const AuthModals = () => {
       ).unwrap();
 
       // Navigate to role dashboard after successful login
-      // Use the role from the login response instead of Redux state to avoid timing issues
       const userRole = user.role || activeRoleTab;
       switch (userRole) {
         case "admin":
@@ -228,13 +173,12 @@ const AuthModals = () => {
         onClose(); // This will reset all states automatically
       }, 50);
     } catch (err) {
-      // Normalize error and set login-specific error
-      const normalizedError = normalizeAuthError(err);
-      setLoginError(normalizedError);
+      // Use the global error handler
+      const normalizedError = handleLoginApiError(err, toast.error);
 
-      // Only show toast for network/server errors, not validation/business rules
-      if (isNetworkError(err)) {
-        toast.error(normalizedError);
+      // Only show toast for general errors, not field/form validation errors
+      if (normalizedError.type === "general") {
+        toast.error(normalizedError.message);
       }
     }
   };
@@ -243,40 +187,33 @@ const AuthModals = () => {
     e.preventDefault();
     dispatch(clearAuthError());
 
-    const newErrors = { ...emptyErrors };
+    // Clear previous errors
+    clearAllRegistrationErrors();
 
-    // Email validation
+    // Basic validation
+    const newErrors = {};
     if (!email) newErrors.email = "Email is required";
     else if (!/\S+@\S+\.\S+/.test(email)) newErrors.email = "Email is invalid";
 
-    // Username validation
     if (!username) newErrors.username = "Username is required";
     else if (username.length < 3)
       newErrors.username = "Username must be at least 3 characters";
 
-    // Password validation
     if (!password) newErrors.password = "Password is required";
     else if (password.length < 6)
       newErrors.password = "Password must be at least 6 characters";
 
-    // Confirm password validation
     if (!confirmPassword)
       newErrors.confirmPassword = "Please confirm your password";
     else if (password !== confirmPassword)
       newErrors.confirmPassword = "Passwords do not match";
 
-    // Role validation
     if (!role) newErrors.role = "Please select a role";
 
-    const hasErrors = Object.values(newErrors).some((value) => value);
-
-    if (hasErrors) {
-      setError(newErrors);
+    if (Object.keys(newErrors).length > 0) {
+      setRegistrationErrors(newErrors);
       return;
     }
-
-    setError({ ...emptyErrors });
-    setRegistrationError("");
 
     try {
       const response = await dispatch(
@@ -293,8 +230,7 @@ const AuthModals = () => {
       setRegistrationStep("otp");
       console.log("Registration Response:", response);
 
-      // Extract userId with better debugging - backend should return user_id as number
-      // Based on API spec, successful registration returns user_id
+      // Extract userId with better debugging
       const extractedUserId =
         response.user_id || response.user?.id || response.id || response.userId;
 
@@ -319,34 +255,13 @@ const AuthModals = () => {
       }
 
       setUserId(extractedUserId);
-      // Don't clear form fields yet
     } catch (err) {
-      // Normalize error and set registration-specific error
-      const normalizedError = normalizeAuthError(err);
-      setRegistrationError(normalizedError);
+      // Use global error handler
+      const normalizedError = handleRegistrationApiError(err, toast.error);
 
-      // Handle field-specific errors separately
-      if (err?.response?.data?.details) {
-        const details = err.response.data.details;
-        const fieldErrors = {};
-
-        // Extract field errors for inline display
-        Object.entries(details).forEach(([field, messages]) => {
-          if (field !== "non_field_errors" && messages) {
-            fieldErrors[field] = Array.isArray(messages)
-              ? messages[0]
-              : messages;
-          }
-        });
-
-        if (Object.keys(fieldErrors).length > 0) {
-          setError((prev) => ({ ...prev, ...fieldErrors }));
-        }
-      }
-
-      // Only show toast for network/server errors, not validation/business rules
-      if (isNetworkError(err)) {
-        toast.error(normalizedError);
+      // Only show toast for general errors, not field/form validation errors
+      if (normalizedError.type === "general") {
+        toast.error(normalizedError.message);
       }
     }
   };
@@ -363,11 +278,11 @@ const AuthModals = () => {
     } catch (err) {
       console.error("Resend OTP failed:", err);
 
-      if (typeof err === "object" && err !== null) {
-        toast.error(err.error || err.message || "Failed to resend OTP");
-      } else {
-        toast.error(err || "Failed to resend OTP");
-      }
+      // Use global error handler
+      const normalizedError = normalizeApiError(err);
+
+      // Show error as toast for resend OTP
+      toast.error(normalizedError.message);
     }
   };
 
@@ -401,15 +316,16 @@ const AuthModals = () => {
     } catch (err) {
       console.error("OTP verification failed:", err);
 
-      if (typeof err === "object" && err !== null) {
-        // Handle 500 errors specifically
-        if (err.status === 500) {
-          setOtpError(`${err.error || "Server error"} ${err.suggestion || ""}`);
-        } else {
-          setOtpError(err.error || err.message || "OTP verification failed");
-        }
+      // Use global error handler
+      const normalizedError = normalizeApiError(err);
+
+      // For OTP errors, always show them inline (not as toast)
+      if (normalizedError.type === "field" || normalizedError.type === "form") {
+        setOtpError(normalizedError.message);
       } else {
-        setOtpError("OTP verification failed. Please try again.");
+        // General errors can be shown as toast
+        toast.error(normalizedError.message);
+        setOtpError("Verification failed. Please try again.");
       }
     }
   };
@@ -443,9 +359,7 @@ const AuthModals = () => {
                     setEmail("");
                     setPassword("");
                     setShowLoginPassword(false);
-                    setError({ ...emptyErrors });
-                    setBackendErrors({});
-                    setLoginError("");
+                    clearAllLoginErrors();
                     dispatch(clearAuthError());
                     // Set the new role
                     setActiveRoleTab(roleOption);
@@ -477,16 +391,15 @@ const AuthModals = () => {
                   onChange={(e) => {
                     toast.dismiss();
                     setEmail(e.target.value);
-                    setError((prev) => ({ ...prev, email: "" }));
-                    setLoginError("");
+                    clearLoginFieldError("email");
                     dispatch(clearAuthError());
                   }}
                   placeholder="e.g. user@email.com"
                   className="w-full bg-slate-950 border border-white/5 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
                 />
-                {error.email && (
+                {loginErrors.email && (
                   <p className="text-red-500 text-xs mt-2 animate-shake">
-                    {error.email}
+                    {loginErrors.email}
                   </p>
                 )}
               </div>
@@ -507,8 +420,7 @@ const AuthModals = () => {
                     onChange={(e) => {
                       toast.dismiss();
                       setPassword(e.target.value);
-                      setError((prev) => ({ ...prev, password: "" }));
-                      setLoginError("");
+                      clearLoginFieldError("password");
                       dispatch(clearAuthError());
                     }}
                     placeholder="••••••••"
@@ -525,29 +437,18 @@ const AuthModals = () => {
                     ></i>
                   </button>
                 </div>
-                {error.password && (
+                {loginErrors.password && (
                   <p className="text-red-500 text-xs mt-2 animate-shake">
-                    {error.password}
+                    {Array.isArray(loginErrors.password)
+                      ? loginErrors.password[0]
+                      : loginErrors.password}
                   </p>
-                )}
-                {backendErrors.password && (
-                  <div className="text-red-500 text-xs mt-2 space-y-1">
-                    {Array.isArray(backendErrors.password) ? (
-                      backendErrors.password.map((msg, idx) => (
-                        <p key={idx} className="animate-shake">
-                          {msg}
-                        </p>
-                      ))
-                    ) : (
-                      <p className="animate-shake">{backendErrors.password}</p>
-                    )}
-                  </div>
                 )}
               </div>
 
-              {loginError && !hasLocalErrors && (
+              {loginFormError && (
                 <p className="text-red-500 text-xs font-bold animate-shake text-center">
-                  {loginError}
+                  {loginFormError}
                 </p>
               )}
 
@@ -591,34 +492,18 @@ const AuthModals = () => {
                     onChange={(e) => {
                       toast.dismiss();
                       setEmail(e.target.value);
-                      setError((prev) => ({ ...prev, email: "" }));
-                      setRegistrationError("");
+                      clearRegistrationFieldError("email");
                       dispatch(clearAuthError());
-                      setBackendErrors((prev) => ({
-                        ...prev,
-                        email: undefined,
-                      }));
                     }}
                     placeholder="example@example.com"
                     className="w-full bg-slate-950 border border-white/5 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
                   />
-                  {error.email && (
+                  {registrationErrors.email && (
                     <p className="text-red-500 text-xs mt-2 animate-shake">
-                      {error.email}
+                      {Array.isArray(registrationErrors.email)
+                        ? registrationErrors.email[0]
+                        : registrationErrors.email}
                     </p>
-                  )}
-                  {backendErrors.email && (
-                    <div className="text-red-500 text-xs mt-2 space-y-1">
-                      {Array.isArray(backendErrors.email) ? (
-                        backendErrors.email.map((msg, idx) => (
-                          <p key={idx} className="animate-shake">
-                            {msg}
-                          </p>
-                        ))
-                      ) : (
-                        <p className="animate-shake">{backendErrors.email}</p>
-                      )}
-                    </div>
                   )}
                 </div>
 
@@ -635,18 +520,17 @@ const AuthModals = () => {
                     name="register-username"
                     type="text"
                     value={username}
-                    maxLength={150}
+                    // maxLength={150}
                     onChange={(e) => {
                       toast.dismiss();
                       setUsername(e.target.value);
-                      setError((prev) => ({ ...prev, username: "" }));
-                      setRegistrationError("");
+                      clearRegistrationFieldError("username");
                       dispatch(clearAuthError());
                     }}
                     placeholder="JohnDoe"
                     className="w-full bg-slate-950 border border-white/5 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
                   />
-                  <div className="flex justify-between items-center mt-1">
+                  {/* <div className="flex justify-between items-center mt-1">
                     <span className="text-xs text-slate-500">
                       3-150 characters
                     </span>
@@ -655,10 +539,12 @@ const AuthModals = () => {
                     >
                       {username.length}/150
                     </span>
-                  </div>
-                  {error.username && (
+                  </div> */}
+                  {registrationErrors.username && (
                     <p className="text-red-500 text-xs mt-2 animate-shake">
-                      {error.username}
+                      {Array.isArray(registrationErrors.username)
+                        ? registrationErrors.username[0]
+                        : registrationErrors.username}
                     </p>
                   )}
                 </div>
@@ -679,13 +565,8 @@ const AuthModals = () => {
                       onChange={(e) => {
                         toast.dismiss();
                         setPassword(e.target.value);
-                        setError((prev) => ({ ...prev, password: "" }));
-                        setRegistrationError("");
+                        clearRegistrationFieldError("password");
                         dispatch(clearAuthError());
-                        setBackendErrors((prev) => ({
-                          ...prev,
-                          password: undefined,
-                        }));
                       }}
                       placeholder="••••••••"
                       className="w-full bg-slate-950 border border-white/5 rounded-2xl px-6 py-4 pr-12 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
@@ -703,25 +584,12 @@ const AuthModals = () => {
                       ></i>
                     </button>
                   </div>
-                  {error.password && (
+                  {registrationErrors.password && (
                     <p className="text-red-500 text-xs mt-2 animate-shake">
-                      {error.password}
+                      {Array.isArray(registrationErrors.password)
+                        ? registrationErrors.password[0]
+                        : registrationErrors.password}
                     </p>
-                  )}
-                  {backendErrors.password && (
-                    <div className="text-red-500 text-xs mt-2 space-y-1">
-                      {Array.isArray(backendErrors.password) ? (
-                        backendErrors.password.map((msg, idx) => (
-                          <p key={idx} className="animate-shake">
-                            {msg}
-                          </p>
-                        ))
-                      ) : (
-                        <p className="animate-shake">
-                          {backendErrors.password}
-                        </p>
-                      )}
-                    </div>
                   )}
 
                   {/* Password Strength Indicator */}
@@ -792,11 +660,7 @@ const AuthModals = () => {
                       onChange={(e) => {
                         toast.dismiss();
                         setConfirmPassword(e.target.value);
-                        setError((prev) => ({
-                          ...prev,
-                          confirmPassword: "",
-                        }));
-                        setRegistrationError("");
+                        clearRegistrationFieldError("confirmPassword");
                         dispatch(clearAuthError());
                       }}
                       placeholder="••••••••"
@@ -815,9 +679,11 @@ const AuthModals = () => {
                       ></i>
                     </button>
                   </div>
-                  {error.confirmPassword && (
+                  {registrationErrors.confirmPassword && (
                     <p className="text-red-500 text-xs mt-2 animate-shake">
-                      {error.confirmPassword}
+                      {Array.isArray(registrationErrors.confirmPassword)
+                        ? registrationErrors.confirmPassword[0]
+                        : registrationErrors.confirmPassword}
                     </p>
                   )}
                 </div>
@@ -836,8 +702,7 @@ const AuthModals = () => {
                     onChange={(e) => {
                       toast.dismiss();
                       setRole(e.target.value);
-                      setError((prev) => ({ ...prev, role: "" }));
-                      setRegistrationError("");
+                      clearRegistrationFieldError("role");
                       dispatch(clearAuthError());
                     }}
                     className="w-full bg-slate-950 border border-white/5 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
@@ -848,18 +713,21 @@ const AuthModals = () => {
                     <option value="student">Student</option>
                     <option value="parent">Parent</option>
                   </select>
-                  {error.role && (
+                  {registrationErrors.role && (
                     <p className="text-red-500 text-xs mt-2 animate-shake">
-                      {error.role}
+                      {Array.isArray(registrationErrors.role)
+                        ? registrationErrors.role[0]
+                        : registrationErrors.role}
                     </p>
                   )}
                 </div>
 
-                {registrationError && !hasLocalErrors && (
+                {registrationFormError && (
                   <p className="text-red-500 text-xs font-bold animate-shake text-center">
-                    {registrationError}
+                    {registrationFormError}
                   </p>
                 )}
+
                 <button
                   type="submit"
                   disabled={isLoading}

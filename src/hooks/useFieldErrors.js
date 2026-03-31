@@ -8,6 +8,7 @@ import { normalizeApiError } from "../utils/errorHandler";
  */
 export const useFieldErrors = (initialErrors = {}) => {
   const [errors, setErrors] = useState(initialErrors);
+  const [formError, setFormError] = useState(null);
 
   /**
    * Handle API errors and map them to form fields
@@ -38,6 +39,8 @@ export const useFieldErrors = (initialErrors = {}) => {
 
     // Handle form-level errors (non_field_errors)
     if (normalizedError.type === "form") {
+      setFormError(normalizedError.message);
+
       // Show toast for form errors if toast function provided and shouldShowToast is true
       if (toastFunction && normalizedError.shouldShowToast) {
         toastFunction(normalizedError.message);
@@ -90,6 +93,7 @@ export const useFieldErrors = (initialErrors = {}) => {
    */
   const clearAllErrors = useCallback(() => {
     setErrors({});
+    setFormError(null);
   }, []);
 
   /**
@@ -146,6 +150,7 @@ export const useFieldErrors = (initialErrors = {}) => {
 
   return {
     errors,
+    formError,
     setErrors,
     handleApiError,
     clearFieldError,

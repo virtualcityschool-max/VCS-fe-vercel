@@ -131,8 +131,19 @@ export const loginUser = createAsyncThunk(
       }
     } catch (error) {
       console.error("❌ Login error:", error);
-      // Preserve full error object for proper non_field_errors handling
-      return rejectWithValue(error);
+      // Preserve full error structure for proper normalization in UI
+      const serializableError = {
+        message: error.message,
+        code: error.code,
+        response: error.response
+          ? {
+              status: error.response.status,
+              statusText: error.response.statusText,
+              data: error.response.data,
+            }
+          : null,
+      };
+      return rejectWithValue(serializableError);
     }
   },
 );
@@ -157,13 +168,20 @@ export const registerUser = createAsyncThunk(
       const response = await authService.register(userData);
       return response;
     } catch (err) {
-      // Extract error message to avoid storing non-serializable AxiosError
-      const errorMessage =
-        err.response?.data?.error ||
-        err.response?.data?.message ||
-        err.message ||
-        "Registration failed";
-      return rejectWithValue(errorMessage);
+      // Preserve full error structure for proper normalization in UI
+      // Create a serializable error object that maintains backend response structure
+      const serializableError = {
+        message: err.message,
+        code: err.code,
+        response: err.response
+          ? {
+              status: err.response.status,
+              statusText: err.response.statusText,
+              data: err.response.data,
+            }
+          : null,
+      };
+      return rejectWithValue(serializableError);
     }
   },
 );
@@ -175,8 +193,19 @@ export const verifyOtp = createAsyncThunk(
       const response = await authService.verifyOtp(userId, otp);
       return response;
     } catch (err) {
-      // Preserve full error object for proper normalization
-      return rejectWithValue(err);
+      // Preserve full error structure for proper normalization in UI
+      const serializableError = {
+        message: err.message,
+        code: err.code,
+        response: err.response
+          ? {
+              status: err.response.status,
+              statusText: err.response.statusText,
+              data: err.response.data,
+            }
+          : null,
+      };
+      return rejectWithValue(serializableError);
     }
   },
 );
@@ -188,8 +217,19 @@ export const resendOtp = createAsyncThunk(
       const response = await authService.resendOtp(email);
       return response;
     } catch (err) {
-      // Preserve full error object for proper normalization
-      return rejectWithValue(err);
+      // Preserve full error structure for proper normalization in UI
+      const serializableError = {
+        message: err.message,
+        code: err.code,
+        response: err.response
+          ? {
+              status: err.response.status,
+              statusText: err.response.statusText,
+              data: err.response.data,
+            }
+          : null,
+      };
+      return rejectWithValue(serializableError);
     }
   },
 );

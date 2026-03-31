@@ -368,8 +368,23 @@ const adminSlice = createSlice({
       })
       .addCase(fetchCourses.fulfilled, (state, action) => {
         state.courses.loading = false;
-        state.courses.data =
+        const coursesData =
           action.payload.data?.data || action.payload.data || action.payload;
+
+        // Restore timestamps from localStorage
+        const timestamps = JSON.parse(
+          localStorage.getItem("courseUpdateTimestamps") || "{}",
+        );
+        const coursesWithTimestamps = coursesData.map((course) => ({
+          ...course,
+          updated_at:
+            course.updated_at ||
+            course.modified_at ||
+            timestamps[course.id] ||
+            null,
+        }));
+
+        state.courses.data = coursesWithTimestamps;
         state.courses.pagination =
           action.payload.pagination || initialState.courses.pagination;
       })
@@ -393,9 +408,39 @@ const adminSlice = createSlice({
         // No optimistic update for instructor-related changes to prevent data corruption
         // Let the refetch handle the state update
       })
-      .addCase(updateCourse.fulfilled, () => {
-        // No local state update - let the refetch handle data synchronization
-        // This prevents instructor object corruption from partial API responses
+      .addCase(updateCourse.fulfilled, (state, action) => {
+        const { courseId } = action.payload;
+        const courseIndex = state.courses.data.findIndex(
+          (course) => course.id === courseId,
+        );
+
+        if (courseIndex !== -1) {
+          // Get the existing course data
+          const existingCourse = state.courses.data[courseIndex];
+
+          // Update with new data from API response and add local timestamp
+          const updatedCourse = {
+            ...existingCourse,
+            ...action.payload, // Use the actual API response data
+            updated_at: new Date().toISOString(), // Add local timestamp
+          };
+
+          // Store timestamp in localStorage for persistence
+          const timestamps = JSON.parse(
+            localStorage.getItem("courseUpdateTimestamps") || "{}",
+          );
+          timestamps[courseId] = updatedCourse.updated_at;
+          localStorage.setItem(
+            "courseUpdateTimestamps",
+            JSON.stringify(timestamps),
+          );
+
+          // Remove from current position
+          state.courses.data.splice(courseIndex, 1);
+
+          // Add to the beginning of the array (top of list)
+          state.courses.data.unshift(updatedCourse);
+        }
       })
       .addCase(updateCourse.rejected, () => {
         // No optimistic update to revert - error handled via toast notification
