@@ -107,7 +107,8 @@ const TeacherPortal = () => {
                 Welcome, {dashboard?.teacher?.username || "Instructor"}!
               </h2>
               <p className="text-indigo-100 text-sm sm:text-base font-medium">
-                You have {dashboard?.upcoming_sessions_count || 0} Live Sessions.
+                You have {dashboard?.upcoming_sessions_count || 0} Live
+                Sessions.
               </p>
             </div>
             <i className="fas fa-sparkles absolute top-6 sm:top-10 right-6 sm:right-10 text-6xl sm:text-8xl text-white/10"></i>
@@ -116,49 +117,48 @@ const TeacherPortal = () => {
             <p className="text-[10px] font-black uppercase text-slate-500 tracking-[0.3em] mb-4">
               Total Students
             </p>
-            <h3 className="text-4xl sm:text-5xl font-black text-white">{dashboard?.total_students || 0}</h3>
+            <h3 className="text-4xl sm:text-5xl font-black text-white">
+              {dashboard?.total_students || 0}
+            </h3>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-10 gap-10">
           <div className="lg:col-span-6 space-y-8">
             <h3 className="text-xl font-bold font-poppins">Today's Schedule</h3>
-            <div className="space-y-4">
-              {[
-                {
-                  time: "10:00 AM",
-                  title: "Quantum Mechanics Basics",
-                  room: "VR-102",
-                  count: 42,
-                },
-                {
-                  time: "01:30 PM",
-                  title: "Advanced Lab: Optics",
-                  room: "VR-005",
-                  count: 12,
-                },
-              ].map((c, i) => (
+            {dashboard?.todays_schedule?.length ? (
+              dashboard.todays_schedule.map((session) => (
                 <div
-                  key={i}
+                  key={session.id}
                   className="bg-slate-900 p-6 rounded-3xl border border-slate-800 flex items-center justify-between hover:border-indigo-500 transition cursor-pointer group"
                 >
                   <div className="flex items-center gap-6">
-                    <div className="text-indigo-400 font-black text-sm">
-                      {c.time}
+                    <div className="text-indigo-400 font-black text-sm whitespace-nowrap">
+                      {new Date(session.schedule_at).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
                     </div>
+
                     <div>
                       <p className="font-bold text-white group-hover:text-indigo-400 transition">
-                        {c.title}
+                        {session.title}
                       </p>
                       <p className="text-[10px] text-slate-500 uppercase tracking-widest">
-                        {c.room} • {c.count} Learners
+                        {session.course_title} • {session.total_learners}{" "}
+                        Learners
                       </p>
                     </div>
                   </div>
+
                   <i className="fas fa-chevron-right text-slate-700"></i>
                 </div>
-              ))}
-            </div>
+              ))
+            ) : (
+              <div className="bg-slate-900 p-6 rounded-3xl border border-slate-800 text-slate-400 text-sm">
+                No sessions scheduled for today.
+              </div>
+            )}
           </div>
 
           <div className="lg:col-span-4 space-y-8">
@@ -166,36 +166,39 @@ const TeacherPortal = () => {
               Risk Alerts
             </h3>
             <div className="bg-rose-500/5 border border-rose-500/20 p-8 rounded-5xl space-y-6 shadow-2xl">
-              {[
-                {
-                  name: "Kevin Wu",
-                  status: "Plagiarism Alert",
-                  action: () => navigate("/student/kevin-wu"),
-                },
-                {
-                  name: "Sarah Ahmed",
-                  status: "Attendance Drop",
-                  action: () => {},
-                },
-              ].map((risk, i) => (
-                <div
-                  key={i}
-                  onClick={risk.action}
-                  className="flex items-center justify-between p-4 bg-slate-900 rounded-2xl border border-rose-500/20 cursor-pointer hover:bg-rose-500/10 transition group"
-                >
-                  <div>
-                    <p className="font-bold text-white group-hover:text-rose-400">
-                      {risk.name}
-                    </p>
-                    <p className="text-[10px] text-rose-500 uppercase font-black tracking-widest">
-                      {risk.status}
-                    </p>
+              {dashboard?.risk_alerts?.length ? (
+                dashboard.risk_alerts.map((alert, i) => (
+                  <div
+                    key={`${alert.student_id}-${i}`}
+                    onClick={() => navigate(`/student/${alert.student_id}`)}
+                    className="flex items-center justify-between p-4 bg-slate-900 rounded-2xl border border-rose-500/20 cursor-pointer hover:bg-rose-500/10 transition group"
+                  >
+                    <div>
+                      <p className="font-bold text-white group-hover:text-rose-400">
+                        {alert.student_name}
+                      </p>
+                      <p className="text-[10px] text-rose-500 uppercase font-black tracking-widest">
+                        {alert.alert_type?.replaceAll("_", " ") || "Risk Alert"}
+                      </p>
+                      <p className="text-[10px] text-slate-500 uppercase tracking-widest mt-1">
+                        {alert.course_title} • {alert.attendance_percentage}%
+                        attendance
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      className="bg-rose-600 text-white px-4 py-2 rounded-xl text-[8px] font-black uppercase shadow-lg"
+                    >
+                      Review
+                    </button>
                   </div>
-                  <button className="bg-rose-600 text-white px-4 py-2 rounded-xl text-[8px] font-black uppercase shadow-lg">
-                    Review
-                  </button>
+                ))
+              ) : (
+                <div className="bg-slate-900 p-6 rounded-3xl border border-slate-800 text-slate-400 text-sm">
+                  No risk alerts right now.
                 </div>
-              ))}
+              )}
             </div>
           </div>
         </div>
