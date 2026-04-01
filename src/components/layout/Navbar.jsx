@@ -36,10 +36,10 @@ const Navbar = ({ variant = "default" }) => {
                 Browse Courses
               </button>
               <button
-                onClick={() => navigate("/instructors")}
+                onClick={() => navigate("/teachers")}
                 className="text-sm font-bold text-slate-400 hover:text-white transition"
               >
-                Find Tutors
+                Find Teachers
               </button>
             </div>
           </div>
@@ -128,12 +128,12 @@ const Navbar = ({ variant = "default" }) => {
               Dashboard
             </button>
             <button
-              onClick={() => navigate("/instructors")}
+              onClick={() => navigate("/teachers")}
               className={`text-slate-400 font-medium text-xs sm:text-sm hover:text-white transition cursor-pointer ${
-                isActivePath("/instructors") ? "text-white" : ""
+                isActivePath("/teachers") ? "text-white" : ""
               }`}
             >
-              Instructors
+              Teachers
             </button>
             <button
               onClick={() => navigate("/courses")}

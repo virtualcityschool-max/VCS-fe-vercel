@@ -20,8 +20,8 @@ export const ROUTES = {
   PUBLIC: {
     HOME: "/",
     COURSES: "/courses",
-    INSTRUCTORS: "/instructors",
-    TEACHER_PROFILE: "/teacher/:id",
+    TEACHERS: "/teachers",
+    TEACHER_PROFILE: "/teachers/:id",
   },
   PROTECTED: {
     ADMIN: "/admin",

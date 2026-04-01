@@ -2,8 +2,8 @@
 export { default as PublicHome } from "./public/PublicHome";
 export { default as Marketplace } from "./public/Marketplace";
 export { default as CourseDetails } from "./public/CourseDetails";
-export { default as InstructorsDirectory } from "./public/InstructorsDirectory";
-export { default as PublicTeacherProfile } from "./public/PublicTeacherProfile";
+export { default as TeachersDirectory } from "./public/TeachersDirectory";
+export { default as TeacherProfile } from "./public/TeacherProfile";
 
 // Student Pages
 export { default as StudentPortal } from "./student/StudentPortal";

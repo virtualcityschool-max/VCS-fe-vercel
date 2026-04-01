@@ -18,6 +18,17 @@ const getTeachers = async (params = {}) => {
   return response.data;
 };
 
+const getTeacherById = async (id) => {
+  if (!id || typeof id !== "string" || id.trim() === "") {
+    throw new Error("Valid teacher ID is required");
+  }
+  const response = await axiosInstance.get(
+    `/courses/teachers/${encodeURIComponent(id.trim())}`,
+  );
+  return response.data;
+};
+
 export const teacherService = {
   getTeachers,
+  getTeacherById,
 };

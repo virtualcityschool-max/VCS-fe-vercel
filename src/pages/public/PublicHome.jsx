@@ -63,8 +63,8 @@ const PublicHome = () => {
           </span>
         </h1>
         <p className="text-slate-400 text-lg md:text-2xl mb-14 max-w-3xl mx-auto leading-relaxed font-medium">
-          Connect with world-class instructors for high-fidelity Live Classes
-          and On-Demand mastery modules at{" "}
+          Connect with world-class teachers for high-fidelity Live Classes and
+          On-Demand mastery modules at{" "}
           <span className="text-white font-bold">VirtualCitySchool</span>.
         </p>
 
@@ -102,7 +102,7 @@ const PublicHome = () => {
             <i className="fas fa-arrow-right group-hover:translate-x-1 transition"></i>
           </button>
           <button
-            onClick={() => navigate("/instructors")}
+            onClick={() => navigate("/teachers")}
             className="group flex items-center justify-center gap-3 border border-white/10 hover:border-white/20 bg-white/5 hover:bg-white/10 text-white px-6 sm:px-10 py-4 sm:py-5 rounded-4xl font-black text-[10px] sm:text-xs uppercase tracking-widest transition-all hover:scale-105"
           >
             Find a Private Tutor
@@ -156,9 +156,9 @@ const PublicHome = () => {
                         {course.title}
                       </h4>
                       <p className="text-slate-500 text-sm font-medium">
-                        {course.instructor?.username ||
-                          course.instructor?.first_name ||
-                          "Instructor"}
+                        {course.teacher?.username ||
+                          course.teacher?.first_name ||
+                          "Teacher"}
                       </p>
                       <div className="mt-8 flex justify-between items-center border-t border-white/5 pt-6">
                         <span className="text-green-400 font-black">

@@ -5,7 +5,7 @@ import studentDashboardReducer from "./slices/studentDashboardSlice";
 import adminReducer from "./slices/adminSlice";
 import coursesReducer from "./slices/coursesSlice";
 import approvalsReducer from "./slices/approvalsSlice";
-import instructorsReducer from "./slices/instructorsSlice";
+import teachersReducer from "./slices/teacherSlice";
 import { authStorage } from "../utils/authStorage";
 
 // Load auth state from localStorage using authStorage utilities
@@ -62,7 +62,7 @@ export const store = configureStore({
     admin: adminReducer,
     courses: coursesReducer,
     approvals: approvalsReducer,
-    instructors: instructorsReducer,
+    teachers: teachersReducer,
   },
   preloadedState: preloadedAuthState ? { auth: preloadedAuthState } : undefined,
 });

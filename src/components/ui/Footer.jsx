@@ -1,8 +1,8 @@
-import React from 'react';
-import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import React from "react";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
-const Footer = ({ variant = 'full' }) => {
+const Footer = ({ variant = "full" }) => {
   const navigate = useNavigate();
   const { isLoggedIn } = useSelector((state) => state.auth);
 
@@ -10,7 +10,7 @@ const Footer = ({ variant = 'full' }) => {
     navigate(path);
   };
 
-  if (variant === 'minimal') {
+  if (variant === "minimal") {
     return (
       <footer className="bg-slate-900 border-t border-slate-800 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center">
@@ -37,19 +37,33 @@ const Footer = ({ variant = 'full' }) => {
               </span>
             </div>
             <p className="text-slate-400 text-sm mb-6 max-w-md">
-              Next-generation learning platform connecting students with world-class instructors for live classes and on-demand mastery modules.
+              Next-generation learning platform connecting students with
+              world-class teachers for live classes and on-demand mastery
+              modules.
             </p>
             <div className="flex gap-4">
-              <a href="#" className="text-slate-400 hover:text-white transition">
+              <a
+                href="#"
+                className="text-slate-400 hover:text-white transition"
+              >
                 <i className="fab fa-twitter"></i>
               </a>
-              <a href="#" className="text-slate-400 hover:text-white transition">
+              <a
+                href="#"
+                className="text-slate-400 hover:text-white transition"
+              >
                 <i className="fab fa-linkedin"></i>
               </a>
-              <a href="#" className="text-slate-400 hover:text-white transition">
+              <a
+                href="#"
+                className="text-slate-400 hover:text-white transition"
+              >
                 <i className="fab fa-facebook"></i>
               </a>
-              <a href="#" className="text-slate-400 hover:text-white transition">
+              <a
+                href="#"
+                className="text-slate-400 hover:text-white transition"
+              >
                 <i className="fab fa-instagram"></i>
               </a>
             </div>
@@ -60,34 +74,34 @@ const Footer = ({ variant = 'full' }) => {
             <h3 className="text-white font-semibold mb-4">Quick Links</h3>
             <ul className="space-y-2">
               <li>
-                <button 
-                  onClick={() => handleNavigation('/courses')}
+                <button
+                  onClick={() => handleNavigation("/courses")}
                   className="text-slate-400 hover:text-white transition text-sm"
                 >
                   Browse Courses
                 </button>
               </li>
               <li>
-                <button 
-                  onClick={() => handleNavigation('/instructors')}
+                <button
+                  onClick={() => handleNavigation("/teachers")}
                   className="text-slate-400 hover:text-white transition text-sm"
                 >
-                  Find Tutors
+                  Find Teachers
                 </button>
               </li>
               {isLoggedIn && (
                 <>
                   <li>
-                    <button 
-                      onClick={() => handleNavigation('/feed')}
+                    <button
+                      onClick={() => handleNavigation("/feed")}
                       className="text-slate-400 hover:text-white transition text-sm"
                     >
                       Student Feed
                     </button>
                   </li>
                   <li>
-                    <button 
-                      onClick={() => handleNavigation('/classroom')}
+                    <button
+                      onClick={() => handleNavigation("/classroom")}
                       className="text-slate-400 hover:text-white transition text-sm"
                     >
                       Classroom

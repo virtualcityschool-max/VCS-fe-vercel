@@ -932,7 +932,7 @@ const AdminDashboard = () => {
                       Course Management
                     </h3>
                     <p className="text-slate-400 text-sm leading-relaxed">
-                      Create and manage courses, assign instructors, and track
+                      Create and manage courses, assign teachers, and track
                       course status
                     </p>
                   </div>
@@ -1074,7 +1074,7 @@ const AdminDashboard = () => {
                           }
                           className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-indigo-500/20 outline-none focus:border-indigo-500 transition"
                         >
-                          <option value="">All Instructors</option>
+                          <option value="">All Teachers</option>
                           {courseFilterOptions.instructors.map((instructor) => (
                             <option key={instructor} value={instructor}>
                               {instructor}
@@ -1168,7 +1168,7 @@ const AdminDashboard = () => {
                     </h4>
                     <p className="text-slate-400 text-sm mb-6 leading-relaxed max-w-md mx-auto">
                       Start by creating your first course. You can add content,
-                      set pricing, and assign instructors.
+                      set pricing, and assign teachers.
                     </p>
                     <button
                       onClick={() => setActiveModal("create-course")}

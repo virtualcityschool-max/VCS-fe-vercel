@@ -1,44 +1,71 @@
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchTeachers } from "../../store/slices/instructorsSlice";
+import { fetchTeachers } from "../../store/slices/teacherSlice";
 
-const InstructorsDirectory = () => {
+const TeachersDirectory = () => {
   const [hasFetched, setHasFetched] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
+  const abortControllerRef = useRef(null);
 
   const dispatch = useDispatch();
-  const { teachers, loading, error } = useSelector(
-    (state) => state.instructors,
-  );
+  const { teachers, loading, error } = useSelector((state) => state.teachers);
 
   useEffect(() => {
+    // Cancel any ongoing request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
     const timer = setTimeout(async () => {
       const query = searchQuery.trim();
 
-      if (!query) {
-        await dispatch(fetchTeachers({}));
+      // Create new abort controller for this request
+      abortControllerRef.current = new AbortController();
+
+      try {
+        if (!query) {
+          await dispatch(fetchTeachers({}));
+          setHasFetched(true);
+          return;
+        }
+
+        const result = await dispatch(fetchTeachers({ teacher: query }));
+        const data = result.payload;
+
+        // Check if request was aborted
+        if (abortControllerRef.current?.signal.aborted) {
+          return;
+        }
+
+        if (!data || data.length === 0) {
+          // Only fetch by course if the teacher search returned no results
+          // and the request wasn't aborted
+          await dispatch(fetchTeachers({ course: query }));
+        }
+
         setHasFetched(true);
-        return;
+      } catch (error) {
+        // Ignore AbortError when request is cancelled
+        if (error.name !== "AbortError") {
+          console.error("Search error:", error);
+          setHasFetched(true);
+        }
       }
+    }, 600);
 
-      const result = await dispatch(fetchTeachers({ teacher: query }));
-      const data = result.payload;
-
-      if (!data || data.length === 0) {
-        await dispatch(fetchTeachers({ course: query }));
+    return () => {
+      clearTimeout(timer);
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
       }
-
-      setHasFetched(true);
-    }, 400);
-
-    return () => clearTimeout(timer);
+    };
   }, [dispatch, searchQuery]);
 
   return (
     <section
-      id="instructors-view"
+      id="teachers-view"
       className="min-h-screen bg-slate-950 text-white font-inter"
     >
       <div className="max-w-7xl mx-auto px-6 py-12 sm:py-20 text-center">
@@ -53,7 +80,7 @@ const InstructorsDirectory = () => {
           <div className="relative group">
             <input
               type="text"
-              placeholder="Search instructors or courses..."
+              placeholder="Search teachers or courses..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-slate-900/80 border border-slate-800 rounded-2xl px-6 py-4 text-sm outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500/40 transition shadow-lg placeholder:text-slate-500"
@@ -88,7 +115,7 @@ const InstructorsDirectory = () => {
           ) : teachers.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-slate-400 text-lg">
-                No instructors found matching your search.
+                No teachers found matching your search.
               </p>
             </div>
           ) : (
@@ -107,7 +134,7 @@ const InstructorsDirectory = () => {
 
                     <div className="flex-1">
                       <h3 className="text-lg font-semibold text-white">
-                        {teacher.teacher_name || "Unnamed instructor"}
+                        {teacher.teacher_name || "Unnamed teacher"}
                       </h3>
 
                       <p className="text-xs text-slate-400 mt-1">
@@ -153,7 +180,7 @@ const InstructorsDirectory = () => {
 
                   {/* CTA */}
                   <button
-                    onClick={() => navigate(`/instructors/${teacher.id}`)}
+                    onClick={() => navigate(`/teachers/${teacher.id}`)}
                     className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold uppercase tracking-wide transition shadow-md hover:shadow-indigo-500/30"
                   >
                     View Profile
@@ -171,4 +198,4 @@ const InstructorsDirectory = () => {
   );
 };
 
-export default InstructorsDirectory;
+export default TeachersDirectory;

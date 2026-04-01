@@ -25,9 +25,9 @@ import {
   StudentFeed,
   Marketplace,
   CourseDetails,
-  PublicTeacherProfile,
+  TeacherProfile,
   TeacherInternalStudentProfile,
-  InstructorsDirectory,
+  TeachersDirectory,
 } from "./pages";
 
 // Protected Route Component with Role-Based Access Control
@@ -151,8 +151,8 @@ const App = () => {
             <Route path="/" element={<PublicHome />} />
             <Route path="/courses" element={<Marketplace />} />
             <Route path="/courses/:courseId" element={<CourseDetails />} />
-            <Route path="/instructors" element={<InstructorsDirectory />} />
-            <Route path="/teacher/:id" element={<PublicTeacherProfile />} />
+            <Route path="/teachers" element={<TeachersDirectory />} />
+            <Route path="/teachers/:id" element={<TeacherProfile />} />
 
             {/* Student-Only Routes */}
             <Route element={<ProtectedRoute allowedRoles={["student"]} />}>

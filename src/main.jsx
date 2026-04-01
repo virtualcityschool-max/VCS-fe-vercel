@@ -4,7 +4,6 @@ import "./styles/index.css";
 import App from "./App.jsx";
 import { Provider } from "react-redux";
 import { store } from "./store";
-import { Toaster } from "react-hot-toast";
 import ErrorBoundary from "./components/ErrorBoundary";
 
 createRoot(document.getElementById("root")).render(
