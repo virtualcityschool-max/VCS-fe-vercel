@@ -38,9 +38,62 @@ export const fetchTeacherById = createAsyncThunk(
   },
 );
 
+export const fetchTeacherDashboard = createAsyncThunk(
+  "teachers/fetchTeacherDashboard",
+  async (_, { rejectWithValue }) => {
+    try {
+      const data = await teacherService.getTeacherDashboard();
+      return data;
+    } catch (error) {
+      return rejectWithValue(
+        error?.response?.data?.error ||
+          error?.message ||
+          "Failed to fetch dashboard",
+      );
+    }
+  },
+);
+
+export const fetchMyCourses = createAsyncThunk(
+  "teachers/fetchMyCourses",
+  async (_, { rejectWithValue }) => {
+    try {
+      const data = await teacherService.getMyCourses();
+      return data;
+    } catch (error) {
+      return rejectWithValue(
+        error?.response?.data?.error ||
+          error?.message ||
+          "Failed to fetch courses",
+      );
+    }
+  },
+);
+
+export const fetchAssignments = createAsyncThunk(
+  "teachers/fetchAssignments",
+  async (_, { rejectWithValue }) => {
+    try {
+      const data = await teacherService.getAssignments();
+      return data;
+    } catch (error) {
+      return rejectWithValue(
+        error?.response?.data?.error ||
+          error?.message ||
+          "Failed to fetch assignments",
+      );
+    }
+  },
+);
+
 const initialState = {
   teachers: [],
   teacherDetails: null,
+
+  dashboard: null,
+  myCourses: [],
+  assignments: [],
+
   loading: false,
   error: null,
 };
@@ -74,6 +127,29 @@ const teacherSlice = createSlice({
       .addCase(fetchTeacherById.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || "Failed to load teacher";
+      })
+      // DASHBOARD
+      .addCase(fetchTeacherDashboard.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchTeacherDashboard.fulfilled, (state, action) => {
+        state.loading = false;
+        state.dashboard = action.payload;
+      })
+      .addCase(fetchTeacherDashboard.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // MY COURSES
+      .addCase(fetchMyCourses.fulfilled, (state, action) => {
+        state.myCourses = Array.isArray(action.payload) ? action.payload : [];
+      })
+
+      // ASSIGNMENTS
+      .addCase(fetchAssignments.fulfilled, (state, action) => {
+        state.assignments = Array.isArray(action.payload) ? action.payload : [];
       });
   },
 });
