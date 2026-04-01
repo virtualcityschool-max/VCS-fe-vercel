@@ -28,7 +28,25 @@ const getTeacherById = async (id) => {
   return response.data;
 };
 
+const getTeacherDashboard = async () => {
+  const response = await axiosInstance.get("/classroom/teacher-dashboard/");
+  return response.data;
+};
+
+const getMyCourses = async () => {
+  const response = await axiosInstance.get("/classroom/my-courses/");
+  return response.data;
+};
+
+const getAssignments = async () => {
+  const response = await axiosInstance.get("/assignments/");
+  return response.data;
+};
+
 export const teacherService = {
   getTeachers,
   getTeacherById,
+  getTeacherDashboard,
+  getMyCourses,
+  getAssignments,
 };
