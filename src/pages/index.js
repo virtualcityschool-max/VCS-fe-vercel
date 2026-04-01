@@ -11,7 +11,11 @@ export { default as StudentFeed } from "./student/StudentFeed";
 export { default as Classroom } from "./student/Classroom";
 
 // Teacher Pages
+export { default as TeacherLayout } from "./teacher/TeacherLayout";
 export { default as TeacherPortal } from "./teacher/TeacherPortal";
+export { default as TeacherClasses } from "./teacher/TeacherClasses";
+export { default as TeacherAttendance } from "./teacher/TeacherAttendance";
+export { default as TeacherGrading } from "./teacher/TeacherGrading";
 export { default as TeacherInternalStudentProfile } from "./teacher/TeacherInternalStudentProfile";
 
 // Admin Pages

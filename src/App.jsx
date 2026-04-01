@@ -19,7 +19,11 @@ import {
   PublicHome,
   AdminDashboard,
   StudentPortal,
+  TeacherLayout,
   TeacherPortal,
+  TeacherClasses,
+  TeacherAttendance,
+  TeacherGrading,
   ParentPortal,
   Classroom,
   StudentFeed,
@@ -167,7 +171,13 @@ const App = () => {
 
             {/* Teacher-Only Routes */}
             <Route element={<ProtectedRoute allowedRoles={["teacher"]} />}>
-              <Route path="/teacher" element={<TeacherPortal />} />
+              <Route path="/teacher" element={<TeacherLayout />}>
+                <Route index element={<TeacherPortal />} />
+                <Route path="classes" element={<TeacherClasses />} />
+                <Route path="attendance" element={<TeacherAttendance />} />
+                <Route path="grading" element={<TeacherGrading />} />
+              </Route>
+
               <Route
                 path="/student/:id"
                 element={<TeacherInternalStudentProfile />}
