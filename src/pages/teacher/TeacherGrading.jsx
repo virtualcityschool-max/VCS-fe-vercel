@@ -49,7 +49,7 @@ const TeacherGrading = () => {
           assignments.map((assignment) => (
             <div
               key={assignment.id}
-              className="bg-slate-900 p-6 rounded-3xl border border-slate-800 hover:border-indigo-500 transition transform hover:-translate-y-1"
+              className="bg-slate-900 p-6 rounded-3xl border border-slate-800 hover:border-indigo-500 transition transform hover:-translate-y-1 "
             >
               <div className="flex items-center justify-between gap-4">
                 <div>
