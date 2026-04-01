@@ -37,6 +37,13 @@ const TeacherClasses = () => {
         </p>
       </div>
 
+      {myCourses?.length > 0 && (
+        <div className="mb-6 text-xs text-slate-400">
+          Showing {myCourses.length} course
+          {myCourses.length > 1 ? "s" : ""}
+        </div>
+      )}
+
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         {myCourses?.length ? (
           myCourses.map((course) => (
@@ -72,8 +79,9 @@ const TeacherClasses = () => {
             </div>
           ))
         ) : (
-          <div className="bg-slate-900 p-6 rounded-3xl border border-slate-800 text-slate-400 text-sm">
-            No classes available.
+          <div className="bg-slate-900 p-10 rounded-3xl border border-slate-800 text-center text-slate-400 text-sm">
+            <p className="mb-2 font-semibold text-white">No classes yet</p>
+            <p>You haven't created or been assigned any courses.</p>
           </div>
         )}
       </div>
