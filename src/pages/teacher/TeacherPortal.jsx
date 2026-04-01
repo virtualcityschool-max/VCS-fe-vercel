@@ -159,6 +159,45 @@ const TeacherPortal = () => {
                 No sessions scheduled for today.
               </div>
             )}
+            <h2 className="text-xl font-black font-poppins mb-6 flex items-center gap-3">
+              <i className="fas fa-book text-indigo-400"></i>
+              My Courses
+            </h2>
+
+            <div className="space-y-4">
+              {myCourses?.length ? (
+                myCourses.map((course) => (
+                  <div
+                    key={course.id}
+                    className="bg-slate-900 p-6 rounded-3xl border border-slate-800 hover:border-indigo-500 transition cursor-pointer group"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-bold text-white group-hover:text-indigo-400 transition">
+                          {course.title}
+                        </p>
+                        <p className="text-[10px] text-slate-500 uppercase tracking-widest">
+                          {course.category} • {course.total_enrolled} students
+                        </p>
+                      </div>
+
+                      <div className="text-right">
+                        <p className="text-yellow-400 font-bold text-sm">
+                          ⭐ {Number(course.rating || 0).toFixed(1)}
+                        </p>
+                        <p className="text-[10px] text-slate-500 uppercase">
+                          {course.status}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="bg-slate-900 p-6 rounded-3xl border border-slate-800 text-slate-400 text-sm">
+                  No courses available.
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="lg:col-span-4 space-y-8">
@@ -197,6 +236,56 @@ const TeacherPortal = () => {
               ) : (
                 <div className="bg-slate-900 p-6 rounded-3xl border border-slate-800 text-slate-400 text-sm">
                   No risk alerts right now.
+                </div>
+              )}
+            </div>
+            <h2 className="text-xl font-black font-poppins mt-10 mb-6 flex items-center gap-3">
+              <i className="fas fa-tasks text-indigo-400"></i>
+              Assignments
+            </h2>
+
+            <div className="space-y-4">
+              {assignments?.length ? (
+                assignments.map((a) => (
+                  <div
+                    key={a.id}
+                    className="bg-slate-900 p-6 rounded-3xl border border-slate-800 hover:border-indigo-500 transition group"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-bold text-white group-hover:text-indigo-400 transition">
+                          {a.title}
+                        </p>
+
+                        <p className="text-[10px] text-slate-500 uppercase tracking-widest">
+                          {a.course_title}
+                        </p>
+
+                        <p className="text-[10px] text-slate-400 mt-1">
+                          {a.submissions_count} submissions • Max Score{" "}
+                          {a.max_score}
+                        </p>
+                      </div>
+
+                      <div className="text-right">
+                        <p
+                          className={`text-xs font-bold ${
+                            a.is_overdue ? "text-rose-500" : "text-emerald-400"
+                          }`}
+                        >
+                          {a.is_overdue ? "Overdue" : "Active"}
+                        </p>
+
+                        <p className="text-[10px] text-slate-500">
+                          Due: {new Date(a.due_date).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="bg-slate-900 p-6 rounded-3xl border border-slate-800 text-slate-400 text-sm">
+                  No assignments available.
                 </div>
               )}
             </div>
