@@ -1,9 +1,43 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  fetchTeacherDashboard,
+  fetchMyCourses,
+  fetchAssignments,
+} from "../../store/slices/teacherSlice";
 
 const TeacherPortal = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const { dashboard, myCourses, assignments, loading, error } = useSelector(
+    (state) => state.teachers,
+  );
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    dispatch(fetchTeacherDashboard());
+    dispatch(fetchMyCourses());
+    dispatch(fetchAssignments());
+  }, [dispatch]);
+
+  if (loading && !dashboard) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-white">
+        <i className="fas fa-spinner animate-spin text-2xl"></i>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-red-400">
+        {error}
+      </div>
+    );
+  }
 
   return (
     <section
@@ -70,14 +104,10 @@ const TeacherPortal = () => {
           <div className="lg:col-span-2 bg-linear-to-br from-indigo-600 to-indigo-800 p-8 sm:p-10 rounded-5xl shadow-2xl relative overflow-hidden">
             <div className="relative z-10">
               <h2 className="text-2xl sm:text-3xl font-black font-poppins mb-2 text-white">
-                Welcome, Dr. Elena!
+                Welcome, {dashboard?.teacher?.username || "Instructor"}!
               </h2>
               <p className="text-indigo-100 text-sm sm:text-base font-medium">
-                You have{" "}
-                <span className="underline decoration-white/30">
-                  3 Live Classes
-                </span>{" "}
-                starting in the next 2 hours.
+                You have {dashboard?.upcoming_sessions_count || 0} Live Sessions.
               </p>
             </div>
             <i className="fas fa-sparkles absolute top-6 sm:top-10 right-6 sm:right-10 text-6xl sm:text-8xl text-white/10"></i>
@@ -86,7 +116,7 @@ const TeacherPortal = () => {
             <p className="text-[10px] font-black uppercase text-slate-500 tracking-[0.3em] mb-4">
               Total Students
             </p>
-            <h3 className="text-4xl sm:text-5xl font-black text-white">185</h3>
+            <h3 className="text-4xl sm:text-5xl font-black text-white">{dashboard?.total_students || 0}</h3>
           </div>
         </div>
 

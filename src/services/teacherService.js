@@ -34,7 +34,7 @@ const getTeacherDashboard = async () => {
 };
 
 const getMyCourses = async () => {
-  const response = await axiosInstance.get("/classroom/my-courses/");
+  const response = await axiosInstance.get("/courses/my-courses/");
   return response.data;
 };
 
