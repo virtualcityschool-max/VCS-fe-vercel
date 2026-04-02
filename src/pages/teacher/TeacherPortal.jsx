@@ -11,9 +11,15 @@ const TeacherPortal = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const { dashboard, myCourses, assignments, loading, error } = useSelector(
-    (state) => state.teachers,
-  );
+  const {
+    dashboard,
+    myCourses,
+    assignments,
+    loadingDashboard,
+    loadingCourses,
+    loadingAssignments,
+    errorDashboard,
+  } = useSelector((state) => state.teachers);
 
   useEffect(() => {
     dispatch(fetchTeacherDashboard());
@@ -21,7 +27,7 @@ const TeacherPortal = () => {
     dispatch(fetchAssignments());
   }, [dispatch]);
 
-  if (!dashboard) {
+  if (loadingDashboard && !dashboard) {
     return (
       <div className="space-y-6 animate-pulse">
         <div className="h-40 bg-slate-800 rounded-3xl" />
@@ -35,10 +41,10 @@ const TeacherPortal = () => {
     );
   }
 
-  if (error && !dashboard) {
+  if (errorDashboard && !dashboard) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center text-red-400">
-        {error}
+        {errorDashboard}
       </div>
     );
   }
@@ -111,7 +117,12 @@ const TeacherPortal = () => {
           </h2>
 
           <div className="space-y-4">
-            {loading ? null : myCourses?.length ? (
+            {loadingCourses ? (
+              <div className="space-y-4 animate-pulse">
+                <div className="h-20 bg-slate-800 rounded-2xl" />
+                <div className="h-20 bg-slate-800 rounded-2xl" />
+              </div>
+            ) : myCourses?.length ? (
               myCourses.map((course) => (
                 <div
                   key={course.id}
@@ -193,7 +204,7 @@ const TeacherPortal = () => {
           </h2>
 
           <div className="space-y-4">
-            {loading ? null : assignments?.length ? (
+            {loadingAssignments ? null : assignments?.length ? (
               assignments.map((a) => (
                 <div
                   key={a.id}
