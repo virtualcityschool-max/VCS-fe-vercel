@@ -1,5 +1,5 @@
 import React from "react";
-import toast from "react-hot-toast";
+import { toast } from "react-toastify";
 
 // Toast deduplication map to prevent duplicate notifications
 const toastDeduplicationMap = new Map();
@@ -21,8 +21,8 @@ export const toastManager = {
 
     // Show toast and store in deduplication map
     const toastId = toast.success(message, {
-      duration: options.duration || 4000,
-      position: options.position || "top-center",
+      autoClose: options.duration || 4000,
+      position: options.position || "top-right",
       ...options,
     });
 
@@ -53,8 +53,8 @@ export const toastManager = {
 
     // Show toast and store in deduplication map
     const toastId = toast.error(message, {
-      duration: options.duration || 6000,
-      position: options.position || "top-center",
+      autoClose: options.duration || 6000,
+      position: options.position || "top-right",
       ...options,
     });
 
@@ -77,7 +77,7 @@ export const toastManager = {
 
   loading: (message, options = {}) => {
     return toast.loading(message, {
-      position: options.position || "top-center",
+      position: options.position || "top-right",
       ...options,
     });
   },
@@ -99,12 +99,22 @@ export const toastManager = {
     });
     toastDeduplicationMap.clear();
   },
+
+  // Cleanup all timeouts (useful for component unmount)
+  cleanupAllTimeouts: () => {
+    toastDeduplicationMap.forEach((entry) => {
+      if (entry.cleanupTimeout) {
+        clearTimeout(entry.cleanupTimeout);
+      }
+    });
+  },
 };
 
 // Utility to dismiss all toasts when unmounting components
 export const useToastCleanup = () => {
   React.useEffect(() => {
     return () => {
+      toastManager.cleanupAllTimeouts();
       toastManager.clear();
     };
   }, []);

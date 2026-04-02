@@ -6,8 +6,9 @@ import {
   Navigate,
   Outlet,
 } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { useSelector, useDispatch } from "react-redux";
-import { Toaster } from "react-hot-toast";
 import { initializeAuth, logoutUser } from "./store/slices/authSlice";
 import { toastManager } from "./utils/toastManager";
 
@@ -204,7 +205,16 @@ const App = () => {
           <AuthModals />
           <AIChat />
           <SimulatorBar />
-          <Toaster position="top-center" />
+          <ToastContainer
+            position="top-right"
+            autoClose={4000}
+            hideProgressBar={false}
+            newestOnTop
+            closeOnClick
+            pauseOnHover
+            draggable
+            theme="dark"
+          />
         </section>
       </div>
     </BrowserRouter>

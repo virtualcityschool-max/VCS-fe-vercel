@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { logoutUser } from "../../store/slices/authSlice";
 import { ROLES, ROUTES } from "../../constants";
-import toast from "react-hot-toast";
+import { toastManager } from "../../utils/toastManager";
 
 const UserProfileDropdown = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -39,45 +39,18 @@ const UserProfileDropdown = () => {
     return "U";
   };
 
-  // const handleSignOut = async () => {
-  //   try {
-  //     setIsDropdownOpen(false);
-  //     toast.success("Signing out...", { duration: 2000 });
-  //     await dispatch(logoutUser()).unwrap();
-  //     navigate("/");
-  //     toast.success("Signed out successfully");
-  //   } catch (error) {
-  //     console.error("Logout error:", error);
-  //     toast.error("Error signing out. Please try again.");
-  //   }
-  // };
-  // const handleSignOut = async () => {
-  //   setIsDropdownOpen(false);
-
-  //   try {
-  //     await toast.promise(dispatch(logoutUser()).unwrap(), {
-  //       loading: "Signing out...",
-  //       success: "Signed out successfully",
-  //       error: "Error signing out. Please try again.",
-  //     });
-
-  //     navigate("/");
-  //   } catch (e) {
-  //     // already handled by toast
-  //   }
-  // };
-
   const handleSignOut = async () => {
     setIsDropdownOpen(false);
 
-    const toastId = toast.loading("Signing out...");
+    const toastId = toastManager.loading("Signing out...");
 
     try {
       await dispatch(logoutUser()).unwrap();
-      toast.dismiss(toastId);
+      toastManager.dismiss(toastId);
       navigate("/");
     } catch {
-      toast.error("Error signing out. Please try again.", { id: toastId });
+      toastManager.dismiss(toastId);
+      toastManager.error("Error signing out. Please try again.");
     }
   };
 
@@ -92,7 +65,7 @@ const UserProfileDropdown = () => {
   const handleProfile = () => {
     setIsDropdownOpen(false);
     // Navigate to profile page when implemented
-    toast.success("Profile page coming soon!");
+    toastManager.success("Profile page coming soon!");
   };
 
   // Close dropdown when clicking outside

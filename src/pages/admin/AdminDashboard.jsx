@@ -23,13 +23,13 @@ import { Button, Input } from "../../components/ui";
 import { useFieldErrors } from "../../hooks";
 import { normalizeApiError } from "../../utils/errorHandler";
 import { BACKEND_CATEGORIES, formatCategoryLabel } from "../../constants";
+import { toastManager } from "../../utils/toastManager";
 
 const AdminDashboard = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("approvals");
   const [activeModal, setActiveModal] = useState(null);
-  const [showToast, setShowToast] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [editingCourse, setEditingCourse] = useState(null);
   const [loadingCourseIds, setLoadingCourseIds] = useState(new Set());
@@ -327,48 +327,22 @@ const AdminDashboard = () => {
     }));
   };
 
-  const triggerToast = (msg) => {
-    setShowToast(msg);
-    // Clear any existing timeout to prevent memory leaks
-    if (triggerToast.timeoutId) {
-      clearTimeout(triggerToast.timeoutId);
-    }
-    // Set new timeout to add fade-out class before removing
-    triggerToast.timeoutId = setTimeout(() => {
-      const toastElement = document.querySelector('[data-toast="admin-toast"]');
-      if (toastElement) {
-        toastElement.classList.add("opacity-0", "scale-95");
-        setTimeout(() => setShowToast(null), 300); // Wait for fade-out animation
-      } else {
-        setShowToast(null);
-      }
-    }, 2700); // Start fading out at 2.7s, remove at 3s
-  };
-
-  useEffect(() => {
-    return () => {
-      if (triggerToast.timeoutId) {
-        clearTimeout(triggerToast.timeoutId);
-      }
-    };
-  }, [triggerToast.timeoutId]);
-
   // Handle approval actions
   const handleApprove = async (userId) => {
     try {
       await dispatch(approveUser(userId)).unwrap();
-      triggerToast("User approved successfully");
+      toastManager.success("User approved successfully");
     } catch (error) {
-      triggerToast(error || "Failed to approve user");
+      toastManager.error(error || "Failed to approve user");
     }
   };
 
   const handleReject = async (userId) => {
     try {
       await dispatch(rejectUser(userId)).unwrap();
-      triggerToast("User rejected successfully");
+      toastManager.success("User rejected successfully");
     } catch (error) {
-      triggerToast(error || "Failed to reject user");
+      toastManager.error(error || "Failed to reject user");
     }
   };
 
@@ -423,13 +397,13 @@ const AdminDashboard = () => {
     setCreateCourseErrors(errors);
 
     if (Object.keys(errors).length > 0) {
-      triggerToast("Please fix highlighted fields");
+      toastManager.error("Please fix highlighted fields");
       return;
     }
 
     try {
       await dispatch(createCourse(courseData)).unwrap();
-      triggerToast("Course created successfully");
+      toastManager.success("Course created successfully");
       setActiveModal(null);
       // Refresh courses to get complete instructor data
       dispatch(fetchCourses());
@@ -445,12 +419,12 @@ const AdminDashboard = () => {
       clearAllCourseErrors();
     } catch (error) {
       // Use enhanced error handling with field-level support
-      const hadFieldErrors = handleCourseApiError(error, triggerToast);
+      const hadFieldErrors = handleCourseApiError(error, toastManager.error);
 
       // If no field errors were handled, show a generic toast
       if (!hadFieldErrors) {
         const normalizedError = normalizeApiError(error);
-        triggerToast(normalizedError.message);
+        toastManager.error(normalizedError.message);
       }
     }
   };
@@ -459,18 +433,18 @@ const AdminDashboard = () => {
   const handleAssignInstructor = async (courseId, instructorId) => {
     try {
       await dispatch(assignInstructor({ courseId, instructorId })).unwrap();
-      triggerToast("Instructor assigned successfully");
+      toastManager.success("Instructor assigned successfully");
       setActiveModal(null);
       // Refetch courses to ensure instructor data is synchronized
       dispatch(fetchCourses());
     } catch (error) {
       // Use enhanced error handling with field-level support
-      const hadFieldErrors = handleCourseApiError(error, triggerToast);
+      const hadFieldErrors = handleCourseApiError(error, toastManager.error);
 
       // If no field errors were handled, show a generic toast
       if (!hadFieldErrors) {
         const normalizedError = normalizeApiError(error);
-        triggerToast(normalizedError.message);
+        toastManager.error(normalizedError.message);
       }
     }
   };
@@ -526,24 +500,27 @@ const AdminDashboard = () => {
     setEditCourseErrors(errors);
 
     if (Object.keys(errors).length > 0) {
-      triggerToast("Please fix highlighted fields");
+      toastManager.error("Please fix highlighted fields");
       return;
     }
 
     setUpdatingCourseId(courseId);
     try {
       await dispatch(updateCourse({ courseId, courseData })).unwrap();
-      triggerToast("Course updated successfully");
+      toastManager.success("Course updated successfully");
       setActiveModal(null);
       // No need to refetch - the Redux reducer handles state update and moves course to top
     } catch (error) {
       // Use standardized error handling with field-level support
-      const hadFieldErrors = handleEditCourseApiError(error, triggerToast);
+      const hadFieldErrors = handleEditCourseApiError(
+        error,
+        toastManager.error,
+      );
 
       // If no field errors were handled, show a generic toast
       if (!hadFieldErrors) {
         const normalizedError = normalizeApiError(error);
-        triggerToast(normalizedError.message);
+        toastManager.error(normalizedError.message);
       }
     } finally {
       setUpdatingCourseId(null);
@@ -564,11 +541,11 @@ const AdminDashboard = () => {
 
     try {
       await dispatch(deleteCourse(courseId)).unwrap();
-      triggerToast("Course deleted successfully");
+      toastManager.success("Course deleted successfully");
       // Refresh courses to update the list
       dispatch(fetchCourses());
     } catch (error) {
-      triggerToast(error || "Failed to delete course");
+      toastManager.error(error || "Failed to delete course");
     }
   };
 
@@ -584,7 +561,7 @@ const AdminDashboard = () => {
       });
     } catch (error) {
       console.error("Error fetching course details:", error);
-      triggerToast("Failed to load course details");
+      toastManager.error("Failed to load course details");
     } finally {
       setLoadingCourseIds((prev) => {
         const newSet = new Set(prev);
@@ -673,35 +650,6 @@ const AdminDashboard = () => {
             </div>
           </div> */}
         </header>
-
-        {/* {showToast && (
-          <div
-            data-toast="admin-toast"
-            className="fixed top-20 left-1/2 -translate-x-1/2 z-9999 bg-emerald-600 text-white px-8 py-4 rounded-2xl shadow-2xl font-bold text-sm animate-slideDown flex items-center gap-4 backdrop-blur-sm border border-emerald-500/20 transition-all duration-300 ease-in-out"
-          >
-            <i className="fas fa-check-circle"></i> {showToast}
-          </div>
-        )} */}
-
-        {showToast && (
-          <div
-            data-toast="admin-toast"
-            className={`fixed top-20 left-1/2 -translate-x-1/2 z-9999 text-white px-8 py-4 rounded-2xl shadow-2xl font-bold text-sm animate-slideDown flex items-center gap-4 backdrop-blur-sm transition-all duration-300 ease-in-out ${
-              showToast === "Please fix highlighted fields"
-                ? "bg-red-600 border border-red-500/20"
-                : "bg-emerald-600 border border-emerald-500/20"
-            }`}
-          >
-            <i
-              className={`fas ${
-                showToast === "Please fix highlighted fields"
-                  ? "fa-exclamation-circle"
-                  : "fa-check-circle"
-              }`}
-            ></i>
-            {showToast}
-          </div>
-        )}
 
         {activeTab === "overview" && (
           <div className="bg-slate-900 border border-slate-800 rounded-[2.5rem] shadow-2xl overflow-hidden animate-fadeIn p-16 text-center">
@@ -1799,7 +1747,7 @@ const AdminDashboard = () => {
                             "Edit course error: courseId is undefined",
                             { activeModal },
                           );
-                          triggerToast("Error: Course ID is missing");
+                          toastManager.error("Error: Course ID is missing");
                           return;
                         }
                         handleUpdateCourse(courseId, courseData);

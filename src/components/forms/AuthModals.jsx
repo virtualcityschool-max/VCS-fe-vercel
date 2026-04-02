@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import toast from "react-hot-toast";
+import { toastManager } from "../../utils/toastManager";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { setAuthModal } from "../../store/slices/uiSlice";
@@ -174,11 +174,11 @@ const AuthModals = () => {
       }, 50);
     } catch (err) {
       // Use the global error handler
-      const normalizedError = handleLoginApiError(err, toast.error);
+      const normalizedError = handleLoginApiError(err, toastManager.error);
 
       // Only show toast for general errors, not field/form validation errors
       if (normalizedError.type === "general") {
-        toast.error(normalizedError.message);
+        toastManager.error(normalizedError.message);
       }
     }
   };
@@ -257,24 +257,27 @@ const AuthModals = () => {
       setUserId(extractedUserId);
     } catch (err) {
       // Use global error handler
-      const normalizedError = handleRegistrationApiError(err, toast.error);
+      const normalizedError = handleRegistrationApiError(
+        err,
+        toastManager.error,
+      );
 
       // Only show toast for general errors, not field/form validation errors
       if (normalizedError.type === "general") {
-        toast.error(normalizedError.message);
+        toastManager.error(normalizedError.message);
       }
     }
   };
 
   const handleResendOtp = async () => {
     if (!email) {
-      toast.error("Email is required to resend OTP");
+      toastManager.error("Email is required to resend OTP");
       return;
     }
 
     try {
       await dispatch(resendOtp(email)).unwrap();
-      toast.success("OTP resent to your email");
+      toastManager.success("OTP resent to your email");
     } catch (err) {
       console.error("Resend OTP failed:", err);
 
@@ -282,7 +285,7 @@ const AuthModals = () => {
       const normalizedError = normalizeApiError(err);
 
       // Show error as toast for resend OTP
-      toast.error(normalizedError.message);
+      toastManager.error(normalizedError.message);
     }
   };
 
@@ -324,7 +327,7 @@ const AuthModals = () => {
         setOtpError(normalizedError.message);
       } else {
         // General errors can be shown as toast
-        toast.error(normalizedError.message);
+        toastManager.error(normalizedError.message);
         setOtpError("Verification failed. Please try again.");
       }
     }
@@ -389,7 +392,7 @@ const AuthModals = () => {
                   type="email"
                   value={email}
                   onChange={(e) => {
-                    toast.dismiss();
+                    toastManager.dismiss();
                     setEmail(e.target.value);
                     clearLoginFieldError("email");
                     dispatch(clearAuthError());
@@ -418,7 +421,7 @@ const AuthModals = () => {
                     type={showLoginPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => {
-                      toast.dismiss();
+                      toastManager.dismiss();
                       setPassword(e.target.value);
                       clearLoginFieldError("password");
                       dispatch(clearAuthError());
@@ -490,7 +493,7 @@ const AuthModals = () => {
                     type="email"
                     value={email}
                     onChange={(e) => {
-                      toast.dismiss();
+                      toastManager.dismiss();
                       setEmail(e.target.value);
                       clearRegistrationFieldError("email");
                       dispatch(clearAuthError());
@@ -522,7 +525,7 @@ const AuthModals = () => {
                     value={username}
                     // maxLength={150}
                     onChange={(e) => {
-                      toast.dismiss();
+                      toastManager.dismiss();
                       setUsername(e.target.value);
                       clearRegistrationFieldError("username");
                       dispatch(clearAuthError());
@@ -563,7 +566,7 @@ const AuthModals = () => {
                       type={showRegisterPassword ? "text" : "password"}
                       value={password}
                       onChange={(e) => {
-                        toast.dismiss();
+                        toastManager.dismiss();
                         setPassword(e.target.value);
                         clearRegistrationFieldError("password");
                         dispatch(clearAuthError());
@@ -658,7 +661,7 @@ const AuthModals = () => {
                       type={showConfirmPassword ? "text" : "password"}
                       value={confirmPassword}
                       onChange={(e) => {
-                        toast.dismiss();
+                        toastManager.dismiss();
                         setConfirmPassword(e.target.value);
                         clearRegistrationFieldError("confirmPassword");
                         dispatch(clearAuthError());
@@ -700,7 +703,7 @@ const AuthModals = () => {
                     name="register-role"
                     value={role}
                     onChange={(e) => {
-                      toast.dismiss();
+                      toastManager.dismiss();
                       setRole(e.target.value);
                       clearRegistrationFieldError("role");
                       dispatch(clearAuthError());

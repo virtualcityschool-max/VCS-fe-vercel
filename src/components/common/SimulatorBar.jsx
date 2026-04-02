@@ -2,7 +2,7 @@ import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { setAuthModal } from "../../store/slices/uiSlice";
-import toast from "react-hot-toast";
+import { toastManager } from "../../utils/toastManager";
 
 const SimulatorBar = () => {
   const navigate = useNavigate();
@@ -89,7 +89,9 @@ const SimulatorBar = () => {
 
     if (button.roles && isLoggedIn && !button.roles.includes(role)) {
       const intendedRole = button.roles[0];
-      toast.error(`Please log in as a ${intendedRole} to access this area.`);
+      toastManager.error(
+        `Please log in as a ${intendedRole} to access this area.`,
+      );
       dispatch(setAuthModal({ type: "login", intendedRole }));
       return;
     }
