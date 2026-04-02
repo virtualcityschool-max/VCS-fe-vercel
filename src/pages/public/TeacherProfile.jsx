@@ -32,11 +32,11 @@ const TeacherProfile = () => {
     };
   }, [id, dispatch]);
 
-  if (loading || !teacherDetails) {
+  if (loading && !teacherDetails) {
     return (
       <section className="min-h-screen bg-slate-950 text-white">
         <div className="max-w-7xl mx-auto px-6 py-12 sm:py-20">
-          <div className="animate-pulse space-y-8">
+          <div className="animate-pulse bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800">
             <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8">
               <div className="flex flex-col lg:flex-row gap-8 items-center">
                 <div className="w-32 h-32 rounded-3xl bg-slate-800" />
