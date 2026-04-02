@@ -278,29 +278,7 @@ const AdminDashboard = () => {
       );
     });
 
-    return filtered.sort((a, b) => {
-      // Prioritize recently updated courses
-      const aUpdatedAt =
-        a.updated_at || a.modified_at
-          ? new Date(a.updated_at || a.modified_at)
-          : new Date(0);
-      const bUpdatedAt =
-        b.updated_at || b.modified_at
-          ? new Date(b.updated_at || b.modified_at)
-          : new Date(0);
-
-      if (aUpdatedAt.getTime() !== bUpdatedAt.getTime()) {
-        return bUpdatedAt.getTime() - aUpdatedAt.getTime();
-      }
-
-      // If no updated_at/modified_at or same timestamp, fall back to created_at
-      if (a.created_at && b.created_at) {
-        return new Date(b.created_at) - new Date(a.created_at);
-      }
-
-      // Final fallback to id (newer = higher id)
-      return (b.id || 0) - (a.id || 0);
-    });
+    return filtered;
   }, [courses.data, courseFilters]);
 
   // Check if any course filters are active
@@ -372,9 +350,9 @@ const AdminDashboard = () => {
     }
 
     // Price validation
-    const price = parseInt(formData.price, 10);
-    if (!formData.price || formData.price <= 0 || isNaN(price) || price < 100) {
-      errors.price = "Price must be at least PKR 100";
+    const price = Number(formData.price);
+    if (formData.price === "" || !Number.isInteger(price) || price < 0) {
+      errors.price = "Price must be a valid non-decimal positive number";
     }
 
     // Status validation
@@ -475,9 +453,10 @@ const AdminDashboard = () => {
     }
 
     // Price validation
-    const price = parseInt(formData.price, 10);
-    if (!formData.price || formData.price <= 0 || isNaN(price) || price < 100) {
-      errors.price = "Price must be at least PKR 100";
+    const price = Number(formData.price);
+
+    if (formData.price === "" || !Number.isInteger(price) || price < 0) {
+      errors.price = "Price must be a valid non-decimal positive number";
     }
 
     // Status validation

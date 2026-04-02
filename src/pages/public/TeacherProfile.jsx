@@ -15,12 +15,10 @@ const TeacherProfile = () => {
   useEffect(() => {
     if (!id) return;
 
-    // Cancel any ongoing request
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
 
-    // Create new abort controller for this request
     abortControllerRef.current = new AbortController();
 
     dispatch(fetchTeacherById(id));
@@ -35,34 +33,72 @@ const TeacherProfile = () => {
   if (loading && !teacherDetails) {
     return (
       <section className="min-h-screen bg-slate-950 text-white">
-        <div className="max-w-7xl mx-auto px-6 py-12 sm:py-20">
-          <div className="animate-pulse bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800">
-            <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8">
-              <div className="flex flex-col lg:flex-row gap-8 items-center">
-                <div className="w-32 h-32 rounded-3xl bg-slate-800" />
-                <div className="flex-1 w-full space-y-4">
-                  <div className="h-8 w-64 bg-slate-800 rounded" />
-                  <div className="h-4 w-40 bg-slate-800 rounded" />
-                  <div className="flex flex-wrap gap-3">
-                    <div className="h-8 w-28 bg-slate-800 rounded-xl" />
-                    <div className="h-8 w-32 bg-slate-800 rounded-xl" />
-                    <div className="h-8 w-36 bg-slate-800 rounded-xl" />
-                  </div>
+        <div className="max-w-7xl mx-auto px-6 py-12 sm:py-20 space-y-8 animate-pulse">
+          {/* Header Skeleton */}
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 sm:p-10">
+            <div className="flex flex-col xl:flex-row gap-8 xl:items-center">
+              <div className="w-28 h-28 sm:w-36 sm:h-36 rounded-3xl bg-slate-800 shrink-0 mx-auto xl:mx-0" />
+
+              <div className="flex-1 space-y-4">
+                <div className="h-8 w-56 bg-slate-800 rounded-xl mx-auto xl:mx-0" />
+                <div className="h-4 w-40 bg-slate-800 rounded-lg mx-auto xl:mx-0" />
+                <div className="h-4 w-full max-w-2xl bg-slate-800 rounded-lg mx-auto xl:mx-0" />
+
+                <div className="flex flex-wrap justify-center xl:justify-start gap-3 pt-2">
+                  <div className="h-9 w-36 bg-slate-800 rounded-xl" />
+                  <div className="h-9 w-32 bg-slate-800 rounded-xl" />
+                  <div className="h-9 w-28 bg-slate-800 rounded-xl" />
+                  <div className="h-9 w-24 bg-slate-800 rounded-xl" />
                 </div>
               </div>
-            </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-2 h-80 bg-slate-900 border border-slate-800 rounded-3xl" />
-              <div className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="h-32 bg-slate-900 border border-slate-800 rounded-3xl" />
-                  <div className="h-32 bg-slate-900 border border-slate-800 rounded-3xl" />
-                </div>
-                <div className="h-72 bg-slate-900 border border-slate-800 rounded-3xl" />
+              <div className="w-full xl:w-72 space-y-3">
+                <div className="h-14 bg-slate-800 rounded-2xl" />
+                <div className="h-14 bg-slate-800 rounded-2xl" />
+                <div className="h-14 bg-slate-800 rounded-2xl" />
               </div>
             </div>
           </div>
+
+          {/* Top Content Skeleton */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-3xl p-8 sm:p-10 space-y-6">
+              <div className="h-7 w-48 bg-slate-800 rounded-xl" />
+              <div className="space-y-3">
+                <div className="h-4 w-24 bg-slate-800 rounded-lg" />
+                <div className="h-4 w-full bg-slate-800 rounded-lg" />
+                <div className="h-4 w-5/6 bg-slate-800 rounded-lg" />
+                <div className="h-4 w-4/6 bg-slate-800 rounded-lg" />
+              </div>
+
+              <div className="space-y-3 pt-2">
+                <div className="h-4 w-24 bg-slate-800 rounded-lg" />
+                <div className="flex flex-wrap gap-2">
+                  <div className="h-8 w-24 bg-slate-800 rounded-full" />
+                  <div className="h-8 w-28 bg-slate-800 rounded-full" />
+                  <div className="h-8 w-20 bg-slate-800 rounded-full" />
+                </div>
+              </div>
+
+              <div className="h-32 bg-slate-800 rounded-3xl" />
+            </div>
+
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="h-28 bg-slate-900 border border-slate-800 rounded-3xl" />
+                <div className="h-28 bg-slate-900 border border-slate-800 rounded-3xl" />
+              </div>
+              <div className="h-80 bg-slate-900 border border-slate-800 rounded-3xl" />
+            </div>
+          </div>
+
+          {/* Bottom Content Skeleton */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 h-96 bg-slate-900 border border-slate-800 rounded-3xl" />
+            <div className="h-80 bg-slate-900 border border-slate-800 rounded-3xl" />
+          </div>
+
+          <div className="h-96 bg-slate-900 border border-slate-800 rounded-3xl" />
         </div>
       </section>
     );
@@ -82,8 +118,24 @@ const TeacherProfile = () => {
     );
   }
 
+  if (!teacherDetails) {
+    return (
+      <section className="min-h-screen bg-slate-950 text-white flex items-center justify-center px-6">
+        <div className="max-w-md w-full bg-slate-900 border border-slate-800 rounded-3xl p-8 text-center shadow-xl">
+          <div className="w-14 h-14 rounded-2xl bg-slate-500/10 text-slate-400 flex items-center justify-center mx-auto mb-4 text-2xl">
+            <i className="fas fa-user"></i>
+          </div>
+          <h2 className="text-xl font-semibold mb-2">Teacher not found</h2>
+          <p className="text-slate-400 text-sm">
+            The requested teacher profile could not be loaded.
+          </p>
+        </div>
+      </section>
+    );
+  }
+
   const expertiseList =
-    teacherDetails.expertise && typeof teacherDetails.expertise === "string"
+    teacherDetails?.expertise && typeof teacherDetails.expertise === "string"
       ? teacherDetails.expertise
           .split(",")
           .map((item) => item.trim())
@@ -95,12 +147,10 @@ const TeacherProfile = () => {
   const totalReviews = teacherDetails.rating_breakdown?.total_reviews ?? 0;
   const activeCourses = teacherDetails.active_courses_count ?? 0;
 
-  // Validate LinkedIn URL with improved security
   const isValidLinkedInUrl = (url) => {
     if (!url || typeof url !== "string") return false;
     try {
       const parsedUrl = new URL(url);
-      // More strict validation - exact domain match for linkedin.com
       return (
         parsedUrl.hostname === "linkedin.com" ||
         parsedUrl.hostname === "www.linkedin.com" ||

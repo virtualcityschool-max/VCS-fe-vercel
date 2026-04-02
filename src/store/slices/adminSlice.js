@@ -415,31 +415,11 @@ const adminSlice = createSlice({
         );
 
         if (courseIndex !== -1) {
-          // Get the existing course data
-          const existingCourse = state.courses.data[courseIndex];
-
-          // Update with new data from API response and add local timestamp
-          const updatedCourse = {
-            ...existingCourse,
-            ...action.payload, // Use the actual API response data
-            updated_at: new Date().toISOString(), // Add local timestamp
+          state.courses.data[courseIndex] = {
+            ...state.courses.data[courseIndex],
+            ...action.payload,
+            updated_at: new Date().toISOString(),
           };
-
-          // Store timestamp in localStorage for persistence
-          const timestamps = JSON.parse(
-            localStorage.getItem("courseUpdateTimestamps") || "{}",
-          );
-          timestamps[courseId] = updatedCourse.updated_at;
-          localStorage.setItem(
-            "courseUpdateTimestamps",
-            JSON.stringify(timestamps),
-          );
-
-          // Remove from current position
-          state.courses.data.splice(courseIndex, 1);
-
-          // Add to the beginning of the array (top of list)
-          state.courses.data.unshift(updatedCourse);
         }
       })
       .addCase(updateCourse.rejected, () => {

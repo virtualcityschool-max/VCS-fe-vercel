@@ -172,9 +172,6 @@ const StudentPortal = () => {
           <div className="xl:col-span-8 space-y-6 lg:space-y-8">
             {/* Live Schedule */}
             <LiveScheduleList />
-
-            {/* Enrolled Courses */}
-            <CourseProgressGrid />
           </div>
 
           {/* Right Column - Sidebar */}
@@ -183,6 +180,8 @@ const StudentPortal = () => {
             <AssignmentOverviewList />
           </div>
         </div>
+        {/* Enrolled Courses */}
+        <CourseProgressGrid />
       </div>
     </section>
   );
