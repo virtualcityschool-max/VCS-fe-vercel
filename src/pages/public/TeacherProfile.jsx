@@ -1,7 +1,9 @@
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useRef } from "react";
 import { fetchTeacherById } from "../../store/slices/teacherSlice";
+import BreadcrumbNavigation from "../../components/ui/BreadcrumbNavigation";
+import BackButton from "../../components/ui/BackButton";
 
 const TeacherProfile = () => {
   const { id } = useParams();
@@ -36,15 +38,15 @@ const TeacherProfile = () => {
         <div className="max-w-7xl mx-auto px-6 py-12 sm:py-20 space-y-8 animate-pulse">
           {/* Header Skeleton */}
           <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 sm:p-10">
-            <div className="flex flex-col xl:flex-row gap-8 xl:items-center">
-              <div className="w-28 h-28 sm:w-36 sm:h-36 rounded-3xl bg-slate-800 shrink-0 mx-auto xl:mx-0" />
+            <div className="flex flex-col lg:flex-row gap-8 lg:items-center">
+              <div className="w-28 h-28 sm:w-36 sm:h-36 rounded-3xl bg-slate-800 shrink-0 mx-auto lg:mx-0" />
 
               <div className="flex-1 space-y-4">
-                <div className="h-8 w-56 bg-slate-800 rounded-xl mx-auto xl:mx-0" />
-                <div className="h-4 w-40 bg-slate-800 rounded-lg mx-auto xl:mx-0" />
-                <div className="h-4 w-full max-w-2xl bg-slate-800 rounded-lg mx-auto xl:mx-0" />
+                <div className="h-8 w-56 bg-slate-800 rounded-xl mx-auto lg:mx-0" />
+                <div className="h-4 w-40 bg-slate-800 rounded-lg mx-auto lg:mx-0" />
+                <div className="h-4 w-full max-w-2xl bg-slate-800 rounded-lg mx-auto lg:mx-0" />
 
-                <div className="flex flex-wrap justify-center xl:justify-start gap-3 pt-2">
+                <div className="flex flex-wrap justify-center lg:justify-start gap-3 pt-2">
                   <div className="h-9 w-36 bg-slate-800 rounded-xl" />
                   <div className="h-9 w-32 bg-slate-800 rounded-xl" />
                   <div className="h-9 w-28 bg-slate-800 rounded-xl" />
@@ -52,7 +54,7 @@ const TeacherProfile = () => {
                 </div>
               </div>
 
-              <div className="w-full xl:w-72 space-y-3">
+              <div className="w-full lg:w-72 space-y-3">
                 <div className="h-14 bg-slate-800 rounded-2xl" />
                 <div className="h-14 bg-slate-800 rounded-2xl" />
                 <div className="h-14 bg-slate-800 rounded-2xl" />
@@ -112,7 +114,12 @@ const TeacherProfile = () => {
             <i className="fas fa-exclamation-triangle"></i>
           </div>
           <h2 className="text-xl font-semibold mb-2">Unable to load teacher</h2>
-          <p className="text-slate-400 text-sm">{error}</p>
+          <p className="text-slate-400 text-sm mb-6">{error}</p>
+          <BackButton
+            to="/teachers"
+            label="Back to Teachers"
+            className="w-full"
+          />
         </div>
       </section>
     );
@@ -126,9 +133,14 @@ const TeacherProfile = () => {
             <i className="fas fa-user"></i>
           </div>
           <h2 className="text-xl font-semibold mb-2">Teacher not found</h2>
-          <p className="text-slate-400 text-sm">
+          <p className="text-slate-400 text-sm mb-6">
             The requested teacher profile could not be loaded.
           </p>
+          <BackButton
+            to="/teachers"
+            label="Back to Teachers"
+            className="w-full"
+          />
         </div>
       </section>
     );
@@ -166,23 +178,38 @@ const TeacherProfile = () => {
       id="teacher-profile-view"
       className="min-h-screen bg-slate-950 text-white"
     >
-      <div className="max-w-7xl mx-auto px-6 py-10 sm:py-14 space-y-8">
+      {/* Breadcrumb Navigation */}
+      <div className="max-w-7xl mx-auto px-6 py-6">
+        <BreadcrumbNavigation
+          items={[
+            { label: "Home", to: "/", icon: "fas fa-home" },
+            { label: "Teachers", to: "/teachers" },
+            {
+              label: (
+                teacherDetails.teacher_name || "Unnamed Teacher"
+              ).substring(0, 25),
+            },
+          ]}
+        />
+      </div>
+
+      <div className="max-w-7xl mx-auto px-6 pb-6 space-y-8">
         {/* Header */}
         <div className="relative overflow-hidden rounded-3xl border border-slate-800 bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 p-8 sm:p-10 shadow-2xl">
           <div className="absolute inset-0 pointer-events-none bg-indigo-500/[0.03]" />
           <div className="absolute -top-16 -right-16 w-64 h-64 bg-indigo-600/10 blur-3xl rounded-full pointer-events-none" />
 
-          <div className="relative z-10 flex flex-col xl:flex-row gap-8 xl:items-center">
+          <div className="relative z-10 flex flex-col lg:flex-row gap-8 lg:items-center">
             {/* Avatar */}
-            <div className="shrink-0 mx-auto xl:mx-0">
+            <div className="shrink-0 mx-auto lg:mx-0">
               <div className="w-28 h-28 sm:w-36 sm:h-36 rounded-3xl bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center text-white text-4xl sm:text-5xl font-bold shadow-xl border border-indigo-400/20">
                 {teacherDetails.teacher_name?.[0]?.toUpperCase() || "T"}
               </div>
             </div>
 
             {/* Main Info */}
-            <div className="flex-1 text-center xl:text-left">
-              <div className="flex flex-col xl:flex-row xl:items-center gap-3 mb-3">
+            <div className="flex-1 text-center lg:text-left">
+              <div className="flex flex-col lg:flex-row lg:items-center gap-3 mb-3">
                 <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight">
                   {teacherDetails.teacher_name || "Unnamed Teacher"}
                 </h1>
@@ -193,11 +220,11 @@ const TeacherProfile = () => {
                 </span>
               </div>
 
-              <p className="text-slate-400 text-sm sm:text-base max-w-2xl mx-auto xl:mx-0 mb-5">
+              <p className="text-slate-400 text-sm sm:text-base max-w-2xl mx-auto lg:mx-0 mb-5">
                 {teacherDetails.bio || "No teacher bio available."}
               </p>
 
-              <div className="flex flex-wrap justify-center xl:justify-start gap-3">
+              <div className="flex flex-wrap justify-center lg:justify-start gap-3">
                 <span className="rounded-xl border border-slate-700 bg-slate-900/70 px-4 py-2 text-xs font-semibold text-slate-300">
                   {teacherDetails.experience_years ?? 0} years experience
                 </span>
@@ -222,7 +249,7 @@ const TeacherProfile = () => {
             </div>
 
             {/* CTA */}
-            <div className="w-full xl:w-72 flex flex-col gap-3">
+            <div className="w-full lg:w-72 flex flex-col gap-3">
               <button className="w-full rounded-2xl bg-indigo-600 px-6 py-4 text-xs font-semibold uppercase tracking-[0.18em] transition hover:bg-indigo-500 shadow-lg hover:shadow-indigo-500/20">
                 Request Tutor
               </button>
@@ -454,7 +481,7 @@ const TeacherProfile = () => {
         </div>
 
         {/* Reviews */}
-        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 sm:p-10 shadow-xl">
+        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 sm:p-10 sm:mb-20 shadow-xl">
           <div className="flex items-center justify-between mb-8 gap-4 flex-wrap">
             <h2 className="text-2xl font-semibold flex items-center gap-3">
               <i className="fas fa-comment-dots text-indigo-400"></i>

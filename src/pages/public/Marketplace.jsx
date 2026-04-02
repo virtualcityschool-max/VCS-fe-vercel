@@ -358,7 +358,7 @@ const Marketplace = () => {
             onSubmit={handleSearch}
             className="max-w-3xl mx-auto relative mb-10 group px-4 sm:px-0"
           >
-            <i className="fas fa-search absolute left-12 sm:left-8 top-1/2 -translate-y-1/2 text-slate-500 text-lg sm:text-xl"></i>
+            {/* <i className="fas fa-search absolute left-12 sm:left-8 top-1/2 -translate-y-1/2 text-slate-500 text-lg sm:text-xl"></i> */}
             <input
               type="text"
               id="course-search"

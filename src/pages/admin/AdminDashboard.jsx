@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useLayoutEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
 import {
   fetchPendingApprovals,
   approveUser,
@@ -27,7 +26,6 @@ import { toastManager } from "../../utils/toastManager";
 
 const AdminDashboard = () => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("approvals");
   const [activeModal, setActiveModal] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -589,17 +587,6 @@ const AdminDashboard = () => {
         className={`w-72 bg-slate-950 border-r border-slate-800 flex flex-col fixed h-full z-50 transition-transform duration-300 lg:translate-x-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
       >
         <div className="p-10">
-          <div
-            className="flex items-center gap-3 mb-16 shrink-0 cursor-pointer"
-            onClick={() => navigate("/")}
-          >
-            <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center font-black text-white">
-              V
-            </div>
-            <span className="text-xl font-black font-poppins tracking-tighter whitespace-nowrap">
-              VirtualCitySchool
-            </span>
-          </div>
           <nav className="space-y-2">
             {["approvals", "courses"].map((tab) => (
               <button
@@ -730,7 +717,117 @@ const AdminDashboard = () => {
                 !approvalsError &&
                 pendingApprovals.length > 0 && (
                   <div className="overflow-x-auto">
-                    <table className="w-full text-left">
+                    {/* Mobile Card View */}
+                    <div className="lg:hidden divide-y divide-slate-800/50">
+                      {pendingApprovals.map((user) => (
+                        <div
+                          key={user.id}
+                          className="p-4 sm:p-6 hover:bg-slate-800/30 transition"
+                        >
+                          <div className="flex items-start gap-3 sm:gap-4 mb-4">
+                            <img
+                              src={
+                                user.profile_image ||
+                                `https://i.pravatar.cc/150?u=${user.email}`
+                              }
+                              className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl border border-slate-700 shadow-md shrink-0"
+                              alt={user.username || user.email}
+                            />
+                            <div className="flex-1 min-w-0">
+                              <p className="font-bold text-white text-sm sm:text-base mb-1">
+                                {user.username ||
+                                  user.first_name + " " + user.last_name ||
+                                  "Unknown User"}
+                              </p>
+                              <p className="text-[9px] sm:text-xs text-slate-500 uppercase break-all">
+                                {user.email}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div className="flex items-center gap-2">
+                              <span className="bg-slate-700/50 text-slate-300 px-2 sm:px-3 py-1 rounded-full text-[8px] sm:text-xs font-black uppercase border border-slate-600">
+                                {user.role || "user"}
+                              </span>
+                            </div>
+
+                            <div className="flex flex-col gap-2">
+                              <span className="text-slate-400 text-xs">
+                                {user.date_joined
+                                  ? new Date(user.date_joined).toLocaleString(
+                                      "en-US",
+                                      {
+                                        year: "numeric",
+                                        month: "short",
+                                        day: "numeric",
+                                        hour: "2-digit",
+                                        minute: "2-digit",
+                                      },
+                                    )
+                                  : "Unknown"}
+                              </span>
+
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={() => handleApprove(user.id)}
+                                  disabled={
+                                    isProcessing[user.id] === "approving"
+                                  }
+                                  className="bg-emerald-600/10 text-emerald-400 px-3 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-emerald-600 hover:text-white transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 sm:gap-2 flex-1 justify-center"
+                                >
+                                  {isProcessing[user.id] === "approving" ? (
+                                    <React.Fragment key="approving">
+                                      <i className="fas fa-spinner fa-spin"></i>
+                                      <span className="hidden sm:inline">
+                                        Approving...
+                                      </span>
+                                      <span className="sm:hidden">...</span>
+                                    </React.Fragment>
+                                  ) : (
+                                    <React.Fragment key="approve">
+                                      <i className="fas fa-check"></i>
+                                      <span className="hidden sm:inline">
+                                        Approve
+                                      </span>
+                                      <span className="sm:hidden">✓</span>
+                                    </React.Fragment>
+                                  )}
+                                </button>
+                                <button
+                                  onClick={() => handleReject(user.id)}
+                                  disabled={
+                                    isProcessing[user.id] === "rejecting"
+                                  }
+                                  className="bg-red-600/10 text-red-400 px-3 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 sm:gap-2 flex-1 justify-center"
+                                >
+                                  {isProcessing[user.id] === "rejecting" ? (
+                                    <React.Fragment key="rejecting">
+                                      <i className="fas fa-spinner fa-spin"></i>
+                                      <span className="hidden sm:inline">
+                                        Rejecting...
+                                      </span>
+                                      <span className="sm:hidden">...</span>
+                                    </React.Fragment>
+                                  ) : (
+                                    <React.Fragment key="reject">
+                                      <i className="fas fa-times"></i>
+                                      <span className="hidden sm:inline">
+                                        Reject
+                                      </span>
+                                      <span className="sm:hidden">✕</span>
+                                    </React.Fragment>
+                                  )}
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Desktop Table View */}
+                    <table className="hidden lg:table w-full text-left">
                       <thead className="bg-slate-950/60 border-b border-slate-800">
                         <tr key="approvals-header">
                           <th className="px-8 py-6 text-[10px] font-black uppercase text-slate-500">
@@ -1139,7 +1236,205 @@ const AdminDashboard = () => {
                 !courses.error &&
                 courses.data.length > 0 && (
                   <div className="overflow-x-auto">
-                    <table className="w-full text-left">
+                    {/* Mobile Card View */}
+                    <div className="lg:hidden divide-y divide-slate-800/30">
+                      {filteredCourses.map((course, index) => (
+                        <div
+                          key={course.id || `course-${index}`}
+                          className="p-4 sm:p-6 hover:bg-slate-800/20 transition-all duration-200"
+                        >
+                          {/* Course Header */}
+                          <div className="flex items-start gap-3 sm:gap-4 mb-4">
+                            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-linear-to-br from-indigo-600/20 to-purple-600/20 rounded-xl flex items-center justify-center shrink-0">
+                              <i className="fas fa-book text-indigo-400 text-sm sm:text-base"></i>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-start justify-between gap-2 mb-2">
+                                <h5 className="font-bold text-white text-sm sm:text-base truncate flex-1">
+                                  {course.title}
+                                </h5>
+                                {(course.updated_at || course.modified_at) &&
+                                  (() => {
+                                    const updatedTime = new Date(
+                                      course.updated_at || course.modified_at,
+                                    );
+                                    const now = new Date();
+                                    const diffInMinutes =
+                                      (now - updatedTime) / (1000 * 60);
+
+                                    if (diffInMinutes <= 5) {
+                                      return (
+                                        <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[7px] sm:text-[8px] font-bold uppercase bg-blue-600/20 text-blue-400 border border-blue-600/30 animate-pulse shrink-0">
+                                          <i className="fas fa-clock mr-1 text-xs"></i>
+                                          {diffInMinutes <= 1
+                                            ? "Just Now"
+                                            : "Recently"}
+                                        </span>
+                                      );
+                                    }
+
+                                    if (diffInMinutes <= 1440) {
+                                      return (
+                                        <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[7px] sm:text-[8px] font-bold uppercase bg-slate-700/40 text-slate-400 border border-slate-600/50 shrink-0">
+                                          <i className="fas fa-clock mr-1 text-xs"></i>
+                                          Updated
+                                        </span>
+                                      );
+                                    }
+
+                                    return null;
+                                  })()}
+                              </div>
+                              <div className="flex items-center gap-2 text-xs text-slate-500 mb-2">
+                                <span className="font-mono">
+                                  ID: {course.id}
+                                </span>
+                              </div>
+                              {course.description && (
+                                <p className="text-xs text-slate-400 line-clamp-2">
+                                  {course.description}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Course Details Grid */}
+                          <div className="grid grid-cols-2 gap-3 mb-4">
+                            {/* Category */}
+                            <div className="bg-slate-800/50 rounded-lg p-2 sm:p-3">
+                              <p className="text-[8px] sm:text-[9px] text-slate-500 uppercase font-medium mb-1">
+                                Category
+                              </p>
+                              <div className="flex items-center gap-1.5">
+                                <i className="fas fa-tag text-slate-400 text-xs"></i>
+                                <span className="text-xs sm:text-sm text-slate-300 truncate">
+                                  {course.category}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Price */}
+                            <div className="bg-slate-800/50 rounded-lg p-2 sm:p-3">
+                              <p className="text-[8px] sm:text-[9px] text-slate-500 uppercase font-medium mb-1">
+                                Price
+                              </p>
+                              <p className="text-xs sm:text-sm text-white font-bold">
+                                PKR {parseFloat(course.price).toFixed(2)}
+                              </p>
+                            </div>
+
+                            {/* Status */}
+                            <div className="bg-slate-800/50 rounded-lg p-2 sm:p-3">
+                              <p className="text-[8px] sm:text-[9px] text-slate-500 uppercase font-medium mb-1">
+                                Status
+                              </p>
+                              <span
+                                className={`inline-flex items-center px-2 py-0.5 rounded-full text-[8px] sm:text-xs font-medium border ${
+                                  course.status === "published"
+                                    ? "bg-emerald-600/20 text-emerald-400 border-emerald-600/30"
+                                    : course.status === "draft"
+                                      ? "bg-amber-600/20 text-amber-400 border-amber-600/30"
+                                      : "bg-slate-600/20 text-slate-400 border-slate-600/30"
+                                }`}
+                              >
+                                <span
+                                  className={`w-1.5 h-1.5 rounded-full mr-1 ${
+                                    course.status === "published"
+                                      ? "bg-emerald-400"
+                                      : course.status === "draft"
+                                        ? "bg-amber-400"
+                                        : "bg-slate-400"
+                                  }`}
+                                ></span>
+                                {course.status}
+                              </span>
+                            </div>
+
+                            {/* Instructor */}
+                            <div className="bg-slate-800/50 rounded-lg p-2 sm:p-3">
+                              <p className="text-[8px] sm:text-[9px] text-slate-500 uppercase font-medium mb-1">
+                                Instructor
+                              </p>
+                              {course.instructor ? (
+                                <div className="flex items-center gap-1.5">
+                                  <img
+                                    src={
+                                      course.instructor.avatar ||
+                                      `https://i.pravatar.cc/150?u=${course.instructor.username}`
+                                    }
+                                    className="w-5 h-5 sm:w-6 sm:h-6 rounded border border-slate-600 object-cover"
+                                    alt={course.instructor.username}
+                                  />
+                                  <span className="text-xs sm:text-sm text-slate-300 truncate">
+                                    {course.instructor.username}
+                                  </span>
+                                </div>
+                              ) : (
+                                <span className="text-xs text-slate-500 italic">
+                                  Not assigned
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Action Buttons */}
+                          <div className="flex flex-col gap-2">
+                            <div className="grid grid-cols-3 gap-2">
+                              <button
+                                onClick={() =>
+                                  fetchCourseDetailsForEdit(course.id)
+                                }
+                                disabled={loadingCourseIds.has(course.id)}
+                                className="bg-blue-600/10 text-blue-400 px-2 py-2 rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 hover:text-white transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1"
+                              >
+                                <i
+                                  className={`fas ${loadingCourseIds.has(course.id) ? "fa-spinner fa-spin" : "fa-edit"} text-xs`}
+                                ></i>
+                                <span className="hidden xs:inline">Edit</span>
+                              </button>
+
+                              <button
+                                onClick={() =>
+                                  setActiveModal({
+                                    type: "assign-instructor",
+                                    courseId: course.id,
+                                  })
+                                }
+                                className={`px-2 py-2 rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all duration-200 flex items-center justify-center gap-1 ${
+                                  course.instructor
+                                    ? "bg-slate-700/50 text-slate-400 hover:bg-indigo-600/50 hover:text-indigo-300 border border-slate-600/50 hover:border-indigo-600/50"
+                                    : "bg-indigo-600/20 text-indigo-300 hover:bg-indigo-600 hover:text-white border border-indigo-600/30 hover:border-indigo-600"
+                                }`}
+                              >
+                                <i
+                                  className={`fas ${course.instructor ? "fa-user-edit" : "fa-user-plus"} text-xs`}
+                                ></i>
+                                <span className="hidden xs:inline">
+                                  {course.instructor ? "Change" : "Assign"}
+                                </span>
+                              </button>
+
+                              <button
+                                onClick={() => {
+                                  console.log(
+                                    "Delete button clicked, course data:",
+                                    course,
+                                  );
+                                  handleDeleteCourse(course.id, course.title);
+                                }}
+                                className="bg-red-600/10 text-red-400 px-2 py-2 rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition flex items-center justify-center gap-1"
+                              >
+                                <i className="fas fa-trash text-xs"></i>
+                                <span className="hidden xs:inline">Delete</span>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Desktop Table View */}
+                    <table className="hidden lg:table w-full text-left">
                       <thead className="bg-slate-950/60 border-b border-slate-800">
                         <tr key="courses-header">
                           <th className="px-8 py-4 text-[10px] font-black uppercase text-slate-500">

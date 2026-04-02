@@ -13,6 +13,8 @@ import {
   LoadingSpinner,
   ErrorMessage,
 } from "../../components/ui";
+import BreadcrumbNavigation from "../../components/ui/BreadcrumbNavigation";
+import BackButton from "../../components/ui/BackButton";
 import { toastManager } from "../../utils/toastManager";
 import { getUserFriendlyMessage } from "../../utils/errorHandler";
 import { useSubmissionGuard } from "../../utils/requestDeduplicator";
@@ -301,26 +303,13 @@ const CourseDetails = () => {
 
       {/* Breadcrumb Navigation */}
       <div className="max-w-7xl mx-auto px-6 py-8 relative z-10">
-        <nav className="flex items-center space-x-3 text-sm backdrop-blur-sm bg-white/5 rounded-full px-6 py-3 w-fit border border-white/10">
-          <Link
-            to="/"
-            className="text-slate-400 hover:text-white transition-colors duration-200 flex items-center gap-2"
-          >
-            <i className="fas fa-home text-xs"></i>
-            Home
-          </Link>
-          <i className="fas fa-chevron-right text-slate-600 text-xs"></i>
-          <Link
-            to="/courses"
-            className="text-slate-400 hover:text-white transition-colors duration-200"
-          >
-            Courses
-          </Link>
-          <i className="fas fa-chevron-right text-slate-600 text-xs"></i>
-          <span className="text-white font-medium truncate max-w-xs">
-            {truncate(normalizedCourse.title, 25)}
-          </span>
-        </nav>
+        <BreadcrumbNavigation
+          items={[
+            { label: "Home", to: "/", icon: "fas fa-home" },
+            { label: "Courses", to: "/courses" },
+            { label: truncate(normalizedCourse.title, 25) },
+          ]}
+        />
       </div>
 
       <div className="max-w-7xl mx-auto px-6 pb-20 relative z-10">
@@ -605,16 +594,12 @@ const CourseDetails = () => {
             </div>
 
             {/* Back Button */}
-            <Link to="/courses">
-              <Button
-                variant="ghost"
-                size="md"
-                className="w-full group hover:bg-white/5 backdrop-blur-sm border border-white/10 rounded-full"
-              >
-                <i className="fas fa-arrow-left mr-2 group-hover:-translate-x-1 transition-transform"></i>
-                Back to Courses
-              </Button>
-            </Link>
+            <BackButton
+              to="/courses"
+              label="Back to Courses"
+              variant="ghost"
+              className="w-full"
+            />
           </div>
         </div>
       </div>
