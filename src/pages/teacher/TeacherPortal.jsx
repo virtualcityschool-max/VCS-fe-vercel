@@ -21,15 +21,21 @@ const TeacherPortal = () => {
     dispatch(fetchAssignments());
   }, [dispatch]);
 
-  if (loading && !dashboard) {
+  if (!dashboard) {
     return (
-      <div className="min-h-[60vh] flex items-center justify-center text-white">
-        <i className="fas fa-spinner animate-spin text-2xl"></i>
+      <div className="space-y-6 animate-pulse">
+        <div className="h-40 bg-slate-800 rounded-3xl" />
+        <div className="grid grid-cols-3 gap-6">
+          <div className="h-32 bg-slate-800 rounded-3xl" />
+          <div className="h-32 bg-slate-800 rounded-3xl" />
+          <div className="h-32 bg-slate-800 rounded-3xl" />
+        </div>
+        <div className="h-64 bg-slate-800 rounded-3xl" />
       </div>
     );
   }
 
-  if (error) {
+  if (error && !dashboard) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center text-red-400">
         {error}
@@ -105,7 +111,7 @@ const TeacherPortal = () => {
           </h2>
 
           <div className="space-y-4">
-            {myCourses?.length ? (
+            {loading ? null : myCourses?.length ? (
               myCourses.map((course) => (
                 <div
                   key={course.id}
@@ -187,7 +193,7 @@ const TeacherPortal = () => {
           </h2>
 
           <div className="space-y-4">
-            {assignments?.length ? (
+            {loading ? null : assignments?.length ? (
               assignments.map((a) => (
                 <div
                   key={a.id}
