@@ -9,6 +9,8 @@ export { default as TeacherProfile } from "./public/TeacherProfile";
 export { default as StudentPortal } from "./student/StudentPortal";
 export { default as StudentFeed } from "./student/StudentFeed";
 export { default as Classroom } from "./student/Classroom";
+export { default as StudentAssignments } from "./student/StudentAssignments";
+export { default as StudentAssignmentDetails } from "./student/StudentAssignmentDetails";
 
 // Teacher Pages
 export { default as TeacherLayout } from "./teacher/TeacherLayout";

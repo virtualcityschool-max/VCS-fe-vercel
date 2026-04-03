@@ -33,6 +33,8 @@ import {
   TeacherProfile,
   TeacherInternalStudentProfile,
   TeachersDirectory,
+  StudentAssignments,
+  StudentAssignmentDetails,
 } from "./pages";
 
 // Protected Route Component with Role-Based Access Control
@@ -163,6 +165,14 @@ const App = () => {
             <Route element={<ProtectedRoute allowedRoles={["student"]} />}>
               <Route path="/student" element={<StudentPortal />} />
               <Route path="/feed" element={<StudentFeed />} />
+              <Route
+                path="/student/assignments"
+                element={<StudentAssignments />}
+              />
+              <Route
+                path="/student/assignments/:id"
+                element={<StudentAssignmentDetails />}
+              />
             </Route>
 
             {/* Shared Authenticated Routes */}

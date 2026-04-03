@@ -43,10 +43,16 @@ const getAssignments = async () => {
   return response.data;
 };
 
+const createAssignment = async (data) => {
+  const response = await axiosInstance.post("/assignments/", data);
+  return response.data;
+};
+
 export const teacherService = {
   getTeachers,
   getTeacherById,
   getTeacherDashboard,
   getMyCourses,
   getAssignments,
+  createAssignment,
 };

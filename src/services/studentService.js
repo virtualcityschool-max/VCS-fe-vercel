@@ -312,6 +312,30 @@ export const studentService = {
     }
   },
 
+  getAssignmentById: async (assignmentId) => {
+    try {
+      const response = await axiosInstance.get(`/assignments/${assignmentId}/`);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching assignment details:", {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+        assignmentId,
+      });
+
+      if (error.response?.status === 401) {
+        throw new Error("Unauthorized. Please log in again.");
+      } else if (error.response?.status === 403) {
+        throw new Error("Access denied.");
+      } else if (error.response?.status === 404) {
+        throw new Error("Assignment not found.");
+      }
+
+      throw new Error(error.message || "Failed to load assignment details");
+    }
+  },
+
   // Get student's graded submissions
   getMyGrades: async (params = {}) => {
     try {

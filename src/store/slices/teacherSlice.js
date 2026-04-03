@@ -86,6 +86,17 @@ export const fetchAssignments = createAsyncThunk(
   },
 );
 
+export const createAssignment = createAsyncThunk(
+  "teachers/createAssignment",
+  async (payload, { rejectWithValue }) => {
+    try {
+      return await teacherService.createAssignment(payload);
+    } catch (err) {
+      return rejectWithValue(err?.message || "Failed to create");
+    }
+  },
+);
+
 const initialState = {
   teachers: [],
   teacherDetails: null,
@@ -93,6 +104,7 @@ const initialState = {
   dashboard: null,
   myCourses: [],
   assignments: [],
+  createdAssignment: null,
 
   // keep old fields for TeachersDirectory / TeacherProfile
   loading: false,
@@ -102,10 +114,12 @@ const initialState = {
   loadingDashboard: false,
   loadingCourses: false,
   loadingAssignments: false,
+  loadingCreateAssignment: false,
 
   errorDashboard: null,
   errorCourses: null,
   errorAssignments: null,
+  errorCreateAssignment: null,
 };
 
 const teacherSlice = createSlice({
@@ -179,6 +193,20 @@ const teacherSlice = createSlice({
       .addCase(fetchAssignments.rejected, (state, action) => {
         state.loadingAssignments = false;
         state.errorAssignments = action.payload;
+      })
+
+      // CREATE ASSIGNMENT
+      .addCase(createAssignment.pending, (state) => {
+        state.loadingCreateAssignment = true;
+        state.errorCreateAssignment = null;
+      })
+      .addCase(createAssignment.fulfilled, (state, action) => {
+        state.loadingCreateAssignment = false;
+        state.assignments.push(action.payload); // replace with unshift instead of push in case backend doesn't show latest assignment at top
+      })
+      .addCase(createAssignment.rejected, (state, action) => {
+        state.loadingCreateAssignment = false;
+        state.errorCreateAssignment = action.payload;
       });
   },
 });
