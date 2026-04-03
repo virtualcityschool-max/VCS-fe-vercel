@@ -48,6 +48,29 @@ const createAssignment = async (data) => {
   return response.data;
 };
 
+const getSubmissions = async (assignmentId) => {
+  const response = await axiosInstance.get(
+    `/assignments/${assignmentId}/submissions/`,
+  );
+  return response.data;
+};
+
+const gradeSubmission = async (submissionId, data) => {
+  const response = await axiosInstance.post(
+    `/submissions/${submissionId}/grade/`,
+    data,
+  );
+  return response.data;
+};
+
+const updateSubmissionGrade = async (submissionId, data) => {
+  const response = await axiosInstance.patch(
+    `/submissions/${submissionId}/grade/`,
+    data,
+  );
+  return response.data;
+};
+
 export const teacherService = {
   getTeachers,
   getTeacherById,
@@ -55,4 +78,7 @@ export const teacherService = {
   getMyCourses,
   getAssignments,
   createAssignment,
+  getSubmissions,
+  gradeSubmission,
+  updateSubmissionGrade,
 };

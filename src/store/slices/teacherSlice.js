@@ -97,6 +97,49 @@ export const createAssignment = createAsyncThunk(
   },
 );
 
+export const fetchSubmissions = createAsyncThunk(
+  "teachers/fetchSubmissions",
+  async (assignmentId, { rejectWithValue }) => {
+    try {
+      const data = await teacherService.getSubmissions(assignmentId);
+      return data;
+    } catch (error) {
+      return rejectWithValue(
+        error?.response?.data?.error || "Failed to fetch submissions",
+      );
+    }
+  },
+);
+
+export const gradeSubmission = createAsyncThunk(
+  "teachers/gradeSubmission",
+  async ({ submissionId, data }, { rejectWithValue }) => {
+    try {
+      const result = await teacherService.gradeSubmission(submissionId, data);
+      return { submissionId, grade: result };
+    } catch (err) {
+      return rejectWithValue(err?.message || "Failed to grade");
+    }
+  },
+);
+
+export const updateSubmissionsGrade = createAsyncThunk(
+  "teachers/updateSubmissionsGrade",
+  async ({ submissionId, data }, { rejectWithValue }) => {
+    try {
+      const result = await teacherService.updateSubmissionGrade(
+        submissionId,
+        data,
+      );
+      return { submissionId, grade: result };
+    } catch (err) {
+      return rejectWithValue(
+        err?.message || "Failed to update submissions grade",
+      );
+    }
+  },
+);
+
 const initialState = {
   teachers: [],
   teacherDetails: null,
@@ -120,6 +163,12 @@ const initialState = {
   errorCourses: null,
   errorAssignments: null,
   errorCreateAssignment: null,
+
+  submissions: [],
+  loadingSubmissions: false,
+  errorSubmissions: null,
+  gradingLoading: false,
+  gradingError: null,
 };
 
 const teacherSlice = createSlice({
@@ -202,11 +251,56 @@ const teacherSlice = createSlice({
       })
       .addCase(createAssignment.fulfilled, (state, action) => {
         state.loadingCreateAssignment = false;
-        state.assignments.push(action.payload); // replace with unshift instead of push in case backend doesn't show latest assignment at top
+        state.assignments.unshift(action.payload); // replace with push instead of unshift in case backend shows latest assignment at top
       })
       .addCase(createAssignment.rejected, (state, action) => {
         state.loadingCreateAssignment = false;
         state.errorCreateAssignment = action.payload;
+      })
+
+      // SUBMISSIONS
+      .addCase(fetchSubmissions.pending, (state) => {
+        state.loadingSubmissions = true;
+      })
+      .addCase(fetchSubmissions.fulfilled, (state, action) => {
+        state.loadingSubmissions = false;
+        state.submissions = Array.isArray(action.payload) ? action.payload : [];
+      })
+      .addCase(fetchSubmissions.rejected, (state, action) => {
+        state.loadingSubmissions = false;
+        state.errorSubmissions = action.payload;
+      })
+      .addCase(gradeSubmission.pending, (state) => {
+        state.gradingLoading = true;
+        state.gradingError = null;
+      })
+      .addCase(gradeSubmission.fulfilled, (state, action) => {
+        state.gradingLoading = false;
+        state.submissions = state.submissions.map((submission) =>
+          submission.id === action.payload.submissionId
+            ? { ...submission, grade: action.payload.grade }
+            : submission,
+        );
+      })
+      .addCase(gradeSubmission.rejected, (state, action) => {
+        state.gradingLoading = false;
+        state.gradingError = action.payload;
+      })
+      .addCase(updateSubmissionsGrade.pending, (state) => {
+        state.gradingLoading = true;
+        state.gradingError = null;
+      })
+      .addCase(updateSubmissionsGrade.fulfilled, (state, action) => {
+        state.gradingLoading = false;
+        state.submissions = state.submissions.map((submission) =>
+          submission.id === action.payload.submissionId
+            ? { ...submission, grade: action.payload.grade }
+            : submission,
+        );
+      })
+      .addCase(updateSubmissionsGrade.rejected, (state, action) => {
+        state.gradingLoading = false;
+        state.gradingError = action.payload;
       });
   },
 });
