@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -6,10 +6,16 @@ import {
   fetchMyCourses,
   fetchAssignments,
 } from "../../store/slices/teacherSlice";
+import { createAnnouncement } from "../../store/slices/announcementsSlice";
+import { toastManager } from "../../utils/toastManager";
 
 const TeacherPortal = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
+  const [courseId, setCourseId] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
     dashboard,
@@ -20,6 +26,38 @@ const TeacherPortal = () => {
     loadingAssignments,
     errorDashboard,
   } = useSelector((state) => state.teachers);
+
+  const handleCreateAnnouncement = async () => {
+    if (!title.trim() || !body.trim()) {
+      toastManager.error("Title and body are required");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+
+      await dispatch(
+        createAnnouncement({
+          title: title.trim(),
+          body: body.trim(),
+          ...(courseId ? { course_id: Number(courseId) } : {}),
+        }),
+      ).unwrap();
+
+      toastManager.success("Announcement posted");
+
+      // reset
+      setTitle("");
+      setBody("");
+      setCourseId("");
+    } catch (err) {
+      toastManager.error(
+        err?.message || err?.error || "Failed to post announcement",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   useEffect(() => {
     dispatch(fetchTeacherDashboard());
@@ -71,6 +109,61 @@ const TeacherPortal = () => {
           <h3 className="text-4xl sm:text-5xl font-black text-white">
             {dashboard?.total_students || 0}
           </h3>
+        </div>
+      </div>
+      {/* CREATE ANNOUNCEMENT */}
+      <div className="bg-slate-900 border border-slate-800 rounded-5xl p-8 mb-12">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-lg font-black font-poppins text-white">
+            Post Announcement
+          </h2>
+          <span className="text-[10px] uppercase tracking-widest text-slate-500">
+            Teacher Panel
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Title */}
+          <input
+            type="text"
+            placeholder="Title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="md:col-span-3 bg-slate-800 border border-slate-700 rounded-xl p-3 text-white placeholder-slate-500 focus:border-indigo-500 outline-none"
+          />
+
+          {/* Body */}
+          <textarea
+            placeholder="Write announcement..."
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            rows={4}
+            className="md:col-span-3 bg-slate-800 border border-slate-700 rounded-xl p-3 text-white placeholder-slate-500 focus:border-indigo-500 outline-none"
+          />
+
+          {/* Course select */}
+          <select
+            value={courseId}
+            onChange={(e) => setCourseId(e.target.value)}
+            className="bg-slate-800 border border-slate-700 rounded-xl p-3 text-white"
+          >
+            <option value="">School-wide</option>
+            {myCourses?.map((course) => (
+              <option key={course.id} value={course.id}>
+                {course.title}
+              </option>
+            ))}
+          </select>
+
+          {/* Submit */}
+          <button
+            type="button"
+            onClick={handleCreateAnnouncement}
+            disabled={isSubmitting}
+            className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-xl font-bold transition disabled:opacity-50"
+          >
+            {isSubmitting ? "Posting..." : "Post"}
+          </button>
         </div>
       </div>
 

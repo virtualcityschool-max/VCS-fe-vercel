@@ -1,5 +1,4 @@
-import React from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 
 const navItems = [
   {
@@ -26,8 +25,6 @@ const navItems = [
 ];
 
 const TeacherSidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
-  const navigate = useNavigate();
-
   const handleCloseSidebar = () => {
     setIsSidebarOpen(false);
   };
@@ -39,21 +36,6 @@ const TeacherSidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
       }`}
     >
       <div className="p-10">
-        <div
-          className="flex items-center gap-3 mb-16 cursor-pointer shrink-0"
-          onClick={() => {
-            navigate("/");
-            handleCloseSidebar();
-          }}
-        >
-          <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center font-black">
-            V
-          </div>
-          <span className="text-lg font-black tracking-tighter whitespace-nowrap">
-            VirtualCitySchool
-          </span>
-        </div>
-
         <nav className="space-y-2">
           {navItems.map((item) => (
             <NavLink

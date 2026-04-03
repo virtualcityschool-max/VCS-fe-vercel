@@ -71,6 +71,11 @@ const updateSubmissionGrade = async (submissionId, data) => {
   return response.data;
 };
 
+const createAnnouncement = async (data) => {
+  const response = await axiosInstance.post("/messaging/announcements/", data);
+  return response.data;
+};
+
 export const teacherService = {
   getTeachers,
   getTeacherById,
@@ -81,4 +86,5 @@ export const teacherService = {
   getSubmissions,
   gradeSubmission,
   updateSubmissionGrade,
+  createAnnouncement,
 };

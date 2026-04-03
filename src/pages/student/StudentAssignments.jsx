@@ -7,7 +7,7 @@ const StudentAssignments = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { assignments, loading, error } = useSelector(
+  const { assignments, error, isFetchingAssignments } = useSelector(
     (state) => state.studentDashboard,
   );
 
@@ -38,7 +38,7 @@ const StudentAssignments = () => {
     };
   };
 
-  if (loading && !assignments?.length) {
+  if (isFetchingAssignments && !assignments?.length) {
     return (
       <div className="min-h-[50vh] flex items-center justify-center text-white">
         <i className="fas fa-spinner animate-spin text-2xl"></i>

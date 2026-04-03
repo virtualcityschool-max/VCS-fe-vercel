@@ -230,8 +230,8 @@ export const studentService = {
     }
   },
 
-  // Get assignment details
-  getAssignmentDetails: async (assignmentId) => {
+  // Get submitted assignment details
+  getSubmittedAssignmentDetails: async (assignmentId) => {
     try {
       const response = await axiosInstance.get(
         `/assignments/${assignmentId}/submissions/`,
@@ -462,6 +462,19 @@ export const studentService = {
 
       throw new Error(error.message || "Failed to load attendance");
     }
+  },
+
+  // Announcements
+  getUnreadAnnouncementsCount: async () => {
+    const response = await axiosInstance.get(
+      "/messaging/announcements/unread-count/",
+    );
+    return response.data;
+  },
+
+  getMyAnnouncements: async () => {
+    const response = await axiosInstance.get("/messaging/announcements/my/");
+    return response.data;
   },
 };
 
