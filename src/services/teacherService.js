@@ -71,6 +71,13 @@ const updateSubmissionGrade = async (submissionId, data) => {
   return response.data;
 };
 
+const getSubmissionById = async (submissionId) => {
+  const response = await axiosInstance.get(
+    `/assignments/submissions/${submissionId}/`,
+  );
+  return response.data;
+};
+
 const createAnnouncement = async (data) => {
   const response = await axiosInstance.post("/messaging/announcements/", data);
   return response.data;
@@ -84,6 +91,7 @@ export const teacherService = {
   getAssignments,
   createAssignment,
   getSubmissions,
+  getSubmissionById,
   gradeSubmission,
   updateSubmissionGrade,
   createAnnouncement,

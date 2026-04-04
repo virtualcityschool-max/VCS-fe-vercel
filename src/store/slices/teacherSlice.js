@@ -140,6 +140,22 @@ export const updateSubmissionsGrade = createAsyncThunk(
   },
 );
 
+export const fetchSubmissionById = createAsyncThunk(
+  "teachers/fetchSubmissionById",
+  async (submissionId, { rejectWithValue }) => {
+    try {
+      const data = await teacherService.getSubmissionById(submissionId);
+      return data;
+    } catch (error) {
+      return rejectWithValue(
+        error?.response?.data?.error ||
+          error?.message ||
+          "Failed to fetch submission details",
+      );
+    }
+  },
+);
+
 const initialState = {
   teachers: [],
   teacherDetails: null,
@@ -169,6 +185,10 @@ const initialState = {
   errorSubmissions: null,
   gradingLoading: false,
   gradingError: null,
+
+  selectedSubmission: null,
+  loadingSelectedSubmission: false,
+  errorSelectedSubmission: null,
 };
 
 const teacherSlice = createSlice({
@@ -251,7 +271,7 @@ const teacherSlice = createSlice({
       })
       .addCase(createAssignment.fulfilled, (state, action) => {
         state.loadingCreateAssignment = false;
-        state.assignments.unshift(action.payload); // replace with push instead of unshift in case backend shows latest assignment at top
+        state.assignments.push(action.payload); // replace with unshift instead of shift in case backend doesn't show latest assignment at top
       })
       .addCase(createAssignment.rejected, (state, action) => {
         state.loadingCreateAssignment = false;
@@ -269,6 +289,18 @@ const teacherSlice = createSlice({
       .addCase(fetchSubmissions.rejected, (state, action) => {
         state.loadingSubmissions = false;
         state.errorSubmissions = action.payload;
+      })
+      .addCase(fetchSubmissionById.pending, (state) => {
+        state.loadingSelectedSubmission = true;
+        state.errorSelectedSubmission = null;
+      })
+      .addCase(fetchSubmissionById.fulfilled, (state, action) => {
+        state.loadingSelectedSubmission = false;
+        state.selectedSubmission = action.payload;
+      })
+      .addCase(fetchSubmissionById.rejected, (state, action) => {
+        state.loadingSelectedSubmission = false;
+        state.errorSelectedSubmission = action.payload;
       })
       .addCase(gradeSubmission.pending, (state) => {
         state.gradingLoading = true;

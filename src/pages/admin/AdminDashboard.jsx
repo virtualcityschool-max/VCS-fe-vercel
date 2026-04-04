@@ -14,6 +14,7 @@ import {
   updateCourse,
   deleteCourse,
   fetchUsers,
+  createUser,
   selectCourses,
   selectUsers,
 } from "../../store/slices/adminSlice";
@@ -23,6 +24,12 @@ import { useFieldErrors } from "../../hooks";
 import { normalizeApiError } from "../../utils/errorHandler";
 import { BACKEND_CATEGORIES, formatCategoryLabel } from "../../constants";
 import { toastManager } from "../../utils/toastManager";
+import {
+  validateEmail,
+  validateUsername,
+  validatePassword,
+  validateRole,
+} from "../../utils/validation";
 
 const AdminDashboard = () => {
   const dispatch = useDispatch();
@@ -33,6 +40,21 @@ const AdminDashboard = () => {
   const [loadingCourseIds, setLoadingCourseIds] = useState(new Set());
   const [updatingCourseId, setUpdatingCourseId] = useState(null);
   const [editCourseForm, setEditCourseForm] = useState({});
+  const [createUserForm, setCreateUserForm] = useState({
+    email: "",
+    username: "",
+    password: "",
+    confirm_password: "",
+    role: "student",
+    student_emails: "",
+  });
+
+  const [createUserErrors, setCreateUserErrors] = useState({});
+  const [isCreatingUser, setIsCreatingUser] = useState(false);
+  const [userRoleFilter, setUserRoleFilter] = useState("");
+  const [showCreateUserPassword, setShowCreateUserPassword] = useState(false);
+  const [showCreateUserConfirmPassword, setShowCreateUserConfirmPassword] =
+    useState(false);
 
   // Use field errors hook for edit course form
   const {
@@ -163,6 +185,32 @@ const AdminDashboard = () => {
       setEditCourseErrors({});
     }
   }, [activeModal, editingCourse, setEditCourseErrors]);
+
+  useEffect(() => {
+    if (activeTab === "users") {
+      handleFetchUsers();
+    }
+  }, [dispatch, activeTab]);
+
+  useEffect(() => {
+    if (activeTab === "users") {
+      handleFetchUsers();
+    }
+  }, [userRoleFilter]);
+
+  useEffect(() => {
+    if (activeModal === "create-user") {
+      setCreateUserForm({
+        email: "",
+        username: "",
+        password: "",
+        confirm_password: "",
+        role: "student",
+        student_emails: "",
+      });
+      setCreateUserErrors({});
+    }
+  }, [activeModal]);
 
   // Get unique values for course filter options
   const courseFilterOptions = useMemo(() => {
@@ -557,6 +605,102 @@ const AdminDashboard = () => {
     setIsSidebarOpen(false);
   };
 
+  const handleFetchUsers = () => {
+    if (userRoleFilter) {
+      dispatch(fetchUsers({ role: userRoleFilter }));
+    } else {
+      dispatch(fetchUsers());
+    }
+  };
+
+  const validateCreateUserForm = (formData) => {
+    const errors = {};
+
+    // Email validation
+    const emailValidation = validateEmail(formData.email);
+    if (!emailValidation.isValid) {
+      errors.email = emailValidation.error;
+    }
+
+    // Username validation
+    const usernameValidation = validateUsername(formData.username);
+    if (!usernameValidation.isValid) {
+      errors.username = usernameValidation.error;
+    }
+
+    // Password validation
+    const passwordValidation = validatePassword(formData.password);
+    if (!passwordValidation.isValid) {
+      errors.password = passwordValidation.errors[0]; // Show first error
+    }
+
+    // Confirm password validation
+    if (!formData.confirm_password) {
+      errors.confirm_password = "Please confirm your password";
+    } else if (formData.password !== formData.confirm_password) {
+      errors.confirm_password = "Passwords do not match";
+    }
+
+    // Role validation
+    const roleValidation = validateRole(formData.role);
+    if (!roleValidation.isValid) {
+      errors.role = roleValidation.error;
+    }
+
+    return errors;
+  };
+
+  const handleCreateUser = async () => {
+    const errors = validateCreateUserForm(createUserForm);
+    setCreateUserErrors(errors);
+
+    if (Object.keys(errors).length > 0) {
+      toastManager.error("Please fix highlighted fields");
+      return;
+    }
+
+    const payload = {
+      email: createUserForm.email.trim(),
+      username: createUserForm.username.trim(),
+      password: createUserForm.password,
+      confirm_password: createUserForm.confirm_password,
+      role: createUserForm.role,
+    };
+
+    if (
+      createUserForm.role === "parent" &&
+      createUserForm.student_emails.trim()
+    ) {
+      payload.student_emails = createUserForm.student_emails
+        .split(",")
+        .map((email) => email.trim())
+        .filter(Boolean);
+    }
+
+    try {
+      setIsCreatingUser(true);
+
+      await dispatch(createUser(payload)).unwrap();
+
+      toastManager.success("User created successfully");
+      setActiveModal(null);
+      setCreateUserForm({
+        email: "",
+        username: "",
+        password: "",
+        confirm_password: "",
+        role: "student",
+        student_emails: "",
+      });
+      setCreateUserErrors({});
+      handleFetchUsers();
+    } catch (error) {
+      toastManager.error(error?.message || error || "Failed to create user");
+    } finally {
+      setIsCreatingUser(false);
+    }
+  };
+
   return (
     <section
       id="admin-view"
@@ -588,7 +732,7 @@ const AdminDashboard = () => {
       >
         <div className="p-10">
           <nav className="space-y-2">
-            {["approvals", "courses"].map((tab) => (
+            {["approvals", "courses", "users"].map((tab) => (
               <button
                 key={tab}
                 onClick={() => handleTabChange(tab)}
@@ -1647,20 +1791,141 @@ const AdminDashboard = () => {
         )}
 
         {activeTab === "users" && (
-          <div className="bg-slate-900 border border-slate-800 rounded-[2.5rem] shadow-2xl overflow-hidden animate-fadeIn p-16 text-center">
-            <div className="w-16 h-16 bg-slate-700/20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <i className="fas fa-users text-slate-400 text-2xl"></i>
+          <div className="bg-slate-900 border border-slate-800 rounded-[2.5rem] overflow-hidden shadow-2xl animate-fadeIn">
+            {/* Header */}
+            <div className="px-8 py-6 border-b border-slate-800 bg-slate-950/40 flex justify-between items-center">
+              <div>
+                <h3 className="text-xl font-bold font-poppins text-white">
+                  User Management
+                </h3>
+                <p className="text-slate-500 text-sm">
+                  Manage all platform users
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <select
+                  value={userRoleFilter}
+                  onChange={(e) => setUserRoleFilter(e.target.value)}
+                  className="bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-xs text-white"
+                >
+                  <option value="">All Roles</option>
+                  <option value="teacher">Teachers</option>
+                  <option value="student">Students</option>
+                  <option value="parent">Parents</option>
+                  <option value="admin">Admins</option>
+                </select>
+
+                <button
+                  onClick={handleFetchUsers}
+                  className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition flex items-center gap-2"
+                >
+                  <i className="fas fa-refresh"></i>
+                  Refresh
+                </button>
+
+                <button
+                  onClick={() => setActiveModal("create-user")}
+                  className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition flex items-center gap-2"
+                >
+                  <i className="fas fa-plus"></i>
+                  Add User
+                </button>
+              </div>
             </div>
-            <h3 className="text-white text-lg font-bold mb-2">
-              User Management Not Integrated Yet
-            </h3>
-            <p className="text-slate-400 text-sm">
-              User management functionality will be available once backend
-              integration is complete
-            </p>
+
+            {/* Content */}
+            {users.loading ? (
+              <div className="p-16 text-center">
+                <i className="fas fa-spinner animate-spin text-2xl text-slate-400"></i>
+                <p className="text-slate-400 mt-3">Loading users...</p>
+              </div>
+            ) : users.data?.length ? (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                  <thead className="bg-slate-950/60 border-b border-slate-800">
+                    <tr>
+                      <th className="px-8 py-4 text-[10px] font-black uppercase text-slate-500">
+                        User
+                      </th>
+                      <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-500">
+                        Role
+                      </th>
+                      <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-500">
+                        Status
+                      </th>
+                      <th className="px-8 py-4 text-[10px] font-black uppercase text-slate-500">
+                        Joined
+                      </th>
+                    </tr>
+                  </thead>
+
+                  <tbody className="divide-y divide-slate-800/50">
+                    {users.data.map((user) => (
+                      <tr
+                        key={user.id}
+                        className="hover:bg-slate-800/30 transition group"
+                      >
+                        {/* User */}
+                        <td className="px-8 py-5">
+                          <div className="flex items-center gap-4">
+                            <img
+                              src={
+                                user.profile_image ||
+                                `https://i.pravatar.cc/150?u=${user.email}`
+                              }
+                              className="w-10 h-10 rounded-xl border border-slate-700"
+                              alt={user.username}
+                            />
+                            <div>
+                              <p className="font-bold text-white group-hover:text-indigo-400 transition">
+                                {user.username || "No Username"}
+                              </p>
+                              <p className="text-[10px] text-slate-500 uppercase">
+                                {user.email}
+                              </p>
+                            </div>
+                          </div>
+                        </td>
+
+                        {/* Role */}
+                        <td className="px-6 py-5">
+                          <span className="bg-slate-700/50 text-slate-300 px-3 py-1 rounded-full text-[10px] font-black uppercase border border-slate-600">
+                            {user.role}
+                          </span>
+                        </td>
+
+                        {/* Status */}
+                        <td className="px-6 py-5">
+                          <span
+                            className={`px-3 py-1 rounded-full text-[10px] font-black uppercase ${
+                              user.is_active
+                                ? "bg-emerald-500/10 text-emerald-400"
+                                : "bg-red-500/10 text-red-400"
+                            }`}
+                          >
+                            {user.is_active ? "Active" : "Inactive"}
+                          </span>
+                        </td>
+
+                        {/* Joined */}
+                        <td className="px-8 py-5 text-sm text-slate-400">
+                          {user.date_joined
+                            ? new Date(user.date_joined).toLocaleDateString()
+                            : "-"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="p-16 text-center text-slate-400">
+                No users found
+              </div>
+            )}
           </div>
         )}
-
         {/* Modals Overlay */}
         {activeModal && (
           <div className="fixed inset-0 z-100 flex items-center justify-center p-6 bg-slate-950/80 backdrop-blur-md">
@@ -2421,6 +2686,276 @@ const AdminDashboard = () => {
                     </form>
                   </>
                 )}
+
+              {/* Create User Modal */}
+              {activeModal === "create-user" && (
+                <>
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-10 h-10 bg-indigo-600/20 rounded-xl flex items-center justify-center">
+                      <i className="fas fa-user-plus text-indigo-400"></i>
+                    </div>
+                    <h3 className="text-2xl font-black font-poppins text-white">
+                      Create User
+                    </h3>
+                  </div>
+
+                  <div className="space-y-5">
+                    <div>
+                      <label className="text-[11px] font-black uppercase text-slate-500 mb-2 block">
+                        Email
+                      </label>
+                      <input
+                        type="email"
+                        value={createUserForm.email}
+                        onChange={(e) =>
+                          setCreateUserForm({
+                            ...createUserForm,
+                            email: e.target.value,
+                          })
+                        }
+                        className={`w-full bg-slate-950 border rounded-2xl px-5 py-4 text-white outline-none ${
+                          createUserErrors.email
+                            ? "border-red-500"
+                            : "border-slate-800"
+                        }`}
+                        placeholder="user@example.com"
+                      />
+                      {createUserErrors.email && (
+                        <p className="mt-2 text-xs text-red-400">
+                          {createUserErrors.email}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] font-black uppercase text-slate-500 mb-2 block">
+                        Username
+                      </label>
+                      <input
+                        type="text"
+                        value={createUserForm.username}
+                        onChange={(e) =>
+                          setCreateUserForm({
+                            ...createUserForm,
+                            username: e.target.value,
+                          })
+                        }
+                        className={`w-full bg-slate-950 border rounded-2xl px-5 py-4 text-white outline-none ${
+                          createUserErrors.username
+                            ? "border-red-500"
+                            : "border-slate-800"
+                        }`}
+                        placeholder="Enter username"
+                      />
+                      {createUserErrors.username && (
+                        <p className="mt-2 text-xs text-red-400">
+                          {createUserErrors.username}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] font-black uppercase text-slate-500 mb-2 block">
+                        Role
+                      </label>
+                      <select
+                        value={createUserForm.role}
+                        onChange={(e) =>
+                          setCreateUserForm({
+                            ...createUserForm,
+                            role: e.target.value,
+                          })
+                        }
+                        className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-5 py-4 text-white outline-none"
+                      >
+                        <option value="student">Student</option>
+                        <option value="teacher">Teacher</option>
+                        <option value="parent">Parent</option>
+                        <option value="admin">Admin</option>
+                      </select>
+                    </div>
+
+                    {createUserForm.role === "parent" && (
+                      <div>
+                        <label className="text-[11px] font-black uppercase text-slate-500 mb-2 block">
+                          Student Emails (optional)
+                        </label>
+                        <textarea
+                          rows="3"
+                          value={createUserForm.student_emails}
+                          onChange={(e) =>
+                            setCreateUserForm({
+                              ...createUserForm,
+                              student_emails: e.target.value,
+                            })
+                          }
+                          className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-5 py-4 text-white outline-none"
+                          placeholder="student1@example.com, student2@example.com"
+                        />
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-[11px] font-black uppercase text-slate-500 mb-2 block">
+                          Password
+                        </label>
+                        <div className="relative">
+                          <input
+                            type={showCreateUserPassword ? "text" : "password"}
+                            value={createUserForm.password}
+                            onChange={(e) =>
+                              setCreateUserForm({
+                                ...createUserForm,
+                                password: e.target.value,
+                              })
+                            }
+                            className={`w-full bg-slate-950 border rounded-2xl px-5 py-4 pr-12 text-white outline-none ${
+                              createUserErrors.password
+                                ? "border-red-500"
+                                : "border-slate-800"
+                            }`}
+                            placeholder="StrongPass123!"
+                          />
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setShowCreateUserPassword(!showCreateUserPassword)
+                            }
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors"
+                            tabIndex="-1"
+                          >
+                            <i
+                              className={`fas ${showCreateUserPassword ? "fa-eye-slash" : "fa-eye"} text-sm`}
+                            ></i>
+                          </button>
+                        </div>
+                        {createUserErrors.password && (
+                          <p className="mt-2 text-xs text-red-400">
+                            {createUserErrors.password}
+                          </p>
+                        )}
+
+                        {/* Password Strength Indicator */}
+                        {createUserForm.password && (
+                          <div className="mt-4 p-4 bg-slate-800/30 rounded-xl border border-slate-700/50">
+                            <p className="text-xs text-slate-400 mb-3 font-medium">
+                              Password must contain:
+                            </p>
+                            <div className="space-y-2">
+                              <div
+                                className={`flex items-center gap-2 text-xs ${createUserForm.password.length >= 8 ? "text-green-400" : "text-slate-500"}`}
+                              >
+                                <i
+                                  className={`fas ${createUserForm.password.length >= 8 ? "fa-check-circle" : "fa-circle"} text-[8px]`}
+                                ></i>
+                                At least 8 characters
+                              </div>
+                              <div
+                                className={`flex items-center gap-2 text-xs ${/[A-Z]/.test(createUserForm.password) ? "text-green-400" : "text-slate-500"}`}
+                              >
+                                <i
+                                  className={`fas ${/[A-Z]/.test(createUserForm.password) ? "fa-check-circle" : "fa-circle"} text-[8px]`}
+                                ></i>
+                                One uppercase letter
+                              </div>
+                              <div
+                                className={`flex items-center gap-2 text-xs ${/[a-z]/.test(createUserForm.password) ? "text-green-400" : "text-slate-500"}`}
+                              >
+                                <i
+                                  className={`fas ${/[a-z]/.test(createUserForm.password) ? "fa-check-circle" : "fa-circle"} text-[8px]`}
+                                ></i>
+                                One lowercase letter
+                              </div>
+                              <div
+                                className={`flex items-center gap-2 text-xs ${/[0-9]/.test(createUserForm.password) ? "text-green-400" : "text-slate-500"}`}
+                              >
+                                <i
+                                  className={`fas ${/[0-9]/.test(createUserForm.password) ? "fa-check-circle" : "fa-circle"} text-[8px]`}
+                                ></i>
+                                One number
+                              </div>
+                              <div
+                                className={`flex items-center gap-2 text-xs ${/[!@#$%^&*()_+=[\]{};':"|,.<>/?]/.test(createUserForm.password) ? "text-green-400" : "text-slate-500"}`}
+                              >
+                                <i
+                                  className={`fas ${/[!@#$%^&*()_+=[\]{};':"|,.<>/?]/.test(createUserForm.password) ? "fa-check-circle" : "fa-circle"} text-[8px]`}
+                                ></i>
+                                One special character
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      <div>
+                        <label className="text-[11px] font-black uppercase text-slate-500 mb-2 block">
+                          Confirm Password
+                        </label>
+                        <div className="relative">
+                          <input
+                            type={
+                              showCreateUserConfirmPassword
+                                ? "text"
+                                : "password"
+                            }
+                            value={createUserForm.confirm_password}
+                            onChange={(e) =>
+                              setCreateUserForm({
+                                ...createUserForm,
+                                confirm_password: e.target.value,
+                              })
+                            }
+                            className={`w-full bg-slate-950 border rounded-2xl px-5 py-4 pr-12 text-white outline-none ${
+                              createUserErrors.confirm_password
+                                ? "border-red-500"
+                                : "border-slate-800"
+                            }`}
+                            placeholder="Repeat password"
+                          />
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setShowCreateUserConfirmPassword(
+                                !showCreateUserConfirmPassword,
+                              )
+                            }
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors"
+                            tabIndex="-1"
+                          >
+                            <i
+                              className={`fas ${showCreateUserConfirmPassword ? "fa-eye-slash" : "fa-eye"} text-sm`}
+                            ></i>
+                          </button>
+                        </div>
+                        {createUserErrors.confirm_password && (
+                          <p className="mt-2 text-xs text-red-400">
+                            {createUserErrors.confirm_password}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end gap-3 pt-4">
+                      <button
+                        type="button"
+                        onClick={() => setActiveModal(null)}
+                        className="bg-slate-700 hover:bg-slate-600 text-white px-6 py-3 rounded-xl text-sm font-bold"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleCreateUser}
+                        disabled={isCreatingUser}
+                        className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-xl text-sm font-bold disabled:opacity-50"
+                      >
+                        {isCreatingUser ? "Creating..." : "Create User"}
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         )}

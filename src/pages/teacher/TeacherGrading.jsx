@@ -6,6 +6,8 @@ import {
   fetchMyCourses,
   fetchSubmissions,
   gradeSubmission,
+  updateSubmissionsGrade,
+  fetchSubmissionById,
 } from "../../store/slices/teacherSlice";
 import { toastManager } from "../../utils/toastManager";
 
@@ -26,14 +28,18 @@ const TeacherGrading = () => {
     selectedAssignmentForSubmissions,
     setSelectedAssignmentForSubmissions,
   ] = useState(null);
+  const [pendingAssignmentId, setPendingAssignmentId] = useState(null);
 
   const dispatch = useDispatch();
   const {
     assignments,
     myCourses,
     submissions,
+    selectedSubmission,
+    loadingSelectedSubmission,
     loadingAssignments,
     errorAssignments,
+    loadingSubmissions,
   } = useSelector((state) => state.teachers);
 
   useEffect(() => {
@@ -45,6 +51,27 @@ const TeacherGrading = () => {
       dispatch(fetchMyCourses());
     }
   }, [dispatch, assignments?.length, myCourses?.length]);
+
+  useEffect(() => {
+    if (selectedSubmission?.grade) {
+      setScore(selectedSubmission.grade.score || "");
+      setFeedback(selectedSubmission.grade.feedback || "");
+    } else {
+      setScore("");
+      setFeedback("");
+    }
+  }, [selectedSubmission]);
+
+  // Handle pending assignment and submissions loading
+  useEffect(() => {
+    if (pendingAssignmentId && !loadingSubmissions) {
+      const assignment = assignments.find((a) => a.id === pendingAssignmentId);
+      if (assignment) {
+        setSelectedAssignmentForSubmissions(assignment);
+        setPendingAssignmentId(null);
+      }
+    }
+  }, [pendingAssignmentId, loadingSubmissions, assignments]);
 
   if (loadingAssignments && !assignments?.length) {
     return (
@@ -149,11 +176,20 @@ const TeacherGrading = () => {
                     type="button"
                     className="mt-3 bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-xl text-xs font-bold transition"
                     onClick={() => {
-                      setSelectedAssignmentForSubmissions(assignment);
+                      setPendingAssignmentId(assignment.id);
                       dispatch(fetchSubmissions(assignment.id));
                     }}
+                    disabled={
+                      loadingSubmissions &&
+                      pendingAssignmentId === assignment.id
+                    }
                   >
-                    Grade
+                    {loadingSubmissions &&
+                    pendingAssignmentId === assignment.id ? (
+                      <i className="fas fa-spinner animate-spin"></i>
+                    ) : (
+                      "Grade"
+                    )}
                   </button>
                 </div>
               </div>
@@ -191,10 +227,8 @@ const TeacherGrading = () => {
                     <button
                       className="bg-indigo-600 px-3 py-1 rounded text-xs"
                       onClick={() => {
-                        setSelectedAssignment({
-                          ...selectedAssignmentForSubmissions,
-                          submissionId: sub.id,
-                        });
+                        dispatch(fetchSubmissionById(sub.id));
+                        setSelectedAssignment(sub.id);
                       }}
                     >
                       Grade
@@ -219,76 +253,135 @@ const TeacherGrading = () => {
       {/* Grade Modal */}
       {selectedAssignment && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-          <div className="bg-slate-900 p-8 rounded-3xl border border-slate-800 w-full max-w-md">
-            <h2 className="text-lg font-bold mb-4">
-              Grade: {selectedAssignment.title}
-            </h2>
+          <div className="bg-slate-900 p-8 rounded-3xl border border-slate-800 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            {loadingSelectedSubmission ? (
+              <div className="text-center text-white">
+                <i className="fas fa-spinner animate-spin"></i>
+              </div>
+            ) : selectedSubmission ? (
+              <>
+                {/* HEADER */}
+                <h2 className="text-lg font-bold mb-4">
+                  Submission by {selectedSubmission.student_name}
+                </h2>
 
-            <input
-              type="number"
-              placeholder="Score"
-              value={score}
-              onChange={(e) => setScore(e.target.value)}
-              className="w-full mb-4 p-3 rounded-xl bg-slate-800 border border-slate-700 text-white"
-            />
+                {/* SUBMISSION INFO */}
+                <div className="mb-6 text-sm text-slate-400">
+                  Submitted at:{" "}
+                  {new Date(selectedSubmission.submitted_at).toLocaleString()}
+                </div>
 
-            <textarea
-              placeholder="Feedback"
-              value={feedback}
-              onChange={(e) => setFeedback(e.target.value)}
-              className="w-full mb-4 p-3 rounded-xl bg-slate-800 border border-slate-700 text-white"
-            />
+                {/* TEXT ANSWER */}
+                <div className="mb-6">
+                  <h3 className="text-xs uppercase text-slate-500 mb-2">
+                    Answer
+                  </h3>
+                  <div className="bg-slate-800 p-4 rounded-xl">
+                    {selectedSubmission.text_answer || "No text submitted"}
+                  </div>
+                </div>
 
-            <div className="flex gap-3 justify-end">
-              <button
-                type="button"
-                className="px-4 py-2 bg-slate-700 rounded-xl"
-                onClick={() => {
-                  setSelectedAssignment(null);
-                  setScore("");
-                  setFeedback("");
-                }}
-              >
-                Cancel
-              </button>
+                {/* FILE */}
+                <div className="mb-6">
+                  <h3 className="text-xs uppercase text-slate-500 mb-2">
+                    Attachment
+                  </h3>
 
-              <button
-                type="button"
-                className="px-4 py-2 bg-indigo-600 rounded-xl"
-                onClick={async () => {
-                  if (!score || Number(score) < 0) {
-                    toastManager.error("Please enter a valid score");
-                    return;
-                  }
+                  {selectedSubmission.file ? (
+                    <a
+                      href={selectedSubmission.file}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-indigo-400 underline text-sm"
+                    >
+                      View Attachment
+                    </a>
+                  ) : (
+                    <p className="text-slate-500 text-sm">No file submitted</p>
+                  )}
+                </div>
 
-                  try {
-                    await dispatch(
-                      gradeSubmission({
-                        submissionId: selectedAssignment.submissionId,
-                        data: {
-                          score: Number(score),
-                          feedback: feedback.trim(),
-                        },
-                      }),
-                    ).unwrap();
+                {/* GRADE FORM */}
+                <div className="mb-4">
+                  <label className="block text-xs text-slate-400 mb-2">
+                    Score (Max:{" "}
+                    {selectedAssignmentForSubmissions?.max_score || "N/A"})
+                  </label>
+                  <input
+                    type="number"
+                    placeholder="Score"
+                    value={score}
+                    onChange={(e) => setScore(e.target.value)}
+                    className="w-full p-3 rounded-xl bg-slate-800 border border-slate-700 text-white"
+                    max={selectedAssignmentForSubmissions?.max_score}
+                  />
+                </div>
 
-                    toastManager.success("Submission graded successfully");
+                <textarea
+                  placeholder="Feedback"
+                  value={feedback}
+                  onChange={(e) => setFeedback(e.target.value)}
+                  className="w-full mb-4 p-3 rounded-xl bg-slate-800 border border-slate-700 text-white"
+                />
 
-                    setSelectedAssignment(null);
-                    setScore("");
-                    setFeedback("");
-                  } catch (err) {
-                    toastManager.error(
-                      err?.error ||
-                        err?.message ||
-                        "Failed to grade submission",
-                    );
-                  }
-                }}
-              >
-                Submit
-              </button>
-            </div>
+                <div className="flex gap-3 justify-end">
+                  <button
+                    className="px-4 py-2 bg-slate-700 rounded-xl"
+                    onClick={() => setSelectedAssignment(null)}
+                  >
+                    Cancel
+                  </button>
+
+                  <button
+                    className="px-4 py-2 bg-indigo-600 rounded-xl"
+                    onClick={async () => {
+                      if (!score || Number(score) < 0) {
+                        toastManager.error("Enter valid score");
+                        return;
+                      }
+
+                      try {
+                        if (selectedSubmission.grade) {
+                          // UPDATE
+                          await dispatch(
+                            updateSubmissionsGrade({
+                              submissionId: selectedSubmission.id,
+                              data: {
+                                score: Number(score),
+                                feedback,
+                              },
+                            }),
+                          ).unwrap();
+
+                          toastManager.success("Grade updated");
+                        } else {
+                          // CREATE
+                          await dispatch(
+                            gradeSubmission({
+                              submissionId: selectedSubmission.id,
+                              data: {
+                                score: Number(score),
+                                feedback,
+                              },
+                            }),
+                          ).unwrap();
+
+                          toastManager.success("Submission graded");
+                        }
+
+                        setSelectedAssignment(null);
+                      } catch (err) {
+                        toastManager.error(err?.message || "Failed to grade");
+                      }
+                    }}
+                  >
+                    {selectedSubmission.grade
+                      ? "Update Grade"
+                      : "Grade Submission"}
+                  </button>
+                </div>
+              </>
+            ) : null}
           </div>
         </div>
       )}
