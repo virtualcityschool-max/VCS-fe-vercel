@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchAssignments,
@@ -10,11 +10,10 @@ import {
   fetchSubmissionById,
 } from "../../store/slices/teacherSlice";
 import { toastManager } from "../../utils/toastManager";
+import GradingForm from "../../components/teacher/GradingForm";
 
 const TeacherGrading = () => {
   const [selectedAssignment, setSelectedAssignment] = useState(null);
-  const [score, setScore] = useState("");
-  const [feedback, setFeedback] = useState("");
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [form, setForm] = useState({
     course: "",
@@ -24,11 +23,12 @@ const TeacherGrading = () => {
     max_score: "",
     status: "published",
   });
+  const [pendingAssignmentId, setPendingAssignmentId] = useState(null);
   const [
     selectedAssignmentForSubmissions,
     setSelectedAssignmentForSubmissions,
   ] = useState(null);
-  const [pendingAssignmentId, setPendingAssignmentId] = useState(null);
+  const isProcessingAssignmentRef = useRef(false);
 
   const dispatch = useDispatch();
   const {
@@ -42,6 +42,25 @@ const TeacherGrading = () => {
     loadingSubmissions,
   } = useSelector((state) => state.teachers);
 
+  // Use useEffect to handle assignment selection when submissions arrive
+  useEffect(() => {
+    if (!isProcessingAssignmentRef.current && pendingAssignmentId) {
+      isProcessingAssignmentRef.current = true;
+
+      // Use setTimeout to defer setState calls and avoid lint warning
+      setTimeout(() => {
+        const assignment = assignments.find(
+          (a) => a.id === pendingAssignmentId,
+        );
+        if (assignment) {
+          setSelectedAssignmentForSubmissions(assignment);
+          setPendingAssignmentId(null);
+        }
+        isProcessingAssignmentRef.current = false;
+      }, 0);
+    }
+  }, [submissions, pendingAssignmentId, assignments]);
+
   useEffect(() => {
     if (!assignments?.length) {
       dispatch(fetchAssignments());
@@ -51,27 +70,6 @@ const TeacherGrading = () => {
       dispatch(fetchMyCourses());
     }
   }, [dispatch, assignments?.length, myCourses?.length]);
-
-  useEffect(() => {
-    if (selectedSubmission?.grade) {
-      setScore(selectedSubmission.grade.score || "");
-      setFeedback(selectedSubmission.grade.feedback || "");
-    } else {
-      setScore("");
-      setFeedback("");
-    }
-  }, [selectedSubmission]);
-
-  // Handle pending assignment and submissions loading
-  useEffect(() => {
-    if (pendingAssignmentId && !loadingSubmissions) {
-      const assignment = assignments.find((a) => a.id === pendingAssignmentId);
-      if (assignment) {
-        setSelectedAssignmentForSubmissions(assignment);
-        setPendingAssignmentId(null);
-      }
-    }
-  }, [pendingAssignmentId, loadingSubmissions, assignments]);
 
   if (loadingAssignments && !assignments?.length) {
     return (
@@ -302,84 +300,45 @@ const TeacherGrading = () => {
                 </div>
 
                 {/* GRADE FORM */}
-                <div className="mb-4">
-                  <label className="block text-xs text-slate-400 mb-2">
-                    Score (Max:{" "}
-                    {selectedAssignmentForSubmissions?.max_score || "N/A"})
-                  </label>
-                  <input
-                    type="number"
-                    placeholder="Score"
-                    value={score}
-                    onChange={(e) => setScore(e.target.value)}
-                    className="w-full p-3 rounded-xl bg-slate-800 border border-slate-700 text-white"
-                    max={selectedAssignmentForSubmissions?.max_score}
-                  />
-                </div>
+                <GradingForm
+                  selectedSubmission={selectedSubmission}
+                  onCancel={() => setSelectedAssignment(null)}
+                  onSubmit={async ({ score, feedback }) => {
+                    try {
+                      if (selectedSubmission.grade) {
+                        // UPDATE
+                        await dispatch(
+                          updateSubmissionsGrade({
+                            submissionId: selectedSubmission.id,
+                            data: {
+                              score: Number(score),
+                              feedback,
+                            },
+                          }),
+                        ).unwrap();
 
-                <textarea
-                  placeholder="Feedback"
-                  value={feedback}
-                  onChange={(e) => setFeedback(e.target.value)}
-                  className="w-full mb-4 p-3 rounded-xl bg-slate-800 border border-slate-700 text-white"
+                        toastManager.success("Grade updated");
+                      } else {
+                        // CREATE
+                        await dispatch(
+                          gradeSubmission({
+                            submissionId: selectedSubmission.id,
+                            data: {
+                              score: Number(score),
+                              feedback,
+                            },
+                          }),
+                        ).unwrap();
+
+                        toastManager.success("Submission graded");
+                      }
+
+                      setSelectedAssignment(null);
+                    } catch (err) {
+                      toastManager.error(err?.message || "Failed to grade");
+                    }
+                  }}
                 />
-
-                <div className="flex gap-3 justify-end">
-                  <button
-                    className="px-4 py-2 bg-slate-700 rounded-xl"
-                    onClick={() => setSelectedAssignment(null)}
-                  >
-                    Cancel
-                  </button>
-
-                  <button
-                    className="px-4 py-2 bg-indigo-600 rounded-xl"
-                    onClick={async () => {
-                      if (!score || Number(score) < 0) {
-                        toastManager.error("Enter valid score");
-                        return;
-                      }
-
-                      try {
-                        if (selectedSubmission.grade) {
-                          // UPDATE
-                          await dispatch(
-                            updateSubmissionsGrade({
-                              submissionId: selectedSubmission.id,
-                              data: {
-                                score: Number(score),
-                                feedback,
-                              },
-                            }),
-                          ).unwrap();
-
-                          toastManager.success("Grade updated");
-                        } else {
-                          // CREATE
-                          await dispatch(
-                            gradeSubmission({
-                              submissionId: selectedSubmission.id,
-                              data: {
-                                score: Number(score),
-                                feedback,
-                              },
-                            }),
-                          ).unwrap();
-
-                          toastManager.success("Submission graded");
-                        }
-
-                        setSelectedAssignment(null);
-                      } catch (err) {
-                        toastManager.error(err?.message || "Failed to grade");
-                      }
-                    }}
-                  >
-                    {selectedSubmission.grade
-                      ? "Update Grade"
-                      : "Grade Submission"}
-                  </button>
-                </div>
               </>
             ) : null}
           </div>

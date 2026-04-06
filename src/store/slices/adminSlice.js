@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { adminService } from "../../services/adminService";
 import { coursesService } from "../../services/coursesService";
 import { handleApiError } from "../../utils/errorHandler";
+import { axiosInstance } from "../../utils";
 
 // Initial state
 const initialState = {
@@ -57,6 +58,13 @@ const initialState = {
 
   // Reports
   reports: {
+    data: [],
+    loading: false,
+    error: null,
+  },
+
+  // Enrollments
+  enrollments: {
     data: [],
     loading: false,
     error: null,
@@ -280,6 +288,21 @@ export const fetchReports = createAsyncThunk(
   },
 );
 
+// Enrollments Thunks
+export const fetchEnrollments = createAsyncThunk(
+  "admin/fetchEnrollments",
+  async (params = {}, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get("/courses/all-enrollments/", {
+        params,
+      });
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.message || "Failed to fetch enrollments");
+    }
+  },
+);
+
 // Slice
 const adminSlice = createSlice({
   name: "admin",
@@ -304,6 +327,9 @@ const adminSlice = createSlice({
     clearReportsError: (state) => {
       state.reports.error = null;
     },
+    clearEnrollmentsError: (state) => {
+      state.enrollments.error = null;
+    },
 
     // Clear all errors
     clearAllErrors: (state) => {
@@ -313,6 +339,7 @@ const adminSlice = createSlice({
       state.settings.error = null;
       state.systemStatus.error = null;
       state.reports.error = null;
+      state.enrollments.error = null;
     },
 
     // Reset specific state
@@ -499,6 +526,21 @@ const adminSlice = createSlice({
         state.reports.loading = false;
         state.reports.error = action.payload;
       });
+
+    // Enrollments
+    builder
+      .addCase(fetchEnrollments.pending, (state) => {
+        state.enrollments.loading = true;
+        state.enrollments.error = null;
+      })
+      .addCase(fetchEnrollments.fulfilled, (state, action) => {
+        state.enrollments.loading = false;
+        state.enrollments.data = action.payload.results || action.payload || [];
+      })
+      .addCase(fetchEnrollments.rejected, (state, action) => {
+        state.enrollments.loading = false;
+        state.enrollments.error = action.payload;
+      });
   },
 });
 
@@ -510,6 +552,7 @@ export const {
   clearSettingsError,
   clearSystemStatusError,
   clearReportsError,
+  clearEnrollmentsError,
   clearAllErrors,
   resetUsers,
   resetCourses,
@@ -523,6 +566,7 @@ export const selectAnalytics = (state) => state.admin.analytics;
 export const selectSettings = (state) => state.admin.settings;
 export const selectSystemStatus = (state) => state.admin.systemStatus;
 export const selectReports = (state) => state.admin.reports;
+export const selectEnrollments = (state) => state.admin.enrollments;
 
 // Convenience selectors
 export const selectUsersLoading = (state) => state.admin.users.loading;
@@ -532,5 +576,7 @@ export const selectSettingsLoading = (state) => state.admin.settings.loading;
 export const selectSystemStatusLoading = (state) =>
   state.admin.systemStatus.loading;
 export const selectReportsLoading = (state) => state.admin.reports.loading;
+export const selectEnrollmentsLoading = (state) =>
+  state.admin.enrollments.loading;
 
 export default adminSlice.reducer;
