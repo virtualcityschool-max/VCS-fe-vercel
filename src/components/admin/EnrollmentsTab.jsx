@@ -177,11 +177,11 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
       {/* Enrollments Table */}
       <div className="bg-slate-900/50 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
         {/* Mobile Card View */}
-        <div className="lg:hidden divide-y divide-slate-800/50">
+        <div className="lg:hidden space-y-4 p-4">
           {filteredEnrollments.map((enrollment, index) => (
             <div
               key={enrollment.id}
-              className="p-4 hover:bg-slate-800/30 transition"
+              className="bg-slate-800/50 border border-slate-700 rounded-xl p-4 hover:bg-slate-800/70 transition"
             >
               {/* Index */}
               <div className="text-xs text-slate-500 mb-3">#{index + 1}</div>

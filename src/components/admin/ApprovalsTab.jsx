@@ -258,7 +258,6 @@ const ApprovalsTab = ({
                                 <span className="hidden sm:inline">
                                   Approving...
                                 </span>
-                                <span className="sm:hidden">...</span>
                               </React.Fragment>
                             ) : (
                               <React.Fragment key="approve">
@@ -266,7 +265,6 @@ const ApprovalsTab = ({
                                 <span className="hidden sm:inline">
                                   Approve
                                 </span>
-                                <span className="sm:hidden">✓</span>
                               </React.Fragment>
                             )}
                           </button>
@@ -281,13 +279,11 @@ const ApprovalsTab = ({
                                 <span className="hidden sm:inline">
                                   Rejecting...
                                 </span>
-                                <span className="sm:hidden">...</span>
                               </React.Fragment>
                             ) : (
                               <React.Fragment key="reject">
                                 <i className="fas fa-times"></i>
                                 <span className="hidden sm:inline">Reject</span>
-                                <span className="sm:hidden">✕</span>
                               </React.Fragment>
                             )}
                           </button>

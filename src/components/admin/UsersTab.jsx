@@ -1,5 +1,87 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button, Input, Card } from "../../components/ui";
+
+// Search controls component
+const SearchControls = ({
+  searchInput,
+  setSearchInput,
+  usersFilters,
+  handleFilterChange,
+  onFetchUsers,
+  handleCreateUser,
+}) => {
+  return (
+    <div className="flex justify-end items-center mb-6">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 lg:gap-4 w-full lg:w-auto max-w-2xl lg:max-w-none">
+        <div className="relative flex-1 lg:flex-initial">
+          <Input
+            type="text"
+            placeholder="Search by username or email..."
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            className="pl-10 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full lg:w-64"
+          />
+          <i className="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+        </div>
+        <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+          <select
+            value={usersFilters.role}
+            onChange={(e) => handleFilterChange("role", e.target.value)}
+            className="px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          >
+            <option value="">All Roles</option>
+            <option value="admin">Admin</option>
+            <option value="teacher">Teacher</option>
+            <option value="student">Student</option>
+            <option value="parent">Parent</option>
+          </select>
+          <select
+            value={usersFilters.is_active}
+            onChange={(e) => handleFilterChange("is_active", e.target.value)}
+            className="px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          >
+            <option value="">All Statuses</option>
+            <option value="true">Active</option>
+            <option value="false">Inactive</option>
+          </select>
+          <select
+            value={usersFilters.ordering}
+            onChange={(e) => handleFilterChange("ordering", e.target.value)}
+            className="px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          >
+            <option value="-date_joined">Newest First</option>
+            <option value="date_joined">Oldest First</option>
+            <option value="username">Username A-Z</option>
+            <option value="-username">Username Z-A</option>
+          </select>
+          <button
+            onClick={() => onFetchUsers()}
+            className="bg-slate-700 hover:bg-slate-600 text-white px-3 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 sm:hidden"
+          >
+            <i className="fas fa-sync"></i>
+            <span className="ml-2">Refresh</span>
+          </button>
+          <button
+            onClick={handleCreateUser}
+            className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-lg active:scale-95 transition items-center justify-center gap-2"
+          >
+            <i className="fas fa-user-plus text-sm"></i>
+            <span className="hidden sm:inline ml-2">Create User</span>
+            <span className="sm:hidden">+</span>
+          </button>
+        </div>
+        <button
+          onClick={() => onFetchUsers()}
+          className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 sm:flex"
+        >
+          <i className="fas fa-sync"></i>
+          <span className="ml-2">Refresh</span>
+        </button>
+      </div>
+    </div>
+  );
+};
 
 const UsersTab = ({
   users,
@@ -8,17 +90,23 @@ const UsersTab = ({
   setUsersFilters,
   onUserDelete,
   onFetchUsers,
-  onUserEdit,
   onCreateUser,
 }) => {
-  // Debounced search handler
-  const [searchInput, setSearchInput] = useState("");
+  const navigate = useNavigate();
+  // Debounced search handler - use controlled pattern
+  const [localSearchInput, setLocalSearchInput] = useState(
+    usersFilters.search || "",
+  );
   const isMountedRef = useRef(true);
+
+  // Use the local input for UI, but sync with external filter when they differ
+  const searchInput = localSearchInput;
+  const setSearchInput = setLocalSearchInput;
 
   // Debounced search update with cleanup
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (isMountedRef.current && searchInput !== usersFilters.search) {
+      if (searchInput !== usersFilters.search) {
         setUsersFilters((prev) => ({ ...prev, search: searchInput }));
       }
     }, 300); // 300ms debounce
@@ -50,11 +138,7 @@ const UsersTab = ({
   };
 
   const handleEditUser = (userId) => {
-    if (onUserEdit) {
-      onUserEdit(userId);
-    } else {
-      console.log("Edit user functionality not implemented:", userId);
-    }
+    navigate(`/admin/users/${userId}`);
   };
 
   const handleCreateUser = () => {
@@ -141,83 +225,19 @@ const UsersTab = ({
       ) : (
         <>
           {/* User List Header */}
-          <div className="flex justify-end items-center mb-6">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 lg:gap-4 w-full lg:w-auto max-w-2xl lg:max-w-none">
-              <div className="relative flex-1 lg:flex-initial">
-                <Input
-                  type="text"
-                  placeholder="Search by username or email..."
-                  value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
-                  className="pl-10 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full lg:w-64"
-                />
-                <i className="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
-              </div>
-              <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
-                <select
-                  value={usersFilters.role}
-                  onChange={(e) => handleFilterChange("role", e.target.value)}
-                  className="px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                >
-                  <option value="">All Roles</option>
-                  <option value="admin">Admin</option>
-                  <option value="teacher">Teacher</option>
-                  <option value="student">Student</option>
-                  <option value="parent">Parent</option>
-                </select>
-                <select
-                  value={usersFilters.is_active}
-                  onChange={(e) =>
-                    handleFilterChange("is_active", e.target.value)
-                  }
-                  className="px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                >
-                  <option value="">All Statuses</option>
-                  <option value="true">Active</option>
-                  <option value="false">Inactive</option>
-                </select>
-                <select
-                  value={usersFilters.ordering}
-                  onChange={(e) =>
-                    handleFilterChange("ordering", e.target.value)
-                  }
-                  className="px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                >
-                  <option value="-date_joined">Newest First</option>
-                  <option value="date_joined">Oldest First</option>
-                  <option value="username">Username A-Z</option>
-                  <option value="-username">Username Z-A</option>
-                </select>
-                <button
-                  onClick={() => onFetchUsers()}
-                  className="bg-slate-700 hover:bg-slate-600 text-white px-3 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 sm:hidden"
-                >
-                  <i className="fas fa-sync"></i>
-                  <span className="ml-2">Refresh</span>
-                </button>
-                <button
-                  onClick={handleCreateUser}
-                  className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-lg active:scale-95 transition flex items-center justify-center gap-2"
-                >
-                  <i className="fas fa-user-plus text-sm"></i>
-                  <span className="hidden sm:inline ml-2">Create User</span>
-                  <span className="sm:hidden">+</span>
-                </button>
-              </div>
-              <button
-                onClick={() => onFetchUsers()}
-                className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 hidden sm:flex"
-              >
-                <i className="fas fa-sync"></i>
-                <span className="ml-2">Refresh</span>
-              </button>
-            </div>
-          </div>
+          <SearchControls
+            searchInput={searchInput}
+            setSearchInput={setSearchInput}
+            usersFilters={usersFilters}
+            handleFilterChange={handleFilterChange}
+            onFetchUsers={onFetchUsers}
+            handleCreateUser={handleCreateUser}
+          />
 
           {/* Users List */}
           <div className="bg-slate-900/50 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
             {/* Mobile Card View */}
-            <div className="lg:hidden divide-y divide-slate-800/50">
+            <div className="lg:hidden divide-y divide-slate-800/50 space-y-4">
               {users?.map((user) => (
                 <div
                   key={user.id}
@@ -268,9 +288,8 @@ const UsersTab = ({
                         onClick={() => handleEditUser(user.id)}
                         className="bg-slate-700/50 text-slate-300 px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium hover:bg-slate-600/50 transition flex items-center gap-1 flex-1 justify-center"
                       >
-                        <i className="fas fa-edit"></i>
-                        <span className="hidden sm:inline">Edit</span>
-                        <span className="sm:hidden">✏</span>
+                        <i className="fas fa-eye"></i>
+                        <span className="hidden sm:inline">View</span>
                       </button>
                       <button
                         onClick={() => handleDeleteUser(user.id)}
@@ -278,7 +297,6 @@ const UsersTab = ({
                       >
                         <i className="fas fa-trash"></i>
                         <span className="hidden sm:inline">Delete</span>
-                        <span className="sm:hidden">🗑</span>
                       </button>
                     </div>
                   </div>
@@ -355,8 +373,8 @@ const UsersTab = ({
                             onClick={() => handleEditUser(user.id)}
                             className="bg-slate-700/50 text-slate-300 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-slate-600/50 transition"
                           >
-                            <i className="fas fa-edit mr-1"></i>
-                            Edit
+                            <i className="fas fa-eye mr-1"></i>
+                            View
                           </button>
                           <button
                             onClick={() => handleDeleteUser(user.id)}

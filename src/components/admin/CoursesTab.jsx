@@ -341,7 +341,7 @@ const CoursesTab = ({
         ) : (
           <div className="overflow-x-auto">
             {/* Mobile Card View */}
-            <div className="lg:hidden divide-y divide-slate-800/50">
+            <div className="lg:hidden divide-y divide-slate-800/50 space-y-4">
               {filteredCourses?.map((course) => (
                 <div
                   key={course.id}
@@ -1009,10 +1009,10 @@ const CoursesTab = ({
                   </Button>
                   <Button
                     type="submit"
-                    disabled={updatingCourseId === activeModal.id}
+                    disabled={updatingCourseId === activeModal?.id}
                     className="bg-indigo-600 hover:bg-indigo-500"
                   >
-                    {updatingCourseId === activeModal.id
+                    {updatingCourseId === activeModal?.id
                       ? "Updating..."
                       : "Update Course"}
                   </Button>

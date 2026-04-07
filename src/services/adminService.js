@@ -9,6 +9,7 @@ const ADMIN_ENDPOINTS = {
   USER_CREATE: "/users/",
   USER_UPDATE: (id) => `/users/${id}/`,
   USER_DELETE: (id) => `/users/${id}/`,
+  USER_PROFILE: (id) => `/users/${id}/profile/`,
 
   // Admin Dashboard
   ADMIN_DASHBOARD: "/admin/dashboard/",
@@ -74,6 +75,30 @@ export const adminService = {
     }
   },
 
+  // User Profile Management
+  getUserProfile: async (userId) => {
+    try {
+      const response = await axiosInstance.get(
+        ADMIN_ENDPOINTS.USER_PROFILE(userId),
+      );
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error, { context: "Get User Profile" });
+    }
+  },
+
+  updateUserProfile: async (userId, profileData) => {
+    try {
+      const response = await axiosInstance.patch(
+        ADMIN_ENDPOINTS.USER_PROFILE(userId),
+        profileData,
+      );
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error, { context: "Update User Profile" });
+    }
+  },
+
   getDashboardAnalytics: async () => {
     try {
       const response = await axiosInstance.get(ADMIN_ENDPOINTS.ADMIN_DASHBOARD);
@@ -97,12 +122,7 @@ export const adminService = {
       // Process raw enrollment data into time-series format for the chart
       const enrollments = response.data.results || response.data || [];
 
-      // Debug logging
-      console.log("🔍 Raw enrollment data:", enrollments);
-      console.log("🔍 Response structure:", response.data);
-
       if (!enrollments || enrollments.length === 0) {
-        console.log("⚠️ No enrollment data found");
         return {
           chartData: [],
           courses: [],
@@ -114,10 +134,6 @@ export const adminService = {
         (e) => e.enrolled_at && e.course && e.course.id,
       );
       if (!hasRequiredFields) {
-        console.log(
-          "⚠️ Enrollment data missing required fields (enrolled_at, course.id)",
-        );
-        console.log("🔍 Sample enrollment object:", enrollments[0]);
         return {
           chartData: [],
           courses: [],
@@ -152,10 +168,6 @@ export const adminService = {
           const enrollmentDate = new Date(enrollment.enrolled_at);
           const enrollmentYear = enrollmentDate.getFullYear();
 
-          console.log(
-            `🔍 Processing enrollment: ${enrollment.course.title}, enrolled_at: ${enrollment.enrolled_at}, year: ${enrollmentYear}, current year: ${currentYear}`,
-          );
-
           // Only count current year enrollments
           if (enrollmentYear === currentYear) {
             const monthName = months[enrollmentDate.getMonth()];
@@ -176,18 +188,10 @@ export const adminService = {
             // Increment counts
             courseMonthlyData[courseTitle][monthName].enrollments += 1;
 
-            console.log(
-              `✅ Including enrollment for ${courseTitle} in ${monthName}`,
-            );
-
             // Count as active if status is active (or default to active)
             if (enrollment.status === "active" || !enrollment.status) {
               courseMonthlyData[courseTitle][monthName].active += 1;
             }
-          } else {
-            console.log(
-              `❌ Filtering out enrollment from ${enrollmentYear} (not current year ${currentYear})`,
-            );
           }
         }
       });
@@ -222,11 +226,6 @@ export const adminService = {
         chartData,
         courses: courseTotals.map(({ courseTitle }) => courseTitle),
       };
-
-      // Debug logging for processed data
-      console.log("🔍 Processed chart data:", chartData);
-      console.log("🔍 Course list:", result.courses);
-      console.log("🔍 Course totals:", courseTotals);
 
       return result;
     } catch (error) {

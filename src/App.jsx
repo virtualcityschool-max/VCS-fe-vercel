@@ -19,6 +19,13 @@ import { SimulatorBar, AIChat, AuthModals, Navbar } from "./components";
 import {
   PublicHome,
   AdminDashboard,
+  AdminLayout,
+  AdminOverviewPage,
+  AdminApprovalsPage,
+  AdminCoursesPage,
+  AdminUsersPage,
+  AdminEnrollmentsPage,
+  UserDetailsPage,
   StudentPortal,
   TeacherLayout,
   TeacherPortal,
@@ -202,7 +209,18 @@ const App = () => {
 
             {/* Admin-Only Routes */}
             <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
-              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/admin" element={<AdminLayout />}>
+                <Route
+                  index
+                  element={<Navigate to="/admin/overview" replace />}
+                />
+                <Route path="overview" element={<AdminOverviewPage />} />
+                <Route path="approvals" element={<AdminApprovalsPage />} />
+                <Route path="courses" element={<AdminCoursesPage />} />
+                <Route path="users" element={<AdminUsersPage />} />
+                <Route path="enrollments" element={<AdminEnrollmentsPage />} />
+              </Route>
+              <Route path="/admin/users/:id" element={<UserDetailsPage />} />
             </Route>
 
             {/* Catch all route */}

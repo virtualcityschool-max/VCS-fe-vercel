@@ -1,0 +1,499 @@
+import React, { useState, useCallback, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  fetchUsers,
+  createUser,
+  deleteUser,
+  selectUsers,
+} from "../../store/slices/adminSlice";
+import {
+  Button,
+  Input,
+  Card,
+  PasswordValidation,
+  PasswordInput,
+} from "../../components/ui";
+import { useFieldErrors } from "../../hooks";
+import {
+  validateEmail,
+  validateUsername,
+  validatePassword,
+  validateRole,
+} from "../../utils/validation";
+import { toastManager } from "../../utils/toastManager";
+import UsersTab from "../../components/admin/UsersTab";
+
+const AdminUsersPage = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  // Users filter state
+  const [usersFilters, setUsersFilters] = useState({
+    search: "",
+    role: "",
+    is_active: "",
+    ordering: "-date_joined",
+  });
+
+  // Create user form state
+  const [createUserForm, setCreateUserForm] = useState({
+    username: "",
+    email: "",
+    password: "",
+    confirm_password: "",
+    role: "student",
+    first_name: "",
+    last_name: "",
+    student_emails: "",
+  });
+
+  const [isCreatingUser, setIsCreatingUser] = useState(false);
+  const [activeModal, setActiveModal] = useState(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const isMountedRef = useRef(true);
+
+  // Create user form error handling
+  const {
+    errors: createUserErrors,
+    setErrors: setCreateUserErrors,
+    handleApiError: handleCreateUserApiError,
+    clearAllErrors: clearAllCreateUserErrors,
+  } = useFieldErrors({});
+
+  // Get users data from Redux store
+  const users = useSelector(selectUsers);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  // Define handleFetchUsers
+  const handleFetchUsers = useCallback(() => {
+    const params = {};
+
+    if (usersFilters.search) {
+      params.search = usersFilters.search;
+    }
+    if (usersFilters.role) {
+      params.role = usersFilters.role;
+    }
+    if (usersFilters.is_active !== "") {
+      params.is_active = usersFilters.is_active;
+    }
+    if (usersFilters.ordering) {
+      params.ordering = usersFilters.ordering;
+    }
+
+    dispatch(fetchUsers(params));
+  }, [dispatch, usersFilters]);
+
+  // Debounced search handler - Fixed the comparison logic
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (isMountedRef.current) {
+        handleFetchUsers();
+      }
+    }, 300); // 300ms debounce
+
+    return () => clearTimeout(timer);
+  }, [usersFilters.search, handleFetchUsers]);
+
+  // Fetch users when component mounts or filters change
+  useEffect(() => {
+    handleFetchUsers();
+  }, [handleFetchUsers]);
+
+  // Handle user deletion
+  const handleDeleteUser = async (userId) => {
+    try {
+      await dispatch(deleteUser(userId)).unwrap();
+      toastManager.success("User deleted successfully");
+      handleFetchUsers();
+    } catch (error) {
+      toastManager.error(error?.message || "Failed to delete user");
+    }
+  };
+
+  // Handle user editing - navigate to user details page
+  const handleEditUser = (userId) => {
+    navigate(`/admin/users/${userId}`);
+  };
+
+  // Shared reset function for create user modal
+  const resetCreateUserModal = useCallback(() => {
+    setCreateUserForm({
+      username: "",
+      email: "",
+      password: "",
+      confirm_password: "",
+      role: "student",
+      first_name: "",
+      last_name: "",
+      student_emails: "",
+    });
+    setCreateUserErrors({});
+    clearAllCreateUserErrors();
+  }, [setCreateUserErrors, clearAllCreateUserErrors]);
+
+  // Handle create user
+  const handleCreateUser = () => {
+    resetCreateUserModal();
+    setActiveModal("create-user");
+  };
+
+  // Handle close create user modal
+  const handleCloseCreateUserModal = () => {
+    resetCreateUserModal();
+    setActiveModal(null);
+  };
+
+  // Validate create user form
+  const validateCreateUserForm = (formData) => {
+    const errors = {};
+
+    // Email validation
+    const emailValidation = validateEmail(formData.email);
+    if (!emailValidation.isValid) {
+      errors.email = emailValidation.error;
+    }
+
+    // Username validation
+    const usernameValidation = validateUsername(formData.username);
+    if (!usernameValidation.isValid) {
+      errors.username = usernameValidation.error;
+    }
+
+    // Password validation
+    const passwordValidation = validatePassword(formData.password);
+    if (!passwordValidation.isValid) {
+      errors.password = passwordValidation.errors[0];
+    }
+
+    // Confirm password validation
+    if (formData.password !== formData.confirm_password) {
+      errors.confirm_password = "Passwords do not match";
+    }
+
+    // Role validation
+    const roleValidation = validateRole(formData.role);
+    if (!roleValidation.isValid) {
+      errors.role = roleValidation.error;
+    }
+
+    return errors;
+  };
+
+  // Handle create user submit
+  const handleCreateUserSubmit = async (userData) => {
+    clearAllCreateUserErrors();
+
+    const validationErrors = validateCreateUserForm(userData);
+    if (Object.keys(validationErrors).length > 0) {
+      setCreateUserErrors(validationErrors);
+      return;
+    }
+
+    const payload = {
+      email: userData.email.trim(),
+      username: userData.username.trim(),
+      password: userData.password,
+      confirm_password: userData.confirm_password,
+      role: userData.role,
+      first_name: userData.first_name?.trim() || "",
+      last_name: userData.last_name?.trim() || "",
+    };
+
+    if (userData.role === "parent" && userData.student_emails?.trim()) {
+      payload.student_emails = userData.student_emails
+        .split(",")
+        .map((email) => email.trim())
+        .filter(Boolean);
+    }
+
+    try {
+      setIsCreatingUser(true);
+      await dispatch(createUser(payload)).unwrap();
+      toastManager.success("User created successfully");
+      resetCreateUserModal();
+      handleFetchUsers();
+    } catch (error) {
+      handleCreateUserApiError(error);
+    } finally {
+      setIsCreatingUser(false);
+    }
+  };
+
+  return (
+    <>
+      <UsersTab
+        users={users?.data || []}
+        loading={users?.loading || false}
+        usersFilters={usersFilters}
+        setUsersFilters={setUsersFilters}
+        onUserDelete={handleDeleteUser}
+        onFetchUsers={handleFetchUsers}
+        onUserEdit={handleEditUser}
+        onCreateUser={handleCreateUser}
+      />
+
+      {/* Create User Modal */}
+      {activeModal === "create-user" && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-900 rounded-2xl p-6 w-full max-w-md border border-slate-800 shadow-2xl">
+            <h3 className="text-xl font-bold text-white mb-4">Create User</h3>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1">
+                  Username
+                </label>
+                <Input
+                  value={createUserForm.username}
+                  onChange={(e) => {
+                    setCreateUserForm({
+                      ...createUserForm,
+                      username: e.target.value,
+                    });
+                    // Clear field error when user starts typing
+                    if (createUserErrors.username) {
+                      setCreateUserErrors((prev) => ({
+                        ...prev,
+                        username: undefined,
+                      }));
+                    }
+                  }}
+                  className="w-full"
+                  placeholder="Username"
+                  error={createUserErrors.username}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1">
+                  Email
+                </label>
+                <Input
+                  type="email"
+                  value={createUserForm.email}
+                  onChange={(e) => {
+                    setCreateUserForm({
+                      ...createUserForm,
+                      email: e.target.value,
+                    });
+                    // Clear field error when user starts typing
+                    if (createUserErrors.email) {
+                      setCreateUserErrors((prev) => ({
+                        ...prev,
+                        email: undefined,
+                      }));
+                    }
+                  }}
+                  className="w-full"
+                  placeholder="Email"
+                  error={createUserErrors.email}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1">
+                  First Name
+                </label>
+                <Input
+                  value={createUserForm.first_name}
+                  onChange={(e) => {
+                    setCreateUserForm({
+                      ...createUserForm,
+                      first_name: e.target.value,
+                    });
+                    // Clear field error when user starts typing
+                    if (createUserErrors.first_name) {
+                      setCreateUserErrors((prev) => ({
+                        ...prev,
+                        first_name: undefined,
+                      }));
+                    }
+                  }}
+                  className="w-full"
+                  placeholder="First Name"
+                  error={createUserErrors.first_name}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1">
+                  Last Name
+                </label>
+                <Input
+                  value={createUserForm.last_name}
+                  onChange={(e) => {
+                    setCreateUserForm({
+                      ...createUserForm,
+                      last_name: e.target.value,
+                    });
+                    // Clear field error when user starts typing
+                    if (createUserErrors.last_name) {
+                      setCreateUserErrors((prev) => ({
+                        ...prev,
+                        last_name: undefined,
+                      }));
+                    }
+                  }}
+                  className="w-full"
+                  placeholder="Last Name"
+                  error={createUserErrors.last_name}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1">
+                  Role
+                </label>
+                <select
+                  value={createUserForm.role}
+                  onChange={(e) => {
+                    setCreateUserForm({
+                      ...createUserForm,
+                      role: e.target.value,
+                    });
+                    // Clear field error when user starts typing
+                    if (createUserErrors.role) {
+                      setCreateUserErrors((prev) => ({
+                        ...prev,
+                        role: undefined,
+                      }));
+                    }
+                  }}
+                  className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                >
+                  <option value="student">Student</option>
+                  <option value="teacher">Teacher</option>
+                  <option value="parent">Parent</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1">
+                  Password
+                </label>
+                <PasswordInput
+                  value={createUserForm.password}
+                  onChange={(e) => {
+                    setCreateUserForm({
+                      ...createUserForm,
+                      password: e.target.value,
+                    });
+                    // Clear field error when user starts typing
+                    if (createUserErrors.password) {
+                      setCreateUserErrors((prev) => ({
+                        ...prev,
+                        password: undefined,
+                      }));
+                    }
+                  }}
+                  placeholder="Password"
+                  error={createUserErrors.password}
+                  showPassword={showPassword}
+                  onTogglePassword={() => setShowPassword(!showPassword)}
+                />
+                {createUserForm.password && (
+                  <PasswordValidation password={createUserForm.password} />
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1">
+                  Confirm Password
+                </label>
+                <PasswordInput
+                  value={createUserForm.confirm_password}
+                  onChange={(e) => {
+                    setCreateUserForm({
+                      ...createUserForm,
+                      confirm_password: e.target.value,
+                    });
+                    // Clear field error when user starts typing
+                    if (createUserErrors.confirm_password) {
+                      setCreateUserErrors((prev) => ({
+                        ...prev,
+                        confirm_password: undefined,
+                      }));
+                    }
+                  }}
+                  placeholder="Confirm Password"
+                  error={createUserErrors.confirm_password}
+                  showPassword={showConfirmPassword}
+                  onTogglePassword={() =>
+                    setShowConfirmPassword(!showConfirmPassword)
+                  }
+                />
+              </div>
+
+              {createUserForm.role === "parent" && (
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
+                    Student Emails (comma separated)
+                  </label>
+                  <textarea
+                    value={createUserForm.student_emails}
+                    onChange={(e) => {
+                      setCreateUserForm({
+                        ...createUserForm,
+                        student_emails: e.target.value,
+                      });
+                      // Clear field error when user starts typing
+                      if (createUserErrors.student_emails) {
+                        setCreateUserErrors((prev) => ({
+                          ...prev,
+                          student_emails: undefined,
+                        }));
+                      }
+                    }}
+                    className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    rows="3"
+                    placeholder="student1@example.com, student2@example.com"
+                  />
+                </div>
+              )}
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <Button
+                variant="secondary"
+                onClick={handleCloseCreateUserModal}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                onClick={() => handleCreateUserSubmit(createUserForm)}
+                disabled={isCreatingUser}
+                className="flex-1"
+              >
+                {isCreatingUser ? (
+                  <>
+                    <i className="fas fa-spinner fa-spin mr-2"></i>
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <i className="fas fa-user-plus mr-2"></i>
+                    Create User
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
+
+export default AdminUsersPage;
