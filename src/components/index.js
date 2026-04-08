@@ -9,5 +9,8 @@ export { default as AuthModals } from "./forms/AuthModals";
 export { default as AIChat } from "./common/AIChat";
 export { default as SimulatorBar } from "./common/SimulatorBar";
 
+// Parent Components
+export * from "./parent";
+
 // UI Components
 export { Button, Card, Input, Footer } from "./ui";

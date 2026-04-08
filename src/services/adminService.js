@@ -14,6 +14,9 @@ const ADMIN_ENDPOINTS = {
   // Admin Dashboard
   ADMIN_DASHBOARD: "/admin/dashboard/",
   ALL_ENROLLMENTS: "/courses/all-enrollments/",
+
+  // Enrollment Management
+  ADMIN_ENROLL: "/courses/admin-enroll/",
 };
 
 // User Management endpoints
@@ -254,6 +257,19 @@ export const adminService = {
       return response.data;
     } catch (error) {
       throw handleApiError(error, { context: "Delete Course" });
+    }
+  },
+
+  // Enrollment Management
+  createEnrollment: async (enrollmentData) => {
+    try {
+      const response = await axiosInstance.post(
+        ADMIN_ENDPOINTS.ADMIN_ENROLL,
+        enrollmentData,
+      );
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error, { context: "Create Enrollment" });
     }
   },
 };

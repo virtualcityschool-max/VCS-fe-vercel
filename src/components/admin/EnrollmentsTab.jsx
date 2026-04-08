@@ -1,8 +1,13 @@
 import React, { useState, useMemo } from "react";
+import { useDispatch } from "react-redux";
+import { clearEnrollmentsError } from "../../store/slices/adminSlice";
 import { Button } from "../../components/ui";
+import CreateEnrollmentModal from "./CreateEnrollmentModal";
 
 const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
+  const dispatch = useDispatch();
   const [searchInput, setSearchInput] = useState("");
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   // Filter enrollments based on search using useMemo instead of useEffect
   const filteredEnrollments = useMemo(() => {
@@ -55,6 +60,24 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
       month: "short",
       day: "numeric",
     });
+  };
+
+  // Handle modal open/close
+  const handleOpenCreateModal = () => {
+    setIsCreateModalOpen(true);
+    // Clear any previous enrollment errors
+    dispatch(clearEnrollmentsError());
+  };
+
+  const handleCloseCreateModal = () => {
+    setIsCreateModalOpen(false);
+    // Clear any enrollment errors when closing
+    dispatch(clearEnrollmentsError());
+  };
+
+  const handleEnrollmentSuccess = () => {
+    // Refresh the enrollments list
+    onRefresh();
   };
 
   if (loading) {
@@ -152,7 +175,8 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-end items-center mb-6">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-xl font-bold text-white">Enrollments</h2>
         <div className="flex items-center gap-4">
           <div className="relative">
             <input
@@ -164,6 +188,13 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
             />
             <i className="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
           </div>
+          <Button
+            onClick={handleOpenCreateModal}
+            className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2"
+          >
+            <i className="fas fa-plus"></i>
+            <span>Create Enrollment</span>
+          </Button>
           <button
             onClick={onRefresh}
             className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2"
@@ -353,6 +384,13 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
           </div>
         )}
       </div>
+
+      {/* Create Enrollment Modal */}
+      <CreateEnrollmentModal
+        isOpen={isCreateModalOpen}
+        onClose={handleCloseCreateModal}
+        onSuccess={handleEnrollmentSuccess}
+      />
     </div>
   );
 };

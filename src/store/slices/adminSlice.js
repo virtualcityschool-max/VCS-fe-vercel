@@ -303,6 +303,18 @@ export const fetchEnrollments = createAsyncThunk(
   },
 );
 
+export const createEnrollment = createAsyncThunk(
+  "admin/createEnrollment",
+  async (enrollmentData, { rejectWithValue }) => {
+    try {
+      const response = await adminService.createEnrollment(enrollmentData);
+      return response;
+    } catch (error) {
+      return rejectWithValue(error); // Preserve full error object for proper error handling
+    }
+  },
+);
+
 // Slice
 const adminSlice = createSlice({
   name: "admin",
@@ -540,6 +552,30 @@ const adminSlice = createSlice({
       .addCase(fetchEnrollments.rejected, (state, action) => {
         state.enrollments.loading = false;
         state.enrollments.error = action.payload;
+      })
+      .addCase(createEnrollment.pending, (state) => {
+        // Don't change loading state here to avoid interfering with list loading
+        // Clear previous enrollment errors
+        state.enrollments.error = null;
+      })
+      .addCase(createEnrollment.fulfilled, (state, action) => {
+        // Add the new enrollment to the beginning of the list
+        if (action.payload && state.enrollments.data) {
+          state.enrollments.data.unshift(action.payload);
+        }
+      })
+      .addCase(createEnrollment.rejected, (state, action) => {
+        // Store only safe error message for the modal to display
+        // This prevents crashes from complex error objects
+        if (typeof action.payload === "string") {
+          state.enrollments.error = action.payload;
+        } else if (action.payload?.message) {
+          state.enrollments.error = action.payload.message;
+        } else if (action.payload?.error) {
+          state.enrollments.error = action.payload.error;
+        } else {
+          state.enrollments.error = "Failed to create enrollment";
+        }
       });
   },
 });
