@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchParentDashboard } from "../../store/slices/parentSlice";
 import { ChildCard, RecentActivity, OverviewStats } from "../../components";
 import { LoadingSpinner, ErrorMessage } from "../../components/ui";
+import ChildLinkRequest from "../../components/parent/ChildLinkRequest";
 
 const ParentPortal = () => {
   const dispatch = useDispatch();
@@ -148,6 +149,11 @@ const ParentPortal = () => {
         <div className="grid grid-cols-1 lg:grid-cols-10 gap-8">
           {/* Main Dashboard - Left Column */}
           <div className="lg:col-span-7 space-y-8">
+            {/* Child Link Requests */}
+            <section>
+              <ChildLinkRequest />
+            </section>
+
             {/* Children Cards */}
             <section>
               <h2 className="text-xl font-bold font-poppins mb-6">

@@ -10,7 +10,6 @@ import CreateEnrollmentModal from "./CreateEnrollmentModal";
 
 const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
   const dispatch = useDispatch();
-  const [searchInput, setSearchInput] = useState("");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   // Filter states

@@ -15,6 +15,10 @@ const ADMIN_ENDPOINTS = {
   ADMIN_DASHBOARD: "/admin/dashboard/",
   ALL_ENROLLMENTS: "/courses/all-enrollments/",
 
+  // Child Link Requests
+  CHILD_LINKS_PENDING: "/admin/child-links/pending/",
+  CHILD_LINK_ACTION: (id) => `/admin/child-links/${id}/`,
+
   // Enrollment Management
   ADMIN_ENROLL: "/courses/admin-enroll/",
 };
@@ -287,6 +291,42 @@ export const adminService = {
       return response.data;
     } catch (error) {
       throw handleApiError(error, { context: "Unenroll Student" });
+    }
+  },
+
+  // Child Link Requests
+  getPendingChildLinks: async () => {
+    try {
+      const response = await axiosInstance.get(
+        ADMIN_ENDPOINTS.CHILD_LINKS_PENDING,
+      );
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error, { context: "Get Pending Child Links" });
+    }
+  },
+
+  approveChildLink: async (linkId) => {
+    try {
+      const response = await axiosInstance.patch(
+        ADMIN_ENDPOINTS.CHILD_LINK_ACTION(linkId),
+        { action: "approve" },
+      );
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error, { context: "Approve Child Link" });
+    }
+  },
+
+  rejectChildLink: async (linkId) => {
+    try {
+      const response = await axiosInstance.patch(
+        ADMIN_ENDPOINTS.CHILD_LINK_ACTION(linkId),
+        { action: "reject" },
+      );
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error, { context: "Reject Child Link" });
     }
   },
 };

@@ -436,4 +436,53 @@ export const authService = {
       throw new Error(error.message || "Failed to reject user");
     }
   },
+
+  // Link child to parent (parent only)
+  linkChild: async (studentIds) => {
+    try {
+      console.log("Linking children:", studentIds);
+
+      const response = await axiosInstance.post("/auth/me/link-child/", {
+        student_ids: studentIds,
+      });
+      console.log("Link Child Response:", response.data);
+
+      return {
+        success: true,
+        data: response.data,
+        message: response.data.message || "Link request(s) sent successfully",
+      };
+    } catch (error) {
+      console.error("Link child error:", {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+        studentIds: studentIds,
+      });
+
+      if (error.response?.status === 400) {
+        const backendError = error.response?.data;
+        throw {
+          error: backendError?.error || "Invalid link request.",
+          status: 400,
+        };
+      }
+
+      if (error.response?.status === 403) {
+        throw {
+          error: "You don't have permission to link children.",
+          status: 403,
+        };
+      }
+
+      if (error.response?.status === 404) {
+        throw {
+          error: "One or more students not found.",
+          status: 404,
+        };
+      }
+
+      throw new Error(error.message || "Failed to link children");
+    }
+  },
 };

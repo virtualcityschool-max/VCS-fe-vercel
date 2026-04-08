@@ -583,11 +583,8 @@ export const handleApiError = (error, options = {}) => {
     toastFunction(normalizedError.message);
   }
 
-  // Return the processed error
-  return {
-    ...normalizedError,
-    originalError: error,
-  };
+  // Return the processed error (serializable only)
+  return normalizedError;
 };
 
 // Common error handler for async operations

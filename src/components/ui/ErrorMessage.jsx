@@ -14,8 +14,12 @@ const ErrorMessage = ({
     inline: "text-red-600 text-sm",
   };
 
+  // Extract message from error object or use as-is if it's a string
+  const errorMessage =
+    typeof error === "object" && error?.message ? error.message : error;
+
   if (variant === "inline") {
-    return <span className={variants[variant]}>{error}</span>;
+    return <span className={variants[variant]}>{errorMessage}</span>;
   }
 
   return (
@@ -27,7 +31,7 @@ const ErrorMessage = ({
         <div className="ml-3 flex-1">
           <h3 className="text-sm font-medium">{title}</h3>
           <div className="mt-2 text-sm">
-            <p>{error}</p>
+            <p>{errorMessage}</p>
           </div>
           {onRetry && (
             <div className="mt-4">

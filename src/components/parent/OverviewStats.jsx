@@ -51,7 +51,7 @@ const OverviewStats = ({ dashboardData }) => {
       <h3 className="text-xs font-black uppercase tracking-[0.3em] text-slate-500 mb-6">
         Overview
       </h3>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 gap-4">
         {stats.map((stat, index) => (
           <div
             key={index}
