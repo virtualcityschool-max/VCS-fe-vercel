@@ -1,7 +1,11 @@
 import React, { useState, useMemo } from "react";
 import { useDispatch } from "react-redux";
-import { clearEnrollmentsError } from "../../store/slices/adminSlice";
+import {
+  clearEnrollmentsError,
+  unenrollStudent,
+} from "../../store/slices/adminSlice";
 import { Button } from "../../components/ui";
+import { toastManager } from "../../utils/toastManager";
 import CreateEnrollmentModal from "./CreateEnrollmentModal";
 
 const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
@@ -9,28 +13,78 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
   const [searchInput, setSearchInput] = useState("");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
-  // Filter enrollments based on search using useMemo instead of useEffect
+  // Filter states
+  const [studentFilter, setStudentFilter] = useState("");
+  const [courseFilter, setCourseFilter] = useState("");
+  const [typeFilter, setTypeFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [dateSort, setDateSort] = useState("newest");
+
+  // Filter enrollments based on all filters using useMemo
   const filteredEnrollments = useMemo(() => {
     if (!enrollments) {
       return [];
     }
 
-    let filtered = enrollments;
+    let filtered = [...enrollments];
 
-    if (searchInput.trim()) {
-      const searchLower = searchInput.toLowerCase();
+    // Student filter
+    if (studentFilter.trim()) {
+      const studentLower = studentFilter.toLowerCase();
       filtered = filtered.filter((enrollment) => {
         return (
-          enrollment.student?.username?.toLowerCase().includes(searchLower) ||
-          enrollment.student?.email?.toLowerCase().includes(searchLower) ||
-          enrollment.course?.title?.toLowerCase().includes(searchLower) ||
-          enrollment.course?.category?.toLowerCase().includes(searchLower)
+          enrollment.student?.username?.toLowerCase().includes(studentLower) ||
+          enrollment.student?.email?.toLowerCase().includes(studentLower)
         );
       });
     }
 
+    // Course filter
+    if (courseFilter.trim()) {
+      const courseLower = courseFilter.toLowerCase();
+      filtered = filtered.filter((enrollment) => {
+        return (
+          enrollment.course?.title?.toLowerCase().includes(courseLower) ||
+          enrollment.course?.category?.toLowerCase().includes(courseLower)
+        );
+      });
+    }
+
+    // Type filter
+    if (typeFilter !== "all") {
+      filtered = filtered.filter((enrollment) => {
+        if (typeFilter === "private") {
+          return enrollment.is_private === true;
+        } else if (typeFilter === "normal") {
+          return enrollment.is_private === false;
+        }
+        return true;
+      });
+    }
+
+    // Status filter
+    if (statusFilter !== "all") {
+      filtered = filtered.filter((enrollment) => {
+        return enrollment.status?.toLowerCase() === statusFilter.toLowerCase();
+      });
+    }
+
+    // Date sorting
+    filtered.sort((a, b) => {
+      const dateA = new Date(a.enrolled_at || 0);
+      const dateB = new Date(b.enrolled_at || 0);
+      return dateSort === "newest" ? dateB - dateA : dateA - dateB;
+    });
+
     return filtered;
-  }, [enrollments, searchInput]);
+  }, [
+    enrollments,
+    studentFilter,
+    courseFilter,
+    typeFilter,
+    statusFilter,
+    dateSort,
+  ]);
 
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
@@ -80,6 +134,40 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
     onRefresh();
   };
 
+  // Unenroll handlers
+  const [unenrollConfirm, setUnenrollConfirm] = useState(null);
+  const [unenrollingId, setUnenrollingId] = useState(null);
+
+  const handleUnenroll = (enrollment) => {
+    setUnenrollConfirm(enrollment);
+  };
+
+  const confirmUnenroll = async () => {
+    if (!unenrollConfirm) return;
+
+    setUnenrollingId(unenrollConfirm.id);
+    try {
+      await dispatch(
+        unenrollStudent({
+          courseId: unenrollConfirm.course.id,
+          studentId: unenrollConfirm.student.id,
+        }),
+      ).unwrap();
+
+      toastManager.success("Student unenrolled successfully");
+      onRefresh(); // Refresh the list
+    } catch (error) {
+      toastManager.error(error?.message || "Failed to unenroll student");
+    } finally {
+      setUnenrollingId(null);
+      setUnenrollConfirm(null);
+    }
+  };
+
+  const cancelUnenroll = () => {
+    setUnenrollConfirm(null);
+  };
+
   if (loading) {
     return (
       <div className="space-y-6">
@@ -109,6 +197,9 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase">
                   Enrolled At
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase">
+                  Actions
                 </th>
               </tr>
             </thead>
@@ -142,6 +233,9 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
                   <td className="px-6 py-4">
                     <div className="h-4 bg-slate-700 rounded w-24"></div>
                   </td>
+                  <td className="px-6 py-4">
+                    <div className="h-8 bg-slate-700 rounded w-16"></div>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -174,34 +268,102 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-bold text-white">Enrollments</h2>
-        <div className="flex items-center gap-4">
+      {/* Header with Filters */}
+      <div className="space-y-4 mb-6">
+        {/* Filter Controls */}
+        <div className="flex flex-wrap gap-3 items-start">
+          {/* Student Filter */}
           <div className="relative">
             <input
               type="text"
-              placeholder="Search enrollments..."
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              className="pl-10 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-64"
+              placeholder="Filter by student..."
+              value={studentFilter}
+              onChange={(e) => setStudentFilter(e.target.value)}
+              className="pl-10 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-48"
             />
-            <i className="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+            <i className="fas fa-user absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
           </div>
-          <Button
-            onClick={handleOpenCreateModal}
-            className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2"
+
+          {/* Course Filter */}
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Filter by course..."
+              value={courseFilter}
+              onChange={(e) => setCourseFilter(e.target.value)}
+              className="pl-10 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-48"
+            />
+            <i className="fas fa-book absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+          </div>
+
+          {/* Type Filter */}
+          <select
+            value={typeFilter}
+            onChange={(e) => setTypeFilter(e.target.value)}
+            className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
           >
-            <i className="fas fa-plus"></i>
-            <span>Create Enrollment</span>
-          </Button>
+            <option value="all">All Types</option>
+            <option value="normal">Normal</option>
+            <option value="private">Private</option>
+          </select>
+
+          {/* Status Filter */}
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          >
+            <option value="all">All Statuses</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+            <option value="cancelled">Cancelled</option>
+            <option value="pending">Pending</option>
+          </select>
+
+          {/* Date Sort */}
+          <select
+            value={dateSort}
+            onChange={(e) => setDateSort(e.target.value)}
+            className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          >
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+          </select>
+
+          {/* Clear Filters */}
           <button
-            onClick={onRefresh}
-            className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2"
+            onClick={() => {
+              setStudentFilter("");
+              setCourseFilter("");
+              setTypeFilter("all");
+              setStatusFilter("all");
+              setDateSort("newest");
+            }}
+            className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-sm font-medium transition flex items-center gap-2"
           >
-            <i className="fas fa-sync"></i>
-            <span>Refresh</span>
+            <i className="fas fa-times"></i>
+            <span>Clear</span>
           </button>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex justify-center md:justify-end">
+          <div className="flex md:items-center gap-4">
+            <Button
+              onClick={handleOpenCreateModal}
+              className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2"
+            >
+              <i className="fas fa-plus"></i>
+              <span>Create Enrollment</span>
+            </Button>
+            <button
+              onClick={onRefresh}
+              className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2"
+            >
+              <i className="fas fa-sync"></i>
+              <span>Refresh</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -276,6 +438,17 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
               <div className="text-xs text-slate-500">
                 Enrolled: {formatDate(enrollment.enrolled_at)}
               </div>
+
+              {/* Actions */}
+              <div className="mt-4 pt-4 border-t border-slate-700">
+                <button
+                  onClick={() => handleUnenroll(enrollment)}
+                  className="w-full px-3 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-lg text-sm font-medium transition flex items-center justify-center gap-2"
+                >
+                  <i className="fas fa-user-minus"></i>
+                  <span>Unenroll</span>
+                </button>
+              </div>
             </div>
           ))}
         </div>
@@ -302,6 +475,9 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase">
                   Enrolled At
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase">
+                  Actions
                 </th>
               </tr>
             </thead>
@@ -353,6 +529,15 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
                   <td className="px-6 py-4 text-sm text-slate-400">
                     {formatDate(enrollment.enrolled_at)}
                   </td>
+                  <td className="px-6 py-4">
+                    <button
+                      onClick={() => handleUnenroll(enrollment)}
+                      className="px-3 py-1 bg-rose-600 hover:bg-rose-500 text-white rounded-lg text-sm font-medium transition flex items-center gap-2"
+                    >
+                      <i className="fas fa-user-minus"></i>
+                      <span>Unenroll</span>
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -366,19 +551,39 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
               <i className="fas fa-user-graduate text-slate-400 text-2xl"></i>
             </div>
             <h3 className="text-xl font-bold text-white mb-2">
-              {searchInput ? "No Matching Enrollments" : "No Enrollments Found"}
+              {studentFilter ||
+              courseFilter ||
+              typeFilter !== "all" ||
+              statusFilter !== "all" ||
+              dateSort !== "newest"
+                ? "No Matching Enrollments"
+                : "No Enrollments Found"}
             </h3>
             <p className="text-slate-400 text-center mb-6 max-w-md">
-              {searchInput
-                ? "Try adjusting your search terms to find what you're looking for."
+              {studentFilter ||
+              courseFilter ||
+              typeFilter !== "all" ||
+              statusFilter !== "all" ||
+              dateSort !== "newest"
+                ? "Try adjusting your filters to find what you're looking for."
                 : "There are no enrollments in the system yet."}
             </p>
-            {searchInput && (
+            {(studentFilter ||
+              courseFilter ||
+              typeFilter !== "all" ||
+              statusFilter !== "all" ||
+              dateSort !== "newest") && (
               <button
-                onClick={() => setSearchInput("")}
+                onClick={() => {
+                  setStudentFilter("");
+                  setCourseFilter("");
+                  setTypeFilter("all");
+                  setStatusFilter("all");
+                  setDateSort("newest");
+                }}
                 className="px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-xl font-medium transition-all duration-200"
               >
-                Clear Search
+                Clear Filters
               </button>
             )}
           </div>
@@ -391,6 +596,62 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
         onClose={handleCloseCreateModal}
         onSuccess={handleEnrollmentSuccess}
       />
+
+      {/* Unenroll Confirmation Modal */}
+      {unenrollConfirm && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl w-full max-w-md">
+            <div className="p-6">
+              <div className="flex items-center justify-center w-12 h-12 bg-rose-500/20 rounded-full mx-auto mb-4">
+                <i className="fas fa-exclamation-triangle text-rose-400 text-xl"></i>
+              </div>
+
+              <h3 className="text-lg font-bold text-white text-center mb-2">
+                Confirm Unenrollment
+              </h3>
+
+              <p className="text-slate-300 text-center mb-6">
+                Are you sure you want to unenroll{" "}
+                <span className="font-medium text-white">
+                  {unenrollConfirm.student?.username}
+                </span>{" "}
+                from{" "}
+                <span className="font-medium text-white">
+                  {unenrollConfirm.course?.title}
+                </span>
+                ?
+              </p>
+
+              <div className="flex items-center justify-center space-x-4">
+                <button
+                  onClick={cancelUnenroll}
+                  disabled={unenrollingId === unenrollConfirm.id}
+                  className="px-6 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmUnenroll}
+                  disabled={unenrollingId === unenrollConfirm.id}
+                  className="px-6 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-lg font-medium transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {unenrollingId === unenrollConfirm.id ? (
+                    <>
+                      <i className="fas fa-spinner fa-spin"></i>
+                      <span>Unenrolling...</span>
+                    </>
+                  ) : (
+                    <>
+                      <i className="fas fa-user-minus"></i>
+                      <span>Unenroll</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

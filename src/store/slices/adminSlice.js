@@ -315,6 +315,18 @@ export const createEnrollment = createAsyncThunk(
   },
 );
 
+export const unenrollStudent = createAsyncThunk(
+  "admin/unenrollStudent",
+  async ({ courseId, studentId }, { rejectWithValue }) => {
+    try {
+      const response = await adminService.unenrollStudent(courseId, studentId);
+      return response;
+    } catch (error) {
+      return rejectWithValue(error); // Preserve full error object for proper error handling
+    }
+  },
+);
+
 // Slice
 const adminSlice = createSlice({
   name: "admin",

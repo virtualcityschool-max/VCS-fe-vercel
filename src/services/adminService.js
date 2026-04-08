@@ -272,4 +272,21 @@ export const adminService = {
       throw handleApiError(error, { context: "Create Enrollment" });
     }
   },
+
+  // Unenroll student from course (Admin only)
+  unenrollStudent: async (courseId, studentId) => {
+    try {
+      const response = await axiosInstance.delete(
+        `/courses/${courseId}/unenroll/`,
+        {
+          data: {
+            student_id: studentId,
+          },
+        },
+      );
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error, { context: "Unenroll Student" });
+    }
+  },
 };
