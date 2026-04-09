@@ -48,15 +48,11 @@ export const adminService = {
   },
 
   createUser: async (userData) => {
-    try {
-      const response = await axiosInstance.post(
-        ADMIN_ENDPOINTS.USER_CREATE,
-        userData,
-      );
-      return response.data;
-    } catch (error) {
-      throw handleApiError(error, { context: "Create User" });
-    }
+    const response = await axiosInstance.post(
+      ADMIN_ENDPOINTS.USER_CREATE,
+      userData,
+    );
+    return response.data;
   },
 
   updateUser: async (userId, userData) => {

@@ -277,12 +277,16 @@ const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
                 </p>
               )}
               {formData.enrollment_type === "private" &&
-                selectedCourse?.instructor && (
-                  <p className="mt-1 text-xs text-slate-400">
-                    Note: Only the assigned course instructor can teach private
-                    enrollments
-                  </p>
-                )}
+              selectedCourse?.instructor ? (
+                <p className="mt-1 text-xs text-slate-400">
+                  Note: Only the assigned course instructor can teach private
+                  enrollments
+                </p>
+              ) : (
+                <p className="mt-1 text-xs text-slate-400">
+                  Please Select a Course to enable private teacher selection
+                </p>
+              )}
             </div>
           )}
 

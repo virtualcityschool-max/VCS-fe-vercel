@@ -137,7 +137,7 @@ const ParentPortal = () => {
       <div className="max-w-7xl mx-auto px-6 py-12">
         <header className="mb-12">
           <h1 className="text-4xl font-bold font-poppins mb-2">
-            Welcome back, Parent!
+            Welcome back!
           </h1>
           <p className="text-slate-400 text-lg">
             Monitor your children's progress at the{" "}

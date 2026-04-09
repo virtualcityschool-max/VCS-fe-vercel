@@ -44,6 +44,11 @@ const ParentProfileTab = ({ profile, onUpdate }) => {
     // Phone validation
     if (!formData.phone?.trim()) {
       newErrors.phone = "Phone number is required";
+    } else if (formData.phone && !/^\+?[\d\s\-()]+$/.test(formData.phone)) {
+      newErrors.phone =
+        "Phone number must contain only digits, spaces, and basic formatting";
+    } else if (formData.phone && formData.phone.length > 20) {
+      newErrors.phone = "Phone number must not exceed 20 characters";
     }
 
     // Address validation

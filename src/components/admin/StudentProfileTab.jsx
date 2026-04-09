@@ -51,6 +51,16 @@ const StudentProfileTab = ({ profile, onUpdate }) => {
     // Date of birth validation
     if (!formData.date_of_birth?.trim()) {
       newErrors.date_of_birth = "Date of birth is required";
+    } else if (new Date(formData.date_of_birth) > new Date()) {
+      newErrors.date_of_birth = "Date of birth cannot be in the future";
+    }
+
+    // Phone number validation (basic numeric check)
+    if (formData.phone && !/^\+?[\d\s\-()]+$/.test(formData.phone)) {
+      newErrors.phone =
+        "Phone number must contain only digits, spaces, and basic formatting";
+    } else if (formData.phone && formData.phone.length > 20) {
+      newErrors.phone = "Phone number must not exceed 20 characters";
     }
 
     setErrors(newErrors);
@@ -213,6 +223,7 @@ const StudentProfileTab = ({ profile, onUpdate }) => {
                     onChange={(e) =>
                       handleInputChange("date_of_birth", e.target.value)
                     }
+                    max={new Date().toISOString().split("T")[0]}
                     error={getFieldError("date_of_birth")}
                     showErrorMessage={false}
                     className="w-full bg-slate-900/60 text-white rounded-2xl pl-12 pr-12 py-4 focus:outline-none focus:ring-4 focus:ring-purple-500/20 transition-all duration-300 shadow-inner hover:border-slate-500/50 group-hover:shadow-lg"

@@ -80,6 +80,14 @@ const TeacherProfileTab = ({ profile, onUpdate }) => {
       newErrors.linkedin = "Please enter a valid LinkedIn URL";
     }
 
+    // Phone number validation (basic numeric check)
+    if (formData.phone && !/^\+?[\d\s\-()]+$/.test(formData.phone)) {
+      newErrors.phone =
+        "Phone number must contain only digits, spaces, and basic formatting";
+    } else if (formData.phone && formData.phone.length > 20) {
+      newErrors.phone = "Phone number must not exceed 20 characters";
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };

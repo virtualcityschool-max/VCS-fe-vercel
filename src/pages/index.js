@@ -21,7 +21,6 @@ export { default as TeacherGrading } from "./teacher/TeacherGrading";
 export { default as TeacherInternalStudentProfile } from "./teacher/TeacherInternalStudentProfile";
 
 // Admin Pages
-export { default as AdminDashboard } from "./admin/AdminDashboard";
 export { default as AdminLayout } from "../components/admin/AdminLayout";
 export { default as AdminOverviewPage } from "./admin/AdminOverviewPage";
 export { default as AdminApprovalsPage } from "./admin/AdminApprovalsPage";

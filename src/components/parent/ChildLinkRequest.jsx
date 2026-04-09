@@ -10,7 +10,7 @@ const ChildLinkRequest = () => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [successData, setSuccessData] = useState(null);
 
-  const { loading: linkLoading, error: linkError } = useSelector(
+  const { loading: linkLoading } = useSelector(
     (state) => state.parent.linkChild,
   );
 
@@ -126,23 +126,6 @@ const ChildLinkRequest = () => {
                     </span>
                   </div>
                 )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Error Message */}
-      {linkError && (
-        <div className="bg-red-600/10 border border-red-500/20 rounded-2xl p-6 mb-8">
-          <div className="flex items-start gap-4">
-            <div className="w-10 h-10 bg-red-600/20 rounded-full flex items-center justify-center shrink-0">
-              <i className="fas fa-exclamation-triangle text-red-400 text-lg"></i>
-            </div>
-            <div>
-              <h4 className="text-red-400 font-bold mb-2">
-                Failed to Send Request
-              </h4>
-              <p className="text-slate-300 text-sm">{linkError}</p>
             </div>
           </div>
         </div>

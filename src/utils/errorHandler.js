@@ -395,7 +395,23 @@ const handleBadRequestError = (data) => {
     return handleValidationError(data);
   }
 
-  // PRIORITY 5: Generic fallback (only when no meaningful message exists)
+  // PRIORITY 5: Final check for field errors that might have been missed
+  if (data?.details && typeof data.details === "object") {
+    const fieldErrorKeys = Object.keys(data.details).filter(
+      (key) => key !== "non_field_errors",
+    );
+    if (fieldErrorKeys.length > 0) {
+      console.log("🔍 Final fallback - found field errors:", data.details);
+      return {
+        type: "field",
+        message: "Please correct the highlighted fields",
+        fieldErrors: normalizeFieldErrors(data.details),
+        shouldShowToast: false,
+      };
+    }
+  }
+
+  // PRIORITY 6: Generic fallback (only when no meaningful message exists)
   return {
     type: "general",
     message: "Invalid request. Please check your input and try again.",

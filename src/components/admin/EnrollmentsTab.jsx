@@ -19,6 +19,17 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [dateSort, setDateSort] = useState("newest");
 
+  // Check if any filters are applied
+  const hasActiveFilters = useMemo(() => {
+    return (
+      studentFilter.trim() ||
+      courseFilter.trim() ||
+      typeFilter !== "all" ||
+      statusFilter !== "all" ||
+      dateSort !== "newest"
+    );
+  }, [studentFilter, courseFilter, typeFilter, statusFilter, dateSort]);
+
   // Filter enrollments based on all filters using useMemo
   const filteredEnrollments = useMemo(() => {
     if (!enrollments) {
@@ -330,19 +341,21 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
           </select>
 
           {/* Clear Filters */}
-          <button
-            onClick={() => {
-              setStudentFilter("");
-              setCourseFilter("");
-              setTypeFilter("all");
-              setStatusFilter("all");
-              setDateSort("newest");
-            }}
-            className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-sm font-medium transition flex items-center gap-2"
-          >
-            <i className="fas fa-times"></i>
-            <span>Clear</span>
-          </button>
+          {hasActiveFilters && (
+            <button
+              onClick={() => {
+                setStudentFilter("");
+                setCourseFilter("");
+                setTypeFilter("all");
+                setStatusFilter("all");
+                setDateSort("newest");
+              }}
+              className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-sm font-medium transition flex items-center gap-2"
+            >
+              <i className="fas fa-times"></i>
+              <span>Clear</span>
+            </button>
+          )}
         </div>
 
         {/* Action Buttons */}

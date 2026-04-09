@@ -27,10 +27,20 @@ export const useFieldErrors = (initialErrors = {}) => {
 
     // Handle field-level errors
     if (normalizedError.type === "field" && normalizedError.fieldErrors) {
-      setErrors(normalizedError.fieldErrors);
+      // Convert array errors to strings for UI compatibility
+      const processedErrors = {};
+      Object.entries(normalizedError.fieldErrors).forEach(
+        ([field, messages]) => {
+          processedErrors[field] = Array.isArray(messages)
+            ? messages[0]
+            : messages;
+        },
+      );
 
-      // Show toast for field errors if toast function provided and shouldShowToast is true
-      if (toastFunction && normalizedError.shouldShowToast) {
+      setErrors(processedErrors);
+
+      // Show toast for field errors to guide users
+      if (toastFunction) {
         toastFunction(normalizedError.message);
       }
 

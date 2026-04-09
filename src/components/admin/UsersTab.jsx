@@ -10,7 +10,16 @@ const SearchControls = ({
   handleFilterChange,
   onFetchUsers,
   handleCreateUser,
+  onClearFilters,
 }) => {
+  // Check if any filters are applied
+  const hasActiveFilters = !!(
+    usersFilters.search ||
+    usersFilters.role ||
+    usersFilters.is_active ||
+    usersFilters.ordering !== "-date_joined"
+  );
+
   return (
     <div className="flex justify-end items-center mb-6">
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 lg:gap-4 w-full lg:w-auto max-w-2xl lg:max-w-none">
@@ -55,6 +64,16 @@ const SearchControls = ({
             <option value="username">Username A-Z</option>
             <option value="-username">Username Z-A</option>
           </select>
+          {hasActiveFilters && (
+            <button
+              onClick={onClearFilters}
+              className="bg-orange-600 hover:bg-orange-500 text-white px-3 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2"
+              title="Clear all filters"
+            >
+              <i className="fas fa-times"></i>
+              <span className="hidden sm:inline">Clear</span>
+            </button>
+          )}
           <button
             onClick={() => onFetchUsers()}
             className="bg-slate-700 hover:bg-slate-600 text-white px-3 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 sm:hidden"
@@ -102,6 +121,17 @@ const UsersTab = ({
   // Use the local input for UI, but sync with external filter when they differ
   const searchInput = localSearchInput;
   const setSearchInput = setLocalSearchInput;
+
+  // Clear all filters handler
+  const handleClearFilters = useCallback(() => {
+    setUsersFilters({
+      search: "",
+      role: "",
+      is_active: "",
+      ordering: "-date_joined",
+    });
+    setLocalSearchInput("");
+  }, [setUsersFilters]);
 
   // Debounced search update with cleanup
   useEffect(() => {
@@ -170,6 +200,16 @@ const UsersTab = ({
 
   return (
     <div className="space-y-6">
+      {/* User List Header */}
+      <SearchControls
+        searchInput={searchInput}
+        setSearchInput={setSearchInput}
+        usersFilters={usersFilters}
+        handleFilterChange={handleFilterChange}
+        onFetchUsers={onFetchUsers}
+        handleCreateUser={handleCreateUser}
+        onClearFilters={handleClearFilters}
+      />
       {/* Loading State */}
       {loading ? (
         <div className="overflow-x-auto">
@@ -224,16 +264,6 @@ const UsersTab = ({
         </div>
       ) : (
         <>
-          {/* User List Header */}
-          <SearchControls
-            searchInput={searchInput}
-            setSearchInput={setSearchInput}
-            usersFilters={usersFilters}
-            handleFilterChange={handleFilterChange}
-            onFetchUsers={onFetchUsers}
-            handleCreateUser={handleCreateUser}
-          />
-
           {/* Users List */}
           <div className="bg-slate-900/50 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
             {/* Mobile Card View */}

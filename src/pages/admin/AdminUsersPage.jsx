@@ -92,21 +92,31 @@ const AdminUsersPage = () => {
     dispatch(fetchUsers(params));
   }, [dispatch, usersFilters]);
 
-  // Debounced search handler - Fixed the comparison logic
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (isMountedRef.current) {
-        handleFetchUsers();
-      }
-    }, 300); // 300ms debounce
+  // // Debounced search handler - Fixed the comparison logic
+  // useEffect(() => {
+  //   const timer = setTimeout(() => {
+  //     if (isMountedRef.current) {
+  //       handleFetchUsers();
+  //     }
+  //   }, 300); // 300ms debounce
 
-    return () => clearTimeout(timer);
-  }, [usersFilters.search, handleFetchUsers]);
+  //   return () => clearTimeout(timer);
+  // }, [usersFilters.search, handleFetchUsers]);
 
-  // Fetch users when component mounts or filters change
+  // // Fetch users when component mounts or filters change
+  // useEffect(() => {
+  //   handleFetchUsers();
+  // }, [handleFetchUsers]);
+
+  // Fetch on initial mount + non-search filter changes
   useEffect(() => {
     handleFetchUsers();
-  }, [handleFetchUsers]);
+  }, [
+    handleFetchUsers,
+    usersFilters.role,
+    usersFilters.is_active,
+    usersFilters.ordering,
+  ]);
 
   // Handle user deletion
   const handleDeleteUser = async (userId) => {
@@ -220,9 +230,10 @@ const AdminUsersPage = () => {
       await dispatch(createUser(payload)).unwrap();
       toastManager.success("User created successfully");
       resetCreateUserModal();
+      setActiveModal(null);
       handleFetchUsers();
     } catch (error) {
-      handleCreateUserApiError(error);
+      handleCreateUserApiError(error, toastManager.error);
     } finally {
       setIsCreatingUser(false);
     }
@@ -244,13 +255,15 @@ const AdminUsersPage = () => {
       {/* Create User Modal */}
       {activeModal === "create-user" && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-900 rounded-2xl p-6 w-full max-w-md border border-slate-800 shadow-2xl">
-            <h3 className="text-xl font-bold text-white mb-4">Create User</h3>
+          <div className="bg-slate-900 rounded-2xl p-6 w-full max-w-md border border-slate-800 shadow-2xl flex flex-col max-h-[80vh]">
+            <h3 className="text-xl font-bold text-white mb-4 shrink-0">
+              Create User
+            </h3>
 
-            <div className="space-y-4">
+            <div className="space-y-4 overflow-y-auto flex-1 px-1">
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-1">
-                  Username
+                  Username <span className="text-red-500">*</span>
                 </label>
                 <Input
                   value={createUserForm.username}
@@ -275,7 +288,7 @@ const AdminUsersPage = () => {
 
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-1">
-                  Email
+                  Email <span className="text-red-500">*</span>
                 </label>
                 <Input
                   type="email"
@@ -351,7 +364,7 @@ const AdminUsersPage = () => {
 
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-1">
-                  Role
+                  Role <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={createUserForm.role}
@@ -379,7 +392,7 @@ const AdminUsersPage = () => {
 
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-1">
-                  Password
+                  Password <span className="text-red-500">*</span>
                 </label>
                 <PasswordInput
                   value={createUserForm.password}
@@ -408,7 +421,7 @@ const AdminUsersPage = () => {
 
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-1">
-                  Confirm Password
+                  Confirm Password <span className="text-red-500">*</span>
                 </label>
                 <PasswordInput
                   value={createUserForm.confirm_password}
@@ -454,15 +467,25 @@ const AdminUsersPage = () => {
                         }));
                       }
                     }}
-                    className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className={`w-full bg-slate-800 border text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                      createUserErrors.student_emails
+                        ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                        : "border-slate-700 focus:border-indigo-500 focus:ring-indigo-500"
+                    }`}
                     rows="3"
                     placeholder="student1@example.com, student2@example.com"
                   />
+                  {createUserErrors.student_emails && (
+                    <p className="mt-2 text-sm text-red-400 flex items-center gap-2 animate-pulse">
+                      <i className="fas fa-exclamation-circle text-sm"></i>
+                      {createUserErrors.student_emails}
+                    </p>
+                  )}
                 </div>
               )}
             </div>
 
-            <div className="flex gap-3 mt-6">
+            <div className="flex gap-3 mt-6 shrink-0">
               <Button
                 variant="secondary"
                 onClick={handleCloseCreateUserModal}

@@ -5,6 +5,7 @@ import {
   fetchPendingApprovals,
   setApprovalsLoading,
 } from "../../store/slices/approvalsSlice";
+import { fetchPendingChildLinks } from "../../store/slices/childLinksSlice";
 import {
   fetchCourses,
   fetchUsers,
@@ -20,6 +21,7 @@ const AdminLayout = () => {
 
   // Get data from Redux store - always call hooks in same order
   const { pendingApprovals } = useSelector((state) => state.approvals);
+  const { pendingChildLinks } = useSelector((state) => state.childLinks);
 
   // Get active tab from current route
   const getActiveTabFromPath = () => {
@@ -44,12 +46,14 @@ const AdminLayout = () => {
   React.useEffect(() => {
     // Initial fetch on mount to populate sidebar count
     dispatch(fetchPendingApprovals());
+    dispatch(fetchPendingChildLinks());
   }, [dispatch]);
 
   React.useEffect(() => {
     // Additional fetch when approvals tab is active or set loading state
     if (activeTab === "approvals") {
       dispatch(fetchPendingApprovals());
+      dispatch(fetchPendingChildLinks());
       dispatch(setApprovalsLoading(true));
     }
   }, [dispatch, activeTab]);
@@ -76,6 +80,10 @@ const AdminLayout = () => {
       dispatch(fetchEnrollments());
     }
   }, [dispatch, activeTab]);
+
+  // Calculate total pending approvals count
+  const totalPendingCount =
+    (pendingApprovals?.length || 0) + (pendingChildLinks?.length || 0);
 
   // Don't render layout if it's a user detail page
   if (activeTab === null) {
@@ -117,7 +125,7 @@ const AdminLayout = () => {
       {/* Sidebar */}
       <Sidebar
         activeTab={activeTab}
-        pendingApprovalsCount={pendingApprovals?.length || 0}
+        pendingApprovalsCount={totalPendingCount}
         isSidebarOpen={isSidebarOpen}
         onMobileClose={() => setIsSidebarOpen(false)}
       />

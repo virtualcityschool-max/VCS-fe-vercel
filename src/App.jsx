@@ -18,7 +18,6 @@ import { SimulatorBar, AIChat, AuthModals, Navbar } from "./components";
 // Pages
 import {
   PublicHome,
-  AdminDashboard,
   AdminLayout,
   AdminOverviewPage,
   AdminApprovalsPage,
@@ -171,7 +170,7 @@ const App = () => {
             {/* Student-Only Routes */}
             <Route element={<ProtectedRoute allowedRoles={["student"]} />}>
               <Route path="/student" element={<StudentPortal />} />
-              <Route path="/feed" element={<StudentFeed />} />
+              {/* <Route path="/feed" element={<StudentFeed />} /> */}
               <Route
                 path="/student/assignments"
                 element={<StudentAssignments />}
