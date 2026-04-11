@@ -14,6 +14,7 @@ import {
   LiveScheduleList,
   CourseProgressGrid,
   AssignmentOverviewList,
+  MyAttendanceList,
 } from "../../components/studentDashboard";
 
 const StudentPortal = () => {
@@ -172,6 +173,9 @@ const StudentPortal = () => {
           <div className="xl:col-span-8 space-y-6 lg:space-y-8">
             {/* Live Schedule */}
             <LiveScheduleList />
+
+            {/* My Attendance */}
+            <MyAttendanceList />
           </div>
 
           {/* Right Column - Sidebar */}

@@ -133,7 +133,7 @@ const Navbar = ({ variant = "default" }) => {
             >
               Home
             </button>
-            {role === "student" && (
+            {/* {role === "student" && (
               <button
                 onClick={() => navigate("/feed")}
                 className={`text-slate-400 font-medium text-xs sm:text-sm hover:text-white transition cursor-pointer ${
@@ -142,7 +142,7 @@ const Navbar = ({ variant = "default" }) => {
               >
                 Feed
               </button>
-            )}
+            )} */}
             <button
               onClick={() => {
                 if (role === "student") navigate("/student");

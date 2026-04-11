@@ -83,6 +83,26 @@ const createAnnouncement = async (data) => {
   return response.data;
 };
 
+const getTeacherSessions = async () => {
+  const response = await axiosInstance.get("/classroom/sessions/");
+  return response.data;
+};
+
+const getSessionAttendance = async (sessionId) => {
+  const response = await axiosInstance.get(
+    `/classroom/sessions/${sessionId}/attendance/`,
+  );
+  return response.data;
+};
+
+const updateSessionAttendance = async (sessionId, attendanceId, data) => {
+  const response = await axiosInstance.patch(
+    `/classroom/sessions/${sessionId}/attendance/${attendanceId}/`,
+    data,
+  );
+  return response.data;
+};
+
 export const teacherService = {
   getTeachers,
   getTeacherById,
@@ -95,4 +115,7 @@ export const teacherService = {
   gradeSubmission,
   updateSubmissionGrade,
   createAnnouncement,
+  getTeacherSessions,
+  getSessionAttendance,
+  updateSessionAttendance,
 };

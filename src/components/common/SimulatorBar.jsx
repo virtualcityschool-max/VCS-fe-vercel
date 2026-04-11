@@ -32,12 +32,12 @@ const SimulatorBar = () => {
       icon: "fa-user-friends",
       roles: ["parent"],
     },
-    {
-      id: "/classroom",
-      label: "Classroom",
-      icon: "fa-video",
-      roles: ["student", "teacher", "admin"],
-    },
+    // {
+    //   id: "/classroom",
+    //   label: "Classroom",
+    //   icon: "fa-video",
+    //   roles: ["student", "teacher", "admin"],
+    // },
     {
       id: "/teacher/123",
       label: "T-Profile",

@@ -156,6 +156,58 @@ export const fetchSubmissionById = createAsyncThunk(
   },
 );
 
+export const fetchTeacherSessions = createAsyncThunk(
+  "teachers/fetchTeacherSessions",
+  async (_, { rejectWithValue }) => {
+    try {
+      const data = await teacherService.getTeacherSessions();
+      return data;
+    } catch (error) {
+      return rejectWithValue(
+        error?.response?.data?.error ||
+          error?.message ||
+          "Failed to fetch sessions",
+      );
+    }
+  },
+);
+
+export const fetchSessionAttendance = createAsyncThunk(
+  "teachers/fetchSessionAttendance",
+  async (sessionId, { rejectWithValue }) => {
+    try {
+      const data = await teacherService.getSessionAttendance(sessionId);
+      return data;
+    } catch (error) {
+      return rejectWithValue(
+        error?.response?.data?.error ||
+          error?.message ||
+          "Failed to fetch attendance",
+      );
+    }
+  },
+);
+
+export const updateSessionAttendance = createAsyncThunk(
+  "teachers/updateSessionAttendance",
+  async ({ sessionId, attendanceId, data }, { rejectWithValue }) => {
+    try {
+      const result = await teacherService.updateSessionAttendance(
+        sessionId,
+        attendanceId,
+        data,
+      );
+      return { attendanceId, data: result };
+    } catch (error) {
+      return rejectWithValue(
+        error?.response?.data?.error ||
+          error?.message ||
+          "Failed to update attendance",
+      );
+    }
+  },
+);
+
 const initialState = {
   teachers: [],
   teacherDetails: null,
@@ -189,6 +241,16 @@ const initialState = {
   selectedSubmission: null,
   loadingSelectedSubmission: false,
   errorSelectedSubmission: null,
+
+  // attendance state
+  sessions: [],
+  loadingSessions: false,
+  errorSessions: null,
+  attendanceRecords: [],
+  loadingAttendance: false,
+  errorAttendance: null,
+  updatingAttendanceId: null,
+  updatingAttendanceError: null,
 };
 
 const teacherSlice = createSlice({
@@ -333,6 +395,54 @@ const teacherSlice = createSlice({
       .addCase(updateSubmissionsGrade.rejected, (state, action) => {
         state.gradingLoading = false;
         state.gradingError = action.payload;
+      })
+
+      // TEACHER SESSIONS
+      .addCase(fetchTeacherSessions.pending, (state) => {
+        state.loadingSessions = true;
+        state.errorSessions = null;
+      })
+      .addCase(fetchTeacherSessions.fulfilled, (state, action) => {
+        state.loadingSessions = false;
+        state.sessions = Array.isArray(action.payload) ? action.payload : [];
+      })
+      .addCase(fetchTeacherSessions.rejected, (state, action) => {
+        state.loadingSessions = false;
+        state.errorSessions = action.payload;
+      })
+
+      // SESSION ATTENDANCE
+      .addCase(fetchSessionAttendance.pending, (state) => {
+        state.loadingAttendance = true;
+        state.errorAttendance = null;
+      })
+      .addCase(fetchSessionAttendance.fulfilled, (state, action) => {
+        state.loadingAttendance = false;
+        state.attendanceRecords = Array.isArray(action.payload)
+          ? action.payload
+          : [];
+      })
+      .addCase(fetchSessionAttendance.rejected, (state, action) => {
+        state.loadingAttendance = false;
+        state.errorAttendance = action.payload;
+      })
+
+      // UPDATE ATTENDANCE
+      .addCase(updateSessionAttendance.pending, (state, action) => {
+        state.updatingAttendanceId = action.meta.arg.attendanceId;
+        state.updatingAttendanceError = null;
+      })
+      .addCase(updateSessionAttendance.fulfilled, (state, action) => {
+        state.updatingAttendanceId = null;
+        state.attendanceRecords = state.attendanceRecords.map((record) =>
+          record.student === action.payload.attendanceId
+            ? { ...record, ...action.payload.data }
+            : record,
+        );
+      })
+      .addCase(updateSessionAttendance.rejected, (state, action) => {
+        state.updatingAttendanceId = null;
+        state.updatingAttendanceError = action.payload;
       });
   },
 });

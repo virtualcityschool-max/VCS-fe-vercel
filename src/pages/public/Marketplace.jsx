@@ -3,7 +3,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { fetchAllCourses } from "../../store/slices/coursesSlice";
 import {
-  enrollInCourse,
+  enrollInCourseNormal,
+  enrollInCoursePrivate,
   unenrollFromCourse,
   fetchStudentDashboard,
 } from "../../store/slices/studentDashboardSlice";
@@ -13,6 +14,7 @@ import { BACKEND_CATEGORIES, formatCategoryLabel } from "../../constants";
 import { useSubmissionGuard } from "../../utils/requestDeduplicator";
 import { getCourseImage } from "../../utils/courseImageUtils";
 import { setAuthModal } from "../../store/slices/uiSlice";
+import EnrollmentTypeModal from "../../components/courses/EnrollmentTypeModal";
 
 const Marketplace = () => {
   const dispatch = useDispatch();
@@ -23,6 +25,8 @@ const Marketplace = () => {
     instructor: "",
   });
   const [showFilters, setShowFilters] = useState(false);
+  const [enrollmentModalOpen, setEnrollmentModalOpen] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState(null);
   const submissionGuard = useSubmissionGuard();
 
   // Get auth state from Redux store
@@ -195,7 +199,7 @@ const Marketplace = () => {
   };
 
   // Handle course enrollment
-  const handleEnrollCourse = async (courseId, courseTitle) => {
+  const handleEnrollCourse = (course) => {
     if (!auth.isLoggedIn) {
       dispatch(setAuthModal("login"));
       return;
@@ -206,10 +210,45 @@ const Marketplace = () => {
       return;
     }
 
+    // Show enrollment modal
+    setSelectedCourse(course);
+    setEnrollmentModalOpen(true);
+  };
+
+  // Handle enrollment type selection
+  const handleEnrollmentTypeSelect = async (type) => {
+    if (!selectedCourse) return;
+
+    const courseId = selectedCourse.id;
+    const courseTitle = selectedCourse.title;
+
     await submissionGuard.guard(async () => {
       try {
-        await dispatch(enrollInCourse(courseId)).unwrap();
-        toastManager.success(`Successfully enrolled in ${courseTitle}`);
+        let response;
+
+        if (type === "normal") {
+          response = await dispatch(enrollInCourseNormal(courseId)).unwrap();
+        } else if (type === "private") {
+          if (!selectedCourse.instructor?.id) {
+            toastManager.error("Private enrollment not available");
+            return;
+          }
+          response = await dispatch(
+            enrollInCoursePrivate({
+              courseId,
+              teacherId: selectedCourse.instructor.id,
+            }),
+          ).unwrap();
+        }
+
+        // Show success message (use backend message if available)
+        const successMessage =
+          response?.message || `Successfully enrolled in ${courseTitle}`;
+        toastManager.success(successMessage);
+
+        // Close modal
+        setEnrollmentModalOpen(false);
+        setSelectedCourse(null);
 
         // Refresh courses to update enrollment status
         dispatch(fetchAllCourses());
@@ -219,10 +258,18 @@ const Marketplace = () => {
           dispatch(fetchStudentDashboard());
         }
       } catch (error) {
-        const errorMessage = error.message || "An error occurred";
+        // Handle errors safely
+        const errorMessage =
+          error?.response?.data?.error || error.message || "An error occurred";
         toastManager.error(errorMessage);
       }
     });
+  };
+
+  // Close enrollment modal
+  const closeEnrollmentModal = () => {
+    setEnrollmentModalOpen(false);
+    setSelectedCourse(null);
   };
 
   // Handle course unenrollment
@@ -606,7 +653,7 @@ const Marketplace = () => {
                           onClick={() =>
                             enrolled
                               ? handleUnenrollCourse(course.id, course.title)
-                              : handleEnrollCourse(course.id, course.title)
+                              : handleEnrollCourse(course)
                           }
                           disabled={
                             enrollingCourseIds.includes(course.id) ||
@@ -639,6 +686,13 @@ const Marketplace = () => {
           </main>
         </div>
       </div>
+
+      {/* Enrollment Type Modal */}
+      <EnrollmentTypeModal
+        isOpen={enrollmentModalOpen}
+        onClose={closeEnrollmentModal}
+        onSelect={handleEnrollmentTypeSelect}
+      />
     </section>
   );
 };

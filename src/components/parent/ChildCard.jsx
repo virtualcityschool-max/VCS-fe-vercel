@@ -1,6 +1,126 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  fetchChildGrades,
+  fetchChildAttendance,
+} from "../../store/slices/parentSlice";
+import {
+  selectChildGrades,
+  selectChildGradesLoading,
+  selectChildGradesError,
+  selectChildAttendance,
+  selectChildAttendanceLoading,
+  selectChildAttendanceError,
+} from "../../store/slices/parentSlice";
+
+// Skeleton Loader Component
+const SkeletonLoader = () => (
+  <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-lg animate-pulse">
+    {/* Header skeleton */}
+    <div className="flex justify-between items-start mb-4">
+      <div className="flex items-center gap-3">
+        <div className="w-16 h-16 bg-slate-700 rounded-2xl border-2 border-slate-600"></div>
+        <div>
+          <div className="w-32 h-6 bg-slate-700 rounded mb-2"></div>
+          <div className="w-20 h-4 bg-slate-700 rounded"></div>
+        </div>
+      </div>
+      <div className="w-24 h-8 bg-slate-700 rounded-full"></div>
+    </div>
+
+    {/* Stats Grid skeleton */}
+    <div className="grid grid-cols-2 gap-3 mb-4">
+      <div className="bg-slate-900/50 p-3 rounded-xl border border-slate-700">
+        <div className="w-12 h-3 bg-slate-600 rounded mb-2"></div>
+        <div className="w-16 h-5 bg-slate-600 rounded"></div>
+      </div>
+      <div className="bg-slate-900/50 p-3 rounded-xl border border-slate-700">
+        <div className="w-20 h-3 bg-slate-600 rounded mb-2"></div>
+        <div className="w-16 h-5 bg-slate-600 rounded"></div>
+      </div>
+    </div>
+
+    {/* Attendance Details skeleton */}
+    <div className="mb-4">
+      <div className="w-28 h-3 bg-slate-600 rounded mb-2"></div>
+      <div className="flex justify-between">
+        <div className="w-16 h-4 bg-slate-700 rounded"></div>
+        <div className="w-12 h-4 bg-slate-700 rounded"></div>
+        <div className="w-16 h-4 bg-slate-700 rounded"></div>
+      </div>
+    </div>
+
+    {/* Assignment Progress skeleton */}
+    <div className="mb-4">
+      <div className="w-20 h-3 bg-slate-600 rounded mb-2"></div>
+      <div className="flex justify-between mb-2">
+        <div className="w-20 h-4 bg-slate-700 rounded"></div>
+        <div className="w-16 h-4 bg-slate-700 rounded"></div>
+      </div>
+    </div>
+
+    {/* Recent Grades skeleton */}
+    <div className="mb-4">
+      <div className="w-24 h-3 bg-slate-600 rounded mb-2"></div>
+      <div className="space-y-2">
+        <div className="bg-slate-900/30 border border-slate-700 rounded-lg p-2">
+          <div className="w-32 h-3 bg-slate-700 rounded mb-1"></div>
+          <div className="w-24 h-3 bg-slate-700 rounded mb-1"></div>
+          <div className="w-20 h-3 bg-slate-700 rounded"></div>
+        </div>
+        <div className="bg-slate-900/30 border border-slate-700 rounded-lg p-2">
+          <div className="w-28 h-3 bg-slate-700 rounded mb-1"></div>
+          <div className="w-20 h-3 bg-slate-700 rounded mb-1"></div>
+          <div className="w-24 h-3 bg-slate-700 rounded"></div>
+        </div>
+      </div>
+    </div>
+
+    {/* Footer skeleton */}
+    <div className="pt-3 border-t border-slate-700 flex justify-between items-center">
+      <div className="w-20 h-3 bg-slate-600 rounded"></div>
+      <div className="w-6 h-6 bg-slate-600 rounded"></div>
+    </div>
+  </div>
+);
 
 const ChildCard = ({ child }) => {
+  const dispatch = useDispatch();
+
+  // Select child-specific data from Redux
+  const childGrades = useSelector(selectChildGrades);
+  const childAttendance = useSelector(selectChildAttendance);
+  const gradesLoading = useSelector(selectChildGradesLoading(child.id));
+  const attendanceLoading = useSelector(selectChildAttendanceLoading(child.id));
+  const gradesError = useSelector(selectChildGradesError(child.id));
+  const attendanceError = useSelector(selectChildAttendanceError(child.id));
+
+  // Fetch data on component mount if not already loaded
+  useEffect(() => {
+    if (!child.id) return;
+
+    if (!childGrades[child.id]) {
+      dispatch(fetchChildGrades(child.id));
+    }
+
+    if (!childAttendance[child.id]) {
+      dispatch(fetchChildAttendance(child.id));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [child.id]);
+
+  // Get data for this specific child
+  const grades = childGrades[child.id];
+  const attendance = childAttendance[child.id];
+
+  // Show skeleton loader if initial data is loading
+  const isInitialLoading =
+    (gradesLoading || attendanceLoading) && !grades && !attendance;
+
+  // Return skeleton loader if initial loading
+  if (isInitialLoading) {
+    return <SkeletonLoader />;
+  }
   const getInitials = (username) => {
     if (!username) return "?";
     return username
@@ -85,7 +205,7 @@ const ChildCard = ({ child }) => {
         </div>
         <span
           className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${getBadgeColor(
-            child.badge
+            child.badge,
           )}`}
         >
           {getBadgeText(child.badge)}
@@ -106,29 +226,52 @@ const ChildCard = ({ child }) => {
           <p className="text-[10px] text-slate-500 font-black uppercase mb-1">
             Attendance
           </p>
-          <p className={`text-lg font-black ${getAttendanceColor(
-            child.attendance?.percentage
-          )}`}>
-            {child.attendance?.percentage?.toFixed(1) || "N/A"}%
-          </p>
+          {attendanceLoading ? (
+            <div className="w-6 h-6 bg-slate-700 rounded animate-pulse"></div>
+          ) : attendanceError ? (
+            <p className="text-rose-400 text-sm">Error</p>
+          ) : (
+            <p
+              className={`text-lg font-black ${getAttendanceColor(
+                attendance?.percentage,
+              )}`}
+            >
+              {attendance?.percentage?.toFixed(1) ||
+                child.attendance?.percentage?.toFixed(1) ||
+                "N/A"}
+              %
+            </p>
+          )}
         </div>
       </div>
 
       {/* Attendance Breakdown */}
-      {child.attendance && (
+      {(attendance || child.attendance) && (
         <div className="mb-4">
           <p className="text-[10px] text-slate-500 font-black uppercase mb-2">
             Attendance Details
           </p>
-          <div className="flex justify-between text-xs">
-            <span className="text-emerald-400">
-              Present: {child.attendance.present}
-            </span>
-            <span className="text-amber-400">Late: {child.attendance.late}</span>
-            <span className="text-rose-400">
-              Absent: {child.attendance.absent}
-            </span>
-          </div>
+          {attendanceLoading ? (
+            <div className="flex justify-between text-xs">
+              <div className="w-12 h-4 bg-slate-700 rounded animate-pulse"></div>
+              <div className="w-12 h-4 bg-slate-700 rounded animate-pulse"></div>
+              <div className="w-12 h-4 bg-slate-700 rounded animate-pulse"></div>
+            </div>
+          ) : attendanceError ? (
+            <p className="text-rose-400 text-xs">No data available</p>
+          ) : (
+            <div className="flex justify-between text-xs">
+              <span className="text-emerald-400">
+                Present: {attendance?.present || child.attendance?.present || 0}
+              </span>
+              <span className="text-amber-400">
+                Late: {attendance?.late || child.attendance?.late || 0}
+              </span>
+              <span className="text-rose-400">
+                Absent: {attendance?.absent || child.attendance?.absent || 0}
+              </span>
+            </div>
+          )}
         </div>
       )}
 
@@ -141,9 +284,7 @@ const ChildCard = ({ child }) => {
           <span className="text-slate-400">
             Progress: {child.submitted_count}/{child.total_assignments}
           </span>
-          <span className="text-slate-400">
-            Graded: {child.graded_count}
-          </span>
+          <span className="text-slate-400">Graded: {child.graded_count}</span>
         </div>
         {child.overdue_count > 0 && (
           <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-2">
@@ -155,34 +296,53 @@ const ChildCard = ({ child }) => {
       </div>
 
       {/* Recent Grades */}
-      {child.recent_grades && child.recent_grades.length > 0 && (
+      {(grades?.length > 0 || child.recent_grades?.length > 0) && (
         <div className="mb-4">
           <p className="text-[10px] text-slate-500 font-black uppercase mb-2">
             Recent Grades
           </p>
-          <div className="space-y-2">
-            {child.recent_grades.slice(0, 2).map((grade, index) => (
-              <div
-                key={index}
-                className="bg-slate-900/30 border border-slate-700 rounded-lg p-2"
-              >
-                <p className="text-xs font-medium text-white truncate">
-                  {grade.assignment}
-                </p>
-                <p className="text-xs text-slate-400 truncate">
-                  {grade.course}
-                </p>
-                <div className="flex justify-between items-center mt-1">
-                  <span className="text-xs text-indigo-400 font-bold">
-                    {grade.score}/{grade.max_score} ({grade.percentage}%)
-                  </span>
-                  <span className="text-[10px] text-slate-500">
-                    {formatDate(grade.graded_at)}
-                  </span>
+          {gradesLoading ? (
+            <div className="space-y-2">
+              {[...Array(2)].map((_, i) => (
+                <div
+                  key={i}
+                  className="bg-slate-900/30 border border-slate-700 rounded-lg p-2"
+                >
+                  <div className="w-24 h-3 bg-slate-700 rounded animate-pulse mb-1"></div>
+                  <div className="w-16 h-3 bg-slate-700 rounded animate-pulse mb-1"></div>
+                  <div className="w-20 h-3 bg-slate-700 rounded animate-pulse"></div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : gradesError ? (
+            <p className="text-rose-400 text-xs">No data available</p>
+          ) : (
+            <div className="space-y-2">
+              {(grades || child.recent_grades || [])
+                .slice(0, 2)
+                .map((grade, index) => (
+                  <div
+                    key={index}
+                    className="bg-slate-900/30 border border-slate-700 rounded-lg p-2"
+                  >
+                    <p className="text-xs font-medium text-white truncate">
+                      {grade.assignment}
+                    </p>
+                    <p className="text-xs text-slate-400 truncate">
+                      {grade.course}
+                    </p>
+                    <div className="flex justify-between items-center mt-1">
+                      <span className="text-xs text-indigo-400 font-bold">
+                        {grade.score}/{grade.max_score} ({grade.percentage}%)
+                      </span>
+                      <span className="text-[10px] text-slate-500">
+                        {formatDate(grade.graded_at)}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          )}
         </div>
       )}
 

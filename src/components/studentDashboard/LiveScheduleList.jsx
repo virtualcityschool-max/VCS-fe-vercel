@@ -1,18 +1,31 @@
 import React from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { selectLiveSchedule, joinLiveSession } from "../../store/slices/studentDashboardSlice";
+import {
+  selectLiveSchedule,
+  joinLiveSession,
+} from "../../store/slices/studentDashboardSlice";
 
 const LiveScheduleList = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const liveSchedule = useSelector(selectLiveSchedule);
-  const isJoiningSession = useSelector((state) => state.studentDashboard.isJoiningSession);
+  const isJoiningSession = useSelector(
+    (state) => state.studentDashboard.isJoiningSession,
+  );
 
   const handleJoinSession = async (sessionId) => {
     try {
-      await dispatch(joinLiveSession(sessionId)).unwrap();
-      navigate("/classroom");
+      const result = await dispatch(joinLiveSession(sessionId)).unwrap();
+      const meetingLink = result.response?.meeting_link;
+
+      if (meetingLink && meetingLink.startsWith("http")) {
+        window.open(meetingLink, "_blank", "noopener,noreferrer");
+      } else {
+        console.error("No meeting link found in response");
+        // Fallback to classroom if no meeting link
+        navigate("/classroom");
+      }
     } catch (error) {
       console.error("Failed to join session:", error);
     }
@@ -20,37 +33,49 @@ const LiveScheduleList = () => {
 
   const formatScheduleTime = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleTimeString('en-US', { 
-      hour: 'numeric', 
-      minute: '2-digit',
-      hour12: true 
+    return date.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
     });
   };
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      weekday: 'short',
-      month: 'short', 
-      day: 'numeric'
+    return date.toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
     });
   };
 
   const getStatusBadge = (status, canJoin) => {
-    if (status === 'live') {
-      return <span className="bg-red-600/20 text-red-400 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest animate-pulse">Live Now</span>;
+    if (status === "live") {
+      return (
+        <span className="bg-red-600/20 text-red-400 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest animate-pulse">
+          Live Now
+        </span>
+      );
     }
     if (canJoin) {
-      return <span className="bg-green-600/20 text-green-400 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">Join Now</span>;
+      return (
+        <span className="bg-green-600/20 text-green-400 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">
+          Join Now
+        </span>
+      );
     }
-    return <span className="bg-slate-700 text-slate-400 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">Scheduled</span>;
+    return (
+      <span className="bg-slate-700 text-slate-400 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">
+        Scheduled
+      </span>
+    );
   };
 
   const getAttendanceColor = (rate) => {
-    if (rate >= 90) return 'text-green-500';
-    if (rate >= 75) return 'text-yellow-500';
-    if (rate >= 60) return 'text-orange-500';
-    return 'text-red-500';
+    if (rate >= 90) return "text-green-500";
+    if (rate >= 75) return "text-yellow-500";
+    if (rate >= 60) return "text-orange-500";
+    return "text-red-500";
   };
 
   if (!liveSchedule || liveSchedule.length === 0) {
@@ -64,8 +89,12 @@ const LiveScheduleList = () => {
           <div className="w-16 h-16 bg-slate-700/50 rounded-full flex items-center justify-center mx-auto mb-4">
             <i className="fas fa-calendar-times text-2xl text-slate-500"></i>
           </div>
-          <h3 className="text-xl font-bold text-white mb-2">No Live Sessions Scheduled</h3>
-          <p className="text-slate-500 text-sm">Check back later for upcoming live sessions</p>
+          <h3 className="text-xl font-bold text-white mb-2">
+            No Live Sessions Scheduled
+          </h3>
+          <p className="text-slate-500 text-sm">
+            Check back later for upcoming live sessions
+          </p>
         </div>
       </section>
     );
@@ -79,8 +108,8 @@ const LiveScheduleList = () => {
       </h2>
       <div className="space-y-6">
         {liveSchedule.map((session) => (
-          <div 
-            key={session.session_id} 
+          <div
+            key={session.session_id}
             className="bg-slate-800 p-8 rounded-[2.5rem] border border-slate-700 flex flex-col md:flex-row items-center gap-8 hover:bg-slate-800/80 transition group shadow-lg"
           >
             {/* Instructor Avatar */}
@@ -111,7 +140,7 @@ const LiveScheduleList = () => {
               <p className="text-slate-500 text-sm mb-4">
                 Instructor: {session.instructor_name}
               </p>
-              
+
               {/* Schedule Info */}
               <div className="flex flex-wrap gap-4 text-xs text-slate-400 mb-4">
                 <div className="flex items-center gap-1">
@@ -135,16 +164,22 @@ const LiveScheduleList = () => {
                 <div className="w-full max-w-sm">
                   <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest mb-2">
                     <span className="text-slate-500">Attendance Rate</span>
-                    <span className={getAttendanceColor(session.attendance_rate)}>
+                    <span
+                      className={getAttendanceColor(session.attendance_rate)}
+                    >
                       {session.attendance_rate}%
                     </span>
                   </div>
                   <div className="h-1.5 bg-slate-900 rounded-full overflow-hidden">
                     <div
                       className={`h-full transition-all duration-1000 ${
-                        session.attendance_rate >= 90 ? 'bg-green-500' :
-                        session.attendance_rate >= 75 ? 'bg-yellow-500' :
-                        session.attendance_rate >= 60 ? 'bg-orange-500' : 'bg-red-500'
+                        session.attendance_rate >= 90
+                          ? "bg-green-500"
+                          : session.attendance_rate >= 75
+                            ? "bg-yellow-500"
+                            : session.attendance_rate >= 60
+                              ? "bg-orange-500"
+                              : "bg-red-500"
                       }`}
                       style={{ width: `${session.attendance_rate}%` }}
                     ></div>

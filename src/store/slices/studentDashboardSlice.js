@@ -74,6 +74,41 @@ export const enrollInCourse = createAsyncThunk(
   },
 );
 
+export const enrollInCourseNormal = createAsyncThunk(
+  "studentDashboard/enrollInCourseNormal",
+  async (courseId, { rejectWithValue }) => {
+    try {
+      const response = await studentService.enrollInCourseNormal(courseId);
+      return { courseId, response };
+    } catch (error) {
+      return rejectWithValue(
+        typeof error === "string"
+          ? error
+          : error?.message || "An error occurred",
+      );
+    }
+  },
+);
+
+export const enrollInCoursePrivate = createAsyncThunk(
+  "studentDashboard/enrollInCoursePrivate",
+  async ({ courseId, teacherId }, { rejectWithValue }) => {
+    try {
+      const response = await studentService.enrollInCoursePrivate(
+        courseId,
+        teacherId,
+      );
+      return { courseId, response };
+    } catch (error) {
+      return rejectWithValue(
+        typeof error === "string"
+          ? error
+          : error?.message || "An error occurred",
+      );
+    }
+  },
+);
+
 export const unenrollFromCourse = createAsyncThunk(
   "studentDashboard/unenrollFromCourse",
   async (courseId, { rejectWithValue }) => {
@@ -186,6 +221,22 @@ export const fetchSessionAttendance = createAsyncThunk(
   },
 );
 
+export const fetchMyAttendance = createAsyncThunk(
+  "studentDashboard/fetchMyAttendance",
+  async (_, { rejectWithValue }) => {
+    try {
+      const attendance = await studentService.getMyAttendance();
+      return attendance;
+    } catch (error) {
+      return rejectWithValue(
+        typeof error === "string"
+          ? error
+          : error?.message || "An error occurred",
+      );
+    }
+  },
+);
+
 // Initial state
 const initialState = {
   // Dashboard data
@@ -196,6 +247,7 @@ const initialState = {
   enrolledCourses: [],
   assignments: [],
   grades: [],
+  myAttendance: [],
   isLoading: false,
   error: null,
   enrollingCourseIds: [],
@@ -203,6 +255,7 @@ const initialState = {
   sessions: [],
   attendance: {},
   isFetchingAttendance: false,
+  isFetchingMyAttendance: false,
   lastFetched: null,
 
   // Pagination and filtering
@@ -355,6 +408,52 @@ const studentDashboardSlice = createSlice({
         state.error = action.payload;
       })
 
+      // Enroll in Course Normal
+      .addCase(enrollInCourseNormal.pending, (state, action) => {
+        const courseId = action.meta.arg;
+        state.enrollingCourseIds.push(courseId);
+        state.error = null;
+      })
+      .addCase(enrollInCourseNormal.fulfilled, (state, action) => {
+        const courseId = action.meta.arg;
+        state.enrollingCourseIds = state.enrollingCourseIds.filter(
+          (id) => id !== courseId,
+        );
+        state.error = null;
+        // Refresh dashboard data to show newly enrolled course
+        // This will be handled by the component calling fetchStudentDashboard
+      })
+      .addCase(enrollInCourseNormal.rejected, (state, action) => {
+        const courseId = action.meta.arg;
+        state.enrollingCourseIds = state.enrollingCourseIds.filter(
+          (id) => id !== courseId,
+        );
+        state.error = action.payload;
+      })
+
+      // Enroll in Course Private
+      .addCase(enrollInCoursePrivate.pending, (state, action) => {
+        const courseId = action.meta.arg.courseId;
+        state.enrollingCourseIds.push(courseId);
+        state.error = null;
+      })
+      .addCase(enrollInCoursePrivate.fulfilled, (state, action) => {
+        const courseId = action.meta.arg.courseId;
+        state.enrollingCourseIds = state.enrollingCourseIds.filter(
+          (id) => id !== courseId,
+        );
+        state.error = null;
+        // Refresh dashboard data to show newly enrolled course
+        // This will be handled by the component calling fetchStudentDashboard
+      })
+      .addCase(enrollInCoursePrivate.rejected, (state, action) => {
+        const courseId = action.meta.arg.courseId;
+        state.enrollingCourseIds = state.enrollingCourseIds.filter(
+          (id) => id !== courseId,
+        );
+        state.error = action.payload;
+      })
+
       // Unenroll from Course
       .addCase(unenrollFromCourse.pending, (state, action) => {
         const courseId = action.meta.arg;
@@ -453,6 +552,21 @@ const studentDashboardSlice = createSlice({
         state.error = action.payload;
       })
 
+      // Fetch My Attendance
+      .addCase(fetchMyAttendance.pending, (state) => {
+        state.isFetchingMyAttendance = true;
+        state.error = null;
+      })
+      .addCase(fetchMyAttendance.fulfilled, (state, action) => {
+        state.isFetchingMyAttendance = false;
+        state.error = null;
+        state.myAttendance = action.payload.results || action.payload;
+      })
+      .addCase(fetchMyAttendance.rejected, (state, action) => {
+        state.isFetchingMyAttendance = false;
+        state.error = action.payload;
+      })
+
       // Handle logout - clear all student-specific data
       .addCase(logoutUser.fulfilled, (state) => {
         state.student = null;
@@ -463,6 +577,7 @@ const studentDashboardSlice = createSlice({
         state.assignments = [];
         state.sessions = [];
         state.grades = [];
+        state.myAttendance = [];
         state.submissions = {};
         state.attendance = {};
         state.lastFetched = null;
@@ -475,6 +590,7 @@ const studentDashboardSlice = createSlice({
         state.isFetchingSubmissions = false;
         state.isFetchingSessions = false;
         state.isFetchingAttendance = false;
+        state.isFetchingMyAttendance = false;
         state.enrollingCourseIds = [];
         state.unenrollingCourseIds = [];
       });
@@ -511,6 +627,10 @@ export const selectSessionsLoading = (state) =>
   state.studentDashboard.isFetchingSessions;
 export const selectAttendanceLoading = (state) =>
   state.studentDashboard.isFetchingAttendance;
+export const selectMyAttendance = (state) =>
+  state.studentDashboard.myAttendance;
+export const selectMyAttendanceLoading = (state) =>
+  state.studentDashboard.isFetchingMyAttendance;
 
 // Filtered selectors
 export const selectFilteredAssignments = createSelector(

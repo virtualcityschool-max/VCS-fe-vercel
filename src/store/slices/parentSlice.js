@@ -13,6 +13,18 @@ const initialState = {
     loading: false,
     error: null,
   },
+  childGrades: {
+    // Key: childId, Value: grades data
+    data: {},
+    loading: {},
+    error: {},
+  },
+  childAttendance: {
+    // Key: childId, Value: attendance data
+    data: {},
+    loading: {},
+    error: {},
+  },
 };
 
 // Async thunks
@@ -39,6 +51,30 @@ export const linkChildren = createAsyncThunk(
       return rejectWithValue(
         error.error || error.message || "Failed to link children",
       );
+    }
+  },
+);
+
+export const fetchChildGrades = createAsyncThunk(
+  "parent/fetchChildGrades",
+  async (childId, { rejectWithValue }) => {
+    try {
+      const response = await parentService.getChildGrades(childId);
+      return { childId, data: response };
+    } catch (error) {
+      return rejectWithValue({ childId, error });
+    }
+  },
+);
+
+export const fetchChildAttendance = createAsyncThunk(
+  "parent/fetchChildAttendance",
+  async (childId, { rejectWithValue }) => {
+    try {
+      const response = await parentService.getChildAttendance(childId);
+      return { childId, data: response };
+    } catch (error) {
+      return rejectWithValue({ childId, error });
     }
   },
 );
@@ -89,6 +125,38 @@ const parentSlice = createSlice({
       .addCase(linkChildren.rejected, (state, action) => {
         state.linkChild.loading = false;
         state.linkChild.error = action.payload;
+      })
+      // Child Grades
+      .addCase(fetchChildGrades.pending, (state, action) => {
+        const childId = action.meta.arg;
+        state.childGrades.loading[childId] = true;
+        state.childGrades.error[childId] = null;
+      })
+      .addCase(fetchChildGrades.fulfilled, (state, action) => {
+        const { childId, data } = action.payload;
+        state.childGrades.loading[childId] = false;
+        state.childGrades.data[childId] = data;
+      })
+      .addCase(fetchChildGrades.rejected, (state, action) => {
+        const { childId, error } = action.payload;
+        state.childGrades.loading[childId] = false;
+        state.childGrades.error[childId] = error;
+      })
+      // Child Attendance
+      .addCase(fetchChildAttendance.pending, (state, action) => {
+        const childId = action.meta.arg;
+        state.childAttendance.loading[childId] = true;
+        state.childAttendance.error[childId] = null;
+      })
+      .addCase(fetchChildAttendance.fulfilled, (state, action) => {
+        const { childId, data } = action.payload;
+        state.childAttendance.loading[childId] = false;
+        state.childAttendance.data[childId] = data;
+      })
+      .addCase(fetchChildAttendance.rejected, (state, action) => {
+        const { childId, error } = action.payload;
+        state.childAttendance.loading[childId] = false;
+        state.childAttendance.error[childId] = error;
       });
   },
 });
@@ -110,5 +178,20 @@ export const selectParentDashboardError = (state) =>
 export const selectLinkChild = (state) => state.parent.linkChild;
 export const selectLinkChildLoading = (state) => state.parent.linkChild.loading;
 export const selectLinkChildError = (state) => state.parent.linkChild.error;
+
+// Child grades selectors
+export const selectChildGrades = (state) => state.parent.childGrades.data;
+export const selectChildGradesLoading = (childId) => (state) =>
+  state.parent.childGrades.loading[childId] || false;
+export const selectChildGradesError = (childId) => (state) =>
+  state.parent.childGrades.error[childId];
+
+// Child attendance selectors
+export const selectChildAttendance = (state) =>
+  state.parent.childAttendance.data;
+export const selectChildAttendanceLoading = (childId) => (state) =>
+  state.parent.childAttendance.loading[childId] || false;
+export const selectChildAttendanceError = (childId) => (state) =>
+  state.parent.childAttendance.error[childId];
 
 export default parentSlice.reducer;

@@ -56,7 +56,7 @@ const PublicHome = () => {
           <i className="fas fa-sparkles"></i>
           Next-Gen Learning Experience
         </div>
-        <h1 className="text-3xl sm:text-6xl md:text-8xl font-black font-poppins mb-8 leading-[1.1] tracking-tight">
+        <h1 className="text-3xl sm:text-6xl md:text-7xl font-black font-poppins mb-8 leading-[1.1] tracking-tight">
           Master Any Subject, <br className="hidden sm:block" />
           <span className="bg-clip-text text-transparent bg-linear-to-r from-indigo-400 via-blue-400 to-teal-400">
             From Anywhere.

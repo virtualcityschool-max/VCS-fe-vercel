@@ -81,12 +81,12 @@ export const studentService = {
   joinLiveSession: async (sessionId) => {
     try {
       const response = await axiosInstance.post(
-        `/student/live-sessions/${sessionId}/join/`,
+        `/classroom/sessions/${sessionId}/join/`,
       );
       return response.data;
     } catch (error) {
       console.error("Error joining live session:", error);
-      throw new Error("Failed to join live session");
+      throw new Error("Failed to join live session.");
     }
   },
 
@@ -252,6 +252,35 @@ export const studentService = {
       return response.data;
     } catch (error) {
       console.error("Error enrolling in course:", error);
+      throw new Error("Failed to enroll in course");
+    }
+  },
+
+  // Normal enrollment
+  enrollInCourseNormal: async (courseId) => {
+    try {
+      const response = await axiosInstance.post(`/courses/enroll/`, {
+        course_id: courseId,
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error enrolling in course (normal):", error);
+      throw new Error("Failed to enroll in course");
+    }
+  },
+
+  // Private enrollment
+  enrollInCoursePrivate: async ({courseId, teacherId}) => {
+    try {
+      const response = await axiosInstance.post(
+        `/courses/teachers/${teacherId}/enroll/`,
+        {
+          course_id: courseId,
+        },
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error enrolling in course (private):", error);
       throw new Error("Failed to enroll in course");
     }
   },
@@ -431,7 +460,7 @@ export const studentService = {
   },
 
   // Get student's attendance for a specific session
-  getSessionAttendance: async (sessionId) => {
+  getMySessionAttendance: async (sessionId) => {
     try {
       console.log("Fetching attendance for session:", sessionId);
 
@@ -461,6 +490,37 @@ export const studentService = {
       }
 
       throw new Error(error.message || "Failed to load attendance");
+    }
+  },
+
+  // Get student's own attendance records
+  getMyAttendance: async () => {
+    try {
+      console.log("Fetching student attendance records...");
+
+      const response = await axiosInstance.get("/classroom/my-attendance/");
+
+      console.log("Student attendance response:", response.data);
+
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching student attendance:", {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+      });
+
+      if (error.response?.status === 401) {
+        throw new Error("Unauthorized. Please log in again.");
+      } else if (error.response?.status === 403) {
+        throw new Error("Access denied. Student privileges required.");
+      } else if (error.response?.status === 404) {
+        throw new Error("No attendance records found.");
+      } else if (error.response?.status === 500) {
+        throw new Error("Server error. Please try again later.");
+      }
+
+      throw new Error(error.message || "Failed to load attendance records");
     }
   },
 

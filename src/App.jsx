@@ -182,9 +182,9 @@ const App = () => {
             </Route>
 
             {/* Shared Authenticated Routes */}
-            <Route element={<ProtectedRoute />}>
+            {/* <Route element={<ProtectedRoute />}>
               <Route path="/classroom" element={<Classroom />} />
-            </Route>
+            </Route> */}
 
             {/* Teacher-Only Routes */}
             <Route element={<ProtectedRoute allowedRoles={["teacher"]} />}>

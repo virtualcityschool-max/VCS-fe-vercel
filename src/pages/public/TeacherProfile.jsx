@@ -250,14 +250,6 @@ const TeacherProfile = () => {
 
             {/* CTA */}
             <div className="w-full lg:w-72 flex flex-col gap-3">
-              <button className="w-full rounded-2xl bg-indigo-600 px-6 py-4 text-xs font-semibold uppercase tracking-[0.18em] transition hover:bg-indigo-500 shadow-lg hover:shadow-indigo-500/20">
-                Request Tutor
-              </button>
-
-              <button className="w-full rounded-2xl border border-slate-700 bg-slate-900 px-6 py-4 text-xs font-semibold uppercase tracking-[0.18em] text-slate-300 transition hover:border-indigo-500/30 hover:text-white">
-                Message Instructor
-              </button>
-
               {teacherDetails.linkedin &&
               isValidLinkedInUrl(teacherDetails.linkedin) ? (
                 <a
@@ -403,9 +395,10 @@ const TeacherProfile = () => {
               {teacherDetails.courses?.length ? (
                 <div className="space-y-4">
                   {teacherDetails.courses.map((course) => (
-                    <div
+                    <Link
                       key={course.id}
-                      className="rounded-2xl border border-slate-800 bg-slate-950/70 p-5 transition hover:border-indigo-500/20"
+                      to={`/courses/${course.id}`}
+                      className="block rounded-2xl border border-slate-800 bg-slate-950/70 p-5 transition hover:bg-slate-800 cursor-pointer"
                     >
                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                         <div>
@@ -429,7 +422,7 @@ const TeacherProfile = () => {
                           {course.status}
                         </span>
                       </div>
-                    </div>
+                    </Link>
                   ))}
                 </div>
               ) : (
