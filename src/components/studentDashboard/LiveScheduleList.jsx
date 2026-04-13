@@ -1,33 +1,44 @@
 import React from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
 import {
   selectLiveSchedule,
   joinLiveSession,
 } from "../../store/slices/studentDashboardSlice";
+import { toastManager } from "../../utils/toastManager";
 
 const LiveScheduleList = () => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const liveSchedule = useSelector(selectLiveSchedule);
   const isJoiningSession = useSelector(
     (state) => state.studentDashboard.isJoiningSession,
   );
 
-  const handleJoinSession = async (sessionId) => {
+  const handleJoinSession = async (session) => {
+    const sessionId = session?.id || session?.session_id;
+    if (!sessionId) {
+      toastManager.error("Session information is unavailable");
+      return;
+    }
+
     try {
       const result = await dispatch(joinLiveSession(sessionId)).unwrap();
-      const meetingLink = result.response?.meeting_link;
+      const meetingLink = result?.meeting_link;
 
       if (meetingLink && meetingLink.startsWith("http")) {
-        window.open(meetingLink, "_blank", "noopener,noreferrer");
+        // Validate URL format
+        try {
+          new URL(meetingLink);
+          window.open(meetingLink, "_blank", "noopener,noreferrer");
+        } catch (urlError) {
+          toastManager.error("Invalid meeting link format");
+          console.log("URL Error:", urlError);
+        }
       } else {
-        console.error("No meeting link found in response");
-        // Fallback to classroom if no meeting link
-        navigate("/classroom");
+        toastManager.error("No valid meeting link found");
       }
     } catch (error) {
       console.error("Failed to join session:", error);
+      toastManager.error("Failed to join session");
     }
   };
 
@@ -109,7 +120,7 @@ const LiveScheduleList = () => {
       <div className="space-y-6">
         {liveSchedule.map((session) => (
           <div
-            key={session.session_id}
+            key={session.id || session.session_id}
             className="bg-slate-800 p-8 rounded-[2.5rem] border border-slate-700 flex flex-col md:flex-row items-center gap-8 hover:bg-slate-800/80 transition group shadow-lg"
           >
             {/* Instructor Avatar */}
@@ -190,30 +201,37 @@ const LiveScheduleList = () => {
 
             {/* Action Button */}
             <div className="flex-shrink-0">
-              {session.can_join && session.meeting_link ? (
-                <button
-                  onClick={() => handleJoinSession(session.session_id)}
-                  disabled={isJoiningSession}
-                  className="w-full md:w-auto bg-blue-600 hover:bg-blue-500 text-white px-8 py-4 rounded-2xl font-bold text-sm shadow-lg shadow-blue-900/40 transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isJoiningSession ? (
-                    <>
-                      <i className="fas fa-spinner fa-spin mr-2"></i>
-                      Joining...
-                    </>
-                  ) : (
-                    <>
-                      <i className="fas fa-video mr-2"></i>
-                      Join Live Room
-                    </>
-                  )}
-                </button>
-              ) : (
-                <button className="w-full md:w-auto border border-slate-600 text-white hover:bg-slate-700 px-8 py-4 rounded-2xl font-bold text-sm transition active:scale-95">
-                  <i className="fas fa-info-circle mr-2"></i>
-                  View Details
-                </button>
-              )}
+              {(() => {
+                const canJoinNow =
+                  session?.can_join ||
+                  session?.status === "live" ||
+                  session?.status === "ongoing";
+
+                return canJoinNow ? (
+                  <button
+                    onClick={() => handleJoinSession(session)}
+                    disabled={isJoiningSession}
+                    className="w-full md:w-auto bg-blue-600 hover:bg-blue-500 text-white px-8 py-4 rounded-2xl font-bold text-sm shadow-lg shadow-blue-900/40 transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isJoiningSession ? (
+                      <>
+                        <i className="fas fa-spinner fa-spin mr-2"></i>
+                        Joining...
+                      </>
+                    ) : (
+                      <>
+                        <i className="fas fa-video mr-2"></i>
+                        Join Live Room
+                      </>
+                    )}
+                  </button>
+                ) : (
+                  <button className="w-full md:w-auto border border-slate-600 text-white hover:bg-slate-700 px-8 py-4 rounded-2xl font-bold text-sm transition active:scale-95">
+                    <i className="fas fa-info-circle mr-2"></i>
+                    View Details
+                  </button>
+                );
+              })()}
             </div>
           </div>
         ))}

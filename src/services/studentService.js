@@ -270,8 +270,16 @@ export const studentService = {
   },
 
   // Private enrollment
-  enrollInCoursePrivate: async ({courseId, teacherId}) => {
+  enrollInCoursePrivate: async ({ courseId, teacherId }) => {
     try {
+      // Validate required parameters
+      if (!courseId) {
+        throw new Error("Course ID is required for private enrollment");
+      }
+      if (!teacherId) {
+        throw new Error("Teacher ID is required for private enrollment");
+      }
+
       const response = await axiosInstance.post(
         `/courses/teachers/${teacherId}/enroll/`,
         {

@@ -550,16 +550,45 @@ export const normalizeFieldErrors = (details) => {
 
   const fieldErrors = {};
   Object.entries(details).forEach(([field, messages]) => {
+    // Map backend field names to frontend field names
+    const frontendField = mapBackendToFrontendField(field);
+
     // Handle both string and array formats
     if (Array.isArray(messages)) {
-      fieldErrors[field] = messages.filter((msg) => typeof msg === "string");
+      fieldErrors[frontendField] = messages.filter(
+        (msg) => typeof msg === "string",
+      );
     } else if (typeof messages === "string") {
-      fieldErrors[field] = [messages];
+      fieldErrors[frontendField] = [messages];
     }
     // Ignore non-string messages
   });
 
   return Object.keys(fieldErrors).length > 0 ? fieldErrors : null;
+};
+
+// Map backend field names to frontend field names
+const mapBackendToFrontendField = (backendField) => {
+  const fieldMappings = {
+    // Session field mappings
+    scheduled_at: "start_time",
+    meeting_link: "meeting_link",
+    title: "title",
+    course: "course_id",
+    course_id: "course_id",
+
+    // User field mappings
+    email: "email",
+    username: "username",
+    password: "password",
+    confirmPassword: "confirmPassword",
+    role: "role",
+
+    // Common field mappings
+    non_field_errors: "non_field_errors",
+  };
+
+  return fieldMappings[backendField] || backendField;
 };
 
 // Get user-friendly message for toast notifications

@@ -95,8 +95,8 @@ const TeacherAttendance = () => {
 
     dispatch(
       updateSessionAttendance({
-        sessionId: record.session,
-        attendanceId: record.studentId,
+        sessionId: selectedSessionId,
+        attendanceId: record.id,
         data,
       }),
     )

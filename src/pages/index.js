@@ -27,6 +27,7 @@ export { default as AdminApprovalsPage } from "./admin/AdminApprovalsPage";
 export { default as AdminCoursesPage } from "./admin/AdminCoursesPage";
 export { default as AdminUsersPage } from "./admin/AdminUsersPage";
 export { default as AdminEnrollmentsPage } from "./admin/AdminEnrollmentsPage";
+export { default as AdminSessionsPage } from "./admin/AdminSessionsPage";
 export { default as UserDetailsPage } from "./admin/UserDetailsPage";
 
 // Parent Pages

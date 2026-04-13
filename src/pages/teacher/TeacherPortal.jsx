@@ -5,6 +5,7 @@ import {
   fetchTeacherDashboard,
   fetchMyCourses,
   fetchAssignments,
+  joinLiveSession,
 } from "../../store/slices/teacherSlice";
 import { createAnnouncement } from "../../store/slices/announcementsSlice";
 import { toastManager } from "../../utils/toastManager";
@@ -25,6 +26,7 @@ const TeacherPortal = () => {
     loadingCourses,
     loadingAssignments,
     errorDashboard,
+    isJoiningSession,
   } = useSelector((state) => state.teachers);
 
   const handleCreateAnnouncement = async () => {
@@ -58,6 +60,28 @@ const TeacherPortal = () => {
       setIsSubmitting(false);
     }
   };
+
+const handleJoinSession = async (sessionId) => {
+  try {
+    const result = await dispatch(joinLiveSession(sessionId)).unwrap();
+    const meetingLink = result?.meeting_link;
+
+    if (meetingLink && meetingLink.startsWith("http")) {
+      try {
+        new URL(meetingLink);
+        window.open(meetingLink, "_blank", "noopener,noreferrer");
+      } catch {
+        toastManager.error("Invalid meeting link format");
+      }
+    } else {
+      toastManager.error("No valid meeting link found");
+    }
+  } catch (err) {
+    toastManager.error(
+      err?.error || err?.message || "Failed to join teacher session",
+    );
+  }
+};
 
   useEffect(() => {
     dispatch(fetchTeacherDashboard());
@@ -175,7 +199,7 @@ const TeacherPortal = () => {
             dashboard.todays_schedule.map((session) => (
               <div
                 key={session.id}
-                className="bg-slate-900 p-6 rounded-3xl border border-slate-800 flex items-center justify-between hover:border-indigo-500 transition cursor-pointer group"
+                className="bg-slate-900 p-6 rounded-3xl border border-slate-800 flex items-center justify-between hover:border-indigo-500 transition group"
               >
                 <div className="flex items-center gap-6">
                   <div className="text-indigo-400 font-black text-sm whitespace-nowrap">
@@ -195,7 +219,23 @@ const TeacherPortal = () => {
                   </div>
                 </div>
 
-                <i className="fas fa-chevron-right text-slate-700"></i>
+                <button
+                  onClick={() => handleJoinSession(session.id)}
+                  disabled={isJoiningSession}
+                  className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-sm font-medium transition disabled:opacity-50 flex items-center gap-2 cursor-pointer"
+                >
+                  {isJoiningSession ? (
+                    <>
+                      <i className="fas fa-spinner fa-spin"></i>
+                      <span>Joining...</span>
+                    </>
+                  ) : (
+                    <>
+                      <i className="fas fa-video"></i>
+                      <span>Join Session</span>
+                    </>
+                  )}
+                </button>
               </div>
             ))
           ) : (

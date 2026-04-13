@@ -38,6 +38,12 @@ const Sidebar = ({
       icon: "fas fa-user-graduate",
       path: "/admin/enrollments",
     },
+    {
+      id: "sessions",
+      label: "Sessions",
+      icon: "fas fa-video",
+      path: "/admin/sessions",
+    },
   ];
 
   const handleTabClick = (path) => {

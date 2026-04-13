@@ -229,14 +229,18 @@ const Marketplace = () => {
         if (type === "normal") {
           response = await dispatch(enrollInCourseNormal(courseId)).unwrap();
         } else if (type === "private") {
-          if (!selectedCourse.instructor?.id) {
-            toastManager.error("Private enrollment not available");
+          const instructorId =
+            selectedCourse.instructor?.id || selectedCourse.instructor_id;
+          if (!instructorId) {
+            toastManager.error(
+              "Private enrollment not available - no instructor assigned",
+            );
             return;
           }
           response = await dispatch(
             enrollInCoursePrivate({
               courseId,
-              teacherId: selectedCourse.instructor.id,
+              teacherId: instructorId,
             }),
           ).unwrap();
         }

@@ -208,6 +208,22 @@ export const updateSessionAttendance = createAsyncThunk(
   },
 );
 
+export const joinLiveSession = createAsyncThunk(
+  "teachers/joinLiveSession",
+  async (sessionId, { rejectWithValue }) => {
+    try {
+      const result = await teacherService.joinLiveSession(sessionId);
+      return result;
+    } catch (error) {
+      return rejectWithValue(
+        error?.response?.data?.error ||
+          error?.message ||
+          "Failed to join live session",
+      );
+    }
+  },
+);
+
 const initialState = {
   teachers: [],
   teacherDetails: null,
@@ -251,6 +267,10 @@ const initialState = {
   errorAttendance: null,
   updatingAttendanceId: null,
   updatingAttendanceError: null,
+
+  // session joining state
+  isJoiningSession: false,
+  joiningSessionError: null,
 };
 
 const teacherSlice = createSlice({
@@ -435,7 +455,7 @@ const teacherSlice = createSlice({
       .addCase(updateSessionAttendance.fulfilled, (state, action) => {
         state.updatingAttendanceId = null;
         state.attendanceRecords = state.attendanceRecords.map((record) =>
-          record.student === action.payload.attendanceId
+          record.id === action.payload.attendanceId
             ? { ...record, ...action.payload.data }
             : record,
         );
@@ -443,6 +463,19 @@ const teacherSlice = createSlice({
       .addCase(updateSessionAttendance.rejected, (state, action) => {
         state.updatingAttendanceId = null;
         state.updatingAttendanceError = action.payload;
+      })
+
+      // JOIN LIVE SESSION
+      .addCase(joinLiveSession.pending, (state) => {
+        state.isJoiningSession = true;
+        state.joiningSessionError = null;
+      })
+      .addCase(joinLiveSession.fulfilled, (state) => {
+        state.isJoiningSession = false;
+      })
+      .addCase(joinLiveSession.rejected, (state, action) => {
+        state.isJoiningSession = false;
+        state.joiningSessionError = action.payload;
       });
   },
 });

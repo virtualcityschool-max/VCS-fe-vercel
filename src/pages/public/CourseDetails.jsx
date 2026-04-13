@@ -136,14 +136,18 @@ const CourseDetails = () => {
         if (type === "normal") {
           response = await dispatch(enrollInCourseNormal(courseId)).unwrap();
         } else if (type === "private") {
-          if (!normalizedCourse.instructor?.id) {
-            toastManager.error("Private enrollment not available");
+          const instructorId =
+            normalizedCourse.instructor?.id || normalizedCourse.instructor_id;
+          if (!instructorId) {
+            toastManager.error(
+              "Private enrollment not available - no instructor assigned",
+            );
             return;
           }
           response = await dispatch(
             enrollInCoursePrivate({
               courseId,
-              teacherId: normalizedCourse.instructor.id,
+              teacherId: instructorId,
             }),
           ).unwrap();
         }

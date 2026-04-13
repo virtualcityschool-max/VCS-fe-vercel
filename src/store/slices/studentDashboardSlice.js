@@ -23,12 +23,28 @@ export const fetchStudentDashboard = createAsyncThunk(
   },
 );
 
+// export const joinLiveSession = createAsyncThunk(
+//   "studentDashboard/joinLiveSession",
+//   async (sessionId, { rejectWithValue }) => {
+//     try {
+//       const response = await studentService.joinLiveSession(sessionId);
+//       return { sessionId, response };
+//     } catch (error) {
+//       return rejectWithValue(
+//         typeof error === "string"
+//           ? error
+//           : error?.message || "An error occurred",
+//       );
+//     }
+//   },
+// );
+
 export const joinLiveSession = createAsyncThunk(
   "studentDashboard/joinLiveSession",
   async (sessionId, { rejectWithValue }) => {
     try {
       const response = await studentService.joinLiveSession(sessionId);
-      return { sessionId, response };
+      return { sessionId, ...response };
     } catch (error) {
       return rejectWithValue(
         typeof error === "string"
@@ -94,10 +110,10 @@ export const enrollInCoursePrivate = createAsyncThunk(
   "studentDashboard/enrollInCoursePrivate",
   async ({ courseId, teacherId }, { rejectWithValue }) => {
     try {
-      const response = await studentService.enrollInCoursePrivate(
+      const response = await studentService.enrollInCoursePrivate({
         courseId,
         teacherId,
-      );
+      });
       return { courseId, response };
     } catch (error) {
       return rejectWithValue(
@@ -296,7 +312,7 @@ const studentDashboardSlice = createSlice({
     updateLiveSessionStatus: (state, action) => {
       const { sessionId, status } = action.payload;
       const session = state.liveSchedule.find(
-        (s) => s.session_id === sessionId,
+        (s) => s.id === sessionId || s.session_id === sessionId,
       );
       if (session) {
         session.status = status;
@@ -354,7 +370,7 @@ const studentDashboardSlice = createSlice({
         // Update session status optimistically
         const { sessionId } = action.payload;
         const session = state.liveSchedule.find(
-          (s) => s.session_id === sessionId,
+          (s) => s.id === sessionId || s.session_id === sessionId,
         );
         if (session) {
           session.status = "joined";

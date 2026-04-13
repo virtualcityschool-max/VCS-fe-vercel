@@ -24,6 +24,7 @@ import {
   AdminCoursesPage,
   AdminUsersPage,
   AdminEnrollmentsPage,
+  AdminSessionsPage,
   UserDetailsPage,
   StudentPortal,
   TeacherLayout,
@@ -218,6 +219,7 @@ const App = () => {
                 <Route path="courses" element={<AdminCoursesPage />} />
                 <Route path="users" element={<AdminUsersPage />} />
                 <Route path="enrollments" element={<AdminEnrollmentsPage />} />
+                <Route path="sessions" element={<AdminSessionsPage />} />
               </Route>
               <Route path="/admin/users/:id" element={<UserDetailsPage />} />
             </Route>

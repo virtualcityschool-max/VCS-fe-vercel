@@ -10,6 +10,7 @@ import {
   fetchCourses,
   fetchUsers,
   fetchEnrollments,
+  fetchSessions,
 } from "../../store/slices/adminSlice";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
@@ -37,6 +38,7 @@ const AdminLayout = () => {
     if (path.includes("/admin/courses")) return "courses";
     if (path.includes("/admin/users")) return "users";
     if (path.includes("/admin/enrollments")) return "enrollments";
+    if (path.includes("/admin/sessions")) return "sessions";
     return "overview"; // default
   };
 
@@ -78,6 +80,13 @@ const AdminLayout = () => {
     // Fetch enrollments when enrollments tab is active
     if (activeTab === "enrollments") {
       dispatch(fetchEnrollments());
+    }
+  }, [dispatch, activeTab]);
+
+  React.useEffect(() => {
+    // Fetch sessions when sessions tab is active
+    if (activeTab === "sessions") {
+      dispatch(fetchSessions());
     }
   }, [dispatch, activeTab]);
 
