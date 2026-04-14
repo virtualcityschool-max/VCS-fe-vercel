@@ -1,14 +1,7 @@
-import { useSelector, useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import { logoutUser } from "../../store/slices/authSlice";
+import { useSelector } from "react-redux";
 
 const StudentFeed = () => {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
   const auth = useSelector((state) => state.auth);
-  const onLogout = () => {
-    dispatch(logoutUser());
-  };
   return (
     <section
       id="feed-view"

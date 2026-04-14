@@ -2,9 +2,11 @@ import axiosInstance from "../utils/axiosInstance";
 
 export const authService = {
   // Get current user profile
-  getMe: async () => {
+  getMe: async (token = null) => {
     try {
-      const response = await axiosInstance.get(`/auth/me/`);
+      const response = await axiosInstance.get("/auth/me/", {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
       return response.data;
     } catch (error) {
       console.error("Get profile error:", {
@@ -27,7 +29,7 @@ export const authService = {
 
       console.log("Sending request data:", requestData);
 
-      const response = await axiosInstance.post(`/auth/login/`, requestData);
+      const response = await axiosInstance.post("/auth/login/", requestData);
 
       console.log("API Response:", response.data);
 
@@ -38,9 +40,9 @@ export const authService = {
             response.data.user?.name || response.data.user?.email || "User",
           email: response.data.user?.email,
           role: response.data.user?.role || credentials.role,
-          token: response.data.access, // Backend returns 'access' field
+          token: response.data.access,
         },
-        refresh_token: response.data.refresh, // Backend returns 'refresh' field
+        refresh_token: response.data.refresh,
       };
     } catch (error) {
       console.error("Login error details:", {
@@ -55,28 +57,8 @@ export const authService = {
         fullError: error,
       });
 
-      let errorMessage = "Login failed. Please try again.";
-
-      if (error.response?.status === 500) {
-        errorMessage = `Server error: ${error.response?.data?.message || "Internal server error. Check backend logs."}`;
-      } else if (
-        error.message.includes("CORS") ||
-        error.message.includes("Network Error")
-      ) {
-        errorMessage =
-          "Network error: Backend may not be running or CORS is not configured. Please check the console.";
-      } else if (error.response?.data?.message) {
-        errorMessage = error.response.data.message;
-      } else if (error.response?.status === 401) {
-        errorMessage =
-          "Invalid credentials. Please check your email and password.";
-      } else if (error.response?.status === 404) {
-        errorMessage = "Login endpoint not found. Please check the API URL.";
-      } else if (error.response?.status === 400) {
-        errorMessage = `Bad request: ${error.response?.data?.message || "Invalid data format"}`;
-      }
-
-      throw new Error(errorMessage);
+      // Preserve full backend error response - DO NOT override messages
+      throw error;
     }
   },
 
@@ -109,18 +91,16 @@ export const authService = {
         `${axiosInstance.defaults.baseURL}/auth/register/`,
       );
 
-      const response = await axiosInstance.post(`/auth/register/`, requestData);
+      const response = await axiosInstance.post("/auth/register/", requestData);
 
       console.log("Registration Response:", response.data);
 
-      // Extract user_id from response for OTP verification
-      // Backend should return user_id in the response data
       const userId = response.data.user_id || response.data.id;
 
       return {
         success: true,
         user: response.data.user,
-        user_id: userId, // Include user_id for OTP verification
+        user_id: userId,
         message: response.data.message || "Registration successful",
       };
     } catch (error) {
@@ -129,113 +109,8 @@ export const authService = {
         error.response?.data || error.message,
       );
 
-      // Handle specific backend error responses per API spec
-      if (error.response?.status === 400) {
-        const backendError = error.response?.data;
-
-        if (backendError?.error?.includes("User already exists")) {
-          const errorDetails = {
-            error:
-              "An account with this email already exists. Please use a different email or try logging in.",
-            status: 400,
-          };
-          throw errorDetails;
-        }
-
-        if (backendError?.error?.includes("Validation failed")) {
-          // Handle specific validation errors
-          if (backendError?.confirm_password) {
-            const errorDetails = {
-              error:
-                "Passwords do not match. Please make sure both passwords are identical.",
-              status: 400,
-              field: "confirm_password",
-            };
-            throw errorDetails;
-          }
-
-          if (backendError?.password) {
-            const errorDetails = {
-              error:
-                "Password is too weak. Please use a stronger password with at least 8 characters.",
-              status: 400,
-              field: "password",
-            };
-            throw errorDetails;
-          }
-
-          if (backendError?.email) {
-            const errorDetails = {
-              error:
-                "Invalid email address. Please enter a valid email address.",
-              status: 400,
-              field: "email",
-            };
-            throw errorDetails;
-          }
-
-          if (backendError?.username) {
-            const errorDetails = {
-              error: "Invalid username. Please choose a different username.",
-              status: 400,
-              field: "username",
-            };
-            throw errorDetails;
-          }
-
-          if (backendError?.role) {
-            const errorDetails = {
-              error: "Invalid role selected. Please select a valid role.",
-              status: 400,
-              field: "role",
-            };
-            throw errorDetails;
-          }
-        }
-
-        // Handle parent-specific errors
-        if (backendError?.error?.includes("No student found with email")) {
-          const errorDetails = {
-            error:
-              "No student account found with the provided email address. Please check the email and try again.",
-            status: 400,
-          };
-          throw errorDetails;
-        }
-
-        // Generic 400 error
-        const errorDetails = {
-          error:
-            backendError?.error ||
-            "Invalid registration data. Please check your information and try again.",
-          status: 400,
-        };
-        throw errorDetails;
-      }
-
-      // Handle 500 specifically - backend server error
-      if (error.response?.status === 500) {
-        const backendError = error.response?.data;
-        console.log("Backend 500 error details:", backendError);
-
-        const errorDetails = {
-          error: "Backend server error during registration.",
-          status: 500,
-          suggestion:
-            "The registration service is experiencing issues. Please try again in a few minutes or contact support.",
-          backendDetails:
-            backendError?.error ||
-            backendError?.message ||
-            "Internal server error",
-        };
-        throw errorDetails;
-      }
-
-      // Preserve structured error objects for field-specific handling
-      if (error.response?.data) {
-        throw error.response.data;
-      }
-      throw new Error(error.message || "Registration failed");
+      // Preserve full backend error response - DO NOT override messages
+      throw error;
     }
   },
 
@@ -245,9 +120,8 @@ export const authService = {
       console.log("Attempting OTP verification for user ID:", userId);
       console.log("User ID type:", typeof userId);
 
-      // Backend expects only user_id (number) and otp, not email
       const requestData = {
-        user_id: parseInt(userId), // Ensure it's a number
+        user_id: parseInt(userId, 10),
         otp: otp,
       };
 
@@ -257,7 +131,7 @@ export const authService = {
       });
 
       const response = await axiosInstance.post(
-        `/auth/verify-otp/`,
+        "/auth/verify-otp/",
         requestData,
       );
 
@@ -276,69 +150,8 @@ export const authService = {
         userIdType: typeof userId,
       });
 
-      // Handle specific backend error responses per API spec
-      if (error.response?.status === 400) {
-        const backendError = error.response?.data;
-
-        if (backendError?.error?.includes("Invalid OTP")) {
-          const errorDetails = {
-            error: "Invalid OTP. Please check your email and try again.",
-            status: 400,
-          };
-          throw errorDetails;
-        }
-
-        if (backendError?.error?.includes("OTP expired")) {
-          const errorDetails = {
-            error:
-              "OTP has expired. Please register again to receive a new OTP.",
-            status: 400,
-          };
-          throw errorDetails;
-        }
-
-        // Handle other 400 errors
-        const errorDetails = {
-          error: backendError?.error || "Invalid OTP request.",
-          status: 400,
-        };
-        throw errorDetails;
-      }
-
-      // Handle 404 specifically - user not found
-      if (error.response?.status === 404) {
-        const errorDetails = {
-          error: "User not found. Please register again.",
-          status: 404,
-          suggestion:
-            "The registration may have failed or expired. Please try registering with the same email.",
-        };
-        throw errorDetails;
-      }
-
-      // Handle 500 specifically - backend server error
-      if (error.response?.status === 500) {
-        const backendError = error.response?.data;
-        console.log("Backend 500 error details:", backendError);
-
-        const errorDetails = {
-          error: "Backend server error during OTP verification.",
-          status: 500,
-          suggestion:
-            "The OTP verification service is experiencing issues. Please try again in a few minutes or contact support.",
-          backendDetails:
-            backendError?.error ||
-            backendError?.message ||
-            "Internal server error",
-        };
-        throw errorDetails;
-      }
-
-      // Preserve structured error objects for field-specific handling
-      if (error.response?.data) {
-        throw error.response.data;
-      }
-      throw new Error(error.message || "OTP verification failed");
+      // Preserve full backend error response - DO NOT override messages
+      throw error;
     }
   },
 
@@ -350,7 +163,7 @@ export const authService = {
         throw new Error("No refresh token available");
       }
 
-      const response = await axiosInstance.post(`/auth/token/refresh/`, {
+      const response = await axiosInstance.post("/auth/token/refresh/", {
         refresh: refreshToken,
       });
 
@@ -369,13 +182,258 @@ export const authService = {
     try {
       const refreshToken = localStorage.getItem("vcs_refresh_token");
       if (refreshToken) {
-        await axiosInstance.post(`/auth/logout/`, {
+        await axiosInstance.post("/auth/logout/", {
           refresh: refreshToken,
         });
       }
     } catch (error) {
       console.error("Logout error:", error);
-      // Continue with local cleanup even if server call fails
+    }
+  },
+
+  // Resend OTP
+  resendOtp: async (email) => {
+    try {
+      console.log("Resending OTP for email:", email);
+
+      const requestData = {
+        email: email,
+      };
+
+      console.log("Resend OTP Request data:", requestData);
+
+      const response = await axiosInstance.post(
+        "/auth/resend-otp/",
+        requestData,
+      );
+
+      console.log("Resend OTP Response:", response.data);
+
+      return {
+        success: true,
+        message: response.data.message || "OTP resent successfully",
+        user_id: response.data.user_id,
+      };
+    } catch (error) {
+      console.error("Resend OTP Error:", {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+        email: email,
+      });
+
+      // Preserve full backend error response - DO NOT override messages
+      throw error;
+    }
+  },
+
+  // Update Profile
+  updateProfile: async (profileData) => {
+    try {
+      console.log("Updating profile:", profileData);
+
+      const response = await axiosInstance.patch("/auth/me/", profileData);
+
+      console.log("Profile Update Response:", response.data);
+
+      return {
+        success: true,
+        user: response.data,
+        message: "Profile updated successfully",
+      };
+    } catch (error) {
+      console.error("Profile Update Error:", {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+      });
+
+      if (error.response?.status === 400) {
+        const backendError = error.response?.data;
+        throw {
+          error:
+            backendError?.error ||
+            "Invalid profile data. Please check your information.",
+          status: 400,
+        };
+      }
+
+      if (error.response?.status === 401) {
+        throw {
+          error: "Unauthorized. Please log in again.",
+          status: 401,
+        };
+      }
+
+      throw new Error(error.message || "Failed to update profile");
+    }
+  },
+
+  // Update Student Profile
+  updateStudentProfile: async (studentData) => {
+    try {
+      console.log("Updating student profile:", studentData);
+
+      const response = await axiosInstance.patch(
+        "/auth/me/profile/student/",
+        studentData,
+      );
+
+      console.log("Student Profile Update Response:", response.data);
+
+      return {
+        success: true,
+        user: response.data,
+        message: "Student profile updated successfully",
+      };
+    } catch (error) {
+      console.error("Student Profile Update Error:", {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+      });
+
+      if (error.response?.status === 400) {
+        const backendError = error.response?.data;
+        throw {
+          error: backendError?.error || "Invalid student profile data.",
+          status: 400,
+        };
+      }
+
+      throw new Error(error.message || "Failed to update student profile");
+    }
+  },
+
+  // Get pending approvals (admin only)
+  getPendingApprovals: async () => {
+    try {
+      console.log("Fetching pending approvals...");
+
+      const response = await axiosInstance.get("/auth/pending-approvals/");
+      console.log("Pending Approvals Response:", response.data);
+
+      return response.data;
+    } catch (error) {
+      console.error("Get pending approvals error:", {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+      });
+
+      if (error.response?.status === 403) {
+        throw {
+          error: "You don't have permission to view pending approvals.",
+          status: 403,
+        };
+      }
+
+      if (error.response?.status === 401) {
+        throw {
+          error: "Please log in to view pending approvals.",
+          status: 401,
+        };
+      }
+
+      throw new Error(error.message || "Failed to fetch pending approvals");
+    }
+  },
+
+  // Approve user (admin only)
+  approveUser: async (userId) => {
+    try {
+      console.log("Approving user:", userId);
+
+      const response = await axiosInstance.patch(`/auth/approve/${userId}/`, {
+        action: "approve",
+      });
+      console.log("Approve User Response:", response.data);
+
+      return {
+        success: true,
+        message: response.data.message || "User approved successfully",
+        user_id: response.data.user_id,
+        is_active: response.data.is_active,
+      };
+    } catch (error) {
+      console.error("Approve user error:", {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+        userId: userId,
+      });
+
+      if (error.response?.status === 403) {
+        throw {
+          error: "You don't have permission to approve users.",
+          status: 403,
+        };
+      }
+
+      if (error.response?.status === 404) {
+        throw {
+          error: "User not found or already processed.",
+          status: 404,
+        };
+      }
+
+      if (error.response?.status === 400) {
+        const backendError = error.response?.data;
+        throw {
+          error: backendError?.error || "Invalid approval request.",
+          status: 400,
+        };
+      }
+
+      throw new Error(error.message || "Failed to approve user");
+    }
+  },
+
+  // Reject user (admin only)
+  rejectUser: async (userId) => {
+    try {
+      console.log("Rejecting user:", userId);
+
+      const response = await axiosInstance.patch(`/auth/approve/${userId}/`, {
+        action: "reject",
+      });
+      console.log("Reject User Response:", response.data);
+
+      return {
+        success: true,
+        message: response.data.message || "User rejected successfully",
+      };
+    } catch (error) {
+      console.error("Reject user error:", {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+        userId: userId,
+      });
+
+      if (error.response?.status === 403) {
+        throw {
+          error: "You don't have permission to reject users.",
+          status: 403,
+        };
+      }
+
+      if (error.response?.status === 404) {
+        throw {
+          error: "User not found or already processed.",
+          status: 404,
+        };
+      }
+
+      if (error.response?.status === 400) {
+        const backendError = error.response?.data;
+        throw {
+          error: backendError?.error || "Invalid rejection request.",
+          status: 400,
+        };
+      }
+
+      throw new Error(error.message || "Failed to reject user");
     }
   },
 };

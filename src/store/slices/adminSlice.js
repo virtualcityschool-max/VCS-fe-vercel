@@ -1,5 +1,8 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { adminService } from "../../services/adminService";
+import { coursesService } from "../../services/coursesService";
+import { handleApiError } from "../../utils/errorHandler";
+import { axiosInstance } from "../../utils";
 
 // Initial state
 const initialState = {
@@ -12,10 +15,10 @@ const initialState = {
       page: 1,
       limit: 20,
       total: 0,
-      totalPages: 0
-    }
+      totalPages: 0,
+    },
   },
-  
+
   // Course Management
   courses: {
     data: [],
@@ -25,10 +28,10 @@ const initialState = {
       page: 1,
       limit: 20,
       total: 0,
-      totalPages: 0
-    }
+      totalPages: 0,
+    },
   },
-  
+
   // Analytics
   analytics: {
     dashboard: null,
@@ -36,29 +39,36 @@ const initialState = {
     courses: null,
     revenue: null,
     loading: false,
-    error: null
+    error: null,
   },
-  
+
   // System Settings
   settings: {
     data: null,
     loading: false,
-    error: null
+    error: null,
   },
-  
+
   // System Status
   systemStatus: {
     data: null,
     loading: false,
-    error: null
+    error: null,
   },
-  
+
   // Reports
   reports: {
     data: [],
     loading: false,
-    error: null
-  }
+    error: null,
+  },
+
+  // Enrollments
+  enrollments: {
+    data: [],
+    loading: false,
+    error: null,
+  },
 };
 
 // User Management Thunks
@@ -69,9 +79,9 @@ export const fetchUsers = createAsyncThunk(
       const response = await adminService.getUsers(params);
       return response;
     } catch (error) {
-      return rejectWithValue(error.message || "Failed to fetch users");
+      return rejectWithValue(error); // Preserve full error object
     }
-  }
+  },
 );
 
 export const createUser = createAsyncThunk(
@@ -81,9 +91,9 @@ export const createUser = createAsyncThunk(
       const response = await adminService.createUser(userData);
       return response;
     } catch (error) {
-      return rejectWithValue(error.message || "Failed to create user");
+      return rejectWithValue(error); // Preserve full error object
     }
-  }
+  },
 );
 
 export const updateUser = createAsyncThunk(
@@ -93,9 +103,9 @@ export const updateUser = createAsyncThunk(
       const response = await adminService.updateUser(userId, userData);
       return response;
     } catch (error) {
-      return rejectWithValue(error.message || "Failed to update user");
+      return rejectWithValue(error); // Preserve full error object
     }
-  }
+  },
 );
 
 export const deleteUser = createAsyncThunk(
@@ -105,46 +115,77 @@ export const deleteUser = createAsyncThunk(
       await adminService.deleteUser(userId);
       return userId;
     } catch (error) {
-      return rejectWithValue(error.message || "Failed to delete user");
+      return rejectWithValue(error); // Preserve full error object
     }
-  }
+  },
 );
 
 // Course Management Thunks
 export const fetchCourses = createAsyncThunk(
   "admin/fetchCourses",
-  async (params = {}, { rejectWithValue }) => {
+  async (_, { rejectWithValue }) => {
     try {
-      const response = await adminService.getCourses(params);
+      const response = await coursesService.getAllCourses();
       return response;
     } catch (error) {
-      return rejectWithValue(error.message || "Failed to fetch courses");
+      return rejectWithValue(error); // Preserve full error object
     }
-  }
+  },
+);
+
+export const fetchAllCourses = createAsyncThunk(
+  "admin/fetchAllCourses",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await coursesService.getAllCourses();
+      return response;
+    } catch (error) {
+      return rejectWithValue(error); // Preserve full error object
+    }
+  },
 );
 
 export const createCourse = createAsyncThunk(
   "admin/createCourse",
   async (courseData, { rejectWithValue }) => {
     try {
-      const response = await adminService.createCourse(courseData);
+      const response = await coursesService.createCourse(courseData);
       return response;
     } catch (error) {
-      return rejectWithValue(error.message || "Failed to create course");
+      return rejectWithValue(error); // Preserve full error object
     }
-  }
+  },
+);
+
+export const assignInstructor = createAsyncThunk(
+  "admin/assignInstructor",
+  async ({ courseId, instructorId }, { rejectWithValue }) => {
+    try {
+      const response = await coursesService.assignInstructor(
+        courseId,
+        instructorId,
+      );
+      return { courseId, instructorId, ...response };
+    } catch (error) {
+      return rejectWithValue(error); // Preserve full error object
+    }
+  },
 );
 
 export const updateCourse = createAsyncThunk(
   "admin/updateCourse",
   async ({ courseId, courseData }, { rejectWithValue }) => {
     try {
-      const response = await adminService.updateCourse(courseId, courseData);
-      return response;
+      const response = await coursesService.updateCourse(courseId, courseData);
+      return { courseId, ...response };
     } catch (error) {
-      return rejectWithValue(error.message || "Failed to update course");
+      const processedError = handleApiError(error, {
+        context: "Update Course",
+        logError: true,
+      });
+      return rejectWithValue(processedError);
     }
-  }
+  },
 );
 
 export const deleteCourse = createAsyncThunk(
@@ -154,9 +195,9 @@ export const deleteCourse = createAsyncThunk(
       await adminService.deleteCourse(courseId);
       return courseId;
     } catch (error) {
-      return rejectWithValue(error.message || "Failed to delete course");
+      return rejectWithValue(error); // Preserve full error object
     }
-  }
+  },
 );
 
 // Analytics Thunks
@@ -167,9 +208,9 @@ export const fetchDashboardAnalytics = createAsyncThunk(
       const response = await adminService.getDashboardAnalytics();
       return response;
     } catch (error) {
-      return rejectWithValue(error.message || "Failed to fetch dashboard analytics");
+      return rejectWithValue(error); // Preserve full error object
     }
-  }
+  },
 );
 
 export const fetchUserAnalytics = createAsyncThunk(
@@ -179,9 +220,9 @@ export const fetchUserAnalytics = createAsyncThunk(
       const response = await adminService.getUserAnalytics(params);
       return response;
     } catch (error) {
-      return rejectWithValue(error.message || "Failed to fetch user analytics");
+      return rejectWithValue(error); // Preserve full error object
     }
-  }
+  },
 );
 
 export const fetchCourseAnalytics = createAsyncThunk(
@@ -191,9 +232,9 @@ export const fetchCourseAnalytics = createAsyncThunk(
       const response = await adminService.getCourseAnalytics(params);
       return response;
     } catch (error) {
-      return rejectWithValue(error.message || "Failed to fetch course analytics");
+      return rejectWithValue(error); // Preserve full error object
     }
-  }
+  },
 );
 
 // Settings Thunks
@@ -204,9 +245,9 @@ export const fetchSettings = createAsyncThunk(
       const response = await adminService.getSettings();
       return response;
     } catch (error) {
-      return rejectWithValue(error.message || "Failed to fetch settings");
+      return rejectWithValue(error); // Preserve full error object
     }
-  }
+  },
 );
 
 export const updateSettings = createAsyncThunk(
@@ -216,9 +257,9 @@ export const updateSettings = createAsyncThunk(
       const response = await adminService.updateSettings(settingsData);
       return response;
     } catch (error) {
-      return rejectWithValue(error.message || "Failed to update settings");
+      return rejectWithValue(error); // Preserve full error object
     }
-  }
+  },
 );
 
 // System Status Thunk
@@ -231,7 +272,7 @@ export const fetchSystemStatus = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.message || "Failed to fetch system status");
     }
-  }
+  },
 );
 
 // Reports Thunks
@@ -244,7 +285,22 @@ export const fetchReports = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.message || "Failed to fetch reports");
     }
-  }
+  },
+);
+
+// Enrollments Thunks
+export const fetchEnrollments = createAsyncThunk(
+  "admin/fetchEnrollments",
+  async (params = {}, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get("/courses/all-enrollments/", {
+        params,
+      });
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.message || "Failed to fetch enrollments");
+    }
+  },
 );
 
 // Slice
@@ -271,7 +327,10 @@ const adminSlice = createSlice({
     clearReportsError: (state) => {
       state.reports.error = null;
     },
-    
+    clearEnrollmentsError: (state) => {
+      state.enrollments.error = null;
+    },
+
     // Clear all errors
     clearAllErrors: (state) => {
       state.users.error = null;
@@ -280,8 +339,9 @@ const adminSlice = createSlice({
       state.settings.error = null;
       state.systemStatus.error = null;
       state.reports.error = null;
+      state.enrollments.error = null;
     },
-    
+
     // Reset specific state
     resetUsers: (state) => {
       state.users = initialState.users;
@@ -291,7 +351,7 @@ const adminSlice = createSlice({
     },
     resetAnalytics: (state) => {
       state.analytics = initialState.analytics;
-    }
+    },
   },
   extraReducers: (builder) => {
     // Users
@@ -303,7 +363,8 @@ const adminSlice = createSlice({
       .addCase(fetchUsers.fulfilled, (state, action) => {
         state.users.loading = false;
         state.users.data = action.payload.data || action.payload;
-        state.users.pagination = action.payload.pagination || initialState.users.pagination;
+        state.users.pagination =
+          action.payload.pagination || initialState.users.pagination;
       })
       .addCase(fetchUsers.rejected, (state, action) => {
         state.users.loading = false;
@@ -313,13 +374,17 @@ const adminSlice = createSlice({
         state.users.data.unshift(action.payload);
       })
       .addCase(updateUser.fulfilled, (state, action) => {
-        const index = state.users.data.findIndex(user => user.id === action.payload.id);
+        const index = state.users.data.findIndex(
+          (user) => user.id === action.payload.id,
+        );
         if (index !== -1) {
           state.users.data[index] = action.payload;
         }
       })
       .addCase(deleteUser.fulfilled, (state, action) => {
-        state.users.data = state.users.data.filter(user => user.id !== action.payload);
+        state.users.data = state.users.data.filter(
+          (user) => user.id !== action.payload,
+        );
       });
 
     // Courses
@@ -330,8 +395,25 @@ const adminSlice = createSlice({
       })
       .addCase(fetchCourses.fulfilled, (state, action) => {
         state.courses.loading = false;
-        state.courses.data = action.payload.data || action.payload;
-        state.courses.pagination = action.payload.pagination || initialState.courses.pagination;
+        const coursesData =
+          action.payload.data?.data || action.payload.data || action.payload;
+
+        // Restore timestamps from localStorage
+        const timestamps = JSON.parse(
+          localStorage.getItem("courseUpdateTimestamps") || "{}",
+        );
+        const coursesWithTimestamps = coursesData.map((course) => ({
+          ...course,
+          updated_at:
+            course.updated_at ||
+            course.modified_at ||
+            timestamps[course.id] ||
+            null,
+        }));
+
+        state.courses.data = coursesWithTimestamps;
+        state.courses.pagination =
+          action.payload.pagination || initialState.courses.pagination;
       })
       .addCase(fetchCourses.rejected, (state, action) => {
         state.courses.loading = false;
@@ -340,14 +422,40 @@ const adminSlice = createSlice({
       .addCase(createCourse.fulfilled, (state, action) => {
         state.courses.data.unshift(action.payload);
       })
-      .addCase(updateCourse.fulfilled, (state, action) => {
-        const index = state.courses.data.findIndex(course => course.id === action.payload.id);
-        if (index !== -1) {
-          state.courses.data[index] = action.payload;
+      .addCase(assignInstructor.fulfilled, (state, action) => {
+        const { courseId, instructorId } = action.payload;
+        const courseIndex = state.courses.data.findIndex(
+          (course) => course.id === courseId,
+        );
+        if (courseIndex !== -1) {
+          state.courses.data[courseIndex].instructor_id = instructorId;
         }
       })
+      .addCase(updateCourse.pending, () => {
+        // No optimistic update for instructor-related changes to prevent data corruption
+        // Let the refetch handle the state update
+      })
+      .addCase(updateCourse.fulfilled, (state, action) => {
+        const { courseId } = action.payload;
+        const courseIndex = state.courses.data.findIndex(
+          (course) => course.id === courseId,
+        );
+
+        if (courseIndex !== -1) {
+          state.courses.data[courseIndex] = {
+            ...state.courses.data[courseIndex],
+            ...action.payload,
+            updated_at: new Date().toISOString(),
+          };
+        }
+      })
+      .addCase(updateCourse.rejected, () => {
+        // No optimistic update to revert - error handled via toast notification
+      })
       .addCase(deleteCourse.fulfilled, (state, action) => {
-        state.courses.data = state.courses.data.filter(course => course.id !== action.payload);
+        state.courses.data = state.courses.data.filter(
+          (course) => course.id !== action.payload,
+        );
       });
 
     // Analytics
@@ -418,7 +526,22 @@ const adminSlice = createSlice({
         state.reports.loading = false;
         state.reports.error = action.payload;
       });
-  }
+
+    // Enrollments
+    builder
+      .addCase(fetchEnrollments.pending, (state) => {
+        state.enrollments.loading = true;
+        state.enrollments.error = null;
+      })
+      .addCase(fetchEnrollments.fulfilled, (state, action) => {
+        state.enrollments.loading = false;
+        state.enrollments.data = action.payload.results || action.payload || [];
+      })
+      .addCase(fetchEnrollments.rejected, (state, action) => {
+        state.enrollments.loading = false;
+        state.enrollments.error = action.payload;
+      });
+  },
 });
 
 // Actions
@@ -429,10 +552,11 @@ export const {
   clearSettingsError,
   clearSystemStatusError,
   clearReportsError,
+  clearEnrollmentsError,
   clearAllErrors,
   resetUsers,
   resetCourses,
-  resetAnalytics
+  resetAnalytics,
 } = adminSlice.actions;
 
 // Selectors
@@ -442,13 +566,17 @@ export const selectAnalytics = (state) => state.admin.analytics;
 export const selectSettings = (state) => state.admin.settings;
 export const selectSystemStatus = (state) => state.admin.systemStatus;
 export const selectReports = (state) => state.admin.reports;
+export const selectEnrollments = (state) => state.admin.enrollments;
 
 // Convenience selectors
 export const selectUsersLoading = (state) => state.admin.users.loading;
 export const selectCoursesLoading = (state) => state.admin.courses.loading;
 export const selectAnalyticsLoading = (state) => state.admin.analytics.loading;
 export const selectSettingsLoading = (state) => state.admin.settings.loading;
-export const selectSystemStatusLoading = (state) => state.admin.systemStatus.loading;
+export const selectSystemStatusLoading = (state) =>
+  state.admin.systemStatus.loading;
 export const selectReportsLoading = (state) => state.admin.reports.loading;
+export const selectEnrollmentsLoading = (state) =>
+  state.admin.enrollments.loading;
 
 export default adminSlice.reducer;

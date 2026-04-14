@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { logoutUser } from "../../store/slices/authSlice";
 import { ROLES, ROUTES } from "../../constants";
-import toast from "react-hot-toast";
+import { toastManager } from "../../utils/toastManager";
 
 const UserProfileDropdown = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -11,13 +11,6 @@ const UserProfileDropdown = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const auth = useSelector((state) => state.auth);
-
-  const getAvatarUrl = () => {
-    if (auth.role === ROLES.TEACHER) return "https://i.pravatar.cc/150?u=elena";
-    if (auth.role === ROLES.ADMIN) return "https://i.pravatar.cc/150?u=admin";
-    if (auth.role === ROLES.PARENT) return "https://i.pravatar.cc/150?u=parent";
-    return "https://i.pravatar.cc/150?u=sarah_j";
-  };
 
   const getRoleLabel = () => {
     switch (auth.role) {
@@ -47,15 +40,17 @@ const UserProfileDropdown = () => {
   };
 
   const handleSignOut = async () => {
+    setIsDropdownOpen(false);
+
+    const toastId = toastManager.loading("Signing out...");
+
     try {
-      setIsDropdownOpen(false);
-      toast.success("Signing out...", { duration: 2000 });
       await dispatch(logoutUser()).unwrap();
+      toastManager.dismiss(toastId);
       navigate("/");
-      toast.success("Signed out successfully");
-    } catch (error) {
-      console.error("Logout error:", error);
-      toast.error("Error signing out. Please try again.");
+    } catch {
+      toastManager.dismiss(toastId);
+      toastManager.error("Error signing out. Please try again.");
     }
   };
 
@@ -70,7 +65,7 @@ const UserProfileDropdown = () => {
   const handleProfile = () => {
     setIsDropdownOpen(false);
     // Navigate to profile page when implemented
-    toast.success("Profile page coming soon!");
+    toastManager.success("Profile page coming soon!");
   };
 
   // Close dropdown when clicking outside

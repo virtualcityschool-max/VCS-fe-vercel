@@ -1,7 +1,6 @@
 import React, { useEffect, useCallback, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
 import {
   fetchStudentDashboard,
   selectDashboardLoading,
@@ -26,7 +25,7 @@ const StudentPortal = () => {
 
   // Ensure component has mounted on client
   useEffect(() => {
-    setHasMounted(true);
+    setTimeout(() => setHasMounted(true), 0);
   }, []);
 
   // Fetch dashboard data on component mount
@@ -44,11 +43,6 @@ const StudentPortal = () => {
     dispatch(fetchStudentDashboard());
   }, [dispatch]);
 
-  // Handle navigation to courses
-  const handleExploreCourses = useCallback(() => {
-    navigate("/courses");
-  }, [navigate]);
-
   // Show loading state while mounting or loading
   if (!hasMounted || isLoading) {
     return (
@@ -59,8 +53,8 @@ const StudentPortal = () => {
         <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
           {/* Loading indicator */}
           <div className="text-center py-12">
-            <div className="w-16 h-16 bg-blue-600/20 rounded-full flex items-center justify-center mx-auto mb-4 animate-spin">
-              <i className="fas fa-spinner text-blue-500 text-2xl"></i>
+            <div className="w-16 h-16 bg-blue-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i className="fas fa-spinner text-blue-500 text-2xl animate-spin"></i>
             </div>
             <h2 className="text-xl font-bold text-white mb-2">
               {!hasMounted
@@ -129,7 +123,12 @@ const StudentPortal = () => {
             <h2 className="text-2xl font-bold text-white mb-2">
               Failed to Load Dashboard
             </h2>
-            <p className="text-slate-400 mb-6">{error}</p>
+            <p className="text-slate-400 mb-6">
+              {typeof error === "string"
+                ? error
+                : error?.message ||
+                  "An error occurred while loading the dashboard"}
+            </p>
             <div className="flex gap-4 justify-center">
               <button
                 onClick={handleRetry}
@@ -173,9 +172,6 @@ const StudentPortal = () => {
           <div className="xl:col-span-8 space-y-6 lg:space-y-8">
             {/* Live Schedule */}
             <LiveScheduleList />
-
-            {/* Enrolled Courses */}
-            <CourseProgressGrid />
           </div>
 
           {/* Right Column - Sidebar */}
@@ -184,6 +180,8 @@ const StudentPortal = () => {
             <AssignmentOverviewList />
           </div>
         </div>
+        {/* Enrolled Courses */}
+        <CourseProgressGrid />
       </div>
     </section>
   );

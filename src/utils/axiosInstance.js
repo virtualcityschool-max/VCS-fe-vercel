@@ -1,13 +1,11 @@
 import axios from "axios";
+import { API_BASE_URL } from "../constants";
 import { authStorage } from "./authStorage";
 
-const baseURL = import.meta.env.VITE_API_BASE_URL || "/api/v1"; // Use relative URL for development proxy
+const baseURL = API_BASE_URL;
 
 console.log("🔧 Axios Instance Base URL:", baseURL);
-console.log(
-  "🔧 Environment VITE_API_BASE_URL:",
-  import.meta.env.VITE_API_BASE_URL,
-);
+console.log("🔧 Environment API_BASE_URL:", API_BASE_URL);
 
 const axiosInstance = axios.create({
   baseURL: baseURL,
@@ -42,6 +40,19 @@ axiosInstance.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
+    // Enhanced debugging for auth endpoints
+    if (config.url?.includes("auth/me")) {
+      console.log("🔍 AUTH DEBUG - Request to /auth/me:", {
+        hasToken: !!token,
+        tokenLength: token?.length,
+        tokenPreview: token ? `${token.substring(0, 20)}...` : null,
+        authorizationHeader: config.headers.Authorization
+          ? "[SET]"
+          : "[NOT_SET]",
+        fullURL: `${config.baseURL}${config.url}`,
+      });
+    }
+
     console.log("🚀 Request:", {
       method: config.method?.toUpperCase(),
       url: config.url,
@@ -53,11 +64,6 @@ axiosInstance.interceptors.request.use(
           ? "[TOKEN_HIDDEN]"
           : undefined,
       },
-      // Only log data for non-sensitive endpoints
-      data:
-        config.url?.includes("register") || config.url?.includes("login")
-          ? "[SENSITIVE_DATA_HIDDEN]"
-          : config.data,
     });
     return config;
   },
@@ -116,7 +122,7 @@ axiosInstance.interceptors.response.use(
           throw new Error("No refresh token available");
         }
 
-        const response = await axios.post(`${baseURL}/auth/token/refresh/`, {
+        const response = await axiosInstance.post("/auth/token/refresh/", {
           refresh: refreshToken,
         });
 

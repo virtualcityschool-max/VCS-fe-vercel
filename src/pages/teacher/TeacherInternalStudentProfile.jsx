@@ -1,9 +1,7 @@
-import React, { useState } from "react";
-import { useDispatch } from "react-redux";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 
 const TeacherInternalStudentProfile = () => {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   return (
     <section

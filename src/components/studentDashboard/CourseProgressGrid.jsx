@@ -46,7 +46,7 @@ const CourseProgressGrid = () => {
       <h2 className="text-xl font-bold font-poppins mb-6 border-b border-slate-800 pb-4">
         Enrolled Courses
       </h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 lg:gap-8">
         {enrolledCourses.map((course) => (
           <div
             key={course.id}

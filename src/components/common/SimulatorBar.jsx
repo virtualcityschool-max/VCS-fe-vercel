@@ -2,7 +2,7 @@ import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { setAuthModal } from "../../store/slices/uiSlice";
-import toast from "react-hot-toast";
+import { toastManager } from "../../utils/toastManager";
 
 const SimulatorBar = () => {
   const navigate = useNavigate();
@@ -39,18 +39,6 @@ const SimulatorBar = () => {
       roles: ["student", "teacher", "admin"],
     },
     {
-      id: "/feed",
-      label: "Student Feed",
-      icon: "fa-rss",
-      roles: ["student"],
-    },
-    {
-      id: "/courses",
-      label: "Courses",
-      icon: "fa-shopping-cart",
-      public: true,
-    },
-    {
       id: "/teacher/123",
       label: "T-Profile",
       icon: "fa-id-card",
@@ -60,15 +48,23 @@ const SimulatorBar = () => {
       id: "/student/456",
       label: "S-Risk",
       icon: "fa-exclamation-triangle",
-      roles: ["teacher", "admin"],
+      roles: ["teacher"],
     },
   ];
 
   // Filter buttons based on authentication status and role
   const getVisibleButtons = () => {
     if (!isLoggedIn) {
-      // Show all buttons when not logged in (on home page or any public page)
-      return buttons;
+      // Show only public buttons when not logged in, but hide specific items
+      return buttons.filter((button) => {
+        // Hide Classroom, T-Profile, and S-Risk for logged-out users
+        const hiddenWhenLoggedOut = [
+          "/classroom",
+          "/teacher/123",
+          "/student/456",
+        ];
+        return !hiddenWhenLoggedOut.includes(button.id);
+      });
     }
 
     // When logged in, only show buttons that are public or match the user's role
@@ -93,7 +89,9 @@ const SimulatorBar = () => {
 
     if (button.roles && isLoggedIn && !button.roles.includes(role)) {
       const intendedRole = button.roles[0];
-      toast.error(`Please log in as a ${intendedRole} to access this area.`);
+      toastManager.error(
+        `Please log in as a ${intendedRole} to access this area.`,
+      );
       dispatch(setAuthModal({ type: "login", intendedRole }));
       return;
     }

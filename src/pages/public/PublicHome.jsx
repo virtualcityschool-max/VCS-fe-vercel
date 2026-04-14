@@ -1,9 +1,42 @@
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { fetchAllCourses } from "../../store/slices/coursesSlice";
+import { useEffect, useState } from "react";
+import { getCourseImage } from "../../utils/courseImageUtils";
 
 const PublicHome = () => {
   const auth = useSelector((state) => state.auth);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // Get courses data from Redux store
+  const { courses } = useSelector((state) => state.courses);
+
+  // Fetch courses on component mount
+  useEffect(() => {
+    dispatch(fetchAllCourses());
+  }, [dispatch]);
+
+  // Filter courses based on search term
+  const filteredCourses =
+    courses?.filter(
+      (course) =>
+        course.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        course.category?.toLowerCase().includes(searchTerm.toLowerCase()),
+    ) || [];
+
+  // Separate enrolled and non-enrolled courses for logged-in students
+  const enrolledCourses =
+    auth.role === "student"
+      ? filteredCourses.filter((course) => course.is_enrolled)
+      : [];
+
+  const availableCourses =
+    auth.role === "student"
+      ? filteredCourses.filter((course) => !course.is_enrolled)
+      : filteredCourses;
 
   return (
     <main
@@ -30,8 +63,8 @@ const PublicHome = () => {
           </span>
         </h1>
         <p className="text-slate-400 text-lg md:text-2xl mb-14 max-w-3xl mx-auto leading-relaxed font-medium">
-          Connect with world-class instructors for high-fidelity Live Classes
-          and On-Demand mastery modules at{" "}
+          Connect with world-class teachers for high-fidelity Live Classes and
+          On-Demand mastery modules at{" "}
           <span className="text-white font-bold">VirtualCitySchool</span>.
         </p>
 
@@ -42,6 +75,10 @@ const PublicHome = () => {
               <i className="fas fa-search text-slate-500 mr-4"></i>
               <input
                 type="search"
+                id="home-search"
+                name="home-search"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="What do you want to learn today?"
                 className="w-full bg-transparent outline-none text-white placeholder-slate-600 py-4 font-medium"
               />
@@ -65,7 +102,7 @@ const PublicHome = () => {
             <i className="fas fa-arrow-right group-hover:translate-x-1 transition"></i>
           </button>
           <button
-            onClick={() => navigate("/instructors")}
+            onClick={() => navigate("/teachers")}
             className="group flex items-center justify-center gap-3 border border-white/10 hover:border-white/20 bg-white/5 hover:bg-white/10 text-white px-6 sm:px-10 py-4 sm:py-5 rounded-4xl font-black text-[10px] sm:text-xs uppercase tracking-widest transition-all hover:scale-105"
           >
             Find a Private Tutor
@@ -75,52 +112,103 @@ const PublicHome = () => {
       </section>
 
       <section className="relative z-10 max-w-7xl mx-auto px-6 py-32 border-t border-white/5">
+        {/* Enrolled Courses Section - Only for logged-in students */}
+        {auth.isLoggedIn &&
+          auth.role === "student" &&
+          enrolledCourses.length > 0 && (
+            <div className="mb-20">
+              <div className="flex justify-between items-end mb-16">
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.4em] text-green-500 mb-4">
+                    My Courses
+                  </p>
+                  <h2 className="text-4xl font-black font-poppins">
+                    Your Enrolled Courses
+                  </h2>
+                </div>
+                <button
+                  onClick={() => navigate("/student")}
+                  className="text-green-400 font-black text-[10px] uppercase tracking-widest hover:text-white transition flex items-center gap-3"
+                >
+                  View Dashboard <i className="fas fa-chevron-right"></i>
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                {enrolledCourses.slice(0, 3).map((course, i) => (
+                  <div
+                    key={course.id}
+                    onClick={() => navigate("/courses")}
+                    className="bg-slate-900/50 border border-green-500/20 rounded-[2.5rem] overflow-hidden group cursor-pointer hover:border-green-500/40 transition-all shadow-xl flex flex-col"
+                  >
+                    <div className="h-56 relative overflow-hidden">
+                      <img
+                        src={getCourseImage(course, i)}
+                        className="w-full h-full object-cover group-hover:scale-110 transition duration-700 opacity-60 group-hover:opacity-100"
+                        alt={course.title}
+                      />
+                      <div className="absolute top-6 left-6 px-4 py-1.5 bg-green-600 rounded-full text-[9px] font-black uppercase tracking-widest shadow-xl">
+                        ✓ Enrolled
+                      </div>
+                    </div>
+                    <div className="p-8">
+                      <h4 className="text-xl font-bold font-poppins mb-2 group-hover:text-green-400 transition">
+                        {course.title}
+                      </h4>
+                      <p className="text-slate-500 text-sm font-medium">
+                        {course.teacher?.username ||
+                          course.teacher?.first_name ||
+                          "Teacher"}
+                      </p>
+                      <div className="mt-8 flex justify-between items-center border-t border-white/5 pt-6">
+                        <span className="text-green-400 font-black">
+                          PKR {course.price || "0.00"}
+                        </span>
+                        <div className="flex text-yellow-500 text-[10px] gap-0.5">
+                          <i className="fas fa-star"></i>
+                          <i className="fas fa-star"></i>
+                          <i className="fas fa-star"></i>
+                          <i className="fas fa-star"></i>
+                          <i className="fas fa-star"></i>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+        {/* Available Courses Section */}
         <div className="flex justify-between items-end mb-16">
           <div>
             <p className="text-[10px] font-black uppercase tracking-[0.4em] text-indigo-500 mb-4">
               Discovery
             </p>
             <h2 className="text-4xl font-black font-poppins">
-              Trending Skills
+              {auth.isLoggedIn && auth.role === "student"
+                ? "Available Courses"
+                : "Trending Skills"}
             </h2>
           </div>
           <button
             onClick={() => navigate("/courses")}
             className="text-indigo-400 font-black text-[10px] uppercase tracking-widest hover:text-white transition flex items-center gap-3"
           >
-            View all 50+ Courses <i className="fas fa-chevron-right"></i>
+            View all Courses <i className="fas fa-chevron-right"></i>
           </button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-          {[
-            {
-              title: "Python for AI Mastery",
-              instructor: "Dr. Sarah Miller",
-              category: "Tech",
-              image: "https://picsum.photos/seed/pyh/600/400",
-            },
-            {
-              title: "SAT Strategic Math",
-              instructor: "Prof. Alex Vance",
-              category: "Test Prep",
-              image: "https://picsum.photos/seed/satm/600/400",
-            },
-            {
-              title: "Urdu Literature",
-              instructor: "Mr. Iqbal",
-              category: "Arts",
-              image: "https://picsum.photos/seed/urduh/600/400",
-            },
-          ].map((course, i) => (
+          {availableCourses.slice(0, 6).map((course, i) => (
             <div
-              key={i}
+              key={course.id}
               onClick={() => navigate("/courses")}
               className="bg-slate-900/50 border border-white/10 rounded-[2.5rem] overflow-hidden group cursor-pointer hover:border-indigo-500/50 transition-all shadow-xl flex flex-col"
             >
               <div className="h-56 relative overflow-hidden">
                 <img
-                  src={course.image}
+                  src={getCourseImage(course, i)}
                   className="w-full h-full object-cover group-hover:scale-110 transition duration-700 opacity-60 group-hover:opacity-100"
                   alt={course.title}
                 />
@@ -133,10 +221,14 @@ const PublicHome = () => {
                   {course.title}
                 </h4>
                 <p className="text-slate-500 text-sm font-medium">
-                  Instructor: {course.instructor}
+                  {course.instructor?.username ||
+                    course.instructor?.first_name ||
+                    "Instructor"}
                 </p>
                 <div className="mt-8 flex justify-between items-center border-t border-white/5 pt-6">
-                  <span className="text-indigo-400 font-black">$19.99</span>
+                  <span className="text-indigo-400 font-black">
+                    PKR {course.price || "19.99"}
+                  </span>
                   <div className="flex text-yellow-500 text-[10px] gap-0.5">
                     <i className="fas fa-star"></i>
                     <i className="fas fa-star"></i>
@@ -154,7 +246,8 @@ const PublicHome = () => {
       {/* Footer Teaser */}
       <footer className="relative z-10 max-w-7xl mx-auto px-6 py-20 text-center border-t border-white/5 opacity-40">
         <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">
-          &copy; {new Date().getFullYear()} VirtualCitySchool Ecosystem. All Rights Reserved.
+          &copy; {new Date().getFullYear()} VirtualCitySchool Ecosystem. All
+          Rights Reserved.
         </p>
       </footer>
     </main>

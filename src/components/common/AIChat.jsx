@@ -61,6 +61,8 @@ const AIChat = () => {
           <div className="p-3 border-t border-slate-700 flex gap-2">
             <input
               type="text"
+              id="ai-chat-input"
+              name="ai-chat-input"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSend()}
