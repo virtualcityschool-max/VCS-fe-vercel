@@ -6,6 +6,8 @@ import {
   createUser,
   deleteUser,
   selectUsers,
+  fetchAvailableStudents,
+  selectAvailableStudents,
 } from "../../store/slices/adminSlice";
 import {
   Button,
@@ -13,6 +15,7 @@ import {
   Card,
   PasswordValidation,
   PasswordInput,
+  MultiSelect,
 } from "../../components/ui";
 import { useFieldErrors } from "../../hooks";
 import {
@@ -45,7 +48,7 @@ const AdminUsersPage = () => {
     role: "student",
     first_name: "",
     last_name: "",
-    student_emails: "",
+    selected_students: [],
   });
 
   const [isCreatingUser, setIsCreatingUser] = useState(false);
@@ -64,6 +67,7 @@ const AdminUsersPage = () => {
 
   // Get users data from Redux store
   const users = useSelector(selectUsers);
+  const availableStudents = useSelector(selectAvailableStudents);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -118,6 +122,13 @@ const AdminUsersPage = () => {
     usersFilters.ordering,
   ]);
 
+  // Fetch available students when create user modal opens
+  useEffect(() => {
+    if (activeModal === "create-user") {
+      dispatch(fetchAvailableStudents());
+    }
+  }, [activeModal, dispatch]);
+
   // Handle user deletion
   const handleDeleteUser = async (userId) => {
     try {
@@ -144,7 +155,7 @@ const AdminUsersPage = () => {
       role: "student",
       first_name: "",
       last_name: "",
-      student_emails: "",
+      selected_students: [],
     });
     setCreateUserErrors({});
     clearAllCreateUserErrors();
@@ -218,11 +229,10 @@ const AdminUsersPage = () => {
       last_name: userData.last_name?.trim() || "",
     };
 
-    if (userData.role === "parent" && userData.student_emails?.trim()) {
-      payload.student_emails = userData.student_emails
-        .split(",")
-        .map((email) => email.trim())
-        .filter(Boolean);
+    if (userData.role === "parent" && userData.selected_students?.length > 0) {
+      payload.student_emails = userData.selected_students.map(
+        (student) => student.email,
+      );
     }
 
     try {
@@ -449,38 +459,27 @@ const AdminUsersPage = () => {
 
               {createUserForm.role === "parent" && (
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1">
-                    Student Emails (comma separated)
-                  </label>
-                  <textarea
-                    value={createUserForm.student_emails}
-                    onChange={(e) => {
+                  <MultiSelect
+                    options={availableStudents.data || []}
+                    value={createUserForm.selected_students}
+                    onChange={(selectedStudents) => {
                       setCreateUserForm({
                         ...createUserForm,
-                        student_emails: e.target.value,
+                        selected_students: selectedStudents,
                       });
                       // Clear field error when user starts typing
-                      if (createUserErrors.student_emails) {
+                      if (createUserErrors.selected_students) {
                         setCreateUserErrors((prev) => ({
                           ...prev,
-                          student_emails: undefined,
+                          selected_students: undefined,
                         }));
                       }
                     }}
-                    className={`w-full bg-slate-800 border text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-                      createUserErrors.student_emails
-                        ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                        : "border-slate-700 focus:border-indigo-500 focus:ring-indigo-500"
-                    }`}
-                    rows="3"
-                    placeholder="student1@example.com, student2@example.com"
+                    label="Select Students"
+                    placeholder="Choose students to link..."
+                    error={createUserErrors.selected_students}
+                    loading={availableStudents.loading}
                   />
-                  {createUserErrors.student_emails && (
-                    <p className="mt-2 text-sm text-red-400 flex items-center gap-2 animate-pulse">
-                      <i className="fas fa-exclamation-circle text-sm"></i>
-                      {createUserErrors.student_emails}
-                    </p>
-                  )}
                 </div>
               )}
             </div>

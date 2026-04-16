@@ -325,4 +325,41 @@ export const adminService = {
       throw handleApiError(error, { context: "Reject Child Link" });
     }
   },
+
+  unlinkChildrenAdmin: async (parentId, studentIds) => {
+    console.log("firstparentId", parentId);
+    try {
+      const response = await axiosInstance.delete("/child-links/unlink/", {
+        data: {
+          parent_id: parentId,
+          student_ids: studentIds,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error, { context: "Unlink Children Admin" });
+    }
+  },
+
+  getAvailableStudents: async () => {
+    try {
+      const response = await axiosInstance.get("/admin/students/available/");
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error, { context: "Get Available Students" });
+    }
+  },
+
+  linkChildrenAdmin: async (parentId, studentIds) => {
+    console.log("first parent Id: ", parentId);
+    try {
+      const response = await axiosInstance.post("/auth/me/link-child/", {
+        student_ids: studentIds,
+        parent_id: parentId,
+      });
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error, { context: "Link Children Admin" });
+    }
+  },
 };

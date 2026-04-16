@@ -273,6 +273,7 @@ const initialState = {
   isFetchingAttendance: false,
   isFetchingMyAttendance: false,
   lastFetched: null,
+  submissions: {},
 
   // Pagination and filtering
   filters: {
@@ -364,17 +365,9 @@ const studentDashboardSlice = createSlice({
         state.isJoiningSession = true;
         state.error = null;
       })
-      .addCase(joinLiveSession.fulfilled, (state, action) => {
+      .addCase(joinLiveSession.fulfilled, (state) => {
         state.isJoiningSession = false;
         state.error = null;
-        // Update session status optimistically
-        const { sessionId } = action.payload;
-        const session = state.liveSchedule.find(
-          (s) => s.id === sessionId || s.session_id === sessionId,
-        );
-        if (session) {
-          session.status = "joined";
-        }
       })
       .addCase(joinLiveSession.rejected, (state, action) => {
         state.isJoiningSession = false;
@@ -394,6 +387,7 @@ const studentDashboardSlice = createSlice({
         const assignment = state.assignments.find((a) => a.id === assignmentId);
         if (assignment) {
           assignment.status = "submitted";
+          assignment.is_submitted = true;
         }
       })
       .addCase(submitAssignment.rejected, (state, action) => {

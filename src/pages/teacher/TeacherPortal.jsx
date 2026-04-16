@@ -6,6 +6,8 @@ import {
   fetchMyCourses,
   fetchAssignments,
   joinLiveSession,
+  startLiveSession,
+  endLiveSession,
 } from "../../store/slices/teacherSlice";
 import { createAnnouncement } from "../../store/slices/announcementsSlice";
 import { toastManager } from "../../utils/toastManager";
@@ -61,27 +63,71 @@ const TeacherPortal = () => {
     }
   };
 
-const handleJoinSession = async (sessionId) => {
-  try {
-    const result = await dispatch(joinLiveSession(sessionId)).unwrap();
-    const meetingLink = result?.meeting_link;
+  const handleStartSession = async (sessionId) => {
+    try {
+      const result = await dispatch(startLiveSession(sessionId)).unwrap();
+      const meetingLink = result?.meeting_link;
 
-    if (meetingLink && meetingLink.startsWith("http")) {
-      try {
-        new URL(meetingLink);
-        window.open(meetingLink, "_blank", "noopener,noreferrer");
-      } catch {
-        toastManager.error("Invalid meeting link format");
+      if (meetingLink && meetingLink.startsWith("http")) {
+        try {
+          new URL(meetingLink);
+          window.open(meetingLink, "_blank", "noopener,noreferrer");
+        } catch {
+          toastManager.error("Invalid meeting link format");
+        }
+      } else {
+        toastManager.error("No valid meeting link found");
       }
-    } else {
-      toastManager.error("No valid meeting link found");
+
+      await dispatch(fetchTeacherDashboard()).unwrap();
+    } catch (err) {
+      toastManager.error(
+        err?.error || err?.message || "Failed to start session",
+      );
     }
-  } catch (err) {
-    toastManager.error(
-      err?.error || err?.message || "Failed to join teacher session",
+  };
+
+  const handleJoinSession = async (sessionId) => {
+    try {
+      const result = await dispatch(joinLiveSession(sessionId)).unwrap();
+      const meetingLink = result?.meeting_link;
+
+      if (meetingLink && meetingLink.startsWith("http")) {
+        try {
+          new URL(meetingLink);
+          window.open(meetingLink, "_blank", "noopener,noreferrer");
+        } catch {
+          toastManager.error("Invalid meeting link format");
+        }
+      } else {
+        toastManager.error("No valid meeting link found");
+      }
+      await dispatch(fetchTeacherDashboard()).unwrap();
+    } catch (err) {
+      toastManager.error(
+        err?.error || err?.message || "Failed to join teacher session",
+      );
+    }
+  };
+
+  const handleEndSession = async (sessionId) => {
+    const isConfirmed = window.confirm(
+      "Are you sure you want to end this session? This action cannot be undone.",
     );
-  }
-};
+
+    if (!isConfirmed) {
+      return;
+    }
+
+    try {
+      await dispatch(endLiveSession(sessionId)).unwrap();
+      toastManager.success("Session ended successfully");
+      // refresh dashboard
+      await dispatch(fetchTeacherDashboard()).unwrap();
+    } catch (err) {
+      toastManager.error(err?.error || err?.message || "Failed to end session");
+    }
+  };
 
   useEffect(() => {
     dispatch(fetchTeacherDashboard());
@@ -219,23 +265,50 @@ const handleJoinSession = async (sessionId) => {
                   </div>
                 </div>
 
-                <button
-                  onClick={() => handleJoinSession(session.id)}
-                  disabled={isJoiningSession}
-                  className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-sm font-medium transition disabled:opacity-50 flex items-center gap-2 cursor-pointer"
-                >
-                  {isJoiningSession ? (
-                    <>
-                      <i className="fas fa-spinner fa-spin"></i>
-                      <span>Joining...</span>
-                    </>
-                  ) : (
-                    <>
+                {session.status === "scheduled" && (
+                  <button
+                    onClick={() => handleStartSession(session.id)}
+                    disabled={isJoiningSession}
+                    className="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded-xl text-sm font-medium transition disabled:opacity-50 flex items-center gap-2"
+                  >
+                    <i className="fas fa-play"></i>
+                    <span>Start Session</span>
+                  </button>
+                )}
+
+                {session.status === "live" && (
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleJoinSession(session.id)}
+                      disabled={isJoiningSession}
+                      className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-sm font-medium transition disabled:opacity-50 flex items-center gap-2"
+                    >
                       <i className="fas fa-video"></i>
                       <span>Join Session</span>
-                    </>
-                  )}
-                </button>
+                    </button>
+
+                    <button
+                      onClick={() => handleEndSession(session.id)}
+                      disabled={isJoiningSession}
+                      className="bg-rose-600 hover:bg-rose-500 text-white px-4 py-2 rounded-xl text-sm font-medium transition disabled:opacity-50 flex items-center gap-2"
+                    >
+                      <i className="fas fa-stop"></i>
+                      <span>End Session</span>
+                    </button>
+                  </div>
+                )}
+
+                {session.status === "ended" && (
+                  <span className="text-slate-400 text-sm font-medium">
+                    Session Ended
+                  </span>
+                )}
+
+                {session.status === "cancelled" && (
+                  <span className="text-rose-400 text-sm font-medium">
+                    Cancelled
+                  </span>
+                )}
               </div>
             ))
           ) : (
@@ -300,7 +373,7 @@ const handleJoinSession = async (sessionId) => {
               dashboard.risk_alerts.map((alert, i) => (
                 <div
                   key={`${alert.student_id}-${i}`}
-                  onClick={() => navigate(`/student/${alert.student_id}`)}
+                  // onClick={() => navigate(`/student/${alert.student_id}`)}
                   className="flex items-center justify-between p-4 bg-slate-900 rounded-2xl border border-rose-500/20 cursor-pointer hover:bg-rose-500/10 transition group"
                 >
                   <div>

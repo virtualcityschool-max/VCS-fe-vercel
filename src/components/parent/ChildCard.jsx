@@ -4,6 +4,7 @@ import {
   fetchChildGrades,
   fetchChildAttendance,
 } from "../../store/slices/parentSlice";
+import { toastManager } from "../../utils/toastManager";
 import {
   selectChildGrades,
   selectChildGradesLoading,
@@ -12,6 +13,11 @@ import {
   selectChildAttendanceLoading,
   selectChildAttendanceError,
 } from "../../store/slices/parentSlice";
+import { unlinkChildLinks } from "../../store/slices/childLinksSlice";
+import {
+  selectChildLinksUnlinking,
+  selectChildLinksError,
+} from "../../store/slices/childLinksSlice";
 
 // Skeleton Loader Component
 const SkeletonLoader = () => (
@@ -94,6 +100,8 @@ const ChildCard = ({ child }) => {
   const attendanceLoading = useSelector(selectChildAttendanceLoading(child.id));
   const gradesError = useSelector(selectChildGradesError(child.id));
   const attendanceError = useSelector(selectChildAttendanceError(child.id));
+  const isUnlinking = useSelector(selectChildLinksUnlinking);
+  const childLinksError = useSelector(selectChildLinksError);
 
   // Fetch data on component mount if not already loaded
   useEffect(() => {
@@ -178,6 +186,24 @@ const ChildCard = ({ child }) => {
       day: "numeric",
       year: "numeric",
     });
+  };
+
+  const handleUnlink = async () => {
+    const confirmed = window.confirm(
+      "Are you sure you want to unlink this child?",
+    );
+    if (!confirmed) return;
+
+    try {
+      await dispatch(unlinkChildLinks([child.id])).unwrap();
+      // Show success message
+      toastManager.success("Child unlinked successfully!");
+      // Refresh parent dashboard by reloading the page
+      window.location.reload();
+    } catch (error) {
+      // Show error message
+      toastManager.error(`Failed to unlink child: ${error}`);
+    }
   };
 
   return (
@@ -351,9 +377,18 @@ const ChildCard = ({ child }) => {
         <p className="text-slate-500 text-[10px] uppercase tracking-widest">
           Active Student
         </p>
-        <button className="text-indigo-400 hover:text-white transition-colors">
-          <i className="fas fa-arrow-right"></i>
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={handleUnlink}
+            disabled={isUnlinking}
+            className="px-3 py-1 text-xs font-medium text-red-400 border border-red-500/30 rounded-lg hover:bg-red-500/10 hover:text-red-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isUnlinking ? "Unlinking..." : "Unlink"}
+          </button>
+          <button className="text-indigo-400 hover:text-white transition-colors">
+            <i className="fas fa-arrow-right"></i>
+          </button>
+        </div>
       </div>
     </div>
   );

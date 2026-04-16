@@ -451,7 +451,7 @@ const SessionsTab = ({
               <h3 className="text-xl font-bold text-white mb-4">
                 No Sessions Created
               </h3>
-              <p className="text-slate-400 text-center mb-6 max-w-md">
+              <p className="text-slate-400 text-center mb-6">
                 Get started by creating your first session. Sessions allow you
                 to schedule online meetings for your courses.
               </p>

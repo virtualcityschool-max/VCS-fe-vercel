@@ -116,13 +116,6 @@ const ParentPortal = () => {
               There are no children associated with your account. Please contact
               the school administration if you believe this is an error.
             </p>
-            <button
-              onClick={handleRefresh}
-              className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-medium transition-all duration-200 flex items-center gap-2"
-            >
-              <i className="fas fa-redo"></i>
-              Refresh
-            </button>
           </div>
         </div>
       </section>

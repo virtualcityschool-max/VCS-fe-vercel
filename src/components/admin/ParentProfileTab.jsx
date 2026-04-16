@@ -1,14 +1,40 @@
 import React, { useState, useEffect } from "react";
+import { useDispatch } from "react-redux";
 import { Button, Input } from "../ui";
 import { useFieldErrors } from "../../hooks";
+import { toastManager } from "../../utils/toastManager";
+import {
+  unlinkChildLinksAdmin,
+  fetchAvailableStudents,
+  linkChildLinksAdmin,
+} from "../../store/slices/childLinksSlice";
+import {
+  selectChildLinksUnlinking,
+  selectAvailableStudents,
+  selectAvailableStudentsLoading,
+  selectAvailableStudentsError,
+  selectChildLinksLinking,
+} from "../../store/slices/childLinksSlice";
+import { useSelector } from "react-redux";
+import { useParams } from "react-router-dom";
 
 const ParentProfileTab = ({ profile, onUpdate }) => {
+  const { id } = useParams();
+
+  const dispatch = useDispatch();
+  const isUnlinking = useSelector(selectChildLinksUnlinking);
+  const availableStudents = useSelector(selectAvailableStudents);
+  const availableStudentsLoading = useSelector(selectAvailableStudentsLoading);
+  const availableStudentsError = useSelector(selectAvailableStudentsError);
+  const isLinking = useSelector(selectChildLinksLinking);
+
   const [formData, setFormData] = useState({
     phone: "",
     address: "",
   });
 
   const [isSaving, setIsSaving] = useState(false);
+  const [selectedStudentIds, setSelectedStudentIds] = useState([]);
 
   const {
     errors,
@@ -28,6 +54,11 @@ const ParentProfileTab = ({ profile, onUpdate }) => {
       });
     }
   }, [profile]);
+
+  // Fetch available students on mount
+  useEffect(() => {
+    dispatch(fetchAvailableStudents());
+  }, [dispatch]);
 
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -93,6 +124,84 @@ const ParentProfileTab = ({ profile, onUpdate }) => {
       address: profile?.address || "",
     });
     clearAllErrors();
+  };
+
+  const handleUnlinkChild = async (childId, childUsername) => {
+    const confirmed = window.confirm(
+      `Are you sure you want to unlink ${childUsername}?`,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      await dispatch(
+        unlinkChildLinksAdmin({
+          parentId: profile.id,
+          studentIds: [childId],
+        }),
+      ).unwrap();
+
+      // Show success toast
+      toastManager.success(`Successfully unlinked ${childUsername}`);
+
+      // Refresh parent profile
+      if (onUpdate) {
+        onUpdate();
+      }
+    } catch (error) {
+      // Show error toast
+      toastManager.error(
+        `Failed to unlink ${childUsername}: ${error.message || "Unknown error"}`,
+      );
+    }
+  };
+
+  const handleLinkChildren = async () => {
+    console.log("profile", profile);
+    // Validate at least one student selected
+    if (selectedStudentIds.length === 0) {
+      toastManager.error("Please select at least one student to link.");
+      return;
+    }
+
+    try {
+      await dispatch(
+        linkChildLinksAdmin({
+          parentId: id,
+          studentIds: selectedStudentIds,
+        }),
+      ).unwrap();
+
+      // Show success toast
+      toastManager.success(
+        `Successfully linked ${selectedStudentIds.length} student(s) to parent.`,
+      );
+
+      // Clear selection
+      setSelectedStudentIds([]);
+
+      // Refresh parent profile
+      if (onUpdate) {
+        onUpdate();
+      }
+
+      // Refresh available students list
+      dispatch(fetchAvailableStudents());
+    } catch (error) {
+      // Show error toast
+      toastManager.error(
+        `Failed to link students: ${error.message || "Unknown error"}`,
+      );
+    }
+  };
+
+  const handleStudentSelectionChange = (e) => {
+    const selectedOptions = Array.from(e.target.selectedOptions, (option) =>
+      Number(option.value),
+    );
+    setSelectedStudentIds(selectedOptions);
   };
 
   return (
@@ -200,11 +309,35 @@ const ParentProfileTab = ({ profile, onUpdate }) => {
                             Active
                           </span>
                         </div>
+                        <Button
+                          type="button"
+                          variant="danger"
+                          size="sm"
+                          onClick={() =>
+                            handleUnlinkChild(child.id, child.username)
+                          }
+                          disabled={isUnlinking}
+                          className="mt-3 px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white text-sm border-red-500/50 shadow-lg transform transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                        >
+                          {isUnlinking ? (
+                            <>
+                              <i className="fas fa-spinner fa-spin mr-2"></i>
+                              Unlinking...
+                            </>
+                          ) : (
+                            <>
+                              <i className="fas fa-unlink mr-2"></i>
+                              Unlink
+                            </>
+                          )}
+                        </Button>
                       </div>
                     </div>
                   </div>
                 ))}
               </div>
+
+              {/* Link New Children Section */}
 
               <div className="mt-6 p-6 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-2xl backdrop-blur-sm">
                 <div className="flex items-center gap-3">
@@ -220,6 +353,95 @@ const ParentProfileTab = ({ profile, onUpdate }) => {
             </div>
           </div>
         )}
+
+        {/* Link New Children Section - Always show */}
+        <div className="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-800/60 via-slate-900/40 to-slate-800/60 border border-slate-700/50 shadow-2xl backdrop-blur-xl transition-all duration-500 hover:shadow-3xl hover:border-slate-600/50">
+          <div className="absolute inset-0 bg-gradient-to-r from-green-500/5 via-teal-500/5 to-green-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div className="relative p-8">
+            <div className="flex items-center gap-4 mb-8">
+              <div className="w-14 h-14 bg-gradient-to-br from-green-500 via-teal-500 to-green-600 rounded-2xl flex items-center justify-center shadow-lg transform transition-all duration-300 group-hover:scale-110 group-hover:rotate-3">
+                <i className="fas fa-link text-white text-lg"></i>
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-white bg-gradient-to-r from-green-400 to-teal-400 bg-clip-text text-transparent">
+                  Link New Children
+                </h3>
+                <p className="text-sm text-slate-400">
+                  Add new students to this parent account
+                </p>
+              </div>
+            </div>
+
+            {availableStudentsError && (
+              <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl">
+                <p className="text-sm text-red-400">
+                  Failed to load available students: {availableStudentsError}
+                </p>
+              </div>
+            )}
+
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-3">
+                Available Students
+              </label>
+              {availableStudentsLoading ? (
+                <div className="flex items-center gap-3 text-slate-400">
+                  <i className="fas fa-spinner fa-spin"></i>
+                  <span>Loading available students...</span>
+                </div>
+              ) : availableStudents.length === 0 ? (
+                <div className="p-4 bg-slate-800/50 border border-slate-600/30 rounded-xl">
+                  <p className="text-sm text-slate-400">
+                    No available students to link.
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <select
+                    multiple
+                    value={selectedStudentIds}
+                    onChange={handleStudentSelectionChange}
+                    className="w-full bg-slate-900/60 border border-slate-600/50 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-green-500/20 focus:border-green-500/50 transition-all duration-300"
+                    size="4"
+                  >
+                    {availableStudents.map((student) => (
+                      <option key={student.id} value={student.id}>
+                        {student.email}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="mt-2 text-xs text-slate-400">
+                    Hold Ctrl (Windows) or Cmd (Mac) to select multiple
+                    students.
+                  </p>
+                </>
+              )}
+            </div>
+
+            <Button
+              type="button"
+              onClick={handleLinkChildren}
+              disabled={
+                isLinking ||
+                availableStudentsLoading ||
+                selectedStudentIds.length === 0
+              }
+              className="w-full px-6 py-3 bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-500 hover:to-teal-500 text-white border-green-500/50 shadow-lg transform transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+            >
+              {isLinking ? (
+                <>
+                  <i className="fas fa-spinner fa-spin mr-3"></i>
+                  Linking...
+                </>
+              ) : (
+                <>
+                  <i className="fas fa-link mr-3"></i>
+                  Link Selected Children
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
 
         {/* Parent Summary Card */}
         <div className="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-800/60 via-slate-900/40 to-slate-800/60 border border-slate-700/50 shadow-2xl backdrop-blur-xl transition-all duration-500 hover:shadow-3xl hover:border-slate-600/50">

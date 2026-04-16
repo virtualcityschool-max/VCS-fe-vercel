@@ -179,16 +179,32 @@ export const authService = {
 
   // Logout
   logout: async () => {
+    let backendLogoutSuccess = false;
+
     try {
       const refreshToken = localStorage.getItem("vcs_refresh_token");
       if (refreshToken) {
         await axiosInstance.post("/auth/logout/", {
           refresh: refreshToken,
         });
+        backendLogoutSuccess = true;
+      } else {
+        backendLogoutSuccess = true; // No token to invalidate
       }
     } catch (error) {
-      console.error("Logout error:", error);
+      console.error("Backend logout failed:", error);
+      // Continue with local logout even if backend fails
+      backendLogoutSuccess = false;
     }
+
+    // Always clear local storage regardless of backend success
+    try {
+      localStorage.removeItem("vcs_refresh_token");
+    } catch (error) {
+      console.error("Failed to clear refresh token from localStorage:", error);
+    }
+
+    return { backendLogoutSuccess };
   },
 
   // Resend OTP

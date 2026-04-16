@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { adminService } from "../../services/adminService";
+import { parentService } from "../../services/parentService";
 
 // Async thunks
 export const fetchPendingChildLinks = createAsyncThunk(
@@ -11,7 +12,9 @@ export const fetchPendingChildLinks = createAsyncThunk(
     } catch (error) {
       console.error("Failed to fetch pending child links:", error);
       return rejectWithValue(
-        error.error || error.message || "Failed to load pending child link requests",
+        error.error ||
+          error.message ||
+          "Failed to load pending child link requests",
       );
     }
   },
@@ -51,11 +54,79 @@ export const rejectChildLink = createAsyncThunk(
   },
 );
 
+export const unlinkChildLinks = createAsyncThunk(
+  "childLinks/unlinkChildLinks",
+  async (studentIds, { rejectWithValue }) => {
+    try {
+      const result = await parentService.unlinkChildren(studentIds);
+      return { studentIds, result };
+    } catch (error) {
+      console.error("Failed to unlink child links:", error);
+      return rejectWithValue(
+        error.error || error.message || "Failed to unlink child",
+      );
+    }
+  },
+);
+
+export const unlinkChildLinksAdmin = createAsyncThunk(
+  "childLinks/unlinkChildLinksAdmin",
+  async ({ parentId, studentIds }, { rejectWithValue }) => {
+    try {
+      const result = await adminService.unlinkChildrenAdmin(
+        parentId,
+        studentIds,
+      );
+      return { parentId, studentIds, result };
+    } catch (error) {
+      console.error("Failed to unlink child links admin:", error);
+      return rejectWithValue(
+        error.error || error.message || "Failed to unlink child",
+      );
+    }
+  },
+);
+
+export const fetchAvailableStudents = createAsyncThunk(
+  "childLinks/fetchAvailableStudents",
+  async (_, { rejectWithValue }) => {
+    try {
+      const students = await adminService.getAvailableStudents();
+      return students;
+    } catch (error) {
+      console.error("Failed to fetch available students:", error);
+      return rejectWithValue(
+        error.error || error.message || "Failed to fetch available students",
+      );
+    }
+  },
+);
+
+export const linkChildLinksAdmin = createAsyncThunk(
+  "childLinks/linkChildLinksAdmin",
+  async ({ parentId, studentIds }, { rejectWithValue }) => {
+    try {
+      const result = await adminService.linkChildrenAdmin(parentId, studentIds);
+      return { parentId, studentIds, result };
+    } catch (error) {
+      console.error("Failed to link child links admin:", error);
+      return rejectWithValue(
+        error.error || error.message || "Failed to link child",
+      );
+    }
+  },
+);
+
 const initialState = {
   pendingChildLinks: [],
   isLoading: false,
   isProcessing: {}, // Track individual link processing state
+  isUnlinking: false,
   error: null,
+  availableStudents: [],
+  availableStudentsLoading: false,
+  availableStudentsError: null,
+  isLinking: false,
 };
 
 const childLinksSlice = createSlice({
@@ -122,6 +193,59 @@ const childLinksSlice = createSlice({
         const linkId = action.meta.arg;
         delete state.isProcessing[linkId];
         state.error = action.payload;
+      })
+      // Unlink Child Links
+      .addCase(unlinkChildLinks.pending, (state) => {
+        state.isUnlinking = true;
+        state.error = null;
+      })
+      .addCase(unlinkChildLinks.fulfilled, (state) => {
+        state.isUnlinking = false;
+        state.error = null;
+      })
+      .addCase(unlinkChildLinks.rejected, (state, action) => {
+        state.isUnlinking = false;
+        state.error = action.payload;
+      })
+      // Unlink Child Links Admin
+      .addCase(unlinkChildLinksAdmin.pending, (state) => {
+        state.isUnlinking = true;
+        state.error = null;
+      })
+      .addCase(unlinkChildLinksAdmin.fulfilled, (state) => {
+        state.isUnlinking = false;
+        state.error = null;
+      })
+      .addCase(unlinkChildLinksAdmin.rejected, (state, action) => {
+        state.isUnlinking = false;
+        state.error = action.payload;
+      })
+      // Fetch Available Students
+      .addCase(fetchAvailableStudents.pending, (state) => {
+        state.availableStudentsLoading = true;
+        state.availableStudentsError = null;
+      })
+      .addCase(fetchAvailableStudents.fulfilled, (state, action) => {
+        state.availableStudentsLoading = false;
+        state.availableStudents = action.payload;
+        state.availableStudentsError = null;
+      })
+      .addCase(fetchAvailableStudents.rejected, (state, action) => {
+        state.availableStudentsLoading = false;
+        state.availableStudentsError = action.payload;
+      })
+      // Link Child Links Admin
+      .addCase(linkChildLinksAdmin.pending, (state) => {
+        state.isLinking = true;
+        state.error = null;
+      })
+      .addCase(linkChildLinksAdmin.fulfilled, (state) => {
+        state.isLinking = false;
+        state.error = null;
+      })
+      .addCase(linkChildLinksAdmin.rejected, (state, action) => {
+        state.isLinking = false;
+        state.error = action.payload;
       });
   },
 });
@@ -139,5 +263,14 @@ export const selectChildLinksLoading = (state) => state.childLinks.isLoading;
 export const selectChildLinksError = (state) => state.childLinks.error;
 export const selectChildLinkProcessingState = (state, linkId) =>
   state.childLinks.isProcessing[linkId];
+export const selectChildLinksUnlinking = (state) =>
+  state.childLinks.isUnlinking;
+export const selectAvailableStudents = (state) =>
+  state.childLinks.availableStudents;
+export const selectAvailableStudentsLoading = (state) =>
+  state.childLinks.availableStudentsLoading;
+export const selectAvailableStudentsError = (state) =>
+  state.childLinks.availableStudentsError;
+export const selectChildLinksLinking = (state) => state.childLinks.isLinking;
 
 export default childLinksSlice.reducer;

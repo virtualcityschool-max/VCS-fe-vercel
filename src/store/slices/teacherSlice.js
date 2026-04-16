@@ -224,6 +224,36 @@ export const joinLiveSession = createAsyncThunk(
   },
 );
 
+export const startLiveSession = createAsyncThunk(
+  "teachers/startLiveSession",
+  async (sessionId, { rejectWithValue }) => {
+    try {
+      return await teacherService.startSession(sessionId);
+    } catch (error) {
+      return rejectWithValue(
+        error?.response?.data?.error ||
+          error?.message ||
+          "Failed to start session",
+      );
+    }
+  },
+);
+
+export const endLiveSession = createAsyncThunk(
+  "teachers/endLiveSession",
+  async (sessionId, { rejectWithValue }) => {
+    try {
+      return await teacherService.endSession(sessionId);
+    } catch (error) {
+      return rejectWithValue(
+        error?.response?.data?.error ||
+          error?.message ||
+          "Failed to end session",
+      );
+    }
+  },
+);
+
 const initialState = {
   teachers: [],
   teacherDetails: null,
@@ -474,6 +504,50 @@ const teacherSlice = createSlice({
         state.isJoiningSession = false;
       })
       .addCase(joinLiveSession.rejected, (state, action) => {
+        state.isJoiningSession = false;
+        state.joiningSessionError = action.payload;
+      })
+
+      // START LIVE SESSION
+      .addCase(startLiveSession.pending, (state) => {
+        state.isJoiningSession = true;
+        state.joiningSessionError = null;
+      })
+      .addCase(startLiveSession.fulfilled, (state, action) => {
+        state.isJoiningSession = false;
+
+        if (state.dashboard?.todays_schedule) {
+          const session = state.dashboard.todays_schedule.find(
+            (s) => s.id === action.meta.arg,
+          );
+          if (session) {
+            session.status = "live";
+          }
+        }
+      })
+      .addCase(startLiveSession.rejected, (state, action) => {
+        state.isJoiningSession = false;
+        state.joiningSessionError = action.payload;
+      })
+
+      // END LIVE SESSION
+      .addCase(endLiveSession.pending, (state) => {
+        state.isJoiningSession = true;
+        state.joiningSessionError = null;
+      })
+      .addCase(endLiveSession.fulfilled, (state, action) => {
+        state.isJoiningSession = false;
+        // Update session status to 'ended' in dashboard after successful end
+        if (state.dashboard?.todays_schedule) {
+          const session = state.dashboard.todays_schedule.find(
+            (s) => s.id === action.meta.arg,
+          );
+          if (session) {
+            session.status = "ended";
+          }
+        }
+      })
+      .addCase(endLiveSession.rejected, (state, action) => {
         state.isJoiningSession = false;
         state.joiningSessionError = action.payload;
       });

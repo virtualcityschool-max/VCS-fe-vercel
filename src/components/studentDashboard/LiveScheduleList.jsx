@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import {
   selectLiveSchedule,
   joinLiveSession,
+  fetchStudentDashboard,
 } from "../../store/slices/studentDashboardSlice";
 import { toastManager } from "../../utils/toastManager";
 
@@ -14,7 +15,7 @@ const LiveScheduleList = () => {
   );
 
   const handleJoinSession = async (session) => {
-    const sessionId = session?.id || session?.session_id;
+    const sessionId = session?.id ?? session?.session_id;
     if (!sessionId) {
       toastManager.error("Session information is unavailable");
       return;
@@ -60,11 +61,18 @@ const LiveScheduleList = () => {
     });
   };
 
-  const getStatusBadge = (status, canJoin) => {
+  const getStatusBadge = (status, canJoin, scheduledAt) => {
     if (status === "live") {
       return (
         <span className="bg-red-600/20 text-red-400 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest animate-pulse">
           Live Now
+        </span>
+      );
+    }
+    if (status === "ended") {
+      return (
+        <span className="bg-slate-700 text-slate-400 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">
+          Ended
         </span>
       );
     }
@@ -75,6 +83,7 @@ const LiveScheduleList = () => {
         </span>
       );
     }
+
     return (
       <span className="bg-slate-700 text-slate-400 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">
         Scheduled
@@ -146,7 +155,11 @@ const LiveScheduleList = () => {
                 <h4 className="text-xl font-bold group-hover:text-blue-400 transition truncate">
                   {session.course_title}
                 </h4>
-                {getStatusBadge(session.status, session.can_join)}
+                {getStatusBadge(
+                  session.status,
+                  session.can_join,
+                  session.scheduled_at,
+                )}
               </div>
               <p className="text-slate-500 text-sm mb-4">
                 Instructor: {session.instructor_name}
@@ -202,10 +215,18 @@ const LiveScheduleList = () => {
             {/* Action Button */}
             <div className="flex-shrink-0">
               {(() => {
-                const canJoinNow =
-                  session?.can_join ||
-                  session?.status === "live" ||
-                  session?.status === "ongoing";
+                // Check backend status first - respect ended status
+                if (session?.status === "ended") {
+                  return (
+                    <button className="w-full md:w-auto border border-slate-600 text-slate-500 cursor-not-allowed px-8 py-4 rounded-2xl font-bold text-sm transition active:scale-95">
+                      <i className="fas fa-info-circle mr-2"></i>
+                      Session Ended
+                    </button>
+                  );
+                }
+
+                let canJoinNow =
+                  session?.can_join === true || session?.status === "live";
 
                 return canJoinNow ? (
                   <button

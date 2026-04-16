@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import {
   selectNextSession,
   joinLiveSession,
+  fetchStudentDashboard,
 } from "../../store/slices/studentDashboardSlice";
 import { toastManager } from "../../utils/toastManager";
 
@@ -14,18 +15,14 @@ const NextSessionCard = () => {
   );
 
   const handleJoinSession = async () => {
-    const sessionId = nextSession?.id || nextSession?.session_id;
+    const sessionId = nextSession?.id ?? nextSession?.session_id;
     if (!sessionId) {
       toastManager.error("Session information is unavailable");
       return;
     }
 
     const canJoinNow =
-      nextSession?.can_join ||
-      nextSession?.status === "live" ||
-      nextSession?.status === "ongoing" ||
-      (typeof nextSession?.starts_in_mins === "number" &&
-        nextSession.starts_in_mins <= 15);
+      nextSession?.can_join === true || nextSession?.status === "live";
 
     if (!canJoinNow) {
       toastManager.error("Session is not available to join at this time");
@@ -68,11 +65,7 @@ const NextSessionCard = () => {
   };
 
   const canJoinNow =
-    nextSession?.can_join ||
-    nextSession?.status === "live" ||
-    nextSession?.status === "ongoing" ||
-    (typeof nextSession?.starts_in_mins === "number" &&
-      nextSession.starts_in_mins <= 15);
+    nextSession?.can_join === true || nextSession?.status === "live";
 
   if (!nextSession) {
     return (
@@ -126,7 +119,7 @@ const NextSessionCard = () => {
             Joining...
           </>
         ) : !canJoinNow ? (
-          "Starting Soon"
+          "Session Not Live"
         ) : (
           "Join Now"
         )}

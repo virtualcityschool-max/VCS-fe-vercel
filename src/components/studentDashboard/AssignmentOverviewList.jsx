@@ -85,7 +85,12 @@ const AssignmentOverviewList = () => {
         <h3 className="text-xs font-black uppercase tracking-widest text-slate-500">
           Assignments
         </h3>
-        <i className="fas fa-tasks text-slate-600 text-xs"></i>
+        <button
+          onClick={() => navigate("/student/assignments")}
+          className="flex items-center"
+        >
+          <i className="fas fa-tasks text-slate-600 text-xs"></i>
+        </button>
       </div>
 
       {/* Status Overview */}
@@ -108,13 +113,13 @@ const AssignmentOverviewList = () => {
 
       {/* Assignment List */}
       <div className="space-y-6">
-        {assignments.slice(0, 6).map((assignment) => {
+        {assignments.slice(0, 3).map((assignment) => {
           const config = getStatusConfig(assignment.status);
 
           return (
             <div
               key={assignment.id}
-              onClick={() => navigate("/student/assignments")}
+              onClick={() => navigate(`/student/assignments/${assignment.id}`)}
               className="cursor-pointer flex flex-col gap-1.5 border-b border-slate-700/30 pb-4 last:border-0 last:pb-0 hover:bg-slate-700/20 rounded-xl p-2 transition"
             >
               <div className="flex justify-between items-start">
@@ -137,7 +142,7 @@ const AssignmentOverviewList = () => {
                   className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold"
                   onClick={(e) => {
                     e.stopPropagation(); // prevent double navigation
-                    navigate("/student/assignments");
+                    navigate(`/student/assignments/${assignment.id}`);
                   }}
                 >
                   View →
@@ -148,14 +153,14 @@ const AssignmentOverviewList = () => {
         })}
       </div>
 
-      {/* View All Button */}
-      {assignments.length > 6 && (
+      {/* See All Button */}
+      {assignments.length > 3 && (
         <button
           type="button"
           onClick={() => navigate("/student/assignments")}
           className="w-full mt-8 py-3 bg-slate-900 border border-slate-700 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition active:scale-95"
         >
-          View All {assignments.length} Assignments
+          See All {assignments.length} Assignments
         </button>
       )}
     </div>

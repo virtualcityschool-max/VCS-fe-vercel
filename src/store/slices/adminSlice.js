@@ -77,6 +77,13 @@ const initialState = {
     loading: false,
     error: null,
   },
+
+  // Available Students for Parent linking
+  availableStudents: {
+    data: [],
+    loading: false,
+    error: null,
+  },
 };
 
 // User Management Thunks
@@ -387,6 +394,19 @@ export const deleteSession = createAsyncThunk(
   },
 );
 
+// Available Students Thunk
+export const fetchAvailableStudents = createAsyncThunk(
+  "admin/fetchAvailableStudents",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await adminService.getAvailableStudents();
+      return response;
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  },
+);
+
 // Slice
 const adminSlice = createSlice({
   name: "admin",
@@ -417,6 +437,9 @@ const adminSlice = createSlice({
     clearSessionsError: (state) => {
       state.sessions.error = null;
     },
+    clearAvailableStudentsError: (state) => {
+      state.availableStudents.error = null;
+    },
 
     // Clear all errors
     clearAllErrors: (state) => {
@@ -428,6 +451,7 @@ const adminSlice = createSlice({
       state.reports.error = null;
       state.enrollments.error = null;
       state.sessions.error = null;
+      state.availableStudents.error = null;
     },
 
     // Reset specific state
@@ -720,6 +744,21 @@ const adminSlice = createSlice({
           (session) => session.id !== action.payload,
         );
       });
+
+    // Available Students
+    builder
+      .addCase(fetchAvailableStudents.pending, (state) => {
+        state.availableStudents.loading = true;
+        state.availableStudents.error = null;
+      })
+      .addCase(fetchAvailableStudents.fulfilled, (state, action) => {
+        state.availableStudents.loading = false;
+        state.availableStudents.data = action.payload;
+      })
+      .addCase(fetchAvailableStudents.rejected, (state, action) => {
+        state.availableStudents.loading = false;
+        state.availableStudents.error = action.payload;
+      });
   },
 });
 
@@ -733,6 +772,7 @@ export const {
   clearReportsError,
   clearEnrollmentsError,
   clearSessionsError,
+  clearAvailableStudentsError,
   clearAllErrors,
   resetUsers,
   resetCourses,
@@ -748,6 +788,7 @@ export const selectSystemStatus = (state) => state.admin.systemStatus;
 export const selectReports = (state) => state.admin.reports;
 export const selectEnrollments = (state) => state.admin.enrollments;
 export const selectSessions = (state) => state.admin.sessions;
+export const selectAvailableStudents = (state) => state.admin.availableStudents;
 
 // Convenience selectors
 export const selectUsersLoading = (state) => state.admin.users.loading;
@@ -760,5 +801,7 @@ export const selectReportsLoading = (state) => state.admin.reports.loading;
 export const selectEnrollmentsLoading = (state) =>
   state.admin.enrollments.loading;
 export const selectSessionsLoading = (state) => state.admin.sessions.loading;
+export const selectAvailableStudentsLoading = (state) =>
+  state.admin.availableStudents.loading;
 
 export default adminSlice.reducer;

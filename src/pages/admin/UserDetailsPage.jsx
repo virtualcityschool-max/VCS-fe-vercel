@@ -1,4 +1,4 @@
-import React, { useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { adminService } from "../../services/adminService";
 import { toastManager } from "../../utils/toastManager";
@@ -233,7 +233,7 @@ const UserDetailsPage = () => {
 
             {activeTab === "profile" && userData?.role === "parent" && (
               <ParentProfileTab
-                profile={userProfile}
+                profile={{ ...userProfile, id }}
                 onUpdate={handleProfileUpdate}
               />
             )}

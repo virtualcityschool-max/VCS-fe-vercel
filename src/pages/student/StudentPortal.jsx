@@ -37,6 +37,17 @@ const StudentPortal = () => {
     }
   }, [dispatch, hasMounted]);
 
+  //Polling
+  useEffect(() => {
+    if (!hasMounted) return;
+
+    const interval = setInterval(() => {
+      dispatch(fetchStudentDashboard());
+    }, 30000); // every 30 seconds
+
+    return () => clearInterval(interval);
+  }, [dispatch, hasMounted]);
+
   // Handle retry on error
   const handleRetry = useCallback(() => {
     console.log("🔄 Student Portal: Retrying dashboard fetch...");

@@ -148,18 +148,39 @@ export const loginUser = createAsyncThunk(
   },
 );
 
-export const logoutUser = createAsyncThunk("auth/logoutUser", async () => {
-  try {
-    await authService.logout();
-  } catch (error) {
-    console.warn("Backend logout failed:", error);
-  }
+export const logoutUser = createAsyncThunk(
+  "auth/logoutUser",
+  async (_, { dispatch }) => {
+    let backendLogoutSuccess = false;
 
-  authStorage.clearAuthStorage();
-  localStorage.removeItem("vcs_refresh_token");
+    try {
+      const result = await authService.logout();
+      backendLogoutSuccess = result.backendLogoutSuccess;
+    } catch (error) {
+      console.warn("Backend logout failed:", error);
+      backendLogoutSuccess = false;
+    }
 
-  return { success: true };
-});
+    // Always clear local storage regardless of backend success
+    try {
+      authStorage.clearAuthStorage();
+      localStorage.removeItem("vcs_refresh_token");
+    } catch (error) {
+      console.error("Failed to clear local storage during logout:", error);
+    }
+
+    // Always dispatch synchronous logout action to clear Redux state
+    dispatch(logout());
+
+    return {
+      success: true,
+      backendLogoutSuccess,
+      message: backendLogoutSuccess
+        ? "Logged out successfully"
+        : "Logged out locally (backend unavailable)",
+    };
+  },
+);
 
 export const registerUser = createAsyncThunk(
   "auth/registerUser",
