@@ -13,7 +13,7 @@ import { initializeAuth, logoutUser } from "./store/slices/authSlice";
 import { toastManager } from "./utils/toastManager";
 
 // Components
-import { SimulatorBar, AIChat, AuthModals, Navbar } from "./components";
+import { AIChat, AuthModals, Navbar } from "./components";
 
 // Pages
 import {
@@ -255,7 +255,6 @@ const App = () => {
         <section className="relative z-50">
           <AuthModals />
           {/* <AIChat /> */}
-          {isLoggedIn && <SimulatorBar />}
           <ToastContainer
             position="top-right"
             autoClose={4000}

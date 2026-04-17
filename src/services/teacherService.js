@@ -38,8 +38,20 @@ const getMyCourses = async () => {
   return response.data;
 };
 
-const getAssignments = async () => {
-  const response = await axiosInstance.get("/assignments/");
+const getAssignments = async (params = {}) => {
+  const query = {};
+
+  if (params.course) {
+    query.course = params.course;
+  }
+
+  if (params.status) {
+    query.status = params.status;
+  }
+
+  const response = await axiosInstance.get("/assignments/", {
+    params: query,
+  });
   return response.data;
 };
 

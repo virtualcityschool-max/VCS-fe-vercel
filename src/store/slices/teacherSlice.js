@@ -72,9 +72,9 @@ export const fetchMyCourses = createAsyncThunk(
 
 export const fetchAssignments = createAsyncThunk(
   "teachers/fetchAssignments",
-  async (_, { rejectWithValue }) => {
+  async (params = {}, { rejectWithValue }) => {
     try {
-      const data = await teacherService.getAssignments();
+      const data = await teacherService.getAssignments(params);
       return data;
     } catch (error) {
       return rejectWithValue(

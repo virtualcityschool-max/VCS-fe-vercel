@@ -161,8 +161,8 @@ const TeacherPortal = () => {
 
   return (
     <div id="teacher-view" className="text-white space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2 bg-linear-to-br from-indigo-600 to-indigo-700 px-6 py-5 rounded-2xl shadow-xl relative overflow-hidden border border-indigo-400/20">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
+        <div className="lg:col-span-7 bg-linear-to-br from-indigo-600 to-indigo-700 px-6 py-5 rounded-2xl shadow-xl relative overflow-hidden border border-indigo-400/20">
           <div className="relative z-10">
             <h2 className="text-xl sm:text-2xl font-black font-poppins mb-1 text-white">
               Welcome, {dashboard?.teacher?.username || "Instructor"}!
@@ -174,7 +174,7 @@ const TeacherPortal = () => {
           <i className="fas fa-sparkles absolute top-4 right-5 text-5xl text-white/10"></i>
         </div>
 
-        <div className="bg-slate-900 border border-slate-800 px-6 py-5 rounded-2xl flex flex-col justify-center text-center">
+        <div className="lg:col-span-3 bg-slate-900 border border-slate-800 px-6 py-5 rounded-2xl flex flex-col justify-center text-center">
           <p className="text-[10px] font-black uppercase text-slate-500 tracking-[0.3em] mb-4">
             Total Students
           </p>
@@ -182,17 +182,16 @@ const TeacherPortal = () => {
             {dashboard?.total_students || 0}
           </h3>
         </div>
-      </div>
-
-      <div className="flex justify-end -mt-1">
-        <button
-          type="button"
-          onClick={() => setIsAnnouncementModalOpen(true)}
-          className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg font-semibold text-sm transition flex items-center gap-2"
-        >
-          <i className="fas fa-bullhorn"></i>
-          <span>Post Announcement</span>
-        </button>
+        <div className="lg:col-span-2 flex items-center lg:justify-end">
+          <button
+            type="button"
+            onClick={() => setIsAnnouncementModalOpen(true)}
+            className="w-full lg:w-auto self-center bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg font-semibold text-sm transition flex items-center justify-center gap-2"
+          >
+            <i className="fas fa-bullhorn"></i>
+            <span>Post Announcement</span>
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-10 gap-4">

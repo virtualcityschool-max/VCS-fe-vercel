@@ -31,7 +31,7 @@ const TeacherClasses = () => {
   return (
     <div className="text-white">
       <div className="mb-10">
-        <h1 className="text-3xl font-black font-poppins mb-2">My Classes</h1>
+        <h1 className="text-3xl font-black font-poppins mb-2">My Courses</h1>
         <p className="text-slate-400 text-sm">
           Manage and review the courses you are currently teaching.
         </p>
