@@ -149,7 +149,7 @@ const UserAccountTab = ({ user, onUpdate }) => {
             Identity
           </h3>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-2">
                 Username
@@ -215,15 +215,9 @@ const UserAccountTab = ({ user, onUpdate }) => {
           </h3>
 
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <label className="text-sm font-medium text-white">
-                  Active Account
-                </label>
-                <p className="text-xs text-slate-400 mt-1">
-                  User can log in and access the system
-                </p>
-              </div>
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-medium text-white">Activate Account</p>
+
               <button
                 type="button"
                 onClick={() =>

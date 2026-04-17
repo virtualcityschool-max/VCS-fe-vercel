@@ -127,146 +127,109 @@ const CoursesTab = ({
     <div className="space-y-6">
       {/* Course Management Header */}
       <div className="mb-8">
-        <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6 shadow-2xl backdrop-blur-sm animate-fadeIn">
-          <div className="flex flex-col lg:flex-row lg:justify-end lg:items-start gap-6">
-            <div className="flex flex-col sm:flex-row gap-3 lg:gap-4">
-              <button
-                onClick={() => setShowCourseFilters(!showCourseFilters)}
-                className="bg-slate-700 hover:bg-slate-600 text-white px-6 py-3 rounded-xl text-sm font-medium shadow-lg active:scale-95 transition-all duration-200 flex items-center justify-center gap-2"
+        <div className="flex justify-end items-center mb-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 lg:gap-4 w-full lg:w-auto max-w-2xl lg:max-w-none">
+            <div className="relative flex-1 lg:flex-initial">
+              <Input
+                type="text"
+                placeholder="Search courses..."
+                value={courseFilters.search}
+                onChange={(e) =>
+                  setCourseFilters({
+                    ...courseFilters,
+                    search: e.target.value,
+                  })
+                }
+                className="pl-10 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full lg:w-64"
+              />
+              <i className="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+              <select
+                value={courseFilters.category}
+                onChange={(e) =>
+                  setCourseFilters({
+                    ...courseFilters,
+                    category: e.target.value,
+                  })
+                }
+                className="px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
               >
-                <i
-                  className={`fas ${showCourseFilters ? "fa-times" : "fa-filter"} text-sm`}
-                ></i>
-                <span>{showCourseFilters ? "Hide Filters" : "Filters"}</span>
-              </button>
+                <option value="">All Categories</option>
+                {BACKEND_CATEGORIES.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {formatCategoryLabel(cat)}
+                  </option>
+                ))}
+              </select>
+              <select
+                value={courseFilters.priceRange}
+                onChange={(e) =>
+                  setCourseFilters({
+                    ...courseFilters,
+                    priceRange: e.target.value,
+                  })
+                }
+                className="px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+                <option value="">All Prices</option>
+                <option value="0-50">PKR 0 - 50</option>
+                <option value="51-100">PKR 51 - 100</option>
+                <option value="101-500">PKR 101 - 500</option>
+                <option value="501-1000">PKR 501 - 1000</option>
+                <option value="1000+">PKR 1000+</option>
+              </select>
+              <select
+                value={courseFilters.status}
+                onChange={(e) =>
+                  setCourseFilters({
+                    ...courseFilters,
+                    status: e.target.value,
+                  })
+                }
+                className="px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+                <option value="">All Status</option>
+                <option value="published">Published</option>
+                <option value="draft">Draft</option>
+              </select>
+              <select
+                value={courseFilters.instructor}
+                onChange={(e) =>
+                  setCourseFilters({
+                    ...courseFilters,
+                    instructor: e.target.value,
+                  })
+                }
+                className="px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+                <option value="">All Instructors</option>
+                {users?.map((user) => (
+                  <option key={user.id} value={user.id}>
+                    {user.username}
+                  </option>
+                ))}
+              </select>
+              {hasActiveCourseFilters && (
+                <button
+                  onClick={resetCourseFilters}
+                  className="bg-orange-600 hover:bg-orange-500 text-white px-3 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2"
+                  title="Clear all filters"
+                >
+                  <i className="fas fa-times"></i>
+                  <span className="hidden sm:inline">Clear</span>
+                </button>
+              )}
               <button
                 onClick={() => setActiveModal("create-course")}
-                className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-xl text-sm font-medium shadow-lg active:scale-95 transition-all duration-200 flex items-center justify-center gap-2"
+                className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-lg active:scale-95 transition items-center justify-center gap-2"
               >
                 <i className="fas fa-plus text-sm"></i>
-                <span>Create Course</span>
+                <span className="hidden sm:inline ml-2">Create Course</span>
+                <span className="sm:hidden">+</span>
               </button>
             </div>
           </div>
-
-          {/* Course Filters */}
-          {showCourseFilters && (
-            <div className="mt-6 p-6 bg-slate-800/50 border border-slate-700 rounded-2xl shadow-xl">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-2">
-                    Search
-                  </label>
-                  <Input
-                    type="text"
-                    placeholder="Search courses..."
-                    value={courseFilters.search}
-                    onChange={(e) =>
-                      setCourseFilters({
-                        ...courseFilters,
-                        search: e.target.value,
-                      })
-                    }
-                    className="w-full"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-2">
-                    Category
-                  </label>
-                  <select
-                    value={courseFilters.category}
-                    onChange={(e) =>
-                      setCourseFilters({
-                        ...courseFilters,
-                        category: e.target.value,
-                      })
-                    }
-                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  >
-                    <option value="">All Categories</option>
-                    {BACKEND_CATEGORIES.map((cat) => (
-                      <option key={cat} value={cat}>
-                        {formatCategoryLabel(cat)}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-2">
-                    Price Range
-                  </label>
-                  <select
-                    value={courseFilters.priceRange}
-                    onChange={(e) =>
-                      setCourseFilters({
-                        ...courseFilters,
-                        priceRange: e.target.value,
-                      })
-                    }
-                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  >
-                    <option value="">All Prices</option>
-                    <option value="0-50">PKR 0 - 50</option>
-                    <option value="51-100">PKR 51 - 100</option>
-                    <option value="101-500">PKR 101 - 500</option>
-                    <option value="501-1000">PKR 501 - 1000</option>
-                    <option value="1000+">PKR 1000+</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-2">
-                    Status
-                  </label>
-                  <select
-                    value={courseFilters.status}
-                    onChange={(e) =>
-                      setCourseFilters({
-                        ...courseFilters,
-                        status: e.target.value,
-                      })
-                    }
-                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  >
-                    <option value="">All Status</option>
-                    <option value="published">Published</option>
-                    <option value="draft">Draft</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-2">
-                    Instructor
-                  </label>
-                  <select
-                    value={courseFilters.instructor}
-                    onChange={(e) =>
-                      setCourseFilters({
-                        ...courseFilters,
-                        instructor: e.target.value,
-                      })
-                    }
-                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  >
-                    <option value="">All Instructors</option>
-                    {users?.map((user) => (
-                      <option key={user.id} value={user.id}>
-                        {user.username}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="lg:pt-5.5">
-                  <button
-                    onClick={resetCourseFilters}
-                    className="bg-slate-700/50 hover:bg-slate-600/50 text-slate-300 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-2 border border-slate-600/50 hover:border-slate-500/50"
-                  >
-                    <i className="fas fa-times text-sm"></i>
-                    Clear Filters
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </div>
 

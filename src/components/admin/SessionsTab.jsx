@@ -142,59 +142,44 @@ const SessionsTab = ({
     <div className="space-y-6">
       {/* Session Management Header */}
       <div className="mb-8">
-        <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6 shadow-2xl backdrop-blur-sm animate-fadeIn">
-          <div className="flex flex-col lg:flex-row lg:justify-end lg:items-start gap-6">
-            <div className="flex flex-col sm:flex-row gap-3 lg:gap-4">
-              <button
-                onClick={() => setShowSessionFilters(!showSessionFilters)}
-                className="bg-slate-700 hover:bg-slate-600 text-white px-6 py-3 rounded-xl text-sm font-medium shadow-lg active:scale-95 transition-all duration-200 flex items-center justify-center gap-2"
-              >
-                <i
-                  className={`fas ${showSessionFilters ? "fa-times" : "fa-filter"} text-sm`}
-                ></i>
-                <span>{showSessionFilters ? "Hide Filters" : "Filters"}</span>
-              </button>
+        <div className="flex justify-end items-center mb-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 lg:gap-4 w-full lg:w-auto max-w-2xl lg:max-w-none">
+            <div className="relative flex-1 lg:flex-initial">
+              <Input
+                type="text"
+                placeholder="Search sessions..."
+                value={sessionFilters.search}
+                onChange={(e) =>
+                  setSessionFilters({
+                    ...sessionFilters,
+                    search: e.target.value,
+                  })
+                }
+                className="pl-10 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full lg:w-64"
+              />
+              <i className="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+              {hasActiveSessionFilters && (
+                <button
+                  onClick={resetSessionFilters}
+                  className="bg-orange-600 hover:bg-orange-500 text-white px-3 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2"
+                  title="Clear all filters"
+                >
+                  <i className="fas fa-times"></i>
+                  <span className="hidden sm:inline">Clear</span>
+                </button>
+              )}
               <button
                 onClick={() => setActiveModal("create-session")}
-                className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-xl text-sm font-medium shadow-lg active:scale-95 transition-all duration-200 flex items-center justify-center gap-2"
+                className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-lg active:scale-95 transition items-center justify-center gap-2"
               >
                 <i className="fas fa-plus text-sm"></i>
-                <span>Create Session</span>
+                <span className="hidden sm:inline ml-2">Create Session</span>
+                <span className="sm:hidden">+</span>
               </button>
             </div>
           </div>
-
-          {/* Session Filters */}
-          {showSessionFilters && (
-            <div className="mt-6 p-6 bg-slate-800/50 border border-slate-700 rounded-2xl shadow-xl">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-2">
-                    Search
-                  </label>
-                  <Input
-                    type="text"
-                    placeholder="Search sessions..."
-                    value={sessionFilters.search}
-                    onChange={(e) =>
-                      setSessionFilters({
-                        ...sessionFilters,
-                        search: e.target.value,
-                      })
-                    }
-                    className="w-full"
-                  />
-                </div>
-                <button
-                  onClick={resetSessionFilters}
-                  className="bg-slate-700/50 hover:bg-slate-600/50 text-slate-300 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-2 border border-slate-600/50 hover:border-slate-500/50"
-                >
-                  <i className="fas fa-times text-sm"></i>
-                  Clear Filters
-                </button>
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
