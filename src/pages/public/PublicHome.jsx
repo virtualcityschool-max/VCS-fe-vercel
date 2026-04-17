@@ -54,12 +54,12 @@ const PublicHome = () => {
       </div>
 
       {/* Hero Section */}
-      <section className="relative z-10 max-w-7xl mx-auto px-6 pt-10 text-center">
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-xs font-black uppercase tracking-widest text-indigo-400 mb-8 animate-fadeIn">
+      <section className="relative z-10 max-w-7xl mx-auto px-6 pt-6 md:pt-8 text-center">
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-xs font-black uppercase tracking-widest text-indigo-400 mb-5 md:mb-6 animate-fadeIn">
           <i className="fas fa-sparkles"></i>
           Next-Gen Learning Experience
         </div>
-        <h1 className="text-3xl sm:text-5xl font-black font-poppins mb-8 leading-[1.1] tracking-tight">
+        <h1 className="text-3xl sm:text-5xl font-black font-poppins mb-6 leading-[1.1] tracking-tight">
           Master Any Subject, <br className="hidden sm:block" />
           <span className="bg-clip-text text-transparent bg-linear-to-r from-indigo-400 via-blue-400 to-teal-400">
             From Anywhere.
@@ -96,17 +96,17 @@ const PublicHome = () => {
           </form>
         </div> */}
 
-        <div className="flex flex-col sm:flex-row gap-6 justify-center">
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <button
             onClick={() => navigate("/courses")}
-            className="group flex items-center justify-center gap-3 bg-white text-slate-950 px-6 sm:px-10 py-4 sm:py-5 rounded-4xl font-black text-[10px] sm:text-xs uppercase tracking-widest transition-all hover:scale-105 shadow-2xl shadow-white/5"
+            className="group flex items-center justify-center gap-3 bg-white text-slate-950 px-6 sm:px-9 py-3.5 sm:py-4 rounded-4xl font-black text-[10px] sm:text-xs uppercase tracking-widest transition-all hover:scale-105 shadow-2xl shadow-white/5"
           >
             Explore Course Catalog
             <i className="fas fa-arrow-right group-hover:translate-x-1 transition"></i>
           </button>
           <button
             onClick={() => navigate("/teachers")}
-            className="group flex items-center justify-center gap-3 border border-white/10 hover:border-white/20 bg-white/5 hover:bg-white/10 text-white px-6 sm:px-10 py-4 sm:py-5 rounded-4xl font-black text-[10px] sm:text-xs uppercase tracking-widest transition-all hover:scale-105"
+            className="group flex items-center justify-center gap-3 border border-white/10 hover:border-white/20 bg-white/5 hover:bg-white/10 text-white px-6 sm:px-9 py-3.5 sm:py-4 rounded-4xl font-black text-[10px] sm:text-xs uppercase tracking-widest transition-all hover:scale-105"
           >
             Find a Private Tutor
             <i className="fas fa-user-graduate group-hover:rotate-12 transition"></i>
@@ -114,18 +114,18 @@ const PublicHome = () => {
         </div>
       </section>
 
-      <section className="relative z-10 max-w-7xl mx-auto px-6 py-16">
+      <section className="relative z-10 max-w-7xl mx-auto px-6 py-10 md:py-12">
         {/* Enrolled Courses Section - Only for logged-in students */}
         {auth.isLoggedIn &&
           auth.role === "student" &&
           enrolledCourses.length > 0 && (
-            <div className="mb-20">
-              <div className="flex justify-between items-end mb-16">
+            <div className="mb-12">
+              <div className="flex justify-between items-end mb-8">
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-[0.4em] text-green-500 mb-4">
+                  <p className="text-[10px] font-black uppercase tracking-[0.4em] text-green-500 mb-2">
                     My Courses
                   </p>
-                  <h2 className="text-4xl font-black font-poppins">
+                  <h2 className="text-2xl md:text-3xl font-black font-poppins">
                     Your Enrolled Courses
                   </h2>
                 </div>
@@ -137,14 +137,14 @@ const PublicHome = () => {
                 </button>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {enrolledCourses.slice(0, 3).map((course, i) => (
                   <div
                     key={course.id}
                     onClick={() => navigate("/courses")}
                     className="bg-slate-900/50 border border-green-500/20 rounded-[2.5rem] overflow-hidden group cursor-pointer hover:border-green-500/40 transition-all shadow-xl flex flex-col"
                   >
-                    <div className="h-56 relative overflow-hidden">
+                    <div className="h-44 relative overflow-hidden">
                       <img
                         src={getCourseImage(course, i)}
                         className="w-full h-full object-cover group-hover:scale-110 transition duration-700 opacity-60 group-hover:opacity-100"
@@ -154,8 +154,8 @@ const PublicHome = () => {
                         ✓ Enrolled
                       </div>
                     </div>
-                    <div className="p-8">
-                      <h4 className="text-xl font-bold font-poppins mb-2 group-hover:text-green-400 transition">
+                    <div className="p-6">
+                      <h4 className="text-lg font-bold font-poppins mb-2 group-hover:text-green-400 transition">
                         {course.title}
                       </h4>
                       <p className="text-slate-500 text-sm font-medium">
@@ -163,7 +163,7 @@ const PublicHome = () => {
                           course.teacher?.first_name ||
                           "Teacher"}
                       </p>
-                      <div className="mt-8 flex justify-between items-center border-t border-white/5 pt-6">
+                      <div className="mt-5 flex justify-between items-center border-t border-white/5 pt-4">
                         <span className="text-green-400 font-black">
                           PKR {course.price || "0.00"}
                         </span>
@@ -183,9 +183,9 @@ const PublicHome = () => {
           )}
 
         {/* Available Courses Section */}
-        <div className="flex justify-between items-end mb-8">
+        <div className="flex justify-between items-end mb-6">
           <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-indigo-500 mb-4">
+            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-indigo-500 mb-2">
               Discovery
             </p>
             <h2 className="text-2xl md:text-4xl font-black font-poppins">
@@ -196,20 +196,20 @@ const PublicHome = () => {
           </div>
           <button
             onClick={() => navigate("/courses")}
-            className="text-indigo-400 font-black text-[10px] uppercase tracking-widest hover:text-white transition flex items-center gap-3"
+            className="hidden md:flex text-indigo-400 font-black text-[10px] uppercase tracking-widest hover:text-white transition items-center gap-3"
           >
             View all Courses <i className="fas fa-chevron-right"></i>
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-          {availableCourses.slice(0, 6).map((course, i) => (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {availableCourses.slice(0, 4).map((course, i) => (
             <div
               key={course.id}
               onClick={() => navigate("/courses")}
               className="bg-slate-900/50 border border-white/10 rounded-[2.5rem] overflow-hidden group cursor-pointer hover:border-indigo-500/50 transition-all shadow-xl flex flex-col"
             >
-              <div className="h-56 relative overflow-hidden">
+              <div className="h-40 md:h-44 relative overflow-hidden">
                 <img
                   src={getCourseImage(course, i)}
                   className="w-full h-full object-cover group-hover:scale-110 transition duration-700 opacity-60 group-hover:opacity-100"
@@ -219,8 +219,8 @@ const PublicHome = () => {
                   {course.category}
                 </div>
               </div>
-              <div className="p-8">
-                <h4 className="text-xl font-bold font-poppins mb-2 group-hover:text-indigo-400 transition">
+              <div className="p-5">
+                <h4 className="text-lg font-bold font-poppins mb-2 group-hover:text-indigo-400 transition">
                   {course.title}
                 </h4>
                 <p className="text-slate-500 text-sm font-medium">
@@ -228,7 +228,7 @@ const PublicHome = () => {
                     course.instructor?.first_name ||
                     "Instructor"}
                 </p>
-                <div className="mt-8 flex justify-between items-center border-t border-white/5 pt-6">
+                <div className="mt-4 flex justify-between items-center border-t border-white/5 pt-4">
                   <span className="text-indigo-400 font-black">
                     PKR {course.price || "19.99"}
                   </span>
@@ -244,10 +244,11 @@ const PublicHome = () => {
             </div>
           ))}
         </div>
+        
       </section>
 
       {/* Footer Teaser */}
-      <footer className="relative z-10 max-w-7xl mx-auto px-6 pb-22 text-center border-t border-white/5">
+      <footer className="relative z-10 max-w-7xl mx-auto px-6 pb-8 pt-5 text-center border-t border-white/5">
         <p className="text-xs font-bold text-white uppercase tracking-widest">
           &copy; {new Date().getFullYear()} VirtualCitySchool Ecosystem. All
           Rights Reserved.
