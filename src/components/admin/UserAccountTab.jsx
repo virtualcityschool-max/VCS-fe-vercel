@@ -3,7 +3,7 @@ import { Button, Input, PasswordValidation, PasswordInput } from "../ui";
 import { validateEmail, validatePassword } from "../../utils/validation";
 import { useFieldErrors } from "../../hooks";
 
-const UserAccountTab = ({ user, onUpdate }) => {
+const UserAccountTab = ({ user, onUpdate, onCancel, onSaved }) => {
   const [formData, setFormData] = useState({
     username: user?.username || "",
     email: user?.email || "",
@@ -101,6 +101,9 @@ const UserAccountTab = ({ user, onUpdate }) => {
       }));
 
       clearAllErrors();
+      if (onSaved) {
+        onSaved();
+      }
     } catch (error) {
       // Handle backend field errors using the error hook
       const originalError = error.originalError || error;
@@ -128,6 +131,9 @@ const UserAccountTab = ({ user, onUpdate }) => {
       confirm_password: "",
     });
     clearAllErrors();
+    if (onCancel) {
+      onCancel();
+    }
   };
 
   const formatDate = (dateString) => {
@@ -140,16 +146,9 @@ const UserAccountTab = ({ user, onUpdate }) => {
   };
 
   return (
-    <div className="space-y-8">
-      <form onSubmit={handleSubmit} className="space-y-8">
-        {/* Identity Section */}
-        <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6">
-          <h3 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
-            <i className="fas fa-user text-indigo-400"></i>
-            Identity
-          </h3>
-
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+    <div className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-2">
                 Username
@@ -204,73 +203,26 @@ const UserAccountTab = ({ user, onUpdate }) => {
                 placeholder="Date joined"
               />
             </div>
-          </div>
         </div>
 
-        {/* Access Section */}
-        <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6">
-          <h3 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
-            <i className="fas fa-shield-alt text-indigo-400"></i>
-            Access
-          </h3>
-
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <p className="text-sm font-medium text-white">Activate Account</p>
-
-              <button
-                type="button"
-                onClick={() =>
-                  handleInputChange("is_active", !formData.is_active)
-                }
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                  formData.is_active ? "bg-indigo-600" : "bg-slate-600"
-                }`}
-              >
-                <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                    formData.is_active ? "translate-x-6" : "translate-x-1"
-                  }`}
-                />
-              </button>
-            </div>
-
-            {/* <div className="flex items-center justify-between">
-              <div>
-                <label className="text-sm font-medium text-white">
-                  Staff Access
-                </label>
-                <p className="text-xs text-slate-400 mt-1">
-                  Can access admin panel and staff features
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() =>
-                  handleInputChange("is_staff", !formData.is_staff)
-                }
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                  formData.is_staff ? "bg-indigo-600" : "bg-slate-600"
-                }`}
-              >
-                <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                    formData.is_staff ? "translate-x-6" : "translate-x-1"
-                  }`}
-                />
-              </button>
-            </div> */}
-          </div>
+        <div className="flex items-center gap-2 py-1">
+          <p className="text-sm font-medium text-white">Activate Account</p>
+          <button
+            type="button"
+            onClick={() => handleInputChange("is_active", !formData.is_active)}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+              formData.is_active ? "bg-indigo-600" : "bg-slate-600"
+            }`}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                formData.is_active ? "translate-x-6" : "translate-x-1"
+              }`}
+            />
+          </button>
         </div>
 
-        {/* Reset Password Section */}
-        <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6">
-          <h3 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
-            <i className="fas fa-key text-indigo-400"></i>
-            Reset Password
-          </h3>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-2">
                 New Password
@@ -305,11 +257,10 @@ const UserAccountTab = ({ user, onUpdate }) => {
                 }
               />
             </div>
-          </div>
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-3 sm:justify-end">
+        <div className="flex flex-col sm:flex-row gap-3 sm:justify-end pt-1">
           <Button
             type="button"
             variant="secondary"

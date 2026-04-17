@@ -194,7 +194,7 @@ const UserDetailsPage = () => {
 
   return (
     <div className="min-h-screen bg-slate-950 text-white">
-      <div className="max-w-7xl mx-auto p-6 md:p-12">
+      <div className="max-w-6xl mx-auto p-4 md:p-8">
         {/* Header Section */}
         <UserDetailsHeader
           user={userData}
@@ -203,40 +203,56 @@ const UserDetailsPage = () => {
         />
 
         {/* Tab Content */}
-        <div className="bg-slate-900/60 border border-slate-800/50 rounded-3xl shadow-2xl backdrop-blur-sm overflow-hidden mt-5">
-          {/* Tab Navigation */}
+        <div className="bg-slate-900/60 border border-slate-800/50 rounded-2xl shadow-2xl backdrop-blur-sm overflow-hidden mt-4">
           <UserDetailsTabs
             activeTab={activeTab}
             onTabChange={setActiveTab}
             userRole={userData?.role}
           />
-
-          {/* Tab Content */}
-          <div className="p-8">
-            {activeTab === "account" && (
-              <UserAccountTab user={userData} onUpdate={handleUserUpdate} />
-            )}
-
-            {activeTab === "profile" && userData?.role === "teacher" && (
-              <TeacherProfileTab
-                profile={userProfile}
-                onUpdate={handleProfileUpdate}
+          <div className="p-4 md:p-5">
+            <div className="space-y-4">
+              {activeTab === "account" && (
+              <UserAccountTab
+                user={userData}
+                onUpdate={handleUserUpdate}
+                onCancel={handleBackToUsers}
+                onSaved={handleBackToUsers}
               />
-            )}
+              )}
 
-            {activeTab === "profile" && userData?.role === "student" && (
-              <StudentProfileTab
-                profile={userProfile}
-                onUpdate={handleProfileUpdate}
-              />
-            )}
+              {activeTab === "profile" && userData?.role === "teacher" && (
+                <div className="pt-2 border-t border-slate-800">
+                  <TeacherProfileTab
+                    profile={userProfile}
+                    onUpdate={handleProfileUpdate}
+                    onCancel={handleBackToUsers}
+                    onSaved={handleBackToUsers}
+                  />
+                </div>
+              )}
 
-            {activeTab === "profile" && userData?.role === "parent" && (
-              <ParentProfileTab
-                profile={{ ...userProfile, id }}
-                onUpdate={handleProfileUpdate}
-              />
-            )}
+              {activeTab === "profile" && userData?.role === "student" && (
+                <div className="pt-2 border-t border-slate-800">
+                  <StudentProfileTab
+                    profile={userProfile}
+                    onUpdate={handleProfileUpdate}
+                    onCancel={handleBackToUsers}
+                    onSaved={handleBackToUsers}
+                  />
+                </div>
+              )}
+
+              {activeTab === "profile" && userData?.role === "parent" && (
+                <div className="pt-2 border-t border-slate-800">
+                  <ParentProfileTab
+                    profile={{ ...userProfile, id }}
+                    onUpdate={handleProfileUpdate}
+                    onCancel={handleBackToUsers}
+                    onSaved={handleBackToUsers}
+                  />
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

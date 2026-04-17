@@ -3,7 +3,7 @@ import { Button, Input } from "../ui";
 import { useFieldErrors } from "../../hooks";
 import DistinctionsEditor from "./DistinctionsEditor";
 
-const TeacherProfileTab = ({ profile, onUpdate }) => {
+const TeacherProfileTab = ({ profile, onUpdate, onCancel, onSaved }) => {
   const [formData, setFormData] = useState({
     bio: "",
     expertise: "",
@@ -111,6 +111,9 @@ const TeacherProfileTab = ({ profile, onUpdate }) => {
 
       await onUpdate(updateData);
       clearAllErrors();
+      if (onSaved) {
+        onSaved();
+      }
     } catch (error) {
       // Handle backend field errors using the error hook
       const originalError = error.originalError || error;
@@ -138,234 +141,134 @@ const TeacherProfileTab = ({ profile, onUpdate }) => {
       distinctions: profile?.distinctions || [],
     });
     clearAllErrors();
+    if (onCancel) {
+      onCancel();
+    }
   };
 
   return (
-    <div className="space-y-8">
-      <form onSubmit={handleSubmit} className="space-y-8">
-        {/* Bio Section */}
-        <div className="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-800/60 via-slate-900/40 to-slate-800/60 border border-slate-700/50 shadow-2xl backdrop-blur-xl transition-all duration-500 hover:shadow-3xl hover:border-slate-600/50">
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-          <div className="relative p-8">
-            <div className="flex items-center gap-4 mb-6">
-              <div className="w-14 h-14 bg-gradient-to-br from-blue-500 via-purple-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg transform transition-all duration-300 group-hover:scale-110 group-hover:rotate-3">
-                <i className="fas fa-pen text-white text-lg"></i>
-              </div>
-              <div>
-                <h3 className="text-xl font-bold text-white bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                  Professional Bio
-                </h3>
-                <p className="text-sm text-slate-400">
-                  Share your teaching experience and philosophy
-                </p>
-              </div>
-            </div>
-            <textarea
-              value={formData.bio}
-              onChange={(e) => handleInputChange("bio", e.target.value)}
-              className={`w-full bg-slate-900/60 border text-white rounded-2xl px-6 py-4 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500/50 resize-none transition-all duration-300 placeholder-slate-500 shadow-inner ${errors.bio ? "border-red-500 focus:border-red-500 focus:ring-red-500" : "border-slate-600/50"}`}
-              rows="4"
-              placeholder="Tell us about your teaching experience, educational philosophy, and what makes you passionate about education..."
-            />
-            {errors.bio && (
-              <p className="mt-3 text-sm text-red-400 flex items-center gap-2 animate-pulse">
-                <i className="fas fa-exclamation-circle text-sm"></i>
-                {getFieldError("bio")}
-              </p>
-            )}
-          </div>
+    <div className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-slate-300 mb-2">Bio</label>
+          <textarea
+            value={formData.bio}
+            onChange={(e) => handleInputChange("bio", e.target.value)}
+            className={`w-full bg-slate-900/60 border text-white rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 resize-none ${
+              errors.bio
+                ? "border-red-500 focus:ring-red-500/20"
+                : "border-slate-700 focus:ring-indigo-500/30"
+            }`}
+            rows="3"
+            placeholder="Brief professional biography..."
+          />
+          {errors.bio && <p className="mt-2 text-sm text-red-400">{getFieldError("bio")}</p>}
         </div>
 
-        {/* Expertise Section */}
-        <div className="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-800/60 via-slate-900/40 to-slate-800/60 border border-slate-700/50 shadow-2xl backdrop-blur-xl transition-all duration-500 hover:shadow-3xl hover:border-slate-600/50">
-          <div className="absolute inset-0 bg-gradient-to-r from-green-500/5 via-teal-500/5 to-green-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-          <div className="relative p-8">
-            <div className="flex items-center gap-4 mb-6">
-              <div className="w-14 h-14 bg-gradient-to-br from-green-500 via-teal-500 to-green-600 rounded-2xl flex items-center justify-center shadow-lg transform transition-all duration-300 group-hover:scale-110 group-hover:rotate-3">
-                <i className="fas fa-graduation-cap text-white text-lg"></i>
-              </div>
-              <div>
-                <h3 className="text-xl font-bold text-white bg-gradient-to-r from-green-400 to-teal-400 bg-clip-text text-transparent">
-                  Areas of Expertise
-                </h3>
-                <p className="text-sm text-slate-400">
-                  Subjects and specializations
-                </p>
-              </div>
-            </div>
+        <div>
+          <label className="block text-sm font-medium text-slate-300 mb-2">Expertise</label>
+          <Input
+            value={formData.expertise}
+            onChange={(e) => handleInputChange("expertise", e.target.value)}
+            placeholder="e.g., Mathematics, Physics"
+            error={getFieldError("expertise")}
+            className="bg-slate-900/60 border-slate-700"
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">
+              Experience (years)
+            </label>
             <Input
-              value={formData.expertise}
-              onChange={(e) => handleInputChange("expertise", e.target.value)}
-              placeholder="e.g., Mathematics, Physics, Computer Science, Literature"
-              error={getFieldError("expertise")}
-              className="bg-slate-900/60 rounded-2xl px-6 py-4 shadow-inner"
+              type="number"
+              value={formData.experience_years}
+              onChange={(e) => handleInputChange("experience_years", e.target.value)}
+              placeholder="Years of experience"
+              error={getFieldError("experience_years")}
+              className="bg-slate-900/60 border-slate-700"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">
+              Rating (0.0 - 5.0)
+            </label>
+            <Input
+              type="number"
+              step="0.1"
+              min="0"
+              max="5"
+              value={formData.rating}
+              onChange={(e) => handleInputChange("rating", e.target.value)}
+              placeholder="0.0 - 5.0"
+              error={getFieldError("rating")}
+              className="bg-slate-900/60 border-slate-700"
             />
           </div>
         </div>
 
-        {/* Experience and Rating Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-800/60 via-slate-900/40 to-slate-800/60 border border-slate-700/50 shadow-2xl backdrop-blur-xl transition-all duration-500 hover:shadow-3xl hover:border-slate-600/50">
-            <div className="absolute inset-0 bg-gradient-to-r from-orange-500/5 via-red-500/5 to-orange-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-            <div className="relative p-8">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="w-14 h-14 bg-gradient-to-br from-orange-500 via-red-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg transform transition-all duration-300 group-hover:scale-110 group-hover:rotate-3">
-                  <i className="fas fa-clock text-white text-lg"></i>
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-white bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent">
-                    Experience
-                  </h3>
-                  <p className="text-sm text-slate-400">Years of teaching</p>
-                </div>
-              </div>
-              <Input
-                type="number"
-                value={formData.experience_years}
-                onChange={(e) =>
-                  handleInputChange("experience_years", e.target.value)
-                }
-                placeholder="Years of experience"
-                error={getFieldError("experience_years")}
-                className="bg-slate-900/60 rounded-2xl px-6 py-4 shadow-inner"
-              />
-            </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">
+              LinkedIn
+            </label>
+            <Input
+              type="url"
+              value={formData.linkedin}
+              onChange={(e) => handleInputChange("linkedin", e.target.value)}
+              placeholder="https://linkedin.com/in/username"
+              error={getFieldError("linkedin")}
+              className="bg-slate-900/60 border-slate-700"
+            />
           </div>
-
-          <div className="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-800/60 via-slate-900/40 to-slate-800/60 border border-slate-700/50 shadow-2xl backdrop-blur-xl transition-all duration-500 hover:shadow-3xl hover:border-slate-600/50">
-            <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/5 via-amber-500/5 to-yellow-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-            <div className="relative p-8">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="w-14 h-14 bg-gradient-to-br from-yellow-500 via-amber-500 to-yellow-600 rounded-2xl flex items-center justify-center shadow-lg transform transition-all duration-300 group-hover:scale-110 group-hover:rotate-3">
-                  <i className="fas fa-star text-white text-lg"></i>
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-white bg-gradient-to-r from-yellow-400 to-amber-400 bg-clip-text text-transparent">
-                    Rating
-                  </h3>
-                  <p className="text-sm text-slate-400">
-                    Performance rating (0.0 - 5.0)
-                  </p>
-                </div>
-              </div>
-              <Input
-                type="number"
-                step="0.1"
-                min="0"
-                max="5"
-                value={formData.rating}
-                onChange={(e) => handleInputChange("rating", e.target.value)}
-                placeholder="0.0 - 5.0"
-                error={getFieldError("rating")}
-                className="bg-slate-900/60 rounded-2xl px-6 py-4 shadow-inner"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Contact Information Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-800/60 via-slate-900/40 to-slate-800/60 border border-slate-700/50 shadow-2xl backdrop-blur-xl transition-all duration-500 hover:shadow-3xl hover:border-slate-600/50">
-            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 via-blue-500/5 to-cyan-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-            <div className="relative p-8">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="w-14 h-14 bg-gradient-to-br from-cyan-500 via-blue-500 to-cyan-600 rounded-2xl flex items-center justify-center shadow-lg transform transition-all duration-300 group-hover:scale-110 group-hover:rotate-3">
-                  <i className="fab fa-linkedin text-white text-lg"></i>
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-white bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
-                    LinkedIn Profile
-                  </h3>
-                  <p className="text-sm text-slate-400">
-                    Professional networking
-                  </p>
-                </div>
-              </div>
-              <Input
-                type="url"
-                value={formData.linkedin}
-                onChange={(e) => handleInputChange("linkedin", e.target.value)}
-                placeholder="https://linkedin.com/in/username"
-                error={getFieldError("linkedin")}
-                className="bg-slate-900/60 rounded-2xl px-6 py-4 shadow-inner"
-              />
-            </div>
-          </div>
-
-          <div className="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-800/60 via-slate-900/40 to-slate-800/60 border border-slate-700/50 shadow-2xl backdrop-blur-xl transition-all duration-500 hover:shadow-3xl hover:border-slate-600/50">
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 via-pink-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-            <div className="relative p-8">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="w-14 h-14 bg-gradient-to-br from-purple-500 via-pink-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg transform transition-all duration-300 group-hover:scale-110 group-hover:rotate-3">
-                  <i className="fas fa-phone text-white text-lg"></i>
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-white bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                    Phone Number
-                  </h3>
-                  <p className="text-sm text-slate-400">Contact information</p>
-                </div>
-              </div>
-              <Input
-                type="tel"
-                value={formData.phone}
-                onChange={(e) => handleInputChange("phone", e.target.value)}
-                placeholder="+1 (555) 123-4567"
-                error={getFieldError("phone")}
-                className="bg-slate-900/60 rounded-2xl px-6 py-4 shadow-inner"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Distinctions Section */}
-        <div className="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-800/60 via-slate-900/40 to-slate-800/60 border border-slate-700/50 shadow-2xl backdrop-blur-xl transition-all duration-500 hover:shadow-3xl hover:border-slate-600/50">
-          <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/5 via-purple-500/5 to-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-          <div className="relative p-8">
-            <div className="flex items-center gap-4 mb-6">
-              <div className="w-14 h-14 bg-gradient-to-br from-indigo-500 via-purple-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg transform transition-all duration-300 group-hover:scale-110 group-hover:rotate-3">
-                <i className="fas fa-trophy text-white text-lg"></i>
-              </div>
-              <div>
-                <h3 className="text-xl font-bold text-white bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
-                  Professional Distinctions
-                </h3>
-                <p className="text-sm text-slate-400">
-                  Awards and achievements
-                </p>
-              </div>
-            </div>
-            <DistinctionsEditor
-              distinctions={formData.distinctions}
-              onChange={handleDistinctionsChange}
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">
+              Phone Number
+            </label>
+            <Input
+              type="tel"
+              value={formData.phone}
+              onChange={(e) => handleInputChange("phone", e.target.value)}
+              placeholder="+1 (555) 123-4567"
+              error={getFieldError("phone")}
+              className="bg-slate-900/60 border-slate-700"
             />
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4 p-8 rounded-3xl bg-gradient-to-br from-slate-800/40 via-slate-900/20 to-slate-800/40 border border-slate-700/50 shadow-2xl backdrop-blur-xl">
+        <div>
+          <label className="block text-sm font-medium text-slate-300 mb-2">
+            Distinctions
+          </label>
+          <DistinctionsEditor
+            distinctions={formData.distinctions}
+            onChange={handleDistinctionsChange}
+          />
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-3 sm:justify-end">
           <Button
             type="button"
             variant="secondary"
             onClick={handleCancel}
-            className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-slate-700/60 to-slate-700/40 hover:from-slate-700/50 hover:to-slate-700/30 text-white border-slate-600/50 shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-xl"
+            className="w-full sm:w-auto"
           >
-            <i className="fas fa-times mr-3"></i>
-            Cancel Changes
+            Cancel
           </Button>
           <Button
             type="submit"
             disabled={isSaving}
-            className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 hover:from-blue-500 hover:via-purple-500 hover:to-blue-500 text-white shadow-2xl transform transition-all duration-300 hover:scale-105 hover:shadow-3xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+            className="w-full sm:w-auto"
           >
             {isSaving ? (
               <>
-                <i className="fas fa-spinner fa-spin mr-3"></i>
+                <i className="fas fa-spinner fa-spin mr-2"></i>
                 Saving...
               </>
             ) : (
               <>
-                <i className="fas fa-save mr-3"></i>
+                <i className="fas fa-save mr-2"></i>
                 Save Profile
               </>
             )}

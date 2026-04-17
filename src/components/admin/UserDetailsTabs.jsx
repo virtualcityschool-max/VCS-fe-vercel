@@ -21,7 +21,7 @@ const UserDetailsTabs = ({ activeTab, onTabChange, userRole }) => {
             onClick={() => onTabChange(tab.id)}
             className={`py-3 px-6 rounded-xl font-semibold text-sm transition-all duration-300 whitespace-nowrap flex items-center gap-3 ${
               activeTab === tab.id
-                ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg"
+                ? "bg-indigo-600 text-white shadow-lg"
                 : "text-slate-400 hover:text-white hover:bg-slate-800/50"
             }`}
           >
