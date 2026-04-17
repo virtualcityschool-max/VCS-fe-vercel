@@ -279,102 +279,94 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
   return (
     <div className="space-y-6">
       {/* Header with Filters */}
-      <div className="space-y-4 mb-6">
-        {/* Filter Controls */}
-        <div className="flex flex-wrap gap-3 items-start">
-          {/* Student Filter */}
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Filter by student..."
-              value={studentFilter}
-              onChange={(e) => setStudentFilter(e.target.value)}
-              className="pl-10 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-48"
-            />
-            <i className="fas fa-user absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
-          </div>
+      <div className="mb-6">
+        <div className="flex justify-end items-center">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-end gap-3 lg:gap-2 w-full">
+            <div className="relative w-full lg:w-auto">
+              <input
+                type="text"
+                placeholder="Filter by student..."
+                value={studentFilter}
+                onChange={(e) => setStudentFilter(e.target.value)}
+                className="pl-10 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full lg:w-48"
+              />
+              <i className="fas fa-user absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+            </div>
 
-          {/* Course Filter */}
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Filter by course..."
-              value={courseFilter}
-              onChange={(e) => setCourseFilter(e.target.value)}
-              className="pl-10 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-48"
-            />
-            <i className="fas fa-book absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
-          </div>
+            <div className="relative w-full lg:w-auto">
+              <input
+                type="text"
+                placeholder="Filter by course..."
+                value={courseFilter}
+                onChange={(e) => setCourseFilter(e.target.value)}
+                className="pl-10 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full lg:w-48"
+              />
+              <i className="fas fa-book absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+            </div>
 
-          {/* Type Filter */}
-          <select
-            value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value)}
-            className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          >
-            <option value="all">All Types</option>
-            <option value="normal">Normal</option>
-            <option value="private">Private</option>
-          </select>
+            <div className="flex flex-wrap justify-end items-center gap-2">
+              <select
+                value={typeFilter}
+                onChange={(e) => setTypeFilter(e.target.value)}
+                className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+                <option value="all">All Types</option>
+                <option value="normal">Normal</option>
+                <option value="private">Private</option>
+              </select>
 
-          {/* Status Filter */}
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          >
-            <option value="all">All Statuses</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-            <option value="cancelled">Cancelled</option>
-            <option value="pending">Pending</option>
-          </select>
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+                <option value="all">All Statuses</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+                <option value="cancelled">Cancelled</option>
+                <option value="pending">Pending</option>
+              </select>
 
-          {/* Date Sort */}
-          <select
-            value={dateSort}
-            onChange={(e) => setDateSort(e.target.value)}
-            className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          >
-            <option value="newest">Newest First</option>
-            <option value="oldest">Oldest First</option>
-          </select>
+              <select
+                value={dateSort}
+                onChange={(e) => setDateSort(e.target.value)}
+                className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+              </select>
 
-          {/* Clear Filters */}
-          {hasActiveFilters && (
-            <button
-              onClick={() => {
-                setStudentFilter("");
-                setCourseFilter("");
-                setTypeFilter("all");
-                setStatusFilter("all");
-                setDateSort("newest");
-              }}
-              className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-sm font-medium transition flex items-center gap-2"
-            >
-              <i className="fas fa-times"></i>
-              <span>Clear</span>
-            </button>
-          )}
-        </div>
+              {hasActiveFilters && (
+                <button
+                  onClick={() => {
+                    setStudentFilter("");
+                    setCourseFilter("");
+                    setTypeFilter("all");
+                    setStatusFilter("all");
+                    setDateSort("newest");
+                  }}
+                  className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-sm font-medium transition flex items-center gap-2"
+                >
+                  <i className="fas fa-times"></i>
+                  <span>Clear</span>
+                </button>
+              )}
 
-        {/* Action Buttons */}
-        <div className="flex justify-center md:justify-end">
-          <div className="flex md:items-center gap-4">
-            <Button
-              onClick={handleOpenCreateModal}
-              className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2"
-            >
-              <i className="fas fa-plus"></i>
-              <span>Create Enrollment</span>
-            </Button>
-            <button
-              onClick={onRefresh}
-              className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2"
-            >
-              <i className="fas fa-sync"></i>
-              <span>Refresh</span>
-            </button>
+              <Button
+                onClick={handleOpenCreateModal}
+                className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2"
+              >
+                <i className="fas fa-plus"></i>
+                <span>Create Enrollment</span>
+              </Button>
+              <button
+                onClick={onRefresh}
+                className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2"
+              >
+                <i className="fas fa-sync"></i>
+                <span>Refresh</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>

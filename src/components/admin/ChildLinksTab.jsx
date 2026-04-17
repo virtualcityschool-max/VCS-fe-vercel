@@ -33,51 +33,7 @@ const ChildLinksTab = ({
 
   return (
     <>
-      {/* Stats Card */}
-      <div className="grid grid-cols-1 md:grid-cols-1 gap-6 mb-8">
-        <div className="bg-linear-to-br from-purple-500/20 to-purple-600/20 border border-purple-500/20 rounded-2xl p-6 backdrop-blur-sm">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-purple-400 text-sm font-medium">
-                Pending Child Link Requests
-              </p>
-              <p className="text-3xl font-bold text-white mt-2">
-                {pendingChildLinks?.length || 0}
-              </p>
-            </div>
-            <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center">
-              <i className="fas fa-link text-purple-400 text-lg"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <div className="bg-slate-900/50 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-sm animate-fadeIn">
-        <div className="p-6 border-b border-slate-800 bg-slate-950/40">
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
-            <div>
-              <h3 className="text-xl font-bold font-poppins text-white flex items-center gap-3">
-                <div className="w-8 h-8 bg-purple-600/20 rounded-lg flex items-center justify-center">
-                  <i className="fas fa-user-link text-purple-400 text-sm"></i>
-                </div>
-                Parent ↔ Child Link Requests
-              </h3>
-              <p className="text-slate-500 text-sm mt-2">
-                Review and approve parent requests to link with their children
-              </p>
-            </div>
-            <button
-              onClick={onRefresh}
-              className="bg-purple-600 hover:bg-purple-500 text-white px-6 py-3 rounded-xl text-sm font-medium shadow-lg active:scale-95 transition-all duration-200 flex items-center gap-2"
-              disabled={childLinksLoading}
-            >
-              <i
-                className={`fas ${childLinksLoading ? "fa-spinner fa-spin" : "fa-refresh"}`}
-              ></i>
-              {childLinksLoading ? "Refreshing..." : "Refresh"}
-            </button>
-          </div>
-        </div>
 
         {/* Other Error State */}
         {childLinksError && !childLinksError.includes("404") && (
@@ -107,19 +63,6 @@ const ChildLinksTab = ({
         {/* Loading State */}
         {childLinksLoading && !childLinksError && (
           <div className="space-y-4">
-            {/* Stats Card Skeleton */}
-            <div className="grid grid-cols-1 md:grid-cols-1 gap-6 mb-8">
-              <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6 backdrop-blur-sm animate-pulse">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="h-4 bg-slate-700 rounded w-48 mb-2"></div>
-                    <div className="h-8 bg-slate-700 rounded w-12"></div>
-                  </div>
-                  <div className="w-12 h-12 bg-slate-700 rounded-xl"></div>
-                </div>
-              </div>
-            </div>
-
             {/* Child Link Cards Skeleton */}
             <div className="space-y-4">
               {[...Array(5)].map((_, index) => (
@@ -203,7 +146,7 @@ const ChildLinksTab = ({
                         <button
                           onClick={() => handleApprove(link.link_id)}
                           disabled={isProcessing[link.link_id] === "approving"}
-                          className="bg-emerald-600/10 text-emerald-400 px-3 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-emerald-600 hover:text-white transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 sm:gap-2 flex-1 justify-center"
+                          className="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 sm:gap-2 flex-1 justify-center"
                         >
                           {isProcessing[link.link_id] === "approving" ? (
                             <React.Fragment key="approving">
@@ -222,7 +165,7 @@ const ChildLinksTab = ({
                         <button
                           onClick={() => handleReject(link.link_id)}
                           disabled={isProcessing[link.link_id] === "rejecting"}
-                          className="bg-red-600/10 text-red-400 px-3 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 sm:gap-2 flex-1 justify-center"
+                          className="bg-red-600 text-white px-3 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-red-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 sm:gap-2 flex-1 justify-center"
                         >
                           {isProcessing[link.link_id] === "rejecting" ? (
                             <React.Fragment key="rejecting">
@@ -293,7 +236,7 @@ const ChildLinksTab = ({
                             disabled={
                               isProcessing[link.link_id] === "approving"
                             }
-                            className="bg-emerald-600/10 text-emerald-400 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-600 hover:text-white transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                            className="bg-emerald-600 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                           >
                             {isProcessing[link.link_id] === "approving" ? (
                               <React.Fragment key="approving">
@@ -312,7 +255,7 @@ const ChildLinksTab = ({
                             disabled={
                               isProcessing[link.link_id] === "rejecting"
                             }
-                            className="bg-red-600/10 text-red-400 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                            className="bg-red-600 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                           >
                             {isProcessing[link.link_id] === "rejecting" ? (
                               <React.Fragment key="rejecting">

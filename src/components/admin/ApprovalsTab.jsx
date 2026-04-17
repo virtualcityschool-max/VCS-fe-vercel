@@ -9,10 +9,6 @@ const ApprovalsTab = ({
   onReject,
   onRefresh,
 }) => {
-  // Compute approved and rejected counts (0 for now since backend doesn't provide this data)
-  const approvedToday = 0;
-  const rejectedToday = 0;
-
   const handleApprove = (userId) => {
     onApprove(userId);
   };
@@ -23,81 +19,7 @@ const ApprovalsTab = ({
 
   return (
     <>
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-gradient-to-br from-blue-500/20 to-blue-600/20 border border-blue-500/20 rounded-2xl p-6 backdrop-blur-sm">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-blue-400 text-sm font-medium">
-                Pending Approvals
-              </p>
-              <p className="text-3xl font-bold text-white mt-2">
-                {pendingApprovals?.length || 0}
-              </p>
-            </div>
-            <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center">
-              <i className="fas fa-clock text-blue-400 text-lg"></i>
-            </div>
-          </div>
-        </div>
-        <div className="bg-gradient-to-br from-emerald-500/20 to-emerald-600/20 border border-emerald-500/20 rounded-2xl p-6 backdrop-blur-sm">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-emerald-400 text-sm font-medium">
-                Approved Today
-              </p>
-              <p className="text-3xl font-bold text-white mt-2">
-                {approvedToday}
-              </p>
-            </div>
-            <div className="w-12 h-12 bg-emerald-500/20 rounded-xl flex items-center justify-center">
-              <i className="fas fa-check-circle text-emerald-400 text-lg"></i>
-            </div>
-          </div>
-        </div>
-        <div className="bg-gradient-to-br from-rose-500/20 to-rose-600/20 border border-rose-500/20 rounded-2xl p-6 backdrop-blur-sm">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-rose-400 text-sm font-medium">
-                Rejected Today
-              </p>
-              <p className="text-3xl font-bold text-white mt-2">
-                {rejectedToday}
-              </p>
-            </div>
-            <div className="w-12 h-12 bg-rose-500/20 rounded-xl flex items-center justify-center">
-              <i className="fas fa-times-circle text-rose-400 text-lg"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <div className="bg-slate-900/50 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-sm animate-fadeIn">
-        <div className="p-6 border-b border-slate-800 bg-slate-950/40">
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
-            <div>
-              <h3 className="text-xl font-bold font-poppins text-white flex items-center gap-3">
-                <div className="w-8 h-8 bg-indigo-600/20 rounded-lg flex items-center justify-center">
-                  <i className="fas fa-user-check text-indigo-400 text-sm"></i>
-                </div>
-                Pending User Approvals
-              </h3>
-              <p className="text-slate-500 text-sm mt-2">
-                Review and approve user registration requests
-              </p>
-            </div>
-            <button
-              onClick={onRefresh}
-              className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-xl text-sm font-medium shadow-lg active:scale-95 transition-all duration-200 flex items-center gap-2"
-              disabled={approvalsLoading}
-            >
-              <i
-                className={`fas ${approvalsLoading ? "fa-spinner fa-spin" : "fa-refresh"}`}
-              ></i>
-              {approvalsLoading ? "Refreshing..." : "Refresh"}
-            </button>
-          </div>
-        </div>
 
         {/* Other Error State */}
         {approvalsError && !approvalsError.includes("404") && (
@@ -250,7 +172,7 @@ const ApprovalsTab = ({
                           <button
                             onClick={() => handleApprove(user.id)}
                             disabled={isProcessing[user.id] === "approving"}
-                            className="bg-emerald-600/10 text-emerald-400 px-3 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-emerald-600 hover:text-white transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 sm:gap-2 flex-1 justify-center"
+                            className="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 sm:gap-2 flex-1 justify-center"
                           >
                             {isProcessing[user.id] === "approving" ? (
                               <React.Fragment key="approving">
@@ -271,7 +193,7 @@ const ApprovalsTab = ({
                           <button
                             onClick={() => handleReject(user.id)}
                             disabled={isProcessing[user.id] === "rejecting"}
-                            className="bg-red-600/10 text-red-400 px-3 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 sm:gap-2 flex-1 justify-center"
+                            className="bg-red-600 text-white px-3 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-red-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 sm:gap-2 flex-1 justify-center"
                           >
                             {isProcessing[user.id] === "rejecting" ? (
                               <React.Fragment key="rejecting">
@@ -366,7 +288,7 @@ const ApprovalsTab = ({
                           <button
                             onClick={() => handleApprove(user.id)}
                             disabled={isProcessing[user.id] === "approving"}
-                            className="bg-emerald-600/10 text-emerald-400 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-600 hover:text-white transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                            className="bg-emerald-600 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                           >
                             {isProcessing[user.id] === "approving" ? (
                               <React.Fragment key="approving">
@@ -383,7 +305,7 @@ const ApprovalsTab = ({
                           <button
                             onClick={() => handleReject(user.id)}
                             disabled={isProcessing[user.id] === "rejecting"}
-                            className="bg-red-600/10 text-red-400 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                            className="bg-red-600 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                           >
                             {isProcessing[user.id] === "rejecting" ? (
                               <React.Fragment key="rejecting">
