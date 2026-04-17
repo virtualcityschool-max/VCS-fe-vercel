@@ -19,6 +19,7 @@ const TeacherPortal = () => {
   const [body, setBody] = useState("");
   const [courseId, setCourseId] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isAnnouncementModalOpen, setIsAnnouncementModalOpen] = useState(false);
 
   const {
     dashboard,
@@ -54,6 +55,7 @@ const TeacherPortal = () => {
       setTitle("");
       setBody("");
       setCourseId("");
+      setIsAnnouncementModalOpen(false);
     } catch (err) {
       toastManager.error(
         err?.message || err?.error || "Failed to post announcement",
@@ -158,108 +160,69 @@ const TeacherPortal = () => {
   }
 
   return (
-    <div id="teacher-view" className="text-white">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-        <div className="lg:col-span-2 bg-linear-to-br from-indigo-600 to-indigo-800 p-8 sm:p-10 rounded-5xl shadow-2xl relative overflow-hidden">
+    <div id="teacher-view" className="text-white space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="lg:col-span-2 bg-linear-to-br from-indigo-600 to-indigo-700 px-6 py-5 rounded-2xl shadow-xl relative overflow-hidden border border-indigo-400/20">
           <div className="relative z-10">
-            <h2 className="text-2xl sm:text-3xl font-black font-poppins mb-2 text-white">
+            <h2 className="text-xl sm:text-2xl font-black font-poppins mb-1 text-white">
               Welcome, {dashboard?.teacher?.username || "Instructor"}!
             </h2>
-            <p className="text-indigo-100 text-sm sm:text-base font-medium">
+            <p className="text-indigo-100 text-sm font-medium">
               You have {dashboard?.upcoming_sessions_count || 0} Live Sessions.
             </p>
           </div>
-          <i className="fas fa-sparkles absolute top-6 sm:top-10 right-6 sm:right-10 text-6xl sm:text-8xl text-white/10"></i>
+          <i className="fas fa-sparkles absolute top-4 right-5 text-5xl text-white/10"></i>
         </div>
 
-        <div className="bg-slate-900 border border-slate-800 p-8 rounded-5xl flex flex-col justify-center text-center">
+        <div className="bg-slate-900 border border-slate-800 px-6 py-5 rounded-2xl flex flex-col justify-center text-center">
           <p className="text-[10px] font-black uppercase text-slate-500 tracking-[0.3em] mb-4">
             Total Students
           </p>
-          <h3 className="text-4xl sm:text-5xl font-black text-white">
+          <h3 className="text-4xl font-black text-white leading-none">
             {dashboard?.total_students || 0}
           </h3>
         </div>
       </div>
-      {/* CREATE ANNOUNCEMENT */}
-      <div className="bg-slate-900 border border-slate-800 rounded-5xl p-8 mb-12">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-black font-poppins text-white">
-            Post Announcement
-          </h2>
-          <span className="text-[10px] uppercase tracking-widest text-slate-500">
-            Teacher Panel
-          </span>
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Title */}
-          <input
-            type="text"
-            placeholder="Title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="md:col-span-3 bg-slate-800 border border-slate-700 rounded-xl p-3 text-white placeholder-slate-500 focus:border-indigo-500 outline-none"
-          />
-
-          {/* Body */}
-          <textarea
-            placeholder="Write announcement..."
-            value={body}
-            onChange={(e) => setBody(e.target.value)}
-            rows={4}
-            className="md:col-span-3 bg-slate-800 border border-slate-700 rounded-xl p-3 text-white placeholder-slate-500 focus:border-indigo-500 outline-none"
-          />
-
-          {/* Course select */}
-          <select
-            value={courseId}
-            onChange={(e) => setCourseId(e.target.value)}
-            className="bg-slate-800 border border-slate-700 rounded-xl p-3 text-white"
-          >
-            <option value="">School-wide</option>
-            {myCourses?.map((course) => (
-              <option key={course.id} value={course.id}>
-                {course.title}
-              </option>
-            ))}
-          </select>
-
-          {/* Submit */}
-          <button
-            type="button"
-            onClick={handleCreateAnnouncement}
-            disabled={isSubmitting}
-            className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-xl font-bold transition disabled:opacity-50"
-          >
-            {isSubmitting ? "Posting..." : "Post"}
-          </button>
-        </div>
+      <div className="flex justify-end -mt-1">
+        <button
+          type="button"
+          onClick={() => setIsAnnouncementModalOpen(true)}
+          className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg font-semibold text-sm transition flex items-center gap-2"
+        >
+          <i className="fas fa-bullhorn"></i>
+          <span>Post Announcement</span>
+        </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-10 gap-10">
-        <div className="lg:col-span-6 space-y-8">
-          <h3 className="text-xl font-bold font-poppins">Today's Schedule</h3>
+      <div className="grid grid-cols-1 xl:grid-cols-10 gap-4">
+        <div className="xl:col-span-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-bold font-poppins">Today's Schedule</h3>
+            <span className="text-xs text-slate-400">
+              {dashboard?.todays_schedule?.length || 0} sessions
+            </span>
+          </div>
 
           {dashboard?.todays_schedule?.length ? (
             dashboard.todays_schedule.map((session) => (
               <div
                 key={session.id}
-                className="bg-slate-900 p-6 rounded-3xl border border-slate-800 flex items-center justify-between hover:border-indigo-500 transition group"
+                className="bg-slate-900 px-4 py-3 rounded-xl border border-slate-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 hover:border-indigo-500/60 transition group"
               >
-                <div className="flex items-center gap-6">
-                  <div className="text-indigo-400 font-black text-sm whitespace-nowrap">
+                <div className="flex items-center gap-4 min-w-0">
+                  <div className="text-indigo-400 font-black text-xs sm:text-sm whitespace-nowrap">
                     {new Date(session.schedule_at).toLocaleTimeString([], {
                       hour: "2-digit",
                       minute: "2-digit",
                     })}
                   </div>
 
-                  <div>
-                    <p className="font-bold text-white group-hover:text-indigo-400 transition">
+                  <div className="min-w-0">
+                    <p className="font-bold text-white group-hover:text-indigo-400 transition truncate">
                       {session.title}
                     </p>
-                    <p className="text-[10px] text-slate-500 uppercase tracking-widest">
+                    <p className="text-[10px] text-slate-500 uppercase tracking-widest truncate">
                       {session.course_title} • {session.total_learners} Learners
                     </p>
                   </div>
@@ -269,7 +232,7 @@ const TeacherPortal = () => {
                   <button
                     onClick={() => handleStartSession(session.id)}
                     disabled={isJoiningSession}
-                    className="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded-xl text-sm font-medium transition disabled:opacity-50 flex items-center gap-2"
+                    className="bg-green-600 hover:bg-green-500 text-white px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition disabled:opacity-50 flex items-center gap-2"
                   >
                     <i className="fas fa-play"></i>
                     <span>Start Session</span>
@@ -281,7 +244,7 @@ const TeacherPortal = () => {
                     <button
                       onClick={() => handleJoinSession(session.id)}
                       disabled={isJoiningSession}
-                      className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-sm font-medium transition disabled:opacity-50 flex items-center gap-2"
+                      className="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition disabled:opacity-50 flex items-center gap-2"
                     >
                       <i className="fas fa-video"></i>
                       <span>Join Session</span>
@@ -290,7 +253,7 @@ const TeacherPortal = () => {
                     <button
                       onClick={() => handleEndSession(session.id)}
                       disabled={isJoiningSession}
-                      className="bg-rose-600 hover:bg-rose-500 text-white px-4 py-2 rounded-xl text-sm font-medium transition disabled:opacity-50 flex items-center gap-2"
+                      className="bg-rose-600 hover:bg-rose-500 text-white px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition disabled:opacity-50 flex items-center gap-2"
                     >
                       <i className="fas fa-stop"></i>
                       <span>End Session</span>
@@ -312,12 +275,12 @@ const TeacherPortal = () => {
               </div>
             ))
           ) : (
-            <div className="bg-slate-900 p-6 rounded-3xl border border-slate-800 text-slate-400 text-sm">
+            <div className="bg-slate-900 p-4 rounded-xl border border-slate-800 text-slate-400 text-sm">
               No sessions scheduled for today.
             </div>
           )}
 
-          <h2 className="text-xl font-black font-poppins mb-6 flex items-center gap-3">
+          <h2 className="text-lg font-black font-poppins pt-2 flex items-center gap-3">
             <i className="fas fa-book text-indigo-400"></i>
             My Courses
           </h2>
@@ -332,7 +295,7 @@ const TeacherPortal = () => {
               myCourses.map((course) => (
                 <div
                   key={course.id}
-                  className="bg-slate-900 p-6 rounded-3xl border border-slate-800 hover:border-indigo-500 transition cursor-pointer group"
+                  className="bg-slate-900 p-4 rounded-xl border border-slate-800 hover:border-indigo-500 transition cursor-pointer group"
                 >
                   <div className="flex items-center justify-between">
                     <div>
@@ -345,7 +308,7 @@ const TeacherPortal = () => {
                     </div>
 
                     <div className="text-right">
-                      <p className="text-yellow-400 font-bold text-sm">
+                      <p className="text-yellow-400 font-bold text-xs sm:text-sm">
                         ⭐ {Number(course.rating || 0).toFixed(1)}
                       </p>
                       <p className="text-[10px] text-slate-500 uppercase">
@@ -356,25 +319,25 @@ const TeacherPortal = () => {
                 </div>
               ))
             ) : (
-              <div className="bg-slate-900 p-6 rounded-3xl border border-slate-800 text-slate-400 text-sm">
+              <div className="bg-slate-900 p-4 rounded-xl border border-slate-800 text-slate-400 text-sm">
                 No courses available.
               </div>
             )}
           </div>
         </div>
 
-        <div className="lg:col-span-4 space-y-8">
-          <h3 className="text-xl font-bold font-poppins text-rose-500">
+        <div className="xl:col-span-4 space-y-4">
+          {/* <h3 className="text-lg font-bold font-poppins text-rose-500">
             Risk Alerts
-          </h3>
+          </h3> */}
 
-          <div className="bg-rose-500/5 border border-rose-500/20 p-8 rounded-5xl space-y-6 shadow-2xl">
+          {/* <div className="bg-rose-500/5 border border-rose-500/20 p-4 rounded-2xl space-y-3 shadow-xl">
             {dashboard?.risk_alerts?.length ? (
               dashboard.risk_alerts.map((alert, i) => (
                 <div
                   key={`${alert.student_id}-${i}`}
                   // onClick={() => navigate(`/student/${alert.student_id}`)}
-                  className="flex items-center justify-between p-4 bg-slate-900 rounded-2xl border border-rose-500/20 cursor-pointer hover:bg-rose-500/10 transition group"
+                  className="flex items-center justify-between p-3 bg-slate-900 rounded-xl border border-rose-500/20 cursor-pointer hover:bg-rose-500/10 transition group"
                 >
                   <div>
                     <p className="font-bold text-white group-hover:text-rose-400">
@@ -391,20 +354,20 @@ const TeacherPortal = () => {
 
                   <button
                     type="button"
-                    className="bg-rose-600 text-white px-4 py-2 rounded-xl text-[8px] font-black uppercase shadow-lg"
+                    className="bg-rose-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase shadow-md"
                   >
                     Review
                   </button>
                 </div>
               ))
             ) : (
-              <div className="bg-slate-900 p-6 rounded-3xl border border-slate-800 text-slate-400 text-sm">
+              <div className="bg-slate-900 p-4 rounded-xl border border-slate-800 text-slate-400 text-sm">
                 No risk alerts right now.
               </div>
             )}
-          </div>
+          </div> */}
 
-          <h2 className="text-xl font-black font-poppins mt-10 mb-6 flex items-center gap-3">
+          <h2 className="text-lg font-black font-poppins pt-2 flex items-center gap-3">
             <i className="fas fa-tasks text-indigo-400"></i>
             Assignments
           </h2>
@@ -414,7 +377,7 @@ const TeacherPortal = () => {
               assignments.map((a) => (
                 <div
                   key={a.id}
-                  className="bg-slate-900 p-6 rounded-3xl border border-slate-800 hover:border-indigo-500 transition group"
+                  className="bg-slate-900 p-4 rounded-xl border border-slate-800 hover:border-indigo-500 transition group"
                 >
                   <div className="flex items-center justify-between">
                     <div>
@@ -449,13 +412,72 @@ const TeacherPortal = () => {
                 </div>
               ))
             ) : (
-              <div className="bg-slate-900 p-6 rounded-3xl border border-slate-800 text-slate-400 text-sm">
+              <div className="bg-slate-900 p-4 rounded-xl border border-slate-800 text-slate-400 text-sm">
                 No assignments available.
               </div>
             )}
           </div>
         </div>
       </div>
+
+      {isAnnouncementModalOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="w-full max-w-xl bg-slate-900 border border-slate-700 rounded-2xl p-5 shadow-2xl">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-base font-bold text-white">Post Announcement</h3>
+              <button
+                type="button"
+                onClick={() => setIsAnnouncementModalOpen(false)}
+                className="text-slate-400 hover:text-white transition"
+              >
+                <i className="fas fa-times"></i>
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <input
+                type="text"
+                placeholder="Title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-sm text-white placeholder-slate-500 focus:border-indigo-500 outline-none"
+              />
+
+              <textarea
+                placeholder="Write announcement..."
+                value={body}
+                onChange={(e) => setBody(e.target.value)}
+                rows={4}
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-sm text-white placeholder-slate-500 focus:border-indigo-500 outline-none"
+              />
+
+              <div className="flex flex-col sm:flex-row gap-3">
+                <select
+                  value={courseId}
+                  onChange={(e) => setCourseId(e.target.value)}
+                  className="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white"
+                >
+                  <option value="">School-wide</option>
+                  {myCourses?.map((course) => (
+                    <option key={course.id} value={course.id}>
+                      {course.title}
+                    </option>
+                  ))}
+                </select>
+
+                <button
+                  type="button"
+                  onClick={handleCreateAnnouncement}
+                  disabled={isSubmitting}
+                  className="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-lg font-semibold text-sm transition disabled:opacity-50"
+                >
+                  {isSubmitting ? "Posting..." : "Post"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
