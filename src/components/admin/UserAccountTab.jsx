@@ -241,7 +241,7 @@ const UserAccountTab = ({ user, onUpdate }) => {
               </button>
             </div>
 
-            <div className="flex items-center justify-between">
+            {/* <div className="flex items-center justify-between">
               <div>
                 <label className="text-sm font-medium text-white">
                   Staff Access
@@ -265,7 +265,7 @@ const UserAccountTab = ({ user, onUpdate }) => {
                   }`}
                 />
               </button>
-            </div>
+            </div> */}
           </div>
         </div>
 

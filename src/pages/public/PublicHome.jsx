@@ -13,10 +13,13 @@ const PublicHome = () => {
 
   // Get courses data from Redux store
   const { courses } = useSelector((state) => state.courses);
+  console.log("courses--->", courses);
 
   // Fetch courses on component mount
   useEffect(() => {
-    dispatch(fetchAllCourses());
+    if (courses.length <= 0) {
+      dispatch(fetchAllCourses());
+    }
   }, [dispatch]);
 
   // Filter courses based on search term
@@ -51,26 +54,26 @@ const PublicHome = () => {
       </div>
 
       {/* Hero Section */}
-      <section className="relative z-10 max-w-7xl mx-auto px-6 pt-32 pb-40 text-center">
+      <section className="relative z-10 max-w-7xl mx-auto px-6 pt-10 text-center">
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-xs font-black uppercase tracking-widest text-indigo-400 mb-8 animate-fadeIn">
           <i className="fas fa-sparkles"></i>
           Next-Gen Learning Experience
         </div>
-        <h1 className="text-3xl sm:text-6xl md:text-7xl font-black font-poppins mb-8 leading-[1.1] tracking-tight">
+        <h1 className="text-3xl sm:text-5xl font-black font-poppins mb-8 leading-[1.1] tracking-tight">
           Master Any Subject, <br className="hidden sm:block" />
           <span className="bg-clip-text text-transparent bg-linear-to-r from-indigo-400 via-blue-400 to-teal-400">
             From Anywhere.
           </span>
         </h1>
-        <p className="text-slate-400 text-lg md:text-2xl mb-14 max-w-3xl mx-auto leading-relaxed font-medium">
+        {/* <p className="text-slate-400 text-lg md:text-xl mb-14 max-w-3xl mx-auto leading-relaxed font-medium">
           Connect with world-class teachers for high-fidelity Live Classes and
           On-Demand mastery modules at{" "}
           <span className="text-white font-bold">VirtualCitySchool</span>.
-        </p>
+        </p> */}
 
-        <div className="max-w-3xl mx-auto relative mb-16 group">
+        {/* <div className="max-w-3xl mx-auto relative mb-16 group">
           <div className="absolute inset-0 bg-indigo-600/20 blur-2xl group-hover:bg-indigo-600/30 transition duration-500 rounded-full"></div>
-          <form className="relative flex flex-col md:flex-row gap-4 p-2 bg-slate-900/80 backdrop-blur-2xl border border-white/10 rounded-4xl shadow-2xl">
+          <form className="relative flex items-center flex-col md:flex-row gap-4 p-2 bg-slate-900/80 backdrop-blur-2xl border border-white/10 rounded-4xl shadow-2xl">
             <div className="flex-1 flex items-center px-6">
               <i className="fas fa-search text-slate-500 mr-4"></i>
               <input
@@ -86,12 +89,12 @@ const PublicHome = () => {
             <button
               type="submit"
               onClick={() => navigate("/courses")}
-              className="bg-indigo-600 hover:bg-indigo-500 text-white px-10 py-4 rounded-4xl font-black text-xs uppercase tracking-widest transition shadow-xl shadow-indigo-900/20"
+              className="bg-indigo-600 hover:bg-indigo-500 text-white px-10 py-4 rounded-4xl font-black text-xs uppercase tracking-widest transition shadow-xl shadow-indigo-900/20 w-fit"
             >
               Search Catalog
             </button>
           </form>
-        </div>
+        </div> */}
 
         <div className="flex flex-col sm:flex-row gap-6 justify-center">
           <button
@@ -111,7 +114,7 @@ const PublicHome = () => {
         </div>
       </section>
 
-      <section className="relative z-10 max-w-7xl mx-auto px-6 py-32 border-t border-white/5">
+      <section className="relative z-10 max-w-7xl mx-auto px-6 py-16">
         {/* Enrolled Courses Section - Only for logged-in students */}
         {auth.isLoggedIn &&
           auth.role === "student" &&
@@ -180,12 +183,12 @@ const PublicHome = () => {
           )}
 
         {/* Available Courses Section */}
-        <div className="flex justify-between items-end mb-16">
+        <div className="flex justify-between items-end mb-8">
           <div>
             <p className="text-[10px] font-black uppercase tracking-[0.4em] text-indigo-500 mb-4">
               Discovery
             </p>
-            <h2 className="text-4xl font-black font-poppins">
+            <h2 className="text-2xl md:text-4xl font-black font-poppins">
               {auth.isLoggedIn && auth.role === "student"
                 ? "Available Courses"
                 : "Trending Skills"}
@@ -199,7 +202,7 @@ const PublicHome = () => {
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
           {availableCourses.slice(0, 6).map((course, i) => (
             <div
               key={course.id}
@@ -244,8 +247,8 @@ const PublicHome = () => {
       </section>
 
       {/* Footer Teaser */}
-      <footer className="relative z-10 max-w-7xl mx-auto px-6 py-20 text-center border-t border-white/5 opacity-40">
-        <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">
+      <footer className="relative z-10 max-w-7xl mx-auto px-6 pb-22 text-center border-t border-white/5">
+        <p className="text-xs font-bold text-white uppercase tracking-widest">
           &copy; {new Date().getFullYear()} VirtualCitySchool Ecosystem. All
           Rights Reserved.
         </p>

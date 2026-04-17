@@ -8,7 +8,10 @@ import {
   selectSessions,
   selectCourses,
   fetchCourses,
+  fetchAvailableStudents,
+  selectAvailableStudents,
 } from "../../store/slices/adminSlice";
+import { adminSessionService } from "../../services/adminSessionService";
 import { Button, Input, Card } from "../../components/ui";
 import { useFieldErrors } from "../../hooks";
 import { normalizeApiError } from "../../utils/errorHandler";
@@ -23,12 +26,18 @@ const AdminSessionsPage = () => {
   const [loadingSessionIds, setLoadingSessionIds] = useState(new Set());
   const [updatingSessionId, setUpdatingSessionId] = useState(null);
 
+  // Private students state for course-specific dropdown
+  const [privateStudents, setPrivateStudents] = useState([]);
+  const [privateStudentsLoading, setPrivateStudentsLoading] = useState(false);
+  const [privateStudentsError, setPrivateStudentsError] = useState(null);
+
   // Session form states
   const [createSessionForm, setCreateSessionForm] = useState({
     course_id: "",
     title: "",
     start_time: "",
-    meeting_link: "",
+    session_type: "group",
+    private_student_id: "",
   });
 
   const [editSessionForm, setEditSessionForm] = useState({});
@@ -40,6 +49,7 @@ const AdminSessionsPage = () => {
   // Get data from Redux store
   const sessions = useSelector(selectSessions);
   const courses = useSelector(selectCourses);
+  const availableStudents = useSelector(selectAvailableStudents);
 
   // Error handling
   const {
@@ -61,6 +71,7 @@ const AdminSessionsPage = () => {
   // Fetch courses on component mount (sessions fetched by AdminLayout)
   useEffect(() => {
     dispatch(fetchCourses()); // For course dropdown
+    dispatch(fetchAvailableStudents()); // For private session student selection
   }, [dispatch]);
 
   // Reset create session form when modal opens/closes
@@ -70,14 +81,55 @@ const AdminSessionsPage = () => {
         course_id: "",
         title: "",
         start_time: "",
-        end_time: "",
-        meeting_link: "",
+        session_type: "group",
+        private_student_id: "",
       });
       clearAllCreateSessionErrors();
     } else if (activeModal === null) {
       clearAllCreateSessionErrors();
     }
   }, [activeModal, clearAllCreateSessionErrors]);
+
+  // Fetch private students when course and session type change
+  useEffect(() => {
+    const fetchPrivateStudents = async () => {
+      if (
+        createSessionForm.session_type === "private" &&
+        createSessionForm.course_id
+      ) {
+        try {
+          setPrivateStudentsLoading(true);
+          setPrivateStudentsError(null);
+          const students = await adminSessionService.getPrivateStudentsByCourse(
+            createSessionForm.course_id,
+          );
+          setPrivateStudents(students);
+        } catch (error) {
+          console.error("Error fetching private students:", error);
+          setPrivateStudentsError("Failed to fetch private students");
+          setPrivateStudents([]);
+        } finally {
+          setPrivateStudentsLoading(false);
+        }
+      } else {
+        // Clear private students when not needed
+        setPrivateStudents([]);
+        setPrivateStudentsError(null);
+      }
+    };
+
+    fetchPrivateStudents();
+  }, [createSessionForm.course_id, createSessionForm.session_type]);
+
+  // Reset private_student_id when course or session type changes
+  useEffect(() => {
+    if (createSessionForm.private_student_id) {
+      setCreateSessionForm((prev) => ({
+        ...prev,
+        private_student_id: "",
+      }));
+    }
+  }, [createSessionForm.course_id, createSessionForm.session_type]);
 
   // Reset edit session form when edit modal opens/closes
   useEffect(() => {
@@ -188,14 +240,9 @@ const AdminSessionsPage = () => {
       }
     }
 
-    if (!formData.meeting_link.trim()) {
-      errors.meeting_link = "Meeting link is required";
-    } else {
-      try {
-        new URL(formData.meeting_link);
-      } catch {
-        errors.meeting_link = "Please enter a valid URL";
-      }
+    if (formData.session_type === "private" && !formData.private_student_id) {
+      errors.private_student_id =
+        "Student selection is required for private sessions";
     }
 
     return errors;
@@ -251,8 +298,29 @@ const AdminSessionsPage = () => {
       return;
     }
 
+    // Find selected course and extract instructor_id
+    const selectedCourse = courses?.data?.find(
+      (c) => c.id === Number(sessionData.course_id),
+    );
+    const instructor_id = selectedCourse?.instructor?.id;
+
+    if (!instructor_id) {
+      toastManager.error("Course instructor not found");
+      return;
+    }
+
+    // Create payload with instructor_id and conditional private_student_id
+    const payload = {
+      ...sessionData,
+      instructor_id,
+      private_student_id:
+        sessionData.session_type === "private"
+          ? sessionData.private_student_id
+          : undefined,
+    };
+
     try {
-      await dispatch(createSession(sessionData)).unwrap();
+      await dispatch(createSession(payload)).unwrap();
       toastManager.success("Session created successfully");
       setActiveModal(null);
       dispatch(fetchSessions());
@@ -260,8 +328,8 @@ const AdminSessionsPage = () => {
         course_id: "",
         title: "",
         start_time: "",
-        end_time: "",
-        meeting_link: "",
+        session_type: "group",
+        private_student_id: "",
       });
       clearAllCreateSessionErrors();
     } catch (error) {
@@ -342,6 +410,10 @@ const AdminSessionsPage = () => {
     <SessionsTab
       sessions={sessions?.data || []}
       courses={courses?.data || []}
+      availableStudents={availableStudents?.data || []}
+      privateStudents={privateStudents}
+      privateStudentsLoading={privateStudentsLoading}
+      privateStudentsError={privateStudentsError}
       loading={sessions?.loading || false}
       loadingSessionIds={loadingSessionIds}
       updatingSessionId={updatingSessionId}

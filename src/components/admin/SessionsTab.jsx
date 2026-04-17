@@ -4,6 +4,9 @@ import { Button, Input, Card } from "../../components/ui";
 const SessionsTab = ({
   sessions,
   courses,
+  privateStudents,
+  privateStudentsLoading,
+  privateStudentsError,
   loading,
   loadingSessionIds,
   updatingSessionId,
@@ -65,7 +68,17 @@ const SessionsTab = ({
   const handleCreateSession = async (e) => {
     e.preventDefault();
     try {
-      await onSessionCreate(createSessionForm);
+      // Create payload based on session type
+      const payload = {
+        ...createSessionForm,
+      };
+
+      // Remove private_student_id for group sessions
+      if (payload.session_type === "group") {
+        delete payload.private_student_id;
+      }
+
+      await onSessionCreate(payload);
     } catch (error) {
       console.error("Failed to create session:", error);
     }
@@ -97,12 +110,12 @@ const SessionsTab = ({
         text: "text-blue-400",
         border: "border-blue-500/20",
       },
-      ongoing: {
+      live: {
         bg: "bg-emerald-500/20",
         text: "text-emerald-400",
         border: "border-emerald-500/20",
       },
-      completed: {
+      ended: {
         bg: "bg-slate-500/20",
         text: "text-slate-400",
         border: "border-slate-500/20",
@@ -504,7 +517,8 @@ const SessionsTab = ({
                   <option value="">Select course</option>
                   {courses?.map((course) => (
                     <option key={course.id} value={course.id}>
-                      {course.title}
+                      {course.title} {" - "}({" "}
+                      {course.instructor?.username || "No instructor"})
                     </option>
                   ))}
                 </select>
@@ -543,65 +557,104 @@ const SessionsTab = ({
                 )}
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Start Time <span className="text-red-400">*</span>
-                  </label>
-                  <input
-                    type="datetime-local"
-                    value={createSessionForm.start_time}
-                    min={new Date().toISOString().slice(0, 16)}
-                    onChange={(e) => {
-                      setCreateSessionForm({
-                        ...createSessionForm,
-                        start_time: e.target.value,
-                      });
-                      clearCreateSessionFieldError("start_time");
-                    }}
-                    className={`w-full px-3 py-2 bg-slate-800 border rounded-lg text-white focus:outline-none focus:ring-2 ${
-                      createSessionErrors?.start_time
-                        ? "border-red-500 focus:ring-red-500"
-                        : "border-slate-700 focus:ring-indigo-500"
-                    }`}
-                  />
-                  {createSessionErrors?.start_time && (
-                    <p className="text-red-400 text-xs mt-1">
-                      {createSessionErrors.start_time}
-                    </p>
-                  )}
-                </div>
-
-                <div></div>
-              </div>
-
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-2">
-                  Meeting Link <span className="text-red-400">*</span>
+                  Start Time <span className="text-red-400">*</span>
                 </label>
                 <input
-                  type="url"
-                  placeholder="https://meet.google.com/..."
-                  value={createSessionForm.meeting_link}
+                  type="datetime-local"
+                  value={createSessionForm.start_time}
+                  min={new Date().toISOString().slice(0, 16)}
                   onChange={(e) => {
                     setCreateSessionForm({
                       ...createSessionForm,
-                      meeting_link: e.target.value,
+                      start_time: e.target.value,
                     });
-                    clearCreateSessionFieldError("meeting_link");
+                    clearCreateSessionFieldError("start_time");
                   }}
                   className={`w-full px-3 py-2 bg-slate-800 border rounded-lg text-white focus:outline-none focus:ring-2 ${
-                    createSessionErrors?.meeting_link
+                    createSessionErrors?.start_time
                       ? "border-red-500 focus:ring-red-500"
                       : "border-slate-700 focus:ring-indigo-500"
                   }`}
                 />
-                {createSessionErrors?.meeting_link && (
+                {createSessionErrors?.start_time && (
                   <p className="text-red-400 text-xs mt-1">
-                    {createSessionErrors.meeting_link}
+                    {createSessionErrors.start_time}
                   </p>
                 )}
               </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  Session Type <span className="text-red-400">*</span>
+                </label>
+                <select
+                  value={createSessionForm.session_type}
+                  onChange={(e) => {
+                    setCreateSessionForm({
+                      ...createSessionForm,
+                      session_type: e.target.value,
+                      private_student_id:
+                        e.target.value === "group"
+                          ? ""
+                          : createSessionForm.private_student_id,
+                    });
+                  }}
+                  className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                >
+                  <option value="group">Group Session</option>
+                  <option value="private">Private Session</option>
+                </select>
+              </div>
+
+              {createSessionForm.session_type === "private" && (
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    Student <span className="text-red-400">*</span>
+                  </label>
+                  {privateStudentsLoading ? (
+                    <div className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-400 text-sm">
+                      Loading students...
+                    </div>
+                  ) : privateStudentsError ? (
+                    <div className="w-full px-3 py-2 bg-slate-800 border border-red-500 rounded-lg text-red-400 text-sm">
+                      {privateStudentsError}
+                    </div>
+                  ) : (
+                    <select
+                      value={createSessionForm.private_student_id}
+                      onChange={(e) => {
+                        setCreateSessionForm({
+                          ...createSessionForm,
+                          private_student_id: e.target.value,
+                        });
+                        clearCreateSessionFieldError("private_student_id");
+                      }}
+                      className={`w-full px-3 py-2 bg-slate-800 border rounded-lg text-white focus:outline-none focus:ring-2 ${
+                        createSessionErrors?.private_student_id
+                          ? "border-red-500 focus:ring-red-500"
+                          : "border-slate-700 focus:ring-indigo-500"
+                      }`}
+                    >
+                      <option value="">Select student</option>
+                      {privateStudents?.map((student) => (
+                        <option
+                          key={student.student_id}
+                          value={student.student_id}
+                        >
+                          {student.username} ({student.email})
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                  {createSessionErrors?.private_student_id && (
+                    <p className="text-red-400 text-xs mt-1">
+                      {createSessionErrors.private_student_id}
+                    </p>
+                  )}
+                </div>
+              )}
 
               <div className="flex gap-3 pt-4">
                 <button
@@ -661,7 +714,8 @@ const SessionsTab = ({
                     <option value="">Select course</option>
                     {courses?.map((course) => (
                       <option key={course.id} value={course.id}>
-                        {course.title}
+                        {course.title} -{" "}
+                        {course.instructor?.username || "No instructor"}
                       </option>
                     ))}
                   </select>

@@ -41,26 +41,14 @@ const Marketplace = () => {
 
   // Fetch courses on component mount
   useEffect(() => {
-    let isMounted = true;
-
-    // Prevent double fetch in React StrictMode development
-    const fetchCourses = () => {
-      if (isMounted) {
-        dispatch(fetchAllCourses());
-      }
-    };
-
-    // Immediate fetch
-    fetchCourses();
+    if (courses?.length <= 0) {
+      dispatch(fetchAllCourses());
+    }
 
     // Fetch student dashboard if user is logged in as student
     if (auth.isLoggedIn && auth.role === "student") {
       dispatch(fetchStudentDashboard());
     }
-
-    return () => {
-      isMounted = false;
-    };
   }, [dispatch, auth.isLoggedIn, auth.role]);
 
   // Get unique values for filter options
@@ -397,8 +385,8 @@ const Marketplace = () => {
     >
       {/* Hero Search Section */}
       <div className="relative overflow-hidden bg-linear-to-r from-blue-900/30 via-[#0f172a] to-purple-900/30 border-b border-slate-800/50">
-        <div className="max-w-7xl mx-auto px-6 py-28 text-center relative z-10">
-          <h1 className="text-5xl md:text-7xl font-black font-poppins mb-6 leading-tight tracking-tight">
+        <div className="max-w-7xl mx-auto px-6 pt-12 md:py-16 text-center relative z-10">
+          <h1 className="text-3xl md:text-5xl font-black font-poppins mb-4 leading-tight tracking-tight">
             Expand your <span className="text-blue-500">potential</span>.
           </h1>
           <p className="text-slate-400 text-lg mb-14 max-w-2xl mx-auto font-medium">
@@ -429,7 +417,7 @@ const Marketplace = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-20">
+      <div className="max-w-7xl mx-auto px-6 pt-10 pb-24">
         <div className="flex flex-col lg:flex-row gap-16">
           <aside className="lg:w-80 shrink-0 space-y-8">
             {/* Filter Toggle Button (Mobile) */}

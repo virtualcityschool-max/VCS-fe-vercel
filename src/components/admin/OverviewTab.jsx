@@ -126,7 +126,7 @@ const OverviewTab = ({
           color="indigo"
         />
         <StatCard
-          label="Active Students"
+          label="Enrolled Students"
           value={analytics.users.students}
           icon="fas fa-graduation-cap"
           trend={8}
@@ -145,6 +145,36 @@ const OverviewTab = ({
           icon="fas fa-chart-line"
           trend={23}
           color="amber"
+        />
+      </div>
+
+      {/* Detailed Stats Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <StatCard
+          label="Teachers"
+          value={analytics.users.teachers}
+          icon="fas fa-chalkboard-teacher"
+          color="blue"
+        />
+        <StatCard
+          label="Parents"
+          value={analytics.users.parents}
+          icon="fas fa-user-friends"
+          color="rose"
+        />
+        <StatCard
+          label="Active Users"
+          value={analytics.users.active}
+          icon="fas fa-user-check"
+          trend={5}
+          color="emerald"
+        />
+        <StatCard
+          label="Enrollments"
+          value={analytics.enrollments.total}
+          icon="fas fa-user-plus"
+          trend={18}
+          color="purple"
         />
       </div>
 
@@ -282,36 +312,6 @@ const OverviewTab = ({
             </BarChart>
           </ResponsiveContainer>
         </div>
-      </div>
-
-      {/* Detailed Stats Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-        <StatCard
-          label="Teachers"
-          value={analytics.users.teachers}
-          icon="fas fa-chalkboard-teacher"
-          color="blue"
-        />
-        <StatCard
-          label="Parents"
-          value={analytics.users.parents}
-          icon="fas fa-user-friends"
-          color="rose"
-        />
-        <StatCard
-          label="Active Users"
-          value={analytics.users.active}
-          icon="fas fa-user-check"
-          trend={5}
-          color="emerald"
-        />
-        <StatCard
-          label="Enrollments"
-          value={analytics.enrollments.total}
-          icon="fas fa-user-plus"
-          trend={18}
-          color="purple"
-        />
       </div>
 
       {/* Enrollment Activity Chart */}

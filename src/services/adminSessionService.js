@@ -13,10 +13,14 @@ const adminSessionService = {
   createSession: async (sessionData) => {
     // Map frontend field names to backend field names
     const mappedData = {
-      course: sessionData.course_id,
+      course: Number(sessionData.course_id),
+      instructor_id: Number(sessionData.instructor_id),
       title: sessionData.title,
       scheduled_at: sessionData.start_time,
-      meeting_link: sessionData.meeting_link,
+      status: "scheduled",
+      ...(sessionData.private_student_id && {
+        private_student_id: Number(sessionData.private_student_id),
+      }),
     };
     const response = await axiosInstance.post(
       "/classroom/sessions/",
@@ -51,6 +55,14 @@ const adminSessionService = {
   getSessionById: async (sessionId) => {
     const response = await axiosInstance.get(
       `/classroom/sessions/${sessionId}/`,
+    );
+    return response.data;
+  },
+
+  // Get private students for a specific course
+  getPrivateStudentsByCourse: async (courseId) => {
+    const response = await axiosInstance.get(
+      `/courses/${courseId}/private-students/`,
     );
     return response.data;
   },

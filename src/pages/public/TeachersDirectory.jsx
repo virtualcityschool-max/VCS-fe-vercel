@@ -2,12 +2,14 @@ import { useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchTeachers } from "../../store/slices/teacherSlice";
+import { useAuth } from "../../hooks/useAuth";
 
 const TeachersDirectory = () => {
   const [hasFetched, setHasFetched] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
   const abortControllerRef = useRef(null);
+  const { isAuthenticated } = useAuth();
 
   const dispatch = useDispatch();
   const { teachers, loading, error } = useSelector((state) => state.teachers);
@@ -26,12 +28,16 @@ const TeachersDirectory = () => {
 
       try {
         if (!query) {
-          await dispatch(fetchTeachers({}));
+          // Only fetch if we don't already have teachers data
+          if (teachers.length <= 0) {
+            await dispatch(fetchTeachers({}));
+            console.log("Fetched teachers when no teacher search:", teachers);
+          }
           setHasFetched(true);
           return;
         }
-
         const result = await dispatch(fetchTeachers({ teacher: query }));
+        console.log("Teacher search result:", result);
         const data = result.payload;
 
         // Check if request was aborted
@@ -43,6 +49,8 @@ const TeachersDirectory = () => {
           // Only fetch by course if the teacher search returned no results
           // and the request wasn't aborted
           await dispatch(fetchTeachers({ course: query }));
+          // console.log("Teachers:", );
+          
         }
 
         setHasFetched(true);
@@ -64,12 +72,9 @@ const TeachersDirectory = () => {
   }, [dispatch, searchQuery]);
 
   return (
-    <section
-      id="teachers-view"
-      className="min-h-screen bg-slate-950 text-white font-inter"
-    >
-      <div className="max-w-7xl mx-auto px-6 py-12 sm:py-20 text-center">
-        <h1 className="text-4xl sm:text-6xl font-black font-poppins mb-6">
+    <section id="teachers-view" className="bg-slate-950 text-white font-inter">
+      <div className="max-w-7xl mx-auto px-6 pt-12 text-center">
+        <h1 className="text-3xl md:text-5xl font-black font-poppins mb-6">
           Find your <span className="text-indigo-500">Mentor</span>.
         </h1>
         <p className="text-slate-400 text-base sm:text-lg mb-12 max-w-2xl mx-auto">
@@ -92,10 +97,10 @@ const TeachersDirectory = () => {
         </div>
 
         <div className="p-6">
-          {!hasFetched || loading ? (
+          {loading ? (
             // Loader
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {[...Array(6)].map((_, i) => (
+              {[...Array(3)].map((_, i) => (
                 <div
                   key={i}
                   className="animate-pulse bg-slate-900 border border-slate-800 rounded-3xl p-6"
@@ -179,12 +184,14 @@ const TeachersDirectory = () => {
                   </div>
 
                   {/* CTA */}
-                  <button
-                    onClick={() => navigate(`/teachers/${teacher.id}`)}
-                    className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold uppercase tracking-wide transition shadow-md hover:shadow-indigo-500/30"
-                  >
-                    View Profile
-                  </button>
+                  {isAuthenticated && (
+                    <button
+                      onClick={() => navigate(`/teachers/${teacher.id}`)}
+                      className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold uppercase tracking-wide transition shadow-md hover:shadow-indigo-500/30"
+                    >
+                      View Profile
+                    </button>
+                  )}
 
                   {/* Hover glow */}
                   <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition pointer-events-none bg-indigo-500/5" />
@@ -199,3 +206,4 @@ const TeachersDirectory = () => {
 };
 
 export default TeachersDirectory;
+

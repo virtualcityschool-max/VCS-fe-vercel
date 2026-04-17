@@ -67,9 +67,12 @@ const SimulatorBar = () => {
       });
     }
 
-    // When logged in, only show buttons that are public or match the user's role
+    // When logged in, only show buttons that are public (except Public Home) or match the user's role
     return buttons.filter((button) => {
-      // Show public buttons
+      // Hide Public Home for logged-in users
+      if (button.id === "/") return false;
+
+      // Show public buttons (except Public Home which is handled above)
       if (button.public) return true;
 
       // Show buttons that match the user's role

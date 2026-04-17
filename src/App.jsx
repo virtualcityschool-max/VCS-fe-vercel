@@ -162,7 +162,29 @@ const App = () => {
         <main className="relative z-10">
           <Routes>
             {/* Public Routes */}
-            <Route path="/" element={<PublicHome />} />
+            <Route
+              path="/"
+              element={
+                isLoggedIn ? (
+                  <Navigate
+                    to={
+                      role === "student"
+                        ? "/student"
+                        : role === "teacher"
+                          ? "/teacher"
+                          : role === "admin"
+                            ? "/admin"
+                            : role === "parent"
+                              ? "/parent"
+                              : "/"
+                    }
+                    replace
+                  />
+                ) : (
+                  <PublicHome />
+                )
+              }
+            />
             <Route path="/courses" element={<Marketplace />} />
             <Route path="/courses/:courseId" element={<CourseDetails />} />
             <Route path="/teachers" element={<TeachersDirectory />} />
@@ -232,8 +254,8 @@ const App = () => {
         {/* Global Overlays and Modals */}
         <section className="relative z-50">
           <AuthModals />
-          <AIChat />
-          <SimulatorBar />
+          {/* <AIChat /> */}
+          {isLoggedIn && <SimulatorBar />}
           <ToastContainer
             position="top-right"
             autoClose={4000}

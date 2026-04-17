@@ -255,13 +255,15 @@ const CoursesTab = ({
                     ))}
                   </select>
                 </div>
-                <button
-                  onClick={resetCourseFilters}
-                  className="bg-slate-700/50 hover:bg-slate-600/50 text-slate-300 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-2 border border-slate-600/50 hover:border-slate-500/50"
-                >
-                  <i className="fas fa-times text-sm"></i>
-                  Clear Filters
-                </button>
+                <div className="lg:pt-5.5">
+                  <button
+                    onClick={resetCourseFilters}
+                    className="bg-slate-700/50 hover:bg-slate-600/50 text-slate-300 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-2 border border-slate-600/50 hover:border-slate-500/50"
+                  >
+                    <i className="fas fa-times text-sm"></i>
+                    Clear Filters
+                  </button>
+                </div>
               </div>
             </div>
           )}
