@@ -11,6 +11,7 @@ import {
 } from "../../store/slices/teacherSlice";
 import { createAnnouncement } from "../../store/slices/announcementsSlice";
 import { toastManager } from "../../utils/toastManager";
+import CourseStudentsModal from "../../components/courses/CourseStudentsModal";
 
 const TeacherPortal = () => {
   const navigate = useNavigate();
@@ -20,6 +21,7 @@ const TeacherPortal = () => {
   const [courseId, setCourseId] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAnnouncementModalOpen, setIsAnnouncementModalOpen] = useState(false);
+  const [studentsModal, setStudentsModal] = useState(null);
 
   const {
     dashboard,
@@ -295,6 +297,9 @@ const TeacherPortal = () => {
                 <div
                   key={course.id}
                   className="bg-slate-900 p-4 rounded-xl border border-slate-800 hover:border-indigo-500 transition cursor-pointer group"
+                  onClick={() =>
+                    setStudentsModal({ id: course.id, title: course.title })
+                  }
                 >
                   <div className="flex items-center justify-between">
                     <div>
@@ -418,6 +423,15 @@ const TeacherPortal = () => {
           </div>
         </div>
       </div>
+
+      {studentsModal && (
+        <CourseStudentsModal
+          courseId={studentsModal.id}
+          courseTitle={studentsModal.title}
+          onClose={() => setStudentsModal(null)}
+          canUnenroll={false}
+        />
+      )}
 
       {isAnnouncementModalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">

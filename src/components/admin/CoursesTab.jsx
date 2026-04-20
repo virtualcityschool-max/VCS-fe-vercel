@@ -1,6 +1,7 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { Button, Input, Card } from "../../components/ui";
 import { BACKEND_CATEGORIES, formatCategoryLabel } from "../../constants";
+import CourseStudentsModal from "../courses/CourseStudentsModal";
 
 const CoursesTab = ({
   courses,
@@ -29,6 +30,8 @@ const CoursesTab = ({
   courseFilters,
   setCourseFilters,
 }) => {
+  const [studentsModal, setStudentsModal] = useState(null);
+
   // Filter courses based on search term and filters
   const filteredCourses = useMemo(() => {
     if (!courses || courses.length === 0) return [];
@@ -310,7 +313,10 @@ const CoursesTab = ({
               {filteredCourses?.map((course) => (
                 <div
                   key={course.id}
-                  className="p-4 sm:p-6 hover:bg-slate-800/30 transition"
+                  className="p-4 sm:p-6 hover:bg-slate-800/30 transition cursor-pointer"
+                  onClick={() =>
+                    setStudentsModal({ id: course.id, title: course.title })
+                  }
                 >
                   <div className="flex flex-col gap-4">
                     {/* Course Info */}
@@ -362,7 +368,10 @@ const CoursesTab = ({
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex flex-col gap-2">
+                    <div
+                      className="flex flex-col gap-2"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <button
                         onClick={() => onCourseEdit(course.id)}
                         className="bg-slate-700/50 text-slate-300 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-slate-600/50 transition flex items-center gap-2"
@@ -421,6 +430,9 @@ const CoursesTab = ({
                   <th className="px-6 py-4 text-xs font-black uppercase text-slate-500">
                     Status
                   </th>
+                  <th className="px-6 py-4 text-xs font-black uppercase text-slate-500">
+                    Enrolled Students
+                  </th>
                   <th className="px-6 py-4 text-xs font-black uppercase text-slate-500 text-right">
                     Actions
                   </th>
@@ -430,7 +442,10 @@ const CoursesTab = ({
                 {filteredCourses?.map((course) => (
                   <tr
                     key={course.id}
-                    className="hover:bg-slate-800/30 transition"
+                    className="hover:bg-slate-800/30 transition cursor-pointer"
+                    onClick={() =>
+                      setStudentsModal({ id: course.id, title: course.title })
+                    }
                   >
                     <td className="px-6 py-4">
                       <div>
@@ -480,7 +495,15 @@ const CoursesTab = ({
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex items-center gap-2 justify-end">
+                      <span className="text-white font-medium">
+                        {course.enrolled_students_count}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div
+                        className="flex items-center gap-2 justify-end"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <button
                           onClick={() => onCourseEdit(course.id)}
                           className="bg-slate-700/50 text-slate-300 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-slate-600/50 transition"
@@ -986,6 +1009,16 @@ const CoursesTab = ({
             </div>
           </div>
         )}
+
+      {/* Enrolled Students Modal */}
+      {studentsModal && (
+        <CourseStudentsModal
+          courseId={studentsModal.id}
+          courseTitle={studentsModal.title}
+          onClose={() => setStudentsModal(null)}
+          canUnenroll={true}
+        />
+      )}
 
       {/* Assign Instructor Modal */}
       {activeModal &&
