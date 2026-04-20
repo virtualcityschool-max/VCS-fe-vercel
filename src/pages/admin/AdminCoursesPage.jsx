@@ -32,7 +32,9 @@ const AdminCoursesPage = () => {
     category: "",
     price: "",
     status: "draft",
-    instructor_ids: [],
+    instructor_id: "",
+    days_of_recurring: [],
+    time: "",
   });
 
   const [editCourseForm, setEditCourseForm] = useState({});
@@ -81,7 +83,9 @@ const AdminCoursesPage = () => {
         category: "",
         price: "",
         status: "draft",
-        instructor_ids: [],
+        instructor_id: "",
+        days_of_recurring: [],
+        time: "",
       });
       clearAllCreateCourseErrors();
     } else if (activeModal === null) {
@@ -97,23 +101,16 @@ const AdminCoursesPage = () => {
       activeModal.type === "edit-course"
     ) {
       if (editingCourse) {
-        const normalizedInstructorIds = Array.isArray(editingCourse.instructors)
-          ? editingCourse.instructors
-              .map((instructor) => instructor?.id)
-              .filter(Boolean)
-          : editingCourse.instructor?.id
-            ? [editingCourse.instructor.id]
-            : editingCourse.instructor_id
-              ? [editingCourse.instructor_id]
-              : [];
-
         setEditCourseForm({
           title: editingCourse.title || "",
           description: editingCourse.description || "",
           category: editingCourse.category || "",
           price: editingCourse.price || "",
           status: editingCourse.status || "draft",
-          instructor_ids: normalizedInstructorIds,
+          instructor_id:
+            editingCourse.instructor?.id || editingCourse.instructor_id || "",
+          days_of_recurring: editingCourse.days_of_recurring || [],
+          time: editingCourse.time || "",
         });
       }
     } else {
@@ -165,6 +162,18 @@ const AdminCoursesPage = () => {
       errors.status = "Course status is required";
     }
 
+    if (!formData.instructor_id) {
+      errors.instructor_id = "Instructor is required";
+    }
+
+    if (!Array.isArray(formData.days_of_recurring) || !formData.days_of_recurring.length) {
+      errors.days_of_recurring = "Please select at least one recurring day";
+    }
+
+    if (!formData.time) {
+      errors.time = "Time is required";
+    }
+
     return errors;
   };
 
@@ -196,6 +205,18 @@ const AdminCoursesPage = () => {
       errors.status = "Course status is required";
     }
 
+    if (!formData.instructor_id) {
+      errors.instructor_id = "Instructor is required";
+    }
+
+    if (!Array.isArray(formData.days_of_recurring) || !formData.days_of_recurring.length) {
+      errors.days_of_recurring = "Please select at least one recurring day";
+    }
+
+    if (!formData.time) {
+      errors.time = "Time is required";
+    }
+
     return errors;
   };
 
@@ -211,19 +232,7 @@ const AdminCoursesPage = () => {
     }
 
     try {
-      const normalizedInstructorIds = Array.isArray(courseData.instructor_ids)
-        ? courseData.instructor_ids
-            .map((teacher) =>
-              typeof teacher === "object" ? teacher?.id : teacher,
-            )
-            .filter(Boolean)
-        : [];
-
-      const payload = {
-        ...courseData,
-        instructor_ids: normalizedInstructorIds,
-      };
-      await dispatch(createCourse(payload)).unwrap();
+      await dispatch(createCourse(courseData)).unwrap();
       toastManager.success("Course created successfully");
       setActiveModal(null);
       dispatch(fetchCourses());
@@ -233,7 +242,9 @@ const AdminCoursesPage = () => {
         category: "",
         price: "",
         status: "draft",
-        instructor_ids: [],
+        instructor_id: "",
+        days_of_recurring: [],
+        time: "",
       });
       clearAllCreateCourseErrors();
     } catch (error) {
@@ -258,19 +269,8 @@ const AdminCoursesPage = () => {
 
     setUpdatingCourseId(editingCourse.id);
     try {
-      const normalizedInstructorIds = Array.isArray(courseData.instructor_ids)
-        ? courseData.instructor_ids
-            .map((teacher) =>
-              typeof teacher === "object" ? teacher?.id : teacher,
-            )
-            .filter(Boolean)
-        : [];
-
       await dispatch(
-        updateCourse({
-          courseId: editingCourse.id,
-          courseData: { ...courseData, instructor_ids: normalizedInstructorIds },
-        }),
+        updateCourse({ courseId: editingCourse.id, courseData }),
       ).unwrap();
       toastManager.success("Course updated successfully");
       setActiveModal(null);
@@ -289,25 +289,15 @@ const AdminCoursesPage = () => {
   };
 
   // Handle instructor assignment
-  const handleAssignInstructor = async (courseId, instructorIds) => {
-    const normalizedInstructorIds = Array.isArray(instructorIds)
-      ? instructorIds
-          .map((teacher) => (typeof teacher === "object" ? teacher?.id : teacher))
-          .filter(Boolean)
-      : [];
-
-    if (!normalizedInstructorIds.length) {
-      toastManager.error("Please select at least one instructor");
+  const handleAssignInstructor = async (courseId, instructorId) => {
+    if (!instructorId) {
+      toastManager.error("Please select an instructor");
       return;
     }
 
     try {
-      await Promise.all(
-        normalizedInstructorIds.map((instructorId) =>
-          dispatch(assignInstructor({ courseId, instructorId })).unwrap(),
-        ),
-      );
-      toastManager.success("Instructor(s) assigned successfully");
+      await dispatch(assignInstructor({ courseId, instructorId })).unwrap();
+      toastManager.success("Instructor assigned successfully");
       setActiveModal(null);
       dispatch(fetchCourses());
     } catch (error) {
