@@ -33,11 +33,13 @@ const AdminSessionsPage = () => {
 
   // Session form states
   const [createSessionForm, setCreateSessionForm] = useState({
-    course_id: "",
+    course: "",
     title: "",
-    start_time: "",
-    session_type: "group",
-    private_student_id: "",
+    scheduled_date: "",
+    scheduled_time: "",
+    is_recurring: false,
+    recurrence_days: [],
+    recurrence_end_date: "",
   });
 
   const [editSessionForm, setEditSessionForm] = useState({});
@@ -78,11 +80,13 @@ const AdminSessionsPage = () => {
   useEffect(() => {
     if (activeModal === "create-session") {
       setCreateSessionForm({
-        course_id: "",
+        course: "",
         title: "",
-        start_time: "",
-        session_type: "group",
-        private_student_id: "",
+        scheduled_date: "",
+        scheduled_time: "",
+        is_recurring: false,
+        recurrence_days: [],
+        recurrence_end_date: "",
       });
       clearAllCreateSessionErrors();
     } else if (activeModal === null) {
@@ -90,46 +94,6 @@ const AdminSessionsPage = () => {
     }
   }, [activeModal, clearAllCreateSessionErrors]);
 
-  // Fetch private students when course and session type change
-  useEffect(() => {
-    const fetchPrivateStudents = async () => {
-      if (
-        createSessionForm.session_type === "private" &&
-        createSessionForm.course_id
-      ) {
-        try {
-          setPrivateStudentsLoading(true);
-          setPrivateStudentsError(null);
-          const students = await adminSessionService.getPrivateStudentsByCourse(
-            createSessionForm.course_id,
-          );
-          setPrivateStudents(students);
-        } catch (error) {
-          console.error("Error fetching private students:", error);
-          setPrivateStudentsError("Failed to fetch private students");
-          setPrivateStudents([]);
-        } finally {
-          setPrivateStudentsLoading(false);
-        }
-      } else {
-        // Clear private students when not needed
-        setPrivateStudents([]);
-        setPrivateStudentsError(null);
-      }
-    };
-
-    fetchPrivateStudents();
-  }, [createSessionForm.course_id, createSessionForm.session_type]);
-
-  // Reset private_student_id when course or session type changes
-  useEffect(() => {
-    if (createSessionForm.private_student_id) {
-      setCreateSessionForm((prev) => ({
-        ...prev,
-        private_student_id: "",
-      }));
-    }
-  }, [createSessionForm.course_id, createSessionForm.session_type]);
 
   // Reset edit session form when edit modal opens/closes
   useEffect(() => {
@@ -219,30 +183,29 @@ const AdminSessionsPage = () => {
   const validateCreateSessionForm = (formData) => {
     const errors = {};
 
-    if (!formData.course_id) {
-      errors.course_id = "Course is required";
-    }
+    if (!formData.course) errors.course = "Course is required";
 
-    if (!formData.title.trim()) {
-      errors.title = "Session title is required";
+    if (!formData.title?.trim()) {
+      errors.title = "Class title is required";
     } else if (formData.title.trim().length < 3) {
       errors.title = "Title must be at least 3 characters";
     }
 
-    if (!formData.start_time) {
-      errors.start_time = "Start time is required";
-    } else {
-      // Check if start time is in the past
-      const startTime = new Date(formData.start_time);
-      const now = new Date();
-      if (startTime < now) {
-        errors.start_time = "Scheduled time must be in the future";
-      }
+    if (!formData.scheduled_date) errors.scheduled_date = "Start date is required";
+    if (!formData.scheduled_time) errors.scheduled_time = "Start time is required";
+
+    if (formData.scheduled_date && formData.scheduled_time) {
+      const scheduled = new Date(`${formData.scheduled_date}T${formData.scheduled_time}`);
+      if (scheduled < new Date()) errors.scheduled_date = "Scheduled time must be in the future";
     }
 
-    if (formData.session_type === "private" && !formData.private_student_id) {
-      errors.private_student_id =
-        "Student selection is required for private sessions";
+    if (formData.is_recurring) {
+      if (!formData.recurrence_days?.length)
+        errors.recurrence_days = "Select at least one recurrence day";
+      if (!formData.recurrence_end_date)
+        errors.recurrence_end_date = "End date is required for recurring classes";
+      else if (formData.scheduled_date && formData.recurrence_end_date <= formData.scheduled_date)
+        errors.recurrence_end_date = "End date must be after start date";
     }
 
     return errors;
@@ -287,10 +250,8 @@ const AdminSessionsPage = () => {
 
   // Handle session creation
   const handleCreateSession = async (sessionData) => {
-    // Clear previous errors first
     clearAllCreateSessionErrors();
 
-    // Run frontend validation
     const validationErrors = validateCreateSessionForm(sessionData);
     if (Object.keys(validationErrors).length > 0) {
       setCreateSessionErrors(validationErrors);
@@ -298,38 +259,46 @@ const AdminSessionsPage = () => {
       return;
     }
 
-    // Find selected course and extract instructor_id
     const selectedCourse = courses?.data?.find(
-      (c) => c.id === Number(sessionData.course_id),
+      (c) => c.id === Number(sessionData.course),
     );
     const instructor_id = selectedCourse?.instructor?.id;
 
     if (!instructor_id) {
-      toastManager.error("Course instructor not found");
+      toastManager.error("Selected course has no instructor assigned");
       return;
     }
 
-    // Create payload with instructor_id and conditional private_student_id
+    // Build ISO datetime with local offset
+    const localOffset = new Date().toTimeString().slice(9, 15).replace(":", "");
+    const offsetStr = `+${localOffset.slice(0, 2)}:${localOffset.slice(2)}`;
+    const scheduled_at = `${sessionData.scheduled_date}T${sessionData.scheduled_time}:00${offsetStr}`;
+
     const payload = {
-      ...sessionData,
+      course: Number(sessionData.course),
       instructor_id,
-      private_student_id:
-        sessionData.session_type === "private"
-          ? sessionData.private_student_id
-          : undefined,
+      title: sessionData.title,
+      scheduled_at,
+      is_recurring: sessionData.is_recurring,
+      ...(sessionData.is_recurring && {
+        recurrence_days: sessionData.recurrence_days,
+        recurrence_end_date: sessionData.recurrence_end_date,
+      }),
     };
 
     try {
       await dispatch(createSession(payload)).unwrap();
-      toastManager.success("Session created successfully");
+      toastManager.success("Class created successfully");
       setActiveModal(null);
       dispatch(fetchSessions());
       setCreateSessionForm({
-        course_id: "",
+        course: "",
         title: "",
-        start_time: "",
-        session_type: "group",
-        private_student_id: "",
+        scheduled_date: "",
+        scheduled_time: "",
+        is_recurring: false,
+        recurrence_days: [],
+        recurrence_end_date: "",
       });
       clearAllCreateSessionErrors();
     } catch (error) {

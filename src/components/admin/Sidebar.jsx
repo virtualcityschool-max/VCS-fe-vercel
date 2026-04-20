@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import UserProfileDropdown from "../layout/UserProfileDropdown";
 
-// Mobile breakpoint constant
 const MOBILE_BREAKPOINT = 1024;
 
 const Sidebar = ({
@@ -40,15 +40,14 @@ const Sidebar = ({
     },
     {
       id: "sessions",
-      label: "Sessions",
-      icon: "fas fa-video",
+      label: "Classes",
+      icon: "fas fa-chalkboard",
       path: "/admin/sessions",
     },
   ];
 
   const handleTabClick = (path) => {
     navigate(path);
-    // Close sidebar on mobile after navigation using callback
     if (window.innerWidth < MOBILE_BREAKPOINT && onMobileClose) {
       onMobileClose();
     }
@@ -56,11 +55,12 @@ const Sidebar = ({
 
   return (
     <aside
-      className={`w-72 bg-slate-950 border-r border-slate-800 flex flex-col fixed h-full z-50 transition-transform duration-300 lg:translate-x-0 ${
+      className={`w-72 bg-slate-950 border-r border-slate-800 flex flex-col fixed h-full z-50 overflow-visible transition-transform duration-300 lg:translate-x-0 ${
         isSidebarOpen ? "translate-x-0" : "-translate-x-full"
       }`}
     >
-      <div className="p-6 border-b border-slate-800">
+      {/* Logo + close button */}
+      <div className="p-6 border-b border-slate-800 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
             <i className="fas fa-graduation-cap text-white text-lg"></i>
@@ -72,9 +72,16 @@ const Sidebar = ({
             <p className="text-xs text-slate-400">Admin Portal</p>
           </div>
         </div>
+        <button
+          onClick={onMobileClose}
+          className="lg:hidden text-slate-400 hover:text-white transition p-1"
+        >
+          <i className="fas fa-times text-lg"></i>
+        </button>
       </div>
 
-      <div className="flex-1 p-6">
+      {/* Nav items */}
+      <div className="flex-1 p-6 overflow-y-auto">
         <nav className="space-y-2">
           {tabs.map((tab) => (
             <button
@@ -100,16 +107,9 @@ const Sidebar = ({
         </nav>
       </div>
 
-      <div className="p-6 border-t border-slate-800">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center">
-            <span className="text-white font-bold text-sm">AD</span>
-          </div>
-          <div className="flex-1">
-            <p className="text-sm font-medium text-white">Admin User</p>
-            <p className="text-xs text-slate-400">admin@virtualcity.edu</p>
-          </div>
-        </div>
+      {/* User profile at bottom */}
+      <div className="p-4 border-t border-slate-800 relative">
+        <UserProfileDropdown dropUp />
       </div>
     </aside>
   );

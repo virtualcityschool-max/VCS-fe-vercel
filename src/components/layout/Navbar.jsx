@@ -55,8 +55,8 @@ const Navbar = ({ variant = "default" }) => {
               className="flex items-center gap-2 sm:gap-3 group cursor-pointer shrink-0"
               onClick={() => navigate("/")}
             >
-              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-indigo-600 rounded-xl flex items-center justify-center font-black text-white shadow-xl shadow-indigo-900/40 group-hover:rotate-12 transition-all">
-                V
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-xl shadow-indigo-900/40 group-hover:rotate-12 transition-all">
+                <i className="fas fa-graduation-cap text-white text-xs sm:text-sm"></i>
               </div>
               <span className="text-sm xs:text-lg sm:text-2xl font-black font-poppins tracking-tighter whitespace-nowrap">
                 VirtualCitySchool
@@ -145,7 +145,7 @@ const Navbar = ({ variant = "default" }) => {
                 Feed
               </button>
             )} */}
-            <button
+            {/* <button
               onClick={() => {
                 if (role === "student") navigate("/student");
                 if (role === "teacher") navigate("/teacher");
@@ -162,8 +162,8 @@ const Navbar = ({ variant = "default" }) => {
               }`}
             >
               Dashboard
-            </button>
-            <button
+            </button> */}
+            {/* <button
               onClick={() => navigate("/teachers")}
               className={`text-slate-400 font-medium text-xs sm:text-sm hover:text-white transition cursor-pointer ${
                 isActivePath("/teachers") ? "text-white" : ""
@@ -178,7 +178,7 @@ const Navbar = ({ variant = "default" }) => {
               }`}
             >
               Catalog
-            </button>
+            </button> */}
           </div>
         </div>
         <div className="flex items-center gap-2 sm:gap-4 shrink-0 ml-4">

@@ -5,7 +5,7 @@ import { logoutUser } from "../../store/slices/authSlice";
 import { ROLES, ROUTES } from "../../constants";
 import { toastManager } from "../../utils/toastManager";
 
-const UserProfileDropdown = () => {
+const UserProfileDropdown = ({ dropUp = false }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
   const dispatch = useDispatch();
@@ -96,12 +96,12 @@ const UserProfileDropdown = () => {
       {/* Profile Button */}
       <button
         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-        className="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-800/50 transition-all duration-200 group"
+        className={`flex items-center gap-3 p-2 rounded-xl hover:bg-slate-800/50 transition-all duration-200 group ${dropUp ? "w-full" : ""}`}
         aria-label="User menu"
         aria-expanded={isDropdownOpen}
       >
         {/* User Info */}
-        <div className="text-right hidden sm:block">
+        <div className={`${dropUp ? "text-left flex-1" : "text-right hidden sm:block"}`}>
           <p className="text-sm font-semibold text-white leading-none mb-1">
             {auth.username || "User"}
           </p>
@@ -151,7 +151,7 @@ const UserProfileDropdown = () => {
 
       {/* Dropdown Menu */}
       {isDropdownOpen && (
-        <div className="absolute right-0 mt-2 w-64 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl overflow-hidden z-50 animate-fadeIn">
+        <div className={`absolute ${dropUp ? "bottom-full mb-2 left-0" : "right-0 mt-2"} w-64 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl overflow-hidden z-[200] animate-fadeIn`}>
           {/* User Info Header */}
           <div className="p-4 border-b border-slate-700 bg-linear-to-r from-slate-800 to-slate-900">
             <div className="flex items-center gap-3">
@@ -203,7 +203,20 @@ const UserProfileDropdown = () => {
               </svg>
               Dashboard
             </button>
-
+            <button
+              onClick={() => { setIsDropdownOpen(false); navigate("/teachers"); }}
+              className="w-full px-4 py-3 text-left text-sm text-slate-300 hover:bg-slate-800 hover:text-white transition-colors duration-150 flex items-center gap-3"
+            >
+              <i className="fas fa-user-graduate"></i>
+              Teachers
+            </button>
+            <button
+              onClick={() => { setIsDropdownOpen(false); navigate("/courses"); }}
+              className="w-full px-4 py-3 text-left text-sm text-slate-300 hover:bg-slate-800 hover:text-white transition-colors duration-150 flex items-center gap-3"
+            >
+              <i className="fas fa-book-open"></i>
+              Courses
+            </button>
             <button
               onClick={handleProfile}
               className="w-full px-4 py-3 text-left text-sm text-slate-300 hover:bg-slate-800 hover:text-white transition-colors duration-150 flex items-center gap-3"
@@ -246,6 +259,7 @@ const UserProfileDropdown = () => {
               Sign Out
             </button>
           </div>
+
         </div>
       )}
     </div>

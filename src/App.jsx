@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   BrowserRouter,
   Routes,
   Route,
   Navigate,
   Outlet,
+  useLocation,
 } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -14,6 +15,8 @@ import { toastManager } from "./utils/toastManager";
 
 // Components
 import { AIChat, AuthModals, Navbar } from "./components";
+import Sidebar from "./components/admin/Sidebar";
+import TeacherSidebar from "./components/teacher/TeacherSidebar";
 
 // Pages
 import {
@@ -50,7 +53,6 @@ const ProtectedRoute = ({ allowedRoles = [] }) => {
     (state) => state.auth,
   );
 
-  // Show loading while auth is initializing
   if (!isInitialized) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center">
@@ -64,101 +66,106 @@ const ProtectedRoute = ({ allowedRoles = [] }) => {
     );
   }
 
-  // Redirect to home if not authenticated
-  if (!isLoggedIn) {
-    return <Navigate to="/" replace />;
-  }
+  if (!isLoggedIn) return <Navigate to="/" replace />;
 
-  // Check role-based access if roles are specified
   if (allowedRoles.length > 0 && !allowedRoles.includes(role)) {
-    // Redirect authenticated users to appropriate dashboard based on their role
     const roleRedirects = {
       student: "/student",
       teacher: "/teacher",
       parent: "/parent",
       admin: "/admin",
     };
-
-    const redirectPath = roleRedirects[role] || "/";
-    return <Navigate to={redirectPath} replace />;
+    return <Navigate to={roleRedirects[role] || "/"} replace />;
   }
 
-  // CRITICAL: Must return Outlet for nested routes to render
   return <Outlet />;
 };
 
-const App = () => {
+// Inner app — inside BrowserRouter so useLocation works
+const AppInner = () => {
   const { isLoggedIn, role, isInitialized } = useSelector(
     (state) => state.auth,
   );
-  const dispatch = useDispatch();
+  const { pendingApprovals } = useSelector((state) => state.approvals);
+  const { pendingChildLinks } = useSelector((state) => state.childLinks);
+  const location = useLocation();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  // Initialize auth on app startup
-  React.useEffect(() => {
-    if (!isInitialized) {
-      dispatch(initializeAuth());
-    }
-  }, [dispatch, isInitialized]);
+  const hasSidebar = isLoggedIn && (role === "admin" || role === "teacher");
 
-  // Handle token refresh events from axiosInstance
-  React.useEffect(() => {
-    const handleTokenRefreshed = (event) => {
-      const { token } = event.detail;
-      console.log("🔄 App: Token refreshed via event");
-      // Update Redux store with new token
-      dispatch({ type: "auth/updateToken", payload: token });
-    };
+  // Close mobile sidebar on route change
+  useEffect(() => {
+    setIsSidebarOpen(false);
+  }, [location.pathname]);
 
-    const handleAuthLogout = () => {
-      console.log("🔄 App: Logout via event");
-      dispatch(logoutUser());
-    };
+  // Compute active tab for admin sidebar highlight
+  const getActiveTab = () => {
+    const p = location.pathname;
+    if (p.includes("/admin/overview")) return "overview";
+    if (p.includes("/admin/approvals")) return "approvals";
+    if (p.includes("/admin/courses")) return "courses";
+    if (p.includes("/admin/users") && p.split("/").length <= 4) return "users";
+    if (p.includes("/admin/enrollments")) return "enrollments";
+    if (p.includes("/admin/sessions")) return "sessions";
+    return null;
+  };
 
-    const handleAuthExpired = (event) => {
-      const { message } = event.detail;
-      console.log("🔄 App: Session expired via event");
+  const totalPendingCount =
+    (pendingApprovals?.length || 0) + (pendingChildLinks?.length || 0);
 
-      // Show user-friendly session expired toast
-      toastManager.error(
-        message || "Your session has expired. Please log in again.",
-      );
-
-      // Clear all toasts and redirect after a short delay
-      setTimeout(() => {
-        toastManager.clear();
-        dispatch(logoutUser());
-      }, 2000);
-    };
-
-    window.addEventListener("token-refreshed", handleTokenRefreshed);
-    window.addEventListener("auth-logout", handleAuthLogout);
-    window.addEventListener("auth-expired", handleAuthExpired);
-
-    return () => {
-      window.removeEventListener("token-refreshed", handleTokenRefreshed);
-      window.removeEventListener("auth-logout", handleAuthLogout);
-      window.removeEventListener("auth-expired", handleAuthExpired);
-    };
-  }, [dispatch]);
-
-  // Debug authentication state
-  React.useEffect(() => {
-    console.log("🔐 App: Auth state updated:", {
-      isLoggedIn,
-      role,
-      isInitialized,
-    });
-  }, [isLoggedIn, role, isInitialized]);
+  // Navbar: hide only on /admin and /teacher routes where sidebar is fully active
+  const onSidebarRoute =
+    location.pathname.startsWith("/admin") ||
+    location.pathname.startsWith("/teacher");
+  const showNavbar = !hasSidebar || !onSidebarRoute;
 
   return (
-    <BrowserRouter>
-      <div className="min-h-screen bg-slate-950 selection:bg-indigo-500/30 overflow-x-hidden">
-        {/* Header with Navigation */}
-        <header className="relative z-50">
-          <Navbar variant={isLoggedIn ? "default" : "public"} />
-        </header>
+    <div className="min-h-screen bg-slate-950 selection:bg-indigo-500/30 overflow-x-hidden">
+      {/* Global sidebar — persists across all pages for admin/teacher */}
+      {hasSidebar && role === "admin" && (
+        <Sidebar
+          activeTab={getActiveTab()}
+          pendingApprovalsCount={totalPendingCount}
+          isSidebarOpen={isSidebarOpen}
+          onMobileClose={() => setIsSidebarOpen(false)}
+        />
+      )}
+      {hasSidebar && role === "teacher" && (
+        <TeacherSidebar
+          isSidebarOpen={isSidebarOpen}
+          setIsSidebarOpen={setIsSidebarOpen}
+        />
+      )}
 
-        {/* Main Content Area */}
+      {/* Mobile overlay */}
+      {hasSidebar && isSidebarOpen && (
+        <div
+          className="lg:hidden fixed inset-0 bg-black/50 z-40"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
+      {/* Content area — offset by sidebar width on desktop */}
+      <div className={hasSidebar ? "lg:ml-72" : ""}>
+        {/* Navbar (hidden on /admin and /teacher routes) */}
+        {showNavbar && (
+          <header className="relative z-50">
+            <Navbar variant={isLoggedIn ? "default" : "public"} />
+          </header>
+        )}
+
+        {/* Floating mobile hamburger (sidebar roles only) */}
+        {hasSidebar && (
+          <button
+            className={`lg:hidden fixed top-4 left-4 z-40 w-10 h-10 bg-slate-900 border border-slate-700 rounded-lg flex items-center justify-center text-slate-400 hover:text-white transition shadow-lg ${
+              isSidebarOpen ? "hidden" : ""
+            }`}
+            onClick={() => setIsSidebarOpen(true)}
+          >
+            <i className="fas fa-bars text-sm"></i>
+          </button>
+        )}
+
         <main className="relative z-10">
           <Routes>
             {/* Public Routes */}
@@ -193,7 +200,6 @@ const App = () => {
             {/* Student-Only Routes */}
             <Route element={<ProtectedRoute allowedRoles={["student"]} />}>
               <Route path="/student" element={<StudentPortal />} />
-              {/* <Route path="/feed" element={<StudentFeed />} /> */}
               <Route
                 path="/student/assignments"
                 element={<StudentAssignments />}
@@ -204,11 +210,6 @@ const App = () => {
               />
             </Route>
 
-            {/* Shared Authenticated Routes */}
-            {/* <Route element={<ProtectedRoute />}>
-              <Route path="/classroom" element={<Classroom />} />
-            </Route> */}
-
             {/* Teacher-Only Routes */}
             <Route element={<ProtectedRoute allowedRoles={["teacher"]} />}>
               <Route path="/teacher" element={<TeacherLayout />}>
@@ -217,7 +218,6 @@ const App = () => {
                 <Route path="attendance" element={<TeacherAttendance />} />
                 <Route path="grading" element={<TeacherGrading />} />
               </Route>
-
               <Route
                 path="/student/:id"
                 element={<TeacherInternalStudentProfile />}
@@ -246,12 +246,11 @@ const App = () => {
               <Route path="/admin/users/:id" element={<UserDetailsPage />} />
             </Route>
 
-            {/* Catch all route */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
 
-        {/* Global Overlays and Modals */}
+        {/* Global Overlays */}
         <section className="relative z-50">
           <AuthModals />
           {/* <AIChat /> */}
@@ -267,6 +266,48 @@ const App = () => {
           />
         </section>
       </div>
+    </div>
+  );
+};
+
+const App = () => {
+  const dispatch = useDispatch();
+  const { isLoggedIn, role, isInitialized } = useSelector(
+    (state) => state.auth,
+  );
+
+  React.useEffect(() => {
+    if (!isInitialized) dispatch(initializeAuth());
+  }, [dispatch, isInitialized]);
+
+  React.useEffect(() => {
+    const handleTokenRefreshed = (event) => {
+      dispatch({ type: "auth/updateToken", payload: event.detail.token });
+    };
+    const handleAuthLogout = () => dispatch(logoutUser());
+    const handleAuthExpired = (event) => {
+      toastManager.error(
+        event.detail?.message || "Your session has expired. Please log in again.",
+      );
+      setTimeout(() => {
+        toastManager.clear();
+        dispatch(logoutUser());
+      }, 2000);
+    };
+
+    window.addEventListener("token-refreshed", handleTokenRefreshed);
+    window.addEventListener("auth-logout", handleAuthLogout);
+    window.addEventListener("auth-expired", handleAuthExpired);
+    return () => {
+      window.removeEventListener("token-refreshed", handleTokenRefreshed);
+      window.removeEventListener("auth-logout", handleAuthLogout);
+      window.removeEventListener("auth-expired", handleAuthExpired);
+    };
+  }, [dispatch]);
+
+  return (
+    <BrowserRouter>
+      <AppInner />
     </BrowserRouter>
   );
 };

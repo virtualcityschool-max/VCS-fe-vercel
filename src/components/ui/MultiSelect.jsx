@@ -12,6 +12,10 @@ const MultiSelect = ({
   containerClassName = "",
   disabled = false,
   loading = false,
+  displayField = "email",
+  searchField = "email",
+  searchPlaceholder = "Search...",
+  emptyMessage = "No options available",
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -32,7 +36,7 @@ const MultiSelect = ({
 
   // Filter options based on search term
   const filteredOptions = options.filter((option) =>
-    option.email.toLowerCase().includes(searchTerm.toLowerCase()),
+    (option[searchField] || "").toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   // Toggle option selection
@@ -89,7 +93,7 @@ const MultiSelect = ({
                   key={item.id}
                   className="inline-flex items-center gap-1 bg-indigo-600 text-white text-xs px-2 py-1 rounded-md"
                 >
-                  {item.email}
+                  {item[displayField] || item.email}
                   {!disabled && (
                     <button
                       type="button"
@@ -126,7 +130,7 @@ const MultiSelect = ({
             <div className="relative">
               <input
                 type="text"
-                placeholder="Search students..."
+                placeholder={searchPlaceholder}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 pl-9 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
@@ -147,7 +151,7 @@ const MultiSelect = ({
               </div>
             ) : filteredOptions.length === 0 ? (
               <div className="p-4 text-center text-slate-400">
-                {searchTerm ? "No students found" : "No available students"}
+                {searchTerm ? "No results found" : emptyMessage}
               </div>
             ) : (
               filteredOptions.map((option) => {
@@ -164,7 +168,7 @@ const MultiSelect = ({
                         : "text-slate-300 hover:bg-slate-700"
                     }`}
                   >
-                    <span className="text-sm">{option.email}</span>
+                    <span className="text-sm">{option[displayField] || option.email}</span>
                     {isSelected && <i className="fas fa-check text-xs"></i>}
                   </div>
                 );

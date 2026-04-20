@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Button, Input, Card } from "../../components/ui";
+import { Button, Input, Card, MultiSelect } from "../../components/ui";
 import { BACKEND_CATEGORIES, formatCategoryLabel } from "../../constants";
 import CourseStudentsModal from "../courses/CourseStudentsModal";
 
@@ -382,9 +382,23 @@ const CoursesTab = ({
                       <div className="flex gap-2">
                         <button
                           onClick={() => {
+                            const existingInstructorIds = Array.isArray(
+                              course.instructors,
+                            )
+                              ? course.instructors
+                                  .map((instructor) => instructor?.id)
+                                  .filter(Boolean)
+                              : course.instructor?.id
+                                ? [course.instructor.id]
+                                : [];
+                            setEditCourseForm((prev) => ({
+                              ...prev,
+                              instructor_ids: existingInstructorIds,
+                            }));
                             setActiveModal({
                               type: "assign-instructor",
                               courseId: course.id,
+                              instructor_ids: existingInstructorIds,
                             });
                           }}
                           className="bg-blue-600/10 text-blue-400 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-blue-600 hover:text-white transition flex items-center gap-2 flex-1"
@@ -513,9 +527,23 @@ const CoursesTab = ({
                         </button>
                         <button
                           onClick={() => {
+                            const existingInstructorIds = Array.isArray(
+                              course.instructors,
+                            )
+                              ? course.instructors
+                                  .map((instructor) => instructor?.id)
+                                  .filter(Boolean)
+                              : course.instructor?.id
+                                ? [course.instructor.id]
+                                : [];
+                            setEditCourseForm((prev) => ({
+                              ...prev,
+                              instructor_ids: existingInstructorIds,
+                            }));
                             setActiveModal({
                               type: "assign-instructor",
                               courseId: course.id,
+                              instructor_ids: existingInstructorIds,
                             });
                           }}
                           className="bg-blue-600/10 text-blue-400 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-blue-600 hover:text-white transition"
@@ -716,7 +744,7 @@ const CoursesTab = ({
                       clearCreateCourseFieldError("status");
                       // If changing to draft, clear instructor error since it's no longer required
                       if (e.target.value === "draft") {
-                        clearCreateCourseFieldError("instructor_id");
+                      clearCreateCourseFieldError("instructor_ids");
                       }
                     }}
                     className={`w-full px-3 py-2 bg-slate-800 border rounded-lg text-white focus:outline-none focus:ring-2 ${
@@ -737,36 +765,29 @@ const CoursesTab = ({
 
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Instructor{" "}
-                    {createCourseForm.status === "published" && (
-                      <span className="text-red-400">*</span>
-                    )}
+                    Instructor(s)
                   </label>
-                  <select
-                    value={createCourseForm.instructor_id}
-                    onChange={(e) => {
+                  <MultiSelect
+                    options={users || []}
+                    value={createCourseForm.instructor_ids}
+                    onChange={(selected) => {
                       setCreateCourseForm({
                         ...createCourseForm,
-                        instructor_id: e.target.value,
+                        instructor_ids: selected,
                       });
-                      clearCreateCourseFieldError("instructor_id");
+                      clearCreateCourseFieldError("instructor_ids");
                     }}
-                    className={`w-full px-3 py-2 bg-slate-800 border rounded-lg text-white focus:outline-none focus:ring-2 ${
-                      createCourseErrors?.instructor_id
-                        ? "border-red-500 focus:ring-red-500"
-                        : "border-slate-700 focus:ring-indigo-500"
-                    }`}
-                  >
-                    <option value="">Select instructor</option>
-                    {users?.map((user) => (
-                      <option key={user.id} value={user.id}>
-                        {user.username}
-                      </option>
-                    ))}
-                  </select>
-                  {createCourseErrors?.instructor_id && (
+                    placeholder="Select teachers..."
+                    displayField="username"
+                    searchField="username"
+                    searchPlaceholder="Search teachers..."
+                    emptyMessage="No teachers available"
+                    error={createCourseErrors?.instructor_ids}
+                    showErrorMessage={false}
+                  />
+                  {createCourseErrors?.instructor_ids && (
                     <p className="text-red-400 text-xs mt-1">
-                      {createCourseErrors.instructor_id}
+                      {createCourseErrors.instructor_ids}
                     </p>
                   )}
                 </div>
@@ -958,30 +979,34 @@ const CoursesTab = ({
 
                   <div>
                     <label className="block text-sm font-medium text-slate-300 mb-2">
-                      Instructor <span className="text-red-400">*</span>
+                      Instructor(s)
                     </label>
-                    <select
-                      value={editCourseForm.instructor_id}
-                      onChange={(e) => {
+                    <MultiSelect
+                      options={users || []}
+                      value={(editCourseForm.instructor_ids || [])
+                        .map((id) => {
+                          if (typeof id === "object") return id;
+                          return users?.find((user) => user.id === id);
+                        })
+                        .filter(Boolean)}
+                      onChange={(selected) => {
                         setEditCourseForm({
                           ...editCourseForm,
-                          instructor_id: e.target.value,
+                          instructor_ids: selected.map((teacher) => teacher.id),
                         });
-                        clearEditCourseFieldError("instructor_id");
+                        clearEditCourseFieldError("instructor_ids");
                       }}
-                      className="w-full px-3 py-2 bg-slate-800 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                      required
-                    >
-                      <option value="">Select an instructor</option>
-                      {users?.map((user) => (
-                        <option key={user.id} value={user.id}>
-                          {user.username}
-                        </option>
-                      ))}
-                    </select>
-                    {editCourseErrors?.instructor_id && (
+                      placeholder="Select teachers..."
+                      displayField="username"
+                      searchField="username"
+                      searchPlaceholder="Search teachers..."
+                      emptyMessage="No teachers available"
+                      error={editCourseErrors?.instructor_ids}
+                      showErrorMessage={false}
+                    />
+                    {editCourseErrors?.instructor_ids && (
                       <p className="text-red-400 text-xs mt-1">
-                        {editCourseErrors.instructor_id}
+                        {editCourseErrors.instructor_ids}
                       </p>
                     )}
                   </div>
@@ -1043,7 +1068,7 @@ const CoursesTab = ({
                   try {
                     await onAssignInstructor(
                       activeModal.courseId,
-                      editCourseForm.instructor_id,
+                      editCourseForm.instructor_ids || [],
                     );
                     setActiveModal(null);
                   } catch (error) {
@@ -1054,27 +1079,36 @@ const CoursesTab = ({
               >
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Select Instructor <span className="text-red-400">*</span>
+                    Select Instructor(s) <span className="text-red-400">*</span>
                   </label>
-                  <select
-                    value={editCourseForm.instructor_id}
-                    onChange={(e) => {
+                  <MultiSelect
+                    options={users || []}
+                    value={(editCourseForm.instructor_ids || [])
+                      .map((id) => {
+                        if (typeof id === "object") return id;
+                        return users?.find((user) => user.id === id);
+                      })
+                      .filter(Boolean)}
+                    onChange={(selected) => {
                       setEditCourseForm({
                         ...editCourseForm,
-                        instructor_id: e.target.value,
+                        instructor_ids: selected.map((teacher) => teacher.id),
                       });
-                      clearEditCourseFieldError("instructor_id");
+                      clearEditCourseFieldError("instructor_ids");
                     }}
-                    className="w-full px-3 py-2 bg-slate-800 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    required
-                  >
-                    <option value="">Select an instructor</option>
-                    {users?.map((user) => (
-                      <option key={user.id} value={user.id}>
-                        {user.username}
-                      </option>
-                    ))}
-                  </select>
+                    placeholder="Select teachers..."
+                    displayField="username"
+                    searchField="username"
+                    searchPlaceholder="Search teachers..."
+                    emptyMessage="No teachers available"
+                    error={editCourseErrors?.instructor_ids}
+                    showErrorMessage={false}
+                  />
+                  {editCourseErrors?.instructor_ids && (
+                    <p className="text-red-400 text-xs mt-1">
+                      {editCourseErrors.instructor_ids}
+                    </p>
+                  )}
                 </div>
 
                 <div className="flex justify-end gap-3 pt-4">
