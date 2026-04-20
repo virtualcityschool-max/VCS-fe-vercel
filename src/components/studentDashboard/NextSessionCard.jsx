@@ -1,28 +1,54 @@
 import React from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
 import {
   selectNextSession,
   joinLiveSession,
+  fetchStudentDashboard,
 } from "../../store/slices/studentDashboardSlice";
+import { toastManager } from "../../utils/toastManager";
 
 const NextSessionCard = () => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const nextSession = useSelector(selectNextSession);
   const isJoiningSession = useSelector(
     (state) => state.studentDashboard.isJoiningSession,
   );
 
   const handleJoinSession = async () => {
-    if (!nextSession?.id) return;
+    const sessionId = nextSession?.id ?? nextSession?.session_id;
+    if (!sessionId) {
+      toastManager.error("Session information is unavailable");
+      return;
+    }
+
+    const canJoinNow =
+      nextSession?.can_join === true || nextSession?.status === "live";
+
+    if (!canJoinNow) {
+      toastManager.error("Session is not available to join at this time");
+      return;
+    }
 
     try {
-      await dispatch(joinLiveSession(nextSession.id)).unwrap();
-      // Navigate to classroom after successful join
-      navigate("/classroom");
+      const result = await dispatch(joinLiveSession(sessionId)).unwrap();
+
+      const meetingLink = result?.meeting_link;
+
+      if (meetingLink && meetingLink.startsWith("http")) {
+        // Validate URL format
+        try {
+          new URL(meetingLink);
+          window.open(meetingLink, "_blank", "noopener,noreferrer");
+        } catch (urlError) {
+          toastManager.error("Invalid meeting link format");
+          console.log("URL Error:", urlError);
+        }
+      } else {
+        toastManager.error("No valid meeting link found");
+      }
     } catch (error) {
       console.error("Failed to join session:", error);
+      toastManager.error("Failed to join session");
     }
   };
 
@@ -37,6 +63,9 @@ const NextSessionCard = () => {
     }
     return `Starts in ${hours}h ${remainingMinutes}m`;
   };
+
+  const canJoinNow =
+    nextSession?.can_join === true || nextSession?.status === "live";
 
   if (!nextSession) {
     return (
@@ -57,7 +86,7 @@ const NextSessionCard = () => {
   }
 
   return (
-    <div className="bg-slate-800/50 backdrop-blur-md p-6 lg:p-8 rounded-[2.5rem] border border-slate-700 shadow-xl flex items-center gap-4 lg:gap-6 min-h-[160px]">
+    <div className="bg-slate-800/50 backdrop-blur-md p-6 lg:p-8 rounded-[2.5rem] border border-slate-700 shadow-xl flex flex-col items-start gap-4 lg:gap-6 min-h-40">
       <div className="w-12 h-12 lg:w-14 lg:h-14 bg-blue-600/10 rounded-2xl flex items-center justify-center text-blue-500 shrink-0">
         <i className="fas fa-broadcast-tower text-lg lg:text-xl"></i>
       </div>
@@ -77,9 +106,9 @@ const NextSessionCard = () => {
       </div>
       <button
         onClick={handleJoinSession}
-        disabled={isJoiningSession || nextSession.starts_in_mins > 15}
+        disabled={isJoiningSession || !canJoinNow}
         className={`w-full md:w-auto px-6 py-3 rounded-2xl font-bold text-sm transition active:scale-95 ${
-          isJoiningSession || nextSession.starts_in_mins > 15
+          isJoiningSession || !canJoinNow
             ? "bg-slate-700 text-slate-500 cursor-not-allowed"
             : "bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-900/40"
         }`}
@@ -89,8 +118,8 @@ const NextSessionCard = () => {
             <i className="fas fa-spinner fa-spin mr-2"></i>
             Joining...
           </>
-        ) : nextSession.starts_in_mins > 15 ? (
-          "Starting Soon"
+        ) : !canJoinNow ? (
+          "Session Not Live"
         ) : (
           "Join Now"
         )}

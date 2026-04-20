@@ -38,8 +38,20 @@ const getMyCourses = async () => {
   return response.data;
 };
 
-const getAssignments = async () => {
-  const response = await axiosInstance.get("/assignments/");
+const getAssignments = async (params = {}) => {
+  const query = {};
+
+  if (params.course) {
+    query.course = params.course;
+  }
+
+  if (params.status) {
+    query.status = params.status;
+  }
+
+  const response = await axiosInstance.get("/assignments/", {
+    params: query,
+  });
   return response.data;
 };
 
@@ -57,7 +69,7 @@ const getSubmissions = async (assignmentId) => {
 
 const gradeSubmission = async (submissionId, data) => {
   const response = await axiosInstance.post(
-    `/submissions/${submissionId}/grade/`,
+    `/assignments/submissions/${submissionId}/grade/`,
     data,
   );
   return response.data;
@@ -65,7 +77,7 @@ const gradeSubmission = async (submissionId, data) => {
 
 const updateSubmissionGrade = async (submissionId, data) => {
   const response = await axiosInstance.patch(
-    `/submissions/${submissionId}/grade/`,
+    `/assignments/submissions/${submissionId}/grade/`,
     data,
   );
   return response.data;
@@ -83,6 +95,52 @@ const createAnnouncement = async (data) => {
   return response.data;
 };
 
+const getTeacherSessions = async () => {
+  const response = await axiosInstance.get("/classroom/sessions/");
+  return response.data;
+};
+
+const getSessionAttendance = async (sessionId) => {
+  const response = await axiosInstance.get(
+    `/classroom/sessions/${sessionId}/attendance/`,
+  );
+  return response.data;
+};
+
+const updateSessionAttendance = async (sessionId, attendanceId, data) => {
+  const response = await axiosInstance.patch(
+    `/classroom/sessions/${sessionId}/attendance/${attendanceId}/`,
+    data,
+  );
+  return response.data;
+};
+
+const joinLiveSession = async (sessionId) => {
+  const response = await axiosInstance.get(`/classroom/sessions/${sessionId}/`);
+  return response.data;
+};
+
+// const joinLiveSession = async (sessionId) => {
+//   const response = await axiosInstance.post(
+//     `/classroom/sessions/${sessionId}/join/`,
+//   );
+//   return response.data;
+// };
+
+const startSession = async (sessionId) => {
+  const response = await axiosInstance.patch(
+    `/classroom/sessions/${sessionId}/start/`,
+  );
+  return response.data;
+};
+
+const endSession = async (sessionId) => {
+  const response = await axiosInstance.patch(
+    `/classroom/sessions/${sessionId}/end/`,
+  );
+  return response.data;
+};
+
 export const teacherService = {
   getTeachers,
   getTeacherById,
@@ -95,4 +153,10 @@ export const teacherService = {
   gradeSubmission,
   updateSubmissionGrade,
   createAnnouncement,
+  getTeacherSessions,
+  getSessionAttendance,
+  updateSessionAttendance,
+  joinLiveSession,
+  startSession,
+  endSession,
 };

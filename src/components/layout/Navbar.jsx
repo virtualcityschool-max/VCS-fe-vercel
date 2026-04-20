@@ -125,15 +125,17 @@ const Navbar = ({ variant = "default" }) => {
             </span>
           </div>
           <div className="flex items-center gap-3 sm:gap-6 overflow-x-auto custom-scrollbar whitespace-nowrap py-2 no-scrollbar">
-            <button
-              onClick={() => navigate("/")}
-              className={`text-slate-400 font-medium text-xs sm:text-sm hover:text-white transition cursor-pointer ${
-                isActivePath("/") ? "text-white" : ""
-              }`}
-            >
-              Home
-            </button>
-            {role === "student" && (
+            {!isLoggedIn && (
+              <button
+                onClick={() => navigate("/")}
+                className={`text-slate-400 font-medium text-xs sm:text-sm hover:text-white transition cursor-pointer ${
+                  isActivePath("/") ? "text-white" : ""
+                }`}
+              >
+                Home
+              </button>
+            )}
+            {/* {role === "student" && (
               <button
                 onClick={() => navigate("/feed")}
                 className={`text-slate-400 font-medium text-xs sm:text-sm hover:text-white transition cursor-pointer ${
@@ -142,7 +144,7 @@ const Navbar = ({ variant = "default" }) => {
               >
                 Feed
               </button>
-            )}
+            )} */}
             <button
               onClick={() => {
                 if (role === "student") navigate("/student");
@@ -197,122 +199,111 @@ const Navbar = ({ variant = "default" }) => {
             </svg>
             <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
           </button> */}
-          <div className="relative" ref={bellRef}>
-            <button
-              type="button"
-              onClick={() => {
-                const nextOpen = !isBellOpen;
-                setIsBellOpen(nextOpen);
+          {role === "student" && (
+            <div className="relative" ref={bellRef}>
+              <button
+                type="button"
+                onClick={() => {
+                  const nextOpen = !isBellOpen;
+                  setIsBellOpen(nextOpen);
 
-                if (nextOpen && role === "student") {
-                  dispatch(fetchMyAnnouncements());
-                }
-              }}
-              className="relative p-2 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-lg transition-all duration-200 group"
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+                  if (nextOpen && role === "student") {
+                    dispatch(fetchMyAnnouncements());
+                  }
+                }}
+                className="relative p-2 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-lg transition-all duration-200 group"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-                />
-              </svg>
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                  />
+                </svg>
 
-              {role === "student" && unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
-                  {unreadCount > 9 ? "9+" : unreadCount}
-                </span>
-              )}
-            </button>
-
-            {isBellOpen && role === "student" && (
-              <div className="absolute right-0 mt-3 w-96 max-w-[calc(100vw-2rem)] bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden z-50">
-                <div className="px-4 py-3 border-b border-slate-800 flex items-center justify-between">
-                  <h3 className="text-sm font-bold text-white">
-                    Announcements
-                  </h3>
-                  <span className="text-[10px] uppercase tracking-widest text-slate-500">
-                    {announcements?.length || 0} items
+                {role === "student" && unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                    {unreadCount > 9 ? "9+" : unreadCount}
                   </span>
-                </div>
+                )}
+              </button>
 
-                <div className="max-h-96 overflow-y-auto">
-                  {loadingItems ? (
-                    <div className="p-4 text-sm text-slate-400">Loading...</div>
-                  ) : announcements?.length ? (
-                    announcements.map((item) => (
-                      <div
-                        key={item.id}
-                        className={`px-4 py-4 border-b border-slate-800 last:border-b-0 ${
-                          item.is_read ? "bg-slate-900" : "bg-blue-500/5"
-                        }`}
-                      >
-                        <div className="flex items-start gap-3">
-                          {!item.is_read && (
-                            <span className="mt-2 w-2 h-2 rounded-full bg-blue-400 shrink-0"></span>
-                          )}
+              {isBellOpen && role === "student" && (
+                <div className="absolute right-0 mt-3 w-96 max-w-[calc(100vw-2rem)] bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden z-50">
+                  <div className="px-4 py-3 border-b border-slate-800 flex items-center justify-between">
+                    <h3 className="text-sm font-bold text-white">
+                      Announcements
+                    </h3>
+                    <span className="text-[10px] uppercase tracking-widest text-slate-500">
+                      {announcements?.length || 0} items
+                    </span>
+                  </div>
 
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-start justify-between gap-3">
-                              <p
-                                className={`text-sm ${
-                                  item.is_read
-                                    ? "text-slate-300"
-                                    : "text-white font-semibold"
-                                }`}
-                              >
-                                {item.title}
+                  <div className="max-h-96 overflow-y-auto">
+                    {loadingItems ? (
+                      <div className="p-4 text-sm text-slate-400">
+                        Loading...
+                      </div>
+                    ) : announcements?.length ? (
+                      announcements.map((item) => (
+                        <div
+                          key={item.id}
+                          className={`px-4 py-4 border-b border-slate-800 last:border-b-0 ${
+                            item.is_read ? "bg-slate-900" : "bg-blue-500/5"
+                          }`}
+                        >
+                          <div className="flex items-start gap-3">
+                            {!item.is_read && (
+                              <span className="mt-2 w-2 h-2 rounded-full bg-blue-400 shrink-0"></span>
+                            )}
+
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-start justify-between gap-3">
+                                <p
+                                  className={`text-sm ${
+                                    item.is_read
+                                      ? "text-slate-300"
+                                      : "text-white font-semibold"
+                                  }`}
+                                >
+                                  {item.title}
+                                </p>
+                                <span className="text-[10px] text-slate-500 shrink-0">
+                                  {new Date(
+                                    item.created_at,
+                                  ).toLocaleDateString()}
+                                </span>
+                              </div>
+
+                              <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                                {item.body}
                               </p>
-                              <span className="text-[10px] text-slate-500 shrink-0">
-                                {new Date(item.created_at).toLocaleDateString()}
-                              </span>
-                            </div>
 
-                            <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-                              {item.body}
-                            </p>
-
-                            <div className="mt-2 flex flex-wrap gap-2 text-[10px] uppercase tracking-widest text-slate-500">
-                              <span>{item.course}</span>
-                              <span>•</span>
-                              <span>{item.posted_by}</span>
+                              <div className="mt-2 flex flex-wrap gap-2 text-[10px] uppercase tracking-widest text-slate-500">
+                                <span>{item.course}</span>
+                                <span>•</span>
+                                <span>{item.posted_by}</span>
+                              </div>
                             </div>
                           </div>
                         </div>
+                      ))
+                    ) : (
+                      <div className="p-4 text-sm text-slate-400">
+                        No announcements yet.
                       </div>
-                    ))
-                  ) : (
-                    <div className="p-4 text-sm text-slate-400">
-                      No announcements yet.
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
-
-          {/* Apps Grid */}
-          <button className="relative p-2 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-lg transition-all duration-200 group">
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
-              />
-            </svg>
-          </button>
+              )}
+            </div>
+          )}
 
           {/* User Profile Dropdown */}
           <UserProfileDropdown />

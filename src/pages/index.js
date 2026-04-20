@@ -21,7 +21,14 @@ export { default as TeacherGrading } from "./teacher/TeacherGrading";
 export { default as TeacherInternalStudentProfile } from "./teacher/TeacherInternalStudentProfile";
 
 // Admin Pages
-export { default as AdminDashboard } from "./admin/AdminDashboard";
+export { default as AdminLayout } from "../components/admin/AdminLayout";
+export { default as AdminOverviewPage } from "./admin/AdminOverviewPage";
+export { default as AdminApprovalsPage } from "./admin/AdminApprovalsPage";
+export { default as AdminCoursesPage } from "./admin/AdminCoursesPage";
+export { default as AdminUsersPage } from "./admin/AdminUsersPage";
+export { default as AdminEnrollmentsPage } from "./admin/AdminEnrollmentsPage";
+export { default as AdminSessionsPage } from "./admin/AdminSessionsPage";
+export { default as UserDetailsPage } from "./admin/UserDetailsPage";
 
 // Parent Pages
 export { default as ParentPortal } from "./parent/ParentPortal";

@@ -14,6 +14,7 @@ import {
   LiveScheduleList,
   CourseProgressGrid,
   AssignmentOverviewList,
+  MyAttendanceList,
 } from "../../components/studentDashboard";
 
 const StudentPortal = () => {
@@ -34,6 +35,17 @@ const StudentPortal = () => {
       console.log("🚀 Student Portal: Fetching dashboard data...");
       dispatch(fetchStudentDashboard());
     }
+  }, [dispatch, hasMounted]);
+
+  //Polling
+  useEffect(() => {
+    if (!hasMounted) return;
+
+    const interval = setInterval(() => {
+      dispatch(fetchStudentDashboard());
+    }, 30000); // every 30 seconds
+
+    return () => clearInterval(interval);
   }, [dispatch, hasMounted]);
 
   // Handle retry on error
@@ -172,6 +184,9 @@ const StudentPortal = () => {
           <div className="xl:col-span-8 space-y-6 lg:space-y-8">
             {/* Live Schedule */}
             <LiveScheduleList />
+
+            {/* My Attendance */}
+            <MyAttendanceList />
           </div>
 
           {/* Right Column - Sidebar */}

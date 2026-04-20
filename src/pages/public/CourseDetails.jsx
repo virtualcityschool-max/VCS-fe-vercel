@@ -3,7 +3,8 @@ import { useParams, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchCourseById } from "../../store/slices/coursesSlice";
 import {
-  enrollInCourse,
+  enrollInCourseNormal,
+  enrollInCoursePrivate,
   unenrollFromCourse,
   fetchStudentDashboard,
 } from "../../store/slices/studentDashboardSlice";
@@ -25,11 +26,13 @@ import {
 } from "../../hooks/useFormat";
 import { getCourseImage } from "../../utils/courseImageUtils";
 import { setAuthModal } from "../../store/slices/uiSlice";
+import EnrollmentTypeModal from "../../components/courses/EnrollmentTypeModal";
 
 const CourseDetails = () => {
   const { courseId } = useParams();
   const dispatch = useDispatch();
   const [imageError, setImageError] = useState(false);
+  const [enrollmentModalOpen, setEnrollmentModalOpen] = useState(false);
   const submissionGuard = useSubmissionGuard();
 
   // Get auth state from Redux store
@@ -104,7 +107,7 @@ const CourseDetails = () => {
   };
 
   // Handle course enrollment
-  const handleEnrollCourse = async (courseData) => {
+  const handleEnrollCourse = () => {
     if (!auth.isLoggedIn) {
       dispatch(setAuthModal("login"));
       return;
@@ -115,23 +118,67 @@ const CourseDetails = () => {
       return;
     }
 
+    // Show enrollment modal
+    setEnrollmentModalOpen(true);
+  };
+
+  // Handle enrollment type selection
+  const handleEnrollmentTypeSelect = async (type) => {
+    if (!normalizedCourse) return;
+
+    const courseId = normalizedCourse.id;
+    const courseTitle = normalizedCourse.title;
+
     await submissionGuard.guard(async () => {
       try {
-        await dispatch(enrollInCourse(courseData.id)).unwrap();
-        toastManager.success(`Successfully enrolled in ${courseData.title}`);
+        let response;
+
+        if (type === "normal") {
+          response = await dispatch(enrollInCourseNormal(courseId)).unwrap();
+        } else if (type === "private") {
+          const instructorId =
+            normalizedCourse.instructor?.id || normalizedCourse.instructor_id;
+          if (!instructorId) {
+            toastManager.error(
+              "Private enrollment not available - no instructor assigned",
+            );
+            return;
+          }
+          response = await dispatch(
+            enrollInCoursePrivate({
+              courseId,
+              teacherId: instructorId,
+            }),
+          ).unwrap();
+        }
+
+        // Show success message (use backend message if available)
+        const successMessage =
+          response?.message || `Successfully enrolled in ${courseTitle}`;
+        toastManager.success(successMessage);
+
+        // Close modal
+        setEnrollmentModalOpen(false);
 
         // Refresh course data to update enrollment status
-        dispatch(fetchCourseById(courseData.id));
+        dispatch(fetchCourseById(courseId));
 
         // Refresh student dashboard to sync enrollment state
         if (auth.role === "student") {
           dispatch(fetchStudentDashboard());
         }
       } catch (error) {
-        const errorMessage = getUserFriendlyMessage(error);
+        // Handle errors safely
+        const errorMessage =
+          error?.response?.data?.error || getUserFriendlyMessage(error);
         toastManager.error(errorMessage);
       }
     });
+  };
+
+  // Close enrollment modal
+  const closeEnrollmentModal = () => {
+    setEnrollmentModalOpen(false);
   };
 
   // Handle course unenrollment
@@ -467,7 +514,7 @@ const CourseDetails = () => {
                     onClick={() =>
                       enrolled
                         ? handleUnenrollCourse(normalizedCourse)
-                        : handleEnrollCourse(normalizedCourse)
+                        : handleEnrollCourse()
                     }
                     disabled={isEnrolling || isUnenrolling}
                     className={`w-full mb-6 py-4 font-black text-xs uppercase tracking-[0.2em] rounded-2xl transition-all active:scale-95 ${
@@ -603,6 +650,13 @@ const CourseDetails = () => {
           </div>
         </div>
       </div>
+
+      {/* Enrollment Type Modal */}
+      <EnrollmentTypeModal
+        isOpen={enrollmentModalOpen}
+        onClose={closeEnrollmentModal}
+        onSelect={handleEnrollmentTypeSelect}
+      />
     </section>
   );
 };

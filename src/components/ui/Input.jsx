@@ -3,6 +3,7 @@ import React from "react";
 const Input = ({
   label,
   error,
+  showErrorMessage = true,
   variant = "default",
   size = "md",
   className = "",
@@ -13,11 +14,15 @@ const Input = ({
     "block w-full rounded-lg border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2";
 
   const variants = {
-    default: "border-slate-300 focus:border-indigo-500 focus:ring-indigo-500",
-    glass:
-      "border-white/20 bg-white/10 backdrop-blur-sm focus:border-white/40 focus:ring-white/20 text-white placeholder-white/60",
-    search:
-      "border-slate-300 bg-slate-50 focus:border-indigo-500 focus:ring-indigo-500 pl-10",
+    default: error
+      ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+      : "border-slate-300 focus:border-indigo-500 focus:ring-indigo-500",
+    glass: error
+      ? "border-red-500/50 bg-red-500/10 backdrop-blur-sm focus:border-red-500/70 focus:ring-red-500/20 text-white placeholder-red-200/60"
+      : "border-white/20 bg-white/10 backdrop-blur-sm focus:border-white/40 focus:ring-white/20 text-white placeholder-white/60",
+    search: error
+      ? "border-red-500 bg-red-50 focus:border-red-500 focus:ring-red-500 pl-10"
+      : "border-slate-300 bg-slate-50 focus:border-indigo-500 focus:ring-indigo-500 pl-10",
   };
 
   const sizes = {
@@ -47,7 +52,12 @@ const Input = ({
         )}
         <input className={inputClasses} {...props} />
       </div>
-      {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+      {error && showErrorMessage && (
+        <p className="mt-2 text-sm text-red-400 flex items-center gap-2 animate-pulse">
+          <i className="fas fa-exclamation-circle text-sm"></i>
+          {error}
+        </p>
+      )}
     </div>
   );
 };

@@ -13,12 +13,19 @@ import { initializeAuth, logoutUser } from "./store/slices/authSlice";
 import { toastManager } from "./utils/toastManager";
 
 // Components
-import { SimulatorBar, AIChat, AuthModals, Navbar } from "./components";
+import { AIChat, AuthModals, Navbar } from "./components";
 
 // Pages
 import {
   PublicHome,
-  AdminDashboard,
+  AdminLayout,
+  AdminOverviewPage,
+  AdminApprovalsPage,
+  AdminCoursesPage,
+  AdminUsersPage,
+  AdminEnrollmentsPage,
+  AdminSessionsPage,
+  UserDetailsPage,
   StudentPortal,
   TeacherLayout,
   TeacherPortal,
@@ -155,7 +162,29 @@ const App = () => {
         <main className="relative z-10">
           <Routes>
             {/* Public Routes */}
-            <Route path="/" element={<PublicHome />} />
+            <Route
+              path="/"
+              element={
+                isLoggedIn ? (
+                  <Navigate
+                    to={
+                      role === "student"
+                        ? "/student"
+                        : role === "teacher"
+                          ? "/teacher"
+                          : role === "admin"
+                            ? "/admin"
+                            : role === "parent"
+                              ? "/parent"
+                              : "/"
+                    }
+                    replace
+                  />
+                ) : (
+                  <PublicHome />
+                )
+              }
+            />
             <Route path="/courses" element={<Marketplace />} />
             <Route path="/courses/:courseId" element={<CourseDetails />} />
             <Route path="/teachers" element={<TeachersDirectory />} />
@@ -164,7 +193,7 @@ const App = () => {
             {/* Student-Only Routes */}
             <Route element={<ProtectedRoute allowedRoles={["student"]} />}>
               <Route path="/student" element={<StudentPortal />} />
-              <Route path="/feed" element={<StudentFeed />} />
+              {/* <Route path="/feed" element={<StudentFeed />} /> */}
               <Route
                 path="/student/assignments"
                 element={<StudentAssignments />}
@@ -176,9 +205,9 @@ const App = () => {
             </Route>
 
             {/* Shared Authenticated Routes */}
-            <Route element={<ProtectedRoute />}>
+            {/* <Route element={<ProtectedRoute />}>
               <Route path="/classroom" element={<Classroom />} />
-            </Route>
+            </Route> */}
 
             {/* Teacher-Only Routes */}
             <Route element={<ProtectedRoute allowedRoles={["teacher"]} />}>
@@ -202,7 +231,19 @@ const App = () => {
 
             {/* Admin-Only Routes */}
             <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
-              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/admin" element={<AdminLayout />}>
+                <Route
+                  index
+                  element={<Navigate to="/admin/overview" replace />}
+                />
+                <Route path="overview" element={<AdminOverviewPage />} />
+                <Route path="approvals" element={<AdminApprovalsPage />} />
+                <Route path="courses" element={<AdminCoursesPage />} />
+                <Route path="users" element={<AdminUsersPage />} />
+                <Route path="enrollments" element={<AdminEnrollmentsPage />} />
+                <Route path="sessions" element={<AdminSessionsPage />} />
+              </Route>
+              <Route path="/admin/users/:id" element={<UserDetailsPage />} />
             </Route>
 
             {/* Catch all route */}
@@ -213,8 +254,7 @@ const App = () => {
         {/* Global Overlays and Modals */}
         <section className="relative z-50">
           <AuthModals />
-          <AIChat />
-          <SimulatorBar />
+          {/* <AIChat /> */}
           <ToastContainer
             position="top-right"
             autoClose={4000}

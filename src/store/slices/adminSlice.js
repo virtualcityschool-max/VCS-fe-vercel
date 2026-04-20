@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { adminService } from "../../services/adminService";
 import { coursesService } from "../../services/coursesService";
+import { adminSessionService } from "../../services/adminSessionService";
 import { handleApiError } from "../../utils/errorHandler";
 import { axiosInstance } from "../../utils";
 
@@ -65,6 +66,20 @@ const initialState = {
 
   // Enrollments
   enrollments: {
+    data: [],
+    loading: false,
+    error: null,
+  },
+
+  // Sessions
+  sessions: {
+    data: [],
+    loading: false,
+    error: null,
+  },
+
+  // Available Students for Parent linking
+  availableStudents: {
     data: [],
     loading: false,
     error: null,
@@ -303,6 +318,95 @@ export const fetchEnrollments = createAsyncThunk(
   },
 );
 
+export const createEnrollment = createAsyncThunk(
+  "admin/createEnrollment",
+  async (enrollmentData, { rejectWithValue }) => {
+    try {
+      const response = await adminService.createEnrollment(enrollmentData);
+      return response;
+    } catch (error) {
+      return rejectWithValue(error); // Preserve full error object for proper error handling
+    }
+  },
+);
+
+export const unenrollStudent = createAsyncThunk(
+  "admin/unenrollStudent",
+  async ({ courseId, studentId }, { rejectWithValue }) => {
+    try {
+      const response = await adminService.unenrollStudent(courseId, studentId);
+      return response;
+    } catch (error) {
+      return rejectWithValue(error); // Preserve full error object for proper error handling
+    }
+  },
+);
+
+// Sessions Thunks
+export const fetchSessions = createAsyncThunk(
+  "admin/fetchSessions",
+  async (params = {}, { rejectWithValue }) => {
+    try {
+      const response = await adminSessionService.getSessions(params);
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.message || "Failed to fetch sessions");
+    }
+  },
+);
+
+export const createSession = createAsyncThunk(
+  "admin/createSession",
+  async (sessionData, { rejectWithValue }) => {
+    try {
+      const response = await adminSessionService.createSession(sessionData);
+      return response;
+    } catch (error) {
+      return rejectWithValue(error); // Preserve full error object for proper error handling
+    }
+  },
+);
+
+export const updateSession = createAsyncThunk(
+  "admin/updateSession",
+  async ({ sessionId, sessionData }, { rejectWithValue }) => {
+    try {
+      const response = await adminSessionService.updateSession(
+        sessionId,
+        sessionData,
+      );
+      return { sessionId, ...response };
+    } catch (error) {
+      return rejectWithValue(error); // Preserve full error object for proper error handling
+    }
+  },
+);
+
+export const deleteSession = createAsyncThunk(
+  "admin/deleteSession",
+  async (sessionId, { rejectWithValue }) => {
+    try {
+      await adminSessionService.deleteSession(sessionId);
+      return sessionId;
+    } catch (error) {
+      return rejectWithValue(error.message || "Failed to delete session");
+    }
+  },
+);
+
+// Available Students Thunk
+export const fetchAvailableStudents = createAsyncThunk(
+  "admin/fetchAvailableStudents",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await adminService.getAvailableStudents();
+      return response;
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  },
+);
+
 // Slice
 const adminSlice = createSlice({
   name: "admin",
@@ -330,6 +434,12 @@ const adminSlice = createSlice({
     clearEnrollmentsError: (state) => {
       state.enrollments.error = null;
     },
+    clearSessionsError: (state) => {
+      state.sessions.error = null;
+    },
+    clearAvailableStudentsError: (state) => {
+      state.availableStudents.error = null;
+    },
 
     // Clear all errors
     clearAllErrors: (state) => {
@@ -340,6 +450,8 @@ const adminSlice = createSlice({
       state.systemStatus.error = null;
       state.reports.error = null;
       state.enrollments.error = null;
+      state.sessions.error = null;
+      state.availableStudents.error = null;
     },
 
     // Reset specific state
@@ -540,6 +652,112 @@ const adminSlice = createSlice({
       .addCase(fetchEnrollments.rejected, (state, action) => {
         state.enrollments.loading = false;
         state.enrollments.error = action.payload;
+      })
+      .addCase(createEnrollment.pending, (state) => {
+        // Don't change loading state here to avoid interfering with list loading
+        // Clear previous enrollment errors
+        state.enrollments.error = null;
+      })
+      .addCase(createEnrollment.fulfilled, (state, action) => {
+        // Add the new enrollment to the beginning of the list
+        if (action.payload && state.enrollments.data) {
+          state.enrollments.data.unshift(action.payload);
+        }
+      })
+      .addCase(createEnrollment.rejected, (state, action) => {
+        // Store only safe error message for the modal to display
+        // This prevents crashes from complex error objects
+        if (typeof action.payload === "string") {
+          state.enrollments.error = action.payload;
+        } else if (action.payload?.message) {
+          state.enrollments.error = action.payload.message;
+        } else if (action.payload?.error) {
+          state.enrollments.error = action.payload.error;
+        } else {
+          state.enrollments.error = "Failed to create enrollment";
+        }
+      });
+
+    // Sessions
+    builder
+      .addCase(fetchSessions.pending, (state) => {
+        state.sessions.loading = true;
+        state.sessions.error = null;
+      })
+      .addCase(fetchSessions.fulfilled, (state, action) => {
+        state.sessions.loading = false;
+        const sessionsData = action.payload.results || action.payload || [];
+        // Map backend field names to frontend field names
+        const mappedSessions = sessionsData.map((session) => ({
+          ...session,
+          course_id: session.course,
+          course: {
+            title: session.course_title || "Unknown Course",
+            id: session.course,
+          }, // Create course object for UI
+          start_time: session.scheduled_at,
+          end_time: session.ends_at || null, // Backend might not return ends_at
+        }));
+        state.sessions.data = mappedSessions;
+      })
+      .addCase(createSession.fulfilled, (state, action) => {
+        // Add the new session to the beginning of the list with field mapping
+        if (action.payload && state.sessions.data) {
+          const mappedSession = {
+            ...action.payload,
+            course_id: action.payload.course,
+            course: {
+              title: action.payload.course_title || "Unknown Course",
+              id: action.payload.course,
+            }, // Create course object for UI
+            start_time: action.payload.scheduled_at,
+            end_time: action.payload.ends_at || null, // Backend might not return ends_at
+          };
+          state.sessions.data.unshift(mappedSession);
+        }
+      })
+      .addCase(updateSession.fulfilled, (state, action) => {
+        const { sessionId } = action.payload;
+        const sessionIndex = state.sessions.data.findIndex(
+          (session) => session.id === sessionId,
+        );
+
+        if (sessionIndex !== -1) {
+          const mappedSession = {
+            ...action.payload,
+            course_id: action.payload.course,
+            course: {
+              title: action.payload.course_title || "Unknown Course",
+              id: action.payload.course,
+            }, // Create course object for UI
+            start_time: action.payload.scheduled_at,
+            end_time: action.payload.ends_at || null, // Backend might not return ends_at
+          };
+          state.sessions.data[sessionIndex] = {
+            ...state.sessions.data[sessionIndex],
+            ...mappedSession,
+          };
+        }
+      })
+      .addCase(deleteSession.fulfilled, (state, action) => {
+        state.sessions.data = state.sessions.data.filter(
+          (session) => session.id !== action.payload,
+        );
+      });
+
+    // Available Students
+    builder
+      .addCase(fetchAvailableStudents.pending, (state) => {
+        state.availableStudents.loading = true;
+        state.availableStudents.error = null;
+      })
+      .addCase(fetchAvailableStudents.fulfilled, (state, action) => {
+        state.availableStudents.loading = false;
+        state.availableStudents.data = action.payload;
+      })
+      .addCase(fetchAvailableStudents.rejected, (state, action) => {
+        state.availableStudents.loading = false;
+        state.availableStudents.error = action.payload;
       });
   },
 });
@@ -553,6 +771,8 @@ export const {
   clearSystemStatusError,
   clearReportsError,
   clearEnrollmentsError,
+  clearSessionsError,
+  clearAvailableStudentsError,
   clearAllErrors,
   resetUsers,
   resetCourses,
@@ -567,6 +787,8 @@ export const selectSettings = (state) => state.admin.settings;
 export const selectSystemStatus = (state) => state.admin.systemStatus;
 export const selectReports = (state) => state.admin.reports;
 export const selectEnrollments = (state) => state.admin.enrollments;
+export const selectSessions = (state) => state.admin.sessions;
+export const selectAvailableStudents = (state) => state.admin.availableStudents;
 
 // Convenience selectors
 export const selectUsersLoading = (state) => state.admin.users.loading;
@@ -578,5 +800,8 @@ export const selectSystemStatusLoading = (state) =>
 export const selectReportsLoading = (state) => state.admin.reports.loading;
 export const selectEnrollmentsLoading = (state) =>
   state.admin.enrollments.loading;
+export const selectSessionsLoading = (state) => state.admin.sessions.loading;
+export const selectAvailableStudentsLoading = (state) =>
+  state.admin.availableStudents.loading;
 
 export default adminSlice.reducer;

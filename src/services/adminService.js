@@ -9,10 +9,18 @@ const ADMIN_ENDPOINTS = {
   USER_CREATE: "/users/",
   USER_UPDATE: (id) => `/users/${id}/`,
   USER_DELETE: (id) => `/users/${id}/`,
+  USER_PROFILE: (id) => `/users/${id}/profile/`,
 
   // Admin Dashboard
   ADMIN_DASHBOARD: "/admin/dashboard/",
   ALL_ENROLLMENTS: "/courses/all-enrollments/",
+
+  // Child Link Requests
+  CHILD_LINKS_PENDING: "/admin/child-links/pending/",
+  CHILD_LINK_ACTION: (id) => `/admin/child-links/${id}/`,
+
+  // Enrollment Management
+  ADMIN_ENROLL: "/courses/admin-enroll/",
 };
 
 // User Management endpoints
@@ -40,15 +48,11 @@ export const adminService = {
   },
 
   createUser: async (userData) => {
-    try {
-      const response = await axiosInstance.post(
-        ADMIN_ENDPOINTS.USER_CREATE,
-        userData,
-      );
-      return response.data;
-    } catch (error) {
-      throw handleApiError(error, { context: "Create User" });
-    }
+    const response = await axiosInstance.post(
+      ADMIN_ENDPOINTS.USER_CREATE,
+      userData,
+    );
+    return response.data;
   },
 
   updateUser: async (userId, userData) => {
@@ -71,6 +75,30 @@ export const adminService = {
       return response.data;
     } catch (error) {
       throw handleApiError(error, { context: "Delete User" });
+    }
+  },
+
+  // User Profile Management
+  getUserProfile: async (userId) => {
+    try {
+      const response = await axiosInstance.get(
+        ADMIN_ENDPOINTS.USER_PROFILE(userId),
+      );
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error, { context: "Get User Profile" });
+    }
+  },
+
+  updateUserProfile: async (userId, profileData) => {
+    try {
+      const response = await axiosInstance.patch(
+        ADMIN_ENDPOINTS.USER_PROFILE(userId),
+        profileData,
+      );
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error, { context: "Update User Profile" });
     }
   },
 
@@ -97,12 +125,7 @@ export const adminService = {
       // Process raw enrollment data into time-series format for the chart
       const enrollments = response.data.results || response.data || [];
 
-      // Debug logging
-      console.log("🔍 Raw enrollment data:", enrollments);
-      console.log("🔍 Response structure:", response.data);
-
       if (!enrollments || enrollments.length === 0) {
-        console.log("⚠️ No enrollment data found");
         return {
           chartData: [],
           courses: [],
@@ -114,10 +137,6 @@ export const adminService = {
         (e) => e.enrolled_at && e.course && e.course.id,
       );
       if (!hasRequiredFields) {
-        console.log(
-          "⚠️ Enrollment data missing required fields (enrolled_at, course.id)",
-        );
-        console.log("🔍 Sample enrollment object:", enrollments[0]);
         return {
           chartData: [],
           courses: [],
@@ -152,10 +171,6 @@ export const adminService = {
           const enrollmentDate = new Date(enrollment.enrolled_at);
           const enrollmentYear = enrollmentDate.getFullYear();
 
-          console.log(
-            `🔍 Processing enrollment: ${enrollment.course.title}, enrolled_at: ${enrollment.enrolled_at}, year: ${enrollmentYear}, current year: ${currentYear}`,
-          );
-
           // Only count current year enrollments
           if (enrollmentYear === currentYear) {
             const monthName = months[enrollmentDate.getMonth()];
@@ -176,18 +191,10 @@ export const adminService = {
             // Increment counts
             courseMonthlyData[courseTitle][monthName].enrollments += 1;
 
-            console.log(
-              `✅ Including enrollment for ${courseTitle} in ${monthName}`,
-            );
-
             // Count as active if status is active (or default to active)
             if (enrollment.status === "active" || !enrollment.status) {
               courseMonthlyData[courseTitle][monthName].active += 1;
             }
-          } else {
-            console.log(
-              `❌ Filtering out enrollment from ${enrollmentYear} (not current year ${currentYear})`,
-            );
           }
         }
       });
@@ -223,11 +230,6 @@ export const adminService = {
         courses: courseTotals.map(({ courseTitle }) => courseTitle),
       };
 
-      // Debug logging for processed data
-      console.log("🔍 Processed chart data:", chartData);
-      console.log("🔍 Course list:", result.courses);
-      console.log("🔍 Course totals:", courseTotals);
-
       return result;
     } catch (error) {
       throw handleApiError(error, {
@@ -255,6 +257,109 @@ export const adminService = {
       return response.data;
     } catch (error) {
       throw handleApiError(error, { context: "Delete Course" });
+    }
+  },
+
+  // Enrollment Management
+  createEnrollment: async (enrollmentData) => {
+    try {
+      const response = await axiosInstance.post(
+        ADMIN_ENDPOINTS.ADMIN_ENROLL,
+        enrollmentData,
+      );
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error, { context: "Create Enrollment" });
+    }
+  },
+
+  // Unenroll student from course (Admin only)
+  unenrollStudent: async (courseId, studentId) => {
+    try {
+      const response = await axiosInstance.delete(
+        `/courses/${courseId}/unenroll/`,
+        {
+          data: {
+            student_id: studentId,
+          },
+        },
+      );
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error, { context: "Unenroll Student" });
+    }
+  },
+
+  // Child Link Requests
+  getPendingChildLinks: async () => {
+    try {
+      const response = await axiosInstance.get(
+        ADMIN_ENDPOINTS.CHILD_LINKS_PENDING,
+      );
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error, { context: "Get Pending Child Links" });
+    }
+  },
+
+  approveChildLink: async (linkId) => {
+    try {
+      const response = await axiosInstance.patch(
+        ADMIN_ENDPOINTS.CHILD_LINK_ACTION(linkId),
+        { action: "approve" },
+      );
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error, { context: "Approve Child Link" });
+    }
+  },
+
+  rejectChildLink: async (linkId) => {
+    try {
+      const response = await axiosInstance.patch(
+        ADMIN_ENDPOINTS.CHILD_LINK_ACTION(linkId),
+        { action: "reject" },
+      );
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error, { context: "Reject Child Link" });
+    }
+  },
+
+  unlinkChildrenAdmin: async (parentId, studentIds) => {
+    console.log("firstparentId", parentId);
+    try {
+      const response = await axiosInstance.delete("/child-links/unlink/", {
+        data: {
+          parent_id: parentId,
+          student_ids: studentIds,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error, { context: "Unlink Children Admin" });
+    }
+  },
+
+  getAvailableStudents: async () => {
+    try {
+      const response = await axiosInstance.get("/admin/students/available/");
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error, { context: "Get Available Students" });
+    }
+  },
+
+  linkChildrenAdmin: async (parentId, studentIds) => {
+    console.log("first parent Id: ", parentId);
+    try {
+      const response = await axiosInstance.post("/auth/me/link-child/", {
+        student_ids: studentIds,
+        parent_id: parentId,
+      });
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error, { context: "Link Children Admin" });
     }
   },
 };

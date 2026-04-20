@@ -15,6 +15,10 @@ import GradingForm from "../../components/teacher/GradingForm";
 const TeacherGrading = () => {
   const [selectedAssignment, setSelectedAssignment] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [filters, setFilters] = useState({
+    course: "",
+    status: "published",
+  });
   const [form, setForm] = useState({
     course: "",
     title: "",
@@ -62,14 +66,19 @@ const TeacherGrading = () => {
   }, [submissions, pendingAssignmentId, assignments]);
 
   useEffect(() => {
-    if (!assignments?.length) {
-      dispatch(fetchAssignments());
-    }
-
     if (!myCourses?.length) {
       dispatch(fetchMyCourses());
     }
-  }, [dispatch, assignments?.length, myCourses?.length]);
+  }, [dispatch, myCourses?.length]);
+
+  useEffect(() => {
+    dispatch(
+      fetchAssignments({
+        ...(filters.course ? { course: filters.course } : {}),
+        status: filters.status,
+      }),
+    );
+  }, [dispatch, filters.course, filters.status]);
 
   if (loadingAssignments && !assignments?.length) {
     return (
@@ -122,7 +131,9 @@ const TeacherGrading = () => {
     <div className="text-white">
       <div className="mb-10 flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-black font-poppins mb-2">Grading</h1>
+          <h1 className="text-3xl font-black font-poppins mb-2">
+            My Assignments
+          </h1>
           <p className="text-slate-400 text-sm">
             Review assignments and move into grading workflows.
           </p>
@@ -135,6 +146,34 @@ const TeacherGrading = () => {
         >
           + Create Assignment
         </button>
+      </div>
+
+      <div className="mb-6 flex flex-col sm:flex-row gap-3 sm:items-center">
+        <select
+          value={filters.course}
+          onChange={(e) =>
+            setFilters((prev) => ({ ...prev, course: e.target.value }))
+          }
+          className="bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        >
+          <option value="">All Courses</option>
+          {myCourses?.map((course) => (
+            <option key={course.id} value={course.id}>
+              {course.title}
+            </option>
+          ))}
+        </select>
+
+        <select
+          value={filters.status}
+          onChange={(e) =>
+            setFilters((prev) => ({ ...prev, status: e.target.value }))
+          }
+          className="bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        >
+          <option value="published">Published</option>
+          <option value="draft">Draft</option>
+        </select>
       </div>
 
       {/* ASSIGNMENTS LIST */}

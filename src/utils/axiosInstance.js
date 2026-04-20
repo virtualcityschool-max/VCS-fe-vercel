@@ -86,6 +86,9 @@ axiosInstance.interceptors.response.use(
   },
   async (error) => {
     const originalRequest = error.config;
+    const isRefreshRequest = originalRequest?.url?.includes(
+      "/auth/token/refresh/",
+    );
 
     console.error("❌ Response Error:", {
       status: error.response?.status,
@@ -96,6 +99,22 @@ axiosInstance.interceptors.response.use(
       // Add full error details for 500 errors
       fullError: error.response?.status === 500 ? error.response : undefined,
     });
+
+    // If refresh token call itself returns 401, force logout immediately.
+    if (error.response?.status === 401 && isRefreshRequest) {
+      processQueue(error, null);
+      authStorage.clearAuthStorage();
+      localStorage.removeItem("vcs_refresh_token");
+      window.dispatchEvent(
+        new CustomEvent("auth-expired", {
+          detail: {
+            message: "Your session has expired. Please log in again.",
+          },
+        }),
+      );
+      window.dispatchEvent(new CustomEvent("auth-logout"));
+      return Promise.reject(error);
+    }
 
     // Handle 401 errors with token refresh
     if (error.response?.status === 401 && !originalRequest._retry) {

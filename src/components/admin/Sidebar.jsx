@@ -1,22 +1,64 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
+
+// Mobile breakpoint constant
+const MOBILE_BREAKPOINT = 1024;
 
 const Sidebar = ({
   activeTab,
-  onTabChange,
-  isSidebarOpen,
   pendingApprovalsCount,
+  isSidebarOpen,
+  onMobileClose,
 }) => {
+  const navigate = useNavigate();
+
   const tabs = [
-    { id: "overview", label: "Overview", icon: "fas fa-chart-line" },
-    { id: "approvals", label: "Approvals", icon: "fas fa-user-check" },
-    { id: "courses", label: "Courses", icon: "fas fa-book" },
-    { id: "users", label: "Users", icon: "fas fa-users" },
-    { id: "enrollments", label: "Enrollments", icon: "fas fa-user-graduate" },
+    {
+      id: "overview",
+      label: "Overview",
+      icon: "fas fa-chart-line",
+      path: "/admin/overview",
+    },
+    {
+      id: "approvals",
+      label: "Approvals",
+      icon: "fas fa-user-check",
+      path: "/admin/approvals",
+    },
+    {
+      id: "courses",
+      label: "Courses",
+      icon: "fas fa-book",
+      path: "/admin/courses",
+    },
+    { id: "users", label: "Users", icon: "fas fa-users", path: "/admin/users" },
+    {
+      id: "enrollments",
+      label: "Enrollments",
+      icon: "fas fa-user-graduate",
+      path: "/admin/enrollments",
+    },
+    {
+      id: "sessions",
+      label: "Sessions",
+      icon: "fas fa-video",
+      path: "/admin/sessions",
+    },
   ];
+
+  const handleTabClick = (path) => {
+    navigate(path);
+    // Close sidebar on mobile after navigation using callback
+    if (window.innerWidth < MOBILE_BREAKPOINT && onMobileClose) {
+      onMobileClose();
+    }
+  };
 
   return (
     <aside
-      className={`w-72 bg-slate-950 border-r border-slate-800 flex flex-col fixed h-full z-50 transition-transform duration-300 lg:translate-x-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
+      className={`w-72 bg-slate-950 border-r border-slate-800 flex flex-col fixed h-full z-50 transition-transform duration-300 lg:translate-x-0 ${
+        isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+      }`}
     >
       <div className="p-6 border-b border-slate-800">
         <div className="flex items-center gap-3">
@@ -37,7 +79,7 @@ const Sidebar = ({
           {tabs.map((tab) => (
             <button
               key={tab.id}
-              onClick={() => onTabChange(tab.id)}
+              onClick={() => handleTabClick(tab.path)}
               className={`w-full text-left px-4 py-3 rounded-xl font-medium text-sm transition-all duration-200 flex items-center gap-3 ${
                 activeTab === tab.id
                   ? "bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg"

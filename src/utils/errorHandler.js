@@ -395,7 +395,23 @@ const handleBadRequestError = (data) => {
     return handleValidationError(data);
   }
 
-  // PRIORITY 5: Generic fallback (only when no meaningful message exists)
+  // PRIORITY 5: Final check for field errors that might have been missed
+  if (data?.details && typeof data.details === "object") {
+    const fieldErrorKeys = Object.keys(data.details).filter(
+      (key) => key !== "non_field_errors",
+    );
+    if (fieldErrorKeys.length > 0) {
+      console.log("🔍 Final fallback - found field errors:", data.details);
+      return {
+        type: "field",
+        message: "Please correct the highlighted fields",
+        fieldErrors: normalizeFieldErrors(data.details),
+        shouldShowToast: false,
+      };
+    }
+  }
+
+  // PRIORITY 6: Generic fallback (only when no meaningful message exists)
   return {
     type: "general",
     message: "Invalid request. Please check your input and try again.",
@@ -534,16 +550,45 @@ export const normalizeFieldErrors = (details) => {
 
   const fieldErrors = {};
   Object.entries(details).forEach(([field, messages]) => {
+    // Map backend field names to frontend field names
+    const frontendField = mapBackendToFrontendField(field);
+
     // Handle both string and array formats
     if (Array.isArray(messages)) {
-      fieldErrors[field] = messages.filter((msg) => typeof msg === "string");
+      fieldErrors[frontendField] = messages.filter(
+        (msg) => typeof msg === "string",
+      );
     } else if (typeof messages === "string") {
-      fieldErrors[field] = [messages];
+      fieldErrors[frontendField] = [messages];
     }
     // Ignore non-string messages
   });
 
   return Object.keys(fieldErrors).length > 0 ? fieldErrors : null;
+};
+
+// Map backend field names to frontend field names
+const mapBackendToFrontendField = (backendField) => {
+  const fieldMappings = {
+    // Session field mappings
+    scheduled_at: "start_time",
+    meeting_link: "meeting_link",
+    title: "title",
+    course: "course_id",
+    course_id: "course_id",
+
+    // User field mappings
+    email: "email",
+    username: "username",
+    password: "password",
+    confirmPassword: "confirmPassword",
+    role: "role",
+
+    // Common field mappings
+    non_field_errors: "non_field_errors",
+  };
+
+  return fieldMappings[backendField] || backendField;
 };
 
 // Get user-friendly message for toast notifications
@@ -583,11 +628,8 @@ export const handleApiError = (error, options = {}) => {
     toastFunction(normalizedError.message);
   }
 
-  // Return the processed error
-  return {
-    ...normalizedError,
-    originalError: error,
-  };
+  // Return the processed error (serializable only)
+  return normalizedError;
 };
 
 // Common error handler for async operations

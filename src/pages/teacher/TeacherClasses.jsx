@@ -1,10 +1,14 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchMyCourses } from "../../store/slices/teacherSlice";
+import CourseStudentsModal from "../../components/courses/CourseStudentsModal";
+import { useState } from "react";
+
 
 const TeacherClasses = () => {
   const dispatch = useDispatch();
   const { myCourses, loading, error } = useSelector((state) => state.teachers);
+  const [studentsModal, setStudentsModal] = useState(null);
 
   useEffect(() => {
     if (!myCourses?.length) {
@@ -31,12 +35,19 @@ const TeacherClasses = () => {
   return (
     <div className="text-white">
       <div className="mb-10">
-        <h1 className="text-3xl font-black font-poppins mb-2">My Classes</h1>
+        <h1 className="text-3xl font-black font-poppins mb-2">My Courses</h1>
         <p className="text-slate-400 text-sm">
           Manage and review the courses you are currently teaching.
         </p>
       </div>
-
+      {studentsModal && (
+        <CourseStudentsModal
+          courseId={studentsModal.id}
+          courseTitle={studentsModal.title}
+          onClose={() => setStudentsModal(null)}
+          canUnenroll={false}
+        />
+      )}
       {myCourses?.length > 0 && (
         <div className="mb-6 text-xs text-slate-400">
           Showing {myCourses.length} course
@@ -50,6 +61,9 @@ const TeacherClasses = () => {
             <div
               key={course.id}
               className="bg-slate-900 p-6 rounded-3xl border border-slate-800 hover:border-indigo-500 transition"
+              onClick={() =>
+                setStudentsModal({ id: course.id, title: course.title })
+              }
             >
               <div className="flex items-start justify-between gap-4 mb-4">
                 <div>

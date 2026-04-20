@@ -8,7 +8,7 @@ const navItems = [
     end: true,
   },
   {
-    label: "My Classes",
+    label: "My Courses",
     to: "/teacher/classes",
     icon: "fa-book-open",
   },
@@ -18,7 +18,7 @@ const navItems = [
     icon: "fa-user-check",
   },
   {
-    label: "Grading",
+    label: "My Assignments",
     to: "/teacher/grading",
     icon: "fa-clipboard-check",
   },

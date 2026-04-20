@@ -3,7 +3,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { fetchAllCourses } from "../../store/slices/coursesSlice";
 import {
-  enrollInCourse,
+  enrollInCourseNormal,
+  enrollInCoursePrivate,
   unenrollFromCourse,
   fetchStudentDashboard,
 } from "../../store/slices/studentDashboardSlice";
@@ -13,6 +14,7 @@ import { BACKEND_CATEGORIES, formatCategoryLabel } from "../../constants";
 import { useSubmissionGuard } from "../../utils/requestDeduplicator";
 import { getCourseImage } from "../../utils/courseImageUtils";
 import { setAuthModal } from "../../store/slices/uiSlice";
+import EnrollmentTypeModal from "../../components/courses/EnrollmentTypeModal";
 
 const Marketplace = () => {
   const dispatch = useDispatch();
@@ -22,7 +24,8 @@ const Marketplace = () => {
     priceRange: "",
     instructor: "",
   });
-  const [showFilters, setShowFilters] = useState(false);
+  const [enrollmentModalOpen, setEnrollmentModalOpen] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState(null);
   const submissionGuard = useSubmissionGuard();
 
   // Get auth state from Redux store
@@ -37,26 +40,14 @@ const Marketplace = () => {
 
   // Fetch courses on component mount
   useEffect(() => {
-    let isMounted = true;
-
-    // Prevent double fetch in React StrictMode development
-    const fetchCourses = () => {
-      if (isMounted) {
-        dispatch(fetchAllCourses());
-      }
-    };
-
-    // Immediate fetch
-    fetchCourses();
+    if (courses?.length <= 0) {
+      dispatch(fetchAllCourses());
+    }
 
     // Fetch student dashboard if user is logged in as student
     if (auth.isLoggedIn && auth.role === "student") {
       dispatch(fetchStudentDashboard());
     }
-
-    return () => {
-      isMounted = false;
-    };
   }, [dispatch, auth.isLoggedIn, auth.role]);
 
   // Get unique values for filter options
@@ -195,7 +186,7 @@ const Marketplace = () => {
   };
 
   // Handle course enrollment
-  const handleEnrollCourse = async (courseId, courseTitle) => {
+  const handleEnrollCourse = (course) => {
     if (!auth.isLoggedIn) {
       dispatch(setAuthModal("login"));
       return;
@@ -206,10 +197,49 @@ const Marketplace = () => {
       return;
     }
 
+    // Show enrollment modal
+    setSelectedCourse(course);
+    setEnrollmentModalOpen(true);
+  };
+
+  // Handle enrollment type selection
+  const handleEnrollmentTypeSelect = async (type) => {
+    if (!selectedCourse) return;
+
+    const courseId = selectedCourse.id;
+    const courseTitle = selectedCourse.title;
+
     await submissionGuard.guard(async () => {
       try {
-        await dispatch(enrollInCourse(courseId)).unwrap();
-        toastManager.success(`Successfully enrolled in ${courseTitle}`);
+        let response;
+
+        if (type === "normal") {
+          response = await dispatch(enrollInCourseNormal(courseId)).unwrap();
+        } else if (type === "private") {
+          const instructorId =
+            selectedCourse.instructor?.id || selectedCourse.instructor_id;
+          if (!instructorId) {
+            toastManager.error(
+              "Private enrollment not available - no instructor assigned",
+            );
+            return;
+          }
+          response = await dispatch(
+            enrollInCoursePrivate({
+              courseId,
+              teacherId: instructorId,
+            }),
+          ).unwrap();
+        }
+
+        // Show success message (use backend message if available)
+        const successMessage =
+          response?.message || `Successfully enrolled in ${courseTitle}`;
+        toastManager.success(successMessage);
+
+        // Close modal
+        setEnrollmentModalOpen(false);
+        setSelectedCourse(null);
 
         // Refresh courses to update enrollment status
         dispatch(fetchAllCourses());
@@ -219,10 +249,18 @@ const Marketplace = () => {
           dispatch(fetchStudentDashboard());
         }
       } catch (error) {
-        const errorMessage = error.message || "An error occurred";
+        // Handle errors safely
+        const errorMessage =
+          error?.response?.data?.error || error.message || "An error occurred";
         toastManager.error(errorMessage);
       }
     });
+  };
+
+  // Close enrollment modal
+  const closeEnrollmentModal = () => {
+    setEnrollmentModalOpen(false);
+    setSelectedCourse(null);
   };
 
   // Handle course unenrollment
@@ -344,177 +382,89 @@ const Marketplace = () => {
       id="classes-view"
       className="min-h-screen bg-[#0f172a] text-white font-inter"
     >
-      {/* Hero Search Section */}
-      <div className="relative overflow-hidden bg-linear-to-r from-blue-900/30 via-[#0f172a] to-purple-900/30 border-b border-slate-800/50">
-        <div className="max-w-7xl mx-auto px-6 py-28 text-center relative z-10">
-          <h1 className="text-5xl md:text-7xl font-black font-poppins mb-6 leading-tight tracking-tight">
-            Expand your <span className="text-blue-500">potential</span>.
-          </h1>
-          <p className="text-slate-400 text-lg mb-14 max-w-2xl mx-auto font-medium">
-            Unlock your future with industry-leading courses designed for the
-            ambitious <span className="text-white">VirtualCity</span> student.
-          </p>
+      {/* Compact Search + Filters Bar */}
+      <div className="relative overflow-hidden border-b border-slate-800/50">
+        <div className="max-w-7xl mx-auto px-6 py-5 relative z-10">
+          <div className="text-center mb-4">
+            <h1 className="text-2xl md:text-3xl font-black font-poppins leading-tight tracking-tight">
+              Expand your <span className="text-blue-500">potential</span>.
+            </h1>
+          </div>
           <form
             onSubmit={handleSearch}
-            className="max-w-3xl mx-auto relative mb-10 group px-4 sm:px-0"
+            className="grid grid-cols-1 md:grid-cols-10 gap-3 max-w-6xl mx-auto"
           >
-            {/* <i className="fas fa-search absolute left-12 sm:left-8 top-1/2 -translate-y-1/2 text-slate-500 text-lg sm:text-xl"></i> */}
-            <input
-              type="text"
-              id="course-search"
-              name="course-search"
-              placeholder="Search topics..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-slate-800/80 backdrop-blur-md border border-slate-700 rounded-3xl sm:rounded-[2.5rem] pl-16 sm:pl-20 pr-10 sm:pr-44 py-5 sm:py-7 focus:ring-4 focus:ring-blue-500/20 outline-none text-sm sm:text-base transition-all group-hover:bg-slate-800 shadow-2xl"
-            />
-            <button
-              type="submit"
-              className="mt-4 sm:mt-0 sm:absolute sm:right-3 sm:top-3 sm:bottom-3 w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white px-8 sm:px-12 py-4 sm:py-0 rounded-2xl sm:rounded-4xl font-bold text-sm transition active:scale-95 shadow-xl shadow-blue-600/30"
-            >
-              Search
-            </button>
+            <div className="md:col-span-4">
+              <Input
+                type="text"
+                id="course-search"
+                name="course-search"
+                placeholder="Search topics..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="h-11 bg-transparent border-slate-700 text-sm"
+              />
+            </div>
+            <div className="md:col-span-2">
+              <select
+                value={filters.category}
+                onChange={(e) => handleFilterChange("category", e.target.value)}
+                className="w-full h-11 bg-slate-800/80 border border-slate-700 rounded-xl px-3 text-white text-sm focus:ring-2 focus:ring-blue-500/20 outline-none focus:border-blue-500 transition"
+              >
+                <option value="">All Categories</option>
+                {filterOptions.categories.map((category) => (
+                  <option key={category} value={category}>
+                    {formatCategoryLabel(category)}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="md:col-span-2">
+              <select
+                value={filters.priceRange}
+                onChange={(e) =>
+                  handleFilterChange("priceRange", e.target.value)
+                }
+                className="w-full h-11 bg-slate-800/80 border border-slate-700 rounded-xl px-3 text-white text-sm focus:ring-2 focus:ring-blue-500/20 outline-none focus:border-blue-500 transition"
+              >
+                <option value="">All Prices</option>
+                {filterOptions.priceRanges.map((range) => (
+                  <option key={range.value} value={range.value}>
+                    {range.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="md:col-span-2">
+              <select
+                value={filters.instructor}
+                onChange={(e) =>
+                  handleFilterChange("instructor", e.target.value)
+                }
+                className="w-full h-11 bg-slate-800/80 border border-slate-700 rounded-xl px-3 text-white text-sm focus:ring-2 focus:ring-blue-500/20 outline-none focus:border-blue-500 transition"
+              >
+                <option value="">All Teachers</option>
+                {filterOptions.instructors.map((instructor) => (
+                  <option key={instructor} value={instructor}>
+                    {instructor}
+                  </option>
+                ))}
+              </select>
+            </div>
           </form>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-20">
-        <div className="flex flex-col lg:flex-row gap-16">
-          <aside className="lg:w-80 shrink-0 space-y-8">
-            {/* Filter Toggle Button (Mobile) */}
-            <div className="lg:hidden">
-              <Button
-                variant="outline"
-                size="md"
-                onClick={() => setShowFilters(!showFilters)}
-                className="w-full flex items-center justify-center gap-2"
-              >
-                <i
-                  className={`fas ${showFilters ? "fa-times" : "fa-filter"}`}
-                ></i>
-                {showFilters ? "Hide Filters" : "Show Filters"}
-              </Button>
+      <div className="max-w-7xl mx-auto px-6 pt-6 pb-16">
+        <main>
+          {hasActiveFilters && (
+            <div className="flex items-center justify-between mb-4 px-1">
+              <span className="text-sm text-slate-400">
+                Showing {filteredCourses.length} result
+                {filteredCourses.length !== 1 ? "s" : ""}
+              </span>
             </div>
-
-            {/* Filters Section */}
-            <div
-              className={`${showFilters ? "block" : "hidden"} lg:block space-y-8`}
-            >
-              {/* Clear Filters */}
-              {hasActiveFilters && (
-                <div className="flex items-center justify-between p-4 bg-slate-800/50 rounded-xl border border-slate-700/50">
-                  <span className="text-sm text-slate-400">
-                    {filteredCourses.length} result
-                    {filteredCourses.length !== 1 ? "s" : ""}
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={resetFilters}
-                    className="text-xs"
-                  >
-                    <i className="fas fa-times mr-1"></i>
-                    Clear All
-                  </Button>
-                </div>
-              )}
-
-              {/* Category Filter */}
-              <div>
-                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 mb-4 flex items-center justify-between">
-                  Category
-                  {filters.category && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleFilterChange("category", "")}
-                      className="text-xs p-1"
-                    >
-                      <i className="fas fa-times"></i>
-                    </Button>
-                  )}
-                </h3>
-                <select
-                  value={filters.category}
-                  onChange={(e) =>
-                    handleFilterChange("category", e.target.value)
-                  }
-                  className="w-full bg-slate-800/80 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm focus:ring-2 focus:ring-blue-500/20 outline-none focus:border-blue-500 transition"
-                >
-                  <option value="">All Categories</option>
-                  {filterOptions.categories.map((category) => (
-                    <option key={category} value={category}>
-                      {formatCategoryLabel(category)}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Price Range Filter */}
-              <div>
-                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 mb-4 flex items-center justify-between">
-                  Price Range
-                  {filters.priceRange && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleFilterChange("priceRange", "")}
-                      className="text-xs p-1"
-                    >
-                      <i className="fas fa-times"></i>
-                    </Button>
-                  )}
-                </h3>
-                <select
-                  value={filters.priceRange}
-                  onChange={(e) =>
-                    handleFilterChange("priceRange", e.target.value)
-                  }
-                  className="w-full bg-slate-800/80 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm focus:ring-2 focus:ring-blue-500/20 outline-none focus:border-blue-500 transition"
-                >
-                  <option value="">All Prices</option>
-                  {filterOptions.priceRanges.map((range) => (
-                    <option key={range.value} value={range.value}>
-                      {range.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Instructor Filter */}
-              <div>
-                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 mb-4 flex items-center justify-between">
-                  Instructor
-                  {filters.instructor && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleFilterChange("instructor", "")}
-                      className="text-xs p-1"
-                    >
-                      <i className="fas fa-times"></i>
-                    </Button>
-                  )}
-                </h3>
-                <select
-                  value={filters.instructor}
-                  onChange={(e) =>
-                    handleFilterChange("instructor", e.target.value)
-                  }
-                  className="w-full bg-slate-800/80 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm focus:ring-2 focus:ring-blue-500/20 outline-none focus:border-blue-500 transition"
-                >
-                  <option value="">All Teachers</option>
-                  {filterOptions.instructors.map((instructor) => (
-                    <option key={instructor} value={instructor}>
-                      {instructor}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </aside>
-
-          <main className="flex-1">
+          )}
             {filteredCourses.length === 0 && hasActiveFilters && (
               <div className="text-center py-12">
                 <div className="w-16 h-16 bg-slate-700/20 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -535,13 +485,13 @@ const Marketplace = () => {
               </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredCourses.map((course, idx) => (
                 <div
                   key={course.id || idx}
                   className="bg-slate-800/50 backdrop-blur-md rounded-[2.5rem] overflow-hidden border border-slate-700/50 shadow-2xl group hover:border-blue-500/40 transition-all flex flex-col"
                 >
-                  <div className="relative aspect-video overflow-hidden">
+                  <div className="relative h-32 overflow-hidden">
                     <Link to={`/courses/${course.id}`}>
                       <img
                         src={getCourseImage(course, idx)}
@@ -555,19 +505,19 @@ const Marketplace = () => {
                       </div>
                     )}
                   </div>
-                  <div className="p-8 flex-1 flex flex-col">
+                  <div className="p-5 flex-1 flex flex-col">
                     <Link to={`/courses/${course.id}`}>
-                      <h3 className="text-xl font-bold font-poppins mb-4 leading-tight group-hover:text-blue-400 transition cursor-pointer min-h-12">
+                      <h3 className="text-lg font-bold font-poppins mb-3 leading-tight group-hover:text-blue-400 transition cursor-pointer min-h-10">
                         {course.title || "Untitled Course"}
                       </h3>
                     </Link>
-                    <div className="flex items-center gap-4 mb-4">
+                    <div className="flex items-center gap-3 mb-3">
                       <img
                         src={
                           course.instructor?.avatar ||
                           `https://i.pravatar.cc/150?u=${course.instructor?.username || idx}`
                         }
-                        className="w-9 h-9 rounded-full border border-slate-700 shadow-md"
+                        className="w-8 h-8 rounded-full border border-slate-700 shadow-md"
                         alt={course.instructor?.username || "Instructor"}
                       />
                       <span className="text-xs text-slate-400 font-bold group-hover:text-slate-200 transition">
@@ -575,14 +525,14 @@ const Marketplace = () => {
                       </span>
                     </div>
                     {course.category && (
-                      <div className="mb-4">
+                      <div className="mb-3">
                         <span className="text-xs text-slate-500 uppercase tracking-widest">
                           {course.category}
                         </span>
                       </div>
                     )}
-                    <div className="flex items-center justify-between mb-4">
-                      <span className="text-lg font-bold text-blue-400">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-base font-bold text-blue-400">
                         PKR {course.price || "0.00"}
                       </span>
                       <div className="flex items-center gap-1">
@@ -593,7 +543,7 @@ const Marketplace = () => {
                       </div>
                     </div>
                     {course.instructor?.expertise && (
-                      <div className="mb-4">
+                      <div className="mb-3">
                         <span className="text-xs text-slate-500">
                           Expertise: {course.instructor.expertise}
                         </span>
@@ -606,13 +556,13 @@ const Marketplace = () => {
                           onClick={() =>
                             enrolled
                               ? handleUnenrollCourse(course.id, course.title)
-                              : handleEnrollCourse(course.id, course.title)
+                              : handleEnrollCourse(course)
                           }
                           disabled={
                             enrollingCourseIds.includes(course.id) ||
                             unenrollingCourseIds.includes(course.id)
                           }
-                          className={`w-full mt-auto py-4 font-black text-xs uppercase tracking-[0.2em] rounded-2xl transition-all active:scale-95 ${
+                          className={`w-full mt-auto py-2.5 font-black text-[11px] uppercase tracking-[0.18em] rounded-xl transition-all active:scale-95 ${
                             enrolled
                               ? unenrollingCourseIds.includes(course.id)
                                 ? "bg-red-600/50 text-red-400 cursor-not-allowed"
@@ -636,9 +586,15 @@ const Marketplace = () => {
                 </div>
               ))}
             </div>
-          </main>
-        </div>
+        </main>
       </div>
+
+      {/* Enrollment Type Modal */}
+      <EnrollmentTypeModal
+        isOpen={enrollmentModalOpen}
+        onClose={closeEnrollmentModal}
+        onSelect={handleEnrollmentTypeSelect}
+      />
     </section>
   );
 };

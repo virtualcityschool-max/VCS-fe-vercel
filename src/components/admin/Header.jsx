@@ -28,6 +28,11 @@ const Header = ({ activeTab }) => {
           title: "Enrollment Management",
           description: "View and manage course enrollments",
         };
+      case "sessions":
+        return {
+          title: "Session Management",
+          description: "Create, edit, and manage course sessions",
+        };
       default:
         return {
           title: activeTab,
@@ -39,7 +44,7 @@ const Header = ({ activeTab }) => {
   const { title, description } = getTabInfo();
 
   return (
-    <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
+    <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-2">
       <div>
         <h2 className="text-3xl md:text-4xl font-black font-poppins text-white capitalize mb-2">
           {title}

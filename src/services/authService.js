@@ -179,16 +179,32 @@ export const authService = {
 
   // Logout
   logout: async () => {
+    let backendLogoutSuccess = false;
+
     try {
       const refreshToken = localStorage.getItem("vcs_refresh_token");
       if (refreshToken) {
         await axiosInstance.post("/auth/logout/", {
           refresh: refreshToken,
         });
+        backendLogoutSuccess = true;
+      } else {
+        backendLogoutSuccess = true; // No token to invalidate
       }
     } catch (error) {
-      console.error("Logout error:", error);
+      console.error("Backend logout failed:", error);
+      // Continue with local logout even if backend fails
+      backendLogoutSuccess = false;
     }
+
+    // Always clear local storage regardless of backend success
+    try {
+      localStorage.removeItem("vcs_refresh_token");
+    } catch (error) {
+      console.error("Failed to clear refresh token from localStorage:", error);
+    }
+
+    return { backendLogoutSuccess };
   },
 
   // Resend OTP
@@ -434,6 +450,55 @@ export const authService = {
       }
 
       throw new Error(error.message || "Failed to reject user");
+    }
+  },
+
+  // Link child to parent (parent only)
+  linkChild: async (studentIds) => {
+    try {
+      console.log("Linking children:", studentIds);
+
+      const response = await axiosInstance.post("/auth/me/link-child/", {
+        student_ids: studentIds,
+      });
+      console.log("Link Child Response:", response.data);
+
+      return {
+        success: true,
+        data: response.data,
+        message: response.data.message || "Link request(s) sent successfully",
+      };
+    } catch (error) {
+      console.error("Link child error:", {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+        studentIds: studentIds,
+      });
+
+      if (error.response?.status === 400) {
+        const backendError = error.response?.data;
+        throw {
+          error: backendError?.error || "Invalid link request.",
+          status: 400,
+        };
+      }
+
+      if (error.response?.status === 403) {
+        throw {
+          error: "You don't have permission to link children.",
+          status: 403,
+        };
+      }
+
+      if (error.response?.status === 404) {
+        throw {
+          error: "One or more students not found.",
+          status: 404,
+        };
+      }
+
+      throw new Error(error.message || "Failed to link children");
     }
   },
 };
