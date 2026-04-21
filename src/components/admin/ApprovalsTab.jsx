@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState } from "react";
+import ConfirmDialog from "../common/ConfirmDialog";
 
 const ApprovalsTab = ({
   pendingApprovals,
@@ -9,12 +10,21 @@ const ApprovalsTab = ({
   onReject,
   onRefresh,
 }) => {
-  const handleApprove = (userId) => {
-    onApprove(userId);
+  const [confirmDialog, setConfirmDialog] = useState({ open: false, type: null, userId: null, username: "" });
+
+  const handleApprove = (userId, username) => {
+    setConfirmDialog({ open: true, type: "approve", userId, username });
   };
 
-  const handleReject = (userId) => {
-    onReject(userId);
+  const handleReject = (userId, username) => {
+    setConfirmDialog({ open: true, type: "reject", userId, username });
+  };
+
+  const handleConfirm = () => {
+    const { type, userId } = confirmDialog;
+    setConfirmDialog({ open: false, type: null, userId: null, username: "" });
+    if (type === "approve") onApprove(userId);
+    else if (type === "reject") onReject(userId);
   };
 
   return (
@@ -170,7 +180,7 @@ const ApprovalsTab = ({
 
                         <div className="flex gap-2">
                           <button
-                            onClick={() => handleApprove(user.id)}
+                            onClick={() => handleApprove(user.id, user.username)}
                             disabled={isProcessing[user.id] === "approving"}
                             className="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 sm:gap-2 flex-1 justify-center"
                           >
@@ -191,7 +201,7 @@ const ApprovalsTab = ({
                             )}
                           </button>
                           <button
-                            onClick={() => handleReject(user.id)}
+                            onClick={() => handleReject(user.id, user.username)}
                             disabled={isProcessing[user.id] === "rejecting"}
                             className="bg-red-600 text-white px-3 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-red-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 sm:gap-2 flex-1 justify-center"
                           >
@@ -286,7 +296,7 @@ const ApprovalsTab = ({
                       <td className="px-8 py-6 text-right">
                         <div className="flex items-center gap-2 justify-end">
                           <button
-                            onClick={() => handleApprove(user.id)}
+                            onClick={() => handleApprove(user.id, user.username)}
                             disabled={isProcessing[user.id] === "approving"}
                             className="bg-emerald-600 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                           >
@@ -303,7 +313,7 @@ const ApprovalsTab = ({
                             )}
                           </button>
                           <button
-                            onClick={() => handleReject(user.id)}
+                            onClick={() => handleReject(user.id, user.username)}
                             disabled={isProcessing[user.id] === "rejecting"}
                             className="bg-red-600 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                           >
@@ -328,6 +338,21 @@ const ApprovalsTab = ({
             </div>
           )}
       </div>
+
+      <ConfirmDialog
+        open={confirmDialog.open}
+        variant={confirmDialog.type === "approve" ? "success" : "danger"}
+        title={confirmDialog.type === "approve" ? "Approve User" : "Reject User"}
+        message={
+          confirmDialog.type === "approve"
+            ? `Are you sure you want to approve "${confirmDialog.username}"? They will gain access to the platform.`
+            : `Are you sure you want to reject "${confirmDialog.username}"? This will deny their registration.`
+        }
+        confirmLabel={confirmDialog.type === "approve" ? "Approve" : "Reject"}
+        cancelLabel="Cancel"
+        onConfirm={handleConfirm}
+        onCancel={() => setConfirmDialog({ open: false, type: null, userId: null, username: "" })}
+      />
     </>
   );
 };

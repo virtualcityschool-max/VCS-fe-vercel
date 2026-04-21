@@ -97,6 +97,20 @@ export const createAssignment = createAsyncThunk(
   },
 );
 
+export const fetchAllSubmissions = createAsyncThunk(
+  "teachers/fetchAllSubmissions",
+  async (params = {}, { rejectWithValue }) => {
+    try {
+      const data = await teacherService.getAllSubmissions(params);
+      return data;
+    } catch (error) {
+      return rejectWithValue(
+        error?.response?.data?.error || error?.message || "Failed to fetch submissions",
+      );
+    }
+  },
+);
+
 export const fetchSubmissions = createAsyncThunk(
   "teachers/fetchSubmissions",
   async (assignmentId, { rejectWithValue }) => {
@@ -158,9 +172,9 @@ export const fetchSubmissionById = createAsyncThunk(
 
 export const fetchTeacherSessions = createAsyncThunk(
   "teachers/fetchTeacherSessions",
-  async (_, { rejectWithValue }) => {
+  async (params = {}, { rejectWithValue }) => {
     try {
-      const data = await teacherService.getTeacherSessions();
+      const data = await teacherService.getTeacherSessions(params);
       return data;
     } catch (error) {
       return rejectWithValue(
@@ -278,6 +292,10 @@ const initialState = {
   errorAssignments: null,
   errorCreateAssignment: null,
 
+  allSubmissions: [],
+  loadingAllSubmissions: false,
+  errorAllSubmissions: null,
+
   submissions: [],
   loadingSubmissions: false,
   errorSubmissions: null,
@@ -388,6 +406,20 @@ const teacherSlice = createSlice({
       .addCase(createAssignment.rejected, (state, action) => {
         state.loadingCreateAssignment = false;
         state.errorCreateAssignment = action.payload;
+      })
+
+      // ALL SUBMISSIONS
+      .addCase(fetchAllSubmissions.pending, (state) => {
+        state.loadingAllSubmissions = true;
+        state.errorAllSubmissions = null;
+      })
+      .addCase(fetchAllSubmissions.fulfilled, (state, action) => {
+        state.loadingAllSubmissions = false;
+        state.allSubmissions = Array.isArray(action.payload) ? action.payload : [];
+      })
+      .addCase(fetchAllSubmissions.rejected, (state, action) => {
+        state.loadingAllSubmissions = false;
+        state.errorAllSubmissions = action.payload;
       })
 
       // SUBMISSIONS

@@ -1,12 +1,16 @@
-import React, { useMemo } from "react";
-import { Button, Input, Card } from "../../components/ui";
+import React, { useMemo, useState } from "react";
+import { Button } from "../../components/ui";
+
+const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const MONTH_NAMES = [
+  "January","February","March","April","May","June",
+  "July","August","September","October","November","December",
+];
 
 const SessionsTab = ({
   sessions,
   courses,
-  privateStudents,
-  privateStudentsLoading,
-  privateStudentsError,
+  teachers = [],
   loading,
   loadingSessionIds,
   updatingSessionId,
@@ -29,56 +33,113 @@ const SessionsTab = ({
   sessionFilters,
   setSessionFilters,
 }) => {
-  // Filter sessions based on search term
+  const [view, setView] = useState("table");
+  const [calendarMonth, setCalendarMonth] = useState(null); // { year, month } — null = auto from data
+
+  // ── filtered sessions (search only; teacher filtering is done server-side) ──
   const filteredSessions = useMemo(() => {
     if (!sessions || sessions.length === 0) return [];
+    return sessions.filter((session) => {
+      if (!sessionFilters.search) return true;
+      const q = sessionFilters.search.toLowerCase();
+      return (
+        session.title?.toLowerCase().includes(q) ||
+        (session.course?.title || session.course_title)?.toLowerCase().includes(q) ||
+        session.teacher_name?.toLowerCase().includes(q)
+      );
+    });
+  }, [sessions, sessionFilters.search]);
 
-    const filtered = sessions.filter((session) => {
-      // Search filter (title, course title, meeting link)
-      const matchesSearch =
-        sessionFilters.search === "" ||
-        session.title
-          ?.toLowerCase()
-          .includes(sessionFilters.search.toLowerCase()) ||
-        session.course?.title
-          ?.toLowerCase()
-          .includes(sessionFilters.search.toLowerCase()) ||
-        session.meeting_link
-          ?.toLowerCase()
-          .includes(sessionFilters.search.toLowerCase());
+  // ── parent sessions (is_child === false) drive the calendar date range ──
+  const parentSessions = useMemo(
+    () => filteredSessions.filter((s) => s.is_child === false),
+    [filteredSessions],
+  );
 
-      return matchesSearch;
+  // min date = earliest scheduled_at among parents; max date = latest recurrence_end_date among parents
+  const { calendarStart, calendarEnd } = useMemo(() => {
+    if (parentSessions.length === 0) return { calendarStart: null, calendarEnd: null };
+
+    let minTs = Infinity;
+    let maxTs = -Infinity;
+
+    parentSessions.forEach((s) => {
+      if (s.scheduled_at) {
+        const t = new Date(s.scheduled_at).getTime();
+        if (t < minTs) minTs = t;
+      }
+      const endStr = s.recurrence_end_date || s.scheduled_at;
+      if (endStr) {
+        const t = new Date(endStr).getTime();
+        if (t > maxTs) maxTs = t;
+      }
     });
 
-    return filtered;
-  }, [sessions, sessionFilters]);
+    return {
+      calendarStart: minTs !== Infinity ? new Date(minTs) : null,
+      calendarEnd: maxTs !== -Infinity ? new Date(maxTs) : null,
+    };
+  }, [parentSessions]);
 
-  // Check if any session filters are active
-  const hasActiveSessionFilters = useMemo(() => {
-    return Object.values(sessionFilters).some((value) => value !== "");
-  }, [sessionFilters]);
+  // derive month range to render
+  const monthRange = useMemo(() => {
+    if (!calendarStart || !calendarEnd) return [];
+    const months = [];
+    const cur = new Date(calendarStart.getFullYear(), calendarStart.getMonth(), 1);
+    const last = new Date(calendarEnd.getFullYear(), calendarEnd.getMonth(), 1);
+    while (cur <= last) {
+      months.push({ year: cur.getFullYear(), month: cur.getMonth() });
+      cur.setMonth(cur.getMonth() + 1);
+    }
+    return months;
+  }, [calendarStart, calendarEnd]);
 
-  // Reset all session filters
-  const resetSessionFilters = () => {
-    setSessionFilters({
-      search: "",
+  // active calendar month index (default to first month in range)
+  const activeMonthIdx = useMemo(() => {
+    if (monthRange.length === 0) return 0;
+    if (calendarMonth === null) return 0;
+    const idx = monthRange.findIndex(
+      (m) => m.year === calendarMonth.year && m.month === calendarMonth.month,
+    );
+    return idx >= 0 ? idx : 0;
+  }, [monthRange, calendarMonth]);
+
+  const activeMonthData = monthRange[activeMonthIdx] || null;
+
+  // build a dateKey → sessions[] map for quick lookup
+  const sessionsByDate = useMemo(() => {
+    const map = {};
+    filteredSessions.forEach((session) => {
+      if (!session.scheduled_at) return;
+      const d = new Date(session.scheduled_at);
+      const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+      if (!map[key]) map[key] = [];
+      map[key].push(session);
     });
-  };
+    return map;
+  }, [filteredSessions]);
+
+  // build calendar grid for the active month
+  const calendarGrid = useMemo(() => {
+    if (!activeMonthData) return [];
+    const { year, month } = activeMonthData;
+    const firstDay = new Date(year, month, 1).getDay(); // 0=Sun
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const cells = [];
+    for (let i = 0; i < firstDay; i++) cells.push(null); // leading blanks
+    for (let d = 1; d <= daysInMonth; d++) cells.push(d);
+    return cells;
+  }, [activeMonthData]);
+
+  const hasActiveSessionFilters = useMemo(
+    () => !!sessionFilters.search,
+    [sessionFilters.search],
+  );
 
   const handleCreateSession = async (e) => {
     e.preventDefault();
     try {
-      // Create payload based on session type
-      const payload = {
-        ...createSessionForm,
-      };
-
-      // Remove private_student_id for group sessions
-      if (payload.session_type === "group") {
-        delete payload.private_student_id;
-      }
-
-      await onSessionCreate(payload);
+      await onSessionCreate({ ...createSessionForm });
     } catch (error) {
       console.error("Failed to create session:", error);
     }
@@ -93,378 +154,365 @@ const SessionsTab = ({
     }
   };
 
-  const formatDateTime = (dateTimeString) => {
-    if (!dateTimeString) return "Not set";
+  const formatDate = (dateTimeString) => {
+    if (!dateTimeString) return "—";
     try {
-      const date = new Date(dateTimeString);
-      return date.toLocaleString();
+      return new Date(dateTimeString).toLocaleDateString([], {
+        year: "numeric", month: "short", day: "numeric",
+      });
     } catch {
-      return "Invalid date";
+      return "—";
+    }
+  };
+
+  const formatTime = (dateTimeString) => {
+    if (!dateTimeString) return "";
+    try {
+      return new Date(dateTimeString).toLocaleTimeString([], {
+        hour: "2-digit", minute: "2-digit",
+      });
+    } catch {
+      return "";
     }
   };
 
   const getStatusBadge = (status) => {
-    const statusConfig = {
-      scheduled: {
-        bg: "bg-blue-500/20",
-        text: "text-blue-400",
-        border: "border-blue-500/20",
-      },
-      live: {
-        bg: "bg-emerald-500/20",
-        text: "text-emerald-400",
-        border: "border-emerald-500/20",
-      },
-      ended: {
-        bg: "bg-slate-500/20",
-        text: "text-slate-400",
-        border: "border-slate-500/20",
-      },
-      cancelled: {
-        bg: "bg-red-500/20",
-        text: "text-red-400",
-        border: "border-red-500/20",
-      },
+    const cfg = {
+      scheduled: "bg-blue-500/20 text-blue-400 border-blue-500/20",
+      live:      "bg-emerald-500/20 text-emerald-400 border-emerald-500/20",
+      ended:     "bg-slate-500/20 text-slate-400 border-slate-500/20",
+      cancelled: "bg-red-500/20 text-red-400 border-red-500/20",
     };
-
-    const config = statusConfig[status] || statusConfig.scheduled;
-
+    const cls = cfg[status] || cfg.scheduled;
     return (
-      <span
-        className={`px-2 py-1 rounded-full text-xs font-medium ${config.bg} ${config.text} ${config.border}`}
-      >
+      <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${cls}`}>
         {status || "scheduled"}
       </span>
     );
   };
 
+  // today key for highlighting
+  const todayKey = (() => {
+    const t = new Date();
+    return `${t.getFullYear()}-${t.getMonth()}-${t.getDate()}`;
+  })();
+
   return (
     <div className="space-y-6">
-      {/* Session Management Header */}
-      <div className="mb-8">
-        <div className="flex justify-end items-center mb-6">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 lg:gap-4 w-full lg:w-auto max-w-2xl lg:max-w-none">
-            <div className="relative flex-1 lg:flex-initial">
-              <Input
-                type="text"
-                placeholder="Search classes..."
-                value={sessionFilters.search}
-                onChange={(e) =>
-                  setSessionFilters({
-                    ...sessionFilters,
-                    search: e.target.value,
-                  })
-                }
-                className="pl-10 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full lg:w-64"
-              />
-              <i className="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
-              {hasActiveSessionFilters && (
-                <button
-                  onClick={resetSessionFilters}
-                  className="bg-orange-600 hover:bg-orange-500 text-white px-3 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2"
-                  title="Clear all filters"
-                >
-                  <i className="fas fa-times"></i>
-                  <span className="hidden sm:inline">Clear</span>
-                </button>
-              )}
-              <button
-                onClick={() => setActiveModal("create-session")}
-                className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-lg active:scale-95 transition items-center justify-center gap-2"
-              >
-                <i className="fas fa-plus text-sm"></i>
-                <span className="hidden sm:inline ml-2">Create Class</span>
-                <span className="sm:hidden">+</span>
-              </button>
-            </div>
-          </div>
+      {/* ── Header bar ── */}
+      <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+        {/* View toggle */}
+        <div className="flex bg-slate-800 border border-slate-700 rounded-lg overflow-hidden shrink-0">
+          <button
+            onClick={() => setView("table")}
+            className={`px-3 py-2 text-sm font-medium transition flex items-center gap-1.5 ${view === "table" ? "bg-indigo-600 text-white" : "text-slate-400 hover:text-white"}`}
+          >
+            <i className="fas fa-table text-xs"></i>
+            <span className="hidden sm:inline">Table</span>
+          </button>
+          <button
+            onClick={() => setView("calendar")}
+            className={`px-3 py-2 text-sm font-medium transition flex items-center gap-1.5 ${view === "calendar" ? "bg-indigo-600 text-white" : "text-slate-400 hover:text-white"}`}
+          >
+            <i className="fas fa-calendar-alt text-xs"></i>
+            <span className="hidden sm:inline">Calendar</span>
+          </button>
         </div>
-      </div>
 
-      {/* Filter Results Info */}
-      {hasActiveSessionFilters && (
-        <div className="mb-4 text-sm text-slate-400">
-          Showing {filteredSessions.length} of {sessions?.length || 0} classes
-        </div>
-      )}
-
-      {/* Sessions List */}
-      <div className="bg-slate-900/50 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-sm">
-        {loading ? (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead className="bg-slate-950/60 border-b border-slate-800">
-                <tr>
-                  <th className="px-6 py-4 text-xs font-black uppercase text-slate-500">
-                    Class
-                  </th>
-                  <th className="px-6 py-4 text-xs font-black uppercase text-slate-500">
-                    Course
-                  </th>
-                  <th className="px-6 py-4 text-xs font-black uppercase text-slate-500">
-                    Start Time
-                  </th>
-                  <th className="px-6 py-4 text-xs font-black uppercase text-slate-500">
-                    Meeting Link
-                  </th>
-                  <th className="px-6 py-4 text-xs font-black uppercase text-slate-500">
-                    Status
-                  </th>
-                  <th className="px-6 py-4 text-xs font-black uppercase text-slate-500 text-right">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800/50">
-                {[...Array(5)].map((_, index) => (
-                  <tr key={index} className="animate-pulse">
-                    <td className="px-6 py-4">
-                      <div className="space-y-2">
-                        <div className="h-4 bg-slate-700 rounded w-32"></div>
-                        <div className="h-3 bg-slate-700 rounded w-48"></div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="h-4 bg-slate-700 rounded w-24"></div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="h-4 bg-slate-700 rounded w-28"></div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="h-4 bg-slate-700 rounded w-28"></div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="h-4 bg-slate-700 rounded w-36"></div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="h-6 bg-slate-700 rounded w-16"></div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2 justify-end">
-                        <div className="h-8 bg-slate-700 rounded w-12"></div>
-                        <div className="h-8 bg-slate-700 rounded w-12"></div>
-                        <div className="h-8 bg-slate-700 rounded w-16"></div>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            {/* Mobile Card View */}
-            <div className="lg:hidden divide-y divide-slate-800/50 space-y-4">
-              {filteredSessions?.map((session) => (
-                <div
-                  key={session.id}
-                  className="p-4 sm:p-6 hover:bg-slate-800/30 transition"
-                >
-                  <div className="flex flex-col gap-4">
-                    {/* Session Info */}
-                    <div className="flex items-start gap-3">
-                      <div className="w-12 h-12 bg-indigo-600/20 rounded-xl flex items-center justify-center">
-                        <i className="fas fa-video text-indigo-400 text-sm"></i>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-bold text-white text-sm sm:text-base mb-1">
-                          {session.title}
-                        </p>
-                        <p className="text-xs text-slate-500 mt-1">
-                          {session.course?.title || "No course"}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Session Details */}
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs text-slate-400">
-                      <div className="flex items-center gap-2">
-                        <i className="fas fa-clock text-indigo-400"></i>
-                        <span>{formatDateTime(session.start_time)}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <i className="fas fa-link text-purple-400"></i>
-                        <span className="truncate max-w-[150px]">
-                          {session.meeting_link}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {getStatusBadge(session.status)}
-                      </div>
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className="flex flex-col gap-2">
-                      <button
-                        onClick={() => onSessionEdit(session.id)}
-                        className="bg-slate-700/50 text-slate-300 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-slate-600/50 transition flex items-center gap-2"
-                      >
-                        <i className="fas fa-edit"></i>
-                        <span>Edit Class</span>
-                      </button>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => onSessionDelete(session.id)}
-                          disabled={loadingSessionIds.has(session.id)}
-                          className="bg-red-600/10 text-red-400 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-red-600/20 transition disabled:opacity-50 flex items-center gap-2 flex-1"
-                        >
-                          <i className="fas fa-trash"></i>
-                          <span>
-                            {loadingSessionIds.has(session.id)
-                              ? "Deleting..."
-                              : "Delete"}
-                          </span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Desktop Table View */}
-            <table className="hidden lg:table w-full text-left">
-              <thead className="bg-slate-950/60 border-b border-slate-800">
-                <tr>
-                  <th className="px-6 py-4 text-xs font-black uppercase text-slate-500">
-                    Class
-                  </th>
-                  <th className="px-6 py-4 text-xs font-black uppercase text-slate-500">
-                    Course
-                  </th>
-                  <th className="px-6 py-4 text-xs font-black uppercase text-slate-500">
-                    Start Time
-                  </th>
-                  <th className="px-6 py-4 text-xs font-black uppercase text-slate-500">
-                    Meeting Link
-                  </th>
-                  <th className="px-6 py-4 text-xs font-black uppercase text-slate-500">
-                    Status
-                  </th>
-                  <th className="px-6 py-4 text-xs font-black uppercase text-slate-500 text-right">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800/50">
-                {filteredSessions?.map((session) => (
-                  <tr
-                    key={session.id}
-                    className="hover:bg-slate-800/30 transition"
-                  >
-                    <td className="px-6 py-4">
-                      <div>
-                        <p className="font-bold text-white group-hover:text-indigo-400 transition">
-                          {session.title}
-                        </p>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="text-slate-300 text-sm">
-                        {session.course?.title || "No course"}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="text-slate-300 text-sm">
-                        {formatDateTime(session.start_time)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <a
-                        href={session.meeting_link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-indigo-400 hover:text-indigo-300 text-sm truncate block max-w-[200px]"
-                        title={session.meeting_link}
-                      >
-                        {session.meeting_link}
-                      </a>
-                    </td>
-                    <td className="px-6 py-4">
-                      {getStatusBadge(session.status)}
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2 justify-end">
-                        <button
-                          onClick={() => onSessionEdit(session.id)}
-                          className="bg-slate-700/50 text-slate-300 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-slate-600/50 transition"
-                        >
-                          <i className="fas fa-edit mr-1"></i>
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => onSessionDelete(session.id)}
-                          disabled={loadingSessionIds.has(session.id)}
-                          className="bg-red-600/10 text-red-400 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-red-600/20 transition disabled:opacity-50"
-                        >
-                          <i className="fas fa-trash mr-1"></i>
-                          {loadingSessionIds.has(session.id)
-                            ? "Deleting..."
-                            : "Delete"}
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        {/* Month nav — inline, only in calendar view with data */}
+        {view === "calendar" && activeMonthData && (
+          <div className="flex items-center gap-1 bg-slate-800 border border-slate-700 rounded-lg px-1 py-1 shrink-0">
+            <button
+              onClick={() => setCalendarMonth(monthRange[Math.max(0, activeMonthIdx - 1)])}
+              disabled={activeMonthIdx === 0}
+              className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-slate-700 text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition"
+            >
+              <i className="fas fa-chevron-left text-xs"></i>
+            </button>
+            <span className="text-sm font-semibold text-white px-2 min-w-[110px] text-center">
+              {MONTH_NAMES[activeMonthData.month]} {activeMonthData.year}
+            </span>
+            <button
+              onClick={() => setCalendarMonth(monthRange[Math.min(monthRange.length - 1, activeMonthIdx + 1)])}
+              disabled={activeMonthIdx === monthRange.length - 1}
+              className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-slate-700 text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition"
+            >
+              <i className="fas fa-chevron-right text-xs"></i>
+            </button>
           </div>
         )}
 
-        {/* No Results State */}
-        {!loading &&
-          filteredSessions.length === 0 &&
-          hasActiveSessionFilters && (
-            <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-16 text-center">
-              <div className="w-20 h-20 bg-slate-700/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                <i className="fas fa-search text-slate-400 text-2xl"></i>
-              </div>
-              <h3 className="text-xl font-bold text-white mb-4">
-                No Classes Found
-              </h3>
-              <p className="text-slate-400 text-center mb-6 max-w-md">
-                No classes match your current filter criteria. Try adjusting
-                your filters or clearing them to see more results.
-              </p>
-              <button
-                onClick={resetSessionFilters}
-                className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-xl text-sm font-medium shadow-lg active:scale-95 transition-all duration-200"
-              >
-                <i className="fas fa-times mr-2"></i>
-                Clear All Filters
-              </button>
-            </div>
-          )}
+        {/* Date range — only in calendar view when range is known */}
+        {view === "calendar" && calendarStart && calendarEnd && (
+          <div className="flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 shrink-0">
+            <i className="fas fa-calendar-alt text-indigo-400 text-xs"></i>
+            <span className="text-xs font-semibold text-white">
+              {calendarStart.toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" })}
+            </span>
+            <i className="fas fa-arrow-right text-slate-500 text-xs"></i>
+            <span className="text-xs font-semibold text-white">
+              {calendarEnd.toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" })}
+            </span>
+          </div>
+        )}
 
-        {/* Empty State */}
-        {!loading &&
-          filteredSessions.length === 0 &&
-          !hasActiveSessionFilters && (
-            <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-16 text-center">
-              <div className="w-20 h-20 bg-slate-700/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                <i className="fas fa-video text-slate-400 text-2xl"></i>
-              </div>
-              <h3 className="text-xl font-bold text-white mb-4">
-                No Classes Created
-              </h3>
-              <p className="text-slate-400 text-center mb-6">
-                Get started by creating your first class. Classes allow you
-                to schedule online meetings for your courses.
-              </p>
-              <button
-                onClick={() => setActiveModal("create-session")}
-                className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-xl text-sm font-medium shadow-lg active:scale-95 transition-all duration-200"
-              >
-                <i className="fas fa-plus mr-2"></i>
-                Create First Class
-              </button>
-            </div>
-          )}
+        {/* Instructor filter */}
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="text-xs font-semibold text-slate-400 hidden sm:inline">Instructor</span>
+          <select
+            value={sessionFilters.teacher}
+            onChange={(e) => setSessionFilters({ ...sessionFilters, teacher: e.target.value })}
+            className="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          >
+            {teachers.map((t) => (
+              <option key={t.id} value={t.id}>{t.username}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Create Class — pushed to the right */}
+        <button
+          onClick={() => setActiveModal("create-session")}
+          className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-lg active:scale-95 transition flex items-center gap-2 ml-auto shrink-0"
+        >
+          <i className="fas fa-plus text-xs"></i>
+          <span>Create Class</span>
+        </button>
       </div>
 
-      {/* Create Class Modal */}
+      {/* ── TABLE VIEW ── */}
+      {view === "table" && (
+        <div className="bg-slate-900/50 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-sm">
+          {loading ? (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
+                <thead className="bg-slate-950/60 border-b border-slate-800">
+                  <tr>
+                    {["Class", "Course", "Teacher", "Start Date", "Recurrence", "End Date", "Status", "Actions"].map((h) => (
+                      <th key={h} className="px-5 py-4 text-xs font-black uppercase text-slate-500">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800/50">
+                  {[...Array(5)].map((_, i) => (
+                    <tr key={i} className="animate-pulse">
+                      {[...Array(8)].map((__, j) => (
+                        <td key={j} className="px-5 py-4"><div className="h-4 bg-slate-700 rounded w-24"></div></td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : filteredSessions.length === 0 ? (
+            <div className="p-16 text-center">
+              <div className="w-16 h-16 bg-slate-700/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i className={`fas ${hasActiveSessionFilters ? "fa-search" : "fa-video"} text-slate-400 text-xl`}></i>
+              </div>
+              <p className="text-white font-bold mb-1">{hasActiveSessionFilters ? "No Classes Found" : "No Classes Created"}</p>
+              <p className="text-slate-400 text-sm mb-4">
+                {hasActiveSessionFilters ? "Try adjusting your filters." : "Create your first class to get started."}
+              </p>
+              {hasActiveSessionFilters ? (
+                <button onClick={() => setSessionFilters({ ...sessionFilters, search: "" })} className="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2 rounded-xl text-sm font-medium transition">Clear Filters</button>
+              ) : (
+                <button onClick={() => setActiveModal("create-session")} className="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2 rounded-xl text-sm font-medium transition">Create First Class</button>
+              )}
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              {/* Mobile cards */}
+              <div className="lg:hidden divide-y divide-slate-800/50">
+                {filteredSessions.map((session) => (
+                  <div key={session.id} className="p-4 hover:bg-slate-800/30 transition">
+                    <div className="flex items-start justify-between gap-3 mb-3">
+                      <div>
+                        <p className="font-bold text-white text-sm">{session.title}</p>
+                        <p className="text-xs text-slate-400 mt-0.5">{session.course?.title || session.course_title || "—"}</p>
+                        <p className="text-xs text-slate-500">{session.teacher_name || "—"}</p>
+                      </div>
+                      {getStatusBadge(session.status)}
+                    </div>
+                    <div className="flex flex-wrap gap-2 text-xs text-slate-400 mb-3">
+                      <span><i className="fas fa-calendar mr-1 text-indigo-400"></i>{formatDate(session.scheduled_at || session.start_time)}</span>
+                      {session.recurrence_days?.length > 0 && (
+                        <span><i className="fas fa-repeat mr-1 text-purple-400"></i>{session.recurrence_days.join(", ")}</span>
+                      )}
+                      {session.recurrence_end_date && (
+                        <span><i className="fas fa-flag-checkered mr-1 text-slate-500"></i>Until {session.recurrence_end_date}</span>
+                      )}
+                    </div>
+                    <div className="flex gap-2">
+                      <button onClick={() => onSessionEdit(session.id)} className="bg-slate-700/50 text-slate-300 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-slate-600/50 transition flex-1 flex items-center justify-center gap-1">
+                        <i className="fas fa-edit"></i> Edit
+                      </button>
+                      <button onClick={() => onSessionDelete(session.id)} disabled={loadingSessionIds.has(session.id)} className="bg-red-600/10 text-red-400 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-red-600/20 transition disabled:opacity-50 flex-1 flex items-center justify-center gap-1">
+                        <i className="fas fa-trash"></i>
+                        {loadingSessionIds.has(session.id) ? "Deleting…" : "Delete"}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop table */}
+              <table className="hidden lg:table w-full text-left">
+                <thead className="bg-slate-950/60 border-b border-slate-800">
+                  <tr>
+                    <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Class</th>
+                    <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Course</th>
+                    <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Teacher</th>
+                    <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Start Date</th>
+                    <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Recurrence</th>
+                    <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">End Date</th>
+                    <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Status</th>
+                    <th className="px-5 py-4 text-xs font-black uppercase text-slate-500 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800/50">
+                  {filteredSessions.map((session) => (
+                    <tr key={session.id} className="hover:bg-slate-800/30 transition">
+                      <td className="px-5 py-4 font-semibold text-white text-sm">{session.title}</td>
+                      <td className="px-5 py-4 text-slate-300 text-sm">{session.course?.title || session.course_title || "—"}</td>
+                      <td className="px-5 py-4 text-slate-300 text-sm">{session.teacher_name || "—"}</td>
+                      <td className="px-5 py-4 text-slate-300 text-sm">{formatDate(session.scheduled_at || session.start_time)}</td>
+                      <td className="px-5 py-4">
+                        {session.recurrence_days?.length > 0 ? (
+                          <div className="flex flex-wrap gap-1">
+                            {session.recurrence_days.map((d) => (
+                              <span key={d} className="px-1.5 py-0.5 bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 rounded text-xs font-medium">{d}</span>
+                            ))}
+                          </div>
+                        ) : <span className="text-slate-500 text-xs">—</span>}
+                      </td>
+                      <td className="px-5 py-4 text-slate-300 text-sm">{session.recurrence_end_date || "—"}</td>
+                      <td className="px-5 py-4">{getStatusBadge(session.status)}</td>
+                      <td className="px-5 py-4">
+                        <div className="flex items-center gap-2 justify-end">
+                          <button onClick={() => onSessionEdit(session.id)} className="bg-slate-700/50 text-slate-300 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-slate-600/50 transition">
+                            <i className="fas fa-edit mr-1"></i>Edit
+                          </button>
+                          <button onClick={() => onSessionDelete(session.id)} disabled={loadingSessionIds.has(session.id)} className="bg-red-600/10 text-red-400 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-red-600/20 transition disabled:opacity-50">
+                            <i className="fas fa-trash mr-1"></i>
+                            {loadingSessionIds.has(session.id) ? "Deleting…" : "Delete"}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── CALENDAR VIEW ── */}
+      {view === "calendar" && (
+        <div className="space-y-4">
+          {/* No data state */}
+          {monthRange.length === 0 && !loading && (
+            <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-16 text-center">
+              <div className="w-16 h-16 bg-slate-700/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i className="fas fa-calendar text-slate-400 text-xl"></i>
+              </div>
+              <p className="text-white font-bold mb-1">No Sessions to Display</p>
+              <p className="text-slate-400 text-sm">Select a teacher to see their calendar.</p>
+            </div>
+          )}
+
+          {monthRange.length > 0 && (
+            <>
+              {/* Calendar grid */}
+              <div className="bg-slate-900/50 border border-slate-800 rounded-2xl overflow-hidden">
+                {/* Day-of-week header */}
+                <div className="grid grid-cols-7 border-b border-slate-800">
+                  {DAY_LABELS.map((d) => (
+                    <div key={d} className="px-2 py-3 text-center text-xs font-black uppercase text-slate-500 bg-slate-950/60">
+                      {d}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Calendar cells */}
+                <div className="grid grid-cols-7">
+                  {calendarGrid.map((day, idx) => {
+                    if (!day) {
+                      return <div key={`blank-${idx}`} className="min-h-[100px] border-b border-r border-slate-800/50 bg-slate-900/20" />;
+                    }
+
+                    const cellKey = `${activeMonthData.year}-${activeMonthData.month}-${day}`;
+                    const daySessions = sessionsByDate[cellKey] || [];
+                    const isToday = cellKey === todayKey;
+                    const isInRange =
+                      calendarStart && calendarEnd &&
+                      new Date(activeMonthData.year, activeMonthData.month, day) >= new Date(calendarStart.getFullYear(), calendarStart.getMonth(), calendarStart.getDate()) &&
+                      new Date(activeMonthData.year, activeMonthData.month, day) <= new Date(calendarEnd.getFullYear(), calendarEnd.getMonth(), calendarEnd.getDate());
+
+                    return (
+                      <div
+                        key={cellKey}
+                        className={`min-h-[100px] border-b border-r border-slate-800/50 p-1.5 flex flex-col gap-1 ${
+                          isToday
+                            ? "bg-indigo-900/20"
+                            : isInRange && daySessions.length > 0
+                              ? "bg-slate-800/20"
+                              : ""
+                        }`}
+                      >
+                        {/* Day number */}
+                        <span className={`text-xs font-bold w-6 h-6 flex items-center justify-center rounded-full self-end ${
+                          isToday
+                            ? "bg-indigo-600 text-white"
+                            : daySessions.length > 0
+                              ? "text-white"
+                              : "text-slate-600"
+                        }`}>
+                          {day}
+                        </span>
+
+                        {/* Session cards in this cell */}
+                        {daySessions.map((session) => (
+                          <div
+                            key={session.id}
+                            className="bg-white rounded-lg p-2 shadow-sm hover:shadow-md transition cursor-pointer group"
+                            onClick={() => onSessionEdit(session.id)}
+                          >
+                            {/* Date + time */}
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-xs font-bold text-indigo-700">
+                                {new Date(session.scheduled_at).toLocaleDateString([], { month: "short", day: "numeric" })}
+                              </span>
+                              <span className="text-xs text-slate-500">
+                                {formatTime(session.scheduled_at)}
+                              </span>
+                            </div>
+
+                            {/* Title */}
+                            <p className="text-xs font-bold text-gray-900 leading-tight line-clamp-2 mb-1">
+                              {session.title}
+                            </p>
+
+                            {/* Course */}
+                            <p className="text-xs text-indigo-600 truncate mb-1.5">
+                              {session.course?.title || session.course_title || "—"}
+                            </p>
+
+                            {/* Status badge */}
+                            {getStatusBadge(session.status)}
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
+      {/* ── CREATE CLASS MODAL ── */}
       {activeModal === "create-session" && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -486,18 +534,55 @@ const SessionsTab = ({
                 </label>
                 <select
                   value={createSessionForm.course}
-                  onChange={(e) => { setCreateSessionForm({ ...createSessionForm, course: e.target.value }); clearCreateSessionFieldError("course"); }}
+                  onChange={(e) => {
+                    setCreateSessionForm({ ...createSessionForm, course: e.target.value, recurrence_end_date: "" });
+                    clearCreateSessionFieldError("course");
+                  }}
                   className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white focus:outline-none focus:ring-2 text-sm ${createSessionErrors?.course ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
                 >
                   <option value="">Select a course</option>
                   {courses?.map((course) => (
-                    <option key={course.id} value={course.id}>
-                      {course.title} — {course.instructor?.username || "No instructor"}
-                    </option>
+                    <option key={course.id} value={course.id}>{course.title}</option>
                   ))}
                 </select>
                 {createSessionErrors?.course && <p className="text-red-400 text-xs mt-1">{createSessionErrors.course}</p>}
               </div>
+
+              {/* Course schedule info */}
+              {(() => {
+                const selectedCourse = createSessionForm.course
+                  ? courses?.find((c) => c.id === Number(createSessionForm.course))
+                  : null;
+                if (!selectedCourse?.schedule) return null;
+                return (
+                  <div className="p-4 bg-slate-800/40 border border-slate-700/50 rounded-xl space-y-3">
+                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Course Schedule (auto-filled)</p>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-medium text-slate-400 mb-1.5">Class Time</label>
+                        <input type="time" value={selectedCourse.schedule.time || ""} disabled className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600/50 rounded-lg text-slate-400 text-sm cursor-not-allowed" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-slate-400 mb-1.5">Instructor</label>
+                        <input type="text" value={selectedCourse.instructor?.username || "—"} disabled className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600/50 rounded-lg text-slate-400 text-sm cursor-not-allowed" />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-slate-400 mb-1.5">Recurring Days</label>
+                      <div className="flex flex-wrap gap-2">
+                        {["MON","TUE","WED","THU","FRI","SAT","SUN"].map((day) => {
+                          const active = (selectedCourse.schedule.days || []).includes(day);
+                          return (
+                            <span key={day} className={`px-3 py-1.5 rounded-lg text-xs font-medium border ${active ? "bg-indigo-600/40 border-indigo-500/50 text-indigo-300" : "bg-slate-800 border-slate-700 text-slate-600"}`}>
+                              {day}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
 
               {/* Title */}
               <div>
@@ -514,285 +599,152 @@ const SessionsTab = ({
                 {createSessionErrors?.title && <p className="text-red-400 text-xs mt-1">{createSessionErrors.title}</p>}
               </div>
 
-              {/* Start Date + Time */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Start Date <span className="text-red-400">*</span>
-                  </label>
-                  <input
-                    type="date"
-                    value={createSessionForm.scheduled_date}
-                    min={new Date().toISOString().split("T")[0]}
-                    onChange={(e) => { setCreateSessionForm({ ...createSessionForm, scheduled_date: e.target.value }); clearCreateSessionFieldError("scheduled_date"); }}
-                    className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white focus:outline-none focus:ring-2 text-sm ${createSessionErrors?.scheduled_date ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
-                  />
-                  {createSessionErrors?.scheduled_date && <p className="text-red-400 text-xs mt-1">{createSessionErrors.scheduled_date}</p>}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Class Time <span className="text-red-400">*</span>
-                  </label>
-                  <input
-                    type="time"
-                    value={createSessionForm.scheduled_time}
-                    onChange={(e) => { setCreateSessionForm({ ...createSessionForm, scheduled_time: e.target.value }); clearCreateSessionFieldError("scheduled_time"); }}
-                    className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white focus:outline-none focus:ring-2 text-sm ${createSessionErrors?.scheduled_time ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
-                  />
-                  {createSessionErrors?.scheduled_time && <p className="text-red-400 text-xs mt-1">{createSessionErrors.scheduled_time}</p>}
-                </div>
+              {/* Start Date */}
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  Start Date <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="date"
+                  value={createSessionForm.scheduled_date}
+                  min={new Date().toISOString().split("T")[0]}
+                  onChange={(e) => { setCreateSessionForm({ ...createSessionForm, scheduled_date: e.target.value }); clearCreateSessionFieldError("scheduled_date"); }}
+                  className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white focus:outline-none focus:ring-2 text-sm ${createSessionErrors?.scheduled_date ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
+                />
+                {createSessionErrors?.scheduled_date && <p className="text-red-400 text-xs mt-1">{createSessionErrors.scheduled_date}</p>}
               </div>
 
-              {/* Recurring toggle */}
-              <div className="flex items-center justify-between p-4 bg-slate-800/50 border border-slate-700/50 rounded-xl">
-                <div>
-                  <p className="text-sm font-medium text-slate-200">Recurring Class</p>
-                  <p className="text-xs text-slate-400 mt-0.5">Repeat this class on selected days</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setCreateSessionForm({ ...createSessionForm, is_recurring: !createSessionForm.is_recurring, recurrence_days: [], recurrence_end_date: "" })}
-                  className={`relative w-11 h-6 rounded-full transition-colors duration-200 focus:outline-none ${createSessionForm.is_recurring ? "bg-indigo-600" : "bg-slate-600"}`}
-                >
-                  <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${createSessionForm.is_recurring ? "translate-x-5" : "translate-x-0"}`} />
-                </button>
+              {/* Recurrence End Date */}
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  Recurrence End Date <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="date"
+                  value={createSessionForm.recurrence_end_date}
+                  min={createSessionForm.scheduled_date || new Date().toISOString().split("T")[0]}
+                  onChange={(e) => { setCreateSessionForm({ ...createSessionForm, recurrence_end_date: e.target.value }); clearCreateSessionFieldError("recurrence_end_date"); }}
+                  className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white focus:outline-none focus:ring-2 text-sm ${createSessionErrors?.recurrence_end_date ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
+                />
+                {createSessionErrors?.recurrence_end_date && <p className="text-red-400 text-xs mt-1">{createSessionErrors.recurrence_end_date}</p>}
+                {createSessionForm.scheduled_date && createSessionForm.recurrence_end_date && (
+                  <p className="text-slate-500 text-xs mt-1">From {createSessionForm.scheduled_date} to {createSessionForm.recurrence_end_date}</p>
+                )}
               </div>
-
-              {/* Recurrence fields */}
-              {createSessionForm.is_recurring && (
-                <div className="space-y-4 pl-1">
-                  {/* Day picker */}
-                  <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
-                      Repeat on <span className="text-red-400">*</span>
-                    </label>
-                    <div className="flex flex-wrap gap-2">
-                      {[
-                        { label: "Mon", value: "MON" },
-                        { label: "Tue", value: "TUE" },
-                        { label: "Wed", value: "WED" },
-                        { label: "Thu", value: "THU" },
-                        { label: "Fri", value: "FRI" },
-                        { label: "Sat", value: "SAT" },
-                        { label: "Sun", value: "SUN" },
-                      ].map((day) => {
-                        const selected = createSessionForm.recurrence_days.includes(day.value);
-                        return (
-                          <button
-                            key={day.value}
-                            type="button"
-                            onClick={() => {
-                              const days = selected
-                                ? createSessionForm.recurrence_days.filter((d) => d !== day.value)
-                                : [...createSessionForm.recurrence_days, day.value];
-                              setCreateSessionForm({ ...createSessionForm, recurrence_days: days });
-                              clearCreateSessionFieldError("recurrence_days");
-                            }}
-                            className={`w-12 h-10 rounded-xl text-xs font-bold transition-all border ${
-                              selected
-                                ? "bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-900/30"
-                                : "bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-500 hover:text-slate-200"
-                            }`}
-                          >
-                            {day.label}
-                          </button>
-                        );
-                      })}
-                    </div>
-                    {createSessionErrors?.recurrence_days && <p className="text-red-400 text-xs mt-1">{createSessionErrors.recurrence_days}</p>}
-                  </div>
-
-                  {/* End date */}
-                  <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
-                      Recurrence End Date <span className="text-red-400">*</span>
-                    </label>
-                    <input
-                      type="date"
-                      value={createSessionForm.recurrence_end_date}
-                      min={createSessionForm.scheduled_date || new Date().toISOString().split("T")[0]}
-                      onChange={(e) => { setCreateSessionForm({ ...createSessionForm, recurrence_end_date: e.target.value }); clearCreateSessionFieldError("recurrence_end_date"); }}
-                      className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white focus:outline-none focus:ring-2 text-sm ${createSessionErrors?.recurrence_end_date ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
-                    />
-                    {createSessionErrors?.recurrence_end_date && <p className="text-red-400 text-xs mt-1">{createSessionErrors.recurrence_end_date}</p>}
-                    {createSessionForm.scheduled_date && createSessionForm.recurrence_end_date && (
-                      <p className="text-slate-500 text-xs mt-1">
-                        From {createSessionForm.scheduled_date} to {createSessionForm.recurrence_end_date}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              )}
 
               <div className="flex gap-3 pt-2">
-                <button type="button" onClick={() => setActiveModal(null)} className="flex-1 bg-slate-700 hover:bg-slate-600 text-white px-6 py-3 rounded-xl text-sm font-medium transition">
-                  Cancel
-                </button>
-                <button type="submit" className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-xl text-sm font-medium transition">
-                  Create Class
-                </button>
+                <button type="button" onClick={() => setActiveModal(null)} className="flex-1 bg-slate-700 hover:bg-slate-600 text-white px-6 py-3 rounded-xl text-sm font-medium transition">Cancel</button>
+                <button type="submit" className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-xl text-sm font-medium transition">Create Class</button>
               </div>
             </form>
           </div>
         </div>
       )}
 
-      {/* Edit Session Modal */}
-      {activeModal &&
-        typeof activeModal === "object" &&
-        activeModal.type === "edit-session" && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-bold text-white">Edit Class</h3>
-                <button
-                  onClick={() => setActiveModal(null)}
-                  className="text-slate-400 hover:text-white transition"
-                >
-                  <i className="fas fa-times text-xl"></i>
-                </button>
+      {/* ── EDIT SESSION MODAL ── */}
+      {activeModal && typeof activeModal === "object" && activeModal.type === "edit-session" && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold text-white">Edit Class</h3>
+              <button onClick={() => setActiveModal(null)} className="text-slate-400 hover:text-white transition">
+                <i className="fas fa-times text-xl"></i>
+              </button>
+            </div>
+            <form onSubmit={handleUpdateSession} className="space-y-4">
+              {/* Read-only info: Course + Teacher */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    Course <span className="text-slate-500 text-xs ml-1">(read-only)</span>
+                  </label>
+                  <input type="text" value={editSessionForm.course_title || ""} disabled className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600/50 rounded-lg text-slate-400 text-sm cursor-not-allowed" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    Teacher <span className="text-slate-500 text-xs ml-1">(read-only)</span>
+                  </label>
+                  <input type="text" value={editSessionForm.teacher_name || ""} disabled className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600/50 rounded-lg text-slate-400 text-sm cursor-not-allowed" />
+                </div>
               </div>
-              <form onSubmit={handleUpdateSession} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Course <span className="text-red-400">*</span>
-                  </label>
-                  <select
-                    value={editSessionForm.course_id}
-                    onChange={(e) => {
-                      setEditSessionForm({
-                        ...editSessionForm,
-                        course_id: e.target.value,
-                      });
-                      clearEditSessionFieldError("course_id");
-                    }}
-                    className={`w-full px-3 py-2 bg-slate-800 border rounded-lg text-white focus:outline-none focus:ring-2 ${
-                      editSessionErrors?.course_id
-                        ? "border-red-500 focus:ring-red-500"
-                        : "border-slate-700 focus:ring-indigo-500"
-                    }`}
-                  >
-                    <option value="">Select course</option>
-                    {courses?.map((course) => (
-                      <option key={course.id} value={course.id}>
-                        {course.title} -{" "}
-                        {course.instructor?.username || "No instructor"}
-                      </option>
-                    ))}
-                  </select>
-                  {editSessionErrors?.course_id && (
-                    <p className="text-red-400 text-xs mt-1">
-                      {editSessionErrors.course_id}
-                    </p>
-                  )}
-                </div>
 
+              {/* Read-only: Recurrence info */}
+              <div className="p-4 bg-slate-800/40 border border-slate-700/50 rounded-xl space-y-3">
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Recurrence Info (read-only)</p>
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Class Title <span className="text-red-400">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Enter class title"
-                    value={editSessionForm.title}
-                    onChange={(e) => {
-                      setEditSessionForm({
-                        ...editSessionForm,
-                        title: e.target.value,
-                      });
-                      clearEditSessionFieldError("title");
-                    }}
-                    className={`w-full px-3 py-2 bg-slate-800 border rounded-lg text-white focus:outline-none focus:ring-2 ${
-                      editSessionErrors?.title
-                        ? "border-red-500 focus:ring-red-500"
-                        : "border-slate-700 focus:ring-indigo-500"
-                    }`}
-                  />
-                  {editSessionErrors?.title && (
-                    <p className="text-red-400 text-xs mt-1">
-                      {editSessionErrors.title}
-                    </p>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
-                      Start Time <span className="text-red-400">*</span>
-                    </label>
-                    <input
-                      type="datetime-local"
-                      value={editSessionForm.start_time}
-                      min={new Date().toISOString().slice(0, 16)}
-                      onChange={(e) => {
-                        setEditSessionForm({
-                          ...editSessionForm,
-                          start_time: e.target.value,
-                        });
-                        clearEditSessionFieldError("start_time");
-                      }}
-                      className={`w-full px-3 py-2 bg-slate-800 border rounded-lg text-white focus:outline-none focus:ring-2 ${
-                        editSessionErrors?.start_time
-                          ? "border-red-500 focus:ring-red-500"
-                          : "border-slate-700 focus:ring-indigo-500"
-                      }`}
-                    />
-                    {editSessionErrors?.start_time && (
-                      <p className="text-red-400 text-xs mt-1">
-                        {editSessionErrors.start_time}
-                      </p>
-                    )}
+                  <label className="block text-xs font-medium text-slate-400 mb-1.5">Recurring Days</label>
+                  <div className="flex flex-wrap gap-2">
+                    {["MON","TUE","WED","THU","FRI","SAT","SUN"].map((day) => {
+                      const active = (editSessionForm.recurrence_days || []).includes(day);
+                      return (
+                        <span key={day} className={`px-3 py-1.5 rounded-lg text-xs font-medium border ${active ? "bg-indigo-600/30 border-indigo-500/50 text-indigo-300" : "bg-slate-800/50 border-slate-700/50 text-slate-600"}`}>
+                          {day}
+                        </span>
+                      );
+                    })}
                   </div>
                 </div>
-
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Meeting Link <span className="text-red-400">*</span>
-                  </label>
-                  <input
-                    type="url"
-                    placeholder="https://meet.google.com/..."
-                    value={editSessionForm.meeting_link}
-                    onChange={(e) => {
-                      setEditSessionForm({
-                        ...editSessionForm,
-                        meeting_link: e.target.value,
-                      });
-                      clearEditSessionFieldError("meeting_link");
-                    }}
-                    className={`w-full px-3 py-2 bg-slate-800 border rounded-lg text-white focus:outline-none focus:ring-2 ${
-                      editSessionErrors?.meeting_link
-                        ? "border-red-500 focus:ring-red-500"
-                        : "border-slate-700 focus:ring-indigo-500"
-                    }`}
-                  />
-                  {editSessionErrors?.meeting_link && (
-                    <p className="text-red-400 text-xs mt-1">
-                      {editSessionErrors.meeting_link}
-                    </p>
-                  )}
+                  <label className="block text-xs font-medium text-slate-400 mb-1.5">Recurrence End Date</label>
+                  <input type="date" value={editSessionForm.recurrence_end_date || ""} disabled className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600/50 rounded-lg text-slate-400 text-sm cursor-not-allowed" />
                 </div>
+              </div>
 
-                <div className="flex gap-3 pt-4">
-                  <button
-                    type="button"
-                    onClick={() => setActiveModal(null)}
-                    className="flex-1 bg-slate-700 hover:bg-slate-600 text-white px-6 py-3 rounded-xl text-sm font-medium transition"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={updatingSessionId}
-                    className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-xl text-sm font-medium transition disabled:opacity-50"
-                  >
-                    {updatingSessionId ? "Updating..." : "Update Class"}
-                  </button>
-                </div>
-              </form>
-            </div>
+              {/* Editable: Title */}
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  Class Title <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="Enter class title"
+                  value={editSessionForm.title || ""}
+                  onChange={(e) => { setEditSessionForm({ ...editSessionForm, title: e.target.value }); clearEditSessionFieldError("title"); }}
+                  className={`w-full px-3 py-2 bg-slate-800 border rounded-lg text-white focus:outline-none focus:ring-2 ${editSessionErrors?.title ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
+                />
+                {editSessionErrors?.title && <p className="text-red-400 text-xs mt-1">{editSessionErrors.title}</p>}
+              </div>
+
+              {/* Editable: Start Time */}
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  Start Time <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="datetime-local"
+                  value={editSessionForm.start_time || ""}
+                  min={new Date().toISOString().slice(0, 16)}
+                  onChange={(e) => { setEditSessionForm({ ...editSessionForm, start_time: e.target.value }); clearEditSessionFieldError("start_time"); }}
+                  className={`w-full px-3 py-2 bg-slate-800 border rounded-lg text-white focus:outline-none focus:ring-2 ${editSessionErrors?.start_time ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
+                />
+                {editSessionErrors?.start_time && <p className="text-red-400 text-xs mt-1">{editSessionErrors.start_time}</p>}
+              </div>
+
+              {/* Editable: Meeting Link */}
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  Meeting Link <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="url"
+                  placeholder="https://meet.google.com/..."
+                  value={editSessionForm.meeting_link || ""}
+                  onChange={(e) => { setEditSessionForm({ ...editSessionForm, meeting_link: e.target.value }); clearEditSessionFieldError("meeting_link"); }}
+                  className={`w-full px-3 py-2 bg-slate-800 border rounded-lg text-white focus:outline-none focus:ring-2 ${editSessionErrors?.meeting_link ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
+                />
+                {editSessionErrors?.meeting_link && <p className="text-red-400 text-xs mt-1">{editSessionErrors.meeting_link}</p>}
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button type="button" onClick={() => setActiveModal(null)} className="flex-1 bg-slate-700 hover:bg-slate-600 text-white px-6 py-3 rounded-xl text-sm font-medium transition">Cancel</button>
+                <button type="submit" disabled={updatingSessionId} className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-xl text-sm font-medium transition disabled:opacity-50">
+                  {updatingSessionId ? "Updating..." : "Update Class"}
+                </button>
+              </div>
+            </form>
           </div>
-        )}
+        </div>
+      )}
     </div>
   );
 };

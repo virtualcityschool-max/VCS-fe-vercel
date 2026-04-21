@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, Input, Card } from "../../components/ui";
+import ConfirmDialog from "../common/ConfirmDialog";
 
 // Search controls component
 const SearchControls = ({
@@ -154,6 +155,7 @@ const UsersTab = ({
   onCreateUser,
 }) => {
   const navigate = useNavigate();
+  const [confirmDialog, setConfirmDialog] = useState({ open: false, userId: null });
   // Debounced search handler - use controlled pattern
   const [localSearchInput, setLocalSearchInput] = useState(
     usersFilters.search || "",
@@ -199,13 +201,17 @@ const UsersTab = ({
     },
     [setUsersFilters],
   );
-  const handleDeleteUser = async (userId) => {
-    if (window.confirm("Are you sure you want to delete this user?")) {
-      try {
-        await onUserDelete(userId);
-      } catch (error) {
-        console.error("Failed to delete user:", error);
-      }
+  const handleDeleteUser = (userId) => {
+    setConfirmDialog({ open: true, userId });
+  };
+
+  const confirmDeleteUser = async () => {
+    const { userId } = confirmDialog;
+    setConfirmDialog({ open: false, userId: null });
+    try {
+      await onUserDelete(userId);
+    } catch (error) {
+      console.error("Failed to delete user:", error);
     }
   };
 
@@ -465,6 +471,17 @@ const UsersTab = ({
           </div>
         </>
       )}
+
+      <ConfirmDialog
+        open={confirmDialog.open}
+        variant="danger"
+        title="Delete User"
+        message="Are you sure you want to delete this user? This action cannot be undone."
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        onConfirm={confirmDeleteUser}
+        onCancel={() => setConfirmDialog({ open: false, userId: null })}
+      />
     </div>
   );
 };

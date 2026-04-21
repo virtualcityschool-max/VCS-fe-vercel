@@ -55,12 +55,10 @@ const Navbar = ({ variant = "default" }) => {
               className="flex items-center gap-2 sm:gap-3 group cursor-pointer shrink-0"
               onClick={() => navigate("/")}
             >
-              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-xl shadow-indigo-900/40 group-hover:rotate-12 transition-all">
-                <i className="fas fa-graduation-cap text-white text-xs sm:text-sm"></i>
-              </div>
-              <span className="text-sm xs:text-lg sm:text-2xl font-black font-poppins tracking-tighter whitespace-nowrap">
+              <img src="/assets/logo.png" alt="Virtual City School" className="w-8 h-8 sm:w-10 sm:h-10 object-contain group-hover:rotate-12 transition-all" style={{width: "100px",height: "100px"}}/>
+              {/* <span className="text-sm xs:text-lg sm:text-2xl font-black font-poppins tracking-tighter whitespace-nowrap">
                 VirtualCitySchool
-              </span>
+              </span> */}
             </div>
             <div className="hidden lg:flex items-center gap-8">
               <button

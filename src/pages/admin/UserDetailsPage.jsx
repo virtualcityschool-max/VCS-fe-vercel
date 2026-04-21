@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import ConfirmDialog from "../../components/common/ConfirmDialog";
 import { useNavigate, useParams } from "react-router-dom";
 import { adminService } from "../../services/adminService";
 import { toastManager } from "../../utils/toastManager";
@@ -41,6 +42,7 @@ const UserDetailsPage = () => {
   const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   // Fetch user data and profile on component mount
   useEffect(() => {
@@ -113,15 +115,13 @@ const UserDetailsPage = () => {
     navigate("/admin/users");
   };
 
-  const handleDeleteUser = async () => {
+  const handleDeleteUser = () => {
     if (!userData) return;
+    setConfirmDelete(true);
+  };
 
-    const confirmed = window.confirm(
-      `Are you sure you want to delete "${getDisplayName(userData)}"? This action cannot be undone.`,
-    );
-
-    if (!confirmed) return;
-
+  const confirmDeleteUser = async () => {
+    setConfirmDelete(false);
     try {
       await adminService.deleteUser(userData.id);
       toastManager.success("User deleted successfully");
@@ -256,6 +256,17 @@ const UserDetailsPage = () => {
           </div>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={confirmDelete}
+        variant="danger"
+        title="Delete User"
+        message={`Are you sure you want to delete "${userData ? getDisplayName(userData) : "this user"}"? This action cannot be undone.`}
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        onConfirm={confirmDeleteUser}
+        onCancel={() => setConfirmDelete(false)}
+      />
     </div>
   );
 };

@@ -2,15 +2,11 @@ import { NavLink } from "react-router-dom";
 import UserProfileDropdown from "../layout/UserProfileDropdown";
 
 const navItems = [
-  { label: "Dashboard", to: "/teacher", icon: "fa-table-columns", end: true },
-  { label: "My Courses", to: "/teacher/classes", icon: "fa-book-open" },
-  { label: "Attendance", to: "/teacher/attendance", icon: "fa-user-check" },
-  { label: "My Assignments", to: "/teacher/grading", icon: "fa-clipboard-check" },
-  { label: "My Sessions", to: "/teacher/sessions", icon: "fa-calendar-alt" },
-  { label: "Submissions", to: "/teacher/submissions", icon: "fa-inbox" },
+  { label: "Dashboard", to: "/student", icon: "fa-table-columns", end: true },
+  { label: "My Classes", to: "/student/classes", icon: "fa-calendar-alt" },
 ];
 
-const TeacherSidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
+const StudentSidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
   return (
     <aside
       className={`w-72 bg-slate-950 border-r border-slate-800 flex flex-col fixed h-full z-50 overflow-visible transition-transform duration-300 lg:translate-x-0 ${
@@ -22,10 +18,8 @@ const TeacherSidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
         <div className="flex items-center gap-3">
           <img src="/assets/logo.png" alt="Virtual City School" className="w-10 h-10 object-contain" />
           <div>
-            <h1 className="text-lg font-black font-poppins text-white">
-              Virtual City
-            </h1>
-            <p className="text-xs text-slate-400">Teacher Portal</p>
+            <h1 className="text-lg font-black font-poppins text-white">Virtual City</h1>
+            <p className="text-xs text-slate-400">Student Portal</p>
           </div>
         </div>
         <button
@@ -72,4 +66,4 @@ const TeacherSidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
   );
 };
 
-export default TeacherSidebar;
+export default StudentSidebar;

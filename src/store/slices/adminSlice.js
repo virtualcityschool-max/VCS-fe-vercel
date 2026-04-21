@@ -71,6 +71,13 @@ const initialState = {
     error: null,
   },
 
+  // Courses filtered by has_session=true (for enrollment dropdown)
+  enrollmentCourses: {
+    data: [],
+    loading: false,
+    error: null,
+  },
+
   // Sessions
   sessions: {
     data: [],
@@ -144,6 +151,17 @@ export const fetchCourses = createAsyncThunk(
       return response;
     } catch (error) {
       return rejectWithValue(error); // Preserve full error object
+    }
+  },
+);
+
+export const fetchCoursesWithSessions = createAsyncThunk(
+  "admin/fetchCoursesWithSessions",
+  async (_, { rejectWithValue }) => {
+    try {
+      return await coursesService.getCoursesWithSessions();
+    } catch (error) {
+      return rejectWithValue(error);
     }
   },
 );
@@ -530,6 +548,19 @@ const adminSlice = createSlice({
       .addCase(fetchCourses.rejected, (state, action) => {
         state.courses.loading = false;
         state.courses.error = action.payload;
+      })
+      .addCase(fetchCoursesWithSessions.pending, (state) => {
+        state.enrollmentCourses.loading = true;
+        state.enrollmentCourses.error = null;
+      })
+      .addCase(fetchCoursesWithSessions.fulfilled, (state, action) => {
+        state.enrollmentCourses.loading = false;
+        const data = action.payload.data?.data || action.payload.data || action.payload;
+        state.enrollmentCourses.data = Array.isArray(data) ? data : [];
+      })
+      .addCase(fetchCoursesWithSessions.rejected, (state, action) => {
+        state.enrollmentCourses.loading = false;
+        state.enrollmentCourses.error = action.payload;
       })
       .addCase(createCourse.fulfilled, (state, action) => {
         state.courses.data.unshift(action.payload);

@@ -16,6 +16,16 @@ export const coursesService = {
     }
   },
 
+  // Get courses that have at least one session (for enrollment dropdown)
+  getCoursesWithSessions: async () => {
+    try {
+      const response = await axiosInstance.get(`/courses/`, { params: { has_session: true } });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
   // Get course by ID
   getCourseById: async (courseId) => {
     try {

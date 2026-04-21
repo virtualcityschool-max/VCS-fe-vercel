@@ -1,9 +1,8 @@
 import React, { useMemo, useState } from "react";
-import { Button, Input, Card } from "../../components/ui";
+import { Button, Card, Input } from "../../components/ui";
 import { BACKEND_CATEGORIES, formatCategoryLabel } from "../../constants";
 import CourseStudentsModal from "../courses/CourseStudentsModal";
-
-const RECURRING_DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+import CourseForm from "./CourseForm";
 
 const CoursesTab = ({
   courses,
@@ -19,7 +18,6 @@ const CoursesTab = ({
   clearCreateCourseFieldError,
   editCourseErrors,
   clearEditCourseFieldError,
-  clearAllEditCourseErrors,
   onCourseCreate,
   onCourseUpdate,
   onCourseDelete,
@@ -519,23 +517,6 @@ const CoursesTab = ({
                           Edit
                         </button>
                         <button
-                          onClick={() => {
-                            setEditCourseForm((prev) => ({
-                              ...prev,
-                              instructor_id:
-                                course.instructor?.id || course.instructor_id || "",
-                            }));
-                            setActiveModal({
-                              type: "assign-instructor",
-                              courseId: course.id,
-                            });
-                          }}
-                          className="bg-blue-600/10 text-blue-400 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-blue-600 hover:text-white transition"
-                        >
-                          <i className="fas fa-user-plus mr-1"></i>
-                          Assign
-                        </button>
-                        <button
                           onClick={() => onCourseDelete(course.id)}
                           disabled={loadingCourseIds.has(course.id)}
                           className="bg-red-600/10 text-red-400 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-red-600/20 transition disabled:opacity-50"
@@ -594,254 +575,16 @@ const CoursesTab = ({
               </button>
             </div>
             <form onSubmit={handleCreateCourse} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
-                  Course Title <span className="text-red-400">*</span>
-                </label>
-                <input
-                  type="text"
-                  placeholder="Enter course title"
-                  value={createCourseForm.title}
-                  onChange={(e) => {
-                    setCreateCourseForm({
-                      ...createCourseForm,
-                      title: e.target.value,
-                    });
-                    clearCreateCourseFieldError("title");
-                  }}
-                  className={`w-full px-3 py-2 bg-slate-800 border rounded-lg text-white focus:outline-none focus:ring-2 ${
-                    createCourseErrors?.title
-                      ? "border-red-500 focus:ring-red-500"
-                      : "border-slate-700 focus:ring-indigo-500"
-                  }`}
-                />
-                {createCourseErrors?.title && (
-                  <p className="text-red-400 text-xs mt-1">
-                    {createCourseErrors.title}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
-                  Description <span className="text-red-400">*</span>
-                </label>
-                <textarea
-                  placeholder="Describe what students will learn in this course..."
-                  value={createCourseForm.description}
-                  onChange={(e) => {
-                    setCreateCourseForm({
-                      ...createCourseForm,
-                      description: e.target.value,
-                    });
-                    clearCreateCourseFieldError("description");
-                  }}
-                  rows={4}
-                  className={`w-full px-3 py-2 bg-slate-800 border rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:border-transparent ${
-                    createCourseErrors?.description
-                      ? "border-red-500 focus:ring-red-500"
-                      : ""
-                  }`}
-                />
-                {createCourseErrors?.description && (
-                  <p className="text-red-400 text-xs mt-1">
-                    {createCourseErrors.description}
-                  </p>
-                )}
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Category <span className="text-red-400">*</span>
-                  </label>
-                  <select
-                    value={createCourseForm.category}
-                    onChange={(e) => {
-                      setCreateCourseForm({
-                        ...createCourseForm,
-                        category: e.target.value,
-                      });
-                      clearCreateCourseFieldError("category");
-                    }}
-                    className={`w-full px-3 py-2 bg-slate-800 border rounded-lg text-white focus:outline-none focus:ring-2 ${
-                      createCourseErrors?.category
-                        ? "border-red-500 focus:ring-red-500"
-                        : "border-slate-700 focus:ring-indigo-500"
-                    }`}
-                  >
-                    <option value="">Select category</option>
-                    {BACKEND_CATEGORIES.map((cat) => (
-                      <option key={cat} value={cat}>
-                        {formatCategoryLabel(cat)}
-                      </option>
-                    ))}
-                  </select>
-                  {createCourseErrors?.category && (
-                    <p className="text-red-400 text-xs mt-1">
-                      {createCourseErrors.category}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Price (PKR) <span className="text-red-400">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    placeholder="Enter price"
-                    value={createCourseForm.price}
-                    onChange={(e) => {
-                      setCreateCourseForm({
-                        ...createCourseForm,
-                        price: e.target.value,
-                      });
-                      clearCreateCourseFieldError("price");
-                    }}
-                    className={`w-full px-3 py-2 bg-slate-800 border rounded-lg text-white focus:outline-none focus:ring-2 ${
-                      createCourseErrors?.price
-                        ? "border-red-500 focus:ring-red-500"
-                        : "border-slate-700 focus:ring-indigo-500"
-                    }`}
-                  />
-                  {createCourseErrors?.price && (
-                    <p className="text-red-400 text-xs mt-1">
-                      {createCourseErrors.price}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
-                  Time <span className="text-red-400">*</span>
-                </label>
-                <input
-                  type="time"
-                  value={createCourseForm.time || ""}
-                  onChange={(e) => {
-                    setCreateCourseForm({
-                      ...createCourseForm,
-                      time: e.target.value,
-                    });
-                    clearCreateCourseFieldError("time");
-                  }}
-                  className={`w-full px-3 py-2 bg-slate-800 border rounded-lg text-white focus:outline-none focus:ring-2 ${
-                    createCourseErrors?.time
-                      ? "border-red-500 focus:ring-red-500"
-                      : "border-slate-700 focus:ring-indigo-500"
-                  }`}
-                />
-                {createCourseErrors?.time && (
-                  <p className="text-red-400 text-xs mt-1">
-                    {createCourseErrors.time}
-                  </p>
-                )}
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Status <span className="text-red-400">*</span>
-                  </label>
-                  <select
-                    value={createCourseForm.status}
-                    onChange={(e) => {
-                      setCreateCourseForm({
-                        ...createCourseForm,
-                        status: e.target.value,
-                      });
-                      clearCreateCourseFieldError("status");
-                      // If changing to draft, clear instructor error since it's no longer required
-                      if (e.target.value === "draft") {
-                      clearCreateCourseFieldError("instructor_id");
-                      }
-                    }}
-                    className={`w-full px-3 py-2 bg-slate-800 border rounded-lg text-white focus:outline-none focus:ring-2 ${
-                      createCourseErrors?.status
-                        ? "border-red-500 focus:ring-red-500"
-                        : "border-slate-700 focus:ring-indigo-500"
-                    }`}
-                  >
-                    <option value="draft">Draft</option>
-                    <option value="published">Published</option>
-                  </select>
-                  {createCourseErrors?.status && (
-                    <p className="text-red-400 text-xs mt-1">
-                      {createCourseErrors.status}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Instructor <span className="text-red-400">*</span>
-                  </label>
-                  <select
-                    value={createCourseForm.instructor_id}
-                    onChange={(e) => {
-                      setCreateCourseForm({
-                        ...createCourseForm,
-                        instructor_id: e.target.value,
-                      });
-                      clearCreateCourseFieldError("instructor_id");
-                    }}
-                    className="w-full px-3 py-2 bg-slate-800 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  >
-                    <option value="">Select an instructor</option>
-                    {users?.map((user) => (
-                      <option key={user.id} value={user.id}>
-                        {user.username}
-                      </option>
-                    ))}
-                  </select>
-                  {createCourseErrors?.instructor_id && (
-                    <p className="text-red-400 text-xs mt-1">
-                      {createCourseErrors.instructor_id}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
-                  Days of Recurring <span className="text-red-400">*</span>
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {RECURRING_DAYS.map((day) => {
-                    const selected = (createCourseForm.days_of_recurring || []).includes(day);
-                    return (
-                      <button
-                        key={day}
-                        type="button"
-                        onClick={() => {
-                          const next = selected
-                            ? createCourseForm.days_of_recurring.filter((d) => d !== day)
-                            : [...(createCourseForm.days_of_recurring || []), day];
-                          setCreateCourseForm({
-                            ...createCourseForm,
-                            days_of_recurring: next,
-                          });
-                        }}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition ${
-                          selected
-                            ? "bg-indigo-600 border-indigo-500 text-white"
-                            : "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700"
-                        }`}
-                      >
-                        {day}
-                      </button>
-                    );
-                  })}
-                </div>
-                {createCourseErrors?.days_of_recurring && (
-                  <p className="text-red-400 text-xs mt-1">
-                    {createCourseErrors.days_of_recurring}
-                  </p>
-                )}
-              </div>
-
+              <CourseForm
+                mode="create"
+                formData={createCourseForm}
+                onChange={(field, value) => {
+                  setCreateCourseForm((prev) => ({ ...prev, [field]: value }));
+                  clearCreateCourseFieldError(field);
+                }}
+                errors={createCourseErrors}
+                users={users}
+              />
               <div className="flex justify-end gap-3 pt-4">
                 <Button
                   type="button"
@@ -852,12 +595,9 @@ const CoursesTab = ({
                 </Button>
                 <Button
                   type="submit"
-                  disabled={updatingCourseId === activeModal?.id}
                   className="bg-indigo-600 hover:bg-indigo-500"
                 >
-                  {updatingCourseId === activeModal?.id
-                    ? "Creating..."
-                    : "Create Course"}
+                  Create Course
                 </Button>
               </div>
             </form>
@@ -885,242 +625,22 @@ const CoursesTab = ({
                   e.preventDefault();
                   try {
                     await onCourseUpdate(editCourseForm);
-                    setActiveModal(null);
-                    setEditCourseForm({});
-                    clearAllEditCourseErrors();
                   } catch (error) {
                     console.error("Failed to update course:", error);
                   }
                 }}
                 className="space-y-4"
               >
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Course Title <span className="text-red-400">*</span>
-                  </label>
-                  <Input
-                    type="text"
-                    placeholder="Enter course title"
-                    value={editCourseForm.title}
-                    onChange={(e) => {
-                      setEditCourseForm({
-                        ...editCourseForm,
-                        title: e.target.value,
-                      });
-                      clearEditCourseFieldError("title");
-                    }}
-                    required
-                  />
-                  {editCourseErrors?.title && (
-                    <p className="text-red-400 text-xs mt-1">
-                      {editCourseErrors.title}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Description <span className="text-red-400">*</span>
-                  </label>
-                  <textarea
-                    placeholder="Describe what students will learn in this course..."
-                    value={editCourseForm.description}
-                    onChange={(e) => {
-                      setEditCourseForm({
-                        ...editCourseForm,
-                        description: e.target.value,
-                      });
-                      clearEditCourseFieldError("description");
-                    }}
-                    rows={4}
-                    className="w-full px-3 py-2 bg-slate-800 border rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:border-transparent"
-                    required
-                  />
-                  {editCourseErrors?.description && (
-                    <p className="text-red-400 text-xs mt-1">
-                      {editCourseErrors.description}
-                    </p>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
-                      Category <span className="text-red-400">*</span>
-                    </label>
-                    <select
-                      value={editCourseForm.category}
-                      onChange={(e) => {
-                        setEditCourseForm({
-                          ...editCourseForm,
-                          category: e.target.value,
-                        });
-                        clearEditCourseFieldError("category");
-                      }}
-                      className="w-full px-3 py-2 bg-slate-800 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                      required
-                    >
-                      <option value="">Select category</option>
-                      {BACKEND_CATEGORIES.map((cat) => (
-                        <option key={cat} value={cat}>
-                          {formatCategoryLabel(cat)}
-                        </option>
-                      ))}
-                    </select>
-                    {editCourseErrors?.category && (
-                      <p className="text-red-400 text-xs mt-1">
-                        {editCourseErrors.category}
-                      </p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
-                      Price (PKR) <span className="text-red-400">*</span>
-                    </label>
-                    <Input
-                      type="number"
-                      placeholder="Enter price"
-                      value={editCourseForm.price}
-                      onChange={(e) => {
-                        setEditCourseForm({
-                          ...editCourseForm,
-                          price: e.target.value,
-                        });
-                        clearEditCourseFieldError("price");
-                      }}
-                      required
-                    />
-                    {editCourseErrors?.price && (
-                      <p className="text-red-400 text-xs mt-1">
-                        {editCourseErrors.price}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Time <span className="text-red-400">*</span>
-                  </label>
-                  <input
-                    type="time"
-                    value={editCourseForm.time || ""}
-                    onChange={(e) => {
-                      setEditCourseForm({
-                        ...editCourseForm,
-                        time: e.target.value,
-                      });
-                      clearEditCourseFieldError("time");
-                    }}
-                    className={`w-full px-3 py-2 bg-slate-800 border rounded-lg text-white focus:outline-none focus:ring-2 ${
-                      editCourseErrors?.time
-                        ? "border-red-500 focus:ring-red-500"
-                        : "border-slate-700 focus:ring-indigo-500"
-                    }`}
-                  />
-                  {editCourseErrors?.time && (
-                    <p className="text-red-400 text-xs mt-1">
-                      {editCourseErrors.time}
-                    </p>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
-                      Status <span className="text-red-400">*</span>
-                    </label>
-                    <select
-                      value={editCourseForm.status}
-                      onChange={(e) => {
-                        setEditCourseForm({
-                          ...editCourseForm,
-                          status: e.target.value,
-                        });
-                        clearEditCourseFieldError("status");
-                      }}
-                      className="w-full px-3 py-2 bg-slate-800 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                      required
-                    >
-                      <option value="draft">Draft</option>
-                      <option value="published">Published</option>
-                    </select>
-                    {editCourseErrors?.status && (
-                      <p className="text-red-400 text-xs mt-1">
-                        {editCourseErrors.status}
-                      </p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
-                      Instructor <span className="text-red-400">*</span>
-                    </label>
-                    <select
-                      value={editCourseForm.instructor_id}
-                      onChange={(e) => {
-                        setEditCourseForm({
-                          ...editCourseForm,
-                          instructor_id: e.target.value,
-                        });
-                        clearEditCourseFieldError("instructor_id");
-                      }}
-                      className="w-full px-3 py-2 bg-slate-800 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    >
-                      <option value="">Select an instructor</option>
-                      {users?.map((user) => (
-                        <option key={user.id} value={user.id}>
-                          {user.username}
-                        </option>
-                      ))}
-                    </select>
-                    {editCourseErrors?.instructor_id && (
-                      <p className="text-red-400 text-xs mt-1">
-                        {editCourseErrors.instructor_id}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Days of Recurring <span className="text-red-400">*</span>
-                  </label>
-                  <div className="flex flex-wrap gap-2">
-                    {RECURRING_DAYS.map((day) => {
-                      const selected = (editCourseForm.days_of_recurring || []).includes(day);
-                      return (
-                        <button
-                          key={day}
-                          type="button"
-                          onClick={() => {
-                            const next = selected
-                              ? (editCourseForm.days_of_recurring || []).filter((d) => d !== day)
-                              : [...(editCourseForm.days_of_recurring || []), day];
-                            setEditCourseForm({
-                              ...editCourseForm,
-                              days_of_recurring: next,
-                            });
-                          }}
-                          className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition ${
-                            selected
-                              ? "bg-indigo-600 border-indigo-500 text-white"
-                              : "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700"
-                          }`}
-                        >
-                          {day}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  {editCourseErrors?.days_of_recurring && (
-                    <p className="text-red-400 text-xs mt-1">
-                      {editCourseErrors.days_of_recurring}
-                    </p>
-                  )}
-                </div>
-
+                <CourseForm
+                  mode="edit"
+                  formData={editCourseForm}
+                  onChange={(field, value) => {
+                    setEditCourseForm((prev) => ({ ...prev, [field]: value }));
+                    clearEditCourseFieldError(field);
+                  }}
+                  errors={editCourseErrors}
+                  users={users}
+                />
                 <div className="flex justify-end gap-3 pt-4">
                   <Button
                     type="button"
@@ -1131,12 +651,10 @@ const CoursesTab = ({
                   </Button>
                   <Button
                     type="submit"
-                    disabled={updatingCourseId === activeModal?.id}
+                    disabled={!!updatingCourseId}
                     className="bg-indigo-600 hover:bg-indigo-500"
                   >
-                    {updatingCourseId === activeModal?.id
-                      ? "Updating..."
-                      : "Update Course"}
+                    {updatingCourseId ? "Updating..." : "Update Course"}
                   </Button>
                 </div>
               </form>

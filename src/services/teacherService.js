@@ -90,13 +90,20 @@ const getSubmissionById = async (submissionId) => {
   return response.data;
 };
 
+const getAllSubmissions = async (params = {}) => {
+  const query = {};
+  if (params.course) query.course = params.course;
+  const response = await axiosInstance.get("/assignments/submissions/all/", { params: query });
+  return response.data;
+};
+
 const createAnnouncement = async (data) => {
   const response = await axiosInstance.post("/messaging/announcements/", data);
   return response.data;
 };
 
-const getTeacherSessions = async () => {
-  const response = await axiosInstance.get("/classroom/sessions/");
+const getTeacherSessions = async (params = {}) => {
+  const response = await axiosInstance.get("/classroom/sessions/", { params });
   return response.data;
 };
 
@@ -150,6 +157,7 @@ export const teacherService = {
   createAssignment,
   getSubmissions,
   getSubmissionById,
+  getAllSubmissions,
   gradeSubmission,
   updateSubmissionGrade,
   createAnnouncement,

@@ -11,20 +11,9 @@ const adminSessionService = {
 
   // Create a new session
   createSession: async (sessionData) => {
-    // Map frontend field names to backend field names
-    const mappedData = {
-      course: Number(sessionData.course_id),
-      instructor_id: Number(sessionData.instructor_id),
-      title: sessionData.title,
-      scheduled_at: sessionData.start_time,
-      status: "scheduled",
-      ...(sessionData.private_student_id && {
-        private_student_id: Number(sessionData.private_student_id),
-      }),
-    };
     const response = await axiosInstance.post(
       "/classroom/sessions/",
-      mappedData,
+      sessionData,
     );
     return response.data;
   },

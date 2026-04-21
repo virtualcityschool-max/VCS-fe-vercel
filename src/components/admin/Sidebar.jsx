@@ -62,9 +62,7 @@ const Sidebar = ({
       {/* Logo + close button */}
       <div className="p-6 border-b border-slate-800 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-            <i className="fas fa-graduation-cap text-white text-lg"></i>
-          </div>
+          <img src="/assets/logo.png" alt="Virtual City School" className=" object-contain" style={{width: "100px",height: "100px"}}/>
           <div>
             <h1 className="text-lg font-black font-poppins text-white">
               Virtual City

@@ -16,6 +16,7 @@ import { useFieldErrors } from "../../hooks";
 import { normalizeApiError } from "../../utils/errorHandler";
 import { toastManager } from "../../utils/toastManager";
 import CoursesTab from "../../components/admin/CoursesTab";
+import ConfirmDialog from "../../components/common/ConfirmDialog";
 
 const AdminCoursesPage = () => {
   const dispatch = useDispatch();
@@ -24,6 +25,7 @@ const AdminCoursesPage = () => {
   const [editingCourse, setEditingCourse] = useState(null);
   const [loadingCourseIds, setLoadingCourseIds] = useState(new Set());
   const [updatingCourseId, setUpdatingCourseId] = useState(null);
+  const [confirmDialog, setConfirmDialog] = useState({ open: false, courseId: null, courseTitle: "" });
 
   // Course form states
   const [createCourseForm, setCreateCourseForm] = useState({
@@ -109,8 +111,10 @@ const AdminCoursesPage = () => {
           status: editingCourse.status || "draft",
           instructor_id:
             editingCourse.instructor?.id || editingCourse.instructor_id || "",
-          days_of_recurring: editingCourse.days_of_recurring || [],
-          time: editingCourse.time || "",
+          instructor: editingCourse.instructor || null,
+          days_of_recurring:
+            editingCourse.schedule?.days || editingCourse.days_of_recurring || [],
+          time: editingCourse.schedule?.time || editingCourse.time || "",
         });
       }
     } else {
@@ -133,51 +137,7 @@ const AdminCoursesPage = () => {
     }
   };
 
-  // Validation functions
-  const validateCreateCourseForm = (formData) => {
-    const errors = {};
-
-    if (!formData.title.trim()) {
-      errors.title = "Course title is required";
-    } else if (formData.title.trim().length < 5) {
-      errors.title = "Title must be at least 5 characters";
-    }
-
-    if (!formData.description.trim()) {
-      errors.description = "Course description is required";
-    } else if (formData.description.trim().length < 10) {
-      errors.description = "Description must be at least 10 characters";
-    }
-
-    if (!formData.category.trim()) {
-      errors.category = "Course category is required";
-    }
-
-    const price = Number(formData.price);
-    if (formData.price === "" || !Number.isInteger(price) || price < 0) {
-      errors.price = "Price must be a valid non-decimal positive number";
-    }
-
-    if (!formData.status) {
-      errors.status = "Course status is required";
-    }
-
-    if (!formData.instructor_id) {
-      errors.instructor_id = "Instructor is required";
-    }
-
-    if (!Array.isArray(formData.days_of_recurring) || !formData.days_of_recurring.length) {
-      errors.days_of_recurring = "Please select at least one recurring day";
-    }
-
-    if (!formData.time) {
-      errors.time = "Time is required";
-    }
-
-    return errors;
-  };
-
-  const validateEditCourseForm = (formData) => {
+  const validateCourseForm = (formData) => {
     const errors = {};
 
     if (!formData.title?.trim()) {
@@ -220,11 +180,24 @@ const AdminCoursesPage = () => {
     return errors;
   };
 
+  const buildCoursePayload = (formData) => ({
+    title: formData.title,
+    description: formData.description,
+    category: formData.category,
+    price: Number(formData.price),
+    status: formData.status,
+    instructor_id: Number(formData.instructor_id),
+    schedule: {
+      days: formData.days_of_recurring,
+      time: formData.time,
+    },
+  });
+
   // Handle course creation
   const handleCreateCourse = async (courseData) => {
     clearAllCreateCourseErrors();
 
-    const validationErrors = validateCreateCourseForm(courseData);
+    const validationErrors = validateCourseForm(courseData);
     if (Object.keys(validationErrors).length > 0) {
       setCreateCourseErrors(validationErrors);
       toastManager.error("Please fix highlighted fields");
@@ -232,7 +205,7 @@ const AdminCoursesPage = () => {
     }
 
     try {
-      await dispatch(createCourse(courseData)).unwrap();
+      await dispatch(createCourse(buildCoursePayload(courseData))).unwrap();
       toastManager.success("Course created successfully");
       setActiveModal(null);
       dispatch(fetchCourses());
@@ -259,7 +232,7 @@ const AdminCoursesPage = () => {
       return;
     }
 
-    const errors = validateEditCourseForm(courseData);
+    const errors = validateCourseForm(courseData);
     setEditCourseErrors(errors);
 
     if (Object.keys(errors).length > 0) {
@@ -270,7 +243,7 @@ const AdminCoursesPage = () => {
     setUpdatingCourseId(editingCourse.id);
     try {
       await dispatch(
-        updateCourse({ courseId: editingCourse.id, courseData }),
+        updateCourse({ courseId: editingCourse.id, courseData: buildCoursePayload(courseData) }),
       ).unwrap();
       toastManager.success("Course updated successfully");
       setActiveModal(null);
@@ -313,15 +286,15 @@ const AdminCoursesPage = () => {
   };
 
   // Handle course deletion
-  const handleDeleteCourse = async (courseId) => {
+  const handleDeleteCourse = (courseId) => {
     const course = courses?.data?.find((c) => c.id === courseId);
     const courseTitle = course?.title || "this course";
+    setConfirmDialog({ open: true, courseId, courseTitle });
+  };
 
-    const confirmed = window.confirm(
-      `Are you sure you want to delete "${courseTitle}"? This action cannot be undone.`,
-    );
-
-    if (!confirmed) return;
+  const confirmDeleteCourse = async () => {
+    const { courseId } = confirmDialog;
+    setConfirmDialog({ open: false, courseId: null, courseTitle: "" });
 
     setLoadingCourseIds((prev) => new Set(prev).add(courseId));
     try {
@@ -340,6 +313,7 @@ const AdminCoursesPage = () => {
   };
 
   return (
+    <>
     <CoursesTab
       courses={courses?.data || []}
       users={users?.data || []}
@@ -367,6 +341,18 @@ const AdminCoursesPage = () => {
       courseFilters={courseFilters}
       setCourseFilters={setCourseFilters}
     />
+
+    <ConfirmDialog
+      open={confirmDialog.open}
+      variant="danger"
+      title="Delete Course"
+      message={`Are you sure you want to delete "${confirmDialog.courseTitle}"? This action cannot be undone.`}
+      confirmLabel="Delete"
+      cancelLabel="Cancel"
+      onConfirm={confirmDeleteCourse}
+      onCancel={() => setConfirmDialog({ open: false, courseId: null, courseTitle: "" })}
+    />
+    </>
   );
 };
 

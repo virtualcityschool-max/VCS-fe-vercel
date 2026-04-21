@@ -6,7 +6,9 @@ export { default as TeachersDirectory } from "./public/TeachersDirectory";
 export { default as TeacherProfile } from "./public/TeacherProfile";
 
 // Student Pages
+export { default as StudentLayout } from "./student/StudentLayout";
 export { default as StudentPortal } from "./student/StudentPortal";
+export { default as StudentClasses } from "./student/StudentClasses";
 export { default as StudentFeed } from "./student/StudentFeed";
 export { default as Classroom } from "./student/Classroom";
 export { default as StudentAssignments } from "./student/StudentAssignments";
@@ -18,6 +20,8 @@ export { default as TeacherPortal } from "./teacher/TeacherPortal";
 export { default as TeacherClasses } from "./teacher/TeacherClasses";
 export { default as TeacherAttendance } from "./teacher/TeacherAttendance";
 export { default as TeacherGrading } from "./teacher/TeacherGrading";
+export { default as TeacherSubmissions } from "./teacher/TeacherSubmissions";
+export { default as TeacherSessionCalendar } from "./teacher/TeacherSessionCalendar";
 export { default as TeacherInternalStudentProfile } from "./teacher/TeacherInternalStudentProfile";
 
 // Admin Pages

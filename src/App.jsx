@@ -17,6 +17,7 @@ import { toastManager } from "./utils/toastManager";
 import { AIChat, AuthModals, Navbar } from "./components";
 import Sidebar from "./components/admin/Sidebar";
 import TeacherSidebar from "./components/teacher/TeacherSidebar";
+import StudentSidebar from "./components/student/StudentSidebar";
 
 // Pages
 import {
@@ -35,6 +36,10 @@ import {
   TeacherClasses,
   TeacherAttendance,
   TeacherGrading,
+  TeacherSubmissions,
+  TeacherSessionCalendar,
+  StudentLayout,
+  StudentClasses,
   ParentPortal,
   Classroom,
   StudentFeed,
@@ -91,7 +96,7 @@ const AppInner = () => {
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  const hasSidebar = isLoggedIn && (role === "admin" || role === "teacher");
+  const hasSidebar = isLoggedIn && (role === "admin" || role === "teacher" || role === "student");
 
   // Close mobile sidebar on route change
   useEffect(() => {
@@ -113,10 +118,11 @@ const AppInner = () => {
   const totalPendingCount =
     (pendingApprovals?.length || 0) + (pendingChildLinks?.length || 0);
 
-  // Navbar: hide only on /admin and /teacher routes where sidebar is fully active
+  // Navbar: hide on routes where sidebar is fully active
   const onSidebarRoute =
     location.pathname.startsWith("/admin") ||
-    location.pathname.startsWith("/teacher");
+    location.pathname.startsWith("/teacher") ||
+    location.pathname.startsWith("/student");
   const showNavbar = !hasSidebar || !onSidebarRoute;
 
   return (
@@ -132,6 +138,12 @@ const AppInner = () => {
       )}
       {hasSidebar && role === "teacher" && (
         <TeacherSidebar
+          isSidebarOpen={isSidebarOpen}
+          setIsSidebarOpen={setIsSidebarOpen}
+        />
+      )}
+      {hasSidebar && role === "student" && (
+        <StudentSidebar
           isSidebarOpen={isSidebarOpen}
           setIsSidebarOpen={setIsSidebarOpen}
         />
@@ -199,15 +211,12 @@ const AppInner = () => {
 
             {/* Student-Only Routes */}
             <Route element={<ProtectedRoute allowedRoles={["student"]} />}>
-              <Route path="/student" element={<StudentPortal />} />
-              <Route
-                path="/student/assignments"
-                element={<StudentAssignments />}
-              />
-              <Route
-                path="/student/assignments/:id"
-                element={<StudentAssignmentDetails />}
-              />
+              <Route path="/student" element={<StudentLayout />}>
+                <Route index element={<StudentPortal />} />
+                <Route path="classes" element={<StudentClasses />} />
+                <Route path="assignments" element={<StudentAssignments />} />
+                <Route path="assignments/:id" element={<StudentAssignmentDetails />} />
+              </Route>
             </Route>
 
             {/* Teacher-Only Routes */}
@@ -217,6 +226,8 @@ const AppInner = () => {
                 <Route path="classes" element={<TeacherClasses />} />
                 <Route path="attendance" element={<TeacherAttendance />} />
                 <Route path="grading" element={<TeacherGrading />} />
+                <Route path="sessions" element={<TeacherSessionCalendar />} />
+                <Route path="submissions" element={<TeacherSubmissions />} />
               </Route>
               <Route
                 path="/student/:id"

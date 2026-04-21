@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchSessions,
@@ -8,6 +8,8 @@ import {
   selectSessions,
   selectCourses,
   fetchCourses,
+  fetchUsers,
+  selectUsers,
   fetchAvailableStudents,
   selectAvailableStudents,
 } from "../../store/slices/adminSlice";
@@ -16,6 +18,7 @@ import { Button, Input, Card } from "../../components/ui";
 import { useFieldErrors } from "../../hooks";
 import { normalizeApiError } from "../../utils/errorHandler";
 import { toastManager } from "../../utils/toastManager";
+import ConfirmDialog from "../../components/common/ConfirmDialog";
 import SessionsTab from "../../components/admin/SessionsTab";
 
 const AdminSessionsPage = () => {
@@ -25,6 +28,7 @@ const AdminSessionsPage = () => {
   const [editingSession, setEditingSession] = useState(null);
   const [loadingSessionIds, setLoadingSessionIds] = useState(new Set());
   const [updatingSessionId, setUpdatingSessionId] = useState(null);
+  const [confirmDialog, setConfirmDialog] = useState({ open: false, sessionId: null, sessionTitle: "" });
 
   // Private students state for course-specific dropdown
   const [privateStudents, setPrivateStudents] = useState([]);
@@ -36,9 +40,6 @@ const AdminSessionsPage = () => {
     course: "",
     title: "",
     scheduled_date: "",
-    scheduled_time: "",
-    is_recurring: false,
-    recurrence_days: [],
     recurrence_end_date: "",
   });
 
@@ -46,11 +47,13 @@ const AdminSessionsPage = () => {
   const [showSessionFilters, setShowSessionFilters] = useState(false);
   const [sessionFilters, setSessionFilters] = useState({
     search: "",
+    teacher: "",
   });
 
   // Get data from Redux store
   const sessions = useSelector(selectSessions);
   const courses = useSelector(selectCourses);
+  const teachers = useSelector(selectUsers);
   const availableStudents = useSelector(selectAvailableStudents);
 
   // Error handling
@@ -70,11 +73,29 @@ const AdminSessionsPage = () => {
     clearAllErrors: clearAllEditSessionErrors,
   } = useFieldErrors({});
 
-  // Fetch courses on component mount (sessions fetched by AdminLayout)
+  // Fetch supporting data on mount
   useEffect(() => {
-    dispatch(fetchCourses()); // For course dropdown
-    dispatch(fetchAvailableStudents()); // For private session student selection
+    dispatch(fetchCourses());
+    dispatch(fetchUsers({ role: "teacher" }));
+    dispatch(fetchAvailableStudents());
   }, [dispatch]);
+
+  // Auto-select the first teacher when the list loads (runs once)
+  const autoSelected = useRef(false);
+  useEffect(() => {
+    const list = teachers?.data;
+    if (list?.length > 0 && !autoSelected.current) {
+      autoSelected.current = true;
+      setSessionFilters((prev) => ({ ...prev, teacher: String(list[0].id) }));
+    }
+  }, [teachers?.data?.length]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Re-fetch sessions when teacher filter changes
+  useEffect(() => {
+    const params = {};
+    if (sessionFilters.teacher) params.teacher = sessionFilters.teacher;
+    dispatch(fetchSessions(params));
+  }, [dispatch, sessionFilters.teacher]);
 
   // Reset create session form when modal opens/closes
   useEffect(() => {
@@ -83,9 +104,6 @@ const AdminSessionsPage = () => {
         course: "",
         title: "",
         scheduled_date: "",
-        scheduled_time: "",
-        is_recurring: false,
-        recurrence_days: [],
         recurrence_end_date: "",
       });
       clearAllCreateSessionErrors();
@@ -122,9 +140,13 @@ const AdminSessionsPage = () => {
 
         setEditSessionForm({
           course_id: editingSession.course_id || "",
+          course_title: editingSession.course?.title || editingSession.course_title || "",
+          teacher_name: editingSession.teacher_name || "",
           title: editingSession.title || "",
-          start_time: formatDateTimeForInput(editingSession.start_time),
+          start_time: formatDateTimeForInput(editingSession.start_time || editingSession.scheduled_at),
           meeting_link: editingSession.meeting_link || "",
+          recurrence_days: editingSession.recurrence_days || [],
+          recurrence_end_date: editingSession.recurrence_end_date || "",
         });
       }
     } else {
@@ -162,9 +184,13 @@ const AdminSessionsPage = () => {
 
         setEditSessionForm({
           course_id: session.course_id || "",
+          course_title: session.course?.title || session.course_title || "",
+          teacher_name: session.teacher_name || "",
           title: session.title || "",
-          start_time: formatDateTimeForInput(session.start_time),
+          start_time: formatDateTimeForInput(session.start_time || session.scheduled_at),
           meeting_link: session.meeting_link || "",
+          recurrence_days: session.recurrence_days || [],
+          recurrence_end_date: session.recurrence_end_date || "",
         });
         setActiveModal({
           type: "edit-session",
@@ -180,7 +206,7 @@ const AdminSessionsPage = () => {
   };
 
   // Validation functions
-  const validateCreateSessionForm = (formData) => {
+  const validateCreateSessionForm = (formData, selectedCourse) => {
     const errors = {};
 
     if (!formData.course) errors.course = "Course is required";
@@ -191,21 +217,17 @@ const AdminSessionsPage = () => {
       errors.title = "Title must be at least 3 characters";
     }
 
-    if (!formData.scheduled_date) errors.scheduled_date = "Start date is required";
-    if (!formData.scheduled_time) errors.scheduled_time = "Start time is required";
-
-    if (formData.scheduled_date && formData.scheduled_time) {
-      const scheduled = new Date(`${formData.scheduled_date}T${formData.scheduled_time}`);
+    if (!formData.scheduled_date) {
+      errors.scheduled_date = "Start date is required";
+    } else if (selectedCourse?.schedule?.time) {
+      const scheduled = new Date(`${formData.scheduled_date}T${selectedCourse.schedule.time}`);
       if (scheduled < new Date()) errors.scheduled_date = "Scheduled time must be in the future";
     }
 
-    if (formData.is_recurring) {
-      if (!formData.recurrence_days?.length)
-        errors.recurrence_days = "Select at least one recurrence day";
-      if (!formData.recurrence_end_date)
-        errors.recurrence_end_date = "End date is required for recurring classes";
-      else if (formData.scheduled_date && formData.recurrence_end_date <= formData.scheduled_date)
-        errors.recurrence_end_date = "End date must be after start date";
+    if (!formData.recurrence_end_date) {
+      errors.recurrence_end_date = "Recurrence end date is required";
+    } else if (formData.scheduled_date && formData.recurrence_end_date <= formData.scheduled_date) {
+      errors.recurrence_end_date = "End date must be after start date";
     }
 
     return errors;
@@ -227,9 +249,13 @@ const AdminSessionsPage = () => {
     if (!formData.start_time) {
       errors.start_time = "Start time is required";
     } else {
+      debugger
       // Check if start time is in the past
       const startTime = new Date(formData.start_time);
       const now = new Date();
+      startTime.setHours(0, 0, 0, 0);
+      now.setHours(0, 0, 0, 0);
+      console.log(now,"lll",startTime)
       if (startTime < now) {
         errors.start_time = "Scheduled time must be in the future";
       }
@@ -252,38 +278,34 @@ const AdminSessionsPage = () => {
   const handleCreateSession = async (sessionData) => {
     clearAllCreateSessionErrors();
 
-    const validationErrors = validateCreateSessionForm(sessionData);
+    const selectedCourse = courses?.data?.find(
+      (c) => c.id === Number(sessionData.course),
+    );
+
+    const validationErrors = validateCreateSessionForm(sessionData, selectedCourse);
     if (Object.keys(validationErrors).length > 0) {
       setCreateSessionErrors(validationErrors);
       toastManager.error("Please fix highlighted fields");
       return;
     }
 
-    const selectedCourse = courses?.data?.find(
-      (c) => c.id === Number(sessionData.course),
-    );
     const instructor_id = selectedCourse?.instructor?.id;
-
     if (!instructor_id) {
       toastManager.error("Selected course has no instructor assigned");
       return;
     }
-
-    // Build ISO datetime with local offset
     const localOffset = new Date().toTimeString().slice(9, 15).replace(":", "");
     const offsetStr = `+${localOffset.slice(0, 2)}:${localOffset.slice(2)}`;
-    const scheduled_at = `${sessionData.scheduled_date}T${sessionData.scheduled_time}:00${offsetStr}`;
-
+    const scheduled_at = `${sessionData.scheduled_date}`;
     const payload = {
       course: Number(sessionData.course),
       instructor_id,
       title: sessionData.title,
       scheduled_at,
-      is_recurring: sessionData.is_recurring,
-      ...(sessionData.is_recurring && {
-        recurrence_days: sessionData.recurrence_days,
-        recurrence_end_date: sessionData.recurrence_end_date,
-      }),
+      is_recurring: true,
+      recurrence_days: selectedCourse?.schedule?.days || [],
+      recurrence_end_date: sessionData.recurrence_end_date,
+      time: selectedCourse?.schedule?.time
     };
 
     try {
@@ -295,9 +317,6 @@ const AdminSessionsPage = () => {
         course: "",
         title: "",
         scheduled_date: "",
-        scheduled_time: "",
-        is_recurring: false,
-        recurrence_days: [],
         recurrence_end_date: "",
       });
       clearAllCreateSessionErrors();
@@ -348,15 +367,15 @@ const AdminSessionsPage = () => {
   };
 
   // Handle session deletion
-  const handleDeleteSession = async (sessionId) => {
+  const handleDeleteSession = (sessionId) => {
     const session = sessions?.data?.find((s) => s.id === sessionId);
     const sessionTitle = session?.title || "this session";
+    setConfirmDialog({ open: true, sessionId, sessionTitle });
+  };
 
-    const confirmed = window.confirm(
-      `Are you sure you want to delete "${sessionTitle}"? This action cannot be undone.`,
-    );
-
-    if (!confirmed) return;
+  const confirmDeleteSession = async () => {
+    const { sessionId } = confirmDialog;
+    setConfirmDialog({ open: false, sessionId: null, sessionTitle: "" });
 
     setLoadingSessionIds((prev) => new Set(prev).add(sessionId));
     try {
@@ -376,6 +395,7 @@ const AdminSessionsPage = () => {
   };
 
   return (
+    <>
     <SessionsTab
       sessions={sessions?.data || []}
       courses={courses?.data || []}
@@ -405,7 +425,20 @@ const AdminSessionsPage = () => {
       setShowSessionFilters={setShowSessionFilters}
       sessionFilters={sessionFilters}
       setSessionFilters={setSessionFilters}
+      teachers={teachers?.data || []}
     />
+
+    <ConfirmDialog
+      open={confirmDialog.open}
+      variant="danger"
+      title="Delete Class"
+      message={`Are you sure you want to delete "${confirmDialog.sessionTitle}"? This action cannot be undone.`}
+      confirmLabel="Delete"
+      cancelLabel="Cancel"
+      onConfirm={confirmDeleteSession}
+      onCancel={() => setConfirmDialog({ open: false, sessionId: null, sessionTitle: "" })}
+    />
+    </>
   );
 };
 

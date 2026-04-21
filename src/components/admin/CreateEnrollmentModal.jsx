@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { createEnrollment } from "../../store/slices/adminSlice";
-import { fetchUsers } from "../../store/slices/adminSlice";
-import { fetchCourses } from "../../store/slices/adminSlice";
+import {
+  createEnrollment,
+  fetchUsers,
+  fetchCoursesWithSessions,
+} from "../../store/slices/adminSlice";
 import { useFieldErrors } from "../../hooks";
 import { Button, Input } from "../../components/ui";
 import { toastManager } from "../../utils/toastManager";
 
 const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
   const dispatch = useDispatch();
-  const { users, courses } = useSelector((state) => state.admin);
+  const { users, enrollmentCourses: courses } = useSelector((state) => state.admin);
   const { loading: createLoading, error: createError } = useSelector(
     (state) => state.admin.enrollments,
   );
@@ -33,7 +35,7 @@ const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
   useEffect(() => {
     if (isOpen) {
       dispatch(fetchUsers());
-      dispatch(fetchCourses());
+      dispatch(fetchCoursesWithSessions());
     }
   }, [dispatch, isOpen]);
 
