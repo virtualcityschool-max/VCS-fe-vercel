@@ -55,7 +55,7 @@ const Navbar = ({ variant = "default" }) => {
               className="flex items-center gap-2 sm:gap-3 group cursor-pointer shrink-0"
               onClick={() => navigate("/")}
             >
-              <img src="/assets/logo.png" alt="Virtual City School" className="w-8 h-8 sm:w-10 sm:h-10 object-contain group-hover:rotate-12 transition-all" style={{width: "100px",height: "100px"}}/>
+              <img src="/assets/logo.png" alt="Virtual City School" className="w-8 h-8 sm:w-10 sm:h-10 object-contain group-hover:rotate-12 transition-all" style={{width: "100px",height: "70px"}}/>
               {/* <span className="text-sm xs:text-lg sm:text-2xl font-black font-poppins tracking-tighter whitespace-nowrap">
                 VirtualCitySchool
               </span> */}

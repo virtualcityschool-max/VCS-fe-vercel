@@ -321,6 +321,7 @@ const AdminSessionsPage = () => {
       });
       clearAllCreateSessionErrors();
     } catch (error) {
+      toastManager.error("Error Creating Class")
       handleCreateSessionApiError(error);
     }
   };
