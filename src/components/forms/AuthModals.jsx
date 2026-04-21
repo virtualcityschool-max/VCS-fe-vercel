@@ -711,7 +711,7 @@ const AuthModals = () => {
                     className="w-full bg-slate-950 border border-white/5 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
                   >
                     <option value="">Select Role</option>
-                    <option value="admin">Admin</option>
+                    {/* <option value="admin">Admin</option> */}
                     <option value="teacher">Teacher</option>
                     <option value="student">Student</option>
                     <option value="parent">Parent</option>
