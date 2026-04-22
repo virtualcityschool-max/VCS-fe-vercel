@@ -190,25 +190,28 @@ export const SelectField = ({
         </label>
       )}
 
-      <select
-        id={name}
-        name={name}
-        value={value || ""}
-        onChange={handleChange}
-        disabled={disabled}
-        className={`w-full bg-slate-950 border ${
-          error ? "border-red-500" : "border-white/5"
-        } rounded-2xl px-6 py-4 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm ${
-          disabled ? "opacity-50 cursor-not-allowed" : ""
-        }`}
-      >
-        <option value="">{placeholder}</option>
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
+      <div className="relative">
+        <select
+          id={name}
+          name={name}
+          value={value || ""}
+          onChange={handleChange}
+          disabled={disabled}
+          className={`w-full appearance-none bg-slate-950 border ${
+            error ? "border-red-500" : "border-white/5"
+          } rounded-2xl px-6 py-4 pr-12 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm cursor-pointer ${
+            disabled ? "opacity-50 cursor-not-allowed" : ""
+          }`}
+        >
+          <option value="">{placeholder}</option>
+          {options.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+        <i className="fas fa-chevron-down absolute right-5 top-1/2 -translate-y-1/2 text-slate-500 text-[10px] pointer-events-none" />
+      </div>
 
       {error && (
         <div className="text-red-500 text-xs space-y-1">

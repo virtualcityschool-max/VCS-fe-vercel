@@ -6,7 +6,7 @@ import {
   fetchCoursesWithSessions,
 } from "../../store/slices/adminSlice";
 import { useFieldErrors } from "../../hooks";
-import { Button } from "../../components/ui";
+import { Button, FilterSelect } from "../../components/ui";
 import { toastManager } from "../../utils/toastManager";
 import { adminService } from "../../services/adminService";
 
@@ -96,7 +96,6 @@ const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
   }, []);
 
   useEffect(() => {
-    debugger
     if(formData.course_id && !formData.teacher_id) {
       formData.teacher_id = availableTeachers[0].id
     }
@@ -154,7 +153,6 @@ const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
   };
 
   const handleInputChange = (e) => {
-    // debugger
     const { name, value } = e.target;
     setFormData((prev) => {
       const next = { ...prev, [name]: value };
@@ -192,58 +190,47 @@ const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* Student */}
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
-              Student <span className="text-red-500">*</span>
-            </label>
-            <select
-              name="student_id"
-              value={formData.student_id}
-              onChange={handleInputChange}
-              className={`w-full px-4 py-2 bg-slate-800 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-                hasFieldError("student_id") ? "border-red-500" : "border-slate-600"
-              }`}
-              disabled={users.loading}
-            >
-              <option value="">Select a student</option>
-              {students.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.username} ({s.email})
-                </option>
-              ))}
-            </select>
-            {getFieldError("student_id") && (
-              <p className="mt-1 text-xs text-red-400">{getFieldError("student_id")}</p>
-            )}
-            {users.loading && <p className="mt-1 text-xs text-slate-400">Loading students...</p>}
-          </div>
+          {/* Student + Course in one row */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                Student <span className="text-red-500">*</span>
+              </label>
+              <FilterSelect
+                name="student_id"
+                value={formData.student_id}
+                onChange={handleInputChange}
+                disabled={users.loading}
+                className={`w-full px-4 py-2 bg-slate-800 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 ${hasFieldError("student_id") ? "border-red-500" : "border-slate-600"}`}
+              >
+                <option value="">Select a student</option>
+                {students.map((s) => (
+                  <option key={s.id} value={s.id}>{s.username} ({s.email})</option>
+                ))}
+              </FilterSelect>
+              {getFieldError("student_id") && <p className="mt-1 text-xs text-red-400">{getFieldError("student_id")}</p>}
+              {users.loading && <p className="mt-1 text-xs text-slate-400">Loading...</p>}
+            </div>
 
-          {/* Course */}
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
-              Course <span className="text-red-500">*</span>
-            </label>
-            <select
-              name="course_id"
-              value={formData.course_id}
-              onChange={handleInputChange}
-              className={`w-full px-4 py-2 bg-slate-800 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-                hasFieldError("course_id") ? "border-red-500" : "border-slate-600"
-              }`}
-              disabled={courses.loading}
-            >
-              <option value="">Select a course</option>
-              {courses.data?.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.title} - {c.category}
-                </option>
-              ))}
-            </select>
-            {getFieldError("course_id") && (
-              <p className="mt-1 text-xs text-red-400">{getFieldError("course_id")}</p>
-            )}
-            {courses.loading && <p className="mt-1 text-xs text-slate-400">Loading courses...</p>}
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                Course <span className="text-red-500">*</span>
+              </label>
+              <FilterSelect
+                name="course_id"
+                value={formData.course_id}
+                onChange={handleInputChange}
+                disabled={courses.loading}
+                className={`w-full px-4 py-2 bg-slate-800 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 ${hasFieldError("course_id") ? "border-red-500" : "border-slate-600"}`}
+              >
+                <option value="">Select a course</option>
+                {courses.data?.map((c) => (
+                  <option key={c.id} value={c.id}>{c.title} - {c.category}</option>
+                ))}
+              </FilterSelect>
+              {getFieldError("course_id") && <p className="mt-1 text-xs text-red-400">{getFieldError("course_id")}</p>}
+              {courses.loading && <p className="mt-1 text-xs text-slate-400">Loading...</p>}
+            </div>
           </div>
 
           {/* Enrollment Type */}
@@ -276,19 +263,17 @@ const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
                 <label className="block text-sm font-medium text-slate-300 mb-2">
                   Teacher <span className="text-red-500">*</span>
                 </label>
-                <select
+                <FilterSelect
                   name="teacher_id"
                   value={availableTeachers[0].teacher_id}
                   onChange={handleInputChange}
-                  className={`w-full px-4 py-2 bg-slate-800 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-                    hasFieldError("teacher_id") ? "border-red-500" : "border-slate-600"
-                  }`}
+                  className={`w-full px-4 py-2 bg-slate-800 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 ${hasFieldError("teacher_id") ? "border-red-500" : "border-slate-600"}`}
                   disabled
                 >
-                    <option key={availableTeachers[0].teacher_id} value={availableTeachers[0].teacher_id}>
-                      {availableTeachers[0].username} ({availableTeachers[0].email})
-                    </option>
-                </select>
+                  <option key={availableTeachers[0].teacher_id} value={availableTeachers[0].teacher_id}>
+                    {availableTeachers[0].username} ({availableTeachers[0].email})
+                  </option>
+                </FilterSelect>
                 {getFieldError("teacher_id") && (
                   <p className="mt-1 text-xs text-red-400">{getFieldError("teacher_id")}</p>
                 )}

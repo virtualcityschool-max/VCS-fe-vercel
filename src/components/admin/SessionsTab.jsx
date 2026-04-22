@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Button, FilterSelect } from "../../components/ui";
+import { Button, FilterSelect, Input } from "../../components/ui";
 
 const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MONTH_NAMES = [
@@ -531,7 +531,7 @@ const SessionsTab = ({
                 <label className="block text-sm font-medium text-slate-300 mb-2">
                   Course <span className="text-red-400">*</span>
                 </label>
-                <select
+                <FilterSelect
                   value={createSessionForm.course}
                   onChange={(e) => {
                     setCreateSessionForm({ ...createSessionForm, course: e.target.value, recurrence_end_date: "" });
@@ -543,7 +543,7 @@ const SessionsTab = ({
                   {courses?.map((course) => (
                     <option key={course.id} value={course.id}>{course.title}</option>
                   ))}
-                </select>
+                </FilterSelect>
                 {createSessionErrors?.course && <p className="text-red-400 text-xs mt-1">{createSessionErrors.course}</p>}
               </div>
 
@@ -588,47 +588,47 @@ const SessionsTab = ({
                 <label className="block text-sm font-medium text-slate-300 mb-2">
                   Class Title <span className="text-red-400">*</span>
                 </label>
-                <input
+                <Input
                   type="text"
                   placeholder="e.g. Python Basics - Batch 2"
                   value={createSessionForm.title}
                   onChange={(e) => { setCreateSessionForm({ ...createSessionForm, title: e.target.value }); clearCreateSessionFieldError("title"); }}
                   className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 text-sm ${createSessionErrors?.title ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
+                  error={createSessionErrors?.title}
                 />
-                {createSessionErrors?.title && <p className="text-red-400 text-xs mt-1">{createSessionErrors.title}</p>}
               </div>
 
-              {/* Start Date */}
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
-                  Start Date <span className="text-red-400">*</span>
-                </label>
-                <input
-                  type="date"
-                  value={createSessionForm.scheduled_date}
-                  min={new Date().toISOString().split("T")[0]}
-                  onChange={(e) => { setCreateSessionForm({ ...createSessionForm, scheduled_date: e.target.value }); clearCreateSessionFieldError("scheduled_date"); }}
-                  className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white focus:outline-none focus:ring-2 text-sm ${createSessionErrors?.scheduled_date ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
-                />
-                {createSessionErrors?.scheduled_date && <p className="text-red-400 text-xs mt-1">{createSessionErrors.scheduled_date}</p>}
-              </div>
-
-              {/* Recurrence End Date */}
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
-                  Recurrence End Date <span className="text-red-400">*</span>
-                </label>
-                <input
-                  type="date"
-                  value={createSessionForm.recurrence_end_date}
-                  min={createSessionForm.scheduled_date || new Date().toISOString().split("T")[0]}
-                  onChange={(e) => { setCreateSessionForm({ ...createSessionForm, recurrence_end_date: e.target.value }); clearCreateSessionFieldError("recurrence_end_date"); }}
-                  className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white focus:outline-none focus:ring-2 text-sm ${createSessionErrors?.recurrence_end_date ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
-                />
-                {createSessionErrors?.recurrence_end_date && <p className="text-red-400 text-xs mt-1">{createSessionErrors.recurrence_end_date}</p>}
-                {createSessionForm.scheduled_date && createSessionForm.recurrence_end_date && (
-                  <p className="text-slate-500 text-xs mt-1">From {createSessionForm.scheduled_date} to {createSessionForm.recurrence_end_date}</p>
-                )}
+              {/* Start Date + Recurrence End Date in one row */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    Start Date <span className="text-red-400">*</span>
+                  </label>
+                  <Input
+                    type="date"
+                    value={createSessionForm.scheduled_date}
+                    min={new Date().toISOString().split("T")[0]}
+                    onChange={(e) => { setCreateSessionForm({ ...createSessionForm, scheduled_date: e.target.value }); clearCreateSessionFieldError("scheduled_date"); }}
+                    className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white focus:outline-none focus:ring-2 text-sm ${createSessionErrors?.scheduled_date ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
+                    error={createSessionErrors?.scheduled_date}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    Recurrence End Date <span className="text-red-400">*</span>
+                  </label>
+                  <Input
+                    type="date"
+                    value={createSessionForm.recurrence_end_date}
+                    min={createSessionForm.scheduled_date || new Date().toISOString().split("T")[0]}
+                    onChange={(e) => { setCreateSessionForm({ ...createSessionForm, recurrence_end_date: e.target.value }); clearCreateSessionFieldError("recurrence_end_date"); }}
+                    className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white focus:outline-none focus:ring-2 text-sm ${createSessionErrors?.recurrence_end_date ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
+                    error={createSessionErrors?.recurrence_end_date}
+                  />
+                  {createSessionForm.scheduled_date && createSessionForm.recurrence_end_date && (
+                    <p className="text-slate-500 text-xs mt-1">From {createSessionForm.scheduled_date} to {createSessionForm.recurrence_end_date}</p>
+                  )}
+                </div>
               </div>
 
               <div className="flex gap-3 pt-2">
@@ -689,34 +689,34 @@ const SessionsTab = ({
                 </div>
               </div>
 
-              {/* Editable: Title */}
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
-                  Class Title <span className="text-red-400">*</span>
-                </label>
-                <input
-                  type="text"
-                  placeholder="Enter class title"
-                  value={editSessionForm.title || ""}
-                  onChange={(e) => { setEditSessionForm({ ...editSessionForm, title: e.target.value }); clearEditSessionFieldError("title"); }}
-                  className={`w-full px-3 py-2 bg-slate-800 border rounded-lg text-white focus:outline-none focus:ring-2 ${editSessionErrors?.title ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
-                />
-                {editSessionErrors?.title && <p className="text-red-400 text-xs mt-1">{editSessionErrors.title}</p>}
-              </div>
-
-              {/* Editable: Start Time */}
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
-                  Start Time <span className="text-red-400">*</span>
-                </label>
-                <input
-                  type="datetime-local"
-                  value={editSessionForm.start_time || ""}
-                  min={new Date().toISOString().slice(0, 16)}
-                  onChange={(e) => { setEditSessionForm({ ...editSessionForm, start_time: e.target.value }); clearEditSessionFieldError("start_time"); }}
-                  className={`w-full px-3 py-2 bg-slate-800 border rounded-lg text-white focus:outline-none focus:ring-2 ${editSessionErrors?.start_time ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
-                />
-                {editSessionErrors?.start_time && <p className="text-red-400 text-xs mt-1">{editSessionErrors.start_time}</p>}
+              {/* Editable: Title + Start Time in one row */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    Class Title <span className="text-red-400">*</span>
+                  </label>
+                  <Input
+                    type="text"
+                    placeholder="Enter class title"
+                    value={editSessionForm.title || ""}
+                    onChange={(e) => { setEditSessionForm({ ...editSessionForm, title: e.target.value }); clearEditSessionFieldError("title"); }}
+                    className={`w-full px-3 py-2 bg-slate-800 border rounded-lg text-white focus:outline-none focus:ring-2 ${editSessionErrors?.title ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
+                    error={editSessionErrors?.title}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    Start Time <span className="text-red-400">*</span>
+                  </label>
+                  <Input
+                    type="datetime-local"
+                    value={editSessionForm.start_time || ""}
+                    min={new Date().toISOString().slice(0, 16)}
+                    onChange={(e) => { setEditSessionForm({ ...editSessionForm, start_time: e.target.value }); clearEditSessionFieldError("start_time"); }}
+                    className={`w-full px-3 py-2 bg-slate-800 border rounded-lg text-white focus:outline-none focus:ring-2 ${editSessionErrors?.start_time ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
+                    error={editSessionErrors?.start_time}
+                  />
+                </div>
               </div>
 
               {/* Editable: Meeting Link */}
@@ -724,14 +724,14 @@ const SessionsTab = ({
                 <label className="block text-sm font-medium text-slate-300 mb-2">
                   Meeting Link <span className="text-red-400">*</span>
                 </label>
-                <input
+                <Input
                   type="url"
                   placeholder="https://meet.google.com/..."
                   value={editSessionForm.meeting_link || ""}
                   onChange={(e) => { setEditSessionForm({ ...editSessionForm, meeting_link: e.target.value }); clearEditSessionFieldError("meeting_link"); }}
                   className={`w-full px-3 py-2 bg-slate-800 border rounded-lg text-white focus:outline-none focus:ring-2 ${editSessionErrors?.meeting_link ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
+                  error={editSessionErrors?.meeting_link}
                 />
-                {editSessionErrors?.meeting_link && <p className="text-red-400 text-xs mt-1">{editSessionErrors.meeting_link}</p>}
               </div>
 
               <div className="flex gap-3 pt-4">

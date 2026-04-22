@@ -176,7 +176,7 @@ const OverviewTab = ({ analytics, analyticsLoading, analyticsError }) => {
       </div>
 
       {/* Row 2 — Course stats (2 cards) */}
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 gap-3 max-w-sm">
         <StatCard
           label="Total Courses"
           value={analytics.courses.total}

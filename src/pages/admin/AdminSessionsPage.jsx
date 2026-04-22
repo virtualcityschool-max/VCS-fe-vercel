@@ -249,7 +249,6 @@ const AdminSessionsPage = () => {
     if (!formData.start_time) {
       errors.start_time = "Start time is required";
     } else {
-      debugger
       // Check if start time is in the past
       const startTime = new Date(formData.start_time);
       const now = new Date();

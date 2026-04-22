@@ -711,24 +711,26 @@ const AuthModals = () => {
                   >
                     Role
                   </label>
-                  <select
-                    id="register-role"
-                    name="register-role"
-                    value={role}
-                    onChange={(e) => {
-                      toastManager.dismiss();
-                      setRole(e.target.value);
-                      clearRegistrationFieldError("role");
-                      dispatch(clearAuthError());
-                    }}
-                    className="w-full bg-slate-950 border border-white/5 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
-                  >
-                    <option value="">Select Role</option>
-                    {/* <option value="admin">Admin</option> */}
-                    <option value="teacher">Teacher</option>
-                    <option value="student">Student</option>
-                    <option value="parent">Parent</option>
-                  </select>
+                  <div className="relative">
+                    <select
+                      id="register-role"
+                      name="register-role"
+                      value={role}
+                      onChange={(e) => {
+                        toastManager.dismiss();
+                        setRole(e.target.value);
+                        clearRegistrationFieldError("role");
+                        dispatch(clearAuthError());
+                      }}
+                      className="w-full appearance-none bg-slate-950 border border-white/5 rounded-2xl px-6 py-4 pr-12 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm cursor-pointer"
+                    >
+                      <option value="">Select Role</option>
+                      <option value="teacher">Teacher</option>
+                      <option value="student">Student</option>
+                      <option value="parent">Parent</option>
+                    </select>
+                    <i className="fas fa-chevron-down absolute right-5 top-1/2 -translate-y-1/2 text-slate-500 text-[10px] pointer-events-none" />
+                  </div>
                   {registrationErrors.role && (
                     <p className="text-red-500 text-xs mt-2 animate-shake">
                       {Array.isArray(registrationErrors.role)

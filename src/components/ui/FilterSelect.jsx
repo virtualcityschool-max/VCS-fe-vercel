@@ -14,7 +14,7 @@ const FilterSelect = ({ className = "", children, ...props }) => (
         focus:outline-none focus:border-indigo-500/60 focus:ring-2 focus:ring-indigo-500/15
         disabled:opacity-50 disabled:cursor-not-allowed
         cursor-pointer transition-all duration-150
-        ${className}`}
+        ${className}`} style={{width: "180px"}}
     >
       {children}
     </select>

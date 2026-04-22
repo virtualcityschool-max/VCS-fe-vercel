@@ -16,6 +16,7 @@ import {
   PasswordValidation,
   PasswordInput,
   MultiSelect,
+  FilterSelect,
 } from "../../components/ui";
 import { useFieldErrors } from "../../hooks";
 import {
@@ -271,133 +272,73 @@ const AdminUsersPage = () => {
             </h3>
 
             <div className="space-y-4 overflow-y-auto flex-1 px-1">
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">
-                  Username <span className="text-red-500">*</span>
-                </label>
-                <Input
-                  value={createUserForm.username}
-                  onChange={(e) => {
-                    setCreateUserForm({
-                      ...createUserForm,
-                      username: e.target.value,
-                    });
-                    // Clear field error when user starts typing
-                    if (createUserErrors.username) {
-                      setCreateUserErrors((prev) => ({
-                        ...prev,
-                        username: undefined,
-                      }));
-                    }
-                  }}
-                  className="w-full"
-                  placeholder="Username"
-                  error={createUserErrors.username}
-                />
+              {/* Username + Email */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
+                    Username <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    value={createUserForm.username}
+                    onChange={(e) => { setCreateUserForm({ ...createUserForm, username: e.target.value }); if (createUserErrors.username) setCreateUserErrors((prev) => ({ ...prev, username: undefined })); }}
+                    className="w-full"
+                    placeholder="Username"
+                    error={createUserErrors.username}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
+                    Email <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    type="email"
+                    value={createUserForm.email}
+                    onChange={(e) => { setCreateUserForm({ ...createUserForm, email: e.target.value }); if (createUserErrors.email) setCreateUserErrors((prev) => ({ ...prev, email: undefined })); }}
+                    className="w-full"
+                    placeholder="Email"
+                    error={createUserErrors.email}
+                  />
+                </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">
-                  Email <span className="text-red-500">*</span>
-                </label>
-                <Input
-                  type="email"
-                  value={createUserForm.email}
-                  onChange={(e) => {
-                    setCreateUserForm({
-                      ...createUserForm,
-                      email: e.target.value,
-                    });
-                    // Clear field error when user starts typing
-                    if (createUserErrors.email) {
-                      setCreateUserErrors((prev) => ({
-                        ...prev,
-                        email: undefined,
-                      }));
-                    }
-                  }}
-                  className="w-full"
-                  placeholder="Email"
-                  error={createUserErrors.email}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">
-                  First Name
-                </label>
-                <Input
-                  value={createUserForm.first_name}
-                  onChange={(e) => {
-                    setCreateUserForm({
-                      ...createUserForm,
-                      first_name: e.target.value,
-                    });
-                    // Clear field error when user starts typing
-                    if (createUserErrors.first_name) {
-                      setCreateUserErrors((prev) => ({
-                        ...prev,
-                        first_name: undefined,
-                      }));
-                    }
-                  }}
-                  className="w-full"
-                  placeholder="First Name"
-                  error={createUserErrors.first_name}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">
-                  Last Name
-                </label>
-                <Input
-                  value={createUserForm.last_name}
-                  onChange={(e) => {
-                    setCreateUserForm({
-                      ...createUserForm,
-                      last_name: e.target.value,
-                    });
-                    // Clear field error when user starts typing
-                    if (createUserErrors.last_name) {
-                      setCreateUserErrors((prev) => ({
-                        ...prev,
-                        last_name: undefined,
-                      }));
-                    }
-                  }}
-                  className="w-full"
-                  placeholder="Last Name"
-                  error={createUserErrors.last_name}
-                />
+              {/* First Name + Last Name */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-1">First Name</label>
+                  <Input
+                    value={createUserForm.first_name}
+                    onChange={(e) => { setCreateUserForm({ ...createUserForm, first_name: e.target.value }); if (createUserErrors.first_name) setCreateUserErrors((prev) => ({ ...prev, first_name: undefined })); }}
+                    className="w-full"
+                    placeholder="First Name"
+                    error={createUserErrors.first_name}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-1">Last Name</label>
+                  <Input
+                    value={createUserForm.last_name}
+                    onChange={(e) => { setCreateUserForm({ ...createUserForm, last_name: e.target.value }); if (createUserErrors.last_name) setCreateUserErrors((prev) => ({ ...prev, last_name: undefined })); }}
+                    className="w-full"
+                    placeholder="Last Name"
+                    error={createUserErrors.last_name}
+                  />
+                </div>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-1">
                   Role <span className="text-red-500">*</span>
                 </label>
-                <select
+                <FilterSelect
                   value={createUserForm.role}
-                  onChange={(e) => {
-                    setCreateUserForm({
-                      ...createUserForm,
-                      role: e.target.value,
-                    });
-                    // Clear field error when user starts typing
-                    if (createUserErrors.role) {
-                      setCreateUserErrors((prev) => ({
-                        ...prev,
-                        role: undefined,
-                      }));
-                    }
-                  }}
+                  onChange={(e) => { setCreateUserForm({ ...createUserForm, role: e.target.value }); if (createUserErrors.role) setCreateUserErrors((prev) => ({ ...prev, role: undefined })); }}
                   className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 >
                   <option value="student">Student</option>
                   <option value="teacher">Teacher</option>
                   <option value="parent">Parent</option>
                   <option value="admin">Admin</option>
-                </select>
+                </FilterSelect>
               </div>
 
               <div>

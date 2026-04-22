@@ -1,5 +1,6 @@
 import React from "react";
 import { BACKEND_CATEGORIES, formatCategoryLabel } from "../../constants";
+import { FilterSelect, Input } from "../ui";
 
 const RECURRING_DAYS = ["MON", "TUE", "WED", "THU", "FRI"];
 
@@ -24,13 +25,13 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], mode = "
         <label className="block text-sm font-medium text-slate-300 mb-2">
           Course Title <span className="text-red-400">*</span>
         </label>
-        <input
+        <Input
           type="text"
           placeholder="Enter course title"
           value={formData.title || ""}
           onChange={(e) => onChange("title", e.target.value)}
           className={fieldClass(errors.title)}
-        />
+        ></Input>
         <FieldError error={errors.title} />
       </div>
 
@@ -49,79 +50,81 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], mode = "
         <FieldError error={errors.description} />
       </div>
 
-      {/* Category — always editable */}
-      <div>
-        <label className="block text-sm font-medium text-slate-300 mb-2">
-          Category <span className="text-red-400">*</span>
-        </label>
-        <select
-          value={formData.category || ""}
-          onChange={(e) => onChange("category", e.target.value)}
-          className={fieldClass(errors.category)}
-        >
-          <option value="">Select category</option>
-          {BACKEND_CATEGORIES.map((cat) => (
-            <option key={cat} value={cat}>
-              {formatCategoryLabel(cat)}
-            </option>
-          ))}
-        </select>
-        <FieldError error={errors.category} />
-      </div>
-
-      {/* Price + Instructor — create only */}
-      {!isEdit && (
-        <>
+      {/* Category + Status (+ Price on create) in one row */}
+      {!isEdit ? (
+        <div className="grid grid-cols-3 gap-3">
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">
+              Category <span className="text-red-400">*</span>
+            </label>
+            <FilterSelect value={formData.category || ""} onChange={(e) => onChange("category", e.target.value)} className={fieldClass(errors.category)}>
+              <option value="">Select category</option>
+              {BACKEND_CATEGORIES.map((cat) => (
+                <option key={cat} value={cat}>{formatCategoryLabel(cat)}</option>
+              ))}
+            </FilterSelect>
+            <FieldError error={errors.category} />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">
+              Status <span className="text-red-400">*</span>
+            </label>
+            <FilterSelect value={formData.status || "draft"} onChange={(e) => onChange("status", e.target.value)} className={fieldClass(errors.status)}>
+              <option value="draft">Draft</option>
+              <option value="published">Published</option>
+            </FilterSelect>
+            <FieldError error={errors.status} />
+          </div>
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-2">
               Price (PKR) <span className="text-red-400">*</span>
             </label>
-            <input
-              type="number"
-              placeholder="Enter price"
-              value={formData.price || ""}
-              onChange={(e) => onChange("price", e.target.value)}
-              className={fieldClass(errors.price)}
-            />
+            <Input type="number" placeholder="Enter price" value={formData.price || ""} onChange={(e) => onChange("price", e.target.value)} className={fieldClass(errors.price)} />
             <FieldError error={errors.price} />
           </div>
-
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-2">
-              Instructor <span className="text-red-400">*</span>
+              Category <span className="text-red-400">*</span>
             </label>
-            <select
-              value={formData.instructor_id || ""}
-              onChange={(e) => onChange("instructor_id", e.target.value)}
-              className={fieldClass(errors.instructor_id)}
-            >
-              <option value="">Select an instructor</option>
-              {users.map((user) => (
-                <option key={user.id} value={user.id}>
-                  {user.username}
-                </option>
+            <FilterSelect value={formData.category || ""} onChange={(e) => onChange("category", e.target.value)} className={fieldClass(errors.category)}>
+              <option value="">Select category</option>
+              {BACKEND_CATEGORIES.map((cat) => (
+                <option key={cat} value={cat}>{formatCategoryLabel(cat)}</option>
               ))}
-            </select>
-            <FieldError error={errors.instructor_id} />
+            </FilterSelect>
+            <FieldError error={errors.category} />
           </div>
-        </>
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">
+              Status <span className="text-red-400">*</span>
+            </label>
+            <FilterSelect value={formData.status || "draft"} onChange={(e) => onChange("status", e.target.value)} className={fieldClass(errors.status)}>
+              <option value="draft">Draft</option>
+              <option value="published">Published</option>
+            </FilterSelect>
+            <FieldError error={errors.status} />
+          </div>
+        </div>
       )}
 
-      {/* Status — always editable */}
-      <div>
-        <label className="block text-sm font-medium text-slate-300 mb-2">
-          Status <span className="text-red-400">*</span>
-        </label>
-        <select
-          value={formData.status || "draft"}
-          onChange={(e) => onChange("status", e.target.value)}
-          className={fieldClass(errors.status)}
-        >
-          <option value="draft">Draft</option>
-          <option value="published">Published</option>
-        </select>
-        <FieldError error={errors.status} />
-      </div>
+      {/* Instructor — create only */}
+      {!isEdit && (
+        <div>
+          <label className="block text-sm font-medium text-slate-300 mb-2">
+            Instructor <span className="text-red-400">*</span>
+          </label>
+          <FilterSelect value={formData.instructor_id || ""} onChange={(e) => onChange("instructor_id", e.target.value)} className={fieldClass(errors.instructor_id)}>
+            <option value="">Select an instructor</option>
+            {users.map((user) => (
+              <option key={user.id} value={user.id}>{user.username}</option>
+            ))}
+          </FilterSelect>
+          <FieldError error={errors.instructor_id} />
+        </div>
+      )}
 
       {/* Instructor — read-only in edit mode */}
       {isEdit && (
