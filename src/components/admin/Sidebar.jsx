@@ -25,24 +25,24 @@ const Sidebar = ({
       icon: "fas fa-user-check",
       path: "/admin/approvals",
     },
+    { id: "users", label: "Users", icon: "fas fa-users", path: "/admin/users" },
     {
       id: "courses",
       label: "Courses",
       icon: "fas fa-book",
       path: "/admin/courses",
     },
-    { id: "users", label: "Users", icon: "fas fa-users", path: "/admin/users" },
-    {
-      id: "enrollments",
-      label: "Enrollments",
-      icon: "fas fa-user-graduate",
-      path: "/admin/enrollments",
-    },
     {
       id: "sessions",
       label: "Classes",
       icon: "fas fa-chalkboard",
       path: "/admin/sessions",
+    },
+    {
+      id: "enrollments",
+      label: "Enrollments",
+      icon: "fas fa-user-graduate",
+      path: "/admin/enrollments",
     },
   ];
 

@@ -56,7 +56,17 @@ const getAssignments = async (params = {}) => {
 };
 
 const createAssignment = async (data) => {
-  const response = await axiosInstance.post("/assignments/", data);
+  const { file, ...rest } = data;
+  if (file) {
+    const formData = new FormData();
+    Object.entries(rest).forEach(([k, v]) => formData.append(k, v));
+    formData.append("file", file);
+    const response = await axiosInstance.post("/assignments/", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return response.data;
+  }
+  const response = await axiosInstance.post("/assignments/", rest);
   return response.data;
 };
 

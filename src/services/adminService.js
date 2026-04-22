@@ -21,6 +21,8 @@ const ADMIN_ENDPOINTS = {
 
   // Enrollment Management
   ADMIN_ENROLL: "/courses/admin-enroll/",
+  PRIVATE_TEACHER_SLOTS: (id) => `/classroom/teachers/${id}/available-slots/`,
+
 };
 
 // User Management endpoints
@@ -35,7 +37,17 @@ export const adminService = {
       throw handleApiError(error, { context: "Get Users" });
     }
   },
-
+  getTeacherPrivateSlots: async (teacherId, params = {}) => {
+    try {
+      const response = await axiosInstance.get(
+        ADMIN_ENDPOINTS.PRIVATE_TEACHER_SLOTS(teacherId),
+        { params },
+      );
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error, { context: "Get Teacher Slots" });
+    }
+  },
   getUserById: async (userId) => {
     try {
       const response = await axiosInstance.get(
@@ -112,7 +124,7 @@ export const adminService = {
       });
     }
   },
-
+  
   getEnrollmentAnalytics: async (params = {}) => {
     try {
       const response = await axiosInstance.get(

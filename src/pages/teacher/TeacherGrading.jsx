@@ -26,6 +26,7 @@ const TeacherGrading = () => {
     due_date: "",
     max_score: "",
     status: "published",
+    file: null,
   });
   const [pendingAssignmentId, setPendingAssignmentId] = useState(null);
   const [
@@ -438,11 +439,43 @@ const TeacherGrading = () => {
               className="w-full mb-4 p-3 rounded-xl bg-slate-800 border border-slate-700 text-white"
             />
 
+            {/* File attachment */}
+            <div className="mb-4">
+              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-widest mb-2">
+                Attachment <span className="text-slate-600 normal-case tracking-normal font-normal">(PDF or Word — optional)</span>
+              </label>
+              <label className="flex items-center gap-3 w-full p-3 rounded-xl bg-slate-800 border border-slate-700 cursor-pointer hover:border-indigo-500 transition group">
+                <i className="fas fa-paperclip text-slate-500 group-hover:text-indigo-400 transition"></i>
+                <span className="text-sm text-slate-400 truncate flex-1">
+                  {form.file ? form.file.name : "Click to upload file…"}
+                </span>
+                {form.file && (
+                  <button
+                    type="button"
+                    onClick={(e) => { e.preventDefault(); setForm({ ...form, file: null }); }}
+                    className="text-slate-500 hover:text-red-400 transition"
+                  >
+                    <i className="fas fa-times text-xs"></i>
+                  </button>
+                )}
+                <input
+                  type="file"
+                  accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                  className="hidden"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0] || null;
+                    setForm({ ...form, file: f });
+                    e.target.value = "";
+                  }}
+                />
+              </label>
+            </div>
+
             <div className="flex gap-3 justify-end">
               <button
                 type="button"
                 className="px-4 py-2 bg-slate-700 rounded-xl"
-                onClick={() => setShowCreateModal(false)}
+                onClick={() => { setShowCreateModal(false); setForm({ course: "", title: "", description: "", due_date: "", max_score: "", status: "published", file: null }); }}
               >
                 Cancel
               </button>
@@ -467,6 +500,7 @@ const TeacherGrading = () => {
                         due_date: form.due_date,
                         max_score: Number(form.max_score),
                         status: form.status,
+                        ...(form.file ? { file: form.file } : {}),
                       }),
                     ).unwrap();
 
@@ -480,6 +514,7 @@ const TeacherGrading = () => {
                       due_date: "",
                       max_score: "",
                       status: "published",
+                      file: null,
                     });
                   } catch (err) {
                     toastManager.error(
