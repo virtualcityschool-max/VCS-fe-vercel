@@ -15,9 +15,7 @@ import { toastManager } from "./utils/toastManager";
 
 // Components
 import { AIChat, AuthModals, Navbar } from "./components";
-import Sidebar from "./components/admin/Sidebar";
-import TeacherSidebar from "./components/teacher/TeacherSidebar";
-import StudentSidebar from "./components/student/StudentSidebar";
+import Sidebar from "./components/layout/Sidebar";
 
 // Pages
 import {
@@ -95,14 +93,14 @@ const AppInner = () => {
   const { pendingChildLinks } = useSelector((state) => state.childLinks);
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isAdminSidebarCollapsed, setIsAdminSidebarCollapsed] = useState(() => {
-    try { return localStorage.getItem("adminSidebarCollapsed") === "true"; } catch { return false; }
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
+    try { return localStorage.getItem("sidebarCollapsed") === "true"; } catch { return false; }
   });
 
-  const toggleAdminSidebar = () => {
-    setIsAdminSidebarCollapsed((prev) => {
+  const toggleSidebar = () => {
+    setIsSidebarCollapsed((prev) => {
       const next = !prev;
-      try { localStorage.setItem("adminSidebarCollapsed", String(next)); } catch {}
+      try { localStorage.setItem("sidebarCollapsed", String(next)); } catch {}
       return next;
     });
   };
@@ -138,27 +136,16 @@ const AppInner = () => {
 
   return (
     <div className="min-h-screen bg-slate-950 selection:bg-indigo-500/30 overflow-x-hidden">
-      {/* Global sidebar — persists across all pages for admin/teacher */}
-      {hasSidebar && role === "admin" && (
+      {/* Unified sidebar for admin / teacher / student */}
+      {hasSidebar && (
         <Sidebar
-          activeTab={getActiveTab()}
-          pendingApprovalsCount={totalPendingCount}
+          role={role}
           isSidebarOpen={isSidebarOpen}
           onMobileClose={() => setIsSidebarOpen(false)}
-          isCollapsed={isAdminSidebarCollapsed}
-          onToggleCollapse={toggleAdminSidebar}
-        />
-      )}
-      {hasSidebar && role === "teacher" && (
-        <TeacherSidebar
-          isSidebarOpen={isSidebarOpen}
-          setIsSidebarOpen={setIsSidebarOpen}
-        />
-      )}
-      {hasSidebar && role === "student" && (
-        <StudentSidebar
-          isSidebarOpen={isSidebarOpen}
-          setIsSidebarOpen={setIsSidebarOpen}
+          activeTab={getActiveTab()}
+          pendingApprovalsCount={totalPendingCount}
+          isCollapsed={isSidebarCollapsed}
+          onToggleCollapse={toggleSidebar}
         />
       )}
 
@@ -171,7 +158,7 @@ const AppInner = () => {
       )}
 
       {/* Content area — offset by sidebar width on desktop */}
-      <div className={hasSidebar ? (role === "admin" && isAdminSidebarCollapsed ? "lg:ml-20" : "lg:ml-72") : ""} style={{ transition: "margin-left 0.3s ease" }}>
+      <div className={hasSidebar ? (isSidebarCollapsed ? "lg:ml-20" : "lg:ml-72") : ""} style={{ transition: "margin-left 0.3s ease" }}>
         {/* Navbar (hidden on /admin and /teacher routes) */}
         {showNavbar && (
           <header className="relative z-50">
