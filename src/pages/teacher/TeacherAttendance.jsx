@@ -6,6 +6,7 @@ import {
   updateSessionAttendance,
 } from "../../store/slices/teacherSlice";
 import { toastManager } from "../../utils/toastManager";
+import { FilterSelect } from "../../components/ui";
 
 const TeacherAttendance = () => {
   const dispatch = useDispatch();
@@ -155,10 +156,10 @@ const TeacherAttendance = () => {
         <label className="block text-sm font-medium text-slate-300 mb-2">
           Select Session
         </label>
-        <select
+        <FilterSelect
           value={selectedSessionId}
           onChange={(e) => handleSessionChange(e.target.value)}
-          className="w-full md:w-96 bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full md:w-96"
         >
           <option value="">Choose a session...</option>
           {sessions.map((session) => (
@@ -166,7 +167,7 @@ const TeacherAttendance = () => {
               {session.title || `Session ${session.id}`}
             </option>
           ))}
-        </select>
+        </FilterSelect>
       </div>
 
       {/* No Sessions State */}
@@ -243,17 +244,14 @@ const TeacherAttendance = () => {
                     <p className="text-xs text-slate-500 uppercase tracking-widest mb-1">
                       Status
                     </p>
-                    <select
+                    <FilterSelect
                       value={editingStatus[record.id] ?? record.status}
-                      onChange={(e) =>
-                        handleStatusChange(record.id, e.target.value)
-                      }
-                      className="bg-slate-800 border border-slate-700 rounded px-3 py-1 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      onChange={(e) => handleStatusChange(record.id, e.target.value)}
                     >
                       <option value="present">Present</option>
                       <option value="absent">Absent</option>
                       <option value="late">Late</option>
-                    </select>
+                    </FilterSelect>
                   </div>
 
                   {/* Times */}

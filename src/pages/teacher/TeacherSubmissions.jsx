@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchAllSubmissions, fetchMyCourses } from "../../store/slices/teacherSlice";
+import { FilterSelect } from "../../components/ui";
 
 const TeacherSubmissions = () => {
   const dispatch = useDispatch();
@@ -67,24 +68,21 @@ const TeacherSubmissions = () => {
         </div>
 
         {/* Course filter */}
-        <div className="flex items-center gap-3">
-          <select
+        <div className="flex items-center gap-2">
+          <FilterSelect
             value={selectedCourse}
             onChange={(e) => setSelectedCourse(e.target.value)}
-            className="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 min-w-[200px]"
+            className="min-w-[200px]"
           >
             <option value="">All Courses</option>
             {courses.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.title}
-              </option>
+              <option key={c.id} value={c.id}>{c.title}</option>
             ))}
-          </select>
-
+          </FilterSelect>
           {selectedCourse && (
             <button
               onClick={() => setSelectedCourse("")}
-              className="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg text-sm transition flex items-center gap-1.5"
+              className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-slate-700/70 bg-slate-900 hover:bg-rose-500/10 hover:border-rose-500/40 text-slate-400 hover:text-rose-400 text-sm transition-all duration-150"
             >
               <i className="fas fa-times text-xs"></i>
               Clear

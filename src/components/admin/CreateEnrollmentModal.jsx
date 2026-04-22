@@ -96,6 +96,10 @@ const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
   }, []);
 
   useEffect(() => {
+    debugger
+    if(formData.course_id && !formData.teacher_id) {
+      formData.teacher_id = availableTeachers[0].id
+    }
     if (
       formData.enrollment_type === "private" &&
       formData.teacher_id &&
@@ -133,6 +137,7 @@ const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
     if (formData.enrollment_type === "private") {
       const slot = slotsData.available_slots[selectedSlotIdx];
       payload.preferred_slots = [{ days: slot.days, time: slot.time }];
+      payload.teacher_id = parseInt(formData.teacher_id);
     }
 
     try {
@@ -149,6 +154,7 @@ const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
   };
 
   const handleInputChange = (e) => {
+    // debugger
     const { name, value } = e.target;
     setFormData((prev) => {
       const next = { ...prev, [name]: value };
@@ -263,7 +269,7 @@ const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
           </div>
 
           {/* Private section */}
-          {formData.enrollment_type === "private" && (
+          {(formData.enrollment_type === "private" && formData.course_id) && (
             <>
               {/* Teacher selector */}
               <div>
@@ -272,19 +278,16 @@ const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
                 </label>
                 <select
                   name="teacher_id"
-                  value={formData.teacher_id}
+                  value={availableTeachers[0].teacher_id}
                   onChange={handleInputChange}
                   className={`w-full px-4 py-2 bg-slate-800 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
                     hasFieldError("teacher_id") ? "border-red-500" : "border-slate-600"
                   }`}
-                  disabled={!selectedCourse || availableTeachers.length === 0}
+                  disabled
                 >
-                  <option value="">Select a teacher</option>
-                  {availableTeachers.map((t) => (
-                    <option key={t.id} value={t.id}>
-                      {t.username} ({t.email})
+                    <option key={availableTeachers[0].teacher_id} value={availableTeachers[0].teacher_id}>
+                      {availableTeachers[0].username} ({availableTeachers[0].email})
                     </option>
-                  ))}
                 </select>
                 {getFieldError("teacher_id") && (
                   <p className="mt-1 text-xs text-red-400">{getFieldError("teacher_id")}</p>

@@ -4,7 +4,7 @@ import {
   clearEnrollmentsError,
   unenrollStudent,
 } from "../../store/slices/adminSlice";
-import { Button } from "../../components/ui";
+import { Button, FilterSelect, SearchInput } from "../../components/ui";
 import { toastManager } from "../../utils/toastManager";
 import CreateEnrollmentModal from "./CreateEnrollmentModal";
 
@@ -280,94 +280,62 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
     <div className="space-y-6">
       {/* Header with Filters */}
       <div className="mb-6">
-        <div className="flex justify-end items-center">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-end gap-3 lg:gap-2 w-full">
-            <div className="relative w-full lg:w-auto">
-              <input
-                type="text"
-                placeholder="Filter by student..."
-                value={studentFilter}
-                onChange={(e) => setStudentFilter(e.target.value)}
-                className="pl-10 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full lg:w-48"
-              />
-              <i className="fas fa-user absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
-            </div>
-
-            <div className="relative w-full lg:w-auto">
-              <input
-                type="text"
-                placeholder="Filter by course..."
-                value={courseFilter}
-                onChange={(e) => setCourseFilter(e.target.value)}
-                className="pl-10 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full lg:w-48"
-              />
-              <i className="fas fa-book absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
-            </div>
-
-            <div className="flex flex-wrap justify-end items-center gap-2">
-              <select
-                value={typeFilter}
-                onChange={(e) => setTypeFilter(e.target.value)}
-                className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              >
-                <option value="all">All Types</option>
-                <option value="normal">Normal</option>
-                <option value="private">Private</option>
-              </select>
-
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              >
-                <option value="all">All Statuses</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-                <option value="cancelled">Cancelled</option>
-                <option value="pending">Pending</option>
-              </select>
-
-              <select
-                value={dateSort}
-                onChange={(e) => setDateSort(e.target.value)}
-                className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              >
-                <option value="newest">Newest First</option>
-                <option value="oldest">Oldest First</option>
-              </select>
-
-              {hasActiveFilters && (
-                <button
-                  onClick={() => {
-                    setStudentFilter("");
-                    setCourseFilter("");
-                    setTypeFilter("all");
-                    setStatusFilter("all");
-                    setDateSort("newest");
-                  }}
-                  className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-sm font-medium transition flex items-center gap-2"
-                >
-                  <i className="fas fa-times"></i>
-                  <span>Clear</span>
-                </button>
-              )}
-
-              <Button
-                onClick={handleOpenCreateModal}
-                className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2"
-              >
-                <i className="fas fa-plus"></i>
-                <span>Create Enrollment</span>
-              </Button>
-              <button
-                onClick={onRefresh}
-                className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2"
-              >
-                <i className="fas fa-sync"></i>
-                <span>Refresh</span>
-              </button>
-            </div>
-          </div>
+        <div className="flex flex-wrap items-center gap-2 justify-end">
+          <SearchInput
+            value={studentFilter}
+            onChange={(e) => setStudentFilter(e.target.value)}
+            onClear={() => setStudentFilter("")}
+            placeholder="Filter by student..."
+            icon="fas fa-user"
+            className="w-full sm:w-44"
+          />
+          <SearchInput
+            value={courseFilter}
+            onChange={(e) => setCourseFilter(e.target.value)}
+            onClear={() => setCourseFilter("")}
+            placeholder="Filter by course..."
+            icon="fas fa-book"
+            className="w-full sm:w-44"
+          />
+          <FilterSelect value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
+            <option value="all">All Types</option>
+            <option value="normal">Normal</option>
+            <option value="private">Private</option>
+          </FilterSelect>
+          <FilterSelect value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+            <option value="all">All Statuses</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+            <option value="cancelled">Cancelled</option>
+            <option value="pending">Pending</option>
+          </FilterSelect>
+          <FilterSelect value={dateSort} onChange={(e) => setDateSort(e.target.value)}>
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+          </FilterSelect>
+          {hasActiveFilters && (
+            <button
+              onClick={() => { setStudentFilter(""); setCourseFilter(""); setTypeFilter("all"); setStatusFilter("all"); setDateSort("newest"); }}
+              className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-slate-700/70 bg-slate-900 hover:bg-rose-500/10 hover:border-rose-500/40 text-slate-400 hover:text-rose-400 text-sm font-medium transition-all duration-150"
+            >
+              <i className="fas fa-times text-xs"></i>
+              <span>Clear</span>
+            </button>
+          )}
+          <button
+            onClick={handleOpenCreateModal}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold shadow-lg shadow-indigo-500/20 active:scale-95 transition-all duration-150"
+          >
+            <i className="fas fa-plus text-xs"></i>
+            <span>Create Enrollment</span>
+          </button>
+          <button
+            onClick={onRefresh}
+            className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-slate-700/70 bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white text-sm font-medium transition-all duration-150"
+          >
+            <i className="fas fa-sync text-xs"></i>
+            <span>Refresh</span>
+          </button>
         </div>
       </div>
 

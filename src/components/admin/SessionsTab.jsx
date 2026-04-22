@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Button } from "../../components/ui";
+import { Button, FilterSelect } from "../../components/ui";
 
 const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MONTH_NAMES = [
@@ -258,16 +258,15 @@ const SessionsTab = ({
 
         {/* Instructor filter */}
         <div className="flex items-center gap-2 shrink-0">
-          <span className="text-xs font-semibold text-slate-400 hidden sm:inline">Instructor</span>
-          <select
+          <span className="text-xs font-semibold text-slate-500 hidden sm:inline">Instructor</span>
+          <FilterSelect
             value={sessionFilters.teacher}
             onChange={(e) => setSessionFilters({ ...sessionFilters, teacher: e.target.value })}
-            className="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
           >
             {teachers.map((t) => (
               <option key={t.id} value={t.id}>{t.username}</option>
             ))}
-          </select>
+          </FilterSelect>
         </div>
 
         {/* Create Class — pushed to the right */}

@@ -97,17 +97,26 @@ const AuthModals = () => {
   };
 
   React.useEffect(() => {
-    if (isOpen && intendedRole) {
-      // Only set the intended role, don't reset everything
-      setActiveRoleTab(intendedRole);
-    }
-
     if (isOpen) {
-      // Clear errors using the new hooks
+      setEmail("");
+      setPassword("");
+      setUsername("");
+      setConfirmPassword("");
+      setRole("");
+      setRegistrationStep("form");
+      setOtp("");
+      setUserId(null);
+      setShowLoginPassword(false);
+      setShowRegisterPassword(false);
+      setShowConfirmPassword(false);
       clearAllLoginErrors();
       clearAllRegistrationErrors();
       setOtpError("");
       dispatch(clearAuthError());
+
+      if (intendedRole) {
+        setActiveRoleTab(intendedRole);
+      }
     }
   }, [
     isOpen,
@@ -491,6 +500,7 @@ const AuthModals = () => {
                     id="register-email"
                     name="register-email"
                     type="email"
+                    autoComplete="off"
                     value={email}
                     onChange={(e) => {
                       toastManager.dismiss();
@@ -522,6 +532,7 @@ const AuthModals = () => {
                     id="register-username"
                     name="register-username"
                     type="text"
+                    autoComplete="off"
                     value={username}
                     // maxLength={150}
                     onChange={(e) => {
@@ -564,6 +575,7 @@ const AuthModals = () => {
                       id="register-password"
                       name="register-password"
                       type={showRegisterPassword ? "text" : "password"}
+                      autoComplete="new-password"
                       value={password}
                       onChange={(e) => {
                         toastManager.dismiss();
@@ -659,6 +671,7 @@ const AuthModals = () => {
                       id="register-confirm-password"
                       name="register-confirm-password"
                       type={showConfirmPassword ? "text" : "password"}
+                      autoComplete="new-password"
                       value={confirmPassword}
                       onChange={(e) => {
                         toastManager.dismiss();

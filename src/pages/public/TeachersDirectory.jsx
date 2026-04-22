@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchTeachers } from "../../store/slices/teacherSlice";
+import { SearchInput } from "../../components/ui";
 import { useAuth } from "../../hooks/useAuth";
 
 const TeachersDirectory = () => {
@@ -81,16 +82,14 @@ const TeachersDirectory = () => {
             </h1>
           </div>
           <div className="max-w-xl mx-auto">
-            <div className="relative group">
-              <input
-                type="text"
-                placeholder="Search teachers or courses..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full h-10 bg-transparent border border-slate-700 rounded-xl px-4 text-xs sm:text-sm outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500/40 transition placeholder:text-slate-500"
-              />
-              <div className="absolute inset-0 rounded-xl opacity-0 group-focus-within:opacity-100 transition pointer-events-none bg-indigo-500/5" />
-            </div>
+            <SearchInput
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onClear={() => setSearchQuery("")}
+              placeholder="Search teachers or courses..."
+              className="w-full"
+              inputClassName="h-10 text-xs sm:text-sm"
+            />
           </div>
         </div>
       </div>

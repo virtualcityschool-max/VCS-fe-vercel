@@ -5,6 +5,11 @@
   --font-poppins: "Poppins", sans-serif;
 }
 
+html,
+body {
+  overflow-x: hidden;
+}
+
 :root {
   --font-inter: "Inter", sans-serif;
   --bg-dark: #020617;

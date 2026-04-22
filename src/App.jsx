@@ -95,6 +95,17 @@ const AppInner = () => {
   const { pendingChildLinks } = useSelector((state) => state.childLinks);
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isAdminSidebarCollapsed, setIsAdminSidebarCollapsed] = useState(() => {
+    try { return localStorage.getItem("adminSidebarCollapsed") === "true"; } catch { return false; }
+  });
+
+  const toggleAdminSidebar = () => {
+    setIsAdminSidebarCollapsed((prev) => {
+      const next = !prev;
+      try { localStorage.setItem("adminSidebarCollapsed", String(next)); } catch {}
+      return next;
+    });
+  };
 
   const hasSidebar = isLoggedIn && (role === "admin" || role === "teacher" || role === "student");
 
@@ -134,6 +145,8 @@ const AppInner = () => {
           pendingApprovalsCount={totalPendingCount}
           isSidebarOpen={isSidebarOpen}
           onMobileClose={() => setIsSidebarOpen(false)}
+          isCollapsed={isAdminSidebarCollapsed}
+          onToggleCollapse={toggleAdminSidebar}
         />
       )}
       {hasSidebar && role === "teacher" && (
@@ -158,7 +171,7 @@ const AppInner = () => {
       )}
 
       {/* Content area — offset by sidebar width on desktop */}
-      <div className={hasSidebar ? "lg:ml-72" : ""}>
+      <div className={hasSidebar ? (role === "admin" && isAdminSidebarCollapsed ? "lg:ml-20" : "lg:ml-72") : ""} style={{ transition: "margin-left 0.3s ease" }}>
         {/* Navbar (hidden on /admin and /teacher routes) */}
         {showNavbar && (
           <header className="relative z-50">

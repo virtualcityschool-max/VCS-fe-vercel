@@ -9,3 +9,5 @@ export { default as ErrorMessage } from "./ErrorMessage";
 export { default as EmptyState } from "./EmptyState";
 export { default as PasswordValidation } from "./PasswordValidation";
 export { default as MultiSelect } from "./MultiSelect";
+export { default as FilterSelect } from "./FilterSelect";
+export { default as SearchInput } from "./SearchInput";

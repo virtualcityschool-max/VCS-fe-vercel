@@ -8,7 +8,7 @@ import {
   unenrollFromCourse,
   fetchStudentDashboard,
 } from "../../store/slices/studentDashboardSlice";
-import { Button, Input } from "../../components/ui";
+import { Button, Input, FilterSelect, SearchInput } from "../../components/ui";
 import { toastManager } from "../../utils/toastManager";
 import { BACKEND_CATEGORIES, formatCategoryLabel } from "../../constants";
 import { useSubmissionGuard } from "../../utils/requestDeduplicator";
@@ -395,61 +395,52 @@ const Marketplace = () => {
             className="grid grid-cols-1 md:grid-cols-10 gap-3 max-w-6xl mx-auto"
           >
             <div className="md:col-span-4">
-              <Input
-                type="text"
+              <SearchInput
                 id="course-search"
                 name="course-search"
                 placeholder="Search topics..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="h-11 bg-transparent border-slate-700 text-sm"
+                onClear={() => setSearchTerm("")}
+                className="w-full"
+                inputClassName="h-11"
               />
             </div>
             <div className="md:col-span-2">
-              <select
+              <FilterSelect
                 value={filters.category}
                 onChange={(e) => handleFilterChange("category", e.target.value)}
-                className="w-full h-11 bg-slate-800/80 border border-slate-700 rounded-xl px-3 text-white text-sm focus:ring-2 focus:ring-blue-500/20 outline-none focus:border-blue-500 transition"
+                className="w-full h-11"
               >
                 <option value="">All Categories</option>
                 {filterOptions.categories.map((category) => (
-                  <option key={category} value={category}>
-                    {formatCategoryLabel(category)}
-                  </option>
+                  <option key={category} value={category}>{formatCategoryLabel(category)}</option>
                 ))}
-              </select>
+              </FilterSelect>
             </div>
             <div className="md:col-span-2">
-              <select
+              <FilterSelect
                 value={filters.priceRange}
-                onChange={(e) =>
-                  handleFilterChange("priceRange", e.target.value)
-                }
-                className="w-full h-11 bg-slate-800/80 border border-slate-700 rounded-xl px-3 text-white text-sm focus:ring-2 focus:ring-blue-500/20 outline-none focus:border-blue-500 transition"
+                onChange={(e) => handleFilterChange("priceRange", e.target.value)}
+                className="w-full h-11"
               >
                 <option value="">All Prices</option>
                 {filterOptions.priceRanges.map((range) => (
-                  <option key={range.value} value={range.value}>
-                    {range.label}
-                  </option>
+                  <option key={range.value} value={range.value}>{range.label}</option>
                 ))}
-              </select>
+              </FilterSelect>
             </div>
             <div className="md:col-span-2">
-              <select
+              <FilterSelect
                 value={filters.instructor}
-                onChange={(e) =>
-                  handleFilterChange("instructor", e.target.value)
-                }
-                className="w-full h-11 bg-slate-800/80 border border-slate-700 rounded-xl px-3 text-white text-sm focus:ring-2 focus:ring-blue-500/20 outline-none focus:border-blue-500 transition"
+                onChange={(e) => handleFilterChange("instructor", e.target.value)}
+                className="w-full h-11"
               >
                 <option value="">All Teachers</option>
                 {filterOptions.instructors.map((instructor) => (
-                  <option key={instructor} value={instructor}>
-                    {instructor}
-                  </option>
+                  <option key={instructor} value={instructor}>{instructor}</option>
                 ))}
-              </select>
+              </FilterSelect>
             </div>
           </form>
         </div>

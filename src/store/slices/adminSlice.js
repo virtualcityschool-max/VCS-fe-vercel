@@ -685,28 +685,16 @@ const adminSlice = createSlice({
         state.enrollments.error = action.payload;
       })
       .addCase(createEnrollment.pending, (state) => {
-        // Don't change loading state here to avoid interfering with list loading
-        // Clear previous enrollment errors
-        state.enrollments.error = null;
+        // intentionally left blank — modal handles its own loading state
       })
       .addCase(createEnrollment.fulfilled, (state, action) => {
-        // Add the new enrollment to the beginning of the list
         if (action.payload && state.enrollments.data) {
           state.enrollments.data.unshift(action.payload);
         }
       })
-      .addCase(createEnrollment.rejected, (state, action) => {
-        // Store only safe error message for the modal to display
-        // This prevents crashes from complex error objects
-        if (typeof action.payload === "string") {
-          state.enrollments.error = action.payload;
-        } else if (action.payload?.message) {
-          state.enrollments.error = action.payload.message;
-        } else if (action.payload?.error) {
-          state.enrollments.error = action.payload.error;
-        } else {
-          state.enrollments.error = "Failed to create enrollment";
-        }
+      .addCase(createEnrollment.rejected, () => {
+        // error is surfaced via .unwrap() in the modal — do not touch enrollments.error
+        // so the existing listing is never affected by a failed create attempt
       });
 
     // Sessions

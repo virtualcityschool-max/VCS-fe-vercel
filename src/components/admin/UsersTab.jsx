@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, Input, Card } from "../../components/ui";
+import { Button, Input, Card, FilterSelect, SearchInput } from "../../components/ui";
 import ConfirmDialog from "../common/ConfirmDialog";
 
 // Search controls component
@@ -32,17 +32,18 @@ const SearchControls = ({
   return (
     <div className="mb-6 space-y-3">
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
-        <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-1 flex flex-wrap items-center gap-1 w-fit">
+        {/* Role tab pills */}
+        <div className="bg-slate-900/60 border border-slate-800/80 rounded-xl p-1 flex flex-wrap items-center gap-1 w-fit">
           {roleTabs.map((tab) => {
             const isActive = usersFilters.role === tab.value;
             return (
               <button
                 key={tab.label}
                 onClick={() => handleFilterChange("role", tab.value)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${
                   isActive
-                    ? "bg-indigo-600 text-white shadow-md"
-                    : "text-slate-300 hover:text-white hover:bg-slate-800/70"
+                    ? "bg-indigo-600 text-white shadow-md shadow-indigo-500/20"
+                    : "text-slate-400 hover:text-white hover:bg-slate-800"
                 }`}
               >
                 {tab.label}
@@ -51,69 +52,56 @@ const SearchControls = ({
           })}
         </div>
 
-        <div className="flex flex-col lg:flex-row lg:items-center gap-3 lg:gap-4 w-full lg:w-auto max-w-2xl lg:max-w-none">
-          <div className="relative flex-1 lg:flex-initial min-w-0">
-            <Input
-              type="text"
-              placeholder="Search by username or email..."
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              className="pl-10 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full lg:w-64"
-            />
-            <i className="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
-            <select
-              value={usersFilters.is_active}
-              onChange={(e) => handleFilterChange("is_active", e.target.value)}
-              className="px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            >
-              <option value="">All Statuses</option>
-              <option value="true">Active</option>
-              <option value="false">Inactive</option>
-            </select>
-            <select
-              value={usersFilters.ordering}
-              onChange={(e) => handleFilterChange("ordering", e.target.value)}
-              className="px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            >
-              <option value="-date_joined">Newest First</option>
-              <option value="date_joined">Oldest First</option>
-              <option value="username">Username A-Z</option>
-              <option value="-username">Username Z-A</option>
-            </select>
-            {hasActiveFilters && (
-              <button
-                onClick={onClearFilters}
-                className="bg-orange-600 hover:bg-orange-500 text-white px-3 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2"
-                title="Clear all filters"
-              >
-                <i className="fas fa-times"></i>
-                <span className="hidden sm:inline">Clear</span>
-              </button>
-            )}
+        <div className="flex flex-wrap items-center gap-2">
+          <SearchInput
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            onClear={() => setSearchInput("")}
+            placeholder="Search by username or email..."
+            className="w-full sm:w-64"
+          />
+          <FilterSelect
+            value={usersFilters.is_active}
+            onChange={(e) => handleFilterChange("is_active", e.target.value)}
+          >
+            <option value="">All Statuses</option>
+            <option value="true">Active</option>
+            <option value="false">Inactive</option>
+          </FilterSelect>
+          <FilterSelect
+            value={usersFilters.ordering}
+            onChange={(e) => handleFilterChange("ordering", e.target.value)}
+          >
+            <option value="-date_joined">Newest First</option>
+            <option value="date_joined">Oldest First</option>
+            <option value="username">Username A–Z</option>
+            <option value="-username">Username Z–A</option>
+          </FilterSelect>
+          {hasActiveFilters && (
             <button
-              onClick={() => onFetchUsers()}
-              className="bg-slate-700 hover:bg-slate-600 text-white px-3 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 sm:hidden"
+              onClick={onClearFilters}
+              title="Clear all filters"
+              className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-slate-700/70 bg-slate-900 hover:bg-rose-500/10 hover:border-rose-500/40 text-slate-400 hover:text-rose-400 text-sm font-medium transition-all duration-150"
             >
-              <i className="fas fa-sync"></i>
-              <span className="ml-2">Refresh</span>
+              <i className="fas fa-times text-xs"></i>
+              <span className="hidden sm:inline">Clear</span>
             </button>
-            <button
-              onClick={handleCreateUser}
-              className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-lg active:scale-95 transition items-center justify-center gap-2"
-            >
-              <i className="fas fa-user-plus text-sm"></i>
-              <span className="hidden sm:inline ml-2">Create User</span>
-              <span className="sm:hidden">+</span>
-            </button>
-          </div>
+          )}
           <button
             onClick={() => onFetchUsers()}
-            className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 sm:flex"
+            className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-slate-700/70 bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white text-sm font-medium transition-all duration-150"
+            title="Refresh"
           >
-            <i className="fas fa-sync"></i>
-            <span className="ml-2">Refresh</span>
+            <i className="fas fa-sync text-xs"></i>
+            <span className="hidden sm:inline">Refresh</span>
+          </button>
+          <button
+            onClick={handleCreateUser}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold shadow-lg shadow-indigo-500/20 active:scale-95 transition-all duration-150"
+          >
+            <i className="fas fa-user-plus text-xs"></i>
+            <span className="hidden sm:inline">Create User</span>
+            <span className="sm:hidden">+</span>
           </button>
         </div>
       </div>

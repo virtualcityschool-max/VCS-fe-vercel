@@ -11,6 +11,7 @@ import {
 } from "../../store/slices/teacherSlice";
 import { toastManager } from "../../utils/toastManager";
 import GradingForm from "../../components/teacher/GradingForm";
+import { FilterSelect } from "../../components/ui";
 
 const TeacherGrading = () => {
   const [selectedAssignment, setSelectedAssignment] = useState(null);
@@ -149,32 +150,23 @@ const TeacherGrading = () => {
         </button>
       </div>
 
-      <div className="mb-6 flex flex-col sm:flex-row gap-3 sm:items-center">
-        <select
+      <div className="mb-6 flex flex-wrap gap-2 items-center">
+        <FilterSelect
           value={filters.course}
-          onChange={(e) =>
-            setFilters((prev) => ({ ...prev, course: e.target.value }))
-          }
-          className="bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          onChange={(e) => setFilters((prev) => ({ ...prev, course: e.target.value }))}
         >
           <option value="">All Courses</option>
           {myCourses?.map((course) => (
-            <option key={course.id} value={course.id}>
-              {course.title}
-            </option>
+            <option key={course.id} value={course.id}>{course.title}</option>
           ))}
-        </select>
-
-        <select
+        </FilterSelect>
+        <FilterSelect
           value={filters.status}
-          onChange={(e) =>
-            setFilters((prev) => ({ ...prev, status: e.target.value }))
-          }
-          className="bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          onChange={(e) => setFilters((prev) => ({ ...prev, status: e.target.value }))}
         >
           <option value="published">Published</option>
           <option value="draft">Draft</option>
-        </select>
+        </FilterSelect>
       </div>
 
       {/* ASSIGNMENTS LIST */}
@@ -391,18 +383,16 @@ const TeacherGrading = () => {
           <div className="bg-slate-900 p-8 rounded-3xl border border-slate-800 w-full max-w-lg">
             <h2 className="text-lg font-bold mb-4">Create Assignment</h2>
 
-            <select
+            <FilterSelect
               value={form.course}
               onChange={(e) => setForm({ ...form, course: e.target.value })}
-              className="w-full mb-4 p-3 rounded-xl bg-slate-800 border border-slate-700 text-white"
+              className="w-full mb-4"
             >
               <option value="">Select Course</option>
               {myCourses?.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.title}
-                </option>
+                <option key={c.id} value={c.id}>{c.title}</option>
               ))}
-            </select>
+            </FilterSelect>
 
             <input
               type="text"
