@@ -43,7 +43,17 @@ export const studentService = {
       throw new Error("Failed to load courses");
     }
   },
-
+  getTeacherPrivateSlots: async (teacherId, params = {}) => {
+    try {
+      const response = await axiosInstance.get(
+        ADMIN_ENDPOINTS.PRIVATE_TEACHER_SLOTS(`/classroom/teachers/${teacherId}/available-slots/`),
+        { params },
+      );
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error, { context: "Get Teacher Slots" });
+    }
+  },
   // Get all enrollments
   getAllEnrollments: async () => {
     try {
