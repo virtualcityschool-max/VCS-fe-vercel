@@ -9,6 +9,7 @@ import { useFieldErrors } from "../../hooks";
 import { Button, FilterSelect } from "../../components/ui";
 import { toastManager } from "../../utils/toastManager";
 import TeacherPrivateAvailableSlots from "../TeacherPrivateAvailableSlots";
+import { showApiError } from "../../utils/apiErrorHandler";
 
 const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
   const dispatch = useDispatch();
@@ -106,7 +107,7 @@ const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
       });
       setSelectedSlot(null);
     } catch (error) {
-      handleApiError(error, toastManager.error);
+      showApiError(error);
     }
   };
 

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { linkChildren } from "../../store/slices/parentSlice";
 import { toastManager } from "../../utils/toastManager";
+import { showApiError } from "../../utils/apiErrorHandler";
 
 const ChildLinkRequest = () => {
   const dispatch = useDispatch();
@@ -70,7 +71,7 @@ const ChildLinkRequest = () => {
         setSuccessData(null);
       }, 5000);
     } catch (error) {
-      toastManager.error(error || "Failed to send link request(s)");
+      showApiError(error);
     }
   };
 

@@ -13,6 +13,24 @@ import GradingForm from "../../components/teacher/GradingForm";
 import { toastManager } from "../../utils/toastManager";
 import { showApiError } from "../../utils/apiErrorHandler";
 
+const getFilename = (url) => {
+  if (!url) return "attachment";
+  return url.split("/").pop() || "attachment";
+};
+
+const DownloadButton = ({ url, label = "Download Attachment", className = "" }) => (
+  <a
+    href={url}
+    download={getFilename(url)}
+    target="_blank"
+    rel="noopener noreferrer"
+    className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-400 hover:text-indigo-300 text-xs font-semibold transition border border-indigo-500/30 ${className}`}
+  >
+    <i className="fas fa-download text-[10px]"></i>
+    {label}
+  </a>
+);
+
 const TeacherSubmissions = () => {
   const dispatch = useDispatch();
   const {
@@ -345,17 +363,9 @@ const TeacherSubmissions = () => {
 
                 {/* File attachment */}
                 <div className="mb-6">
-                  <h3 className="text-xs uppercase tracking-widest text-slate-500 font-bold mb-2">Attachment</h3>
+                  <h3 className="text-xs uppercase tracking-widest text-slate-500 font-bold mb-2">Student Attachment</h3>
                   {selectedSubmission.file ? (
-                    <a
-                      href={selectedSubmission.file}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center gap-2 text-indigo-400 hover:text-indigo-300 underline text-sm transition"
-                    >
-                      <i className="fas fa-paperclip"></i>
-                      View Attachment
-                    </a>
+                    <DownloadButton url={selectedSubmission.file} label="Download Submitted File" />
                   ) : (
                     <p className="text-slate-500 text-sm italic">No file submitted</p>
                   )}

@@ -7,6 +7,7 @@ import {
 } from "../../store/slices/teacherSlice";
 import { toastManager } from "../../utils/toastManager";
 import { FilterSelect } from "../../components/ui";
+import { showApiError } from "../../utils/apiErrorHandler";
 
 const TeacherAttendance = () => {
   const dispatch = useDispatch();
@@ -119,8 +120,7 @@ const TeacherAttendance = () => {
       })
       .catch((error) => {
         // Show error toast
-        toastManager.error("Failed to update attendance. Please try again.");
-        console.error("Attendance update error:", error);
+        showApiError(err);
       });
   };
 

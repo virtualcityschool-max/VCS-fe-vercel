@@ -7,6 +7,7 @@ import {
 import { Button, FilterSelect, SearchInput } from "../../components/ui";
 import { toastManager } from "../../utils/toastManager";
 import CreateEnrollmentModal from "./CreateEnrollmentModal";
+import { showApiError } from "../../utils/apiErrorHandler";
 
 const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
   const dispatch = useDispatch();
@@ -167,7 +168,7 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
       toastManager.success("Student unenrolled successfully");
       onRefresh(); // Refresh the list
     } catch (error) {
-      toastManager.error(error?.message || "Failed to unenroll student");
+      showApiError(error);
     } finally {
       setUnenrollingId(null);
       setUnenrollConfirm(null);

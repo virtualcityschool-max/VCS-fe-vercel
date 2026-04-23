@@ -6,6 +6,24 @@ import { submitAssignment } from "../../store/slices/studentDashboardSlice";
 import { toastManager } from "../../utils/toastManager";
 import { validateFile, ACCEPT_STRING } from "../../utils/fileValidation";
 
+const getFilename = (url) => {
+  if (!url) return "attachment";
+  return url.split("/").pop() || "attachment";
+};
+
+const DownloadButton = ({ url, label = "Download Attachment", className = "" }) => (
+  <a
+    href={url}
+    download={getFilename(url)}
+    target="_blank"
+    rel="noopener noreferrer"
+    className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-400 hover:text-indigo-300 text-sm font-semibold transition border border-indigo-500/30 ${className}`}
+  >
+    <i className="fas fa-download"></i>
+    {label}
+  </a>
+);
+
 const StudentAssignmentDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -82,9 +100,7 @@ const StudentAssignmentDetails = () => {
       setAnswer("");
       setFile(null);
     } catch (err) {
-      toastManager.error(
-        err?.error || err?.message || "Failed to submit assignment",
-      );
+      showApiError(err);
     }
   };
 
@@ -171,6 +187,11 @@ const StudentAssignmentDetails = () => {
               <div className="bg-slate-800/60 border border-slate-700 rounded-2xl p-5 text-slate-300 leading-relaxed whitespace-pre-wrap">
                 {assignment.description}
               </div>
+              {assignment.file && (
+                <div className="mt-3">
+                  <DownloadButton url={assignment.file} label="Download Assignment File" />
+                </div>
+              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -225,15 +246,10 @@ const StudentAssignmentDetails = () => {
                     )}
 
                     {assignment.my_submission?.file && (
-                      <a
-                        href={assignment.my_submission.file}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-2 text-indigo-400 hover:text-indigo-300 text-sm underline transition"
-                      >
-                        <i className="fas fa-paperclip"></i>
-                        View Attachment
-                      </a>
+                      <DownloadButton
+                        url={assignment.my_submission.file}
+                        label="Download My Submission"
+                      />
                     )}
 
                     {assignment.my_submission?.submitted_at && (

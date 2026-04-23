@@ -389,8 +389,9 @@ const AdminSessionsPage = () => {
       toastManager.success("Session deleted successfully");
       dispatch(fetchSessions());
     } catch (error) {
-      const normalizedError = normalizeApiError(error);
-      toastManager.error(normalizedError.message);
+      showApiError(error);
+      // const normalizedError = normalizeApiError(error);
+      // toastManager.error(normalizedError.message);
     } finally {
       setLoadingSessionIds((prev) => {
         const newSet = new Set(prev);

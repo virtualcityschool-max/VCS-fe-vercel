@@ -15,6 +15,24 @@ import { validateFile, ACCEPT_STRING } from "../../utils/fileValidation";
 import GradingForm from "../../components/teacher/GradingForm";
 import { FilterSelect } from "../../components/ui";
 
+const getFilename = (url) => {
+  if (!url) return "attachment";
+  return url.split("/").pop() || "attachment";
+};
+
+const DownloadButton = ({ url, label = "Download Attachment", className = "" }) => (
+  <a
+    href={url}
+    download={getFilename(url)}
+    target="_blank"
+    rel="noopener noreferrer"
+    className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-400 hover:text-indigo-300 text-xs font-semibold transition border border-indigo-500/30 ${className}`}
+  >
+    <i className="fas fa-download text-[10px]"></i>
+    {label}
+  </a>
+);
+
 const TeacherGrading = () => {
   const [selectedAssignment, setSelectedAssignment] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -191,6 +209,12 @@ const TeacherGrading = () => {
                     {assignment.submissions_count} submissions • Max Score{" "}
                     {assignment.max_score}
                   </p>
+
+                  {assignment.file && (
+                    <div className="mt-3">
+                      <DownloadButton url={assignment.file} label="Download Assignment File" />
+                    </div>
+                  )}
                 </div>
 
                 <div className="text-right">
@@ -317,20 +341,13 @@ const TeacherGrading = () => {
                 {/* FILE */}
                 <div className="mb-6">
                   <h3 className="text-xs uppercase text-slate-500 mb-2">
-                    Attachment
+                    Student Attachment
                   </h3>
 
                   {selectedSubmission.file ? (
-                    <a
-                      href={selectedSubmission.file}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-indigo-400 underline text-sm"
-                    >
-                      View Attachment
-                    </a>
+                    <DownloadButton url={selectedSubmission.file} label="Download Submitted File" />
                   ) : (
-                    <p className="text-slate-500 text-sm">No file submitted</p>
+                    <p className="text-slate-500 text-sm italic">No file submitted</p>
                   )}
                 </div>
 

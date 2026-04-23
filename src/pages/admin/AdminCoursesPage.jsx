@@ -268,14 +268,15 @@ const AdminCoursesPage = () => {
       setActiveModal(null);
       dispatch(fetchCourses());
     } catch (error) {
-      const hadFieldErrors = handleEditCourseApiError(
-        error,
-        toastManager.error,
-      );
-      if (!hadFieldErrors) {
-        const normalizedError = normalizeApiError(error);
-        toastManager.error(normalizedError.message);
-      }
+      showApiError(error);
+      // const hadFieldErrors = handleEditCourseApiError(
+      //   error,
+      //   toastManager.error,
+      // );
+      // if (!hadFieldErrors) {
+      //   const normalizedError = normalizeApiError(error);
+      //   toastManager.error(normalizedError.message);
+      // }
     }
   };
 
@@ -296,7 +297,7 @@ const AdminCoursesPage = () => {
       toastManager.success("Course deleted successfully");
       dispatch(fetchCourses());
     } catch (error) {
-      toastManager.error(error?.message || "Failed to delete course");
+      showApiError(error);
     } finally {
       setLoadingCourseIds((prev) => {
         const newSet = new Set(prev);

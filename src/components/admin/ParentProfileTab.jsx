@@ -17,6 +17,7 @@ import {
 } from "../../store/slices/childLinksSlice";
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
+import { showApiError } from "../../utils/apiErrorHandler";
 
 const ParentProfileTab = ({ profile, onUpdate, onCancel, onSaved }) => {
   const { id } = useParams();
@@ -158,9 +159,7 @@ const ParentProfileTab = ({ profile, onUpdate, onCancel, onSaved }) => {
       }
     } catch (error) {
       // Show error toast
-      toastManager.error(
-        `Failed to unlink ${childUsername}: ${error.message || "Unknown error"}`,
-      );
+      showApiError(error);
     }
   };
 

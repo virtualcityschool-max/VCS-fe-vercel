@@ -27,6 +27,7 @@ import {
 } from "../../utils/validation";
 import { toastManager } from "../../utils/toastManager";
 import UsersTab from "../../components/admin/UsersTab";
+import { showApiError } from "../../utils/apiErrorHandler";
 
 const AdminUsersPage = () => {
   const dispatch = useDispatch();
@@ -137,7 +138,7 @@ const AdminUsersPage = () => {
       toastManager.success("User deleted successfully");
       handleFetchUsers();
     } catch (error) {
-      toastManager.error(error?.message || "Failed to delete user");
+      showApiError(error);
     }
   };
 
@@ -244,7 +245,7 @@ const AdminUsersPage = () => {
       setActiveModal(null);
       handleFetchUsers();
     } catch (error) {
-      handleCreateUserApiError(error, toastManager.error);
+      showApiError(error);
     } finally {
       setIsCreatingUser(false);
     }

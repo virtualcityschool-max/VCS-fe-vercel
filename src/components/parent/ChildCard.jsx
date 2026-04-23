@@ -18,6 +18,7 @@ import {
   selectChildLinksUnlinking,
   selectChildLinksError,
 } from "../../store/slices/childLinksSlice";
+import { showApiError } from "../../utils/apiErrorHandler";
 
 // Skeleton Loader Component
 const SkeletonLoader = () => (
@@ -202,7 +203,7 @@ const ChildCard = ({ child }) => {
       window.location.reload();
     } catch (error) {
       // Show error message
-      toastManager.error(`Failed to unlink child: ${error}`);
+      showApiError(error);
     }
   };
 

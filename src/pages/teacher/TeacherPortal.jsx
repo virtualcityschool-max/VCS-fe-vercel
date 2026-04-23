@@ -12,6 +12,7 @@ import {
 import { createAnnouncement } from "../../store/slices/announcementsSlice";
 import { toastManager } from "../../utils/toastManager";
 import CourseStudentsModal from "../../components/courses/CourseStudentsModal";
+import { showApiError } from "../../utils/apiErrorHandler";
 
 const DAY_MAP = { SUN: 0, MON: 1, TUE: 2, WED: 3, THU: 4, FRI: 5, SAT: 6 };
 
@@ -107,9 +108,7 @@ const TeacherPortal = () => {
       setCourseId("");
       setIsAnnouncementModalOpen(false);
     } catch (err) {
-      toastManager.error(
-        err?.message || err?.error || "Failed to post announcement",
-      );
+      showApiError(err);
     } finally {
       setIsSubmitting(false);
     }
@@ -135,9 +134,7 @@ const TeacherPortal = () => {
 
       await dispatch(fetchTeacherDashboard()).unwrap();
     } catch (err) {
-      toastManager.error(
-        err?.error || err?.message || "Failed to start session",
-      );
+      showApiError(err);
     }
   };
 
@@ -158,9 +155,7 @@ const TeacherPortal = () => {
       }
       await dispatch(fetchTeacherDashboard()).unwrap();
     } catch (err) {
-      toastManager.error(
-        err?.error || err?.message || "Failed to join teacher session",
-      );
+      showApiError(err);
     }
   };
 
@@ -179,7 +174,7 @@ const TeacherPortal = () => {
       // refresh dashboard
       await dispatch(fetchTeacherDashboard()).unwrap();
     } catch (err) {
-      toastManager.error(err?.error || err?.message || "Failed to end session");
+      showApiError(err);
     }
   };
 

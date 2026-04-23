@@ -20,6 +20,7 @@ import { toastManager } from "../../utils/toastManager";
 import ApprovalsTab from "../../components/admin/ApprovalsTab";
 import ChildLinksTab from "../../components/admin/ChildLinksTab";
 import EnrollmentRequestsTab from "../../components/admin/EnrollmentRequestsTab";
+import { showApiError } from "../../utils/apiErrorHandler";
 
 const AdminApprovalsPage = () => {
   const dispatch = useDispatch();
@@ -60,7 +61,7 @@ const AdminApprovalsPage = () => {
       await dispatch(approveUser(userId)).unwrap();
       toastManager.success("User approved successfully");
     } catch (error) {
-      toastManager.error(error || "Failed to approve user");
+      showApiError(error);
     }
   };
 
@@ -82,7 +83,7 @@ const AdminApprovalsPage = () => {
       await dispatch(approveChildLink(linkId)).unwrap();
       toastManager.success("Child link approved successfully");
     } catch (error) {
-      toastManager.error(error || "Failed to approve child link");
+      showApiError(error);
     }
   };
 
@@ -91,7 +92,7 @@ const AdminApprovalsPage = () => {
       await dispatch(rejectChildLink(linkId)).unwrap();
       toastManager.success("Child link rejected successfully");
     } catch (error) {
-      toastManager.error(error || "Failed to reject child link");
+      showApiError(error);
     }
   };
 
@@ -104,7 +105,7 @@ const AdminApprovalsPage = () => {
       await dispatch(actionEnrollment({ enrollmentId, action: "approve" })).unwrap();
       toastManager.success("Enrollment approved successfully");
     } catch (error) {
-      toastManager.error(error || "Failed to approve enrollment");
+      showApiError(error);
     }
   };
 
@@ -113,7 +114,7 @@ const AdminApprovalsPage = () => {
       await dispatch(actionEnrollment({ enrollmentId, action: "reject" })).unwrap();
       toastManager.success("Enrollment rejected successfully");
     } catch (error) {
-      toastManager.error(error || "Failed to reject enrollment");
+      showApiError(error);
     }
   };
 
