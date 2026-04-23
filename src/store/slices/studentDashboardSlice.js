@@ -56,6 +56,32 @@ export const joinLiveSession = createAsyncThunk(
   },
 );
 
+export const startStudentSession = createAsyncThunk(
+  "studentDashboard/startSession",
+  async (sessionId, { rejectWithValue }) => {
+    try {
+      return await studentService.startSession(sessionId);
+    } catch (error) {
+      return rejectWithValue(
+        error?.response?.data?.error || error?.message || "Failed to start session",
+      );
+    }
+  },
+);
+
+export const endStudentSession = createAsyncThunk(
+  "studentDashboard/endSession",
+  async (sessionId, { rejectWithValue }) => {
+    try {
+      return await studentService.endSession(sessionId);
+    } catch (error) {
+      return rejectWithValue(
+        error?.response?.data?.error || error?.message || "Failed to end session",
+      );
+    }
+  },
+);
+
 export const submitAssignment = createAsyncThunk(
   "studentDashboard/submitAssignment",
   async ({ assignmentId, submissionData }, { rejectWithValue }) => {
@@ -233,9 +259,9 @@ export const fetchSessionAttendance = createAsyncThunk(
 
 export const fetchMyAttendance = createAsyncThunk(
   "studentDashboard/fetchMyAttendance",
-  async (_, { rejectWithValue }) => {
+  async (params = {}, { rejectWithValue }) => {
     try {
-      const attendance = await studentService.getMyAttendance();
+      const attendance = await studentService.getMyAttendance(params);
       return attendance;
     } catch (error) {
       return rejectWithValue(
@@ -364,6 +390,30 @@ const studentDashboardSlice = createSlice({
         state.error = null;
       })
       .addCase(joinLiveSession.rejected, (state, action) => {
+        state.isJoiningSession = false;
+        state.error = action.payload;
+      })
+
+      // Start Student Session
+      .addCase(startStudentSession.pending, (state) => {
+        state.isJoiningSession = true;
+      })
+      .addCase(startStudentSession.fulfilled, (state) => {
+        state.isJoiningSession = false;
+      })
+      .addCase(startStudentSession.rejected, (state, action) => {
+        state.isJoiningSession = false;
+        state.error = action.payload;
+      })
+
+      // End Student Session
+      .addCase(endStudentSession.pending, (state) => {
+        state.isJoiningSession = true;
+      })
+      .addCase(endStudentSession.fulfilled, (state) => {
+        state.isJoiningSession = false;
+      })
+      .addCase(endStudentSession.rejected, (state, action) => {
         state.isJoiningSession = false;
         state.error = action.payload;
       })

@@ -253,6 +253,17 @@ export const startLiveSession = createAsyncThunk(
   },
 );
 
+export const fetchAllAttendance = createAsyncThunk(
+  "teachers/fetchAllAttendance",
+  async (params = {}, { rejectWithValue }) => {
+    try {
+      return await teacherService.getAllAttendance(params);
+    } catch (error) {
+      return rejectWithValue(error?.response?.data?.error || error?.message || "Failed to fetch attendance");
+    }
+  },
+);
+
 export const endLiveSession = createAsyncThunk(
   "teachers/endLiveSession",
   async (sessionId, { rejectWithValue }) => {
@@ -295,6 +306,10 @@ const initialState = {
   allSubmissions: [],
   loadingAllSubmissions: false,
   errorAllSubmissions: null,
+
+  allAttendance: [],
+  loadingAllAttendance: false,
+  errorAllAttendance: null,
 
   submissions: [],
   loadingSubmissions: false,
@@ -587,6 +602,20 @@ const teacherSlice = createSlice({
       .addCase(endLiveSession.rejected, (state, action) => {
         state.isJoiningSession = false;
         state.joiningSessionError = action.payload;
+      })
+
+      // FETCH ALL ATTENDANCE
+      .addCase(fetchAllAttendance.pending, (state) => {
+        state.loadingAllAttendance = true;
+        state.errorAllAttendance = null;
+      })
+      .addCase(fetchAllAttendance.fulfilled, (state, action) => {
+        state.loadingAllAttendance = false;
+        state.allAttendance = action.payload?.results ?? action.payload ?? [];
+      })
+      .addCase(fetchAllAttendance.rejected, (state, action) => {
+        state.loadingAllAttendance = false;
+        state.errorAllAttendance = action.payload;
       });
   },
 });

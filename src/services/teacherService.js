@@ -132,6 +132,11 @@ const updateSessionAttendance = async (sessionId, attendanceId, data) => {
   return response.data;
 };
 
+const getAllAttendance = async (params = {}) => {
+  const response = await axiosInstance.get("/classroom/attendance/", { params });
+  return response.data;
+};
+
 const joinLiveSession = async (sessionId) => {
   const response = await axiosInstance.get(`/classroom/sessions/${sessionId}/`);
   return response.data;
@@ -174,6 +179,7 @@ export const teacherService = {
   getTeacherSessions,
   getSessionAttendance,
   updateSessionAttendance,
+  getAllAttendance,
   joinLiveSession,
   startSession,
   endSession,

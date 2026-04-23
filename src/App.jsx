@@ -48,6 +48,9 @@ import {
   TeachersDirectory,
   StudentAssignments,
   StudentAssignmentDetails,
+  StudentAttendance,
+  ParentLayout,
+  ParentAttendance,
 } from "./pages";
 
 // Protected Route Component with Role-Based Access Control
@@ -105,7 +108,7 @@ const AppInner = () => {
     });
   };
 
-  const hasSidebar = isLoggedIn && (role === "admin" || role === "teacher" || role === "student");
+  const hasSidebar = isLoggedIn && (role === "admin" || role === "teacher" || role === "student" || role === "parent");
 
   // Close mobile sidebar on route change
   useEffect(() => {
@@ -131,7 +134,8 @@ const AppInner = () => {
   const onSidebarRoute =
     location.pathname.startsWith("/admin") ||
     location.pathname.startsWith("/teacher") ||
-    location.pathname.startsWith("/student");
+    location.pathname.startsWith("/student") ||
+    location.pathname.startsWith("/parent");
   const showNavbar = !hasSidebar || !onSidebarRoute;
 
   return (
@@ -216,6 +220,7 @@ const AppInner = () => {
                 <Route path="classes" element={<StudentClasses />} />
                 <Route path="assignments" element={<StudentAssignments />} />
                 <Route path="assignments/:id" element={<StudentAssignmentDetails />} />
+                <Route path="attendance" element={<StudentAttendance />} />
               </Route>
             </Route>
 
@@ -237,7 +242,10 @@ const AppInner = () => {
 
             {/* Parent-Only Routes */}
             <Route element={<ProtectedRoute allowedRoles={["parent"]} />}>
-              <Route path="/parent" element={<ParentPortal />} />
+              <Route path="/parent" element={<ParentLayout />}>
+                <Route index element={<ParentPortal />} />
+                <Route path="attendance" element={<ParentAttendance />} />
+              </Route>
             </Route>
 
             {/* Admin-Only Routes */}

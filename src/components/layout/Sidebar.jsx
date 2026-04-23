@@ -27,16 +27,22 @@ const NAV_CONFIG = {
     { label: "Submissions",    to: "/teacher/submissions", icon: "fas fa-inbox" },
   ],
   student: [
-    { label: "Dashboard",   to: "/student",             icon: "fas fa-table-columns", end: true },
+    { label: "Dashboard",   to: "/student",             icon: "fas fa-table-columns",  end: true },
     { label: "My Classes",  to: "/student/classes",     icon: "fas fa-calendar-alt" },
     { label: "Assignments", to: "/student/assignments", icon: "fas fa-clipboard-list" },
+    { label: "Attendance",  to: "/student/attendance",  icon: "fas fa-user-check" },
+  ],
+  parent: [
+    { label: "Dashboard",        to: "/parent",             icon: "fas fa-table-columns", end: true },
+    { label: "Child Attendance", to: "/parent/attendance",  icon: "fas fa-user-check" },
   ],
 };
 
 const PORTAL_LABEL = {
-  admin: "Admin Portal",
+  admin:   "Admin Portal",
   teacher: "Teacher Portal",
   student: "Student Portal",
+  parent:  "Parent Portal",
 };
 
 // ── Unified nav item — works for all roles ────────────────────────────────────

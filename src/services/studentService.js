@@ -89,6 +89,20 @@ export const studentService = {
     }
   },
 
+  startSession: async (sessionId) => {
+    const response = await axiosInstance.patch(
+      `/classroom/sessions/${sessionId}/start/`,
+    );
+    return response.data;
+  },
+
+  endSession: async (sessionId) => {
+    const response = await axiosInstance.patch(
+      `/classroom/sessions/${sessionId}/end/`,
+    );
+    return response.data;
+  },
+
   // Submit assignment
   submitAssignment: async (assignmentId, submissionData) => {
     try {
@@ -490,11 +504,11 @@ export const studentService = {
   },
 
   // Get student's own attendance records
-  getMyAttendance: async () => {
+  getMyAttendance: async (params = {}) => {
     try {
       console.log("Fetching student attendance records...");
 
-      const response = await axiosInstance.get("/classroom/my-attendance/");
+      const response = await axiosInstance.get("/classroom/my-attendance/", { params });
 
       console.log("Student attendance response:", response.data);
 

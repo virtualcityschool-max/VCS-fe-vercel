@@ -13,6 +13,7 @@ export { default as StudentFeed } from "./student/StudentFeed";
 export { default as Classroom } from "./student/Classroom";
 export { default as StudentAssignments } from "./student/StudentAssignments";
 export { default as StudentAssignmentDetails } from "./student/StudentAssignmentDetails";
+export { default as StudentAttendance } from "./student/StudentAttendance";
 
 // Teacher Pages
 export { default as TeacherLayout } from "./teacher/TeacherLayout";
@@ -35,4 +36,6 @@ export { default as AdminSessionsPage } from "./admin/AdminSessionsPage";
 export { default as UserDetailsPage } from "./admin/UserDetailsPage";
 
 // Parent Pages
+export { default as ParentLayout } from "./parent/ParentLayout";
 export { default as ParentPortal } from "./parent/ParentPortal";
+export { default as ParentAttendance } from "./parent/ParentAttendance";
