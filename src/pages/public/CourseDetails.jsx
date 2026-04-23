@@ -17,7 +17,7 @@ import {
 import BreadcrumbNavigation from "../../components/ui/BreadcrumbNavigation";
 import BackButton from "../../components/ui/BackButton";
 import { toastManager } from "../../utils/toastManager";
-import { getUserFriendlyMessage } from "../../utils/errorHandler";
+import { showApiError } from "../../utils/apiErrorHandler";
 import { useSubmissionGuard } from "../../utils/requestDeduplicator";
 import {
   useDateFormat,
@@ -34,7 +34,6 @@ const CourseDetails = () => {
   const [imageError, setImageError] = useState(false);
   const [enrollmentModalOpen, setEnrollmentModalOpen] = useState(false);
   const submissionGuard = useSubmissionGuard();
-
   // Get auth state from Redux store
   const auth = useSelector((state) => state.auth);
 
@@ -135,7 +134,8 @@ const CourseDetails = () => {
 
         if (type === "normal") {
           response = await dispatch(enrollInCourseNormal(courseId)).unwrap();
-        } else if (type === "private") {
+        } 
+        else if (type === "private") {
           const instructorId =
             normalizedCourse.instructor?.id || normalizedCourse.instructor_id;
           if (!instructorId) {
@@ -168,10 +168,48 @@ const CourseDetails = () => {
           dispatch(fetchStudentDashboard());
         }
       } catch (error) {
-        // Handle errors safely
-        const errorMessage =
-          error?.response?.data?.error || getUserFriendlyMessage(error);
-        toastManager.error(errorMessage);
+        showApiError(error);
+      }
+    });
+  };
+  const callPrivateEnrollmentCall = async (slot) => {
+    if (!slot || !normalizedCourse) return;
+
+    const courseId = normalizedCourse.id;
+    const courseTitle = normalizedCourse.title;
+
+    await submissionGuard.guard(async () => {
+      try {
+        const instructorId =
+          normalizedCourse.instructor?.id || normalizedCourse.instructor_id;
+        if (!instructorId) {
+          toastManager.error(
+            "Private enrollment not available - no instructor assigned",
+          );
+          return;
+        }
+
+        const response = await dispatch(
+          enrollInCoursePrivate({
+            courseId,
+            teacherId: instructorId,
+            preferred_slots: [{ days: slot.days, time: slot.time }],
+          }),
+        ).unwrap();
+
+        const successMessage =
+          response?.message || `Successfully enrolled in ${courseTitle}`;
+        toastManager.success(successMessage);
+
+        setEnrollmentModalOpen(false);
+
+        dispatch(fetchCourseById(courseId));
+
+        if (auth.role === "student") {
+          dispatch(fetchStudentDashboard());
+        }
+      } catch (error) {
+        showApiError(error);
       }
     });
   };
@@ -217,8 +255,7 @@ const CourseDetails = () => {
           dispatch(fetchStudentDashboard());
         }
       } catch (error) {
-        const errorMessage = getUserFriendlyMessage(error);
-        toastManager.error(errorMessage);
+        showApiError(error);
       }
     });
   };
@@ -655,8 +692,18 @@ const CourseDetails = () => {
       <EnrollmentTypeModal
         isOpen={enrollmentModalOpen}
         onClose={closeEnrollmentModal}
-        onSelect={handleEnrollmentTypeSelect}
+        onSelect={(type) => {
+          if (type !== "private") {
+            handleEnrollmentTypeSelect(type);
+          }
+        }}
+        instructorId={normalizedCourse.instructor_id}
+        teacher={normalizedCourse.instructor}
+        onSlotSelect={callPrivateEnrollmentCall}
+        isEnrolling={isEnrolling}
       />
+      {/* if enrollment type is private show available slots then on save that selected slot with course and teacher_id */}
+      
     </section>
   );
 };

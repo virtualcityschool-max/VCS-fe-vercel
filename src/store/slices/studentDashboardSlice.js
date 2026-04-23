@@ -5,6 +5,7 @@ import {
 } from "@reduxjs/toolkit";
 import { studentService } from "../../services/studentService";
 import { logoutUser } from "./authSlice";
+import { extractApiErrorMessage } from "../../utils/apiErrorHandler";
 
 // Async thunks
 export const fetchStudentDashboard = createAsyncThunk(
@@ -97,30 +98,23 @@ export const enrollInCourseNormal = createAsyncThunk(
       const response = await studentService.enrollInCourseNormal(courseId);
       return { courseId, response };
     } catch (error) {
-      return rejectWithValue(
-        typeof error === "string"
-          ? error
-          : error?.message || "An error occurred",
-      );
+      return rejectWithValue(extractApiErrorMessage(error));
     }
   },
 );
 
 export const enrollInCoursePrivate = createAsyncThunk(
   "studentDashboard/enrollInCoursePrivate",
-  async ({ courseId, teacherId }, { rejectWithValue }) => {
+  async ({ courseId, teacherId, preferred_slots }, { rejectWithValue }) => {
     try {
       const response = await studentService.enrollInCoursePrivate({
         courseId,
         teacherId,
+        preferred_slots,
       });
       return { courseId, response };
     } catch (error) {
-      return rejectWithValue(
-        typeof error === "string"
-          ? error
-          : error?.message || "An error occurred",
-      );
+      return rejectWithValue(extractApiErrorMessage(error));
     }
   },
 );

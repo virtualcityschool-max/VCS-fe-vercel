@@ -43,17 +43,6 @@ export const studentService = {
       throw new Error("Failed to load courses");
     }
   },
-  getTeacherPrivateSlots: async (teacherId, params = {}) => {
-    try {
-      const response = await axiosInstance.get(
-        ADMIN_ENDPOINTS.PRIVATE_TEACHER_SLOTS(`/classroom/teachers/${teacherId}/available-slots/`),
-        { params },
-      );
-      return response.data;
-    } catch (error) {
-      throw handleApiError(error, { context: "Get Teacher Slots" });
-    }
-  },
   // Get all enrollments
   getAllEnrollments: async () => {
     try {
@@ -268,39 +257,28 @@ export const studentService = {
 
   // Normal enrollment
   enrollInCourseNormal: async (courseId) => {
-    try {
-      const response = await axiosInstance.post(`/courses/enroll/`, {
-        course_id: courseId,
-      });
-      return response.data;
-    } catch (error) {
-      console.error("Error enrolling in course (normal):", error);
-      throw new Error("Failed to enroll in course");
-    }
+    const response = await axiosInstance.post(`/courses/enroll/`, { course_id: courseId });
+    return response.data;
   },
 
   // Private enrollment
-  enrollInCoursePrivate: async ({ courseId, teacherId }) => {
-    try {
-      // Validate required parameters
-      if (!courseId) {
-        throw new Error("Course ID is required for private enrollment");
-      }
-      if (!teacherId) {
-        throw new Error("Teacher ID is required for private enrollment");
-      }
+  getTeacherAvailableSlots: async (teacherId) => {
+    const response = await axiosInstance.get(`classroom/teachers/${teacherId}/available-slots/`);
+    return response.data;
+  },
 
-      const response = await axiosInstance.post(
-        `/courses/teachers/${teacherId}/enroll/`,
-        {
-          course_id: courseId,
-        },
-      );
-      return response.data;
-    } catch (error) {
-      console.error("Error enrolling in course (private):", error);
-      throw new Error("Failed to enroll in course");
-    }
+  enrollInCoursePrivate: async ({ courseId, teacherId, preferred_slots }) => {
+    if (!courseId) throw new Error("Course ID is required for private enrollment");
+    if (!teacherId) throw new Error("Teacher ID is required for private enrollment");
+
+    const body = { course_id: courseId };
+    if (preferred_slots) body.preferred_slots = preferred_slots;
+
+    const response = await axiosInstance.post(
+      `/courses/teachers/${teacherId}/enroll/`,
+      body,
+    );
+    return response.data;
   },
 
   // Unenroll from course

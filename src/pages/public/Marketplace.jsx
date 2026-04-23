@@ -15,6 +15,7 @@ import { useSubmissionGuard } from "../../utils/requestDeduplicator";
 import { getCourseImage } from "../../utils/courseImageUtils";
 import { setAuthModal } from "../../store/slices/uiSlice";
 import EnrollmentTypeModal from "../../components/courses/EnrollmentTypeModal";
+import { showApiError } from "../../utils/apiErrorHandler";
 
 const Marketplace = () => {
   const dispatch = useDispatch();
@@ -202,57 +203,73 @@ const Marketplace = () => {
     setEnrollmentModalOpen(true);
   };
 
-  // Handle enrollment type selection
+  // Handle normal enrollment type selection only — private is handled by callPrivateEnrollmentCall
   const handleEnrollmentTypeSelect = async (type) => {
-    if (!selectedCourse) return;
+    if (type !== "normal" || !selectedCourse) return;
 
     const courseId = selectedCourse.id;
     const courseTitle = selectedCourse.title;
 
     await submissionGuard.guard(async () => {
       try {
-        let response;
+        const response = await dispatch(enrollInCourseNormal(courseId)).unwrap();
 
-        if (type === "normal") {
-          response = await dispatch(enrollInCourseNormal(courseId)).unwrap();
-        } else if (type === "private") {
-          const instructorId =
-            selectedCourse.instructor?.id || selectedCourse.instructor_id;
-          if (!instructorId) {
-            toastManager.error(
-              "Private enrollment not available - no instructor assigned",
-            );
-            return;
-          }
-          response = await dispatch(
-            enrollInCoursePrivate({
-              courseId,
-              teacherId: instructorId,
-            }),
-          ).unwrap();
-        }
-
-        // Show success message (use backend message if available)
         const successMessage =
           response?.message || `Successfully enrolled in ${courseTitle}`;
         toastManager.success(successMessage);
 
-        // Close modal
         setEnrollmentModalOpen(false);
         setSelectedCourse(null);
 
-        // Refresh courses to update enrollment status
         dispatch(fetchAllCourses());
 
-        // Always refresh student dashboard to sync enrollment state
         if (auth.role === "student") {
           dispatch(fetchStudentDashboard());
         }
       } catch (error) {
-        // Handle errors safely
-        const errorMessage =
-          error?.response?.data?.error || error.message || "An error occurred";
-        toastManager.error(errorMessage);
+        showApiError(error);
+      }
+    });
+  };
+
+  // Handle private enrollment after a slot is selected in the modal
+  const callPrivateEnrollmentCall = async (slot) => {
+    if (!slot || !selectedCourse) return;
+
+    const courseId = selectedCourse.id;
+    const courseTitle = selectedCourse.title;
+    const instructorId =
+      selectedCourse.instructor?.id || selectedCourse.instructor_id;
+
+    if (!instructorId) {
+      toastManager.error("Private enrollment not available - no instructor assigned");
+      return;
+    }
+
+    await submissionGuard.guard(async () => {
+      try {
+        const response = await dispatch(
+          enrollInCoursePrivate({
+            courseId,
+            teacherId: instructorId,
+            preferred_slots: [{ days: slot.days, time: slot.time }],
+          }),
+        ).unwrap();
+
+        const successMessage =
+          response?.message || `Successfully enrolled in ${courseTitle}`;
+        toastManager.success(successMessage);
+
+        setEnrollmentModalOpen(false);
+        setSelectedCourse(null);
+
+        dispatch(fetchAllCourses());
+
+        if (auth.role === "student") {
+          dispatch(fetchStudentDashboard());
+        }
+      } catch (error) {
+        showApiError(error);
       }
     });
   };
@@ -284,12 +301,6 @@ const Marketplace = () => {
       return;
     }
 
-    console.log("unenroll debug", {
-      courseId,
-      user: auth?.user,
-      enrolledCourses,
-    });
-
     await submissionGuard.guard(async () => {
       try {
         await dispatch(unenrollFromCourse(courseId)).unwrap();
@@ -303,8 +314,7 @@ const Marketplace = () => {
           dispatch(fetchStudentDashboard());
         }
       } catch (error) {
-        const errorMessage = error.message || "An error occurred";
-        toastManager.error(errorMessage);
+        showApiError(error);
       }
     });
   };
@@ -585,6 +595,10 @@ const Marketplace = () => {
         isOpen={enrollmentModalOpen}
         onClose={closeEnrollmentModal}
         onSelect={handleEnrollmentTypeSelect}
+        instructorId={selectedCourse?.instructor?.id || selectedCourse?.instructor_id}
+        teacher={selectedCourse?.instructor}
+        onSlotSelect={callPrivateEnrollmentCall}
+        isEnrolling={selectedCourse ? enrollingCourseIds.includes(selectedCourse.id) : false}
       />
     </section>
   );
