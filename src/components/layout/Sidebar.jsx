@@ -11,12 +11,12 @@ const MOBILE_BREAKPOINT = 1024;
 
 const NAV_CONFIG = {
   admin: [
-    { id: "overview",    label: "Overview",     icon: "fas fa-chart-line",    path: "/admin/overview" },
-    { id: "approvals",   label: "Approvals",    icon: "fas fa-user-check",    path: "/admin/approvals" },
-    { id: "users",       label: "Users",        icon: "fas fa-users",         path: "/admin/users" },
-    { id: "courses",     label: "Courses",      icon: "fas fa-book",          path: "/admin/courses" },
-    { id: "sessions",    label: "Classes",      icon: "fas fa-chalkboard",    path: "/admin/sessions" },
-    { id: "enrollments", label: "Enrollments",  icon: "fas fa-user-graduate", path: "/admin/enrollments" },
+    { id: "overview",    label: "Overview",     icon: "fas fa-chart-line",    to: "/admin/overview" },
+    { id: "approvals",   label: "Approvals",    icon: "fas fa-user-check",    to: "/admin/approvals" },
+    { id: "users",       label: "Users",        icon: "fas fa-users",         to: "/admin/users" },
+    { id: "courses",     label: "Courses",      icon: "fas fa-book",          to: "/admin/courses" },
+    { id: "sessions",    label: "Classes",      icon: "fas fa-chalkboard",    to: "/admin/sessions" },
+    { id: "enrollments", label: "Enrollments",  icon: "fas fa-user-graduate", to: "/admin/enrollments" },
   ],
   teacher: [
     { label: "Dashboard",      to: "/teacher",             icon: "fas fa-table-columns",  end: true },
@@ -211,7 +211,8 @@ const Sidebar = ({
                   isCollapsed={isCollapsed}
                   isActive={activeTab === tab.id}
                   badge={tab.id === "approvals" ? pendingApprovalsCount : 0}
-                  onClick={() => handleAdminNav(tab.path)}
+                  to={tab.to}
+                  // onClick={() => handleAdminNav(tab.path)}
                 />
               ))
             : NAV_CONFIG[role]?.map((item) => (

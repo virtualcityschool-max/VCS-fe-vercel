@@ -22,6 +22,8 @@ const ADMIN_ENDPOINTS = {
   // Enrollment Management
   ADMIN_ENROLL: "/courses/admin-enroll/",
   PRIVATE_TEACHER_SLOTS: (id) => `/classroom/teachers/${id}/available-slots/`,
+  PENDING_ENROLLMENTS: "/courses/enrollments/pending/",
+  ENROLLMENT_ACTION: (id) => `/courses/enrollments/${id}/approve/`,
 
 };
 
@@ -372,6 +374,27 @@ export const adminService = {
       return response.data;
     } catch (error) {
       throw handleApiError(error, { context: "Link Children Admin" });
+    }
+  },
+
+  getPendingEnrollments: async () => {
+    try {
+      const response = await axiosInstance.get(ADMIN_ENDPOINTS.PENDING_ENROLLMENTS);
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error, { context: "Get Pending Enrollments" });
+    }
+  },
+
+  actionEnrollment: async (enrollmentId, action) => {
+    try {
+      const response = await axiosInstance.patch(
+        ADMIN_ENDPOINTS.ENROLLMENT_ACTION(enrollmentId),
+        { action },
+      );
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error, { context: "Enrollment Action" });
     }
   },
 };
