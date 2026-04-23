@@ -40,7 +40,6 @@ const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
 
   // Auto set teacher when course selected
   useEffect(() => {
-    // debugger
     if (formData.course_id) {
       const selectedCourse = courses.data?.find(
         (c) => c.id === parseInt(formData.course_id),
