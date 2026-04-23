@@ -8,8 +8,10 @@ import {
   gradeSubmission,
   updateSubmissionsGrade,
   fetchSubmissionById,
+  clearSelectedSubmission,
 } from "../../store/slices/teacherSlice";
 import { toastManager } from "../../utils/toastManager";
+import { validateFile, ACCEPT_STRING } from "../../utils/fileValidation";
 import GradingForm from "../../components/teacher/GradingForm";
 import { FilterSelect } from "../../components/ui";
 
@@ -218,7 +220,7 @@ const TeacherGrading = () => {
                     pendingAssignmentId === assignment.id ? (
                       <i className="fas fa-spinner animate-spin"></i>
                     ) : (
-                      "Grade"
+                      "View Submissions"
                     )}
                   </button>
                 </div>
@@ -257,6 +259,7 @@ const TeacherGrading = () => {
                     <button
                       className="bg-indigo-600 px-3 py-1 rounded text-xs"
                       onClick={() => {
+                        dispatch(clearSelectedSubmission());
                         dispatch(fetchSubmissionById(sub.id));
                         setSelectedAssignment(sub.id);
                       }}
@@ -334,7 +337,7 @@ const TeacherGrading = () => {
                 {/* GRADE FORM */}
                 <GradingForm
                   selectedSubmission={selectedSubmission}
-                  onCancel={() => setSelectedAssignment(null)}
+                  onCancel={() => { setSelectedAssignment(null); dispatch(clearSelectedSubmission()); }}
                   onSubmit={async ({ score, feedback }) => {
                     try {
                       if (selectedSubmission.grade) {
@@ -366,6 +369,7 @@ const TeacherGrading = () => {
                       }
 
                       setSelectedAssignment(null);
+                      dispatch(clearSelectedSubmission());
                     } catch (err) {
                       toastManager.error(err?.message || "Failed to grade");
                     }
@@ -450,12 +454,12 @@ const TeacherGrading = () => {
                 )}
                 <input
                   type="file"
-                  accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                  accept={ACCEPT_STRING}
                   className="hidden"
                   onChange={(e) => {
                     const f = e.target.files?.[0] || null;
-                    setForm({ ...form, file: f });
                     e.target.value = "";
+                    if (f && validateFile(f)) setForm({ ...form, file: f });
                   }}
                 />
               </label>

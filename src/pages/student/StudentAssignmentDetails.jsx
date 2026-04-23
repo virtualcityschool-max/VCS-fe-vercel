@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { studentService } from "../../services/studentService";
 import { submitAssignment } from "../../store/slices/studentDashboardSlice";
 import { toastManager } from "../../utils/toastManager";
+import { validateFile, ACCEPT_STRING } from "../../utils/fileValidation";
 
 const StudentAssignmentDetails = () => {
   const { id } = useParams();
@@ -21,38 +22,10 @@ const StudentAssignmentDetails = () => {
   const [answer, setAnswer] = useState("");
   const [file, setFile] = useState(null);
 
-  const allowedExtensions = [
-    ".pdf",
-    ".doc",
-    ".docx",
-    ".txt",
-    ".png",
-    ".jpg",
-    ".jpeg",
-    ".zip",
-  ];
-
-  const maxSizeMB = 10;
-
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     if (!selectedFile) return;
-
-    const ext = selectedFile.name
-      .slice(selectedFile.name.lastIndexOf("."))
-      .toLowerCase();
-
-    if (!allowedExtensions.includes(ext)) {
-      toastManager.error("Invalid file type");
-      return;
-    }
-
-    if (selectedFile.size > maxSizeMB * 1024 * 1024) {
-      toastManager.error("File must be less than 10MB");
-      return;
-    }
-
-    setFile(selectedFile);
+    if (validateFile(selectedFile)) setFile(selectedFile);
   };
 
   useEffect(() => {
@@ -95,6 +68,14 @@ const StudentAssignmentDetails = () => {
           ? {
               ...prev,
               is_submitted: true,
+              my_submission: {
+                text_answer: answer.trim(),
+                file: null,
+                submitted_at: new Date().toISOString(),
+                is_graded: false,
+                score: null,
+                feedback: null,
+              },
             }
           : prev,
       );
@@ -225,8 +206,79 @@ const StudentAssignmentDetails = () => {
               </h2>
 
               {isSubmitted ? (
-                <div className="bg-blue-500/10 border border-blue-500/20 rounded-2xl p-5 text-blue-300">
-                  You have already submitted this assignment.
+                <div className="space-y-4">
+                  {/* Submission content */}
+                  <div className="bg-slate-800/60 border border-slate-700 rounded-2xl p-5 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-xs uppercase tracking-widest text-slate-500 font-bold">Your Submission</h3>
+                      <span className="px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-blue-500/10 text-blue-400">
+                        Submitted
+                      </span>
+                    </div>
+
+                    {assignment.my_submission?.text_answer ? (
+                      <div className="bg-slate-900/60 border border-slate-700 rounded-xl p-4 text-slate-300 text-sm leading-relaxed whitespace-pre-wrap">
+                        {assignment.my_submission.text_answer}
+                      </div>
+                    ) : (
+                      <p className="text-slate-500 text-sm italic">No text submitted</p>
+                    )}
+
+                    {assignment.my_submission?.file && (
+                      <a
+                        href={assignment.my_submission.file}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-2 text-indigo-400 hover:text-indigo-300 text-sm underline transition"
+                      >
+                        <i className="fas fa-paperclip"></i>
+                        View Attachment
+                      </a>
+                    )}
+
+                    {assignment.my_submission?.submitted_at && (
+                      <p className="text-xs text-slate-500">
+                        <i className="fas fa-clock mr-1"></i>
+                        Submitted on{" "}
+                        {new Date(assignment.my_submission.submitted_at).toLocaleString([], {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Grade result */}
+                  {assignment.my_submission?.is_graded ? (
+                    <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-5 space-y-3">
+                      <div className="flex items-center gap-2">
+                        <i className="fas fa-check-circle text-emerald-400"></i>
+                        <h3 className="text-sm font-bold text-emerald-400">Graded</h3>
+                        {assignment.my_submission.score != null && (
+                          <span className="ml-auto text-white font-black text-lg">
+                            {assignment.my_submission.score}
+                            <span className="text-slate-400 font-normal text-sm">/{assignment.max_score}</span>
+                          </span>
+                        )}
+                      </div>
+                      {assignment.my_submission.feedback && (
+                        <div>
+                          <p className="text-xs uppercase tracking-widest text-slate-500 font-bold mb-1">Feedback</p>
+                          <p className="text-slate-300 text-sm leading-relaxed">
+                            {assignment.my_submission.feedback}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-2xl p-4 flex items-center gap-3 text-yellow-300 text-sm">
+                      <i className="fas fa-hourglass-half"></i>
+                      Awaiting grade from your teacher.
+                    </div>
+                  )}
                 </div>
               ) : isOverdue ? (
                 <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-5 text-red-300">
@@ -245,7 +297,7 @@ const StudentAssignmentDetails = () => {
                     <input
                       ref={fileInputRef}
                       type="file"
-                      accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg,.zip"
+                      accept={ACCEPT_STRING}
                       onChange={handleFileChange}
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     />

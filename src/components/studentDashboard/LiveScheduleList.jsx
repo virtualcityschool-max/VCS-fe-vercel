@@ -1,45 +1,70 @@
 import React from "react";
-import { useSelector, useDispatch } from "react-redux";
-import {
-  selectLiveSchedule,
-  joinLiveSession,
-  fetchStudentDashboard,
-} from "../../store/slices/studentDashboardSlice";
+import { useSelector } from "react-redux";
+import { selectLiveSchedule } from "../../store/slices/studentDashboardSlice";
 import { toastManager } from "../../utils/toastManager";
 
-const LiveScheduleList = () => {
-  const dispatch = useDispatch();
-  const liveSchedule = useSelector(selectLiveSchedule);
-  const isJoiningSession = useSelector(
-    (state) => state.studentDashboard.isJoiningSession,
-  );
+const DAY_MAP = { SUN: 0, MON: 1, TUE: 2, WED: 3, THU: 4, FRI: 5, SAT: 6 };
 
-  const handleJoinSession = async (session) => {
-    const sessionId = session?.id ?? session?.session_id;
-    if (!sessionId) {
-      toastManager.error("Session information is unavailable");
+const parseRecurringSchedule = (recurringSchedule) => {
+  if (!recurringSchedule) return null;
+  const match = recurringSchedule.match(
+    /^(.*?)\s*@\s*(\d{1,2}):(\d{2})\s*(AM|PM)$/i,
+  );
+  if (!match) return null;
+  let hour = parseInt(match[2]);
+  const minute = parseInt(match[3]);
+  const period = match[4].toUpperCase();
+  if (period === "PM" && hour !== 12) hour += 12;
+  if (period === "AM" && hour === 12) hour = 0;
+  const days = match[1]
+    .split(/\s*[&,]\s*/)
+    .map((d) => DAY_MAP[d.trim().toUpperCase()])
+    .filter((d) => d !== undefined);
+  return { days, hour, minute };
+};
+
+const isWithinSessionWindow = (recurringSchedule) => {
+  const parsed = parseRecurringSchedule(recurringSchedule);
+  if (!parsed) return false;
+  const now = new Date();
+  if (!parsed.days.includes(now.getDay())) return false;
+  const start = new Date();
+  start.setHours(parsed.hour, parsed.minute, 0, 0);
+  const end = new Date(start.getTime() + 60 * 60 * 1000);
+  return now >= start && now <= end;
+};
+
+const getWindowLabel = (recurringSchedule) => {
+  const match = recurringSchedule?.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+  if (!match) return "";
+  let h = parseInt(match[1]);
+  const m = parseInt(match[2]);
+  const p = match[3].toUpperCase();
+  let endH = h + 1;
+  let endP = p;
+  if (endH === 12 && p === "AM") endP = "PM";
+  if (endH > 12) {
+    endH -= 12;
+    endP = p === "AM" ? "PM" : "AM";
+  }
+  const pad = (n) => n.toString().padStart(2, "0");
+  return `${h}:${pad(m)} ${p} – ${endH}:${pad(m)} ${endP}`;
+};
+
+const LiveScheduleList = () => {
+  const liveSchedule = useSelector(selectLiveSchedule);
+
+  const handleJoinSession = (session) => {
+    const meetingLink = session?.meeting_link;
+    if (!meetingLink || !meetingLink.startsWith("http")) {
+      toastManager.error("No valid meeting link found");
       return;
     }
-
     try {
-      const result = await dispatch(joinLiveSession(sessionId)).unwrap();
-      const meetingLink = result?.meeting_link;
-
-      if (meetingLink && meetingLink.startsWith("http")) {
-        // Validate URL format
-        try {
-          new URL(meetingLink);
-          window.open(meetingLink, "_blank", "noopener,noreferrer");
-        } catch (urlError) {
-          toastManager.error("Invalid meeting link format");
-          console.log("URL Error:", urlError);
-        }
-      } else {
-        toastManager.error("No valid meeting link found");
-      }
-    } catch (error) {
-      console.error("Failed to join session:", error);
-      toastManager.error("Failed to join session");
+      new URL(meetingLink);
+      window.open(meetingLink, "_blank", "noopener,noreferrer");
+    } catch {
+      toastManager.error("Invalid meeting link format");
     }
   };
 
@@ -214,43 +239,38 @@ const LiveScheduleList = () => {
 
             {/* Action Button */}
             <div className="flex-shrink-0">
-              {(() => {
-                // Check backend status first - respect ended status
-                if (session?.status === "ended") {
-                  return (
-                    <button className="w-full md:w-auto border border-slate-600 text-slate-500 cursor-not-allowed px-8 py-4 rounded-2xl font-bold text-sm transition active:scale-95">
-                      <i className="fas fa-info-circle mr-2"></i>
-                      Session Ended
+              {session?.status === "ended" ? (
+                <button
+                  disabled
+                  className="w-full md:w-auto border border-slate-600 text-slate-500 cursor-not-allowed px-8 py-4 rounded-2xl font-bold text-sm"
+                >
+                  <i className="fas fa-check-circle mr-2"></i>
+                  Session Ended
+                </button>
+              ) : (() => {
+                const canJoin = isWithinSessionWindow(session.recurring_schedule);
+                const windowLabel = getWindowLabel(session.recurring_schedule);
+                return (
+                  <div className="relative group">
+                    <button
+                      onClick={() => canJoin && handleJoinSession(session)}
+                      disabled={!canJoin}
+                      className={`w-full md:w-auto px-8 py-4 rounded-2xl font-bold text-sm transition active:scale-95 flex items-center gap-2 ${
+                        canJoin
+                          ? "bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-900/40"
+                          : "border border-slate-600 text-slate-500 cursor-not-allowed opacity-60"
+                      }`}
+                    >
+                      <i className="fas fa-video"></i>
+                      Join Session
                     </button>
-                  );
-                }
-
-                let canJoinNow =
-                  session?.can_join === true || session?.status === "live";
-
-                return canJoinNow ? (
-                  <button
-                    onClick={() => handleJoinSession(session)}
-                    disabled={isJoiningSession}
-                    className="w-full md:w-auto bg-blue-600 hover:bg-blue-500 text-white px-8 py-4 rounded-2xl font-bold text-sm shadow-lg shadow-blue-900/40 transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isJoiningSession ? (
-                      <>
-                        <i className="fas fa-spinner fa-spin mr-2"></i>
-                        Joining...
-                      </>
-                    ) : (
-                      <>
-                        <i className="fas fa-video mr-2"></i>
-                        Join Live Room
-                      </>
+                    {!canJoin && (
+                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-slate-700 border border-slate-600 text-white text-xs rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-xl">
+                        <p className="font-semibold text-slate-300 mb-0.5">Time to join</p>
+                        <p className="text-white font-bold">{windowLabel || session.recurring_schedule}</p>
+                      </div>
                     )}
-                  </button>
-                ) : (
-                  <button className="w-full md:w-auto border border-slate-600 text-white hover:bg-slate-700 px-8 py-4 rounded-2xl font-bold text-sm transition active:scale-95">
-                    <i className="fas fa-info-circle mr-2"></i>
-                    View Details
-                  </button>
+                  </div>
                 );
               })()}
             </div>

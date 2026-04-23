@@ -20,7 +20,7 @@ import { normalizeApiError } from "../../utils/errorHandler";
 import { toastManager } from "../../utils/toastManager";
 import ConfirmDialog from "../../components/common/ConfirmDialog";
 import SessionsTab from "../../components/admin/SessionsTab";
-
+import { showApiError } from "../../utils/apiErrorHandler";
 const AdminSessionsPage = () => {
   const dispatch = useDispatch();
 
@@ -220,8 +220,16 @@ const AdminSessionsPage = () => {
     if (!formData.scheduled_date) {
       errors.scheduled_date = "Start date is required";
     } else if (selectedCourse?.schedule?.time) {
-      const scheduled = new Date(`${formData.scheduled_date}T${selectedCourse.schedule.time}`);
-      if (scheduled < new Date()) errors.scheduled_date = "Scheduled time must be in the future";
+      debugger
+      const [year, month, day] = formData.scheduled_date.split("-");
+      const scheduled = new Date(year, month - 1, day);
+      const today = new Date();
+      scheduled.setHours(0, 0, 0, 0);
+      today.setHours(0, 0, 0, 0);
+      
+      if (scheduled < today) {
+        errors.scheduled_date = "Scheduled date must be today or in the future";
+      }
     }
 
     if (!formData.recurrence_end_date) {
@@ -249,14 +257,13 @@ const AdminSessionsPage = () => {
     if (!formData.start_time) {
       errors.start_time = "Start time is required";
     } else {
-      // Check if start time is in the past
-      const startTime = new Date(formData.start_time);
-      const now = new Date();
-      startTime.setHours(0, 0, 0, 0);
-      now.setHours(0, 0, 0, 0);
-      console.log(now,"lll",startTime)
-      if (startTime < now) {
-        errors.start_time = "Scheduled time must be in the future";
+      const [year, month, day] = formData.scheduled_date.split("-");
+      const scheduled = new Date(year, month - 1, day);
+      const today = new Date();
+      scheduled.setHours(0, 0, 0, 0);
+      today.setHours(0, 0, 0, 0);
+      if (scheduled < today) {
+        errors.scheduled_date = "Scheduled date must be today or in the future";
       }
     }
 
@@ -320,8 +327,7 @@ const AdminSessionsPage = () => {
       });
       clearAllCreateSessionErrors();
     } catch (error) {
-      toastManager.error("Error Creating Class")
-      handleCreateSessionApiError(error);
+      showApiError(error);
     }
   };
 

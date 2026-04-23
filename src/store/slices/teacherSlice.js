@@ -324,7 +324,12 @@ const initialState = {
 const teacherSlice = createSlice({
   name: "teachers",
   initialState,
-  reducers: {},
+  reducers: {
+    clearSelectedSubmission(state) {
+      state.selectedSubmission = null;
+      state.loadingSelectedSubmission = false;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchTeachers.pending, (state) => {
@@ -586,4 +591,5 @@ const teacherSlice = createSlice({
   },
 });
 
+export const { clearSelectedSubmission } = teacherSlice.actions;
 export default teacherSlice.reducer;

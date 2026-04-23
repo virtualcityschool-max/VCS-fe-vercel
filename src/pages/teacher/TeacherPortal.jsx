@@ -13,6 +13,54 @@ import { createAnnouncement } from "../../store/slices/announcementsSlice";
 import { toastManager } from "../../utils/toastManager";
 import CourseStudentsModal from "../../components/courses/CourseStudentsModal";
 
+const DAY_MAP = { SUN: 0, MON: 1, TUE: 2, WED: 3, THU: 4, FRI: 5, SAT: 6 };
+
+const parseRecurringSchedule = (recurringSchedule) => {
+  if (!recurringSchedule) return null;
+  const match = recurringSchedule.match(
+    /^(.*?)\s*@\s*(\d{1,2}):(\d{2})\s*(AM|PM)$/i,
+  );
+  if (!match) return null;
+  let hour = parseInt(match[2]);
+  const minute = parseInt(match[3]);
+  const period = match[4].toUpperCase();
+  if (period === "PM" && hour !== 12) hour += 12;
+  if (period === "AM" && hour === 12) hour = 0;
+  const days = match[1]
+    .split(/\s*[&,]\s*/)
+    .map((d) => DAY_MAP[d.trim().toUpperCase()])
+    .filter((d) => d !== undefined);
+  return { days, hour, minute };
+};
+
+const isWithinSessionWindow = (recurringSchedule) => {
+  const parsed = parseRecurringSchedule(recurringSchedule);
+  if (!parsed) return true;
+  const now = new Date();
+  if (!parsed.days.includes(now.getDay())) return false;
+  const start = new Date();
+  start.setHours(parsed.hour, parsed.minute, 0, 0);
+  const end = new Date(start.getTime() + 60 * 60 * 1000);
+  return now >= start && now <= end;
+};
+
+const getWindowLabel = (recurringSchedule) => {
+  const match = recurringSchedule?.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+  if (!match) return "";
+  let h = parseInt(match[1]);
+  const m = parseInt(match[2]);
+  const p = match[3].toUpperCase();
+  let endH = h + 1;
+  let endP = p;
+  if (endH === 12 && p === "AM") endP = "PM";
+  if (endH > 12) {
+    endH -= 12;
+    endP = p === "AM" ? "PM" : "AM";
+  }
+  const pad = (n) => n.toString().padStart(2, "0");
+  return `${h}:${pad(m)} ${p} – ${endH}:${pad(m)} ${endP}`;
+};
+
 const TeacherPortal = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -67,10 +115,12 @@ const TeacherPortal = () => {
     }
   };
 
-  const handleStartSession = async (sessionId) => {
+  const handleStartSession = async (session) => {
+    const sessionId = session?.id ?? session?.session_id;
+    const fallbackLink = session?.meeting_link;
     try {
       const result = await dispatch(startLiveSession(sessionId)).unwrap();
-      const meetingLink = result?.meeting_link;
+      const meetingLink = result?.meeting_link || fallbackLink;
 
       if (meetingLink && meetingLink.startsWith("http")) {
         try {
@@ -229,38 +279,70 @@ const TeacherPortal = () => {
                   </div>
                 </div>
 
-                {session.status === "scheduled" && (
-                  <button
-                    onClick={() => handleStartSession(session.id)}
-                    disabled={isJoiningSession}
-                    className="bg-green-600 hover:bg-green-500 text-white px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition disabled:opacity-50 flex items-center gap-2"
-                  >
-                    <i className="fas fa-play"></i>
-                    <span>Start Session</span>
-                  </button>
-                )}
+                {session.status === "scheduled" && (() => {
+                  const canStart = isWithinSessionWindow(session.recurring_schedule);
+                  const windowLabel = getWindowLabel(session.recurring_schedule);
+                  return (
+                    <div className="relative group">
+                      <button
+                        onClick={() => canStart && handleStartSession(session)}
+                        disabled={isJoiningSession || !canStart}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition ${
+                          canStart
+                            ? "bg-green-600 hover:bg-green-500 text-white disabled:opacity-50"
+                            : "border border-slate-600 text-slate-500 cursor-not-allowed opacity-60"
+                        }`}
+                      >
+                        <i className="fas fa-play"></i>
+                        <span>Start Session</span>
+                      </button>
+                      {!canStart && (
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-slate-700 border border-slate-600 text-white text-xs rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-xl">
+                          <p className="font-semibold text-slate-300 mb-0.5">Time to start</p>
+                          <p className="text-white font-bold">{windowLabel || session.recurring_schedule || "Check schedule"}</p>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
 
-                {session.status === "live" && (
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => handleJoinSession(session.id)}
-                      disabled={isJoiningSession}
-                      className="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition disabled:opacity-50 flex items-center gap-2"
-                    >
-                      <i className="fas fa-video"></i>
-                      <span>Join Session</span>
-                    </button>
+                {session.status === "live" && (() => {
+                  const canJoin = isWithinSessionWindow(session.recurring_schedule);
+                  const windowLabel = getWindowLabel(session.recurring_schedule);
+                  return (
+                    <div className="flex items-center gap-2">
+                      <div className="relative group">
+                        <button
+                          onClick={() => canJoin && handleJoinSession(session.id)}
+                          disabled={isJoiningSession || !canJoin}
+                          className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition ${
+                            canJoin
+                              ? "bg-indigo-600 hover:bg-indigo-500 text-white disabled:opacity-50"
+                              : "border border-slate-600 text-slate-500 cursor-not-allowed opacity-60"
+                          }`}
+                        >
+                          <i className="fas fa-video"></i>
+                          <span>Join Session</span>
+                        </button>
+                        {!canJoin && (
+                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-slate-700 border border-slate-600 text-white text-xs rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-xl">
+                            <p className="font-semibold text-slate-300 mb-0.5">Time to join</p>
+                            <p className="text-white font-bold">{windowLabel || session.recurring_schedule || "Check schedule"}</p>
+                          </div>
+                        )}
+                      </div>
 
-                    <button
-                      onClick={() => handleEndSession(session.id)}
-                      disabled={isJoiningSession}
-                      className="bg-rose-600 hover:bg-rose-500 text-white px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition disabled:opacity-50 flex items-center gap-2"
-                    >
-                      <i className="fas fa-stop"></i>
-                      <span>End Session</span>
-                    </button>
-                  </div>
-                )}
+                      <button
+                        onClick={() => handleEndSession(session.id)}
+                        disabled={isJoiningSession}
+                        className="bg-rose-600 hover:bg-rose-500 text-white px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition disabled:opacity-50 flex items-center gap-2"
+                      >
+                        <i className="fas fa-stop"></i>
+                        <span>End Session</span>
+                      </button>
+                    </div>
+                  );
+                })()}
 
                 {session.status === "ended" && (
                   <span className="text-slate-400 text-sm font-medium">

@@ -17,6 +17,7 @@ import { normalizeApiError } from "../../utils/errorHandler";
 import { toastManager } from "../../utils/toastManager";
 import CoursesTab from "../../components/admin/CoursesTab";
 import ConfirmDialog from "../../components/common/ConfirmDialog";
+import { showApiError } from "../../utils/apiErrorHandler";
 
 const AdminCoursesPage = () => {
   const dispatch = useDispatch();
@@ -221,7 +222,7 @@ const AdminCoursesPage = () => {
       });
       clearAllCreateCourseErrors();
     } catch (error) {
-      handleCreateCourseApiError(error);
+      showApiError(error)
     }
   };
 
@@ -248,14 +249,7 @@ const AdminCoursesPage = () => {
       toastManager.success("Course updated successfully");
       setActiveModal(null);
     } catch (error) {
-      const hadFieldErrors = handleEditCourseApiError(
-        error,
-        toastManager.error,
-      );
-      if (!hadFieldErrors) {
-        const normalizedError = normalizeApiError(error);
-        toastManager.error(normalizedError.message);
-      }
+      showApiError(error)
     } finally {
       setUpdatingCourseId(null);
     }
