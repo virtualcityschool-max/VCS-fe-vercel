@@ -259,7 +259,7 @@ const Sidebar = ({
                   </span>
                 )}
               </span>
-              <span className={`whitespace-nowrap overflow-hidden transition-all duration-300 ${isCollapsed ? "w-0 opacity-0" : "flex-1 opacity-100"}`}>
+              <span className={`whitespace-nowrap overflow-hidden transition-all duration-300 ${isCollapsed ? "w-0 opacity-0" : "opacity-100"}`}>
                 Announcements
               </span>
               {!isCollapsed && unreadCount > 0 && (

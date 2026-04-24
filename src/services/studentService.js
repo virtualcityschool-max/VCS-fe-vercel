@@ -98,7 +98,7 @@ export const studentService = {
 
   endSession: async (sessionId) => {
     const response = await axiosInstance.patch(
-      `/classroom/sessions/${sessionId}/end/`,
+      `/classroom/sessions/${sessionId}/leave/`,
     );
     return response.data;
   },
