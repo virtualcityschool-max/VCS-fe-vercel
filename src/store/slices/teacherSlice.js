@@ -264,6 +264,28 @@ export const fetchAllAttendance = createAsyncThunk(
   },
 );
 
+export const bulkMarkAttendance = createAsyncThunk(
+  "teachers/bulkMarkAttendance",
+  async ({ sessionId, records }, { rejectWithValue }) => {
+    try {
+      return await teacherService.bulkMarkAttendance(sessionId, records);
+    } catch (error) {
+      return rejectWithValue(error?.response?.data?.error || error?.message || "Failed to mark attendance");
+    }
+  },
+);
+
+export const updateStudentAttendance = createAsyncThunk(
+  "teachers/updateStudentAttendance",
+  async ({ sessionId, studentId, data }, { rejectWithValue }) => {
+    try {
+      return await teacherService.updateStudentAttendance(sessionId, studentId, data);
+    } catch (error) {
+      return rejectWithValue(error?.response?.data?.error || error?.message || "Failed to update attendance");
+    }
+  },
+);
+
 export const endLiveSession = createAsyncThunk(
   "teachers/endLiveSession",
   async (sessionId, { rejectWithValue }) => {
@@ -310,6 +332,8 @@ const initialState = {
   allAttendance: [],
   loadingAllAttendance: false,
   errorAllAttendance: null,
+  markingBulkAttendance: false,
+  patchingStudentAttendance: false,
 
   submissions: [],
   loadingSubmissions: false,
@@ -616,6 +640,35 @@ const teacherSlice = createSlice({
       .addCase(fetchAllAttendance.rejected, (state, action) => {
         state.loadingAllAttendance = false;
         state.errorAllAttendance = action.payload;
+      })
+
+      // BULK MARK ATTENDANCE
+      .addCase(bulkMarkAttendance.pending, (state) => {
+        state.markingBulkAttendance = true;
+      })
+      .addCase(bulkMarkAttendance.fulfilled, (state) => {
+        state.markingBulkAttendance = false;
+      })
+      .addCase(bulkMarkAttendance.rejected, (state) => {
+        state.markingBulkAttendance = false;
+      })
+
+      // UPDATE STUDENT ATTENDANCE (PATCH)
+      .addCase(updateStudentAttendance.pending, (state) => {
+        state.patchingStudentAttendance = true;
+      })
+      .addCase(updateStudentAttendance.fulfilled, (state, action) => {
+        state.patchingStudentAttendance = false;
+        // Optimistically update the record in allAttendance if it matches
+        const updated = action.payload;
+        if (updated?.id) {
+          state.allAttendance = state.allAttendance.map((r) =>
+            r.id === updated.id ? { ...r, ...updated } : r
+          );
+        }
+      })
+      .addCase(updateStudentAttendance.rejected, (state) => {
+        state.patchingStudentAttendance = false;
       });
   },
 });

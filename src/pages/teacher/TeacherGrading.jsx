@@ -136,8 +136,8 @@ const TeacherGrading = () => {
 
     if (selectedDate <= now) return "Due date must be in the future";
 
-    if (!form.max_score) return "Max score is required";
-    if (Number(form.max_score) <= 0) return "Max score must be greater than 0";
+    if (!form.max_score) return "Total marks is required";
+    if (Number(form.max_score) <= 0) return "Total marks must be greater than 0";
 
     return null;
   };
@@ -444,7 +444,7 @@ const TeacherGrading = () => {
             <input
               type="number"
               min={1}
-              placeholder="Max Score"
+              placeholder="Total marks"
               value={form.max_score}
               onChange={(e) => setForm({ ...form, max_score: e.target.value })}
               className="w-full mb-4 p-3 rounded-xl bg-slate-800 border border-slate-700 text-white"

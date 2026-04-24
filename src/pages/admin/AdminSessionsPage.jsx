@@ -39,7 +39,10 @@ const AdminSessionsPage = () => {
   const [createSessionForm, setCreateSessionForm] = useState({
     course: "",
     title: "",
+    time: "",
     scheduled_date: "",
+    is_recurring: true,
+    recurrence_days: [],
     recurrence_end_date: "",
   });
 
@@ -103,7 +106,10 @@ const AdminSessionsPage = () => {
       setCreateSessionForm({
         course: "",
         title: "",
+        time: "",
         scheduled_date: "",
+        is_recurring: true,
+        recurrence_days: [],
         recurrence_end_date: "",
       });
       clearAllCreateSessionErrors();
@@ -206,7 +212,7 @@ const AdminSessionsPage = () => {
   };
 
   // Validation functions
-  const validateCreateSessionForm = (formData, selectedCourse) => {
+  const validateCreateSessionForm = (formData) => {
     const errors = {};
 
     if (!formData.course) errors.course = "Course is required";
@@ -217,21 +223,24 @@ const AdminSessionsPage = () => {
       errors.title = "Title must be at least 3 characters";
     }
 
+    if (!formData.time) errors.time = "Class time is required";
+
     if (!formData.scheduled_date) {
       errors.scheduled_date = "Start date is required";
-    } else if (selectedCourse?.schedule?.time) {
-      debugger
+    } else {
       const [year, month, day] = formData.scheduled_date.split("-");
       const scheduled = new Date(year, month - 1, day);
       const today = new Date();
       scheduled.setHours(0, 0, 0, 0);
       today.setHours(0, 0, 0, 0);
-      
       if (scheduled < today) {
         errors.scheduled_date = "Scheduled date must be today or in the future";
       }
     }
 
+    if (!formData.recurrence_days?.length) {
+      errors.recurrence_days = "Select at least one recurring day";
+    }
     if (!formData.recurrence_end_date) {
       errors.recurrence_end_date = "Recurrence end date is required";
     } else if (formData.scheduled_date && formData.recurrence_end_date <= formData.scheduled_date) {
@@ -288,7 +297,7 @@ const AdminSessionsPage = () => {
       (c) => c.id === Number(sessionData.course),
     );
 
-    const validationErrors = validateCreateSessionForm(sessionData, selectedCourse);
+    const validationErrors = validateCreateSessionForm(sessionData);
     if (Object.keys(validationErrors).length > 0) {
       setCreateSessionErrors(validationErrors);
       toastManager.error("Please fix highlighted fields");
@@ -300,18 +309,16 @@ const AdminSessionsPage = () => {
       toastManager.error("Selected course has no instructor assigned");
       return;
     }
-    const localOffset = new Date().toTimeString().slice(9, 15).replace(":", "");
-    const offsetStr = `+${localOffset.slice(0, 2)}:${localOffset.slice(2)}`;
-    const scheduled_at = `${sessionData.scheduled_date}`;
+
     const payload = {
       course: Number(sessionData.course),
       instructor_id,
       title: sessionData.title,
-      scheduled_at,
-      is_recurring: true,
-      recurrence_days: selectedCourse?.schedule?.days || [],
+      scheduled_at: sessionData.scheduled_date,
+      time: sessionData.time,
+      is_recurring: sessionData.is_recurring,
+      recurrence_days: sessionData.is_recurring ? (sessionData.recurrence_days || []) : [],
       recurrence_end_date: sessionData.recurrence_end_date,
-      time: selectedCourse?.schedule?.time
     };
 
     try {
@@ -322,7 +329,10 @@ const AdminSessionsPage = () => {
       setCreateSessionForm({
         course: "",
         title: "",
+        time: "",
         scheduled_date: "",
+        is_recurring: true,
+        recurrence_days: [],
         recurrence_end_date: "",
       });
       clearAllCreateSessionErrors();

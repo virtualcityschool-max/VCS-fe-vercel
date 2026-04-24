@@ -20,7 +20,19 @@ const initialState = {
     error: {},
   },
   childAttendance: {
-    // Key: childId, Value: attendance data
+    // Key: childId, Value: attendance summary (used by ChildCard)
+    data: {},
+    loading: {},
+    error: {},
+  },
+  childCourses: {
+    // Key: childId, Value: courses array
+    data: {},
+    loading: {},
+    error: {},
+  },
+  childAttendanceRecords: {
+    // Key: childId, Value: filtered records array (used by ParentAttendance page)
     data: {},
     loading: {},
     error: {},
@@ -42,9 +54,9 @@ export const fetchParentDashboard = createAsyncThunk(
 
 export const linkChildren = createAsyncThunk(
   "parent/linkChildren",
-  async (studentIds, { rejectWithValue }) => {
+  async ({ student_ids, student_emails }, { rejectWithValue }) => {
     try {
-      const response = await authService.linkChild(studentIds);
+      const response = await authService.linkChild({ student_ids, student_emails });
       return response;
     } catch (error) {
       console.error("Failed to link children:", error);
@@ -73,6 +85,30 @@ export const fetchChildAttendance = createAsyncThunk(
     try {
       const response = await parentService.getChildAttendance(childId);
       return { childId, data: response };
+    } catch (error) {
+      return rejectWithValue({ childId, error });
+    }
+  },
+);
+
+export const fetchChildCourses = createAsyncThunk(
+  "parent/fetchChildCourses",
+  async (childId, { rejectWithValue }) => {
+    try {
+      const data = await parentService.getChildCourses(childId);
+      return { childId, data };
+    } catch (error) {
+      return rejectWithValue({ childId, error });
+    }
+  },
+);
+
+export const fetchChildAttendanceRecords = createAsyncThunk(
+  "parent/fetchChildAttendanceRecords",
+  async ({ childId, courseId, from, to }, { rejectWithValue }) => {
+    try {
+      const data = await parentService.getChildAttendanceRecords({ childId, courseId, from, to });
+      return { childId, data };
     } catch (error) {
       return rejectWithValue({ childId, error });
     }
@@ -142,7 +178,7 @@ const parentSlice = createSlice({
         state.childGrades.loading[childId] = false;
         state.childGrades.error[childId] = error;
       })
-      // Child Attendance
+      // Child Attendance (summary — used by ChildCard)
       .addCase(fetchChildAttendance.pending, (state, action) => {
         const childId = action.meta.arg;
         state.childAttendance.loading[childId] = true;
@@ -157,6 +193,38 @@ const parentSlice = createSlice({
         const { childId, error } = action.payload;
         state.childAttendance.loading[childId] = false;
         state.childAttendance.error[childId] = error;
+      })
+      // Child Courses
+      .addCase(fetchChildCourses.pending, (state, action) => {
+        const childId = action.meta.arg;
+        state.childCourses.loading[childId] = true;
+        state.childCourses.error[childId] = null;
+      })
+      .addCase(fetchChildCourses.fulfilled, (state, action) => {
+        const { childId, data } = action.payload;
+        state.childCourses.loading[childId] = false;
+        state.childCourses.data[childId] = Array.isArray(data) ? data : [];
+      })
+      .addCase(fetchChildCourses.rejected, (state, action) => {
+        const { childId, error } = action.payload;
+        state.childCourses.loading[childId] = false;
+        state.childCourses.error[childId] = error;
+      })
+      // Child Attendance Records (filtered — used by ParentAttendance page)
+      .addCase(fetchChildAttendanceRecords.pending, (state, action) => {
+        const { childId } = action.meta.arg;
+        state.childAttendanceRecords.loading[childId] = true;
+        state.childAttendanceRecords.error[childId] = null;
+      })
+      .addCase(fetchChildAttendanceRecords.fulfilled, (state, action) => {
+        const { childId, data } = action.payload;
+        state.childAttendanceRecords.loading[childId] = false;
+        state.childAttendanceRecords.data[childId] = Array.isArray(data) ? data : [];
+      })
+      .addCase(fetchChildAttendanceRecords.rejected, (state, action) => {
+        const { childId, error } = action.payload;
+        state.childAttendanceRecords.loading[childId] = false;
+        state.childAttendanceRecords.error[childId] = error;
       });
   },
 });
@@ -193,5 +261,16 @@ export const selectChildAttendanceLoading = (childId) => (state) =>
   state.parent.childAttendance.loading[childId] || false;
 export const selectChildAttendanceError = (childId) => (state) =>
   state.parent.childAttendance.error[childId];
+
+// Child courses selectors
+export const selectChildCourses = (state) => state.parent.childCourses.data;
+export const selectChildCoursesLoading = (childId) => (state) =>
+  state.parent.childCourses.loading[childId] || false;
+
+// Child attendance records selectors (filtered, for attendance page)
+export const selectChildAttendanceRecords = (state) =>
+  state.parent.childAttendanceRecords.data;
+export const selectChildAttendanceRecordsLoading = (childId) => (state) =>
+  state.parent.childAttendanceRecords.loading[childId] || false;
 
 export default parentSlice.reducer;

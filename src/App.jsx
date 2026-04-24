@@ -27,6 +27,7 @@ import {
   AdminUsersPage,
   AdminEnrollmentsPage,
   AdminSessionsPage,
+  AdminAttendancePage,
   UserDetailsPage,
   StudentPortal,
   TeacherLayout,
@@ -124,6 +125,7 @@ const AppInner = () => {
     if (p.includes("/admin/users") && p.split("/").length <= 4) return "users";
     if (p.includes("/admin/enrollments")) return "enrollments";
     if (p.includes("/admin/sessions")) return "sessions";
+    if (p.includes("/admin/attendance")) return "attendance";
     return null;
   };
 
@@ -261,6 +263,7 @@ const AppInner = () => {
                 <Route path="users" element={<AdminUsersPage />} />
                 <Route path="enrollments" element={<AdminEnrollmentsPage />} />
                 <Route path="sessions" element={<AdminSessionsPage />} />
+                <Route path="attendance" element={<AdminAttendancePage />} />
               </Route>
               <Route path="/admin/users/:id" element={<UserDetailsPage />} />
             </Route>

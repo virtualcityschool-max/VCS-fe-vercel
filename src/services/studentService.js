@@ -90,14 +90,14 @@ export const studentService = {
   },
 
   startSession: async (sessionId) => {
-    const response = await axiosInstance.patch(
-      `/classroom/sessions/${sessionId}/start/`,
+    const response = await axiosInstance.post(
+      `/classroom/sessions/${sessionId}/join/`,
     );
     return response.data;
   },
 
   endSession: async (sessionId) => {
-    const response = await axiosInstance.patch(
+    const response = await axiosInstance.post(
       `/classroom/sessions/${sessionId}/leave/`,
     );
     return response.data;
@@ -508,7 +508,7 @@ export const studentService = {
     try {
       console.log("Fetching student attendance records...");
 
-      const response = await axiosInstance.get("/classroom/my-attendance/", { params });
+      const response = await axiosInstance.get("/classroom/attendance/", { params });
 
       console.log("Student attendance response:", response.data);
 

@@ -268,9 +268,18 @@ const AdminUsersPage = () => {
       {activeModal === "create-user" && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-slate-900 rounded-2xl p-6 w-full max-w-md border border-slate-800 shadow-2xl flex flex-col max-h-[80vh]">
-            <h3 className="text-xl font-bold text-white mb-4 shrink-0">
-              Create User
-            </h3>
+            <div className="flex items-center justify-between mb-5 shrink-0">
+              <div>
+                <h3 className="text-xl font-bold text-white">Create User</h3>
+                <p className="text-xs text-slate-400 mt-0.5">Add a new user to the platform</p>
+              </div>
+              <button
+                onClick={handleCloseCreateUserModal}
+                className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition"
+              >
+                <i className="fas fa-times text-sm" />
+              </button>
+            </div>
 
             <div className="space-y-4 overflow-y-auto flex-1 px-1">
               {/* Username + Email */}
@@ -284,6 +293,7 @@ const AdminUsersPage = () => {
                     onChange={(e) => { setCreateUserForm({ ...createUserForm, username: e.target.value }); if (createUserErrors.username) setCreateUserErrors((prev) => ({ ...prev, username: undefined })); }}
                     className="w-full"
                     placeholder="Username"
+                    autoComplete="off"
                     error={createUserErrors.username}
                   />
                 </div>
@@ -297,6 +307,7 @@ const AdminUsersPage = () => {
                     onChange={(e) => { setCreateUserForm({ ...createUserForm, email: e.target.value }); if (createUserErrors.email) setCreateUserErrors((prev) => ({ ...prev, email: undefined })); }}
                     className="w-full"
                     placeholder="Email"
+                    autoComplete="off"
                     error={createUserErrors.email}
                   />
                 </div>
@@ -311,6 +322,7 @@ const AdminUsersPage = () => {
                     onChange={(e) => { setCreateUserForm({ ...createUserForm, first_name: e.target.value }); if (createUserErrors.first_name) setCreateUserErrors((prev) => ({ ...prev, first_name: undefined })); }}
                     className="w-full"
                     placeholder="First Name"
+                    autoComplete="off"
                     error={createUserErrors.first_name}
                   />
                 </div>
@@ -321,6 +333,7 @@ const AdminUsersPage = () => {
                     onChange={(e) => { setCreateUserForm({ ...createUserForm, last_name: e.target.value }); if (createUserErrors.last_name) setCreateUserErrors((prev) => ({ ...prev, last_name: undefined })); }}
                     className="w-full"
                     placeholder="Last Name"
+                    autoComplete="off"
                     error={createUserErrors.last_name}
                   />
                 </div>
@@ -349,19 +362,11 @@ const AdminUsersPage = () => {
                 <PasswordInput
                   value={createUserForm.password}
                   onChange={(e) => {
-                    setCreateUserForm({
-                      ...createUserForm,
-                      password: e.target.value,
-                    });
-                    // Clear field error when user starts typing
-                    if (createUserErrors.password) {
-                      setCreateUserErrors((prev) => ({
-                        ...prev,
-                        password: undefined,
-                      }));
-                    }
+                    setCreateUserForm({ ...createUserForm, password: e.target.value });
+                    if (createUserErrors.password) setCreateUserErrors((prev) => ({ ...prev, password: undefined }));
                   }}
                   placeholder="Password"
+                  autoComplete="new-password"
                   error={createUserErrors.password}
                   showPassword={showPassword}
                   onTogglePassword={() => setShowPassword(!showPassword)}
@@ -378,24 +383,14 @@ const AdminUsersPage = () => {
                 <PasswordInput
                   value={createUserForm.confirm_password}
                   onChange={(e) => {
-                    setCreateUserForm({
-                      ...createUserForm,
-                      confirm_password: e.target.value,
-                    });
-                    // Clear field error when user starts typing
-                    if (createUserErrors.confirm_password) {
-                      setCreateUserErrors((prev) => ({
-                        ...prev,
-                        confirm_password: undefined,
-                      }));
-                    }
+                    setCreateUserForm({ ...createUserForm, confirm_password: e.target.value });
+                    if (createUserErrors.confirm_password) setCreateUserErrors((prev) => ({ ...prev, confirm_password: undefined }));
                   }}
                   placeholder="Confirm Password"
+                  autoComplete="new-password"
                   error={createUserErrors.confirm_password}
                   showPassword={showConfirmPassword}
-                  onTogglePassword={() =>
-                    setShowConfirmPassword(!showConfirmPassword)
-                  }
+                  onTogglePassword={() => setShowConfirmPassword(!showConfirmPassword)}
                 />
               </div>
 

@@ -137,6 +137,22 @@ const getAllAttendance = async (params = {}) => {
   return response.data;
 };
 
+const bulkMarkAttendance = async (sessionId, records) => {
+  const response = await axiosInstance.post(
+    `/classroom/sessions/${sessionId}/attendance/bulk/`,
+    { records },
+  );
+  return response.data;
+};
+
+const updateStudentAttendance = async (sessionId, studentId, data) => {
+  const response = await axiosInstance.patch(
+    `/classroom/sessions/${sessionId}/attendance/${studentId}/`,
+    data,
+  );
+  return response.data;
+};
+
 const joinLiveSession = async (sessionId) => {
   const response = await axiosInstance.get(`/classroom/sessions/${sessionId}/`);
   return response.data;
@@ -180,6 +196,8 @@ export const teacherService = {
   getSessionAttendance,
   updateSessionAttendance,
   getAllAttendance,
+  bulkMarkAttendance,
+  updateStudentAttendance,
   joinLiveSession,
   startSession,
   endSession,

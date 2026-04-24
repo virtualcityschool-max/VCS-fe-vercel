@@ -174,7 +174,7 @@ const StudentAssignmentDetails = () => {
               </span>
 
               <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-slate-800 text-slate-300">
-                Max Score: {assignment.max_score}
+                Total marks: {assignment.max_score}
               </span>
             </div>
           </div>

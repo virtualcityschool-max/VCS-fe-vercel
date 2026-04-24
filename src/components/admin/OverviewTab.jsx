@@ -42,7 +42,7 @@ const OverviewTab = ({ analytics, analyticsLoading, analyticsError }) => {
             </div>
           ))}
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-2 gap-3">
+        <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 gap-3">
           {[...Array(2)].map((_, i) => (
             <div
               key={i}
@@ -176,7 +176,7 @@ const OverviewTab = ({ analytics, analyticsLoading, analyticsError }) => {
       </div>
 
       {/* Row 2 — Course stats (2 cards) */}
-      <div className="grid grid-cols-2 gap-3 max-w-sm">
+      <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 gap-3">
         <StatCard
           label="Total Courses"
           value={analytics.courses.total}
@@ -246,6 +246,7 @@ const OverviewTab = ({ analytics, analyticsLoading, analyticsError }) => {
                 />
                 <Tooltip
                   {...tooltipStyle}
+                  cursor={false}
                   formatter={(value, name) => [`PKR ${value.toLocaleString()}`, name]}
                   labelFormatter={(label, payload) =>
                     payload?.[0]?.payload?.fullName || label
@@ -294,6 +295,7 @@ const OverviewTab = ({ analytics, analyticsLoading, analyticsError }) => {
                 <YAxis stroke="#94a3b8" allowDecimals={false} tick={{ fontSize: 10 }} />
                 <Tooltip
                   {...tooltipStyle}
+                  cursor={false}
                   formatter={(value) => [value, "Students"]}
                   labelFormatter={(label, payload) =>
                     payload?.[0]?.payload?.fullName || label

@@ -547,42 +547,6 @@ const SessionsTab = ({
                 {createSessionErrors?.course && <p className="text-red-400 text-xs mt-1">{createSessionErrors.course}</p>}
               </div>
 
-              {/* Course schedule info */}
-              {(() => {
-                const selectedCourse = createSessionForm.course
-                  ? courses?.find((c) => c.id === Number(createSessionForm.course))
-                  : null;
-                if (!selectedCourse?.schedule) return null;
-                return (
-                  <div className="p-4 bg-slate-800/40 border border-slate-700/50 rounded-xl space-y-3">
-                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Course Schedule (auto-filled)</p>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-xs font-medium text-slate-400 mb-1.5">Class Time</label>
-                        <input type="time" value={selectedCourse.schedule.time || ""} disabled className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600/50 rounded-lg text-slate-400 text-sm cursor-not-allowed" />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-medium text-slate-400 mb-1.5">Instructor</label>
-                        <input type="text" value={selectedCourse.instructor?.username || "—"} disabled className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600/50 rounded-lg text-slate-400 text-sm cursor-not-allowed" />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-slate-400 mb-1.5">Recurring Days</label>
-                      <div className="flex flex-wrap gap-2">
-                        {["MON","TUE","WED","THU","FRI","SAT","SUN"].map((day) => {
-                          const active = (selectedCourse.schedule.days || []).includes(day);
-                          return (
-                            <span key={day} className={`px-3 py-1.5 rounded-lg text-xs font-medium border ${active ? "bg-indigo-600/40 border-indigo-500/50 text-indigo-300" : "bg-slate-800 border-slate-700 text-slate-600"}`}>
-                              {day}
-                            </span>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })()}
-
               {/* Title */}
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-2">
@@ -598,8 +562,20 @@ const SessionsTab = ({
                 />
               </div>
 
-              {/* Start Date + Recurrence End Date in one row */}
+              {/* Time + Start Date */}
               <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    Class Time <span className="text-red-400">*</span>
+                  </label>
+                  <input
+                    type="time"
+                    value={createSessionForm.time}
+                    onChange={(e) => { setCreateSessionForm({ ...createSessionForm, time: e.target.value }); clearCreateSessionFieldError("time"); }}
+                    className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white focus:outline-none focus:ring-2 text-sm [color-scheme:dark] ${createSessionErrors?.time ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
+                  />
+                  {createSessionErrors?.time && <p className="text-red-400 text-xs mt-1">{createSessionErrors.time}</p>}
+                </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">
                     Start Date <span className="text-red-400">*</span>
@@ -613,22 +589,52 @@ const SessionsTab = ({
                     error={createSessionErrors?.scheduled_date}
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Recurrence End Date <span className="text-red-400">*</span>
-                  </label>
-                  <Input
-                    type="date"
-                    value={createSessionForm.recurrence_end_date}
-                    min={createSessionForm.scheduled_date || new Date().toISOString().split("T")[0]}
-                    onChange={(e) => { setCreateSessionForm({ ...createSessionForm, recurrence_end_date: e.target.value }); clearCreateSessionFieldError("recurrence_end_date"); }}
-                    className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white focus:outline-none focus:ring-2 text-sm ${createSessionErrors?.recurrence_end_date ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
-                    error={createSessionErrors?.recurrence_end_date}
-                  />
-                  {createSessionForm.scheduled_date && createSessionForm.recurrence_end_date && (
-                    <p className="text-slate-500 text-xs mt-1">From {createSessionForm.scheduled_date} to {createSessionForm.recurrence_end_date}</p>
-                  )}
+              </div>
+
+              {/* Recurring Days */}
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  Recurring Days <span className="text-red-400">*</span>
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {["MON","TUE","WED","THU","FRI","SAT","SUN"].map((day) => {
+                    const active = (createSessionForm.recurrence_days || []).includes(day);
+                    return (
+                      <button
+                        key={day}
+                        type="button"
+                        onClick={() => {
+                          const days = createSessionForm.recurrence_days || [];
+                          const next = active ? days.filter((d) => d !== day) : [...days, day];
+                          setCreateSessionForm({ ...createSessionForm, recurrence_days: next });
+                          clearCreateSessionFieldError("recurrence_days");
+                        }}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition ${active ? "bg-indigo-600/40 border-indigo-500/50 text-indigo-300" : "bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-600 hover:text-white"}`}
+                      >
+                        {day}
+                      </button>
+                    );
+                  })}
                 </div>
+                {createSessionErrors?.recurrence_days && <p className="text-red-400 text-xs mt-1">{createSessionErrors.recurrence_days}</p>}
+              </div>
+
+              {/* Recurrence End Date */}
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  Recurrence End Date <span className="text-red-400">*</span>
+                </label>
+                <Input
+                  type="date"
+                  value={createSessionForm.recurrence_end_date}
+                  min={createSessionForm.scheduled_date || new Date().toISOString().split("T")[0]}
+                  onChange={(e) => { setCreateSessionForm({ ...createSessionForm, recurrence_end_date: e.target.value }); clearCreateSessionFieldError("recurrence_end_date"); }}
+                  className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white focus:outline-none focus:ring-2 text-sm ${createSessionErrors?.recurrence_end_date ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
+                  error={createSessionErrors?.recurrence_end_date}
+                />
+                {createSessionForm.scheduled_date && createSessionForm.recurrence_end_date && (
+                  <p className="text-slate-500 text-xs mt-1">From {createSessionForm.scheduled_date} to {createSessionForm.recurrence_end_date}</p>
+                )}
               </div>
 
               <div className="flex gap-3 pt-2">

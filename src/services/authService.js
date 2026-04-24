@@ -454,14 +454,13 @@ export const authService = {
   },
 
   // Link child to parent (parent only)
-  linkChild: async (studentIds) => {
+  linkChild: async ({ student_ids = [], student_emails = [] }) => {
     try {
-      console.log("Linking children:", studentIds);
+      const body = {};
+      if (student_ids.length)    body.student_ids    = student_ids;
+      if (student_emails.length) body.student_emails = student_emails;
 
-      const response = await axiosInstance.post("/auth/me/link-child/", {
-        student_ids: studentIds,
-      });
-      console.log("Link Child Response:", response.data);
+      const response = await axiosInstance.post("/auth/me/link-child/", body);
 
       return {
         success: true,
@@ -469,12 +468,6 @@ export const authService = {
         message: response.data.message || "Link request(s) sent successfully",
       };
     } catch (error) {
-      console.error("Link child error:", {
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message,
-        studentIds: studentIds,
-      });
 
       if (error.response?.status === 400) {
         const backendError = error.response?.data;
