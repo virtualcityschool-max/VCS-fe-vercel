@@ -92,3 +92,41 @@ h3,
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
 }
+
+/* Quill dark theme overrides */
+.ql-toolbar.ql-snow {
+  background: #1e293b;
+  border-color: #334155 !important;
+  border-radius: 0.75rem 0.75rem 0 0;
+}
+.ql-container.ql-snow {
+  background: #0f172a;
+  border-color: #334155 !important;
+  border-radius: 0 0 0.75rem 0.75rem;
+  min-height: 160px;
+  color: #e2e8f0;
+  font-size: 0.875rem;
+}
+.ql-editor.ql-blank::before {
+  color: #64748b !important;
+  font-style: normal;
+}
+.ql-snow .ql-stroke { stroke: #94a3b8 !important; }
+.ql-snow .ql-fill { fill: #94a3b8 !important; }
+.ql-snow .ql-picker { color: #94a3b8 !important; }
+.ql-snow .ql-picker-options { background: #1e293b !important; border-color: #334155 !important; }
+.ql-snow.ql-toolbar button:hover .ql-stroke,
+.ql-snow.ql-toolbar button.ql-active .ql-stroke { stroke: #818cf8 !important; }
+.ql-snow.ql-toolbar button:hover .ql-fill,
+.ql-snow.ql-toolbar button.ql-active .ql-fill { fill: #818cf8 !important; }
+.ql-snow.ql-toolbar button:hover,
+.ql-snow.ql-toolbar button.ql-active { color: #818cf8 !important; }
+
+/* Outline rendered HTML in course detail */
+.course-outline-content h1,
+.course-outline-content h2,
+.course-outline-content h3 { color: #f1f5f9; font-family: var(--font-poppins); margin-bottom: 0.5rem; }
+.course-outline-content p { color: #94a3b8; line-height: 1.7; margin-bottom: 0.5rem; }
+.course-outline-content ul, .course-outline-content ol { color: #94a3b8; padding-left: 1.5rem; margin-bottom: 0.5rem; }
+.course-outline-content strong { color: #e2e8f0; }
+.course-outline-content a { color: #818cf8; }

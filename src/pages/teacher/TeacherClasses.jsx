@@ -1,14 +1,13 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { fetchMyCourses } from "../../store/slices/teacherSlice";
-import CourseStudentsModal from "../../components/courses/CourseStudentsModal";
-import { useState } from "react";
-
+import { formatCategoryLabel } from "../../constants";
 
 const TeacherClasses = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { myCourses, loading, error } = useSelector((state) => state.teachers);
-  const [studentsModal, setStudentsModal] = useState(null);
 
   useEffect(() => {
     if (!myCourses?.length) {
@@ -40,18 +39,10 @@ const TeacherClasses = () => {
           Manage and review the courses you are currently teaching.
         </p>
       </div>
-      {studentsModal && (
-        <CourseStudentsModal
-          courseId={studentsModal.id}
-          courseTitle={studentsModal.title}
-          onClose={() => setStudentsModal(null)}
-          canUnenroll={false}
-        />
-      )}
+
       {myCourses?.length > 0 && (
         <div className="mb-6 text-xs text-slate-400">
-          Showing {myCourses.length} course
-          {myCourses.length > 1 ? "s" : ""}
+          Showing {myCourses.length} course{myCourses.length > 1 ? "s" : ""}
         </div>
       )}
 
@@ -60,22 +51,19 @@ const TeacherClasses = () => {
           myCourses.map((course) => (
             <div
               key={course.id}
-              className="bg-slate-900 p-6 rounded-3xl border border-slate-800 hover:border-indigo-500 transition"
-              onClick={() =>
-                setStudentsModal({ id: course.id, title: course.title })
-              }
+              className="bg-slate-900 p-6 rounded-3xl border border-slate-800 hover:border-indigo-500/60 transition cursor-pointer group"
+              onClick={() => navigate(`/teacher/courses/${course.id}`)}
             >
               <div className="flex items-start justify-between gap-4 mb-4">
-                <div>
-                  <h2 className="text-lg font-bold text-white">
+                <div className="flex-1 min-w-0">
+                  <h2 className="text-lg font-bold text-white group-hover:text-indigo-400 transition truncate">
                     {course.title}
                   </h2>
                   <p className="text-xs text-slate-500 uppercase tracking-widest mt-1">
-                    {course.category} • {course.status}
+                    {formatCategoryLabel(course.category)} • {course.status}
                   </p>
                 </div>
-
-                <div className="text-right">
+                <div className="text-right flex-shrink-0">
                   <p className="text-yellow-400 font-bold text-sm">
                     ⭐ {Number(course.rating || 0).toFixed(1)}
                   </p>
@@ -88,7 +76,10 @@ const TeacherClasses = () => {
 
               <div className="flex items-center justify-between text-xs text-slate-400">
                 <span>{course.total_enrolled} students</span>
-                <span>PKR {course.price}</span>
+                <span className="flex items-center gap-1.5 text-slate-500 group-hover:text-indigo-400 transition">
+                  View details
+                  <i className="fas fa-arrow-right text-xs"></i>
+                </span>
               </div>
             </div>
           ))

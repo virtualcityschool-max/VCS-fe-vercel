@@ -88,6 +88,8 @@ const CourseDetails = () => {
       schedule: course.schedule,
       created_at: course.created_at,
       updated_at: course.updated_at,
+      outline: course.outline || null,
+      attachment: course.attachment || null,
     };
   }, [course, courseId]);
 
@@ -494,6 +496,53 @@ const CourseDetails = () => {
                     </p>
                   </div>
                 </div>
+
+                {/* Course Outline */}
+                {normalizedCourse.outline &&
+                  normalizedCourse.outline.replace(/<[^>]*>/g, "").trim() && (
+                  <div className="mb-8">
+                    <h2 className="text-2xl font-bold font-poppins mb-6 flex items-center gap-3">
+                      <div className="w-8 h-8 bg-indigo-500/20 rounded-lg flex items-center justify-center">
+                        <i className="fas fa-list-alt text-indigo-400 text-sm"></i>
+                      </div>
+                      Course Outline
+                    </h2>
+                    <div className="bg-slate-800/30 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50">
+                      <div
+                        className="course-outline-content"
+                        dangerouslySetInnerHTML={{ __html: normalizedCourse.outline }}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Attachment */}
+                {normalizedCourse.attachment && (
+                  <div className="mb-8">
+                    <h2 className="text-2xl font-bold font-poppins mb-6 flex items-center gap-3">
+                      <div className="w-8 h-8 bg-amber-500/20 rounded-lg flex items-center justify-center">
+                        <i className="fas fa-paperclip text-amber-400 text-sm"></i>
+                      </div>
+                      Course Attachment
+                    </h2>
+                    <a
+                      href={normalizedCourse.attachment}
+                      target="_blank"
+                      rel="noreferrer"
+                      download
+                      className="inline-flex items-center gap-4 px-6 py-4 bg-slate-800/40 hover:bg-slate-700/50 backdrop-blur-sm border border-slate-700/50 hover:border-amber-500/30 rounded-2xl text-white font-medium transition-all duration-200 group"
+                    >
+                      <div className="w-10 h-10 bg-amber-500/20 group-hover:bg-amber-500/30 rounded-xl flex items-center justify-center transition-colors">
+                        <i className="fas fa-download text-amber-400"></i>
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold">Download Attachment</p>
+                        <p className="text-xs text-slate-400">Click to download course material</p>
+                      </div>
+                      <i className="fas fa-arrow-right text-slate-500 group-hover:text-amber-400 group-hover:translate-x-1 transition-all ml-auto"></i>
+                    </a>
+                  </div>
+                )}
 
                 {/* Course Schedule */}
                 {normalizedCourse.schedule && (

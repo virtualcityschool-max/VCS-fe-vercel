@@ -75,8 +75,7 @@ const UserProfileDropdown = ({ dropUp = false, isCollapsed = false }) => {
 
   const handleProfile = () => {
     setIsDropdownOpen(false);
-    // Navigate to profile page when implemented
-    toastManager.success("Profile page coming soon!");
+    navigate("/profile");
   };
 
   // Close dropdown when clicking outside

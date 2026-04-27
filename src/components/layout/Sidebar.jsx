@@ -167,37 +167,45 @@ const Sidebar = ({
     `}>
 
       {/* ── Header ── */}
-      <div className={`border-b border-slate-800/80 flex items-center flex-shrink-0 h-20 overflow-hidden
-        ${isCollapsed ? "justify-center px-0" : "px-5 gap-3"}`}>
-
-        <div className={`flex-shrink-0 transition-all duration-300 ${isCollapsed ? "w-10 h-10" : "w-14 h-14"}`}>
-          <img src="/assets/logo.png" alt="VCS" className="w-full h-full object-contain" />
+      {isCollapsed ? (
+        /* Collapsed: logo02 + expand button on same line */
+        <div className="border-b border-slate-800/80 flex-shrink-0 flex items-center justify-between px-3 h-16">
+          <div className="w-9 h-9 flex-shrink-0">
+            <img src="/assets/logo02.png" alt="VCS" className="w-full h-full object-contain" />
+          </div>
+          <button
+            onClick={onToggleCollapse}
+            className="hidden lg:flex items-center justify-center w-7 h-7 rounded-lg
+              text-slate-500 hover:text-white hover:bg-slate-800 transition-all duration-200"
+            title="Expand sidebar"
+          >
+            <i className="fas fa-chevron-right text-xs" />
+          </button>
         </div>
-
-        <div className={`overflow-hidden transition-all duration-300 min-w-0 ${isCollapsed ? "w-0 opacity-0" : "flex-1 opacity-100"}`}>
-          <h1 className="text-base font-black font-poppins text-white leading-tight whitespace-nowrap">Virtual City</h1>
-          <p className="text-[11px] text-slate-500 whitespace-nowrap">{PORTAL_LABEL[role]}</p>
+      ) : (
+        /* Expanded: logo + toggle button on the same line */
+        <div className="border-b border-slate-800/80 flex-shrink-0 flex items-center justify-between px-4 py-3">
+          <div className="w-[170px] h-[90px] flex-shrink-0">
+            <img src="/assets/logo.png" alt="VCS" className="w-full h-full object-contain" />
+          </div>
+          {/* Desktop collapse / mobile close — right of logo */}
+          <button
+            onClick={onToggleCollapse}
+            className="hidden lg:flex items-center justify-center w-7 h-7 rounded-lg flex-shrink-0
+              text-slate-500 hover:text-white hover:bg-slate-800 transition-all duration-200"
+            title="Collapse sidebar"
+          >
+            <i className="fas fa-chevron-left text-xs" />
+          </button>
+          <button
+            onClick={onMobileClose}
+            className="lg:hidden flex items-center justify-center w-7 h-7 rounded-lg flex-shrink-0
+              text-slate-400 hover:text-white hover:bg-slate-800 transition-all duration-200"
+          >
+            <i className="fas fa-times text-sm" />
+          </button>
         </div>
-
-        {/* Mobile close */}
-        <button
-          onClick={onMobileClose}
-          className={`lg:hidden text-slate-400 hover:text-white transition p-1 flex-shrink-0 ${isCollapsed ? "hidden" : ""}`}
-        >
-          <i className="fas fa-times text-lg" />
-        </button>
-
-        {/* Desktop collapse toggle — all roles */}
-        <button
-          onClick={onToggleCollapse}
-          className={`hidden lg:flex items-center justify-center flex-shrink-0 w-7 h-7 rounded-lg
-            text-slate-500 hover:text-white hover:bg-slate-800 transition-all duration-200
-            ${isCollapsed ? "" : "ml-auto"}`}
-          title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-        >
-          <i className={`fas fa-chevron-${isCollapsed ? "right" : "left"} text-xs`} />
-        </button>
-      </div>
+      )}
 
       {/* ── Nav ── */}
       <div className={`flex-1 py-4 overflow-y-auto overflow-x-hidden ${isCollapsed ? "px-3" : "px-4"}`}>

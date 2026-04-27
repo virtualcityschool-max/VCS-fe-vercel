@@ -1,7 +1,7 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button, Card, Input, FilterSelect, SearchInput } from "../../components/ui";
 import { BACKEND_CATEGORIES, formatCategoryLabel } from "../../constants";
-import CourseStudentsModal from "../courses/CourseStudentsModal";
 import CourseForm from "./CourseForm";
 
 const CoursesTab = ({
@@ -30,7 +30,7 @@ const CoursesTab = ({
   courseFilters,
   setCourseFilters,
 }) => {
-  const [studentsModal, setStudentsModal] = useState(null);
+  const navigate = useNavigate();
 
   // Filter courses based on search term and filters
   const filteredCourses = useMemo(() => {
@@ -275,7 +275,7 @@ const CoursesTab = ({
                   key={course.id}
                   className="p-4 sm:p-6 hover:bg-slate-800/30 transition cursor-pointer"
                   onClick={() =>
-                    setStudentsModal({ id: course.id, title: course.title })
+                    navigate(`/admin/courses/${course.id}`)
                   }
                 >
                   <div className="flex flex-col gap-4">
@@ -409,7 +409,7 @@ const CoursesTab = ({
                     key={course.id}
                     className="hover:bg-slate-800/30 transition cursor-pointer"
                     onClick={() =>
-                      setStudentsModal({ id: course.id, title: course.title })
+                      navigate(`/admin/courses/${course.id}`)
                     }
                   >
                     <td className="px-6 py-4">
@@ -621,16 +621,6 @@ const CoursesTab = ({
             </div>
           </div>
         )}
-
-      {/* Enrolled Students Modal */}
-      {studentsModal && (
-        <CourseStudentsModal
-          courseId={studentsModal.id}
-          courseTitle={studentsModal.title}
-          onClose={() => setStudentsModal(null)}
-          canUnenroll={true}
-        />
-      )}
 
       {/* Assign Instructor Modal */}
       {activeModal &&

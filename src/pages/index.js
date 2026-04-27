@@ -19,6 +19,7 @@ export { default as StudentAttendance } from "./student/StudentAttendance";
 export { default as TeacherLayout } from "./teacher/TeacherLayout";
 export { default as TeacherPortal } from "./teacher/TeacherPortal";
 export { default as TeacherClasses } from "./teacher/TeacherClasses";
+export { default as TeacherCourseDetailPage } from "./teacher/TeacherCourseDetailPage";
 export { default as TeacherAttendance } from "./teacher/TeacherAttendance";
 export { default as TeacherGrading } from "./teacher/TeacherGrading";
 export { default as TeacherSubmissions } from "./teacher/TeacherSubmissions";
@@ -30,11 +31,15 @@ export { default as AdminLayout } from "../components/admin/AdminLayout";
 export { default as AdminOverviewPage } from "./admin/AdminOverviewPage";
 export { default as AdminApprovalsPage } from "./admin/AdminApprovalsPage";
 export { default as AdminCoursesPage } from "./admin/AdminCoursesPage";
+export { default as AdminCourseDetailPage } from "./admin/AdminCourseDetailPage";
 export { default as AdminUsersPage } from "./admin/AdminUsersPage";
 export { default as AdminEnrollmentsPage } from "./admin/AdminEnrollmentsPage";
 export { default as AdminSessionsPage } from "./admin/AdminSessionsPage";
 export { default as AdminAttendancePage } from "./admin/AdminAttendance";
 export { default as UserDetailsPage } from "./admin/UserDetailsPage";
+
+// Profile
+export { default as ProfilePage } from "./profile/ProfilePage";
 
 // Parent Pages
 export { default as ParentLayout } from "./parent/ParentLayout";

@@ -243,6 +243,16 @@ export const authService = {
     }
   },
 
+  // Update role-specific profile (student / teacher / parent)
+  updateRoleProfile: async (role, profileData) => {
+    try {
+      const response = await axiosInstance.patch(`/auth/me/profile/${role}/`, profileData);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
   // Update Profile
   updateProfile: async (profileData) => {
     try {

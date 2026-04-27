@@ -24,6 +24,8 @@ import {
   AdminOverviewPage,
   AdminApprovalsPage,
   AdminCoursesPage,
+  AdminCourseDetailPage,
+  ProfilePage,
   AdminUsersPage,
   AdminEnrollmentsPage,
   AdminSessionsPage,
@@ -33,6 +35,7 @@ import {
   TeacherLayout,
   TeacherPortal,
   TeacherClasses,
+  TeacherCourseDetailPage,
   TeacherAttendance,
   TeacherGrading,
   TeacherSubmissions,
@@ -240,6 +243,7 @@ const AppInner = () => {
                 path="/student/:id"
                 element={<TeacherInternalStudentProfile />}
               />
+              <Route path="/teacher/courses/:courseId" element={<TeacherCourseDetailPage />} />
             </Route>
 
             {/* Parent-Only Routes */}
@@ -266,6 +270,12 @@ const AppInner = () => {
                 <Route path="attendance" element={<AdminAttendancePage />} />
               </Route>
               <Route path="/admin/users/:id" element={<UserDetailsPage />} />
+              <Route path="/admin/courses/:courseId" element={<AdminCourseDetailPage />} />
+            </Route>
+
+            {/* Profile — all authenticated roles */}
+            <Route element={<ProtectedRoute allowedRoles={["student", "teacher", "admin", "parent"]} />}>
+              <Route path="/profile" element={<ProfilePage />} />
             </Route>
 
             <Route path="*" element={<Navigate to="/" replace />} />

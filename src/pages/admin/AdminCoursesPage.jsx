@@ -38,6 +38,8 @@ const AdminCoursesPage = () => {
     instructor_id: "",
     days_of_recurring: [],
     time: "",
+    outline: "",
+    attachment: null,
   });
 
   const [editCourseForm, setEditCourseForm] = useState({});
@@ -89,6 +91,8 @@ const AdminCoursesPage = () => {
         instructor_id: "",
         days_of_recurring: [],
         time: "",
+        outline: "",
+        attachment: null,
       });
       clearAllCreateCourseErrors();
     } else if (activeModal === null) {
@@ -116,6 +120,9 @@ const AdminCoursesPage = () => {
           days_of_recurring:
             editingCourse.schedule?.days || editingCourse.days_of_recurring || [],
           time: editingCourse.schedule?.time || editingCourse.time || "",
+          outline: editingCourse.outline || "",
+          attachment: null,
+          attachment_url: editingCourse.attachment || null,
         });
       }
     } else {
@@ -181,18 +188,19 @@ const AdminCoursesPage = () => {
     return errors;
   };
 
-  const buildCoursePayload = (formData) => ({
-    title: formData.title,
-    description: formData.description,
-    category: formData.category,
-    price: Number(formData.price),
-    status: formData.status,
-    instructor_id: Number(formData.instructor_id),
-    schedule: {
-      days: formData.days_of_recurring,
-      time: formData.time,
-    },
-  });
+  const buildCoursePayload = (formData) => {
+    const fd = new FormData();
+    fd.append("title", formData.title);
+    fd.append("description", formData.description);
+    fd.append("category", formData.category);
+    fd.append("price", Number(formData.price));
+    fd.append("status", formData.status);
+    fd.append("instructor_id", Number(formData.instructor_id));
+    fd.append("schedule", JSON.stringify({ days: formData.days_of_recurring, time: formData.time }));
+    if (formData.outline) fd.append("outline", formData.outline);
+    if (formData.attachment instanceof File) fd.append("attachment", formData.attachment);
+    return fd;
+  };
 
   // Handle course creation
   const handleCreateCourse = async (courseData) => {
@@ -219,6 +227,8 @@ const AdminCoursesPage = () => {
         instructor_id: "",
         days_of_recurring: [],
         time: "",
+        outline: "",
+        attachment: null,
       });
       clearAllCreateCourseErrors();
     } catch (error) {

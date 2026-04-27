@@ -34,6 +34,11 @@ const processQueue = (error, token = null) => {
 // Add request interceptor for authentication and debugging
 axiosInstance.interceptors.request.use(
   (config) => {
+    // Let axios set Content-Type automatically for multipart uploads
+    if (config.data instanceof FormData) {
+      delete config.headers["Content-Type"];
+    }
+
     // Add Authorization header if token exists
     const token = authStorage.getAccessToken();
     if (token) {
