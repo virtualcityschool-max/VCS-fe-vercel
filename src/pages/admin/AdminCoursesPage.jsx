@@ -170,13 +170,13 @@ const AdminCoursesPage = () => {
       errors.instructor_id = "Instructor is required";
     }
 
-    if (!Array.isArray(formData.days_of_recurring) || !formData.days_of_recurring.length) {
-      errors.days_of_recurring = "Please select at least one recurring day";
-    }
+    // if (!Array.isArray(formData.days_of_recurring) || !formData.days_of_recurring.length) {
+    //   errors.days_of_recurring = "Please select at least one recurring day";
+    // }
 
-    if (!formData.time) {
-      errors.time = "Time is required";
-    }
+    // if (!formData.time) {
+    //   errors.time = "Time is required";
+    // }
 
     return errors;
   };

@@ -288,9 +288,9 @@ const CoursesTab = ({
                         <p className="font-bold text-white text-sm sm:text-base mb-1">
                           {course.title}
                         </p>
-                        <p className="text-xs text-slate-500 mt-1 line-clamp-2">
+                        {/* <p className="text-xs text-slate-500 mt-1 line-clamp-2">
                           {course.description}
-                        </p>
+                        </p> */}
                       </div>
                     </div>
 
