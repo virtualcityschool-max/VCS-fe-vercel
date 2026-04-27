@@ -468,30 +468,7 @@ export const authService = {
         message: response.data.message || "Link request(s) sent successfully",
       };
     } catch (error) {
-
-      if (error.response?.status === 400) {
-        const backendError = error.response?.data;
-        throw {
-          error: backendError?.error || "Invalid link request.",
-          status: 400,
-        };
-      }
-
-      if (error.response?.status === 403) {
-        throw {
-          error: "You don't have permission to link children.",
-          status: 403,
-        };
-      }
-
-      if (error.response?.status === 404) {
-        throw {
-          error: "One or more students not found.",
-          status: 404,
-        };
-      }
-
-      throw new Error(error.message || "Failed to link children");
+      throw error;
     }
   },
 };
