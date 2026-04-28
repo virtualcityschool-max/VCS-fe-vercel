@@ -369,15 +369,11 @@ const AdminEvaluationPage = () => {
               <option value="">
                 {privateList.length === 0 ? "Search first to load students" : "— Select a student —"}
               </option>
-              {privateList.map((s) => {
-                const name  = s.username || s.student?.username || s.name  || `Student #${s.id}`;
-                const email = s.email    || s.student?.email    || "";
-                return (
-                  <option key={s.id} value={s.id}>
-                    {name}{email ? ` (${email})` : ""}
-                  </option>
-                );
-              })}
+              {privateList.map((s) => (
+                <option key={s.enrollment_id} value={s.student_id}>
+                  {s.username}{s.email ? ` (${s.email})` : ""}
+                </option>
+              ))}
             </SelectField>
           )}
 

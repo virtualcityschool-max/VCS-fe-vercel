@@ -14,6 +14,7 @@ import { toastManager } from "../../utils/toastManager";
 import { validateFile, ACCEPT_STRING } from "../../utils/fileValidation";
 import GradingForm from "../../components/teacher/GradingForm";
 import { FilterSelect } from "../../components/ui";
+import { coursesService } from "../../services/coursesService";
 
 const getFilename = (url) => {
   if (!url) return "attachment";
@@ -48,7 +49,11 @@ const TeacherGrading = () => {
     max_score: "",
     status: "published",
     file: null,
+    assignmentType: "public",
+    private_student_ids: [],
   });
+  const [privateStudents, setPrivateStudents] = useState([]);
+  const [loadingPrivateStudents, setLoadingPrivateStudents] = useState(false);
   const [pendingAssignmentId, setPendingAssignmentId] = useState(null);
   const [
     selectedAssignmentForSubmissions,
@@ -117,6 +122,23 @@ const TeacherGrading = () => {
       </div>
     );
   }
+
+  const fetchPrivateStudents = async (courseId) => {
+    setLoadingPrivateStudents(true);
+    setPrivateStudents([]);
+    try {
+      const data = await coursesService.getPrivateStudents(courseId);
+      const list = Array.isArray(data) ? data : (data?.results || []);
+      setPrivateStudents(list);
+      if (list.length > 0) {
+        setForm((prev) => ({ ...prev, private_student_ids: [list[0].student_id] }));
+      }
+    } catch {
+      toastManager.error("Failed to load private students");
+    } finally {
+      setLoadingPrivateStudents(false);
+    }
+  };
 
   const validateForm = () => {
     if (!form.course) return "Please select a course";
@@ -406,7 +428,13 @@ const TeacherGrading = () => {
 
             <FilterSelect
               value={form.course}
-              onChange={(e) => setForm({ ...form, course: e.target.value })}
+              onChange={(e) => {
+                const courseId = e.target.value;
+                setForm({ ...form, course: courseId, private_student_ids: [] });
+                if (form.assignmentType === "private" && courseId) {
+                  fetchPrivateStudents(courseId);
+                }
+              }}
               className="w-full mb-4"
             >
               <option value="">Select Course</option>
@@ -414,6 +442,70 @@ const TeacherGrading = () => {
                 <option key={c.id} value={c.id}>{c.title}</option>
               ))}
             </FilterSelect>
+
+            {/* Public / Private toggle */}
+            <div className="mb-4">
+              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-widest mb-2">
+                Assignment Type
+              </label>
+              <div className="flex gap-2">
+                {["public", "private"].map((type) => (
+                  <button
+                    key={type}
+                    type="button"
+                    onClick={() => {
+                      setForm({ ...form, assignmentType: type, private_student_ids: [] });
+                      if (type === "private" && form.course) {
+                        fetchPrivateStudents(form.course);
+                      }
+                    }}
+                    className={`flex-1 py-2 rounded-xl text-sm font-semibold transition border ${
+                      form.assignmentType === type
+                        ? type === "private"
+                          ? "bg-amber-600 border-amber-600 text-white"
+                          : "bg-indigo-600 border-indigo-600 text-white"
+                        : "bg-slate-800 border-slate-700 text-slate-400 hover:text-white"
+                    }`}
+                  >
+                    <i className={`fas fa-${type === "public" ? "users" : "lock"} mr-2 text-xs`} />
+                    {type.charAt(0).toUpperCase() + type.slice(1)}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Private students multi-select (only when private) */}
+            {form.assignmentType === "private" && (
+              <div className="mb-4">
+                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-widest mb-2">
+                  Private Students
+                  {form.private_student_ids.length > 0 && (
+                    <span className="ml-2 normal-case tracking-normal font-normal text-amber-400">
+                      {form.private_student_ids.length} selected
+                    </span>
+                  )}
+                </label>
+                {!form.course ? (
+                  <p className="text-xs text-slate-500 italic py-2">Select a course first</p>
+                ) : loadingPrivateStudents ? (
+                  <div className="h-10 bg-slate-800 rounded-xl animate-pulse" />
+                ) : privateStudents.length === 0 ? (
+                  <p className="text-xs text-slate-500 italic py-2">No private students enrolled in this course</p>
+                ) : (
+                  <select
+                    value={form.private_student_ids[0] ?? ""}
+                    onChange={(e) => setForm({ ...form, private_student_ids: [Number(e.target.value)] })}
+                    className="w-full p-3 rounded-xl bg-slate-800 border border-amber-700/40 text-white text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/50 appearance-none"
+                  >
+                    {privateStudents.map((s) => (
+                      <option key={s.enrollment_id} value={s.student_id}>
+                        {s.username}{s.email ? ` — ${s.email}` : ""}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+            )}
 
             <input
               type="text"
@@ -486,7 +578,7 @@ const TeacherGrading = () => {
               <button
                 type="button"
                 className="px-4 py-2 bg-slate-700 rounded-xl"
-                onClick={() => { setShowCreateModal(false); setForm({ course: "", title: "", description: "", due_date: "", max_score: "", status: "published", file: null }); }}
+                onClick={() => { setShowCreateModal(false); setPrivateStudents([]); setForm({ course: "", title: "", description: "", due_date: "", max_score: "", status: "published", file: null, assignmentType: "public", private_student_ids: [] }); }}
               >
                 Cancel
               </button>
@@ -512,12 +604,16 @@ const TeacherGrading = () => {
                         max_score: Number(form.max_score),
                         status: form.status,
                         ...(form.file ? { file: form.file } : {}),
+                        ...(form.assignmentType === "private"
+                          ? { private_student_ids: form.private_student_ids }
+                          : {}),
                       }),
                     ).unwrap();
 
                     toastManager.success("Assignment created");
 
                     setShowCreateModal(false);
+                    setPrivateStudents([]);
                     setForm({
                       course: "",
                       title: "",
@@ -526,6 +622,8 @@ const TeacherGrading = () => {
                       max_score: "",
                       status: "published",
                       file: null,
+                      assignmentType: "public",
+                      private_student_ids: [],
                     });
                   } catch (err) {
                     toastManager.error(
