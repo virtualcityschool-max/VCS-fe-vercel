@@ -211,7 +211,7 @@ const OverviewTab = ({ analytics, analyticsLoading, analyticsError }) => {
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-4 text-xs text-slate-400 ml-11 mb-4">
+          {/* <div className="flex items-center gap-4 text-xs text-slate-400 ml-11 mb-4">
             <span className="flex items-center gap-1.5">
               <span className="w-3 h-3 rounded-sm bg-emerald-500 inline-block"></span>
               Earned
@@ -220,7 +220,7 @@ const OverviewTab = ({ analytics, analyticsLoading, analyticsError }) => {
               <span className="w-3 h-3 rounded-sm bg-rose-500 inline-block"></span>
               Lost
             </span>
-          </div>
+          </div> */}
 
           {revenueData.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12">

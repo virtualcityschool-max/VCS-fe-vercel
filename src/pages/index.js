@@ -25,6 +25,7 @@ export { default as TeacherGrading } from "./teacher/TeacherGrading";
 export { default as TeacherSubmissions } from "./teacher/TeacherSubmissions";
 export { default as TeacherSessionCalendar } from "./teacher/TeacherSessionCalendar";
 export { default as TeacherInternalStudentProfile } from "./teacher/TeacherInternalStudentProfile";
+export { default as TeacherEvaluationPage } from "./teacher/TeacherEvaluationPage";
 
 // Admin Pages
 export { default as AdminLayout } from "../components/admin/AdminLayout";

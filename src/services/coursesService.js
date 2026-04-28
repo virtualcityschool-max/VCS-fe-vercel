@@ -126,6 +126,26 @@ export const coursesService = {
     }
   },
 
+  // Get evaluations (teacher/admin)
+  getEvaluations: async (params = {}) => {
+    try {
+      const response = await axiosInstance.get("/courses/evaluations/", { params });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Get privately enrolled students for a course
+  getPrivateStudents: async (courseId) => {
+    try {
+      const response = await axiosInstance.get(`/courses/${courseId}/private-students/`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
   // Get all enrollments
   getAllEnrollments: async () => {
     try {

@@ -25,7 +25,8 @@ const NAV_CONFIG = {
     { label: "Attendance",     to: "/teacher/attendance",  icon: "fas fa-user-check" },
     { label: "My Assignments", to: "/teacher/grading",     icon: "fas fa-clipboard-check" },
     { label: "My Sessions",    to: "/teacher/sessions",    icon: "fas fa-calendar-alt" },
-    { label: "Submissions",    to: "/teacher/submissions", icon: "fas fa-inbox" },
+    { label: "Submissions",    to: "/teacher/submissions",  icon: "fas fa-inbox" },
+    { label: "Evaluations",    to: "/teacher/evaluations",  icon: "fas fa-chart-bar" },
   ],
   student: [
     { label: "Dashboard",   to: "/student",             icon: "fas fa-table-columns",  end: true },

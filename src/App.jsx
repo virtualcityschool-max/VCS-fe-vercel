@@ -49,6 +49,7 @@ import {
   CourseDetails,
   TeacherProfile,
   TeacherInternalStudentProfile,
+  TeacherEvaluationPage,
   TeachersDirectory,
   StudentAssignments,
   StudentAssignmentDetails,
@@ -238,6 +239,7 @@ const AppInner = () => {
                 <Route path="grading" element={<TeacherGrading />} />
                 <Route path="sessions" element={<TeacherSessionCalendar />} />
                 <Route path="submissions" element={<TeacherSubmissions />} />
+                <Route path="evaluations" element={<TeacherEvaluationPage />} />
               </Route>
               <Route
                 path="/student/:id"
