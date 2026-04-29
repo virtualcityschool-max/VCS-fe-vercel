@@ -70,6 +70,32 @@ const createAssignment = async (data) => {
   return response.data;
 };
 
+const getAssignmentById = async (id) => {
+  const response = await axiosInstance.get(`/assignments/${id}/`);
+  return response.data;
+};
+
+const updateAssignment = async (id, data) => {
+  const { file, ...rest } = data;
+  if (file) {
+    const formData = new FormData();
+    Object.entries(rest).forEach(([k, v]) => {
+      if (v !== undefined && v !== null) formData.append(k, v);
+    });
+    formData.append("file", file);
+    const response = await axiosInstance.patch(`/assignments/${id}/`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return response.data;
+  }
+  const response = await axiosInstance.patch(`/assignments/${id}/`, rest);
+  return response.data;
+};
+
+const deleteAssignment = async (id) => {
+  await axiosInstance.delete(`/assignments/${id}/`);
+};
+
 const getSubmissions = async (assignmentId) => {
   const response = await axiosInstance.get(
     `/assignments/${assignmentId}/submissions/`,
@@ -186,6 +212,9 @@ export const teacherService = {
   getMyCourses,
   getAssignments,
   createAssignment,
+  getAssignmentById,
+  updateAssignment,
+  deleteAssignment,
   getSubmissions,
   getSubmissionById,
   getAllSubmissions,

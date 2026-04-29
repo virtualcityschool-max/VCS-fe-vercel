@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchSessions,
@@ -83,21 +83,14 @@ const AdminSessionsPage = () => {
     dispatch(fetchAvailableStudents());
   }, [dispatch]);
 
-  // Auto-select the first teacher when the list loads (runs once)
-  const autoSelected = useRef(false);
-  useEffect(() => {
-    const list = teachers?.data;
-    if (list?.length > 0 && !autoSelected.current) {
-      autoSelected.current = true;
-      setSessionFilters((prev) => ({ ...prev, teacher: String(list[0].id) }));
-    }
-  }, [teachers?.data?.length]); // eslint-disable-line react-hooks/exhaustive-deps
-
   // Re-fetch sessions when teacher filter changes
   useEffect(() => {
     const params = {};
     if (sessionFilters.teacher) params.teacher = sessionFilters.teacher;
-    dispatch(fetchSessions(params));
+    // if(params) {
+
+      dispatch(fetchSessions(params));
+    // }
   }, [dispatch, sessionFilters.teacher]);
 
   // Reset create session form when modal opens/closes

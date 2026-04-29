@@ -30,6 +30,7 @@ import {
   AdminEnrollmentsPage,
   AdminSessionsPage,
   AdminAttendancePage,
+  AdminEvaluationPage,
   UserDetailsPage,
   StudentPortal,
   TeacherLayout,
@@ -130,19 +131,14 @@ const AppInner = () => {
     if (p.includes("/admin/enrollments")) return "enrollments";
     if (p.includes("/admin/sessions")) return "sessions";
     if (p.includes("/admin/attendance")) return "attendance";
+    if (p.includes("/admin/evaluations")) return "evaluations";
     return null;
   };
 
   const totalPendingCount =
     (pendingApprovals?.length || 0) + (pendingChildLinks?.length || 0);
 
-  // Navbar: hide on routes where sidebar is fully active
-  const onSidebarRoute =
-    location.pathname.startsWith("/admin") ||
-    location.pathname.startsWith("/teacher") ||
-    location.pathname.startsWith("/student") ||
-    location.pathname.startsWith("/parent");
-  const showNavbar = !hasSidebar || !onSidebarRoute;
+  const showNavbar = !isLoggedIn;
 
   return (
     <div className="min-h-screen bg-slate-950 selection:bg-indigo-500/30 overflow-x-hidden">
@@ -270,6 +266,7 @@ const AppInner = () => {
                 <Route path="enrollments" element={<AdminEnrollmentsPage />} />
                 <Route path="sessions" element={<AdminSessionsPage />} />
                 <Route path="attendance" element={<AdminAttendancePage />} />
+                <Route path="evaluations" element={<AdminEvaluationPage />} />
               </Route>
               <Route path="/admin/users/:id" element={<UserDetailsPage />} />
               <Route path="/admin/courses/:courseId" element={<AdminCourseDetailPage />} />

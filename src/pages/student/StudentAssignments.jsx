@@ -18,14 +18,15 @@ const StudentAssignments = () => {
   }, [dispatch, assignments?.length]);
 
   const getStatusConfig = (assignment) => {
-    if (assignment.is_overdue) {
+    // debugger
+    if (assignment.status == "overdue") {
       return {
         color: "text-red-500 bg-red-500/10",
         label: "Overdue",
       };
     }
 
-    if (assignment.is_submitted) {
+    if (assignment.status == "submitted" || assignment.status == "graded") {
       return {
         color: "text-blue-500 bg-blue-500/10",
         label: "Submitted",

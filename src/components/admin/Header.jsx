@@ -33,6 +33,16 @@ const Header = ({ activeTab }) => {
           title: "Class Management",
           description: "Create, edit, and manage course classes",
         };
+      case "evaluations":
+        return {
+          title: "Evaluations",
+          description: "Review student performance across teachers and courses",
+        };
+      case "attendance":
+        return {
+          title: "Attendance",
+          description: "Monitor teacher and student attendance across all courses.",
+        };
       default:
         return {
           title: activeTab,

@@ -18,6 +18,7 @@ const NAV_CONFIG = {
     { id: "sessions",    label: "Classes",      icon: "fas fa-chalkboard",    to: "/admin/sessions" },
     { id: "enrollments", label: "Enrollments",  icon: "fas fa-user-graduate", to: "/admin/enrollments" },
     { id: "attendance",  label: "Attendance",   icon: "fas fa-calendar-check", to: "/admin/attendance" },
+    { id: "evaluations", label: "Evaluations",  icon: "fas fa-chart-bar",      to: "/admin/evaluations" },
   ],
   teacher: [
     { label: "Dashboard",      to: "/teacher",             icon: "fas fa-table-columns",  end: true },

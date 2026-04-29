@@ -139,13 +139,7 @@ const AdminAttendance = () => {
   };
 
   return (
-    <div className="text-white px-4 sm:px-6 py-8 space-y-6">
-      <div>
-        <h1 className="text-2xl font-black font-poppins">Attendance</h1>
-        <p className="text-slate-400 text-sm mt-1">
-          Monitor teacher and student attendance across all courses.
-        </p>
-      </div>
+    <div>
 
       {/* Tabs */}
       <div className="flex gap-1 border-b border-slate-800">
@@ -169,7 +163,7 @@ const AdminAttendance = () => {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap items-end gap-3">
+      <div className="flex flex-wrap items-end gap-3 my-2">
         {/* Course */}
         <div className="flex flex-col gap-1">
           <span className="text-[10px] uppercase tracking-widest text-slate-500 font-bold px-0.5">Course</span>

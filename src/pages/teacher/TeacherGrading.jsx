@@ -3,6 +3,8 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   fetchAssignments,
   createAssignment,
+  updateAssignment,
+  deleteAssignment,
   fetchMyCourses,
   fetchSubmissions,
   gradeSubmission,
@@ -60,6 +62,14 @@ const TeacherGrading = () => {
     setSelectedAssignmentForSubmissions,
   ] = useState(null);
   const isProcessingAssignmentRef = useRef(false);
+
+  // View / Edit / Delete state
+  const [viewAssignment, setViewAssignment] = useState(null);
+  const [editTarget, setEditTarget] = useState(null);
+  const [editForm, setEditForm] = useState(null);
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
 
   const dispatch = useDispatch();
   const {
@@ -217,21 +227,18 @@ const TeacherGrading = () => {
           assignments.map((assignment) => (
             <div
               key={assignment.id}
-              className="bg-slate-900 p-6 rounded-3xl border border-slate-800 hover:border-indigo-500 transition transform hover:-translate-y-1 "
+              className="bg-slate-900 p-6 rounded-3xl border border-slate-800 hover:border-indigo-500/50 transition"
             >
-              <div className="flex items-center justify-between gap-4">
-                <div>
+              <div className="flex items-start justify-between gap-4">
+                {/* Left: info */}
+                <div className="flex-1 min-w-0">
                   <h2 className="font-bold text-white">{assignment.title}</h2>
-
                   <p className="text-[10px] text-slate-500 uppercase tracking-widest mt-1">
                     {assignment.course_title}
                   </p>
-
                   <p className="text-xs text-slate-400 mt-2">
-                    {assignment.submissions_count} submissions • Max Score{" "}
-                    {assignment.max_score}
+                    {assignment.submissions_count} submission{assignment.submissions_count !== 1 ? "s" : ""} &nbsp;·&nbsp; Max Score {assignment.max_score}
                   </p>
-
                   {assignment.file && (
                     <div className="mt-3">
                       <DownloadButton url={assignment.file} label="Download Assignment File" />
@@ -239,32 +246,72 @@ const TeacherGrading = () => {
                   )}
                 </div>
 
-                <div className="text-right">
-                  <p
-                    className={`text-xs font-bold ${
-                      assignment.is_overdue
-                        ? "text-rose-500"
-                        : "text-emerald-400"
-                    }`}
-                  >
+                {/* Right: status + actions + submissions */}
+                <div className="flex flex-col items-end gap-3 flex-shrink-0">
+                  {/* Status */}
+                  <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
+                    assignment.is_overdue
+                      ? "bg-rose-500/15 text-rose-400"
+                      : "bg-emerald-500/15 text-emerald-400"
+                  }`}>
                     {assignment.is_overdue ? "Overdue" : "Active"}
-                  </p>
+                  </span>
 
+                  {/* Action icons */}
+                  <div className="flex items-center gap-1">
+                    {/* View */}
+                    <button
+                      type="button"
+                      title="View assignment"
+                      onClick={() => setViewAssignment(assignment)}
+                      className="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-800 hover:bg-indigo-600/20 text-slate-400 hover:text-indigo-400 border border-slate-700 hover:border-indigo-500/40 transition"
+                    >
+                      <i className="fas fa-eye text-xs" />
+                    </button>
+                    {/* Edit */}
+                    <button
+                      type="button"
+                      title="Edit assignment"
+                      onClick={() => {
+                        setEditTarget(assignment);
+                        setEditForm({
+                          title: assignment.title,
+                          description: assignment.description || "",
+                          due_date: assignment.due_date
+                            ? assignment.due_date.slice(0, 16)
+                            : "",
+                          max_score: String(assignment.max_score),
+                          status: assignment.status || "published",
+                          file: null,
+                        });
+                      }}
+                      className="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-800 hover:bg-amber-600/20 text-slate-400 hover:text-amber-400 border border-slate-700 hover:border-amber-500/40 transition"
+                    >
+                      <i className="fas fa-pencil text-xs" />
+                    </button>
+                    {/* Delete */}
+                    <button
+                      type="button"
+                      title="Delete assignment"
+                      onClick={() => setDeleteTarget(assignment)}
+                      className="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-800 hover:bg-rose-600/20 text-slate-400 hover:text-rose-400 border border-slate-700 hover:border-rose-500/40 transition"
+                    >
+                      <i className="fas fa-trash text-xs" />
+                    </button>
+                  </div>
+
+                  {/* View submissions */}
                   <button
                     type="button"
-                    className="mt-3 bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-xl text-xs font-bold transition"
+                    className="bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-xl text-xs font-bold transition"
                     onClick={() => {
                       setPendingAssignmentId(assignment.id);
                       dispatch(fetchSubmissions(assignment.id));
                     }}
-                    disabled={
-                      loadingSubmissions &&
-                      pendingAssignmentId === assignment.id
-                    }
+                    disabled={loadingSubmissions && pendingAssignmentId === assignment.id}
                   >
-                    {loadingSubmissions &&
-                    pendingAssignmentId === assignment.id ? (
-                      <i className="fas fa-spinner animate-spin"></i>
+                    {loadingSubmissions && pendingAssignmentId === assignment.id ? (
+                      <i className="fas fa-spinner animate-spin" />
                     ) : (
                       "View Submissions"
                     )}
@@ -303,14 +350,18 @@ const TeacherGrading = () => {
                     </div>
 
                     <button
-                      className="bg-indigo-600 px-3 py-1 rounded text-xs"
+                      className={`px-3 py-1 rounded text-xs ${
+                        sub.status === "graded"
+                          ? "bg-green-600"
+                          : "bg-indigo-600"
+                      }`}
                       onClick={() => {
                         dispatch(clearSelectedSubmission());
                         dispatch(fetchSubmissionById(sub.id));
                         setSelectedAssignment(sub.id);
                       }}
                     >
-                      Grade
+                      {sub.status === "graded" ? "Graded" : "Grade"}
                     </button>
                   </div>
                 ))
@@ -407,6 +458,9 @@ const TeacherGrading = () => {
                         toastManager.success("Submission graded");
                       }
 
+                      if (selectedAssignmentForSubmissions?.id) {
+                        dispatch(fetchSubmissions(selectedAssignmentForSubmissions.id));
+                      }
                       setSelectedAssignment(null);
                       dispatch(clearSelectedSubmission());
                     } catch (err) {
@@ -416,6 +470,302 @@ const TeacherGrading = () => {
                 />
               </>
             ) : null}
+          </div>
+        </div>
+      )}
+
+      {/* ── VIEW MODAL ── */}
+      {viewAssignment && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-900 rounded-3xl border border-slate-800 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800">
+              <h2 className="font-bold text-white text-sm">Assignment Details</h2>
+              <button
+                onClick={() => setViewAssignment(null)}
+                className="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-white transition"
+              >
+                <i className="fas fa-times text-xs" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-5">
+              {/* Title */}
+              <div>
+                <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Title</p>
+                <p className="text-white font-semibold">{viewAssignment.title}</p>
+              </div>
+
+              {/* Course */}
+              <div>
+                <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Course</p>
+                <p className="text-slate-300 text-sm">{viewAssignment.course_title}</p>
+              </div>
+
+              {/* Description */}
+              <div>
+                <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Description</p>
+                <p className="text-slate-300 text-sm whitespace-pre-wrap">{viewAssignment.description || "—"}</p>
+              </div>
+
+              {/* Meta row */}
+              <div className="grid grid-cols-3 gap-3">
+                <div className="bg-slate-800/60 rounded-2xl p-3">
+                  <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Max Score</p>
+                  <p className="text-white font-bold">{viewAssignment.max_score}</p>
+                </div>
+                <div className="bg-slate-800/60 rounded-2xl p-3">
+                  <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Status</p>
+                  <p className={`text-xs font-bold capitalize ${viewAssignment.status === "published" ? "text-emerald-400" : "text-slate-400"}`}>
+                    {viewAssignment.status}
+                  </p>
+                </div>
+                <div className="bg-slate-800/60 rounded-2xl p-3">
+                  <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Submissions</p>
+                  <p className="text-white font-bold">{viewAssignment.submissions_count}</p>
+                </div>
+              </div>
+
+              {/* Due date */}
+              <div>
+                <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Due Date</p>
+                <p className="text-slate-300 text-sm">
+                  {viewAssignment.due_date
+                    ? new Date(viewAssignment.due_date).toLocaleString()
+                    : "—"}
+                </p>
+              </div>
+
+              {/* File */}
+              {viewAssignment.file && (
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-2">Attachment</p>
+                  <DownloadButton url={viewAssignment.file} label="Download Assignment File" />
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── EDIT MODAL ── */}
+      {editTarget && editForm && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-900 rounded-3xl border border-slate-800 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800">
+              <div>
+                <h2 className="font-bold text-white text-sm">Edit Assignment</h2>
+                <p className="text-[10px] text-slate-500 mt-0.5">{editTarget.course_title}</p>
+              </div>
+              <button
+                onClick={() => { setEditTarget(null); setEditForm(null); }}
+                className="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-white transition"
+              >
+                <i className="fas fa-times text-xs" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              {/* Title */}
+              <div>
+                <label className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1.5 block">Title</label>
+                <input
+                  type="text"
+                  value={editForm.title}
+                  onChange={(e) => setEditForm((p) => ({ ...p, title: e.target.value.trimStart() }))}
+                  className="w-full p-3 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                />
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1.5 block">Description</label>
+                <textarea
+                  rows={4}
+                  value={editForm.description}
+                  onChange={(e) => setEditForm((p) => ({ ...p, description: e.target.value }))}
+                  className="w-full p-3 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 resize-none"
+                />
+              </div>
+
+              {/* Due date + Max score row */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1.5 block">Due Date</label>
+                  <input
+                    type="datetime-local"
+                    value={editForm.due_date}
+                    onChange={(e) => setEditForm((p) => ({ ...p, due_date: e.target.value }))}
+                    className="w-full p-3 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1.5 block">Max Score</label>
+                  <input
+                    type="number"
+                    min={1}
+                    value={editForm.max_score}
+                    onChange={(e) => setEditForm((p) => ({ ...p, max_score: e.target.value }))}
+                    className="w-full p-3 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                  />
+                </div>
+              </div>
+
+              {/* Status */}
+              <div>
+                <label className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1.5 block">Status</label>
+                <div className="flex gap-2">
+                  {["published", "draft"].map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => setEditForm((p) => ({ ...p, status: s }))}
+                      className={`flex-1 py-2.5 rounded-xl text-xs font-semibold transition border ${
+                        editForm.status === s
+                          ? "bg-indigo-600 border-indigo-600 text-white"
+                          : "bg-slate-800 border-slate-700 text-slate-400 hover:text-white"
+                      }`}
+                    >
+                      {s.charAt(0).toUpperCase() + s.slice(1)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* File */}
+              <div>
+                <label className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1.5 block">
+                  Attachment <span className="normal-case tracking-normal font-normal text-slate-600">(replace existing — optional)</span>
+                </label>
+                {editTarget.file && !editForm.file && (
+                  <div className="mb-2">
+                    <DownloadButton url={editTarget.file} label="Current file" />
+                  </div>
+                )}
+                <label className="flex items-center gap-3 w-full p-3 rounded-xl bg-slate-800 border border-slate-700 cursor-pointer hover:border-indigo-500 transition group">
+                  <i className="fas fa-paperclip text-slate-500 group-hover:text-indigo-400 transition" />
+                  <span className="text-sm text-slate-400 truncate flex-1">
+                    {editForm.file ? editForm.file.name : "Click to upload new file…"}
+                  </span>
+                  {editForm.file && (
+                    <button
+                      type="button"
+                      onClick={(e) => { e.preventDefault(); setEditForm((p) => ({ ...p, file: null })); }}
+                      className="text-slate-500 hover:text-red-400 transition"
+                    >
+                      <i className="fas fa-times text-xs" />
+                    </button>
+                  )}
+                  <input
+                    type="file"
+                    accept={ACCEPT_STRING}
+                    className="hidden"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0] || null;
+                      e.target.value = "";
+                      if (f && validateFile(f)) setEditForm((p) => ({ ...p, file: f }));
+                    }}
+                  />
+                </label>
+              </div>
+
+              {/* Footer buttons */}
+              <div className="flex gap-3 justify-end pt-2">
+                <button
+                  type="button"
+                  onClick={() => { setEditTarget(null); setEditForm(null); }}
+                  className="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-xl text-sm transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  disabled={savingEdit || !editForm.title.trim() || !editForm.max_score}
+                  onClick={async () => {
+                    setSavingEdit(true);
+                    try {
+                      await dispatch(
+                        updateAssignment({
+                          id: editTarget.id,
+                          data: {
+                            title: editForm.title.trim(),
+                            description: editForm.description.trim(),
+                            due_date: editForm.due_date,
+                            max_score: Number(editForm.max_score),
+                            status: editForm.status,
+                            ...(editForm.file ? { file: editForm.file } : {}),
+                          },
+                        })
+                      ).unwrap();
+                      toastManager.success("Assignment updated");
+                      setEditTarget(null);
+                      setEditForm(null);
+                    } catch (err) {
+                      toastManager.error(err?.message || err?.title?.[0] || "Failed to update");
+                    } finally {
+                      setSavingEdit(false);
+                    }
+                  }}
+                  className="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 rounded-xl text-sm font-semibold transition flex items-center gap-2"
+                >
+                  {savingEdit && <i className="fas fa-spinner animate-spin text-xs" />}
+                  Save Changes
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── DELETE CONFIRM MODAL ── */}
+      {deleteTarget && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-900 rounded-3xl border border-slate-800 w-full max-w-sm p-6 space-y-5">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-rose-500/15 border border-rose-500/20 flex items-center justify-center flex-shrink-0">
+                <i className="fas fa-trash text-rose-400 text-sm" />
+              </div>
+              <div>
+                <h3 className="font-bold text-white text-sm">Delete Assignment</h3>
+                <p className="text-slate-400 text-xs mt-0.5">This action cannot be undone</p>
+              </div>
+            </div>
+
+            <p className="text-slate-300 text-sm">
+              Are you sure you want to delete <span className="font-semibold text-white">"{deleteTarget.title}"</span>? All submissions linked to it will also be removed.
+            </p>
+
+            <div className="flex gap-3 justify-end">
+              <button
+                type="button"
+                onClick={() => setDeleteTarget(null)}
+                disabled={!!deletingId}
+                className="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-xl text-sm transition disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={!!deletingId}
+                onClick={async () => {
+                  setDeletingId(deleteTarget.id);
+                  try {
+                    await dispatch(deleteAssignment(deleteTarget.id)).unwrap();
+                    toastManager.success("Assignment deleted");
+                    setDeleteTarget(null);
+                  } catch (err) {
+                    toastManager.error(err?.message || "Failed to delete");
+                  } finally {
+                    setDeletingId(null);
+                  }
+                }}
+                className="px-5 py-2 bg-rose-600 hover:bg-rose-500 disabled:opacity-50 rounded-xl text-sm font-semibold transition flex items-center gap-2"
+              >
+                {deletingId && <i className="fas fa-spinner animate-spin text-xs" />}
+                Delete
+              </button>
+            </div>
           </div>
         </div>
       )}

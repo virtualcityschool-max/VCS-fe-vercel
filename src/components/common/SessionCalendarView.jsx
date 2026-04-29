@@ -141,7 +141,7 @@ const SessionCalendarView = ({ sessions = [], loading = false }) => {
   return (
     <div className="space-y-4">
       {/* Schedule info strip */}
-      {calendarStart && calendarEnd && (() => {
+      {/* {calendarStart && calendarEnd && (() => {
         const ref = parentSessions.length > 0 ? parentSessions[0] : sessions[0];
         return (
           <div className="bg-slate-800/60 border border-slate-700 rounded-2xl px-5 py-4 flex flex-wrap items-center gap-4">
@@ -180,7 +180,7 @@ const SessionCalendarView = ({ sessions = [], loading = false }) => {
             </div>
           </div>
         );
-      })()}
+      })()} */}
 
       {/* Month navigation */}
       <div className="flex items-center justify-between bg-slate-900/50 border border-slate-800 rounded-2xl px-5 py-3">

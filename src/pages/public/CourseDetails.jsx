@@ -156,7 +156,7 @@ const CourseDetails = () => {
 
         // Show success message (use backend message if available)
         const successMessage =
-          response?.message || `Successfully enrolled in ${courseTitle}`;
+          response?.message || `Successfully made enrollment request for ${courseTitle}`;
         toastManager.success(successMessage);
 
         // Close modal
@@ -200,7 +200,7 @@ const CourseDetails = () => {
         ).unwrap();
 
         const successMessage =
-          response?.message || `Successfully enrolled in ${courseTitle}`;
+          response?.message || `Successfully made enrollment request for ${courseTitle}`;
         toastManager.success(successMessage);
 
         setEnrollmentModalOpen(false);

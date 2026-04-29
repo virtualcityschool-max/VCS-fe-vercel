@@ -215,7 +215,7 @@ const Marketplace = () => {
         const response = await dispatch(enrollInCourseNormal(courseId)).unwrap();
 
         const successMessage =
-          response?.message || `Successfully enrolled in ${courseTitle}`;
+          response?.message || `Successfully made enrollment request for ${courseTitle}`;
         toastManager.success(successMessage);
 
         setEnrollmentModalOpen(false);
@@ -257,7 +257,7 @@ const Marketplace = () => {
         ).unwrap();
 
         const successMessage =
-          response?.message || `Successfully enrolled in ${courseTitle}`;
+          response?.message || `Successfully made enrollment request for ${courseTitle}`;
         toastManager.success(successMessage);
 
         setEnrollmentModalOpen(false);
@@ -304,7 +304,7 @@ const Marketplace = () => {
     await submissionGuard.guard(async () => {
       try {
         await dispatch(unenrollFromCourse(courseId)).unwrap();
-        toastManager.success(`Successfully unenrolled from ${courseTitle}`);
+        toastManager.success(`Successfully made enrollment request for ${courseTitle}`);
 
         // Refresh courses to update enrollment status
         dispatch(fetchAllCourses());
@@ -564,14 +564,16 @@ const Marketplace = () => {
                             unenrollingCourseIds.includes(course.id)
                           }
                           className={`w-full mt-auto py-2.5 font-black text-[11px] uppercase tracking-[0.18em] rounded-xl transition-all active:scale-95 ${
-                            enrolled
-                              ? unenrollingCourseIds.includes(course.id)
-                                ? "bg-red-600/50 text-red-400 cursor-not-allowed"
-                                : "bg-red-600/20 border border-red-600/30 text-red-400 hover:bg-red-600 hover:text-white"
-                              : enrollingCourseIds.includes(course.id)
-                                ? "bg-slate-600 text-slate-400 cursor-not-allowed"
-                                : "bg-slate-900 border border-blue-600/30 text-blue-500 hover:bg-blue-600 hover:text-white"
-                          }`}
+                              enrolled
+                                ? unenrollingCourseIds.includes(course.id)
+                                  ? "bg-red-600/50 text-red-400 cursor-not-allowed"
+                                  : "bg-red-600/20 border border-red-600/30 text-red-400 hover:bg-red-600 hover:text-white"
+                                : course.enrollment_status === "pending"
+                                  ? "bg-yellow-600/20 border border-yellow-500/30 text-yellow-400 hover:bg-yellow-500 hover:text-white"
+                                  : enrollingCourseIds.includes(course.id)
+                                    ? "bg-slate-600 text-slate-400 cursor-not-allowed"
+                                    : "bg-slate-900 border border-blue-600/30 text-blue-500 hover:bg-blue-600 hover:text-white"
+                                    }`}
                         >
                           {enrolled
                             ? unenrollingCourseIds.includes(course.id)
@@ -579,7 +581,7 @@ const Marketplace = () => {
                               : "Unenroll"
                             : enrollingCourseIds.includes(course.id)
                               ? "Enrolling..."
-                              : "Enroll Now"}
+                              :course.enrollment_status == "pending"? "Pending" : "Enroll Now"}
                         </button>
                       );
                     })()}

@@ -37,6 +37,7 @@ export { default as AdminUsersPage } from "./admin/AdminUsersPage";
 export { default as AdminEnrollmentsPage } from "./admin/AdminEnrollmentsPage";
 export { default as AdminSessionsPage } from "./admin/AdminSessionsPage";
 export { default as AdminAttendancePage } from "./admin/AdminAttendance";
+export { default as AdminEvaluationPage } from "./admin/AdminEvaluationPage";
 export { default as UserDetailsPage } from "./admin/UserDetailsPage";
 
 // Profile

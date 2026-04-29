@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { Button, FilterSelect, Input } from "../../components/ui";
+import SessionCalendarView from "../common/SessionCalendarView";
 
 const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MONTH_NAMES = [
@@ -218,9 +219,10 @@ const SessionsTab = ({
             <span className="hidden sm:inline">Calendar</span>
           </button>
         </div>
+        <div class="flex gap-3 ml-auto">
 
         {/* Month nav — inline, only in calendar view with data */}
-        {view === "calendar" && activeMonthData && (
+        {/* {view === "calendar" && activeMonthData && (
           <div className="flex items-center gap-1 bg-slate-800 border border-slate-700 rounded-lg px-1 py-1 shrink-0">
             <button
               onClick={() => setCalendarMonth(monthRange[Math.max(0, activeMonthIdx - 1)])}
@@ -240,7 +242,7 @@ const SessionsTab = ({
               <i className="fas fa-chevron-right text-xs"></i>
             </button>
           </div>
-        )}
+        )} */}
 
         {/* Date range — only in calendar view when range is known */}
         {view === "calendar" && calendarStart && calendarEnd && (
@@ -263,16 +265,18 @@ const SessionsTab = ({
             value={sessionFilters.teacher}
             onChange={(e) => setSessionFilters({ ...sessionFilters, teacher: e.target.value })}
           >
+            <option value="" selected>All Teachers</option>
             {teachers.map((t) => (
               <option key={t.id} value={t.id}>{t.username}</option>
             ))}
           </FilterSelect>
         </div>
+      </div>
 
         {/* Create Class — pushed to the right */}
         <button
           onClick={() => setActiveModal("create-session")}
-          className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-lg active:scale-95 transition flex items-center gap-2 ml-auto shrink-0"
+          className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-lg active:scale-95 transition flex items-center gap-2 shrink-0"
         >
           <i className="fas fa-plus text-xs"></i>
           <span>Create Class</span>
@@ -408,107 +412,7 @@ const SessionsTab = ({
 
       {/* ── CALENDAR VIEW ── */}
       {view === "calendar" && (
-        <div className="space-y-4">
-          {/* No data state */}
-          {monthRange.length === 0 && !loading && (
-            <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-16 text-center">
-              <div className="w-16 h-16 bg-slate-700/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i className="fas fa-calendar text-slate-400 text-xl"></i>
-              </div>
-              <p className="text-white font-bold mb-1">No Sessions to Display</p>
-              <p className="text-slate-400 text-sm">Select a teacher to see their calendar.</p>
-            </div>
-          )}
-
-          {monthRange.length > 0 && (
-            <>
-              {/* Calendar grid */}
-              <div className="bg-slate-900/50 border border-slate-800 rounded-2xl overflow-hidden">
-                {/* Day-of-week header */}
-                <div className="grid grid-cols-7 border-b border-slate-800">
-                  {DAY_LABELS.map((d) => (
-                    <div key={d} className="px-2 py-3 text-center text-xs font-black uppercase text-slate-500 bg-slate-950/60">
-                      {d}
-                    </div>
-                  ))}
-                </div>
-
-                {/* Calendar cells */}
-                <div className="grid grid-cols-7">
-                  {calendarGrid.map((day, idx) => {
-                    if (!day) {
-                      return <div key={`blank-${idx}`} className="min-h-[100px] border-b border-r border-slate-800/50 bg-slate-900/20" />;
-                    }
-
-                    const cellKey = `${activeMonthData.year}-${activeMonthData.month}-${day}`;
-                    const daySessions = sessionsByDate[cellKey] || [];
-                    const isToday = cellKey === todayKey;
-                    const isInRange =
-                      calendarStart && calendarEnd &&
-                      new Date(activeMonthData.year, activeMonthData.month, day) >= new Date(calendarStart.getFullYear(), calendarStart.getMonth(), calendarStart.getDate()) &&
-                      new Date(activeMonthData.year, activeMonthData.month, day) <= new Date(calendarEnd.getFullYear(), calendarEnd.getMonth(), calendarEnd.getDate());
-
-                    return (
-                      <div
-                        key={cellKey}
-                        className={`min-h-[100px] border-b border-r border-slate-800/50 p-1.5 flex flex-col gap-1 ${
-                          isToday
-                            ? "bg-indigo-900/20"
-                            : isInRange && daySessions.length > 0
-                              ? "bg-slate-800/20"
-                              : ""
-                        }`}
-                      >
-                        {/* Day number */}
-                        <span className={`text-xs font-bold w-6 h-6 flex items-center justify-center rounded-full self-end ${
-                          isToday
-                            ? "bg-indigo-600 text-white"
-                            : daySessions.length > 0
-                              ? "text-white"
-                              : "text-slate-600"
-                        }`}>
-                          {day}
-                        </span>
-
-                        {/* Session cards in this cell */}
-                        {daySessions.map((session) => (
-                          <div
-                            key={session.id}
-                            className="bg-white rounded-lg p-2 shadow-sm hover:shadow-md transition cursor-pointer group"
-                            onClick={() => onSessionEdit(session.id)}
-                          >
-                            {/* Date + time */}
-                            <div className="flex items-center justify-between mb-1">
-                              <span className="text-xs font-bold text-indigo-700">
-                                {new Date(session.scheduled_at).toLocaleDateString([], { month: "short", day: "numeric" })}
-                              </span>
-                              <span className="text-xs text-slate-500">
-                                {formatTime(session.scheduled_at)}
-                              </span>
-                            </div>
-
-                            {/* Title */}
-                            <p className="text-xs font-bold text-gray-900 leading-tight line-clamp-2 mb-1">
-                              {session.title}
-                            </p>
-
-                            {/* Course */}
-                            <p className="text-xs text-indigo-600 truncate mb-1.5">
-                              {session.course?.title || session.course_title || "—"}
-                            </p>
-
-                            {/* Status badge */}
-                            {getStatusBadge(session.status)}
-                          </div>
-                        ))}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </>
-          )}
-        </div>
+        <SessionCalendarView sessions={filteredSessions} loading={loading} />
       )}
 
       {/* ── CREATE CLASS MODAL ── */}

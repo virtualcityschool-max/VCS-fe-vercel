@@ -97,6 +97,29 @@ export const createAssignment = createAsyncThunk(
   },
 );
 
+export const updateAssignment = createAsyncThunk(
+  "teachers/updateAssignment",
+  async ({ id, data }, { rejectWithValue }) => {
+    try {
+      return await teacherService.updateAssignment(id, data);
+    } catch (err) {
+      return rejectWithValue(err?.response?.data || err?.message || "Failed to update assignment");
+    }
+  },
+);
+
+export const deleteAssignment = createAsyncThunk(
+  "teachers/deleteAssignment",
+  async (id, { rejectWithValue }) => {
+    try {
+      await teacherService.deleteAssignment(id);
+      return id;
+    } catch (err) {
+      return rejectWithValue(err?.response?.data?.error || err?.message || "Failed to delete assignment");
+    }
+  },
+);
+
 export const fetchAllSubmissions = createAsyncThunk(
   "teachers/fetchAllSubmissions",
   async (params = {}, { rejectWithValue }) => {
@@ -450,6 +473,18 @@ const teacherSlice = createSlice({
       .addCase(createAssignment.rejected, (state, action) => {
         state.loadingCreateAssignment = false;
         state.errorCreateAssignment = action.payload;
+      })
+
+      // UPDATE ASSIGNMENT
+      .addCase(updateAssignment.fulfilled, (state, action) => {
+        state.assignments = state.assignments.map((a) =>
+          a.id === action.payload.id ? action.payload : a
+        );
+      })
+
+      // DELETE ASSIGNMENT
+      .addCase(deleteAssignment.fulfilled, (state, action) => {
+        state.assignments = state.assignments.filter((a) => a.id !== action.payload);
       })
 
       // ALL SUBMISSIONS
