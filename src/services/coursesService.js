@@ -126,6 +126,26 @@ export const coursesService = {
     }
   },
 
+  // Get grading scale (public, no auth)
+  getGradingScale: async () => {
+    try {
+      const response = await axiosInstance.get("/courses/grading-scale/");
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Update grading scale (admin only, send only changed fields)
+  updateGradingScale: async (data) => {
+    try {
+      const response = await axiosInstance.patch("/courses/grading-scale/", data);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
   // Get evaluations (teacher/admin)
   getEvaluations: async (params = {}) => {
     try {

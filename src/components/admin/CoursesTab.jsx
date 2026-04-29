@@ -1,8 +1,154 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, Card, Input, FilterSelect, SearchInput } from "../../components/ui";
 import { BACKEND_CATEGORIES, formatCategoryLabel } from "../../constants";
 import CourseForm from "./CourseForm";
+import { coursesService } from "../../services/coursesService";
+import { toastManager } from "../../utils/toastManager";
+
+const GRADE_STYLE = {
+  "A+": "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
+  "A":  "bg-pink-500/15   text-pink-400   border-pink-500/20",
+  "B":  "bg-blue-500/15   text-blue-400   border-blue-500/20",
+  "C":  "bg-yellow-500/15 text-yellow-400 border-yellow-500/20",
+  "D":  "bg-orange-500/15 text-orange-400 border-orange-500/20",
+  "F":  "bg-red-500/15    text-red-400    border-red-500/20",
+};
+
+const GRADE_FIELDS = [
+  { grade: "A+", field: "a_plus_min", label: "A+ minimum %" },
+  { grade: "A",  field: "a_min",      label: "A minimum %"  },
+  { grade: "B",  field: "b_min",      label: "B minimum %"  },
+  { grade: "C",  field: "c_min",      label: "C minimum %"  },
+  { grade: "D",  field: "d_min",      label: "D minimum %"  },
+];
+
+// ── Grading Scale Modal ───────────────────────────────────────────────────────
+const GradingScaleModal = ({ onClose }) => {
+  const [original, setOriginal] = useState(null);
+  const [form, setForm]         = useState({});
+  const [loading, setLoading]   = useState(true);
+  const [saving, setSaving]     = useState(false);
+
+  useEffect(() => {
+    coursesService.getGradingScale()
+      .then((data) => {
+        const vals = {
+          a_plus_min: data.a_plus_min,
+          a_min:      data.a_min,
+          b_min:      data.b_min,
+          c_min:      data.c_min,
+          d_min:      data.d_min,
+        };
+        setOriginal(vals);
+        setForm(vals);
+      })
+      .catch(() => toastManager.error("Failed to load grading scale"))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const handleSave = async () => {
+    // Send only changed fields
+    const changed = {};
+    GRADE_FIELDS.forEach(({ field }) => {
+      const val = Number(form[field]);
+      if (original && val !== Number(original[field])) changed[field] = val;
+    });
+    if (!Object.keys(changed).length) { onClose(); return; }
+    setSaving(true);
+    try {
+      await coursesService.updateGradingScale(changed);
+      toastManager.success("Grading scale updated");
+      onClose();
+    } catch {
+      toastManager.error("Failed to update grading scale");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl w-full max-w-md">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-800">
+          <div>
+            <h3 className="text-base font-bold text-white flex items-center gap-2">
+              <i className="fas fa-chart-bar text-indigo-400 text-sm" />
+              Grading Scale
+            </h3>
+            <p className="text-xs text-slate-500 mt-0.5">Minimum percentage required for each grade</p>
+          </div>
+          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition">
+            <i className="fas fa-times text-sm" />
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="px-6 py-5 space-y-3">
+          {loading ? (
+            <div className="space-y-3">
+              {[1,2,3,4,5].map((i) => <div key={i} className="h-12 bg-slate-800 rounded-xl animate-pulse" />)}
+            </div>
+          ) : (
+            <>
+              {GRADE_FIELDS.map(({ grade, field, label }) => (
+                <div key={grade} className="flex items-center gap-3">
+                  {/* Grade badge */}
+                  <span className={`w-10 h-10 flex items-center justify-center rounded-xl border text-sm font-black flex-shrink-0 ${GRADE_STYLE[grade]}`}>
+                    {grade}
+                  </span>
+                  {/* Input */}
+                  <div className="flex-1">
+                    <label className="text-[10px] uppercase tracking-widest text-slate-500 font-bold block mb-1">{label}</label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={form[field] ?? ""}
+                        onChange={(e) => setForm((f) => ({ ...f, [field]: e.target.value }))}
+                        className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 tabular-nums"
+                      />
+                      <span className="text-slate-500 text-sm font-medium flex-shrink-0">%</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              {/* F grade — always read-only */}
+              <div className="flex items-center gap-3">
+                <span className={`w-10 h-10 flex items-center justify-center rounded-xl border text-sm font-black flex-shrink-0 ${GRADE_STYLE["F"]}`}>
+                  F
+                </span>
+                <div className="flex-1">
+                  <label className="text-[10px] uppercase tracking-widest text-slate-500 font-bold block mb-1">F — Below D minimum</label>
+                  <div className="px-3 py-2 bg-slate-800/40 border border-slate-700/40 rounded-xl text-slate-500 text-sm italic">
+                    Below {form.d_min ?? "—"}%
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="flex gap-3 px-6 pb-5">
+          <button onClick={onClose} className="flex-1 bg-slate-700 hover:bg-slate-600 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition">
+            Cancel
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={saving || loading}
+            className="flex-1 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2"
+          >
+            {saving ? <><i className="fas fa-spinner fa-spin text-xs" />Saving…</> : "Save Changes"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const CoursesTab = ({
   courses,
@@ -31,6 +177,7 @@ const CoursesTab = ({
   setCourseFilters,
 }) => {
   const navigate = useNavigate();
+  const [gradingScaleOpen, setGradingScaleOpen] = useState(false);
 
   // Filter courses based on search term and filters
   const filteredCourses = useMemo(() => {
@@ -185,6 +332,13 @@ const CoursesTab = ({
               <span className="hidden sm:inline">Clear</span>
             </button>
           )}
+          <button
+            onClick={() => setGradingScaleOpen(true)}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white text-sm font-semibold active:scale-95 transition-all duration-150"
+          >
+            <i className="fas fa-chart-bar text-xs"></i>
+            <span className="hidden sm:inline">Grading Scale</span>
+          </button>
           <button
             onClick={() => setActiveModal("create-course")}
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold shadow-lg shadow-indigo-500/20 active:scale-95 transition-all duration-150"
@@ -698,6 +852,7 @@ const CoursesTab = ({
             </div>
           </div>
         )}
+      {gradingScaleOpen && <GradingScaleModal onClose={() => setGradingScaleOpen(false)} />}
     </div>
   );
 };

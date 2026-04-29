@@ -154,7 +154,7 @@ const AdminEvaluationPage = () => {
                 onChange={(e) => setSelectedCourseId(e.target.value)}
                 style={{ width: 240 }}
               >
-                <option value="">All Courses</option>
+                <option value="">--</option>
                 {courses.map((c) => (
                   <option key={c.id} value={c.id}>{c.title}</option>
                 ))}
@@ -165,9 +165,10 @@ const AdminEvaluationPage = () => {
 
         {/* Course status pill */}
         {selectedCourse && (
-          <div className="flex items-center gap-2 text-xs text-slate-500">
-            <i className="fas fa-graduation-cap text-slate-600" />
-            <span>{selectedCourse.title}</span>
+          <div className="flex items-center gap-2 text-xs text-slate-500 mb-2">
+            {/* <i className="fas fa-graduation-cap text-slate-600" />
+            <span>{selectedCourse.title}</span> */}
+            <span>Course Status: </span>
             {courseStatus && (
               <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold uppercase ${
                 courseStatus === "completed"
@@ -221,9 +222,9 @@ const AdminEvaluationPage = () => {
           publicStudents.length > 0 ? (
             <>
               <div className="flex items-center justify-between px-1">
-                <p className="text-sm text-slate-400">
+                {/* <p className="text-sm text-slate-400">
                   {publicStudents.length} student{publicStudents.length !== 1 ? "s" : ""}
-                </p>
+                </p> */}
                 {isCompleted && (
                   <div className="flex items-center gap-4 text-xs text-slate-500">
                     <span className="flex items-center gap-1">

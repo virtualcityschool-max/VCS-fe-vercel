@@ -8,6 +8,7 @@ import {
   bulkMarkAttendance,
   updateStudentAttendance,
 } from "../../store/slices/teacherSlice";
+import { coursesService } from "../../services/coursesService";
 import AttendanceCalendar from "../../components/common/AttendanceCalendar";
 import { FilterSelect, FilterDateInput } from "../../components/ui";
 import { toastManager } from "../../utils/toastManager";
@@ -51,50 +52,28 @@ const StatusPill = ({ value, active, onClick, disabled }) => {
   );
 };
 
-// ── Session attendance table — shows enrolled students with current status ────
-const SessionAttendanceTable = ({ enrolledStudents, attendanceRecords, sessionId, dispatch, onRefresh }) => {
-  const [savingId, setSavingId] = useState(null);
+const fmtTime = (iso) => {
+  if (!iso) return <span className="text-slate-600 italic text-xs">—</span>;
+  return (
+    <span className="text-slate-300 text-xs tabular-nums">
+      {new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+    </span>
+  );
+};
 
-  const recordByStudent = useMemo(() => {
-    const map = {};
-    (attendanceRecords || []).forEach((r) => {
-      const sid = r.student?.id ?? r.student_id ?? r.student;
-      if (sid != null) map[String(sid)] = r;
-    });
-    return map;
-  }, [attendanceRecords]);
+// ── Session attendance table — read-only info view ────────────────────────────
+const SessionAttendanceTable = ({ attendanceRecords }) => {
+  const rows = useMemo(
+    () => (attendanceRecords || []).filter((r) => r.participant_role === "student"),
+    [attendanceRecords]
+  );
 
-  const handleStatus = async (student, newStatus) => {
-    if (!sessionId || savingId === student.id) return;
-    const existing = recordByStudent[String(student.id)];
-    if (existing?.status === newStatus) return;
-    setSavingId(student.id);
-    try {
-      if (existing) {
-        await dispatch(updateStudentAttendance({
-          sessionId,
-          studentId: student.id,
-          data: { status: newStatus },
-        })).unwrap();
-      } else {
-        await dispatch(bulkMarkAttendance({
-          sessionId,
-          records: [{ student: student.id, status: newStatus }],
-        })).unwrap();
-      }
-      onRefresh();
-    } catch {
-      toastManager.error("Failed to update attendance");
-    } finally {
-      setSavingId(null);
-    }
-  };
-
-  if (!enrolledStudents.length) {
+  if (!rows.length) {
     return (
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-12 text-center">
         <i className="fas fa-user-slash text-slate-600 text-3xl mb-3" />
-        <p className="text-slate-300 font-semibold">No students enrolled</p>
+        <p className="text-slate-300 font-semibold">No attendance records</p>
+        <p className="text-slate-500 text-sm mt-1">Select a session or mark attendance first</p>
       </div>
     );
   }
@@ -105,65 +84,32 @@ const SessionAttendanceTable = ({ enrolledStudents, attendanceRecords, sessionId
         <table className="w-full text-sm border-collapse">
           <thead>
             <tr className="border-b border-slate-800">
-              <th className="sticky left-0 z-10 bg-slate-900 px-5 py-4 text-left text-[10px] uppercase tracking-wider text-slate-500 font-semibold min-w-[180px] border-r border-slate-800"
-                  style={{ boxShadow: "4px 0 8px rgba(0,0,0,0.4)" }}>
-                Student
-              </th>
-              <th className="px-4 py-4 text-center text-[10px] uppercase tracking-wider text-slate-500 font-semibold min-w-[120px]">
-                Current Status
-              </th>
-              <th className="px-5 py-4 text-left text-[10px] uppercase tracking-wider text-slate-500 font-semibold">
-                Change Status
-              </th>
+              <th className="px-5 py-4 text-left text-[10px] uppercase tracking-wider text-slate-500 font-semibold min-w-[160px]">Student</th>
+              <th className="px-4 py-4 text-center text-[10px] uppercase tracking-wider text-slate-500 font-semibold min-w-[110px]">Joined At</th>
+              <th className="px-4 py-4 text-center text-[10px] uppercase tracking-wider text-slate-500 font-semibold min-w-[110px]">Left At</th>
+              <th className="px-4 py-4 text-center text-[10px] uppercase tracking-wider text-slate-500 font-semibold min-w-[100px]">Status</th>
             </tr>
           </thead>
           <tbody>
-            {enrolledStudents.map((student) => {
-              const record  = recordByStudent[String(student.id)];
-              const isPending = savingId === student.id;
-              return (
-                <tr key={student.id} className="border-b border-slate-800/40 last:border-0 group">
-                  {/* Student */}
-                  <td className="sticky left-0 z-10 bg-slate-900 group-hover:bg-slate-800 px-5 py-3.5 border-r border-slate-800/50 transition-colors"
-                      style={{ boxShadow: "4px 0 8px rgba(0,0,0,0.4)" }}>
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-7 h-7 rounded-full bg-indigo-600/20 flex items-center justify-center flex-shrink-0">
-                        <span className="text-indigo-400 text-xs font-bold">
-                          {student.username?.charAt(0)?.toUpperCase()}
-                        </span>
-                      </div>
-                      <p className="text-white text-xs font-semibold truncate">{student.username}</p>
+            {rows.map((r) => (
+              <tr key={r.id} className="border-b border-slate-800/40 last:border-0 hover:bg-slate-800/20 transition-colors">
+                <td className="px-5 py-3.5">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-7 h-7 rounded-full bg-indigo-600/20 flex items-center justify-center flex-shrink-0">
+                      <span className="text-indigo-400 text-xs font-bold">
+                        {(r.student_name || "?").charAt(0).toUpperCase()}
+                      </span>
                     </div>
-                  </td>
-
-                  {/* Current status */}
-                  <td className="px-4 py-3.5 text-center group-hover:bg-slate-800/10 transition-colors">
-                    {isPending ? (
-                      <i className="fas fa-spinner fa-spin text-slate-400 text-xs" />
-                    ) : record ? (
-                      <StatusBadge status={record.status} />
-                    ) : (
-                      <span className="text-slate-600 text-xs italic">Not marked</span>
-                    )}
-                  </td>
-
-                  {/* Status pills to change */}
-                  <td className="px-5 py-3.5 group-hover:bg-slate-800/10 transition-colors">
-                    <div className="flex gap-2">
-                      {STATUS_OPTIONS.map((opt) => (
-                        <StatusPill
-                          key={opt}
-                          value={opt}
-                          active={record?.status === opt}
-                          disabled={isPending}
-                          onClick={() => handleStatus(student, opt)}
-                        />
-                      ))}
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
+                    <p className="text-white text-xs font-semibold truncate">{r.student_name || `Student #${r.student}`}</p>
+                  </div>
+                </td>
+                <td className="px-4 py-3.5 text-center">{fmtTime(r.joined_at)}</td>
+                <td className="px-4 py-3.5 text-center">{fmtTime(r.left_at)}</td>
+                <td className="px-4 py-3.5 text-center">
+                  <StatusBadge status={r.status} />
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
@@ -251,14 +197,12 @@ const TeacherAttendance = () => {
   const [dayRecords, setDayRecords] = useState(null);
 
   // Bulk mark modal
-  const [markModal, setMarkModal]     = useState(false);
-  const [markCourseId, setMarkCourseId] = useState(""); // course dropdown inside mark modal
-  const [markSessionId, setMarkSessionId] = useState("");
-  const [markStatuses, setMarkStatuses]   = useState({});
+  const [markModal, setMarkModal]   = useState(false);
+  const [markStatuses, setMarkStatuses] = useState({});
 
-  const activeCourseId   = courseId || (myCourses?.[0] ? String(myCourses[0].id) : "");
-  const activeCourse     = myCourses?.find((c) => String(c.id) === activeCourseId);
-  const enrolledStudents = activeCourse?.enrolled_students ?? [];
+  const [enrolledStudents, setEnrolledStudents] = useState([]);
+
+  const activeCourseId = courseId || (myCourses?.[0] ? String(myCourses[0].id) : "");
 
   // Calendar mode always needs a specific student; table mode defaults to "" (all)
   const activeStudentId = (viewMode === "calendar" && tab === "students")
@@ -277,6 +221,14 @@ const TeacherAttendance = () => {
   useEffect(() => {
     if (!myCourses?.length) dispatch(fetchMyCourses());
   }, [dispatch]);
+
+  // Fetch enrolled students from course detail whenever course changes
+  useEffect(() => {
+    if (!activeCourseId) { setEnrolledStudents([]); return; }
+    coursesService.getCourseById(activeCourseId)
+      .then((data) => setEnrolledStudents(data?.enrolled_students || []))
+      .catch(() => setEnrolledStudents([]));
+  }, [activeCourseId]);
 
   // Fetch sessions whenever course changes (needed for table view + mark modal)
   useEffect(() => {
@@ -318,12 +270,6 @@ const TeacherAttendance = () => {
     dispatch(fetchAllAttendance(params));
   }, [dispatch, tab, viewMode, activeCourseId, activeStudentId, fromDate, toDate, teacherId]);
 
-  // Mark modal — re-fetch sessions if course changes inside modal
-  useEffect(() => {
-    if (markModal && markCourseId && markCourseId !== activeCourseId) {
-      dispatch(fetchTeacherSessions({ course: markCourseId }));
-    }
-  }, [markCourseId, markModal, dispatch]);
 
   // ── Computed ────────────────────────────────────────────────────────────────
 
@@ -347,11 +293,6 @@ const TeacherAttendance = () => {
     return { total, present, absent, rate: total ? Math.round((present / total) * 100) : 0 };
   }, [allAttendance, attendanceRecords, tab, viewMode]);
 
-  // Students enrolled in the course selected inside the mark modal
-  const markCourse          = myCourses?.find((c) => String(c.id) === markCourseId);
-  const markEnrolledStudents = markCourse?.enrolled_students ?? enrolledStudents;
-  // Sessions shown in the mark modal (re-fetched when markCourseId differs)
-  const markSessions = parentSessions;
 
   // ── Handlers ────────────────────────────────────────────────────────────────
 
@@ -393,22 +334,28 @@ const TeacherAttendance = () => {
   };
 
   const handleBulkMark = async () => {
-    if (!markSessionId) { toastManager.error("Select a session first"); return; }
-    if (!markEnrolledStudents.length) { toastManager.error("No students enrolled"); return; }
-    const records = markEnrolledStudents.map((s) => ({ student: s.id, status: markStatuses[s.id] || "present" }));
+    if (!tableSessionId) { toastManager.error("No session selected"); return; }
+    if (!enrolledStudents.length) { toastManager.error("No students enrolled"); return; }
+    const existingByStudent = {};
+    (attendanceRecords || []).filter((r) => r.participant_role === "student").forEach((r) => {
+      const sid = r.student?.id ?? r.student;
+      if (sid != null) existingByStudent[String(sid)] = r;
+    });
+    const records = enrolledStudents.map((s) => ({
+      student: s.id,
+      status: markStatuses[s.id] || existingByStudent[String(s.id)]?.status || "present",
+    }));
     try {
-      await dispatch(bulkMarkAttendance({ sessionId: markSessionId, records })).unwrap();
+      await dispatch(bulkMarkAttendance({ sessionId: tableSessionId, records })).unwrap();
       toastManager.success("Attendance marked successfully");
       setMarkModal(false);
-      if (tableSessionId) dispatch(fetchSessionAttendance(tableSessionId));
+      dispatch(fetchSessionAttendance(tableSessionId));
     } catch {
       toastManager.error("Failed to mark attendance");
     }
   };
 
   const openMarkModal = () => {
-    setMarkCourseId(activeCourseId);
-    setMarkSessionId("");
     setMarkStatuses({});
     setMarkModal(true);
   };
@@ -544,7 +491,7 @@ const TeacherAttendance = () => {
         </div>
 
         {/* Mark Attendance button */}
-        {tab === "students" && enrolledStudents.length > 0 && (
+        {tab === "students" && activeCourseId && (
           <div className="flex flex-col gap-1">
             <span className="text-[10px] uppercase tracking-widest text-slate-500 font-bold px-0.5 opacity-0 select-none">_</span>
             <button
@@ -584,13 +531,7 @@ const TeacherAttendance = () => {
 
           {/* ── TABLE VIEW ── */}
           {viewMode === "table" && tab === "students" && (
-            <SessionAttendanceTable
-              enrolledStudents={enrolledStudents}
-              attendanceRecords={attendanceRecords || []}
-              sessionId={tableSessionId}
-              dispatch={dispatch}
-              onRefresh={() => tableSessionId && dispatch(fetchSessionAttendance(tableSessionId))}
-            />
+            <SessionAttendanceTable attendanceRecords={attendanceRecords || []} />
           )}
 
           {viewMode === "table" && tab === "mine" && (
@@ -781,13 +722,36 @@ const TeacherAttendance = () => {
       )}
 
       {/* ── BULK MARK ATTENDANCE MODAL ── */}
-      {markModal && (
+      {markModal && (() => {
+        const activeSession = parentSessions.find((s) => String(s.id) === tableSessionId);
+        const activeCourse  = myCourses?.find((c) => String(c.id) === activeCourseId);
+        const existingByStudent = {};
+        (attendanceRecords || []).filter((r) => r.participant_role === "student").forEach((r) => {
+          const sid = r.student?.id ?? r.student;
+          if (sid != null) existingByStudent[String(sid)] = r;
+        });
+        return (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col">
+            {/* Header */}
             <div className="flex items-center justify-between px-6 py-5 border-b border-slate-800 shrink-0">
               <div>
-                <h3 className="text-base font-bold text-white">Mark Session Attendance</h3>
-                <p className="text-xs text-slate-400 mt-0.5">Set status for all enrolled students</p>
+                <h3 className="text-base font-bold text-white">Mark Attendance</h3>
+                <div className="flex items-center gap-2 mt-1 flex-wrap">
+                  {activeCourse && (
+                    <span className="text-[10px] bg-slate-800 border border-slate-700 text-slate-400 px-2 py-0.5 rounded-lg font-medium">
+                      <i className="fas fa-book text-slate-600 mr-1" />{activeCourse.title}
+                    </span>
+                  )}
+                  {activeSession ? (
+                    <span className="text-[10px] bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 px-2 py-0.5 rounded-lg font-medium">
+                      <i className="fas fa-chalkboard mr-1" />{activeSession.title}
+                      {activeSession.scheduled_at && ` · ${new Date(activeSession.scheduled_at).toLocaleDateString([], { month: "short", day: "numeric" })}`}
+                    </span>
+                  ) : (
+                    <span className="text-[10px] text-rose-400">No session selected</span>
+                  )}
+                </div>
               </div>
               <button onClick={() => setMarkModal(false)} className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition">
                 <i className="fas fa-times text-sm" />
@@ -795,47 +759,13 @@ const TeacherAttendance = () => {
             </div>
 
             <div className="px-6 py-4 space-y-4 overflow-y-auto flex-1">
-              {/* Course dropdown */}
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-widest text-slate-500 mb-2">Course</label>
-                <FilterSelect
-                  value={markCourseId}
-                  onChange={(e) => { setMarkCourseId(e.target.value); setMarkSessionId(""); setMarkStatuses({}); }}
-                  className="w-full"
-                >
-                  {myCourses?.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
-                </FilterSelect>
-              </div>
-
-              {/* Session picker */}
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-widest text-slate-500 mb-2">Session</label>
-                {loadingSessions ? (
-                  <div className="flex items-center gap-2 text-slate-400 text-sm py-2">
-                    <i className="fas fa-spinner animate-spin text-xs" /> Loading sessions…
-                  </div>
-                ) : (
-                  <FilterSelect
-                    value={markSessionId}
-                    onChange={(e) => setMarkSessionId(e.target.value)}
-                    className="w-full"
-                  >
-                    <option value="">Select a session</option>
-                    {markSessions.map((s) => (
-                      <option key={s.id} value={s.id}>
-                        {s.title}{s.scheduled_at ? ` — ${new Date(s.scheduled_at).toLocaleDateString([], { month: "short", day: "numeric" })}` : ""}
-                      </option>
-                    ))}
-                  </FilterSelect>
-                )}
-              </div>
 
               {/* Students list */}
-              {markEnrolledStudents.length > 0 && (
+              {enrolledStudents.length > 0 ? (
                 <div>
-                  <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center justify-between mb-3">
                     <label className="text-xs font-semibold uppercase tracking-widest text-slate-500">
-                      Students ({markEnrolledStudents.length})
+                      Students ({enrolledStudents.length})
                     </label>
                     <div className="flex gap-1.5">
                       {STATUS_OPTIONS.map((s) => (
@@ -844,10 +774,10 @@ const TeacherAttendance = () => {
                           type="button"
                           onClick={() => {
                             const all = {};
-                            markEnrolledStudents.forEach((st) => { all[st.id] = s; });
+                            enrolledStudents.forEach((st) => { all[st.id] = s; });
                             setMarkStatuses(all);
                           }}
-                          className="px-2 py-1 rounded-lg text-[10px] font-semibold border border-slate-700 text-slate-400 hover:border-slate-600 hover:text-white transition capitalize"
+                          className="px-2.5 py-1 rounded-lg text-[10px] font-semibold border border-slate-700 text-slate-400 hover:border-slate-500 hover:text-white transition capitalize"
                         >
                           All {STATUS_CONFIG[s].label}
                         </button>
@@ -855,31 +785,57 @@ const TeacherAttendance = () => {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    {markEnrolledStudents.map((s) => {
-                      const status = markStatuses[s.id] || "present";
+                    {enrolledStudents.map((s) => {
+                      const existing  = existingByStudent[String(s.id)];
+                      const newStatus = markStatuses[s.id] || existing?.status || "present";
                       return (
-                        <div key={s.id} className="flex items-center justify-between gap-3 px-3 py-2.5 bg-slate-800/40 border border-slate-700/50 rounded-xl">
-                          <div className="flex items-center gap-2 min-w-0">
+                        <div key={s.id} className="bg-slate-800/40 border border-slate-700/50 rounded-xl px-3 py-2.5 space-y-2">
+                          {/* Top row: avatar + name + times + current status */}
+                          <div className="flex items-center gap-2 flex-wrap">
                             <div className="w-7 h-7 rounded-full bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center shrink-0">
-                              <i className="fas fa-user text-indigo-400 text-[10px]" />
+                              <span className="text-indigo-400 text-[10px] font-bold">{s.username?.charAt(0)?.toUpperCase()}</span>
                             </div>
-                            <p className="text-sm font-medium text-white truncate">{s.username}</p>
+                            <p className="text-sm font-semibold text-white flex-1 truncate">{s.username}</p>
+                            {existing && (
+                              <div className="flex items-center gap-2 shrink-0 flex-wrap">
+                                {existing.joined_at && (
+                                  <span className="text-[10px] text-slate-500 flex items-center gap-1">
+                                    <i className="fas fa-sign-in-alt text-emerald-500/70" />
+                                    {new Date(existing.joined_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                                  </span>
+                                )}
+                                {existing.left_at && (
+                                  <span className="text-[10px] text-slate-500 flex items-center gap-1">
+                                    <i className="fas fa-sign-out-alt text-rose-500/70" />
+                                    {new Date(existing.left_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                                  </span>
+                                )}
+                                <span className="text-[10px] text-slate-500 font-medium">Current:</span>
+                                <StatusBadge status={existing.status} />
+                              </div>
+                            )}
                           </div>
-                          <div className="flex gap-1.5 shrink-0">
-                            {STATUS_OPTIONS.map((opt) => (
-                              <StatusPill
-                                key={opt}
-                                value={opt}
-                                active={status === opt}
-                                onClick={() => setMarkStatuses((prev) => ({ ...prev, [s.id]: opt }))}
-                              />
-                            ))}
+                          {/* Bottom row: update pills */}
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] text-slate-600 font-medium shrink-0">Update to:</span>
+                            <div className="flex gap-1.5">
+                              {STATUS_OPTIONS.map((opt) => (
+                                <StatusPill
+                                  key={opt}
+                                  value={opt}
+                                  active={newStatus === opt}
+                                  onClick={() => setMarkStatuses((prev) => ({ ...prev, [s.id]: opt }))}
+                                />
+                              ))}
+                            </div>
                           </div>
                         </div>
                       );
                     })}
                   </div>
                 </div>
+              ) : (
+                <p className="text-slate-500 text-sm text-center py-4">No enrolled students found</p>
               )}
             </div>
 
@@ -889,15 +845,16 @@ const TeacherAttendance = () => {
               </button>
               <button
                 onClick={handleBulkMark}
-                disabled={markingBulkAttendance || !markSessionId}
+                disabled={markingBulkAttendance || !tableSessionId}
                 className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition disabled:opacity-50 flex items-center justify-center gap-2"
               >
-                {markingBulkAttendance ? <><i className="fas fa-spinner fa-spin text-xs" /> Saving…</> : "Mark Attendance"}
+                {markingBulkAttendance ? <><i className="fas fa-spinner fa-spin text-xs" /> Saving…</> : "Save Attendance"}
               </button>
             </div>
           </div>
         </div>
-      )}
+        );
+      })()}
     </div>
   );
 };

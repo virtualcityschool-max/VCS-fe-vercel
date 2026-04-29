@@ -1,4 +1,5 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useEffect } from "react";
+import { coursesService } from "../../services/coursesService";
 
 // ── Badges ────────────────────────────────────────────────────────────────────
 const PendingBadge = () => (
@@ -8,16 +9,20 @@ const PendingBadge = () => (
   </span>
 );
 
-const ResultBadge = ({ result }) => {
-  const passed = result === "passed";
+const GRADE_STYLE = {
+  "A+": "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
+  "A":  "bg-pink-500/15   text-pink-400   border-pink-500/20",
+  "B":  "bg-blue-500/15   text-blue-400   border-blue-500/20",
+  "C":  "bg-yellow-500/15 text-yellow-400 border-yellow-500/20",
+  "D":  "bg-orange-500/15 text-orange-400 border-orange-500/20",
+  "F":  "bg-red-500/15    text-red-400    border-red-500/20",
+};
+
+const GradeBadge = ({ grade }) => {
+  const style = GRADE_STYLE[grade] ?? "bg-slate-700/50 text-slate-400 border-slate-600/30";
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border whitespace-nowrap ${
-      passed
-        ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/20"
-        : "bg-red-500/15 text-red-400 border-red-500/20"
-    }`}>
-      <i className={`fas fa-${passed ? "check" : "times"} text-[10px]`} />
-      {passed ? "Passed" : "Failed"}
+    <span className={`inline-flex items-center justify-center px-3 py-1 rounded-lg text-sm font-black border whitespace-nowrap min-w-[40px] ${style}`}>
+      {grade ?? "—"}
     </span>
   );
 };
@@ -40,6 +45,14 @@ const OBTAINED_W = 110; // px
  */
 const EvaluationMatrix = ({ students = [], courseStatus }) => {
   const isCompleted = courseStatus === "completed";
+
+  const [gradingScale, setGradingScale] = useState([]);
+
+  useEffect(() => {
+    coursesService.getGradingScale()
+      .then((data) => setGradingScale(data?.scales || []))
+      .catch(() => {});
+  }, []);
 
   // Collect every unique assignment across all students (preserves insertion order)
   const allAssignments = useMemo(() => {
@@ -71,6 +84,26 @@ const EvaluationMatrix = ({ students = [], courseStatus }) => {
   }
 
   return (
+    <div className="space-y-3">
+
+      {/* ── Grading scale strip ── */}
+      {gradingScale.length > 0 && (
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-[10px] uppercase tracking-widest text-slate-500 font-bold shrink-0">Grading Scale</span>
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {gradingScale.map((s) => (
+              <div
+                key={s.grade}
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-bold whitespace-nowrap ${GRADE_STYLE[s.grade] ?? "bg-slate-700/50 text-slate-400 border-slate-600/30"}`}
+              >
+                <span>{s.grade}</span>
+                <span className="font-normal opacity-70">{s.range}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
     <div className="bg-slate-900/50 border border-slate-800 rounded-3xl overflow-hidden">
       {/* ── Scrollable container ── */}
       <div className="overflow-x-auto">
@@ -193,7 +226,7 @@ const EvaluationMatrix = ({ students = [], courseStatus }) => {
                     style={{ minWidth: GRADE_W }}
                   >
                     {isCompleted
-                      ? <ResultBadge result={s.final_totals?.result} />
+                      ? <GradeBadge grade={s.final_totals?.grade} />
                       : <PendingBadge />
                     }
                   </td>
@@ -203,6 +236,7 @@ const EvaluationMatrix = ({ students = [], courseStatus }) => {
           </tbody>
         </table>
       </div>
+    </div>
     </div>
   );
 };
