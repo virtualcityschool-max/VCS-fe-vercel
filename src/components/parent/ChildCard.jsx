@@ -108,9 +108,9 @@ const ChildCard = ({ child }) => {
   useEffect(() => {
     if (!child.id) return;
 
-    if (!childGrades[child.id]) {
-      dispatch(fetchChildGrades(child.id));
-    }
+    // if (!childGrades[child.id]) {
+    //   dispatch(fetchChildGrades(child.id));
+    // }
 
     if (!childAttendance[child.id]) {
       dispatch(fetchChildAttendance(child.id));

@@ -30,14 +30,16 @@ const NAV_CONFIG = {
     { label: "Evaluations",    to: "/teacher/evaluations",  icon: "fas fa-chart-bar" },
   ],
   student: [
-    { label: "Dashboard",   to: "/student",             icon: "fas fa-table-columns",  end: true },
-    { label: "My Classes",  to: "/student/classes",     icon: "fas fa-calendar-alt" },
-    { label: "Assignments", to: "/student/assignments", icon: "fas fa-clipboard-list" },
-    { label: "Attendance",  to: "/student/attendance",  icon: "fas fa-user-check" },
+    { label: "Dashboard",   to: "/student",               icon: "fas fa-table-columns",  end: true },
+    { label: "My Classes",  to: "/student/classes",       icon: "fas fa-calendar-alt" },
+    { label: "Assignments", to: "/student/assignments",   icon: "fas fa-clipboard-list" },
+    { label: "Attendance",  to: "/student/attendance",    icon: "fas fa-user-check" },
+    { label: "Evaluations", to: "/student/evaluations",   icon: "fas fa-chart-bar" },
   ],
   parent: [
-    { label: "Dashboard",        to: "/parent",             icon: "fas fa-table-columns", end: true },
-    { label: "Child Attendance", to: "/parent/attendance",  icon: "fas fa-user-check" },
+    { label: "Dashboard",        to: "/parent",              icon: "fas fa-table-columns", end: true },
+    { label: "Child Attendance", to: "/parent/attendance",   icon: "fas fa-user-check" },
+    { label: "Evaluations",      to: "/parent/evaluations",  icon: "fas fa-chart-bar" },
   ],
 };
 

@@ -156,6 +156,16 @@ export const coursesService = {
     }
   },
 
+  // Get evaluations for the current user (student sees own; parent sees linked children)
+  getMyEvaluations: async (params = {}) => {
+    try {
+      const response = await axiosInstance.get("/courses/my-evaluation/", { params });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
   // Get privately enrolled students for a course
   getPrivateStudents: async (courseId) => {
     try {

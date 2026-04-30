@@ -82,8 +82,8 @@ const ParentAttendance = () => {
   // Fetch attendance records whenever filters change
   useEffect(() => {
     if (!childId || !courseId) return;
-    dispatch(fetchChildAttendanceRecords({ childId, courseId, from: fromDate, to: toDate }));
-  }, [dispatch, childId, courseId, fromDate, toDate]);
+    dispatch(fetchChildAttendanceRecords({ childId, courseId }));
+  }, [dispatch, childId, courseId]);
 
   const attendanceByDate = useMemo(() => {
     const map = {};
@@ -184,7 +184,7 @@ const ParentAttendance = () => {
           </FilterSelect>
         </div>
 
-        <FilterDateInput
+        {/* <FilterDateInput
           label="From"
           value={fromDate}
           max={toDate}
@@ -197,7 +197,7 @@ const ParentAttendance = () => {
           min={fromDate}
           max={todayStr()}
           onChange={(e) => { setToDate(e.target.value); setSelectedDay(null); }}
-        />
+        /> */}
       </div>
 
       {/* Active child badge */}

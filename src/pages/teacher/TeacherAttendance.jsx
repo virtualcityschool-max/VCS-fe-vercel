@@ -10,56 +10,18 @@ import {
 } from "../../store/slices/teacherSlice";
 import { coursesService } from "../../services/coursesService";
 import AttendanceCalendar from "../../components/common/AttendanceCalendar";
+import AttendanceEditModal from "../../components/common/AttendanceEditModal";
+import {
+  STATUS_CONFIG, STATUS_OPTIONS,
+  StatusBadge, StatusPill,
+  fmtTime, SessionBanner,
+} from "../../components/common/attendanceShared";
 import { FilterSelect, FilterDateInput } from "../../components/ui";
 import { toastManager } from "../../utils/toastManager";
 
 const toDateStr = (d) => d.toISOString().slice(0, 10);
 const monthStart = () => { const d = new Date(); d.setDate(1); return toDateStr(d); };
 const todayStr = () => toDateStr(new Date());
-
-const STATUS_CONFIG = {
-  present: { label: "Present", badge: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" },
-  absent:  { label: "Absent",  badge: "bg-rose-500/20 text-rose-400 border-rose-500/30" },
-  late:    { label: "Late",    badge: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30" },
-};
-
-const STATUS_OPTIONS = ["present", "late", "absent"];
-
-const StatusBadge = ({ status }) => {
-  const cfg = STATUS_CONFIG[status] ?? STATUS_CONFIG.absent;
-  return (
-    <span className={`px-2 py-0.5 rounded-full text-xs border font-semibold whitespace-nowrap ${cfg.badge}`}>
-      {cfg.label}
-    </span>
-  );
-};
-
-const StatusPill = ({ value, active, onClick, disabled }) => {
-  const cfg = STATUS_CONFIG[value];
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition capitalize disabled:opacity-40 disabled:cursor-not-allowed ${
-        active
-          ? cfg.badge
-          : "bg-slate-800 border-slate-700 text-slate-500 hover:border-slate-600 hover:text-slate-300"
-      }`}
-    >
-      {cfg.label}
-    </button>
-  );
-};
-
-const fmtTime = (iso) => {
-  if (!iso) return <span className="text-slate-600 italic text-xs">—</span>;
-  return (
-    <span className="text-slate-300 text-xs tabular-nums">
-      {new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-    </span>
-  );
-};
 
 // ── Session attendance table ───────────────────────────────────────────────────
 const SessionAttendanceTable = ({ attendanceRecords, onEdit, session }) => {
@@ -78,25 +40,9 @@ const SessionAttendanceTable = ({ attendanceRecords, onEdit, session }) => {
     );
   }
 
-  const sessionStart = session?.scheduled_at ? new Date(session.scheduled_at) : null;
-
   return (
     <div className="space-y-3">
-      {sessionStart && (
-        <div className="flex items-center gap-3 px-4 py-3 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl">
-          <i className="fas fa-calendar-alt text-indigo-400 text-sm" />
-          <div className="flex items-center gap-4 flex-wrap">
-            <div>
-              <p className="text-[10px] uppercase tracking-widest text-indigo-400/70 font-bold">Session Start</p>
-              <p className="text-sm font-semibold text-indigo-300">
-                {sessionStart.toLocaleDateString([], { weekday: "short", month: "short", day: "numeric", year: "numeric" })}
-                <span className="text-indigo-400/70 mx-1.5">·</span>
-                {sessionStart.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
+      <SessionBanner session={session} />
     <div className="bg-slate-900/50 border border-slate-800 rounded-3xl overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full text-sm border-collapse">
@@ -230,13 +176,13 @@ const TeacherAttendance = () => {
   });
   const [selectedDay, setSelectedDay] = useState(null);
 
-  const [editRecord, setEditRecord] = useState(null);
-  const [editForm, setEditForm]     = useState({ status: "present", note: "" });
-  const [dayRecords, setDayRecords] = useState(null);
+  const [editRecord, setEditRecord]         = useState(null);
+  const [dayRecords, setDayRecords]         = useState(null);
 
   // Bulk mark modal
-  const [markModal, setMarkModal]   = useState(false);
-  const [markStatuses, setMarkStatuses] = useState({});
+  const [markModal, setMarkModal]           = useState(false);
+  const [markStatuses, setMarkStatuses]     = useState({});
+  const [selectedStudentIds, setSelectedStudentIds] = useState(new Set());
 
   const [enrolledStudents, setEnrolledStudents] = useState([]);
 
@@ -331,6 +277,40 @@ const TeacherAttendance = () => {
     return { total, present, absent, rate: total ? Math.round((present / total) * 100) : 0 };
   }, [allAttendance, attendanceRecords, tab, viewMode]);
 
+  // Merged student list for the bulk modal (attendance records + unenrolled students)
+  const markStudents = useMemo(() => {
+    if (!markModal) return [];
+    const fromRecords = (attendanceRecords || [])
+      .filter((r) => r.participant_role === "student")
+      .map((r) => ({
+        id: String(r.student?.id ?? r.student),
+        username: r.student_name || `Student #${r.student?.id ?? r.student}`,
+        joinedAt: r.joined_at,
+        leftAt: r.left_at,
+        existingStatus: r.status,
+        hasRecord: true,
+      }));
+    const recordedIds = new Set(fromRecords.map((s) => s.id));
+    const fromEnrolled = enrolledStudents
+      .filter((s) => !recordedIds.has(String(s.id)))
+      .map((s) => ({
+        id: String(s.id),
+        username: s.username,
+        joinedAt: null,
+        leftAt: null,
+        existingStatus: null,
+        hasRecord: false,
+      }));
+    return [...fromRecords, ...fromEnrolled];
+  }, [markModal, attendanceRecords, enrolledStudents]);
+
+  // Auto-select all students when modal opens or when attendance data refreshes
+  useEffect(() => {
+    if (markModal && markStudents.length > 0) {
+      setSelectedStudentIds(new Set(markStudents.map((s) => s.id)));
+    }
+  }, [markModal, markStudents.length]);
+
 
   // ── Handlers ────────────────────────────────────────────────────────────────
 
@@ -351,18 +331,15 @@ const TeacherAttendance = () => {
     else setDayRecords(records);
   };
 
-  const openEdit = (r) => {
-    setEditRecord(r);
-    setEditForm({ status: r.status || "present", note: r.note || "" });
-  };
+  const openEdit = (r) => setEditRecord(r);
 
-  const handleEditSave = async () => {
+  const handleEditSave = async (form) => {
     if (!editRecord) return;
     const sessionId = editRecord.session?.id ?? editRecord.session_id ?? editRecord.session;
     const sId       = editRecord.student?.id ?? editRecord.student_id ?? editRecord.student;
     if (!sessionId || !sId) { toastManager.error("Missing session or student info"); return; }
     try {
-      await dispatch(updateStudentAttendance({ sessionId, studentId: sId, data: { status: editForm.status, note: editForm.note } })).unwrap();
+      await dispatch(updateStudentAttendance({ sessionId, studentId: sId, data: { status: form.status, note: form.note } })).unwrap();
       toastManager.success("Attendance updated");
       setEditRecord(null);
       if (tableSessionId) dispatch(fetchSessionAttendance(tableSessionId));
@@ -373,19 +350,11 @@ const TeacherAttendance = () => {
 
   const handleBulkMark = async () => {
     if (!tableSessionId) { toastManager.error("No session selected"); return; }
-    // Build merged list: attendance records first, then enrolled students not yet recorded
-    const fromRecords = (attendanceRecords || [])
-      .filter((r) => r.participant_role === "student")
-      .map((r) => ({ id: r.student?.id ?? r.student, existingStatus: r.status }));
-    const recordedIds = new Set(fromRecords.map((s) => String(s.id)));
-    const fromEnrolled = enrolledStudents
-      .filter((s) => !recordedIds.has(String(s.id)))
-      .map((s) => ({ id: s.id, existingStatus: null }));
-    const allStudents = [...fromRecords, ...fromEnrolled];
-    if (!allStudents.length) { toastManager.error("No students found for this session"); return; }
-    const records = allStudents.map((s) => ({
+    const selected = markStudents.filter((s) => selectedStudentIds.has(s.id));
+    if (!selected.length) { toastManager.error("No students selected"); return; }
+    const records = selected.map((s) => ({
       student: s.id,
-      status: markStatuses[String(s.id)] ?? s.existingStatus ?? "present",
+      status: markStatuses[s.id] ?? s.existingStatus ?? "present",
     }));
     try {
       await dispatch(bulkMarkAttendance({ sessionId: tableSessionId, records })).unwrap();
@@ -403,15 +372,14 @@ const TeacherAttendance = () => {
   };
 
   const openMarkModal = () => {
-    // Pre-populate with existing statuses so pills reflect current state
     const initial = {};
     (attendanceRecords || []).filter((r) => r.participant_role === "student").forEach((r) => {
       const sid = r.student?.id ?? r.student;
       if (sid != null) initial[String(sid)] = r.status;
     });
     setMarkStatuses(initial);
+    setSelectedStudentIds(new Set());
     setMarkModal(true);
-    // Ensure attendance data is fresh for the selected session
     if (tableSessionId) dispatch(fetchSessionAttendance(tableSessionId));
   };
 
@@ -728,91 +696,34 @@ const TeacherAttendance = () => {
         </div>
       )}
 
-      {/* ── EDIT ATTENDANCE MODAL (calendar view) ── */}
-      {editRecord && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl w-full max-w-sm">
-            <div className="flex items-center justify-between px-6 py-5 border-b border-slate-800">
-              <div>
-                <h3 className="text-base font-bold text-white">Edit Attendance</h3>
-                <p className="text-xs text-slate-400 mt-0.5 truncate">{editRecord.session_title}</p>
-              </div>
-              <button onClick={() => setEditRecord(null)} className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition">
-                <i className="fas fa-times text-sm" />
-              </button>
-            </div>
-            <div className="px-6 py-5 space-y-4">
-              {editRecord.student_name && (
-                <div className="flex items-center gap-3 px-3 py-2.5 bg-slate-800/40 border border-slate-700/50 rounded-xl">
-                  <i className="fas fa-user-graduate text-indigo-400 text-xs w-4 text-center" />
-                  <p className="text-sm font-semibold text-white">{editRecord.student_name}</p>
-                </div>
-              )}
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-widest text-slate-500 mb-2">Status</label>
-                <div className="flex gap-2">
-                  {STATUS_OPTIONS.map((s) => (
-                    <StatusPill key={s} value={s} active={editForm.status === s} onClick={() => setEditForm((f) => ({ ...f, status: s }))} />
-                  ))}
-                </div>
-              </div>
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-widest text-slate-500 mb-2">Note</label>
-                <textarea
-                  rows={3}
-                  placeholder="Optional note"
-                  value={editForm.note}
-                  onChange={(e) => setEditForm((f) => ({ ...f, note: e.target.value }))}
-                  className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white text-sm placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
-                />
-              </div>
-            </div>
-            <div className="flex gap-3 px-6 pb-5">
-              <button onClick={() => setEditRecord(null)} className="flex-1 bg-slate-700 hover:bg-slate-600 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition">
-                Cancel
-              </button>
-              <button
-                onClick={handleEditSave}
-                disabled={patchingStudentAttendance}
-                className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition disabled:opacity-50 flex items-center justify-center gap-2"
-              >
-                {patchingStudentAttendance ? <><i className="fas fa-spinner fa-spin text-xs" /> Saving…</> : "Save Changes"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* ── EDIT ATTENDANCE MODAL ── */}
+      <AttendanceEditModal
+        record={editRecord}
+        onClose={() => setEditRecord(null)}
+        onSave={handleEditSave}
+        saving={patchingStudentAttendance}
+      />
 
       {/* ── BULK MARK / EDIT ATTENDANCE MODAL ── */}
       {markModal && (() => {
         const activeSession = parentSessions.find((s) => String(s.id) === tableSessionId);
         const activeCourse  = myCourses?.find((c) => String(c.id) === activeCourseId);
+        const hasExisting   = markStudents.some((s) => s.hasRecord);
+        const allSelected   = markStudents.length > 0 && selectedStudentIds.size === markStudents.length;
 
-        // Primary source: attendance records already in this session
-        const fromRecords = (attendanceRecords || [])
-          .filter((r) => r.participant_role === "student")
-          .map((r) => ({
-            id: String(r.student?.id ?? r.student),
-            username: r.student_name || `Student #${r.student?.id ?? r.student}`,
-            joinedAt: r.joined_at,
-            leftAt: r.left_at,
-            existingStatus: r.status,
-            hasRecord: true,
-          }));
-        // Secondary: enrolled students not yet in this session's attendance
-        const recordedIds = new Set(fromRecords.map((s) => s.id));
-        const fromEnrolled = enrolledStudents
-          .filter((s) => !recordedIds.has(String(s.id)))
-          .map((s) => ({
-            id: String(s.id),
-            username: s.username,
-            joinedAt: null,
-            leftAt: null,
-            existingStatus: null,
-            hasRecord: false,
-          }));
-        const allStudents = [...fromRecords, ...fromEnrolled];
-        const hasExisting = fromRecords.length > 0;
+        const toggleAll = () => {
+          setSelectedStudentIds(
+            allSelected ? new Set() : new Set(markStudents.map((s) => s.id))
+          );
+        };
+
+        const toggleOne = (id) => {
+          setSelectedStudentIds((prev) => {
+            const next = new Set(prev);
+            next.has(id) ? next.delete(id) : next.add(id);
+            return next;
+          });
+        };
 
         return (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -844,7 +755,6 @@ const TeacherAttendance = () => {
               </button>
             </div>
 
-            {/* Loading state while fetching fresh attendance */}
             {loadingAttendance ? (
               <div className="flex items-center justify-center py-16 flex-1">
                 <div className="text-center">
@@ -854,10 +764,10 @@ const TeacherAttendance = () => {
               </div>
             ) : (
             <div className="px-6 py-4 space-y-4 overflow-y-auto flex-1">
-              {/* ── Bulk mark-all section ── */}
+              {/* ── Bulk status buttons (apply to selected) ── */}
               <div className="bg-slate-800/40 border border-slate-700/50 rounded-xl px-4 py-3 space-y-2">
                 <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">
-                  Mark all students as
+                  Mark selected as
                 </p>
                 <div className="flex gap-2">
                   {STATUS_OPTIONS.map((s) => {
@@ -866,34 +776,62 @@ const TeacherAttendance = () => {
                       <button
                         key={s}
                         type="button"
+                        disabled={selectedStudentIds.size === 0}
                         onClick={() => {
-                          const all = {};
-                          allStudents.forEach((st) => { all[st.id] = s; });
-                          setMarkStatuses(all);
+                          const updated = { ...markStatuses };
+                          markStudents.forEach((st) => {
+                            if (selectedStudentIds.has(st.id)) updated[st.id] = s;
+                          });
+                          setMarkStatuses(updated);
                         }}
-                        className={`flex-1 py-2 rounded-xl text-xs font-semibold border transition capitalize ${cfg.badge}`}
+                        className={`flex-1 py-2 rounded-xl text-xs font-semibold border transition capitalize disabled:opacity-30 disabled:cursor-not-allowed ${cfg.badge}`}
                       >
                         <i className={`fas ${s === "present" ? "fa-check-circle" : s === "absent" ? "fa-times-circle" : "fa-clock"} mr-1.5`} />
-                        All {cfg.label}
+                        {cfg.label}
                       </button>
                     );
                   })}
                 </div>
               </div>
 
-              {/* ── Individual students ── */}
-              {allStudents.length > 0 ? (
+              {/* ── Student list ── */}
+              {markStudents.length > 0 ? (
                 <div>
-                  <label className="text-[10px] uppercase tracking-widest text-slate-500 font-bold block mb-3">
-                    Students ({allStudents.length})
-                  </label>
+                  <div className="flex items-center justify-between mb-3">
+                    <label className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">
+                      Students ({selectedStudentIds.size}/{markStudents.length} selected)
+                    </label>
+                    <button
+                      type="button"
+                      onClick={toggleAll}
+                      className="text-xs text-indigo-400 hover:text-indigo-300 transition font-medium"
+                    >
+                      {allSelected ? "Deselect All" : "Select All"}
+                    </button>
+                  </div>
                   <div className="space-y-2">
-                    {allStudents.map((s) => {
+                    {markStudents.map((s) => {
                       const curStatus = markStatuses[s.id] ?? s.existingStatus ?? "present";
+                      const isSelected = selectedStudentIds.has(s.id);
                       return (
-                        <div key={s.id} className="bg-slate-800/40 border border-slate-700/50 rounded-xl px-3 py-2.5 space-y-2">
-                          {/* Top row: avatar + name + join/leave times */}
-                          <div className="flex items-center gap-2 flex-wrap">
+                        <div
+                          key={s.id}
+                          onClick={() => toggleOne(s.id)}
+                          className={`border rounded-xl px-3 py-2.5 space-y-2 cursor-pointer transition ${
+                            isSelected
+                              ? "bg-indigo-900/10 border-indigo-500/30"
+                              : "bg-slate-800/40 border-slate-700/50 opacity-60"
+                          }`}
+                        >
+                          {/* Top row: checkbox + avatar + name + join/leave times */}
+                          <div className="flex items-center gap-2.5 flex-wrap">
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => toggleOne(s.id)}
+                              onClick={(e) => e.stopPropagation()}
+                              className="w-4 h-4 rounded border-slate-600 accent-indigo-500 cursor-pointer shrink-0"
+                            />
                             <div className="w-7 h-7 rounded-full bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center shrink-0">
                               <span className="text-indigo-400 text-[10px] font-bold">{s.username?.charAt(0)?.toUpperCase()}</span>
                             </div>
@@ -916,7 +854,7 @@ const TeacherAttendance = () => {
                             )}
                           </div>
                           {/* Status pills */}
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                             <span className="text-[10px] text-slate-600 font-medium shrink-0">
                               {s.hasRecord ? "Change to:" : "Mark as:"}
                             </span>
@@ -952,12 +890,12 @@ const TeacherAttendance = () => {
               </button>
               <button
                 onClick={handleBulkMark}
-                disabled={markingBulkAttendance || !tableSessionId || loadingAttendance}
+                disabled={markingBulkAttendance || !tableSessionId || loadingAttendance || selectedStudentIds.size === 0}
                 className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {markingBulkAttendance
                   ? <><i className="fas fa-spinner fa-spin text-xs" /> Saving…</>
-                  : hasExisting ? "Save Changes" : "Save Attendance"}
+                  : `${hasExisting ? "Save" : "Mark"} (${selectedStudentIds.size})`}
               </button>
             </div>
           </div>

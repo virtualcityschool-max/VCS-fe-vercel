@@ -78,7 +78,7 @@ const AdminSessionsPage = () => {
 
   // Fetch supporting data on mount
   useEffect(() => {
-    dispatch(fetchCourses());
+    dispatch(fetchCourses({has_session: true}));
     dispatch(fetchUsers({ role: "teacher" }));
     dispatch(fetchAvailableStudents());
   }, [dispatch]);

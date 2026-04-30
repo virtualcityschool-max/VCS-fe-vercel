@@ -14,6 +14,7 @@ export { default as Classroom } from "./student/Classroom";
 export { default as StudentAssignments } from "./student/StudentAssignments";
 export { default as StudentAssignmentDetails } from "./student/StudentAssignmentDetails";
 export { default as StudentAttendance } from "./student/StudentAttendance";
+export { default as StudentEvaluationPage } from "./student/StudentEvaluationPage";
 
 // Teacher Pages
 export { default as TeacherLayout } from "./teacher/TeacherLayout";
@@ -47,3 +48,4 @@ export { default as ProfilePage } from "./profile/ProfilePage";
 export { default as ParentLayout } from "./parent/ParentLayout";
 export { default as ParentPortal } from "./parent/ParentPortal";
 export { default as ParentAttendance } from "./parent/ParentAttendance";
+export { default as ParentEvaluationPage } from "./parent/ParentEvaluationPage";

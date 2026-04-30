@@ -55,8 +55,10 @@ import {
   StudentAssignments,
   StudentAssignmentDetails,
   StudentAttendance,
+  StudentEvaluationPage,
   ParentLayout,
   ParentAttendance,
+  ParentEvaluationPage,
 } from "./pages";
 
 // Protected Route Component with Role-Based Access Control
@@ -223,6 +225,7 @@ const AppInner = () => {
                 <Route path="assignments" element={<StudentAssignments />} />
                 <Route path="assignments/:id" element={<StudentAssignmentDetails />} />
                 <Route path="attendance" element={<StudentAttendance />} />
+                <Route path="evaluations" element={<StudentEvaluationPage />} />
               </Route>
             </Route>
 
@@ -249,6 +252,7 @@ const AppInner = () => {
               <Route path="/parent" element={<ParentLayout />}>
                 <Route index element={<ParentPortal />} />
                 <Route path="attendance" element={<ParentAttendance />} />
+                <Route path="evaluations" element={<ParentEvaluationPage />} />
               </Route>
             </Route>
 
