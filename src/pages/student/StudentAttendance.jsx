@@ -7,7 +7,6 @@ import {
   selectMyAttendanceLoading,
   selectEnrolledCourses,
 } from "../../store/slices/studentDashboardSlice";
-import AttendanceCalendar from "../../components/common/AttendanceCalendar";
 import { FilterSelect, FilterDateInput } from "../../components/ui";
 
 const toDateStr = (d) => d.toISOString().slice(0, 10);
@@ -19,40 +18,55 @@ const monthStart = () => {
 const todayStr = () => toDateStr(new Date());
 
 const STATUS_CONFIG = {
-  present: {
-    label: "Present",
-    badge: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
-  },
-  absent: {
-    label: "Absent",
-    badge: "bg-rose-500/20 text-rose-400 border-rose-500/30",
-  },
-  late: {
-    label: "Late",
-    badge: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
-  },
+  present: { label: "Present", badge: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" },
+  absent:  { label: "Absent",  badge: "bg-rose-500/20 text-rose-400 border-rose-500/30" },
+  late:    { label: "Late",    badge: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30" },
+};
+
+const StatusBadge = ({ status }) => {
+  const cfg = STATUS_CONFIG[status] ?? STATUS_CONFIG.absent;
+  return (
+    <span className={`px-2 py-0.5 rounded-full text-xs border font-semibold whitespace-nowrap ${cfg.badge}`}>
+      {cfg.label}
+    </span>
+  );
+};
+
+const fmtDateTime = (iso) => {
+  if (!iso) return <span className="text-slate-600 italic text-xs">—</span>;
+  const d = new Date(iso);
+  return (
+    <span className="text-slate-300 text-xs tabular-nums">
+      {d.toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" })}
+      <span className="text-slate-600 mx-1">·</span>
+      {d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+    </span>
+  );
+};
+
+const fmtTime = (iso) => {
+  if (!iso) return <span className="text-slate-600 italic text-xs">—</span>;
+  return (
+    <span className="text-slate-300 text-xs tabular-nums">
+      {new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+    </span>
+  );
 };
 
 const StudentAttendance = () => {
-  const dispatch = useDispatch();
-  const attendance   = useSelector(selectMyAttendance);
-  const isLoading    = useSelector(selectMyAttendanceLoading);
+  const dispatch        = useDispatch();
+  const attendance      = useSelector(selectMyAttendance);
+  const isLoading       = useSelector(selectMyAttendanceLoading);
   const enrolledCourses = useSelector(selectEnrolledCourses);
 
-  const [courseId,    setCourseId]    = useState("");
-  const [fromDate,    setFromDate]    = useState(monthStart());
-  const [toDate,      setToDate]      = useState(todayStr());
-  const [calMonth,    setCalMonth]    = useState(() => {
-    const d = new Date();
-    return { year: d.getFullYear(), month: d.getMonth() };
-  });
-  const [selectedDay, setSelectedDay] = useState(null);
+  const [courseId,  setCourseId]  = useState("");
+  const [fromDate,  setFromDate]  = useState(monthStart());
+  const [toDate,    setToDate]    = useState(todayStr());
 
   useEffect(() => {
     if (!enrolledCourses?.length) dispatch(fetchStudentDashboard());
   }, [dispatch]);
 
-  // Auto-select first course once courses are available
   useEffect(() => {
     if (enrolledCourses?.length && !courseId) {
       setCourseId(String(enrolledCourses[0].id));
@@ -63,17 +77,6 @@ const StudentAttendance = () => {
     if (!courseId) return;
     dispatch(fetchMyAttendance({ course: courseId, from: fromDate, to: toDate }));
   }, [dispatch, courseId, fromDate, toDate]);
-
-  const attendanceByDate = useMemo(() => {
-    const map = {};
-    (attendance || []).forEach((r) => {
-      const key = (r.created_at || r.joined_at || "").slice(0, 10);
-      if (!key) return;
-      if (!map[key]) map[key] = [];
-      map[key].push(r);
-    });
-    return map;
-  }, [attendance]);
 
   const stats = useMemo(() => {
     const all     = attendance || [];
@@ -86,25 +89,6 @@ const StudentAttendance = () => {
       rate: total ? Math.round(((present + late) / total) * 100) : 0,
     };
   }, [attendance]);
-
-  const prevMonth = () => {
-    setCalMonth((c) => {
-      const d = new Date(c.year, c.month - 1, 1);
-      return { year: d.getFullYear(), month: d.getMonth() };
-    });
-    setSelectedDay(null);
-  };
-  const nextMonth = () => {
-    setCalMonth((c) => {
-      const d = new Date(c.year, c.month + 1, 1);
-      return { year: d.getFullYear(), month: d.getMonth() };
-    });
-    setSelectedDay(null);
-  };
-
-  const displayRecords = selectedDay
-    ? attendanceByDate[selectedDay] || []
-    : attendance || [];
 
   const rateColor =
     stats.rate >= 90 ? "text-emerald-400" :
@@ -127,7 +111,7 @@ const StudentAttendance = () => {
           <span className="text-[10px] uppercase tracking-widest text-slate-500 font-bold px-0.5">Course</span>
           <FilterSelect
             value={courseId}
-            onChange={(e) => { setCourseId(e.target.value); setSelectedDay(null); }}
+            onChange={(e) => setCourseId(e.target.value)}
             style={{ width: 200 }}
           >
             {enrolledCourses?.map((c) => (
@@ -140,7 +124,7 @@ const StudentAttendance = () => {
           label="From"
           value={fromDate}
           max={toDate}
-          onChange={(e) => { setFromDate(e.target.value); setSelectedDay(null); }}
+          onChange={(e) => setFromDate(e.target.value)}
         />
 
         <FilterDateInput
@@ -148,145 +132,103 @@ const StudentAttendance = () => {
           value={toDate}
           min={fromDate}
           max={todayStr()}
-          onChange={(e) => { setToDate(e.target.value); setSelectedDay(null); }}
+          onChange={(e) => setToDate(e.target.value)}
         />
       </div>
 
       {isLoading ? (
         <div className="flex items-center justify-center py-20">
-          <i className="fas fa-spinner animate-spin text-indigo-400 text-2xl"></i>
+          <i className="fas fa-spinner animate-spin text-indigo-400 text-2xl" />
         </div>
       ) : !attendance?.length ? (
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-12 text-center">
-          <i className="fas fa-calendar-times text-slate-600 text-3xl mb-3"></i>
+          <i className="fas fa-calendar-times text-slate-600 text-3xl mb-3" />
           <p className="text-slate-300 font-semibold">No attendance to show</p>
           <p className="text-slate-500 text-sm mt-1">No records found for the selected filters.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          {/* Left: stats + rate bar + calendar */}
-          <div className="xl:col-span-2 space-y-4">
-            {/* Stats */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {[
-                { label: "Total",   value: stats.total,   color: "text-white" },
-                { label: "Present", value: stats.present, color: "text-emerald-400" },
-                { label: "Absent",  value: stats.absent,  color: "text-rose-400" },
-                { label: "Rate",    value: `${stats.rate}%`, color: rateColor },
-              ].map((s) => (
-                <div key={s.label} className="bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-center">
-                  <p className={`text-2xl font-black ${s.color}`}>{s.value}</p>
-                  <p className="text-[10px] uppercase tracking-widest text-slate-500 mt-0.5">{s.label}</p>
-                </div>
-              ))}
-            </div>
-
-            {/* Rate bar */}
-            <div className="bg-slate-900 border border-slate-800 rounded-xl px-4 py-3">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-xs font-semibold text-slate-400">Attendance Rate</p>
-                <p className={`text-sm font-black ${rateColor}`}>{stats.rate}%</p>
+        <>
+          {/* Stats */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {[
+              { label: "Total",   value: stats.total,      color: "text-white" },
+              { label: "Present", value: stats.present,    color: "text-emerald-400" },
+              { label: "Absent",  value: stats.absent,     color: "text-rose-400" },
+              { label: "Rate",    value: `${stats.rate}%`, color: rateColor },
+            ].map((s) => (
+              <div key={s.label} className="bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-center">
+                <p className={`text-2xl font-black ${s.color}`}>{s.value}</p>
+                <p className="text-[10px] uppercase tracking-widest text-slate-500 mt-0.5">{s.label}</p>
               </div>
-              <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                <div
-                  className={`h-full rounded-full transition-all duration-700 ${
-                    stats.rate >= 90 ? "bg-emerald-500" :
-                    stats.rate >= 75 ? "bg-yellow-500"  :
-                    stats.rate >= 60 ? "bg-orange-500"  :
-                                       "bg-rose-500"
-                  }`}
-                  style={{ width: `${stats.rate}%` }}
-                />
-              </div>
-              <p className="text-[10px] text-slate-500 mt-1.5">
-                {stats.rate >= 75 ? "You're on track. Keep it up!" : "Your attendance needs improvement."}
-              </p>
-            </div>
-
-            {/* Calendar */}
-            <AttendanceCalendar
-              attendanceByDate={attendanceByDate}
-              fromDate={fromDate}
-              toDate={toDate}
-              calMonth={calMonth}
-              onPrevMonth={prevMonth}
-              onNextMonth={nextMonth}
-              selectedDay={selectedDay}
-              onDaySelect={setSelectedDay}
-            />
+            ))}
           </div>
 
-          {/* Right: records panel */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-slate-300">
-                {selectedDay
-                  ? new Date(selectedDay + "T00:00:00").toLocaleDateString([], {
-                      weekday: "short", month: "short", day: "numeric", year: "numeric",
-                    })
-                  : "All Records"}
-              </h3>
-              {selectedDay && (
-                <button
-                  onClick={() => setSelectedDay(null)}
-                  className="text-xs text-slate-500 hover:text-white transition flex items-center gap-1"
-                >
-                  <i className="fas fa-times text-[10px]"></i> Clear
-                </button>
-              )}
+          {/* Rate bar */}
+          <div className="bg-slate-900 border border-slate-800 rounded-xl px-4 py-3">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs font-semibold text-slate-400">Attendance Rate</p>
+              <p className={`text-sm font-black ${rateColor}`}>{stats.rate}%</p>
             </div>
+            <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all duration-700 ${
+                  stats.rate >= 90 ? "bg-emerald-500" :
+                  stats.rate >= 75 ? "bg-yellow-500"  :
+                  stats.rate >= 60 ? "bg-orange-500"  :
+                                     "bg-rose-500"
+                }`}
+                style={{ width: `${stats.rate}%` }}
+              />
+            </div>
+            <p className="text-[10px] text-slate-500 mt-1.5">
+              {stats.rate >= 75 ? "You're on track. Keep it up!" : "Your attendance needs improvement."}
+            </p>
+          </div>
 
-            {!displayRecords.length ? (
-              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-10 text-center">
-                <i className="fas fa-calendar-times text-slate-600 text-2xl mb-3"></i>
-                <p className="text-slate-400 text-sm">
-                  {selectedDay ? "No records for this day." : "No records in selected range."}
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-2 max-h-[500px] overflow-y-auto pr-0.5">
-                {displayRecords.map((r) => {
-                  const cfg = STATUS_CONFIG[r.status] ?? STATUS_CONFIG.absent;
-                  const dateKey = (r.created_at || r.joined_at || "");
-                  return (
-                    <div
-                      key={r.id}
-                      className="bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 hover:border-slate-700 transition"
+          {/* Table */}
+          <div className="bg-slate-900/50 border border-slate-800 rounded-3xl overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-800">
+                    <th className="px-5 py-4 text-left text-[10px] uppercase tracking-wider text-slate-500 font-semibold min-w-[180px]">Session</th>
+                    <th className="px-4 py-4 text-left text-[10px] uppercase tracking-wider text-slate-500 font-semibold min-w-[200px]">Date &amp; Time</th>
+                    <th className="px-4 py-4 text-center text-[10px] uppercase tracking-wider text-slate-500 font-semibold min-w-[110px]">Joined At</th>
+                    <th className="px-4 py-4 text-center text-[10px] uppercase tracking-wider text-slate-500 font-semibold min-w-[110px]">Left At</th>
+                    <th className="px-4 py-4 text-center text-[10px] uppercase tracking-wider text-slate-500 font-semibold min-w-[100px]">Status</th>
+                    <th className="px-5 py-4 text-left text-[10px] uppercase tracking-wider text-slate-500 font-semibold">Note</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(attendance || []).map((r, idx) => (
+                    <tr
+                      key={r.id ?? idx}
+                      className="border-b border-slate-800/40 last:border-0 hover:bg-slate-800/20 transition-colors"
                     >
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0">
-                          <p className="font-semibold text-white text-sm truncate">
-                            {r.session_title}
-                          </p>
-                          {r.course_title && (
-                            <p className="text-xs text-indigo-400 truncate mt-0.5">
-                              {r.course_title}
-                            </p>
-                          )}
-                          <p className="text-[10px] text-slate-500 mt-1">
-                            {dateKey
-                              ? new Date(dateKey).toLocaleDateString([], {
-                                  month: "short", day: "numeric", year: "numeric",
-                                })
-                              : "—"}
-                          </p>
-                        </div>
-                        <span className={`mt-0.5 shrink-0 px-2 py-0.5 rounded-full text-xs border font-semibold ${cfg.badge}`}>
-                          {cfg.label}
-                        </span>
-                      </div>
-                      {r.note && (
-                        <p className="text-xs text-slate-500 italic mt-2 border-t border-slate-800 pt-1.5">
-                          {r.note}
-                        </p>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
+                      <td className="px-5 py-3.5">
+                        <p className="text-white text-xs font-semibold">{r.session_title || "—"}</p>
+                        {r.course_title && (
+                          <p className="text-indigo-400 text-[10px] mt-0.5">{r.course_title}</p>
+                        )}
+                      </td>
+                      <td className="px-4 py-3.5">
+                        {fmtDateTime(r.created_at || r.joined_at)}
+                      </td>
+                      <td className="px-4 py-3.5 text-center">{fmtTime(r.joined_at)}</td>
+                      <td className="px-4 py-3.5 text-center">{fmtTime(r.left_at)}</td>
+                      <td className="px-4 py-3.5 text-center">
+                        <StatusBadge status={r.status} />
+                      </td>
+                      <td className="px-5 py-3.5">
+                        <p className="text-slate-500 text-xs italic">{r.note || "—"}</p>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   );
