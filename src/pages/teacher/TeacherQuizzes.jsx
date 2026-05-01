@@ -1,0 +1,976 @@
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  fetchQuizzes,
+  createQuiz,
+  updateQuiz,
+  deleteQuiz,
+  fetchQuizSubmissions,
+  fetchQuizSubmissionById,
+  gradeQuizTextAnswers,
+  fetchMyCourses,
+  clearSelectedQuizSubmission,
+} from "../../store/slices/teacherSlice";
+import { FilterSelect } from "../../components/ui";
+import { toastManager } from "../../utils/toastManager";
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+const defaultOption = () => ({ option_text: "", is_correct: false });
+const defaultQuestion = () => ({
+  question_text: "",
+  question_type: "SINGLE_CHOICE",
+  max_marks: "",
+  options: [defaultOption(), defaultOption(), defaultOption(), defaultOption()],
+});
+
+const QUESTION_TYPES = [
+  { value: "SINGLE_CHOICE",   label: "Single Choice" },
+  { value: "MULTIPLE_CHOICE", label: "Multiple Choice" },
+  { value: "TEXT_FORMAT",     label: "Text / Essay" },
+];
+
+const statusColor = (status) => {
+  if (status === "graded")      return "text-emerald-400 bg-emerald-500/10";
+  if (status === "auto_graded") return "text-blue-400 bg-blue-500/10";
+  if (status === "submitted")   return "text-amber-400 bg-amber-500/10";
+  return "text-slate-400 bg-slate-500/10";
+};
+
+const statusLabel = (status) => {
+  if (status === "graded")      return "Graded";
+  if (status === "auto_graded") return "Auto Graded";
+  if (status === "submitted")   return "Pending Grade";
+  return status ?? "—";
+};
+
+// ── Question Builder ──────────────────────────────────────────────────────────
+const QuestionBuilder = ({ questions, onChange }) => {
+  const setQuestion = (idx, patch) =>
+    onChange(questions.map((q, i) => (i === idx ? { ...q, ...patch } : q)));
+
+  const setOption = (qIdx, oIdx, patch) => {
+    const opts = questions[qIdx].options.map((o, i) => (i === oIdx ? { ...o, ...patch } : o));
+    setQuestion(qIdx, { options: opts });
+  };
+
+  const pickSingle = (qIdx, oIdx) => {
+    const opts = questions[qIdx].options.map((o, i) => ({ ...o, is_correct: i === oIdx }));
+    setQuestion(qIdx, { options: opts });
+  };
+
+  const toggleMultiple = (qIdx, oIdx) => {
+    const opts = questions[qIdx].options.map((o, i) =>
+      i === oIdx ? { ...o, is_correct: !o.is_correct } : o
+    );
+    setQuestion(qIdx, { options: opts });
+  };
+
+  const changeType = (qIdx, newType) => {
+    const q = questions[qIdx];
+    if (newType === "TEXT_FORMAT") {
+      setQuestion(qIdx, { question_type: newType, options: [] });
+    } else if (q.question_type === "TEXT_FORMAT") {
+      setQuestion(qIdx, {
+        question_type: newType,
+        options: [defaultOption(), defaultOption(), defaultOption(), defaultOption()],
+      });
+    } else {
+      setQuestion(qIdx, { question_type: newType });
+    }
+  };
+
+  const removeQuestion = (idx) => onChange(questions.filter((_, i) => i !== idx));
+
+  const addQuestion = () => onChange([...questions, defaultQuestion()]);
+
+  return (
+    <div className="space-y-5">
+      {questions.map((q, qIdx) => (
+        <div key={qIdx} className="bg-slate-800/60 rounded-2xl border border-slate-700 p-4">
+          {/* Question header */}
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+              Question {qIdx + 1}
+            </span>
+            {questions.length > 1 && (
+              <button
+                type="button"
+                onClick={() => removeQuestion(qIdx)}
+                className="w-7 h-7 flex items-center justify-center rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 transition"
+              >
+                <i className="fas fa-times text-xs" />
+              </button>
+            )}
+          </div>
+
+          {/* Question text */}
+          <input
+            type="text"
+            placeholder="Question text"
+            value={q.question_text}
+            onChange={(e) => setQuestion(qIdx, { question_text: e.target.value })}
+            className="w-full mb-3 p-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+          />
+
+          {/* Type + Marks row */}
+          <div className="flex gap-2 mb-3">
+            <select
+              value={q.question_type}
+              onChange={(e) => changeType(qIdx, e.target.value)}
+              className="flex-1 p-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 appearance-none"
+            >
+              {QUESTION_TYPES.map((t) => (
+                <option key={t.value} value={t.value}>{t.label}</option>
+              ))}
+            </select>
+            <input
+              type="number"
+              min={1}
+              placeholder="Marks"
+              value={q.max_marks}
+              onChange={(e) => setQuestion(qIdx, { max_marks: e.target.value })}
+              className="w-24 p-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+            />
+          </div>
+
+          {/* Options */}
+          {q.question_type === "SINGLE_CHOICE" && (
+            <div className="space-y-2">
+              <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Options — select 1 correct</p>
+              {q.options.map((opt, oIdx) => (
+                <div key={oIdx} className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name={`single-${qIdx}`}
+                    checked={opt.is_correct}
+                    onChange={() => pickSingle(qIdx, oIdx)}
+                    className="accent-indigo-500 w-4 h-4 flex-shrink-0 cursor-pointer"
+                  />
+                  <input
+                    type="text"
+                    placeholder={`Option ${oIdx + 1}`}
+                    value={opt.option_text}
+                    onChange={(e) => setOption(qIdx, oIdx, { option_text: e.target.value })}
+                    className="flex-1 p-2 rounded-lg bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500/50"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {q.question_type === "MULTIPLE_CHOICE" && (
+            <div className="space-y-2">
+              <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Options — check all correct</p>
+              {q.options.map((opt, oIdx) => (
+                <div key={oIdx} className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={opt.is_correct}
+                    onChange={() => toggleMultiple(qIdx, oIdx)}
+                    className="accent-indigo-500 w-4 h-4 flex-shrink-0 cursor-pointer"
+                  />
+                  <input
+                    type="text"
+                    placeholder={`Option ${oIdx + 1}`}
+                    value={opt.option_text}
+                    onChange={(e) => setOption(qIdx, oIdx, { option_text: e.target.value })}
+                    className="flex-1 p-2 rounded-lg bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500/50"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {q.question_type === "TEXT_FORMAT" && (
+            <p className="text-xs text-slate-500 italic">Students will write a text answer for this question.</p>
+          )}
+        </div>
+      ))}
+
+      <button
+        type="button"
+        onClick={addQuestion}
+        className="w-full py-2.5 rounded-xl border border-dashed border-slate-700 hover:border-indigo-500 text-slate-400 hover:text-indigo-400 text-sm font-semibold transition flex items-center justify-center gap-2"
+      >
+        <i className="fas fa-plus text-xs" />
+        Add Question
+      </button>
+    </div>
+  );
+};
+
+// ── Quiz form validation ──────────────────────────────────────────────────────
+const validateQuizForm = (form, questions) => {
+  if (!form.course)         return "Please select a course";
+  if (!form.title.trim())   return "Title is required";
+  if (!form.total_marks)    return "Total marks is required";
+  if (!form.published_at)   return "Publish date is required";
+  if (!form.due_date)       return "Due date is required";
+
+  const now = new Date();
+  const pub = new Date(form.published_at);
+  const due = new Date(form.due_date);
+
+  if (pub < new Date(Date.now() - 60 * 1000)) return "Publish date cannot be in the past";
+  if (due <= pub)  return "Due date must be after publish date";
+
+  if (!questions.length) return "Add at least one question";
+
+  for (let i = 0; i < questions.length; i++) {
+    const q = questions[i];
+    if (!q.question_text.trim()) return `Question ${i + 1}: text is required`;
+    if (!q.max_marks || Number(q.max_marks) <= 0) return `Question ${i + 1}: marks must be > 0`;
+
+    if (q.question_type === "SINGLE_CHOICE") {
+      if (q.options.length !== 4) return `Question ${i + 1}: must have exactly 4 options`;
+      if (q.options.some((o) => !o.option_text.trim())) return `Question ${i + 1}: all option texts required`;
+      if (q.options.filter((o) => o.is_correct).length !== 1)
+        return `Question ${i + 1}: must mark exactly 1 correct option`;
+    }
+    if (q.question_type === "MULTIPLE_CHOICE") {
+      if (q.options.length !== 4) return `Question ${i + 1}: must have exactly 4 options`;
+      if (q.options.some((o) => !o.option_text.trim())) return `Question ${i + 1}: all option texts required`;
+      if (!q.options.some((o) => o.is_correct))
+        return `Question ${i + 1}: must mark at least 1 correct option`;
+    }
+  }
+
+  const sumMarks = questions.reduce((s, q) => s + Number(q.max_marks || 0), 0);
+  if (sumMarks !== Number(form.total_marks))
+    return `Total marks (${form.total_marks}) must equal sum of question marks (${sumMarks})`;
+
+  return null;
+};
+
+// ── Build payload from form state ─────────────────────────────────────────────
+const buildPayload = (form, questions) => ({
+  course: Number(form.course),
+  title: form.title.trim(),
+  description: form.description.trim(),
+  total_marks: Number(form.total_marks),
+  published_at: form.published_at,
+  due_date: form.due_date,
+  questions: questions.map((q) => {
+    const base = {
+      ...(q.id ? { id: q.id } : {}),
+      question_text: q.question_text.trim(),
+      question_type: q.question_type,
+      max_marks: Number(q.max_marks),
+    };
+    if (q.question_type !== "TEXT_FORMAT") {
+      base.options = q.options.map((o) => ({
+        ...(o.id ? { id: o.id } : {}),
+        option_text: o.option_text.trim(),
+        is_correct: o.is_correct,
+      }));
+    }
+    return base;
+  }),
+});
+
+// ── Populate form from quiz object (for edit) ─────────────────────────────────
+const quizToForm = (quiz) => ({
+  course: String(quiz.course ?? ""),
+  title: quiz.title ?? "",
+  description: quiz.description ?? "",
+  total_marks: String(quiz.total_marks ?? ""),
+  published_at: quiz.published_at ? quiz.published_at.slice(0, 16) : "",
+  due_date: quiz.due_date ? quiz.due_date.slice(0, 16) : "",
+});
+
+const quizToQuestions = (quiz) =>
+  (quiz.questions ?? []).map((q) => ({
+    id: q.id,
+    question_text: q.question_text ?? "",
+    question_type: q.question_type ?? "SINGLE_CHOICE",
+    max_marks: String(q.max_marks ?? ""),
+    options: q.question_type === "TEXT_FORMAT"
+      ? []
+      : (q.options ?? []).map((o) => ({
+          id: o.id,
+          option_text: o.option_text ?? "",
+          is_correct: o.is_correct ?? false,
+        })),
+  }));
+
+// ── Main Component ────────────────────────────────────────────────────────────
+const TeacherQuizzes = () => {
+  const dispatch = useDispatch();
+  const {
+    quizzes,
+    loadingQuizzes,
+    myCourses,
+    quizSubmissions,
+    loadingQuizSubmissions,
+    selectedQuizSubmission,
+    loadingSelectedQuizSubmission,
+  } = useSelector((s) => s.teachers);
+
+  const [filterCourse, setFilterCourse] = useState("");
+
+  // Modal state
+  const [showCreate,  setShowCreate]  = useState(false);
+  const [editTarget,  setEditTarget]  = useState(null);
+  const [viewQuiz,    setViewQuiz]    = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deletingId,  setDeletingId]  = useState(null);
+  const [submissionsQuiz, setSubmissionsQuiz] = useState(null);
+  const [gradingSubId, setGradingSubId] = useState(null);
+  const [gradeInputs, setGradeInputs] = useState({});
+  const [saving, setSaving] = useState(false);
+
+  // Create / Edit form state
+  const emptyForm = { course: "", title: "", description: "", total_marks: "", published_at: "", due_date: "" };
+  const [form, setForm]           = useState(emptyForm);
+  const [questions, setQuestions] = useState([defaultQuestion()]);
+
+  useEffect(() => {
+    if (!myCourses?.length) dispatch(fetchMyCourses());
+  }, [dispatch, myCourses?.length]);
+
+  useEffect(() => {
+    dispatch(fetchQuizzes(filterCourse ? { course: filterCourse } : {}));
+  }, [dispatch, filterCourse]);
+
+  // ── Create ────────────────────────────────────────────────────────────────
+  const handleCreate = async () => {
+    const err = validateQuizForm(form, questions);
+    if (err) { toastManager.error(err); return; }
+    setSaving(true);
+    try {
+      await dispatch(createQuiz(buildPayload(form, questions))).unwrap();
+      toastManager.success("Quiz created");
+      setShowCreate(false);
+      setForm(emptyForm);
+      setQuestions([defaultQuestion()]);
+    } catch (e) {
+      const msg = typeof e === "string" ? e : (e?.detail || e?.title?.[0] || e?.questions || JSON.stringify(e));
+      toastManager.error(msg || "Failed to create quiz");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // ── Edit ──────────────────────────────────────────────────────────────────
+  const openEdit = (quiz) => {
+    setEditTarget(quiz);
+    setForm(quizToForm(quiz));
+    setQuestions(quizToQuestions(quiz));
+  };
+
+  const handleEdit = async () => {
+    const err = validateQuizForm(form, questions);
+    if (err) { toastManager.error(err); return; }
+    setSaving(true);
+    try {
+      await dispatch(updateQuiz({ id: editTarget.id, data: buildPayload(form, questions) })).unwrap();
+      toastManager.success("Quiz updated");
+      setEditTarget(null);
+    } catch (e) {
+      const detail = e?.detail || (typeof e === "string" ? e : JSON.stringify(e));
+      toastManager.error(detail || "Failed to update quiz");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // ── Delete ────────────────────────────────────────────────────────────────
+  const handleDelete = async () => {
+    setDeletingId(deleteTarget.id);
+    try {
+      await dispatch(deleteQuiz(deleteTarget.id)).unwrap();
+      toastManager.success("Quiz deleted");
+      setDeleteTarget(null);
+    } catch (e) {
+      const detail = e?.detail || (typeof e === "string" ? e : JSON.stringify(e));
+      toastManager.error(detail || "Failed to delete quiz");
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  // ── Submissions ───────────────────────────────────────────────────────────
+  const openSubmissions = (quiz) => {
+    setSubmissionsQuiz(quiz);
+    dispatch(fetchQuizSubmissions(quiz.id));
+  };
+
+  const openGrading = (subId) => {
+    setGradingSubId(subId);
+    dispatch(clearSelectedQuizSubmission());
+    dispatch(fetchQuizSubmissionById(subId));
+    setGradeInputs({});
+  };
+
+  const handleGrade = async () => {
+    if (!selectedQuizSubmission) return;
+    const textQuestions = selectedQuizSubmission.answers?.filter(
+      (a) => a.question_type === "TEXT_FORMAT"
+    ) ?? [];
+    const grades = textQuestions.map((a) => ({
+      question_id: a.question_id,
+      marks: Number(gradeInputs[a.question_id] ?? 0),
+    }));
+
+    for (const g of grades) {
+      const q = textQuestions.find((a) => a.question_id === g.question_id);
+      if (g.marks < 0) { toastManager.error("Marks cannot be negative"); return; }
+      if (g.marks > (q?.max_marks ?? 0)) {
+        toastManager.error(`Marks exceed max (${q?.max_marks}) for question ${g.question_id}`);
+        return;
+      }
+    }
+
+    setSaving(true);
+    try {
+      await dispatch(gradeQuizTextAnswers({ submissionId: selectedQuizSubmission.id, grades })).unwrap();
+      toastManager.success("Submission graded");
+      if (submissionsQuiz) dispatch(fetchQuizSubmissions(submissionsQuiz.id));
+      setGradingSubId(null);
+    } catch (e) {
+      const detail = e?.grades || e?.detail || (typeof e === "string" ? e : JSON.stringify(e));
+      toastManager.error(detail || "Failed to grade");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // ── Render helpers ────────────────────────────────────────────────────────
+  const renderQuizForm = (onSubmit, isEdit = false) => (
+    <div className="space-y-4">
+      {/* Course */}
+      {!isEdit && (
+        <div>
+          <label className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1.5 block">Course</label>
+          <FilterSelect
+            value={form.course}
+            onChange={(e) => setForm((p) => ({ ...p, course: e.target.value }))}
+            className="w-full"
+          >
+            <option value="">Select Course</option>
+            {myCourses?.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
+          </FilterSelect>
+        </div>
+      )}
+
+      {/* Title */}
+      <div>
+        <label className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1.5 block">Title</label>
+        <input
+          type="text"
+          placeholder="Quiz title"
+          value={form.title}
+          onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))}
+          className="w-full p-3 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+        />
+      </div>
+
+      {/* Description */}
+      <div>
+        <label className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1.5 block">Description</label>
+        <textarea
+          rows={2}
+          placeholder="Optional description"
+          value={form.description}
+          onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
+          className="w-full p-3 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 resize-none"
+        />
+      </div>
+
+      {/* Total marks + dates */}
+      <div className="grid grid-cols-3 gap-3">
+        <div>
+          <label className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1.5 block">Total Marks</label>
+          <input
+            type="number"
+            min={1}
+            placeholder="e.g. 20"
+            value={form.total_marks}
+            onChange={(e) => setForm((p) => ({ ...p, total_marks: e.target.value }))}
+            className="w-full p-3 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+          />
+        </div>
+        <div>
+          <label className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1.5 block">Publish Date</label>
+          <input
+            type="datetime-local"
+            value={form.published_at}
+            onChange={(e) => setForm((p) => ({ ...p, published_at: e.target.value }))}
+            className="w-full p-3 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+          />
+        </div>
+        <div>
+          <label className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1.5 block">Due Date</label>
+          <input
+            type="datetime-local"
+            value={form.due_date}
+            onChange={(e) => setForm((p) => ({ ...p, due_date: e.target.value }))}
+            className="w-full p-3 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+          />
+        </div>
+      </div>
+
+      {/* Question builder */}
+      <div>
+        <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-3">Questions</p>
+        <QuestionBuilder questions={questions} onChange={setQuestions} />
+      </div>
+
+      {/* Footer */}
+      <div className="flex gap-3 justify-end pt-2">
+        <button
+          type="button"
+          onClick={() => { setShowCreate(false); setEditTarget(null); setForm(emptyForm); setQuestions([defaultQuestion()]); }}
+          className="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-xl text-sm transition"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          disabled={saving}
+          onClick={onSubmit}
+          className="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 rounded-xl text-sm font-semibold transition flex items-center gap-2"
+        >
+          {saving && <i className="fas fa-spinner animate-spin text-xs" />}
+          {isEdit ? "Save Changes" : "Create Quiz"}
+        </button>
+      </div>
+    </div>
+  );
+
+  // ── Main render ───────────────────────────────────────────────────────────
+  return (
+    <div>
+      {/* List header */}
+      <div className="mb-6 flex flex-wrap gap-3 items-center justify-between">
+        <FilterSelect
+          value={filterCourse}
+          onChange={(e) => setFilterCourse(e.target.value)}
+        >
+          <option value="">All Courses</option>
+          {myCourses?.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
+        </FilterSelect>
+
+        <button
+          type="button"
+          onClick={() => { setShowCreate(true); setForm(emptyForm); setQuestions([defaultQuestion()]); }}
+          className="bg-indigo-600 hover:bg-indigo-500 px-5 py-3 rounded-xl text-xs font-bold transition"
+        >
+          + Create Quiz
+        </button>
+      </div>
+
+      {/* Quiz list */}
+      {loadingQuizzes && !quizzes?.length ? (
+        <div className="flex items-center justify-center py-16 text-white">
+          <i className="fas fa-spinner animate-spin text-2xl" />
+        </div>
+      ) : quizzes?.length ? (
+        <div className="space-y-4">
+          {quizzes.map((quiz) => (
+            <div
+              key={quiz.id}
+              className="bg-slate-900 p-6 rounded-3xl border border-slate-800 hover:border-indigo-500/40 transition"
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1 min-w-0">
+                  <h2 className="font-bold text-white">{quiz.title}</h2>
+                  <p className="text-[10px] text-slate-500 uppercase tracking-widest mt-1">{quiz.course_title}</p>
+                  <p className="text-xs text-slate-400 mt-2">
+                    {quiz.submissions_count ?? 0} submission{quiz.submissions_count !== 1 ? "s" : ""}
+                    &nbsp;·&nbsp; {quiz.total_marks} marks
+                    {quiz.due_date && <>&nbsp;·&nbsp; Due {new Date(quiz.due_date).toLocaleDateString()}</>}
+                  </p>
+                </div>
+
+                <div className="flex flex-col items-end gap-3 flex-shrink-0">
+                  <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
+                    quiz.is_locked
+                      ? "bg-rose-500/15 text-rose-400"
+                      : quiz.is_published
+                        ? "bg-emerald-500/15 text-emerald-400"
+                        : "bg-slate-500/15 text-slate-400"
+                  }`}>
+                    {quiz.is_locked ? "Locked" : quiz.is_published ? "Published" : "Unpublished"}
+                  </span>
+
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      title="View quiz"
+                      onClick={() => setViewQuiz(quiz)}
+                      className="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-800 hover:bg-indigo-600/20 text-slate-400 hover:text-indigo-400 border border-slate-700 hover:border-indigo-500/40 transition"
+                    >
+                      <i className="fas fa-eye text-xs" />
+                    </button>
+                    <button
+                      type="button"
+                      title="Edit quiz"
+                      onClick={() => openEdit(quiz)}
+                      disabled={quiz.is_locked}
+                      className="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-800 hover:bg-amber-600/20 text-slate-400 hover:text-amber-400 border border-slate-700 hover:border-amber-500/40 transition disabled:opacity-40"
+                    >
+                      <i className="fas fa-pencil text-xs" />
+                    </button>
+                    <button
+                      type="button"
+                      title="Delete quiz"
+                      onClick={() => setDeleteTarget(quiz)}
+                      disabled={quiz.is_locked}
+                      className="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-800 hover:bg-rose-600/20 text-slate-400 hover:text-rose-400 border border-slate-700 hover:border-rose-500/40 transition disabled:opacity-40"
+                    >
+                      <i className="fas fa-trash text-xs" />
+                    </button>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => openSubmissions(quiz)}
+                    className="bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-xl text-xs font-bold transition"
+                  >
+                    View Submissions
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="bg-slate-900 p-6 rounded-3xl border border-slate-800 text-slate-400 text-sm">
+          No quizzes found. Create your first quiz above.
+        </div>
+      )}
+
+      {/* ── CREATE MODAL ── */}
+      {showCreate && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-900 rounded-3xl border border-slate-800 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 sticky top-0 bg-slate-900 z-10">
+              <h2 className="font-bold text-white text-sm">Create Quiz</h2>
+              <button
+                onClick={() => { setShowCreate(false); setForm(emptyForm); setQuestions([defaultQuestion()]); }}
+                className="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-white transition"
+              >
+                <i className="fas fa-times text-xs" />
+              </button>
+            </div>
+            <div className="p-6">{renderQuizForm(handleCreate, false)}</div>
+          </div>
+        </div>
+      )}
+
+      {/* ── EDIT MODAL ── */}
+      {editTarget && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-900 rounded-3xl border border-slate-800 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 sticky top-0 bg-slate-900 z-10">
+              <div>
+                <h2 className="font-bold text-white text-sm">Edit Quiz</h2>
+                <p className="text-[10px] text-slate-500 mt-0.5">{editTarget.course_title}</p>
+              </div>
+              <button
+                onClick={() => { setEditTarget(null); setForm(emptyForm); setQuestions([defaultQuestion()]); }}
+                className="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-white transition"
+              >
+                <i className="fas fa-times text-xs" />
+              </button>
+            </div>
+            <div className="p-6">{renderQuizForm(handleEdit, true)}</div>
+          </div>
+        </div>
+      )}
+
+      {/* ── VIEW MODAL ── */}
+      {viewQuiz && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-900 rounded-3xl border border-slate-800 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 sticky top-0 bg-slate-900 z-10">
+              <h2 className="font-bold text-white text-sm">Quiz Details</h2>
+              <button
+                onClick={() => setViewQuiz(null)}
+                className="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-white transition"
+              >
+                <i className="fas fa-times text-xs" />
+              </button>
+            </div>
+            <div className="p-6 space-y-5">
+              <div>
+                <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Title</p>
+                <p className="text-white font-semibold">{viewQuiz.title}</p>
+              </div>
+              {viewQuiz.description && (
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Description</p>
+                  <p className="text-slate-300 text-sm">{viewQuiz.description}</p>
+                </div>
+              )}
+              <div className="grid grid-cols-3 gap-3">
+                <div className="bg-slate-800/60 rounded-2xl p-3">
+                  <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Total Marks</p>
+                  <p className="text-white font-bold">{viewQuiz.total_marks}</p>
+                </div>
+                <div className="bg-slate-800/60 rounded-2xl p-3">
+                  <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Submissions</p>
+                  <p className="text-white font-bold">{viewQuiz.submissions_count ?? 0}</p>
+                </div>
+                <div className="bg-slate-800/60 rounded-2xl p-3">
+                  <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Status</p>
+                  <p className={`text-xs font-bold ${viewQuiz.is_locked ? "text-rose-400" : viewQuiz.is_published ? "text-emerald-400" : "text-slate-400"}`}>
+                    {viewQuiz.is_locked ? "Locked" : viewQuiz.is_published ? "Published" : "Draft"}
+                  </p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Publish Date</p>
+                  <p className="text-slate-300 text-sm">{viewQuiz.published_at ? new Date(viewQuiz.published_at).toLocaleString() : "—"}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Due Date</p>
+                  <p className="text-slate-300 text-sm">{viewQuiz.due_date ? new Date(viewQuiz.due_date).toLocaleString() : "—"}</p>
+                </div>
+              </div>
+              {/* Questions preview */}
+              {viewQuiz.questions?.length > 0 && (
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-3">Questions ({viewQuiz.questions.length})</p>
+                  <div className="space-y-3">
+                    {viewQuiz.questions.map((q, idx) => (
+                      <div key={q.id} className="bg-slate-800/60 rounded-xl p-3">
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <p className="text-sm text-white font-medium">{idx + 1}. {q.question_text}</p>
+                          <span className="text-[10px] text-slate-500 flex-shrink-0">{q.max_marks} marks</span>
+                        </div>
+                        <span className="text-[10px] uppercase tracking-wider text-indigo-400">{q.question_type.replace("_", " ")}</span>
+                        {q.options?.length > 0 && (
+                          <div className="mt-2 space-y-1">
+                            {q.options.map((o) => (
+                              <div key={o.id} className={`flex items-center gap-2 text-xs ${o.is_correct ? "text-emerald-400" : "text-slate-400"}`}>
+                                <i className={`fas fa-${o.is_correct ? "check-circle" : "circle"} text-[10px]`} />
+                                {o.option_text}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── DELETE CONFIRM ── */}
+      {deleteTarget && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-900 rounded-3xl border border-slate-800 w-full max-w-sm p-6 space-y-5">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-rose-500/15 border border-rose-500/20 flex items-center justify-center flex-shrink-0">
+                <i className="fas fa-trash text-rose-400 text-sm" />
+              </div>
+              <div>
+                <h3 className="font-bold text-white text-sm">Delete Quiz</h3>
+                <p className="text-slate-400 text-xs mt-0.5">This cannot be undone</p>
+              </div>
+            </div>
+            <p className="text-slate-300 text-sm">
+              Delete <span className="font-semibold text-white">"{deleteTarget.title}"</span>?
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                type="button"
+                onClick={() => setDeleteTarget(null)}
+                disabled={!!deletingId}
+                className="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-xl text-sm transition disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={!!deletingId}
+                onClick={handleDelete}
+                className="px-5 py-2 bg-rose-600 hover:bg-rose-500 disabled:opacity-50 rounded-xl text-sm font-semibold transition flex items-center gap-2"
+              >
+                {deletingId && <i className="fas fa-spinner animate-spin text-xs" />}
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── SUBMISSIONS MODAL ── */}
+      {submissionsQuiz && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-900 rounded-3xl border border-slate-800 w-full max-w-lg max-h-[85vh] flex flex-col">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 flex-shrink-0">
+              <h2 className="font-bold text-white text-sm">Submissions: {submissionsQuiz.title}</h2>
+              <button
+                onClick={() => setSubmissionsQuiz(null)}
+                className="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-white transition"
+              >
+                <i className="fas fa-times text-xs" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-6">
+              {loadingQuizSubmissions ? (
+                <div className="flex items-center justify-center py-8">
+                  <i className="fas fa-spinner animate-spin text-white text-xl" />
+                </div>
+              ) : quizSubmissions?.length ? (
+                <div className="space-y-3">
+                  {quizSubmissions.map((sub) => (
+                    <div key={sub.id} className="bg-slate-800 p-4 rounded-2xl flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-bold text-white">{sub.student_name}</p>
+                        <p className="text-xs text-slate-400 mt-0.5">
+                          {sub.obtained_marks != null ? `${sub.obtained_marks} / ${sub.total_marks_snapshot}` : "Not graded"}
+                          {sub.percentage != null ? ` (${sub.percentage}%)` : ""}
+                        </p>
+                        <p className="text-xs text-slate-500 mt-0.5">{new Date(sub.submitted_at).toLocaleString()}</p>
+                      </div>
+                      <div className="flex flex-col items-end gap-2">
+                        <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${statusColor(sub.status)}`}>
+                          {statusLabel(sub.status)}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => openGrading(sub.id)}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition ${
+                            sub.status === "submitted"
+                              ? "bg-indigo-600 hover:bg-indigo-500"
+                              : "bg-slate-700 hover:bg-slate-600"
+                          }`}
+                        >
+                          {sub.status === "submitted" ? "Grade" : "View"}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-slate-400 text-sm text-center py-8">No submissions yet.</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── GRADING / VIEW SUBMISSION MODAL ── */}
+      {gradingSubId && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[60] p-4">
+          <div className="bg-slate-900 rounded-3xl border border-slate-800 w-full max-w-xl max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 flex-shrink-0">
+              <h2 className="font-bold text-white text-sm">
+                {selectedQuizSubmission ? `Submission — ${selectedQuizSubmission.student_name}` : "Loading…"}
+              </h2>
+              <button
+                onClick={() => { setGradingSubId(null); dispatch(clearSelectedQuizSubmission()); }}
+                className="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-white transition"
+              >
+                <i className="fas fa-times text-xs" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-6">
+              {loadingSelectedQuizSubmission ? (
+                <div className="flex items-center justify-center py-8">
+                  <i className="fas fa-spinner animate-spin text-white text-xl" />
+                </div>
+              ) : selectedQuizSubmission ? (
+                <div className="space-y-5">
+                  {/* Summary */}
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="bg-slate-800/60 rounded-2xl p-3">
+                      <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Score</p>
+                      <p className="text-white font-bold">
+                        {selectedQuizSubmission.obtained_marks != null ? selectedQuizSubmission.obtained_marks : "—"} / {selectedQuizSubmission.total_marks_snapshot}
+                      </p>
+                    </div>
+                    <div className="bg-slate-800/60 rounded-2xl p-3">
+                      <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">%</p>
+                      <p className="text-white font-bold">{selectedQuizSubmission.percentage != null ? `${selectedQuizSubmission.percentage}%` : "—"}</p>
+                    </div>
+                    <div className="bg-slate-800/60 rounded-2xl p-3">
+                      <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Status</p>
+                      <p className={`text-xs font-bold ${statusColor(selectedQuizSubmission.status).split(" ")[0]}`}>
+                        {statusLabel(selectedQuizSubmission.status)}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Answers */}
+                  {selectedQuizSubmission.answers?.map((ans, idx) => (
+                    <div key={ans.question_id} className="bg-slate-800/60 rounded-2xl p-4">
+                      <div className="flex items-start justify-between gap-2 mb-2">
+                        <p className="text-sm font-semibold text-white">{idx + 1}. {ans.question_text}</p>
+                        <span className="text-[10px] text-slate-500 flex-shrink-0">{ans.max_marks} marks</span>
+                      </div>
+                      <span className="text-[10px] uppercase tracking-wider text-indigo-400 mb-3 block">
+                        {ans.question_type?.replace("_", " ")}
+                      </span>
+
+                      {ans.question_type === "TEXT_FORMAT" ? (
+                        <div>
+                          <div className="bg-slate-800 rounded-xl p-3 text-sm text-slate-300 mb-3 min-h-[60px]">
+                            {ans.text_answer || <span className="text-slate-500 italic">No answer</span>}
+                          </div>
+                          {selectedQuizSubmission.status === "submitted" && (
+                            <div>
+                              <label className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1.5 block">
+                                Assign Marks (max {ans.max_marks})
+                              </label>
+                              <input
+                                type="number"
+                                min={0}
+                                max={ans.max_marks}
+                                value={gradeInputs[ans.question_id] ?? ""}
+                                onChange={(e) => setGradeInputs((p) => ({ ...p, [ans.question_id]: e.target.value }))}
+                                className="w-24 p-2 rounded-lg bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                              />
+                            </div>
+                          )}
+                          {selectedQuizSubmission.status !== "submitted" && (
+                            <p className="text-xs text-slate-400">
+                              Marks: <span className="text-white font-semibold">{ans.obtained_marks ?? "—"}</span>
+                            </p>
+                          )}
+                        </div>
+                      ) : (
+                        <div>
+                          <p className="text-xs text-slate-500 mb-1">Selected options: {ans.selected_options?.join(", ") || "none"}</p>
+                          <p className="text-xs text-slate-400">
+                            Marks: <span className={`font-semibold ${ans.obtained_marks > 0 ? "text-emerald-400" : "text-rose-400"}`}>
+                              {ans.obtained_marks ?? "—"} / {ans.max_marks}
+                            </span>
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+
+                  {/* Grade button */}
+                  {selectedQuizSubmission.status === "submitted" && (
+                    <button
+                      type="button"
+                      disabled={saving}
+                      onClick={handleGrade}
+                      className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 rounded-xl text-sm font-bold transition flex items-center justify-center gap-2"
+                    >
+                      {saving && <i className="fas fa-spinner animate-spin text-xs" />}
+                      Submit Grades
+                    </button>
+                  )}
+                </div>
+              ) : null}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default TeacherQuizzes;

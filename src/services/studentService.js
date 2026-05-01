@@ -534,6 +534,27 @@ export const studentService = {
     }
   },
 
+  // Quiz APIs
+  getStudentQuizzes: async (params = {}) => {
+    const response = await axiosInstance.get("/quizzes/", { params });
+    return response.data;
+  },
+
+  getStudentQuizById: async (id) => {
+    const response = await axiosInstance.get(`/quizzes/${id}/`);
+    return response.data;
+  },
+
+  submitQuiz: async (quizId, answers) => {
+    const response = await axiosInstance.post(`/quizzes/${quizId}/submit/`, { answers });
+    return response.data;
+  },
+
+  getMyQuizSubmission: async (submissionId) => {
+    const response = await axiosInstance.get(`/quizzes/submissions/${submissionId}/`);
+    return response.data;
+  },
+
   // Announcements
   getUnreadAnnouncementsCount: async () => {
     const response = await axiosInstance.get(

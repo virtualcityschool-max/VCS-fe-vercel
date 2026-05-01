@@ -133,6 +133,46 @@ const getAllSubmissions = async (params = {}) => {
   return response.data;
 };
 
+// ── Quiz APIs ─────────────────────────────────────────────────────────────────
+const getQuizzes = async (params = {}) => {
+  const response = await axiosInstance.get("/quizzes/", { params });
+  return response.data;
+};
+
+const createQuiz = async (data) => {
+  const response = await axiosInstance.post("/quizzes/", data);
+  return response.data;
+};
+
+const getQuizById = async (id) => {
+  const response = await axiosInstance.get(`/quizzes/${id}/`);
+  return response.data;
+};
+
+const updateQuiz = async (id, data) => {
+  const response = await axiosInstance.patch(`/quizzes/${id}/`, data);
+  return response.data;
+};
+
+const deleteQuiz = async (id) => {
+  await axiosInstance.delete(`/quizzes/${id}/`);
+};
+
+const getQuizSubmissions = async (quizId) => {
+  const response = await axiosInstance.get(`/quizzes/${quizId}/submissions/`);
+  return response.data;
+};
+
+const getQuizSubmissionById = async (submissionId) => {
+  const response = await axiosInstance.get(`/quizzes/submissions/${submissionId}/`);
+  return response.data;
+};
+
+const gradeQuizSubmission = async (submissionId, grades) => {
+  const response = await axiosInstance.patch(`/quizzes/submissions/${submissionId}/grade/`, { grades });
+  return response.data;
+};
+
 const createAnnouncement = async (data) => {
   const response = await axiosInstance.post("/messaging/announcements/", data);
   return response.data;
@@ -220,6 +260,14 @@ export const teacherService = {
   getAllSubmissions,
   gradeSubmission,
   updateSubmissionGrade,
+  getQuizzes,
+  createQuiz,
+  getQuizById,
+  updateQuiz,
+  deleteQuiz,
+  getQuizSubmissions,
+  getQuizSubmissionById,
+  gradeQuizSubmission,
   createAnnouncement,
   getTeacherSessions,
   getSessionAttendance,

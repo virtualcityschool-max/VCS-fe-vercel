@@ -13,6 +13,8 @@ export { default as StudentFeed } from "./student/StudentFeed";
 export { default as Classroom } from "./student/Classroom";
 export { default as StudentAssignments } from "./student/StudentAssignments";
 export { default as StudentAssignmentDetails } from "./student/StudentAssignmentDetails";
+export { default as StudentAssessments } from "./student/StudentAssessments";
+export { default as StudentQuizDetail } from "./student/StudentQuizDetail";
 export { default as StudentAttendance } from "./student/StudentAttendance";
 export { default as StudentEvaluationPage } from "./student/StudentEvaluationPage";
 
@@ -23,6 +25,7 @@ export { default as TeacherClasses } from "./teacher/TeacherClasses";
 export { default as TeacherCourseDetailPage } from "./teacher/TeacherCourseDetailPage";
 export { default as TeacherAttendance } from "./teacher/TeacherAttendance";
 export { default as TeacherGrading } from "./teacher/TeacherGrading";
+export { default as TeacherAssessments } from "./teacher/TeacherAssessments";
 export { default as TeacherSubmissions } from "./teacher/TeacherSubmissions";
 export { default as TeacherSessionCalendar } from "./teacher/TeacherSessionCalendar";
 export { default as TeacherInternalStudentProfile } from "./teacher/TeacherInternalStudentProfile";

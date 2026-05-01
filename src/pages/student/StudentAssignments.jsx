@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { fetchStudentAssignments } from "../../store/slices/studentDashboardSlice";
 
-const StudentAssignments = () => {
+const StudentAssignments = ({ hideHeader = false }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -56,16 +56,13 @@ const StudentAssignments = () => {
   }
 
   return (
-    <div className="text-white px-6 py-8">
-      {/* Header */}
-      <div className="mb-10">
-        <h1 className="text-3xl font-black font-poppins mb-2">
-          All Assignments
-        </h1>
-        <p className="text-slate-400 text-sm">
-          View and manage all your assignments in one place.
-        </p>
-      </div>
+    <div className={`text-white ${hideHeader ? "" : "px-6 py-8"}`}>
+      {!hideHeader && (
+        <div className="mb-10">
+          <h1 className="text-3xl font-black font-poppins mb-2">All Assignments</h1>
+          <p className="text-slate-400 text-sm">View and manage all your assignments in one place.</p>
+        </div>
+      )}
 
       {/* List */}
       <div className="space-y-4">

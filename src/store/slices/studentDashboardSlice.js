@@ -273,6 +273,39 @@ export const fetchMyAttendance = createAsyncThunk(
   },
 );
 
+export const fetchStudentQuizzes = createAsyncThunk(
+  "studentDashboard/fetchStudentQuizzes",
+  async (params = {}, { rejectWithValue }) => {
+    try {
+      return await studentService.getStudentQuizzes(params);
+    } catch (error) {
+      return rejectWithValue(error?.message || "Failed to fetch quizzes");
+    }
+  },
+);
+
+export const fetchStudentQuizById = createAsyncThunk(
+  "studentDashboard/fetchStudentQuizById",
+  async (id, { rejectWithValue }) => {
+    try {
+      return await studentService.getStudentQuizById(id);
+    } catch (error) {
+      return rejectWithValue(error?.message || "Failed to fetch quiz");
+    }
+  },
+);
+
+export const submitStudentQuiz = createAsyncThunk(
+  "studentDashboard/submitStudentQuiz",
+  async ({ quizId, answers }, { rejectWithValue }) => {
+    try {
+      return await studentService.submitQuiz(quizId, answers);
+    } catch (error) {
+      return rejectWithValue(error?.response?.data || error?.message || "Failed to submit quiz");
+    }
+  },
+);
+
 // Initial state
 const initialState = {
   // Dashboard data
@@ -300,6 +333,14 @@ const initialState = {
     status: "all", // all, overdue, pending, submitted, graded
     course: "all",
   },
+
+  // Quiz state
+  quizzes: [],
+  isFetchingQuizzes: false,
+  currentQuiz: null,
+  isFetchingCurrentQuiz: false,
+  isSubmittingQuiz: false,
+  quizSubmitError: null,
 };
 
 // Slice
@@ -619,6 +660,46 @@ const studentDashboardSlice = createSlice({
       .addCase(fetchMyAttendance.rejected, (state, action) => {
         state.isFetchingMyAttendance = false;
         state.error = action.payload;
+      })
+
+      // QUIZZES
+      .addCase(fetchStudentQuizzes.pending, (state) => {
+        state.isFetchingQuizzes = true;
+      })
+      .addCase(fetchStudentQuizzes.fulfilled, (state, action) => {
+        state.isFetchingQuizzes = false;
+        state.quizzes = Array.isArray(action.payload) ? action.payload : [];
+      })
+      .addCase(fetchStudentQuizzes.rejected, (state) => {
+        state.isFetchingQuizzes = false;
+      })
+      .addCase(fetchStudentQuizById.pending, (state) => {
+        state.isFetchingCurrentQuiz = true;
+        state.currentQuiz = null;
+      })
+      .addCase(fetchStudentQuizById.fulfilled, (state, action) => {
+        state.isFetchingCurrentQuiz = false;
+        state.currentQuiz = action.payload;
+      })
+      .addCase(fetchStudentQuizById.rejected, (state) => {
+        state.isFetchingCurrentQuiz = false;
+      })
+      .addCase(submitStudentQuiz.pending, (state) => {
+        state.isSubmittingQuiz = true;
+        state.quizSubmitError = null;
+      })
+      .addCase(submitStudentQuiz.fulfilled, (state, action) => {
+        state.isSubmittingQuiz = false;
+        if (state.currentQuiz) {
+          state.currentQuiz = {
+            ...state.currentQuiz,
+            my_submission: action.payload,
+          };
+        }
+      })
+      .addCase(submitStudentQuiz.rejected, (state, action) => {
+        state.isSubmittingQuiz = false;
+        state.quizSubmitError = action.payload;
       })
 
       // Handle logout - clear all student-specific data

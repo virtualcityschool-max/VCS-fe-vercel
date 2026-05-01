@@ -39,6 +39,7 @@ import {
   TeacherCourseDetailPage,
   TeacherAttendance,
   TeacherGrading,
+  TeacherAssessments,
   TeacherSubmissions,
   TeacherSessionCalendar,
   StudentLayout,
@@ -54,6 +55,8 @@ import {
   TeachersDirectory,
   StudentAssignments,
   StudentAssignmentDetails,
+  StudentAssessments,
+  StudentQuizDetail,
   StudentAttendance,
   StudentEvaluationPage,
   ParentLayout,
@@ -222,8 +225,10 @@ const AppInner = () => {
               <Route path="/student" element={<StudentLayout />}>
                 <Route index element={<StudentPortal />} />
                 <Route path="classes" element={<StudentClasses />} />
+                <Route path="assessments" element={<StudentAssessments />} />
                 <Route path="assignments" element={<StudentAssignments />} />
                 <Route path="assignments/:id" element={<StudentAssignmentDetails />} />
+                <Route path="quizzes/:id" element={<StudentQuizDetail />} />
                 <Route path="attendance" element={<StudentAttendance />} />
                 <Route path="evaluations" element={<StudentEvaluationPage />} />
               </Route>
@@ -235,6 +240,7 @@ const AppInner = () => {
                 <Route index element={<TeacherPortal />} />
                 <Route path="classes" element={<TeacherClasses />} />
                 <Route path="attendance" element={<TeacherAttendance />} />
+                <Route path="assessments" element={<TeacherAssessments />} />
                 <Route path="grading" element={<TeacherGrading />} />
                 <Route path="sessions" element={<TeacherSessionCalendar />} />
                 <Route path="submissions" element={<TeacherSubmissions />} />

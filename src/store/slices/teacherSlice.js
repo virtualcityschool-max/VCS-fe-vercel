@@ -193,6 +193,84 @@ export const fetchSubmissionById = createAsyncThunk(
   },
 );
 
+export const fetchQuizzes = createAsyncThunk(
+  "teachers/fetchQuizzes",
+  async (params = {}, { rejectWithValue }) => {
+    try {
+      return await teacherService.getQuizzes(params);
+    } catch (err) {
+      return rejectWithValue(err?.response?.data?.error || err?.message || "Failed to fetch quizzes");
+    }
+  },
+);
+
+export const createQuiz = createAsyncThunk(
+  "teachers/createQuiz",
+  async (data, { rejectWithValue }) => {
+    try {
+      return await teacherService.createQuiz(data);
+    } catch (err) {
+      return rejectWithValue(err?.response?.data || err?.message || "Failed to create quiz");
+    }
+  },
+);
+
+export const updateQuiz = createAsyncThunk(
+  "teachers/updateQuiz",
+  async ({ id, data }, { rejectWithValue }) => {
+    try {
+      return await teacherService.updateQuiz(id, data);
+    } catch (err) {
+      return rejectWithValue(err?.response?.data || err?.message || "Failed to update quiz");
+    }
+  },
+);
+
+export const deleteQuiz = createAsyncThunk(
+  "teachers/deleteQuiz",
+  async (id, { rejectWithValue }) => {
+    try {
+      await teacherService.deleteQuiz(id);
+      return id;
+    } catch (err) {
+      return rejectWithValue(err?.response?.data?.detail || err?.message || "Failed to delete quiz");
+    }
+  },
+);
+
+export const fetchQuizSubmissions = createAsyncThunk(
+  "teachers/fetchQuizSubmissions",
+  async (quizId, { rejectWithValue }) => {
+    try {
+      return await teacherService.getQuizSubmissions(quizId);
+    } catch (err) {
+      return rejectWithValue(err?.message || "Failed to fetch quiz submissions");
+    }
+  },
+);
+
+export const fetchQuizSubmissionById = createAsyncThunk(
+  "teachers/fetchQuizSubmissionById",
+  async (submissionId, { rejectWithValue }) => {
+    try {
+      return await teacherService.getQuizSubmissionById(submissionId);
+    } catch (err) {
+      return rejectWithValue(err?.message || "Failed to fetch quiz submission");
+    }
+  },
+);
+
+export const gradeQuizTextAnswers = createAsyncThunk(
+  "teachers/gradeQuizTextAnswers",
+  async ({ submissionId, grades }, { rejectWithValue }) => {
+    try {
+      return await teacherService.gradeQuizSubmission(submissionId, grades);
+    } catch (err) {
+      return rejectWithValue(err?.response?.data || err?.message || "Failed to grade quiz");
+    }
+  },
+);
+
 export const fetchTeacherSessions = createAsyncThunk(
   "teachers/fetchTeacherSessions",
   async (params = {}, { rejectWithValue }) => {
@@ -381,6 +459,16 @@ const initialState = {
   // session joining state
   isJoiningSession: false,
   joiningSessionError: null,
+
+  // quiz state
+  quizzes: [],
+  loadingQuizzes: false,
+  errorQuizzes: null,
+  quizSubmissions: [],
+  loadingQuizSubmissions: false,
+  selectedQuizSubmission: null,
+  loadingSelectedQuizSubmission: false,
+  errorSelectedQuizSubmission: null,
 };
 
 const teacherSlice = createSlice({
@@ -390,6 +478,10 @@ const teacherSlice = createSlice({
     clearSelectedSubmission(state) {
       state.selectedSubmission = null;
       state.loadingSelectedSubmission = false;
+    },
+    clearSelectedQuizSubmission(state) {
+      state.selectedQuizSubmission = null;
+      state.loadingSelectedQuizSubmission = false;
     },
   },
   extraReducers: (builder) => {
@@ -694,7 +786,6 @@ const teacherSlice = createSlice({
       })
       .addCase(updateStudentAttendance.fulfilled, (state, action) => {
         state.patchingStudentAttendance = false;
-        // Optimistically update the record in allAttendance if it matches
         const updated = action.payload;
         if (updated?.id) {
           state.allAttendance = state.allAttendance.map((r) =>
@@ -704,9 +795,64 @@ const teacherSlice = createSlice({
       })
       .addCase(updateStudentAttendance.rejected, (state) => {
         state.patchingStudentAttendance = false;
+      })
+
+      // QUIZZES
+      .addCase(fetchQuizzes.pending, (state) => {
+        state.loadingQuizzes = true;
+        state.errorQuizzes = null;
+      })
+      .addCase(fetchQuizzes.fulfilled, (state, action) => {
+        state.loadingQuizzes = false;
+        state.quizzes = Array.isArray(action.payload) ? action.payload : [];
+      })
+      .addCase(fetchQuizzes.rejected, (state, action) => {
+        state.loadingQuizzes = false;
+        state.errorQuizzes = action.payload;
+      })
+      .addCase(createQuiz.fulfilled, (state, action) => {
+        state.quizzes.unshift(action.payload);
+      })
+      .addCase(updateQuiz.fulfilled, (state, action) => {
+        state.quizzes = state.quizzes.map((q) =>
+          q.id === action.payload.id ? action.payload : q
+        );
+      })
+      .addCase(deleteQuiz.fulfilled, (state, action) => {
+        state.quizzes = state.quizzes.filter((q) => q.id !== action.payload);
+      })
+      .addCase(fetchQuizSubmissions.pending, (state) => {
+        state.loadingQuizSubmissions = true;
+      })
+      .addCase(fetchQuizSubmissions.fulfilled, (state, action) => {
+        state.loadingQuizSubmissions = false;
+        state.quizSubmissions = Array.isArray(action.payload) ? action.payload : [];
+      })
+      .addCase(fetchQuizSubmissions.rejected, (state) => {
+        state.loadingQuizSubmissions = false;
+      })
+      .addCase(fetchQuizSubmissionById.pending, (state) => {
+        state.loadingSelectedQuizSubmission = true;
+        state.errorSelectedQuizSubmission = null;
+      })
+      .addCase(fetchQuizSubmissionById.fulfilled, (state, action) => {
+        state.loadingSelectedQuizSubmission = false;
+        state.selectedQuizSubmission = action.payload;
+      })
+      .addCase(fetchQuizSubmissionById.rejected, (state, action) => {
+        state.loadingSelectedQuizSubmission = false;
+        state.errorSelectedQuizSubmission = action.payload;
+      })
+      .addCase(gradeQuizTextAnswers.fulfilled, (state, action) => {
+        state.selectedQuizSubmission = action.payload;
+        if (action.payload?.id) {
+          state.quizSubmissions = state.quizSubmissions.map((s) =>
+            s.id === action.payload.id ? { ...s, status: action.payload.status, obtained_marks: action.payload.obtained_marks } : s
+          );
+        }
       });
   },
 });
 
-export const { clearSelectedSubmission } = teacherSlice.actions;
+export const { clearSelectedSubmission, clearSelectedQuizSubmission } = teacherSlice.actions;
 export default teacherSlice.reducer;
