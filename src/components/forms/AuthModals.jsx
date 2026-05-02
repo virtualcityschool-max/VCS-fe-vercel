@@ -10,6 +10,7 @@ import {
   verifyOtp,
   resendOtp,
 } from "../../store/slices/authSlice";
+import { authService } from "../../services/authService";
 import { normalizeApiError } from "../../utils/errorHandler";
 import { useFieldErrors } from "../../hooks";
 
@@ -46,6 +47,17 @@ const AuthModals = () => {
   const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [showRegisterPassword, setShowRegisterPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
+
+  // Forgot Password state
+  const [fpStep, setFpStep] = useState("idle"); // idle | request | verify | reset | success
+  const [fpEmail, setFpEmail] = useState("");
+  const [fpOtp, setFpOtp] = useState("");
+  const [fpNewPassword, setFpNewPassword] = useState("");
+  const [fpConfirmPassword, setFpConfirmPassword] = useState("");
+  const [fpLoading, setFpLoading] = useState(false);
+  const [fpError, setFpError] = useState("");
 
   // Registration form state
   const [username, setUsername] = useState("");
@@ -86,6 +98,17 @@ const AuthModals = () => {
     setShowLoginPassword(false);
     setShowRegisterPassword(false);
     setShowConfirmPassword(false);
+    setShowNewPassword(false);
+    setShowConfirmNewPassword(false);
+
+    // Reset forgot password flow
+    setFpStep("idle");
+    setFpEmail("");
+    setFpOtp("");
+    setFpNewPassword("");
+    setFpConfirmPassword("");
+    setFpLoading(false);
+    setFpError("");
 
     // Clear Redux auth error
     dispatch(clearAuthError());
@@ -113,6 +136,13 @@ const AuthModals = () => {
       clearAllRegistrationErrors();
       setOtpError("");
       dispatch(clearAuthError());
+      setFpStep("idle");
+      setFpEmail("");
+      setFpOtp("");
+      setFpNewPassword("");
+      setFpConfirmPassword("");
+      setFpLoading(false);
+      setFpError("");
 
       if (intendedRole) {
         setActiveRoleTab(intendedRole);
@@ -342,18 +372,68 @@ const AuthModals = () => {
     }
   };
 
+  const handleFpRequestOtp = async (e) => {
+    e.preventDefault();
+    if (!fpEmail.trim()) { setFpError("Email is required"); return; }
+    setFpError("");
+    setFpLoading(true);
+    try {
+      await authService.forgotPasswordRequestOtp(fpEmail.trim());
+      setFpStep("verify");
+    } catch (err) {
+      const msg = err?.response?.data?.detail || err?.response?.data?.email?.[0] || err?.message || "Failed to send OTP";
+      setFpError(msg);
+    } finally {
+      setFpLoading(false);
+    }
+  };
+
+  const handleFpVerifyOtp = async (e) => {
+    e.preventDefault();
+    if (!fpOtp.trim()) { setFpError("OTP is required"); return; }
+    setFpError("");
+    setFpLoading(true);
+    try {
+      await authService.forgotPasswordVerifyOtp(fpEmail.trim(), fpOtp.trim());
+      setFpStep("reset");
+    } catch (err) {
+      const msg = err?.response?.data?.detail || err?.response?.data?.otp?.[0] || err?.message || "Invalid OTP";
+      setFpError(msg);
+    } finally {
+      setFpLoading(false);
+    }
+  };
+
+  const handleFpReset = async (e) => {
+    e.preventDefault();
+    if (!fpNewPassword) { setFpError("New password is required"); return; }
+    if (fpNewPassword !== fpConfirmPassword) { setFpError("Passwords do not match"); return; }
+    setFpError("");
+    setFpLoading(true);
+    try {
+      await authService.forgotPasswordReset(fpEmail.trim(), fpNewPassword, fpConfirmPassword);
+      setFpStep("success");
+    } catch (err) {
+      const data = err?.response?.data;
+      const msg = data?.detail || data?.new_password?.[0] || data?.confirm_password?.[0] || err?.message || "Failed to reset password";
+      setFpError(msg);
+    } finally {
+      setFpLoading(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-100 flex items-center justify-center p-6 bg-slate-950/80 backdrop-blur-md animate-fadeIn">
       <div className="bg-slate-900 border border-white/10 w-full max-w-md rounded-[2.5rem] shadow-2xl overflow-hidden glass relative">
         <button
           onClick={onClose}
-          className="absolute top-6 right-6 text-slate-500 hover:text-white transition"
+          className="absolute top-6 right-6 z-20 text-slate-500 hover:text-white transition"
         >
           <i className="fas fa-times text-xl"></i>
         </button>
 
         {isOpen === "login" ? (
-          <div className="p-6 sm:p-10">
+          <div className="p-6 sm:p-10 relative overflow-hidden" style={{ minHeight: 480 }}>
             <h2 className="text-2xl sm:text-3xl font-black font-poppins text-white mb-2 text-center">
               Secure Login
             </h2>
@@ -482,7 +562,162 @@ const AuthModals = () => {
                   "LOGIN"
                 )}
               </button>
+
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={() => { setFpStep("request"); setFpEmail(email); setFpError(""); }}
+                  className="text-xs text-slate-500 hover:text-indigo-400 transition"
+                >
+                  Forgot password?
+                </button>
+              </div>
             </form>
+
+            {/* ── Forgot Password overlay ── */}
+            {fpStep !== "idle" && (
+              <div className="absolute inset-0 bg-slate-900 rounded-[2.5rem] flex flex-col p-6 sm:p-10 z-10">
+                <button
+                  type="button"
+                  onClick={() => { setFpStep("idle"); setFpError(""); setFpOtp(""); setFpNewPassword(""); setFpConfirmPassword(""); }}
+                  className="flex items-center gap-2 text-slate-400 hover:text-white text-xs mb-6 transition"
+                >
+                  <i className="fas fa-arrow-left text-[10px]" />
+                  Back to Login
+                </button>
+
+                {fpStep === "request" && (
+                  <form onSubmit={handleFpRequestOtp} className="space-y-5 flex-1">
+                    <div className="text-center mb-6">
+                      <div className="w-16 h-16 bg-indigo-500/20 rounded-3xl flex items-center justify-center text-2xl mx-auto mb-4">
+                        <i className="fas fa-lock text-indigo-400" />
+                      </div>
+                      <h2 className="text-xl font-black font-poppins text-white mb-1">Forgot Password</h2>
+                      <p className="text-slate-400 text-xs">Enter your email to receive a reset code</p>
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block">Email</label>
+                      <input
+                        type="email"
+                        value={fpEmail}
+                        onChange={(e) => { setFpEmail(e.target.value); setFpError(""); }}
+                        placeholder="you@example.com"
+                        className="w-full bg-slate-950 border border-white/5 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
+                      />
+                    </div>
+                    {fpError && <p className="text-red-500 text-xs animate-shake">{fpError}</p>}
+                    <button
+                      type="submit"
+                      disabled={fpLoading}
+                      className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-400 text-white py-4 rounded-2xl font-bold text-sm transition flex items-center justify-center gap-2"
+                    >
+                      {fpLoading && <i className="fas fa-circle-notch fa-spin" />}
+                      {fpLoading ? "Sending…" : "Send Reset Code"}
+                    </button>
+                  </form>
+                )}
+
+                {fpStep === "verify" && (
+                  <form onSubmit={handleFpVerifyOtp} className="space-y-5 flex-1">
+                    <div className="text-center mb-6">
+                      <div className="w-16 h-16 bg-emerald-500/20 rounded-3xl flex items-center justify-center text-2xl mx-auto mb-4">
+                        <i className="fas fa-envelope-open-text text-emerald-400" />
+                      </div>
+                      <h2 className="text-xl font-black font-poppins text-white mb-1">Check Your Email</h2>
+                      <p className="text-slate-400 text-xs">Enter the 6-digit code sent to <strong className="text-slate-300">{fpEmail}</strong></p>
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block text-center">Reset Code</label>
+                      <input
+                        type="text"
+                        value={fpOtp}
+                        onChange={(e) => { setFpOtp(e.target.value.replace(/\D/g, "").slice(0, 6)); setFpError(""); }}
+                        placeholder="000000"
+                        maxLength={6}
+                        className="w-full bg-slate-950 border border-white/5 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-center text-2xl font-mono"
+                      />
+                    </div>
+                    {fpError && <p className="text-red-500 text-xs animate-shake text-center">{fpError}</p>}
+                    <button
+                      type="submit"
+                      disabled={fpLoading || fpOtp.length !== 6}
+                      className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:bg-emerald-400 text-white py-4 rounded-2xl font-bold text-sm transition flex items-center justify-center gap-2"
+                    >
+                      {fpLoading && <i className="fas fa-circle-notch fa-spin" />}
+                      {fpLoading ? "Verifying…" : "Verify Code"}
+                    </button>
+                  </form>
+                )}
+
+                {fpStep === "reset" && (
+                  <form onSubmit={handleFpReset} className="space-y-5 flex-1">
+                    <div className="text-center mb-6">
+                      <div className="w-16 h-16 bg-amber-500/20 rounded-3xl flex items-center justify-center text-2xl mx-auto mb-4">
+                        <i className="fas fa-key text-amber-400" />
+                      </div>
+                      <h2 className="text-xl font-black font-poppins text-white mb-1">New Password</h2>
+                      <p className="text-slate-400 text-xs">Choose a strong password for your account</p>
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block">New Password</label>
+                      <div className="relative">
+                        <input
+                          type={showNewPassword ? "text" : "password"}
+                          value={fpNewPassword}
+                          onChange={(e) => { setFpNewPassword(e.target.value); setFpError(""); }}
+                          placeholder="••••••••"
+                          className="w-full bg-slate-950 border border-white/5 rounded-2xl px-6 py-4 pr-12 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
+                        />
+                        <button type="button" onClick={() => setShowNewPassword(!showNewPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition" tabIndex="-1">
+                          <i className={`fas ${showNewPassword ? "fa-eye-slash" : "fa-eye"} text-sm`} />
+                        </button>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block">Confirm Password</label>
+                      <div className="relative">
+                        <input
+                          type={showConfirmNewPassword ? "text" : "password"}
+                          value={fpConfirmPassword}
+                          onChange={(e) => { setFpConfirmPassword(e.target.value); setFpError(""); }}
+                          placeholder="••••••••"
+                          className="w-full bg-slate-950 border border-white/5 rounded-2xl px-6 py-4 pr-12 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
+                        />
+                        <button type="button" onClick={() => setShowConfirmNewPassword(!showConfirmNewPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition" tabIndex="-1">
+                          <i className={`fas ${showConfirmNewPassword ? "fa-eye-slash" : "fa-eye"} text-sm`} />
+                        </button>
+                      </div>
+                    </div>
+                    {fpError && <p className="text-red-500 text-xs animate-shake">{fpError}</p>}
+                    <button
+                      type="submit"
+                      disabled={fpLoading}
+                      className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-400 text-white py-4 rounded-2xl font-bold text-sm transition flex items-center justify-center gap-2"
+                    >
+                      {fpLoading && <i className="fas fa-circle-notch fa-spin" />}
+                      {fpLoading ? "Resetting…" : "Reset Password"}
+                    </button>
+                  </form>
+                )}
+
+                {fpStep === "success" && (
+                  <div className="flex flex-col items-center justify-center flex-1 text-center animate-fadeIn">
+                    <div className="w-20 h-20 bg-emerald-500/20 rounded-3xl flex items-center justify-center text-3xl mb-6">
+                      <i className="fas fa-check-circle text-emerald-400" />
+                    </div>
+                    <h2 className="text-xl font-black font-poppins text-white mb-2">Password Reset!</h2>
+                    <p className="text-slate-400 text-sm mb-8">Your password has been updated. You can now log in.</p>
+                    <button
+                      type="button"
+                      onClick={() => { setFpStep("idle"); setFpEmail(""); setFpOtp(""); setFpNewPassword(""); setFpConfirmPassword(""); setFpError(""); }}
+                      className="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition"
+                    >
+                      Back to Login
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         ) : (
           <div className="p-6 sm:p-10">

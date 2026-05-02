@@ -4,6 +4,7 @@ import { fetchParentDashboard } from "../../store/slices/parentSlice";
 import { coursesService } from "../../services/coursesService";
 import { toastManager } from "../../utils/toastManager";
 import EvaluationMatrix from "../../components/common/EvaluationMatrix";
+import { FilterSelect } from "../../components/ui";
 
 const ParentEvaluationPage = () => {
   const dispatch = useDispatch();
@@ -57,7 +58,7 @@ const ParentEvaluationPage = () => {
 
   return (
     <div className="min-h-screen text-white p-6 lg:p-8">
-      <div className="max-w-6xl mx-auto space-y-6">
+      <div className="mx-auto space-y-6">
 
         <div>
           <h1 className="text-2xl font-black font-poppins text-white">Child Evaluations</h1>
@@ -75,18 +76,13 @@ const ParentEvaluationPage = () => {
               {dashLoading ? (
                 <div className="h-10 bg-slate-800 rounded-xl animate-pulse" />
               ) : (
-                <select
+                <FilterSelect
                   value={childId}
                   onChange={(e) => setChildId(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-slate-800/60 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 appearance-none"
+                  style={{ width: 200 }}
                 >
-                  {children.length === 0 && <option value="">No children linked</option>}
-                  {children.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.username || c.name || `Child ${c.id}`}
-                    </option>
-                  ))}
-                </select>
+                  {children.map((c) => <option key={c.id} value={c.id}>{c.username || c.name || `Child ${c.id}`}</option>)}
+                </FilterSelect>
               )}
             </div>
 
@@ -98,31 +94,31 @@ const ParentEvaluationPage = () => {
               {loading ? (
                 <div className="h-10 bg-slate-800 rounded-xl animate-pulse" />
               ) : (
-                <select
+                <FilterSelect
                   value={selectedCourseId}
                   onChange={(e) => setSelectedCourseId(e.target.value)}
                   disabled={courses.length === 0}
                   className="w-full px-4 py-2.5 bg-slate-800/60 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 appearance-none disabled:opacity-50"
                 >
-                  {courses.length === 0 && <option value="">No courses found</option>}
-                  {courses.map((c) => (
-                    <option key={c.id} value={c.id}>{c.title}</option>
-                  ))}
-                </select>
+                  {courses.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
+                </FilterSelect>
               )}
             </div>
           </div>
 
           {activeChild && (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <div className="w-6 h-6 rounded-full bg-indigo-600/30 border border-indigo-500/40 flex items-center justify-center text-[10px] font-bold text-indigo-300">
                 {(activeChild.username || activeChild.name || "?")[0].toUpperCase()}
               </div>
               <span className="text-sm text-slate-400">
                 Viewing <span className="text-white font-semibold">{activeChild.username || activeChild.name}</span>
               </span>
+              <span className="text-[10px] font-bold text-slate-500 bg-slate-800 border border-slate-700 px-2 py-0.5 rounded-lg">
+                ID #{activeChild.id}
+              </span>
               {courseStatus && (
-                <span className={`ml-1 px-1.5 py-0.5 rounded text-[10px] font-bold uppercase ${
+                <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold uppercase ${
                   courseStatus === "completed"
                     ? "bg-emerald-500/15 text-emerald-400"
                     : courseStatus === "published"

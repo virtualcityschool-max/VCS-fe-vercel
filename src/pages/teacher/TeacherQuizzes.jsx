@@ -824,7 +824,14 @@ const TeacherQuizzes = () => {
                   {quizSubmissions.map((sub) => (
                     <div key={sub.id} className="bg-slate-800 p-4 rounded-2xl flex items-center justify-between gap-3">
                       <div>
-                        <p className="text-sm font-bold text-white">{sub.student_name}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-bold text-white">{sub.student_name}</p>
+                          {sub.student_id && (
+                            <span className="text-[10px] text-slate-500 bg-slate-700 border border-slate-600 px-1.5 py-0.5 rounded font-bold">
+                              #{sub.student_id}
+                            </span>
+                          )}
+                        </div>
                         <p className="text-xs text-slate-400 mt-0.5">
                           {sub.obtained_marks != null ? `${sub.obtained_marks} / ${sub.total_marks_snapshot}` : "Not graded"}
                           {sub.percentage != null ? ` (${sub.percentage}%)` : ""}
@@ -917,22 +924,21 @@ const TeacherQuizzes = () => {
                           <div className="bg-slate-800 rounded-xl p-3 text-sm text-slate-300 mb-3 min-h-[60px]">
                             {ans.text_answer || <span className="text-slate-500 italic">No answer</span>}
                           </div>
-                          {selectedQuizSubmission.status === "submitted" && (
+                          {selectedQuizSubmission.status !== "auto_graded" ? (
                             <div>
                               <label className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1.5 block">
-                                Assign Marks (max {ans.max_marks})
+                                {selectedQuizSubmission.status === "submitted" ? "Assign Marks" : "Edit Marks"} (max {ans.max_marks})
                               </label>
                               <input
                                 type="number"
                                 min={0}
                                 max={ans.max_marks}
-                                value={gradeInputs[ans.question_id] ?? ""}
+                                value={gradeInputs[ans.question_id] ?? (ans.obtained_marks ?? "")}
                                 onChange={(e) => setGradeInputs((p) => ({ ...p, [ans.question_id]: e.target.value }))}
                                 className="w-24 p-2 rounded-lg bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
                               />
                             </div>
-                          )}
-                          {selectedQuizSubmission.status !== "submitted" && (
+                          ) : (
                             <p className="text-xs text-slate-400">
                               Marks: <span className="text-white font-semibold">{ans.obtained_marks ?? "—"}</span>
                             </p>
@@ -951,8 +957,8 @@ const TeacherQuizzes = () => {
                     </div>
                   ))}
 
-                  {/* Grade button */}
-                  {selectedQuizSubmission.status === "submitted" && (
+                  {/* Grade / Re-grade button */}
+                  {selectedQuizSubmission.status !== "auto_graded" && (
                     <button
                       type="button"
                       disabled={saving}
@@ -960,7 +966,7 @@ const TeacherQuizzes = () => {
                       className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 rounded-xl text-sm font-bold transition flex items-center justify-center gap-2"
                     >
                       {saving && <i className="fas fa-spinner animate-spin text-xs" />}
-                      Submit Grades
+                      {selectedQuizSubmission.status === "submitted" ? "Submit Grades" : "Save Grades"}
                     </button>
                   )}
                 </div>

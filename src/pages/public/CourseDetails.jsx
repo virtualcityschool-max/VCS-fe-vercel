@@ -406,11 +406,8 @@ const CourseDetails = () => {
             <div className="bg-slate-800/40 backdrop-blur-xl rounded-4xl overflow-hidden border border-slate-700/50 shadow-2xl hover:shadow-blue-500/10 transition-all duration-500">
               {/* Course Thumbnail */}
               <div className="relative aspect-video overflow-hidden bg-slate-900/50">
-                {imageError ? (
-                  <div className="w-full h-full flex items-center justify-center bg-linear-to-br from-blue-600/20 via-purple-600/20 to-teal-600/20 relative overflow-hidden">
-                    <div className="absolute inset-0 bg-linear-to-br from-blue-500/10 to-purple-500/10 animate-pulse"></div>
-                    <i className="fas fa-book text-slate-400 text-5xl relative z-10"></i>
-                  </div>
+                {imageError || !getCourseImage(normalizedCourse) ? (
+                  <div className="w-full h-full bg-slate-800" />
                 ) : (
                   <img
                     src={getCourseImage(normalizedCourse)}

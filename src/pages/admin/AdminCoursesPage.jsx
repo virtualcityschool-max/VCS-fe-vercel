@@ -18,6 +18,7 @@ import { toastManager } from "../../utils/toastManager";
 import CoursesTab from "../../components/admin/CoursesTab";
 import ConfirmDialog from "../../components/common/ConfirmDialog";
 import { showApiError } from "../../utils/apiErrorHandler";
+import { fetchAllCourses } from "../../store/slices/coursesSlice";
 
 const AdminCoursesPage = () => {
   const dispatch = useDispatch();
@@ -40,6 +41,7 @@ const AdminCoursesPage = () => {
     time: "",
     outline: "",
     attachment: null,
+    thumbnail: null,
   });
 
   const [editCourseForm, setEditCourseForm] = useState({});
@@ -93,6 +95,7 @@ const AdminCoursesPage = () => {
         time: "",
         outline: "",
         attachment: null,
+        thumbnail: null,
       });
       clearAllCreateCourseErrors();
     } else if (activeModal === null) {
@@ -123,6 +126,8 @@ const AdminCoursesPage = () => {
           outline: editingCourse.outline || "",
           attachment: null,
           attachment_url: editingCourse.attachment || null,
+          thumbnail: null,
+          thumbnail_url: editingCourse.thumbnail || null,
         });
       }
     } else {
@@ -199,6 +204,7 @@ const AdminCoursesPage = () => {
     fd.append("schedule", JSON.stringify({ days: formData.days_of_recurring, time: formData.time }));
     if (formData.outline) fd.append("outline", formData.outline);
     if (formData.attachment instanceof File) fd.append("attachment", formData.attachment);
+    if (formData.thumbnail instanceof File) fd.append("thumbnail", formData.thumbnail);
     return fd;
   };
 
@@ -218,6 +224,7 @@ const AdminCoursesPage = () => {
       toastManager.success("Course created successfully");
       setActiveModal(null);
       dispatch(fetchCourses());
+      dispatch(fetchAllCourses());
       setCreateCourseForm({
         title: "",
         description: "",
@@ -229,6 +236,7 @@ const AdminCoursesPage = () => {
         time: "",
         outline: "",
         attachment: null,
+        thumbnail: null,
       });
       clearAllCreateCourseErrors();
     } catch (error) {

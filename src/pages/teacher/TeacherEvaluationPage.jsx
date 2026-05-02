@@ -3,6 +3,7 @@ import { teacherService } from "../../services/teacherService";
 import { coursesService } from "../../services/coursesService";
 import { toastManager } from "../../utils/toastManager";
 import EvaluationMatrix from "../../components/common/EvaluationMatrix";
+import { FilterSelect } from "../../components/ui";
 
 // ── Main page ─────────────────────────────────────────────────────────────────
 const TeacherEvaluationPage = () => {
@@ -121,7 +122,7 @@ const TeacherEvaluationPage = () => {
 
   return (
     <div className="min-h-screen text-white p-6 lg:p-8">
-      <div className="max-w-6xl mx-auto space-y-6">
+      <div className="mx-auto space-y-6">
 
         <div>
           <h1 className="text-2xl font-black font-poppins text-white">Evaluations</h1>
@@ -139,16 +140,13 @@ const TeacherEvaluationPage = () => {
               {loadingCourses ? (
                 <div className="h-10 bg-slate-800 rounded-xl animate-pulse" />
               ) : (
-                <select
+                <FilterSelect
                   value={selectedCourseId}
                   onChange={(e) => handleCourseChange(e.target.value)}
                   className="w-full px-4 py-2.5 bg-slate-800/60 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 appearance-none"
                 >
-                  {courses.length === 0 && <option value="">No courses found</option>}
-                  {courses.map((c) => (
-                    <option key={c.id} value={c.id}>{c.title}</option>
-                  ))}
-                </select>
+                  {courses.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
+                </FilterSelect>
               )}
             </div>
 
@@ -164,14 +162,6 @@ const TeacherEvaluationPage = () => {
                   }`}
                 >
                   <i className="fas fa-users mr-1.5" />Public
-                </button>
-                <button
-                  onClick={() => setTab("private")}
-                  className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition ${
-                    tab === "private" ? "bg-amber-600 text-white" : "text-slate-400 hover:text-white"
-                  }`}
-                >
-                  <i className="fas fa-lock mr-1.5" />Private
                 </button>
               </div>
             </div>

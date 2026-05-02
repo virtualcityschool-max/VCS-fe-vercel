@@ -2,6 +2,7 @@ import React from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { selectEnrolledCourses } from "../../store/slices/studentDashboardSlice";
+import { getStorageUrl } from "../../utils/storageUrl";
 
 const CourseProgressGrid = () => {
   const enrolledCourses = useSelector(selectEnrolledCourses);
@@ -56,14 +57,12 @@ const CourseProgressGrid = () => {
             <div className="h-32 lg:h-36 bg-slate-700 relative overflow-hidden shrink-0">
               {course.thumbnail ? (
                 <img
-                  src={course.thumbnail}
+                  src={getStorageUrl(course.thumbnail)}
                   alt={course.title}
                   className="w-full h-full object-cover opacity-50 group-hover:scale-110 transition duration-700"
                 />
               ) : (
-                <div className="w-full h-full bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center">
-                  <i className="fas fa-book text-3xl lg:text-4xl text-slate-600"></i>
-                </div>
+                <div className="w-full h-full bg-slate-800" />
               )}
               <div className="absolute inset-0 bg-gradient-to-t from-slate-800 to-transparent"></div>
             </div>

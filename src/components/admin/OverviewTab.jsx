@@ -43,7 +43,7 @@ const StatCardTip = ({ label, value, icon, color, items }) => {
             <i className={`${icon} text-sm`} />
           </div>
           <p className="text-[10px] uppercase tracking-wider opacity-80 leading-tight">{label}</p>
-          <i className="fas fa-info-circle text-[9px] opacity-40 ml-auto" />
+          <i className="fas fa-info-circle text-sm opacity-50 ml-auto" />
         </div>
         <h3 className="text-2xl font-bold leading-none">{value}</h3>
       </div>
@@ -180,9 +180,12 @@ const OverviewTab = ({ analytics, analyticsLoading, analyticsError }) => {
           icon="fas fa-book"
           color="purple"
           items={[
-            { label: "Enrollments", value: analytics.enrollments.total,     color: "text-white"       },
-            { label: "Active",      value: analytics.enrollments.active,    color: "text-emerald-400" },
-            { label: "Cancelled",   value: analytics.enrollments.cancelled, color: "text-rose-400"    },
+            { label: "Total Enrollments", value: analytics.enrollments.total, color: "text-white" },
+            ...(analytics.enrollments?.by_course || []).map((c) => ({
+              label: c.course?.length > 20 ? c.course.slice(0, 20) + "…" : c.course,
+              value: c.students,
+              color: "text-indigo-400",
+            })),
           ]}
         />
       </div>

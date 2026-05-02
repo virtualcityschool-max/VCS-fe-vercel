@@ -131,15 +131,6 @@ const AdminEvaluationPage = () => {
                 <i className="fas fa-users text-[10px]" />
                 Public
               </button>
-              <button
-                onClick={() => handleTabSwitch("private")}
-                className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-semibold transition ${
-                  tab === "private" ? "bg-amber-600 text-white" : "text-slate-400 hover:text-white"
-                }`}
-              >
-                <i className="fas fa-lock text-[10px]" />
-                Private
-              </button>
             </div>
           </div>
 

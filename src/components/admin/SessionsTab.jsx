@@ -501,7 +501,7 @@ const SessionsTab = ({
                   Recurring Days <span className="text-red-400">*</span>
                 </label>
                 <div className="flex flex-wrap gap-2">
-                  {["MON","TUE","WED","THU","FRI","SAT","SUN"].map((day) => {
+                  {["MON","TUE","WED","THU","FRI"].map((day) => {
                     const active = (createSessionForm.recurrence_days || []).includes(day);
                     return (
                       <button
@@ -583,7 +583,7 @@ const SessionsTab = ({
                 <div>
                   <label className="block text-xs font-medium text-slate-400 mb-1.5">Recurring Days</label>
                   <div className="flex flex-wrap gap-2">
-                    {["MON","TUE","WED","THU","FRI","SAT","SUN"].map((day) => {
+                    {["MON","TUE","WED","THU","FRI"].map((day) => {
                       const active = (editSessionForm.recurrence_days || []).includes(day);
                       return (
                         <span key={day} className={`px-3 py-1.5 rounded-lg text-xs font-medium border ${active ? "bg-indigo-600/30 border-indigo-500/50 text-indigo-300" : "bg-slate-800/50 border-slate-700/50 text-slate-600"}`}>

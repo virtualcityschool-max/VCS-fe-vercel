@@ -5,6 +5,7 @@ import { studentService } from "../../services/studentService";
 import { submitAssignment } from "../../store/slices/studentDashboardSlice";
 import { toastManager } from "../../utils/toastManager";
 import { validateFile, ACCEPT_STRING } from "../../utils/fileValidation";
+import { getStorageUrl } from "../../utils/storageUrl";
 
 const getFilename = (url) => {
   if (!url) return "attachment";
@@ -187,9 +188,9 @@ const StudentAssignmentDetails = () => {
               <div className="bg-slate-800/60 border border-slate-700 rounded-2xl p-5 text-slate-300 leading-relaxed whitespace-pre-wrap">
                 {assignment.description}
               </div>
-              {assignment.file && (
+              {assignment.file_url && (
                 <div className="mt-3">
-                  <DownloadButton url={assignment.file} label="Download Assignment File" />
+                  <DownloadButton url={getStorageUrl(assignment.file_url)} label="Download Assignment File" />
                 </div>
               )}
             </div>
@@ -245,9 +246,9 @@ const StudentAssignmentDetails = () => {
                       <p className="text-slate-500 text-sm italic">No text submitted</p>
                     )}
 
-                    {assignment.my_submission?.file && (
+                    {assignment.my_submission?.file_url && (
                       <DownloadButton
-                        url={assignment.my_submission.file}
+                        url={getStorageUrl(assignment.my_submission.file_url)}
                         label="Download My Submission"
                       />
                     )}

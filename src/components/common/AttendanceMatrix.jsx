@@ -116,8 +116,8 @@ const AttendanceMatrix = ({
         </span>
       </div>
 
-      <div className="bg-slate-900/50 border border-slate-800 rounded-3xl overflow-hidden">
-        <div className="overflow-x-auto">
+      <div className="bg-slate-900/50 border border-slate-800 rounded-3xl">
+        <div className="rounded-3xl">
           <table className="text-sm border-collapse" style={{ minWidth: "100%" }}>
             <thead>
               {/* Row 1: sticky name col (rowspan 2) + month group headers + sticky summary col (rowspan 2) */}
@@ -237,18 +237,14 @@ const AttendanceMatrix = ({
                               <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-40 opacity-0 group-hover/cell:opacity-100 -translate-y-0.5 group-hover/cell:translate-y-0 transition-all duration-150 whitespace-nowrap">
                                 <div className="bg-slate-800 border border-slate-700 rounded-xl shadow-2xl px-3 py-2 text-left text-[11px] space-y-1 min-w-[120px]">
                                   <p className="font-bold capitalize text-white">{record.status}</p>
-                                  {joinedStr && (
                                     <p className="text-slate-400 flex items-center gap-1.5">
-                                      <i className="fas fa-sign-in-alt text-emerald-400 text-[10px]" />
-                                      {joinedStr}
+                                      {/* <i className="fas fa-sign-in-alt text-emerald-400 text-[10px]" /> */}
+                                      Joined At: {joinedStr ? joinedStr : "—"}
                                     </p>
-                                  )}
-                                  {leftStr && (
                                     <p className="text-slate-400 flex items-center gap-1.5">
-                                      <i className="fas fa-sign-out-alt text-rose-400 text-[10px]" />
-                                      {leftStr}
+                                      {/* <i className="fas fa-sign-out-alt text-rose-400 text-[10px]" /> */}
+                                      Left At: {leftStr ? leftStr : "—"}
                                     </p>
-                                  )}
                                   {record.note && (
                                     <p className="text-slate-500 italic border-t border-slate-700 pt-1 max-w-[180px] whitespace-normal leading-relaxed">
                                       {record.note}

@@ -1,9 +1,8 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import QuillEditor from "../common/QuillEditor";
 import { BACKEND_CATEGORIES, formatCategoryLabel } from "../../constants";
 import { FilterSelect, Input } from "../ui";
-
-const WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+import { getStorageUrl } from "../../utils/storageUrl";
 
 const fieldClass = (error) =>
   `w-full px-3 py-2 bg-slate-800 border rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 ${
@@ -15,6 +14,8 @@ const FieldError = ({ error }) =>
 
 const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], mode = "create" }) => {
   const fileInputRef = useRef(null);
+  const thumbnailInputRef = useRef(null);
+  const [thumbnailPreview, setThumbnailPreview] = useState(null);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0] || null;
@@ -27,8 +28,25 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], mode = "
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
+  const handleThumbnailChange = (e) => {
+    const file = e.target.files[0] || null;
+    if (!file) return;
+    onChange("thumbnail", file);
+    const url = URL.createObjectURL(file);
+    setThumbnailPreview(url);
+  };
+
+  const clearThumbnail = () => {
+    onChange("thumbnail", null);
+    onChange("thumbnail_url", null);
+    setThumbnailPreview(null);
+    if (thumbnailInputRef.current) thumbnailInputRef.current.value = "";
+  };
+
   const existingUrl = formData.attachment_url;
   const selectedFile = formData.attachment instanceof File ? formData.attachment : null;
+  const existingThumbnail = formData.thumbnail_url;
+  const selectedThumbnail = formData.thumbnail instanceof File ? formData.thumbnail : null;
 
   return (
     <div className="space-y-4">
@@ -133,39 +151,6 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], mode = "
         <FieldError error={errors.instructor_id} />
       </div>
 
-      {/* Schedule Days — weekdays only */}
-      <div>
-        <label className="block text-sm font-medium text-slate-300 mb-2">
-          Schedule Days
-          <span className="text-slate-500 text-xs font-normal ml-2">optional — weekdays only</span>
-        </label>
-        <div className="flex flex-wrap gap-2">
-          {WEEKDAYS.map((day) => {
-            const selected = (formData.days_of_recurring || []).includes(day);
-            return (
-              <button
-                key={day}
-                type="button"
-                onClick={() => {
-                  const current = formData.days_of_recurring || [];
-                  const next = selected
-                    ? current.filter((d) => d !== day)
-                    : [...current, day];
-                  onChange("days_of_recurring", next);
-                }}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
-                  selected
-                    ? "bg-indigo-600 text-white border-indigo-500 shadow-sm shadow-indigo-500/20"
-                    : "bg-slate-800 text-slate-400 border-slate-700 hover:border-indigo-500/50 hover:text-slate-200"
-                }`}
-              >
-                {day.slice(0, 3)}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
       {/* Course Outline — optional */}
       <div>
         <label className="block text-sm font-medium text-slate-300 mb-2">
@@ -176,6 +161,82 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], mode = "
           value={formData.outline || ""}
           onChange={(val) => onChange("outline", val)}
           placeholder="Describe the topics, modules, and structure of this course..."
+        />
+      </div>
+
+      {/* Thumbnail — optional */}
+      <div>
+        <label className="block text-sm font-medium text-slate-300 mb-2">
+          Course Thumbnail
+          <span className="text-slate-500 text-xs font-normal ml-2">optional — JPG, PNG, JPEG</span>
+        </label>
+
+        {/* Preview */}
+        {(thumbnailPreview || existingThumbnail) && !selectedThumbnail && existingThumbnail && (
+          <div className="relative mb-2 w-full rounded-xl overflow-hidden border border-slate-700" style={{ height: 140 }}>
+            <img
+              src={getStorageUrl(existingThumbnail)}
+              alt="Current thumbnail"
+              className="w-full h-full object-cover"
+            />
+            <button
+              type="button"
+              onClick={clearThumbnail}
+              className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-red-600 transition"
+            >
+              <i className="fas fa-times text-xs" />
+            </button>
+          </div>
+        )}
+
+        {thumbnailPreview && selectedThumbnail && (
+          <div className="relative mb-2 w-full rounded-xl overflow-hidden border border-indigo-500/40" style={{ height: 140 }}>
+            <img
+              src={thumbnailPreview}
+              alt="New thumbnail preview"
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute bottom-0 left-0 right-0 px-3 py-1.5 bg-black/50 text-xs text-white truncate">
+              {selectedThumbnail.name}
+            </div>
+            <button
+              type="button"
+              onClick={clearThumbnail}
+              className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-red-600 transition"
+            >
+              <i className="fas fa-times text-xs" />
+            </button>
+          </div>
+        )}
+
+        {!thumbnailPreview && !existingThumbnail && (
+          <button
+            type="button"
+            onClick={() => thumbnailInputRef.current?.click()}
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 border border-dashed border-slate-600 hover:border-indigo-500 rounded-xl text-slate-400 hover:text-indigo-400 text-sm transition"
+          >
+            <i className="fas fa-image"></i>
+            <span>Upload thumbnail</span>
+          </button>
+        )}
+
+        {(thumbnailPreview || existingThumbnail) && (
+          <button
+            type="button"
+            onClick={() => thumbnailInputRef.current?.click()}
+            className="mt-2 text-xs text-indigo-400 hover:text-indigo-300 transition"
+          >
+            <i className="fas fa-pencil-alt mr-1 text-[10px]" />
+            Replace thumbnail
+          </button>
+        )}
+
+        <input
+          ref={thumbnailInputRef}
+          type="file"
+          accept=".jpg,.jpeg,.png"
+          className="hidden"
+          onChange={handleThumbnailChange}
         />
       </div>
 

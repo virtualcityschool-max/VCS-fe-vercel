@@ -145,11 +145,15 @@ const PublicHome = () => {
                     className="bg-slate-900/50 border border-green-500/20 rounded-[2.5rem] overflow-hidden group cursor-pointer hover:border-green-500/40 transition-all shadow-xl flex flex-col"
                   >
                     <div className="h-44 relative overflow-hidden">
-                      <img
-                        src={getCourseImage(course, i)}
-                        className="w-full h-full object-cover group-hover:scale-110 transition duration-700 opacity-60 group-hover:opacity-100"
-                        alt={course.title}
-                      />
+                      {getCourseImage(course, i) ? (
+                        <img
+                          src={getCourseImage(course, i)}
+                          className="w-full h-full object-cover group-hover:scale-110 transition duration-700 opacity-60 group-hover:opacity-100"
+                          alt={course.title}
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-slate-800" />
+                      )}
                       <div className="absolute top-6 left-6 px-4 py-1.5 bg-green-600 rounded-full text-[9px] font-black uppercase tracking-widest shadow-xl">
                         ✓ Enrolled
                       </div>
@@ -210,11 +214,15 @@ const PublicHome = () => {
               className="bg-slate-900/50 border border-white/10 rounded-[2.5rem] overflow-hidden group cursor-pointer hover:border-indigo-500/50 transition-all shadow-xl flex flex-col"
             >
               <div className="h-40 md:h-44 relative overflow-hidden">
-                <img
-                  src={getCourseImage(course, i)}
-                  className="w-full h-full object-cover group-hover:scale-110 transition duration-700 opacity-60 group-hover:opacity-100"
-                  alt={course.title}
-                />
+                {getCourseImage(course, i) ? (
+                  <img
+                    src={getCourseImage(course, i)}
+                    className="w-full h-full object-cover group-hover:scale-110 transition duration-700 opacity-60 group-hover:opacity-100"
+                    alt={course.title}
+                  />
+                ) : (
+                  <div className="w-full h-full bg-slate-800" />
+                )}
                 <div className="absolute top-6 left-6 px-4 py-1.5 bg-indigo-600 rounded-full text-[9px] font-black uppercase tracking-widest shadow-xl">
                   {course.category}
                 </div>

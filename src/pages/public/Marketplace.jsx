@@ -494,11 +494,15 @@ const Marketplace = () => {
                 >
                   <div className="relative h-32 overflow-hidden">
                     <Link to={`/courses/${course.id}`}>
-                      <img
-                        src={getCourseImage(course, idx)}
-                        className="w-full h-full object-cover group-hover:scale-110 transition duration-700 opacity-80 group-hover:opacity-100"
-                        alt={course.title || "Course"}
-                      />
+                      {getCourseImage(course, idx) ? (
+                        <img
+                          src={getCourseImage(course, idx)}
+                          className="w-full h-full object-cover group-hover:scale-110 transition duration-700 opacity-80 group-hover:opacity-100"
+                          alt={course.title || "Course"}
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-slate-800" />
+                      )}
                     </Link>
                     {course.status === "published" && (
                       <div className="absolute top-4 right-4 bg-green-600 text-white px-3 py-1 rounded-full text-xs font-bold">

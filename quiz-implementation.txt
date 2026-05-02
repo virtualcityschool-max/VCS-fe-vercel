@@ -1,0 +1,1659 @@
+Quiz APIs
+  Teacher — Create Quiz
+
+  POST /api/v1/quizzes/
+
+
+  Payload:
+  {
+    "course": 1,
+    "title": "Week 1 Quiz",
+    "description": "Covers chapter 1 to 3",
+    "total_marks": 20,
+    "published_at": "2026-05-10T09:00:00Z",
+    "due_date": "2026-05-15T23:59:00Z",
+    "questions": [
+      {
+        "question_text": "What is Python?",
+        "question_type": "SINGLE_CHOICE",
+        "max_marks": 5,
+        "options": [
+          { "option_text": "A programming language", "is_correct": true  },
+          { "option_text": "A database",             "is_correct": false },
+          { "option_text": "A snake",                "is_correct": false },
+          { "option_text": "A framework",            "is_correct": false }
+        ]
+      },
+      {
+        "question_text": "Which are valid Python data types?",
+        "question_type": "MULTIPLE_CHOICE",
+        "max_marks": 5,
+        "options": [
+          { "option_text": "int",   "is_correct": true  },
+          { "option_text": "str",   "is_correct": true  },
+          { "option_text": "fast",  "is_correct": false },
+          { "option_text": "tuple", "is_correct": true  }
+        ]
+      },
+      {
+        "question_text": "Explain OOP in your own words.",
+        "question_type": "TEXT_FORMAT",
+        "max_marks": 10
+      }
+    ]
+  }
+
+  Validation errors:
+  { "total_marks": "total_marks (20) must equal sum of all question max_marks (25)." }
+  { "questions": "Question 1 (SINGLE_CHOICE) must have exactly 4 options." }
+  { "questions": "Question 1 (SINGLE_CHOICE) must have exactly 1 correct option." }
+  { "questions": "Question 2 (MULTIPLE_CHOICE) must have exactly 4 options." }
+  { "questions": "Question 2 (MULTIPLE_CHOICE) must have at least 1 correct option." }
+  { "questions": "Question 3 (TEXT_FORMAT) must not have options." }
+  { "due_date": "due_date must be after published_at." }
+  { "published_at": "published_at must be in the future." }
+
+  Response 201 — backend auto-assigns IDs to questions and options:
+
+  {
+    "id": 1,
+    "course_title": "Python Basics",
+    "created_by_name": "teacher_ali",
+    "title": "Week 1 Quiz",
+    "description": "Covers chapter 1 to 3",
+    "total_marks": 20,
+    "published_at": "2026-05-10T09:00:00Z",
+    "due_date": "2026-05-15T23:59:00Z",
+    "is_published": false,
+    "is_locked": false,
+    "submissions_count": 0,
+    "questions": [
+      {
+        "id": 1,
+        "question_text": "What is Python?",
+        "question_type": "SINGLE_CHOICE",
+        "max_marks": 5,
+        "options": [
+          { "id": 1, "option_text": "A programming language", "is_correct": true  },
+          { "id": 2, "option_text": "A database",             "is_correct": false },
+          { "id": 3, "option_text": "A snake",                "is_correct": false },
+          { "id": 4, "option_text": "A framework",            "is_correct": false }
+        ]
+      },
+      {
+        "id": 2,
+        "question_text": "Which are valid Python data types?",
+        "question_type": "MULTIPLE_CHOICE",
+        "max_marks": 5,
+        "options": [
+          { "id": 5, "option_text": "int",   "is_correct": true  },
+          { "id": 6, "option_text": "str",   "is_correct": true  },
+          { "id": 7, "option_text": "fast",  "is_correct": false },
+          { "id": 8, "option_text": "tuple", "is_correct": true  }
+        ]
+      },
+      {
+        "id": 3,
+        "question_text": "Explain OOP in your own words.",
+        "question_type": "TEXT_FORMAT",
+        "max_marks": 10,
+        "options": []
+      }
+    ],
+    "created_at": "2026-05-01T10:00:00Z",
+    "updated_at": "2026-05-01T10:00:00Z"
+  }
+
+  ▎ IDs assigned by backend: question IDs 1, 2, 3 — option IDs globally unique 1–8 across the quiz. Student uses these IDs when submitting.
+
+  ---
+  Teacher — View All My Quizzes
+
+  GET /api/v1/quizzes/
+  GET /api/v1/quizzes/?course=1
+  GET /api/v1/quizzes/?search=week
+
+  Response 200:
+  [
+    {
+      "id": 1,
+      "title": "Week 1 Quiz",
+      "course": 1,
+      "course_title": "Python Basics",
+      "total_marks": 20,
+      "published_at": "2026-05-10T09:00:00Z",
+      "due_date": "2026-05-15T23:59:00Z",
+      "is_published": true,
+      "is_locked": true,
+      "submissions_count": 12,
+      "created_at": "2026-05-01T10:00:00Z"
+    }
+  ]
+
+  ---
+  Teacher — View Single Quiz
+
+  GET /api/v1/quizzes/1/
+
+  Response 200: Same as create response. Teacher sees is_correct on all options and sees is_locked, submissions_count.
+
+  ---
+  Teacher — Update Quiz
+
+  PATCH /api/v1/quizzes/1/
+
+  Returns 403 the moment any student has submitted. No partial updates to questions — send the full questions array with existing IDs.
+
+  Payload (any top-level field, or replace full questions):
+  {
+    "due_date": "2026-05-18T23:59:00Z"
+  }
+
+  {
+    "questions": [
+      {
+        "id": 1,
+        "question_text": "What is Python used for?",
+        "question_type": "SINGLE_CHOICE",
+        "max_marks": 5,
+        "options": [
+          { "id": 1, "option_text": "Web development", "is_correct": true  },
+          { "id": 2, "option_text": "Cooking",         "is_correct": false },
+          { "id": 3, "option_text": "Driving",         "is_correct": false },
+          { "id": 4, "option_text": "Painting",        "is_correct": false }
+        ]
+      },
+      {
+        "id": 2,
+        "question_text": "Which are valid Python data types?",
+        "question_type": "MULTIPLE_CHOICE",
+        "max_marks": 5,
+        "options": [
+          { "id": 5, "option_text": "int",   "is_correct": true  },
+          { "id": 6, "option_text": "str",   "is_correct": true  },
+          { "id": 7, "option_text": "fast",  "is_correct": false },
+          { "id": 8, "option_text": "tuple", "is_correct": true  }
+        ]
+      },
+      {
+        "id": 3,
+        "question_text": "Explain OOP in your own words.",
+        "question_type": "TEXT_FORMAT",
+        "max_marks": 10,
+        "options": []
+      }
+    ]
+  }
+
+  Response 200: Full updated quiz (same as create response).
+
+  Response 403 locked:
+  {
+    "detail": "This quiz is locked. It has existing submissions and cannot be modified."
+  }
+
+  ---
+  Teacher — Delete Quiz
+  DELETE /api/v1/quizzes/1/
+  Response 204 — success.
+  Response 403 — locked (submissions exist).
+
+  ---
+  Teacher — View Submissions for a Quiz
+
+  GET /api/v1/quizzes/1/submissions/
+
+  Response 200:
+  [
+    {
+      "id": 42,
+      "quiz": 1,
+      "quiz_title": "Week 1 Quiz",
+      "student": 7,
+      "student_name": "student_sara",
+      "status": "submitted",
+      "obtained_marks": "10.00",
+      "total_marks_snapshot": 20,
+      "percentage": 50.0,
+      "submitted_at": "2026-05-12T11:30:00Z"
+    },
+    {
+      "id": 43,
+      "quiz": 1,
+      "quiz_title": "Week 1 Quiz",
+      "student": 8,
+      "student_name": "student_ahmed",
+      "status": "auto_graded",
+      "obtained_marks": "20.00",
+      "total_marks_snapshot": 20,
+      "percentage": 100.0,
+      "submitted_at": "2026-05-12T12:00:00Z"
+    }
+  ]
+
+  ---
+  Teacher — View Full Submission Detail
+  GET /api/v1/quizzes/submissions/42/
+
+  Response 200:
+  {
+    "id": 42,
+    "quiz": 1,
+    "quiz_title": "Week 1 Quiz",
+    "course_title": "Python Basics",
+    "student": 7,
+    "student_name": "student_sara",
+    "status": "submitted",
+    "obtained_marks": "10.00",
+    "total_marks_snapshot": 20,
+    "percentage": 50.0,
+    "submitted_at": "2026-05-12T11:30:00Z",
+    "updated_at": "2026-05-12T11:30:00Z",
+    "answers": [
+      {
+        "question_id": 1,
+        "question_text": "What is Python?",
+        "question_type": "SINGLE_CHOICE",
+        "max_marks": 5,
+        "selected_options": [1],
+        "text_answer": null,
+        "obtained_marks": 5.0,
+        "status": "auto_graded"
+      },
+      {
+        "question_id": 2,
+        "question_text": "Which are valid Python data types?",
+        "question_type": "MULTIPLE_CHOICE",
+        "max_marks": 5,
+        "selected_options": [5],
+        "text_answer": null,
+        "obtained_marks": 5.0,
+        "status": "auto_graded"
+      },
+      {
+        "question_id": 3,
+        "question_text": "Explain OOP in your own words.",
+        "question_type": "TEXT_FORMAT",
+        "max_marks": 10,
+        "selected_options": [],
+        "text_answer": "OOP is a paradigm where code is structured using objects...",
+        "obtained_marks": null,
+        "status": "pending_manual_grading"
+      }
+    ]
+  }
+
+  ---
+  Teacher — Grade Text Answers
+  PATCH /api/v1/quizzes/submissions/42/grade/
+
+  Only needed when the submission has status: "submitted" meaning text questions are pending. One call, all text questions at once.
+
+  Payload:
+  {
+    "grades": [
+      { "question_id": 3, "marks": 8 }
+    ]
+  }
+
+  Validation errors:
+  { "grades": "question_id 3: marks (12) exceed max_marks (10)." }
+  { "grades": "question_id 3 is not a TEXT_FORMAT question in this submission." }
+  { "grades": "marks cannot be negative." }
+
+  Response 200 — fully updated submission:
+  {
+    "id": 42,
+    "quiz": 1,
+    "quiz_title": "Week 1 Quiz",
+    "course_title": "Python Basics",
+    "student": 7,
+    "student_name": "student_sara",
+    "status": "graded",
+    "obtained_marks": "18.00",
+    "total_marks_snapshot": 20,
+    "percentage": 90.0,
+    "submitted_at": "2026-05-12T11:30:00Z",
+    "updated_at": "2026-05-12T12:00:00Z",
+    "answers": [
+      {
+        "question_id": 1,
+        "question_type": "SINGLE_CHOICE",
+        "max_marks": 5,
+        "selected_options": [1],
+        "obtained_marks": 5.0,
+        "status": "auto_graded"
+      },
+      {
+        "question_id": 2,
+        "question_type": "MULTIPLE_CHOICE",
+        "max_marks": 5,
+        "selected_options": [5],
+        "obtained_marks": 5.0,
+        "status": "auto_graded"
+      },
+      {
+        "question_id": 3,
+        "question_type": "TEXT_FORMAT",
+        "max_marks": 10,
+        "text_answer": "OOP is a paradigm where code is structured using objects...",
+        "obtained_marks": 8.0,
+        "status": "graded"
+      }
+    ]
+  }
+
+  ------
+  Student APIs
+
+  Student — List Available Quizzes
+  GET /api/v1/quizzes/
+
+  Only shows quizzes where published_at <= now and student is enrolled in the course. Questions and is_correct are not included in list view.
+
+  Response 200:
+  [
+    {
+      "id": 1,
+      "title": "Week 1 Quiz",
+      "course_title": "Python Basics",
+      "total_marks": 20,
+      "published_at": "2026-05-10T09:00:00Z",
+      "due_date": "2026-05-15T23:59:00Z",
+      "is_overdue": false,
+      "my_submission": { "status": "pending" }
+    },
+    {
+      "id": 2,
+      "title": "Week 2 Quiz",
+      "course_title": "Python Basics",
+      "total_marks": 30,
+      "due_date": "2026-05-22T23:59:00Z",
+      "is_overdue": false,
+      "my_submission": {
+        "id": 42,
+        "status": "graded",
+        "obtained_marks": "18.00",
+        "total_marks": 20,
+        "submitted_at": "2026-05-12T11:30:00Z"
+      }
+    }
+  ]
+
+  my_submission.status values:
+
+  ┌─────────────┬─────────────────────────────────────────────────────────┐
+  │   Status    │                         Meaning                         │
+  ├─────────────┼─────────────────────────────────────────────────────────┤
+  │ pending     │ Not submitted, window is open                           │
+  ├─────────────┼─────────────────────────────────────────────────────────┤
+  │ missed      │ Due date passed, never submitted                        │
+  ├─────────────┼─────────────────────────────────────────────────────────┤
+  │ auto_graded │ Done — MCQ only quiz, fully scored                      │
+  ├─────────────┼─────────────────────────────────────────────────────────┤
+  │ submitted   │ Submitted — waiting for teacher to grade text questions │
+  ├─────────────┼─────────────────────────────────────────────────────────┤
+  │ graded      │ Fully graded including text questions                   │
+  └─────────────┴─────────────────────────────────────────────────────────┘
+
+  ---
+  Student — View Quiz Detail
+  GET /api/v1/quizzes/1/
+
+  Returns 404 if published_at > now.
+  is_correct is stripped from every option — student never sees correct answers.
+
+  Response 200:
+  {
+    "id": 1,
+    "title": "Week 1 Quiz",
+    "description": "Covers chapter 1 to 3",
+    "course_title": "Python Basics",
+    "total_marks": 20,
+    "published_at": "2026-05-10T09:00:00Z",
+    "due_date": "2026-05-15T23:59:00Z",
+    "is_overdue": false,
+    "my_submission": { "status": "pending" },
+    "questions": [
+      {
+        "id": 1,
+        "question_text": "What is Python?",
+        "question_type": "SINGLE_CHOICE",
+        "max_marks": 5,
+        "options": [
+          { "id": 1, "option_text": "A programming language" },
+          { "id": 2, "option_text": "A database"             },
+          { "id": 3, "option_text": "A snake"                },
+          { "id": 4, "option_text": "A framework"            }
+        ]
+      },
+      {
+        "id": 2,
+        "question_text": "Which are valid Python data types?",
+        "question_type": "MULTIPLE_CHOICE",
+        "max_marks": 5,
+        "options": [
+          { "id": 5, "option_text": "int"   },
+          { "id": 6, "option_text": "str"   },
+          { "id": 7, "option_text": "fast"  },
+          { "id": 8, "option_text": "tuple" }
+        ]
+      },
+      {
+        "id": 3,
+        "question_text": "Explain OOP in your own words.",
+        "question_type": "TEXT_FORMAT",
+        "max_marks": 10,
+        "options": []
+      }
+    ]
+  }
+
+  ▎ Student uses the id from each question and each option when submitting.
+
+  ---
+  Student — Submit Quiz
+  POST /api/v1/quizzes/1/submit/
+
+  Timing guards:
+  - now < published_at → 400 Not available yet
+  - now > due_date → 400 Window closed
+  - Already submitted → 400 Already submitted
+  - Not enrolled → 403
+
+  Payload:
+  {
+    "answers": [
+      { "question_id": 1, "selected_options": [1]    },
+      { "question_id": 2, "selected_options": [5, 6] },
+      { "question_id": 3, "text_answer": "OOP is a paradigm where code is structured using objects and classes." }
+    ]
+  }
+
+  Answer rules per type:
+
+  ┌─────────────────┬──────────────────────┬─────────────┐
+  │      Type       │   selected_options   │ text_answer │
+  ├─────────────────┼──────────────────────┼─────────────┤
+  │ SINGLE_CHOICE   │ exactly 1 option ID  │ omit        │
+  ├─────────────────┼──────────────────────┼─────────────┤
+  │ MULTIPLE_CHOICE │ 1 or more option IDs │ omit        │
+  ├─────────────────┼──────────────────────┼─────────────┤
+  │ TEXT_FORMAT     │ omit or []           │ required    │
+  └─────────────────┴──────────────────────┴─────────────┘
+
+  Response 201 — MCQ graded immediately, text marked pending:
+  {
+    "id": 42,
+    "quiz": 1,
+    "quiz_title": "Week 1 Quiz",
+    "student": 7,
+    "student_name": "student_sara",
+    "status": "submitted",
+    "obtained_marks": "10.00",
+    "total_marks_snapshot": 20,
+    "percentage": 50.0,
+    "submitted_at": "2026-05-12T11:30:00Z",
+    "answers": [
+      {
+        "question_id": 1,
+        "question_text": "What is Python?",
+        "question_type": "SINGLE_CHOICE",
+        "max_marks": 5,
+        "selected_options": [1],
+        "text_answer": null,
+        "obtained_marks": 5.0,
+        "status": "auto_graded"
+      },
+      {
+        "question_id": 2,
+        "question_text": "Which are valid Python data types?",
+        "question_type": "MULTIPLE_CHOICE",
+        "max_marks": 5,
+        "selected_options": [5, 6],
+        "text_answer": null,
+        "obtained_marks": 5.0,
+        "status": "auto_graded"
+      },
+      {
+        "question_id": 3,
+        "question_text": "Explain OOP in your own words.",
+        "question_type": "TEXT_FORMAT",
+        "max_marks": 10,
+        "selected_options": [],
+        "text_answer": "OOP is a paradigm where code is structured using objects and classes.",
+        "obtained_marks": null,
+        "status": "pending_manual_grading"
+      }
+    ]
+  }
+
+  If quiz has no TEXT_FORMAT questions, response comes back with status: "auto_graded" and every obtained_marks is a number — fully done with no teacher action needed.
+
+  ---
+  Student — View My Submission
+  GET /api/v1/quizzes/submissions/42/
+
+  Returns the same structure as the submit response. Student can only see their own submission.
+
+  ---
+  OR Grading Rule (MULTIPLE_CHOICE)
+  Options 5 int, 6 str, 8 tuple are correct. Option 7 fast is wrong.
+
+  ┌─────────────────┬─────────────────────────────────────────┐
+  │ Student selects │                 Result                  │
+  ├─────────────────┼─────────────────────────────────────────┤
+  │ [5]             │ :white_check_mark: Full 5 marks                         │
+  ├─────────────────┼─────────────────────────────────────────┤
+  │ [5, 6]          │ :white_check_mark: Full 5 marks                         │
+  ├─────────────────┼─────────────────────────────────────────┤
+  │ [5, 7]          │ :white_check_mark: Full 5 marks — one correct is enough │
+  ├─────────────────┼─────────────────────────────────────────┤
+  │ [7]             │ :x: 0 marks                              │
+  └─────────────────┴─────────────────────────────────────────┘
+
+  Quiz APIs
+
+  Teacher — Create Quiz
+
+
+
+  POST /api/v1/quizzes/
+
+
+
+  Payload:
+
+  {
+
+    "course": 1,
+
+    "title": "Week 1 Quiz",
+
+    "description": "Covers chapter 1 to 3",
+
+    "total_marks": 20,
+
+    "published_at": "2026-05-10T09:00:00Z",
+
+    "due_date": "2026-05-15T23:59:00Z",
+
+    "questions": [
+
+      {
+
+        "question_text": "What is Python?",
+
+        "question_type": "SINGLE_CHOICE",
+
+        "max_marks": 5,
+
+        "options": [
+
+          { "option_text": "A programming language", "is_correct": true  },
+
+          { "option_text": "A database",             "is_correct": false },
+
+          { "option_text": "A snake",                "is_correct": false },
+
+          { "option_text": "A framework",            "is_correct": false }
+
+        ]
+
+      },
+
+      {
+
+        "question_text": "Which are valid Python data types?",
+
+        "question_type": "MULTIPLE_CHOICE",
+
+        "max_marks": 5,
+
+        "options": [
+
+          { "option_text": "int",   "is_correct": true  },
+
+          { "option_text": "str",   "is_correct": true  },
+
+          { "option_text": "fast",  "is_correct": false },
+
+          { "option_text": "tuple", "is_correct": true  }
+
+        ]
+
+      },
+
+      {
+
+        "question_text": "Explain OOP in your own words.",
+
+        "question_type": "TEXT_FORMAT",
+
+        "max_marks": 10
+
+      }
+
+    ]
+
+  }
+
+
+
+  Validation errors:
+
+  { "total_marks": "total_marks (20) must equal sum of all question max_marks (25)." }
+
+  { "questions": "Question 1 (SINGLE_CHOICE) must have exactly 4 options." }
+
+  { "questions": "Question 1 (SINGLE_CHOICE) must have exactly 1 correct option." }
+
+  { "questions": "Question 2 (MULTIPLE_CHOICE) must have exactly 4 options." }
+
+  { "questions": "Question 2 (MULTIPLE_CHOICE) must have at least 1 correct option." }
+
+  { "questions": "Question 3 (TEXT_FORMAT) must not have options." }
+
+  { "due_date": "due_date must be after published_at." }
+
+  { "published_at": "published_at must be in the future." }
+
+
+
+  Response 201 — backend auto-assigns IDs to questions and options:
+
+
+
+  {
+
+    "id": 1,
+
+    "course_title": "Python Basics",
+
+    "created_by_name": "teacher_ali",
+
+    "title": "Week 1 Quiz",
+
+    "description": "Covers chapter 1 to 3",
+
+    "total_marks": 20,
+
+    "published_at": "2026-05-10T09:00:00Z",
+
+    "due_date": "2026-05-15T23:59:00Z",
+
+    "is_published": false,
+
+    "is_locked": false,
+
+    "submissions_count": 0,
+
+    "questions": [
+
+      {
+
+        "id": 1,
+
+        "question_text": "What is Python?",
+
+        "question_type": "SINGLE_CHOICE",
+
+        "max_marks": 5,
+
+        "options": [
+
+          { "id": 1, "option_text": "A programming language", "is_correct": true  },
+
+          { "id": 2, "option_text": "A database",             "is_correct": false },
+
+          { "id": 3, "option_text": "A snake",                "is_correct": false },
+
+          { "id": 4, "option_text": "A framework",            "is_correct": false }
+
+        ]
+
+      },
+
+      {
+
+        "id": 2,
+
+        "question_text": "Which are valid Python data types?",
+
+        "question_type": "MULTIPLE_CHOICE",
+
+        "max_marks": 5,
+
+        "options": [
+
+          { "id": 5, "option_text": "int",   "is_correct": true  },
+
+          { "id": 6, "option_text": "str",   "is_correct": true  },
+
+          { "id": 7, "option_text": "fast",  "is_correct": false },
+
+          { "id": 8, "option_text": "tuple", "is_correct": true  }
+
+        ]
+
+      },
+
+      {
+
+        "id": 3,
+
+        "question_text": "Explain OOP in your own words.",
+
+        "question_type": "TEXT_FORMAT",
+
+        "max_marks": 10,
+
+        "options": []
+
+      }
+
+    ],
+
+    "created_at": "2026-05-01T10:00:00Z",
+
+    "updated_at": "2026-05-01T10:00:00Z"
+
+  }
+
+
+
+  ▎ IDs assigned by backend: question IDs 1, 2, 3 — option IDs globally unique 1–8 across the quiz. Student uses these IDs when submitting.
+
+
+
+  ---
+
+  Teacher — View All My Quizzes
+
+
+
+  GET /api/v1/quizzes/
+
+  GET /api/v1/quizzes/?course=1
+
+  GET /api/v1/quizzes/?search=week
+
+
+
+  Response 200:
+
+  [
+
+    {
+
+      "id": 1,
+
+      "title": "Week 1 Quiz",
+
+      "course": 1,
+
+      "course_title": "Python Basics",
+
+      "total_marks": 20,
+
+      "published_at": "2026-05-10T09:00:00Z",
+
+      "due_date": "2026-05-15T23:59:00Z",
+
+      "is_published": true,
+
+      "is_locked": true,
+
+      "submissions_count": 12,
+
+      "created_at": "2026-05-01T10:00:00Z"
+
+    }
+
+  ]
+
+
+
+  ---
+
+  Teacher — View Single Quiz
+
+
+
+  GET /api/v1/quizzes/1/
+
+
+
+  Response 200: Same as create response. Teacher sees is_correct on all options and sees is_locked, submissions_count.
+
+
+
+  ---
+
+  Teacher — Update Quiz
+
+
+
+  PATCH /api/v1/quizzes/1/
+
+
+
+  Returns 403 the moment any student has submitted. No partial updates to questions — send the full questions array with existing IDs.
+
+
+
+  Payload (any top-level field, or replace full questions):
+
+  {
+
+    "due_date": "2026-05-18T23:59:00Z"
+
+  }
+
+
+
+  {
+
+    "questions": [
+
+      {
+
+        "id": 1,
+
+        "question_text": "What is Python used for?",
+
+        "question_type": "SINGLE_CHOICE",
+
+        "max_marks": 5,
+
+        "options": [
+
+          { "id": 1, "option_text": "Web development", "is_correct": true  },
+
+          { "id": 2, "option_text": "Cooking",         "is_correct": false },
+
+          { "id": 3, "option_text": "Driving",         "is_correct": false },
+
+          { "id": 4, "option_text": "Painting",        "is_correct": false }
+
+        ]
+
+      },
+
+      {
+
+        "id": 2,
+
+        "question_text": "Which are valid Python data types?",
+
+        "question_type": "MULTIPLE_CHOICE",
+
+        "max_marks": 5,
+
+        "options": [
+
+          { "id": 5, "option_text": "int",   "is_correct": true  },
+
+          { "id": 6, "option_text": "str",   "is_correct": true  },
+
+          { "id": 7, "option_text": "fast",  "is_correct": false },
+
+          { "id": 8, "option_text": "tuple", "is_correct": true  }
+
+        ]
+
+      },
+
+      {
+
+        "id": 3,
+
+        "question_text": "Explain OOP in your own words.",
+
+        "question_type": "TEXT_FORMAT",
+
+        "max_marks": 10,
+
+        "options": []
+
+      }
+
+    ]
+
+  }
+
+
+
+  Response 200: Full updated quiz (same as create response).
+
+
+
+  Response 403 locked:
+
+  {
+
+    "detail": "This quiz is locked. It has existing submissions and cannot be modified."
+
+  }
+
+
+
+  ---
+
+  Teacher — Delete Quiz
+
+  DELETE /api/v1/quizzes/1/
+
+  Response 204 — success.
+
+  Response 403 — locked (submissions exist).
+
+
+
+  ---
+
+  Teacher — View Submissions for a Quiz
+
+
+
+  GET /api/v1/quizzes/1/submissions/
+
+
+
+  Response 200:
+
+  [
+
+    {
+
+      "id": 42,
+
+      "quiz": 1,
+
+      "quiz_title": "Week 1 Quiz",
+
+      "student": 7,
+
+      "student_name": "student_sara",
+
+      "status": "submitted",
+
+      "obtained_marks": "10.00",
+
+      "total_marks_snapshot": 20,
+
+      "percentage": 50.0,
+
+      "submitted_at": "2026-05-12T11:30:00Z"
+
+    },
+
+    {
+
+      "id": 43,
+
+      "quiz": 1,
+
+      "quiz_title": "Week 1 Quiz",
+
+      "student": 8,
+
+      "student_name": "student_ahmed",
+
+      "status": "auto_graded",
+
+      "obtained_marks": "20.00",
+
+      "total_marks_snapshot": 20,
+
+      "percentage": 100.0,
+
+      "submitted_at": "2026-05-12T12:00:00Z"
+
+    }
+
+  ]
+
+
+
+  ---
+
+  Teacher — View Full Submission Detail
+
+  GET /api/v1/quizzes/submissions/42/
+
+
+
+  Response 200:
+
+  {
+
+    "id": 42,
+
+    "quiz": 1,
+
+    "quiz_title": "Week 1 Quiz",
+
+    "course_title": "Python Basics",
+
+    "student": 7,
+
+    "student_name": "student_sara",
+
+    "status": "submitted",
+
+    "obtained_marks": "10.00",
+
+    "total_marks_snapshot": 20,
+
+    "percentage": 50.0,
+
+    "submitted_at": "2026-05-12T11:30:00Z",
+
+    "updated_at": "2026-05-12T11:30:00Z",
+
+    "answers": [
+
+      {
+
+        "question_id": 1,
+
+        "question_text": "What is Python?",
+
+        "question_type": "SINGLE_CHOICE",
+
+        "max_marks": 5,
+
+        "selected_options": [1],
+
+        "text_answer": null,
+
+        "obtained_marks": 5.0,
+
+        "status": "auto_graded"
+
+      },
+
+      {
+
+        "question_id": 2,
+
+        "question_text": "Which are valid Python data types?",
+
+        "question_type": "MULTIPLE_CHOICE",
+
+        "max_marks": 5,
+
+        "selected_options": [5],
+
+        "text_answer": null,
+
+        "obtained_marks": 5.0,
+
+        "status": "auto_graded"
+
+      },
+
+      {
+
+        "question_id": 3,
+
+        "question_text": "Explain OOP in your own words.",
+
+        "question_type": "TEXT_FORMAT",
+
+        "max_marks": 10,
+
+        "selected_options": [],
+
+        "text_answer": "OOP is a paradigm where code is structured using objects...",
+
+        "obtained_marks": null,
+
+        "status": "pending_manual_grading"
+
+      }
+
+    ]
+
+  }
+
+
+
+  ---
+
+  Teacher — Grade Text Answers
+
+  PATCH /api/v1/quizzes/submissions/42/grade/
+
+
+
+  Only needed when the submission has status: "submitted" meaning text questions are pending. One call, all text questions at once.
+
+
+
+  Payload:
+
+  {
+
+    "grades": [
+
+      { "question_id": 3, "marks": 8 }
+
+    ]
+
+  }
+
+
+
+  Validation errors:
+
+  { "grades": "question_id 3: marks (12) exceed max_marks (10)." }
+
+  { "grades": "question_id 3 is not a TEXT_FORMAT question in this submission." }
+
+  { "grades": "marks cannot be negative." }
+
+
+
+  Response 200 — fully updated submission:
+
+  {
+
+    "id": 42,
+
+    "quiz": 1,
+
+    "quiz_title": "Week 1 Quiz",
+
+    "course_title": "Python Basics",
+
+    "student": 7,
+
+    "student_name": "student_sara",
+
+    "status": "graded",
+
+    "obtained_marks": "18.00",
+
+    "total_marks_snapshot": 20,
+
+    "percentage": 90.0,
+
+    "submitted_at": "2026-05-12T11:30:00Z",
+
+    "updated_at": "2026-05-12T12:00:00Z",
+
+    "answers": [
+
+      {
+
+        "question_id": 1,
+
+        "question_type": "SINGLE_CHOICE",
+
+        "max_marks": 5,
+
+        "selected_options": [1],
+
+        "obtained_marks": 5.0,
+
+        "status": "auto_graded"
+
+      },
+
+      {
+
+        "question_id": 2,
+
+        "question_type": "MULTIPLE_CHOICE",
+
+        "max_marks": 5,
+
+        "selected_options": [5],
+
+        "obtained_marks": 5.0,
+
+        "status": "auto_graded"
+
+      },
+
+      {
+
+        "question_id": 3,
+
+        "question_type": "TEXT_FORMAT",
+
+        "max_marks": 10,
+
+        "text_answer": "OOP is a paradigm where code is structured using objects...",
+
+        "obtained_marks": 8.0,
+
+        "status": "graded"
+
+      }
+
+    ]
+
+  }
+
+
+
+  ------
+
+  Student APIs
+
+
+
+  Student — List Available Quizzes
+
+  GET /api/v1/quizzes/
+
+
+
+  Only shows quizzes where published_at <= now and student is enrolled in the course. Questions and is_correct are not included in list view.
+
+
+
+  Response 200:
+
+  [
+
+    {
+
+      "id": 1,
+
+      "title": "Week 1 Quiz",
+
+      "course_title": "Python Basics",
+
+      "total_marks": 20,
+
+      "published_at": "2026-05-10T09:00:00Z",
+
+      "due_date": "2026-05-15T23:59:00Z",
+
+      "is_overdue": false,
+
+      "my_submission": { "status": "pending" }
+
+    },
+
+    {
+
+      "id": 2,
+
+      "title": "Week 2 Quiz",
+
+      "course_title": "Python Basics",
+
+      "total_marks": 30,
+
+      "due_date": "2026-05-22T23:59:00Z",
+
+      "is_overdue": false,
+
+      "my_submission": {
+
+        "id": 42,
+
+        "status": "graded",
+
+        "obtained_marks": "18.00",
+
+        "total_marks": 20,
+
+        "submitted_at": "2026-05-12T11:30:00Z"
+
+      }
+
+    }
+
+  ]
+
+
+
+  my_submission.status values:
+
+
+
+  ┌─────────────┬─────────────────────────────────────────────────────────┐
+
+  │   Status    │                         Meaning                         │
+
+  ├─────────────┼─────────────────────────────────────────────────────────┤
+
+  │ pending     │ Not submitted, window is open                           │
+
+  ├─────────────┼─────────────────────────────────────────────────────────┤
+
+  │ missed      │ Due date passed, never submitted                        │
+
+  ├─────────────┼─────────────────────────────────────────────────────────┤
+
+  │ auto_graded │ Done — MCQ only quiz, fully scored                      │
+
+  ├─────────────┼─────────────────────────────────────────────────────────┤
+
+  │ submitted   │ Submitted — waiting for teacher to grade text questions │
+
+  ├─────────────┼─────────────────────────────────────────────────────────┤
+
+  │ graded      │ Fully graded including text questions                   │
+
+  └─────────────┴─────────────────────────────────────────────────────────┘
+
+
+
+  ---
+
+  Student — View Quiz Detail
+
+  GET /api/v1/quizzes/1/
+
+
+
+  Returns 404 if published_at > now.
+
+  is_correct is stripped from every option — student never sees correct answers.
+
+
+
+  Response 200:
+
+  {
+
+    "id": 1,
+
+    "title": "Week 1 Quiz",
+
+    "description": "Covers chapter 1 to 3",
+
+    "course_title": "Python Basics",
+
+    "total_marks": 20,
+
+    "published_at": "2026-05-10T09:00:00Z",
+
+    "due_date": "2026-05-15T23:59:00Z",
+
+    "is_overdue": false,
+
+    "my_submission": { "status": "pending" },
+
+    "questions": [
+
+      {
+
+        "id": 1,
+
+        "question_text": "What is Python?",
+
+        "question_type": "SINGLE_CHOICE",
+
+        "max_marks": 5,
+
+        "options": [
+
+          { "id": 1, "option_text": "A programming language" },
+
+          { "id": 2, "option_text": "A database"             },
+
+          { "id": 3, "option_text": "A snake"                },
+
+          { "id": 4, "option_text": "A framework"            }
+
+        ]
+
+      },
+
+      {
+
+        "id": 2,
+
+        "question_text": "Which are valid Python data types?",
+
+        "question_type": "MULTIPLE_CHOICE",
+
+        "max_marks": 5,
+
+        "options": [
+
+          { "id": 5, "option_text": "int"   },
+
+          { "id": 6, "option_text": "str"   },
+
+          { "id": 7, "option_text": "fast"  },
+
+          { "id": 8, "option_text": "tuple" }
+
+        ]
+
+      },
+
+      {
+
+        "id": 3,
+
+        "question_text": "Explain OOP in your own words.",
+
+        "question_type": "TEXT_FORMAT",
+
+        "max_marks": 10,
+
+        "options": []
+
+      }
+
+    ]
+
+  }
+
+
+
+  ▎ Student uses the id from each question and each option when submitting.
+
+
+
+  ---
+
+  Student — Submit Quiz
+
+  POST /api/v1/quizzes/1/submit/
+
+
+
+  Timing guards:
+
+  - now < published_at → 400 Not available yet
+
+  - now > due_date → 400 Window closed
+
+  - Already submitted → 400 Already submitted
+
+  - Not enrolled → 403
+
+
+
+  Payload:
+
+  {
+
+    "answers": [
+
+      { "question_id": 1, "selected_options": [1]    },
+
+      { "question_id": 2, "selected_options": [5, 6] },
+
+      { "question_id": 3, "text_answer": "OOP is a paradigm where code is structured using objects and classes." }
+
+    ]
+
+  }
+
+
+
+  Answer rules per type:
+
+
+
+  ┌─────────────────┬──────────────────────┬─────────────┐
+
+  │      Type       │   selected_options   │ text_answer │
+
+  ├─────────────────┼──────────────────────┼─────────────┤
+
+  │ SINGLE_CHOICE   │ exactly 1 option ID  │ omit        │
+
+  ├─────────────────┼──────────────────────┼─────────────┤
+
+  │ MULTIPLE_CHOICE │ 1 or more option IDs │ omit        │
+
+  ├─────────────────┼──────────────────────┼─────────────┤
+
+  │ TEXT_FORMAT     │ omit or []           │ required    │
+
+  └─────────────────┴──────────────────────┴─────────────┘
+
+
+
+  Response 201 — MCQ graded immediately, text marked pending:
+
+  {
+
+    "id": 42,
+
+    "quiz": 1,
+
+    "quiz_title": "Week 1 Quiz",
+
+    "student": 7,
+
+    "student_name": "student_sara",
+
+    "status": "submitted",
+
+    "obtained_marks": "10.00",
+
+    "total_marks_snapshot": 20,
+
+    "percentage": 50.0,
+
+    "submitted_at": "2026-05-12T11:30:00Z",
+
+    "answers": [
+
+      {
+
+        "question_id": 1,
+
+        "question_text": "What is Python?",
+
+        "question_type": "SINGLE_CHOICE",
+
+        "max_marks": 5,
+
+        "selected_options": [1],
+
+        "text_answer": null,
+
+        "obtained_marks": 5.0,
+
+        "status": "auto_graded"
+
+      },
+
+      {
+
+        "question_id": 2,
+
+        "question_text": "Which are valid Python data types?",
+
+        "question_type": "MULTIPLE_CHOICE",
+
+        "max_marks": 5,
+
+        "selected_options": [5, 6],
+
+        "text_answer": null,
+
+        "obtained_marks": 5.0,
+
+        "status": "auto_graded"
+
+      },
+
+      {
+
+        "question_id": 3,
+
+        "question_text": "Explain OOP in your own words.",
+
+        "question_type": "TEXT_FORMAT",
+
+        "max_marks": 10,
+
+        "selected_options": [],
+
+        "text_answer": "OOP is a paradigm where code is structured using objects and classes.",
+
+        "obtained_marks": null,
+
+        "status": "pending_manual_grading"
+
+      }
+
+    ]
+
+  }
+
+
+
+  If quiz has no TEXT_FORMAT questions, response comes back with status: "auto_graded" and every obtained_marks is a number — fully done with no teacher action needed.
+
+
+
+  ---
+
+  Student — View My Submission
+
+  GET /api/v1/quizzes/submissions/42/
+
+
+
+  Returns the same structure as the submit response. Student can only see their own submission.
+
+
+
+  ---
+
+  OR Grading Rule (MULTIPLE_CHOICE)
+
+  Options 5 int, 6 str, 8 tuple are correct. Option 7 fast is wrong.
+
+
+
+  ┌─────────────────┬─────────────────────────────────────────┐
+
+  │ Student selects │                 Result                  │
+
+  ├─────────────────┼─────────────────────────────────────────┤
+
+  │ [5]             │ :white_check_mark: Full 5 marks                         │
+
+  ├─────────────────┼─────────────────────────────────────────┤
+
+  │ [5, 6]          │ :white_check_mark: Full 5 marks                         │
+
+  ├─────────────────┼─────────────────────────────────────────┤
+
+  │ [5, 7]          │ :white_check_mark: Full 5 marks — one correct is enough │
+
+  ├─────────────────┼─────────────────────────────────────────┤
+
+  │ [7]             │ :x: 0 marks                              │
+
+  └─────────────────┴─────────────────────────────────────────┘
+
+you can read above and i wanted to implement this on frontend while creating a quiz all fields like text description etc will be as it is but an option to add a question with type if type mcq then a text box will below 4 boxes will appears for multiple allow multiple correct(options will be in a checkbox) by checkbox if single allow 1 selection as radio(options will be a radio) and if text type then simple question box, an add more button and then question type, we can add more question as many as we want  and on click of quiz creation it will generate payload and thats it quiz is created. To open a created quiz it will open it in same boxes UI question answer format(with selected answers) and teacher can edit it as well the tab my assignment will renamed to assessments and 2 tab if assignment selected then there will be current assignments listing and same as its right now but add assignment button will be inside this tab and other quizes tab and add quiz and listing of quiz etc also student side changes will be same tab based renamed etc

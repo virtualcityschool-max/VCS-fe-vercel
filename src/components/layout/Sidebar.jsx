@@ -136,8 +136,6 @@ const Sidebar = ({
   useEffect(() => {
     if (role !== "student") return;
     dispatch(fetchUnreadAnnouncementsCount());
-    const interval = setInterval(() => dispatch(fetchUnreadAnnouncementsCount()), 30000);
-    return () => clearInterval(interval);
   }, [dispatch, role]);
 
   useEffect(() => {

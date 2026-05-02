@@ -362,14 +362,7 @@ const AdminSessionsPage = () => {
       setActiveModal(null);
       dispatch(fetchSessions());
     } catch (error) {
-      const hadFieldErrors = handleEditSessionApiError(
-        error,
-        toastManager.error,
-      );
-      if (!hadFieldErrors) {
-        const normalizedError = normalizeApiError(error);
-        toastManager.error(normalizedError.message);
-      }
+      showApiError(error);
     } finally {
       setUpdatingSessionId(null);
     }

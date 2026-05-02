@@ -13,10 +13,12 @@ import {
   clearSelectedSubmission,
 } from "../../store/slices/teacherSlice";
 import { toastManager } from "../../utils/toastManager";
+import { showApiError } from "../../utils/apiErrorHandler";
 import { validateFile, ACCEPT_STRING } from "../../utils/fileValidation";
 import GradingForm from "../../components/teacher/GradingForm";
 import { FilterSelect } from "../../components/ui";
 import { coursesService } from "../../services/coursesService";
+import { getStorageUrl } from "../../utils/storageUrl";
 
 const getFilename = (url) => {
   if (!url) return "attachment";
@@ -68,6 +70,7 @@ const TeacherGrading = () => {
   const [editTarget, setEditTarget] = useState(null);
   const [editForm, setEditForm] = useState(null);
   const [savingEdit, setSavingEdit] = useState(false);
+  const [savingCreate, setSavingCreate] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
 
@@ -239,9 +242,9 @@ const TeacherGrading = () => {
                   <p className="text-xs text-slate-400 mt-2">
                     {assignment.submissions_count} submission{assignment.submissions_count !== 1 ? "s" : ""} &nbsp;·&nbsp; Max Score {assignment.max_score}
                   </p>
-                  {assignment.file && (
+                  {assignment.file_url && (
                     <div className="mt-3">
-                      <DownloadButton url={assignment.file} label="Download Assignment File" />
+                      <DownloadButton url={getStorageUrl(assignment.file_url)} label="Download Assignment File" />
                     </div>
                   )}
                 </div>
@@ -417,8 +420,8 @@ const TeacherGrading = () => {
                     Student Attachment
                   </h3>
 
-                  {selectedSubmission.file ? (
-                    <DownloadButton url={selectedSubmission.file} label="Download Submitted File" />
+                  {selectedSubmission.file_url ? (
+                    <DownloadButton url={getStorageUrl(selectedSubmission.file_url)} label="Download Submitted File" />
                   ) : (
                     <p className="text-slate-500 text-sm italic">No file submitted</p>
                   )}
@@ -464,7 +467,7 @@ const TeacherGrading = () => {
                       setSelectedAssignment(null);
                       dispatch(clearSelectedSubmission());
                     } catch (err) {
-                      toastManager.error(err?.message || "Failed to grade");
+                      showApiError(err);
                     }
                   }}
                 />
@@ -537,10 +540,10 @@ const TeacherGrading = () => {
               </div>
 
               {/* File */}
-              {viewAssignment.file && (
+              {viewAssignment.file_url && (
                 <div>
                   <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-2">Attachment</p>
-                  <DownloadButton url={viewAssignment.file} label="Download Assignment File" />
+                  <DownloadButton url={getStorageUrl(viewAssignment.file_url)} label="Download Assignment File" />
                 </div>
               )}
             </div>
@@ -638,9 +641,9 @@ const TeacherGrading = () => {
                 <label className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1.5 block">
                   Attachment <span className="normal-case tracking-normal font-normal text-slate-600">(replace existing — optional)</span>
                 </label>
-                {editTarget.file && !editForm.file && (
+                {editTarget.file_url && !editForm.file && (
                   <div className="mb-2">
-                    <DownloadButton url={editTarget.file} label="Current file" />
+                    <DownloadButton url={getStorageUrl(editTarget.file_url)} label="Current file" />
                   </div>
                 )}
                 <label className="flex items-center gap-3 w-full p-3 rounded-xl bg-slate-800 border border-slate-700 cursor-pointer hover:border-indigo-500 transition group">
@@ -702,7 +705,7 @@ const TeacherGrading = () => {
                       setEditTarget(null);
                       setEditForm(null);
                     } catch (err) {
-                      toastManager.error(err?.message || err?.title?.[0] || "Failed to update");
+                      showApiError(err);
                     } finally {
                       setSavingEdit(false);
                     }
@@ -755,7 +758,7 @@ const TeacherGrading = () => {
                     toastManager.success("Assignment deleted");
                     setDeleteTarget(null);
                   } catch (err) {
-                    toastManager.error(err?.message || "Failed to delete");
+                    showApiError(err);
                   } finally {
                     setDeletingId(null);
                   }
@@ -934,16 +937,13 @@ const TeacherGrading = () => {
               </button>
 
               <button
-                disabled={isFormInvalid}
-                className="px-4 py-2 bg-indigo-600 rounded-xl disabled:opacity-50"
+                disabled={isFormInvalid || savingCreate}
+                className="px-4 py-2 bg-indigo-600 rounded-xl disabled:opacity-50 flex items-center gap-2"
                 onClick={async () => {
                   const error = validateForm();
+                  if (error) { toastManager.error(error); return; }
 
-                  if (error) {
-                    toastManager.error(error);
-                    return;
-                  }
-
+                  setSavingCreate(true);
                   try {
                     await dispatch(
                       createAssignment({
@@ -959,31 +959,22 @@ const TeacherGrading = () => {
                           : {}),
                       }),
                     ).unwrap();
-
                     toastManager.success("Assignment created");
-
                     setShowCreateModal(false);
                     setPrivateStudents([]);
-                    setForm({
-                      course: "",
-                      title: "",
-                      description: "",
-                      due_date: "",
-                      max_score: "",
-                      status: "published",
-                      file: null,
-                      assignmentType: "public",
-                      private_student_ids: [],
-                    });
+                    dispatch(fetchAssignments({
+                      ...(filters.course ? { course: filters.course } : {}),
+                      status: filters.status,
+                    }));
+                    setForm({ course: "", title: "", description: "", due_date: "", max_score: "", status: "published", file: null, assignmentType: "public", private_student_ids: [] });
                   } catch (err) {
-                    toastManager.error(
-                      err?.error ||
-                        err?.message ||
-                        "Failed to create assignment",
-                    );
+                    showApiError(err);
+                  } finally {
+                    setSavingCreate(false);
                   }
                 }}
               >
+                {savingCreate && <i className="fas fa-spinner animate-spin text-xs" />}
                 Create
               </button>
             </div>

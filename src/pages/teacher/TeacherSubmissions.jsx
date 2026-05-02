@@ -12,6 +12,7 @@ import { FilterSelect } from "../../components/ui";
 import GradingForm from "../../components/teacher/GradingForm";
 import { toastManager } from "../../utils/toastManager";
 import { showApiError } from "../../utils/apiErrorHandler";
+import { getStorageUrl } from "../../utils/storageUrl";
 
 const getFilename = (url) => {
   if (!url) return "attachment";
@@ -232,9 +233,16 @@ const TeacherSubmissions = () => {
                 <div key={sub.id} className="p-4 hover:bg-slate-800/30 transition">
                   <div className="flex items-start justify-between gap-3 mb-2">
                     <div>
-                      <p className="font-bold text-white text-sm">
-                        {sub.student_name || sub.student?.username || `Student #${sub.student}`}
-                      </p>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="font-bold text-white text-sm">
+                          {sub.student_name || sub.student?.username || `Student #${sub.student}`}
+                        </p>
+                        {sub.student_id && (
+                          <span className="text-[10px] text-slate-500 bg-slate-800 border border-slate-700 px-1.5 py-0.5 rounded font-bold">
+                            #{sub.student_id}
+                          </span>
+                        )}
+                      </div>
                       <p className="text-xs text-slate-400 mt-0.5">
                         {sub.assignment_title || sub.assignment?.title || "—"}
                       </p>
@@ -284,9 +292,14 @@ const TeacherSubmissions = () => {
                           <div className="w-8 h-8 bg-indigo-600/20 rounded-full flex items-center justify-center text-xs font-bold text-indigo-300 shrink-0">
                             {(sub.student_name || sub.student?.username || "?")[0].toUpperCase()}
                           </div>
-                          <span className="font-semibold text-white text-sm">
-                            {sub.student_name || sub.student?.username || `Student #${sub.student}`}
-                          </span>
+                          <div>
+                            <span className="font-semibold text-white text-sm">
+                              {sub.student_name || sub.student?.username || `Student #${sub.student}`}
+                            </span>
+                            {sub.student_id && (
+                              <p className="text-[10px] text-slate-500 mt-0.5">ID #{sub.student_id}</p>
+                            )}
+                          </div>
                         </div>
                       </td>
                       <td className="px-5 py-4 text-slate-300 text-sm">
@@ -364,8 +377,8 @@ const TeacherSubmissions = () => {
                 {/* File attachment */}
                 <div className="mb-6">
                   <h3 className="text-xs uppercase tracking-widest text-slate-500 font-bold mb-2">Student Attachment</h3>
-                  {selectedSubmission.file ? (
-                    <DownloadButton url={selectedSubmission.file} label="Download Submitted File" />
+                  {selectedSubmission.file_url ? (
+                    <DownloadButton url={getStorageUrl(selectedSubmission.file_url)} label="Download Submitted File" />
                   ) : (
                     <p className="text-slate-500 text-sm italic">No file submitted</p>
                   )}

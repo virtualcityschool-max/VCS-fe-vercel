@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { coursesService } from "../../services/coursesService";
 import { toastManager } from "../../utils/toastManager";
 import EvaluationMatrix from "../../components/common/EvaluationMatrix";
+import { FilterSelect } from "../../components/ui";
 
 const StudentEvaluationPage = () => {
   const [allResults, setAllResults]           = useState([]);
@@ -32,7 +33,7 @@ const StudentEvaluationPage = () => {
 
   return (
     <div className="min-h-screen text-white p-6 lg:p-8">
-      <div className="max-w-6xl mx-auto space-y-6">
+      <div className="mx-auto space-y-6">
 
         <div>
           <h1 className="text-2xl font-black font-poppins text-white">My Evaluations</h1>
@@ -47,16 +48,13 @@ const StudentEvaluationPage = () => {
             {loading ? (
               <div className="h-10 bg-slate-800 rounded-xl animate-pulse" />
             ) : (
-              <select
+              <FilterSelect
                 value={selectedCourseId}
                 onChange={(e) => setSelectedCourseId(e.target.value)}
-                className="w-full sm:w-80 px-4 py-2.5 bg-slate-800/60 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 appearance-none"
+                style={{ width: 240 }}
               >
-                {courses.length === 0 && <option value="">No courses found</option>}
-                {courses.map((c) => (
-                  <option key={c.id} value={c.id}>{c.title}</option>
-                ))}
-              </select>
+                {courses.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
+              </FilterSelect>
             )}
           </div>
 

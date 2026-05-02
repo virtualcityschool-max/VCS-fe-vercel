@@ -3,6 +3,7 @@ import ConfirmDialog from "../../components/common/ConfirmDialog";
 import { useNavigate, useParams } from "react-router-dom";
 import { adminService } from "../../services/adminService";
 import { toastManager } from "../../utils/toastManager";
+import { showApiError } from "../../utils/apiErrorHandler";
 import {
   UserDetailsHeader,
   UserDetailsTabs,
@@ -127,7 +128,7 @@ const UserDetailsPage = () => {
       toastManager.success("User deleted successfully");
       navigate("/admin/users");
     } catch (error) {
-      toastManager.error(error.message || "Failed to delete user");
+      showApiError(error);
     }
   };
 
@@ -138,7 +139,7 @@ const UserDetailsPage = () => {
       toastManager.success("Account updated successfully");
       return updatedUser;
     } catch (error) {
-      toastManager.error(error.message || "Failed to update account");
+      showApiError(error);
       throw error;
     }
   };
@@ -153,7 +154,7 @@ const UserDetailsPage = () => {
       toastManager.success("Profile updated successfully");
       return updatedProfileData;
     } catch (error) {
-      toastManager.error(error.message || "Failed to update profile");
+      showApiError(error);
       throw error;
     }
   };

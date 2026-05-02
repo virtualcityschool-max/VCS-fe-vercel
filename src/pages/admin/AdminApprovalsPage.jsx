@@ -73,7 +73,7 @@ const AdminApprovalsPage = () => {
       await dispatch(rejectUser(userId)).unwrap();
       toastManager.success("User rejected successfully");
     } catch (error) {
-      toastManager.error(error || "Failed to reject user");
+      showApiError(error);
     }
   };
 
