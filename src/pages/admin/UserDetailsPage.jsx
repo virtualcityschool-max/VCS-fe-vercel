@@ -235,6 +235,7 @@ const UserDetailsPage = () => {
                 <div className="pt-2 border-t border-slate-800">
                   <StudentProfileTab
                     profile={userProfile}
+                    userId={userData?.id}
                     onUpdate={handleProfileUpdate}
                     onCancel={handleBackToUsers}
                     onSaved={handleBackToUsers}

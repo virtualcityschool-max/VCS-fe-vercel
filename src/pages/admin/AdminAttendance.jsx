@@ -93,11 +93,11 @@ const AdminAttendance = () => {
   const isLoading = loadingSessions || loadingAllAttendance;
 
   return (
-    <div className="text-white px-4 sm:px-6 py-8 space-y-6">
-      <div>
+    <div className="text-white space-y-6">
+      {/* <div>
         <h1 className="text-2xl font-black font-poppins">Attendance</h1>
         <p className="text-slate-400 text-sm mt-1">Session-wise attendance matrix for all courses.</p>
-      </div>
+      </div> */}
 
       {/* Tabs */}
       <div className="flex gap-1 border-b border-slate-800">

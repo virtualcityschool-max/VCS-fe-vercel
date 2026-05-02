@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState } from "react";
+import ConfirmDialog from "../common/ConfirmDialog";
 
 const EnrollmentRequestsTab = ({
   enrollments,
@@ -9,6 +10,17 @@ const EnrollmentRequestsTab = ({
   onReject,
   onRefresh,
 }) => {
+  const [confirmDialog, setConfirmDialog] = useState({ open: false, type: null, enrollmentId: null, label: "" });
+
+  const handleApprove = (id, label) => setConfirmDialog({ open: true, type: "approve", enrollmentId: id, label });
+  const handleReject  = (id, label) => setConfirmDialog({ open: true, type: "reject",  enrollmentId: id, label });
+
+  const handleConfirm = () => {
+    const { type, enrollmentId } = confirmDialog;
+    setConfirmDialog({ open: false, type: null, enrollmentId: null, label: "" });
+    if (type === "approve") onApprove(enrollmentId);
+    else if (type === "reject") onReject(enrollmentId);
+  };
   if (loading && !enrollments?.length) {
     return (
       <div className="space-y-3">
@@ -114,7 +126,7 @@ const EnrollmentRequestsTab = ({
               {/* Actions */}
               <div className="flex items-center gap-2 flex-shrink-0">
                 <button
-                  onClick={() => onApprove(enrollment.id)}
+                  onClick={() => handleApprove(enrollment.id, `${enrollment.student_name} — ${enrollment.course_title}`)}
                   disabled={isProcessing}
                   className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-semibold rounded-xl transition"
                 >
@@ -126,7 +138,7 @@ const EnrollmentRequestsTab = ({
                   Approve
                 </button>
                 <button
-                  onClick={() => onReject(enrollment.id)}
+                  onClick={() => handleReject(enrollment.id, `${enrollment.student_name} — ${enrollment.course_title}`)}
                   disabled={isProcessing}
                   className="flex items-center gap-1.5 px-4 py-2 bg-rose-600/20 hover:bg-rose-600/30 border border-rose-500/30 hover:border-rose-500/60 disabled:opacity-50 disabled:cursor-not-allowed text-rose-400 text-xs font-semibold rounded-xl transition"
                 >
@@ -142,6 +154,20 @@ const EnrollmentRequestsTab = ({
           </div>
         );
       })}
+      <ConfirmDialog
+        open={confirmDialog.open}
+        variant={confirmDialog.type === "approve" ? "success" : "danger"}
+        title={confirmDialog.type === "approve" ? "Approve Enrollment" : "Reject Enrollment"}
+        message={
+          confirmDialog.type === "approve"
+            ? `Approve enrollment for "${confirmDialog.label}"?`
+            : `Reject enrollment for "${confirmDialog.label}"? This will deny the student's request.`
+        }
+        confirmLabel={confirmDialog.type === "approve" ? "Approve" : "Reject"}
+        cancelLabel="Cancel"
+        onConfirm={handleConfirm}
+        onCancel={() => setConfirmDialog({ open: false, type: null, enrollmentId: null, label: "" })}
+      />
     </div>
   );
 };

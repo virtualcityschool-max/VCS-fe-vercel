@@ -45,15 +45,18 @@ const AdminApprovalsPage = () => {
   const enrollmentsError = useSelector(selectEnrollmentsError);
   const enrollmentsProcessing = useSelector(selectEnrollmentsProcessing);
 
-  // Fetch pending approvals when component mounts or tab changes
+  // Fetch all three on initial load so badges show counts on every tab
   useEffect(() => {
-    if (activeTab === "users") {
-      dispatch(fetchPendingApprovals());
-    } else if (activeTab === "childLinks") {
-      dispatch(fetchPendingChildLinks());
-    } else if (activeTab === "enrollments") {
-      dispatch(fetchPendingEnrollments());
-    }
+    dispatch(fetchPendingApprovals());
+    dispatch(fetchPendingChildLinks());
+    dispatch(fetchPendingEnrollments());
+  }, [dispatch]);
+
+  // Re-fetch the active tab's data when switching (to pick up any changes)
+  useEffect(() => {
+    if (activeTab === "users") dispatch(fetchPendingApprovals());
+    else if (activeTab === "childLinks") dispatch(fetchPendingChildLinks());
+    else if (activeTab === "enrollments") dispatch(fetchPendingEnrollments());
   }, [dispatch, activeTab]);
 
   const handleApprove = async (userId) => {

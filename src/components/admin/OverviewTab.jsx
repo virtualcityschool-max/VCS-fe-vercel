@@ -24,6 +24,48 @@ const tooltipStyle = {
   itemStyle: { color: "#e2e8f0" },
 };
 
+// ── Stat card with hover tooltip breakdown ───────────────────────────────────
+const StatCardTip = ({ label, value, icon, color, items }) => {
+  const colorClasses = {
+    indigo: "from-indigo-500/20 to-indigo-600/20 border-indigo-500/20 text-indigo-400",
+    emerald: "from-emerald-500/20 to-emerald-600/20 border-emerald-500/20 text-emerald-400",
+    amber: "from-amber-500/20 to-amber-600/20 border-amber-500/20 text-amber-400",
+    purple: "from-purple-500/20 to-purple-600/20 border-purple-500/20 text-purple-400",
+    rose: "from-rose-500/20 to-rose-600/20 border-rose-500/20 text-rose-400",
+    blue: "from-blue-500/20 to-blue-600/20 border-blue-500/20 text-blue-400",
+  };
+  return (
+    <div className="group relative">
+      <div className={`relative overflow-hidden bg-gradient-to-br ${colorClasses[color]} rounded-xl px-4 py-4 border backdrop-blur-sm transition-all duration-300 hover:scale-[1.02] hover:shadow-lg cursor-default`}>
+        <div className="absolute top-0 right-0 w-14 h-14 bg-white/5 rounded-full -mr-6 -mt-6" />
+        <div className="relative z-10 flex items-center gap-2.5 mb-2.5">
+          <div className="w-7 h-7 bg-white/10 rounded-md flex items-center justify-center flex-shrink-0">
+            <i className={`${icon} text-sm`} />
+          </div>
+          <p className="text-[10px] uppercase tracking-wider opacity-80 leading-tight">{label}</p>
+          <i className="fas fa-info-circle text-[9px] opacity-40 ml-auto" />
+        </div>
+        <h3 className="text-2xl font-bold leading-none">{value}</h3>
+      </div>
+      {/* Tooltip */}
+      {items?.length > 0 && (
+        <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 z-30 opacity-0 group-hover:opacity-100 -translate-y-1 group-hover:translate-y-0 transition-all duration-150 min-w-[160px]">
+          <div className="bg-slate-800 border border-slate-700 rounded-xl shadow-2xl p-3">
+            {items.map((item) => (
+              <div key={item.label} className="flex items-center justify-between gap-4 py-1 first:pt-0 last:pb-0">
+                <span className="text-slate-400 text-xs whitespace-nowrap">{item.label}</span>
+                <span className={`text-xs font-bold tabular-nums ${item.color || "text-white"}`}>{item.value}</span>
+              </div>
+            ))}
+          </div>
+          {/* Arrow */}
+          <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-px border-4 border-transparent border-t-slate-700" />
+        </div>
+      )}
+    </div>
+  );
+};
+
 const OverviewTab = ({ analytics, analyticsLoading, analyticsError }) => {
   if (analyticsLoading) {
     return (
@@ -115,81 +157,33 @@ const OverviewTab = ({ analytics, analyticsLoading, analyticsError }) => {
 
   return (
     <div className="space-y-4 animate-fadeIn">
-      {/* Row 1 — User stats (8 cards) */}
-      <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 gap-3">
-        <StatCard
+      {/* Row 1 — User stats */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <StatCardTip
           label="Total Users"
           value={analytics.users.total}
           icon="fas fa-users"
           color="indigo"
-          compact
+          items={[
+            { label: "Active",   value: analytics.users.active,            color: "text-emerald-400" },
+            { label: "Inactive", value: analytics.users.inactive,          color: "text-amber-400"   },
+            { label: "Rejected", value: analytics.users.rejected ?? 0,     color: "text-rose-400"    },
+          ]}
         />
-        <StatCard
-          label="Admins"
-          value={analytics.users.admins}
-          icon="fas fa-user-shield"
-          color="rose"
-          compact
-        />
-        <StatCard
-          label="Teachers"
-          value={analytics.users.teachers}
-          icon="fas fa-chalkboard-teacher"
-          color="blue"
-          compact
-        />
-        <StatCard
-          label="Parents"
-          value={analytics.users.parents}
-          icon="fas fa-user-friends"
-          color="purple"
-          compact
-        />
-        <StatCard
-          label="Students"
-          value={analytics.users.students}
-          icon="fas fa-graduation-cap"
-          color="emerald"
-          compact
-        />
-        <StatCard
-          label="Active"
-          value={analytics.users.active}
-          icon="fas fa-user-check"
-          color="emerald"
-          compact
-        />
-        <StatCard
-          label="Inactive"
-          value={analytics.users.inactive}
-          icon="fas fa-user-slash"
-          color="amber"
-          compact
-        />
-        {/* <StatCard
-          label="Rejected"
-          value={analytics.users.rejected ?? 0}
-          icon="fas fa-user-times"
-          color="rose"
-          compact
-        /> */}
-      </div>
-
-      {/* Row 2 — Course stats (2 cards) */}
-      <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 gap-3">
-        <StatCard
+        <StatCard label="Admins"    value={analytics.users.admins}    icon="fas fa-user-shield"         color="rose"    compact />
+        <StatCard label="Teachers"  value={analytics.users.teachers}  icon="fas fa-chalkboard-teacher"  color="blue"    compact />
+        <StatCard label="Parents"   value={analytics.users.parents}   icon="fas fa-user-friends"        color="purple"  compact />
+        <StatCard label="Students"  value={analytics.users.students}  icon="fas fa-graduation-cap"      color="emerald" compact />
+        <StatCardTip
           label="Total Courses"
           value={analytics.courses.total}
           icon="fas fa-book"
           color="purple"
-          compact
-        />
-        <StatCard
-          label="Total Enrollments"
-          value={analytics.enrollments.total}
-          icon="fas fa-user-plus"
-          color="amber"
-          compact
+          items={[
+            { label: "Enrollments", value: analytics.enrollments.total,     color: "text-white"       },
+            { label: "Active",      value: analytics.enrollments.active,    color: "text-emerald-400" },
+            { label: "Cancelled",   value: analytics.enrollments.cancelled, color: "text-rose-400"    },
+          ]}
         />
       </div>
 

@@ -41,7 +41,7 @@ const Header = ({ activeTab }) => {
       case "attendance":
         return {
           title: "Attendance",
-          description: "Monitor teacher and student attendance across all courses.",
+          description: "Session-wise attendance matrix for all courses.",
         };
       default:
         return {

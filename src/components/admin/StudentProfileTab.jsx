@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Button, Input, FilterSelect } from "../ui";
 import { useFieldErrors } from "../../hooks";
 
-const StudentProfileTab = ({ profile, onUpdate, onCancel, onSaved }) => {
+const StudentProfileTab = ({ profile, userId, onUpdate, onCancel, onSaved }) => {
   const [formData, setFormData] = useState({
     grade_level: "",
     date_of_birth: "",
@@ -111,6 +111,17 @@ const StudentProfileTab = ({ profile, onUpdate, onCancel, onSaved }) => {
 
   return (
     <div className="space-y-4">
+      {/* Student ID — read-only */}
+      {userId != null && (
+        <div className="flex items-center gap-3 px-4 py-3 bg-slate-800/40 border border-slate-700/50 rounded-xl">
+          <i className="fas fa-id-badge text-indigo-400 text-sm flex-shrink-0" />
+          <div>
+            <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Student ID</p>
+            <p className="text-white font-semibold text-sm">#{userId}</p>
+          </div>
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>

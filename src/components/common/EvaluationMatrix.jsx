@@ -31,9 +31,9 @@ const GradeBadge = ({ grade }) => {
 const leftShadow  = { boxShadow: "4px 0 8px rgba(0,0,0,0.4)" };
 const rightShadow = { boxShadow: "-4px 0 8px rgba(0,0,0,0.4)" };
 
-// Grade column width — must stay in sync between th and td
-const GRADE_W    = 120; // px
-const OBTAINED_W = 110; // px
+const GRADE_W      = 120; // px
+const OBTAINED_W   = 110; // px
+const PERCENTAGE_W = 100; // px
 
 /**
  * EvaluationMatrix
@@ -41,7 +41,6 @@ const OBTAINED_W = 110; // px
  * Props:
  *   students     — array of student evaluation objects from the API
  *   courseStatus — "published" | "completed" | undefined
- *                  Grade column shows Pending unless courseStatus === "completed"
  */
 const EvaluationMatrix = ({ students = [], courseStatus }) => {
   const isCompleted = courseStatus === "completed";
@@ -54,7 +53,7 @@ const EvaluationMatrix = ({ students = [], courseStatus }) => {
       .catch(() => {});
   }, []);
 
-  // Collect every unique assignment across all students (preserves insertion order)
+  // Collect every unique assignment across all students
   const allAssignments = useMemo(() => {
     const map = new Map();
     students.forEach((s) => {
@@ -65,6 +64,23 @@ const EvaluationMatrix = ({ students = [], courseStatus }) => {
             id: a.assignment_id,
             title: a.title,
             max_score: a.max_score,
+          });
+        }
+      });
+    });
+    return Array.from(map.values());
+  }, [students]);
+
+  // Collect every unique quiz across all students
+  const allQuizzes = useMemo(() => {
+    const map = new Map();
+    students.forEach((s) => {
+      (s.quizzes?.items || []).forEach((q) => {
+        if (!map.has(q.quiz_id)) {
+          map.set(q.quiz_id, {
+            id: q.quiz_id,
+            title: q.title,
+            max_score: q.total_marks,
           });
         }
       });
@@ -119,10 +135,10 @@ const EvaluationMatrix = ({ students = [], courseStatus }) => {
                 Student
               </th>
 
-              {/* Scrollable — one column per assignment */}
+              {/* Scrollable — assignment columns */}
               {allAssignments.map((a) => (
                 <th
-                  key={a.id}
+                  key={`a-${a.id}`}
                   className="px-4 py-4 text-center text-[10px] uppercase tracking-wider text-slate-500 font-semibold min-w-[130px]"
                 >
                   <div className="truncate max-w-[120px] mx-auto text-slate-300 normal-case tracking-normal" title={a.title}>
@@ -134,10 +150,33 @@ const EvaluationMatrix = ({ students = [], courseStatus }) => {
                 </th>
               ))}
 
+              {/* Scrollable — quiz columns */}
+              {allQuizzes.map((q) => (
+                <th
+                  key={`q-${q.id}`}
+                  className="px-4 py-4 text-center text-[10px] uppercase tracking-wider text-slate-500 font-semibold min-w-[130px]"
+                >
+                  <div className="truncate max-w-[120px] mx-auto text-slate-300 normal-case tracking-normal" title={q.title}>
+                    {q.title}
+                  </div>
+                  <div className="text-slate-600 text-[9px] mt-0.5 tracking-normal normal-case font-normal">
+                    Quiz · Max: {q.max_score}
+                  </div>
+                </th>
+              ))}
+
+              {/* Fixed right — Percentage */}
+              <th
+                className="sticky z-20 bg-slate-900 px-4 py-4 text-center text-[10px] uppercase tracking-wider text-slate-500 font-semibold border-l border-slate-800"
+                style={{ right: GRADE_W + OBTAINED_W, minWidth: PERCENTAGE_W, ...rightShadow }}
+              >
+                Pct
+              </th>
+
               {/* Fixed right — Obtained */}
               <th
                 className="sticky z-20 bg-slate-900 px-4 py-4 text-center text-[10px] uppercase tracking-wider text-slate-500 font-semibold border-l border-slate-800"
-                style={{ right: GRADE_W, minWidth: OBTAINED_W, ...rightShadow }}
+                style={{ right: GRADE_W, minWidth: OBTAINED_W }}
               >
                 Obtained
               </th>
@@ -162,6 +201,13 @@ const EvaluationMatrix = ({ students = [], courseStatus }) => {
               const assignmentMap = Object.fromEntries(
                 allStudentAssignments.map((a) => [a.assignment_id, a])
               );
+              const quizMap = Object.fromEntries(
+                (s.quizzes?.items || []).map((q) => [q.quiz_id, q])
+              );
+
+              const pct = s.combined_totals?.computed_percentage
+                ?? s.final_totals?.percentage
+                ?? null;
 
               return (
                 <tr
@@ -195,7 +241,7 @@ const EvaluationMatrix = ({ students = [], courseStatus }) => {
                     const sa = assignmentMap[a.id];
                     return (
                       <td
-                        key={a.id}
+                        key={`a-${a.id}`}
                         className="px-4 py-3.5 text-center group-hover:bg-slate-800/30 transition-colors"
                       >
                         {sa?.is_graded ? (
@@ -207,16 +253,49 @@ const EvaluationMatrix = ({ students = [], courseStatus }) => {
                     );
                   })}
 
+                  {/* Scrollable — quiz score cells */}
+                  {allQuizzes.map((q) => {
+                    const sq = quizMap[q.id];
+                    return (
+                      <td
+                        key={`q-${q.id}`}
+                        className="px-4 py-3.5 text-center group-hover:bg-slate-800/30 transition-colors"
+                      >
+                        {sq?.is_graded ? (
+                          <span className="text-white font-bold tabular-nums">
+                            {sq.obtained_marks ?? sq.score}
+                          </span>
+                        ) : (
+                          <span className="text-slate-600 text-xs">—</span>
+                        )}
+                      </td>
+                    );
+                  })}
+
+                  {/* Fixed right — Percentage */}
+                  <td
+                    className="sticky z-10 bg-slate-900 group-hover:bg-slate-800 px-4 py-3.5 text-center border-l border-slate-800/50 transition-colors"
+                    style={{ right: GRADE_W + OBTAINED_W, minWidth: PERCENTAGE_W, ...rightShadow }}
+                  >
+                    {pct != null ? (
+                      <span className={`font-bold tabular-nums text-sm ${pct >= 75 ? "text-emerald-400" : "text-rose-400"}`}>
+                        {pct}%
+                      </span>
+                    ) : (
+                      <span className="text-slate-600 text-xs">—</span>
+                    )}
+                  </td>
+
                   {/* Fixed right — Obtained */}
                   <td
                     className="sticky z-10 bg-slate-900 group-hover:bg-slate-800 px-4 py-3.5 text-center border-l border-slate-800/50 transition-colors"
-                    style={{ right: GRADE_W, minWidth: OBTAINED_W, ...rightShadow }}
+                    style={{ right: GRADE_W, minWidth: OBTAINED_W }}
                   >
                     <span className="text-white font-bold tabular-nums">
-                      {s.assignment_totals?.computed_obtained ?? "—"}
+                      {s.combined_totals?.computed_obtained ?? s.assignment_totals?.computed_obtained ?? "—"}
                     </span>
                     <span className="text-slate-500 text-xs tabular-nums">
-                      /{s.assignment_totals?.computed_total ?? "—"}
+                      /{s.combined_totals?.computed_total ?? s.assignment_totals?.computed_total ?? "—"}
                     </span>
                   </td>
 

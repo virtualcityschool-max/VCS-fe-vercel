@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState } from "react";
+import ConfirmDialog from "../common/ConfirmDialog";
 
 const ChildLinksTab = ({
   pendingChildLinks,
@@ -9,12 +10,21 @@ const ChildLinksTab = ({
   onReject,
   onRefresh,
 }) => {
-  const handleApprove = (linkId) => {
-    onApprove(linkId);
+  const [confirmDialog, setConfirmDialog] = useState({ open: false, type: null, linkId: null, label: "" });
+
+  const handleApprove = (linkId, label) => {
+    setConfirmDialog({ open: true, type: "approve", linkId, label });
   };
 
-  const handleReject = (linkId) => {
-    onReject(linkId);
+  const handleReject = (linkId, label) => {
+    setConfirmDialog({ open: true, type: "reject", linkId, label });
+  };
+
+  const handleConfirm = () => {
+    const { type, linkId } = confirmDialog;
+    setConfirmDialog({ open: false, type: null, linkId: null, label: "" });
+    if (type === "approve") onApprove(linkId);
+    else if (type === "reject") onReject(linkId);
   };
 
   const formatDate = (dateString) => {
@@ -144,7 +154,7 @@ const ChildLinksTab = ({
 
                       <div className="flex gap-2">
                         <button
-                          onClick={() => handleApprove(link.link_id)}
+                          onClick={() => handleApprove(link.link_id, `${link.parent} → ${link.student}`)}
                           disabled={isProcessing[link.link_id] === "approving"}
                           className="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 sm:gap-2 flex-1 justify-center"
                         >
@@ -163,7 +173,7 @@ const ChildLinksTab = ({
                           )}
                         </button>
                         <button
-                          onClick={() => handleReject(link.link_id)}
+                          onClick={() => handleReject(link.link_id, `${link.parent} → ${link.student}`)}
                           disabled={isProcessing[link.link_id] === "rejecting"}
                           className="bg-red-600 text-white px-3 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-red-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 sm:gap-2 flex-1 justify-center"
                         >
@@ -232,7 +242,7 @@ const ChildLinksTab = ({
                       <td className="px-8 py-6 text-right">
                         <div className="flex items-center gap-2 justify-end">
                           <button
-                            onClick={() => handleApprove(link.link_id)}
+                            onClick={() => handleApprove(link.link_id, `${link.parent} → ${link.student}`)}
                             disabled={
                               isProcessing[link.link_id] === "approving"
                             }
@@ -251,7 +261,7 @@ const ChildLinksTab = ({
                             )}
                           </button>
                           <button
-                            onClick={() => handleReject(link.link_id)}
+                            onClick={() => handleReject(link.link_id, `${link.parent} → ${link.student}`)}
                             disabled={
                               isProcessing[link.link_id] === "rejecting"
                             }
@@ -278,6 +288,21 @@ const ChildLinksTab = ({
             </div>
           )}
       </div>
+
+      <ConfirmDialog
+        open={confirmDialog.open}
+        variant={confirmDialog.type === "approve" ? "success" : "danger"}
+        title={confirmDialog.type === "approve" ? "Approve Child Link" : "Reject Child Link"}
+        message={
+          confirmDialog.type === "approve"
+            ? `Approve the parent-child link for "${confirmDialog.label}"?`
+            : `Reject the parent-child link for "${confirmDialog.label}"?`
+        }
+        confirmLabel={confirmDialog.type === "approve" ? "Approve" : "Reject"}
+        cancelLabel="Cancel"
+        onConfirm={handleConfirm}
+        onCancel={() => setConfirmDialog({ open: false, type: null, linkId: null, label: "" })}
+      />
     </>
   );
 };

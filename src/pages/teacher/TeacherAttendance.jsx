@@ -9,73 +9,17 @@ import {
   updateStudentAttendance,
 } from "../../store/slices/teacherSlice";
 import { coursesService } from "../../services/coursesService";
-import AttendanceCalendar from "../../components/common/AttendanceCalendar";
 import AttendanceMatrix from "../../components/common/AttendanceMatrix";
 import AttendanceEditModal from "../../components/common/AttendanceEditModal";
 import {
   STATUS_CONFIG, STATUS_OPTIONS,
-  StatusBadge, StatusPill,
-  fmtTime, SessionBanner,
+  StatusPill,
 } from "../../components/common/attendanceShared";
-import { FilterSelect, FilterDateInput } from "../../components/ui";
+import { FilterSelect } from "../../components/ui";
 import { toastManager } from "../../utils/toastManager";
 
-const toDateStr = (d) => d.toISOString().slice(0, 10);
-const monthStart = () => { const d = new Date(); d.setDate(1); return toDateStr(d); };
-const todayStr   = () => toDateStr(new Date());
-
-// ── My attendance table (mine tab, table view) ────────────────────────────────
-const MyAttendanceTable = ({ records }) => {
-  if (!records.length) {
-    return (
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-12 text-center">
-        <i className="fas fa-calendar-times text-slate-600 text-3xl mb-3" />
-        <p className="text-slate-300 font-semibold">No attendance to show</p>
-        <p className="text-slate-500 text-sm mt-1">No records found for the selected filters.</p>
-      </div>
-    );
-  }
-  return (
-    <div className="bg-slate-900/50 border border-slate-800 rounded-3xl overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm border-collapse">
-          <thead>
-            <tr className="border-b border-slate-800">
-              <th className="px-5 py-4 text-left text-[10px] uppercase tracking-wider text-slate-500 font-semibold min-w-[200px]">Session</th>
-              <th className="px-4 py-4 text-center text-[10px] uppercase tracking-wider text-slate-500 font-semibold min-w-[120px]">Date</th>
-              <th className="px-4 py-4 text-center text-[10px] uppercase tracking-wider text-slate-500 font-semibold min-w-[110px]">Status</th>
-              <th className="px-5 py-4 text-left text-[10px] uppercase tracking-wider text-slate-500 font-semibold">Note</th>
-            </tr>
-          </thead>
-          <tbody>
-            {records.map((r, idx) => (
-              <tr key={r.id ?? idx} className="border-b border-slate-800/40 last:border-0 hover:bg-slate-800/20 transition-colors">
-                <td className="px-5 py-3.5">
-                  <p className="text-white text-xs font-semibold">{r.session_title}</p>
-                </td>
-                <td className="px-4 py-3.5 text-center">
-                  <p className="text-slate-400 text-xs">
-                    {new Date(r.created_at).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" })}
-                  </p>
-                </td>
-                <td className="px-4 py-3.5 text-center"><StatusBadge status={r.status} /></td>
-                <td className="px-5 py-3.5">
-                  <p className="text-slate-500 text-xs italic">{r.note || "—"}</p>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-};
-
-// ── Main component ─────────────────────────────────────────────────────────────
 const TeacherAttendance = () => {
   const dispatch  = useDispatch();
-  const profile   = useSelector((s) => s.auth.profile);
-  const teacherId = profile?.id;
 
   const {
     myCourses, allAttendance, loadingAllAttendance,
@@ -85,44 +29,23 @@ const TeacherAttendance = () => {
   } = useSelector((s) => s.teachers);
 
   const [tab,      setTab]      = useState("mine");
-  // For "students" tab: "matrix" | "calendar"
-  // For "mine" tab:     "table"  | "calendar"
-  const [viewMode, setViewMode] = useState("table");
-  const [courseId,   setCourseId]   = useState("");
-  const [studentId,  setStudentId]  = useState("");
-  const [fromDate,   setFromDate]   = useState(monthStart());
-  const [toDate,     setToDate]     = useState(todayStr());
-  const [calMonth,   setCalMonth]   = useState(() => {
-    const d = new Date();
-    return { year: d.getFullYear(), month: d.getMonth() };
-  });
-  const [selectedDay, setSelectedDay] = useState(null);
-
+  const [courseId, setCourseId] = useState("");
   const [editRecord, setEditRecord] = useState(null);
-  const [dayRecords, setDayRecords] = useState(null);
 
-  // Bulk mark modal — session is chosen inside the modal
   const [markModal,          setMarkModal]          = useState(false);
   const [markSessionId,      setMarkSessionId]      = useState("");
   const [markStatuses,       setMarkStatuses]       = useState({});
   const [selectedStudentIds, setSelectedStudentIds] = useState(new Set());
-
-  const [enrolledStudents, setEnrolledStudents] = useState([]);
+  const [enrolledStudents,   setEnrolledStudents]   = useState([]);
 
   const activeCourseId = courseId || (myCourses?.[0] ? String(myCourses[0].id) : "");
 
-  // Calendar students mode: must have a specific student
-  const activeStudentId = (viewMode === "calendar" && tab === "students")
-    ? (studentId || (enrolledStudents[0] ? String(enrolledStudents[0].id) : ""))
-    : studentId;
-
-  // Top-level sessions only (used for matrix columns + mark modal session list)
   const parentSessions = useMemo(
     () => (sessions || []).filter((s) => s.is_child === false || s.is_child == null),
     [sessions]
   );
 
-  // ── Effects ─────────────────────────────────────────────────────────────────
+  // ── Effects ──────────────────────────────────────────────────────────────────
 
   useEffect(() => {
     if (!myCourses?.length) dispatch(fetchMyCourses());
@@ -135,72 +58,28 @@ const TeacherAttendance = () => {
       .catch(() => setEnrolledStudents([]));
   }, [activeCourseId]);
 
-  // Fetch sessions whenever course changes (for matrix columns + mark modal)
   useEffect(() => {
     if (activeCourseId) dispatch(fetchTeacherSessions({ course: activeCourseId }));
   }, [activeCourseId, dispatch]);
 
-  // Reset mark session when course changes
   useEffect(() => {
     setMarkSessionId("");
   }, [activeCourseId]);
 
-  // Fetch attendance — covers: mine (both views), students calendar, students matrix
   useEffect(() => {
     if (!activeCourseId) return;
-    if (viewMode === "calendar" && tab === "students" && !activeStudentId) return;
+    dispatch(fetchAllAttendance({
+      course: activeCourseId,
+      participant_role: tab === "mine" ? "teacher" : "student",
+    }));
+  }, [dispatch, tab, activeCourseId]);
 
-    const params = { course: activeCourseId };
-
-    if (tab === "mine") {
-      params.participant_role = "teacher";
-      if (teacherId) params.teacher = teacherId;
-      if (viewMode === "calendar" || viewMode === "table") {
-        params.from = fromDate;
-        params.to   = toDate;
-      }
-    } else {
-      // students tab — both matrix and calendar
-      params.participant_role = "student";
-      if (viewMode === "calendar" && activeStudentId) {
-        params.student = activeStudentId;
-        params.from    = fromDate;
-        params.to      = toDate;
-      }
-    }
-
-    dispatch(fetchAllAttendance(params));
-  }, [dispatch, tab, viewMode, activeCourseId, activeStudentId, fromDate, toDate, teacherId]);
-
-  // Fetch session attendance when mark modal opens (to pre-fill statuses)
   useEffect(() => {
-    if (markModal && markSessionId) {
-      dispatch(fetchSessionAttendance(markSessionId));
-    }
+    if (markModal && markSessionId) dispatch(fetchSessionAttendance(markSessionId));
   }, [dispatch, markModal, markSessionId]);
 
-  // ── Computed ────────────────────────────────────────────────────────────────
+  // ── Mark modal helpers ────────────────────────────────────────────────────────
 
-  const attendanceByDate = useMemo(() => {
-    const map = {};
-    (allAttendance || []).forEach((r) => {
-      const key = (r.created_at || "").slice(0, 10);
-      if (!key) return;
-      if (!map[key]) map[key] = [];
-      map[key].push(r);
-    });
-    return map;
-  }, [allAttendance]);
-
-  const stats = useMemo(() => {
-    const src     = (tab === "mine") ? (allAttendance || []) : (allAttendance || []);
-    const present = src.filter((r) => r.status === "present").length;
-    const absent  = src.filter((r) => r.status === "absent").length;
-    const total   = src.length;
-    return { total, present, absent, rate: total ? Math.round((present / total) * 100) : 0 };
-  }, [allAttendance, tab]);
-
-  // Students for bulk mark: merge attendance records + enrolled (not yet recorded)
   const markStudents = useMemo(() => {
     if (!markModal) return [];
     const fromRecords = (attendanceRecords || [])
@@ -227,24 +106,7 @@ const TeacherAttendance = () => {
     }
   }, [markModal, markStudents.length]);
 
-  // ── Handlers ────────────────────────────────────────────────────────────────
-
-  const prevMonth = () => {
-    setCalMonth((c) => { const d = new Date(c.year, c.month - 1, 1); return { year: d.getFullYear(), month: d.getMonth() }; });
-    setSelectedDay(null);
-  };
-  const nextMonth = () => {
-    setCalMonth((c) => { const d = new Date(c.year, c.month + 1, 1); return { year: d.getFullYear(), month: d.getMonth() }; });
-    setSelectedDay(null);
-  };
-
-  const displayRecords = selectedDay ? (attendanceByDate[selectedDay] || []) : (allAttendance || []);
-
-  const handleCalendarDayClick = (records) => {
-    if (tab !== "students" || !records?.length) return;
-    if (records.length === 1) setEditRecord(records[0]);
-    else setDayRecords(records);
-  };
+  // ── Handlers ─────────────────────────────────────────────────────────────────
 
   const handleEditSave = async (form) => {
     if (!editRecord) return;
@@ -255,11 +117,7 @@ const TeacherAttendance = () => {
       await dispatch(updateStudentAttendance({ sessionId, studentId: sId, data: { status: form.status, note: form.note } })).unwrap();
       toastManager.success("Attendance updated");
       setEditRecord(null);
-      // Refresh matrix data
-      dispatch(fetchAllAttendance({
-        course: activeCourseId,
-        participant_role: "student",
-      }));
+      dispatch(fetchAllAttendance({ course: activeCourseId, participant_role: "student" }));
     } catch {
       toastManager.error("Failed to update attendance");
     }
@@ -277,7 +135,6 @@ const TeacherAttendance = () => {
       await dispatch(bulkMarkAttendance({ sessionId: markSessionId, records })).unwrap();
       toastManager.success("Attendance saved successfully");
       setMarkModal(false);
-      // Refresh matrix
       dispatch(fetchAllAttendance({ course: activeCourseId, participant_role: "student" }));
     } catch {
       toastManager.error("Failed to save attendance");
@@ -295,17 +152,9 @@ const TeacherAttendance = () => {
     setMarkModal(true);
   };
 
-  const handleTabSwitch = (newTab) => {
-    setTab(newTab);
-    setStudentId("");
-    setSelectedDay(null);
-    setViewMode(newTab === "students" ? "matrix" : "table");
-  };
+  const isLoading = loadingSessions || loadingAllAttendance;
 
-  const isCalendarLoading = loadingAllAttendance;
-  const isMatrixLoading   = loadingSessions || loadingAllAttendance;
-
-  // ── Render ─────────────────────────────────────────────────────────────────
+  // ── Render ────────────────────────────────────────────────────────────────────
 
   return (
     <div className="text-white px-4 sm:px-6 py-8 space-y-6">
@@ -314,7 +163,7 @@ const TeacherAttendance = () => {
         <p className="text-slate-400 text-sm mt-1">Track your sessions and monitor student attendance.</p>
       </div>
 
-      {/* Main tabs */}
+      {/* Tabs */}
       <div className="flex gap-1 border-b border-slate-800">
         {[
           { id: "mine",     label: "My Attendance",       icon: "fa-user-check" },
@@ -322,7 +171,7 @@ const TeacherAttendance = () => {
         ].map((t) => (
           <button
             key={t.id}
-            onClick={() => handleTabSwitch(t.id)}
+            onClick={() => setTab(t.id)}
             className={`flex items-center gap-2 px-5 py-2.5 text-sm font-semibold border-b-2 -mb-px transition ${
               tab === t.id ? "border-indigo-500 text-white" : "border-transparent text-slate-400 hover:text-white"
             }`}
@@ -333,77 +182,19 @@ const TeacherAttendance = () => {
         ))}
       </div>
 
-      {/* Filters */}
+      {/* Filters + Mark button */}
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <div className="flex flex-wrap items-end gap-3">
-          {/* View toggle */}
-          <div className="flex flex-col gap-1">
-            <span className="text-[10px] uppercase tracking-widest text-slate-500 font-bold px-0.5">View</span>
-            <div className="flex gap-1 bg-slate-800/60 border border-slate-700 rounded-xl p-1">
-              {(tab === "students"
-                ? [
-                    { id: "matrix",   label: "Matrix",   icon: "fa-table" },
-                    { id: "calendar", label: "Calendar", icon: "fa-calendar-alt" },
-                  ]
-                : [
-                    { id: "table",    label: "Table",    icon: "fa-list" },
-                    { id: "calendar", label: "Calendar", icon: "fa-calendar-alt" },
-                  ]
-              ).map((v) => (
-                <button
-                  key={v.id}
-                  type="button"
-                  onClick={() => { setViewMode(v.id); setSelectedDay(null); }}
-                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition ${
-                    viewMode === v.id ? "bg-indigo-600 text-white" : "text-slate-400 hover:text-white"
-                  }`}
-                >
-                  <i className={`fas ${v.icon} text-[10px]`} />
-                  {v.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Course */}
-          <div className="flex flex-col gap-1">
-            <span className="text-[10px] uppercase tracking-widest text-slate-500 font-bold px-0.5">Course</span>
-            <FilterSelect
-              value={activeCourseId}
-              onChange={(e) => { setCourseId(e.target.value); setStudentId(""); setSelectedDay(null); }}
-              style={{ width: 200 }}
-            >
-              {myCourses?.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
-            </FilterSelect>
-          </div>
-
-          {/* Student selector — only in calendar mode for students tab */}
-          {tab === "students" && viewMode === "calendar" && (
-            <div className="flex flex-col gap-1">
-              <span className="text-[10px] uppercase tracking-widest text-slate-500 font-bold px-0.5">Student</span>
-              <FilterSelect
-                value={activeStudentId}
-                onChange={(e) => { setStudentId(e.target.value); setSelectedDay(null); }}
-                style={{ width: 200 }}
-              >
-                {enrolledStudents.length === 0
-                  ? <option value="">No students enrolled</option>
-                  : enrolledStudents.map((s) => <option key={s.id} value={s.id}>{s.username}</option>)
-                }
-              </FilterSelect>
-            </div>
-          )}
-
-          {/* Date range — calendar or mine tab */}
-          {(viewMode === "calendar" || tab === "mine") && (
-            <>
-              <FilterDateInput label="From" value={fromDate} max={toDate}       onChange={(e) => { setFromDate(e.target.value); setSelectedDay(null); }} />
-              <FilterDateInput label="To"   value={toDate}   min={fromDate} max={todayStr()} onChange={(e) => { setToDate(e.target.value); setSelectedDay(null); }} />
-            </>
-          )}
+        <div className="flex flex-col gap-1">
+          <span className="text-[10px] uppercase tracking-widest text-slate-500 font-bold px-0.5">Course</span>
+          <FilterSelect
+            value={activeCourseId}
+            onChange={(e) => setCourseId(e.target.value)}
+            style={{ width: 200 }}
+          >
+            {myCourses?.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
+          </FilterSelect>
         </div>
 
-        {/* Mark Attendance button */}
         {tab === "students" && activeCourseId && (
           <div className="flex flex-col gap-1">
             <span className="text-[10px] uppercase tracking-widest text-slate-500 font-bold px-0.5 opacity-0 select-none">_</span>
@@ -418,145 +209,23 @@ const TeacherAttendance = () => {
         )}
       </div>
 
-      {/* ── Content ── */}
-
-      {/* STUDENTS — MATRIX */}
-      {tab === "students" && viewMode === "matrix" && (
-        isMatrixLoading ? (
-          <div className="flex items-center justify-center py-20">
-            <i className="fas fa-spinner animate-spin text-indigo-400 text-2xl" />
-          </div>
-        ) : (
-          <AttendanceMatrix
-            sessions={parentSessions}
-            attendanceRecords={(allAttendance || []).filter((r) => r.participant_role === "student")}
-            participantRole="student"
-            onEditRecord={setEditRecord}
-          />
-        )
-      )}
-
-      {/* STUDENTS — CALENDAR */}
-      {tab === "students" && viewMode === "calendar" && (
-        isCalendarLoading ? (
-          <div className="flex items-center justify-center py-20">
-            <i className="fas fa-spinner animate-spin text-indigo-400 text-2xl" />
-          </div>
-        ) : enrolledStudents.length === 0 ? (
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-12 text-center">
-            <i className="fas fa-user-slash text-slate-600 text-3xl mb-3" />
-            <p className="text-slate-300 font-semibold">No students enrolled</p>
-          </div>
-        ) : !allAttendance?.length ? (
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-12 text-center">
-            <i className="fas fa-calendar-times text-slate-600 text-3xl mb-3" />
-            <p className="text-slate-300 font-semibold">No attendance to show</p>
-            <p className="text-slate-500 text-sm mt-1">No records found for the selected filters.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-            <div className="xl:col-span-2">
-              <AttendanceCalendar
-                attendanceByDate={attendanceByDate}
-                fromDate={fromDate} toDate={toDate}
-                calMonth={calMonth}
-                onPrevMonth={prevMonth} onNextMonth={nextMonth}
-                selectedDay={selectedDay} onDaySelect={setSelectedDay}
-                onDayClick={handleCalendarDayClick}
-              />
-            </div>
-            <CalendarRecordsPanel
-              displayRecords={displayRecords}
-              selectedDay={selectedDay}
-              onClear={() => setSelectedDay(null)}
-              onEdit={(r) => setEditRecord(r)}
-              editable
-            />
-          </div>
-        )
-      )}
-
-      {/* MINE — TABLE */}
-      {tab === "mine" && viewMode === "table" && (
-        isCalendarLoading ? (
-          <div className="flex items-center justify-center py-20">
-            <i className="fas fa-spinner animate-spin text-indigo-400 text-2xl" />
-          </div>
-        ) : (
-          <MyAttendanceTable records={allAttendance || []} />
-        )
-      )}
-
-      {/* MINE — CALENDAR */}
-      {tab === "mine" && viewMode === "calendar" && (
-        isCalendarLoading ? (
-          <div className="flex items-center justify-center py-20">
-            <i className="fas fa-spinner animate-spin text-indigo-400 text-2xl" />
-          </div>
-        ) : !allAttendance?.length ? (
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-12 text-center">
-            <i className="fas fa-calendar-times text-slate-600 text-3xl mb-3" />
-            <p className="text-slate-300 font-semibold">No attendance to show</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-            <div className="xl:col-span-2">
-              <AttendanceCalendar
-                attendanceByDate={attendanceByDate}
-                fromDate={fromDate} toDate={toDate}
-                calMonth={calMonth}
-                onPrevMonth={prevMonth} onNextMonth={nextMonth}
-                selectedDay={selectedDay} onDaySelect={setSelectedDay}
-              />
-            </div>
-            <CalendarRecordsPanel
-              displayRecords={displayRecords}
-              selectedDay={selectedDay}
-              onClear={() => setSelectedDay(null)}
-              editable={false}
-            />
-          </div>
-        )
-      )}
-
-      {/* ── DAY RECORDS PICKER (calendar multi-record days) ── */}
-      {dayRecords && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl w-full max-w-sm">
-            <div className="flex items-center justify-between px-6 py-5 border-b border-slate-800">
-              <div>
-                <h3 className="text-base font-bold text-white">Select Record</h3>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  {new Date(dayRecords[0].created_at).toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" })}
-                </p>
-              </div>
-              <button onClick={() => setDayRecords(null)} className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition">
-                <i className="fas fa-times text-sm" />
-              </button>
-            </div>
-            <div className="px-4 py-3 space-y-2">
-              {dayRecords.map((r) => (
-                <button
-                  key={r.id}
-                  onClick={() => { setDayRecords(null); setEditRecord(r); }}
-                  className="w-full flex items-center justify-between gap-3 px-4 py-3 bg-slate-800/40 border border-slate-700/50 rounded-xl hover:border-indigo-500/50 transition text-left group"
-                >
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-white truncate">{r.session_title}</p>
-                    {r.student_name && <p className="text-xs text-indigo-400 truncate mt-0.5">{r.student_name}</p>}
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <StatusBadge status={r.status} />
-                    <i className="fas fa-chevron-right text-[10px] text-slate-600 group-hover:text-indigo-400 transition" />
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
+      {/* Matrix */}
+      {isLoading ? (
+        <div className="flex items-center justify-center py-20">
+          <i className="fas fa-spinner animate-spin text-indigo-400 text-2xl" />
         </div>
+      ) : (
+        <AttendanceMatrix
+          sessions={parentSessions}
+          attendanceRecords={(allAttendance || []).filter(
+            (r) => r.participant_role === (tab === "mine" ? "teacher" : "student")
+          )}
+          participantRole={tab === "mine" ? "teacher" : "student"}
+          onEditRecord={tab === "students" ? setEditRecord : undefined}
+        />
       )}
 
-      {/* ── EDIT MODAL ── */}
+      {/* Edit Modal */}
       <AttendanceEditModal
         record={editRecord}
         onClose={() => setEditRecord(null)}
@@ -564,12 +233,11 @@ const TeacherAttendance = () => {
         saving={patchingStudentAttendance}
       />
 
-      {/* ── BULK MARK MODAL ── */}
+      {/* Bulk Mark Modal */}
       {markModal && (() => {
-        const activeCourse  = myCourses?.find((c) => String(c.id) === activeCourseId);
-        const activeSession = parentSessions.find((s) => String(s.id) === markSessionId);
-        const hasExisting   = markStudents.some((s) => s.hasRecord);
-        const allSelected   = markStudents.length > 0 && selectedStudentIds.size === markStudents.length;
+        const activeCourse = myCourses?.find((c) => String(c.id) === activeCourseId);
+        const hasExisting  = markStudents.some((s) => s.hasRecord);
+        const allSelected  = markStudents.length > 0 && selectedStudentIds.size === markStudents.length;
 
         const toggleAll = () =>
           setSelectedStudentIds(allSelected ? new Set() : new Set(markStudents.map((s) => s.id)));
@@ -583,17 +251,14 @@ const TeacherAttendance = () => {
         return (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
             <div className="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col">
-              {/* Header */}
               <div className="flex items-center justify-between px-6 py-5 border-b border-slate-800 shrink-0">
                 <div>
                   <h3 className="text-base font-bold text-white">{hasExisting ? "Edit Attendance" : "Mark Attendance"}</h3>
-                  <div className="flex items-center gap-2 mt-1 flex-wrap">
-                    {activeCourse && (
-                      <span className="text-[10px] bg-slate-800 border border-slate-700 text-slate-400 px-2 py-0.5 rounded-lg font-medium">
-                        <i className="fas fa-book text-slate-600 mr-1" />{activeCourse.title}
-                      </span>
-                    )}
-                  </div>
+                  {activeCourse && (
+                    <span className="text-[10px] bg-slate-800 border border-slate-700 text-slate-400 px-2 py-0.5 rounded-lg font-medium mt-1 inline-block">
+                      <i className="fas fa-book text-slate-600 mr-1" />{activeCourse.title}
+                    </span>
+                  )}
                 </div>
                 <button onClick={() => setMarkModal(false)} className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition">
                   <i className="fas fa-times text-sm" />
@@ -601,7 +266,6 @@ const TeacherAttendance = () => {
               </div>
 
               <div className="px-6 py-4 space-y-4 overflow-y-auto flex-1">
-                {/* Session selector inside modal */}
                 <div>
                   <label className="text-[10px] uppercase tracking-widest text-slate-500 font-bold block mb-1.5">Session</label>
                   {loadingSessions ? (
@@ -622,7 +286,6 @@ const TeacherAttendance = () => {
                   )}
                 </div>
 
-                {/* Bulk status buttons */}
                 <div className="bg-slate-800/40 border border-slate-700/50 rounded-xl px-4 py-3 space-y-2">
                   <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Mark selected as</p>
                   <div className="flex gap-2">
@@ -650,7 +313,6 @@ const TeacherAttendance = () => {
                   </div>
                 </div>
 
-                {/* Student list */}
                 {markStudents.length > 0 ? (
                   <div>
                     <div className="flex items-center justify-between mb-3">
@@ -752,59 +414,5 @@ const TeacherAttendance = () => {
     </div>
   );
 };
-
-// ── Small shared panel used by both calendar views ────────────────────────────
-const CalendarRecordsPanel = ({ displayRecords, selectedDay, onClear, onEdit, editable = false }) => (
-  <div className="space-y-3">
-    <div className="flex items-center justify-between">
-      <h3 className="text-sm font-bold text-slate-300">
-        {selectedDay
-          ? new Date(selectedDay + "T00:00:00").toLocaleDateString([], { weekday: "short", month: "short", day: "numeric", year: "numeric" })
-          : "All Records"}
-      </h3>
-      {selectedDay && (
-        <button onClick={onClear} className="text-xs text-slate-500 hover:text-white transition flex items-center gap-1">
-          <i className="fas fa-times text-[10px]" /> Clear
-        </button>
-      )}
-    </div>
-    {editable && displayRecords.length > 0 && (
-      <p className="text-[10px] text-slate-600 italic px-0.5">Click a record to edit</p>
-    )}
-    {!displayRecords.length ? (
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-10 text-center">
-        <i className="fas fa-calendar-times text-slate-600 text-2xl mb-3" />
-        <p className="text-slate-400 text-sm">{selectedDay ? "No records for this day." : "No records in range."}</p>
-      </div>
-    ) : (
-      <div className="space-y-2 max-h-[500px] overflow-y-auto pr-0.5">
-        {displayRecords.map((r) => (
-          <div
-            key={r.id}
-            onClick={editable ? () => onEdit?.(r) : undefined}
-            className={`bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 transition ${
-              editable ? "cursor-pointer hover:border-indigo-500/50 hover:bg-slate-800/40 group" : "hover:border-slate-700"
-            }`}
-          >
-            <div className="flex items-start justify-between gap-2">
-              <div className="min-w-0 flex-1">
-                <p className="font-semibold text-white text-sm truncate">{r.session_title}</p>
-                {r.student_name && <p className="text-xs text-indigo-400 truncate mt-0.5">{r.student_name}</p>}
-                <p className="text-[10px] text-slate-500 mt-1">
-                  {new Date(r.created_at).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" })}
-                </p>
-              </div>
-              <div className="flex items-center gap-2 shrink-0 mt-0.5">
-                <StatusBadge status={r.status} />
-                {editable && <i className="fas fa-chevron-right text-[10px] text-slate-600 group-hover:text-indigo-400 transition" />}
-              </div>
-            </div>
-            {r.note && <p className="text-xs text-slate-500 italic mt-2 border-t border-slate-800 pt-1.5">{r.note}</p>}
-          </div>
-        ))}
-      </div>
-    )}
-  </div>
-);
 
 export default TeacherAttendance;

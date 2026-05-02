@@ -3,6 +3,8 @@ import QuillEditor from "../common/QuillEditor";
 import { BACKEND_CATEGORIES, formatCategoryLabel } from "../../constants";
 import { FilterSelect, Input } from "../ui";
 
+const WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+
 const fieldClass = (error) =>
   `w-full px-3 py-2 bg-slate-800 border rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 ${
     error ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"
@@ -129,6 +131,39 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], mode = "
           ))}
         </FilterSelect>
         <FieldError error={errors.instructor_id} />
+      </div>
+
+      {/* Schedule Days — weekdays only */}
+      <div>
+        <label className="block text-sm font-medium text-slate-300 mb-2">
+          Schedule Days
+          <span className="text-slate-500 text-xs font-normal ml-2">optional — weekdays only</span>
+        </label>
+        <div className="flex flex-wrap gap-2">
+          {WEEKDAYS.map((day) => {
+            const selected = (formData.days_of_recurring || []).includes(day);
+            return (
+              <button
+                key={day}
+                type="button"
+                onClick={() => {
+                  const current = formData.days_of_recurring || [];
+                  const next = selected
+                    ? current.filter((d) => d !== day)
+                    : [...current, day];
+                  onChange("days_of_recurring", next);
+                }}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
+                  selected
+                    ? "bg-indigo-600 text-white border-indigo-500 shadow-sm shadow-indigo-500/20"
+                    : "bg-slate-800 text-slate-400 border-slate-700 hover:border-indigo-500/50 hover:text-slate-200"
+                }`}
+              >
+                {day.slice(0, 3)}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Course Outline — optional */}

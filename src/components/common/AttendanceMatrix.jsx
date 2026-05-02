@@ -212,22 +212,52 @@ const AttendanceMatrix = ({
 
                     {/* Per-session cells */}
                     {sortedSessions.map((s) => {
-                      const record = lookupMap[`${p.id}_${s.id}`];
-                      const cfg    = record ? CELL[record.status] : null;
+                      const record   = lookupMap[`${p.id}_${s.id}`];
+                      const cfg      = record ? CELL[record.status] : null;
                       const editable = !!onEditRecord && !!record;
+
+                      const fmtTime = (ts) => ts
+                        ? new Date(ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+                        : null;
+                      const joinedStr = fmtTime(record?.joined_at);
+                      const leftStr   = fmtTime(record?.left_at);
+
                       return (
                         <td
                           key={s.id}
                           className={`px-1 py-3 text-center group-hover:bg-slate-800/30 transition-colors ${editable ? "cursor-pointer" : ""}`}
-                          title={record
-                            ? `${record.status}${record.note ? ` — ${record.note}` : ""}`
-                            : "No record"}
                           onClick={() => editable && onEditRecord(record)}
                         >
                           {cfg ? (
-                            <span className={`inline-flex items-center justify-center w-7 h-7 rounded-lg text-[11px] font-bold border select-none ${cfg.cls} ${editable ? "hover:ring-1 hover:ring-white/20" : ""}`}>
-                              {cfg.letter}
-                            </span>
+                            <div className="relative inline-flex group/cell">
+                              <span className={`inline-flex items-center justify-center w-7 h-7 rounded-lg text-[11px] font-bold border select-none ${cfg.cls} ${editable ? "hover:ring-1 hover:ring-white/20" : ""}`}>
+                                {cfg.letter}
+                              </span>
+                              {/* Hover tooltip */}
+                              <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-40 opacity-0 group-hover/cell:opacity-100 -translate-y-0.5 group-hover/cell:translate-y-0 transition-all duration-150 whitespace-nowrap">
+                                <div className="bg-slate-800 border border-slate-700 rounded-xl shadow-2xl px-3 py-2 text-left text-[11px] space-y-1 min-w-[120px]">
+                                  <p className="font-bold capitalize text-white">{record.status}</p>
+                                  {joinedStr && (
+                                    <p className="text-slate-400 flex items-center gap-1.5">
+                                      <i className="fas fa-sign-in-alt text-emerald-400 text-[10px]" />
+                                      {joinedStr}
+                                    </p>
+                                  )}
+                                  {leftStr && (
+                                    <p className="text-slate-400 flex items-center gap-1.5">
+                                      <i className="fas fa-sign-out-alt text-rose-400 text-[10px]" />
+                                      {leftStr}
+                                    </p>
+                                  )}
+                                  {record.note && (
+                                    <p className="text-slate-500 italic border-t border-slate-700 pt-1 max-w-[180px] whitespace-normal leading-relaxed">
+                                      {record.note}
+                                    </p>
+                                  )}
+                                </div>
+                                <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-px border-4 border-transparent border-t-slate-700" />
+                              </div>
+                            </div>
                           ) : (
                             <span className="text-slate-700 text-xs select-none">—</span>
                           )}

@@ -103,11 +103,11 @@ const UserProfileDropdown = ({ dropUp = false, isCollapsed = false }) => {
       >
         {/* User Info — hidden when collapsed */}
         {!isCollapsed && (
-          <div className={`${dropUp ? "text-left flex-1" : "text-right hidden sm:block"}`}>
-            <p className="text-sm font-semibold text-white leading-none mb-1">
+          <div className={`min-w-0 ${dropUp ? "text-left flex-1" : "text-right hidden sm:block"}`}>
+            <p className="text-sm font-semibold text-white leading-none mb-1 truncate">
               {auth.username || "User"}
             </p>
-            <p className="text-xs text-indigo-400 font-medium uppercase tracking-wider leading-none">
+            <p className="text-xs text-indigo-400 font-medium uppercase tracking-wider leading-none truncate">
               {getRoleLabel()}
             </p>
           </div>
@@ -185,8 +185,8 @@ const UserProfileDropdown = ({ dropUp = false, isCollapsed = false }) => {
                 <p className="text-sm font-semibold text-white truncate">
                   {auth.username || "User"}
                 </p>
-                <p className="text-xs text-slate-400">{auth.user?.email}</p>
-                <p className="text-xs text-indigo-400 font-medium uppercase tracking-wider mt-1">
+                <p className="text-xs text-slate-400 truncate">{auth.user?.email}</p>
+                <p className="text-xs text-indigo-400 font-medium uppercase tracking-wider mt-1 truncate">
                   {getRoleLabel()}
                 </p>
               </div>
