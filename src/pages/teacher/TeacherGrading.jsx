@@ -240,7 +240,7 @@ const TeacherGrading = () => {
                     {assignment.course_title}
                   </p>
                   <p className="text-xs text-slate-400 mt-2">
-                    {assignment.submissions_count} submission{assignment.submissions_count !== 1 ? "s" : ""} &nbsp;·&nbsp; Max Score {assignment.max_score}
+                    {assignment.submissions_count} submission{assignment.submissions_count !== 1 ? "s" : ""} &nbsp;·&nbsp; Total {assignment.max_score}
                   </p>
                   {assignment.file_url && (
                     <div className="mt-3">
@@ -514,7 +514,7 @@ const TeacherGrading = () => {
               {/* Meta row */}
               <div className="grid grid-cols-3 gap-3">
                 <div className="bg-slate-800/60 rounded-2xl p-3">
-                  <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Max Score</p>
+                  <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Total</p>
                   <p className="text-white font-bold">{viewAssignment.max_score}</p>
                 </div>
                 <div className="bg-slate-800/60 rounded-2xl p-3">
@@ -592,7 +592,7 @@ const TeacherGrading = () => {
                 />
               </div>
 
-              {/* Due date + Max score row */}
+              {/* Due date + Total row */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1.5 block">Due Date</label>
@@ -604,7 +604,7 @@ const TeacherGrading = () => {
                   />
                 </div>
                 <div>
-                  <label className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1.5 block">Max Score</label>
+                  <label className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1.5 block">Total</label>
                   <input
                     type="number"
                     min={1}
