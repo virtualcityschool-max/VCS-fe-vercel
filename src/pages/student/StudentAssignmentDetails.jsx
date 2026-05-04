@@ -5,7 +5,7 @@ import { studentService } from "../../services/studentService";
 import { submitAssignment } from "../../store/slices/studentDashboardSlice";
 import { toastManager } from "../../utils/toastManager";
 import { validateFile, ACCEPT_STRING } from "../../utils/fileValidation";
-import { getStorageUrl } from "../../utils/storageUrl";
+import { getStorageUrl, handleFileDownload } from "../../utils/storageUrl";
 
 const getFilename = (url) => {
   if (!url) return "attachment";
@@ -189,8 +189,8 @@ const StudentAssignmentDetails = () => {
                 {assignment.description}
               </div>
               {assignment.file_url && (
-                <div className="mt-3">
-                  <DownloadButton url={getStorageUrl(assignment.file_url)} label="Download Assignment File" />
+                <div className="mt-3" className="w-10 text-blue-600 hover:text-blue-800 underline" onClick={()=>handleFileDownload(assignment.file_url)}>
+                  {/* <DownloadButton url={getStorageUrl(assignment.file_url)} label="Download Assignment File" /> */}
                 </div>
               )}
             </div>
@@ -247,10 +247,13 @@ const StudentAssignmentDetails = () => {
                     )}
 
                     {assignment.my_submission?.file_url && (
-                      <DownloadButton
-                        url={getStorageUrl(assignment.my_submission.file_url)}
-                        label="Download My Submission"
-                      />
+                      <div class="cursor-pointer text-blue-600 hover:text-blue-800 underline" onClick={()=>handleFileDownload(assignment.my_submission.file_url)}>
+                        Download
+                      </div>
+                      // <DownloadButton
+                      //   url={getStorageUrl(assignment.my_submission.file_url)}
+                      //   label="Download My Submission"
+                      // />
                     )}
 
                     {assignment.my_submission?.submitted_at && (

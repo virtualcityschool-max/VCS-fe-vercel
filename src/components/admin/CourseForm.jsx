@@ -2,7 +2,7 @@ import React, { useRef, useState } from "react";
 import QuillEditor from "../common/QuillEditor";
 import { BACKEND_CATEGORIES, formatCategoryLabel } from "../../constants";
 import { FilterSelect, Input } from "../ui";
-import { getStorageUrl } from "../../utils/storageUrl";
+import { getStorageUrl, handleFileDownload } from "../../utils/storageUrl";
 import { handleDownload } from "../../utils/courseImageUtils";
 
 const fieldClass = (error) =>
@@ -259,7 +259,7 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], mode = "
               rel="noreferrer"
               className="text-indigo-400 hover:text-indigo-300 text-xs"
             > */}
-              <span onClick={()=>handleDownload(getStorageUrl(existingUrl))}>
+              <span class="cursor-pointer text-blue-600 hover:text-blue-800 underline" onClick={()=>handleFileDownload(existingUrl)}>
               Download
               </span>
             {/* </a> */}
