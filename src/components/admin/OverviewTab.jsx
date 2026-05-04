@@ -33,6 +33,7 @@ const StatCardTip = ({ label, value, icon, color, items }) => {
     purple: "from-purple-500/20 to-purple-600/20 border-purple-500/20 text-purple-400",
     rose: "from-rose-500/20 to-rose-600/20 border-rose-500/20 text-rose-400",
     blue: "from-blue-500/20 to-blue-600/20 border-blue-500/20 text-blue-400",
+    pink: "from-pink-500/20 to-pink-600/20 border-pink-500/20 text-pink-400"
   };
   return (
     <div className="group relative">
@@ -171,8 +172,8 @@ const OverviewTab = ({ analytics, analyticsLoading, analyticsError }) => {
           ]}
         />
         <StatCard label="Admins"    value={analytics.users.admins}    icon="fas fa-user-shield"         color="rose"    compact />
-        <StatCard label="Teachers"  value={analytics.users.teachers}  icon="fas fa-chalkboard-teacher"  color="blue"    compact />
-        <StatCard label="Parents"   value={analytics.users.parents}   icon="fas fa-user-friends"        color="purple"  compact />
+        <StatCard label="Teachers"  value={analytics.users.teachers}  icon="fas fa-chalkboard-teacher"  color="pink"    compact />
+        <StatCard label="Parents"   value={analytics.users.parents}   icon="fas fa-user-friends"        color="amber"  compact />
         <StatCard label="Students"  value={analytics.users.students}  icon="fas fa-graduation-cap"      color="emerald" compact />
         <StatCardTip
           label="Total Courses"

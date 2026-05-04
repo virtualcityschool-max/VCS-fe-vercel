@@ -50,7 +50,7 @@ const AdminAttendance = () => {
 
   // Load courses once
   useEffect(() => {
-    if (!courses.length) dispatch(fetchCourses());
+   dispatch(fetchCourses());
   }, [dispatch]);
 
   // Fetch sessions whenever course changes

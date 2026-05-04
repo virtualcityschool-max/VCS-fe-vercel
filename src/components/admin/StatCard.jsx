@@ -8,6 +8,7 @@ const StatCard = ({ label, value, icon, trend, color = "indigo", compact = false
     purple: "from-purple-500/20 to-purple-600/20 border-purple-500/20 text-purple-400",
     rose: "from-rose-500/20 to-rose-600/20 border-rose-500/20 text-rose-400",
     blue: "from-blue-500/20 to-blue-600/20 border-blue-500/20 text-blue-400",
+    pink: "from-pink-500/20 to-pink-600/20 border-pink-500/20 text-pink-400"
   };
 
   if (compact) {
