@@ -16,6 +16,7 @@ import { getCourseImage } from "../../utils/courseImageUtils";
 import { setAuthModal } from "../../store/slices/uiSlice";
 import EnrollmentTypeModal from "../../components/courses/EnrollmentTypeModal";
 import { showApiError } from "../../utils/apiErrorHandler";
+import { getStorageUrl } from "../../utils/storageUrl";
 
 const Marketplace = () => {
   const dispatch = useDispatch();
@@ -517,14 +518,15 @@ const Marketplace = () => {
                       </h3>
                     </Link>
                     <div className="flex items-center gap-3 mb-3">
+                      {course.instructor?.avatar?
                       <img
                         src={
-                          course.instructor?.avatar ||
-                          `https://i.pravatar.cc/150?u=${course.instructor?.username || idx}`
-                        }
+                          getStorageUrl(course.instructor?.avatar)}
                         className="w-8 h-8 rounded-full border border-slate-700 shadow-md"
                         alt={course.instructor?.username || "Instructor"}
-                      />
+                      />:
+                      <i className="fas fa-user text-white"></i>
+                      }
                       <span className="text-xs text-slate-400 font-bold group-hover:text-slate-200 transition">
                         {course.instructor?.username || "Unknown Instructor"}
                       </span>

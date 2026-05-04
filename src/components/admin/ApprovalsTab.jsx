@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import ConfirmDialog from "../common/ConfirmDialog";
+import { getStorageUrl } from "../../utils/storageUrl";
 
 const ApprovalsTab = ({
   pendingApprovals,
@@ -135,14 +136,16 @@ const ApprovalsTab = ({
                     className="p-4 sm:p-6 hover:bg-slate-800/30 transition"
                   >
                     <div className="flex items-start gap-3 sm:gap-4 mb-4">
+                      {user.profile_image?
                       <img
                         src={
-                          user.profile_image ||
-                          `https://i.pravatar.cc/150?u=${user.email}`
+                          getStorageUrl(user.profile_image)
                         }
                         className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl border border-slate-700 shadow-md shrink-0"
                         alt={user.username || user.email}
-                      />
+                      />:
+                       <i className="fas fa-user text-white"></i>
+                      }
                       <div className="flex-1 min-w-0">
                         <p className="font-bold text-white text-sm sm:text-base mb-1">
                           {user.username ||
@@ -252,14 +255,16 @@ const ApprovalsTab = ({
                     >
                       <td className="px-8 py-6">
                         <div className="flex items-center gap-4">
+                          {user.profile_image?
                           <img
                             src={
-                              user.profile_image ||
-                              `https://i.pravatar.cc/150?u=${user.email}`
+                              getStorageUrl(user.profile_image)
                             }
                             className="w-10 h-10 rounded-xl border border-slate-700 shadow-md"
                             alt={user.username || user.email}
-                          />
+                          />:
+                           <i className="fas fa-user text-white"></i>
+                          }
                           <div>
                             <p className="font-bold text-white group-hover:text-indigo-400 transition">
                               {user.username ||

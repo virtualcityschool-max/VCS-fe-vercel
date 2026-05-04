@@ -5,6 +5,7 @@ import {
   fetchUsers,
   createUser,
   deleteUser,
+  purgeUser,
   selectUsers,
   fetchAvailableStudents,
   selectAvailableStudents,
@@ -131,11 +132,22 @@ const AdminUsersPage = () => {
     }
   }, [activeModal, dispatch]);
 
-  // Handle user deletion
+  // Handle user deletion (soft-delete — sets inactive)
   const handleDeleteUser = async (userId) => {
     try {
       await dispatch(deleteUser(userId)).unwrap();
-      toastManager.success("User deleted successfully");
+      toastManager.success("User deactivated successfully");
+      handleFetchUsers();
+    } catch (error) {
+      showApiError(error);
+    }
+  };
+
+  // Handle user purge (hard-delete — permanent removal)
+  const handlePurgeUser = async (userId) => {
+    try {
+      await dispatch(purgeUser(userId)).unwrap();
+      toastManager.success("User permanently deleted");
       handleFetchUsers();
     } catch (error) {
       showApiError(error);
@@ -259,6 +271,7 @@ const AdminUsersPage = () => {
         usersFilters={usersFilters}
         setUsersFilters={setUsersFilters}
         onUserDelete={handleDeleteUser}
+        onUserPurge={handlePurgeUser}
         onFetchUsers={handleFetchUsers}
         onUserEdit={handleEditUser}
         onCreateUser={handleCreateUser}

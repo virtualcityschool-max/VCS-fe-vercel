@@ -44,6 +44,8 @@ const AdminSessionsPage = () => {
     is_recurring: true,
     recurrence_days: [],
     recurrence_end_date: "",
+    instructor_id: "",
+    instructor_username: "",
   });
 
   const [editSessionForm, setEditSessionForm] = useState({});
@@ -78,7 +80,7 @@ const AdminSessionsPage = () => {
 
   // Fetch supporting data on mount
   useEffect(() => {
-    dispatch(fetchCourses({has_session: true}));
+    dispatch(fetchCourses({has_session: false}));
     dispatch(fetchUsers({ role: "teacher" }));
     dispatch(fetchAvailableStudents());
   }, [dispatch]);
@@ -104,6 +106,8 @@ const AdminSessionsPage = () => {
         is_recurring: true,
         recurrence_days: [],
         recurrence_end_date: "",
+        instructor_id: "",
+        instructor_username: "",
       });
       clearAllCreateSessionErrors();
     } else if (activeModal === null) {
@@ -327,6 +331,8 @@ const AdminSessionsPage = () => {
         is_recurring: true,
         recurrence_days: [],
         recurrence_end_date: "",
+        instructor_id: "",
+        instructor_username: "",
       });
       clearAllCreateSessionErrors();
     } catch (error) {
@@ -372,6 +378,12 @@ const AdminSessionsPage = () => {
   const handleDeleteSession = (sessionId) => {
     const session = sessions?.data?.find((s) => s.id === sessionId);
     const sessionTitle = session?.title || "this session";
+
+    if ((session?.enrollment_count ?? 0) >= 1) {
+      toastManager.error("Cannot delete session as enrollment exists against this session.");
+      return;
+    }
+
     setConfirmDialog({ open: true, sessionId, sessionTitle });
   };
 

@@ -878,7 +878,7 @@ const TeacherGrading = () => {
               }
               className="w-full mb-4 p-3 rounded-xl bg-slate-800 border border-slate-700 text-white"
             />
-
+            <label className="block text-xs font-semibold text-slate-400 uppercase tracking-widest mb-2">Due Date</label>
             <input
               type="datetime-local"
               value={form.due_date}
@@ -937,7 +937,7 @@ const TeacherGrading = () => {
               </button>
 
               <button
-                disabled={isFormInvalid || savingCreate}
+                // disabled={isFormInvalid || savingCreate}
                 className="px-4 py-2 bg-indigo-600 rounded-xl disabled:opacity-50 flex items-center gap-2"
                 onClick={async () => {
                   const error = validateForm();

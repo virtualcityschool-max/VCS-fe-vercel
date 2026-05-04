@@ -5,6 +5,8 @@ import { coursesService } from "../../services/coursesService";
 import { unenrollStudent } from "../../store/slices/adminSlice";
 import { toastManager } from "../../utils/toastManager";
 import { formatCategoryLabel } from "../../constants";
+import { handleDownload } from "../../utils/courseImageUtils";
+import { getStorageUrl } from "../../utils/storageUrl";
 
 const Badge = ({ children, color = "slate" }) => {
   const colors = {
@@ -238,18 +240,15 @@ const AdminCourseDetailPage = () => {
                   </div>
                   <h2 className="text-base font-bold text-white">Course Attachment</h2>
                 </div>
-                <a
-                  href={course.attachment}
-                  target="_blank"
-                  rel="noreferrer"
-                  download
+                <button
+                  onClick={() => handleDownload(getStorageUrl(course.attachment))}
                   className="inline-flex items-center gap-3 px-5 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-slate-600 rounded-2xl text-sm text-white font-medium transition group"
                 >
                   <div className="w-8 h-8 bg-amber-500/20 rounded-xl flex items-center justify-center group-hover:bg-amber-500/30 transition">
                     <i className="fas fa-download text-amber-400 text-xs"></i>
                   </div>
                   <span>Download Attachment</span>
-                </a>
+                </button>
               </div>
             )}
 

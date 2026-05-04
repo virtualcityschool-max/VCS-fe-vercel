@@ -3,6 +3,7 @@ import QuillEditor from "../common/QuillEditor";
 import { BACKEND_CATEGORIES, formatCategoryLabel } from "../../constants";
 import { FilterSelect, Input } from "../ui";
 import { getStorageUrl } from "../../utils/storageUrl";
+import { handleDownload } from "../../utils/courseImageUtils";
 
 const fieldClass = (error) =>
   `w-full px-3 py-2 bg-slate-800 border rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 ${
@@ -252,14 +253,16 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], mode = "
           <div className="flex items-center gap-3 p-3 bg-slate-800/60 border border-slate-700 rounded-xl mb-2">
             <i className="fas fa-paperclip text-indigo-400 text-sm"></i>
             <span className="text-slate-300 text-sm truncate flex-1">Current attachment</span>
-            <a
-              href={existingUrl}
-              target="_blank"
+            {/* <a
+              // href={existingUrl}
+              // target="_blank"
               rel="noreferrer"
               className="text-indigo-400 hover:text-indigo-300 text-xs"
-            >
-              View
-            </a>
+            > */}
+              <span onClick={()=>handleDownload(getStorageUrl(existingUrl))}>
+              Download
+              </span>
+            {/* </a> */}
             <button type="button" onClick={clearFile} className="text-slate-500 hover:text-red-400 transition">
               <i className="fas fa-times text-xs"></i>
             </button>

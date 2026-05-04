@@ -92,6 +92,18 @@ export const adminService = {
     }
   },
 
+  purgeUser: async (userId) => {
+    try {
+      const response = await axiosInstance.delete(
+        ADMIN_ENDPOINTS.USER_DELETE(userId),
+        { params: { permanent: true } },
+      );
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error, { context: "Purge User" });
+    }
+  },
+
   // User Profile Management
   getUserProfile: async (userId) => {
     try {

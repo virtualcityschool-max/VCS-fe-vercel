@@ -13,15 +13,20 @@ import { toastManager } from "./toastManager";
 export const extractApiErrorMessage = (error) => {
   if (typeof error === "string") return error;
 
-  const data = error?.response?.data;
-
+  const data = error?.response?.data??error
   if (data?.details && typeof data.details === "object") {
     const messages = [];
-    Object.values(data.details).forEach((v) => {
+    // Use Object.entries to get both [key, value]
+    Object.entries(data.details).forEach(([key, v]) => {
       if (Array.isArray(v)) {
-        v.forEach((m) => { if (typeof m === "string") messages.push(m); });
+        v.forEach((m) => {
+          if (typeof m === "string") {
+            // Format as "Key: Message"
+            messages.push(`${key}: ${m}`);
+          }
+        });
       } else if (typeof v === "string") {
-        messages.push(v);
+        messages.push(`${key}: ${v}`);
       }
     });
     if (messages.length > 0) return messages.join(" ");

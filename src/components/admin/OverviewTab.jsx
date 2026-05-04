@@ -49,7 +49,7 @@ const StatCardTip = ({ label, value, icon, color, items }) => {
       </div>
       {/* Tooltip */}
       {items?.length > 0 && (
-        <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 z-30 opacity-0 group-hover:opacity-100 -translate-y-1 group-hover:translate-y-0 transition-all duration-150 min-w-[160px]">
+        <div className="pointer-events-none absolute top-full left-1/2 -translate-x-1/2 mb-2.5 z-30 opacity-0 group-hover:opacity-100 -translate-y-1 group-hover:translate-y-0 transition-all duration-150 min-w-[160px]">
           <div className="bg-slate-800 border border-slate-700 rounded-xl shadow-2xl p-3">
             {items.map((item) => (
               <div key={item.label} className="flex items-center justify-between gap-4 py-1 first:pt-0 last:pb-0">
@@ -233,7 +233,7 @@ const OverviewTab = ({ analytics, analyticsLoading, analyticsError }) => {
                 margin={{ top: 4, right: 8, left: 0, bottom: 0 }}
               >
                 <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                <XAxis dataKey="name" stroke="#94a3b8" tick={{ fontSize: 11 }} />
+                <XAxis interval={0} hide={true} dataKey="name" stroke="#94a3b8" tick={{ fontSize: 11 }} />
                 <YAxis
                   stroke="#94a3b8"
                   tick={{ fontSize: 10 }}
@@ -288,7 +288,7 @@ const OverviewTab = ({ analytics, analyticsLoading, analyticsError }) => {
                 margin={{ top: 4, right: 8, left: 0, bottom: 0 }}
               >
                 <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                <XAxis dataKey="name" stroke="#94a3b8" tick={{ fontSize: 11 }} />
+                <XAxis interval={0} hide={true} dataKey="name" stroke="#94a3b8" tick={{ fontSize: 11 }} />
                 <YAxis stroke="#94a3b8" allowDecimals={false} tick={{ fontSize: 10 }} />
                 <Tooltip
                   {...tooltipStyle}

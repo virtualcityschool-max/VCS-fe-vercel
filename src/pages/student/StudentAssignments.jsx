@@ -18,7 +18,6 @@ const StudentAssignments = ({ hideHeader = false }) => {
   }, [dispatch, assignments?.length]);
 
   const getStatusConfig = (assignment) => {
-    // debugger
     if (assignment.status == "overdue") {
       return {
         color: "text-red-500 bg-red-500/10",

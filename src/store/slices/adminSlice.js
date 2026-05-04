@@ -142,12 +142,24 @@ export const deleteUser = createAsyncThunk(
   },
 );
 
+export const purgeUser = createAsyncThunk(
+  "admin/purgeUser",
+  async (userId, { rejectWithValue }) => {
+    try {
+      await adminService.purgeUser(userId);
+      return userId;
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  },
+);
+
 // Course Management Thunks
 export const fetchCourses = createAsyncThunk(
   "admin/fetchCourses",
-  async (_, { rejectWithValue }) => {
+  async (params = {}, { rejectWithValue }) => {
     try {
-      const response = await coursesService.getAllCourses();
+      const response = await coursesService.getAllCourses(params);
       return response;
     } catch (error) {
       return rejectWithValue(error); // Preserve full error object
@@ -365,7 +377,7 @@ export const fetchSessions = createAsyncThunk(
   "admin/fetchSessions",
   async (params = {}, { rejectWithValue }) => {
     try {
-      const response = await adminSessionService.getSessions(params);
+      const response = await adminSessionService.getSessions({view: "parent"});
       return response;
     } catch (error) {
       return rejectWithValue(error.message || "Failed to fetch sessions");
@@ -512,6 +524,11 @@ const adminSlice = createSlice({
         }
       })
       .addCase(deleteUser.fulfilled, (state, action) => {
+        state.users.data = state.users.data.filter(
+          (user) => user.id !== action.payload,
+        );
+      })
+      .addCase(purgeUser.fulfilled, (state, action) => {
         state.users.data = state.users.data.filter(
           (user) => user.id !== action.payload,
         );

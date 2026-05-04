@@ -133,7 +133,7 @@ const FilterSelect = ({
   );
 
   return (
-    <div ref={triggerRef} className="relative inline-flex" style={style}>
+    <div ref={triggerRef} className="relative " style={style}>
       {/* Trigger */}
       <button
         type="button"

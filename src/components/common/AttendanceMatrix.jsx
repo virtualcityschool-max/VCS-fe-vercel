@@ -117,7 +117,7 @@ const AttendanceMatrix = ({
       </div>
 
       <div className="bg-slate-900/50 border border-slate-800 rounded-3xl">
-        <div className="rounded-3xl">
+        <div className="rounded-3xl overflow-x-auto">
           <table className="text-sm border-collapse" style={{ minWidth: "100%" }}>
             <thead>
               {/* Row 1: sticky name col (rowspan 2) + month group headers + sticky summary col (rowspan 2) */}

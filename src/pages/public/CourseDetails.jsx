@@ -24,9 +24,10 @@ import {
   useNumberFormat,
   useTextFormat,
 } from "../../hooks/useFormat";
-import { getCourseImage } from "../../utils/courseImageUtils";
+import { getCourseImage, handleDownload } from "../../utils/courseImageUtils";
 import { setAuthModal } from "../../store/slices/uiSlice";
 import EnrollmentTypeModal from "../../components/courses/EnrollmentTypeModal";
+import { getStorageUrl } from "../../utils/storageUrl";
 
 const CourseDetails = () => {
   const { courseId } = useParams();
@@ -522,22 +523,22 @@ const CourseDetails = () => {
                       </div>
                       Course Attachment
                     </h2>
-                    <a
+                    {/* <a
                       href={normalizedCourse.attachment}
                       target="_blank"
                       rel="noreferrer"
                       download
                       className="inline-flex items-center gap-4 px-6 py-4 bg-slate-800/40 hover:bg-slate-700/50 backdrop-blur-sm border border-slate-700/50 hover:border-amber-500/30 rounded-2xl text-white font-medium transition-all duration-200 group"
-                    >
-                      <div className="w-10 h-10 bg-amber-500/20 group-hover:bg-amber-500/30 rounded-xl flex items-center justify-center transition-colors">
-                        <i className="fas fa-download text-amber-400"></i>
+                    > */}
+                      <div className="w-10 h-10 bg-amber-500/20 group-hover:bg-amber-500/30 rounded-xl flex items-center justify-center transition-colors" onClick={()=>handleDownload(getStorageUrl(normalizedCourse.attachment))}>
+                        <i className="fas fa-download text-amber-400" ></i>
                       </div>
                       <div>
                         <p className="text-sm font-semibold">Download Attachment</p>
                         <p className="text-xs text-slate-400">Click to download course material</p>
                       </div>
                       <i className="fas fa-arrow-right text-slate-500 group-hover:text-amber-400 group-hover:translate-x-1 transition-all ml-auto"></i>
-                    </a>
+                    {/* </a> */}
                   </div>
                 )}
 
