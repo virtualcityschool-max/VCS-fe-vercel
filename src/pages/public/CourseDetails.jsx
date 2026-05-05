@@ -24,16 +24,18 @@ import {
   useNumberFormat,
   useTextFormat,
 } from "../../hooks/useFormat";
-import { getCourseImage, handleDownload } from "../../utils/courseImageUtils";
+import { getCourseImage } from "../../utils/courseImageUtils";
 import { setAuthModal } from "../../store/slices/uiSlice";
 import EnrollmentTypeModal from "../../components/courses/EnrollmentTypeModal";
-import { getStorageUrl, handleFileDownload } from "../../utils/storageUrl";
+import { getStorageUrl } from "../../utils/storageUrl";
+import FileViewerModal from "../../components/common/FileViewerModal";
 
 const CourseDetails = () => {
   const { courseId } = useParams();
   const dispatch = useDispatch();
   const [imageError, setImageError] = useState(false);
   const [enrollmentModalOpen, setEnrollmentModalOpen] = useState(false);
+  const [viewerUrl, setViewerUrl] = useState(null);
   const submissionGuard = useSubmissionGuard();
   // Get auth state from Redux store
   const auth = useSelector((state) => state.auth);
@@ -523,25 +525,18 @@ const CourseDetails = () => {
                       </div>
                       Course Attachment
                     </h2>
-                    {/* <a
-                      href={normalizedCourse.attachment}
-                      target="_blank"
-                      rel="noreferrer"
-                      download
-                      className="inline-flex items-center gap-4 px-6 py-4 bg-slate-800/40 hover:bg-slate-700/50 backdrop-blur-sm border border-slate-700/50 hover:border-amber-500/30 rounded-2xl text-white font-medium transition-all duration-200 group"
-                    > */}
-                    <div class="cursor-pointer text-blue-600 hover:text-blue-800 underline" onClick={()=>handleFileDownload(normalizedCourse.attachment)}>
-
-                      <div className="w-10 h-10 bg-amber-500/20 group-hover:bg-amber-500/30 rounded-xl flex items-center justify-center transition-colors">
-                        <i className="fas fa-download text-amber-400" ></i>
+                    <button
+                      onClick={() => setViewerUrl(getStorageUrl(normalizedCourse.attachment))}
+                      className="inline-flex items-center gap-4 px-6 py-4 bg-slate-800/40 hover:bg-slate-700/50 backdrop-blur-sm border border-slate-700/50 hover:border-indigo-500/30 rounded-2xl text-white font-medium transition-all duration-200 group"
+                    >
+                      <div className="w-10 h-10 bg-indigo-500/20 group-hover:bg-indigo-500/30 rounded-xl flex items-center justify-center transition-colors">
+                        <i className="fas fa-eye text-indigo-400"></i>
                       </div>
                       <div>
-                        <p className="text-sm font-semibold">Download Attachment</p>
-                        <p className="text-xs text-slate-400">Click to download course material</p>
+                        <p className="text-xs text-slate-400">Click to preview course material</p>
                       </div>
-                      <i className="fas fa-arrow-right text-slate-500 group-hover:text-amber-400 group-hover:translate-x-1 transition-all ml-auto"></i>
-                    </div>
-                    {/* </a> */}
+                      <i className="fas fa-arrow-right text-slate-500 group-hover:text-indigo-400 group-hover:translate-x-1 transition-all ml-auto"></i>
+                    </button>
                   </div>
                 )}
 
@@ -752,8 +747,9 @@ const CourseDetails = () => {
         onSlotSelect={callPrivateEnrollmentCall}
         isEnrolling={isEnrolling}
       />
-      {/* if enrollment type is private show available slots then on save that selected slot with course and teacher_id */}
-      
+      {viewerUrl && (
+        <FileViewerModal filePath={viewerUrl} handleClose={() => setViewerUrl(null)} />
+      )}
     </section>
   );
 };

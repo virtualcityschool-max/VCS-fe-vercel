@@ -20,10 +20,10 @@ const StudentAttendance = () => {
   const [coursesLoading, setCoursesLoading] = useState(false);
   const [courseId, setCourseId]           = useState("");
 
-  const parentSessions = useMemo(
-    () => (sessions || []).filter((s) => s.is_child === false || s.is_child == null),
-    [sessions]
-  );
+  // const parentSessions = useMemo(
+  //   () => (sessions || []).filter((s) => s.is_child === false || s.is_child == null),
+  //   [sessions]
+  // );
 
   const isLoading = isAttendanceLoading || loadingSessions || coursesLoading;
 
@@ -82,7 +82,7 @@ const StudentAttendance = () => {
         </div>
       ) : (
         <AttendanceMatrix
-          sessions={parentSessions}
+          sessions={sessions}
           attendanceRecords={attendance || []}
           participantRole="student"
         />

@@ -2,8 +2,8 @@ import React, { useRef, useState } from "react";
 import QuillEditor from "../common/QuillEditor";
 import { BACKEND_CATEGORIES, formatCategoryLabel } from "../../constants";
 import { FilterSelect, Input } from "../ui";
-import { getStorageUrl, handleFileDownload } from "../../utils/storageUrl";
-import { handleDownload } from "../../utils/courseImageUtils";
+import { getStorageUrl } from "../../utils/storageUrl";
+import FileViewerModal from "../common/FileViewerModal";
 
 const fieldClass = (error) =>
   `w-full px-3 py-2 bg-slate-800 border rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 ${
@@ -17,6 +17,7 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], mode = "
   const fileInputRef = useRef(null);
   const thumbnailInputRef = useRef(null);
   const [thumbnailPreview, setThumbnailPreview] = useState(null);
+  const [viewerUrl, setViewerUrl] = useState(null);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0] || null;
@@ -253,16 +254,14 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], mode = "
           <div className="flex items-center gap-3 p-3 bg-slate-800/60 border border-slate-700 rounded-xl mb-2">
             <i className="fas fa-paperclip text-indigo-400 text-sm"></i>
             <span className="text-slate-300 text-sm truncate flex-1">Current attachment</span>
-            {/* <a
-              // href={existingUrl}
-              // target="_blank"
-              rel="noreferrer"
-              className="text-indigo-400 hover:text-indigo-300 text-xs"
-            > */}
-              <span class="cursor-pointer text-blue-600 hover:text-blue-800 underline" onClick={()=>handleFileDownload(existingUrl)}>
-              Download
-              </span>
-            {/* </a> */}
+            <button
+              type="button"
+              onClick={() => setViewerUrl(getStorageUrl(existingUrl))}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-700/40 hover:bg-slate-700 text-slate-400 hover:text-white text-xs font-semibold transition border border-slate-600/30"
+            >
+              <i className="fas fa-eye text-[10px]" />
+              Preview
+            </button>
             <button type="button" onClick={clearFile} className="text-slate-500 hover:text-red-400 transition">
               <i className="fas fa-times text-xs"></i>
             </button>
@@ -301,6 +300,10 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], mode = "
           onChange={handleFileChange}
         />
       </div>
+
+      {viewerUrl && (
+        <FileViewerModal filePath={viewerUrl} handleClose={() => setViewerUrl(null)} />
+      )}
     </div>
   );
 };

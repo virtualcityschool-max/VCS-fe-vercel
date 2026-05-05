@@ -120,49 +120,6 @@ const StudentPortal = () => {
     );
   }
 
-  // Error state
-  if (error) {
-    return (
-      <section
-        id="student-view"
-        className="min-h-screen bg-[#0f172a] text-white font-inter"
-      >
-        <div className="max-w-7xl mx-auto px-6 py-8">
-          <div className="bg-red-500/10 border border-red-500/20 rounded-[2.5rem] p-8 text-center">
-            <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <i className="fas fa-exclamation-triangle text-2xl text-red-500"></i>
-            </div>
-            <h2 className="text-2xl font-bold text-white mb-2">
-              Failed to Load Dashboard
-            </h2>
-            <p className="text-slate-400 mb-6">
-              {typeof error === "string"
-                ? error
-                : error?.message ||
-                  "An error occurred while loading the dashboard"}
-            </p>
-            <div className="flex gap-4 justify-center">
-              <button
-                onClick={handleRetry}
-                className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-2xl font-bold text-sm transition active:scale-95"
-              >
-                <i className="fas fa-redo mr-2"></i>
-                Try Again
-              </button>
-              <button
-                onClick={() => navigate("/")}
-                className="bg-slate-700 hover:bg-slate-600 text-white px-6 py-3 rounded-2xl font-bold text-sm transition active:scale-95"
-              >
-                <i className="fas fa-home mr-2"></i>
-                Go Home
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
   // Success state - render dashboard with real data
   console.log("✅ Student Portal: Rendering dashboard with data");
   return (

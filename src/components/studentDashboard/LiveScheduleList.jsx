@@ -7,6 +7,7 @@ import {
 } from "../../store/slices/studentDashboardSlice";
 import { toastManager } from "../../utils/toastManager";
 import { formatDate, formatScheduleTime, getWindowLabel, isWithinSessionWindow } from "../common/StartSession";
+import { showApiError } from "../../utils/apiErrorHandler";
 
 const LiveScheduleList = () => {
   const dispatch = useDispatch();
@@ -42,7 +43,7 @@ const LiveScheduleList = () => {
       openMeetingLink(meetingLink);
       setActiveSessionIds((prev) => ({ ...prev, [sessionId]: true }));
     } catch (err) {
-      toastManager.error(err?.error || err?.message || "Failed to join session");
+      showApiError(err)
     } finally {
       setLoadingSessionId(null);
     }
@@ -137,8 +138,8 @@ const LiveScheduleList = () => {
           const sessionId = session?.session_id ?? session?.id;
           const isActive = !!activeSessionIds[sessionId];
           const isThisLoading = loadingSessionId === sessionId;
-          const canJoin = isWithinSessionWindow(session.recurring_schedule);
-          const windowLabel = getWindowLabel(session.recurring_schedule);
+          const canJoin = isWithinSessionWindow(session.scheduled_at);
+          const windowLabel = getWindowLabel(session.scheduled_at);
 
           return (
             <div

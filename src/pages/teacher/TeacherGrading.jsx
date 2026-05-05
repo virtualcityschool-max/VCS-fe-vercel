@@ -19,24 +19,25 @@ import GradingForm from "../../components/teacher/GradingForm";
 import { FilterSelect } from "../../components/ui";
 import { coursesService } from "../../services/coursesService";
 import { getStorageUrl } from "../../utils/storageUrl";
+import FileViewerModal from "../../components/common/FileViewerModal";
 
-const getFilename = (url) => {
-  if (!url) return "attachment";
-  return url.split("/").pop() || "attachment";
+const PreviewButton = ({ url, className = "" }) => {
+  const [open, setOpen] = React.useState(false);
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-700/40 hover:bg-slate-700 text-slate-400 hover:text-white text-xs font-semibold transition border border-slate-600/30 ${className}`}
+      >
+        <i className="fas fa-eye text-[10px]" />
+        Preview
+      </button>
+      {open && <FileViewerModal filePath={url} handleClose={() => setOpen(false)} />}
+    </>
+  );
 };
 
-const DownloadButton = ({ url, label = "Download Attachment", className = "" }) => (
-  <a
-    href={url}
-    download={getFilename(url)}
-    target="_blank"
-    rel="noopener noreferrer"
-    className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-400 hover:text-indigo-300 text-xs font-semibold transition border border-indigo-500/30 ${className}`}
-  >
-    <i className="fas fa-download text-[10px]"></i>
-    {label}
-  </a>
-);
 
 const TeacherGrading = () => {
   const [selectedAssignment, setSelectedAssignment] = useState(null);
@@ -244,8 +245,8 @@ const TeacherGrading = () => {
                   </p>
                   {assignment.file_url && (
                     <div className="mt-3">
-                      <DownloadButton url={getStorageUrl(assignment.file_url)} label="Download Assignment File" />
-                    </div>
+                      <PreviewButton url={getStorageUrl(assignment.file_url)} />
+                      </div>
                   )}
                 </div>
 
@@ -421,7 +422,7 @@ const TeacherGrading = () => {
                   </h3>
 
                   {selectedSubmission.file_url ? (
-                    <DownloadButton url={getStorageUrl(selectedSubmission.file_url)} label="Download Submitted File" />
+                    <PreviewButton url={getStorageUrl(selectedSubmission.file_url)} />
                   ) : (
                     <p className="text-slate-500 text-sm italic">No file submitted</p>
                   )}
@@ -543,7 +544,7 @@ const TeacherGrading = () => {
               {viewAssignment.file_url && (
                 <div>
                   <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-2">Attachment</p>
-                  <DownloadButton url={getStorageUrl(viewAssignment.file_url)} label="Download Assignment File" />
+                  <PreviewButton url={getStorageUrl(viewAssignment.file_url)} />
                 </div>
               )}
             </div>
@@ -643,7 +644,7 @@ const TeacherGrading = () => {
                 </label>
                 {editTarget.file_url && !editForm.file && (
                   <div className="mb-2">
-                    <DownloadButton url={getStorageUrl(editTarget.file_url)} label="Current file" />
+                    <PreviewButton url={getStorageUrl(editTarget.file_url)} />
                   </div>
                 )}
                 <label className="flex items-center gap-3 w-full p-3 rounded-xl bg-slate-800 border border-slate-700 cursor-pointer hover:border-indigo-500 transition group">

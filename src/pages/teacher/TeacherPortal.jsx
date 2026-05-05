@@ -229,8 +229,8 @@ const TeacherPortal = () => {
                 </div>
 
                 {session.status === "scheduled" && (() => {
-                  const canStart = isWithinSessionWindow(session.recurring_schedule, session.schedule_at);
-                  const windowLabel = getWindowLabel(session.recurring_schedule, session.schedule_at);
+                  const canStart = isWithinSessionWindow(session.schedule_at);
+                  const windowLabel = getWindowLabel(session.schedule_at);
                   return (
                     <div className="relative group">
                       <button
@@ -248,50 +248,33 @@ const TeacherPortal = () => {
                       {!canStart && (
                         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-slate-700 border border-slate-600 text-white text-xs rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-xl">
                           <p className="font-semibold text-slate-300 mb-0.5">Time to start</p>
-                          <p className="text-white font-bold">{windowLabel || session.recurring_schedule || "Check schedule"}</p>
+                          <p className="text-white font-bold">{windowLabel || "Check schedule"}</p>
                         </div>
                       )}
                     </div>
                   );
                 })()}
 
-                {session.status === "live" && (() => {
-                  const canJoin = isWithinSessionWindow(session.recurring_schedule, session.schedule_at);
-                  const windowLabel = getWindowLabel(session.recurring_schedule, session.schedule_at);
-                  return (
-                    <div className="flex items-center gap-2">
-                      <div className="relative group">
-                        <button
-                          onClick={() => canJoin && handleJoinSession(session.id)}
-                          disabled={isJoiningSession || !canJoin}
-                          className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition ${
-                            canJoin
-                              ? "bg-indigo-600 hover:bg-indigo-500 text-white disabled:opacity-50"
-                              : "border border-slate-600 text-slate-500 cursor-not-allowed opacity-60"
-                          }`}
-                        >
-                          <i className="fas fa-video"></i>
-                          <span>Join Session</span>
-                        </button>
-                        {!canJoin && (
-                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-slate-700 border border-slate-600 text-white text-xs rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-xl">
-                            <p className="font-semibold text-slate-300 mb-0.5">Time to join</p>
-                            <p className="text-white font-bold">{windowLabel || session.recurring_schedule || "Check schedule"}</p>
-                          </div>
-                        )}
-                      </div>
-
-                      <button
-                        onClick={() => handleEndSession(session.id)}
-                        disabled={isJoiningSession}
-                        className="bg-rose-600 hover:bg-rose-500 text-white px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition disabled:opacity-50 flex items-center gap-2"
-                      >
-                        <i className="fas fa-stop"></i>
-                        <span>End Session</span>
-                      </button>
-                    </div>
-                  );
-                })()}
+                {session.status === "live" && (
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleJoinSession(session.id)}
+                      disabled={isJoiningSession}
+                      className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition bg-indigo-600 hover:bg-indigo-500 text-white disabled:opacity-50"
+                    >
+                      <i className="fas fa-video"></i>
+                      <span>Join Session</span>
+                    </button>
+                    <button
+                      onClick={() => handleEndSession(session.id)}
+                      disabled={isJoiningSession}
+                      className="bg-rose-600 hover:bg-rose-500 text-white px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition disabled:opacity-50 flex items-center gap-2"
+                    >
+                      <i className="fas fa-stop"></i>
+                      <span>End Session</span>
+                    </button>
+                  </div>
+                )}
 
                 {session.status === "ended" && (
                   <span className="text-slate-400 text-sm font-medium">

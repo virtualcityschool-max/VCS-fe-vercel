@@ -13,10 +13,10 @@ const TeacherAssessments = () => {
   return (
     <div className="text-white">
       {/* Page header */}
-      <div className="mb-8">
+      {/* <div className="mb-8">
         <h1 className="text-3xl font-black font-poppins mb-2">Assessments</h1>
         <p className="text-slate-400 text-sm">Manage assignments and quizzes for your courses.</p>
-      </div>
+      </div> */}
 
       {/* Tabs */}
       <div className="flex gap-1 mb-8 bg-slate-900 p-1 rounded-2xl border border-slate-800 w-fit">

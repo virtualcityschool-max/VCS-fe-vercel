@@ -33,10 +33,10 @@ const AdminAttendance = () => {
   const activeCourseId = courseId || (courses[0] ? String(courses[0].id) : "");
 
   // Top-level sessions only (no child sessions as separate columns)
-  const parentSessions = useMemo(
-    () => (sessions || []).filter((s) => s.is_child === false || s.is_child == null),
-    [sessions]
-  );
+  // const parentSessions = useMemo(
+  //   () => (sessions || []).filter((s) => s.is_child === false || s.is_child == null),
+  //   [sessions]
+  // );
 
   // Overall stats from flat attendance list
   const stats = useMemo(() => {
@@ -156,7 +156,7 @@ const AdminAttendance = () => {
         </div>
       ) : (
         <AttendanceMatrix
-          sessions={parentSessions}
+          sessions={sessions}
           attendanceRecords={allAttendance || []}
           participantRole={tab === "teacher" ? "teacher" : "student"}
           onEditRecord={setEditRecord}

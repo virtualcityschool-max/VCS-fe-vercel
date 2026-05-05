@@ -5,8 +5,8 @@ import { coursesService } from "../../services/coursesService";
 import { unenrollStudent } from "../../store/slices/adminSlice";
 import { toastManager } from "../../utils/toastManager";
 import { formatCategoryLabel } from "../../constants";
-import { handleDownload } from "../../utils/courseImageUtils";
 import { getStorageUrl } from "../../utils/storageUrl";
+import FileViewerModal from "../../components/common/FileViewerModal";
 
 const Badge = ({ children, color = "slate" }) => {
   const colors = {
@@ -79,6 +79,7 @@ const AdminCourseDetailPage = () => {
   const [unenrollingId, setUnenrollingId] = useState(null);
   const [confirmStudent, setConfirmStudent] = useState(null);
   const [activeTab, setActiveTab] = useState("details");
+  const [viewerUrl, setViewerUrl] = useState(null);
 
   const fetchCourse = async () => {
     setLoading(true);
@@ -241,13 +242,13 @@ const AdminCourseDetailPage = () => {
                   <h2 className="text-base font-bold text-white">Course Attachment</h2>
                 </div>
                 <button
-                  onClick={() => handleDownload(getStorageUrl(course.attachment))}
-                  className="inline-flex items-center gap-3 px-5 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-slate-600 rounded-2xl text-sm text-white font-medium transition group"
+                  onClick={() => setViewerUrl(getStorageUrl(course.attachment))}
+                  className="inline-flex items-center gap-3 px-5 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-indigo-500/40 rounded-2xl text-sm text-white font-medium transition group"
                 >
-                  <div className="w-8 h-8 bg-amber-500/20 rounded-xl flex items-center justify-center group-hover:bg-amber-500/30 transition">
-                    <i className="fas fa-download text-amber-400 text-xs"></i>
+                  <div className="w-8 h-8 bg-indigo-500/20 rounded-xl flex items-center justify-center group-hover:bg-indigo-500/30 transition">
+                    <i className="fas fa-eye text-indigo-400 text-xs"></i>
                   </div>
-                  <span>Download Attachment</span>
+                  <span>Preview Attachment</span>
                 </button>
               </div>
             )}
@@ -330,6 +331,9 @@ const AdminCourseDetailPage = () => {
           onConfirm={handleUnenroll}
           onCancel={() => setConfirmStudent(null)}
         />
+      )}
+      {viewerUrl && (
+        <FileViewerModal filePath={viewerUrl} handleClose={() => setViewerUrl(null)} />
       )}
     </div>
   );

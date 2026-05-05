@@ -30,10 +30,10 @@ const ParentAttendance = () => {
   const courses = childId ? (childCoursesMap[childId] ?? []) : [];
   const isLoading = dashLoading || isCoursesLoading || loadingSessions || loadingAllAttendance;
 
-  const parentSessions = useMemo(
-    () => (sessions || []).filter((s) => s.is_child === false || s.is_child == null),
-    [sessions]
-  );
+  // const parentSessions = useMemo(
+  //   () => (sessions || []).filter((s) => s.is_child === false || s.is_child == null),
+  //   [sessions]
+  // );
 
   useEffect(() => {
     if (!dashboardData) dispatch(fetchParentDashboard());
@@ -122,7 +122,7 @@ const ParentAttendance = () => {
         </div>
       ) : (
         <AttendanceMatrix
-          sessions={parentSessions}
+          sessions={sessions}
           attendanceRecords={allAttendance || []}
           participantRole="student"
         />

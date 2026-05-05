@@ -542,15 +542,16 @@ const TeacherQuizzes = () => {
   return (
     <div>
       {/* List header */}
-      <div className="mb-6 flex flex-wrap gap-3 items-center justify-between">
-        <FilterSelect
-          value={filterCourse}
-          onChange={(e) => setFilterCourse(e.target.value)}
-        >
-          <option value="">All Courses</option>
-          {myCourses?.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
-        </FilterSelect>
-
+      
+        <div className="mb-10 flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-black font-poppins mb-2">
+            My Quizes
+          </h1>
+          <p className="text-slate-400 text-sm">
+            Review Quiz and move into grading workflows.
+          </p>
+        </div>
         <button
           type="button"
           onClick={() => { setShowCreate(true); setForm(emptyForm); setQuestions([defaultQuestion()]); }}
@@ -559,7 +560,15 @@ const TeacherQuizzes = () => {
           + Create Quiz
         </button>
       </div>
-
+      <div className="mb-6 flex flex-wrap gap-3 items-center justify-between">
+        <FilterSelect
+          value={filterCourse}
+          onChange={(e) => setFilterCourse(e.target.value)}
+        >
+          <option value="">All Courses</option>
+          {myCourses?.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
+        </FilterSelect>
+      </div>
       {/* Quiz list */}
       {loadingQuizzes && !quizzes?.length ? (
         <div className="flex items-center justify-center py-16 text-white">

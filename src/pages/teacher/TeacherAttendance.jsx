@@ -40,8 +40,8 @@ const TeacherAttendance = () => {
 
   const activeCourseId = courseId || (myCourses?.[0] ? String(myCourses[0].id) : "");
 
-  const parentSessions = useMemo(
-    () => (sessions || []).filter((s) => s.is_child === false || s.is_child == null),
+  const allSessions = useMemo(
+    () => [...(sessions || [])].sort((a, b) => new Date(a.scheduled_at) - new Date(b.scheduled_at)),
     [sessions]
   );
 
@@ -216,7 +216,7 @@ const TeacherAttendance = () => {
         </div>
       ) : (
         <AttendanceMatrix
-          sessions={parentSessions}
+          sessions={allSessions}
           attendanceRecords={(allAttendance || []).filter(
             (r) => r.participant_role === (tab === "mine" ? "teacher" : "student")
           )}
@@ -277,7 +277,7 @@ const TeacherAttendance = () => {
                       className="w-full px-4 py-2.5 bg-slate-800/60 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 appearance-none"
                     >
                       <option value="">— Select a session —</option>
-                      {parentSessions.map((s) => (
+                      {allSessions.map((s) => (
                         <option key={s.id} value={s.id}>
                           {s.title}{s.scheduled_at ? ` — ${new Date(s.scheduled_at).toLocaleDateString([], { month: "short", day: "numeric" })}` : ""}
                         </option>
