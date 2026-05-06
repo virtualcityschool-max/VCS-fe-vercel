@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { fetchStudentQuizzes } from "../../store/slices/studentDashboardSlice";
@@ -17,9 +17,19 @@ const StudentQuizList = () => {
   const navigate = useNavigate();
   const { quizzes, isFetchingQuizzes } = useSelector((s) => s.studentDashboard);
 
+  const [filterCourse, setFilterCourse] = useState("");
+
   useEffect(() => {
-    dispatch(fetchStudentQuizzes());
-  }, [dispatch]);
+    dispatch(fetchStudentQuizzes(filterCourse ? { course: filterCourse } : {}));
+  }, [dispatch, filterCourse]);
+
+  const courseOptions = useMemo(() => {
+    const map = new Map();
+    (quizzes ?? []).forEach((q) => {
+      if (q.course && q.course_title) map.set(q.course, q.course_title);
+    });
+    return Array.from(map.entries()).map(([id, title]) => ({ id, title }));
+  }, [quizzes]);
 
   if (isFetchingQuizzes && !quizzes?.length) {
     return (
@@ -30,6 +40,21 @@ const StudentQuizList = () => {
   }
 
   return (
+    <div>
+      {/* Course filter */}
+      <div className="mb-5">
+        <select
+          value={filterCourse}
+          onChange={(e) => setFilterCourse(e.target.value)}
+          className="px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 appearance-none min-w-[180px]"
+        >
+          <option value="">All Courses</option>
+          {courseOptions.map((c) => (
+            <option key={c.id} value={c.id}>{c.title}</option>
+          ))}
+        </select>
+      </div>
+
     <div className="space-y-4">
       {quizzes?.length ? (
         quizzes.map((quiz) => {
@@ -72,6 +97,7 @@ const StudentQuizList = () => {
           No quizzes available yet.
         </div>
       )}
+    </div>
     </div>
   );
 };

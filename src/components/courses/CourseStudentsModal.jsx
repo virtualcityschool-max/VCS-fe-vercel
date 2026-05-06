@@ -145,7 +145,8 @@ const CourseStudentsModal = ({ courseId, courseTitle, onClose, canUnenroll }) =>
                     <div className="bg-slate-800/50 rounded-xl p-3 border border-slate-700/40">
                       <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Enrolled</p>
                       <p className="text-white text-sm font-bold">
-                        {students.length} <span className="text-slate-400 font-normal text-xs">students</span>
+                        {students.length} 
+                        {/* <span className="text-slate-400 font-normal text-xs">students</span> */}
                       </p>
                     </div>
                   </div>

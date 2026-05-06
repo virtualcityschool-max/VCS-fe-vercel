@@ -64,9 +64,9 @@ const TeacherClasses = () => {
                   </p>
                 </div>
                 <div className="text-right flex-shrink-0">
-                  <p className="text-yellow-400 font-bold text-sm">
+                  {/* <p className="text-yellow-400 font-bold text-sm">
                     ⭐ {Number(course.rating || 0).toFixed(1)}
-                  </p>
+                  </p> */}
                 </div>
               </div>
 

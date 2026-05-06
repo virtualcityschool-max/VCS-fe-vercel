@@ -152,7 +152,7 @@ const ApprovalsTab = ({
                             user.first_name + " " + user.last_name ||
                             "Unknown User"}
                         </p>
-                        <p className="text-[9px] sm:text-xs text-slate-500 uppercase break-all">
+                        <p className="text-[9px] sm:text-xs text-slate-500 break-all">
                           {user.email}
                         </p>
                       </div>
@@ -242,7 +242,7 @@ const ApprovalsTab = ({
                     <th className="px-8 py-6 text-[10px] font-black uppercase text-slate-500">
                       Registration Date
                     </th>
-                    <th className="px-8 py-6 text-[10px] font-black uppercase text-slate-500 text-right">
+                    <th className="px-8 py-6 text-[10px] font-black uppercase text-slate-500 text-center">
                       Actions
                     </th>
                   </tr>
@@ -255,6 +255,8 @@ const ApprovalsTab = ({
                     >
                       <td className="px-8 py-6">
                         <div className="flex items-center gap-4">
+                          <div class="w-10 h-10 rounded-full bg-slate-900 flex items-center justify-center overflow-hidden">
+
                           {user.profile_image?
                           <img
                             src={
@@ -265,13 +267,14 @@ const ApprovalsTab = ({
                           />:
                            <i className="fas fa-user text-white"></i>
                           }
+                          </div>
                           <div>
                             <p className="font-bold text-white group-hover:text-indigo-400 transition">
                               {user.username ||
                                 user.first_name + " " + user.last_name ||
                                 "Unknown User"}
                             </p>
-                            <p className="text-[9px] text-slate-500 uppercase">
+                            <p className="text-[11px] text-slate-500">
                               {user.email}
                             </p>
                           </div>
@@ -298,8 +301,8 @@ const ApprovalsTab = ({
                             : "Unknown"}
                         </span>
                       </td>
-                      <td className="px-8 py-6 text-right">
-                        <div className="flex items-center gap-2 justify-end">
+                      <td className="px-8 py-6 text-center">
+                        <div className="flex items-center gap-2 justify-center">
                           <button
                             onClick={() => handleApprove(user.id, user.username)}
                             disabled={isProcessing[user.id] === "approving"}

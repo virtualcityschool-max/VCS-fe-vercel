@@ -162,8 +162,8 @@ const TeacherPortal = () => {
 
   return (
     <div id="teacher-view" className="text-white space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
-        <div className="lg:col-span-7 bg-linear-to-br from-indigo-600 to-indigo-700 px-6 py-5 rounded-2xl shadow-xl relative overflow-hidden border border-indigo-400/20">
+      <div className="grid grid-cols-1 xl:grid-cols-10 gap-4">
+        <div className="xl:col-span-6 bg-linear-to-br from-indigo-600 to-indigo-700 px-6 py-5 rounded-2xl shadow-xl relative overflow-hidden border border-indigo-400/20">
           <div className="relative z-10">
             <h2 className="text-xl sm:text-2xl font-black font-poppins mb-1 text-white">
               Welcome, {dashboard?.teacher?.username || "Instructor"}!
@@ -175,15 +175,15 @@ const TeacherPortal = () => {
           <i className="fas fa-sparkles absolute top-4 right-5 text-5xl text-white/10"></i>
         </div>
 
-        <div className="lg:col-span-3 bg-slate-900 border border-slate-800 px-6 py-5 rounded-2xl flex flex-col justify-center text-center">
+        {/* <div className="lg:col-span-3 bg-slate-900 border border-slate-800 px-6 py-5 rounded-2xl flex flex-col justify-center text-center">
           <p className="text-[10px] font-black uppercase text-slate-500 tracking-[0.3em] mb-4">
             Total Students
           </p>
           <h3 className="text-4xl font-black text-white leading-none">
             {dashboard?.total_students || 0}
           </h3>
-        </div>
-        <div className="lg:col-span-2 flex items-center lg:justify-end">
+        </div> */}
+        <div className="lg:col-span-2 flex items-center lg:justify-start ml-4">
           <button
             type="button"
             onClick={() => setIsAnnouncementModalOpen(true)}
@@ -326,9 +326,9 @@ const TeacherPortal = () => {
                     </div>
 
                     <div className="text-right">
-                      <p className="text-yellow-400 font-bold text-xs sm:text-sm">
+                      {/* <p className="text-yellow-400 font-bold text-xs sm:text-sm">
                         ⭐ {Number(course.rating || 0).toFixed(1)}
-                      </p>
+                      </p> */}
                       <p className="text-[10px] text-slate-500 uppercase">
                         {course.status}
                       </p>
@@ -408,7 +408,7 @@ const TeacherPortal = () => {
                       </p>
 
                       <p className="text-[10px] text-slate-400 mt-1">
-                        {a.submissions_count} submissions • Total{" "}
+                        {a.submissions_count} submission(s) • Total{" "}
                         {a.max_score}
                       </p>
                     </div>

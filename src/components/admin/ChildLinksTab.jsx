@@ -131,8 +131,8 @@ const ChildLinksTab = ({
                     className="p-4 sm:p-6 hover:bg-slate-800/30 transition"
                   >
                     <div className="flex items-start gap-3 sm:gap-4 mb-4">
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-linear-to-br from-purple-500/20 to-purple-600/20 border border-purple-500/20 flex items-center justify-center shrink-0">
-                        <i className="fas fa-link text-purple-400 text-sm"></i>
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl border border-indigo-500 flex items-center justify-center shrink-0">
+                        <i className="fas fa-link text-indigo-500 text-sm"></i>
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-bold text-white text-sm sm:text-base mb-1">
@@ -201,13 +201,13 @@ const ChildLinksTab = ({
               <table className="hidden lg:table w-full text-left">
                 <thead className="bg-slate-950/60 border-b border-slate-800">
                   <tr key="child-links-header">
-                    <th className="px-8 py-6 text-[10px] font-black uppercase text-slate-500">
+                    <th className="px-8 py-6 text-[10px] font-black uppercase text-slate-500  text-start">
                       Link Information
                     </th>
-                    <th className="px-8 py-6 text-[10px] font-black uppercase text-slate-500">
+                    <th className="px-8 py-6 text-[10px] font-black uppercase text-slate-500 text-start">
                       Requested At
                     </th>
-                    <th className="px-8 py-6 text-[10px] font-black uppercase text-slate-500 text-right">
+                    <th className="px-8 py-6 text-[10px] font-black uppercase text-slate-500 text-center">
                       Actions
                     </th>
                   </tr>
@@ -219,9 +219,9 @@ const ChildLinksTab = ({
                       className="hover:bg-slate-800/30 transition group"
                     >
                       <td className="px-8 py-6">
-                        <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-xl bg-linear-to-br from-purple-500/20 to-purple-600/20 border border-purple-500/20 flex items-center justify-center">
-                            <i className="fas fa-link text-purple-400 text-sm"></i>
+                        <div className="flex items-center justify-start gap-4">
+                          <div className="w-10 h-10 rounded-xl border border-indigo-500 flex items-center justify-center">
+                            <i className="fas fa-link text-indigo-500 text-sm"></i>
                           </div>
                           <div>
                             <p className="font-bold text-white group-hover:text-purple-400 transition">
@@ -239,8 +239,8 @@ const ChildLinksTab = ({
                           {formatDate(link.requested_at)}
                         </span>
                       </td>
-                      <td className="px-8 py-6 text-right">
-                        <div className="flex items-center gap-2 justify-end">
+                      <td className="px-8 py-6 text-center">
+                        <div className="flex items-center gap-2 justify-center">
                           <button
                             onClick={() => handleApprove(link.link_id, `${link.parent} → ${link.student}`)}
                             disabled={

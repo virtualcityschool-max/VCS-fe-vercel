@@ -217,10 +217,10 @@ const UserProfileTab = ({ profile, onUpdate }) => {
 
         {/* Rating Section */}
         <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6">
-          <h3 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
+          {/* <h3 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
             <i className="fas fa-star text-indigo-400"></i>
             Rating
-          </h3>
+          </h3> */}
 
           <div className="space-y-4">
             <div>

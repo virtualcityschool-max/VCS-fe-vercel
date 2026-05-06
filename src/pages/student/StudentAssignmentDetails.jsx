@@ -119,7 +119,7 @@ const StudentAssignmentDetails = () => {
         <p className="text-red-400 mb-4">{error || "Assignment not found."}</p>
         <button
           type="button"
-          onClick={() => navigate("/student/assignments")}
+          onClick={() => navigate("/student/assessments?tab=assignments")}
           className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-xl"
         >
           Back to Assignments
@@ -143,7 +143,7 @@ const StudentAssignmentDetails = () => {
       <div className="max-w-4xl mx-auto">
         <button
           type="button"
-          onClick={() => navigate("/student/assignments")}
+          onClick={() => navigate("/student/assessments?tab=assignments")}
           className="mb-6 text-sm text-slate-400 hover:text-white transition"
         >
           <i className="fas fa-arrow-left mr-2"></i>

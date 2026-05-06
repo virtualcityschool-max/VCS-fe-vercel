@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { fetchStudentAssignments } from "../../store/slices/studentDashboardSlice";
@@ -11,11 +11,20 @@ const StudentAssignments = ({ hideHeader = false }) => {
     (state) => state.studentDashboard,
   );
 
+  const [filterCourse, setFilterCourse] = useState("");
+
   useEffect(() => {
-    if (!assignments?.length) {
-      dispatch(fetchStudentAssignments());
-    }
-  }, [dispatch, assignments?.length]);
+    dispatch(fetchStudentAssignments(filterCourse ? { course: filterCourse } : {}));
+  }, [dispatch, filterCourse]);
+
+  // Derive course list from all-assignments baseline (no filter applied)
+  const courseOptions = useMemo(() => {
+    const map = new Map();
+    (assignments ?? []).forEach((a) => {
+      if (a.course && a.course_title) map.set(a.course, a.course_title);
+    });
+    return Array.from(map.entries()).map(([id, title]) => ({ id, title }));
+  }, [assignments]);
 
   const getStatusConfig = (assignment) => {
     if (assignment.status == "overdue") {
@@ -62,6 +71,20 @@ const StudentAssignments = ({ hideHeader = false }) => {
           <p className="text-slate-400 text-sm">View and manage all your assignments in one place.</p>
         </div>
       )}
+
+      {/* Course filter */}
+      <div className="mb-5">
+        <select
+          value={filterCourse}
+          onChange={(e) => setFilterCourse(e.target.value)}
+          className="px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 appearance-none min-w-[180px]"
+        >
+          <option value="">All Courses</option>
+          {courseOptions.map((c) => (
+            <option key={c.id} value={c.id}>{c.title}</option>
+          ))}
+        </select>
+      </div>
 
       {/* List */}
       <div className="space-y-4">
