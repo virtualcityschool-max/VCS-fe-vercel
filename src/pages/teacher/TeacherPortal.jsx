@@ -137,11 +137,11 @@ const TeacherPortal = () => {
     dispatch(fetchMyCourses());
     dispatch(fetchAssignments());
 
-    const interval = setInterval(() => {
-      dispatch(fetchTeacherDashboard());
-    }, 3000);
+    // const interval = setInterval(() => {
+    //   dispatch(fetchTeacherDashboard());
+    // }, 3000);
 
-    return () => clearInterval(interval);
+    // return () => clearInterval(interval);
   }, [dispatch]);
 
   if (loadingDashboard && !dashboard) {
@@ -235,7 +235,8 @@ const TeacherPortal = () => {
                 </div>
 
                 {session.status === "scheduled" && (() => {
-                  const canStart = isWithinSessionWindow(session.schedule_at);
+                  // const canStart = isWithinSessionWindow(session.schedule_at);
+                  let canStart = true
                   const windowLabel = getWindowLabel(session.schedule_at);
                   return (
                     <div className="relative group">
@@ -251,7 +252,7 @@ const TeacherPortal = () => {
                         <i className="fas fa-play"></i>
                         <span>Start Session</span>
                       </button>
-                      {!canStart && (
+                      {canStart && (
                         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-slate-700 border border-slate-600 text-white text-xs rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-xl">
                           <p className="font-semibold text-slate-300 mb-0.5">Time to start</p>
                           <p className="text-white font-bold">{windowLabel || "Check schedule"}</p>

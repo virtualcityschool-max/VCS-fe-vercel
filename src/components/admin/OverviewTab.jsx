@@ -36,7 +36,7 @@ const StatCardTip = ({ label, value, icon, color, items }) => {
     pink: "from-pink-500/20 to-pink-600/20 border-pink-500/20 text-pink-400"
   };
   return (
-    <div className="group relative">
+    <div className="relative">
       <div className={`relative overflow-hidden bg-gradient-to-br ${colorClasses[color]} rounded-xl px-4 py-4 border backdrop-blur-sm transition-all duration-300 hover:scale-[1.02] hover:shadow-lg cursor-default`}>
         <div className="absolute top-0 right-0 w-14 h-14 bg-white/5 rounded-full -mr-6 -mt-6" />
         <div className="relative z-10 flex items-center gap-2.5 mb-2.5">
@@ -44,23 +44,25 @@ const StatCardTip = ({ label, value, icon, color, items }) => {
             <i className={`${icon} text-sm`} />
           </div>
           <p className="text-[10px] uppercase tracking-wider opacity-80 leading-tight">{label}</p>
-          <i className="fas fa-info-circle text-sm opacity-50 ml-auto" />
         </div>
         <h3 className="text-2xl font-bold leading-none">{value}</h3>
       </div>
-      {/* Tooltip */}
+
+      {/* Info icon lives outside overflow-hidden so the tooltip isn't clipped */}
       {items?.length > 0 && (
-        <div className="pointer-events-none absolute top-full left-1/2 -translate-x-1/2 mb-2.5 z-30 opacity-0 group-hover:opacity-100 -translate-y-1 group-hover:translate-y-0 transition-all duration-150 min-w-[160px]">
-          <div className="bg-slate-800 border border-slate-700 rounded-xl shadow-2xl p-3">
-            {items.map((item) => (
-              <div key={item.label} className="flex items-center justify-between gap-4 py-1 first:pt-0 last:pb-0">
-                <span className="text-slate-400 text-xs whitespace-nowrap">{item.label}</span>
-                <span className={`text-xs font-bold tabular-nums ${item.color || "text-white"}`}>{item.value}</span>
-              </div>
-            ))}
+        <div className="group/tip absolute top-2.5 right-2.5 z-20">
+          <i className="fas fa-info-circle text-sm opacity-50 hover:opacity-100 cursor-pointer transition-opacity" />
+          <div className="pointer-events-none absolute top-full right-0 mt-2 z-30 opacity-0 group-hover/tip:opacity-100 translate-y-[-4px] group-hover/tip:translate-y-0 transition-all duration-150 min-w-[160px]">
+            <div className="bg-slate-800 border border-slate-700 rounded-xl shadow-2xl p-3">
+              {items.map((item) => (
+                <div key={item.label} className="flex items-center justify-between gap-4 py-1 first:pt-0 last:pb-0">
+                  <span className="text-slate-400 text-xs whitespace-nowrap">{item.label}</span>
+                  <span className={`text-xs font-bold tabular-nums ${item.color || "text-white"}`}>{item.value}</span>
+                </div>
+              ))}
+            </div>
+            <div className="absolute bottom-full right-3 border-4 border-transparent border-b-slate-700" />
           </div>
-          {/* Arrow */}
-          <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-px border-4 border-transparent border-t-slate-700" />
         </div>
       )}
     </div>

@@ -6,6 +6,7 @@ import {
   createUser,
   deleteUser,
   purgeUser,
+  toggleUserActive,
   selectUsers,
   fetchAvailableStudents,
   selectAvailableStudents,
@@ -132,12 +133,11 @@ const AdminUsersPage = () => {
     }
   }, [activeModal, dispatch]);
 
-  // Handle user deletion (soft-delete — sets inactive)
-  const handleDeleteUser = async (userId) => {
+  // Handle active/inactive toggle via PATCH
+  const handleDeleteUser = async (userId, user) => {
     try {
-      await dispatch(deleteUser(userId)).unwrap();
-      toastManager.success("User deactivated successfully");
-      handleFetchUsers();
+      await dispatch(toggleUserActive({ userId, user })).unwrap();
+      toastManager.success(user.is_active ? "User deactivated successfully" : "User activated successfully");
     } catch (error) {
       showApiError(error);
     }

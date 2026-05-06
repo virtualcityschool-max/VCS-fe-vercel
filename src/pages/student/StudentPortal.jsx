@@ -40,11 +40,11 @@ const StudentPortal = () => {
   useEffect(() => {
     if (!hasMounted) return;
 
-    const interval = setInterval(() => {
-      dispatch(fetchStudentDashboard());
-    }, 3000);
+    // const interval = setInterval(() => {
+    //   dispatch(fetchStudentDashboard());
+    // }, 3000);
 
-    return () => clearInterval(interval);
+    // return () => clearInterval(interval);
   }, [dispatch, hasMounted]);
 
   // Handle retry on error

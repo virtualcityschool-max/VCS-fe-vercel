@@ -111,8 +111,8 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], mode = "
           >
             <option value="draft">Draft</option>
             <option value="published">Published</option>
-            <option value="completed">Completed</option>
-            <option value="archived">Archived</option>
+            {mode!="create"?<option value="completed">Completed</option>:""}
+            {/* <option value="archived">Archived</option> */}
           </FilterSelect>
           <FieldError error={errors.status} />
         </div>

@@ -138,7 +138,8 @@ const LiveScheduleList = () => {
           const sessionId = session?.session_id ?? session?.id;
           const isActive = !!activeSessionIds[sessionId];
           const isThisLoading = loadingSessionId === sessionId;
-          const canJoin = isWithinSessionWindow(session.scheduled_at);
+          // const canJoin = isWithinSessionWindow(session.scheduled_at);
+          let canJoin = true;
           const windowLabel = getWindowLabel(session.scheduled_at);
 
           return (
@@ -261,7 +262,7 @@ const LiveScheduleList = () => {
                         <><i className="fas fa-video"></i> Join Session</>
                       )}
                     </button>
-                    {!canJoin && (
+                    {canJoin && (
                       <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-slate-700 border border-slate-600 text-white text-xs rounded-lg whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity pointer-events-none z-10 shadow-xl">
                         <p className="font-semibold text-slate-300 mb-0.5">Time to join</p>
                         <p className="text-white font-bold">{windowLabel || session.recurring_schedule}</p>

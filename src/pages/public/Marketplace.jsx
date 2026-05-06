@@ -305,7 +305,7 @@ const Marketplace = () => {
     await submissionGuard.guard(async () => {
       try {
         await dispatch(unenrollFromCourse(courseId)).unwrap();
-        toastManager.success(`Successfully made enrollment request for ${courseTitle}`);
+        toastManager.success(`Successfully unenrolledfrom course ${courseTitle}`);
 
         // Refresh courses to update enrollment status
         dispatch(fetchAllCourses());

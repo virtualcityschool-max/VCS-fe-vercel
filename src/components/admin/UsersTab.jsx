@@ -144,7 +144,7 @@ const UsersTab = ({
   onCreateUser,
 }) => {
   const navigate = useNavigate();
-  const [confirmDialog, setConfirmDialog] = useState({ open: false, userId: null });
+  const [confirmDialog, setConfirmDialog] = useState({ open: false, userId: null, isActive: false, user: null });
   const [purgeDialog, setPurgeDialog] = useState({ open: false, userId: null });
   // Debounced search handler - use controlled pattern
   const [localSearchInput, setLocalSearchInput] = useState(
@@ -191,17 +191,17 @@ const UsersTab = ({
     },
     [setUsersFilters],
   );
-  const handleDeleteUser = (userId) => {
-    setConfirmDialog({ open: true, userId });
+  const handleDeleteUser = (user) => {
+    setConfirmDialog({ open: true, userId: user.id, isActive: user.is_active, user });
   };
 
   const confirmDeleteUser = async () => {
-    const { userId } = confirmDialog;
-    setConfirmDialog({ open: false, userId: null });
+    const { userId, user } = confirmDialog;
+    setConfirmDialog({ open: false, userId: null, isActive: false, user: null });
     try {
-      await onUserDelete(userId);
+      await onUserDelete(userId, user);
     } catch (error) {
-      console.error("Failed to delete user:", error);
+      console.error("Failed to toggle user status:", error);
     }
   };
 
@@ -374,19 +374,23 @@ const UsersTab = ({
                         <span className="hidden sm:inline">Edit</span>
                       </button>
                       <button
-                        onClick={() => handleDeleteUser(user.id)}
-                        className="bg-red-600/10 text-red-400 px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium hover:bg-red-600/20 transition flex items-center gap-1 flex-1 justify-center"
+                        onClick={() => handleDeleteUser(user)}
+                        className={`px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition flex items-center gap-1 flex-1 justify-center ${
+                          user.is_active
+                            ? "bg-amber-600/10 text-amber-400 hover:bg-amber-600/20"
+                            : "bg-emerald-600/10 text-emerald-400 hover:bg-emerald-600/20"
+                        }`}
                       >
-                        <i className="fas fa-trash"></i>
-                        <span className="hidden sm:inline">Delete</span>
+                        <i className={`fas ${user.is_active ? "fa-ban" : "fa-check-circle"}`}></i>
+                        <span className="hidden sm:inline">{user.is_active ? "Deactivate" : "Activate"}</span>
                       </button>
                       <button
                         onClick={() => handlePurgeUser(user.id)}
-                        className="bg-rose-900/20 text-rose-400 px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium hover:bg-rose-900/40 transition flex items-center gap-1 flex-1 justify-center"
+                        className="bg-red-900/20 text-red-400 px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium hover:bg-red-900/40 transition flex items-center gap-1 flex-1 justify-center"
                         title="Permanently delete"
                       >
-                        <i className="fas fa-skull-crossbones"></i>
-                        <span className="hidden sm:inline">Purge</span>
+                        <i className="fas fa-trash"></i>
+                        <span className="hidden sm:inline">Delete</span>
                       </button>
                     </div>
                   </div>
@@ -467,19 +471,23 @@ const UsersTab = ({
                             Edit
                           </button>
                           <button
-                            onClick={() => handleDeleteUser(user.id)}
-                            className="bg-red-600/10 text-red-400 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-red-600/20 transition"
+                            onClick={() => handleDeleteUser(user)}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${
+                              user.is_active
+                                ? "bg-amber-600/10 text-amber-400 hover:bg-amber-600/20"
+                                : "bg-emerald-600/10 text-emerald-400 hover:bg-emerald-600/20"
+                            }`}
                           >
-                            <i className="fas fa-trash mr-1"></i>
-                            Delete
+                            <i className={`fas ${user.is_active ? "fa-ban" : "fa-check-circle"} mr-1`}></i>
+                            {user.is_active ? "Deactivate" : "Activate"}
                           </button>
                           <button
                             onClick={() => handlePurgeUser(user.id)}
-                            className="bg-rose-900/20 text-rose-400 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-rose-900/40 transition"
+                            className="bg-red-900/20 text-red-400 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-red-900/40 transition"
                             title="Permanently delete"
                           >
-                            <i className="fas fa-skull-crossbones mr-1"></i>
-                            Purge
+                            <i className="fas fa-trash mr-1"></i>
+                            Delete
                           </button>
                         </div>
                       </td>
@@ -494,21 +502,25 @@ const UsersTab = ({
 
       <ConfirmDialog
         open={confirmDialog.open}
-        variant="danger"
-        title="Delete User"
-        message="Are you sure you want to delete this user? This will deactivate the account."
-        confirmLabel="Delete"
+        variant={confirmDialog.isActive ? "warning" : "success"}
+        title={confirmDialog.isActive ? "Deactivate User" : "Activate User"}
+        message={
+          confirmDialog.isActive
+            ? "Are you sure you want to deactivate this user? They will lose access to the platform."
+            : "Are you sure you want to activate this user? They will regain access to the platform."
+        }
+        confirmLabel={confirmDialog.isActive ? "Deactivate" : "Activate"}
         cancelLabel="Cancel"
         onConfirm={confirmDeleteUser}
-        onCancel={() => setConfirmDialog({ open: false, userId: null })}
+        onCancel={() => setConfirmDialog({ open: false, userId: null, isActive: false, user: null })}
       />
 
       <ConfirmDialog
         open={purgeDialog.open}
         variant="danger"
-        title="Permanently Delete User"
-        message="This will permanently remove the user record and cannot be undone. Are you sure you want to purge this user?"
-        confirmLabel="Purge"
+        title="Delete User Permanently"
+        message="This will permanently remove the user record and cannot be undone. This action is irreversible."
+        confirmLabel="Delete"
         cancelLabel="Cancel"
         onConfirm={confirmPurgeUser}
         onCancel={() => setPurgeDialog({ open: false, userId: null })}

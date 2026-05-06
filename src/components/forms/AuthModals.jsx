@@ -1096,17 +1096,17 @@ const AuthModals = () => {
                   Registration Successful!
                 </h2>
                 <p className="text-slate-400 text-sm leading-relaxed mb-8">
-                  Your account has been created and verified successfully.
+                  {role=="student"?"Your account has been created and verified successfully.":"You Account has been verified Contact admin for approval"}
                 </p>
-                <button
+                {/* <button
                   onClick={() => {
                     // Close the modal completely - user can then click Login normally
                     onClose();
                   }}
                   className="w-full bg-slate-800 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-700 transition"
                 >
-                  Go to Login
-                </button>
+                  {activeRoleTab=="student"?"Go to Login" :""}
+                </button> */}
               </div>
             )}
           </div>
