@@ -60,6 +60,8 @@ const TeacherGrading = () => {
   const [privateStudents, setPrivateStudents] = useState([]);
   const [loadingPrivateStudents, setLoadingPrivateStudents] = useState(false);
   const [pendingAssignmentId, setPendingAssignmentId] = useState(null);
+  const [assignmentTotal, setAssignmentTotal] = useState(0);
+
   const [
     selectedAssignmentForSubmissions,
     setSelectedAssignmentForSubmissions,
@@ -310,6 +312,7 @@ const TeacherGrading = () => {
                     className="bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-xl text-xs font-bold transition"
                     onClick={() => {
                       setPendingAssignmentId(assignment.id);
+                      setAssignmentTotal(assignment.max_score)
                       dispatch(fetchSubmissions(assignment.id));
                     }}
                     disabled={loadingSubmissions && pendingAssignmentId === assignment.id}
@@ -471,6 +474,7 @@ const TeacherGrading = () => {
                       showApiError(err);
                     }
                   }}
+                  assignmentMaxScore={assignmentTotal}
                 />
               </>
             ) : null}

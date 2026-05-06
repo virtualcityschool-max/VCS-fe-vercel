@@ -37,16 +37,15 @@ const StudentPortal = () => {
     }
   }, [dispatch, hasMounted]);
 
-  //Polling
-  // useEffect(() => {
-  //   if (!hasMounted) return;
+  useEffect(() => {
+    if (!hasMounted) return;
 
-  //   const interval = setInterval(() => {
-  //     dispatch(fetchStudentDashboard());
-  //   }, 30000); // every 30 seconds
+    const interval = setInterval(() => {
+      dispatch(fetchStudentDashboard());
+    }, 3000);
 
-  //   return () => clearInterval(interval);
-  // }, [dispatch, hasMounted]);
+    return () => clearInterval(interval);
+  }, [dispatch, hasMounted]);
 
   // Handle retry on error
   const handleRetry = useCallback(() => {

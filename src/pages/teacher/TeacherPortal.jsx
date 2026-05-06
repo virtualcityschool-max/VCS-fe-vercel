@@ -136,6 +136,12 @@ const TeacherPortal = () => {
     dispatch(fetchTeacherDashboard());
     dispatch(fetchMyCourses());
     dispatch(fetchAssignments());
+
+    const interval = setInterval(() => {
+      dispatch(fetchTeacherDashboard());
+    }, 3000);
+
+    return () => clearInterval(interval);
   }, [dispatch]);
 
   if (loadingDashboard && !dashboard) {

@@ -11,6 +11,7 @@ import {
   fetchMyCourses,
   clearSelectedQuizSubmission,
 } from "../../store/slices/teacherSlice";
+import { teacherService } from "../../services/teacherService";
 import { FilterSelect } from "../../components/ui";
 import { toastManager } from "../../utils/toastManager";
 
@@ -352,10 +353,18 @@ const TeacherQuizzes = () => {
   };
 
   // ── Edit ──────────────────────────────────────────────────────────────────
-  const openEdit = (quiz) => {
+  const openEdit = async (quiz) => {
     setEditTarget(quiz);
     setForm(quizToForm(quiz));
     setQuestions(quizToQuestions(quiz));
+    try {
+      const detail = await teacherService.getQuizById(quiz.id);
+      setEditTarget(detail);
+      setForm(quizToForm(detail));
+      setQuestions(quizToQuestions(detail));
+    } catch {
+      toastManager.error("Failed to load quiz detail");
+    }
   };
 
   const handleEdit = async () => {
@@ -607,7 +616,15 @@ const TeacherQuizzes = () => {
                     <button
                       type="button"
                       title="View quiz"
-                      onClick={() => setViewQuiz(quiz)}
+                      onClick={async () => {
+                        setViewQuiz(quiz);
+                        try {
+                          const detail = await teacherService.getQuizById(quiz.id);
+                          setViewQuiz(detail);
+                        } catch {
+                          toastManager.error("Failed to load quiz detail");
+                        }
+                      }}
                       className="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-800 hover:bg-indigo-600/20 text-slate-400 hover:text-indigo-400 border border-slate-700 hover:border-indigo-500/40 transition"
                     >
                       <i className="fas fa-eye text-xs" />

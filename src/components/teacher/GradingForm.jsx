@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-const GradingForm = ({ selectedSubmission, onSubmit, onCancel }) => {
+const GradingForm = ({ selectedSubmission, onSubmit, onCancel, assignmentMaxScore }) => {
   // Use the selectedSubmission.id as key to force component reset
   const [score, setScore] = useState(
     () => selectedSubmission?.grade?.score?.toString() || "",
@@ -25,7 +25,7 @@ const GradingForm = ({ selectedSubmission, onSubmit, onCancel }) => {
     >
       <div>
         <label className="block text-sm font-medium text-gray-300 mb-2">
-          Score
+          Score: (<span className="mb-6 text-sm text-slate-400">Max Score: {assignmentMaxScore}</span>)
         </label>
         <input
           type="number"
@@ -33,7 +33,7 @@ const GradingForm = ({ selectedSubmission, onSubmit, onCancel }) => {
           value={selectedSubmission ? score || "" : ""}
           onChange={(e) => setScore(e.target.value)}
           className="w-full p-3 rounded-xl bg-slate-800 border border-slate-700 text-white"
-          max={100}
+          max={assignmentMaxScore}
           min={0}
           step="0.1"
         />

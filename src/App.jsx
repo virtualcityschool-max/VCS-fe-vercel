@@ -58,7 +58,7 @@ import {
   StudentAssessments,
   StudentQuizDetail,
   StudentAttendance,
-  StudentExamDetail,
+  // StudentExamDetail,
   StudentEvaluationPage,
   ParentLayout,
   ParentAttendance,
@@ -230,7 +230,7 @@ const AppInner = () => {
                 <Route path="assignments" element={<StudentAssignments />} />
                 <Route path="assignments/:id" element={<StudentAssignmentDetails />} />
                 <Route path="quizzes/:id" element={<StudentQuizDetail />} />
-                <Route path="exams/:id"  element={<StudentExamDetail />} />
+                {/* <Route path="exams/:id"  element={<StudentExamDetail />} /> */}
                 <Route path="attendance" element={<StudentAttendance />} />
                 <Route path="evaluations" element={<StudentEvaluationPage />} />
               </Route>
