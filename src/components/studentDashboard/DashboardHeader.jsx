@@ -74,7 +74,7 @@ const DashboardHeader = () => {
 
       {(studentId || email) && (
         <div className="flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-white/10 pt-3">
-          {studentId && <InfoChip icon="id-badge" value={String(studentId)} />}
+          <span className="text-[11px]">Student ID:</span>{studentId && <InfoChip icon="id-badge" value={String(studentId)} />}
           {email && <InfoChip icon="envelope" value={email} />}
         </div>
       )}

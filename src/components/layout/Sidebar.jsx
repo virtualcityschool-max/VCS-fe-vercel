@@ -12,7 +12,7 @@ const MOBILE_BREAKPOINT = 1024;
 const NAV_CONFIG = {
   admin: [
     { id: "overview",    label: "Overview",     icon: "fas fa-chart-line",    to: "/admin/overview" },
-    { id: "approvals",   label: "Approvals",    icon: "fas fa-user-check",    to: "/admin/approvals" },
+    { id: "approvals",   label: "Approval pending",    icon: "fas fa-user-check",    to: "/admin/approvals" },
     { id: "users",       label: "Users",        icon: "fas fa-users",         to: "/admin/users" },
     { id: "courses",     label: "Courses",      icon: "fas fa-book",          to: "/admin/courses" },
     { id: "sessions",    label: "Classes",      icon: "fas fa-chalkboard",    to: "/admin/sessions" },

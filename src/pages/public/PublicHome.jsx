@@ -101,7 +101,7 @@ const PublicHome = () => {
             onClick={() => navigate("/courses")}
             className="group flex items-center justify-center gap-3 bg-white text-slate-950 px-6 sm:px-9 py-3.5 sm:py-4 rounded-4xl font-black text-[10px] sm:text-xs uppercase tracking-widest transition-all hover:scale-105 shadow-2xl shadow-white/5"
           >
-            Explore Course Catalog
+            Explore Course
             <i className="fas fa-arrow-right group-hover:translate-x-1 transition"></i>
           </button>
           <button

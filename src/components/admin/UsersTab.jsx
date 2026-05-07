@@ -15,10 +15,10 @@ const SearchControls = ({
 }) => {
   const roleTabs = [
     { value: "", label: "All" },
-    { value: "admin", label: "Admin" },
-    { value: "teacher", label: "Teacher" },
-    { value: "student", label: "Student" },
-    { value: "parent", label: "Parent" },
+    { value: "admin", label: "Admin(s)" },
+    { value: "teacher", label: "Teacher(s)" },
+    { value: "student", label: "Student(s)" },
+    { value: "parent", label: "Parent(s)" },
   ];
 
   // Check if any filters are applied

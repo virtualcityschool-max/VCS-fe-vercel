@@ -236,7 +236,7 @@ const AdminEvaluationPage = () => {
               <div className="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-3">
                 <i className="fas fa-inbox text-slate-500 text-xl" />
               </div>
-              <p className="text-slate-400 text-sm">No public evaluations found for this course</p>
+              <p className="text-slate-400 text-sm">No Data Found</p>
             </div>
           ) : (
             <div className="bg-slate-900/50 border border-slate-800 border-dashed rounded-3xl p-12 text-center">

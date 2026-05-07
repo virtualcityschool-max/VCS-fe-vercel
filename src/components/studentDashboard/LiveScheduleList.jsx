@@ -271,7 +271,7 @@ const LiveScheduleList = () => {
       <ConfirmDialog
         open={endConfirm.open}
         variant="warning"
-        title="End Session"
+        title="Leave Session"
         message="Are you sure you want to end this session? This cannot be undone and you will not be able to rejoin."
         confirmLabel="End Session"
         cancelLabel="Cancel"
