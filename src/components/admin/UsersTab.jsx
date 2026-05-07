@@ -12,7 +12,6 @@ const SearchControls = ({
   onFetchUsers,
   handleCreateUser,
   onClearFilters,
-  courses = [],
 }) => {
   const roleTabs = [
     { value: "", label: "All" },
@@ -27,7 +26,6 @@ const SearchControls = ({
     usersFilters.search ||
     usersFilters.role ||
     usersFilters.is_active ||
-    usersFilters.course ||
     usersFilters.ordering !== "-date_joined"
   );
 
@@ -70,16 +68,6 @@ const SearchControls = ({
             <option value="">All Statuses</option>
             <option value="true">Active</option>
             <option value="false">Inactive</option>
-          </FilterSelect>
-          <FilterSelect
-            style={{ minWidth: "160px" }}
-            value={usersFilters.course}
-            onChange={(e) => handleFilterChange("course", e.target.value)}
-          >
-            <option value="">All Courses</option>
-            {courses.map((c) => (
-              <option key={c.id} value={c.id}>{c.title}</option>
-            ))}
           </FilterSelect>
           <FilterSelect
             style={{ minWidth: "140px" }}
@@ -156,7 +144,6 @@ const UsersTab = ({
   onUserPurge,
   onFetchUsers,
   onCreateUser,
-  courses = [],
 }) => {
   const navigate = useNavigate();
   const [confirmDialog, setConfirmDialog] = useState({ open: false, userId: null, isActive: false, user: null });
@@ -178,7 +165,6 @@ const UsersTab = ({
       role: "",
       is_active: "",
       ordering: "-date_joined",
-      course: "",
     });
     setLocalSearchInput("");
   }, [setUsersFilters]);
@@ -277,7 +263,6 @@ const UsersTab = ({
         onFetchUsers={onFetchUsers}
         handleCreateUser={handleCreateUser}
         onClearFilters={handleClearFilters}
-        courses={courses}
       />
       {/* Loading State */}
       {loading ? (

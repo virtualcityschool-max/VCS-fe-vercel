@@ -108,7 +108,7 @@ const PublicHome = () => {
             onClick={() => navigate("/teachers")}
             className="group flex items-center justify-center gap-3 border border-white/10 hover:border-white/20 bg-white/5 hover:bg-white/10 text-white px-6 sm:px-9 py-3.5 sm:py-4 rounded-4xl font-black text-[10px] sm:text-xs uppercase tracking-widest transition-all hover:scale-105"
           >
-            Find a Private Tutor
+            Explore Tutor
             <i className="fas fa-user-graduate group-hover:rotate-12 transition"></i>
           </button>
         </div>

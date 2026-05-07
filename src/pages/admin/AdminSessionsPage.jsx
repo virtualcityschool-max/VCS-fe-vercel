@@ -53,7 +53,8 @@ const AdminSessionsPage = () => {
   const [sessionFilters, setSessionFilters] = useState({
     search: "",
     teacher: "",
-    view: "parent",
+    course: "",
+    view: "",
   });
 
   // Get data from Redux store
@@ -81,18 +82,19 @@ const AdminSessionsPage = () => {
 
   // Fetch supporting data on mount
   useEffect(() => {
-    dispatch(fetchCourses({has_session: false}));
+    dispatch(fetchCourses());
     dispatch(fetchUsers({ role: "teacher" }));
     dispatch(fetchAvailableStudents());
   }, [dispatch]);
 
-  // Re-fetch sessions when teacher or view filter changes
+  // Re-fetch sessions when teacher, course, or view filter changes
   useEffect(() => {
     const params = {};
     if (sessionFilters.teacher) params.teacher = sessionFilters.teacher;
+    if (sessionFilters.course) params.course = sessionFilters.course;
     if (sessionFilters.view) params.view = sessionFilters.view;
     dispatch(fetchSessions(params));
-  }, [dispatch, sessionFilters.teacher, sessionFilters.view]);
+  }, [dispatch, sessionFilters.teacher, sessionFilters.course, sessionFilters.view]);
 
   // Reset create session form when modal opens/closes
   useEffect(() => {

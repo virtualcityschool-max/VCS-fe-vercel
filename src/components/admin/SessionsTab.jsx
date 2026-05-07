@@ -271,6 +271,21 @@ const SessionsTab = ({
           </FilterSelect>
         </div>
 
+        {/* Course filter */}
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="text-xs font-semibold text-slate-500 hidden sm:inline">Course</span>
+          <FilterSelect
+            style={{ minWidth: "180px" }}
+            value={sessionFilters.course}
+            onChange={(e) => setSessionFilters({ ...sessionFilters, course: e.target.value })}
+          >
+            <option value="">All Courses</option>
+            {courses?.map((c) => (
+              <option key={c.id} value={c.id}>{c.title}</option>
+            ))}
+          </FilterSelect>
+        </div>
+
         {/* Instructor filter */}
         <div className="flex items-center gap-2 shrink-0">
           <span className="text-xs font-semibold text-slate-500 hidden sm:inline">Instructor</span>

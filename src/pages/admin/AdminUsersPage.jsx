@@ -10,8 +10,6 @@ import {
   selectUsers,
   fetchAvailableStudents,
   selectAvailableStudents,
-  fetchCourses,
-  selectCourses,
 } from "../../store/slices/adminSlice";
 import {
   Button,
@@ -43,7 +41,6 @@ const AdminUsersPage = () => {
     role: "",
     is_active: "",
     ordering: "-date_joined",
-    course: "",
   });
 
   // Create user form state
@@ -75,7 +72,6 @@ const AdminUsersPage = () => {
   // Get users data from Redux store
   const users = useSelector(selectUsers);
   const availableStudents = useSelector(selectAvailableStudents);
-  const courses = useSelector(selectCourses);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -84,9 +80,6 @@ const AdminUsersPage = () => {
     };
   }, []);
 
-  useEffect(() => {
-    dispatch(fetchCourses());
-  }, [dispatch]);
 
   // Define handleFetchUsers
   const handleFetchUsers = useCallback(() => {
@@ -104,10 +97,6 @@ const AdminUsersPage = () => {
     if (usersFilters.ordering) {
       params.ordering = usersFilters.ordering;
     }
-    if (usersFilters.course) {
-      params.course = usersFilters.course;
-    }
-
     dispatch(fetchUsers(params));
   }, [dispatch, usersFilters]);
 
@@ -135,7 +124,6 @@ const AdminUsersPage = () => {
     usersFilters.role,
     usersFilters.is_active,
     usersFilters.ordering,
-    usersFilters.course,
   ]);
 
   // Fetch available students when create user modal opens
@@ -287,7 +275,6 @@ const AdminUsersPage = () => {
         onFetchUsers={handleFetchUsers}
         onUserEdit={handleEditUser}
         onCreateUser={handleCreateUser}
-        courses={courses?.data || []}
       />
 
       {/* Create User Modal */}
