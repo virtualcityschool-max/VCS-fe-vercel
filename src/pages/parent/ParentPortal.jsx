@@ -82,7 +82,7 @@ const ParentPortal = () => {
     );
   }
 
-  // Empty state
+  // Empty state — no children linked yet, but still show the link request section
   if (
     !dashboardData ||
     !dashboardData.children ||
@@ -104,6 +104,8 @@ const ParentPortal = () => {
               terminal.
             </p>
           </header>
+
+          <ChildLinkRequest />
 
           <div className="flex flex-col items-center justify-center py-16">
             <div className="w-16 h-16 bg-slate-500/20 rounded-full flex items-center justify-center mb-6">

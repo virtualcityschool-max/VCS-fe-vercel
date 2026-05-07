@@ -258,14 +258,28 @@ const SessionsTab = ({
           </div>
         )}
 
+        {/* View filter */}
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="text-xs font-semibold text-slate-500 hidden sm:inline">Session Type</span>
+          <FilterSelect
+            style={{ minWidth: "130px" }}
+            value={sessionFilters.view}
+            onChange={(e) => setSessionFilters({ ...sessionFilters, view: e.target.value })}
+          >
+            <option value="">All</option>
+            <option value="parent">Parent</option>
+          </FilterSelect>
+        </div>
+
         {/* Instructor filter */}
         <div className="flex items-center gap-2 shrink-0">
           <span className="text-xs font-semibold text-slate-500 hidden sm:inline">Instructor</span>
           <FilterSelect
+            style={{ minWidth: "160px" }}
             value={sessionFilters.teacher}
             onChange={(e) => setSessionFilters({ ...sessionFilters, teacher: e.target.value })}
           >
-            <option value="" selected>All Teachers</option>
+            <option value="">All Teachers</option>
             {teachers.map((t) => (
               <option key={t.id} value={t.id}>{t.username}</option>
             ))}

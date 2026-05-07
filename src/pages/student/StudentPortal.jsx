@@ -127,32 +127,33 @@ const StudentPortal = () => {
       className="min-h-screen bg-[#0f172a] text-white font-inter"
     >
       <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
-        {/* Dashboard Header */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
-          <DashboardHeader />
-          <NextSessionCard />
-          <OverdueAssignmentsCard />
+        {/* Dashboard Header — wide, two small cards stacked on the right */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6 items-start">
+          <div className="md:col-span-2 gap-4 flex flex-col ">
+            <DashboardHeader />
+            {/* <NextSessionCard /> */}
+            <LiveScheduleList />
+            <MyAttendanceList />
+          </div>
+          <div className="flex flex-col gap-4 lg:gap-6">
+            <OverdueAssignmentsCard />
+            {/* <div className="xl:col-span-4 space-y-6 lg:space-y-8"> */}
+              <AssignmentOverviewList />
+            {/* </div> */}
+          </div>
         </div>
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 lg:gap-8">
-          {/* Left Column - Main Content */}
           <div className="xl:col-span-8 space-y-6 lg:space-y-8">
-            {/* Live Schedule */}
-            <LiveScheduleList />
-
-            {/* My Attendance */}
-            <MyAttendanceList />
-          </div>
-
-          {/* Right Column - Sidebar */}
-          <div className="xl:col-span-4 space-y-6 lg:space-y-8">
-            {/* Assignment Overview */}
-            <AssignmentOverviewList />
           </div>
         </div>
+
         {/* Enrolled Courses */}
         <CourseProgressGrid />
+
+        {/* Live Schedule — at the bottom */}
+        
       </div>
     </section>
   );

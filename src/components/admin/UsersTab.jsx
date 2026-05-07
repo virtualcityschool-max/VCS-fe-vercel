@@ -12,6 +12,7 @@ const SearchControls = ({
   onFetchUsers,
   handleCreateUser,
   onClearFilters,
+  courses = [],
 }) => {
   const roleTabs = [
     { value: "", label: "All" },
@@ -26,6 +27,7 @@ const SearchControls = ({
     usersFilters.search ||
     usersFilters.role ||
     usersFilters.is_active ||
+    usersFilters.course ||
     usersFilters.ordering !== "-date_joined"
   );
 
@@ -61,6 +63,7 @@ const SearchControls = ({
             className="w-full sm:w-64"
           />
           <FilterSelect
+            style={{ minWidth: "130px" }}
             value={usersFilters.is_active}
             onChange={(e) => handleFilterChange("is_active", e.target.value)}
           >
@@ -69,6 +72,17 @@ const SearchControls = ({
             <option value="false">Inactive</option>
           </FilterSelect>
           <FilterSelect
+            style={{ minWidth: "160px" }}
+            value={usersFilters.course}
+            onChange={(e) => handleFilterChange("course", e.target.value)}
+          >
+            <option value="">All Courses</option>
+            {courses.map((c) => (
+              <option key={c.id} value={c.id}>{c.title}</option>
+            ))}
+          </FilterSelect>
+          <FilterSelect
+            style={{ minWidth: "140px" }}
             value={usersFilters.ordering}
             onChange={(e) => handleFilterChange("ordering", e.target.value)}
           >
@@ -142,6 +156,7 @@ const UsersTab = ({
   onUserPurge,
   onFetchUsers,
   onCreateUser,
+  courses = [],
 }) => {
   const navigate = useNavigate();
   const [confirmDialog, setConfirmDialog] = useState({ open: false, userId: null, isActive: false, user: null });
@@ -163,6 +178,7 @@ const UsersTab = ({
       role: "",
       is_active: "",
       ordering: "-date_joined",
+      course: "",
     });
     setLocalSearchInput("");
   }, [setUsersFilters]);
@@ -261,6 +277,7 @@ const UsersTab = ({
         onFetchUsers={onFetchUsers}
         handleCreateUser={handleCreateUser}
         onClearFilters={handleClearFilters}
+        courses={courses}
       />
       {/* Loading State */}
       {loading ? (
@@ -472,7 +489,8 @@ const UsersTab = ({
                           </button>
                           <button
                             onClick={() => handleDeleteUser(user)}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${
+                            style={{ minWidth: "100px" }}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition text-center ${
                               user.is_active
                                 ? "bg-amber-600/10 text-amber-400 hover:bg-amber-600/20"
                                 : "bg-emerald-600/10 text-emerald-400 hover:bg-emerald-600/20"

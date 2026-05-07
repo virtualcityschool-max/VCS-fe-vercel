@@ -500,7 +500,7 @@ export const authService = {
         message: response.data.message || "Link request(s) sent successfully",
       };
     } catch (error) {
-      throw error;
+      throw error?.response;
     }
   },
 };

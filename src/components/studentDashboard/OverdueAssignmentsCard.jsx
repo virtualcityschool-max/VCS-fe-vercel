@@ -83,9 +83,9 @@ const OverdueAssignmentsCard = () => {
         )}
       </div>
 
-      <button className="w-full bg-red-600 hover:bg-red-500 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition shadow-lg shadow-red-900/30 active:scale-95">
+      {/* <button className="w-full bg-red-600 hover:bg-red-500 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition shadow-lg shadow-red-900/30 active:scale-95">
         View All Overdue
-      </button>
+      </button> */}
     </div>
   );
 };

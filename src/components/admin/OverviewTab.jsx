@@ -145,7 +145,7 @@ const OverviewTab = ({ analytics, analyticsLoading, analyticsError }) => {
     name: truncate(item.course),
     fullName: item.course,
     Revenue: item.revenue,
-    "Lost Revenue": item.lost_revenue,
+    // "Lost Revenue": item.lost_revenue,
   }));
 
   const enrollmentData = (analytics.enrollments?.by_course || []).map(

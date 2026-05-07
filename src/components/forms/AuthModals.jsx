@@ -13,6 +13,7 @@ import {
 import { authService } from "../../services/authService";
 import { normalizeApiError } from "../../utils/errorHandler";
 import { useFieldErrors } from "../../hooks";
+import { showApiError } from "../../utils/apiErrorHandler";
 
 const AuthModals = () => {
   const [activeRoleTab, setActiveRoleTab] = useState("student");
@@ -356,19 +357,20 @@ const AuthModals = () => {
       // Registration successful - show success state
       setRegistrationStep("success");
     } catch (err) {
+      showApiError(err)
       console.error("OTP verification failed:", err);
 
-      // Use global error handler
-      const normalizedError = normalizeApiError(err);
+      // // Use global error handler
+      // const normalizedError = normalizeApiError(err);
 
-      // For OTP errors, always show them inline (not as toast)
-      if (normalizedError.type === "field" || normalizedError.type === "form") {
-        setOtpError(normalizedError.message);
-      } else {
-        // General errors can be shown as toast
-        toastManager.error(normalizedError.message);
-        setOtpError("Verification failed. Please try again.");
-      }
+      // // For OTP errors, always show them inline (not as toast)
+      // if (normalizedError.type === "field" || normalizedError.type === "form") {
+      //   setOtpError(normalizedError.message);
+      // } else {
+      //   // General errors can be shown as toast
+      //   toastManager.error(normalizedError.message);
+      //   setOtpError("Verification failed. Please try again.");
+      // }
     }
   };
 
@@ -381,8 +383,7 @@ const AuthModals = () => {
       await authService.forgotPasswordRequestOtp(fpEmail.trim());
       setFpStep("verify");
     } catch (err) {
-      const msg = err?.response?.data?.detail || err?.response?.data?.email?.[0] || err?.message || "Failed to send OTP";
-      setFpError(msg);
+      showApiError(err)
     } finally {
       setFpLoading(false);
     }

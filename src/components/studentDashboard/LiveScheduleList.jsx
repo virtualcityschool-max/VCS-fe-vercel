@@ -4,10 +4,12 @@ import {
   selectLiveSchedule,
   startStudentSession,
   endStudentSession,
+  fetchStudentDashboard,
 } from "../../store/slices/studentDashboardSlice";
 import { toastManager } from "../../utils/toastManager";
-import { formatDate, formatScheduleTime, getWindowLabel, isWithinSessionWindow } from "../common/StartSession";
+import { formatDate, formatScheduleTime } from "../common/StartSession";
 import { showApiError } from "../../utils/apiErrorHandler";
+import ConfirmDialog from "../common/ConfirmDialog";
 
 const LiveScheduleList = () => {
   const dispatch = useDispatch();
@@ -16,10 +18,9 @@ const LiveScheduleList = () => {
     (state) => state.studentDashboard.isJoiningSession,
   );
 
-  // Track which sessions the student has started (session_id → true)
-  const [activeSessionIds, setActiveSessionIds] = useState({});
-  // Track which session is currently being acted on
   const [loadingSessionId, setLoadingSessionId] = useState(null);
+  const [loadingAction, setLoadingAction] = useState(null); // 'join' | 'end'
+  const [endConfirm, setEndConfirm] = useState({ open: false, session: null });
 
   const openMeetingLink = (link) => {
     if (!link || !link.startsWith("http")) {
@@ -37,54 +38,53 @@ const LiveScheduleList = () => {
   const handleJoinSession = async (session) => {
     const sessionId = session?.session_id ?? session?.id;
     setLoadingSessionId(sessionId);
+    setLoadingAction("join");
     try {
       const result = await dispatch(startStudentSession(sessionId)).unwrap();
       const meetingLink = result?.meeting_link || session?.meeting_link;
       openMeetingLink(meetingLink);
-      setActiveSessionIds((prev) => ({ ...prev, [sessionId]: true }));
+      dispatch(fetchStudentDashboard());
     } catch (err) {
-      showApiError(err)
+      showApiError(err);
     } finally {
       setLoadingSessionId(null);
+      setLoadingAction(null);
     }
   };
 
-  const handleEndSession = async (session) => {
+  const handleEndSession = (session) => {
+    setEndConfirm({ open: true, session });
+  };
+
+  const confirmEndSession = async () => {
+    const { session } = endConfirm;
+    setEndConfirm({ open: false, session: null });
     const sessionId = session?.session_id ?? session?.id;
     setLoadingSessionId(sessionId);
+    setLoadingAction("end");
     try {
       await dispatch(endStudentSession(sessionId)).unwrap();
       toastManager.success("Session ended");
-      setActiveSessionIds((prev) => {
-        const next = { ...prev };
-        delete next[sessionId];
-        return next;
-      });
+      dispatch(fetchStudentDashboard());
     } catch (err) {
       toastManager.error(err?.error || err?.message || "Failed to end session");
     } finally {
       setLoadingSessionId(null);
+      setLoadingAction(null);
     }
   };
 
   
 
-  const getStatusBadge = (session, isActive) => {
-    if (isActive) {
-      return (
-        <span className="bg-green-600/20 text-green-400 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest animate-pulse">
-          In Session
-        </span>
-      );
-    }
-    if (session.status === "live") {
+  const getStatusBadge = (session) => {
+    if (session.has_joined) {
       return (
         <span className="bg-red-600/20 text-red-400 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest animate-pulse">
           Live Now
         </span>
       );
     }
-    if (session.status === "ended") {
+    if (session.left_at) {
       return (
         <span className="bg-slate-700 text-slate-400 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">
           Ended
@@ -136,11 +136,7 @@ const LiveScheduleList = () => {
       <div className="space-y-6">
         {liveSchedule.map((session) => {
           const sessionId = session?.session_id ?? session?.id;
-          const isActive = !!activeSessionIds[sessionId];
           const isThisLoading = loadingSessionId === sessionId;
-          // const canJoin = isWithinSessionWindow(session.scheduled_at);
-          let canJoin = true;
-          const windowLabel = getWindowLabel(session.scheduled_at);
 
           return (
             <div
@@ -170,7 +166,7 @@ const LiveScheduleList = () => {
                   <h4 className="text-xl font-bold group-hover:text-blue-400 transition truncate">
                     {session.course_title}
                   </h4>
-                  {getStatusBadge(session, isActive)}
+                  {getStatusBadge(session)}
                 </div>
                 <p className="text-slate-500 text-sm mb-4">
                   Instructor: {session.instructor_name}
@@ -223,58 +219,65 @@ const LiveScheduleList = () => {
 
               {/* Action Buttons */}
               <div className="flex-shrink-0 flex flex-col gap-2">
-                {session?.status === "ended" && !isActive ? (
-                  <button
-                    disabled
-                    className="border border-slate-600 text-slate-500 cursor-not-allowed px-8 py-4 rounded-2xl font-bold text-sm"
-                  >
-                    <i className="fas fa-check-circle mr-2"></i>
-                    Session Ended
-                  </button>
-                ) : isActive ? (
-                  /* Student has joined — show End Session */
-                  <button
-                    onClick={() => handleEndSession(session)}
-                    disabled={isThisLoading || isJoiningSession}
-                    className="bg-rose-600 hover:bg-rose-500 text-white px-8 py-4 rounded-2xl font-bold text-sm shadow-lg shadow-rose-900/40 transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                  >
-                    {isThisLoading ? (
-                      <><i className="fas fa-spinner fa-spin"></i> Ending...</>
-                    ) : (
-                      <><i className="fas fa-stop-circle"></i> End Session</>
-                    )}
-                  </button>
-                ) : (
-                  /* Join Session — gated by time window */
-                  <div className="relative group/btn">
+                {session?.status === "ended" || session.left_at ? (
+                  <span className="text-slate-500 text-sm font-semibold uppercase tracking-widest">
+                    {session.status}
+                  </span>
+                ) : session?.has_joined ? (
+                  <>
                     <button
-                      onClick={() => canJoin && handleJoinSession(session)}
-                      disabled={!canJoin || isThisLoading || isJoiningSession}
-                      className={`px-8 py-4 rounded-2xl font-bold text-sm transition active:scale-95 flex items-center gap-2 ${
-                        canJoin
-                          ? "bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-900/40 disabled:opacity-50 disabled:cursor-not-allowed"
-                          : "border border-slate-600 text-slate-500 cursor-not-allowed opacity-60"
-                      }`}
+                      onClick={() => handleJoinSession(session)}
+                      disabled={isThisLoading || isJoiningSession}
+                      className="bg-blue-600 hover:bg-blue-500 text-white px-8 py-4 rounded-2xl font-bold text-sm shadow-lg shadow-blue-900/40 transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                     >
-                      {isThisLoading ? (
+                      {isThisLoading && loadingAction === "join" ? (
                         <><i className="fas fa-spinner fa-spin"></i> Joining...</>
                       ) : (
                         <><i className="fas fa-video"></i> Join Session</>
                       )}
                     </button>
-                    {canJoin && (
-                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-slate-700 border border-slate-600 text-white text-xs rounded-lg whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity pointer-events-none z-10 shadow-xl">
-                        <p className="font-semibold text-slate-300 mb-0.5">Time to join</p>
-                        <p className="text-white font-bold">{windowLabel || session.recurring_schedule}</p>
-                      </div>
+                    <button
+                      onClick={() => handleEndSession(session)}
+                      disabled={isThisLoading || isJoiningSession}
+                      className="bg-rose-600 hover:bg-rose-500 text-white px-8 py-4 rounded-2xl font-bold text-sm shadow-lg shadow-rose-900/40 transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    >
+                      {isThisLoading && loadingAction === "end" ? (
+                        <><i className="fas fa-spinner fa-spin"></i> Ending...</>
+                      ) : (
+                        <><i className="fas fa-stop-circle"></i> End Session</>
+                      )}
+                    </button>
+                  </>
+                ) : (
+                  /* scheduled */
+                  <button
+                    onClick={() => handleJoinSession(session)}
+                    disabled={isThisLoading || isJoiningSession}
+                    className="bg-blue-600 hover:bg-blue-500 text-white px-8 py-4 rounded-2xl font-bold text-sm shadow-lg shadow-blue-900/40 transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  >
+                    {isThisLoading ? (
+                      <><i className="fas fa-spinner fa-spin"></i> Joining...</>
+                    ) : (
+                      <><i className="fas fa-video"></i> Join Session</>
                     )}
-                  </div>
+                  </button>
                 )}
               </div>
             </div>
           );
         })}
       </div>
+
+      <ConfirmDialog
+        open={endConfirm.open}
+        variant="warning"
+        title="End Session"
+        message="Are you sure you want to end this session? This cannot be undone and you will not be able to rejoin."
+        confirmLabel="End Session"
+        cancelLabel="Cancel"
+        onConfirm={confirmEndSession}
+        onCancel={() => setEndConfirm({ open: false, session: null })}
+      />
     </section>
   );
 };

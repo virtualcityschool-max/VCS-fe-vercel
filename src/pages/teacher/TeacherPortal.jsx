@@ -13,6 +13,7 @@ import { createAnnouncement } from "../../store/slices/announcementsSlice";
 import { toastManager } from "../../utils/toastManager";
 import CourseStudentsModal from "../../components/courses/CourseStudentsModal";
 import { showApiError } from "../../utils/apiErrorHandler";
+import ConfirmDialog from "../../components/common/ConfirmDialog";
 import { getWindowLabel, isWithinSessionWindow } from "../../components/common/StartSession";
 
 
@@ -25,6 +26,7 @@ const TeacherPortal = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAnnouncementModalOpen, setIsAnnouncementModalOpen] = useState(false);
   const [studentsModal, setStudentsModal] = useState(null);
+  const [endSessionConfirm, setEndSessionConfirm] = useState({ open: false, sessionId: null });
 
   const {
     dashboard,
@@ -113,19 +115,16 @@ const TeacherPortal = () => {
     }
   };
 
-  const handleEndSession = async (sessionId) => {
-    const isConfirmed = window.confirm(
-      "Are you sure you want to end this session? This action cannot be undone.",
-    );
+  const handleEndSession = (sessionId) => {
+    setEndSessionConfirm({ open: true, sessionId });
+  };
 
-    if (!isConfirmed) {
-      return;
-    }
-
+  const confirmEndSession = async () => {
+    const { sessionId } = endSessionConfirm;
+    setEndSessionConfirm({ open: false, sessionId: null });
     try {
       await dispatch(endLiveSession(sessionId)).unwrap();
       toastManager.success("Session ended successfully");
-      // refresh dashboard
       await dispatch(fetchTeacherDashboard()).unwrap();
     } catch (err) {
       showApiError(err);
@@ -512,6 +511,16 @@ const TeacherPortal = () => {
           </div>
         </div>
       )}
+      <ConfirmDialog
+        open={endSessionConfirm.open}
+        variant="warning"
+        title="End Session"
+        message="Are you sure you want to end this session? This cannot be undone and students will not be able to rejoin."
+        confirmLabel="End Session"
+        cancelLabel="Cancel"
+        onConfirm={confirmEndSession}
+        onCancel={() => setEndSessionConfirm({ open: false, sessionId: null })}
+      />
     </div>
   );
 };
