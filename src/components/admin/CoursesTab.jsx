@@ -156,6 +156,7 @@ const CoursesTab = ({
   loading,
   loadingCourseIds,
   updatingCourseId,
+  isCreatingCourse = false,
   editCourseForm,
   setEditCourseForm,
   createCourseForm,
@@ -709,9 +710,14 @@ const CoursesTab = ({
                 </Button>
                 <Button
                   type="submit"
-                  className="bg-indigo-600 hover:bg-indigo-500"
+                  disabled={isCreatingCourse}
+                  className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                 >
-                  Create Course
+                  {isCreatingCourse ? (
+                    <><i className="fas fa-spinner fa-spin"></i> Creating...</>
+                  ) : (
+                    "Create Course"
+                  )}
                 </Button>
               </div>
             </form>

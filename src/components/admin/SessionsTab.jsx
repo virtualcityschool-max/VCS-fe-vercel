@@ -395,8 +395,8 @@ const SessionsTab = ({
                     <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Course</th>
                     <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Teacher</th>
                     <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Start Date</th>
-                    <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Recurrence</th>
                     <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">End Date</th>
+                    <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Recurrence</th>
                     <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Status</th>
                     <th className="px-5 py-4 text-xs font-black uppercase text-slate-500 text-right">Actions</th>
                   </tr>
@@ -408,6 +408,7 @@ const SessionsTab = ({
                       <td className="px-5 py-4 text-slate-300 text-sm">{session.course?.title || session.course_title || "—"}</td>
                       <td className="px-5 py-4 text-slate-300 text-sm">{session.teacher_name || "—"}</td>
                       <td className="px-5 py-4 text-slate-300 text-sm">{formatDate(session.scheduled_at || session.start_time)}</td>
+                      <td className="px-5 py-4 text-slate-300 text-sm">{formatDate(session.recurrence_end_date) || "—"}</td>
                       <td className="px-5 py-4">
                         {session.recurrence_days?.length > 0 ? (
                           <div className="flex flex-wrap gap-1">
@@ -417,7 +418,6 @@ const SessionsTab = ({
                           </div>
                         ) : <span className="text-slate-500 text-xs">—</span>}
                       </td>
-                      <td className="px-5 py-4 text-slate-300 text-sm">{session.recurrence_end_date || "—"}</td>
                       <td className="px-5 py-4">{getStatusBadge(session.status)}</td>
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-2 justify-end">
