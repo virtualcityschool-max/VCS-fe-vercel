@@ -86,32 +86,32 @@ const NextSessionCard = () => {
   }
 
   return (
-    <div className="bg-slate-900/40 backdrop-blur-xl p-6 rounded-[2rem] border border-white/5 shadow-2xl flex items-center gap-6 transition-all duration-300 hover:border-blue-500/20 group relative overflow-hidden">
+    <div className="bg-slate-900/40 backdrop-blur-xl p-4 lg:p-5 rounded-[1.5rem] border border-white/5 shadow-2xl flex items-center gap-4 transition-all duration-300 hover:border-blue-500/20 group relative overflow-hidden">
       {/* Dynamic Glow Effect */}
-      <div className={`absolute -right-10 -top-10 w-32 h-32 rounded-full blur-[60px] transition-all duration-700 ${canJoinNow ? 'bg-blue-600/20' : 'bg-slate-600/5'}`}></div>
+      <div className={`absolute -right-10 -top-10 w-24 h-24 rounded-full blur-[50px] transition-all duration-700 ${canJoinNow ? 'bg-blue-600/20' : 'bg-slate-600/5'}`}></div>
       
-      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-all duration-500 border border-white/5 ${canJoinNow ? 'bg-blue-600/20 text-blue-400 shadow-[0_0_20px_rgba(37,99,235,0.2)]' : 'bg-slate-800/50 text-slate-500'}`}>
-        <i className={`fas ${canJoinNow ? 'fa-broadcast-tower animate-pulse' : 'fa-clock'} text-xl`}></i>
+      <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 group-hover:scale-105 transition-all duration-500 border border-white/5 ${canJoinNow ? 'bg-blue-600/20 text-blue-400 shadow-[0_0_15px_rgba(37,99,235,0.15)]' : 'bg-slate-800/50 text-slate-500'}`}>
+        <i className={`fas ${canJoinNow ? 'fa-broadcast-tower animate-pulse' : 'fa-clock'} text-lg`}></i>
       </div>
 
       <div className="min-w-0 flex-1 relative z-10">
-        <div className="flex items-center gap-2 mb-1.5">
-          <span className="text-[9px] font-black text-blue-400 uppercase tracking-[0.2em] bg-blue-400/10 px-2 py-0.5 rounded-md border border-blue-400/10">
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-[8px] font-black text-blue-400 uppercase tracking-[0.2em] bg-blue-400/10 px-2 py-0.5 rounded-md border border-blue-400/10">
             {nextSession.course_title}
           </span>
           {canJoinNow && (
-            <span className="flex h-2 w-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]"></span>
+            <span className="flex h-1.5 w-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]"></span>
           )}
         </div>
-        <h3 className="text-lg font-black text-white mb-0.5 truncate tracking-tight">
+        <h3 className="text-base font-black text-white mb-0.5 truncate tracking-tight">
           {nextSession.title}
         </h3>
-        <div className="flex items-center gap-3">
-          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+        <div className="flex items-center gap-2.5">
+          <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">
             {nextSession.teacher_name}
           </p>
-          <div className="h-1 w-1 rounded-full bg-slate-700"></div>
-          <p className="text-[11px] font-black text-blue-400/90 tracking-wide">
+          <div className="h-0.5 w-0.5 rounded-full bg-slate-700"></div>
+          <p className="text-[10px] font-black text-blue-400/90 tracking-wide">
             {formatStartsIn(nextSession.starts_in_mins)}
           </p>
         </div>
@@ -121,7 +121,7 @@ const NextSessionCard = () => {
         <button
           onClick={handleJoinSession}
           disabled={isJoiningSession || !canJoinNow}
-          className={`px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all duration-300 active:scale-95 ${
+          className={`px-4 py-2.5 rounded-xl font-black text-[9px] uppercase tracking-widest transition-all duration-300 active:scale-95 ${
             isJoiningSession || !canJoinNow
               ? "bg-slate-800/50 text-slate-500 cursor-not-allowed border border-white/5"
               : "bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-900/40 border border-blue-400/30 hover:shadow-blue-500/20"

@@ -100,7 +100,7 @@ const EnrollmentTypeModal = ({
                     <i className="fas fa-globe text-lg"></i>
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-white font-bold text-lg mb-1">Normal Enrollment</h3>
+                    <h3 className="text-white font-bold text-lg mb-1">Standard Enrollment</h3>
                     <p className="text-slate-400 text-sm">
                       Enroll directly in the course through the public marketplace
                     </p>
@@ -109,7 +109,7 @@ const EnrollmentTypeModal = ({
               </button>
 
               {/* Private enrollment */}
-              <button
+              {/* <button
                 onClick={handlePrivateClick}
                 className={`w-full bg-slate-800 hover:bg-slate-700 border rounded-2xl p-6 text-left transition-all group ${
                   isPrivate
@@ -128,7 +128,7 @@ const EnrollmentTypeModal = ({
                     </p>
                   </div>
                 </div>
-              </button>
+              </button> */}
             </div>
 
             {/* Slot selection — only shown when Private is active */}
@@ -176,7 +176,7 @@ const EnrollmentTypeModal = ({
       <ConfirmDialog
         open={showNormalConfirm}
         variant="success"
-        title="Confirm Normal Enrollment"
+        title="Confirm Standard Enrollment"
         message="Are you sure you want to enroll in this course publicly through the marketplace?"
         confirmLabel="Yes, Enroll"
         cancelLabel="Cancel"
