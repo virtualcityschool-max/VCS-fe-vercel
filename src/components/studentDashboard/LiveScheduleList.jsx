@@ -108,7 +108,7 @@ const LiveScheduleList = () => {
       <section>
         <h2 className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 mb-6 border-b border-white/5 pb-4 flex items-center gap-3">
           <span className="w-1.5 h-1.5 bg-slate-700 rounded-full"></span>
-         My Live Schedule
+          My Live Schedule
         </h2>
         <div className="bg-slate-900/40 backdrop-blur-xl p-8 rounded-[1.5rem] border border-white/5 text-center shadow-2xl transition-all duration-500 hover:border-white/10">
           <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/5">
@@ -129,7 +129,7 @@ const LiveScheduleList = () => {
     <section>
       <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-6 border-b border-white/5 pb-4 flex items-center gap-3">
         <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-ping"></span>
-        Active Schedule
+        My Live Schedule
       </h2>
       <div className="space-y-4">
         {liveSchedule.map((session) => {
@@ -170,7 +170,7 @@ const LiveScheduleList = () => {
                   {getStatusBadge(session)}
                 </div>
                 <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mb-3 opacity-60">
-                  {session.instructor_name}
+                  Instructor: {session.instructor_name}
                 </p>
 
                 {/* Schedule Info */}
@@ -183,28 +183,33 @@ const LiveScheduleList = () => {
                     <i className="fas fa-clock text-indigo-400/60"></i>
                     <span>{formatScheduleTime(session.scheduled_at)}</span>
                   </div>
+                  {session.recurring_schedule && (
+                    <div className="flex items-center gap-1">
+                      <i className="fas fa-repeat"></i>
+                      <span>{session.recurring_schedule}</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Attendance Rate - Slim */}
                 {session.attendance_rate !== null && (
                   <div className="w-full max-w-[200px] mx-auto md:mx-0">
                     <div className="flex justify-between text-[10px] font-black uppercase tracking-[0.15em] mb-1.5">
-                      <span className="text-slate-500 opacity-60">Presence</span>
+                      <span className="text-slate-500 opacity-60">Attendance Rate</span>
                       <span className={getAttendanceColor(session.attendance_rate)}>
                         {session.attendance_rate}%
                       </span>
                     </div>
                     <div className="h-1 bg-white/5 rounded-full overflow-hidden">
                       <div
-                        className={`h-full transition-all duration-1000 ${
-                          session.attendance_rate >= 90
+                        className={`h-full transition-all duration-1000 ${session.attendance_rate >= 90
                             ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.3)]"
                             : session.attendance_rate >= 75
                               ? "bg-amber-500"
                               : session.attendance_rate >= 60
                                 ? "bg-orange-500"
                                 : "bg-red-500"
-                        }`}
+                          }`}
                         style={{ width: `${session.attendance_rate}%` }}
                       ></div>
                     </div>
@@ -226,11 +231,11 @@ const LiveScheduleList = () => {
                       className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-blue-900/40 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                     >
                       {isThisLoading && loadingAction === "join" ? (
-                        <i className="fas fa-spinner fa-spin"></i>
+                        <i className="fas fa-spinner fa-spin">Joining...</i>
                       ) : (
                         <i className="fas fa-video"></i>
                       )}
-                      Resume
+                      Join Session
                     </button>
                     <button
                       onClick={() => handleEndSession(session)}
@@ -238,11 +243,11 @@ const LiveScheduleList = () => {
                       className="bg-red-600/10 hover:bg-red-600/20 text-red-400 px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest border border-red-500/10 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                     >
                       {isThisLoading && loadingAction === "end" ? (
-                        <i className="fas fa-spinner fa-spin"></i>
+                        <i className="fas fa-spinner fa-spin"> Ending...</i>
                       ) : (
                         <i className="fas fa-stop-circle"></i>
                       )}
-                      Exit
+                      Leave Session
                     </button>
                   </>
                 ) : (
@@ -252,11 +257,11 @@ const LiveScheduleList = () => {
                     className="bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-blue-900/40 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                   >
                     {isThisLoading ? (
-                      <i className="fas fa-spinner fa-spin"></i>
+                      <i className="fas fa-spinner fa-spin">Joining...</i>
                     ) : (
                       <i className="fas fa-play text-[10px]"></i>
                     )}
-                    Start Class
+                    Join Session
                   </button>
                 )}
               </div>
@@ -268,9 +273,9 @@ const LiveScheduleList = () => {
       <ConfirmDialog
         open={endConfirm.open}
         variant="warning"
-        title="Exit Session"
-        message="Are you sure you want to end this session? This will finalize your attendance for today."
-        confirmLabel="Confirm Exit"
+        title="Leave Session"
+        message="Are you sure you want to leave this session?"
+        confirmLabel="Confirm Leave"
         cancelLabel="Cancel"
         onConfirm={confirmEndSession}
         onCancel={() => setEndConfirm({ open: false, session: null })}

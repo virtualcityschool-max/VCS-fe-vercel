@@ -414,7 +414,7 @@ const TeacherPortal = () => {
                       </p>
 
                       <p className="text-[10px] text-slate-400 mt-1">
-                        {a.submissions_count} submission(s) • Total{" "}
+                        {a.submissions_count} submission(s) • Total Marks{" "}
                         {a.max_score}
                       </p>
                     </div>
