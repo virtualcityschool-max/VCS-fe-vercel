@@ -30,6 +30,7 @@ export { default as TeacherSubmissions } from "./teacher/TeacherSubmissions";
 export { default as TeacherSessionCalendar } from "./teacher/TeacherSessionCalendar";
 export { default as TeacherInternalStudentProfile } from "./teacher/TeacherInternalStudentProfile";
 export { default as TeacherEvaluationPage } from "./teacher/TeacherEvaluationPage";
+export { default as TeacherHireLeads } from "./teacher/TeacherHireLeads";
 
 // Admin Pages
 export { default as AdminLayout } from "../components/admin/AdminLayout";

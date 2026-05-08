@@ -575,6 +575,9 @@ const adminSlice = createSlice({
         );
         const coursesWithTimestamps = coursesData.map((course) => ({
           ...course,
+          category: typeof course.category === "object" && course.category !== null
+            ? course.category.name ?? null
+            : course.category ?? null,
           updated_at:
             course.updated_at ||
             course.modified_at ||
@@ -719,7 +722,18 @@ const adminSlice = createSlice({
       })
       .addCase(fetchEnrollments.fulfilled, (state, action) => {
         state.enrollments.loading = false;
-        state.enrollments.data = action.payload.results || action.payload || [];
+        const raw = action.payload.results || action.payload || [];
+        state.enrollments.data = raw.map((enrollment) => ({
+          ...enrollment,
+          course: enrollment.course
+            ? {
+                ...enrollment.course,
+                category: typeof enrollment.course.category === "object" && enrollment.course.category !== null
+                  ? enrollment.course.category.name ?? null
+                  : enrollment.course.category ?? null,
+              }
+            : enrollment.course,
+        }));
       })
       .addCase(fetchEnrollments.rejected, (state, action) => {
         state.enrollments.loading = false;

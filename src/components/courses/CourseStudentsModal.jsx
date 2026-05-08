@@ -133,7 +133,7 @@ const CourseStudentsModal = ({ courseId, courseTitle, onClose, canUnenroll }) =>
                     <div className="bg-slate-800/50 rounded-xl p-3 border border-slate-700/40">
                       <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Category</p>
                       <p className="text-white text-sm font-medium truncate capitalize">
-                        {course.category?.replace(/_/g, " ") || "—"}
+                        {(typeof course.category === "object" ? course.category?.name : course.category)?.replace(/_/g, " ") || "—"}
                       </p>
                     </div>
                     <div className="bg-slate-800/50 rounded-xl p-3 border border-slate-700/40">

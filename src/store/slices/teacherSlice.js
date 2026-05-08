@@ -532,7 +532,13 @@ const teacherSlice = createSlice({
       })
       .addCase(fetchMyCourses.fulfilled, (state, action) => {
         state.loadingCourses = false;
-        state.myCourses = Array.isArray(action.payload) ? action.payload : [];
+        const raw = Array.isArray(action.payload) ? action.payload : [];
+        state.myCourses = raw.map((c) => ({
+          ...c,
+          category: typeof c.category === "object" && c.category !== null
+            ? c.category.name ?? null
+            : c.category ?? null,
+        }));
       })
       .addCase(fetchMyCourses.rejected, (state, action) => {
         state.loadingCourses = false;

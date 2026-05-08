@@ -16,10 +16,15 @@ import {
   approveChildLink,
   rejectChildLink,
 } from "../../store/slices/childLinksSlice";
+import {
+  fetchAdminHireRequests,
+  actionHireRequest,
+} from "../../store/slices/hireSlice";
 import { toastManager } from "../../utils/toastManager";
 import ApprovalsTab from "../../components/admin/ApprovalsTab";
 import ChildLinksTab from "../../components/admin/ChildLinksTab";
 import EnrollmentRequestsTab from "../../components/admin/EnrollmentRequestsTab";
+import HireRequestsTab from "../../components/admin/HireRequestsTab";
 import { showApiError } from "../../utils/apiErrorHandler";
 
 const AdminApprovalsPage = () => {
@@ -45,19 +50,16 @@ const AdminApprovalsPage = () => {
   const enrollmentsError = useSelector(selectEnrollmentsError);
   const enrollmentsProcessing = useSelector(selectEnrollmentsProcessing);
 
-  // Fetch all three on initial load so badges show counts on every tab
+  const { adminRequests: hireRequests, adminLoading: hireLoading, adminError: hireError, adminProcessing: hireProcessing } = useSelector((state) => state.hire);
+  const [hireStatusFilter, setHireStatusFilter] = useState(undefined);
+
+  // Fetch all once on mount — no re-fetch on tab switch
   useEffect(() => {
     dispatch(fetchPendingApprovals());
     dispatch(fetchPendingChildLinks());
     dispatch(fetchPendingEnrollments());
+    dispatch(fetchAdminHireRequests());
   }, [dispatch]);
-
-  // Re-fetch the active tab's data when switching (to pick up any changes)
-  useEffect(() => {
-    if (activeTab === "users") dispatch(fetchPendingApprovals());
-    else if (activeTab === "childLinks") dispatch(fetchPendingChildLinks());
-    else if (activeTab === "enrollments") dispatch(fetchPendingEnrollments());
-  }, [dispatch, activeTab]);
 
   const handleApprove = async (userId) => {
     try {
@@ -125,22 +127,50 @@ const AdminApprovalsPage = () => {
     dispatch(fetchPendingEnrollments());
   };
 
+  const handleApproveHireRequest = async (id) => {
+    try {
+      await dispatch(actionHireRequest({ id, action: "approve" })).unwrap();
+      toastManager.success("Hire request approved");
+    } catch (error) {
+      showApiError(error);
+    }
+  };
+
+  const handleRejectHireRequest = async (id) => {
+    try {
+      await dispatch(actionHireRequest({ id, action: "reject" })).unwrap();
+      toastManager.success("Hire request rejected");
+    } catch (error) {
+      showApiError(error);
+    }
+  };
+
+  const handleRefreshHireRequests = () => {
+    dispatch(fetchAdminHireRequests(hireStatusFilter));
+  };
+
+  const pendingHireCount = hireRequests?.filter((r) => r.status === "pending").length || 0;
+
   const isActiveTabLoading =
     activeTab === "users" ? approvalsLoading
     : activeTab === "childLinks" ? childLinksLoading
-    : enrollmentsLoading;
+    : activeTab === "enrollments" ? enrollmentsLoading
+    : hireLoading;
 
   const activeRefreshHandler =
     activeTab === "users" ? handleRefreshApprovals
     : activeTab === "childLinks" ? handleRefreshChildLinks
-    : handleRefreshEnrollments;
+    : activeTab === "enrollments" ? handleRefreshEnrollments
+    : handleRefreshHireRequests;
 
   const activePendingCount =
     activeTab === "users"
       ? pendingApprovals?.length || 0
       : activeTab === "childLinks"
       ? pendingChildLinks?.length || 0
-      : pendingEnrollments?.length || 0;
+      : activeTab === "enrollments"
+      ? pendingEnrollments?.length || 0
+      : pendingHireCount;
 
   // Placeholder counts until backend provides processed-today metrics.
   const approvedTodayCount = 0;
@@ -197,6 +227,22 @@ const AdminApprovalsPage = () => {
               {pendingEnrollments?.length > 0 && (
                 <span className="bg-emerald-500 text-white text-xs px-2 py-0.5 rounded-full">
                   {pendingEnrollments.length}
+                </span>
+              )}
+            </button>
+            <button
+              onClick={() => setActiveTab("hireRequests")}
+              className={`inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
+                activeTab === "hireRequests"
+                  ? "bg-indigo-600 text-white shadow-lg"
+                  : "text-slate-400 hover:text-white hover:bg-slate-800/50"
+              }`}
+            >
+              <i className="fas fa-handshake"></i>
+              Teacher Hire Requests
+              {pendingHireCount > 0 && (
+                <span className="bg-orange-500 text-white text-xs px-2 py-0.5 rounded-full">
+                  {pendingHireCount}
                 </span>
               )}
             </button>
@@ -271,6 +317,20 @@ const AdminApprovalsPage = () => {
           onApprove={handleApproveEnrollment}
           onReject={handleRejectEnrollment}
           onRefresh={handleRefreshEnrollments}
+        />
+      )}
+
+      {activeTab === "hireRequests" && (
+        <HireRequestsTab
+          requests={hireRequests}
+          loading={hireLoading}
+          error={hireError}
+          processing={hireProcessing}
+          onApprove={handleApproveHireRequest}
+          onReject={handleRejectHireRequest}
+          onRefresh={handleRefreshHireRequests}
+          statusFilter={hireStatusFilter}
+          onStatusFilterChange={setHireStatusFilter}
         />
       )}
     </div>

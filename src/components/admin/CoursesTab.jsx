@@ -196,7 +196,7 @@ const CoursesTab = ({
         course.instructor?.username
           ?.toLowerCase()
           .includes(courseFilters.search.toLowerCase()) ||
-        course.category
+        (typeof course.category === "object" ? course.category?.name : course.category)
           ?.toLowerCase()
           .includes(courseFilters.search.toLowerCase()) ||
         course.description
@@ -206,7 +206,7 @@ const CoursesTab = ({
       // Category filter
       const matchesCategory =
         courseFilters.category === "" ||
-        course.category === courseFilters.category;
+        (typeof course.category === "object" ? course.category?.name : course.category) === courseFilters.category;
 
       // Price range filter
       const matchesPrice =

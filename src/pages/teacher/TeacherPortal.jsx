@@ -327,7 +327,7 @@ const TeacherPortal = () => {
                         {course.title}
                       </p>
                       <p className="text-[10px] text-slate-500 uppercase tracking-widest">
-                        {course.category} • {course.total_enrolled} students
+                        {typeof course.category === "object" ? course.category?.name : course.category} • {course.total_enrolled} students
                       </p>
                     </div>
 

@@ -4,10 +4,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchTeachers } from "../../store/slices/teacherSlice";
 import { SearchInput } from "../../components/ui";
 import { useAuth } from "../../hooks/useAuth";
+import HireTutorModal from "../../components/public/HireTutorModal";
 
 const TeachersDirectory = () => {
   const [hasFetched, setHasFetched] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [hireModal, setHireModal] = useState(null);
   const navigate = useNavigate();
   const abortControllerRef = useRef(null);
   const { isAuthenticated } = useAuth();
@@ -74,6 +76,9 @@ const TeachersDirectory = () => {
 
   return (
     <section id="teachers-view" className="bg-slate-950 text-white font-inter">
+      {hireModal && (
+        <HireTutorModal teacher={hireModal} onClose={() => setHireModal(null)} />
+      )}
       <div className="relative overflow-hidden border-b border-slate-800/50">
         <div className="max-w-7xl mx-auto px-6 py-5 relative z-10">
           <div className="text-center mb-4">
@@ -183,14 +188,22 @@ const TeachersDirectory = () => {
                   </div>
 
                   {/* CTA */}
-                  {isAuthenticated && (
+                  <div className="flex gap-2">
+                    {isAuthenticated && (
+                      <button
+                        onClick={() => navigate(`/teachers/${teacher.id}`)}
+                        className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-[11px] font-semibold uppercase tracking-wide transition shadow-md hover:shadow-indigo-500/30"
+                      >
+                        View Profile
+                      </button>
+                    )}
                     <button
-                      onClick={() => navigate(`/teachers/${teacher.id}`)}
-                      className="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-[11px] font-semibold uppercase tracking-wide transition shadow-md hover:shadow-indigo-500/30"
+                      onClick={() => setHireModal(teacher)}
+                      className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-[11px] font-semibold uppercase tracking-wide transition shadow-md hover:shadow-emerald-500/30"
                     >
-                      View Profile
+                      Hire Tutor
                     </button>
-                  )}
+                  </div>
 
                   {/* Hover glow */}
                   <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition pointer-events-none bg-indigo-500/5" />

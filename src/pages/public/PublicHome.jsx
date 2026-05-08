@@ -27,7 +27,7 @@ const PublicHome = () => {
     courses?.filter(
       (course) =>
         course.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        course.category?.toLowerCase().includes(searchTerm.toLowerCase()),
+        (typeof course.category === "string" ? course.category : course.category?.name ?? "")?.toLowerCase().includes(searchTerm.toLowerCase()),
     ) || [];
 
   // Separate enrolled and non-enrolled courses for logged-in students
@@ -224,7 +224,7 @@ const PublicHome = () => {
                   <div className="w-full h-full bg-slate-800" />
                 )}
                 <div className="absolute top-6 left-6 px-4 py-1.5 bg-indigo-600 rounded-full text-[9px] font-black uppercase tracking-widest shadow-xl">
-                  {course.category}
+                  {typeof course.category === "object" ? course.category?.name : course.category}
                 </div>
               </div>
               <div className="p-5">

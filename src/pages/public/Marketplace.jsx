@@ -103,12 +103,12 @@ const Marketplace = () => {
         course.instructor?.username
           ?.toLowerCase()
           .includes(searchTerm.toLowerCase()) ||
-        course.category?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (typeof course.category === "string" ? course.category : course.category?.name ?? "")?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         course.description?.toLowerCase().includes(searchTerm.toLowerCase());
 
       // Category filter
       const matchesCategory =
-        filters.category === "" || course.category === filters.category;
+        filters.category === "" || (typeof course.category === "object" ? course.category?.name : course.category) === filters.category;
 
       // Price range filter
       const matchesPrice =
@@ -325,35 +325,6 @@ const Marketplace = () => {
     );
   }
 
-  // Error state
-  if (error) {
-    return (
-      <section className="min-h-screen bg-[#0f172a] text-white font-inter">
-        <div className="max-w-7xl mx-auto px-6 py-20">
-          <div className="flex items-center justify-center min-h-[60vh]">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-red-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i className="fas fa-exclamation-triangle text-red-500 text-2xl"></i>
-              </div>
-              <p className="text-white text-lg mb-4">Unable to load courses</p>
-              <p className="text-slate-400 text-sm mb-6">
-                {typeof error === "string"
-                  ? error
-                  : error?.message || "Failed to load courses"}
-              </p>
-              <button
-                onClick={() => dispatch(fetchAllCourses())}
-                className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-xl font-bold transition"
-              >
-                Try Again
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
   // Empty state
   if (!isLoading && courses.length === 0) {
     return (
@@ -521,7 +492,7 @@ const Marketplace = () => {
                     {course.category && (
                       <div className="mb-3">
                         <span className="text-xs text-slate-500 uppercase tracking-widest">
-                          {course.category}
+                          {typeof course.category === "object" ? course.category?.name : course.category}
                         </span>
                       </div>
                     )}

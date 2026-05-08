@@ -2,6 +2,13 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { coursesService } from "../../services/coursesService";
 import { logoutUser } from "./authSlice";
 
+const normalizeCategoryField = (obj) => ({
+  ...obj,
+  category: typeof obj?.category === "object" && obj?.category !== null
+    ? obj.category.name ?? null
+    : obj?.category ?? null,
+});
+
 // Async thunks
 export const fetchAllCourses = createAsyncThunk(
   "courses/fetchAllCourses",
@@ -57,7 +64,9 @@ const coursesSlice = createSlice({
       })
       .addCase(fetchAllCourses.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.courses = action.payload;
+        state.courses = Array.isArray(action.payload)
+          ? action.payload.map(normalizeCategoryField)
+          : action.payload;
         state.error = null;
       })
       .addCase(fetchAllCourses.rejected, (state, action) => {
@@ -71,7 +80,7 @@ const coursesSlice = createSlice({
       })
       .addCase(fetchCourseById.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.currentCourse = action.payload;
+        state.currentCourse = action.payload ? normalizeCategoryField(action.payload) : null;
         state.error = null;
       })
       .addCase(fetchCourseById.rejected, (state, action) => {

@@ -52,6 +52,7 @@ import {
   TeacherProfile,
   TeacherInternalStudentProfile,
   TeacherEvaluationPage,
+  TeacherHireLeads,
   TeachersDirectory,
   StudentAssignments,
   StudentAssignmentDetails,
@@ -104,8 +105,11 @@ const AppInner = () => {
   const { isLoggedIn, role, isInitialized } = useSelector(
     (state) => state.auth,
   );
-  const { pendingApprovals } = useSelector((state) => state.approvals);
+  const { pendingApprovals, pendingEnrollments } = useSelector((state) => state.approvals);
   const { pendingChildLinks } = useSelector((state) => state.childLinks);
+  const pendingHireCount = useSelector((state) =>
+    (state.hire?.adminRequests || []).filter((r) => r.status === "pending").length
+  );
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
@@ -142,7 +146,10 @@ const AppInner = () => {
   };
 
   const totalPendingCount =
-    (pendingApprovals?.length || 0) + (pendingChildLinks?.length || 0);
+    (pendingApprovals?.length || 0) +
+    (pendingChildLinks?.length || 0) +
+    (pendingEnrollments?.length || 0) +
+    pendingHireCount;
 
   const showNavbar = !isLoggedIn;
 
@@ -247,6 +254,7 @@ const AppInner = () => {
                 <Route path="sessions" element={<TeacherSessionCalendar />} />
                 <Route path="submissions" element={<TeacherSubmissions />} />
                 <Route path="evaluations" element={<TeacherEvaluationPage />} />
+                <Route path="hire-leads" element={<TeacherHireLeads />} />
               </Route>
               <Route
                 path="/student/:id"

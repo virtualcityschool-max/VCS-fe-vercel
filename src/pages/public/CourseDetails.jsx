@@ -83,7 +83,7 @@ const CourseDetails = () => {
       title: course.title || "Untitled Course",
       description: course.description || "No description available.",
       thumbnail: course.thumbnail,
-      category: course.category || "general",
+      category: (typeof course.category === "object" && course.category !== null ? course.category.name : course.category) || "general",
       price: course.price || "0.00",
       status: course.status || "draft",
       instructor_id: course.instructor_id,

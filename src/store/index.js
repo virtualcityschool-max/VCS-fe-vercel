@@ -9,6 +9,7 @@ import teachersReducer from "./slices/teacherSlice";
 import announcementsReducer from "./slices/announcementsSlice";
 import parentReducer from "./slices/parentSlice";
 import childLinksReducer from "./slices/childLinksSlice";
+import hireReducer from "./slices/hireSlice";
 import { authStorage } from "../utils/authStorage";
 
 // Load auth state from localStorage using authStorage utilities
@@ -68,6 +69,7 @@ const appReducer = combineReducers({
   announcements: announcementsReducer,
   parent: parentReducer,
   childLinks: childLinksReducer,
+  hire: hireReducer,
 });
 
 // Reset all slices to their initial state when the user logs out

@@ -56,7 +56,7 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
       filtered = filtered.filter((enrollment) => {
         return (
           enrollment.course?.title?.toLowerCase().includes(courseLower) ||
-          enrollment.course?.category?.toLowerCase().includes(courseLower)
+          (typeof enrollment.course?.category === "object" ? enrollment.course?.category?.name : enrollment.course?.category)?.toLowerCase().includes(courseLower)
         );
       });
     }
@@ -374,7 +374,7 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
                   {enrollment.course?.title || "Unknown Course"}
                 </div>
                 <div className="text-xs text-slate-500">
-                  {enrollment.course?.category || "No category"} • PKR{" "}
+                  {(typeof enrollment.course?.category === "object" ? enrollment.course?.category?.name : enrollment.course?.category) || "No category"} • PKR{" "}
                   {enrollment.course?.price || "0"}
                 </div>
               </div>
@@ -476,7 +476,7 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
                         {enrollment.course?.title || "Unknown Course"}
                       </div>
                       <div className="text-sm text-slate-400">
-                        {enrollment.course?.category || "No category"} • PKR{" "}
+                        {(typeof enrollment.course?.category === "object" ? enrollment.course?.category?.name : enrollment.course?.category) || "No category"} • PKR{" "}
                         {enrollment.course?.price || "0"}
                       </div>
                     </div>
