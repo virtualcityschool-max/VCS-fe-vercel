@@ -108,7 +108,7 @@ const NextSessionCard = () => {
         </h3>
         <div className="flex items-center gap-2.5">
           <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">
-            {nextSession.teacher_name}
+            with {nextSession.teacher_name}
           </p>
           <div className="h-0.5 w-0.5 rounded-full bg-slate-700"></div>
           <p className="text-[10px] font-black text-blue-400/90 tracking-wide">
