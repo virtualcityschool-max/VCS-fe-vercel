@@ -343,16 +343,16 @@ const Marketplace = () => {
       className="min-h-screen bg-[#0f172a] text-white font-inter animate-fadeIn"
     >
       {/* Compact Search + Filters Bar */}
-      <div className="relative overflow-hidden border-b border-slate-800/50 animate-fadeSlideUp">
+      <div className="relative overflow-hidden border-b border-slate-800/50 animate-fadeIn">
         <div className="max-w-7xl mx-auto px-6 py-5 relative z-10">
           <div className="text-center mb-4">
-            <h1 className="text-2xl md:text-3xl font-black font-poppins leading-tight tracking-tight">
+            <h1 className="text-2xl md:text-3xl font-black font-poppins leading-tight tracking-tight animate-scaleIn">
               Expand your <span className="text-blue-500">potential</span>.
             </h1>
           </div>
           <form
             onSubmit={handleSearch}
-            className="grid grid-cols-1 md:grid-cols-10 gap-3 max-w-6xl mx-auto"
+            className="grid grid-cols-1 md:grid-cols-10 gap-3 max-w-6xl mx-auto animate-springyReveal"
           >
             <div className="md:col-span-4">
               <SearchInput
@@ -440,8 +440,8 @@ const Marketplace = () => {
               {filteredCourses.map((course, idx) => (
                 <div
                   key={course.id || idx}
-                  style={{ animationDelay: `${idx * 0.05}s` }}
-                  className="bg-slate-800/50 backdrop-blur-md rounded-[1.5rem] overflow-hidden border border-slate-700/50 shadow-2xl group hover:border-blue-500/40 transition-all flex flex-col animate-fadeSlideUp opacity-0"
+                  style={{ animationDelay: `${idx * 0.08}s` }}
+                  className="bg-slate-800/50 backdrop-blur-md rounded-[1.5rem] overflow-hidden border border-slate-700/50 shadow-2xl group flex flex-col animate-springyReveal opacity-0 glass-shine hover-lift"
                 >
                   <div className="relative h-32 overflow-hidden">
                     <Link to={`/courses/${course.id}`}>
