@@ -375,7 +375,12 @@ const SessionsTab = ({
                       )}
                     </div>
                     <div className="flex gap-2">
-                      <button onClick={() => onSessionEdit(session.id)} className="bg-slate-700/50 text-slate-300 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-slate-600/50 transition flex-1 flex items-center justify-center gap-1">
+                      <button
+                        onClick={() => onSessionEdit(session.id)}
+                        disabled={(session.enrollment_count ?? 0) >= 1}
+                        title={(session.enrollment_count ?? 0) >= 1 ? "Cannot edit: session has enrollments" : "Edit session"}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition flex-1 flex items-center justify-center gap-1 ${(session.enrollment_count ?? 0) >= 1 ? "bg-slate-800/30 text-slate-600 cursor-not-allowed" : "bg-slate-700/50 text-slate-300 hover:bg-slate-600/50"}`}
+                      >
                         <i className="fas fa-edit"></i> Edit
                       </button>
                       <button onClick={() => onSessionDelete(session.id)} disabled={loadingSessionIds.has(session.id)} className="bg-red-600/10 text-red-400 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-red-600/20 transition disabled:opacity-50 flex-1 flex items-center justify-center gap-1">
@@ -421,7 +426,12 @@ const SessionsTab = ({
                       <td className="px-5 py-4">{getStatusBadge(session.status)}</td>
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-2 justify-end">
-                          <button onClick={() => onSessionEdit(session.id)} className="bg-slate-700/50 text-slate-300 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-slate-600/50 transition">
+                          <button
+                            onClick={() => onSessionEdit(session.id)}
+                            disabled={(session.enrollment_count ?? 0) >= 1}
+                            title={(session.enrollment_count ?? 0) >= 1 ? "Cannot edit: session has enrollments" : "Edit session"}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${(session.enrollment_count ?? 0) >= 1 ? "bg-slate-800/30 text-slate-600 cursor-not-allowed" : "bg-slate-700/50 text-slate-300 hover:bg-slate-600/50"}`}
+                          >
                             <i className="fas fa-edit mr-1"></i>Edit
                           </button>
                           <button onClick={() => onSessionDelete(session.id)} disabled={loadingSessionIds.has(session.id)} className="bg-red-600/10 text-red-400 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-red-600/20 transition disabled:opacity-50">

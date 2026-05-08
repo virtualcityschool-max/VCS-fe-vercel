@@ -3,13 +3,16 @@ import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
   fetchStudentDashboard,
+  fetchMyEnrollments,
   selectDashboardLoading,
   selectDashboardError,
   clearError,
   selectEnrolledCourses,
   selectNextSession,
   selectAssignments,
+  selectPendingEnrollments,
 } from "../../store/slices/studentDashboardSlice";
+import { getStorageUrl } from "../../utils/storageUrl";
 import {
   DashboardHeader,
   NextSessionCard,
@@ -28,6 +31,7 @@ const StudentPortal = () => {
   const enrolledCourses = useSelector(selectEnrolledCourses);
   const nextSession = useSelector(selectNextSession);
   const assignments = useSelector(selectAssignments);
+  const pendingEnrollments = useSelector(selectPendingEnrollments);
 
   const [hasMounted, setHasMounted] = useState(false);
 
@@ -44,14 +48,13 @@ const StudentPortal = () => {
   // Fetch dashboard data on component mount
   useEffect(() => {
     if (hasMounted) {
-      console.log("🚀 Student Portal: Fetching dashboard data...");
       dispatch(fetchStudentDashboard());
+      dispatch(fetchMyEnrollments());
     }
   }, [dispatch, hasMounted]);
 
   // Handle retry on error
   const handleRetry = useCallback(() => {
-    console.log("🔄 Student Portal: Retrying dashboard fetch...");
     dispatch(clearError());
     dispatch(fetchStudentDashboard());
   }, [dispatch]);
@@ -124,37 +127,90 @@ const StudentPortal = () => {
     );
   }
 
-  // Success state - render dashboard with real data
-  console.log("✅ Student Portal: Rendering dashboard with data");
   return (
     <section
       id="student-view"
       className="min-h-screen bg-[#0f172a] text-white font-inter"
     >
       <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
-        {/* Dashboard Header - Full Width */}
+        {/* Dashboard Header */}
         <DashboardHeader />
 
+        {/* Pending Enrollments — always visible when present */}
+        {pendingEnrollments.length > 0 && (
+          <div className="rounded-[2rem] border border-amber-500/20 bg-amber-500/5 overflow-hidden">
+            <div className="flex items-center gap-3 px-6 py-4 border-b border-amber-500/10">
+              <span className="w-2 h-2 bg-amber-400 rounded-full animate-pulse shrink-0"></span>
+              <div>
+                <p className="text-sm font-black text-amber-300">
+                  {pendingEnrollments.length} Enrollment{pendingEnrollments.length !== 1 ? "s" : ""} Awaiting Approval
+                </p>
+                <p className="text-[10px] text-amber-500/70 font-medium">Typically reviewed within 24–48 hours</p>
+              </div>
+            </div>
+            <div className="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+              {pendingEnrollments.map((enrollment) => {
+                const course = enrollment.course || {};
+                const enrolledDate = enrollment.enrolled_at
+                  ? new Date(enrollment.enrolled_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })
+                  : null;
+                return (
+                  <div
+                    key={enrollment.id}
+                    title="Approval pending"
+                    className="flex items-center gap-3 p-3 rounded-2xl bg-slate-900/60 border border-white/5 cursor-not-allowed opacity-70"
+                  >
+                    <div className="w-11 h-11 rounded-xl bg-slate-800 overflow-hidden shrink-0 border border-white/5">
+                      {course.thumbnail ? (
+                        <img src={getStorageUrl(course.thumbnail)} alt="" className="w-full h-full object-cover opacity-60 group-hover:opacity-90 transition-opacity" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <i className="fas fa-book text-slate-600 text-xs"></i>
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white text-xs font-bold truncate mb-0.5 group-hover:text-amber-300 transition-colors">
+                        {course.title || "—"}
+                      </p>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[9px] font-black uppercase tracking-wider text-amber-500/80">Pending</span>
+                        {enrollment.is_private && (
+                          <>
+                            <span className="text-slate-600">·</span>
+                            <span className="text-[9px] font-bold text-purple-400/80 uppercase tracking-wider">Private</span>
+                          </>
+                        )}
+                        {enrolledDate && (
+                          <>
+                            <span className="text-slate-600">·</span>
+                            <span className="text-[9px] text-slate-500">{enrolledDate}</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {isDashboardEmpty ? (
-          /* Premium Welcome Empty State Banner */
           <div className="relative group overflow-hidden rounded-[2.5rem] border border-white/5 bg-slate-900/40 backdrop-blur-xl p-12 lg:p-20 text-center shadow-2xl transition-all duration-500 hover:border-blue-500/10">
-            {/* Decorative background effects */}
             <div className="absolute top-0 right-0 w-96 h-96 bg-blue-600/10 rounded-full blur-[120px] -mr-48 -mt-48 transition-all duration-1000 group-hover:bg-blue-600/20"></div>
             <div className="absolute bottom-0 left-0 w-96 h-96 bg-indigo-600/5 rounded-full blur-[120px] -ml-48 -mb-48"></div>
-            
             <div className="relative z-10 max-w-2xl mx-auto">
               <div className="w-24 h-24 bg-blue-600/10 rounded-[2.5rem] border border-blue-500/20 flex items-center justify-center mx-auto mb-10 shadow-[0_0_40px_rgba(37,99,235,0.1)] group-hover:scale-110 group-hover:rotate-6 transition-all duration-700">
                 <i className="fas fa-rocket text-4xl text-blue-400 group-hover:animate-bounce"></i>
               </div>
-              
               <h2 className="text-3xl lg:text-5xl font-black text-white mb-6 tracking-tight font-poppins">
                 Ready to <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">Launch</span> Your Journey?
               </h2>
               <p className="text-slate-400 text-lg lg:text-xl font-medium mb-12 leading-relaxed opacity-80">
                 Your personalized learning workspace is set up and ready. <br className="hidden md:block" /> Start by enrolling in a course to unlock your dashboard's full power.
               </p>
-              
-              <button 
+              <button
                 onClick={() => navigate('/courses')}
                 className="inline-flex items-center gap-4 px-12 py-5 bg-blue-600 hover:bg-blue-500 text-white rounded-[2rem] font-black text-xs lg:text-sm uppercase tracking-[0.2em] transition-all duration-300 shadow-xl shadow-blue-900/40 hover:shadow-blue-500/30 active:scale-95 group/btn"
               >
@@ -165,30 +221,19 @@ const StudentPortal = () => {
           </div>
         ) : (
           <>
-            {/* Action Cards - 2 Columns */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
               <NextSessionCard />
               <OverdueAssignmentsCard />
             </div>
-
-            {/* Main Content Grid */}
             <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 lg:gap-8">
-              {/* Left Column - Main Content */}
               <div className="xl:col-span-8 space-y-6 lg:space-y-8">
-                {/* Live Schedule */}
                 <LiveScheduleList />
-
-                {/* My Attendance */}
                 <MyAttendanceList />
               </div>
-
-              {/* Right Column - Sidebar */}
               <div className="xl:col-span-4 space-y-6 lg:space-y-8">
-                {/* Assignment Overview */}
                 <AssignmentOverviewList />
               </div>
             </div>
-            {/* Enrolled Courses */}
             <CourseProgressGrid />
           </>
         )}

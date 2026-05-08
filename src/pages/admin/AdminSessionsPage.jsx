@@ -163,9 +163,12 @@ const AdminSessionsPage = () => {
   // Fetch detailed session data for editing
   const fetchSessionDetailsForEdit = async (sessionId) => {
     try {
-      // For now, we'll use the session data from the list
-      // In a real implementation, you might want to fetch detailed data
       const session = sessions?.data?.find((s) => s.id === sessionId);
+
+      if ((session?.enrollment_count ?? 0) >= 1) {
+        toastManager.error("Cannot edit session as enrollment exists against this session.");
+        return;
+      }
       if (session) {
         setEditingSession(session);
         // Set the edit form immediately to avoid race condition

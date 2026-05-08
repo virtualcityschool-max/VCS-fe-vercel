@@ -507,6 +507,39 @@ const Marketplace = () => {
                     )}
                     {(() => {
                       const enrolled = isCourseEnrolled(course);
+                      const noSessions = !course.has_session;
+                      const isEnrolling = enrollingCourseIds.includes(course.id);
+                      const isUnenrolling = unenrollingCourseIds.includes(course.id);
+                      const isPending = course.enrollment_status === "pending";
+
+                      let btnClass = "w-full mt-auto py-2.5 font-black text-[11px] uppercase tracking-[0.18em] rounded-xl transition-all active:scale-95 ";
+                      let label = "";
+                      let disabled = false;
+                      let title = "";
+
+                      if (enrolled) {
+                        label = isUnenrolling ? "Unenrolling..." : "Unenroll";
+                        disabled = isUnenrolling;
+                        btnClass += isUnenrolling
+                          ? "bg-red-600/50 text-red-400 cursor-not-allowed"
+                          : "bg-red-600/20 border border-red-600/30 text-red-400 hover:bg-red-600 hover:text-white";
+                      } else if (isPending) {
+                        label = "Approval pending";
+                        btnClass += "bg-yellow-600/20 border border-yellow-500/30 text-yellow-400 hover:bg-yellow-500 hover:text-white";
+                      } else if (noSessions) {
+                        label = "Enroll Now";
+                        disabled = true;
+                        title = "No sessions available for this course";
+                        btnClass += "bg-slate-900 border border-blue-600/30 text-blue-500/40 cursor-not-allowed";
+                      } else if (isEnrolling) {
+                        label = "Enrolling...";
+                        disabled = true;
+                        btnClass += "bg-slate-600 text-slate-400 cursor-not-allowed";
+                      } else {
+                        label = "Enroll Now";
+                        btnClass += "bg-slate-900 border border-blue-600/30 text-blue-500 hover:bg-blue-600 hover:text-white";
+                      }
+
                       return (
                         <button
                           onClick={() =>
@@ -514,29 +547,11 @@ const Marketplace = () => {
                               ? handleUnenrollCourse(course.id, course.title)
                               : handleEnrollCourse(course)
                           }
-                          disabled={
-                            enrollingCourseIds.includes(course.id) ||
-                            unenrollingCourseIds.includes(course.id)
-                          }
-                          className={`w-full mt-auto py-2.5 font-black text-[11px] uppercase tracking-[0.18em] rounded-xl transition-all active:scale-95 ${
-                              enrolled
-                                ? unenrollingCourseIds.includes(course.id)
-                                  ? "bg-red-600/50 text-red-400 cursor-not-allowed"
-                                  : "bg-red-600/20 border border-red-600/30 text-red-400 hover:bg-red-600 hover:text-white"
-                                : course.enrollment_status === "pending"
-                                  ? "bg-yellow-600/20 border border-yellow-500/30 text-yellow-400 hover:bg-yellow-500 hover:text-white"
-                                  : enrollingCourseIds.includes(course.id)
-                                    ? "bg-slate-600 text-slate-400 cursor-not-allowed"
-                                    : "bg-slate-900 border border-blue-600/30 text-blue-500 hover:bg-blue-600 hover:text-white"
-                                    }`}
+                          disabled={disabled}
+                          title={title}
+                          className={btnClass}
                         >
-                          {enrolled
-                            ? unenrollingCourseIds.includes(course.id)
-                              ? "Unenrolling..."
-                              : "Unenroll"
-                            : enrollingCourseIds.includes(course.id)
-                              ? "Enrolling..."
-                              :course.enrollment_status == "pending"? "Approval pending" : "Enroll Now"}
+                          {label}
                         </button>
                       );
                     })()}

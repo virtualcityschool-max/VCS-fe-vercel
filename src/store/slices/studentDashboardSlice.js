@@ -295,6 +295,17 @@ export const fetchStudentQuizById = createAsyncThunk(
   },
 );
 
+export const fetchMyEnrollments = createAsyncThunk(
+  "studentDashboard/fetchMyEnrollments",
+  async (_, { rejectWithValue }) => {
+    try {
+      return await studentService.getMyEnrollments();
+    } catch (error) {
+      return rejectWithValue(error?.message || "Failed to load enrollments");
+    }
+  },
+);
+
 export const submitStudentQuiz = createAsyncThunk(
   "studentDashboard/submitStudentQuiz",
   async ({ quizId, answers }, { rejectWithValue }) => {
@@ -333,6 +344,10 @@ const initialState = {
     status: "all", // all, overdue, pending, submitted, graded
     course: "all",
   },
+
+  // My enrollments (active + pending from /courses/my-enrollments/)
+  myEnrollments: [],
+  myEnrollmentsLoading: false,
 
   // Quiz state
   quizzes: [],
@@ -702,6 +717,18 @@ const studentDashboardSlice = createSlice({
         state.quizSubmitError = action.payload;
       })
 
+      // Fetch My Enrollments
+      .addCase(fetchMyEnrollments.pending, (state) => {
+        state.myEnrollmentsLoading = true;
+      })
+      .addCase(fetchMyEnrollments.fulfilled, (state, action) => {
+        state.myEnrollmentsLoading = false;
+        state.myEnrollments = Array.isArray(action.payload) ? action.payload : [];
+      })
+      .addCase(fetchMyEnrollments.rejected, (state) => {
+        state.myEnrollmentsLoading = false;
+      })
+
       // Handle logout - clear all student-specific data
       .addCase(logoutUser.fulfilled, (state) => {
         state.student = null;
@@ -728,6 +755,8 @@ const studentDashboardSlice = createSlice({
         state.isFetchingMyAttendance = false;
         state.enrollingCourseIds = [];
         state.unenrollingCourseIds = [];
+        state.myEnrollments = [];
+        state.myEnrollmentsLoading = false;
       });
   },
 });
@@ -766,6 +795,10 @@ export const selectMyAttendance = (state) =>
   state.studentDashboard.myAttendance;
 export const selectMyAttendanceLoading = (state) =>
   state.studentDashboard.isFetchingMyAttendance;
+export const selectMyEnrollments = (state) => state.studentDashboard.myEnrollments;
+export const selectMyEnrollmentsLoading = (state) => state.studentDashboard.myEnrollmentsLoading;
+export const selectPendingEnrollments = (state) =>
+  (state.studentDashboard.myEnrollments || []).filter((e) => e.status === "pending");
 
 // Filtered selectors
 export const selectFilteredAssignments = createSelector(
