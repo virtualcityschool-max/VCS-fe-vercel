@@ -69,16 +69,16 @@ const NextSessionCard = () => {
 
   if (!nextSession) {
     return (
-      <div className="bg-slate-800/50 backdrop-blur-md p-6 lg:p-8 rounded-[2.5rem] border border-slate-700 shadow-xl flex items-center gap-4 lg:gap-6 min-h-[160px]">
-        <div className="w-12 h-12 lg:w-14 lg:h-14 bg-slate-700/50 rounded-2xl flex items-center justify-center text-slate-500 shrink-0">
-          <i className="fas fa-calendar-times text-lg lg:text-xl"></i>
+      <div className="bg-slate-900/40 backdrop-blur-xl p-6 rounded-[2rem] border border-white/5 shadow-2xl flex items-center gap-6 transition-all duration-300 hover:border-blue-500/20 group">
+        <div className="w-14 h-14 bg-slate-800/50 rounded-2xl flex items-center justify-center text-slate-500 shrink-0 group-hover:scale-110 transition-all duration-500 border border-white/5">
+          <i className="fas fa-calendar-alt text-xl opacity-40"></i>
         </div>
         <div className="min-w-0 flex-1">
-          <h3 className="text-lg lg:text-xl font-bold text-white mb-1 line-clamp-2">
+          <h3 className="text-lg font-black text-white/90 mb-0.5 tracking-tight">
             No Upcoming Sessions
           </h3>
-          <p className="text-slate-400 text-sm line-clamp-2">
-            Check back later for scheduled live sessions
+          <p className="text-slate-500 text-[10px] font-bold uppercase tracking-[0.15em]">
+           Check back later for scheduled live sessions
           </p>
         </div>
       </div>
@@ -86,44 +86,56 @@ const NextSessionCard = () => {
   }
 
   return (
-    <div className="bg-slate-800/50 backdrop-blur-md p-6 lg:p-8 rounded-[2.5rem] border border-slate-700 shadow-xl flex flex-col items-start gap-4 lg:gap-6 min-h-40">
-      <div className="w-12 h-12 lg:w-14 lg:h-14 bg-blue-600/10 rounded-2xl flex items-center justify-center text-blue-500 shrink-0">
-        <i className="fas fa-broadcast-tower text-lg lg:text-xl"></i>
+    <div className="bg-slate-900/40 backdrop-blur-xl p-6 rounded-[2rem] border border-white/5 shadow-2xl flex items-center gap-6 transition-all duration-300 hover:border-blue-500/20 group relative overflow-hidden">
+      {/* Dynamic Glow Effect */}
+      <div className={`absolute -right-10 -top-10 w-32 h-32 rounded-full blur-[60px] transition-all duration-700 ${canJoinNow ? 'bg-blue-600/20' : 'bg-slate-600/5'}`}></div>
+      
+      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-all duration-500 border border-white/5 ${canJoinNow ? 'bg-blue-600/20 text-blue-400 shadow-[0_0_20px_rgba(37,99,235,0.2)]' : 'bg-slate-800/50 text-slate-500'}`}>
+        <i className={`fas ${canJoinNow ? 'fa-broadcast-tower animate-pulse' : 'fa-clock'} text-xl`}></i>
       </div>
-      <div className="min-w-0 flex-1">
-        <p className="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-1 truncate">
-          {nextSession.course_title}
-        </p>
-        <h3 className="text-lg lg:text-xl font-bold text-white mb-1 line-clamp-2">
+
+      <div className="min-w-0 flex-1 relative z-10">
+        <div className="flex items-center gap-2 mb-1.5">
+          <span className="text-[9px] font-black text-blue-400 uppercase tracking-[0.2em] bg-blue-400/10 px-2 py-0.5 rounded-md border border-blue-400/10">
+            {nextSession.course_title}
+          </span>
+          {canJoinNow && (
+            <span className="flex h-2 w-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]"></span>
+          )}
+        </div>
+        <h3 className="text-lg font-black text-white mb-0.5 truncate tracking-tight">
           {nextSession.title}
         </h3>
-        <p className="text-xs text-slate-500 mb-2 truncate">
-          with {nextSession.teacher_name}
-        </p>
-        <p className="text-sm font-semibold text-blue-400">
-          {formatStartsIn(nextSession.starts_in_mins)}
-        </p>
+        <div className="flex items-center gap-3">
+          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+            {nextSession.teacher_name}
+          </p>
+          <div className="h-1 w-1 rounded-full bg-slate-700"></div>
+          <p className="text-[11px] font-black text-blue-400/90 tracking-wide">
+            {formatStartsIn(nextSession.starts_in_mins)}
+          </p>
+        </div>
       </div>
-      <button
-        onClick={handleJoinSession}
-        disabled={isJoiningSession || !canJoinNow}
-        className={`w-full md:w-auto px-6 py-3 rounded-2xl font-bold text-sm transition active:scale-95 ${
-          isJoiningSession || !canJoinNow
-            ? "bg-slate-700 text-slate-500 cursor-not-allowed"
-            : "bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-900/40"
-        }`}
-      >
-        {isJoiningSession ? (
-          <>
-            <i className="fas fa-spinner fa-spin mr-2"></i>
-            Joining...
-          </>
-        ) : !canJoinNow ? (
-          "Session Not Live"
-        ) : (
-          "Join Now"
-        )}
-      </button>
+
+      <div className="shrink-0 relative z-10">
+        <button
+          onClick={handleJoinSession}
+          disabled={isJoiningSession || !canJoinNow}
+          className={`px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all duration-300 active:scale-95 ${
+            isJoiningSession || !canJoinNow
+              ? "bg-slate-800/50 text-slate-500 cursor-not-allowed border border-white/5"
+              : "bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-900/40 border border-blue-400/30 hover:shadow-blue-500/20"
+          }`}
+        >
+          {isJoiningSession ? (
+            <i className="fas fa-spinner fa-spin"></i>
+          ) : !canJoinNow ? (
+            "Session Not Live"
+          ) : (
+            "Join Now"
+          )}
+        </button>
+      </div>
     </div>
   );
 };

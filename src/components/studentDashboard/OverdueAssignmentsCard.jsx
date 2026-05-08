@@ -24,68 +24,65 @@ const OverdueAssignmentsCard = () => {
 
   if (!overdueAssignments || overdueAssignments.count === 0) {
     return (
-      <div className="bg-green-500/5 p-8 rounded-[2.5rem] border-2 border-green-500/20 shadow-2xl relative overflow-hidden group">
-        <div className="absolute -top-10 -right-10 w-32 h-32 bg-green-500/5 rounded-full blur-3xl group-hover:bg-green-500/10 transition"></div>
-        <h3 className="text-green-500 font-black uppercase tracking-[0.2em] text-[10px] mb-8">
-          All Assignments Complete
-        </h3>
-        <div className="mb-10">
-          <p className="text-4xl font-black text-white mb-2">0</p>
-          <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">
-            Overdue Assignments • Great job!
-          </p>
+      <div className="bg-slate-900/40 backdrop-blur-xl p-6 rounded-[2rem] border border-white/5 shadow-2xl flex items-center gap-6 transition-all duration-300 hover:border-emerald-500/20 group">
+        <div className="w-14 h-14 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-400 shrink-0 group-hover:scale-110 transition-all duration-500 border border-emerald-500/10">
+          <i className="fas fa-check-circle text-xl"></i>
         </div>
-        <div className="flex items-center justify-center text-green-400">
-          <i className="fas fa-check-circle text-2xl mr-2"></i>
-          <span className="font-semibold">You're all caught up</span>
+        <div className="min-w-0 flex-1">
+          <h3 className="text-lg font-black text-white/90 mb-0.5 tracking-tight">
+            Clear Workspace
+          </h3>
+          <p className="text-emerald-500/70 text-[10px] font-black uppercase tracking-[0.15em]">
+            All assignments submitted
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-red-500/5 p-8 rounded-[2.5rem] border-2 border-red-500/20 shadow-2xl relative overflow-hidden group">
-      <div className="absolute -top-10 -right-10 w-32 h-32 bg-red-500/5 rounded-full blur-3xl group-hover:bg-red-500/10 transition"></div>
-      <h3 className="text-red-500 font-black uppercase tracking-[0.2em] text-[10px] mb-8">
-        Overdue Assignments
-      </h3>
-      <div className="mb-10">
-        <p className="text-4xl font-black text-white mb-2">{overdueAssignments.count}</p>
-        <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">
-          Assignment{overdueAssignments.count !== 1 ? 's' : ''} Past Due • Need Attention
-        </p>
-      </div>
+    <div className="bg-slate-900/40 backdrop-blur-xl p-6 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden group transition-all duration-300 hover:border-red-500/20">
+      {/* Premium Red Glow Effect */}
+      <div className="absolute -right-10 -top-10 w-32 h-32 bg-red-500/10 rounded-full blur-[60px]"></div>
       
-      <div className="space-y-4 mb-8">
-        {overdueAssignments.items?.slice(0, 3).map((assignment) => (
-          <div key={assignment.id} className="border-b border-red-500/10 pb-3 last:border-0">
-            <div className="flex justify-between items-start mb-1">
-              <h4 className="font-semibold text-white text-sm flex-1 mr-2">
-                {assignment.title}
-              </h4>
-              <span className="text-red-400 text-xs font-black uppercase tracking-widest whitespace-nowrap">
-                {getDaysOverdue(assignment.due_date)}d late
-              </span>
-            </div>
-            <p className="text-slate-500 text-xs">
-              {assignment.course_title}
-            </p>
-            <p className="text-red-400/70 text-xs mt-1">
-              Due: {formatDate(assignment.due_date)}
+      <div className="flex items-center justify-between mb-6 relative z-10">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-red-500/10 rounded-2xl flex items-center justify-center text-red-400 group-hover:scale-110 transition-all duration-500 border border-red-500/10 shadow-[0_0_15px_rgba(239,68,68,0.1)]">
+            <i className="fas fa-exclamation-circle text-lg"></i>
+          </div>
+          <div>
+            <h3 className="text-red-500 font-black uppercase tracking-[0.2em] text-[9px]">
+              Past Due Assignments • Need Attention
+            </h3>
+            <p className="text-white font-black text-lg tracking-tight">
+              {overdueAssignments.count} Overdue
             </p>
           </div>
-        ))}
-        
-        {overdueAssignments.count > 3 && (
-          <p className="text-slate-500 text-xs text-center py-2">
-            +{overdueAssignments.count - 3} more overdue assignment{overdueAssignments.count - 3 !== 1 ? 's' : ''}
-          </p>
-        )}
+        </div>
       </div>
-
-      {/* <button className="w-full bg-red-600 hover:bg-red-500 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition shadow-lg shadow-red-900/30 active:scale-95">
-        View All Overdue
-      </button> */}
+      
+      <div className="space-y-3 relative z-10">
+        {overdueAssignments.items?.slice(0, 2).map((assignment) => (
+          <div key={assignment.id} className="bg-white/5 rounded-[1.25rem] p-4 border border-white/5 flex items-center justify-between gap-6 hover:bg-white/10 transition-colors duration-300">
+            <div className="min-w-0 flex-1">
+              <h4 className="font-bold text-white text-[13px] truncate tracking-tight mb-0.5">
+                {assignment.title}
+              </h4>
+              <p className="text-slate-500 text-[9px] uppercase tracking-wider font-black opacity-60">
+                {assignment.course_title}
+              </p>
+            </div>
+            <div className="text-right shrink-0">
+              <span className="text-red-400 text-[10px] font-black uppercase tracking-widest block mb-0.5">
+                {getDaysOverdue(assignment.due_date)}d late
+              </span>
+              <span className="text-slate-500 text-[9px] font-bold block opacity-40">
+                {formatDate(assignment.due_date)}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { toastManager } from "../../utils/toastManager";
 import { useSelector, useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { setAuthModal } from "../../store/slices/uiSlice";
 import {
   loginUser,
@@ -69,6 +69,7 @@ const AuthModals = () => {
   const { authModal } = useSelector((state) => state.ui);
   const { isLoading, resendOtpLoading } = useSelector((state) => state.auth);
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const isOpen = authModal.type;
   const intendedRole = authModal.intendedRole;
@@ -145,13 +146,17 @@ const AuthModals = () => {
       setFpLoading(false);
       setFpError("");
 
+      const urlRole = searchParams.get("role");
       if (intendedRole) {
         setActiveRoleTab(intendedRole);
+      } else if (urlRole && ["student", "teacher", "parent", "admin"].includes(urlRole)) {
+        setActiveRoleTab(urlRole);
       }
     }
   }, [
     isOpen,
     intendedRole,
+    searchParams,
     dispatch,
     clearAllLoginErrors,
     clearAllRegistrationErrors,
@@ -354,8 +359,19 @@ const AuthModals = () => {
     try {
       await dispatch(verifyOtp({ userId, otp })).unwrap();
 
-      // Registration successful - show success state
-      setRegistrationStep("success");
+      toastManager.success("Verification successful, you can login now");
+
+      // Update URL with role for persistence
+      setSearchParams((prev) => {
+        prev.set("role", role);
+        return prev;
+      });
+
+      // Automatically switch to login modal with the registered role pre-selected
+      dispatch(setAuthModal({ type: "login", intendedRole: role }));
+
+      // Reset registration step for next time
+      setRegistrationStep("form");
     } catch (err) {
       showApiError(err)
       console.error("OTP verification failed:", err);
@@ -456,6 +472,10 @@ const AuthModals = () => {
                     dispatch(clearAuthError());
                     // Set the new role
                     setActiveRoleTab(roleOption);
+                    setSearchParams((prev) => {
+                      prev.set("role", roleOption);
+                      return prev;
+                    });
                   }}
                   className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
                     activeRoleTab === roleOption

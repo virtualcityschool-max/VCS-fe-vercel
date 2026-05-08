@@ -80,8 +80,11 @@ const StudentPortal = () => {
           </div>
 
           {/* Loading skeleton for header */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[1, 2, 3].map((i) => (
+          <div className="bg-slate-800 p-10 rounded-[2.5rem] border border-slate-700 animate-pulse w-full"></div>
+
+          {/* Loading skeleton for action cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {[1, 2].map((i) => (
               <div
                 key={i}
                 className="bg-slate-800 p-8 rounded-[2.5rem] border border-slate-700 animate-pulse"
@@ -127,20 +130,13 @@ const StudentPortal = () => {
       className="min-h-screen bg-[#0f172a] text-white font-inter"
     >
       <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
-        {/* Dashboard Header — wide, two small cards stacked on the right */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6 items-start">
-          <div className="md:col-span-2 gap-4 flex flex-col ">
-            <DashboardHeader />
-            {/* <NextSessionCard /> */}
-            <LiveScheduleList />
-            <MyAttendanceList />
-          </div>
-          <div className="flex flex-col gap-4 lg:gap-6">
-            <OverdueAssignmentsCard />
-            {/* <div className="xl:col-span-4 space-y-6 lg:space-y-8"> */}
-              <AssignmentOverviewList />
-            {/* </div> */}
-          </div>
+        {/* Dashboard Header - Full Width */}
+        <DashboardHeader />
+
+        {/* Action Cards - 2 Columns */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
+          <NextSessionCard />
+          <OverdueAssignmentsCard />
         </div>
 
         {/* Main Content Grid */}
