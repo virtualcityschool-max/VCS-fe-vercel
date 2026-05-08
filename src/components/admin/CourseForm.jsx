@@ -12,20 +12,39 @@ const fieldClass = (error) =>
 const FieldError = ({ error }) =>
   error ? <p className="text-red-400 text-xs mt-1">{error}</p> : null;
 
+const ALLOWED_EXTENSIONS = [".pdf", ".doc", ".docx", ".txt", ".png", ".jpg", ".jpeg", ".zip"];
+const MAX_FILE_SIZE_MB = 10;
+
 const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categories = [], mode = "create" }) => {
   const fileInputRef = useRef(null);
   const thumbnailInputRef = useRef(null);
   const [thumbnailPreview, setThumbnailPreview] = useState(null);
   const [viewerUrl, setViewerUrl] = useState(null);
+  const [fileError, setFileError] = useState(null);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0] || null;
+    if (!file) return;
+
+    const ext = "." + file.name.split(".").pop().toLowerCase();
+    if (!ALLOWED_EXTENSIONS.includes(ext)) {
+      setFileError(`File type not allowed. Allowed: ${ALLOWED_EXTENSIONS.join(", ")}`);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+    if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+      setFileError(`File too large. Maximum size is ${MAX_FILE_SIZE_MB} MB.`);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+    setFileError(null);
     onChange("attachment", file);
   };
 
   const clearFile = () => {
     onChange("attachment", null);
     onChange("attachment_url", null);
+    setFileError(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -291,10 +310,16 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
           </button>
         )}
 
+        {fileError && (
+          <p className="text-red-400 text-xs mt-2 flex items-center gap-1.5">
+            <i className="fas fa-exclamation-circle"></i> {fileError}
+          </p>
+        )}
+
         <input
           ref={fileInputRef}
           type="file"
-          accept=".pdf,.doc,.docx,.zip,.png,.jpg,.jpeg,.ppt,.pptx,.xls,.xlsx,.txt"
+          accept={ALLOWED_EXTENSIONS.join(",")}
           className="hidden"
           onChange={handleFileChange}
         />

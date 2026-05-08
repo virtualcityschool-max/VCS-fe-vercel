@@ -375,14 +375,26 @@ const SessionsTab = ({
                       )}
                     </div>
                     <div className="flex gap-2">
-                      <button
-                        onClick={() => onSessionEdit(session.id)}
-                        disabled={(session.enrollment_count ?? 0) >= 1}
-                        title={(session.enrollment_count ?? 0) >= 1 ? "Cannot edit: session has enrollments" : "Edit session"}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition flex-1 flex items-center justify-center gap-1 ${(session.enrollment_count ?? 0) >= 1 ? "bg-slate-800/30 text-slate-600 cursor-not-allowed" : "bg-slate-700/50 text-slate-300 hover:bg-slate-600/50"}`}
-                      >
-                        <i className="fas fa-edit"></i> Edit
-                      </button>
+                      {(() => {
+                        const isChild = session.is_child === true;
+                        const overEnrollment = (session.enrollment_count ?? 0) > 3;
+                        const blocked = isChild || overEnrollment;
+                        const tip = isChild
+                          ? "Child sessions cannot be edited"
+                          : overEnrollment
+                          ? "Cannot edit: session has more than 3 enrollments"
+                          : "Edit session";
+                        return (
+                          <button
+                            onClick={() => onSessionEdit(session.id)}
+                            disabled={blocked}
+                            title={tip}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition flex-1 flex items-center justify-center gap-1 ${blocked ? "bg-slate-800/30 text-slate-600 cursor-not-allowed" : "bg-slate-700/50 text-slate-300 hover:bg-slate-600/50"}`}
+                          >
+                            <i className="fas fa-edit"></i> Edit
+                          </button>
+                        );
+                      })()}
                       <button onClick={() => onSessionDelete(session.id)} disabled={loadingSessionIds.has(session.id)} className="bg-red-600/10 text-red-400 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-red-600/20 transition disabled:opacity-50 flex-1 flex items-center justify-center gap-1">
                         <i className="fas fa-trash"></i>
                         {loadingSessionIds.has(session.id) ? "Deleting…" : "Delete"}
@@ -426,14 +438,26 @@ const SessionsTab = ({
                       <td className="px-5 py-4">{getStatusBadge(session.status)}</td>
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-2 justify-end">
-                          <button
-                            onClick={() => onSessionEdit(session.id)}
-                            disabled={(session.enrollment_count ?? 0) >= 1}
-                            title={(session.enrollment_count ?? 0) >= 1 ? "Cannot edit: session has enrollments" : "Edit session"}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${(session.enrollment_count ?? 0) >= 1 ? "bg-slate-800/30 text-slate-600 cursor-not-allowed" : "bg-slate-700/50 text-slate-300 hover:bg-slate-600/50"}`}
-                          >
-                            <i className="fas fa-edit mr-1"></i>Edit
-                          </button>
+                          {(() => {
+                            const isChild = session.is_child === true;
+                            const overEnrollment = (session.enrollment_count ?? 0) > 3;
+                            const blocked = isChild || overEnrollment;
+                            const tip = isChild
+                              ? "Child sessions cannot be edited"
+                              : overEnrollment
+                              ? "Cannot edit: session has more than 3 enrollments"
+                              : "Edit session";
+                            return (
+                              <button
+                                onClick={() => onSessionEdit(session.id)}
+                                disabled={blocked}
+                                title={tip}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${blocked ? "bg-slate-800/30 text-slate-600 cursor-not-allowed" : "bg-slate-700/50 text-slate-300 hover:bg-slate-600/50"}`}
+                              >
+                                <i className="fas fa-edit mr-1"></i>Edit
+                              </button>
+                            );
+                          })()}
                           <button onClick={() => onSessionDelete(session.id)} disabled={loadingSessionIds.has(session.id)} className="bg-red-600/10 text-red-400 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-red-600/20 transition disabled:opacity-50">
                             <i className="fas fa-trash mr-1"></i>
                             {loadingSessionIds.has(session.id) ? "Deleting…" : "Delete"}
@@ -652,27 +676,34 @@ const SessionsTab = ({
                 />
               </div>
 
-              {/* Row 3: Start Time | End Date */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Start Time <span className="text-red-400">*</span>
-                  </label>
-                  <Input
-                    type="datetime-local"
-                    value={editSessionForm.start_time || ""}
-                    min={new Date().toISOString().slice(0, 16)}
-                    onChange={(e) => { setEditSessionForm({ ...editSessionForm, start_time: e.target.value }); clearEditSessionFieldError("start_time"); }}
-                    className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white focus:outline-none focus:ring-2 text-sm ${editSessionErrors?.start_time ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
-                    error={editSessionErrors?.start_time}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
-                    End Date
-                  </label>
-                  <input type="date" value={editSessionForm.recurrence_end_date || ""} disabled className="w-full px-3 py-2.5 bg-slate-700/50 border border-slate-600/50 rounded-xl text-slate-400 text-sm cursor-not-allowed" />
-                </div>
+              {/* Row 3: Start Time */}
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  Start Time <span className="text-red-400">*</span>
+                </label>
+                <Input
+                  type="datetime-local"
+                  value={editSessionForm.start_time || ""}
+                  min={new Date().toISOString().slice(0, 16)}
+                  onChange={(e) => { setEditSessionForm({ ...editSessionForm, start_time: e.target.value }); clearEditSessionFieldError("start_time"); }}
+                  className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white focus:outline-none focus:ring-2 text-sm ${editSessionErrors?.start_time ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
+                  error={editSessionErrors?.start_time}
+                />
+              </div>
+
+              {/* Row 3b: End Date (full width) */}
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  Recurrence End Date
+                </label>
+                <input
+                  type="date"
+                  value={editSessionForm.recurrence_end_date || ""}
+                  min={new Date().toISOString().slice(0, 10)}
+                  onChange={(e) => { setEditSessionForm({ ...editSessionForm, recurrence_end_date: e.target.value }); clearEditSessionFieldError("recurrence_end_date"); }}
+                  className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white focus:outline-none focus:ring-2 text-sm [color-scheme:dark] ${editSessionErrors?.recurrence_end_date ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
+                />
+                {editSessionErrors?.recurrence_end_date && <p className="text-red-400 text-xs mt-1">{editSessionErrors.recurrence_end_date}</p>}
               </div>
 
               {/* Row 4: Recurring Days | Meeting Link */}
@@ -685,25 +716,35 @@ const SessionsTab = ({
                     {["MON","TUE","WED","THU","FRI"].map((day) => {
                       const active = (editSessionForm.recurrence_days || []).includes(day);
                       return (
-                        <span key={day} className={`px-3 py-1.5 rounded-lg text-xs font-medium border ${active ? "bg-indigo-600/30 border-indigo-500/50 text-indigo-300" : "bg-slate-800/50 border-slate-700/50 text-slate-600"}`}>
+                        <button
+                          key={day}
+                          type="button"
+                          onClick={() => {
+                            const days = editSessionForm.recurrence_days || [];
+                            const next = active ? days.filter((d) => d !== day) : [...days, day];
+                            setEditSessionForm({ ...editSessionForm, recurrence_days: next });
+                            clearEditSessionFieldError("recurrence_days");
+                          }}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition ${active ? "bg-indigo-600/40 border-indigo-500/50 text-indigo-300" : "bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-600 hover:text-white"}`}
+                        >
                           {day}
-                        </span>
+                        </button>
                       );
                     })}
                   </div>
+                  {editSessionErrors?.recurrence_days && <p className="text-red-400 text-xs mt-1">{editSessionErrors.recurrence_days}</p>}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Meeting Link <span className="text-red-400">*</span>
+                    Meeting Link
                   </label>
-                  <Input
-                    type="url"
-                    placeholder="https://meet.google.com/..."
+                  <input
+                    type="text"
                     value={editSessionForm.meeting_link || ""}
-                    onChange={(e) => { setEditSessionForm({ ...editSessionForm, meeting_link: e.target.value }); clearEditSessionFieldError("meeting_link"); }}
-                    className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 text-sm ${editSessionErrors?.meeting_link ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
-                    error={editSessionErrors?.meeting_link}
+                    disabled
+                    className="w-full px-3 py-2.5 bg-slate-700/50 border border-slate-600/50 rounded-xl text-slate-500 text-sm cursor-not-allowed"
                   />
+                  <p className="text-slate-600 text-[10px] mt-1">Meeting link cannot be changed</p>
                 </div>
               </div>
 

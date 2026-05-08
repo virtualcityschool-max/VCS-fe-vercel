@@ -165,8 +165,12 @@ const AdminSessionsPage = () => {
     try {
       const session = sessions?.data?.find((s) => s.id === sessionId);
 
-      if ((session?.enrollment_count ?? 0) >= 1) {
-        toastManager.error("Cannot edit session as enrollment exists against this session.");
+      if (session?.is_child === true) {
+        toastManager.error("Child sessions cannot be edited. Edit the parent session instead.");
+        return;
+      }
+      if ((session?.enrollment_count ?? 0) > 3) {
+        toastManager.error("Cannot edit: this session has more than 3 enrollments.");
         return;
       }
       if (session) {
@@ -267,23 +271,24 @@ const AdminSessionsPage = () => {
     if (!formData.start_time) {
       errors.start_time = "Start time is required";
     } else {
-      const [year, month, day] = formData.scheduled_date.split("-");
-      const scheduled = new Date(year, month - 1, day);
+      const scheduled = new Date(formData.start_time);
       const today = new Date();
-      scheduled.setHours(0, 0, 0, 0);
       today.setHours(0, 0, 0, 0);
       if (scheduled < today) {
-        errors.scheduled_date = "Scheduled date must be today or in the future";
+        errors.start_time = "Start time must be today or in the future";
       }
     }
 
-    if (!formData.meeting_link?.trim()) {
-      errors.meeting_link = "Meeting link is required";
+    if (!formData.recurrence_days?.length) {
+      errors.recurrence_days = "Select at least one recurring day";
+    }
+
+    if (!formData.recurrence_end_date) {
+      errors.recurrence_end_date = "Recurrence end date is required";
     } else {
-      try {
-        new URL(formData.meeting_link);
-      } catch {
-        errors.meeting_link = "Please enter a valid URL";
+      const startDate = formData.start_time ? formData.start_time.slice(0, 10) : "";
+      if (startDate && formData.recurrence_end_date <= startDate) {
+        errors.recurrence_end_date = "End date must be after start date";
       }
     }
 
@@ -364,9 +369,10 @@ const AdminSessionsPage = () => {
     }
 
     setUpdatingSessionId(editingSession.id);
+    const { meeting_link: _drop, ...payload } = sessionData;
     try {
       await dispatch(
-        updateSession({ sessionId: editingSession.id, sessionData }),
+        updateSession({ sessionId: editingSession.id, sessionData: payload }),
       ).unwrap();
       toastManager.success("Session updated successfully");
       setActiveModal(null);
