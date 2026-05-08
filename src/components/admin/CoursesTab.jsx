@@ -896,17 +896,20 @@ const CoursesTab = ({
       {/* Create Course Modal */}
       {activeModal === "create-course" && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold text-white">
-                Create New Course
-              </h3>
-              <button
-                onClick={() => setActiveModal(null)}
-                className="text-slate-400 hover:text-white transition"
-              >
-                <i className="fas fa-times text-xl"></i>
-              </button>
+          <div className="bg-slate-900 border border-slate-800 rounded-[1.5rem] p-4 sm:p-8 w-full max-w-2xl lg:max-w-6xl max-h-[92vh] overflow-y-auto shadow-2xl transition-all duration-300">
+            <div className="flex flex-col gap-1 mb-8 pb-6 border-b border-white/5 relative">
+              <div className="flex justify-between items-center">
+                <h3 className="text-xl font-black text-white tracking-tight">Create New Course</h3>
+                <button
+                  onClick={() => setActiveModal(null)}
+                  className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-white hover:bg-white/5 transition-all"
+                >
+                  <i className="fas fa-times text-lg"></i>
+                </button>
+              </div>
+              <p className="text-slate-500 text-[12px] font-medium leading-relaxed max-w-2xl">
+                Fill in the details below to initialize a new educational course for the platform.
+              </p>
             </div>
             <form onSubmit={handleCreateCourse} className="space-y-4">
               <CourseForm
@@ -920,7 +923,7 @@ const CoursesTab = ({
                 users={users}
                 categories={categories}
               />
-              <div className="flex justify-end gap-3 pt-4">
+              <div className="flex justify-end gap-4 pt-8 mt-8 border-t border-white/5">
                 <Button
                   type="button"
                   onClick={() => setActiveModal(null)}
@@ -950,18 +953,21 @@ const CoursesTab = ({
         typeof activeModal === "object" &&
         activeModal.type === "edit-course" && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-              <div className="flex justify-between items-center mb-1">
-                <h3 className="text-xl font-bold text-white">Edit Course</h3>
-
-                <button
-                  onClick={() => setActiveModal(null)}
-                  className="text-slate-400 hover:text-white transition"
-                >
-                  <i className="fas fa-times text-xl"></i>
-                </button>
+            <div className="bg-slate-900 border border-slate-800 rounded-[1.5rem] p-4 sm:p-8 w-full max-w-2xl lg:max-w-6xl max-h-[92vh] overflow-y-auto shadow-2xl transition-all duration-300">
+              <div className="flex flex-col gap-1 mb-8 pb-6 border-b border-white/5 relative">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-xl font-black text-white tracking-tight">Edit Course</h3>
+                  <button
+                    onClick={() => setActiveModal(null)}
+                    className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-white hover:bg-white/5 transition-all"
+                  >
+                    <i className="fas fa-times text-lg"></i>
+                  </button>
+                </div>
+                <p className="text-slate-500 text-[12px] font-medium leading-relaxed max-w-2xl">
+                  Course content is hidden after completion. Please refer to the <span className="text-indigo-400 font-bold">Evaluations</span> tab for final grades and student performance.
+                </p>
               </div>
-                <span className="text-slate-400 text-[13px] pb-4">Course content is hidden after completion, please check the Evaluations tab for final grades.</span>
               <form
                 onSubmit={async (e) => {
                   e.preventDefault();
@@ -984,7 +990,7 @@ const CoursesTab = ({
                   users={users}
                   categories={categories}
                 />
-                <div className="flex justify-end gap-3 pt-4">
+                <div className="flex justify-end gap-4 pt-8 mt-8 border-t border-white/5">
                   <Button
                     type="button"
                     onClick={() => setActiveModal(null)}
