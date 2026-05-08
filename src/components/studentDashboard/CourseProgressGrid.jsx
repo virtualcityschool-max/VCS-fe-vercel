@@ -1,12 +1,17 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { selectEnrolledCourses } from "../../store/slices/studentDashboardSlice";
+import {
+  selectEnrolledCourses,
+  selectPendingEnrollments,
+} from "../../store/slices/studentDashboardSlice";
 import { getStorageUrl } from "../../utils/storageUrl";
 
 const CourseProgressGrid = () => {
   const navigate = useNavigate();
   const enrolledCourses = useSelector(selectEnrolledCourses);
+  const pendingEnrollments = useSelector(selectPendingEnrollments);
+  const [showPendingModal, setShowPendingModal] = React.useState(false);
 
   const getProgressColor = (percent) => {
     if (percent >= 80) return "bg-green-500";
@@ -21,6 +26,18 @@ const CourseProgressGrid = () => {
         <h2 className="text-xl lg:text-2xl font-black font-poppins text-white/90">
           Enrolled Courses
         </h2>
+
+        {pendingEnrollments.length > 0 && (
+          <button
+            onClick={() => setShowPendingModal(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 rounded-xl transition-all group"
+          >
+            <span className="w-2 h-2 bg-amber-400 rounded-full animate-pulse shrink-0"></span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-amber-400">
+              {pendingEnrollments.length} Pending Approval{pendingEnrollments.length !== 1 ? "s" : ""}
+            </span>
+          </button>
+        )}
       </div>
 
       {/* Active course cards */}
@@ -92,6 +109,84 @@ const CourseProgressGrid = () => {
         </div>
       </div>
 
+      {/* Pending Approvals Modal */}
+      {showPendingModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-slate-950/70 backdrop-blur-sm"
+            onClick={() => setShowPendingModal(false)}
+          />
+          <div className="relative w-full max-w-lg bg-[#131c2e] border border-white/10 rounded-[2rem] shadow-2xl overflow-hidden">
+            {/* Header */}
+            <div className="px-7 pt-7 pb-5 border-b border-white/5 flex items-start justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2.5 mb-1">
+                  <span className="w-2 h-2 bg-amber-400 rounded-full animate-pulse shrink-0"></span>
+                  <h3 className="text-base font-black text-white font-poppins">Pending Approvals</h3>
+                </div>
+                <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">
+                  Awaiting administrator review · typically 24–48 hrs
+                </p>
+              </div>
+              <button
+                onClick={() => setShowPendingModal(false)}
+                className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-all shrink-0"
+              >
+                <i className="fas fa-times text-xs"></i>
+              </button>
+            </div>
+
+            {/* List */}
+            <div className="px-5 py-4 space-y-2.5 max-h-[60vh] overflow-y-auto custom-scrollbar">
+              {pendingEnrollments.map((enrollment) => {
+                const course = enrollment.course || {};
+                const enrolledDate = enrollment.enrolled_at
+                  ? new Date(enrollment.enrolled_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+                  : null;
+
+                return (
+                  <div
+                    key={enrollment.id}
+                    onClick={() => { setShowPendingModal(false); navigate("/courses"); }}
+                    className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-white/[0.03] border border-white/5 hover:border-amber-500/20 hover:bg-amber-500/5 transition-all cursor-pointer group active:scale-[0.99]"
+                  >
+                    <div className="w-12 h-12 rounded-xl bg-slate-800 overflow-hidden shrink-0 border border-white/10">
+                      {course.thumbnail ? (
+                        <img src={getStorageUrl(course.thumbnail)} alt="" className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <i className="fas fa-book text-slate-600 text-sm"></i>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white font-bold text-sm truncate mb-1 group-hover:text-amber-300 transition-colors">
+                        {course.title || "—"}
+                      </p>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[9px] font-black uppercase tracking-wider">
+                          <i className="fas fa-clock text-[8px]"></i> Pending
+                        </span>
+                        {enrollment.is_private && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-purple-500/10 border border-purple-500/20 text-purple-400 text-[9px] font-black uppercase tracking-wider">
+                            <i className="fas fa-lock text-[8px]"></i> Private
+                          </span>
+                        )}
+                        {enrolledDate && (
+                          <span className="text-[9px] text-slate-500">Applied {enrolledDate}</span>
+                        )}
+                      </div>
+                    </div>
+
+                    <i className="fas fa-arrow-right text-xs text-slate-600 group-hover:text-amber-400 transition-colors shrink-0"></i>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 };

@@ -45,9 +45,9 @@ const FIELDS = {
     { key: "phone",            label: "Phone",             icon: "phone",         type: "tel",       placeholder: "+92 300 0000000" },
   ],
   student: [
-    { key: "phone", label: "Phone",         icon: "phone",        type: "tel",  placeholder: "+92 300 0000000" },
-    { key: "date_of_birth",   label: "Date of Birth", icon: "calendar-alt", type: "date", placeholder: "" },
-    // { key: "grade", label: "Grade Level",   icon: "graduation-cap", type: "text", placeholder: "e.g. 10th, A-Level" },
+    { key: "grade_level",   label: "Grade Level",   icon: "graduation-cap", type: "text", placeholder: "e.g. Grade 8, A-Level" },
+    { key: "phone",         label: "Phone",         icon: "phone",          type: "tel",  placeholder: "+92 300 0000000" },
+    { key: "date_of_birth", label: "Date of Birth", icon: "calendar-alt",   type: "date", placeholder: "" },
   ],
   parent: [
     { key: "phone",   label: "Phone",   icon: "phone",         type: "tel",  placeholder: "+92 300 0000000" },
