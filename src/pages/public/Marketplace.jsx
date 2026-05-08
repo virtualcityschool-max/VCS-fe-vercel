@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { fetchAllCourses } from "../../store/slices/coursesSlice";
+import { fetchAllCourses, fetchCategories } from "../../store/slices/coursesSlice";
 import {
   enrollInCourseNormal,
   enrollInCoursePrivate,
@@ -10,7 +10,7 @@ import {
 } from "../../store/slices/studentDashboardSlice";
 import { Button, Input, FilterSelect, SearchInput } from "../../components/ui";
 import { toastManager } from "../../utils/toastManager";
-import { BACKEND_CATEGORIES, formatCategoryLabel } from "../../constants";
+import { formatCategoryLabel } from "../../constants";
 import { useSubmissionGuard } from "../../utils/requestDeduplicator";
 import { getCourseImage } from "../../utils/courseImageUtils";
 import { setAuthModal } from "../../store/slices/uiSlice";
@@ -34,27 +34,19 @@ const Marketplace = () => {
   const auth = useSelector((state) => state.auth);
 
   // Get courses data from Redux store
-  const { courses, isLoading, error } = useSelector((state) => state.courses);
+  const { courses, isLoading, error, categories } = useSelector((state) => state.courses);
 
   // Get student dashboard state for enrollment tracking
   const { enrollingCourseIds, unenrollingCourseIds, enrolledCourses } =
     useSelector((state) => state.studentDashboard);
 
-  // Fetch courses on component mount
   useEffect(() => {
-    if (courses?.length <= 0) {
-      dispatch(fetchAllCourses());
-    }
-
-    // Fetch student dashboard if user is logged in as student
-    if (auth.isLoggedIn && auth.role === "student") {
-      dispatch(fetchStudentDashboard());
-    }
+    if (courses?.length <= 0) dispatch(fetchAllCourses());
+    dispatch(fetchCategories());
+    if (auth.isLoggedIn && auth.role === "student") dispatch(fetchStudentDashboard());
   }, [dispatch, auth.isLoggedIn, auth.role]);
 
   const filterOptions = useMemo(() => {
-    // Categories and instructors calculation
-    const categories = BACKEND_CATEGORIES;
     const instructors = courses ? [
       ...new Set(
         courses.map((course) => course.instructor?.username).filter(Boolean),
@@ -85,7 +77,6 @@ const Marketplace = () => {
     }
 
     return {
-      categories: categories.sort(),
       instructors: instructors.sort(),
       priceRanges,
     };
@@ -382,8 +373,8 @@ const Marketplace = () => {
                 className="w-full h-11"
               >
                 <option value="">All Categories</option>
-                {filterOptions.categories.map((category) => (
-                  <option key={category} value={category}>{formatCategoryLabel(category)}</option>
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.name}>{formatCategoryLabel(cat.name)}</option>
                 ))}
               </FilterSelect>
             </div>

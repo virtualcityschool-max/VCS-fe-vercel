@@ -126,6 +126,26 @@ export const coursesService = {
     }
   },
 
+  // ── Course Categories ──────────────────────────────────────────
+  getCategories: async () => {
+    try {
+      const response = await axiosInstance.get("/courses/categories/");
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // send full desired list; backend creates/updates/deletes to match
+  syncCategories: async (list) => {
+    try {
+      const response = await axiosInstance.post("/courses/categories/sync/", list);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
   // Get grading scale (public, no auth)
   getGradingScale: async () => {
     try {

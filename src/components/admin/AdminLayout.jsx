@@ -3,9 +3,10 @@ import { Outlet, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchPendingApprovals,
-  setApprovalsLoading,
+  fetchPendingEnrollments,
 } from "../../store/slices/approvalsSlice";
 import { fetchPendingChildLinks } from "../../store/slices/childLinksSlice";
+import { fetchAdminHireRequests } from "../../store/slices/hireSlice";
 import {
   fetchCourses,
   fetchUsers,
@@ -35,18 +36,14 @@ const AdminLayout = () => {
 
   const activeTab = getActiveTabFromPath();
 
+  // Fetch all approval counts once on mount so the sidebar badge is always accurate.
+  // AdminApprovalsPage reads from this Redux state directly — no duplicate fetches.
   React.useEffect(() => {
     dispatch(fetchPendingApprovals());
     dispatch(fetchPendingChildLinks());
+    dispatch(fetchPendingEnrollments());
+    dispatch(fetchAdminHireRequests());
   }, [dispatch]);
-
-  React.useEffect(() => {
-    if (activeTab === "approvals") {
-      dispatch(fetchPendingApprovals());
-      dispatch(fetchPendingChildLinks());
-      dispatch(setApprovalsLoading(true));
-    }
-  }, [dispatch, activeTab]);
 
   React.useEffect(() => {
     if (activeTab === "courses") {

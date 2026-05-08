@@ -23,6 +23,7 @@ import { fetchAllCourses } from "../../store/slices/coursesSlice";
 const AdminCoursesPage = () => {
   const dispatch = useDispatch();
 
+  const [categories, setCategories] = useState([]);
   const [activeModal, setActiveModal] = useState(null);
   const [editingCourse, setEditingCourse] = useState(null);
   const [loadingCourseIds, setLoadingCourseIds] = useState(new Set());
@@ -76,10 +77,13 @@ const AdminCoursesPage = () => {
     clearAllErrors: clearAllEditCourseErrors,
   } = useFieldErrors({});
 
-  // Fetch courses on component mount
+  // Fetch courses and categories on mount
   useEffect(() => {
     dispatch(fetchCourses());
-    dispatch(fetchUsers({ role: "teacher" })); // For instructor assignment
+    dispatch(fetchUsers({ role: "teacher" }));
+    coursesService.getCategories()
+      .then(setCategories)
+      .catch(() => {});
   }, [dispatch]);
 
   // Reset create course form when modal opens/closes
@@ -115,7 +119,7 @@ const AdminCoursesPage = () => {
         setEditCourseForm({
           title: editingCourse.title || "",
           description: editingCourse.description || "",
-          category: editingCourse.category || "",
+          category: editingCourse.category?.id?.toString() || editingCourse.category || "",
           price: editingCourse.price || "",
           status: editingCourse.status || "draft",
           instructor_id:
@@ -166,7 +170,7 @@ const AdminCoursesPage = () => {
       errors.description = "Description must be at least 10 characters";
     }
 
-    if (!formData.category?.trim()) {
+    if (!formData.category) {
       errors.category = "Course category is required";
     }
 
@@ -198,7 +202,7 @@ const AdminCoursesPage = () => {
     const fd = new FormData();
     fd.append("title", formData.title);
     fd.append("description", formData.description);
-    fd.append("category", formData.category);
+    if (formData.category) fd.append("category", Number(formData.category));
     fd.append("price", Number(formData.price));
     fd.append("status", formData.status);
     fd.append("instructor_id", Number(formData.instructor_id));
@@ -334,6 +338,8 @@ const AdminCoursesPage = () => {
     <CoursesTab
       courses={courses?.data || []}
       users={users?.data || []}
+      categories={categories}
+      onCategoriesChanged={setCategories}
       loading={courses?.loading || false}
       loadingCourseIds={loadingCourseIds}
       updatingCourseId={updatingCourseId}

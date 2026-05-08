@@ -188,18 +188,18 @@ const TeachersDirectory = () => {
                   </div>
 
                   {/* CTA */}
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 mt-auto">
                     {isAuthenticated && (
                       <button
                         onClick={() => navigate(`/teachers/${teacher.id}`)}
-                        className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-[11px] font-semibold uppercase tracking-wide transition shadow-md hover:shadow-indigo-500/30"
+                        className="flex-1 py-2.5 rounded-xl bg-slate-900 border border-indigo-600/30 text-indigo-400 hover:bg-indigo-600 hover:text-white font-black text-[11px] uppercase tracking-[0.18em] transition-all active:scale-95"
                       >
                         View Profile
                       </button>
                     )}
                     <button
                       onClick={() => setHireModal(teacher)}
-                      className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-[11px] font-semibold uppercase tracking-wide transition shadow-md hover:shadow-emerald-500/30"
+                      className="flex-1 py-2.5 rounded-xl bg-slate-900 border border-blue-600/30 text-blue-500 hover:bg-blue-600 hover:text-white font-black text-[11px] uppercase tracking-[0.18em] transition-all active:scale-95"
                     >
                       Hire Tutor
                     </button>

@@ -23,6 +23,19 @@ export const fetchAllCourses = createAsyncThunk(
   },
 );
 
+export const fetchCategories = createAsyncThunk(
+  "courses/fetchCategories",
+  async (_, { getState, rejectWithValue }) => {
+    // Skip if already loaded
+    if (getState().courses.categories.length > 0) return null;
+    try {
+      return await coursesService.getCategories();
+    } catch (error) {
+      return rejectWithValue(error.message || "Failed to load categories");
+    }
+  },
+);
+
 export const fetchCourseById = createAsyncThunk(
   "courses/fetchCourseById",
   async (courseId, { rejectWithValue }) => {
@@ -42,6 +55,8 @@ const initialState = {
   isLoading: false,
   error: null,
   stats: null,
+  categories: [],
+  categoriesLoading: false,
 };
 
 const coursesSlice = createSlice({
@@ -86,6 +101,20 @@ const coursesSlice = createSlice({
       .addCase(fetchCourseById.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
+      })
+
+      // Fetch Categories
+      .addCase(fetchCategories.pending, (state) => {
+        state.categoriesLoading = true;
+      })
+      .addCase(fetchCategories.fulfilled, (state, action) => {
+        state.categoriesLoading = false;
+        if (action.payload !== null) {
+          state.categories = Array.isArray(action.payload) ? action.payload : [];
+        }
+      })
+      .addCase(fetchCategories.rejected, (state) => {
+        state.categoriesLoading = false;
       })
 
       // Handle logout - clear course enrollment flags

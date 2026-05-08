@@ -53,13 +53,8 @@ const AdminApprovalsPage = () => {
   const { adminRequests: hireRequests, adminLoading: hireLoading, adminError: hireError, adminProcessing: hireProcessing } = useSelector((state) => state.hire);
   const [hireStatusFilter, setHireStatusFilter] = useState(undefined);
 
-  // Fetch all once on mount — no re-fetch on tab switch
-  useEffect(() => {
-    dispatch(fetchPendingApprovals());
-    dispatch(fetchPendingChildLinks());
-    dispatch(fetchPendingEnrollments());
-    dispatch(fetchAdminHireRequests());
-  }, [dispatch]);
+  // Data is pre-loaded by AdminLayout on mount — no fetch needed here.
+  // Use the Refresh buttons inside each tab for manual re-fetch.
 
   const handleApprove = async (userId) => {
     try {

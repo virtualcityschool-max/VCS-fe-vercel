@@ -11,11 +11,8 @@ const PublicHome = () => {
   const dispatch = useDispatch();
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Get courses data from Redux store
-  const { courses } = useSelector((state) => state.courses);
-  console.log("courses--->", courses);
+  const { courses, isLoading: coursesLoading } = useSelector((state) => state.courses);
 
-  // Fetch courses on component mount
   useEffect(() => {
     if (courses.length <= 0) {
       dispatch(fetchAllCourses());
@@ -207,7 +204,18 @@ const PublicHome = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {availableCourses.slice(0, 4).map((course, i) => (
+          {coursesLoading && courses.length === 0
+            ? [...Array(4)].map((_, i) => (
+                <div key={i} className="bg-slate-900/50 border border-white/10 rounded-[2.5rem] overflow-hidden animate-pulse flex flex-col">
+                  <div className="h-40 md:h-44 bg-slate-800" />
+                  <div className="p-5 space-y-3">
+                    <div className="h-4 bg-slate-800 rounded w-3/4" />
+                    <div className="h-3 bg-slate-800 rounded w-1/2" />
+                    <div className="h-3 bg-slate-800 rounded w-1/3 mt-4" />
+                  </div>
+                </div>
+              ))
+            : availableCourses.slice(0, 4).map((course, i) => (
             <div
               key={course.id}
               onClick={() => navigate("/courses")}
@@ -250,9 +258,10 @@ const PublicHome = () => {
                 </div>
               </div>
             </div>
-          ))}
+          ))
+          }
         </div>
-        
+
       </section>
 
       {/* Footer Teaser */}

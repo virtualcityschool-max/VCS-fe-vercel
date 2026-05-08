@@ -1,6 +1,5 @@
 import React, { useRef, useState } from "react";
 import QuillEditor from "../common/QuillEditor";
-import { BACKEND_CATEGORIES, formatCategoryLabel } from "../../constants";
 import { FilterSelect, Input } from "../ui";
 import { getStorageUrl } from "../../utils/storageUrl";
 import FileViewerModal from "../common/FileViewerModal";
@@ -13,7 +12,7 @@ const fieldClass = (error) =>
 const FieldError = ({ error }) =>
   error ? <p className="text-red-400 text-xs mt-1">{error}</p> : null;
 
-const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], mode = "create" }) => {
+const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categories = [], mode = "create" }) => {
   const fileInputRef = useRef(null);
   const thumbnailInputRef = useRef(null);
   const [thumbnailPreview, setThumbnailPreview] = useState(null);
@@ -94,8 +93,8 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], mode = "
             className={fieldClass(errors.category)}
           >
             <option value="">Select category</option>
-            {BACKEND_CATEGORIES.map((cat) => (
-              <option key={cat} value={cat}>{formatCategoryLabel(cat)}</option>
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.id}>{cat.name}</option>
             ))}
           </FilterSelect>
           <FieldError error={errors.category} />
