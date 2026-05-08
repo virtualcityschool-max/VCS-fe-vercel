@@ -5,6 +5,7 @@ import { BACKEND_CATEGORIES, formatCategoryLabel } from "../../constants";
 import CourseForm from "./CourseForm";
 import { coursesService } from "../../services/coursesService";
 import { toastManager } from "../../utils/toastManager";
+import { showApiError } from "../../utils/apiErrorHandler";
 
 const GRADE_STYLE = {
   "A+": "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
@@ -60,8 +61,9 @@ const GradingScaleModal = ({ onClose }) => {
       await coursesService.updateGradingScale(changed);
       toastManager.success("Grading scale updated");
       onClose();
-    } catch {
-      toastManager.error("Failed to update grading scale");
+    } catch(err) {
+      showApiError(err)
+      // toastManager.error("Failed to update grading scale");
     } finally {
       setSaving(false);
     }
@@ -156,6 +158,7 @@ const CoursesTab = ({
   loading,
   loadingCourseIds,
   updatingCourseId,
+  isCreatingCourse = false,
   editCourseForm,
   setEditCourseForm,
   createCourseForm,
@@ -709,9 +712,14 @@ const CoursesTab = ({
                 </Button>
                 <Button
                   type="submit"
-                  className="bg-indigo-600 hover:bg-indigo-500"
+                  disabled={isCreatingCourse}
+                  className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                 >
-                  Create Course
+                  {isCreatingCourse ? (
+                    <><i className="fas fa-spinner fa-spin"></i> Creating...</>
+                  ) : (
+                    "Create Course"
+                  )}
                 </Button>
               </div>
             </form>

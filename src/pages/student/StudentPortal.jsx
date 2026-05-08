@@ -141,23 +141,15 @@ const StudentPortal = () => {
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 lg:gap-8">
-          {/* Left Column - Main Content */}
           <div className="xl:col-span-8 space-y-6 lg:space-y-8">
-            {/* Live Schedule */}
-            <LiveScheduleList />
-
-            {/* My Attendance */}
-            <MyAttendanceList />
-          </div>
-
-          {/* Right Column - Sidebar */}
-          <div className="xl:col-span-4 space-y-6 lg:space-y-8">
-            {/* Assignment Overview */}
-            <AssignmentOverviewList />
           </div>
         </div>
+
         {/* Enrolled Courses */}
         <CourseProgressGrid />
+
+        {/* Live Schedule — at the bottom */}
+        
       </div>
     </section>
   );

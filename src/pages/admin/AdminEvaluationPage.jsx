@@ -119,7 +119,7 @@ const AdminEvaluationPage = () => {
         {/* ── Filter bar: tabs left, course right ── */}
         <div className="flex items-end justify-between gap-4 flex-wrap mb-2">
           {/* Enrollment type tabs */}
-          <div className="flex flex-col gap-1">
+          {/* <div className="flex flex-col gap-1">
             <span className="text-[10px] uppercase tracking-widest text-slate-500 font-bold px-0.5">Enrollment Type</span>
             <div className="flex gap-1 bg-slate-800/60 border border-slate-700 rounded-xl p-1">
               <button
@@ -132,7 +132,7 @@ const AdminEvaluationPage = () => {
                 Public
               </button>
             </div>
-          </div>
+          </div> */}
 
           {/* Course selector */}
           <div className="flex flex-col gap-1">
@@ -236,7 +236,7 @@ const AdminEvaluationPage = () => {
               <div className="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-3">
                 <i className="fas fa-inbox text-slate-500 text-xl" />
               </div>
-              <p className="text-slate-400 text-sm">No public evaluations found for this course</p>
+              <p className="text-slate-400 text-sm">No Data Found</p>
             </div>
           ) : (
             <div className="bg-slate-900/50 border border-slate-800 border-dashed rounded-3xl p-12 text-center">

@@ -141,11 +141,11 @@ const EvaluationMatrix = ({ students = [], courseStatus }) => {
                   key={`a-${a.id}`}
                   className="px-4 py-4 text-center text-[10px] uppercase tracking-wider text-slate-500 font-semibold min-w-[130px]"
                 >
-                  <div className="truncate max-w-[120px] mx-auto text-slate-300 normal-case tracking-normal" title={a.title}>
+                  <div className="truncate max-w-[120px] mx-auto text-slate-300 normal-case tracking-normal text-[14px]" title={a.title}>
                     {a.title}
                   </div>
-                  <div className="text-slate-600 text-[9px] mt-0.5 tracking-normal normal-case font-normal">
-                    Max: {a.max_score}
+                  <div className="text-slate-600 text-[11px] mt-0.5 tracking-normal normal-case font-normal">
+                    Asgmt · Total: {a.max_score}
                   </div>
                 </th>
               ))}
@@ -160,7 +160,7 @@ const EvaluationMatrix = ({ students = [], courseStatus }) => {
                     {q.title}
                   </div>
                   <div className="text-slate-600 text-[9px] mt-0.5 tracking-normal normal-case font-normal">
-                    Quiz · Max: {q.max_score}
+                    Quiz · Total: {q.max_score}
                   </div>
                 </th>
               ))}

@@ -395,7 +395,7 @@ export const fetchSessions = createAsyncThunk(
   "admin/fetchSessions",
   async (params = {}, { rejectWithValue }) => {
     try {
-      const response = await adminSessionService.getSessions();
+      const response = await adminSessionService.getSessions(params);
       return response;
     } catch (error) {
       return rejectWithValue(error.message || "Failed to fetch sessions");

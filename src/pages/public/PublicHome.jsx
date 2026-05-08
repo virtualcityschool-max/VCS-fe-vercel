@@ -101,14 +101,14 @@ const PublicHome = () => {
             onClick={() => navigate("/courses")}
             className="group flex items-center justify-center gap-3 bg-white text-slate-950 px-6 sm:px-9 py-3.5 sm:py-4 rounded-4xl font-black text-[10px] sm:text-xs uppercase tracking-widest transition-all hover:scale-105 shadow-2xl shadow-white/5"
           >
-            Explore Course Catalog
+            Explore Course
             <i className="fas fa-arrow-right group-hover:translate-x-1 transition"></i>
           </button>
           <button
             onClick={() => navigate("/teachers")}
             className="group flex items-center justify-center gap-3 border border-white/10 hover:border-white/20 bg-white/5 hover:bg-white/10 text-white px-6 sm:px-9 py-3.5 sm:py-4 rounded-4xl font-black text-[10px] sm:text-xs uppercase tracking-widest transition-all hover:scale-105"
           >
-            Find a Private Tutor
+            Explore Tutor
             <i className="fas fa-user-graduate group-hover:rotate-12 transition"></i>
           </button>
         </div>
@@ -171,13 +171,13 @@ const PublicHome = () => {
                         <span className="text-green-400 font-black">
                           PKR {course.price || "0.00"}
                         </span>
-                        <div className="flex text-yellow-500 text-[10px] gap-0.5">
+                        {/* <div className="flex text-yellow-500 text-[10px] gap-0.5">
                           <i className="fas fa-star"></i>
                           <i className="fas fa-star"></i>
                           <i className="fas fa-star"></i>
                           <i className="fas fa-star"></i>
                           <i className="fas fa-star"></i>
-                        </div>
+                        </div> */}
                       </div>
                     </div>
                   </div>
@@ -240,13 +240,13 @@ const PublicHome = () => {
                   <span className="text-indigo-400 font-black">
                     PKR {course.price || "19.99"}
                   </span>
-                  <div className="flex text-yellow-500 text-[10px] gap-0.5">
+                  {/* <div className="flex text-yellow-500 text-[10px] gap-0.5">
                     <i className="fas fa-star"></i>
                     <i className="fas fa-star"></i>
                     <i className="fas fa-star"></i>
                     <i className="fas fa-star"></i>
                     <i className="fas fa-star"></i>
-                  </div>
+                  </div> */}
                 </div>
               </div>
             </div>

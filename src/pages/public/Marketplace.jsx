@@ -204,14 +204,11 @@ const Marketplace = () => {
     await submissionGuard.guard(async () => {
       try {
         const response = await dispatch(enrollInCourseNormal(courseId)).unwrap();
-
         const successMessage =
-          response?.message || `Successfully made enrollment request for ${courseTitle}`;
+          response?.message || `Enrolment request sent`;
         toastManager.success(successMessage);
-
         setEnrollmentModalOpen(false);
         setSelectedCourse(null);
-
         dispatch(fetchAllCourses());
 
         if (auth.role === "student") {
@@ -399,7 +396,7 @@ const Marketplace = () => {
               <SearchInput
                 id="course-search"
                 name="course-search"
-                placeholder="Search topics..."
+                placeholder="Search courses..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onClear={() => setSearchTerm("")}

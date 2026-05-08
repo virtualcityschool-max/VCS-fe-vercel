@@ -78,7 +78,7 @@ const ChildLinkRequest = () => {
       </div>
 
       {/* Success Message */}
-      {showSuccess && successData && (
+      {/* {showSuccess && successData && (
         <div className="bg-emerald-600/10 border border-emerald-500/20 rounded-2xl p-6 mb-8">
           <div className="flex items-start gap-4">
             <div className="w-10 h-10 bg-emerald-600/20 rounded-full flex items-center justify-center shrink-0">
@@ -102,7 +102,7 @@ const ChildLinkRequest = () => {
             </div>
           </div>
         </div>
-      )}
+      )} */}
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Input row */}

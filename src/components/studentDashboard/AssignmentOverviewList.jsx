@@ -86,7 +86,7 @@ const AssignmentOverviewList = () => {
           Assignments
         </h3>
         <button
-          onClick={() => navigate("/student/assignments")}
+          onClick={() => navigate("/student/assessments")}
           className="flex items-center"
         >
           <i className="fas fa-tasks text-slate-600 text-xs"></i>
@@ -157,7 +157,7 @@ const AssignmentOverviewList = () => {
       {assignments.length > 3 && (
         <button
           type="button"
-          onClick={() => navigate("/student/assignments")}
+          onClick={() => navigate("/student/assessments")}
           className="w-full mt-8 py-3 bg-slate-900 border border-slate-700 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition active:scale-95"
         >
           See All {assignments.length} Assignments

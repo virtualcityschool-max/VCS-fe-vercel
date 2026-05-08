@@ -42,18 +42,18 @@ const UserProfileDropdown = ({ dropUp = false, isCollapsed = false }) => {
   const handleSignOut = async () => {
     setIsDropdownOpen(false);
 
-    const toastId = toastManager.loading("Signing out...");
+    // const toastId = toastManager.loading("Signing out...");
 
     try {
       const result = await dispatch(logoutUser()).unwrap();
       toastManager.dismiss(toastId);
 
       // Show appropriate message based on backend logout success
-      if (result.backendLogoutSuccess) {
-        toastManager.success("Logged out successfully");
-      } else {
-        toastManager.info("Logged out locally (backend unavailable)");
-      }
+      // if (result.backendLogoutSuccess) {
+      //   toastManager.success("Logged out successfully");
+      // } else {
+      //   toastManager.info("Logged out locally (backend unavailable)");
+      // }
 
       // Always navigate to home regardless of backend success
       navigate("/");

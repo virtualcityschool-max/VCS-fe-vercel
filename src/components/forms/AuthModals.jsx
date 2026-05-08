@@ -13,6 +13,7 @@ import {
 import { authService } from "../../services/authService";
 import { normalizeApiError } from "../../utils/errorHandler";
 import { useFieldErrors } from "../../hooks";
+import { showApiError } from "../../utils/apiErrorHandler";
 
 const AuthModals = () => {
   const [activeRoleTab, setActiveRoleTab] = useState("student");
@@ -372,19 +373,20 @@ const AuthModals = () => {
       // Reset registration step for next time
       setRegistrationStep("form");
     } catch (err) {
+      showApiError(err)
       console.error("OTP verification failed:", err);
 
-      // Use global error handler
-      const normalizedError = normalizeApiError(err);
+      // // Use global error handler
+      // const normalizedError = normalizeApiError(err);
 
-      // For OTP errors, always show them inline (not as toast)
-      if (normalizedError.type === "field" || normalizedError.type === "form") {
-        setOtpError(normalizedError.message);
-      } else {
-        // General errors can be shown as toast
-        toastManager.error(normalizedError.message);
-        setOtpError("Verification failed. Please try again.");
-      }
+      // // For OTP errors, always show them inline (not as toast)
+      // if (normalizedError.type === "field" || normalizedError.type === "form") {
+      //   setOtpError(normalizedError.message);
+      // } else {
+      //   // General errors can be shown as toast
+      //   toastManager.error(normalizedError.message);
+      //   setOtpError("Verification failed. Please try again.");
+      // }
     }
   };
 
@@ -397,8 +399,7 @@ const AuthModals = () => {
       await authService.forgotPasswordRequestOtp(fpEmail.trim());
       setFpStep("verify");
     } catch (err) {
-      const msg = err?.response?.data?.detail || err?.response?.data?.email?.[0] || err?.message || "Failed to send OTP";
-      setFpError(msg);
+      showApiError(err)
     } finally {
       setFpLoading(false);
     }
@@ -440,7 +441,7 @@ const AuthModals = () => {
 
   return (
     <div className="fixed inset-0 z-100 flex items-center justify-center p-6 bg-slate-950/80 backdrop-blur-md animate-fadeIn">
-      <div className="bg-slate-900 border border-white/10 w-full max-w-md rounded-[2.5rem] shadow-2xl overflow-hidden glass relative">
+      <div className="bg-slate-900 border border-white/10 w-full max-w-md rounded-[2.5rem] shadow-2xl overflow-hidden glass relative flex flex-col max-h-[90vh]">
         <button
           onClick={onClose}
           className="absolute top-6 right-6 z-20 text-slate-500 hover:text-white transition"
@@ -449,7 +450,7 @@ const AuthModals = () => {
         </button>
 
         {isOpen === "login" ? (
-          <div className="p-6 sm:p-10 relative overflow-hidden" style={{ minHeight: 480 }}>
+          <div className="p-6 sm:p-10 relative overflow-y-auto flex-1">
             <h2 className="text-2xl sm:text-3xl font-black font-poppins text-white mb-2 text-center">
               Secure Login
             </h2>
@@ -740,7 +741,7 @@ const AuthModals = () => {
             )}
           </div>
         ) : (
-          <div className="p-6 sm:p-10">
+          <div className="p-6 sm:p-10 overflow-y-auto flex-1">
             {registrationStep === "form" && (
               <form onSubmit={handleRegisterSubmit} className="space-y-5">
                 {/* Your existing registration form fields */}

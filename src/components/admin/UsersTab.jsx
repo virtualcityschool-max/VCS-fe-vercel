@@ -15,10 +15,10 @@ const SearchControls = ({
 }) => {
   const roleTabs = [
     { value: "", label: "All" },
-    { value: "admin", label: "Admin" },
-    { value: "teacher", label: "Teacher" },
-    { value: "student", label: "Student" },
-    { value: "parent", label: "Parent" },
+    { value: "admin", label: "Admin(s)" },
+    { value: "teacher", label: "Teacher(s)" },
+    { value: "student", label: "Student(s)" },
+    { value: "parent", label: "Parent(s)" },
   ];
 
   // Check if any filters are applied
@@ -61,6 +61,7 @@ const SearchControls = ({
             className="w-full sm:w-64"
           />
           <FilterSelect
+            style={{ minWidth: "130px" }}
             value={usersFilters.is_active}
             onChange={(e) => handleFilterChange("is_active", e.target.value)}
           >
@@ -69,6 +70,7 @@ const SearchControls = ({
             <option value="false">Inactive</option>
           </FilterSelect>
           <FilterSelect
+            style={{ minWidth: "140px" }}
             value={usersFilters.ordering}
             onChange={(e) => handleFilterChange("ordering", e.target.value)}
           >
@@ -472,7 +474,8 @@ const UsersTab = ({
                           </button>
                           <button
                             onClick={() => handleDeleteUser(user)}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${
+                            style={{ minWidth: "100px" }}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition text-center ${
                               user.is_active
                                 ? "bg-amber-600/10 text-amber-400 hover:bg-amber-600/20"
                                 : "bg-emerald-600/10 text-emerald-400 hover:bg-emerald-600/20"

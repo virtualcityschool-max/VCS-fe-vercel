@@ -258,14 +258,43 @@ const SessionsTab = ({
           </div>
         )}
 
+        {/* View filter */}
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="text-xs font-semibold text-slate-500 hidden sm:inline">Session Type</span>
+          <FilterSelect
+            style={{ minWidth: "130px" }}
+            value={sessionFilters.view}
+            onChange={(e) => setSessionFilters({ ...sessionFilters, view: e.target.value })}
+          >
+            <option value="">All</option>
+            <option value="parent">Parent</option>
+          </FilterSelect>
+        </div>
+
+        {/* Course filter */}
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="text-xs font-semibold text-slate-500 hidden sm:inline">Course</span>
+          <FilterSelect
+            style={{ minWidth: "180px" }}
+            value={sessionFilters.course}
+            onChange={(e) => setSessionFilters({ ...sessionFilters, course: e.target.value })}
+          >
+            <option value="">All Courses</option>
+            {courses?.map((c) => (
+              <option key={c.id} value={c.id}>{c.title}</option>
+            ))}
+          </FilterSelect>
+        </div>
+
         {/* Instructor filter */}
         <div className="flex items-center gap-2 shrink-0">
           <span className="text-xs font-semibold text-slate-500 hidden sm:inline">Instructor</span>
           <FilterSelect
+            style={{ minWidth: "160px" }}
             value={sessionFilters.teacher}
             onChange={(e) => setSessionFilters({ ...sessionFilters, teacher: e.target.value })}
           >
-            <option value="" selected>All Teachers</option>
+            <option value="">All Teachers</option>
             {teachers.map((t) => (
               <option key={t.id} value={t.id}>{t.username}</option>
             ))}
@@ -366,8 +395,8 @@ const SessionsTab = ({
                     <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Course</th>
                     <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Teacher</th>
                     <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Start Date</th>
-                    <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Recurrence</th>
                     <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">End Date</th>
+                    <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Recurrence</th>
                     <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Status</th>
                     <th className="px-5 py-4 text-xs font-black uppercase text-slate-500 text-right">Actions</th>
                   </tr>
@@ -379,6 +408,7 @@ const SessionsTab = ({
                       <td className="px-5 py-4 text-slate-300 text-sm">{session.course?.title || session.course_title || "—"}</td>
                       <td className="px-5 py-4 text-slate-300 text-sm">{session.teacher_name || "—"}</td>
                       <td className="px-5 py-4 text-slate-300 text-sm">{formatDate(session.scheduled_at || session.start_time)}</td>
+                      <td className="px-5 py-4 text-slate-300 text-sm">{formatDate(session.recurrence_end_date) || "—"}</td>
                       <td className="px-5 py-4">
                         {session.recurrence_days?.length > 0 ? (
                           <div className="flex flex-wrap gap-1">
@@ -388,7 +418,6 @@ const SessionsTab = ({
                           </div>
                         ) : <span className="text-slate-500 text-xs">—</span>}
                       </td>
-                      <td className="px-5 py-4 text-slate-300 text-sm">{session.recurrence_end_date || "—"}</td>
                       <td className="px-5 py-4">{getStatusBadge(session.status)}</td>
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-2 justify-end">

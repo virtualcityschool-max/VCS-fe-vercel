@@ -80,6 +80,7 @@ const AdminUsersPage = () => {
     };
   }, []);
 
+
   // Define handleFetchUsers
   const handleFetchUsers = useCallback(() => {
     const params = {};
@@ -96,7 +97,6 @@ const AdminUsersPage = () => {
     if (usersFilters.ordering) {
       params.ordering = usersFilters.ordering;
     }
-
     dispatch(fetchUsers(params));
   }, [dispatch, usersFilters]);
 

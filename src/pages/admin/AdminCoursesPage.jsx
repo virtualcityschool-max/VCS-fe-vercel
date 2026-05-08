@@ -27,6 +27,7 @@ const AdminCoursesPage = () => {
   const [editingCourse, setEditingCourse] = useState(null);
   const [loadingCourseIds, setLoadingCourseIds] = useState(new Set());
   const [updatingCourseId, setUpdatingCourseId] = useState(null);
+  const [isCreatingCourse, setIsCreatingCourse] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState({ open: false, courseId: null, courseTitle: "" });
 
   // Course form states
@@ -219,6 +220,7 @@ const AdminCoursesPage = () => {
       return;
     }
 
+    setIsCreatingCourse(true);
     try {
       await dispatch(createCourse(buildCoursePayload(courseData))).unwrap();
       toastManager.success("Course created successfully");
@@ -240,7 +242,9 @@ const AdminCoursesPage = () => {
       });
       clearAllCreateCourseErrors();
     } catch (error) {
-      showApiError(error)
+      showApiError(error);
+    } finally {
+      setIsCreatingCourse(false);
     }
   };
 
@@ -333,6 +337,7 @@ const AdminCoursesPage = () => {
       loading={courses?.loading || false}
       loadingCourseIds={loadingCourseIds}
       updatingCourseId={updatingCourseId}
+      isCreatingCourse={isCreatingCourse}
       editCourseForm={editCourseForm}
       setEditCourseForm={setEditCourseForm}
       createCourseForm={createCourseForm}
