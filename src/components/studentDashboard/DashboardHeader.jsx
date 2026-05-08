@@ -17,23 +17,21 @@ const InfoChip = ({ label, value, icon, isMono = false }) => {
   };
 
   return (
-    <div className="flex items-center gap-2">
+    <button
+      onClick={handleCopy}
+      className="group flex items-center gap-2 px-2 py-1 hover:bg-white/5 rounded-lg transition-colors border border-transparent hover:border-white/5"
+      title="Click to copy"
+    >
+      <i className={`fas fa-${icon} text-indigo-400/60 text-[10px]`} />
       <span className="text-[9px] font-bold uppercase tracking-widest text-slate-500 font-inter">
         {label}:
       </span>
-      <button
-        onClick={handleCopy}
-        className="group flex items-center gap-1.5 px-2 py-1 hover:bg-white/5 rounded-lg transition-colors border border-transparent hover:border-white/5"
-        title="Click to copy"
-      >
-        <i className={`fas fa-${icon} text-indigo-400/60 text-[10px]`} />
-        <span className={`text-[11px] ${isMono ? "font-mono" : "font-inter"} font-medium text-slate-300 group-hover:text-white transition-colors`}>
-          {value}
-        </span>
-        <i className={`fas fa-copy text-[9px] text-white/10 group-hover:text-white/30 transition-opacity ${state === "copied" ? "hidden" : ""}`} />
-        {state === "copied" && <i className="fas fa-check text-[9px] text-green-400 animate-in fade-in zoom-in" />}
-      </button>
-    </div>
+      <span className={`text-[11px] ${isMono ? "font-mono" : "font-inter"} font-medium text-slate-300 group-hover:text-white transition-colors`}>
+        {value}
+      </span>
+      <i className={`fas fa-copy text-[9px] text-white/10 group-hover:text-white/30 transition-opacity ${state === "copied" ? "hidden" : ""}`} />
+      {state === "copied" && <i className="fas fa-check text-[9px] text-green-400 animate-in fade-in zoom-in" />}
+    </button>
   );
 };
 

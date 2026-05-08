@@ -574,7 +574,7 @@ const Marketplace = () => {
                               : "Unenroll"
                             : enrollingCourseIds.includes(course.id)
                               ? "Enrolling..."
-                              :course.enrollment_status == "pending"? "Pending" : "Enroll Now"}
+                              :course.enrollment_status == "pending"? "Approval pending" : "Enroll Now"}
                         </button>
                       );
                     })()}
