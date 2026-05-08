@@ -52,41 +52,42 @@ const Marketplace = () => {
     }
   }, [dispatch, auth.isLoggedIn, auth.role]);
 
-  // Get unique values for filter options
   const filterOptions = useMemo(() => {
-    if (!courses || courses.length === 0) {
-      return {
-        categories: BACKEND_CATEGORIES,
-        instructors: [],
-        priceRanges: [
-          { value: "0-50", label: "Free - PKR 50" },
-          { value: "51-100", label: "PKR 51 - 100" },
-          { value: "101-500", label: "PKR 101 - 500" },
-          { value: "501-1000", label: "PKR 501 - 1000" },
-          { value: "1000+", label: "PKR 1000+" },
-        ],
-      };
-    }
-
-    // Use backend categories for consistency
+    // Categories and instructors calculation
     const categories = BACKEND_CATEGORIES;
-
-    const instructors = [
+    const instructors = courses ? [
       ...new Set(
         courses.map((course) => course.instructor?.username).filter(Boolean),
       ),
-    ];
+    ] : [];
+
+    // Dynamic price ranges based on course prices
+    const prices = (courses || []).map((c) => parseFloat(c.price) || 0);
+    const maxPrice = Math.max(...prices, 0);
+    
+    let priceRanges = [];
+    if (maxPrice === 0) {
+      priceRanges = [{ value: "0-0", label: "Free" }];
+    } else {
+      // Determine a reasonable step based on max price, ensuring it ends with 0
+      // We aim for approximately 5 ranges
+      let step = Math.ceil(maxPrice / 5 / 10) * 10;
+      if (step === 0) step = 10;
+      
+      for (let i = 0; i < maxPrice; i += step) {
+        const lower = i;
+        const upper = i + step;
+        priceRanges.push({
+          value: `${lower}-${upper}`,
+          label: `PKR ${lower.toFixed(0)} - ${upper.toFixed(0)}`,
+        });
+      }
+    }
 
     return {
       categories: categories.sort(),
       instructors: instructors.sort(),
-      priceRanges: [
-        { value: "0-50", label: "Free - PKR 50" },
-        { value: "51-100", label: "PKR 51 - 100" },
-        { value: "101-500", label: "PKR 101 - 500" },
-        { value: "501-1000", label: "PKR 501 - 1000" },
-        { value: "1000+", label: "PKR 1000+" },
-      ],
+      priceRanges,
     };
   }, [courses]);
 
@@ -114,20 +115,9 @@ const Marketplace = () => {
         filters.priceRange === "" ||
         (() => {
           const price = parseFloat(course.price) || 0;
-          switch (filters.priceRange) {
-            case "0-50":
-              return price >= 0 && price <= 50;
-            case "51-100":
-              return price >= 51 && price <= 100;
-            case "101-500":
-              return price >= 101 && price <= 500;
-            case "501-1000":
-              return price >= 501 && price <= 1000;
-            case "1000+":
-              return price >= 1000;
-            default:
-              return true;
-          }
+          const [min, max] = filters.priceRange.split("-").map(parseFloat);
+          if (min === 0) return price >= 0 && price <= max;
+          return price > min && price <= max;
         })();
 
       // Instructor filter
