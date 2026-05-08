@@ -7,6 +7,18 @@ const STATUS_BADGE = {
   rejected: "bg-rose-500/20 text-rose-400 border-rose-500/30",
 };
 
+const DetailRow = ({ icon, label, value }) => (
+  <div className="flex items-start gap-3 py-3 border-b border-white/5 last:border-0">
+    <div className="w-7 h-7 rounded-lg bg-slate-800 flex items-center justify-center shrink-0 mt-0.5">
+      <i className={`fas fa-${icon} text-slate-400 text-xs`}></i>
+    </div>
+    <div className="flex-1 min-w-0">
+      <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-0.5">{label}</p>
+      <p className="text-sm text-white font-medium break-words">{value || <span className="text-slate-600 italic font-normal">Not provided</span>}</p>
+    </div>
+  </div>
+);
+
 const HireRequestsTab = ({
   requests,
   loading,
@@ -19,6 +31,7 @@ const HireRequestsTab = ({
   onStatusFilterChange,
 }) => {
   const [confirm, setConfirm] = useState({ open: false, type: null, id: null, label: "" });
+  const [detailReq, setDetailReq] = useState(null);
 
   const handleConfirm = () => {
     const { type, id } = confirm;
@@ -133,27 +146,36 @@ const HireRequestsTab = ({
                   )}
                 </div>
 
-                {/* Actions — only for pending */}
-                {req.status === "pending" && (
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <button
-                      onClick={() => setConfirm({ open: true, type: "approve", id: req.id, label: req.full_name })}
-                      disabled={isProcessing}
-                      className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-xs font-semibold rounded-xl transition"
-                    >
-                      {isProcessing && action === "approve" ? <i className="fas fa-spinner fa-spin"></i> : <i className="fas fa-check"></i>}
-                      Approve
-                    </button>
-                    <button
-                      onClick={() => setConfirm({ open: true, type: "reject", id: req.id, label: req.full_name })}
-                      disabled={isProcessing}
-                      className="flex items-center gap-1.5 px-4 py-2 bg-rose-600/20 hover:bg-rose-600/30 border border-rose-500/30 hover:border-rose-500/60 disabled:opacity-50 text-rose-400 text-xs font-semibold rounded-xl transition"
-                    >
-                      {isProcessing && action === "reject" ? <i className="fas fa-spinner fa-spin"></i> : <i className="fas fa-times"></i>}
-                      Reject
-                    </button>
-                  </div>
-                )}
+                {/* Actions */}
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <button
+                    onClick={() => setDetailReq(req)}
+                    className="flex items-center gap-1.5 px-3 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs font-semibold rounded-xl transition"
+                  >
+                    <i className="fas fa-eye text-xs"></i>
+                    View
+                  </button>
+                  {req.status === "pending" && (
+                    <>
+                      <button
+                        onClick={() => setConfirm({ open: true, type: "approve", id: req.id, label: req.full_name })}
+                        disabled={isProcessing}
+                        className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-xs font-semibold rounded-xl transition"
+                      >
+                        {isProcessing && action === "approve" ? <i className="fas fa-spinner fa-spin"></i> : <i className="fas fa-check"></i>}
+                        Approve
+                      </button>
+                      <button
+                        onClick={() => setConfirm({ open: true, type: "reject", id: req.id, label: req.full_name })}
+                        disabled={isProcessing}
+                        className="flex items-center gap-1.5 px-4 py-2 bg-rose-600/20 hover:bg-rose-600/30 border border-rose-500/30 hover:border-rose-500/60 disabled:opacity-50 text-rose-400 text-xs font-semibold rounded-xl transition"
+                      >
+                        {isProcessing && action === "reject" ? <i className="fas fa-spinner fa-spin"></i> : <i className="fas fa-times"></i>}
+                        Reject
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
           );
@@ -174,6 +196,78 @@ const HireRequestsTab = ({
         onConfirm={handleConfirm}
         onCancel={() => setConfirm({ open: false, type: null, id: null, label: "" })}
       />
+
+      {/* Detail modal — vertical card layout */}
+      {detailReq && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm" onClick={() => setDetailReq(null)} />
+          <div className="relative w-full max-w-sm bg-[#0f1829] border border-white/10 rounded-3xl shadow-2xl overflow-hidden flex flex-col">
+
+            {/* Close button */}
+            <button
+              onClick={() => setDetailReq(null)}
+              className="absolute top-4 right-4 z-10 w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-all"
+            >
+              <i className="fas fa-times text-xs"></i>
+            </button>
+
+            {/* Avatar hero */}
+            <div className="bg-gradient-to-b from-indigo-600/20 to-transparent pt-8 pb-6 px-6 flex flex-col items-center text-center gap-3">
+              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-black text-3xl shadow-xl shadow-indigo-900/40">
+                {detailReq.full_name?.[0]?.toUpperCase() || "?"}
+              </div>
+              <div>
+                <h3 className="text-lg font-black text-white font-poppins">{detailReq.full_name}</h3>
+                <span className={`inline-block mt-1 text-[10px] font-bold px-3 py-1 rounded-full border uppercase tracking-widest ${STATUS_BADGE[detailReq.status] || STATUS_BADGE.pending}`}>
+                  {detailReq.status}
+                </span>
+              </div>
+            </div>
+
+            {/* Details list */}
+            <div className="px-5 pb-2 flex-1 overflow-y-auto custom-scrollbar space-y-0 divide-y divide-white/5">
+              <DetailRow icon="envelope"            label="Email"            value={detailReq.email} />
+              <DetailRow icon="phone"               label="Phone"            value={detailReq.phone} />
+              <DetailRow icon="chalkboard-teacher"  label="Teacher Requested" value={detailReq.teacher?.username || `Teacher #${detailReq.teacher?.id}`} />
+              <DetailRow icon="comment-alt"         label="Message"          value={detailReq.message} />
+              <DetailRow icon="calendar-alt"        label="Submitted"        value={detailReq.created_at ? new Date(detailReq.created_at).toLocaleString() : null} />
+              {detailReq.reviewed_at && (
+                <>
+                  <DetailRow icon="user-check" label="Reviewed By" value={detailReq.reviewed_by_name} />
+                  <DetailRow icon="clock"      label="Reviewed At" value={new Date(detailReq.reviewed_at).toLocaleString()} />
+                </>
+              )}
+            </div>
+
+            {/* Action buttons stacked vertically for pending */}
+            {detailReq.status === "pending" ? (
+              <div className="px-5 pb-6 pt-4 border-t border-white/5 flex flex-col gap-2.5">
+                <button
+                  onClick={() => { setDetailReq(null); setConfirm({ open: true, type: "approve", id: detailReq.id, label: detailReq.full_name }); }}
+                  className="w-full flex items-center justify-center gap-2 py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black uppercase tracking-widest rounded-2xl transition active:scale-95"
+                >
+                  <i className="fas fa-check"></i> Approve Request
+                </button>
+                <button
+                  onClick={() => { setDetailReq(null); setConfirm({ open: true, type: "reject", id: detailReq.id, label: detailReq.full_name }); }}
+                  className="w-full flex items-center justify-center gap-2 py-3 bg-rose-600/10 hover:bg-rose-600/20 border border-rose-500/30 text-rose-400 text-xs font-black uppercase tracking-widest rounded-2xl transition active:scale-95"
+                >
+                  <i className="fas fa-times"></i> Reject Request
+                </button>
+              </div>
+            ) : (
+              <div className="px-5 pb-5 pt-4 border-t border-white/5">
+                <button
+                  onClick={() => setDetailReq(null)}
+                  className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-black uppercase tracking-widest rounded-2xl transition"
+                >
+                  Close
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

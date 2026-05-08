@@ -12,20 +12,39 @@ const fieldClass = (error) =>
 const FieldError = ({ error }) =>
   error ? <p className="text-red-400 text-xs mt-1">{error}</p> : null;
 
+const ALLOWED_EXTENSIONS = [".pdf", ".doc", ".docx", ".txt", ".png", ".jpg", ".jpeg", ".zip"];
+const MAX_FILE_SIZE_MB = 10;
+
 const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categories = [], mode = "create" }) => {
   const fileInputRef = useRef(null);
   const thumbnailInputRef = useRef(null);
   const [thumbnailPreview, setThumbnailPreview] = useState(null);
   const [viewerUrl, setViewerUrl] = useState(null);
+  const [fileError, setFileError] = useState(null);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0] || null;
+    if (!file) return;
+
+    const ext = "." + file.name.split(".").pop().toLowerCase();
+    if (!ALLOWED_EXTENSIONS.includes(ext)) {
+      setFileError(`File type not allowed. Allowed: ${ALLOWED_EXTENSIONS.join(", ")}`);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+    if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+      setFileError(`File too large. Maximum size is ${MAX_FILE_SIZE_MB} MB.`);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+    setFileError(null);
     onChange("attachment", file);
   };
 
   const clearFile = () => {
     onChange("attachment", null);
     onChange("attachment_url", null);
+    setFileError(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -196,14 +215,37 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-2">
               Attachment
-              <span className="text-slate-500 text-[10px] uppercase font-black ml-2 opacity-50">PDF, ZIP</span>
+              <span className="text-slate-500 text-[10px] uppercase font-black ml-2 opacity-50">PDF, ZIP, DOC</span>
             </label>
+            
             {(existingUrl || selectedFile) ? (
               <div className="flex flex-col justify-center h-[100px] gap-2 p-3 bg-slate-800/40 border border-slate-700 rounded-xl relative group">
                 <div className="flex items-center gap-2 overflow-hidden">
                   <i className="fas fa-paperclip text-indigo-400 text-xs shrink-0"></i>
-                  <span className="text-slate-300 text-[11px] font-bold truncate">{selectedFile ? selectedFile.name : "Attached File"}</span>
+                  <span className="text-slate-300 text-[11px] font-bold truncate">
+                    {selectedFile ? selectedFile.name : "Current Attachment"}
+                  </span>
                 </div>
+                
+                <div className="flex items-center gap-2">
+                  {existingUrl && !selectedFile && (
+                    <button
+                      type="button"
+                      onClick={() => setViewerUrl(getStorageUrl(existingUrl))}
+                      className="text-[9px] font-black uppercase tracking-widest text-indigo-400 hover:text-indigo-300"
+                    >
+                      Preview
+                    </button>
+                  )}
+                  <button 
+                    type="button" 
+                    onClick={() => fileInputRef.current?.click()} 
+                    className="text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-white"
+                  >
+                    Change
+                  </button>
+                </div>
+
                 <button
                   type="button"
                   onClick={clearFile}
@@ -211,7 +253,6 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
                 >
                   <i className="fas fa-times text-[10px]" />
                 </button>
-                <button type="button" onClick={() => fileInputRef.current?.click()} className="text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-white">Change</button>
               </div>
             ) : (
               <button
@@ -220,10 +261,25 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
                 className="w-full h-[100px] flex flex-col items-center justify-center gap-1 border border-dashed border-slate-700 hover:border-indigo-500 rounded-xl text-slate-500 hover:text-indigo-400 transition bg-slate-800/20"
               >
                 <i className="fas fa-paperclip text-lg"></i>
-                <span className="text-[10px] font-black uppercase tracking-widest">Attach</span>
+                <span className="text-[10px] font-black uppercase tracking-widest">Attach File</span>
               </button>
             )}
-            <input ref={fileInputRef} type="file" className="hidden" onChange={handleFileChange} />
+
+            {fileError ? (
+              <p className="text-red-400 text-[10px] mt-1 flex items-center gap-1">
+                <i className="fas fa-exclamation-circle"></i> {fileError}
+              </p>
+            ) : (
+              <p className="text-slate-600 text-[9px] mt-1">Max 10MB</p>
+            )}
+            
+            <input 
+              ref={fileInputRef} 
+              type="file" 
+              accept={ALLOWED_EXTENSIONS.join(",")} 
+              className="hidden" 
+              onChange={handleFileChange} 
+            />
           </div>
         </div>
 
@@ -243,7 +299,9 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
         </div>
       </div>
 
-      {viewerUrl && <FileViewerModal filePath={viewerUrl} handleClose={() => setViewerUrl(null)} />}
+      {viewerUrl && (
+        <FileViewerModal filePath={viewerUrl} handleClose={() => setViewerUrl(null)} />
+      )}
     </div>
   );
 };
