@@ -1,8 +1,10 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import { selectOverdueAssignments } from "../../store/slices/studentDashboardSlice";
+import { useNavigate } from "react-router-dom";
 
 const OverdueAssignmentsCard = () => {
+  const navigate = useNavigate();
   const overdueAssignments = useSelector(selectOverdueAssignments);
 
   const formatDate = (dateString) => {
@@ -14,17 +16,28 @@ const OverdueAssignmentsCard = () => {
     });
   };
 
-  const getDaysOverdue = (dateString) => {
+  const getOverdueTimeLabel = (dateString) => {
     const dueDate = new Date(dateString);
     const today = new Date();
     const diffTime = Math.abs(today - dueDate);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) return "Overdue Today";
+    if (diffDays === 1) return "1 day late";
+    if (diffDays < 7) return `${diffDays} days late`;
+    
+    const diffWeeks = Math.floor(diffDays / 7);
+    if (diffWeeks === 1) return "1 week late";
+    if (diffWeeks < 4) return `${diffWeeks} weeks late`;
+    
+    const diffMonths = Math.floor(diffDays / 30);
+    if (diffMonths === 1) return "1 month late";
+    return `${diffMonths} months late`;
   };
 
   if (!overdueAssignments || overdueAssignments.count === 0) {
     return (
-      <div className="bg-slate-900/40 backdrop-blur-xl p-6 rounded-[2rem] border border-white/5 shadow-2xl flex items-center gap-6 transition-all duration-300 hover:border-emerald-500/20 group">
+      <div className="bg-slate-900/40 backdrop-blur-xl p-6 rounded-[1.5rem] border border-white/5 shadow-2xl flex items-center gap-6 transition-all duration-300 hover:border-emerald-500/20 group">
         <div className="w-14 h-14 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-400 shrink-0 group-hover:scale-110 transition-all duration-500 border border-emerald-500/10">
           <i className="fas fa-check-circle text-xl"></i>
         </div>
@@ -59,6 +72,14 @@ const OverdueAssignmentsCard = () => {
             </p>
           </div>
         </div>
+
+        <button 
+          onClick={() => navigate("/student/assessments")}
+          className="text-[9px] cursor-pointer font-black uppercase tracking-widest text-slate-500 hover:text-white transition-colors flex items-center gap-1.5 group/link"
+        >
+          View All
+          <i className="fas fa-arrow-right group-hover/link:translate-x-0.5 transition-transform text-[8px]"></i>
+        </button>
       </div>
       
       <div className="space-y-2 relative z-10">
@@ -74,7 +95,7 @@ const OverdueAssignmentsCard = () => {
             </div>
             <div className="text-right shrink-0">
               <span className="text-red-400 text-[9px] font-black uppercase tracking-widest block">
-                {getDaysOverdue(assignment.due_date)}d late
+                {getOverdueTimeLabel(assignment.due_date)}
               </span>
               <span className="text-slate-500 text-[8px] font-bold block opacity-40">
                 {formatDate(assignment.due_date)}

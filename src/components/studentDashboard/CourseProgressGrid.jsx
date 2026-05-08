@@ -28,7 +28,7 @@ const CourseProgressGrid = () => {
         {enrolledCourses.map((course) => (
           <div
             key={course.id}
-            className="bg-slate-900/40 backdrop-blur-xl rounded-[2rem] border border-white/5 overflow-hidden group shadow-2xl hover:border-blue-500/20 transition-all duration-500 flex flex-col h-full"
+            className="bg-slate-900/40 backdrop-blur-xl rounded-[1.5rem] border border-white/5 overflow-hidden group shadow-2xl hover:border-blue-500/20 transition-all duration-500 flex flex-col h-full"
           >
             <div className="h-32 lg:h-36 bg-slate-800 relative overflow-hidden shrink-0">
               {course.thumbnail ? (
@@ -78,9 +78,9 @@ const CourseProgressGrid = () => {
         {/* Explore more card */}
         <div
           onClick={() => navigate("/courses")}
-          className="bg-slate-900/20 rounded-[2rem] border-2 border-dashed border-white/5 flex flex-col items-center justify-center p-8 group cursor-pointer hover:border-blue-500/30 hover:bg-blue-500/5 transition-all duration-300 min-h-[280px]"
+          className="bg-slate-900/20 rounded-[1.5rem] border-2 border-dashed border-white/5 flex flex-col items-center justify-center p-8 group cursor-pointer hover:border-blue-500/30 hover:bg-blue-500/5 transition-all duration-300 min-h-[280px]"
         >
-          <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:border-blue-500/20 group-hover:bg-blue-500/10 transition-all duration-500 text-slate-500 group-hover:text-blue-400">
+          <div className="w-14 h-14 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:border-blue-500/20 group-hover:bg-blue-500/10 transition-all duration-500 text-slate-500 group-hover:text-blue-400">
             <i className="fas fa-plus text-xl"></i>
           </div>
           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 group-hover:text-blue-400/80 text-center transition-colors">

@@ -340,19 +340,19 @@ const Marketplace = () => {
   return (
     <section
       id="classes-view"
-      className="min-h-screen bg-[#0f172a] text-white font-inter"
+      className="min-h-screen bg-[#0f172a] text-white font-inter animate-fadeIn"
     >
       {/* Compact Search + Filters Bar */}
-      <div className="relative overflow-hidden border-b border-slate-800/50">
+      <div className="relative overflow-hidden border-b border-slate-800/50 animate-fadeIn">
         <div className="max-w-7xl mx-auto px-6 py-5 relative z-10">
           <div className="text-center mb-4">
-            <h1 className="text-2xl md:text-3xl font-black font-poppins leading-tight tracking-tight">
+            <h1 className="text-2xl md:text-3xl font-black font-poppins leading-tight tracking-tight animate-scaleIn">
               Expand your <span className="text-blue-500">potential</span>.
             </h1>
           </div>
           <form
             onSubmit={handleSearch}
-            className="grid grid-cols-1 md:grid-cols-10 gap-3 max-w-6xl mx-auto"
+            className="grid grid-cols-1 md:grid-cols-10 gap-3 max-w-6xl mx-auto animate-springyReveal"
           >
             <div className="md:col-span-4">
               <SearchInput
@@ -440,121 +440,139 @@ const Marketplace = () => {
               {filteredCourses.map((course, idx) => (
                 <div
                   key={course.id || idx}
-                  className="bg-slate-800/50 backdrop-blur-md rounded-[2.5rem] overflow-hidden border border-slate-700/50 shadow-2xl group hover:border-blue-500/40 transition-all flex flex-col"
+                  style={{ animationDelay: `${idx * 0.08}s` }}
+                  className="bg-[#1a2235]/60 backdrop-blur-xl rounded-[1.5rem] overflow-hidden border border-white/5 shadow-2xl group flex flex-col animate-springyReveal opacity-0 glass-shine hover-lift"
                 >
-                  <div className="relative h-32 overflow-hidden">
-                    <Link to={`/courses/${course.id}`}>
+                  {/* Image Container */}
+                  <div className="relative aspect-[16/10] overflow-hidden bg-slate-900/50">
+                    <Link to={`/courses/${course.id}`} className="block h-full">
                       {getCourseImage(course, idx) ? (
                         <img
                           src={getCourseImage(course, idx)}
-                          className="w-full h-full object-cover group-hover:scale-110 transition duration-700 opacity-80 group-hover:opacity-100"
+                          className="w-full h-full object-cover group-hover:scale-110 transition duration-1000 opacity-70 group-hover:opacity-100"
                           alt={course.title || "Course"}
                         />
                       ) : (
-                        <div className="w-full h-full bg-slate-800" />
+                        <div className="w-full h-full bg-slate-800 flex items-center justify-center">
+                          <i className="fas fa-book-open text-slate-700 text-3xl"></i>
+                        </div>
                       )}
                     </Link>
+                    
+                    {/* Status Badge */}
+                    <div className="absolute top-4 left-4 z-10">
+                      <span className="bg-slate-900/80 backdrop-blur-md text-[9px] font-black uppercase tracking-[0.15em] text-blue-400 px-3 py-1.5 rounded-lg border border-blue-500/20 shadow-xl">
+                        {typeof course.category === "object" ? course.category?.name : course.category || "General"}
+                      </span>
+                    </div>
+
+                    {/* Published/Draft Indicator */}
                     {course.status === "published" && (
-                      <div className="absolute top-4 right-4 bg-green-600 text-white px-3 py-1 rounded-full text-xs font-bold">
-                        Published
-                      </div>
+                      <div className="absolute top-4 right-4 z-10 w-2 h-2 bg-green-500 rounded-full shadow-[0_0_10px_rgba(34,197,94,0.8)] animate-pulse"></div>
                     )}
                   </div>
-                  <div className="p-5 flex-1 flex flex-col">
-                    <Link to={`/courses/${course.id}`}>
-                      <h3 className="text-lg font-bold font-poppins mb-3 leading-tight group-hover:text-blue-400 transition cursor-pointer min-h-10">
-                        {course.title || "Untitled Course"}
-                      </h3>
-                    </Link>
-                    <div className="flex items-center gap-3 mb-3">
-                      {course.instructor?.avatar?
-                      <img
-                        src={
-                          getStorageUrl(course.instructor?.avatar)}
-                        className="w-8 h-8 rounded-full border border-slate-700 shadow-md"
-                        alt={course.instructor?.username || "Instructor"}
-                      />:
-                      <i className="fas fa-user text-white"></i>
-                      }
-                      <span className="text-xs text-slate-400 font-bold group-hover:text-slate-200 transition">
-                        {course.instructor?.username || "Unknown Instructor"}
-                      </span>
-                    </div>
-                    {course.category && (
-                      <div className="mb-3">
-                        <span className="text-xs text-slate-500 uppercase tracking-widest">
-                          {typeof course.category === "object" ? course.category?.name : course.category}
-                        </span>
-                      </div>
-                    )}
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-base font-bold text-blue-400">
-                        PKR {course.price || "0.00"}
-                      </span>
-                      <div className="flex items-center gap-1">
-                        <i className="fas fa-star text-yellow-400 text-xs"></i>
-                        <span className="text-xs text-slate-400">
-                          {course.rating || "0.00"}
+
+                  {/* Content Section */}
+                  <div className="p-6 flex-1 flex flex-col">
+                    <div className="mb-4">
+                      <Link to={`/courses/${course.id}`}>
+                        <h3 className="text-[17px] font-black font-poppins mb-2 leading-tight group-hover:text-blue-400 transition-colors cursor-pointer min-h-[42px] line-clamp-2 tracking-tight">
+                          {course.title || "Untitled Course"}
+                        </h3>
+                      </Link>
+                      
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-6 h-6 rounded-full overflow-hidden border border-white/10 shrink-0">
+                          {course.instructor?.avatar ? (
+                            <img
+                              src={getStorageUrl(course.instructor?.avatar)}
+                              className="w-full h-full object-cover"
+                              alt={course.instructor?.username}
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-slate-800 flex items-center justify-center">
+                              <i className="fas fa-user text-[10px] text-slate-500"></i>
+                            </div>
+                          )}
+                        </div>
+                        <span className="text-[11px] text-slate-400 font-bold tracking-tight">
+                          {course.instructor?.username || "Instructor"}
                         </span>
                       </div>
                     </div>
-                    {course.instructor?.expertise && (
-                      <div className="mb-3">
-                        <span className="text-xs text-slate-500">
-                          Expertise: {course.instructor.expertise}
-                        </span>
+
+                    <div className="mt-auto space-y-4">
+                      {/* Price and Rating Row */}
+                      <div className="flex items-center justify-between py-3 border-y border-white/5">
+                        <div className="flex flex-col">
+                          <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Price</span>
+                          <span className="text-sm font-black text-white">
+                            PKR {course.price || "0.00"}
+                          </span>
+                        </div>
+                        <div className="flex flex-col items-end">
+                          <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Rating</span>
+                          <div className="flex items-center gap-1">
+                            <i className="fas fa-star text-yellow-500 text-[10px]"></i>
+                            <span className="text-xs font-black text-white">
+                              {course.rating || "5.0"}
+                            </span>
+                          </div>
+                        </div>
                       </div>
-                    )}
-                    {(() => {
-                      const enrolled = isCourseEnrolled(course);
-                      const noSessions = !course.has_session;
-                      const isEnrolling = enrollingCourseIds.includes(course.id);
-                      const isUnenrolling = unenrollingCourseIds.includes(course.id);
-                      const isPending = course.enrollment_status === "pending";
 
-                      let btnClass = "w-full mt-auto py-2.5 font-black text-[11px] uppercase tracking-[0.18em] rounded-xl transition-all active:scale-95 ";
-                      let label = "";
-                      let disabled = false;
-                      let title = "";
+                      {/* CTA Button */}
+                      {(() => {
+                        const enrolled = isCourseEnrolled(course);
+                        const noSessions = !course.has_session;
+                        const isEnrolling = enrollingCourseIds.includes(course.id);
+                        const isUnenrolling = unenrollingCourseIds.includes(course.id);
+                        const isPending = course.enrollment_status === "pending";
 
-                      if (enrolled) {
-                        label = isUnenrolling ? "Unenrolling..." : "Unenroll";
-                        disabled = isUnenrolling;
-                        btnClass += isUnenrolling
-                          ? "bg-red-600/50 text-red-400 cursor-not-allowed"
-                          : "bg-red-600/20 border border-red-600/30 text-red-400 hover:bg-red-600 hover:text-white";
-                      } else if (isPending) {
-                        label = "Approval pending";
-                        btnClass += "bg-yellow-600/20 border border-yellow-500/30 text-yellow-400 hover:bg-yellow-500 hover:text-white";
-                      } else if (noSessions) {
-                        label = "Enroll Now";
-                        disabled = true;
-                        title = "No sessions available for this course";
-                        btnClass += "bg-slate-900 border border-blue-600/30 text-blue-500/40 cursor-not-allowed";
-                      } else if (isEnrolling) {
-                        label = "Enrolling...";
-                        disabled = true;
-                        btnClass += "bg-slate-600 text-slate-400 cursor-not-allowed";
-                      } else {
-                        label = "Enroll Now";
-                        btnClass += "bg-slate-900 border border-blue-600/30 text-blue-500 hover:bg-blue-600 hover:text-white";
-                      }
+                        let cls = "w-full py-3.5 font-black text-[10px] uppercase tracking-[0.2em] rounded-2xl transition-all active:scale-95 shadow-xl ";
+                        let label = "";
+                        let disabled = false;
+                        let title = "";
 
-                      return (
-                        <button
-                          onClick={() =>
-                            enrolled
-                              ? handleUnenrollCourse(course.id, course.title)
-                              : handleEnrollCourse(course)
-                          }
-                          disabled={disabled}
-                          title={title}
-                          className={btnClass}
-                        >
-                          {label}
-                        </button>
-                      );
-                    })()}
+                        if (enrolled) {
+                          label = isUnenrolling ? "Unenrolling..." : "Unenroll";
+                          disabled = isUnenrolling;
+                          cls += isUnenrolling
+                            ? "bg-red-600/50 text-red-400 cursor-not-allowed"
+                            : "bg-red-600/10 border border-red-600/20 text-red-400 hover:bg-red-600 hover:text-white";
+                        } else if (isPending) {
+                          label = "Approval Pending";
+                          disabled = true;
+                          cls += "bg-amber-600/10 border border-amber-500/20 text-amber-400 cursor-not-allowed";
+                        } else if (noSessions) {
+                          label = "Enroll Now";
+                          disabled = true;
+                          title = "No sessions available for this course";
+                          cls += "bg-gradient-to-r from-blue-600/40 to-indigo-600/40 text-white/40 cursor-not-allowed";
+                        } else if (isEnrolling) {
+                          label = "Enrolling...";
+                          disabled = true;
+                          cls += "bg-slate-700 text-slate-400 cursor-not-allowed";
+                        } else {
+                          label = "Enroll Now";
+                          cls += "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-500 hover:to-indigo-500 shadow-blue-900/40";
+                        }
+
+                        return (
+                          <button
+                            onClick={() => {
+                              if (enrolled) handleUnenrollCourse(course.id, course.title);
+                              else if (!isPending && !noSessions && !isEnrolling) handleEnrollCourse(course);
+                            }}
+                            disabled={disabled}
+                            title={title}
+                            className={cls}
+                          >
+                            {label}
+                          </button>
+                        );
+                      })()}
+                    </div>
                   </div>
                 </div>
               ))}
