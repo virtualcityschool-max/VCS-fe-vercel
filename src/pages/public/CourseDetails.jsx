@@ -382,7 +382,7 @@ const CourseDetails = () => {
   const isUnenrolling = unenrollingCourseIds.includes(normalizedCourse.id);
 
   return (
-    <section className="min-h-screen bg-[#0f172a] text-white font-inter relative overflow-hidden">
+    <section className="min-h-screen bg-[#0f172a] text-white font-inter relative overflow-hidden animate-fadeIn">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-20%] left-[-10%] w-[40%] h-[40%] bg-blue-600/10 blur-[120px] rounded-full animate-pulse"></div>
@@ -391,7 +391,7 @@ const CourseDetails = () => {
       </div>
 
       {/* Breadcrumb Navigation */}
-      <div className="max-w-7xl mx-auto px-6 py-8 relative z-10">
+      <div className="max-w-7xl mx-auto px-6 py-8 relative z-10 animate-fadeSlideUp">
         <BreadcrumbNavigation
           items={[
             { label: "Home", to: "/", icon: "fas fa-home" },
@@ -401,7 +401,7 @@ const CourseDetails = () => {
         />
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 pb-20 relative z-10">
+      <div className="max-w-7xl mx-auto px-6 pb-20 relative z-10 animate-fadeSlideUp" style={{ animationDelay: '0.1s' }}>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
           {/* Main Content - 2 columns */}
           <div className="lg:col-span-2 space-y-8">

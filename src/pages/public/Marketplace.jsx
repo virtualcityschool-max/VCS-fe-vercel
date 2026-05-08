@@ -340,10 +340,10 @@ const Marketplace = () => {
   return (
     <section
       id="classes-view"
-      className="min-h-screen bg-[#0f172a] text-white font-inter"
+      className="min-h-screen bg-[#0f172a] text-white font-inter animate-fadeIn"
     >
       {/* Compact Search + Filters Bar */}
-      <div className="relative overflow-hidden border-b border-slate-800/50">
+      <div className="relative overflow-hidden border-b border-slate-800/50 animate-fadeSlideUp">
         <div className="max-w-7xl mx-auto px-6 py-5 relative z-10">
           <div className="text-center mb-4">
             <h1 className="text-2xl md:text-3xl font-black font-poppins leading-tight tracking-tight">
@@ -440,7 +440,8 @@ const Marketplace = () => {
               {filteredCourses.map((course, idx) => (
                 <div
                   key={course.id || idx}
-                  className="bg-slate-800/50 backdrop-blur-md rounded-[2.5rem] overflow-hidden border border-slate-700/50 shadow-2xl group hover:border-blue-500/40 transition-all flex flex-col"
+                  style={{ animationDelay: `${idx * 0.05}s` }}
+                  className="bg-slate-800/50 backdrop-blur-md rounded-[1.5rem] overflow-hidden border border-slate-700/50 shadow-2xl group hover:border-blue-500/40 transition-all flex flex-col animate-fadeSlideUp opacity-0"
                 >
                   <div className="relative h-32 overflow-hidden">
                     <Link to={`/courses/${course.id}`}>

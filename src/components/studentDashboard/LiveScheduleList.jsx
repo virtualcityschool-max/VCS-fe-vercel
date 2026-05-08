@@ -110,7 +110,7 @@ const LiveScheduleList = () => {
           <span className="w-1.5 h-1.5 bg-slate-700 rounded-full"></span>
          My Live Schedule
         </h2>
-        <div className="bg-slate-900/40 backdrop-blur-xl p-8 rounded-[1.75rem] border border-white/5 text-center shadow-2xl transition-all duration-500 hover:border-white/10">
+        <div className="bg-slate-900/40 backdrop-blur-xl p-8 rounded-[1.5rem] border border-white/5 text-center shadow-2xl transition-all duration-500 hover:border-white/10">
           <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/5">
             <i className="fas fa-calendar-times text-xl text-slate-600"></i>
           </div>
@@ -139,7 +139,7 @@ const LiveScheduleList = () => {
           return (
             <div
               key={sessionId}
-              className="bg-slate-900/40 backdrop-blur-xl p-5 rounded-[1.75rem] border border-white/5 flex flex-col md:flex-row items-center gap-6 hover:bg-white/5 transition-all duration-300 group shadow-2xl relative overflow-hidden"
+              className="bg-slate-900/40 backdrop-blur-xl p-5 rounded-[1.5rem] border border-white/5 flex flex-col md:flex-row items-center gap-6 hover:bg-white/5 transition-all duration-300 group shadow-2xl relative overflow-hidden"
             >
               {/* Dynamic Glow Effect */}
               {session.has_joined && (

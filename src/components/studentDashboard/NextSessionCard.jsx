@@ -69,7 +69,7 @@ const NextSessionCard = () => {
 
   if (!nextSession) {
     return (
-      <div className="bg-slate-900/40 backdrop-blur-xl p-6 rounded-[2rem] border border-white/5 shadow-2xl flex items-center gap-6 transition-all duration-300 hover:border-blue-500/20 group">
+      <div className="bg-slate-900/40 backdrop-blur-xl p-6 rounded-[1.5rem] border border-white/5 shadow-2xl flex items-center gap-6 transition-all duration-300 hover:border-blue-500/20 group">
         <div className="w-14 h-14 bg-slate-800/50 rounded-2xl flex items-center justify-center text-slate-500 shrink-0 group-hover:scale-110 transition-all duration-500 border border-white/5">
           <i className="fas fa-calendar-alt text-xl opacity-40"></i>
         </div>
