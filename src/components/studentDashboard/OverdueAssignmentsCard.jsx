@@ -1,8 +1,10 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import { selectOverdueAssignments } from "../../store/slices/studentDashboardSlice";
+import { useNavigate } from "react-router-dom";
 
 const OverdueAssignmentsCard = () => {
+  const navigate = useNavigate();
   const overdueAssignments = useSelector(selectOverdueAssignments);
 
   const formatDate = (dateString) => {
@@ -14,12 +16,23 @@ const OverdueAssignmentsCard = () => {
     });
   };
 
-  const getDaysOverdue = (dateString) => {
+  const getOverdueTimeLabel = (dateString) => {
     const dueDate = new Date(dateString);
     const today = new Date();
     const diffTime = Math.abs(today - dueDate);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) return "Overdue Today";
+    if (diffDays === 1) return "1 day late";
+    if (diffDays < 7) return `${diffDays} days late`;
+    
+    const diffWeeks = Math.floor(diffDays / 7);
+    if (diffWeeks === 1) return "1 week late";
+    if (diffWeeks < 4) return `${diffWeeks} weeks late`;
+    
+    const diffMonths = Math.floor(diffDays / 30);
+    if (diffMonths === 1) return "1 month late";
+    return `${diffMonths} months late`;
   };
 
   if (!overdueAssignments || overdueAssignments.count === 0) {
@@ -59,6 +72,14 @@ const OverdueAssignmentsCard = () => {
             </p>
           </div>
         </div>
+
+        <button 
+          onClick={() => navigate("/student/assessments")}
+          className="text-[9px] cursor-pointer font-black uppercase tracking-widest text-slate-500 hover:text-white transition-colors flex items-center gap-1.5 group/link"
+        >
+          View All
+          <i className="fas fa-arrow-right group-hover/link:translate-x-0.5 transition-transform text-[8px]"></i>
+        </button>
       </div>
       
       <div className="space-y-2 relative z-10">
@@ -74,7 +95,7 @@ const OverdueAssignmentsCard = () => {
             </div>
             <div className="text-right shrink-0">
               <span className="text-red-400 text-[9px] font-black uppercase tracking-widest block">
-                {getDaysOverdue(assignment.due_date)}d late
+                {getOverdueTimeLabel(assignment.due_date)}
               </span>
               <span className="text-slate-500 text-[8px] font-bold block opacity-40">
                 {formatDate(assignment.due_date)}
