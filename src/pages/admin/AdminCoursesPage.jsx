@@ -18,7 +18,6 @@ import { toastManager } from "../../utils/toastManager";
 import CoursesTab from "../../components/admin/CoursesTab";
 import ConfirmDialog from "../../components/common/ConfirmDialog";
 import { showApiError } from "../../utils/apiErrorHandler";
-import { fetchAllCourses } from "../../store/slices/coursesSlice";
 
 const AdminCoursesPage = () => {
   const dispatch = useDispatch();
@@ -77,14 +76,12 @@ const AdminCoursesPage = () => {
     clearAllErrors: clearAllEditCourseErrors,
   } = useFieldErrors({});
 
-  // Fetch courses and categories on mount
+  // Fetch categories on mount (courses + teachers are handled by AdminLayout on tab switch)
   useEffect(() => {
-    dispatch(fetchCourses());
-    dispatch(fetchUsers({ role: "teacher" }));
     coursesService.getCategories()
       .then(setCategories)
       .catch(() => {});
-  }, [dispatch]);
+  }, []);
 
   // Reset create course form when modal opens/closes
   useEffect(() => {
@@ -229,8 +226,6 @@ const AdminCoursesPage = () => {
       await dispatch(createCourse(buildCoursePayload(courseData))).unwrap();
       toastManager.success("Course created successfully");
       setActiveModal(null);
-      dispatch(fetchCourses());
-      dispatch(fetchAllCourses());
       setCreateCourseForm({
         title: "",
         description: "",
@@ -292,7 +287,6 @@ const AdminCoursesPage = () => {
       await dispatch(assignInstructor({ courseId, instructorId })).unwrap();
       toastManager.success("Instructor assigned successfully");
       setActiveModal(null);
-      dispatch(fetchCourses());
     } catch (error) {
       showApiError(error);
       // const hadFieldErrors = handleEditCourseApiError(
@@ -321,7 +315,6 @@ const AdminCoursesPage = () => {
     try {
       await dispatch(deleteCourse(courseId)).unwrap();
       toastManager.success("Course deleted successfully");
-      dispatch(fetchCourses());
     } catch (error) {
       showApiError(error);
     } finally {

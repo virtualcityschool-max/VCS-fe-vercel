@@ -141,8 +141,7 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
   };
 
   const handleEnrollmentSuccess = () => {
-    // Refresh the enrollments list
-    onRefresh();
+    // Redux slice handles adding the new enrollment via createEnrollment.fulfilled
   };
 
   // Unenroll handlers
@@ -166,7 +165,7 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
       ).unwrap();
 
       toastManager.success("Student unenrolled successfully");
-      onRefresh(); // Refresh the list
+      // Redux slice handles removing via unenrollStudent.fulfilled
     } catch (error) {
       showApiError(error);
     } finally {

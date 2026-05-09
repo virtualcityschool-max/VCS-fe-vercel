@@ -40,7 +40,8 @@ const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
     }
   }, [isOpen]);
 
-  const selectedCourse = courses.data?.find((c) => c.id === parseInt(formData.course_id));
+  const publishedCourses = courses.data?.filter((c) => c.status === "published") || [];
+  const selectedCourse = publishedCourses.find((c) => c.id === parseInt(formData.course_id));
   const teacherId = selectedCourse?.instructor?.id ?? null;
   const teacher = users.data?.find((u) => u.id === teacherId) ?? null;
   const students = users.data?.filter((u) => u.role === "student" && u.is_active) || [];
@@ -140,7 +141,7 @@ const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
               className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
             >
               <option value="">Select a course</option>
-              {courses.data?.map((c) => (
+              {publishedCourses.map((c) => (
                 <option key={c.id} value={c.id}>{c.title}</option>
               ))}
             </FilterSelect>

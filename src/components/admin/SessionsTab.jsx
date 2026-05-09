@@ -502,7 +502,7 @@ const SessionsTab = ({
                   <FilterSelect
                     value={createSessionForm.course}
                     onChange={(e) => {
-                      const selectedCourse = courses?.find((c) => c.id === Number(e.target.value));
+                      const selectedCourse = courses?.find((c) => c.id === Number(e.target.value) && c.status === "published" && !c.has_session);
                       setCreateSessionForm({
                         ...createSessionForm,
                         course: e.target.value,
@@ -515,7 +515,7 @@ const SessionsTab = ({
                     className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white focus:outline-none focus:ring-2 text-sm ${createSessionErrors?.course ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
                   >
                     <option value="">Select a course</option>
-                    {courses?.map((course) => (
+                    {courses?.filter((c) => c.status === "published" && !c.has_session).map((course) => (
                       <option key={course.id} value={course.id}>{course.title}</option>
                     ))}
                   </FilterSelect>

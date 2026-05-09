@@ -744,12 +744,25 @@ const adminSlice = createSlice({
       })
       .addCase(createEnrollment.fulfilled, (state, action) => {
         if (action.payload && state.enrollments.data) {
-          state.enrollments.data.unshift(action.payload);
+          const p = action.payload;
+          state.enrollments.data.unshift({
+            id: p.enrollment_id,
+            student: p.student,
+            course: p.course,
+            is_private: p.is_private,
+            status: "active",
+            enrolled_at: new Date().toISOString(),
+          });
         }
       })
       .addCase(createEnrollment.rejected, () => {
         // error is surfaced via .unwrap() in the modal — do not touch enrollments.error
-        // so the existing listing is never affected by a failed create attempt
+      })
+      .addCase(unenrollStudent.fulfilled, (state, action) => {
+        const { courseId, studentId } = action.meta.arg;
+        state.enrollments.data = state.enrollments.data.filter(
+          (e) => !(e.course?.id === courseId && e.student?.id === studentId),
+        );
       });
 
     // Sessions
