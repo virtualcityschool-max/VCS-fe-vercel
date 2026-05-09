@@ -130,6 +130,7 @@ const AdminCoursesPage = () => {
           attachment_url: editingCourse.attachment || null,
           thumbnail: null,
           thumbnail_url: editingCourse.thumbnail || null,
+          has_session: editingCourse.has_session ?? false,
         });
       }
     } else {

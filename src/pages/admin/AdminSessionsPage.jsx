@@ -333,6 +333,11 @@ const AdminSessionsPage = () => {
       await dispatch(updateSession({ sessionId: editingSession.id, sessionData: payload })).unwrap();
       toastManager.success("Session updated successfully");
       setActiveModal(null);
+      const params = {};
+      if (sessionFilters.teacher) params.teacher = sessionFilters.teacher;
+      if (sessionFilters.course) params.course = sessionFilters.course;
+      if (sessionFilters.view) params.view = sessionFilters.view;
+      dispatch(fetchSessions(params));
     } catch (error) {
       showApiError(error);
     } finally {
@@ -361,10 +366,13 @@ const AdminSessionsPage = () => {
     try {
       await dispatch(deleteSession(sessionId)).unwrap();
       toastManager.success("Session deleted successfully");
+      const params = {};
+      if (sessionFilters.teacher) params.teacher = sessionFilters.teacher;
+      if (sessionFilters.course) params.course = sessionFilters.course;
+      if (sessionFilters.view) params.view = sessionFilters.view;
+      dispatch(fetchSessions(params));
     } catch (error) {
       showApiError(error);
-      // const normalizedError = normalizeApiError(error);
-      // toastManager.error(normalizedError.message);
     } finally {
       setLoadingSessionIds((prev) => {
         const newSet = new Set(prev);

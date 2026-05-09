@@ -619,6 +619,7 @@ const CoursesTab = ({
             <option value="">All Status</option>
             <option value="published">Published</option>
             <option value="draft">Draft</option>
+            <option value="completed">Completed</option>
           </FilterSelect>
           <FilterSelect
             value={courseFilters.instructor}

@@ -155,21 +155,39 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
           <label className="block text-sm font-medium text-slate-300 mb-2">
             Instructor <span className="text-red-400">*</span>
           </label>
-          <FilterSelect
-            value={
-              mode === "edit"
-                ? (formData.instructor_id || formData.instructor?.id || "")
-                : (formData.instructor_id || "")
-            }
-            onChange={(e) => onChange("instructor_id", e.target.value)}
-            className={fieldClass(errors.instructor_id)}
-          >
-            <option value="">Select an instructor</option>
-            {users.map((user) => (
-              <option key={user.id} value={user.id}>{user.username}</option>
-            ))}
-          </FilterSelect>
-          <FieldError error={errors.instructor_id} />
+          {mode === "edit" && formData.has_session ? (
+            <>
+              <input
+                type="text"
+                value={
+                  users.find((u) => u.id === Number(formData.instructor_id || formData.instructor?.id))?.username ||
+                  formData.instructor?.username ||
+                  "—"
+                }
+                disabled
+                className="w-full px-3 py-2 bg-slate-700/40 border border-slate-700/40 rounded-lg text-slate-400 cursor-not-allowed text-sm"
+              />
+              <p className="text-[10px] text-slate-500 mt-1">Instructor cannot be changed once a class has been created for this course.</p>
+            </>
+          ) : (
+            <>
+              <FilterSelect
+                value={
+                  mode === "edit"
+                    ? (formData.instructor_id || formData.instructor?.id || "")
+                    : (formData.instructor_id || "")
+                }
+                onChange={(e) => onChange("instructor_id", e.target.value)}
+                className={fieldClass(errors.instructor_id)}
+              >
+                <option value="">Select an instructor</option>
+                {users.map((user) => (
+                  <option key={user.id} value={user.id}>{user.username}</option>
+                ))}
+              </FilterSelect>
+              <FieldError error={errors.instructor_id} />
+            </>
+          )}
         </div>
       </div>
 
