@@ -132,43 +132,40 @@ const TeachersDirectory = () => {
               {teachers.map((teacher) => (
                 <div
                   key={teacher.id}
-                  className="group relative bg-gradient-to-b from-slate-900/80 to-slate-900 border border-slate-800 rounded-3xl p-5 transition-all duration-300 ease-out hover:border-indigo-500/40 hover:shadow-[0_10px_40px_-10px_rgba(99,102,241,0.35)] hover:-translate-y-[2px]"
+                  className="group relative bg-gradient-to-b from-slate-900/80 to-slate-900 border border-slate-800 rounded-3xl p-5 transition-all duration-300 ease-out hover:border-indigo-500/40 hover:shadow-[0_10px_40px_-10px_rgba(99,102,241,0.35)] hover:-translate-y-[2px] flex flex-col"
                 >
+                  {/* Hover glow overlay */}
+                  <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition duration-300 pointer-events-none bg-indigo-500/4" />
+
                   {/* Top */}
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition duration-300 pointer-events-none bg-indigo-500/4" />
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center text-white font-bold text-base shadow-md transition-transform duration-300 group-hover:scale-105">
+                  <div className="flex items-center gap-3 mb-4 relative z-10">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center text-white font-bold text-base shadow-md transition-transform duration-300 group-hover:scale-105 shrink-0">
                       {teacher.teacher_name?.[0]?.toUpperCase() || "T"}
                     </div>
 
-                    <div className="flex-1">
-                      <h3 className="text-base font-semibold text-white">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-base font-semibold text-white truncate">
                         {teacher.teacher_name || "Unnamed teacher"}
                       </h3>
-
-                      <p className="text-xs text-slate-400 mt-1">
+                      <p className="text-xs text-slate-400 mt-0.5 truncate">
                         {teacher.expertise || "No expertise specified"}
                       </p>
                     </div>
                   </div>
 
-                  {/* Stats */}
-                  <div className="flex items-center justify-between mb-4 text-sm">
-                    <div className="flex items-center gap-1 text-yellow-400 font-medium">
-                      ★ {teacher.rating?.toFixed?.(1) ?? "0.0"}
-                    </div>
-
-                    <div className="text-slate-400">
+                  {/* Experience */}
+                  <div className="mb-4 relative z-10">
+                    <span className="text-xs text-slate-400">
+                      <i className="fas fa-briefcase text-slate-600 mr-1.5" />
                       {teacher.experience ?? 0} yrs experience
-                    </div>
+                    </span>
                   </div>
 
                   {/* Courses */}
-                  <div className="mb-4">
+                  <div className="mb-4 relative z-10 flex-1">
                     <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-2">
                       Courses
                     </p>
-
                     <div className="flex flex-wrap gap-2">
                       {teacher.courses?.length ? (
                         teacher.courses.slice(0, 3).map((course) => (
@@ -187,26 +184,23 @@ const TeachersDirectory = () => {
                     </div>
                   </div>
 
-                  {/* CTA */}
-                  <div className="flex gap-2 mt-auto">
+                  {/* CTA — pinned to bottom */}
+                  <div className="flex flex-col gap-2 mt-auto relative z-10">
                     {isAuthenticated && (
                       <button
                         onClick={() => navigate(`/teachers/${teacher.id}`)}
-                        className="flex-1 py-2.5 rounded-xl bg-slate-900 border border-indigo-600/30 text-indigo-400 hover:bg-indigo-600 hover:text-white font-black text-[11px] uppercase tracking-[0.18em] transition-all active:scale-95"
+                        className="w-full py-2.5 rounded-xl bg-slate-900 border border-indigo-600/30 text-indigo-400 hover:bg-indigo-600 hover:text-white font-black text-[11px] uppercase tracking-[0.18em] transition-all active:scale-95"
                       >
                         View Profile
                       </button>
                     )}
                     <button
                       onClick={() => setHireModal(teacher)}
-                      className="flex-1 py-2.5 rounded-xl bg-slate-900 border border-blue-600/30 text-blue-500 hover:bg-blue-600 hover:text-white font-black text-[11px] uppercase tracking-[0.18em] transition-all active:scale-95"
+                      className="w-full py-2.5 rounded-xl bg-slate-900 border border-blue-600/30 text-blue-500 hover:bg-blue-600 hover:text-white font-black text-[11px] uppercase tracking-[0.18em] transition-all active:scale-95"
                     >
                       Hire Tutor
                     </button>
                   </div>
-
-                  {/* Hover glow */}
-                  <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition pointer-events-none bg-indigo-500/5" />
                 </div>
               ))}
             </div>

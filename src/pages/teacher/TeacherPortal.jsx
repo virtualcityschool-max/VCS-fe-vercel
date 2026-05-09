@@ -202,25 +202,43 @@ const TeacherPortal = () => {
 
       <div className="grid grid-cols-1 xl:grid-cols-10 gap-4">
         <div className="xl:col-span-6 space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-bold font-poppins">Today's Schedule</h3>
-            <span className="text-xs text-slate-400">
-              {dashboard?.todays_schedule?.length || 0} sessions
-            </span>
-          </div>
+          {(() => {
+            const today = new Date();
+            const end = new Date(today);
+            end.setDate(end.getDate() + 6);
+            const fmt = (d) => d.toLocaleDateString([], { month: "short", day: "numeric" });
+            const rangeLabel = `${fmt(today)} – ${fmt(end)}`;
+            return (
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <h3 className="text-lg font-bold font-poppins leading-tight">Upcoming Sessions</h3>
+                  <p className="text-[11px] text-slate-500 font-medium mt-0.5">{rangeLabel}</p>
+                </div>
+                <span className="text-xs text-slate-400 mt-1 shrink-0">
+                  {dashboard?.todays_schedule?.length || 0} sessions
+                </span>
+              </div>
+            );
+          })()}
 
           {dashboard?.todays_schedule?.length ? (
-            dashboard.todays_schedule.map((session) => (
+            dashboard.todays_schedule.map((session) => {
+              const schedDate = new Date(session.schedule_at);
+              const dayLabel = schedDate.toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" });
+              const timeLabel = schedDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+              return (
               <div
                 key={session.id}
                 className="bg-slate-900 px-4 py-3 rounded-xl border border-slate-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 hover:border-indigo-500/60 transition group"
               >
                 <div className="flex items-center gap-4 min-w-0">
-                  <div className="text-indigo-400 font-black text-xs sm:text-sm whitespace-nowrap">
-                    {new Date(session.schedule_at).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
+                  <div className="flex flex-col items-center text-center shrink-0 min-w-[56px]">
+                    <span className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider whitespace-nowrap">
+                      {dayLabel}
+                    </span>
+                    <span className="text-indigo-400 font-black text-xs sm:text-sm whitespace-nowrap">
+                      {timeLabel}
+                    </span>
                   </div>
 
                   <div className="min-w-0">
@@ -294,10 +312,11 @@ const TeacherPortal = () => {
                   </span>
                 )}
               </div>
-            ))
+            );
+            })
           ) : (
             <div className="bg-slate-900 p-4 rounded-xl border border-slate-800 text-slate-400 text-sm">
-              No sessions scheduled for today.
+              No sessions in the next 7 days.
             </div>
           )}
 

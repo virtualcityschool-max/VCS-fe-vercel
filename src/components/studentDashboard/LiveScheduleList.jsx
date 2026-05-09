@@ -103,13 +103,22 @@ const LiveScheduleList = () => {
     return "text-red-400";
   };
 
+  const today = new Date();
+  const end = new Date(today);
+  end.setDate(end.getDate() + 6);
+  const fmtDay = (d) => d.toLocaleDateString([], { month: "short", day: "numeric" });
+  const scheduleRangeLabel = `${fmtDay(today)} – ${fmtDay(end)}`;
+
   if (!liveSchedule || liveSchedule.length === 0) {
     return (
       <section>
-        <h2 className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 mb-6 border-b border-white/5 pb-4 flex items-center gap-3">
-          <span className="w-1.5 h-1.5 bg-slate-700 rounded-full"></span>
-          My Live Schedule
-        </h2>
+        <div className="mb-6 border-b border-white/5 pb-4 flex items-center justify-between">
+          <h2 className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 flex items-center gap-3">
+            <span className="w-1.5 h-1.5 bg-slate-700 rounded-full"></span>
+            Upcoming Sessions
+          </h2>
+          <span className="text-[10px] text-slate-600 font-semibold">{scheduleRangeLabel}</span>
+        </div>
         <div className="bg-slate-900/40 backdrop-blur-xl p-8 rounded-[1.5rem] border border-white/5 text-center shadow-2xl transition-all duration-500 hover:border-white/10">
           <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/5">
             <i className="fas fa-calendar-times text-xl text-slate-600"></i>
@@ -127,10 +136,13 @@ const LiveScheduleList = () => {
 
   return (
     <section>
-      <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-6 border-b border-white/5 pb-4 flex items-center gap-3">
-        <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-ping"></span>
-        My Live Schedule
-      </h2>
+      <div className="mb-6 border-b border-white/5 pb-4 flex items-center justify-between">
+        <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 flex items-center gap-3">
+          <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-ping"></span>
+          Upcoming Sessions
+        </h2>
+        <span className="text-[10px] text-slate-600 font-semibold">{scheduleRangeLabel}</span>
+      </div>
       <div className="space-y-4">
         {liveSchedule.map((session) => {
           const sessionId = session?.session_id ?? session?.id;
@@ -177,18 +189,21 @@ const LiveScheduleList = () => {
                 <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-[11px] text-slate-400 font-bold uppercase tracking-wider mb-3">
                   <div className="flex items-center gap-1.5">
                     <i className="fas fa-calendar text-blue-400/60"></i>
-                    <span>{formatDate(session.scheduled_at)}</span>
+                    <span>
+                      {/* {new Date(session.scheduled_at).toLocaleDateString([], { weekday: "short" })},{" "} */}
+                      {formatDate(session.scheduled_at)}
+                    </span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <i className="fas fa-clock text-indigo-400/60"></i>
                     <span>{formatScheduleTime(session.scheduled_at)}</span>
                   </div>
-                  {session.recurring_schedule && (
+                  {/* {session.recurring_schedule && (
                     <div className="flex items-center gap-1">
                       <i className="fas fa-repeat"></i>
                       <span>{session.recurring_schedule}</span>
                     </div>
-                  )}
+                  )} */}
                 </div>
 
                 {/* Attendance Rate - Slim */}
