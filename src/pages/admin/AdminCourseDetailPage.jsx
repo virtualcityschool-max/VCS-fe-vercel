@@ -1,12 +1,22 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { coursesService } from "../../services/coursesService";
-import { unenrollStudent } from "../../store/slices/adminSlice";
+import {
+  unenrollStudent,
+  updateCourse,
+  deleteCourse,
+  fetchUsers,
+} from "../../store/slices/adminSlice";
+import { fetchCourses } from "../../store/slices/adminSlice";
 import { toastManager } from "../../utils/toastManager";
 import { formatCategoryLabel } from "../../constants";
 import { getStorageUrl } from "../../utils/storageUrl";
 import FileViewerModal from "../../components/common/FileViewerModal";
+import ConfirmDialog from "../../components/common/ConfirmDialog";
+import CourseForm from "../../components/admin/CourseForm";
+import { showApiError } from "../../utils/apiErrorHandler";
+import { useFieldErrors } from "../../hooks";
 
 const Badge = ({ children, color = "slate" }) => {
   const colors = {
@@ -50,17 +60,8 @@ const ConfirmUnenroll = ({ student, onConfirm, onCancel, loading }) => (
       <p className="text-white font-semibold text-sm">{student.username}</p>
       <p className="text-slate-400 text-xs mt-0.5 mb-5">{student.email}</p>
       <div className="flex gap-3">
-        <button
-          onClick={onCancel}
-          className="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-2 rounded-xl text-sm font-medium transition"
-        >
-          Cancel
-        </button>
-        <button
-          onClick={onConfirm}
-          disabled={loading}
-          className="flex-1 bg-red-600 hover:bg-red-500 text-white py-2 rounded-xl text-sm font-medium transition disabled:opacity-50"
-        >
+        <button onClick={onCancel} className="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-2 rounded-xl text-sm font-medium transition">Cancel</button>
+        <button onClick={onConfirm} disabled={loading} className="flex-1 bg-red-600 hover:bg-red-500 text-white py-2 rounded-xl text-sm font-medium transition disabled:opacity-50">
           {loading ? "Removing..." : "Yes, Remove"}
         </button>
       </div>
@@ -81,6 +82,23 @@ const AdminCourseDetailPage = () => {
   const [activeTab, setActiveTab] = useState("details");
   const [viewerUrl, setViewerUrl] = useState(null);
 
+  // Edit state
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editForm, setEditForm] = useState({});
+  const [teachers, setTeachers] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [updating, setUpdating] = useState(false);
+
+  // Delete state
+  const [deleteDialog, setDeleteDialog] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const {
+    errors: editErrors,
+    setErrors: setEditErrors,
+    clearAllErrors: clearAllEditErrors,
+  } = useFieldErrors({});
+
   const fetchCourse = async () => {
     setLoading(true);
     try {
@@ -94,7 +112,106 @@ const AdminCourseDetailPage = () => {
     }
   };
 
-  useEffect(() => { fetchCourse(); }, [courseId]);
+  useEffect(() => {
+    fetchCourse();
+    // fetch supporting data for edit form
+    dispatch(fetchUsers({ role: "teacher" }))
+      .unwrap()
+      .then((res) => setTeachers(res?.data || res || []))
+      .catch(() => {});
+    coursesService.getCategories()
+      .then(setCategories)
+      .catch(() => {});
+  }, [courseId]);
+
+  const openEdit = () => {
+    if (!course) return;
+    clearAllEditErrors();
+    setEditForm({
+      title: course.title || "",
+      description: course.description || "",
+      category: course.category?.id?.toString() || course.category || "",
+      price: course.price || "",
+      status: course.status || "draft",
+      instructor_id: course.instructor?.id || "",
+      instructor: course.instructor || null,
+      days_of_recurring: course.schedule?.days || course.days_of_recurring || [],
+      time: course.schedule?.time || course.time || "",
+      outline: course.outline || "",
+      attachment: null,
+      attachment_url: course.attachment || null,
+      thumbnail: null,
+      thumbnail_url: course.thumbnail || null,
+    });
+    setEditModalOpen(true);
+  };
+
+  const handleFormChange = (field, value) => {
+    setEditForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const validateForm = (formData) => {
+    const errors = {};
+    if (!formData.title?.trim()) errors.title = "Course title is required";
+    else if (formData.title.trim().length < 5) errors.title = "Title must be at least 5 characters";
+    if (!formData.description?.trim()) errors.description = "Description is required";
+    else if (formData.description.trim().length < 10) errors.description = "Description must be at least 10 characters";
+    if (!formData.category) errors.category = "Category is required";
+    const price = Number(formData.price);
+    if (formData.price === "" || !Number.isInteger(price) || price < 0) errors.price = "Price must be a valid non-decimal positive number";
+    if (!formData.status) errors.status = "Status is required";
+    if (!formData.instructor_id) errors.instructor_id = "Instructor is required";
+    return errors;
+  };
+
+  const buildPayload = (formData) => {
+    const fd = new FormData();
+    fd.append("title", formData.title);
+    fd.append("description", formData.description);
+    if (formData.category) fd.append("category", Number(formData.category));
+    fd.append("price", Number(formData.price));
+    fd.append("status", formData.status);
+    fd.append("instructor_id", Number(formData.instructor_id));
+    fd.append("schedule", JSON.stringify({ days: formData.days_of_recurring || [], time: formData.time || "" }));
+    if (formData.outline) fd.append("outline", formData.outline);
+    if (formData.attachment instanceof File) fd.append("attachment", formData.attachment);
+    if (formData.thumbnail instanceof File) fd.append("thumbnail", formData.thumbnail);
+    return fd;
+  };
+
+  const handleUpdate = async () => {
+    const errors = validateForm(editForm);
+    setEditErrors(errors);
+    if (Object.keys(errors).length > 0) {
+      toastManager.error("Please fix highlighted fields");
+      return;
+    }
+    setUpdating(true);
+    try {
+      await dispatch(updateCourse({ courseId: Number(courseId), courseData: buildPayload(editForm) })).unwrap();
+      toastManager.success("Course updated successfully");
+      setEditModalOpen(false);
+      fetchCourse();
+    } catch (err) {
+      showApiError(err);
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    setDeleting(true);
+    try {
+      await dispatch(deleteCourse(Number(courseId))).unwrap();
+      toastManager.success("Course deleted successfully");
+      navigate("/admin/courses");
+    } catch (err) {
+      showApiError(err);
+    } finally {
+      setDeleting(false);
+      setDeleteDialog(false);
+    }
+  };
 
   const handleUnenroll = async () => {
     if (!confirmStudent) return;
@@ -164,11 +281,30 @@ const AdminCourseDetailPage = () => {
               <i className="fas fa-graduation-cap text-indigo-400 text-2xl"></i>
             </div>
             <div className="flex-1 min-w-0">
-              <div className="flex flex-wrap items-start gap-3 mb-2">
-                <h1 className="text-2xl font-black font-poppins text-white leading-tight">{course.title}</h1>
-                <Badge color={course.status === "published" ? "green" : "slate"}>
-                  {course.status}
-                </Badge>
+              <div className="flex flex-wrap items-start justify-between gap-3 mb-2">
+                <div className="flex flex-wrap items-center gap-3">
+                  <h1 className="text-2xl font-black font-poppins text-white leading-tight">{course.title}</h1>
+                  <Badge color={course.status === "published" ? "green" : "slate"}>
+                    {course.status}
+                  </Badge>
+                </div>
+                {/* Edit / Delete actions */}
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <button
+                    onClick={openEdit}
+                    className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl transition active:scale-95"
+                  >
+                    <i className="fas fa-pen text-[10px]"></i>
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => setDeleteDialog(true)}
+                    className="flex items-center gap-2 px-4 py-2 bg-red-600/10 hover:bg-red-600/20 border border-red-500/30 text-red-400 text-xs font-bold rounded-xl transition active:scale-95"
+                  >
+                    <i className="fas fa-trash text-[10px]"></i>
+                    Delete
+                  </button>
+                </div>
               </div>
               <p className="text-slate-400 text-sm leading-relaxed mb-4 max-w-2xl">
                 {course.description}
@@ -200,9 +336,7 @@ const AdminCourseDetailPage = () => {
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`flex-1 py-2 rounded-xl text-sm font-semibold transition capitalize ${
-                activeTab === tab
-                  ? "bg-indigo-600 text-white"
-                  : "text-slate-400 hover:text-white"
+                activeTab === tab ? "bg-indigo-600 text-white" : "text-slate-400 hover:text-white"
               }`}
             >
               {tab === "students" ? `Students (${students.length})` : "Details"}
@@ -215,8 +349,6 @@ const AdminCourseDetailPage = () => {
 
           {/* LEFT: Course details */}
           <div className={`lg:col-span-3 space-y-5 ${activeTab === "students" ? "hidden lg:block" : ""}`}>
-
-            {/* Outline */}
             {hasOutline && (
               <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6">
                 <div className="flex items-center gap-3 mb-4">
@@ -225,14 +357,10 @@ const AdminCourseDetailPage = () => {
                   </div>
                   <h2 className="text-base font-bold text-white">Course Outline</h2>
                 </div>
-                <div
-                  className="course-outline-content"
-                  dangerouslySetInnerHTML={{ __html: course.outline }}
-                />
+                <div className="course-outline-content" dangerouslySetInnerHTML={{ __html: course.outline }} />
               </div>
             )}
 
-            {/* Attachment */}
             {hasAttachment && (
               <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6">
                 <div className="flex items-center gap-3 mb-4">
@@ -253,7 +381,6 @@ const AdminCourseDetailPage = () => {
               </div>
             )}
 
-            {/* Empty state */}
             {!hasOutline && !hasAttachment && (
               <div className="bg-slate-900/50 border border-slate-800 border-dashed rounded-3xl p-10 text-center">
                 <div className="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-3">
@@ -267,7 +394,6 @@ const AdminCourseDetailPage = () => {
           {/* RIGHT: Enrolled Students */}
           <div className={`lg:col-span-2 ${activeTab === "details" ? "hidden lg:block" : ""}`}>
             <div className="bg-slate-900/50 border border-slate-800 rounded-3xl overflow-hidden">
-              {/* Students header */}
               <div className="px-5 py-4 border-b border-slate-800 flex items-center gap-3">
                 <div className="w-8 h-8 bg-indigo-600/15 rounded-xl flex items-center justify-center">
                   <i className="fas fa-user-graduate text-indigo-400 text-xs"></i>
@@ -277,8 +403,6 @@ const AdminCourseDetailPage = () => {
                   <p className="text-xs text-slate-500">{students.length} enrolled</p>
                 </div>
               </div>
-
-              {/* Students list */}
               <div className="p-4 space-y-2 max-h-[60vh] overflow-y-auto custom-scrollbar">
                 {students.length === 0 ? (
                   <div className="py-12 text-center">
@@ -308,11 +432,10 @@ const AdminCourseDetailPage = () => {
                         title="Remove student"
                         className="w-7 h-7 bg-red-500/10 hover:bg-red-500/25 text-red-400 rounded-full flex items-center justify-center transition disabled:opacity-40 flex-shrink-0"
                       >
-                        {unenrollingId === student.id ? (
-                          <i className="fas fa-spinner fa-spin text-xs"></i>
-                        ) : (
-                          <i className="fas fa-user-minus text-xs"></i>
-                        )}
+                        {unenrollingId === student.id
+                          ? <i className="fas fa-spinner fa-spin text-xs"></i>
+                          : <i className="fas fa-user-minus text-xs"></i>
+                        }
                       </button>
                     </div>
                   ))
@@ -323,6 +446,57 @@ const AdminCourseDetailPage = () => {
         </div>
       </div>
 
+      {/* ── Edit Modal ── */}
+      {editModalOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-5xl max-h-[92vh] overflow-y-auto">
+            <div className="flex justify-between items-center px-6 py-5 border-b border-slate-800 sticky top-0 bg-slate-900 z-10">
+              <h3 className="text-lg font-bold text-white">Edit Course</h3>
+              <button onClick={() => setEditModalOpen(false)} className="text-slate-400 hover:text-white transition">
+                <i className="fas fa-times text-xl"></i>
+              </button>
+            </div>
+            <div className="p-6">
+              <CourseForm
+                formData={editForm}
+                onChange={handleFormChange}
+                errors={editErrors}
+                users={teachers}
+                categories={categories}
+                mode="edit"
+              />
+            </div>
+            <div className="flex gap-3 px-6 py-5 border-t border-slate-800 sticky bottom-0 bg-slate-900">
+              <button
+                onClick={() => setEditModalOpen(false)}
+                className="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-3 rounded-xl text-sm font-semibold transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleUpdate}
+                disabled={updating}
+                className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white py-3 rounded-xl text-sm font-semibold transition disabled:opacity-50"
+              >
+                {updating ? <><i className="fas fa-spinner fa-spin mr-2"></i>Saving…</> : "Save Changes"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Delete Confirm ── */}
+      <ConfirmDialog
+        open={deleteDialog}
+        variant="danger"
+        title="Delete Course"
+        message={`Are you sure you want to delete "${course.title}"? This action cannot be undone.`}
+        confirmLabel={deleting ? "Deleting…" : "Delete"}
+        cancelLabel="Cancel"
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteDialog(false)}
+      />
+
       {/* Unenroll confirmation */}
       {confirmStudent && (
         <ConfirmUnenroll
@@ -332,6 +506,7 @@ const AdminCourseDetailPage = () => {
           onCancel={() => setConfirmStudent(null)}
         />
       )}
+
       {viewerUrl && (
         <FileViewerModal filePath={viewerUrl} handleClose={() => setViewerUrl(null)} />
       )}

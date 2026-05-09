@@ -20,16 +20,9 @@ const adminSessionService = {
 
   // Update a session
   updateSession: async (sessionId, sessionData) => {
-    // Map frontend field names to backend field names
-    const mappedData = {
-      course: sessionData.course_id,
-      title: sessionData.title,
-      scheduled_at: sessionData.start_time,
-      meeting_link: sessionData.meeting_link,
-    };
     const response = await axiosInstance.patch(
       `/classroom/sessions/${sessionId}/`,
-      mappedData,
+      sessionData,
     );
     return response.data;
   },

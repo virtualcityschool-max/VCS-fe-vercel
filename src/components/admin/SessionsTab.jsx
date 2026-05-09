@@ -219,7 +219,7 @@ const SessionsTab = ({
             <span className="hidden sm:inline">Calendar</span>
           </button>
         </div>
-        <div class="flex gap-3 ml-auto">
+        <div className="flex gap-3 ml-auto">
 
         {/* Month nav — inline, only in calendar view with data */}
         {/* {view === "calendar" && activeMonthData && (
@@ -377,19 +377,19 @@ const SessionsTab = ({
                     <div className="flex gap-2">
                       {(() => {
                         const isChild = session.is_child === true;
-                        const overEnrollment = (session.enrollment_count ?? 0) > 3;
-                        const blocked = isChild || overEnrollment;
+                        const hasEnrollments = (session.enrollment_count ?? 0) >= 1;
+                        const blocked = isChild || hasEnrollments;
                         const tip = isChild
                           ? "Child sessions cannot be edited"
-                          : overEnrollment
-                          ? "Cannot edit: session has more than 3 enrollments"
+                          : hasEnrollments
+                          ? "Cannot edit: session has active enrollments"
                           : "Edit session";
                         return (
                           <button
-                            onClick={() => onSessionEdit(session.id)}
+                            onClick={() => !blocked && onSessionEdit(session.id)}
                             disabled={blocked}
                             title={tip}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition flex-1 flex items-center justify-center gap-1 ${blocked ? "bg-slate-800/30 text-slate-600 cursor-not-allowed" : "bg-slate-700/50 text-slate-300 hover:bg-slate-600/50"}`}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-medium flex-1 flex items-center justify-center gap-1 transition ${blocked ? "bg-slate-800/30 text-slate-600 cursor-not-allowed" : "bg-slate-700/50 text-slate-300 hover:bg-slate-600/50"}`}
                           >
                             <i className="fas fa-edit"></i> Edit
                           </button>
@@ -440,16 +440,16 @@ const SessionsTab = ({
                         <div className="flex items-center gap-2 justify-end">
                           {(() => {
                             const isChild = session.is_child === true;
-                            const overEnrollment = (session.enrollment_count ?? 0) > 3;
-                            const blocked = isChild || overEnrollment;
+                            const hasEnrollments = (session.enrollment_count ?? 0) >= 1;
+                            const blocked = isChild || hasEnrollments;
                             const tip = isChild
                               ? "Child sessions cannot be edited"
-                              : overEnrollment
-                              ? "Cannot edit: session has more than 3 enrollments"
+                              : hasEnrollments
+                              ? "Cannot edit: session has active enrollments"
                               : "Edit session";
                             return (
                               <button
-                                onClick={() => onSessionEdit(session.id)}
+                                onClick={() => !blocked && onSessionEdit(session.id)}
                                 disabled={blocked}
                                 title={tip}
                                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${blocked ? "bg-slate-800/30 text-slate-600 cursor-not-allowed" : "bg-slate-700/50 text-slate-300 hover:bg-slate-600/50"}`}
@@ -637,31 +637,35 @@ const SessionsTab = ({
       {/* ── EDIT SESSION MODAL ── */}
       {activeModal && typeof activeModal === "object" && activeModal.type === "edit-session" && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold text-white">Edit Class</h3>
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            {/* Header */}
+            <div className="flex justify-between items-center px-6 py-5 border-b border-slate-800 sticky top-0 bg-slate-900 z-10">
+              <div>
+                <h3 className="text-xl font-bold text-white">Edit Class</h3>
+                <p className="text-xs text-slate-400 mt-0.5">Update class details</p>
+              </div>
               <button onClick={() => setActiveModal(null)} className="text-slate-400 hover:text-white transition">
                 <i className="fas fa-times text-xl"></i>
               </button>
             </div>
-            <form onSubmit={handleUpdateSession} className="space-y-5">
-              {/* Row 1: Course | Instructor */}
+
+            <form onSubmit={handleUpdateSession} className="p-6 space-y-5">
+
+              {/* Course | Instructor — read-only */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Course
-                  </label>
-                  <input type="text" value={editSessionForm.course_title || ""} disabled className="w-full px-3 py-2.5 bg-slate-700/50 border border-slate-600/50 rounded-xl text-slate-400 text-sm cursor-not-allowed" />
+                  <label className="block text-sm font-medium text-slate-300 mb-2">Course</label>
+                  <input type="text" value={editSessionForm.course_title || ""} disabled
+                    className="w-full px-3 py-2.5 bg-slate-700/50 border border-slate-600/50 rounded-xl text-slate-400 text-sm cursor-not-allowed" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Instructor
-                  </label>
-                  <input type="text" value={editSessionForm.teacher_name || ""} disabled className="w-full px-3 py-2.5 bg-slate-700/50 border border-slate-600/50 rounded-xl text-slate-400 text-sm cursor-not-allowed" />
+                  <label className="block text-sm font-medium text-slate-300 mb-2">Instructor</label>
+                  <input type="text" value={editSessionForm.teacher_name || ""} disabled
+                    className="w-full px-3 py-2.5 bg-slate-700/50 border border-slate-600/50 rounded-xl text-slate-400 text-sm cursor-not-allowed" />
                 </div>
               </div>
 
-              {/* Row 2: Class Title (full width) */}
+              {/* Class Title */}
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-2">
                   Class Title <span className="text-red-400">*</span>
@@ -676,41 +680,53 @@ const SessionsTab = ({
                 />
               </div>
 
-              {/* Row 3: Start Time */}
+              {/* Description */}
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
-                  Start Time <span className="text-red-400">*</span>
-                </label>
-                <Input
-                  type="datetime-local"
-                  value={editSessionForm.start_time || ""}
-                  min={new Date().toISOString().slice(0, 16)}
-                  onChange={(e) => { setEditSessionForm({ ...editSessionForm, start_time: e.target.value }); clearEditSessionFieldError("start_time"); }}
-                  className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white focus:outline-none focus:ring-2 text-sm ${editSessionErrors?.start_time ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
-                  error={editSessionErrors?.start_time}
+                <label className="block text-sm font-medium text-slate-300 mb-2">Description</label>
+                <textarea
+                  placeholder="Describe this class session..."
+                  value={editSessionForm.description || ""}
+                  onChange={(e) => setEditSessionForm({ ...editSessionForm, description: e.target.value })}
+                  rows={3}
+                  className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm resize-none"
                 />
               </div>
 
-              {/* Row 3b: End Date (full width) */}
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
-                  Recurrence End Date
-                </label>
-                <input
-                  type="date"
-                  value={editSessionForm.recurrence_end_date || ""}
-                  min={new Date().toISOString().slice(0, 10)}
-                  onChange={(e) => { setEditSessionForm({ ...editSessionForm, recurrence_end_date: e.target.value }); clearEditSessionFieldError("recurrence_end_date"); }}
-                  className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white focus:outline-none focus:ring-2 text-sm [color-scheme:dark] ${editSessionErrors?.recurrence_end_date ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
-                />
-                {editSessionErrors?.recurrence_end_date && <p className="text-red-400 text-xs mt-1">{editSessionErrors.recurrence_end_date}</p>}
-              </div>
-
-              {/* Row 4: Recurring Days | Meeting Link */}
+              {/* Start Date | End Date */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Recurring Days
+                    Start Date <span className="text-red-400">*</span>
+                  </label>
+                  <input
+                    type="date"
+                    value={editSessionForm.start_date || ""}
+                    min={new Date().toISOString().split("T")[0]}
+                    onChange={(e) => { setEditSessionForm({ ...editSessionForm, start_date: e.target.value }); clearEditSessionFieldError("start_date"); }}
+                    className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white focus:outline-none focus:ring-2 text-sm [color-scheme:dark] ${editSessionErrors?.start_date ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
+                  />
+                  {editSessionErrors?.start_date && <p className="text-red-400 text-xs mt-1">{editSessionErrors.start_date}</p>}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    End Date <span className="text-red-400">*</span>
+                  </label>
+                  <input
+                    type="date"
+                    value={editSessionForm.recurrence_end_date || ""}
+                    min={editSessionForm.start_date || new Date().toISOString().split("T")[0]}
+                    onChange={(e) => { setEditSessionForm({ ...editSessionForm, recurrence_end_date: e.target.value }); clearEditSessionFieldError("recurrence_end_date"); }}
+                    className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white focus:outline-none focus:ring-2 text-sm [color-scheme:dark] ${editSessionErrors?.recurrence_end_date ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
+                  />
+                  {editSessionErrors?.recurrence_end_date && <p className="text-red-400 text-xs mt-1">{editSessionErrors.recurrence_end_date}</p>}
+                </div>
+              </div>
+
+              {/* Recurring Days | Class Time */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    Recurring Days <span className="text-red-400">*</span>
                   </label>
                   <div className="flex flex-wrap gap-2">
                     {["MON","TUE","WED","THU","FRI"].map((day) => {
@@ -736,22 +752,26 @@ const SessionsTab = ({
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Meeting Link
+                    Class Time <span className="text-red-400">*</span>
                   </label>
                   <input
-                    type="text"
-                    value={editSessionForm.meeting_link || ""}
-                    disabled
-                    className="w-full px-3 py-2.5 bg-slate-700/50 border border-slate-600/50 rounded-xl text-slate-500 text-sm cursor-not-allowed"
+                    type="time"
+                    value={editSessionForm.time || ""}
+                    onChange={(e) => { setEditSessionForm({ ...editSessionForm, time: e.target.value }); clearEditSessionFieldError("time"); }}
+                    className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white focus:outline-none focus:ring-2 text-sm [color-scheme:dark] ${editSessionErrors?.time ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
                   />
-                  <p className="text-slate-600 text-[10px] mt-1">Meeting link cannot be changed</p>
+                  {editSessionErrors?.time && <p className="text-red-400 text-xs mt-1">{editSessionErrors.time}</p>}
                 </div>
               </div>
 
               <div className="flex gap-3 pt-2">
-                <button type="button" onClick={() => setActiveModal(null)} className="flex-1 bg-slate-700 hover:bg-slate-600 text-white px-6 py-3 rounded-xl text-sm font-medium transition">Cancel</button>
-                <button type="submit" disabled={updatingSessionId} className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-xl text-sm font-medium transition disabled:opacity-50">
-                  {updatingSessionId ? "Updating..." : "Update Class"}
+                <button type="button" onClick={() => setActiveModal(null)}
+                  className="flex-1 bg-slate-700 hover:bg-slate-600 text-white px-6 py-3 rounded-xl text-sm font-medium transition">
+                  Cancel
+                </button>
+                <button type="submit" disabled={!!updatingSessionId}
+                  className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-xl text-sm font-medium transition disabled:opacity-50">
+                  {updatingSessionId ? <><i className="fas fa-spinner fa-spin mr-2"></i>Updating…</> : "Update Class"}
                 </button>
               </div>
             </form>

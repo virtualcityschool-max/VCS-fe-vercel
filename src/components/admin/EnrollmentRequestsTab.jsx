@@ -99,7 +99,7 @@ const EnrollmentRequestsTab = ({
                         ? "bg-purple-500/20 text-purple-400 border border-purple-500/30"
                         : "bg-indigo-500/20 text-indigo-400 border border-indigo-500/30"
                     }`}>
-                      {enrollment.is_private ? "Private" : "Normal"}
+                      {enrollment.is_private ? "Private" : "Standard"}
                     </span>
                   </div>
                   <p className="text-xs text-slate-400 truncate">{enrollment.student_email}</p>

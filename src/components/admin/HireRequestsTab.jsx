@@ -8,13 +8,15 @@ const STATUS_BADGE = {
 };
 
 const DetailRow = ({ icon, label, value }) => (
-  <div className="flex items-start gap-3 py-3 border-b border-white/5 last:border-0">
+  <div className="flex items-start gap-3 py-3.5">
     <div className="w-7 h-7 rounded-lg bg-slate-800 flex items-center justify-center shrink-0 mt-0.5">
       <i className={`fas fa-${icon} text-slate-400 text-xs`}></i>
     </div>
     <div className="flex-1 min-w-0">
-      <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-0.5">{label}</p>
-      <p className="text-sm text-white font-medium break-words">{value || <span className="text-slate-600 italic font-normal">Not provided</span>}</p>
+      <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">{label}</p>
+      <p className="text-sm text-white font-medium break-words whitespace-pre-wrap leading-relaxed">
+        {value || <span className="text-slate-600 italic font-normal">Not provided</span>}
+      </p>
     </div>
   </div>
 );
@@ -197,74 +199,95 @@ const HireRequestsTab = ({
         onCancel={() => setConfirm({ open: false, type: null, id: null, label: "" })}
       />
 
-      {/* Detail modal — vertical card layout */}
+      {/* Detail modal — wide horizontal layout */}
       {detailReq && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm" onClick={() => setDetailReq(null)} />
-          <div className="relative w-full max-w-sm bg-[#0f1829] border border-white/10 rounded-3xl shadow-2xl overflow-hidden flex flex-col">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setDetailReq(null)} />
+          <div className="relative w-full max-w-3xl bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl flex flex-col max-h-[90vh]">
 
-            {/* Close button */}
-            <button
-              onClick={() => setDetailReq(null)}
-              className="absolute top-4 right-4 z-10 w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-all"
-            >
-              <i className="fas fa-times text-xs"></i>
-            </button>
-
-            {/* Avatar hero */}
-            <div className="bg-gradient-to-b from-indigo-600/20 to-transparent pt-8 pb-6 px-6 flex flex-col items-center text-center gap-3">
-              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-black text-3xl shadow-xl shadow-indigo-900/40">
+            {/* Sticky header */}
+            <div className="flex items-center gap-4 px-6 py-5 border-b border-slate-800 sticky top-0 bg-slate-900 rounded-t-2xl z-10">
+              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-black text-lg shrink-0">
                 {detailReq.full_name?.[0]?.toUpperCase() || "?"}
               </div>
-              <div>
-                <h3 className="text-lg font-black text-white font-poppins">{detailReq.full_name}</h3>
-                <span className={`inline-block mt-1 text-[10px] font-bold px-3 py-1 rounded-full border uppercase tracking-widest ${STATUS_BADGE[detailReq.status] || STATUS_BADGE.pending}`}>
-                  {detailReq.status}
-                </span>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="text-base font-bold text-white truncate">{detailReq.full_name}</h3>
+                  <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border uppercase tracking-widest shrink-0 ${STATUS_BADGE[detailReq.status] || STATUS_BADGE.pending}`}>
+                    {detailReq.status}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-400 truncate">{detailReq.email}</p>
+              </div>
+              <button
+                onClick={() => setDetailReq(null)}
+                className="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-white transition shrink-0"
+              >
+                <i className="fas fa-times text-xs"></i>
+              </button>
+            </div>
+
+            {/* Two-column body */}
+            <div className="flex-1 overflow-y-auto custom-scrollbar">
+              <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-slate-800 min-h-0">
+
+                {/* Left — info details */}
+                <div className="px-6 py-5 space-y-0 divide-y divide-slate-800/60">
+                  <DetailRow icon="phone"              label="Phone"             value={detailReq.phone} />
+                  <DetailRow icon="chalkboard-teacher" label="Teacher Requested" value={detailReq.teacher?.username || `Teacher #${detailReq.teacher?.id}`} />
+                  <DetailRow icon="calendar-alt"       label="Submitted"         value={detailReq.created_at ? new Date(detailReq.created_at).toLocaleString() : null} />
+                  {detailReq.reviewed_at && (
+                    <>
+                      <DetailRow icon="user-check" label="Reviewed By" value={detailReq.reviewed_by_name} />
+                      <DetailRow icon="clock"      label="Reviewed At" value={new Date(detailReq.reviewed_at).toLocaleString()} />
+                    </>
+                  )}
+                </div>
+
+                {/* Right — message */}
+                <div className="px-6 py-5 flex flex-col gap-2">
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="w-7 h-7 rounded-lg bg-slate-800 flex items-center justify-center shrink-0">
+                      <i className="fas fa-comment-alt text-slate-400 text-xs"></i>
+                    </div>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Message</p>
+                  </div>
+                  <div className="flex-1 bg-slate-800/50 border border-slate-700/50 rounded-xl p-4 min-h-[140px]">
+                    {detailReq.message
+                      ? <p className="text-sm text-white leading-relaxed whitespace-pre-wrap break-words">{detailReq.message}</p>
+                      : <p className="text-slate-600 italic text-sm">No message provided</p>
+                    }
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Details list */}
-            <div className="px-5 pb-2 flex-1 overflow-y-auto custom-scrollbar space-y-0 divide-y divide-white/5">
-              <DetailRow icon="envelope"            label="Email"            value={detailReq.email} />
-              <DetailRow icon="phone"               label="Phone"            value={detailReq.phone} />
-              <DetailRow icon="chalkboard-teacher"  label="Teacher Requested" value={detailReq.teacher?.username || `Teacher #${detailReq.teacher?.id}`} />
-              <DetailRow icon="comment-alt"         label="Message"          value={detailReq.message} />
-              <DetailRow icon="calendar-alt"        label="Submitted"        value={detailReq.created_at ? new Date(detailReq.created_at).toLocaleString() : null} />
-              {detailReq.reviewed_at && (
-                <>
-                  <DetailRow icon="user-check" label="Reviewed By" value={detailReq.reviewed_by_name} />
-                  <DetailRow icon="clock"      label="Reviewed At" value={new Date(detailReq.reviewed_at).toLocaleString()} />
-                </>
-              )}
-            </div>
-
-            {/* Action buttons stacked vertically for pending */}
-            {detailReq.status === "pending" ? (
-              <div className="px-5 pb-6 pt-4 border-t border-white/5 flex flex-col gap-2.5">
-                <button
-                  onClick={() => { setDetailReq(null); setConfirm({ open: true, type: "approve", id: detailReq.id, label: detailReq.full_name }); }}
-                  className="w-full flex items-center justify-center gap-2 py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black uppercase tracking-widest rounded-2xl transition active:scale-95"
-                >
-                  <i className="fas fa-check"></i> Approve Request
-                </button>
-                <button
-                  onClick={() => { setDetailReq(null); setConfirm({ open: true, type: "reject", id: detailReq.id, label: detailReq.full_name }); }}
-                  className="w-full flex items-center justify-center gap-2 py-3 bg-rose-600/10 hover:bg-rose-600/20 border border-rose-500/30 text-rose-400 text-xs font-black uppercase tracking-widest rounded-2xl transition active:scale-95"
-                >
-                  <i className="fas fa-times"></i> Reject Request
-                </button>
-              </div>
-            ) : (
-              <div className="px-5 pb-5 pt-4 border-t border-white/5">
+            {/* Sticky footer */}
+            <div className="px-6 py-5 border-t border-slate-800 sticky bottom-0 bg-slate-900 rounded-b-2xl">
+              {detailReq.status === "pending" ? (
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => { setDetailReq(null); setConfirm({ open: true, type: "approve", id: detailReq.id, label: detailReq.full_name }); }}
+                    className="flex-1 flex items-center justify-center gap-2 py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold rounded-xl transition active:scale-95"
+                  >
+                    <i className="fas fa-check text-xs"></i> Approve
+                  </button>
+                  <button
+                    onClick={() => { setDetailReq(null); setConfirm({ open: true, type: "reject", id: detailReq.id, label: detailReq.full_name }); }}
+                    className="flex-1 flex items-center justify-center gap-2 py-3 bg-rose-600/10 hover:bg-rose-600/20 border border-rose-500/30 text-rose-400 text-sm font-semibold rounded-xl transition active:scale-95"
+                  >
+                    <i className="fas fa-times text-xs"></i> Reject
+                  </button>
+                </div>
+              ) : (
                 <button
                   onClick={() => setDetailReq(null)}
-                  className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-black uppercase tracking-widest rounded-2xl transition"
+                  className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-semibold rounded-xl transition"
                 >
                   Close
                 </button>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       )}

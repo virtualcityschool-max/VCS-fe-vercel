@@ -117,103 +117,59 @@ const AdminSessionsPage = () => {
   }, [activeModal, clearAllCreateSessionErrors]);
 
 
-  // Reset edit session form when edit modal opens/closes
+  // Clear edit form when modal closes
   useEffect(() => {
-    if (
-      activeModal &&
-      typeof activeModal === "object" &&
-      activeModal.type === "edit-session"
-    ) {
-      if (editingSession) {
-        // Convert datetime format for HTML datetime-local inputs
-        const formatDateTimeForInput = (dateTimeString) => {
-          if (!dateTimeString) return "";
-          try {
-            const date = new Date(dateTimeString);
-            // Format as YYYY-MM-DDTHH:MM for datetime-local input
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, "0");
-            const day = String(date.getDate()).padStart(2, "0");
-            const hours = String(date.getHours()).padStart(2, "0");
-            const minutes = String(date.getMinutes()).padStart(2, "0");
-            return `${year}-${month}-${day}T${hours}:${minutes}`;
-          } catch {
-            return "";
-          }
-        };
-
-        setEditSessionForm({
-          course_id: editingSession.course_id || "",
-          course_title: editingSession.course?.title || editingSession.course_title || "",
-          teacher_name: editingSession.teacher_name || "",
-          title: editingSession.title || "",
-          start_time: formatDateTimeForInput(editingSession.start_time || editingSession.scheduled_at),
-          meeting_link: editingSession.meeting_link || "",
-          recurrence_days: editingSession.recurrence_days || [],
-          recurrence_end_date: editingSession.recurrence_end_date || "",
-        });
-      }
-    } else {
-      // Clear form and errors when modal is closed
+    if (activeModal === null) {
       setEditSessionForm({});
       clearAllEditSessionErrors();
     }
-  }, [activeModal, editingSession, clearAllEditSessionErrors]);
+  }, [activeModal, clearAllEditSessionErrors]);
 
   // Fetch detailed session data for editing
-  const fetchSessionDetailsForEdit = async (sessionId) => {
-    try {
-      const session = sessions?.data?.find((s) => s.id === sessionId);
+  const fetchSessionDetailsForEdit = (sessionId) => {
+    const session = sessions?.data?.find((s) => s.id === sessionId);
 
-      if (session?.is_child === true) {
-        toastManager.error("Child sessions cannot be edited. Edit the parent session instead.");
-        return;
-      }
-      if ((session?.enrollment_count ?? 0) > 3) {
-        toastManager.error("Cannot edit: this session has more than 3 enrollments.");
-        return;
-      }
-      if (session) {
-        setEditingSession(session);
-        // Set the edit form immediately to avoid race condition
-        // Convert datetime format for HTML datetime-local inputs
-        const formatDateTimeForInput = (dateTimeString) => {
-          if (!dateTimeString) return "";
-          try {
-            const date = new Date(dateTimeString);
-            // Format as YYYY-MM-DDTHH:MM for datetime-local input
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, "0");
-            const day = String(date.getDate()).padStart(2, "0");
-            const hours = String(date.getHours()).padStart(2, "0");
-            const minutes = String(date.getMinutes()).padStart(2, "0");
-            return `${year}-${month}-${day}T${hours}:${minutes}`;
-          } catch {
-            return "";
-          }
-        };
-
-        setEditSessionForm({
-          course_id: session.course_id || "",
-          course_title: session.course?.title || session.course_title || "",
-          teacher_name: session.teacher_name || "",
-          title: session.title || "",
-          start_time: formatDateTimeForInput(session.start_time || session.scheduled_at),
-          meeting_link: session.meeting_link || "",
-          recurrence_days: session.recurrence_days || [],
-          recurrence_end_date: session.recurrence_end_date || "",
-        });
-        setActiveModal({
-          type: "edit-session",
-          sessionId: sessionId,
-        });
-      } else {
-        toastManager.error("Session not found");
-      }
-    } catch (error) {
-      console.error("Error fetching session details:", error);
-      toastManager.error("Failed to load session details");
+    if (!session) {
+      toastManager.error("Session not found");
+      return;
     }
+
+    if (session.is_child === true) {
+      toastManager.error("Child sessions cannot be edited. Edit the parent session instead.");
+      return;
+    }
+
+    if ((session.enrollment_count ?? 0) >= 1) {
+      toastManager.error("Cannot edit: this session has active enrollments.");
+      return;
+    }
+
+    // Parse scheduled datetime into separate date + time for the form
+    const rawDateTime = session.start_time || session.scheduled_at;
+    let startDate = "";
+    let startTime = "";
+    if (rawDateTime) {
+      try {
+        const d = new Date(rawDateTime);
+        startDate = d.toISOString().slice(0, 10);
+        startTime = `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+      } catch {}
+    }
+
+    setEditingSession(session);
+    setEditSessionForm({
+      course_id: session.course_id || "",
+      course_title: session.course?.title || session.course_title || "",
+      teacher_name: session.teacher_name || "",
+      instructor_id: session.instructor_id || "",
+      title: session.title || "",
+      description: session.description || "",
+      start_date: startDate,
+      time: startTime,
+      recurrence_days: session.recurrence_days || [],
+      recurrence_end_date: session.recurrence_end_date || "",
+    });
+    setActiveModal({ type: "edit-session", sessionId });
   };
 
   // Validation functions
@@ -258,38 +214,27 @@ const AdminSessionsPage = () => {
   const validateEditSessionForm = (formData) => {
     const errors = {};
 
-    if (!formData.course_id) {
-      errors.course_id = "Course is required";
-    }
+    if (!formData.title?.trim()) errors.title = "Session title is required";
+    else if (formData.title.trim().length < 5) errors.title = "Title must be at least 5 characters";
 
-    if (!formData.title?.trim()) {
-      errors.title = "Session title is required";
-    } else if (formData.title.trim().length < 3) {
-      errors.title = "Title must be at least 3 characters";
-    }
-
-    if (!formData.start_time) {
-      errors.start_time = "Start time is required";
+    if (!formData.start_date) {
+      errors.start_date = "Start date is required";
     } else {
-      const scheduled = new Date(formData.start_time);
+      const d = new Date(formData.start_date);
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      if (scheduled < today) {
-        errors.start_time = "Start time must be today or in the future";
-      }
+      d.setHours(0, 0, 0, 0);
+      if (d < today) errors.start_date = "Start date must be today or in the future";
     }
 
-    if (!formData.recurrence_days?.length) {
-      errors.recurrence_days = "Select at least one recurring day";
-    }
+    if (!formData.time) errors.time = "Class time is required";
+
+    if (!formData.recurrence_days?.length) errors.recurrence_days = "Select at least one recurring day";
 
     if (!formData.recurrence_end_date) {
       errors.recurrence_end_date = "Recurrence end date is required";
-    } else {
-      const startDate = formData.start_time ? formData.start_time.slice(0, 10) : "";
-      if (startDate && formData.recurrence_end_date <= startDate) {
-        errors.recurrence_end_date = "End date must be after start date";
-      }
+    } else if (formData.start_date && formData.recurrence_end_date <= formData.start_date) {
+      errors.recurrence_end_date = "End date must be after start date";
     }
 
     return errors;
@@ -356,27 +301,35 @@ const AdminSessionsPage = () => {
       return;
     }
 
-    // Clear previous errors first
     clearAllEditSessionErrors();
 
-    // Run frontend validation
     const frontendErrors = validateEditSessionForm(sessionData);
     setEditSessionErrors(frontendErrors);
-
     if (Object.keys(frontendErrors).length > 0) {
       toastManager.error("Please fix highlighted fields");
       return;
     }
 
     setUpdatingSessionId(editingSession.id);
-    const { meeting_link: _drop, ...payload } = sessionData;
+
+    const payload = {
+      title: sessionData.title,
+      description: sessionData.description || "",
+      is_recurring: true,
+      recurrence_days: sessionData.recurrence_days || [],
+      recurrence_end_date: sessionData.recurrence_end_date,
+    };
+    if (sessionData.start_date && sessionData.time) {
+      payload.scheduled_at = `${sessionData.start_date}T${sessionData.time}:00Z`;
+    }
+    if (sessionData.instructor_id) {
+      payload.instructor_id = Number(sessionData.instructor_id);
+    }
+
     try {
-      await dispatch(
-        updateSession({ sessionId: editingSession.id, sessionData: payload }),
-      ).unwrap();
+      await dispatch(updateSession({ sessionId: editingSession.id, sessionData: payload })).unwrap();
       toastManager.success("Session updated successfully");
       setActiveModal(null);
-      dispatch(fetchSessions());
     } catch (error) {
       showApiError(error);
     } finally {
@@ -405,7 +358,6 @@ const AdminSessionsPage = () => {
     try {
       await dispatch(deleteSession(sessionId)).unwrap();
       toastManager.success("Session deleted successfully");
-      dispatch(fetchSessions());
     } catch (error) {
       showApiError(error);
       // const normalizedError = normalizeApiError(error);
