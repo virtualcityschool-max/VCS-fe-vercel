@@ -157,13 +157,13 @@ const TeacherPortal = () => {
     );
   }
 
-  if (errorDashboard && !dashboard) {
-    return (
-      <div className="min-h-[60vh] flex items-center justify-center text-red-400">
-        {errorDashboard}
-      </div>
-    );
-  }
+  // if (errorDashboard && !dashboard) {
+  //   return (
+  //     <div className="min-h-[60vh] flex items-center justify-center text-red-400">
+  //       {errorDashboard}
+  //     </div>
+  //   );
+  // }
 
   return (
     <div id="teacher-view" className="text-white space-y-6">
