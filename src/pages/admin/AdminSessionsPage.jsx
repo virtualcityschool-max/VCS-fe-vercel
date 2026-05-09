@@ -158,7 +158,7 @@ const AdminSessionsPage = () => {
 
     setEditingSession(session);
     setEditSessionForm({
-      course_id: session.course_id || "",
+      course_id: session.course?.id || session.course_id || "",
       course_title: session.course?.title || session.course_title || "",
       teacher_name: session.teacher_name || "",
       instructor_id: session.instructor_id || "",
@@ -319,6 +319,9 @@ const AdminSessionsPage = () => {
       recurrence_days: sessionData.recurrence_days || [],
       recurrence_end_date: sessionData.recurrence_end_date,
     };
+    if (sessionData.course_id) {
+      payload.course = Number(sessionData.course_id);
+    }
     if (sessionData.start_date && sessionData.time) {
       payload.scheduled_at = `${sessionData.start_date}T${sessionData.time}:00Z`;
     }
