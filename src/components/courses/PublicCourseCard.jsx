@@ -19,7 +19,6 @@ const PublicCourseCard = ({
     let cls = "w-full py-3.5 font-black text-[10px] uppercase tracking-[0.2em] rounded-2xl transition-all active:scale-95 shadow-xl ";
     let label = "";
     let disabled = false;
-    let title = "";
 
     if (enrolled) {
       label = isUnenrolling ? "Unenrolling..." : "Unenroll";
@@ -34,7 +33,6 @@ const PublicCourseCard = ({
     } else if (noSessions) {
       label = "Enroll Now";
       disabled = true;
-      title = "No sessions available for this course";
       cls += "bg-gradient-to-r from-blue-600/40 to-indigo-600/40 text-white/40 cursor-not-allowed";
     } else if (isEnrolling) {
       label = "Enrolling...";
@@ -45,7 +43,7 @@ const PublicCourseCard = ({
       cls += "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-500 hover:to-indigo-500 shadow-blue-900/40";
     }
 
-    return (
+    const btn = (
       <button
         onClick={(e) => {
           e.stopPropagation();
@@ -53,12 +51,25 @@ const PublicCourseCard = ({
           else if (!isPending && !noSessions && !isEnrolling) onEnroll(course);
         }}
         disabled={disabled}
-        title={title}
         className={cls}
       >
         {label}
       </button>
     );
+
+    if (noSessions) {
+      return (
+        <div className="relative group/tooltip">
+          {btn}
+          <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 px-3 py-1.5 bg-slate-800 border border-slate-700 text-white text-[11px] font-medium rounded-lg whitespace-nowrap opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-150 shadow-xl z-10">
+            No sessions available for this course
+            <div className="absolute top-full left-1/2 -translate-x-1/2 border-[5px] border-transparent border-t-slate-700"></div>
+          </div>
+        </div>
+      );
+    }
+
+    return btn;
   };
 
   return (

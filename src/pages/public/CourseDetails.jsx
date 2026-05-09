@@ -93,6 +93,7 @@ const CourseDetails = () => {
       updated_at: course.updated_at,
       outline: course.outline || null,
       attachment: course.attachment || null,
+      has_session: course.has_session ?? true,
     };
   }, [course, courseId]);
 
@@ -380,6 +381,7 @@ const CourseDetails = () => {
   const enrolled = isCourseEnrolled(normalizedCourse);
   const isEnrolling = enrollingCourseIds.includes(normalizedCourse.id);
   const isUnenrolling = unenrollingCourseIds.includes(normalizedCourse.id);
+  const noSessions = !normalizedCourse.has_session;
 
   return (
     <section className="min-h-screen bg-[#0f172a] text-white font-inter relative overflow-hidden animate-fadeIn">
@@ -592,31 +594,41 @@ const CourseDetails = () => {
 
                 {/* CTA Button */}
                 {auth.isLoggedIn && auth.role === "student" ? (
-                  <button
-                    onClick={() =>
-                      enrolled
-                        ? handleUnenrollCourse(normalizedCourse)
-                        : handleEnrollCourse()
-                    }
-                    disabled={isEnrolling || isUnenrolling}
-                    className={`w-full mb-6 py-4 font-black text-xs uppercase tracking-[0.2em] rounded-2xl transition-all active:scale-95 ${
-                      enrolled
+                  <div className={`relative mb-6 ${noSessions && !enrolled ? "group/tooltip" : ""}`}>
+                    <button
+                      onClick={() =>
+                        enrolled
+                          ? handleUnenrollCourse(normalizedCourse)
+                          : handleEnrollCourse()
+                      }
+                      disabled={isEnrolling || isUnenrolling || (noSessions && !enrolled)}
+                      className={`w-full py-4 font-black text-xs uppercase tracking-[0.2em] rounded-2xl transition-all active:scale-95 ${
+                        enrolled
+                          ? isUnenrolling
+                            ? "bg-red-600/50 text-red-400 cursor-not-allowed"
+                            : "bg-red-600/20 border border-red-600/30 text-red-400 hover:bg-red-600 hover:text-white"
+                          : noSessions
+                            ? "bg-linear-to-r from-blue-600/40 to-cyan-600/40 text-white/40 cursor-not-allowed"
+                            : isEnrolling
+                              ? "bg-slate-600 text-slate-400 cursor-not-allowed"
+                              : "bg-linear-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 border-0 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-300 hover:scale-[1.02] text-white"
+                      }`}
+                    >
+                      {enrolled
                         ? isUnenrolling
-                          ? "bg-red-600/50 text-red-400 cursor-not-allowed"
-                          : "bg-red-600/20 border border-red-600/30 text-red-400 hover:bg-red-600 hover:text-white"
+                          ? "Unenrolling..."
+                          : "Unenroll"
                         : isEnrolling
-                          ? "bg-slate-600 text-slate-400 cursor-not-allowed"
-                          : "bg-linear-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 border-0 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-300 hover:scale-[1.02] text-white"
-                    }`}
-                  >
-                    {enrolled
-                      ? isUnenrolling
-                        ? "Unenrolling..."
-                        : "Unenroll"
-                      : isEnrolling
-                        ? "Enrolling..."
-                        : "Enroll Now"}
-                  </button>
+                          ? "Enrolling..."
+                          : "Enroll Now"}
+                    </button>
+                    {noSessions && !enrolled && (
+                      <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 px-3 py-1.5 bg-slate-800 border border-slate-700 text-white text-[11px] font-medium rounded-lg whitespace-nowrap opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-150 shadow-xl z-10">
+                        No sessions available for this course
+                        <div className="absolute top-full left-1/2 -translate-x-1/2 border-[5px] border-transparent border-t-slate-700"></div>
+                      </div>
+                    )}
+                  </div>
                 ) : auth.isLoggedIn ? (
                   <div className="text-center py-4 mb-6">
                     <p className="text-slate-400 text-sm mb-4">
@@ -632,16 +644,27 @@ const CourseDetails = () => {
                     </Button>
                   </div>
                 ) : (
-                  <div className="mb-6">
+                  <div className={`mb-6 relative ${noSessions ? "group/tooltip" : ""}`}>
                     <Button
                       variant="primary"
                       size="lg"
-                      className="w-full bg-linear-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 border-0 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-300 hover:scale-[1.02] group"
-                      onClick={() => dispatch(setAuthModal("login"))}
+                      disabled={noSessions}
+                      className={`w-full border-0 shadow-lg transition-all duration-300 group ${
+                        noSessions
+                          ? "bg-linear-to-r from-blue-600/40 to-cyan-600/40 text-white/40 cursor-not-allowed shadow-none"
+                          : "bg-linear-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 shadow-blue-500/25 hover:shadow-blue-500/40 hover:scale-[1.02]"
+                      }`}
+                      onClick={() => !noSessions && dispatch(setAuthModal("login"))}
                     >
-                      <i className="fas fa-sign-in-alt mr-2 group-hover:translate-x-1 transition-transform"></i>
+                      <i className={`fas fa-sign-in-alt mr-2 ${!noSessions ? "group-hover:translate-x-1 transition-transform" : ""}`}></i>
                       Login to Enroll
                     </Button>
+                    {noSessions && (
+                      <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 px-3 py-1.5 bg-slate-800 border border-slate-700 text-white text-[11px] font-medium rounded-lg whitespace-nowrap opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-150 shadow-xl z-10">
+                        No sessions available for this course
+                        <div className="absolute top-full left-1/2 -translate-x-1/2 border-[5px] border-transparent border-t-slate-700"></div>
+                      </div>
+                    )}
                   </div>
                 )}
 
