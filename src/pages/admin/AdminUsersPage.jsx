@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchUsers,
@@ -31,17 +31,17 @@ import { toastManager } from "../../utils/toastManager";
 import UsersTab from "../../components/admin/UsersTab";
 import { showApiError } from "../../utils/apiErrorHandler";
 
+const DEFAULT_FILTERS = { search: "", role: "", is_active: "", ordering: "-date_joined" };
+
 const AdminUsersPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  // Users filter state
-  const [usersFilters, setUsersFilters] = useState({
-    search: "",
-    role: "",
-    is_active: "",
-    ordering: "-date_joined",
-  });
+  // Restore filters if navigating back from edit, otherwise use defaults
+  const [usersFilters, setUsersFilters] = useState(
+    () => location.state?.filters ?? DEFAULT_FILTERS,
+  );
 
   // Create user form state
   const [createUserForm, setCreateUserForm] = useState({
@@ -72,6 +72,9 @@ const AdminUsersPage = () => {
   // Get users data from Redux store
   const users = useSelector(selectUsers);
   const availableStudents = useSelector(selectAvailableStudents);
+
+  // Stores the last filter values the effect actually fetched with, to detect real changes
+  const prevFilterRef = useRef(null);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -116,15 +119,18 @@ const AdminUsersPage = () => {
   //   handleFetchUsers();
   // }, [handleFetchUsers]);
 
-  // Fetch on initial mount + non-search filter changes
+  // Re-fetch only when role / status / ordering actually change (not on mount)
   useEffect(() => {
-    handleFetchUsers();
-  }, [
-    handleFetchUsers,
-    usersFilters.role,
-    usersFilters.is_active,
-    usersFilters.ordering,
-  ]);
+    const current = { role: usersFilters.role, is_active: usersFilters.is_active, ordering: usersFilters.ordering };
+    const prev = prevFilterRef.current;
+    prevFilterRef.current = current;
+
+    if (prev === null) return; // first render — AdminLayout owns the initial fetch
+
+    if (prev.role !== current.role || prev.is_active !== current.is_active || prev.ordering !== current.ordering) {
+      handleFetchUsers();
+    }
+  }, [usersFilters.role, usersFilters.is_active, usersFilters.ordering, handleFetchUsers]);
 
   // Fetch available students when create user modal opens
   useEffect(() => {
@@ -148,15 +154,14 @@ const AdminUsersPage = () => {
     try {
       await dispatch(purgeUser(userId)).unwrap();
       toastManager.success("User permanently deleted");
-      handleFetchUsers();
     } catch (error) {
       showApiError(error);
     }
   };
 
-  // Handle user editing - navigate to user details page
+  // Handle user editing - carry current filters so they can be restored on back
   const handleEditUser = (userId) => {
-    navigate(`/admin/users/${userId}`);
+    navigate(`/admin/users/${userId}`, { state: { filters: usersFilters } });
   };
 
   // Shared reset function for create user modal
@@ -255,7 +260,6 @@ const AdminUsersPage = () => {
       toastManager.success("User created successfully");
       resetCreateUserModal();
       setActiveModal(null);
-      handleFetchUsers();
     } catch (error) {
       showApiError(error);
     } finally {

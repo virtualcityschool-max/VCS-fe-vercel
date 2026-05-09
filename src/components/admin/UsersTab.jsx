@@ -143,6 +143,7 @@ const UsersTab = ({
   onUserDelete,
   onUserPurge,
   onFetchUsers,
+  onUserEdit,
   onCreateUser,
 }) => {
   const navigate = useNavigate();
@@ -222,7 +223,8 @@ const UsersTab = ({
   };
 
   const handleEditUser = (userId) => {
-    navigate(`/admin/users/${userId}`);
+    if (onUserEdit) onUserEdit(userId);
+    else navigate(`/admin/users/${userId}`);
   };
 
   const handleCreateUser = () => {

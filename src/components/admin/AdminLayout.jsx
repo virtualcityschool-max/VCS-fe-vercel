@@ -53,7 +53,7 @@ const AdminLayout = () => {
   }, [dispatch, activeTab]);
 
   React.useEffect(() => {
-    if (activeTab === "users") dispatch(fetchUsers());
+    if (activeTab === "users" && !location.state?.skipFetch) dispatch(fetchUsers());
   }, [dispatch, activeTab]);
 
   React.useEffect(() => {

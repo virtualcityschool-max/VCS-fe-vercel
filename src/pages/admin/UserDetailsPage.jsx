@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import ConfirmDialog from "../../components/common/ConfirmDialog";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { updateUser, purgeUser } from "../../store/slices/adminSlice";
 import { adminService } from "../../services/adminService";
 import { toastManager } from "../../utils/toastManager";
 import { showApiError } from "../../utils/apiErrorHandler";
@@ -37,6 +39,8 @@ const getDisplayName = (user) => {
 const UserDetailsPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const dispatch = useDispatch();
 
   const [activeTab, setActiveTab] = useState("account");
   const [userData, setUserData] = useState(null);
@@ -113,7 +117,7 @@ const UserDetailsPage = () => {
   }, [id]);
 
   const handleBackToUsers = () => {
-    navigate("/admin/users");
+    navigate("/admin/users", { state: { skipFetch: true, filters: location.state?.filters } });
   };
 
   const handleDeleteUser = () => {
@@ -124,9 +128,9 @@ const UserDetailsPage = () => {
   const confirmDeleteUser = async () => {
     setConfirmDelete(false);
     try {
-      await adminService.deleteUser(userData.id);
+      await dispatch(purgeUser(userData.id)).unwrap();
       toastManager.success("User deleted successfully");
-      navigate("/admin/users");
+      navigate("/admin/users", { state: { skipFetch: true, filters: location.state?.filters } });
     } catch (error) {
       showApiError(error);
     }
@@ -134,7 +138,7 @@ const UserDetailsPage = () => {
 
   const handleUserUpdate = async (updatedData) => {
     try {
-      const updatedUser = await adminService.updateUser(id, updatedData);
+      const updatedUser = await dispatch(updateUser({ userId: id, userData: updatedData })).unwrap();
       setUserData(updatedUser);
       toastManager.success("Account updated successfully");
       return updatedUser;
