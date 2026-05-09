@@ -481,20 +481,22 @@ const SessionsTab = ({
       {/* ── CREATE CLASS MODAL ── */}
       {activeModal === "create-session" && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-6">
+          <div className="bg-slate-900 border border-slate-800 rounded-[1.5rem] p-4 sm:p-8 w-full max-w-2xl lg:max-w-4xl max-h-[92vh] overflow-y-auto shadow-2xl transition-all duration-300">
+
+            {/* Header */}
+            <div className="flex justify-between items-start mb-8 pb-6 border-b border-white/5">
               <div>
-                <h3 className="text-xl font-bold text-white">Create New Class</h3>
-                <p className="text-xs text-slate-400 mt-0.5">Schedule a class for a course</p>
+                <h3 className="text-xl font-black text-white tracking-tight">Create New Class</h3>
+                <p className="text-slate-500 text-[12px] font-medium mt-1">Schedule a recurring class for a published course</p>
               </div>
-              <button onClick={() => setActiveModal(null)} className="text-slate-400 hover:text-white transition">
-                <i className="fas fa-times text-xl"></i>
+              <button onClick={() => setActiveModal(null)} className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-white hover:bg-white/5 transition-all">
+                <i className="fas fa-times text-lg"></i>
               </button>
             </div>
 
             <form onSubmit={handleCreateSession} className="space-y-5">
               {/* Row 1: Course | Instructor */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">
                     Course <span className="text-red-400">*</span>
@@ -522,9 +524,7 @@ const SessionsTab = ({
                   {createSessionErrors?.course && <p className="text-red-400 text-xs mt-1">{createSessionErrors.course}</p>}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Instructor
-                  </label>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">Instructor</label>
                   <input
                     type="text"
                     value={createSessionForm.instructor_username || ""}
@@ -535,7 +535,7 @@ const SessionsTab = ({
                 </div>
               </div>
 
-              {/* Row 2: Class Title (full width) */}
+              {/* Row 2: Class Title */}
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-2">
                   Class Title <span className="text-red-400">*</span>
@@ -550,8 +550,8 @@ const SessionsTab = ({
                 />
               </div>
 
-              {/* Row 3: Start Date | Recurrence End Date */}
-              <div className="grid grid-cols-2 gap-4">
+              {/* Row 3: Start Date | End Date */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">
                     Start Date <span className="text-red-400">*</span>
@@ -583,8 +583,8 @@ const SessionsTab = ({
                 </div>
               </div>
 
-              {/* Row 4: Recurring Days | Time */}
-              <div className="grid grid-cols-2 gap-4">
+              {/* Row 4: Recurring Days | Class Time */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">
                     Recurring Days <span className="text-red-400">*</span>
@@ -625,9 +625,10 @@ const SessionsTab = ({
                 </div>
               </div>
 
-              <div className="flex gap-3 pt-2">
-                <button type="button" onClick={() => setActiveModal(null)} className="flex-1 bg-slate-700 hover:bg-slate-600 text-white px-6 py-3 rounded-xl text-sm font-medium transition">Cancel</button>
-                <button type="submit" className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-xl text-sm font-medium transition">Create Class</button>
+              {/* Footer */}
+              <div className="flex justify-end gap-4 pt-8 mt-4 border-t border-white/5">
+                <button type="button" onClick={() => setActiveModal(null)} className="px-6 py-2.5 rounded-xl text-sm font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition">Cancel</button>
+                <button type="submit" className="px-6 py-2.5 rounded-xl text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition">Create Class</button>
               </div>
             </form>
           </div>
@@ -637,22 +638,23 @@ const SessionsTab = ({
       {/* ── EDIT SESSION MODAL ── */}
       {activeModal && typeof activeModal === "object" && activeModal.type === "edit-session" && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+          <div className="bg-slate-900 border border-slate-800 rounded-[1.5rem] p-4 sm:p-8 w-full max-w-2xl lg:max-w-4xl max-h-[92vh] overflow-y-auto shadow-2xl transition-all duration-300">
+
             {/* Header */}
-            <div className="flex justify-between items-center px-6 py-5 border-b border-slate-800 sticky top-0 bg-slate-900 z-10">
+            <div className="flex justify-between items-start mb-8 pb-6 border-b border-white/5">
               <div>
-                <h3 className="text-xl font-bold text-white">Edit Class</h3>
-                <p className="text-xs text-slate-400 mt-0.5">Update class details</p>
+                <h3 className="text-xl font-black text-white tracking-tight">Edit Class</h3>
+                <p className="text-slate-500 text-[12px] font-medium mt-1">Update class schedule and details</p>
               </div>
-              <button onClick={() => setActiveModal(null)} className="text-slate-400 hover:text-white transition">
-                <i className="fas fa-times text-xl"></i>
+              <button onClick={() => setActiveModal(null)} className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-white hover:bg-white/5 transition-all">
+                <i className="fas fa-times text-lg"></i>
               </button>
             </div>
 
-            <form onSubmit={handleUpdateSession} className="p-6 space-y-5">
+            <form onSubmit={handleUpdateSession} className="space-y-5">
 
               {/* Course | Instructor — read-only */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">Course</label>
                   <input type="text" value={editSessionForm.course_title || ""} disabled
@@ -693,7 +695,7 @@ const SessionsTab = ({
               </div>
 
               {/* Start Date | End Date */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">
                     Start Date <span className="text-red-400">*</span>
@@ -723,7 +725,7 @@ const SessionsTab = ({
               </div>
 
               {/* Recurring Days | Class Time */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">
                     Recurring Days <span className="text-red-400">*</span>
@@ -764,14 +766,15 @@ const SessionsTab = ({
                 </div>
               </div>
 
-              <div className="flex gap-3 pt-2">
+              {/* Footer */}
+              <div className="flex justify-end gap-4 pt-8 mt-4 border-t border-white/5">
                 <button type="button" onClick={() => setActiveModal(null)}
-                  className="flex-1 bg-slate-700 hover:bg-slate-600 text-white px-6 py-3 rounded-xl text-sm font-medium transition">
+                  className="px-6 py-2.5 rounded-xl text-sm font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition">
                   Cancel
                 </button>
                 <button type="submit" disabled={!!updatingSessionId}
-                  className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-xl text-sm font-medium transition disabled:opacity-50">
-                  {updatingSessionId ? <><i className="fas fa-spinner fa-spin mr-2"></i>Updating…</> : "Update Class"}
+                  className="px-6 py-2.5 rounded-xl text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition disabled:opacity-50 flex items-center gap-2">
+                  {updatingSessionId ? <><i className="fas fa-spinner fa-spin text-xs"></i>Updating…</> : "Update Class"}
                 </button>
               </div>
             </form>

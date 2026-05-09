@@ -284,25 +284,27 @@ const AdminUsersPage = () => {
       {/* Create User Modal */}
       {activeModal === "create-user" && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-900 rounded-2xl p-6 w-full max-w-md border border-slate-800 shadow-2xl flex flex-col max-h-[80vh]">
-            <div className="flex items-center justify-between mb-5 shrink-0">
+          <div className="bg-slate-900 border border-slate-800 rounded-[1.5rem] p-4 sm:p-8 w-full max-w-2xl lg:max-w-4xl max-h-[92vh] overflow-y-auto shadow-2xl transition-all duration-300">
+
+            {/* Header */}
+            <div className="flex justify-between items-start mb-8 pb-6 border-b border-white/5">
               <div>
-                <h3 className="text-xl font-bold text-white">Create User</h3>
-                <p className="text-xs text-slate-400 mt-0.5">Add a new user to the platform</p>
+                <h3 className="text-xl font-black text-white tracking-tight">Create User</h3>
+                <p className="text-slate-500 text-[12px] font-medium mt-1">Add a new user to the platform</p>
               </div>
               <button
                 onClick={handleCloseCreateUserModal}
-                className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition"
+                className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-white hover:bg-white/5 transition-all"
               >
-                <i className="fas fa-times text-sm" />
+                <i className="fas fa-times text-lg" />
               </button>
             </div>
 
-            <div className="space-y-4 overflow-y-auto flex-1 px-1">
-              {/* Username + Email */}
-              <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-5">
+              {/* Username | Email */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1">
+                  <label className="block text-sm font-medium text-slate-300 mb-1.5">
                     Username <span className="text-red-500">*</span>
                   </label>
                   <Input
@@ -315,7 +317,7 @@ const AdminUsersPage = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1">
+                  <label className="block text-sm font-medium text-slate-300 mb-1.5">
                     Email <span className="text-red-500">*</span>
                   </label>
                   <Input
@@ -330,10 +332,10 @@ const AdminUsersPage = () => {
                 </div>
               </div>
 
-              {/* First Name + Last Name */}
-              <div className="grid grid-cols-2 gap-3">
+              {/* First Name | Last Name */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1">First Name</label>
+                  <label className="block text-sm font-medium text-slate-300 mb-1.5">First Name</label>
                   <Input
                     value={createUserForm.first_name}
                     onChange={(e) => { setCreateUserForm({ ...createUserForm, first_name: e.target.value }); if (createUserErrors.first_name) setCreateUserErrors((prev) => ({ ...prev, first_name: undefined })); }}
@@ -344,7 +346,7 @@ const AdminUsersPage = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1">Last Name</label>
+                  <label className="block text-sm font-medium text-slate-300 mb-1.5">Last Name</label>
                   <Input
                     value={createUserForm.last_name}
                     onChange={(e) => { setCreateUserForm({ ...createUserForm, last_name: e.target.value }); if (createUserErrors.last_name) setCreateUserErrors((prev) => ({ ...prev, last_name: undefined })); }}
@@ -356,8 +358,9 @@ const AdminUsersPage = () => {
                 </div>
               </div>
 
+              {/* Role */}
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">
+                <label className="block text-sm font-medium text-slate-300 mb-1.5">
                   Role <span className="text-red-500">*</span>
                 </label>
                 <FilterSelect
@@ -372,43 +375,45 @@ const AdminUsersPage = () => {
                 </FilterSelect>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">
-                  Password <span className="text-red-500">*</span>
-                </label>
-                <PasswordInput
-                  value={createUserForm.password}
-                  onChange={(e) => {
-                    setCreateUserForm({ ...createUserForm, password: e.target.value });
-                    if (createUserErrors.password) setCreateUserErrors((prev) => ({ ...prev, password: undefined }));
-                  }}
-                  placeholder="Password"
-                  autoComplete="new-password"
-                  error={createUserErrors.password}
-                  showPassword={showPassword}
-                  onTogglePassword={() => setShowPassword(!showPassword)}
-                />
-                {createUserForm.password && (
-                  <PasswordValidation password={createUserForm.password} />
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">
-                  Confirm Password <span className="text-red-500">*</span>
-                </label>
-                <PasswordInput
-                  value={createUserForm.confirm_password}
-                  onChange={(e) => {
-                    setCreateUserForm({ ...createUserForm, confirm_password: e.target.value });
-                    if (createUserErrors.confirm_password) setCreateUserErrors((prev) => ({ ...prev, confirm_password: undefined }));
-                  }}
-                  placeholder="Confirm Password"
-                  autoComplete="new-password"
-                  error={createUserErrors.confirm_password}
-                  showPassword={showConfirmPassword}
-                  onTogglePassword={() => setShowConfirmPassword(!showConfirmPassword)}
-                />
+              {/* Password | Confirm Password */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-1.5">
+                    Password <span className="text-red-500">*</span>
+                  </label>
+                  <PasswordInput
+                    value={createUserForm.password}
+                    onChange={(e) => {
+                      setCreateUserForm({ ...createUserForm, password: e.target.value });
+                      if (createUserErrors.password) setCreateUserErrors((prev) => ({ ...prev, password: undefined }));
+                    }}
+                    placeholder="Password"
+                    autoComplete="new-password"
+                    error={createUserErrors.password}
+                    showPassword={showPassword}
+                    onTogglePassword={() => setShowPassword(!showPassword)}
+                  />
+                  {createUserForm.password && (
+                    <PasswordValidation password={createUserForm.password} />
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-1.5">
+                    Confirm Password <span className="text-red-500">*</span>
+                  </label>
+                  <PasswordInput
+                    value={createUserForm.confirm_password}
+                    onChange={(e) => {
+                      setCreateUserForm({ ...createUserForm, confirm_password: e.target.value });
+                      if (createUserErrors.confirm_password) setCreateUserErrors((prev) => ({ ...prev, confirm_password: undefined }));
+                    }}
+                    placeholder="Confirm Password"
+                    autoComplete="new-password"
+                    error={createUserErrors.confirm_password}
+                    showPassword={showConfirmPassword}
+                    onTogglePassword={() => setShowConfirmPassword(!showConfirmPassword)}
+                  />
+                </div>
               </div>
 
               {createUserForm.role === "parent" && (
@@ -417,17 +422,8 @@ const AdminUsersPage = () => {
                     options={availableStudents.data || []}
                     value={createUserForm.selected_students}
                     onChange={(selectedStudents) => {
-                      setCreateUserForm({
-                        ...createUserForm,
-                        selected_students: selectedStudents,
-                      });
-                      // Clear field error when user starts typing
-                      if (createUserErrors.selected_students) {
-                        setCreateUserErrors((prev) => ({
-                          ...prev,
-                          selected_students: undefined,
-                        }));
-                      }
+                      setCreateUserForm({ ...createUserForm, selected_students: selectedStudents });
+                      if (createUserErrors.selected_students) setCreateUserErrors((prev) => ({ ...prev, selected_students: undefined }));
                     }}
                     label="Select Students"
                     placeholder="Choose students to link..."
@@ -438,30 +434,20 @@ const AdminUsersPage = () => {
               )}
             </div>
 
-            <div className="flex gap-3 mt-6 shrink-0">
-              <Button
-                variant="secondary"
-                onClick={handleCloseCreateUserModal}
-                className="flex-1"
-              >
+            {/* Footer */}
+            <div className="flex justify-end gap-4 pt-8 mt-8 border-t border-white/5">
+              <Button variant="secondary" onClick={handleCloseCreateUserModal}>
                 Cancel
               </Button>
               <Button
                 variant="primary"
                 onClick={() => handleCreateUserSubmit(createUserForm)}
                 disabled={isCreatingUser}
-                className="flex-1"
               >
                 {isCreatingUser ? (
-                  <>
-                    <i className="fas fa-spinner fa-spin mr-2"></i>
-                    Creating...
-                  </>
+                  <><i className="fas fa-spinner fa-spin mr-2"></i>Creating...</>
                 ) : (
-                  <>
-                    <i className="fas fa-user-plus mr-2"></i>
-                    Create User
-                  </>
+                  <><i className="fas fa-user-plus mr-2"></i>Create User</>
                 )}
               </Button>
             </div>

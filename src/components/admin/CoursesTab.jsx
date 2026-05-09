@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, Card, Input, FilterSelect, SearchInput } from "../../components/ui";
 import CourseForm from "./CourseForm";
@@ -152,7 +152,7 @@ const GradingScaleModal = ({ onClose }) => {
 };
 
 // ── Course Categories Modal ───────────────────────────────────────────────────
-const CourseCategoriesModal = ({ onClose, onCategoriesChanged }) => {
+const CourseCategoriesModal = ({ onClose, onCategoriesChanged, initialEditId, initialDeleteId }) => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading]       = useState(true);
   const [saving, setSaving]         = useState(false);
@@ -164,7 +164,16 @@ const CourseCategoriesModal = ({ onClose, onCategoriesChanged }) => {
 
   useEffect(() => {
     coursesService.getCategories()
-      .then((data) => setCategories(data))
+      .then((data) => {
+        setCategories(data);
+        if (initialEditId) {
+          const cat = data.find((c) => c.id === initialEditId);
+          if (cat) { setEditingId(initialEditId); setEditingName(cat.name); }
+        }
+        if (initialDeleteId) {
+          setConfirmDeleteId(initialDeleteId);
+        }
+      })
       .catch(() => toastManager.error("Failed to load categories"))
       .finally(() => setLoading(false));
   }, []);
@@ -390,7 +399,25 @@ const CoursesTab = ({
 }) => {
   const navigate = useNavigate();
   const [gradingScaleOpen, setGradingScaleOpen]     = useState(false);
-  const [categoriesOpen, setCategoriesOpen]         = useState(false);
+  const [catDropdownOpen, setCatDropdownOpen]       = useState(false);
+  const [categoriesOpenWith, setCategoriesOpenWith] = useState(null); // null | { editId?, deleteId? }
+  const catDropdownRef = useRef(null);
+
+  // Close category dropdown on outside click/tap (works on mobile)
+  useEffect(() => {
+    if (!catDropdownOpen) return;
+    const handler = (e) => {
+      if (catDropdownRef.current && !catDropdownRef.current.contains(e.target)) {
+        setCatDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    document.addEventListener("touchstart", handler);
+    return () => {
+      document.removeEventListener("mousedown", handler);
+      document.removeEventListener("touchstart", handler);
+    };
+  }, [catDropdownOpen]);
 
   // Filter courses based on search term and filters
   const filteredCourses = useMemo(() => {
@@ -498,15 +525,82 @@ const CoursesTab = ({
             placeholder="Search courses..."
             className="w-full sm:w-56"
           />
-          <FilterSelect
-            value={courseFilters.category}
-            onChange={(e) => setCourseFilters({ ...courseFilters, category: e.target.value })}
-          >
-            <option value="">All Categories</option>
-            {categories.map((cat) => (
-              <option key={cat.id} value={cat.id.toString()}>{cat.name}</option>
-            ))}
-          </FilterSelect>
+          {/* Category filter dropdown with inline add/edit/delete */}
+          <div className="relative" ref={catDropdownRef}>
+            <button
+              onClick={() => setCatDropdownOpen((o) => !o)}
+              className="flex items-center gap-2 px-3 py-2 bg-slate-800/60 border border-slate-700/70 text-slate-300 hover:text-white rounded-xl text-sm font-medium transition-all w-full sm:w-auto sm:min-w-[160px] justify-between"
+            >
+              <span className="flex items-center gap-1.5 truncate">
+                <i className="fas fa-tags text-xs text-indigo-400 shrink-0" />
+                <span className="truncate">
+                  {courseFilters.category
+                    ? (categories.find((c) => c.id.toString() === courseFilters.category)?.name ?? "Category")
+                    : "All Categories"}
+                </span>
+              </span>
+              <i className={`fas fa-chevron-down text-xs text-slate-500 shrink-0 transition-transform duration-200 ${catDropdownOpen ? "rotate-180" : ""}`} />
+            </button>
+
+            {catDropdownOpen && (
+              <div className="absolute top-full right-0 sm:left-0 sm:right-auto mt-1.5 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-30 w-56 overflow-hidden">
+                {/* All Categories — fixed, not scrolled */}
+                <button
+                  onClick={() => { setCourseFilters({ ...courseFilters, category: "" }); setCatDropdownOpen(false); }}
+                  className={`w-full text-left px-3 py-2.5 text-sm transition flex items-center gap-2 ${courseFilters.category === "" ? "text-indigo-400 bg-indigo-500/10" : "text-slate-300 hover:bg-slate-800 hover:text-white"}`}
+                >
+                  <i className="fas fa-border-all text-xs opacity-60" />
+                  All Categories
+                </button>
+
+                {categories.length > 0 && <div className="border-t border-slate-800" />}
+
+                {/* Scrollable category list with fixed height */}
+                <div className="max-h-48 overflow-y-auto overscroll-contain">
+                  {categories.map((cat) => (
+                    <div
+                      key={cat.id}
+                      className="flex items-center gap-1 px-2 py-1.5 hover:bg-slate-800/70 group"
+                    >
+                      <button
+                        onClick={() => { setCourseFilters({ ...courseFilters, category: cat.id.toString() }); setCatDropdownOpen(false); }}
+                        className={`flex-1 text-left text-sm px-1.5 py-1 rounded-lg transition truncate ${courseFilters.category === cat.id.toString() ? "text-indigo-400 font-semibold" : "text-slate-300 group-hover:text-white"}`}
+                      >
+                        {cat.name}
+                      </button>
+                      {/* Always visible on mobile, hover-only on desktop */}
+                      <button
+                        onClick={() => { setCatDropdownOpen(false); setCategoriesOpenWith({ editId: cat.id }); }}
+                        title="Rename"
+                        className="w-6 h-6 flex items-center justify-center rounded-md text-slate-500 hover:text-white hover:bg-slate-700 transition text-xs opacity-100 sm:opacity-0 sm:group-hover:opacity-100 shrink-0"
+                      >
+                        <i className="fas fa-pencil-alt" />
+                      </button>
+                      <button
+                        onClick={() => { setCatDropdownOpen(false); setCategoriesOpenWith({ deleteId: cat.id }); }}
+                        title="Delete"
+                        className="w-6 h-6 flex items-center justify-center rounded-md text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition text-xs opacity-100 sm:opacity-0 sm:group-hover:opacity-100 shrink-0"
+                      >
+                        <i className="fas fa-trash-alt" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="border-t border-slate-800" />
+
+                {/* Add Category — fixed at bottom */}
+                <button
+                  onClick={() => { setCatDropdownOpen(false); setCategoriesOpenWith({}); }}
+                  className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-indigo-400 hover:bg-indigo-500/10 hover:text-indigo-300 transition font-semibold"
+                >
+                  <i className="fas fa-plus text-xs" />
+                  Add Category
+                </button>
+              </div>
+            )}
+          </div>
+
           <FilterSelect
             value={courseFilters.priceRange}
             onChange={(e) => setCourseFilters({ ...courseFilters, priceRange: e.target.value })}
@@ -545,13 +639,6 @@ const CoursesTab = ({
               <span className="hidden sm:inline">Clear</span>
             </button>
           )}
-          <button
-            onClick={() => setCategoriesOpen(true)}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white text-sm font-semibold active:scale-95 transition-all duration-150"
-          >
-            <i className="fas fa-tags text-xs"></i>
-            <span className="hidden sm:inline">Course Categories</span>
-          </button>
           <button
             onClick={() => setGradingScaleOpen(true)}
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white text-sm font-semibold active:scale-95 transition-all duration-150"
@@ -1088,10 +1175,18 @@ const CoursesTab = ({
           </div>
         )}
       {gradingScaleOpen && <GradingScaleModal onClose={() => setGradingScaleOpen(false)} />}
-      {categoriesOpen && (
+      {categoriesOpenWith !== null && (
         <CourseCategoriesModal
-          onClose={() => setCategoriesOpen(false)}
-          onCategoriesChanged={onCategoriesChanged}
+          onClose={() => setCategoriesOpenWith(null)}
+          onCategoriesChanged={(updated) => {
+            onCategoriesChanged(updated);
+            // If the active filter category was deleted, reset to "All"
+            if (courseFilters.category && !updated.find((c) => c.id.toString() === courseFilters.category)) {
+              setCourseFilters((prev) => ({ ...prev, category: "" }));
+            }
+          }}
+          initialEditId={categoriesOpenWith?.editId}
+          initialDeleteId={categoriesOpenWith?.deleteId}
         />
       )}
     </div>

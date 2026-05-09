@@ -90,61 +90,62 @@ const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+      <div className="bg-slate-900 border border-slate-800 rounded-[1.5rem] p-4 sm:p-8 w-full max-w-2xl lg:max-w-3xl max-h-[92vh] overflow-y-auto shadow-2xl transition-all duration-300">
 
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-800">
+        <div className="flex justify-between items-start mb-8 pb-6 border-b border-white/5">
           <div>
-            <h2 className="text-xl font-bold text-white">Create Enrollment</h2>
-            <p className="text-xs text-slate-400 mt-0.5">Enroll a student into a course</p>
+            <h2 className="text-xl font-black text-white tracking-tight">Create Enrollment</h2>
+            <p className="text-slate-500 text-[12px] font-medium mt-1">Enroll a student into a published course</p>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition"
+            className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-white hover:bg-white/5 transition-all"
           >
-            <i className="fas fa-times text-sm" />
+            <i className="fas fa-times text-lg" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="px-6 py-5 space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-5">
 
-          {/* Student */}
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
-              Student <span className="text-red-400">*</span>
-            </label>
-            <FilterSelect
-              name="student_id"
-              value={formData.student_id}
-              onChange={(e) => setFormData((p) => ({ ...p, student_id: e.target.value }))}
-              className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-            >
-              <option value="">Select a student</option>
-              {students.map((s) => (
-                <option key={s.id} value={s.id}>{s.username}</option>
-              ))}
-            </FilterSelect>
-          </div>
+          {/* Student | Course */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                Student <span className="text-red-400">*</span>
+              </label>
+              <FilterSelect
+                name="student_id"
+                value={formData.student_id}
+                onChange={(e) => setFormData((p) => ({ ...p, student_id: e.target.value }))}
+                className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+              >
+                <option value="">Select a student</option>
+                {students.map((s) => (
+                  <option key={s.id} value={s.id}>{s.username}</option>
+                ))}
+              </FilterSelect>
+            </div>
 
-          {/* Course */}
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
-              Course <span className="text-red-400">*</span>
-            </label>
-            <FilterSelect
-              name="course_id"
-              value={formData.course_id}
-              onChange={(e) => {
-                setFormData((p) => ({ ...p, course_id: e.target.value }));
-                setSelectedSlot(null);
-              }}
-              className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-            >
-              <option value="">Select a course</option>
-              {publishedCourses.map((c) => (
-                <option key={c.id} value={c.id}>{c.title}</option>
-              ))}
-            </FilterSelect>
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                Course <span className="text-red-400">*</span>
+              </label>
+              <FilterSelect
+                name="course_id"
+                value={formData.course_id}
+                onChange={(e) => {
+                  setFormData((p) => ({ ...p, course_id: e.target.value }));
+                  setSelectedSlot(null);
+                }}
+                className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+              >
+                <option value="">Select a course</option>
+                {publishedCourses.map((c) => (
+                  <option key={c.id} value={c.id}>{c.title}</option>
+                ))}
+              </FilterSelect>
+            </div>
           </div>
 
           {/* Enrollment Type */}
@@ -200,19 +201,19 @@ const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
 
           {formError && <p className="text-red-400 text-sm">{formError}</p>}
 
-          {/* Actions */}
-          <div className="flex gap-3 pt-1">
+          {/* Footer */}
+          <div className="flex justify-end gap-4 pt-8 mt-4 border-t border-white/5">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 bg-slate-700 hover:bg-slate-600 text-white px-6 py-3 rounded-xl text-sm font-medium transition"
+              className="px-6 py-2.5 rounded-xl text-sm font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={createLoading}
-              className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-xl text-sm font-medium transition disabled:opacity-50 flex items-center justify-center gap-2"
+              className="px-6 py-2.5 rounded-xl text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition disabled:opacity-50 flex items-center gap-2"
             >
               {createLoading
                 ? <><i className="fas fa-spinner fa-spin text-xs" /> Creating…</>
