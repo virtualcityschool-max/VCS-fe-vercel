@@ -7,7 +7,7 @@ import { showApiError } from "../../utils/apiErrorHandler";
 const isEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 const isNumericId = (v) => /^\d+$/.test(v);
 
-const ChildLinkRequest = () => {
+const ChildLinkRequest = ({ onSuccess }) => {
   const dispatch = useDispatch();
   const [input, setInput] = useState("");
   const [entries, setEntries] = useState([]); // { type: "id"|"email", value: string }
@@ -57,7 +57,12 @@ const ChildLinkRequest = () => {
       setEntries([]);
       setInput("");
       toastManager.success(result.message || "Link request(s) sent successfully");
-      setTimeout(() => { setShowSuccess(false); setSuccessData(null); }, 5000);
+      
+      if (onSuccess) {
+        setTimeout(() => onSuccess(result.data), 1500);
+      } else {
+        setTimeout(() => { setShowSuccess(false); setSuccessData(null); }, 5000);
+      }
     } catch (error) {
       showApiError(error);
     }

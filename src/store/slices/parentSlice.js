@@ -61,7 +61,7 @@ export const linkChildren = createAsyncThunk(
     } catch (error) {
       console.error("Failed to link children:", error);
       return rejectWithValue(
-        error.error || error.message || "Failed to link child(s)",
+        error.error || error.message || error.data?.error || "Failed to link child(s)",
       );
     }
   },

@@ -13,26 +13,50 @@ import { toastManager } from "./toastManager";
 export const extractApiErrorMessage = (error) => {
   if (typeof error === "string") return error;
 
-  const data = error?.response?.data??error
-  if (data?.details && typeof data.details === "object") {
+  // data can be from axios response or passed directly from a rejected thunk
+  const data = error?.response?.data || error?.data || error;
+
+  // 1. If data is just a string, return it
+  if (typeof data === "string") return data;
+
+  // 2. Check for nested details or just the data object itself
+  const details = data?.details || data;
+
+  if (details && typeof details === "object" && !Array.isArray(details)) {
     const messages = [];
-    // Use Object.entries to get both [key, value]
-    Object.entries(data.details).forEach(([key, v]) => {
+    
+    // Ignore meta keys that aren't user-facing errors
+    const ignoredKeys = ["status", "statusText", "url", "message", "error_code", "request_id", "timestamp"];
+
+    Object.entries(details).forEach(([key, v]) => {
+      if (ignoredKeys.includes(key)) return;
+
       if (Array.isArray(v)) {
         v.forEach((m) => {
           if (typeof m === "string") {
-            // Format as "Key: Message"
-            messages.push(`${key}: ${m}`);
+            // If the key is specific, we keep it; if generic, we omit it
+            if (["non_field_errors", "detail", "error", "message"].includes(key)) {
+              messages.push(m);
+            } else {
+              messages.push(`${m}`);
+            }
           }
         });
       } else if (typeof v === "string") {
-        messages.push(`${key}: ${v}`);
+        if (["non_field_errors", "detail", "error", "message"].includes(key)) {
+          messages.push(v);
+        } else {
+          messages.push(v);
+        }
       }
     });
+
     if (messages.length > 0) return messages.join(" ");
   }
 
-  if (data?.error) return data.error;
+  // 3. Fallbacks for other structures
+  if (data?.error && typeof data.error === "string") return data.error;
+  if (data?.message && typeof data.message === "string") return data.message;
 
   return error?.message || "An unexpected error occurred";
 };

@@ -8,11 +8,7 @@ export const fetchTeachers = createAsyncThunk(
       const data = await teacherService.getTeachers(params);
       return data;
     } catch (error) {
-      return rejectWithValue(
-        error?.response?.data?.error ||
-          error?.message ||
-          "Failed to fetch teachers",
-      );
+      return rejectWithValue(error);
     }
   },
 );
@@ -29,11 +25,7 @@ export const fetchTeacherById = createAsyncThunk(
       const data = await teacherService.getTeacherById(id);
       return data;
     } catch (error) {
-      return rejectWithValue(
-        error?.response?.data?.error ||
-          error?.message ||
-          "Failed to fetch teacher",
-      );
+      return rejectWithValue(error);
     }
   },
 );
@@ -45,11 +37,7 @@ export const fetchTeacherDashboard = createAsyncThunk(
       const data = await teacherService.getTeacherDashboard();
       return data;
     } catch (error) {
-      return rejectWithValue(
-        error?.response?.data?.error ||
-          error?.message ||
-          "Failed to fetch dashboard",
-      );
+      return rejectWithValue(error);
     }
   },
 );
@@ -61,11 +49,7 @@ export const fetchMyCourses = createAsyncThunk(
       const data = await teacherService.getMyCourses();
       return data;
     } catch (error) {
-      return rejectWithValue(
-        error?.response?.data?.error ||
-          error?.message ||
-          "Failed to fetch courses",
-      );
+      return rejectWithValue(error);
     }
   },
 );
@@ -77,11 +61,7 @@ export const fetchAssignments = createAsyncThunk(
       const data = await teacherService.getAssignments(params);
       return data;
     } catch (error) {
-      return rejectWithValue(
-        error?.response?.data?.error ||
-          error?.message ||
-          "Failed to fetch assignments",
-      );
+      return rejectWithValue(error);
     }
   },
 );
@@ -92,7 +72,7 @@ export const createAssignment = createAsyncThunk(
     try {
       return await teacherService.createAssignment(payload);
     } catch (err) {
-      return rejectWithValue(err?.message || "Failed to create");
+      return rejectWithValue(err);
     }
   },
 );
@@ -103,7 +83,7 @@ export const updateAssignment = createAsyncThunk(
     try {
       return await teacherService.updateAssignment(id, data);
     } catch (err) {
-      return rejectWithValue(err?.response?.data || err?.message || "Failed to update assignment");
+      return rejectWithValue(err);
     }
   },
 );
@@ -115,7 +95,7 @@ export const deleteAssignment = createAsyncThunk(
       await teacherService.deleteAssignment(id);
       return id;
     } catch (err) {
-      return rejectWithValue(err?.response?.data?.error || err?.message || "Failed to delete assignment");
+      return rejectWithValue(err);
     }
   },
 );
@@ -127,9 +107,7 @@ export const fetchAllSubmissions = createAsyncThunk(
       const data = await teacherService.getAllSubmissions(params);
       return data;
     } catch (error) {
-      return rejectWithValue(
-        error?.response?.data?.error || error?.message || "Failed to fetch submissions",
-      );
+      return rejectWithValue(error);
     }
   },
 );
@@ -141,9 +119,7 @@ export const fetchSubmissions = createAsyncThunk(
       const data = await teacherService.getSubmissions(assignmentId);
       return data;
     } catch (error) {
-      return rejectWithValue(
-        error?.response?.data?.error || "Failed to fetch submissions",
-      );
+      return rejectWithValue(error);
     }
   },
 );
@@ -155,7 +131,7 @@ export const gradeSubmission = createAsyncThunk(
       const result = await teacherService.gradeSubmission(submissionId, data);
       return { submissionId, grade: result };
     } catch (err) {
-      return rejectWithValue(err?.message || "Failed to grade");
+      return rejectWithValue(err);
     }
   },
 );
@@ -170,9 +146,7 @@ export const updateSubmissionsGrade = createAsyncThunk(
       );
       return { submissionId, grade: result };
     } catch (err) {
-      return rejectWithValue(
-        err?.message || "Failed to update submissions grade",
-      );
+      return rejectWithValue(err);
     }
   },
 );
@@ -184,11 +158,7 @@ export const fetchSubmissionById = createAsyncThunk(
       const data = await teacherService.getSubmissionById(submissionId);
       return data;
     } catch (error) {
-      return rejectWithValue(
-        error?.response?.data?.error ||
-          error?.message ||
-          "Failed to fetch submission details",
-      );
+      return rejectWithValue(error);
     }
   },
 );
@@ -199,7 +169,7 @@ export const fetchQuizzes = createAsyncThunk(
     try {
       return await teacherService.getQuizzes(params);
     } catch (err) {
-      return rejectWithValue(err?.response?.data?.error || err?.message || "Failed to fetch quizzes");
+      return rejectWithValue(err);
     }
   },
 );
@@ -210,7 +180,7 @@ export const createQuiz = createAsyncThunk(
     try {
       return await teacherService.createQuiz(data);
     } catch (err) {
-      return rejectWithValue(err?.response?.data || err?.message || "Failed to create quiz");
+      return rejectWithValue(err);
     }
   },
 );
@@ -221,7 +191,7 @@ export const updateQuiz = createAsyncThunk(
     try {
       return await teacherService.updateQuiz(id, data);
     } catch (err) {
-      return rejectWithValue(err?.response?.data || err?.message || "Failed to update quiz");
+      return rejectWithValue(err);
     }
   },
 );
@@ -233,7 +203,7 @@ export const deleteQuiz = createAsyncThunk(
       await teacherService.deleteQuiz(id);
       return id;
     } catch (err) {
-      return rejectWithValue(err?.response?.data?.detail || err?.message || "Failed to delete quiz");
+      return rejectWithValue(err);
     }
   },
 );
@@ -244,7 +214,7 @@ export const fetchQuizSubmissions = createAsyncThunk(
     try {
       return await teacherService.getQuizSubmissions(quizId);
     } catch (err) {
-      return rejectWithValue(err?.message || "Failed to fetch quiz submissions");
+      return rejectWithValue(err);
     }
   },
 );
@@ -255,7 +225,7 @@ export const fetchQuizSubmissionById = createAsyncThunk(
     try {
       return await teacherService.getQuizSubmissionById(submissionId);
     } catch (err) {
-      return rejectWithValue(err?.message || "Failed to fetch quiz submission");
+      return rejectWithValue(err);
     }
   },
 );
@@ -266,7 +236,7 @@ export const gradeQuizTextAnswers = createAsyncThunk(
     try {
       return await teacherService.gradeQuizSubmission(submissionId, grades);
     } catch (err) {
-      return rejectWithValue(err?.response?.data || err?.message || "Failed to grade quiz");
+      return rejectWithValue(err);
     }
   },
 );
@@ -278,11 +248,7 @@ export const fetchTeacherSessions = createAsyncThunk(
       const data = await teacherService.getTeacherSessions(params);
       return data;
     } catch (error) {
-      return rejectWithValue(
-        error?.response?.data?.error ||
-          error?.message ||
-          "Failed to fetch sessions",
-      );
+      return rejectWithValue(error);
     }
   },
 );
@@ -294,11 +260,7 @@ export const fetchSessionAttendance = createAsyncThunk(
       const data = await teacherService.getSessionAttendance(sessionId);
       return data;
     } catch (error) {
-      return rejectWithValue(
-        error?.response?.data?.error ||
-          error?.message ||
-          "Failed to fetch attendance",
-      );
+      return rejectWithValue(error);
     }
   },
 );
@@ -314,11 +276,7 @@ export const updateSessionAttendance = createAsyncThunk(
       );
       return { attendanceId, data: result };
     } catch (error) {
-      return rejectWithValue(
-        error?.response?.data?.error ||
-          error?.message ||
-          "Failed to update attendance",
-      );
+      return rejectWithValue(error);
     }
   },
 );
@@ -330,11 +288,7 @@ export const joinLiveSession = createAsyncThunk(
       const result = await teacherService.joinLiveSession(sessionId);
       return result;
     } catch (error) {
-      return rejectWithValue(
-        error?.response?.data?.error ||
-          error?.message ||
-          "Failed to join live session",
-      );
+      return rejectWithValue(error);
     }
   },
 );
@@ -345,11 +299,7 @@ export const startLiveSession = createAsyncThunk(
     try {
       return await teacherService.startSession(sessionId);
     } catch (error) {
-      return rejectWithValue(
-        error?.response?.data?.error ||
-          error?.message ||
-          "Failed to start session",
-      );
+      return rejectWithValue(error);
     }
   },
 );
@@ -360,7 +310,7 @@ export const fetchAllAttendance = createAsyncThunk(
     try {
       return await teacherService.getAllAttendance(params);
     } catch (error) {
-      return rejectWithValue(error?.response?.data?.error || error?.message || "Failed to fetch attendance");
+      return rejectWithValue(error);
     }
   },
 );
@@ -371,7 +321,7 @@ export const bulkMarkAttendance = createAsyncThunk(
     try {
       return await teacherService.bulkMarkAttendance(sessionId, records);
     } catch (error) {
-      return rejectWithValue(error?.response?.data?.error || error?.message || "Failed to mark attendance");
+      return rejectWithValue(error);
     }
   },
 );
@@ -382,7 +332,7 @@ export const updateStudentAttendance = createAsyncThunk(
     try {
       return await teacherService.updateStudentAttendance(sessionId, studentId, data);
     } catch (error) {
-      return rejectWithValue(error?.response?.data?.error || error?.message || "Failed to update attendance");
+      return rejectWithValue(error);
     }
   },
 );
@@ -393,11 +343,7 @@ export const endLiveSession = createAsyncThunk(
     try {
       return await teacherService.endSession(sessionId);
     } catch (error) {
-      return rejectWithValue(
-        error?.response?.data?.error ||
-          error?.message ||
-          "Failed to end session",
-      );
+      return rejectWithValue(error);
     }
   },
 );
