@@ -17,76 +17,117 @@ const TeacherClasses = () => {
 
   if (loading && !myCourses?.length) {
     return (
-      <div className="min-h-[40vh] flex items-center justify-center text-white">
-        <i className="fas fa-spinner animate-spin text-2xl"></i>
+      <div className="space-y-8 animate-fadeIn">
+        <div className="space-y-3 px-2">
+          <div className="w-48 h-10 bg-slate-800/50 rounded-xl animate-pulse" />
+          <div className="w-64 h-4 bg-slate-800/30 rounded-lg animate-pulse" />
+        </div>
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="h-64 bg-slate-800/30 backdrop-blur-md rounded-[2.5rem] border border-white/5 relative overflow-hidden">
+              <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-shimmer" />
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
 
   if (error && !myCourses?.length) {
     return (
-      <div className="min-h-[40vh] flex items-center justify-center text-red-400">
-        {error}
+      <div className="min-h-[60vh] flex flex-col items-center justify-center text-center p-8 bg-slate-900/50 backdrop-blur-xl rounded-[3rem] border border-rose-500/10">
+        <div className="w-20 h-20 bg-rose-500/10 rounded-3xl flex items-center justify-center text-rose-500 text-3xl mb-6 border border-rose-500/20">
+          <i className="fas fa-exclamation-triangle"></i>
+        </div>
+        <h3 className="text-2xl font-black text-white mb-2">Sync Error</h3>
+        <p className="text-slate-400 max-w-md mx-auto">{error}</p>
       </div>
     );
   }
 
   return (
-    <div className="text-white">
-      <div className="mb-10">
-        <h1 className="text-3xl font-black font-poppins mb-2">My Courses</h1>
-        <p className="text-slate-400 text-sm">
-          Manage and review the courses you are currently teaching.
-        </p>
+    <div className="text-white space-y-10 pb-12 animate-fadeIn">
+      {/* --- Page Header --- */}
+      <div className="relative group px-2">
+        <h1 className="text-4xl font-black font-poppins tracking-tight mb-2">My Courses</h1>
+        <div className="flex items-center gap-3">
+          <span className="w-12 h-1 bg-indigo-500 rounded-full"></span>
+          <p className="text-slate-500 text-sm font-medium tracking-wide">
+            Manage and review the courses you are currently teaching.
+          </p>
+        </div>
       </div>
 
-      {myCourses?.length > 0 && (
-        <div className="mb-6 text-xs text-slate-400">
-          Showing {myCourses.length} course{myCourses.length > 1 ? "s" : ""}
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
         {myCourses?.length ? (
           myCourses.map((course) => (
             <div
               key={course.id}
-              className="bg-slate-900 p-6 rounded-3xl border border-slate-800 hover:border-indigo-500/60 transition cursor-pointer group"
+              className="relative group bg-slate-900/40 backdrop-blur-md p-8 rounded-[2.5rem] border border-white/5 hover:border-indigo-500/40 transition-all duration-500 cursor-pointer overflow-hidden shadow-2xl hover:shadow-indigo-500/10"
               onClick={() => navigate(`/teacher/courses/${course.id}`)}
             >
-              <div className="flex items-start justify-between gap-4 mb-4">
-                <div className="flex-1 min-w-0">
-                  <h2 className="text-lg font-bold text-white group-hover:text-indigo-400 transition truncate">
-                    {course.title}
-                  </h2>
-                  <p className="text-xs text-slate-500 uppercase tracking-widest mt-1">
-                    {formatCategoryLabel(course.category)} • {course.status}
-                  </p>
+              {/* Decorative background element */}
+              <div className="absolute top-0 right-0 w-48 h-48 bg-indigo-500/5 rounded-full blur-3xl -mr-20 -mt-20 group-hover:bg-indigo-500/10 transition-colors"></div>
+              
+              <div className="relative z-10 flex flex-col h-full">
+                <div className="flex items-start justify-between gap-6 mb-6">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className="px-3 py-1 bg-indigo-500/10 text-indigo-400 rounded-lg text-[10px] font-black uppercase tracking-widest border border-indigo-500/10">
+                        {formatCategoryLabel(course.category)}
+                      </span>
+                      <span className={`text-[10px] font-black uppercase tracking-widest ${course.status === 'published' ? 'text-emerald-400' : 'text-amber-400'}`}>
+                        {course.status}
+                      </span>
+                    </div>
+                    <h2 className="text-2xl font-black font-poppins text-white group-hover:text-indigo-400 transition-colors leading-tight truncate">
+                      {course.title}
+                    </h2>
+                  </div>
+                  
+                  <div className="w-14 h-14 bg-slate-950 border border-white/5 rounded-2xl flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform shadow-lg">
+                    <i className="fas fa-graduation-cap text-xl"></i>
+                  </div>
                 </div>
-                <div className="text-right flex-shrink-0">
-                  {/* <p className="text-yellow-400 font-bold text-sm">
-                    ⭐ {Number(course.rating || 0).toFixed(1)}
-                  </p> */}
+
+                <p className="text-slate-400 text-sm leading-relaxed mb-8 line-clamp-2 font-medium">
+                  {course.description || "No description available."}
+                </p>
+
+                <div className="mt-auto flex items-center justify-between pt-6 border-t border-white/5">
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
+                      <i className="fas fa-user-graduate text-[10px] text-indigo-500/60"></i>
+                      <span className="text-xs font-bold text-slate-300">{course.total_enrolled} Learners</span>
+                    </div>
+                    {/* <div className="flex items-center gap-2">
+                      <i className="fas fa-star text-[10px] text-yellow-500/60"></i>
+                      <span className="text-xs font-bold text-slate-300">5.0</span>
+                    </div> */}
+                  </div>
+                  
+                  <button className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-indigo-400 group-hover:text-white transition-colors">
+                    Manage Course
+                    <i className="fas fa-arrow-right text-[10px] group-hover:translate-x-1 transition-transform"></i>
+                  </button>
                 </div>
-              </div>
-
-              <p className="text-sm text-slate-400 mb-5 line-clamp-3">
-                {course.description || "No description available."}
-              </p>
-
-              <div className="flex items-center justify-between text-xs text-slate-400">
-                <span>{course.total_enrolled} students</span>
-                <span className="flex items-center gap-1.5 text-slate-500 group-hover:text-indigo-400 transition">
-                  View details
-                  <i className="fas fa-arrow-right text-xs"></i>
-                </span>
               </div>
             </div>
           ))
         ) : (
-          <div className="bg-slate-900 p-10 rounded-3xl border border-slate-800 text-center text-slate-400 text-sm">
-            <p className="mb-2 font-semibold text-white">No classes yet</p>
-            <p>You haven't created or been assigned any courses.</p>
+          <div className="xl:col-span-2 min-h-[50vh] flex flex-col items-center justify-center p-12 bg-slate-900/30 backdrop-blur-md rounded-[3rem] border border-white/5 border-dashed relative overflow-hidden">
+             <div className="absolute inset-0 bg-linear-to-b from-indigo-500/5 to-transparent opacity-50"></div>
+             
+             <div className="relative z-10 text-center flex flex-col items-center max-w-sm">
+                <div className="w-24 h-24 bg-slate-800/50 rounded-[2rem] flex items-center justify-center text-slate-600 text-4xl mb-8 border border-white/5 shadow-2xl">
+                  <i className="fas fa-folder-open"></i>
+                </div>
+                <h3 className="text-2xl font-black text-white mb-3">No classes yet</h3>
+                <p className="text-slate-500 font-medium text-sm leading-relaxed mb-8">
+                  You haven't created or been assigned any courses yet. Once assigned, your academic portfolio will appear here.
+                </p>
+                {/* No button added to preserve logic, but layout is prepared for it */}
+             </div>
           </div>
         )}
       </div>

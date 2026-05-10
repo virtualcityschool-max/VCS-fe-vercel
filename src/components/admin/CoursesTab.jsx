@@ -27,6 +27,7 @@ const GRADE_FIELDS = [
 const GradingScaleModal = ({ onClose }) => {
   const [original, setOriginal] = useState(null);
   const [form, setForm]         = useState({});
+  const [errors, setErrors]     = useState({});
   const [loading, setLoading]   = useState(true);
   const [saving, setSaving]     = useState(false);
 
@@ -48,6 +49,58 @@ const GradingScaleModal = ({ onClose }) => {
   }, []);
 
   const handleSave = async () => {
+    setErrors({});
+    // ── Validation ──
+    const aPlus = Number(form.a_plus_min);
+    const a     = Number(form.a_min);
+    const b     = Number(form.b_min);
+    const c     = Number(form.c_min);
+    const d     = Number(form.d_min);
+
+    // 1. Range check
+    const newErrors = {};
+    GRADE_FIELDS.forEach(({ field, label }) => {
+      const v = Number(form[field]);
+      if (v < 1 || v > 100) {
+        newErrors[field] = true;
+      }
+    });
+
+    if (Object.keys(newErrors).length) {
+      setErrors(newErrors);
+      toastManager.error("All thresholds must be between 1 and 100");
+      return;
+    }
+
+    // 2. Strict descending check with user-friendly messages
+    if (aPlus <= a) {
+      setErrors({ a_plus_min: true, a_min: true });
+      toastManager.error("A+ threshold must be higher than A threshold");
+      return;
+    }
+    if (a <= b) {
+      setErrors({ a_min: true, b_min: true });
+      toastManager.error("A threshold must be higher than B threshold");
+      return;
+    }
+    if (b <= c) {
+      setErrors({ b_min: true, c_min: true });
+      toastManager.error("B threshold must be higher than C threshold");
+      return;
+    }
+    if (c <= d) {
+      setErrors({ c_min: true, d_min: true });
+      toastManager.error("C threshold must be higher than D threshold");
+      return;
+    }
+
+    // 3. Minimum D check
+    if (d < 1) {
+      setErrors({ d_min: true });
+      toastManager.error("D threshold must be at least 1%");
+      return;
+    }
+
     // Send only changed fields
     const changed = {};
     GRADE_FIELDS.forEach(({ field }) => {
@@ -62,7 +115,6 @@ const GradingScaleModal = ({ onClose }) => {
       onClose();
     } catch(err) {
       showApiError(err)
-      // toastManager.error("Failed to update grading scale");
     } finally {
       setSaving(false);
     }
@@ -105,11 +157,18 @@ const GradingScaleModal = ({ onClose }) => {
                     <div className="flex items-center gap-2">
                       <input
                         type="number"
-                        min="0"
+                        min="1"
                         max="100"
                         value={form[field] ?? ""}
-                        onChange={(e) => setForm((f) => ({ ...f, [field]: e.target.value }))}
-                        className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 tabular-nums"
+                        onChange={(e) => {
+                          setForm((f) => ({ ...f, [field]: e.target.value }));
+                          if (errors[field]) setErrors(prev => ({ ...prev, [field]: false }));
+                        }}
+                        className={`w-full px-3 py-2 bg-slate-800 border rounded-xl text-white text-sm focus:outline-none focus:ring-2 tabular-nums transition-colors ${
+                          errors[field] 
+                            ? "border-red-500/50 focus:ring-red-500/30 focus:border-red-500" 
+                            : "border-slate-700 focus:ring-indigo-500/50 focus:border-indigo-500/50"
+                        }`}
                       />
                       <span className="text-slate-500 text-sm font-medium flex-shrink-0">%</span>
                     </div>

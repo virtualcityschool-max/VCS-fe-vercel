@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { coursesService } from "../../services/coursesService";
-import { logoutUser } from "./authSlice";
+import { logoutUser, loginUser } from "./authSlice";
 
 const normalizeCategoryField = (obj) => ({
   ...obj,
@@ -117,20 +117,17 @@ const coursesSlice = createSlice({
         state.categoriesLoading = false;
       })
 
-      // Handle logout - clear course enrollment flags
-      .addCase(logoutUser.fulfilled, (state) => {
-        // Reset courses to remove any enrollment flags from previous session
-        state.courses = state.courses.map((course) => ({
-          ...course,
-          is_enrolled: false,
-        }));
-        state.currentCourse = state.currentCourse
-          ? {
-              ...state.currentCourse,
-              is_enrolled: false,
-            }
-          : null;
-      });
+      // Handle login/logout - invalidate courses data to ensure fresh enrollment status
+      .addMatcher(
+        (action) =>
+          action.type === loginUser.fulfilled.type ||
+          action.type === logoutUser.fulfilled.type,
+        (state) => {
+          state.courses = [];
+          state.currentCourse = null;
+          state.error = null;
+        }
+      );
   },
 });
 

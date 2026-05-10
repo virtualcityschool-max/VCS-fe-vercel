@@ -195,7 +195,7 @@ const UserProfileDropdown = ({ dropUp = false, isCollapsed = false }) => {
 
           {/* Menu Items */}
           <div className="py-2">
-            <button
+            {/* <button
               onClick={handleDashboard}
               className="w-full px-4 py-3 text-left text-sm text-slate-300 hover:bg-slate-800 hover:text-white transition-colors duration-150 flex items-center gap-3"
             >
@@ -213,7 +213,7 @@ const UserProfileDropdown = ({ dropUp = false, isCollapsed = false }) => {
                 />
               </svg>
               Dashboard
-            </button>
+            </button> */}
             {/* <button
               onClick={() => { setIsDropdownOpen(false); navigate("/teachers"); }}
               className="w-full px-4 py-3 text-left text-sm text-slate-300 hover:bg-slate-800 hover:text-white transition-colors duration-150 flex items-center gap-3"

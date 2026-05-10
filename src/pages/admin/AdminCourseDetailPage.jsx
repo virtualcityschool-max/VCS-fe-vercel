@@ -313,7 +313,7 @@ const AdminCourseDetailPage = () => {
                 <MetaTile icon="user" label="Instructor" value={course.instructor?.username || "—"} />
                 <MetaTile icon="tag" label="Category" value={formatCategoryLabel(course.category) || "—"} />
                 <MetaTile
-                  icon="rupee-sign"
+                  icon="wallet"
                   label="Price"
                   value={course.price ? `PKR ${Number(course.price).toLocaleString()}` : "Free"}
                   valueClass="text-emerald-400"

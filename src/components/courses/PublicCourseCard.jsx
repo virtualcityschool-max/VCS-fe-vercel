@@ -144,7 +144,7 @@ const PublicCourseCard = ({
                 PKR {course.price || "0.00"}
               </span>
             </div>
-            <div className="flex flex-col items-end">
+            {/* <div className="flex flex-col items-end">
               <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Rating</span>
               <div className="flex items-center gap-1">
                 <i className="fas fa-star text-yellow-500 text-[10px]"></i>
@@ -152,7 +152,7 @@ const PublicCourseCard = ({
                   {course.rating || "5.0"}
                 </span>
               </div>
-            </div>
+            </div> */}
           </div>
 
           {/* CTA Button */}
