@@ -4,7 +4,7 @@ import { fetchAllCourses } from "../../store/slices/coursesSlice";
 import { useEffect, useState, useMemo } from "react";
 import { getCourseImage } from "../../utils/courseImageUtils";
 import { getStorageUrl } from "../../utils/storageUrl";
-import { setAuthModal } from "../../store/slices/uiSlice";
+import { setAuthModal, setEnrollmentIntent } from "../../store/slices/uiSlice";
 import { fetchStudentDashboard, unenrollFromCourse } from "../../store/slices/studentDashboardSlice";
 import AuthRequiredModal from "../../components/common/AuthRequiredModal";
 import PublicCourseCard from "../../components/courses/PublicCourseCard";
@@ -20,6 +20,7 @@ const PublicHome = () => {
 
   const { courses, isLoading: coursesLoading } = useSelector((state) => state.courses);
   const { enrolledCourses, enrollingCourseIds } = useSelector((state) => state.studentDashboard);
+  const { enrollmentIntent } = useSelector((state) => state.ui);
 
   useEffect(() => {
     if (courses.length <= 0) {
@@ -42,6 +43,10 @@ const PublicHome = () => {
   // Handle enrollment button
   const handleEnrollClick = (course) => {
     if (!auth.isLoggedIn) {
+      dispatch(setEnrollmentIntent({ 
+        courseId: course.id, 
+        courseTitle: course.title 
+      }));
       setAuthModalOpen(true);
       return;
     }

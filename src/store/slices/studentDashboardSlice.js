@@ -356,6 +356,9 @@ const initialState = {
   isFetchingCurrentQuiz: false,
   isSubmittingQuiz: false,
   quizSubmitError: null,
+
+  // Specific error states for isolation
+  myAttendanceError: null,
 };
 
 // Slice
@@ -447,7 +450,7 @@ const studentDashboardSlice = createSlice({
       })
       .addCase(joinLiveSession.rejected, (state, action) => {
         state.isJoiningSession = false;
-        state.error = action.payload;
+        // Don't set global error, let component handle it via toast
       })
 
       // Start Student Session
@@ -459,7 +462,7 @@ const studentDashboardSlice = createSlice({
       })
       .addCase(startStudentSession.rejected, (state, action) => {
         state.isJoiningSession = false;
-        state.error = action.payload;
+        // Handled via toast in component
       })
 
       // End Student Session
@@ -471,7 +474,7 @@ const studentDashboardSlice = createSlice({
       })
       .addCase(endStudentSession.rejected, (state, action) => {
         state.isJoiningSession = false;
-        state.error = action.payload;
+        // Handled via toast in component
       })
 
       // Submit Assignment
@@ -665,16 +668,16 @@ const studentDashboardSlice = createSlice({
       // Fetch My Attendance
       .addCase(fetchMyAttendance.pending, (state) => {
         state.isFetchingMyAttendance = true;
-        state.error = null;
+        state.myAttendanceError = null;
       })
       .addCase(fetchMyAttendance.fulfilled, (state, action) => {
         state.isFetchingMyAttendance = false;
-        state.error = null;
+        state.myAttendanceError = null;
         state.myAttendance = action.payload.results || action.payload;
       })
       .addCase(fetchMyAttendance.rejected, (state, action) => {
         state.isFetchingMyAttendance = false;
-        state.error = action.payload;
+        state.myAttendanceError = action.payload;
       })
 
       // QUIZZES
@@ -793,8 +796,8 @@ export const selectAttendanceLoading = (state) =>
   state.studentDashboard.isFetchingAttendance;
 export const selectMyAttendance = (state) =>
   state.studentDashboard.myAttendance;
-export const selectMyAttendanceLoading = (state) =>
-  state.studentDashboard.isFetchingMyAttendance;
+export const selectMyAttendanceLoading = (state) => state.studentDashboard.isFetchingMyAttendance;
+export const selectMyAttendanceError = (state) => state.studentDashboard.myAttendanceError;
 export const selectMyEnrollments = (state) => state.studentDashboard.myEnrollments;
 export const selectMyEnrollmentsLoading = (state) => state.studentDashboard.myEnrollmentsLoading;
 export const selectPendingEnrollments = (state) =>

@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import {
   selectMyAttendance,
   selectMyAttendanceLoading,
-  selectDashboardError,
+  selectMyAttendanceError,
   fetchMyAttendance,
 } from "../../store/slices/studentDashboardSlice";
 
@@ -11,7 +11,7 @@ const MyAttendanceList = () => {
   const dispatch = useDispatch();
   const attendance = useSelector(selectMyAttendance);
   const isLoading = useSelector(selectMyAttendanceLoading);
-  const error = useSelector(selectDashboardError);
+  const error = useSelector(selectMyAttendanceError);
 
   // Fetch attendance on component mount
   useEffect(() => {

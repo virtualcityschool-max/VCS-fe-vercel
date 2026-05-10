@@ -25,7 +25,7 @@ import {
   useTextFormat,
 } from "../../hooks/useFormat";
 import { getCourseImage } from "../../utils/courseImageUtils";
-import { setAuthModal } from "../../store/slices/uiSlice";
+import { setAuthModal, setEnrollmentIntent } from "../../store/slices/uiSlice";
 import EnrollmentTypeModal from "../../components/courses/EnrollmentTypeModal";
 import { getStorageUrl } from "../../utils/storageUrl";
 import FileViewerModal from "../../components/common/FileViewerModal";
@@ -51,6 +51,8 @@ const CourseDetails = () => {
   const { enrollingCourseIds, unenrollingCourseIds, enrolledCourses } =
     useSelector((state) => state.studentDashboard);
 
+  const { enrollmentIntent } = useSelector((state) => state.ui);
+
   // Formatting hooks
   const { formatDate } = useDateFormat();
   const { formatCurrency } = useNumberFormat();
@@ -73,6 +75,8 @@ const CourseDetails = () => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setImageError(false);
   }, [courseId]);
+
+
 
   // Normalize course data for safe rendering
   const normalizedCourse = React.useMemo(() => {
@@ -127,6 +131,18 @@ const CourseDetails = () => {
     // Show enrollment modal
     setEnrollmentModalOpen(true);
   };
+
+  // Handle post-login enrollment intent
+  useEffect(() => {
+    if (auth.isLoggedIn && auth.role === "student" && enrollmentIntent && normalizedCourse) {
+      if (enrollmentIntent.courseId === normalizedCourse.id) {
+        // Automatically open enrollment modal
+        handleEnrollCourse();
+        // Clear intent
+        dispatch(setEnrollmentIntent(null));
+      }
+    }
+  }, [auth.isLoggedIn, auth.role, enrollmentIntent, normalizedCourse, dispatch]);
 
   // Handle enrollment type selection
   const handleEnrollmentTypeSelect = async (type) => {
@@ -660,7 +676,15 @@ const CourseDetails = () => {
                           ? "bg-linear-to-r from-blue-600/40 to-cyan-600/40 text-white/40 cursor-not-allowed shadow-none"
                           : "bg-linear-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 shadow-blue-500/25 hover:shadow-blue-500/40 hover:scale-[1.02]"
                       }`}
-                      onClick={() => !noSessions && dispatch(setAuthModal("login"))}
+                      onClick={() => {
+                        if (!noSessions) {
+                          dispatch(setEnrollmentIntent({ 
+                            courseId: normalizedCourse.id, 
+                            courseTitle: normalizedCourse.title 
+                          }));
+                          dispatch(setAuthModal("login"));
+                        }
+                      }}
                     >
                       <i className={`fas fa-sign-in-alt mr-2 ${!noSessions ? "group-hover:translate-x-1 transition-transform" : ""}`}></i>
                       Login to Enroll

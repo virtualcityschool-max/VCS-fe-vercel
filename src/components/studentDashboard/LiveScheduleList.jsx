@@ -243,40 +243,55 @@ const LiveScheduleList = () => {
                     <button
                       onClick={() => handleJoinSession(session)}
                       disabled={isThisLoading || isJoiningSession}
-                      className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-blue-900/40 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                      className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-blue-900/40 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-w-[140px]"
                     >
                       {isThisLoading && loadingAction === "join" ? (
-                        <i className="fas fa-spinner fa-spin">Joining...</i>
+                        <>
+                          <i className="fas fa-spinner fa-spin"></i>
+                          <span>Joining...</span>
+                        </>
                       ) : (
-                        <i className="fas fa-video"></i>
+                        <>
+                          <i className="fas fa-video"></i>
+                          <span>Join Session</span>
+                        </>
                       )}
-                      Join Session
                     </button>
                     <button
                       onClick={() => handleEndSession(session)}
                       disabled={isThisLoading || isJoiningSession}
-                      className="bg-red-600/10 hover:bg-red-600/20 text-red-400 px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest border border-red-500/10 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                      className="bg-red-600/10 hover:bg-red-600/20 text-red-400 px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest border border-red-500/10 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-w-[140px]"
                     >
                       {isThisLoading && loadingAction === "end" ? (
-                        <i className="fas fa-spinner fa-spin"> Ending...</i>
+                        <>
+                          <i className="fas fa-spinner fa-spin"></i>
+                          <span>Ending...</span>
+                        </>
                       ) : (
-                        <i className="fas fa-stop-circle"></i>
+                        <>
+                          <i className="fas fa-stop-circle"></i>
+                          <span>Leave Session</span>
+                        </>
                       )}
-                      Leave Session
                     </button>
                   </>
                 ) : (
                   <button
                     onClick={() => handleJoinSession(session)}
                     disabled={isThisLoading || isJoiningSession}
-                    className="bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-blue-900/40 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    className="bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-blue-900/40 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-w-[150px]"
                   >
                     {isThisLoading ? (
-                      <i className="fas fa-spinner fa-spin">Joining...</i>
+                      <>
+                        <i className="fas fa-spinner fa-spin"></i>
+                        <span>Joining...</span>
+                      </>
                     ) : (
-                      <i className="fas fa-play text-[10px]"></i>
+                      <>
+                        <i className="fas fa-play text-[10px]"></i>
+                        <span>Join Session</span>
+                      </>
                     )}
-                    Join Session
                   </button>
                 )}
               </div>

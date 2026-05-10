@@ -121,18 +121,24 @@ const NextSessionCard = () => {
         <button
           onClick={handleJoinSession}
           disabled={isJoiningSession || !canJoinNow}
-          className={`px-4 py-2.5 rounded-xl font-black text-[9px] uppercase tracking-widest transition-all duration-300 active:scale-95 ${
+          className={`px-4 py-2.5 rounded-xl font-black text-[9px] uppercase tracking-widest transition-all duration-300 active:scale-95 flex items-center justify-center gap-2 min-w-[120px] ${
             isJoiningSession || !canJoinNow
               ? "bg-slate-800/50 text-slate-500 cursor-not-allowed border border-white/5"
               : "bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-900/40 border border-blue-400/30 hover:shadow-blue-500/20"
           }`}
         >
           {isJoiningSession ? (
-            <i className="fas fa-spinner fa-spin"></i>
+            <>
+              <i className="fas fa-spinner fa-spin"></i>
+              <span>Joining...</span>
+            </>
           ) : !canJoinNow ? (
             "Session Not Live"
           ) : (
-            "Join Now"
+            <>
+              <i className="fas fa-play text-[8px]"></i>
+              <span>Join Now</span>
+            </>
           )}
         </button>
       </div>

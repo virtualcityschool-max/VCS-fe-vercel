@@ -66,7 +66,7 @@ const AuthModals = () => {
   const [role, setRole] = useState("");
 
   const dispatch = useDispatch();
-  const { authModal } = useSelector((state) => state.ui);
+  const { authModal, enrollmentIntent } = useSelector((state) => state.ui);
   const { isLoading, resendOtpLoading } = useSelector((state) => state.auth);
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -201,7 +201,11 @@ const AuthModals = () => {
           navigate("/admin", { replace: true });
           break;
         case "student":
-          navigate("/student", { replace: true });
+          if (enrollmentIntent) {
+            navigate(`/courses/${enrollmentIntent.courseId}`, { replace: true });
+          } else {
+            navigate("/student", { replace: true });
+          }
           break;
         case "teacher":
           navigate("/teacher", { replace: true });

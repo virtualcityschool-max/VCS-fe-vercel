@@ -13,7 +13,7 @@ import { toastManager } from "../../utils/toastManager";
 import { formatCategoryLabel } from "../../constants";
 import { useSubmissionGuard } from "../../utils/requestDeduplicator";
 import { getCourseImage } from "../../utils/courseImageUtils";
-import { setAuthModal } from "../../store/slices/uiSlice";
+import { setAuthModal, setEnrollmentIntent } from "../../store/slices/uiSlice";
 import EnrollmentTypeModal from "../../components/courses/EnrollmentTypeModal";
 import { showApiError } from "../../utils/apiErrorHandler";
 import { getStorageUrl } from "../../utils/storageUrl";
@@ -43,11 +43,15 @@ const Marketplace = () => {
   const { enrollingCourseIds, unenrollingCourseIds, enrolledCourses } =
     useSelector((state) => state.studentDashboard);
 
+  const { enrollmentIntent } = useSelector((state) => state.ui);
+
   useEffect(() => {
     if (courses?.length <= 0) dispatch(fetchAllCourses());
     dispatch(fetchCategories());
     if (auth.isLoggedIn && auth.role === "student") dispatch(fetchStudentDashboard());
   }, [dispatch, auth.isLoggedIn, auth.role]);
+
+
 
   const filterOptions = useMemo(() => {
     const instructors = courses ? [
@@ -174,6 +178,10 @@ const Marketplace = () => {
   // Handle course enrollment
   const handleEnrollCourse = (course) => {
     if (!auth.isLoggedIn) {
+      dispatch(setEnrollmentIntent({ 
+        courseId: course.id, 
+        courseTitle: course.title 
+      }));
       setAuthModalOpen(true);
       return;
     }
@@ -187,6 +195,17 @@ const Marketplace = () => {
     setSelectedCourse(course);
     setEnrollmentModalOpen(true);
   };
+
+  // Handle post-login enrollment intent
+  useEffect(() => {
+    if (auth.isLoggedIn && auth.role === "student" && enrollmentIntent) {
+      const course = courses.find(c => c.id === enrollmentIntent.courseId);
+      if (course) {
+        handleEnrollCourse(course);
+        dispatch(setEnrollmentIntent(null));
+      }
+    }
+  }, [auth.isLoggedIn, auth.role, enrollmentIntent, courses, dispatch]);
 
   // Handle normal enrollment type selection only — private is handled by callPrivateEnrollmentCall
   const handleEnrollmentTypeSelect = async (type) => {
