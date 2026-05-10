@@ -77,7 +77,7 @@ const HireRequestsTab = ({
   return (
     <div className="space-y-4">
       {/* Filter bar */}
-      <div className="flex flex-wrap gap-2">
+      {/* <div className="flex flex-wrap gap-2">
         {["all", "pending", "approved", "rejected"].map((s) => (
           <button
             key={s}
@@ -91,7 +91,7 @@ const HireRequestsTab = ({
             {s}
           </button>
         ))}
-      </div>
+      </div> */}
 
       {!requests?.length ? (
         <div className="flex flex-col items-center justify-center py-16">
