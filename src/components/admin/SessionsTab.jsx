@@ -15,6 +15,7 @@ const SessionsTab = ({
   loading,
   loadingSessionIds,
   updatingSessionId,
+  isCreatingSession = false,
   editSessionForm,
   setEditSessionForm,
   createSessionForm,
@@ -628,7 +629,10 @@ const SessionsTab = ({
               {/* Footer */}
               <div className="flex justify-end gap-4 pt-8 mt-4 border-t border-white/5">
                 <button type="button" onClick={() => setActiveModal(null)} className="px-6 py-2.5 rounded-xl text-sm font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition">Cancel</button>
-                <button type="submit" className="px-6 py-2.5 rounded-xl text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition">Create Class</button>
+                <button type="submit" disabled={isCreatingSession}
+                  className="px-6 py-2.5 rounded-xl text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition disabled:opacity-50 flex items-center gap-2">
+                  {isCreatingSession ? <><i className="fas fa-spinner fa-spin text-xs"></i>Creating…</> : "Create Class"}
+                </button>
               </div>
             </form>
           </div>
@@ -653,12 +657,34 @@ const SessionsTab = ({
 
             <form onSubmit={handleUpdateSession} className="space-y-5">
 
-              {/* Course | Instructor — read-only */}
+              {/* Course (editable) | Instructor (read-only) */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">Course</label>
-                  <input type="text" value={editSessionForm.course_title || ""} disabled
-                    className="w-full px-3 py-2.5 bg-slate-700/50 border border-slate-600/50 rounded-xl text-slate-400 text-sm cursor-not-allowed" />
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    Course <span className="text-red-400">*</span>
+                  </label>
+                  <FilterSelect
+                    value={editSessionForm.course_id || ""}
+                    onChange={(e) => {
+                      const selected = courses.find((c) => c.id === Number(e.target.value));
+                      setEditSessionForm({
+                        ...editSessionForm,
+                        course_id: e.target.value,
+                        course_title: selected?.title || "",
+                        teacher_name: selected?.instructor?.username || "",
+                        instructor_id: selected?.instructor?.id || "",
+                      });
+                    }}
+                    className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                  >
+                    <option value="">Select a course</option>
+                    {courses
+                      .filter((c) => c.status === "published" && (!c.has_session || c.id === Number(editSessionForm.course_id)))
+                      .map((c) => (
+                        <option key={c.id} value={c.id}>{c.title}</option>
+                      ))
+                    }
+                  </FilterSelect>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">Instructor</label>
