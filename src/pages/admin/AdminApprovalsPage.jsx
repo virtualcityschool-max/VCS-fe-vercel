@@ -53,8 +53,15 @@ const AdminApprovalsPage = () => {
   const { adminRequests: hireRequests, adminLoading: hireLoading, adminError: hireError, adminProcessing: hireProcessing } = useSelector((state) => state.hire);
   const [hireStatusFilter, setHireStatusFilter] = useState(undefined);
 
-  // Data is pre-loaded by AdminLayout on mount — no fetch needed here.
-  // Use the Refresh buttons inside each tab for manual re-fetch.
+  // Re-fetch all 4 APIs every time this page is visited.
+  // AdminLayout only fetches once on mount; navigating away and back
+  // would otherwise show stale data.
+  useEffect(() => {
+    dispatch(fetchPendingApprovals());
+    dispatch(fetchPendingChildLinks());
+    dispatch(fetchPendingEnrollments());
+    dispatch(fetchAdminHireRequests(hireStatusFilter));
+  }, [dispatch]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleApprove = async (userId) => {
     try {

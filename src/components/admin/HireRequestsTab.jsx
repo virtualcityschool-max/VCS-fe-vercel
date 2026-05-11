@@ -157,7 +157,7 @@ const HireRequestsTab = ({
                     <i className="fas fa-eye text-xs"></i>
                     View
                   </button>
-                  {req.status === "pending" && (
+                  {req.status === "pending" ? (
                     <>
                       <button
                         onClick={() => setConfirm({ open: true, type: "approve", id: req.id, label: req.full_name })}
@@ -176,7 +176,17 @@ const HireRequestsTab = ({
                         Reject
                       </button>
                     </>
-                  )}
+                  ) : req.status === "approved" ? (
+                    <div className="flex items-center gap-1.5 px-4 py-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold rounded-xl">
+                      <i className="fas fa-check-circle text-xs"></i>
+                      Approved
+                    </div>
+                  ) : req.status === "rejected" ? (
+                    <div className="flex items-center gap-1.5 px-4 py-2 bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-semibold rounded-xl">
+                      <i className="fas fa-times-circle text-xs"></i>
+                      Rejected
+                    </div>
+                  ) : null}
                 </div>
               </div>
             </div>
