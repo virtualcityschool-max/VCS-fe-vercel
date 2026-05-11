@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Button, Input } from "../ui";
+import { Button, Input, Card } from "../ui";
 import { useFieldErrors } from "../../hooks";
 import DistinctionsEditor from "./DistinctionsEditor";
 
@@ -153,130 +153,165 @@ const TeacherProfileTab = ({ profile, onUpdate, onCancel, onSaved }) => {
   };
 
   return (
-    <div className="space-y-4">
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-slate-300 mb-2">Bio</label>
-          <textarea
-            value={formData.bio}
-            onChange={(e) => handleInputChange("bio", e.target.value)}
-            className={`w-full bg-slate-900/60 border text-white rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 resize-none ${
-              errors.bio
-                ? "border-red-500 focus:ring-red-500/20"
-                : "border-slate-700 focus:ring-indigo-500/30"
-            }`}
-            rows="3"
-            placeholder="Brief professional biography..."
-          />
-          {errors.bio && <p className="mt-2 text-sm text-red-400">{getFieldError("bio")}</p>}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-slate-300 mb-2">Expertise</label>
-          <Input
-            value={formData.expertise}
-            onChange={(e) => handleInputChange("expertise", e.target.value)}
-            placeholder="e.g., Mathematics, Physics"
-            error={getFieldError("expertise")}
-            className="bg-slate-900/60 border-slate-700"
-          />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
-              Experience (years)
-            </label>
-            <Input
-              type="number"
-              value={formData.experience_years}
-              onChange={(e) => handleInputChange("experience_years", e.target.value)}
-              placeholder="Years of experience"
-              error={getFieldError("experience_years")}
-              className="bg-slate-900/60 border-slate-700"
-            />
+    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Professional Summary Section */}
+        <Card variant="glass" padding="md" className="border-indigo-500/10">
+          <div className="flex items-center gap-3 mb-5 pb-3 border-b border-white/5">
+            <div className="w-8 h-8 rounded-lg bg-indigo-500/20 flex items-center justify-center text-indigo-400">
+              <i className="fas fa-user-tie text-sm"></i>
+            </div>
+            <h3 className="text-base font-semibold text-white">Professional Summary</h3>
           </div>
-          {/* <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
-              Rating (0.0 - 5.0)
-            </label>
-            <Input
-              type="number"
-              step="0.1"
-              min="0"
-              max="5"
-              value={formData.rating}
-              onChange={(e) => handleInputChange("rating", e.target.value)}
-              placeholder="0.0 - 5.0"
-              error={getFieldError("rating")}
-              className="bg-slate-900/60 border-slate-700"
-            />
-          </div> */}
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
-              LinkedIn
-            </label>
-            <Input
-              type="url"
-              value={formData.linkedin}
-              onChange={(e) => handleInputChange("linkedin", e.target.value)}
-              placeholder="https://linkedin.com/in/username"
-              error={getFieldError("linkedin")}
-              className="bg-slate-900/60 border-slate-700"
-            />
+          
+          <div className="space-y-4">
+            <div>
+              <label className="flex items-center gap-2 text-sm font-medium text-slate-300 mb-2.5">
+                <i className="fas fa-quote-left text-xs text-indigo-400/60"></i>
+                Bio
+              </label>
+              <textarea
+                value={formData.bio}
+                onChange={(e) => handleInputChange("bio", e.target.value)}
+                className={`w-full bg-slate-900/60 border text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 resize-none min-h-[120px] ${
+                  errors.bio
+                    ? "border-red-500/50 bg-red-500/5"
+                    : "border-slate-700/50 hover:border-slate-600 focus:border-indigo-500/50"
+                }`}
+                placeholder="Write a brief professional biography that highlights the teacher's background and teaching philosophy..."
+              />
+              {errors.bio && (
+                <p className="mt-2 text-sm text-red-400 flex items-center gap-2">
+                  <i className="fas fa-exclamation-circle text-xs"></i>
+                  {getFieldError("bio")}
+                </p>
+              )}
+            </div>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
-              Phone Number
-            </label>
-            <Input
-              type="tel"
-              value={formData.phone}
-              onChange={(e) => handleInputChange("phone", e.target.value)}
-              placeholder="+1 (555) 123-4567"
-              error={getFieldError("phone")}
-              className="bg-slate-900/60 border-slate-700"
-            />
-          </div>
-        </div>
+        </Card>
 
-        <div>
-          <label className="block text-sm font-medium text-slate-300 mb-2">
-            Distinctions
-          </label>
+        {/* Professional Details Section */}
+        <Card variant="glass" padding="md" className="border-indigo-500/10">
+          <div className="flex items-center gap-3 mb-5 pb-3 border-b border-white/5">
+            <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center text-emerald-400">
+              <i className="fas fa-graduation-cap text-sm"></i>
+            </div>
+            <h3 className="text-base font-semibold text-white">Professional Details</h3>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="flex items-center gap-2 text-sm font-medium text-slate-300 mb-2.5">
+                <i className="fas fa-star text-xs text-emerald-400/60"></i>
+                Expertise
+              </label>
+              <Input
+                value={formData.expertise}
+                onChange={(e) => handleInputChange("expertise", e.target.value)}
+                placeholder="e.g., Mathematics, Physics"
+                error={getFieldError("expertise")}
+                className="bg-slate-900/60 border-slate-700/50 hover:border-slate-600 transition-all"
+              />
+            </div>
+
+            <div>
+              <label className="flex items-center gap-2 text-sm font-medium text-slate-300 mb-2.5">
+                <i className="fas fa-briefcase text-xs text-emerald-400/60"></i>
+                Experience (years)
+              </label>
+              <Input
+                type="number"
+                value={formData.experience_years}
+                onChange={(e) => handleInputChange("experience_years", e.target.value)}
+                placeholder="Years of experience"
+                error={getFieldError("experience_years")}
+                className="bg-slate-900/60 border-slate-700/50 hover:border-slate-600 transition-all"
+              />
+            </div>
+          </div>
+        </Card>
+
+        {/* Connect & Contact Section */}
+        <Card variant="glass" padding="md" className="border-indigo-500/10">
+          <div className="flex items-center gap-3 mb-5 pb-3 border-b border-white/5">
+            <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center text-blue-400">
+              <i className="fas fa-link text-sm"></i>
+            </div>
+            <h3 className="text-base font-semibold text-white">Connect & Contact</h3>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="flex items-center gap-2 text-sm font-medium text-slate-300 mb-2.5">
+                <i className="fab fa-linkedin text-xs text-blue-400/60"></i>
+                LinkedIn Profile
+              </label>
+              <Input
+                type="url"
+                value={formData.linkedin}
+                onChange={(e) => handleInputChange("linkedin", e.target.value)}
+                placeholder="https://linkedin.com/in/username"
+                error={getFieldError("linkedin")}
+                className="bg-slate-900/60 border-slate-700/50 hover:border-slate-600 transition-all"
+              />
+            </div>
+            <div>
+              <label className="flex items-center gap-2 text-sm font-medium text-slate-300 mb-2.5">
+                <i className="fas fa-phone text-xs text-blue-400/60"></i>
+                Phone Number
+              </label>
+              <Input
+                type="tel"
+                value={formData.phone}
+                onChange={(e) => handleInputChange("phone", e.target.value)}
+                placeholder="+1 (555) 123-4567"
+                error={getFieldError("phone")}
+                className="bg-slate-900/60 border-slate-700/50 hover:border-slate-600 transition-all"
+              />
+            </div>
+          </div>
+        </Card>
+
+        {/* Distinctions Section */}
+        <Card variant="glass" padding="md" className="border-indigo-500/10">
+          <div className="flex items-center gap-3 mb-5 pb-3 border-b border-white/5">
+            <div className="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center text-amber-400">
+              <i className="fas fa-award text-sm"></i>
+            </div>
+            <h3 className="text-base font-semibold text-white">Achievements & Distinctions</h3>
+          </div>
+          
           <DistinctionsEditor
             distinctions={formData.distinctions}
             onChange={handleDistinctionsChange}
           />
-        </div>
+        </Card>
 
-        <div className="flex flex-col sm:flex-row gap-3 sm:justify-end">
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row gap-4 sm:justify-end pt-4">
           <Button
             type="button"
             variant="secondary"
             onClick={handleCancel}
-            className="w-full sm:w-auto"
+            className="w-full sm:w-auto px-8 bg-slate-800/50 border-slate-700 hover:bg-slate-700/50"
           >
-            Cancel
+            Cancel Changes
           </Button>
           <Button
             type="submit"
             disabled={isSaving}
-            className="w-full sm:w-auto"
+            className="w-full sm:w-auto px-10 bg-indigo-600 hover:bg-indigo-500 shadow-lg shadow-indigo-500/20 transition-all duration-300"
           >
             {isSaving ? (
-              <>
-                <i className="fas fa-spinner fa-spin mr-2"></i>
-                Saving...
-              </>
+              <span className="flex items-center gap-2">
+                <i className="fas fa-circle-notch fa-spin"></i>
+                Saving Profile...
+              </span>
             ) : (
-              <>
-                <i className="fas fa-save mr-2"></i>
+              <span className="flex items-center gap-2">
+                <i className="fas fa-check-circle"></i>
                 Save Profile
-              </>
+              </span>
             )}
           </Button>
         </div>
