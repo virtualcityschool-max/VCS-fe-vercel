@@ -63,39 +63,43 @@ const ParentAttendance = () => {
 
   return (
     <div className="text-white px-4 sm:px-6 py-8 space-y-6">
-      <div>
-        <h1 className="text-2xl font-black font-poppins">Child Attendance</h1>
-        <p className="text-slate-400 text-sm mt-1">Monitor your child's session attendance.</p>
-      </div>
-
-      {/* Filters */}
-      <div className="flex flex-wrap items-end gap-3">
-        <div className="flex flex-col gap-1">
-          <span className="text-[10px] uppercase tracking-widest text-slate-500 font-bold px-0.5">Child</span>
-          <FilterSelect
-            value={childId}
-            onChange={(e) => { setChildId(e.target.value); setCourseId(""); }}
-            style={{ width: 180 }}
-          >
-            {children.map((c) => (
-              <option key={c.id} value={c.id}>{c.username || c.name || `Child ${c.id}`}</option>
-            ))}
-          </FilterSelect>
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-black font-poppins">Child Attendance</h1>
+          <p className="text-slate-400 text-sm mt-1">Monitor your child's session attendance.</p>
         </div>
 
-        <div className="flex flex-col gap-1">
-          <span className="text-[10px] uppercase tracking-widest text-slate-500 font-bold px-0.5">Course</span>
-          <FilterSelect
-            value={courseId}
-            onChange={(e) => setCourseId(e.target.value)}
-            disabled={!courses.length}
-            style={{ width: 200 }}
-          >
-            {courses.length === 0
-              ? <option value="">No courses</option>
-              : courses.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)
-            }
-          </FilterSelect>
+        {/* Filters */}
+        <div className="flex flex-wrap items-end gap-3">
+          <div className="flex flex-col gap-1">
+            <span className="text-[10px] uppercase tracking-widest text-slate-500 font-bold px-0.5">Child</span>
+            <FilterSelect
+              value={childId}
+              onChange={(e) => { setChildId(e.target.value); setCourseId(""); }}
+              style={{ width: 300 }}
+            >
+              {children.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {`${c.username || c.name} (ID: ${c.id})`}
+                </option>
+              ))}
+            </FilterSelect>
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <span className="text-[10px] uppercase tracking-widest text-slate-500 font-bold px-0.5">Course</span>
+            <FilterSelect
+              value={courseId}
+              onChange={(e) => setCourseId(e.target.value)}
+              disabled={!courses.length}
+              style={{ width: 200 }}
+            >
+              {courses.length === 0
+                ? <option value="">No courses</option>
+                : courses.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)
+              }
+            </FilterSelect>
+          </div>
         </div>
       </div>
 

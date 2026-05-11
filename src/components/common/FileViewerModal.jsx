@@ -1,4 +1,5 @@
 import React from "react";
+import { createPortal } from "react-dom";
 import DocViewer, { DocViewerRenderers } from "@cyntler/react-doc-viewer";
 
 const FILE_ICON = {
@@ -127,49 +128,52 @@ const FileViewerModal = ({ filePath, handleClose }) => {
     return <DownloadOnly url={filePath} filename={filename} iconClass={iconClass} reason="This file type cannot be previewed." />;
   };
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
       onClick={handleClose}
     >
       <div
-        className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-4xl flex flex-col shadow-2xl"
-        style={{ height: "85vh" }}
+        className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-5xl flex flex-col shadow-2xl animate-in fade-in zoom-in duration-300"
+        style={{ height: "90vh" }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3 border-b border-slate-800 flex-shrink-0 rounded-t-3xl">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 flex-shrink-0 rounded-t-3xl bg-slate-900/50 backdrop-blur-md">
           <div className="flex items-center gap-3 min-w-0">
-            <i className={`fas ${iconClass} text-slate-400 flex-shrink-0`} />
-            <span className="text-white text-sm font-semibold truncate max-w-xs" title={filename}>
+            <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center flex-shrink-0">
+              <i className={`fas ${iconClass} text-indigo-400 text-sm`} />
+            </div>
+            <span className="text-white text-sm font-bold truncate max-w-md" title={filename}>
               {filename}
             </span>
           </div>
-          <div className="flex items-center gap-2 flex-shrink-0 ml-4">
+          <div className="flex items-center gap-3 flex-shrink-0">
             <button
               type="button"
               onClick={() => triggerDownload(filePath, filename)}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition shadow-lg shadow-indigo-500/20"
             >
-              <i className="fas fa-download text-xs" />
+              <i className="fas fa-download text-[10px]" />
               Download
             </button>
             <button
               type="button"
               onClick={handleClose}
-              className="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition"
+              className="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-800 hover:bg-rose-600/20 text-slate-400 hover:text-rose-400 transition-all border border-slate-700 hover:border-rose-500/30"
             >
-              <i className="fas fa-times text-xs" />
+              <i className="fas fa-times text-sm" />
             </button>
           </div>
         </div>
 
         {/* Body — relative so sub-viewers can use absolute inset-0 */}
-        <div className="flex-1 min-h-0 relative overflow-hidden rounded-b-3xl">
+        <div className="flex-1 min-h-0 relative overflow-hidden rounded-b-3xl bg-slate-950/50">
           {renderBody()}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
