@@ -31,14 +31,17 @@ export const extractApiErrorMessage = (error) => {
     Object.entries(details).forEach(([key, v]) => {
       if (ignoredKeys.includes(key)) return;
 
+      // Format the key for display (replace underscores with spaces and capitalize)
+      const label = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+
       if (Array.isArray(v)) {
         v.forEach((m) => {
           if (typeof m === "string") {
-            // If the key is specific, we keep it; if generic, we omit it
             if (["non_field_errors", "detail", "error", "message"].includes(key)) {
               messages.push(m);
             } else {
-              messages.push(`${m}`);
+              // Changed this line to include the key
+              messages.push(`${label}: ${m}`);
             }
           }
         });
@@ -46,7 +49,8 @@ export const extractApiErrorMessage = (error) => {
         if (["non_field_errors", "detail", "error", "message"].includes(key)) {
           messages.push(v);
         } else {
-          messages.push(v);
+          // Changed this line to include the key
+          messages.push(`${label}: ${v}`);
         }
       }
     });

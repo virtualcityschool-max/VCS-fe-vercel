@@ -156,7 +156,7 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
           <label className="block text-sm font-medium text-slate-300 mb-2">
             Instructor <span className="text-red-400">*</span>
           </label>
-          {mode === "edit" && formData.has_session ? (
+          {mode === "edit" && (formData.has_session || formData.enrolled_students_count) ? (
             <>
               <input
                 type="text"

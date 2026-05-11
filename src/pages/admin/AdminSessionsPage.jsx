@@ -29,6 +29,7 @@ const AdminSessionsPage = () => {
   const [editingSession, setEditingSession] = useState(null);
   const [loadingSessionIds, setLoadingSessionIds] = useState(new Set());
   const [updatingSessionId, setUpdatingSessionId] = useState(null);
+  const [isCreatingSession, setIsCreatingSession] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState({ open: false, sessionId: null, sessionTitle: "" });
 
   // Private students state for course-specific dropdown
@@ -276,10 +277,15 @@ const localDate = new Date(`${sessionData.scheduled_date}T${sessionData.time}`);
       recurrence_end_date: sessionData.recurrence_end_date,
     };
     try {
+      setIsCreatingSession(true);
       await dispatch(createSession(payload)).unwrap();
       toastManager.success("Class created successfully");
       setActiveModal(null);
-      dispatch(fetchSessions());
+      const params = {};
+      if (sessionFilters.teacher) params.teacher = sessionFilters.teacher;
+      if (sessionFilters.course) params.course = sessionFilters.course;
+      if (sessionFilters.view) params.view = sessionFilters.view;
+      dispatch(fetchSessions(params));
       setCreateSessionForm({
         course: "",
         title: "",
@@ -294,6 +300,8 @@ const localDate = new Date(`${sessionData.scheduled_date}T${sessionData.time}`);
       clearAllCreateSessionErrors();
     } catch (error) {
       showApiError(error);
+    } finally {
+      setIsCreatingSession(false);
     }
   };
 
@@ -315,18 +323,23 @@ const localDate = new Date(`${sessionData.scheduled_date}T${sessionData.time}`);
 
     setUpdatingSessionId(editingSession.id);
 
-    // Omit course and instructor_id — they are read-only in the edit form
-    // and re-sending them triggers the backend's instructor-overlap validator.
-    // scheduled_at is included so the user can change the date/time;
-    // the backend must exclude the current session from its overlap check.
+    // Omit instructor_id — it is read-only in the edit form and re-sending it
+    // triggers the backend's instructor-overlap validator against itself.
+    // Course is editable and included when changed.
+    // The backend must exclude the current session from its overlap check.
     const payload = {
       title: sessionData.title,
       description: sessionData.description || "",
       is_recurring: true,
       recurrence_days: sessionData.recurrence_days || [],
       recurrence_end_date: sessionData.recurrence_end_date,
-      instructor_id: sessionData.teacher || sessionData.instructor_id
     };
+    if (sessionData.course_id) {
+      payload.course = Number(sessionData.course_id);
+    }
+    if (sessionData.instructor_id) {
+      payload.instructor_id = Number(sessionData.instructor_id);
+    }
     if (sessionData.start_date && sessionData.time) {
       const localDate = new Date(`${sessionData.start_date}T${sessionData.time}`);
       payload.scheduled_at = formatLocalISO(localDate);
@@ -374,6 +387,7 @@ const localDate = new Date(`${sessionData.scheduled_date}T${sessionData.time}`);
       if (sessionFilters.course) params.course = sessionFilters.course;
       if (sessionFilters.view) params.view = sessionFilters.view;
       dispatch(fetchSessions(params));
+      dispatch(fetchCourses());
     } catch (error) {
       showApiError(error);
     } finally {
@@ -397,6 +411,7 @@ const localDate = new Date(`${sessionData.scheduled_date}T${sessionData.time}`);
       loading={sessions?.loading || false}
       loadingSessionIds={loadingSessionIds}
       updatingSessionId={updatingSessionId}
+      isCreatingSession={isCreatingSession}
       editSessionForm={editSessionForm}
       setEditSessionForm={setEditSessionForm}
       createSessionForm={createSessionForm}
