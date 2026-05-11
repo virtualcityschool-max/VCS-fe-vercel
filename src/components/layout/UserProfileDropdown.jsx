@@ -42,11 +42,11 @@ const UserProfileDropdown = ({ dropUp = false, isCollapsed = false }) => {
   const handleSignOut = async () => {
     setIsDropdownOpen(false);
 
-    const toastId = toastManager.loading("Signing out...");
+    // const toastId = toastManager.loading("Signing out...");
 
     try {
       const result = await dispatch(logoutUser()).unwrap();
-      toastManager.dismiss(toastId);
+      // toastManager.dismiss(toastId);
 
       // Always navigate to home regardless of backend success
       navigate("/");
