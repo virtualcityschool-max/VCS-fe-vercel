@@ -4,6 +4,7 @@ import { fetchUserProfile } from "../../store/slices/authSlice";
 import { authService } from "../../services/authService";
 import { toastManager } from "../../utils/toastManager";
 import { showApiError } from "../../utils/apiErrorHandler";
+import { useFieldErrors } from "../../hooks";
 
 // ── Tiny helpers ──────────────────────────────────────────────────────────────
 
@@ -26,6 +27,7 @@ const Field = ({ label, icon, children }) => (
     <label className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
       <i className={`fas fa-${icon} text-slate-600`} />
       {label}
+      {children.props?.required && <span className="text-rose-500 ml-0.5">*</span>}
     </label>
     {children}
   </div>
@@ -40,14 +42,14 @@ const FIELDS = {
   teacher: [
     { key: "bio",              label: "Bio",               icon: "align-left",    type: "textarea",  placeholder: "Tell students about yourself…" },
     { key: "expertise",        label: "Expertise",         icon: "star",          type: "text",      placeholder: "e.g. Mathematics, Physics" },
-    { key: "experience_years", label: "Years of Experience", icon: "briefcase",   type: "number",    placeholder: "0" },
+    { key: "experience_years", label: "Years of Experience", icon: "briefcase",   type: "number",    placeholder: "0", required: true },
     { key: "linkedin",         label: "LinkedIn URL",      icon: "linkedin",      type: "url",       placeholder: "https://linkedin.com/in/…" },
     { key: "phone",            label: "Phone",             icon: "phone",         type: "tel",       placeholder: "+92 300 0000000" },
   ],
   student: [
     { key: "grade_level",   label: "Grade Level",   icon: "graduation-cap", type: "text", placeholder: "e.g. Grade 8, A-Level" },
     { key: "phone",         label: "Phone",         icon: "phone",          type: "tel",  placeholder: "+92 300 0000000" },
-    { key: "date_of_birth", label: "Date of Birth", icon: "calendar-alt",   type: "date", placeholder: "" },
+    { key: "date_of_birth", label: "Date of Birth", icon: "calendar-alt",   type: "date", placeholder: "", required: true },
   ],
   parent: [
     { key: "phone",   label: "Phone",   icon: "phone",         type: "tel",  placeholder: "+92 300 0000000" },
@@ -66,6 +68,14 @@ const ProfilePage = () => {
   const [editing, setEditing]   = useState(false);
   const [saving, setSaving]     = useState(false);
   const [form, setForm]         = useState({});
+
+  const {
+    errors,
+    setErrors,
+    clearFieldError,
+    clearAllErrors,
+    getFieldError,
+  } = useFieldErrors({});
 
   // ── Fetch full profile ──────────────────────────────────────────────────────
   useEffect(() => {
@@ -102,25 +112,48 @@ const ProfilePage = () => {
 
   // ── Save ───────────────────────────────────────────────────────────────────
   const handleSave = async () => {
+    // Validation
+    const newErrors = {};
+    if (role === "teacher" && (form.experience_years === "" || form.experience_years === null)) {
+      newErrors.experience_years = "Experience years is required";
+    }
+    if (role === "student" && (form.date_of_birth === "" || form.date_of_birth === null)) {
+      newErrors.date_of_birth = "Date of birth is required";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      toastManager.error("Please fix the errors in the form");
+      return;
+    }
+
     setSaving(true);
     try {
       const payload = {};
       (FIELDS[role] || []).forEach(({ key, type }) => {
         const val = form[key];
-        if (val !== "" && val !== null && val !== undefined) {
+        // Ensure empty values are sent as '' as requested
+        if (val === "" || val === null || val === undefined) {
+          payload[key] = "";
+        } else {
           payload[key] = type === "number" ? Number(val) : val;
         }
       });
       await authService.updateRoleProfile(role, payload);
       toastManager.success("Profile updated successfully");
       setEditing(false);
+      clearAllErrors();
       // re-fetch to reflect saved state
       const fresh = await authService.getMe();
       setProfile(fresh);
       initForm(fresh);
       dispatch(fetchUserProfile());
     } catch (err) {
-      showApiError(err);
+      if (err.originalError?.response?.data?.details) {
+        setErrors(err.originalError.response.data.details);
+      } else {
+        showApiError(err);
+      }
     } finally {
       setSaving(false);
     }
@@ -129,6 +162,7 @@ const ProfilePage = () => {
   const handleCancel = () => {
     initForm(profile);
     setEditing(false);
+    clearAllErrors();
   };
 
   // ── Derived ────────────────────────────────────────────────────────────────
@@ -215,24 +249,31 @@ const ProfilePage = () => {
               Profile Details
             </h2>
 
-            {fields.map(({ key, label, icon, type, placeholder }) => (
+            {fields.map(({ key, label, icon, type, placeholder, required }) => (
               <Field key={key} label={label} icon={icon}>
+                <div required={required}>
                 {editing ? (
                   type === "textarea" ? (
                     <textarea
                       rows={4}
                       placeholder={placeholder}
                       value={form[key] || ""}
-                      onChange={(e) => setForm((p) => ({ ...p, [key]: e.target.value }))}
-                      className={inputCls}
+                      onChange={(e) => {
+                        setForm((p) => ({ ...p, [key]: e.target.value }));
+                        clearFieldError(key);
+                      }}
+                      className={`${inputCls} ${errors[key] ? "border-red-500 ring-1 ring-red-500/20" : ""}`}
                     />
                   ) : (
                     <input
                       type={type}
                       placeholder={placeholder}
                       value={form[key] || ""}
-                      onChange={(e) => setForm((p) => ({ ...p, [key]: e.target.value }))}
-                      className={inputCls}
+                      onChange={(e) => {
+                        setForm((p) => ({ ...p, [key]: e.target.value }));
+                        clearFieldError(key);
+                      }}
+                      className={`${inputCls} ${errors[key] ? "border-red-500 ring-1 ring-red-500/20" : ""}`}
                     />
                   )
                 ) : (
@@ -240,6 +281,13 @@ const ProfilePage = () => {
                     {roleProfile[key] ?? <span className="text-slate-600 italic">Not set</span>}
                   </div>
                 )}
+                {editing && errors[key] && (
+                  <p className="mt-1.5 text-[11px] text-red-400 font-medium flex items-center gap-1.5">
+                    <i className="fas fa-exclamation-circle" />
+                    {getFieldError(key)}
+                  </p>
+                )}
+                </div>
               </Field>
             ))}
 

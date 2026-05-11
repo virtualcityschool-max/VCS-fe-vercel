@@ -111,8 +111,8 @@ const TeacherProfileTab = ({ profile, onUpdate, onCancel, onSaved }) => {
         ...formData,
         experience_years: formData.experience_years
           ? parseInt(formData.experience_years)
-          : null,
-        rating: formData.rating ? parseFloat(formData.rating) : null,
+          : "",
+        rating: formData.rating ? parseFloat(formData.rating) : "",
       };
 
       await onUpdate(updateData);
