@@ -830,7 +830,7 @@ const CoursesTab = ({
                       )}
                       <div className="flex items-center gap-2">
                         <i className="fas fa-tag text-purple-400"></i>
-                        <span>{course.category?.name ?? "—"}</span>
+                        <span>{course.category?.name?? course.category}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <i className="fas fa-dollar-sign text-amber-400"></i>
@@ -960,8 +960,8 @@ const CoursesTab = ({
                       )}
                     </td>
                     <td className="px-6 py-4">
-                      <span className="bg-slate-700/50 text-slate-300 px-2 py-1 rounded-full text-xs font-medium border border-slate-600">
-                        {course.category?.name ?? "—"}
+                      <span className="bg-slate-700/50 text-slate-300 px-2 py-1 rounded-full text-xs font-medium border border-slate-600 md:text-nowrap">
+                        {course.category?.name ?? course.category}
                       </span>
                     </td>
                     <td className="px-6 py-4">

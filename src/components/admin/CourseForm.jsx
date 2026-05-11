@@ -115,7 +115,7 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
             >
               <option value="">Select category</option>
               {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>{cat.name}</option>
+                <option key={cat.id} value={String(cat.id)}>{cat.name}</option>
               ))}
             </FilterSelect>
             <FieldError error={errors.category} />
@@ -142,6 +142,7 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
             <Input
               type="number"
               placeholder="0"
+              max="10000000"
               value={formData.price || ""}
               onChange={(e) => onChange("price", e.target.value)}
               className={fieldClass(errors.price)}
