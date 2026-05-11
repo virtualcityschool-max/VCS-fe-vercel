@@ -522,12 +522,21 @@ const AuthModals = () => {
               </div>
 
               <div>
-                <label
-                  htmlFor="login-password"
-                  className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block"
-                >
-                  Password
-                </label>
+                <div className="flex justify-between items-center mb-2">
+                  <label
+                    htmlFor="login-password"
+                    className="text-[10px] font-black uppercase text-slate-500 tracking-widest block"
+                  >
+                    Password
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => { setFpStep("request"); setFpEmail(email); setFpError(""); }}
+                    className="text-[10px] font-black uppercase text-indigo-400 hover:text-indigo-300 transition tracking-widest"
+                  >
+                    Forgot Password?
+                  </button>
+                </div>
                 <div className="relative">
                   <input
                     id="login-password"
@@ -588,14 +597,17 @@ const AuthModals = () => {
                 )}
               </button>
 
-              <div className="text-center">
-                <button
-                  type="button"
-                  onClick={() => { setFpStep("request"); setFpEmail(email); setFpError(""); }}
-                  className="text-xs text-slate-500 hover:text-indigo-400 transition"
-                >
-                  Forgot password?
-                </button>
+              <div className="text-center mt-6">
+                <p className="text-slate-500 text-xs">
+                  Don't have an account with any role?{" "}
+                  <button
+                    type="button"
+                    onClick={() => dispatch(setAuthModal({ type: "register" }))}
+                    className="text-indigo-400 hover:text-indigo-300 font-bold transition"
+                  >
+                    Sign Up
+                  </button>
+                </p>
               </div>
             </form>
 
@@ -1032,6 +1044,19 @@ const AuthModals = () => {
                       "REGISTER NOW"
                     )}
                   </button>
+                </div>
+
+                <div className="md:col-span-2 text-center mt-4">
+                  <p className="text-slate-500 text-xs">
+                    Already have an account?{" "}
+                    <button
+                      type="button"
+                      onClick={() => dispatch(setAuthModal({ type: "login" }))}
+                      className="text-indigo-400 hover:text-indigo-300 font-bold transition"
+                    >
+                      Sign In
+                    </button>
+                  </p>
                 </div>
               </form>
             )}
