@@ -21,6 +21,7 @@ import { toastManager } from "../../utils/toastManager";
 import ConfirmDialog from "../../components/common/ConfirmDialog";
 import SessionsTab from "../../components/admin/SessionsTab";
 import { showApiError } from "../../utils/apiErrorHandler";
+import { formatLocalISO } from "../../utils/validation";
 const AdminSessionsPage = () => {
   const dispatch = useDispatch();
 
@@ -144,24 +145,27 @@ const AdminSessionsPage = () => {
       return;
     }
 
-    // Parse scheduled datetime into separate date + time for the form
+    // Parse scheduled datetime into separate date + time for the form.
+    // Parse directly from the ISO string to preserve the original offset (e.g. +05:00)
+    // instead of letting JS convert it to local/UTC time.
     const rawDateTime = session.start_time || session.scheduled_at;
     let startDate = "";
     let startTime = "";
     if (rawDateTime) {
-      try {
-        const d = new Date(rawDateTime);
-        startDate = d.toISOString().slice(0, 10);
-        startTime = `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
-      } catch {}
+      const match = rawDateTime.match(/^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})/);
+      if (match) {
+        startDate = match[1];
+        startTime = match[2];
+      }
     }
 
     setEditingSession(session);
+
     setEditSessionForm({
       course_id: session.course?.id || session.course_id || "",
       course_title: session.course?.title || session.course_title || "",
       teacher_name: session.teacher_name || "",
-      instructor_id: session.instructor_id || "",
+      instructor_id: session.instructor_id || session.teacher,
       title: session.title || "",
       description: session.description || "",
       start_date: startDate,
@@ -260,18 +264,17 @@ const AdminSessionsPage = () => {
       toastManager.error("Selected course has no instructor assigned");
       return;
     }
-
+const localDate = new Date(`${sessionData.scheduled_date}T${sessionData.time}`);
     const payload = {
       course: Number(sessionData.course),
       instructor_id,
       title: sessionData.title,
-      scheduled_at: sessionData.scheduled_date,
-      time: sessionData.time,
+      scheduled_at: formatLocalISO(localDate),
+      // time: sessionData.time,
       is_recurring: sessionData.is_recurring,
       recurrence_days: sessionData.is_recurring ? (sessionData.recurrence_days || []) : [],
       recurrence_end_date: sessionData.recurrence_end_date,
     };
-
     try {
       await dispatch(createSession(payload)).unwrap();
       toastManager.success("Class created successfully");
@@ -312,21 +315,21 @@ const AdminSessionsPage = () => {
 
     setUpdatingSessionId(editingSession.id);
 
+    // Omit course and instructor_id — they are read-only in the edit form
+    // and re-sending them triggers the backend's instructor-overlap validator.
+    // scheduled_at is included so the user can change the date/time;
+    // the backend must exclude the current session from its overlap check.
     const payload = {
       title: sessionData.title,
       description: sessionData.description || "",
       is_recurring: true,
       recurrence_days: sessionData.recurrence_days || [],
       recurrence_end_date: sessionData.recurrence_end_date,
+      instructor_id: sessionData.teacher || sessionData.instructor_id
     };
-    if (sessionData.course_id) {
-      payload.course = Number(sessionData.course_id);
-    }
     if (sessionData.start_date && sessionData.time) {
-      payload.scheduled_at = `${sessionData.start_date}T${sessionData.time}:00Z`;
-    }
-    if (sessionData.instructor_id) {
-      payload.instructor_id = Number(sessionData.instructor_id);
+      const localDate = new Date(`${sessionData.start_date}T${sessionData.time}`);
+      payload.scheduled_at = formatLocalISO(localDate);
     }
 
     try {

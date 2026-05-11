@@ -133,3 +133,21 @@ export const validateRegistrationForm = (formData) => {
     errors,
   };
 };
+
+export const formatLocalISO = (date) => {
+    const offset = -date.getTimezoneOffset();
+    const absOffset = Math.abs(offset);
+    const hours = Math.floor(absOffset / 60).toString().padStart(2, '0');
+    const mins = (absOffset % 60).toString().padStart(2, '0');
+    const sign = offset >= 0 ? '+' : '-';
+    
+    // Manually build the string so it doesn't convert to UTC
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    const hh = date.getHours().toString().padStart(2, '0');
+    const mm = date.getMinutes().toString().padStart(2, '0');
+    const ss = date.getSeconds().toString().padStart(2, '0');
+
+    return `${year}-${month}-${day}T${hh}:${mm}:${ss}${sign}${hours}:${mins}`;
+}
