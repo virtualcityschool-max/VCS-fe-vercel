@@ -50,23 +50,16 @@ const StudentAttendance = () => {
 
   return (
     <div className="text-white px-4 sm:px-6 py-8 space-y-6">
-      <div>
-        <h1 className="text-2xl font-black font-poppins">My Attendance</h1>
-        <p className="text-slate-400 text-sm mt-1">Track your session attendance across all courses.</p>
-      </div>
-
-      {/* Course filter */}
-      <div className="flex flex-wrap items-end gap-3">
-        <div className="flex flex-col gap-1">
-          <span className="text-[10px] uppercase tracking-widest text-slate-500 font-bold px-0.5">Course</span>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-black font-poppins">My Attendance</h1>
+          <p className="text-slate-400 text-sm mt-1">Track your session attendance across all courses.</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
           {coursesLoading ? (
             <div className="h-10 w-48 bg-slate-800 rounded-xl animate-pulse" />
           ) : (
-            <FilterSelect
-              value={courseId}
-              onChange={(e) => setCourseId(e.target.value)}
-              style={{ width: 200 }}
-            >
+            <FilterSelect value={courseId} onChange={(e) => setCourseId(e.target.value)} style={{ minWidth: 160 }}>
               {courses.length === 0
                 ? <option value="">No enrolled courses</option>
                 : courses.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)

@@ -259,22 +259,37 @@ const SessionsTab = ({
           </div>
         )}
 
+        {/* Status filter */}
+        <div className="flex items-center gap-2 shrink-0">
+          {/* <span className="text-xs font-semibold text-slate-500 hidden sm:inline">Status</span> */}
+          <FilterSelect
+            style={{ minWidth: "130px" }}
+            value={sessionFilters.status}
+            onChange={(e) => setSessionFilters({ ...sessionFilters, status: e.target.value })}
+          >
+            <option value="">All Status</option>
+            <option value="scheduled">Scheduled</option>
+            <option value="live">Live</option>
+            <option value="ended">Ended</option>
+          </FilterSelect>
+        </div>
+
         {/* View filter */}
         <div className="flex items-center gap-2 shrink-0">
-          <span className="text-xs font-semibold text-slate-500 hidden sm:inline">Session Type</span>
+          {/* <span className="text-xs font-semibold text-slate-500 hidden sm:inline">Session Type</span> */}
           <FilterSelect
             style={{ minWidth: "130px" }}
             value={sessionFilters.view}
             onChange={(e) => setSessionFilters({ ...sessionFilters, view: e.target.value })}
           >
-            <option value="">All</option>
-            <option value="parent">Parent</option>
+            <option value="">All Sessions</option>
+            <option value="parent">Parent Session</option>
           </FilterSelect>
         </div>
 
         {/* Course filter */}
         <div className="flex items-center gap-2 shrink-0">
-          <span className="text-xs font-semibold text-slate-500 hidden sm:inline">Course</span>
+          {/* <span className="text-xs font-semibold text-slate-500 hidden sm:inline">Course</span> */}
           <FilterSelect
             style={{ minWidth: "180px" }}
             value={sessionFilters.course}
@@ -289,7 +304,7 @@ const SessionsTab = ({
 
         {/* Instructor filter */}
         <div className="flex items-center gap-2 shrink-0">
-          <span className="text-xs font-semibold text-slate-500 hidden sm:inline">Instructor</span>
+          {/* <span className="text-xs font-semibold text-slate-500 hidden sm:inline">Instructor</span> */}
           <FilterSelect
             style={{ minWidth: "160px" }}
             value={sessionFilters.teacher}

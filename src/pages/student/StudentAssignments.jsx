@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { fetchStudentAssignments } from "../../store/slices/studentDashboardSlice";
+import { FilterSelect } from "../../components/ui";
 
 const StudentAssignments = ({ hideHeader = false }) => {
   const dispatch = useDispatch();
@@ -63,28 +64,30 @@ const StudentAssignments = ({ hideHeader = false }) => {
     );
   }
 
+  const filterRow = (
+    <div className="flex flex-wrap items-center gap-2 shrink-0">
+      <FilterSelect value={filterCourse} onChange={(e) => setFilterCourse(e.target.value)} style={{ minWidth: 160 }}>
+        <option value="">All Courses</option>
+        {courseOptions.map((c) => (
+          <option key={c.id} value={c.id}>{c.title}</option>
+        ))}
+      </FilterSelect>
+    </div>
+  );
+
   return (
     <div className={`text-white ${hideHeader ? "" : "px-6 py-8"}`}>
-      {!hideHeader && (
-        <div className="mb-10">
-          <h1 className="text-3xl font-black font-poppins mb-2">All Assignments</h1>
-          <p className="text-slate-400 text-sm">View and manage all your assignments in one place.</p>
+      {!hideHeader ? (
+        <div className="mb-10 flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-black font-poppins mb-2">All Assignments</h1>
+            <p className="text-slate-400 text-sm">View and manage all your assignments in one place.</p>
+          </div>
+          {filterRow}
         </div>
+      ) : (
+        <div className="mb-5">{filterRow}</div>
       )}
-
-      {/* Course filter */}
-      <div className="mb-5">
-        <select
-          value={filterCourse}
-          onChange={(e) => setFilterCourse(e.target.value)}
-          className="px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 appearance-none min-w-[180px]"
-        >
-          <option value="">All Courses</option>
-          {courseOptions.map((c) => (
-            <option key={c.id} value={c.id}>{c.title}</option>
-          ))}
-        </select>
-      </div>
 
       {/* List */}
       <div className="space-y-4">

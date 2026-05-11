@@ -49,7 +49,7 @@ const StudentAssessments = () => {
 
       {/* Tab content — suppress the sub-page header on StudentAssignments */}
       {activeTab === "assignments" && <StudentAssignments hideHeader />}
-      {activeTab === "quizzes"     && <StudentQuizList />}
+      {activeTab === "quizzes"     && <StudentQuizList hideHeader />}
     </div>
   );
 };
