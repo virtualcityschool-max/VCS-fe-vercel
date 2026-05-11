@@ -31,6 +31,7 @@ const AdminLayout = () => {
     if (path.includes("/admin/sessions")) return "sessions";
     if (path.includes("/admin/evaluations")) return "evaluations";
     if (path.includes("/admin/attendance")) return "attendance";
+    if (path.includes("/admin/categories")) return "categories";
     return "overview";
   };
 

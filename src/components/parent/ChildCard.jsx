@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchChildGrades,
@@ -93,6 +93,7 @@ const SkeletonLoader = () => (
 
 const ChildCard = ({ child }) => {
   const dispatch = useDispatch();
+  const [isGradesExpanded, setIsGradesExpanded] = useState(false);
 
   // Select child-specific data from Redux
   const childGrades = useSelector(selectChildGrades);
@@ -181,7 +182,7 @@ const ChildCard = ({ child }) => {
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return "N/A";
+    if (!dateString) return "0";
     return new Date(dateString).toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
@@ -208,8 +209,9 @@ const ChildCard = ({ child }) => {
   };
 
   return (
-    <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-lg hover:border-indigo-500/30 transition-all duration-300">
-      {/* Header with avatar and badge */}
+    <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-lg hover:border-indigo-500/30 transition-all duration-300 flex flex-col h-full">
+      <div className="flex-grow">
+        {/* Header with avatar and badge */}
       <div className="flex justify-between items-start mb-4">
         <div className="flex items-center gap-3">
           {child.avatar ? (
@@ -246,7 +248,7 @@ const ChildCard = ({ child }) => {
             GPA
           </p>
           <p className={`text-lg font-black ${getGpaColor(child.gpa)}`}>
-            {child.gpa?.toFixed(2) || "N/A"}
+            {child.gpa?.toFixed(2) || "0.00"}
           </p>
         </div>
         <div className="bg-slate-900/50 p-3 rounded-xl border border-slate-700">
@@ -265,7 +267,7 @@ const ChildCard = ({ child }) => {
             >
               {attendance?.percentage?.toFixed(1) ||
                 child.attendance?.percentage?.toFixed(1) ||
-                "N/A"}
+                "0"}
               %
             </p>
           )}
@@ -345,51 +347,73 @@ const ChildCard = ({ child }) => {
             <p className="text-rose-400 text-xs">No data available</p>
           ) : (
             <div className="space-y-2">
-              {(grades || child.recent_grades || [])
-                .slice(0, 2)
-                .map((grade, index) => (
-                  <div
-                    key={index}
-                    className="bg-slate-900/30 border border-slate-700 rounded-lg p-2"
-                  >
-                    <p className="text-xs font-medium text-white truncate">
-                      {grade.assignment}
-                    </p>
-                    <p className="text-xs text-slate-400 truncate">
-                      {grade.course}
-                    </p>
-                    <div className="flex justify-between items-center mt-1">
-                      <span className="text-xs text-indigo-400 font-bold">
-                        {grade.score}/{grade.max_score} ({grade.percentage}%)
-                      </span>
-                      <span className="text-[10px] text-slate-500">
-                        {formatDate(grade.graded_at)}
-                      </span>
+              {/* Hide button on top when expanded */}
+              {isGradesExpanded && (
+                <button
+                  onClick={() => setIsGradesExpanded(false)}
+                  className="w-full py-1 text-[9px] font-black uppercase tracking-widest text-indigo-400/60 hover:text-indigo-400 flex items-center justify-center gap-2 transition-colors group mb-2"
+                >
+                  Hide Grades <i className="fas fa-chevron-up text-[7px] transition-transform group-hover:-translate-y-0.5"></i>
+                </button>
+              )}
+
+              {/* Grades List */}
+              <div 
+                className={`space-y-2 overflow-y-auto custom-scrollbar transition-all duration-300 ${
+                  isGradesExpanded ? "max-h-[160px]" : ""
+                }`}
+              >
+                {(grades || child.recent_grades || [])
+                  .slice(0, isGradesExpanded ? undefined : 1)
+                  .map((grade, index) => (
+                    <div
+                      key={index}
+                      className="bg-slate-900/30 border border-slate-700 rounded-lg p-2 hover:border-slate-600 transition-colors"
+                    >
+                      <p className="text-xs font-medium text-white truncate">
+                        {grade.assignment}
+                      </p>
+                      <p className="text-xs text-slate-400 truncate">
+                        {grade.course}
+                      </p>
+                      <div className="flex justify-between items-center mt-1">
+                        <span className="text-xs text-indigo-400 font-bold">
+                          {grade.score}/{grade.max_score} ({grade.percentage}%)
+                        </span>
+                        <span className="text-[10px] text-slate-500">
+                          {formatDate(grade.graded_at)}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+              </div>
+
+              {/* View All button at bottom when collapsed */}
+              {!isGradesExpanded && (grades || child.recent_grades || []).length > 1 && (
+                <button
+                  onClick={() => setIsGradesExpanded(true)}
+                  className="w-full py-2 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-indigo-400 flex items-center justify-center gap-2 transition-colors border border-transparent hover:border-slate-700 rounded-lg group"
+                >
+                  View All ({(grades || child.recent_grades || []).length}){" "}
+                  <i className="fas fa-chevron-down text-[8px] transition-transform group-hover:translate-y-0.5"></i>
+                </button>
+              )}
             </div>
           )}
         </div>
       )}
+      </div>
 
-      {/* Footer */}
-      <div className="pt-3 border-t border-slate-700 flex justify-between items-center">
-        <p className="text-slate-500 text-[10px] uppercase tracking-widest">
-          Active Student
-        </p>
-        <div className="flex gap-2">
-          <button
-            onClick={handleUnlink}
-            disabled={isUnlinking}
-            className="px-3 py-1 text-xs font-medium text-red-400 border border-red-500/30 rounded-lg hover:bg-red-500/10 hover:text-red-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isUnlinking ? "Unlinking..." : "Unlink"}
-          </button>
-          <button className="text-indigo-400 hover:text-white transition-colors">
-            <i className="fas fa-arrow-right"></i>
-          </button>
-        </div>
+      {/* Bottom Action - Clear Unlink button aligned at the bottom */}
+      <div className="pt-4 border-t border-slate-700 mt-auto">
+        <button
+          onClick={handleUnlink}
+          disabled={isUnlinking}
+          className="w-full py-2.5 text-xs font-bold uppercase tracking-widest text-rose-400 bg-rose-500/5 hover:bg-rose-500/10 border border-rose-500/20 hover:border-rose-500/40 rounded-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+        >
+          <i className="fas fa-user-minus text-[10px]"></i>
+          {isUnlinking ? "Unlinking..." : "Unlink Child Profile"}
+        </button>
       </div>
     </div>
   );

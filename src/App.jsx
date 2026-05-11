@@ -31,6 +31,7 @@ import {
   AdminSessionsPage,
   AdminAttendancePage,
   AdminEvaluationPage,
+  AdminCategoriesPage,
   UserDetailsPage,
   StudentPortal,
   TeacherLayout,
@@ -142,6 +143,7 @@ const AppInner = () => {
     if (p.includes("/admin/sessions")) return "sessions";
     if (p.includes("/admin/attendance")) return "attendance";
     if (p.includes("/admin/evaluations")) return "evaluations";
+    if (p.includes("/admin/categories")) return "categories";
     return null;
   };
 
@@ -287,6 +289,7 @@ const AppInner = () => {
                 <Route path="sessions" element={<AdminSessionsPage />} />
                 <Route path="attendance" element={<AdminAttendancePage />} />
                 <Route path="evaluations" element={<AdminEvaluationPage />} />
+                <Route path="categories" element={<AdminCategoriesPage />} />
               </Route>
               <Route path="/admin/users/:id" element={<UserDetailsPage />} />
               <Route path="/admin/courses/:courseId" element={<AdminCourseDetailPage />} />
