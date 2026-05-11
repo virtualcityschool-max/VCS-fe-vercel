@@ -58,8 +58,14 @@ const TeacherProfileTab = ({ profile, onUpdate, onCancel, onSaved }) => {
 
     // Experience years validation
     if (
-      formData.experience_years &&
-      (isNaN(formData.experience_years) || formData.experience_years < 0)
+      formData.experience_years === "" ||
+      formData.experience_years === null ||
+      formData.experience_years === undefined
+    ) {
+      newErrors.experience_years = "Experience years is required";
+    } else if (
+      isNaN(formData.experience_years) ||
+      formData.experience_years < 0
     ) {
       newErrors.experience_years = "Experience years must be a positive number";
     }
@@ -190,7 +196,7 @@ const TeacherProfileTab = ({ profile, onUpdate, onCancel, onSaved }) => {
               className="bg-slate-900/60 border-slate-700"
             />
           </div>
-          <div>
+          {/* <div>
             <label className="block text-sm font-medium text-slate-300 mb-2">
               Rating (0.0 - 5.0)
             </label>
@@ -205,7 +211,7 @@ const TeacherProfileTab = ({ profile, onUpdate, onCancel, onSaved }) => {
               error={getFieldError("rating")}
               className="bg-slate-900/60 border-slate-700"
             />
-          </div>
+          </div> */}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
