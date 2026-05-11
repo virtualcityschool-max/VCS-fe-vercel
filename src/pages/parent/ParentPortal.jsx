@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchParentDashboard } from "../../store/slices/parentSlice";
-import { ChildCard, RecentActivity, OverviewStats } from "../../components";
+import { ChildCard, RecentActivity, OverviewStats, ParentDashboardHeader } from "../../components";
 import { LoadingSpinner, ErrorMessage, Button } from "../../components/ui";
 import ChildLinkRequest from "../../components/parent/ChildLinkRequest";
 
@@ -33,11 +33,19 @@ const ParentPortal = () => {
         id="parent-view"
         className="min-h-screen bg-[#0f172a] text-white font-inter"
       >
-        <div className="max-w-7xl mx-auto px-6 py-12">
-          <header className="mb-12">
-            <div className="h-8 bg-slate-700 rounded w-64 animate-pulse mb-2"></div>
-            <div className="h-4 bg-slate-700 rounded w-96 animate-pulse"></div>
-          </header>
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          <div className="bg-slate-800/40 rounded-[2.5rem] border border-slate-700/50 p-10 mb-12 animate-pulse">
+            <div className="flex items-center gap-6">
+              <div className="w-16 h-16 rounded-[2rem] bg-slate-700"></div>
+              <div className="space-y-3">
+                <div className="h-8 bg-slate-700 rounded w-64"></div>
+                <div className="flex gap-3">
+                  <div className="h-6 bg-slate-700 rounded w-24"></div>
+                  <div className="h-6 bg-slate-700 rounded w-24"></div>
+                </div>
+              </div>
+            </div>
+          </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-10 gap-8">
             <div className="lg:col-span-7 space-y-8">
@@ -98,7 +106,7 @@ const ParentPortal = () => {
         className="min-h-screen bg-[#0f172a] text-white font-inter relative overflow-hidden"
       >
         {/* Decorative elements */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-purple-600/10 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/3"></div>
+        <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-600/10 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/3"></div>
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-600/10 blur-[120px] rounded-full translate-y-1/2 -translate-x-1/3"></div>
 
         <div className="max-w-4xl mx-auto px-6 py-20 relative z-10">
@@ -112,21 +120,21 @@ const ParentPortal = () => {
           </header>
 
           <div className="bg-slate-800/40 backdrop-blur-xl border border-slate-700/50 rounded-[2.5rem] p-8 md:p-12 text-center shadow-2xl">
-            <div className="w-24 h-24 bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-3xl flex items-center justify-center mx-auto mb-8 border border-white/5 shadow-inner">
-              <i className="fas fa-user-plus text-purple-400 text-3xl"></i>
+            <div className="w-24 h-24 bg-gradient-to-br from-indigo-500/20 to-blue-500/20 rounded-3xl flex items-center justify-center mx-auto mb-8 border border-white/5 shadow-inner">
+              <i className="fas fa-user-plus text-indigo-400 text-3xl"></i>
             </div>
             
             <h2 className="text-2xl font-bold text-white mb-4">Start Your Journey</h2>
             <p className="text-slate-400 mb-10 max-w-md mx-auto leading-relaxed">
               To monitor attendance, grades, and course progress, please link your children using their 
-              <span className="text-purple-400 font-bold"> Student ID</span> or 
-              <span className="text-purple-400 font-bold"> Email</span>.
+              <span className="text-indigo-400 font-bold"> Student ID</span> or 
+              <span className="text-indigo-400 font-bold"> Email</span>.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
                 onClick={() => setIsLinkModalOpen(true)}
-                className="px-10 py-4 bg-purple-600 hover:bg-purple-500 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-purple-900/40 transition-all hover:scale-[1.02]"
+                className="px-10 py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-indigo-900/40 transition-all hover:scale-[1.02]"
               >
                 <i className="fas fa-link mr-2"></i> Request Child Linking
               </Button>
@@ -183,37 +191,27 @@ const ParentPortal = () => {
       id="parent-view"
       className="min-h-screen bg-[#0f172a] text-white font-inter"
     >
-      <div className="max-w-7xl mx-auto px-6 py-12">
-        <header className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div>
-            <p className="text-purple-500 font-black text-[10px] uppercase tracking-[0.4em] mb-2">
-              Management Dashboard
-            </p>
-            <h1 className="text-4xl md:text-5xl font-black font-poppins tracking-tight">
-              Welcome back, {userName}!
-            </h1>
-            <p className="text-slate-400 text-lg mt-2">
-              Monitoring <span className="text-white font-bold">{dashboardData.children.length} {dashboardData.children.length === 1 ? "student" : "students"}</span> at VirtualCitySchool.
-            </p>
-          </div>
-          <Button
-            onClick={() => setIsLinkModalOpen(true)}
-            className="bg-purple-600 hover:bg-purple-500 text-white px-8 py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-purple-900/40 transition-all hover:scale-[1.02]"
-          >
-            <i className="fas fa-link mr-2"></i> Request Child Link
-          </Button>
-        </header>
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        <ParentDashboardHeader 
+          dashboardData={dashboardData} 
+          userName={userName} 
+          onLinkRequest={() => setIsLinkModalOpen(true)} 
+        />
 
         <div className="grid grid-cols-1 lg:grid-cols-10 gap-8">
           {/* Main Dashboard - Left Column */}
           <div className="lg:col-span-7 space-y-12">
             {/* Children Cards */}
             <section>
-              <div className="flex items-center gap-3 mb-8">
-                <div className="w-1.5 h-6 bg-purple-500 rounded-full"></div>
-                <h2 className="text-2xl font-black font-poppins tracking-tight">
-                  Your Children
-                </h2>
+              <div className="flex items-center justify-between mb-10">
+                <div className="flex items-center gap-4">
+                  <div className="w-2 h-10 bg-gradient-to-b from-indigo-500 to-blue-500 rounded-full shadow-lg shadow-indigo-500/20"></div>
+                  <div>
+                    <h2 className="text-3xl font-black font-poppins tracking-tight text-white">
+                      Your Children
+                    </h2>
+                  </div>
+                </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {dashboardData.children.map((child, i) => (
@@ -225,9 +223,6 @@ const ParentPortal = () => {
 
           {/* Sidebar - Right Column */}
           <div className="lg:col-span-3 space-y-12">
-            {/* Overview Stats */}
-            <OverviewStats dashboardData={dashboardData} />
-
             {/* Recent Activity */}
             <RecentActivity activities={dashboardData.recent_activity} />
           </div>
