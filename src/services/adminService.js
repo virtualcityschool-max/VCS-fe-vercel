@@ -295,7 +295,7 @@ export const adminService = {
       );
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Create Enrollment" });
+      throw error
     }
   },
 
@@ -312,7 +312,7 @@ export const adminService = {
       );
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Unenroll Student" });
+      throw error
     }
   },
 
