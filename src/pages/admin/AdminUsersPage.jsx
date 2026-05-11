@@ -119,18 +119,23 @@ const AdminUsersPage = () => {
   //   handleFetchUsers();
   // }, [handleFetchUsers]);
 
-  // Re-fetch only when role / status / ordering actually change (not on mount)
+  // Re-fetch when any filter changes (not on mount — AdminLayout owns the initial fetch)
   useEffect(() => {
-    const current = { role: usersFilters.role, is_active: usersFilters.is_active, ordering: usersFilters.ordering };
+    const current = { role: usersFilters.role, is_active: usersFilters.is_active, ordering: usersFilters.ordering, search: usersFilters.search };
     const prev = prevFilterRef.current;
     prevFilterRef.current = current;
 
-    if (prev === null) return; // first render — AdminLayout owns the initial fetch
+    if (prev === null) return;
 
-    if (prev.role !== current.role || prev.is_active !== current.is_active || prev.ordering !== current.ordering) {
+    if (
+      prev.role !== current.role ||
+      prev.is_active !== current.is_active ||
+      prev.ordering !== current.ordering ||
+      prev.search !== current.search
+    ) {
       handleFetchUsers();
     }
-  }, [usersFilters.role, usersFilters.is_active, usersFilters.ordering, handleFetchUsers]);
+  }, [usersFilters.role, usersFilters.is_active, usersFilters.ordering, usersFilters.search, handleFetchUsers]);
 
   // Fetch available students when create user modal opens
   useEffect(() => {
