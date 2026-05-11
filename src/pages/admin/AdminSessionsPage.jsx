@@ -57,6 +57,7 @@ const AdminSessionsPage = () => {
     teacher: "",
     course: "",
     view: "",
+    status: "",
   });
 
   // Get data from Redux store
@@ -89,14 +90,15 @@ const AdminSessionsPage = () => {
     dispatch(fetchAvailableStudents());
   }, [dispatch]);
 
-  // Re-fetch sessions when teacher, course, or view filter changes
+  // Re-fetch sessions when server-side filters change
   useEffect(() => {
     const params = {};
     if (sessionFilters.teacher) params.teacher = sessionFilters.teacher;
     if (sessionFilters.course) params.course = sessionFilters.course;
     if (sessionFilters.view) params.view = sessionFilters.view;
+    if (sessionFilters.status) params.status = sessionFilters.status;
     dispatch(fetchSessions(params));
-  }, [dispatch, sessionFilters.teacher, sessionFilters.course, sessionFilters.view]);
+  }, [dispatch, sessionFilters.teacher, sessionFilters.course, sessionFilters.view, sessionFilters.status]);
 
   // Reset create session form when modal opens/closes
   useEffect(() => {
@@ -285,6 +287,7 @@ const localDate = new Date(`${sessionData.scheduled_date}T${sessionData.time}`);
       if (sessionFilters.teacher) params.teacher = sessionFilters.teacher;
       if (sessionFilters.course) params.course = sessionFilters.course;
       if (sessionFilters.view) params.view = sessionFilters.view;
+      if (sessionFilters.status) params.status = sessionFilters.status;
       dispatch(fetchSessions(params));
       setCreateSessionForm({
         course: "",
@@ -353,6 +356,7 @@ const localDate = new Date(`${sessionData.scheduled_date}T${sessionData.time}`);
       if (sessionFilters.teacher) params.teacher = sessionFilters.teacher;
       if (sessionFilters.course) params.course = sessionFilters.course;
       if (sessionFilters.view) params.view = sessionFilters.view;
+      if (sessionFilters.status) params.status = sessionFilters.status;
       dispatch(fetchSessions(params));
     } catch (error) {
       showApiError(error);
@@ -386,6 +390,7 @@ const localDate = new Date(`${sessionData.scheduled_date}T${sessionData.time}`);
       if (sessionFilters.teacher) params.teacher = sessionFilters.teacher;
       if (sessionFilters.course) params.course = sessionFilters.course;
       if (sessionFilters.view) params.view = sessionFilters.view;
+      if (sessionFilters.status) params.status = sessionFilters.status;
       dispatch(fetchSessions(params));
       dispatch(fetchCourses());
     } catch (error) {
