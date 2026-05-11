@@ -149,7 +149,7 @@ const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
           </div>
 
           {/* Enrollment Type */}
-          <div>
+          {/* <div>
             <label className="block text-sm font-medium text-slate-300 mb-2">Enrollment Type</label>
             <div className="flex gap-2">
               {["normal", "private"].map((type) => (
@@ -170,35 +170,37 @@ const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
                 </button>
               ))}
             </div>
-          </div>
+          </div> */}
 
           {/* Private section */}
+          <>
           {formData.enrollment_type === "private" && formData.course_id && (
-            <div className="space-y-4">
-              {/* Instructor info */}
-              <div className="flex items-center gap-3 px-4 py-3 bg-slate-800/40 border border-slate-700/50 rounded-xl">
-                <div className="w-8 h-8 rounded-full bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center shrink-0">
-                  <i className="fas fa-chalkboard-teacher text-indigo-400 text-xs" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs text-slate-500 uppercase tracking-widest font-bold">Instructor</p>
-                  <p className="text-sm font-semibold text-white truncate">
-                    {teacher ? teacher.username : <span className="text-slate-500 italic">No instructor assigned</span>}
-                  </p>
-                </div>
-              </div>
+            <></>
+            // <div className="space-y-4">
+            //   {/* Instructor info */}
+            //   <div className="flex items-center gap-3 px-4 py-3 bg-slate-800/40 border border-slate-700/50 rounded-xl">
+            //     <div className="w-8 h-8 rounded-full bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center shrink-0">
+            //       <i className="fas fa-chalkboard-teacher text-indigo-400 text-xs" />
+            //     </div>
+            //     <div className="min-w-0">
+            //       <p className="text-xs text-slate-500 uppercase tracking-widest font-bold">Instructor</p>
+            //       <p className="text-sm font-semibold text-white truncate">
+            //         {teacher ? teacher.username : <span className="text-slate-500 italic">No instructor assigned</span>}
+            //       </p>
+            //     </div>
+            //   </div>
 
-              {teacher && (
-                <TeacherPrivateAvailableSlots
-                  teacher={teacher}
-                  teacherId={teacherId}
-                  studentId={formData.student_id}
-                  onSlotSelect={setSelectedSlot}
-                />
-              )}
-            </div>
+            //   {teacher && (
+            //     <TeacherPrivateAvailableSlots
+            //       teacher={teacher}
+            //       teacherId={teacherId}
+            //       studentId={formData.student_id}
+            //       onSlotSelect={setSelectedSlot}
+            //     />
+            //   )}
+            // </div>
           )}
-
+</>
           {formError && <p className="text-red-400 text-sm">{formError}</p>}
 
           {/* Footer */}

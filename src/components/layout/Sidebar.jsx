@@ -1,10 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate, NavLink } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  fetchUnreadAnnouncementsCount,
-  fetchMyAnnouncements,
-} from "../../store/slices/announcementsSlice";
+import { fetchUnreadAnnouncementsCount, fetchMyAnnouncements } from "../../store/slices/announcementsSlice";
 import UserProfileDropdown from "./UserProfileDropdown";
 
 const MOBILE_BREAKPOINT = 1024;
@@ -19,6 +16,7 @@ const NAV_CONFIG = {
     { id: "enrollments", label: "Enrollments",  icon: "fas fa-user-graduate", to: "/admin/enrollments" },
     { id: "attendance",  label: "Attendance",   icon: "fas fa-calendar-check", to: "/admin/attendance" },
     { id: "evaluations", label: "Evaluations",  icon: "fas fa-chart-bar",      to: "/admin/evaluations" },
+    { id: "categories",  label: "Categories",   icon: "fas fa-tags",           to: "/admin/categories" },
   ],
   teacher: [
     { label: "Dashboard",    to: "/teacher",                icon: "fas fa-table-columns",  end: true },
@@ -129,7 +127,7 @@ const Sidebar = ({
 
   // Student announcements
   const { unreadCount, items: announcements, loadingItems } = useSelector(
-    (state) => state.announcements,
+    (state) => state.auth.role === "student" ? state.announcements : { unreadCount: 0, items: [], loadingItems: false },
   );
   const [isBellOpen, setIsBellOpen] = useState(false);
   const bellRef = useRef(null);
@@ -154,11 +152,6 @@ const Sidebar = ({
     if (next) dispatch(fetchMyAnnouncements());
   };
 
-  const handleAdminNav = (path) => {
-    navigate(path);
-    if (window.innerWidth < MOBILE_BREAKPOINT && onMobileClose) onMobileClose();
-  };
-
   return (
     <aside className={`
       bg-slate-950 border-r border-slate-800/80 flex flex-col fixed h-full z-50
@@ -170,7 +163,6 @@ const Sidebar = ({
 
       {/* ── Header ── */}
       {isCollapsed ? (
-        /* Collapsed: logo02 + expand button on same line */
         <div className="border-b border-slate-800/80 flex-shrink-0 flex items-center justify-between px-3 h-16">
           <div className="w-9 h-9 flex-shrink-0">
             <img src="/assets/logo02.png" alt="VCS" className="w-full h-full object-contain" />
@@ -185,12 +177,10 @@ const Sidebar = ({
           </button>
         </div>
       ) : (
-        /* Expanded: logo + toggle button on the same line */
         <div className="border-b border-slate-800/80 flex-shrink-0 flex items-center justify-between px-4 py-3">
           <div className="w-[170px] h-[90px] flex-shrink-0">
             <img src="/assets/logo.png" alt="VCS" className="w-full h-full object-contain" />
           </div>
-          {/* Desktop collapse / mobile close — right of logo */}
           <button
             onClick={onToggleCollapse}
             className="hidden lg:flex items-center justify-center w-7 h-7 rounded-lg flex-shrink-0
@@ -229,7 +219,6 @@ const Sidebar = ({
                   isActive={activeTab === tab.id}
                   badge={tab.id === "approvals" ? pendingApprovalsCount : 0}
                   to={tab.to}
-                  // onClick={() => handleAdminNav(tab.path)}
                 />
               ))
             : NAV_CONFIG[role]?.map((item) => (
@@ -279,19 +268,8 @@ const Sidebar = ({
                 </span>
               )}
             </button>
-
-            {/* Collapsed tooltip */}
-            {isCollapsed && (
-              <div className="pointer-events-none absolute left-[calc(100%+12px)] top-1/2 -translate-y-1/2 z-[300]
-                opacity-0 group-hover:opacity-100 transition-all duration-150">
-                <div className="bg-slate-800 border border-slate-700 text-white text-xs font-medium px-3 py-1.5 rounded-lg shadow-xl whitespace-nowrap">
-                  Announcements
-                </div>
-              </div>
-            )}
           </div>
 
-          {/* Announcements dropdown */}
           {isBellOpen && (
             <div className="absolute bottom-full left-0 right-0 mb-2 mx-2 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden z-50">
               <div className="px-4 py-3 border-b border-slate-800 flex items-center justify-between">
