@@ -425,7 +425,7 @@ const TeacherQuizzes = () => {
       const q = textQuestions.find((a) => a.question_id === g.question_id);
       if (g.marks < 0) { toastManager.error("Marks cannot be negative"); return; }
       if (g.marks > (q?.max_marks ?? 0)) {
-        toastManager.error(`Marks exceed max (${q?.max_marks}) for question ${g.question_id}`);
+        toastManager.error(`Entered marks exceeded the allowed marks for question ${g.question_id}`);
         return;
       }
     }
@@ -434,12 +434,12 @@ const TeacherQuizzes = () => {
     try {
       await dispatch(gradeQuizTextAnswers({ submissionId: selectedQuizSubmission.id, grades })).unwrap();
       toastManager.success("Submission graded");
-      if (submissionsQuiz) dispatch(fetchQuizSubmissions(submissionsQuiz.id));
+      
       setGradingSubId(null);
     } catch (e) {
-      const detail = e?.grades || e?.detail || (typeof e === "string" ? e : JSON.stringify(e));
-      toastManager.error(detail || "Failed to grade");
+      
     } finally {
+      if (submissionsQuiz) dispatch(fetchQuizSubmissions(submissionsQuiz.id));
       setSaving(false);
     }
   };
@@ -552,7 +552,7 @@ const TeacherQuizzes = () => {
     <div>
       {/* List header */}
       
-        <div className="mb-10 flex justify-between items-center">
+        <div className="mb-10 flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-3xl font-black font-poppins mb-2">
             My Quizes
@@ -561,22 +561,22 @@ const TeacherQuizzes = () => {
             Review Quiz and move into grading workflows.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => { setShowCreate(true); setForm(emptyForm); setQuestions([defaultQuestion()]); }}
-          className="bg-indigo-600 hover:bg-indigo-500 px-5 py-3 rounded-xl text-xs font-bold transition"
-        >
-          + Create Quiz
-        </button>
-      </div>
-      <div className="mb-6 flex flex-wrap gap-3 items-center justify-between">
-        <FilterSelect
-          value={filterCourse}
-          onChange={(e) => setFilterCourse(e.target.value)}
-        >
-          <option value="">All Courses</option>
-          {myCourses?.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
-        </FilterSelect>
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <FilterSelect
+            value={filterCourse}
+            onChange={(e) => setFilterCourse(e.target.value)}
+          >
+            <option value="">All Courses</option>
+            {myCourses?.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
+          </FilterSelect>
+          <button
+            type="button"
+            onClick={() => { setShowCreate(true); setForm(emptyForm); setQuestions([defaultQuestion()]); }}
+            className="bg-indigo-600 hover:bg-indigo-500 px-5 py-3 rounded-xl text-xs font-bold transition whitespace-nowrap"
+          >
+            + Create Quiz
+          </button>
+        </div>
       </div>
       {/* Quiz list */}
       {loadingQuizzes && !quizzes?.length ? (

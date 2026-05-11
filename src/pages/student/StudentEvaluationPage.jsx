@@ -35,46 +35,24 @@ const StudentEvaluationPage = () => {
     <div className="min-h-screen text-white p-6 lg:p-8">
       <div className="mx-auto space-y-6">
 
-        <div>
-          <h1 className="text-2xl font-black font-poppins text-white">My Evaluations</h1>
-          <p className="text-slate-400 text-sm mt-1">View your assignment scores and final grades</p>
-        </div>
-
-        <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-5 space-y-3">
+        <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <label className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1.5 block">
-              Course
-            </label>
+            <h1 className="text-2xl font-black font-poppins text-white">My Evaluations</h1>
+            <p className="text-slate-400 text-sm mt-1">View your assignment scores and final grades</p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
             {loading ? (
-              <div className="h-10 bg-slate-800 rounded-xl animate-pulse" />
+              <div className="h-10 w-48 bg-slate-800 rounded-xl animate-pulse" />
             ) : (
               <FilterSelect
                 value={selectedCourseId}
                 onChange={(e) => setSelectedCourseId(e.target.value)}
-                style={{ width: 240 }}
+                style={{ minWidth: 160 }}
               >
                 {courses.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
               </FilterSelect>
             )}
           </div>
-
-          {selectedResult && (
-            <p className="text-xs text-slate-500 flex items-center gap-1.5">
-              <i className="fas fa-graduation-cap text-slate-600" />
-              {selectedResult.course.title}
-              {courseStatus && (
-                <span className={`ml-1 px-1.5 py-0.5 rounded text-[10px] font-bold uppercase ${
-                  courseStatus === "completed"
-                    ? "bg-emerald-500/15 text-emerald-400"
-                    : courseStatus === "published"
-                    ? "bg-blue-500/15 text-blue-400"
-                    : "bg-slate-700 text-slate-400"
-                }`}>
-                  {courseStatus}
-                </span>
-              )}
-            </p>
-          )}
         </div>
 
         {loading ? (
