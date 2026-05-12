@@ -306,7 +306,27 @@ const AdminUsersPage = () => {
             </div>
 
             <div className="space-y-5">
-              {/* Username | Email */}
+              {/* Email */}
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1.5">
+                  Email <span className="text-red-500">*</span>
+                </label>
+                <Input
+                  type="email"
+                  value={createUserForm.email}
+                  onChange={(e) => {
+                    setCreateUserForm({ ...createUserForm, email: e.target.value });
+                    if (createUserErrors.email)
+                      setCreateUserErrors((prev) => ({ ...prev, email: undefined }));
+                  }}
+                  className="w-full"
+                  placeholder="Email"
+                  autoComplete="off"
+                  error={createUserErrors.email}
+                />
+              </div>
+
+              {/* Username | Role */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-1.5">
@@ -314,7 +334,17 @@ const AdminUsersPage = () => {
                   </label>
                   <Input
                     value={createUserForm.username}
-                    onChange={(e) => { setCreateUserForm({ ...createUserForm, username: e.target.value }); if (createUserErrors.username) setCreateUserErrors((prev) => ({ ...prev, username: undefined })); }}
+                    onChange={(e) => {
+                      setCreateUserForm({
+                        ...createUserForm,
+                        username: e.target.value,
+                      });
+                      if (createUserErrors.username)
+                        setCreateUserErrors((prev) => ({
+                          ...prev,
+                          username: undefined,
+                        }));
+                    }}
                     className="w-full"
                     placeholder="Username"
                     autoComplete="off"
@@ -323,17 +353,25 @@ const AdminUsersPage = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-1.5">
-                    Email <span className="text-red-500">*</span>
+                    Role <span className="text-red-500">*</span>
                   </label>
-                  <Input
-                    type="email"
-                    value={createUserForm.email}
-                    onChange={(e) => { setCreateUserForm({ ...createUserForm, email: e.target.value }); if (createUserErrors.email) setCreateUserErrors((prev) => ({ ...prev, email: undefined })); }}
-                    className="w-full"
-                    placeholder="Email"
-                    autoComplete="off"
-                    error={createUserErrors.email}
-                  />
+                  <FilterSelect
+                    value={createUserForm.role}
+                    onChange={(e) => {
+                      setCreateUserForm({ ...createUserForm, role: e.target.value });
+                      if (createUserErrors.role)
+                        setCreateUserErrors((prev) => ({
+                          ...prev,
+                          role: undefined,
+                        }));
+                    }}
+                    className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  >
+                    <option value="student">Student</option>
+                    <option value="teacher">Teacher</option>
+                    <option value="parent">Parent</option>
+                    <option value="admin">Admin</option>
+                  </FilterSelect>
                 </div>
               </div>
 
@@ -361,23 +399,6 @@ const AdminUsersPage = () => {
                     error={createUserErrors.last_name}
                   />
                 </div>
-              </div>
-
-              {/* Role */}
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1.5">
-                  Role <span className="text-red-500">*</span>
-                </label>
-                <FilterSelect
-                  value={createUserForm.role}
-                  onChange={(e) => { setCreateUserForm({ ...createUserForm, role: e.target.value }); if (createUserErrors.role) setCreateUserErrors((prev) => ({ ...prev, role: undefined })); }}
-                  className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                >
-                  <option value="student">Student</option>
-                  <option value="teacher">Teacher</option>
-                  <option value="parent">Parent</option>
-                  <option value="admin">Admin</option>
-                </FilterSelect>
               </div>
 
               {/* Password | Confirm Password */}

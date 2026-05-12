@@ -211,7 +211,7 @@ const AdminApprovalsPage = () => {
               <i className="fas fa-link"></i>
               Child Link Requests
               {pendingChildLinks?.length > 0 && (
-                <span className="bg-purple-500 text-white text-xs px-2 py-0.5 rounded-full">
+                <span className="bg-indigo-500 text-white text-xs px-2 py-0.5 rounded-full">
                   {pendingChildLinks.length}
                 </span>
               )}
@@ -227,7 +227,7 @@ const AdminApprovalsPage = () => {
               <i className="fas fa-user-graduate"></i>
               Enrollment Requests
               {pendingEnrollments?.length > 0 && (
-                <span className="bg-emerald-500 text-white text-xs px-2 py-0.5 rounded-full">
+                <span className="bg-indigo-500 text-white text-xs px-2 py-0.5 rounded-full">
                   {pendingEnrollments.length}
                 </span>
               )}
@@ -243,7 +243,7 @@ const AdminApprovalsPage = () => {
               <i className="fas fa-handshake"></i>
               Teacher Hire Requests
               {pendingHireCount > 0 && (
-                <span className="bg-orange-500 text-white text-xs px-2 py-0.5 rounded-full">
+                <span className="bg-indigo-500 text-white text-xs px-2 py-0.5 rounded-full">
                   {pendingHireCount}
                 </span>
               )}

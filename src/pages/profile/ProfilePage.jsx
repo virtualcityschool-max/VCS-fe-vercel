@@ -232,14 +232,14 @@ const ProfilePage = () => {
           </div>
 
           {/* Teacher rating pill */}
-          {role === "teacher" && roleProfile?.rating && (
+          {/* {role === "teacher" && roleProfile?.rating && (
             <div className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded-full">
               <i className="fas fa-star text-amber-400 text-xs" />
               <span className="text-amber-300 text-xs font-semibold">
                 Rating: {Number(roleProfile.rating).toFixed(1)}
               </span>
             </div>
-          )}
+          )} */}
         </div>
 
         {/* ── Role profile fields ───────────────────────────────────────────── */}
