@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchParentDashboard } from "../../store/slices/parentSlice";
-import { ChildCard, RecentActivity, OverviewStats, ParentDashboardHeader } from "../../components";
+import { ChildCard, RecentActivity, OverviewStats, ParentDashboardHeader, PendingChildLinks } from "../../components";
 import { LoadingSpinner, ErrorMessage, Button } from "../../components/ui";
 import ChildLinkRequest from "../../components/parent/ChildLinkRequest";
 
@@ -222,7 +222,12 @@ const ParentPortal = () => {
           </div>
 
           {/* Sidebar - Right Column */}
-          <div className="lg:col-span-3 space-y-12">
+          <div className="lg:col-span-3 space-y-8">
+            {/* Pending link requests */}
+            <PendingChildLinks
+              links={dashboardData.pending_child_links}
+              onRequestNew={() => setIsLinkModalOpen(true)}
+            />
             {/* Recent Activity */}
             <RecentActivity activities={dashboardData.recent_activity} />
           </div>

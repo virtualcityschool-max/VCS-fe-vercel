@@ -156,6 +156,16 @@ const SessionsTab = ({
     }
   };
 
+  const getDayFromScheduledAt = (dateString) => {
+    if (!dateString) return null;
+    const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    try {
+      return days[new Date(dateString).getDay()];
+    } catch {
+      return null;
+    }
+  };
+
   const formatDate = (dateTimeString) => {
     if (!dateTimeString) return "—";
     try {
@@ -354,18 +364,18 @@ const SessionsTab = ({
             </div>
           ) : filteredSessions.length === 0 ? (
             <div className="p-16 text-center">
-              <div className="w-16 h-16 bg-slate-700/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              {/* <div className="w-16 h-16 bg-slate-700/20 rounded-full flex items-center justify-center mx-auto mb-4">
                 <i className={`fas ${hasActiveSessionFilters ? "fa-search" : "fa-video"} text-slate-400 text-xl`}></i>
-              </div>
-              <p className="text-white font-bold mb-1">{hasActiveSessionFilters ? "No Classes Found" : "No Classes Created"}</p>
-              <p className="text-slate-400 text-sm mb-4">
+              </div> */}
+              <p className="text-white font-bold mb-1">No data to show</p>
+              {/* <p className="text-slate-400 text-sm mb-4">
                 {hasActiveSessionFilters ? "Try adjusting your filters." : "Create your first class to get started."}
-              </p>
-              {hasActiveSessionFilters ? (
+              </p> */}
+              {/* {hasActiveSessionFilters ? (
                 <button onClick={() => setSessionFilters({ ...sessionFilters, search: "" })} className="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2 rounded-xl text-sm font-medium transition">Clear Filters</button>
               ) : (
                 <button onClick={() => setActiveModal("create-session")} className="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2 rounded-xl text-sm font-medium transition">Create First Class</button>
-              )}
+              )} */}
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -383,29 +393,25 @@ const SessionsTab = ({
                     </div>
                     <div className="flex flex-wrap gap-2 text-xs text-slate-400 mb-3">
                       <span><i className="fas fa-calendar mr-1 text-indigo-400"></i>{formatDate(session.scheduled_at || session.start_time)}</span>
-                      {session.recurrence_days?.length > 0 && (
+                      {session.recurrence_days?.length > 0 ? (
                         <span><i className="fas fa-repeat mr-1 text-purple-400"></i>{session.recurrence_days.join(", ")}</span>
-                      )}
+                      ) : (() => {
+                        const derived = getDayFromScheduledAt(session.scheduled_at || session.start_time);
+                        return derived ? <span><i className="fas fa-repeat mr-1 text-slate-500"></i>{derived}</span> : null;
+                      })()}
                       {session.recurrence_end_date && (
                         <span><i className="fas fa-flag-checkered mr-1 text-slate-500"></i>Until {session.recurrence_end_date}</span>
                       )}
                     </div>
                     <div className="flex gap-2">
-                      {(() => {
-                        const isChild = session.is_child === true;
+                      {!session.is_child && (() => {
                         const hasEnrollments = (session.enrollment_count ?? 0) >= 1;
-                        const blocked = isChild || hasEnrollments;
-                        const tip = isChild
-                          ? "Child sessions cannot be edited"
-                          : hasEnrollments
-                          ? "Cannot edit: session has active enrollments"
-                          : "Edit session";
                         return (
                           <button
-                            onClick={() => !blocked && onSessionEdit(session.id)}
-                            disabled={blocked}
-                            title={tip}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-medium flex-1 flex items-center justify-center gap-1 transition ${blocked ? "bg-slate-800/30 text-slate-600 cursor-not-allowed" : "bg-slate-700/50 text-slate-300 hover:bg-slate-600/50"}`}
+                            onClick={() => !hasEnrollments && onSessionEdit(session.id)}
+                            disabled={hasEnrollments}
+                            title={hasEnrollments ? "Cannot edit: session has active enrollments" : "Edit session"}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-medium flex-1 flex items-center justify-center gap-1 transition ${hasEnrollments ? "bg-slate-800/30 text-slate-600 cursor-not-allowed" : "bg-slate-700/50 text-slate-300 hover:bg-slate-600/50"}`}
                           >
                             <i className="fas fa-edit"></i> Edit
                           </button>
@@ -449,26 +455,24 @@ const SessionsTab = ({
                               <span key={d} className="px-1.5 py-0.5 bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 rounded text-xs font-medium">{d}</span>
                             ))}
                           </div>
-                        ) : <span className="text-slate-500 text-xs">—</span>}
+                        ) : (() => {
+                          const derived = getDayFromScheduledAt(session.scheduled_at || session.start_time);
+                          return derived
+                            ? <span className="px-1.5 py-0.5 bg-slate-700/50 text-slate-400 border border-slate-600/40 rounded text-xs font-medium">{derived}</span>
+                            : <span className="text-slate-500 text-xs">—</span>;
+                        })()}
                       </td>
                       <td className="px-5 py-4">{getStatusBadge(session.status)}</td>
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-2 justify-end">
-                          {(() => {
-                            const isChild = session.is_child === true;
+                          {!session.is_child && (() => {
                             const hasEnrollments = (session.enrollment_count ?? 0) >= 1;
-                            const blocked = isChild || hasEnrollments;
-                            const tip = isChild
-                              ? "Child sessions cannot be edited"
-                              : hasEnrollments
-                              ? "Cannot edit: session has active enrollments"
-                              : "Edit session";
                             return (
                               <button
-                                onClick={() => !blocked && onSessionEdit(session.id)}
-                                disabled={blocked}
-                                title={tip}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${blocked ? "bg-slate-800/30 text-slate-600 cursor-not-allowed" : "bg-slate-700/50 text-slate-300 hover:bg-slate-600/50"}`}
+                                onClick={() => !hasEnrollments && onSessionEdit(session.id)}
+                                disabled={hasEnrollments}
+                                title={hasEnrollments ? "Cannot edit: session has active enrollments" : "Edit session"}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${hasEnrollments ? "bg-slate-800/30 text-slate-600 cursor-not-allowed" : "bg-slate-700/50 text-slate-300 hover:bg-slate-600/50"}`}
                               >
                                 <i className="fas fa-edit mr-1"></i>Edit
                               </button>
@@ -524,7 +528,6 @@ const SessionsTab = ({
                       setCreateSessionForm({
                         ...createSessionForm,
                         course: e.target.value,
-                        recurrence_end_date: "",
                         instructor_id: selectedCourse?.instructor?.id || "",
                         instructor_username: selectedCourse?.instructor?.username || "",
                       });

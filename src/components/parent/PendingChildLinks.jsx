@@ -1,0 +1,118 @@
+import React from "react";
+
+const formatRequestedAt = (dateString) => {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now - date;
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 1) return "Just now";
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays === 1) return "Yesterday";
+  if (diffDays < 7) return `${diffDays} days ago`;
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+};
+
+const getInitials = (name) => {
+  if (!name) return "?";
+  return name
+    .split(/[_\s]/)
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+};
+
+const PendingChildLinks = ({ links, onRequestNew }) => {
+  if (!links || links.length === 0) return null;
+
+  return (
+    <div className="bg-[#1e293b]/90 backdrop-blur-xl rounded-[1.5rem] border border-amber-500/20 shadow-2xl overflow-hidden">
+      {/* Header */}
+      <div className="px-6 pt-6 pb-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <div className="w-8 h-8 bg-amber-500/15 rounded-xl flex items-center justify-center border border-amber-500/20">
+              <i className="fas fa-clock text-amber-400 text-xs"></i>
+            </div>
+            <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-amber-500 rounded-full flex items-center justify-center text-[9px] font-black text-slate-900 animate-pulse">
+              {links.length}
+            </span>
+          </div>
+          <div>
+            <h3 className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">
+              Awaiting Approval
+            </h3>
+            <p className="text-[9px] text-amber-500/70 font-medium mt-0.5">
+              Link request{links.length > 1 ? "s" : ""} pending admin review
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Divider */}
+      <div className="h-px bg-amber-500/10 mx-6" />
+
+      {/* List */}
+      <div className="p-4 space-y-3">
+        {links.map((link) => (
+          <div
+            key={link.student_id}
+            className="flex items-center gap-3 bg-slate-800/60 rounded-2xl p-3.5 border border-white/5 hover:border-amber-500/15 transition-all duration-300 group"
+          >
+            {/* Avatar */}
+            <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0 text-sm font-black text-amber-400 group-hover:bg-amber-500/15 transition-colors">
+              {getInitials(link.student_name)}
+            </div>
+
+            {/* Info */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <p className="text-sm font-bold text-white truncate">
+                  {link.student_name}
+                </p>
+                <span className="text-[8px] font-black uppercase tracking-widest text-slate-500 bg-slate-700/60 px-1.5 py-0.5 rounded">
+                  ID #{link.student_id}
+                </span>
+              </div>
+              {link.student_email && (
+                <p className="text-[10px] text-slate-400 mt-0.5 flex items-center gap-1.5 truncate">
+                  <i className="fas fa-envelope text-[9px] text-slate-500 shrink-0" />
+                  {link.student_email}
+                </p>
+              )}
+              <p className="text-[10px] text-slate-500 mt-0.5 flex items-center gap-1.5">
+                <i className="far fa-clock text-[9px]" />
+                Requested {formatRequestedAt(link.requested_at)}
+              </p>
+            </div>
+
+            {/* Status pill */}
+            <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-amber-500/10 rounded-xl border border-amber-500/20 shrink-0">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+              <span className="text-[8px] font-black uppercase tracking-widest text-amber-400">
+                Pending
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Footer hint */}
+      <div className="px-5 pb-5">
+        <div className="bg-amber-500/5 border border-amber-500/10 rounded-xl px-4 py-3 flex items-start gap-3">
+          <i className="fas fa-info-circle text-amber-500/60 text-xs mt-0.5 shrink-0" />
+          <p className="text-[10px] text-slate-500 leading-relaxed">
+            These requests are under review by school administration. You'll get access to your child's dashboard once approved.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default PendingChildLinks;
