@@ -109,52 +109,70 @@ const HireRequestsTab = ({
           return (
             <div
               key={req.id}
-              className="bg-slate-900 border border-slate-800 rounded-2xl p-5 hover:border-slate-700 transition-colors"
+              className="bg-slate-900 border border-slate-800 rounded-2xl p-5 hover:border-slate-700 transition-all duration-300"
             >
-              <div className="flex flex-col sm:flex-row sm:items-start gap-4">
-                {/* Requester info */}
-                <div className="flex items-start gap-3 flex-1 min-w-0">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                
+                {/* 1. Requester info (Col 1-5) */}
+                <div className="lg:col-span-5 flex items-start gap-4 min-w-0">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-black text-lg flex-shrink-0 shadow-lg shadow-indigo-500/10">
                     {req.full_name?.[0]?.toUpperCase() || "?"}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <p className="text-sm font-semibold text-white">{req.full_name}</p>
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border uppercase tracking-wide ${STATUS_BADGE[req.status] || STATUS_BADGE.pending}`}>
+                    <div className="flex items-center gap-3 mb-1">
+                      <p className="text-sm font-black text-white truncate">{req.full_name}</p>
+                      <span className={`text-[9px] font-black px-2 py-0.5 rounded-full border uppercase tracking-[0.1em] shrink-0 ${STATUS_BADGE[req.status] || STATUS_BADGE.pending}`}>
                         {req.status}
                       </span>
                     </div>
-                    <p className="text-xs text-slate-400 mt-0.5">{req.email}</p>
-                    {req.phone && <p className="text-xs text-slate-500">{req.phone}</p>}
+                    <p className="text-[11px] text-slate-400 truncate mb-1">{req.email}</p>
+                    <div className="flex items-center gap-3">
+                      {req.phone && <p className="text-[10px] text-slate-500 flex items-center gap-1"><i className="fas fa-phone-alt text-[8px]"></i> {req.phone}</p>}
+                    </div>
                     {req.message && (
-                      <p className="text-xs text-slate-400 mt-1 line-clamp-2 italic">"{req.message}"</p>
+                      <div className="mt-2 p-2 rounded-lg bg-slate-800/50 border border-slate-700/50">
+                        <p className="text-[10px] text-slate-400 line-clamp-1 italic">
+                          <i className="fas fa-quote-left text-[8px] mr-1.5 opacity-50"></i>
+                          {req.message}
+                        </p>
+                      </div>
                     )}
                   </div>
                 </div>
 
-                {/* Teacher + meta */}
-                <div className="flex-1 min-w-0 sm:border-l sm:border-slate-800 sm:pl-4">
-                  <p className="text-sm font-medium text-white">
-                    <i className="fas fa-chalkboard-teacher text-indigo-400 mr-1.5 text-xs"></i>
-                    {req.teacher?.username || `Teacher #${req.teacher?.id}`}
-                  </p>
-                  <p className="text-[10px] text-slate-500 mt-1">
-                    Submitted: {new Date(req.created_at).toLocaleString()}
-                  </p>
-                  {req.reviewed_at && (
-                    <p className="text-[10px] text-slate-500">
-                      Reviewed by {req.reviewed_by_name} · {new Date(req.reviewed_at).toLocaleString()}
-                    </p>
-                  )}
+                {/* 2. Teacher info (Col 6-9) */}
+                <div className="lg:col-span-4 min-w-0 lg:border-l lg:border-slate-800 lg:pl-6">
+                  <div className="flex flex-col gap-1.5">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-lg bg-indigo-500/10 flex items-center justify-center shrink-0">
+                        <i className="fas fa-chalkboard-teacher text-indigo-400 text-[10px]"></i>
+                      </div>
+                      <p className="text-sm font-bold text-slate-200 truncate">
+                        {req.teacher?.username || `Teacher #${req.teacher?.id}`}
+                      </p>
+                    </div>
+                    <div className="space-y-0.5">
+                      <p className="text-[10px] text-slate-500 flex items-center gap-1.5">
+                        <i className="far fa-clock text-[8px]"></i>
+                        Submitted: {new Date(req.created_at).toLocaleString()}
+                      </p>
+                      {req.reviewed_at && (
+                        <p className="text-[10px] text-slate-500 flex items-center gap-1.5">
+                          <i className="fas fa-user-check text-[8px]"></i>
+                          By {req.reviewed_by_name} · {new Date(req.reviewed_at).toLocaleString()}
+                        </p>
+                      )}
+                    </div>
+                  </div>
                 </div>
 
-                {/* Actions */}
-                <div className="flex items-center gap-2 flex-shrink-0">
+                {/* 3. Actions (Col 10-12) */}
+                <div className="lg:col-span-3 flex items-center justify-end gap-2 shrink-0">
                   <button
                     onClick={() => setDetailReq(req)}
-                    className="flex items-center gap-1.5 px-3 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs font-semibold rounded-xl transition"
+                    className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-[11px] font-black uppercase tracking-widest rounded-xl transition-all"
                   >
-                    <i className="fas fa-eye text-xs"></i>
+                    <i className="fas fa-eye text-[10px]"></i>
                     View
                   </button>
                   {req.status === "pending" ? (
@@ -162,7 +180,7 @@ const HireRequestsTab = ({
                       <button
                         onClick={() => setConfirm({ open: true, type: "approve", id: req.id, label: req.full_name })}
                         disabled={isProcessing}
-                        className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-xs font-semibold rounded-xl transition"
+                        className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-[11px] font-black uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-indigo-600/10"
                       >
                         {isProcessing && action === "approve" ? <i className="fas fa-spinner fa-spin"></i> : <i className="fas fa-check"></i>}
                         Approve
@@ -170,20 +188,20 @@ const HireRequestsTab = ({
                       <button
                         onClick={() => setConfirm({ open: true, type: "reject", id: req.id, label: req.full_name })}
                         disabled={isProcessing}
-                        className="flex items-center gap-1.5 px-4 py-2 bg-rose-600/20 hover:bg-rose-600/30 border border-rose-500/30 hover:border-rose-500/60 disabled:opacity-50 text-rose-400 text-xs font-semibold rounded-xl transition"
+                        className="flex items-center gap-2 px-4 py-2 bg-rose-600/10 hover:bg-rose-600/20 border border-rose-500/20 hover:border-rose-500/50 disabled:opacity-50 text-rose-400 text-[11px] font-black uppercase tracking-widest rounded-xl transition-all"
                       >
                         {isProcessing && action === "reject" ? <i className="fas fa-spinner fa-spin"></i> : <i className="fas fa-times"></i>}
                         Reject
                       </button>
                     </>
                   ) : req.status === "approved" ? (
-                    <div className="flex items-center gap-1.5 px-4 py-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold rounded-xl">
-                      <i className="fas fa-check-circle text-xs"></i>
+                    <div className="flex items-center gap-2 px-5 py-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-black uppercase tracking-widest rounded-xl">
+                      <i className="fas fa-check-circle text-[10px]"></i>
                       Approved
                     </div>
                   ) : req.status === "rejected" ? (
-                    <div className="flex items-center gap-1.5 px-4 py-2 bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-semibold rounded-xl">
-                      <i className="fas fa-times-circle text-xs"></i>
+                    <div className="flex items-center gap-2 px-5 py-2 bg-rose-500/10 border border-rose-500/20 text-rose-400 text-[11px] font-black uppercase tracking-widest rounded-xl">
+                      <i className="fas fa-times-circle text-[10px]"></i>
                       Rejected
                     </div>
                   ) : null}
