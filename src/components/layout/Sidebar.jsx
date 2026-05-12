@@ -164,7 +164,18 @@ const Sidebar = ({
       {/* ── Header ── */}
       {isCollapsed ? (
         <div className="border-b border-slate-800/80 flex-shrink-0 flex items-center justify-between px-3 h-16">
-          <div className="w-9 h-9 flex-shrink-0">
+          <div
+            className="w-9 h-9 flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+            onClick={() => {
+              const dashboardPaths = {
+                admin: "/admin/overview",
+                teacher: "/teacher",
+                student: "/student",
+                parent: "/parent",
+              };
+              navigate(dashboardPaths[role] || "/");
+            }}
+          >
             <img src="/assets/logo02.png" alt="VCS" className="w-full h-full object-contain" />
           </div>
           <button
@@ -178,7 +189,18 @@ const Sidebar = ({
         </div>
       ) : (
         <div className="border-b border-slate-800/80 flex-shrink-0 flex items-center justify-between px-4 py-3">
-          <div className="w-[170px] h-[90px] flex-shrink-0">
+          <div
+            className="w-[170px] h-[90px] flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+            onClick={() => {
+              const dashboardPaths = {
+                admin: "/admin/overview",
+                teacher: "/teacher",
+                student: "/student",
+                parent: "/parent",
+              };
+              navigate(dashboardPaths[role] || "/");
+            }}
+          >
             <img src="/assets/logo.png" alt="VCS" className="w-full h-full object-contain" />
           </div>
           <button

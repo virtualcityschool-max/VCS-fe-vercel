@@ -124,32 +124,37 @@ const TeacherEvaluationPage = () => {
     <div className="min-h-screen text-white p-6 lg:p-8">
       <div className="mx-auto space-y-6">
 
-        <div>
-          <h1 className="text-2xl font-black font-poppins text-white">Evaluations</h1>
-          <p className="text-slate-400 text-sm mt-1">View student performance and assignment results</p>
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-black font-poppins text-white">Evaluations</h1>
+            <p className="text-slate-400 text-sm mt-1">View student performance and assignment results</p>
+          </div>
+
+          <div className="w-full sm:w-64">
+            <label className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1.5 block">
+              Course
+            </label>
+            {loadingCourses ? (
+              <div className="h-10 bg-slate-800 rounded-xl animate-pulse" />
+            ) : (
+              <FilterSelect
+                value={selectedCourseId}
+                onChange={(e) => handleCourseChange(e.target.value)}
+                className="w-full px-4 py-2.5 bg-slate-800/60 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 appearance-none"
+              >
+                {courses.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.title}
+                  </option>
+                ))}
+              </FilterSelect>
+            )}
+          </div>
         </div>
 
         {/* Filters bar */}
         <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-5 space-y-4">
-          <div className="flex flex-col sm:flex-row gap-4">
-
-            <div className="flex-1 min-w-0">
-              <label className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1.5 block">
-                Course
-              </label>
-              {loadingCourses ? (
-                <div className="h-10 bg-slate-800 rounded-xl animate-pulse" />
-              ) : (
-                <FilterSelect
-                  value={selectedCourseId}
-                  onChange={(e) => handleCourseChange(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-slate-800/60 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 appearance-none"
-                >
-                  {courses.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
-                </FilterSelect>
-              )}
-            </div>
-
+          {/* <div className="flex flex-col sm:flex-row gap-4">
             <div>
               <label className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1.5 block">
                 Enrollment Type
@@ -165,7 +170,7 @@ const TeacherEvaluationPage = () => {
                 </button>
               </div>
             </div>
-          </div>
+          </div> */}
 
           {/* Private student dropdown */}
           {tab === "private" && (

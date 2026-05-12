@@ -199,9 +199,9 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase">
                   Course
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase">
+                {/* <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase">
                   Enrollment Type
-                </th>
+                </th> */}
                 <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase">
                   Status
                 </th>
@@ -297,11 +297,11 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
             icon="fas fa-book"
             className="w-full sm:w-44"
           />
-          <FilterSelect value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
+          {/* <FilterSelect value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
             <option value="all">All Types</option>
             <option value="normal">Normal</option>
             <option value="private">Private</option>
-          </FilterSelect>
+          </FilterSelect> */}
           <FilterSelect value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
             <option value="all">All Statuses</option>
             <option value="active">Active</option>
@@ -380,7 +380,7 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
 
               {/* Type and Status */}
               <div className="flex items-center justify-between mb-4">
-                <div>
+                {/* <div>
                   <div className="text-sm font-medium text-slate-300 mb-1">
                     Type
                   </div>
@@ -391,7 +391,7 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
                   >
                     {enrollment.is_private ? "Private" : "Normal"}
                   </span>
-                </div>
+                </div> */}
                 <div className="text-right">
                   <div className="text-sm font-medium text-slate-300 mb-1">
                     Status
@@ -439,9 +439,9 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase">
                   Course
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase">
+                {/* <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase">
                   Enrollment Type
-                </th>
+                </th> */}
                 <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase">
                   Status
                 </th>
@@ -480,7 +480,7 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4">
+                  {/* <td className="px-6 py-4">
                     <span
                       className={`px-2 py-1 rounded-full text-xs font-black uppercase tracking-widest ${getTypeColor(
                         enrollment.is_private,
@@ -488,7 +488,7 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
                     >
                       {enrollment.is_private ? "Private" : "Normal"}
                     </span>
-                  </td>
+                  </td> */}
                   <td className="px-6 py-4">
                     <span
                       className={`px-2 py-1 rounded-full text-xs font-black uppercase tracking-widest ${getStatusColor(
