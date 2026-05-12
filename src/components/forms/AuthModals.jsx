@@ -60,8 +60,6 @@ const AuthModals = () => {
   const [fpConfirmPassword, setFpConfirmPassword] = useState("");
   const [fpLoading, setFpLoading] = useState(false);
   const [fpResendLoading, setFpResendLoading] = useState(false);
-  const [fpCooldown, setFpCooldown] = useState(0);
-  const fpCooldownRef = React.useRef(null);
   const [fpError, setFpError] = useState("");
 
   // Registration form state
@@ -117,8 +115,6 @@ const AuthModals = () => {
     setFpConfirmPassword("");
     setFpLoading(false);
     setFpResendLoading(false);
-    setFpCooldown(0);
-    clearInterval(fpCooldownRef.current);
     setFpError("");
 
     // Clear Redux auth error
@@ -155,8 +151,6 @@ const AuthModals = () => {
       setFpConfirmPassword("");
       setFpLoading(false);
       setFpResendLoading(false);
-      setFpCooldown(0);
-      clearInterval(fpCooldownRef.current);
       setFpError("");
 
       const urlRole = searchParams.get("role");
@@ -403,17 +397,6 @@ const AuthModals = () => {
     }
   };
 
-  const startFpCooldown = () => {
-    clearInterval(fpCooldownRef.current);
-    setFpCooldown(60);
-    fpCooldownRef.current = setInterval(() => {
-      setFpCooldown((prev) => {
-        if (prev <= 1) { clearInterval(fpCooldownRef.current); return 0; }
-        return prev - 1;
-      });
-    }, 1000);
-  };
-
   const handleFpRequestOtp = async (e) => {
     e.preventDefault();
     if (!fpEmail.trim()) { setFpError("Email is required"); return; }
@@ -422,7 +405,6 @@ const AuthModals = () => {
     try {
       await authService.forgotPasswordRequestOtp(fpEmail.trim());
       setFpStep("verify");
-      startFpCooldown();
     } catch (err) {
       showApiError(err);
     } finally {
@@ -438,7 +420,6 @@ const AuthModals = () => {
       await authService.forgotPasswordRequestOtp(fpEmail.trim());
       toastManager.success("Reset code resent to your email");
       setFpOtp("");
-      startFpCooldown();
     } catch (err) {
       showApiError(err);
     } finally {
@@ -473,7 +454,7 @@ const AuthModals = () => {
       setFpStep("success");
     } catch (err) {
       const data = err?.response?.data;
-      const msg = data?.detail || data?.new_password?.[0] || data?.confirm_password?.[0] || err?.message || "Failed to reset password";
+      const msg = data?.detail || typeof data?.new_password === 'string' ? data.new_password : data?.new_password?.[0] || data?.confirm_password?.[0] || err?.message || "Failed to reset password";
       setFpError(msg);
     } finally {
       setFpLoading(false);
@@ -658,7 +639,7 @@ const AuthModals = () => {
               <div className="absolute inset-0 bg-slate-900 rounded-[2.5rem] flex flex-col p-6 sm:p-10 z-10">
                 <button
                   type="button"
-                  onClick={() => { setFpStep("idle"); setFpError(""); setFpOtp(""); setFpNewPassword(""); setFpConfirmPassword(""); setFpCooldown(0); clearInterval(fpCooldownRef.current); }}
+                  onClick={() => { setFpStep("idle"); setFpError(""); setFpOtp(""); setFpNewPassword(""); setFpConfirmPassword(""); }}
                   className="flex items-center gap-2 text-slate-400 hover:text-white text-xs mb-6 transition"
                 >
                   <i className="fas fa-arrow-left text-[10px]" />
@@ -731,24 +712,18 @@ const AuthModals = () => {
                     <div className="text-center">
                       <p className="text-xs sm:text-sm text-slate-400 font-medium">
                         Didn't receive code?{" "}
-                        {fpCooldown > 0 ? (
-                          <span className="text-slate-600 ml-1 font-black text-xs">
-                            Resend in {fpCooldown}s
-                          </span>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={handleFpResendOtp}
-                            disabled={fpResendLoading}
-                            className="text-indigo-400 font-black hover:text-indigo-300 ml-1 transition-colors disabled:text-slate-600 disabled:cursor-not-allowed"
-                          >
-                            {fpResendLoading ? (
-                              <i className="fas fa-circle-notch fa-spin" />
-                            ) : (
-                              "Resend OTP"
-                            )}
-                          </button>
-                        )}
+                        <button
+                          type="button"
+                          onClick={handleFpResendOtp}
+                          disabled={fpResendLoading}
+                          className="text-indigo-400 font-black hover:text-indigo-300 ml-1 transition-colors disabled:text-slate-600 disabled:cursor-not-allowed"
+                        >
+                          {fpResendLoading ? (
+                            <i className="fas fa-circle-notch fa-spin" />
+                          ) : (
+                            "Resend OTP"
+                          )}
+                        </button>
                       </p>
                     </div>
                   </form>

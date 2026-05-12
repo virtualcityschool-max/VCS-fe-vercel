@@ -84,6 +84,9 @@ export const authService = {
         confirm_password: userData.confirmPassword,
         role: userData.role,
       };
+      if (userData.grade_level) {
+        requestData.grade_level = userData.grade_level;
+      }
 
       console.log("Request data being sent to backend:", requestData);
       console.log(
