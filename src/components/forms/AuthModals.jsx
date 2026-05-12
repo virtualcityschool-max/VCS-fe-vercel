@@ -663,8 +663,8 @@ const AuthModals = () => {
                   <form onSubmit={handleFpVerifyOtp} className="space-y-5 flex-1">
                     <div className="text-center mb-6 flex flex-col items-center">
                       <img src="/assets/logo.png" alt="Virtual City School" className="h-10 sm:h-12 object-contain mb-8" />
-                      <div className="w-16 h-16 bg-emerald-500/20 rounded-3xl flex items-center justify-center text-2xl mx-auto mb-4">
-                        <i className="fas fa-envelope-open-text text-emerald-400" />
+                      <div className="w-16 h-16 bg-indigo-500/20 rounded-3xl flex items-center justify-center text-2xl mx-auto mb-4">
+                        <i className="fas fa-envelope-open-text text-indigo-400" />
                       </div>
                       <h2 className="text-xl font-black font-poppins text-white mb-1">Check Your Email</h2>
                       <p className="text-slate-400 text-xs">Enter the 6-digit code sent to <strong className="text-slate-300">{fpEmail}</strong></p>
@@ -684,7 +684,7 @@ const AuthModals = () => {
                     <button
                       type="submit"
                       disabled={fpLoading || fpOtp.length !== 6}
-                      className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:bg-emerald-400 text-white py-4 rounded-2xl font-bold text-sm transition flex items-center justify-center gap-2"
+                      className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-400 text-white py-4 rounded-2xl font-bold text-sm transition flex items-center justify-center gap-2"
                     >
                       {fpLoading && <i className="fas fa-circle-notch fa-spin" />}
                       {fpLoading ? "Verifying…" : "Verify Code"}
@@ -1074,7 +1074,7 @@ const AuthModals = () => {
               <form onSubmit={handleOtpVerification} className="space-y-5">
                 <div className="text-center mb-8 flex flex-col items-center">
                   <img src="/assets/logo.png" alt="Virtual City School" className="h-10 sm:h-12 object-contain mb-8" />
-                  <div className="w-16 h-16 bg-emerald-500/20 text-emerald-500 rounded-3xl flex items-center justify-center text-2xl mx-auto mb-6">
+                  <div className="w-16 h-16 bg-indigo-500/20 text-indigo-500 rounded-3xl flex items-center justify-center text-2xl mx-auto mb-6">
                     <i className="fas fa-envelope-open-text"></i>
                   </div>
                   <h2 className="text-xl font-black font-poppins text-white mb-2">
@@ -1116,10 +1116,10 @@ const AuthModals = () => {
                 <button
                   type="submit"
                   disabled={isLoading || otp.length !== 6}
-                  className={`w-full bg-emerald-600 text-white py-4 rounded-2xl font-bold ${
+                  className={`w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold ${
                     isLoading || otp.length !== 6
-                      ? "bg-emerald-400 cursor-not-allowed"
-                      : "hover:bg-emerald-500"
+                      ? "bg-indigo-400 cursor-not-allowed"
+                      : "hover:bg-indigo-500"
                   }`}
                 >
                   {isLoading ? (
