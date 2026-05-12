@@ -14,7 +14,7 @@ import { initializeAuth, logoutUser } from "./store/slices/authSlice";
 import { toastManager } from "./utils/toastManager";
 
 // Components
-import { AIChat, AuthModals, Navbar } from "./components";
+import { AIChat, AuthModals, Navbar, Footer, ScrollToTop } from "./components";
 import Sidebar from "./components/layout/Sidebar";
 
 // Pages
@@ -65,6 +65,8 @@ import {
   ParentLayout,
   ParentAttendance,
   ParentEvaluationPage,
+  PrivacyPolicy,
+  TermsAndConditions,
 } from "./pages";
 
 // Protected Route Component with Role-Based Access Control
@@ -229,6 +231,8 @@ const AppInner = () => {
             <Route path="/courses/:courseId" element={<CourseDetails />} />
             <Route path="/teachers" element={<TeachersDirectory />} />
             <Route path="/teachers/:id" element={<TeacherProfile />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/terms" element={<TermsAndConditions />} />
 
             {/* Student-Only Routes */}
             <Route element={<ProtectedRoute allowedRoles={["student"]} />}>
@@ -303,6 +307,7 @@ const AppInner = () => {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
+        {showNavbar && <Footer />}
 
         {/* Global Overlays */}
         <section className="relative z-50">
@@ -360,6 +365,7 @@ const App = () => {
 
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <AppInner />
     </BrowserRouter>
   );

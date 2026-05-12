@@ -8,6 +8,7 @@ export { default as AuthModals } from "./forms/AuthModals";
 // Common Components
 export { default as AIChat } from "./common/AIChat";
 export { default as SimulatorBar } from "./common/SimulatorBar";
+export { default as ScrollToTop } from "./common/ScrollToTop";
 
 // Parent Components
 export * from "./parent";

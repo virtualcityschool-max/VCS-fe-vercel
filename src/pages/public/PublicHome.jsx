@@ -207,12 +207,6 @@ const PublicHome = () => {
         </div>
       </section>
 
-      {/* Footer Teaser */}
-      <footer className="relative z-10 max-w-7xl mx-auto px-6 pb-12 pt-10 text-center border-t border-white/5">
-        <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em]">
-          &copy; {new Date().getFullYear()} VirtualCitySchool Ecosystem
-        </p>
-      </footer>
 
       <AuthRequiredModal 
         isOpen={authModalOpen} 

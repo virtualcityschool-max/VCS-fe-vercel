@@ -15,7 +15,7 @@ const Footer = ({ variant = "full" }) => {
       <footer className="bg-slate-900 border-t border-slate-800 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center">
           <p className="text-slate-400 text-sm">
-            © 2024 Virtual City School. All rights reserved.
+            © {new Date().getFullYear()} Virtual City School. All rights reserved.
           </p>
         </div>
       </footer>
@@ -41,7 +41,7 @@ const Footer = ({ variant = "full" }) => {
               world-class teachers for live classes and on-demand mastery
               modules.
             </p>
-            <div className="flex gap-4">
+            {/* <div className="flex gap-4">
               <a
                 href="#"
                 className="text-slate-400 hover:text-white transition"
@@ -66,7 +66,7 @@ const Footer = ({ variant = "full" }) => {
               >
                 <i className="fab fa-instagram"></i>
               </a>
-            </div>
+            </div> */}
           </div>
 
           {/* Quick Links */}
@@ -76,7 +76,7 @@ const Footer = ({ variant = "full" }) => {
               <li>
                 <button
                   onClick={() => handleNavigation("/courses")}
-                  className="text-slate-400 hover:text-white transition text-sm"
+                  className="text-slate-400 hover:text-white transition cursor-pointer text-sm"
                 >
                   Browse Courses
                 </button>
@@ -84,7 +84,7 @@ const Footer = ({ variant = "full" }) => {
               <li>
                 <button
                   onClick={() => handleNavigation("/teachers")}
-                  className="text-slate-400 hover:text-white transition text-sm"
+                  className="text-slate-400 hover:text-white cursor-pointer transition text-sm"
                 >
                   Find Teachers
                 </button>
@@ -94,7 +94,7 @@ const Footer = ({ variant = "full" }) => {
                   <li>
                     <button
                       onClick={() => handleNavigation("/feed")}
-                      className="text-slate-400 hover:text-white transition text-sm"
+                      className="text-slate-400 hover:text-white cursor-pointer transition text-sm"
                     >
                       Student Feed
                     </button>
@@ -102,7 +102,7 @@ const Footer = ({ variant = "full" }) => {
                   <li>
                     <button
                       onClick={() => handleNavigation("/classroom")}
-                      className="text-slate-400 hover:text-white transition text-sm"
+                      className="text-slate-400 hover:text-white cursor-pointer transition text-sm"
                     >
                       Classroom
                     </button>
@@ -116,26 +116,24 @@ const Footer = ({ variant = "full" }) => {
           <div>
             <h3 className="text-white font-semibold mb-4">Support</h3>
             <ul className="space-y-2">
+             
               <li>
-                <button className="text-slate-400 hover:text-white transition text-sm">
-                  Help Center
-                </button>
-              </li>
-              <li>
-                <button className="text-slate-400 hover:text-white transition text-sm">
+                <button 
+                  onClick={() => handleNavigation("/privacy-policy")}
+                  className="text-slate-400 hover:text-white cursor-pointer transition text-sm text-left"
+                >
                   Privacy Policy
                 </button>
               </li>
               <li>
-                <button className="text-slate-400 hover:text-white transition text-sm">
+                <button 
+                  onClick={() => handleNavigation("/terms")}
+                  className="text-slate-400 hover:text-white cursor-pointer transition text-sm text-left"
+                >
                   Terms of Service
                 </button>
               </li>
-              <li>
-                <button className="text-slate-400 hover:text-white transition text-sm">
-                  Contact Us
-                </button>
-              </li>
+              
             </ul>
           </div>
         </div>
@@ -143,17 +141,20 @@ const Footer = ({ variant = "full" }) => {
         <div className="border-t border-slate-800 mt-12 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-slate-400 text-sm">
-              © 2024 Virtual City School. All rights reserved.
+              © {new Date().getFullYear()} Virtual City School. All rights reserved.
             </p>
             <div className="flex gap-6 mt-4 md:mt-0">
-              <button className="text-slate-400 hover:text-white transition text-sm">
+              <button 
+                onClick={() => handleNavigation("/privacy-policy")}
+                className="text-slate-400 hover:text-white cursor-pointer transition text-sm"
+              >
                 Privacy
               </button>
-              <button className="text-slate-400 hover:text-white transition text-sm">
+              <button 
+                onClick={() => handleNavigation("/terms")}
+                className="text-slate-400 hover:text-white cursor-pointer transition text-sm"
+              >
                 Terms
-              </button>
-              <button className="text-slate-400 hover:text-white transition text-sm">
-                Cookies
               </button>
             </div>
           </div>

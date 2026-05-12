@@ -4,6 +4,8 @@ export { default as Marketplace } from "./public/Marketplace";
 export { default as CourseDetails } from "./public/CourseDetails";
 export { default as TeachersDirectory } from "./public/TeachersDirectory";
 export { default as TeacherProfile } from "./public/TeacherProfile";
+export { default as PrivacyPolicy } from "./public/PrivacyPolicy";
+export { default as TermsAndConditions } from "./public/TermsAndConditions";
 
 // Student Pages
 export { default as StudentLayout } from "./student/StudentLayout";
