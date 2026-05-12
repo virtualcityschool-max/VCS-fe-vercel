@@ -13,7 +13,6 @@ import {
 } from "../../store/slices/studentDashboardSlice";
 import {
   DashboardHeader,
-  NextSessionCard,
   OverdueAssignmentsCard,
   LiveScheduleList,
   CourseProgressGrid,
@@ -157,22 +156,27 @@ const StudentPortal = () => {
             </div>
           </div>
         ) : (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
-              <NextSessionCard />
-              <OverdueAssignmentsCard />
-            </div>
-            <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 lg:gap-8">
-              <div className="xl:col-span-8 space-y-6 lg:space-y-8">
+          <div className="space-y-12 lg:space-y-16">
+            {/* Main Dashboard Content */}
+            <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 lg:gap-10 items-start">
+              {/* Primary Column: Learning Activity */}
+              <div className="xl:col-span-8 space-y-10 lg:space-y-12">
                 <LiveScheduleList />
                 <MyAttendanceList />
               </div>
-              <div className="xl:col-span-4 space-y-6 lg:space-y-8">
+
+              {/* Sidebar: Alerts & Summaries */}
+              <div className="xl:col-span-4 space-y-8 lg:space-y-10">
+                <OverdueAssignmentsCard />
                 <AssignmentOverviewList />
               </div>
             </div>
-            <CourseProgressGrid />
-          </>
+
+            {/* Curriculum Overview */}
+            <div className="pt-4 border-t border-white/5">
+              <CourseProgressGrid />
+            </div>
+          </div>
         )}
       </div>
     </section>

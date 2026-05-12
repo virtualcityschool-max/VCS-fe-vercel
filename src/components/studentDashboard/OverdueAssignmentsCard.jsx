@@ -65,7 +65,7 @@ const OverdueAssignmentsCard = () => {
           </div>
           <div>
             <h3 className="text-red-500 font-black uppercase tracking-[0.2em] text-[8px]">
-              Past Due Assignments • Need Attention
+              Past Due Assignments
             </h3>
             <p className="text-white font-black text-base tracking-tight">
               {overdueAssignments.count} Overdue
