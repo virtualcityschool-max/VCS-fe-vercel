@@ -59,6 +59,9 @@ const AuthModals = () => {
   const [fpNewPassword, setFpNewPassword] = useState("");
   const [fpConfirmPassword, setFpConfirmPassword] = useState("");
   const [fpLoading, setFpLoading] = useState(false);
+  const [fpResendLoading, setFpResendLoading] = useState(false);
+  const [fpCooldown, setFpCooldown] = useState(0);
+  const fpCooldownRef = React.useRef(null);
   const [fpError, setFpError] = useState("");
 
   // Registration form state
@@ -113,6 +116,9 @@ const AuthModals = () => {
     setFpNewPassword("");
     setFpConfirmPassword("");
     setFpLoading(false);
+    setFpResendLoading(false);
+    setFpCooldown(0);
+    clearInterval(fpCooldownRef.current);
     setFpError("");
 
     // Clear Redux auth error
@@ -148,6 +154,9 @@ const AuthModals = () => {
       setFpNewPassword("");
       setFpConfirmPassword("");
       setFpLoading(false);
+      setFpResendLoading(false);
+      setFpCooldown(0);
+      clearInterval(fpCooldownRef.current);
       setFpError("");
 
       const urlRole = searchParams.get("role");
@@ -394,6 +403,17 @@ const AuthModals = () => {
     }
   };
 
+  const startFpCooldown = () => {
+    clearInterval(fpCooldownRef.current);
+    setFpCooldown(60);
+    fpCooldownRef.current = setInterval(() => {
+      setFpCooldown((prev) => {
+        if (prev <= 1) { clearInterval(fpCooldownRef.current); return 0; }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
   const handleFpRequestOtp = async (e) => {
     e.preventDefault();
     if (!fpEmail.trim()) { setFpError("Email is required"); return; }
@@ -402,10 +422,27 @@ const AuthModals = () => {
     try {
       await authService.forgotPasswordRequestOtp(fpEmail.trim());
       setFpStep("verify");
+      startFpCooldown();
     } catch (err) {
-      showApiError(err)
+      showApiError(err);
     } finally {
       setFpLoading(false);
+    }
+  };
+
+  const handleFpResendOtp = async () => {
+    if (!fpEmail.trim()) return;
+    setFpResendLoading(true);
+    setFpError("");
+    try {
+      await authService.forgotPasswordRequestOtp(fpEmail.trim());
+      toastManager.success("Reset code resent to your email");
+      setFpOtp("");
+      startFpCooldown();
+    } catch (err) {
+      showApiError(err);
+    } finally {
+      setFpResendLoading(false);
     }
   };
 
@@ -495,7 +532,7 @@ const AuthModals = () => {
               ))}
             </div>
 
-            <form onSubmit={handleLogin} className="space-y-5">
+            <form onSubmit={handleLogin} className="space-y-5" autoComplete="off">
               <div>
                 <label
                   htmlFor="login-email"
@@ -507,6 +544,7 @@ const AuthModals = () => {
                   id="login-email"
                   name="login-email"
                   type="email"
+                  autoComplete="off"
                   value={email}
                   onChange={(e) => {
                     toastManager.dismiss();
@@ -545,6 +583,7 @@ const AuthModals = () => {
                     id="login-password"
                     name="login-password"
                     type={showLoginPassword ? "text" : "password"}
+                    autoComplete="new-password"
                     value={password}
                     onChange={(e) => {
                       toastManager.dismiss();
@@ -619,7 +658,7 @@ const AuthModals = () => {
               <div className="absolute inset-0 bg-slate-900 rounded-[2.5rem] flex flex-col p-6 sm:p-10 z-10">
                 <button
                   type="button"
-                  onClick={() => { setFpStep("idle"); setFpError(""); setFpOtp(""); setFpNewPassword(""); setFpConfirmPassword(""); }}
+                  onClick={() => { setFpStep("idle"); setFpError(""); setFpOtp(""); setFpNewPassword(""); setFpConfirmPassword(""); setFpCooldown(0); clearInterval(fpCooldownRef.current); }}
                   className="flex items-center gap-2 text-slate-400 hover:text-white text-xs mb-6 transition"
                 >
                   <i className="fas fa-arrow-left text-[10px]" />
@@ -692,18 +731,24 @@ const AuthModals = () => {
                     <div className="text-center">
                       <p className="text-xs sm:text-sm text-slate-400 font-medium">
                         Didn't receive code?{" "}
-                        <button
-                          type="button"
-                          onClick={handleFpRequestOtp}
-                          disabled={fpLoading}
-                          className={`text-indigo-400 font-black hover:text-indigo-300 ml-1 transition-colors disabled:text-slate-600 disabled:cursor-not-allowed`}
-                        >
-                          {fpLoading ? (
-                            <i className="fas fa-circle-notch fa-spin"></i>
-                          ) : (
-                            "Resend OTP"
-                          )}
-                        </button>
+                        {fpCooldown > 0 ? (
+                          <span className="text-slate-600 ml-1 font-black text-xs">
+                            Resend in {fpCooldown}s
+                          </span>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={handleFpResendOtp}
+                            disabled={fpResendLoading}
+                            className="text-indigo-400 font-black hover:text-indigo-300 ml-1 transition-colors disabled:text-slate-600 disabled:cursor-not-allowed"
+                          >
+                            {fpResendLoading ? (
+                              <i className="fas fa-circle-notch fa-spin" />
+                            ) : (
+                              "Resend OTP"
+                            )}
+                          </button>
+                        )}
                       </p>
                     </div>
                   </form>

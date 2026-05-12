@@ -8,13 +8,27 @@ const GradingForm = ({ selectedSubmission, onSubmit, onCancel, assignmentMaxScor
   const [feedback, setFeedback] = useState(
     () => selectedSubmission?.grade?.feedback || "",
   );
+  const [scoreError, setScoreError] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit({
-      score: parseFloat(score) || 0,
-      feedback,
-    });
+
+    if (score === "" || score === null || score === undefined) {
+      setScoreError("Score is required — enter 0 or higher");
+      return;
+    }
+    const numeric = parseFloat(score);
+    if (isNaN(numeric) || numeric < 0) {
+      setScoreError("Score must be 0 or greater");
+      return;
+    }
+    if (assignmentMaxScore !== undefined && assignmentMaxScore !== null && numeric > parseFloat(assignmentMaxScore)) {
+      setScoreError(`Score cannot exceed max marks (${assignmentMaxScore})`);
+      return;
+    }
+
+    setScoreError("");
+    onSubmit({ score: numeric, feedback });
   };
 
   return (
@@ -30,13 +44,19 @@ const GradingForm = ({ selectedSubmission, onSubmit, onCancel, assignmentMaxScor
         <input
           type="number"
           placeholder="Score"
-          value={selectedSubmission ? score || "" : ""}
-          onChange={(e) => setScore(e.target.value)}
-          className="w-full p-3 rounded-xl bg-slate-800 border border-slate-700 text-white"
+          value={selectedSubmission ? score : ""}
+          onChange={(e) => { setScore(e.target.value); setScoreError(""); }}
+          className={`w-full p-3 rounded-xl bg-slate-800 border text-white ${scoreError ? "border-red-500 focus:ring-1 focus:ring-red-500" : "border-slate-700"}`}
           max={assignmentMaxScore}
           min={0}
           step="0.1"
         />
+        {scoreError && (
+          <p className="mt-1.5 text-xs text-red-400 font-medium flex items-center gap-1.5">
+            <i className="fas fa-exclamation-circle" />
+            {scoreError}
+          </p>
+        )}
       </div>
 
       <div>

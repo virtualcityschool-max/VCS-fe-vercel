@@ -23,7 +23,7 @@ const NAV_CONFIG = {
     { label: "My Courses",   to: "/teacher/classes",        icon: "fas fa-book-open" },
     { label: "Attendance",   to: "/teacher/attendance",     icon: "fas fa-user-check" },
     { label: "Assessments",  to: "/teacher/assessments",    icon: "fas fa-clipboard-check" },
-    { label: "My Sessions",  to: "/teacher/sessions",       icon: "fas fa-calendar-alt" },
+    { label: "My Classes",  to: "/teacher/sessions",       icon: "fas fa-calendar-alt" },
     { label: "Evaluations",  to: "/teacher/evaluations",    icon: "fas fa-chart-bar" },
     { label: "Hire Leads",   to: "/teacher/hire-leads",     icon: "fas fa-handshake" },
   ],
