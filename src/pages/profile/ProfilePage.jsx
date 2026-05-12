@@ -5,6 +5,7 @@ import { authService } from "../../services/authService";
 import { toastManager } from "../../utils/toastManager";
 import { showApiError } from "../../utils/apiErrorHandler";
 import { useFieldErrors } from "../../hooks";
+import { validatePhone } from "../../utils/validation";
 
 // ── Tiny helpers ──────────────────────────────────────────────────────────────
 
@@ -44,15 +45,15 @@ const FIELDS = {
     { key: "expertise",        label: "Expertise",         icon: "star",          type: "text",      placeholder: "e.g. Mathematics, Physics" },
     { key: "experience_years", label: "Years of Experience", icon: "briefcase",   type: "number",    placeholder: "0", required: true },
     { key: "linkedin",         label: "LinkedIn URL",      icon: "linkedin",      type: "url",       placeholder: "https://linkedin.com/in/…" },
-    { key: "phone",            label: "Phone",             icon: "phone",         type: "tel",       placeholder: "+92 300 0000000" },
+    { key: "phone",            label: "Phone",             icon: "phone",         type: "tel",       placeholder: "+1-800-5551234" },
   ],
   student: [
     { key: "grade_level",   label: "Grade Level",   icon: "graduation-cap", type: "text", placeholder: "e.g. Grade 8, A-Level" },
-    { key: "phone",         label: "Phone",         icon: "phone",          type: "tel",  placeholder: "+92 300 0000000" },
+    { key: "phone",         label: "Phone",         icon: "phone",          type: "tel",  placeholder: "+1-800-5551234" },
     { key: "date_of_birth", label: "Date of Birth", icon: "calendar-alt",   type: "date", placeholder: "", required: true },
   ],
   parent: [
-    { key: "phone",   label: "Phone",   icon: "phone",         type: "tel",  placeholder: "+92 300 0000000" },
+    { key: "phone",   label: "Phone",   icon: "phone",         type: "tel",  placeholder: "+1-800-5551234" },
     { key: "address", label: "Address", icon: "map-marker-alt", type: "text", placeholder: "Street, City, Country" },
   ],
 };
@@ -119,6 +120,10 @@ const ProfilePage = () => {
     }
     if (role === "student" && (form.date_of_birth === "" || form.date_of_birth === null)) {
       newErrors.date_of_birth = "Date of birth is required";
+    }
+    if (form.phone !== undefined) {
+      const phoneResult = validatePhone(form.phone);
+      if (!phoneResult.isValid) newErrors.phone = phoneResult.error;
     }
 
     if (Object.keys(newErrors).length > 0) {

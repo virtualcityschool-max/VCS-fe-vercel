@@ -50,22 +50,22 @@ const StatCardTip = ({ label, value, icon, color, items }) => {
 
       {/* Info icon and tooltip breakdown */}
       {items?.length > 0 && (
-        <>
-          <div className="absolute top-2.5 right-2.5 z-20">
-            <i className="fas fa-info-circle text-sm opacity-40 group-hover/tip:opacity-100 cursor-pointer transition-opacity" />
-          </div>
-          <div className="pointer-events-none absolute top-full right-0 mt-2 z-40 opacity-0 invisible group-hover/tip:opacity-100 group-hover/tip:visible translate-y-[-4px] group-hover/tip:translate-y-0 transition-all duration-200 min-w-[200px]">
-            <div className="bg-slate-900/95 border border-slate-700/50 rounded-xl shadow-2xl p-3 backdrop-blur-md">
-              {items.map((item) => (
-                <div key={item.label} className="flex items-center justify-between gap-4 py-1.5 first:pt-0 last:pb-0 border-b border-slate-700/30 last:border-0">
-                  <span className="text-slate-400 text-xs whitespace-nowrap">{item.label}</span>
-                  <span className={`text-xs font-bold tabular-nums ${item.color || "text-white"}`}>{item.value}</span>
-                </div>
-              ))}
-            </div>
+        <div className="absolute top-2.5 right-2.5 z-20 group/info">
+          <i className="fas fa-info-circle text-sm opacity-40 group-hover/info:opacity-100 cursor-pointer transition-opacity" />
+          <div className="pointer-events-auto absolute top-full right-0 mt-2 z-40 opacity-0 invisible group-hover/info:opacity-100 group-hover/info:visible translate-y-[-4px] group-hover/info:translate-y-0 transition-all duration-200 min-w-[200px]">
             <div className="absolute bottom-full right-3 border-4 border-transparent border-b-slate-900/95" />
+            <div className="bg-slate-900/95 border border-slate-700/50 rounded-xl shadow-2xl backdrop-blur-md overflow-hidden">
+              <div className="max-h-[180px] overflow-y-auto custom-scrollbar p-3">
+                {items.map((item) => (
+                  <div key={item.label} className="flex items-center justify-between gap-4 py-1.5 first:pt-0 last:pb-0 border-b border-slate-700/30 last:border-0">
+                    <span className="text-slate-400 text-xs whitespace-nowrap">{item.label}</span>
+                    <span className={`text-xs font-bold tabular-nums ${item.color || "text-white"}`}>{item.value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
-        </>
+        </div>
       )}
     </div>
   );

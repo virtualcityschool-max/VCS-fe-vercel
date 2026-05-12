@@ -65,6 +65,7 @@ const AuthModals = () => {
   const [username, setUsername] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [role, setRole] = useState("");
+  const [gradeLevel, setGradeLevel] = useState("");
 
   const dispatch = useDispatch();
   const { authModal, enrollmentIntent } = useSelector((state) => state.ui);
@@ -83,6 +84,7 @@ const AuthModals = () => {
     setUsername("");
     setConfirmPassword("");
     setRole("");
+    setGradeLevel("");
 
     // Reset role tab to default
     setActiveRoleTab("student");
@@ -129,6 +131,7 @@ const AuthModals = () => {
       setUsername("");
       setConfirmPassword("");
       setRole("");
+      setGradeLevel("");
       setRegistrationStep("form");
       setOtp("");
       setUserId(null);
@@ -266,15 +269,11 @@ const AuthModals = () => {
     }
 
     try {
-      const response = await dispatch(
-        registerUser({
-          email,
-          username,
-          password,
-          confirmPassword,
-          role,
-        }),
-      ).unwrap();
+      const registerPayload = { email, username, password, confirmPassword, role };
+      if (role === "student" && gradeLevel.trim()) {
+        registerPayload.grade_level = gradeLevel.trim();
+      }
+      const response = await dispatch(registerUser(registerPayload)).unwrap();
 
       // Move to OTP step instead of showing success
       setRegistrationStep("otp");
@@ -1025,6 +1024,7 @@ const AuthModals = () => {
                     onChange={(e) => {
                       toastManager.dismiss();
                       setRole(e.target.value);
+                      setGradeLevel("");
                       clearRegistrationFieldError("role");
                       dispatch(clearAuthError());
                     }}
@@ -1043,6 +1043,28 @@ const AuthModals = () => {
                     </p>
                   )}
                 </div>
+
+                {role === "student" && (
+                  <div>
+                    <label
+                      htmlFor="register-grade"
+                      className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 flex items-center gap-2"
+                    >
+                      Grade Level
+                      <span className="text-slate-600 normal-case font-medium tracking-normal text-[9px]">(optional)</span>
+                    </label>
+                    <input
+                      id="register-grade"
+                      name="register-grade"
+                      type="text"
+                      autoComplete="off"
+                      value={gradeLevel}
+                      onChange={(e) => setGradeLevel(e.target.value)}
+                      placeholder="e.g. Grade 8, A-Level"
+                      className="w-full bg-slate-950 border border-white/5 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
+                    />
+                  </div>
+                )}
 
                 {registrationFormError && (
                   <div className="md:col-span-2">

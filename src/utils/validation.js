@@ -47,6 +47,26 @@ export const validateEmail = (email) => {
   return { isValid: true, error: null };
 };
 
+// Phone validation — accepts any international number (7–15 digits, optional + prefix and separators)
+export const validatePhone = (phone) => {
+  if (!phone) return { isValid: true, error: null }; // optional field
+  const trimmed = phone.trim();
+  // Strip allowed formatting characters, keeping the optional leading +
+  const hasPlus = trimmed.startsWith("+");
+  const digitsOnly = trimmed.replace(/[\s\-().+]/g, "");
+  if (!/^\d+$/.test(digitsOnly)) {
+    return { isValid: false, error: "Phone number may only contain digits, spaces, dashes, or parentheses" };
+  }
+  if (digitsOnly.length < 7 || digitsOnly.length > 15) {
+    return { isValid: false, error: "Phone number must be between 7 and 15 digits" };
+  }
+  // If a + was present the first digit group is the country code (1–3 digits, must not start with 0)
+  if (hasPlus && /^0/.test(digitsOnly)) {
+    return { isValid: false, error: "Country code cannot start with 0" };
+  }
+  return { isValid: true, error: null };
+};
+
 // Username validation
 export const validateUsername = (username) => {
   if (!username) {
