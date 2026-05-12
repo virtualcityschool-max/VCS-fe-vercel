@@ -122,7 +122,7 @@ const TeacherClasses = () => {
                 <div className="w-24 h-24 bg-slate-800/50 rounded-[2rem] flex items-center justify-center text-slate-600 text-4xl mb-8 border border-white/5 shadow-2xl">
                   <i className="fas fa-folder-open"></i>
                 </div>
-                <h3 className="text-2xl font-black text-white mb-3">No classes yet</h3>
+                <h3 className="text-2xl font-black text-white mb-3">No courses available yet</h3>
                 <p className="text-slate-500 font-medium text-sm leading-relaxed mb-8">
                   You haven't created or been assigned any courses yet. Once assigned, your academic portfolio will appear here.
                 </p>

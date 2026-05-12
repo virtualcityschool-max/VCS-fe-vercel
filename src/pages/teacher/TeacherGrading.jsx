@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import ReactDOM from "react-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchAssignments,
@@ -39,13 +40,22 @@ const PreviewButton = ({ url, className = "" }) => {
 };
 
 
-const TeacherGrading = () => {
+const TeacherGrading = ({ 
+  externalFilters, 
+  onFiltersChange, 
+  hideHeader = false,
+  controlsContainerId 
+}) => {
   const [selectedAssignment, setSelectedAssignment] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [filters, setFilters] = useState({
+  const [internalFilters, setInternalFilters] = useState({
     course: "",
     status: "published",
   });
+
+  const filters = externalFilters || internalFilters;
+  const setFilters = onFiltersChange || setInternalFilters;
+
   const [form, setForm] = useState({
     course: "",
     title: "",
@@ -123,6 +133,36 @@ const TeacherGrading = () => {
     );
   }, [dispatch, filters.course, filters.status]);
 
+  const headerActions = (
+    <>
+      <FilterSelect
+        value={filters.course}
+        onChange={(e) => setFilters((prev) => ({ ...prev, course: e.target.value }))}
+      >
+        <option value="">All Courses</option>
+        {myCourses?.map((course) => (
+          <option key={course.id} value={course.id}>{course.title}</option>
+        ))}
+      </FilterSelect>
+      <FilterSelect
+        value={filters.status}
+        onChange={(e) => setFilters((prev) => ({ ...prev, status: e.target.value }))}
+      >
+        <option value="published">Published</option>
+        <option value="draft">Draft</option>
+      </FilterSelect>
+      <button
+        type="button"
+        onClick={() => setShowCreateModal(true)}
+        className="bg-indigo-600 hover:bg-indigo-500 px-5 py-3 rounded-xl text-xs font-bold transition whitespace-nowrap"
+      >
+        + Create Assignment
+      </button>
+    </>
+  );
+
+  const controlsContainer = controlsContainerId ? document.getElementById(controlsContainerId) : null;
+
   if (loadingAssignments && !assignments?.length) {
     return (
       <div className="min-h-[40vh] flex items-center justify-center text-white">
@@ -189,43 +229,49 @@ const TeacherGrading = () => {
 
   return (
     <div className="text-white">
-      <div className="mb-10 flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-black font-poppins mb-2">
-            My Assignments
-          </h1>
-          <p className="text-slate-400 text-sm">
-            Review assignments and move into grading workflows.
-          </p>
-        </div>
+      {controlsContainer && ReactDOM.createPortal(headerActions, controlsContainer)}
 
-        <button
-          type="button"
-          onClick={() => setShowCreateModal(true)}
-          className="bg-indigo-600 hover:bg-indigo-500 px-5 py-3 rounded-xl text-xs font-bold"
-        >
-          + Create Assignment
-        </button>
-      </div>
+      {!hideHeader && (
+        <>
+          <div className="mb-10 flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-black font-poppins mb-2">
+                My Assignments
+              </h1>
+              <p className="text-slate-400 text-sm">
+                Review assignments and move into grading workflows.
+              </p>
+            </div>
 
-      <div className="mb-6 flex flex-wrap gap-2 items-center">
-        <FilterSelect
-          value={filters.course}
-          onChange={(e) => setFilters((prev) => ({ ...prev, course: e.target.value }))}
-        >
-          <option value="">All Courses</option>
-          {myCourses?.map((course) => (
-            <option key={course.id} value={course.id}>{course.title}</option>
-          ))}
-        </FilterSelect>
-        <FilterSelect
-          value={filters.status}
-          onChange={(e) => setFilters((prev) => ({ ...prev, status: e.target.value }))}
-        >
-          <option value="published">Published</option>
-          <option value="draft">Draft</option>
-        </FilterSelect>
-      </div>
+            <button
+              type="button"
+              onClick={() => setShowCreateModal(true)}
+              className="bg-indigo-600 hover:bg-indigo-500 px-5 py-3 rounded-xl text-xs font-bold"
+            >
+              + Create Assignment
+            </button>
+          </div>
+
+          <div className="mb-6 flex flex-wrap gap-2 items-center">
+            <FilterSelect
+              value={filters.course}
+              onChange={(e) => setFilters((prev) => ({ ...prev, course: e.target.value }))}
+            >
+              <option value="">All Courses</option>
+              {myCourses?.map((course) => (
+                <option key={course.id} value={course.id}>{course.title}</option>
+              ))}
+            </FilterSelect>
+            <FilterSelect
+              value={filters.status}
+              onChange={(e) => setFilters((prev) => ({ ...prev, status: e.target.value }))}
+            >
+              <option value="published">Published</option>
+              <option value="draft">Draft</option>
+            </FilterSelect>
+          </div>
+        </>
+      )}
 
       {/* ASSIGNMENTS LIST */}
       <div className="space-y-4">

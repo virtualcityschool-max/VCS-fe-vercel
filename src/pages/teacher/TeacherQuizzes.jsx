@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import ReactDOM from "react-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchQuizzes,
@@ -295,7 +296,12 @@ const quizToQuestions = (quiz) =>
   }));
 
 // ── Main Component ────────────────────────────────────────────────────────────
-const TeacherQuizzes = () => {
+const TeacherQuizzes = ({ 
+  externalFilters, 
+  onFiltersChange, 
+  hideHeader = false,
+  controlsContainerId 
+}) => {
   const dispatch = useDispatch();
   const {
     quizzes,
@@ -307,7 +313,18 @@ const TeacherQuizzes = () => {
     loadingSelectedQuizSubmission,
   } = useSelector((s) => s.teachers);
 
-  const [filterCourse, setFilterCourse] = useState("");
+  const [internalFilters, setInternalFilters] = useState({
+    course: "",
+  });
+
+  const filterCourse = externalFilters?.course ?? internalFilters.course;
+  const setFilterCourse = (val) => {
+    if (onFiltersChange) {
+      onFiltersChange((prev) => ({ ...prev, course: val }));
+    } else {
+      setInternalFilters({ course: val });
+    }
+  };
 
   // Modal state
   const [showCreate,  setShowCreate]  = useState(false);
@@ -332,6 +349,27 @@ const TeacherQuizzes = () => {
   useEffect(() => {
     dispatch(fetchQuizzes(filterCourse ? { course: filterCourse } : {}));
   }, [dispatch, filterCourse]);
+
+  const headerActions = (
+    <>
+      <FilterSelect
+        value={filterCourse}
+        onChange={(e) => setFilterCourse(e.target.value)}
+      >
+        <option value="">All Courses</option>
+        {myCourses?.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
+      </FilterSelect>
+      <button
+        type="button"
+        onClick={() => { setShowCreate(true); setForm(emptyForm); setQuestions([defaultQuestion()]); }}
+        className="bg-indigo-600 hover:bg-indigo-500 px-5 py-3 rounded-xl text-xs font-bold transition whitespace-nowrap"
+      >
+        + Create Quiz
+      </button>
+    </>
+  );
+
+  const controlsContainer = controlsContainerId ? document.getElementById(controlsContainerId) : null;
 
   // ── Create ────────────────────────────────────────────────────────────────
   const handleCreate = async () => {
@@ -550,8 +588,9 @@ const TeacherQuizzes = () => {
   // ── Main render ───────────────────────────────────────────────────────────
   return (
     <div>
-      {/* List header */}
-      
+      {controlsContainer && ReactDOM.createPortal(headerActions, controlsContainer)}
+
+      {!hideHeader && (
         <div className="mb-10 flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-3xl font-black font-poppins mb-2">
@@ -578,6 +617,7 @@ const TeacherQuizzes = () => {
           </button>
         </div>
       </div>
+      )}
       {/* Quiz list */}
       {loadingQuizzes && !quizzes?.length ? (
         <div className="flex items-center justify-center py-16 text-white">
