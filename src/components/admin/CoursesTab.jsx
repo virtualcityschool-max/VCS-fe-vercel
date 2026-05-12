@@ -498,41 +498,47 @@ const CoursesTab = ({
         course.description
           ?.toLowerCase()
           .includes(courseFilters.search.toLowerCase());
-
-      // Category filter — compare by ID
+      // Category filter — compare by normalized name
       const matchesCategory =
         courseFilters.category === "" ||
-        course.category?.id?.toString() === courseFilters.category;
+        (() => {
+          const cat = course.category;
+          if (!cat) return false;
+          const catName = typeof cat === "object" ? cat.name : String(cat);
+          return (catName || "").toLowerCase().replace(/\s+/g, "") === courseFilters.category;
+        })();
 
       // Price range filter
       const matchesPrice =
         courseFilters.priceRange === "" ||
         (() => {
           const price = parseFloat(course.price) || 0;
-          switch (courseFilters.priceRange) {
-            case "0-50":
-              return price >= 0 && price <= 50;
-            case "51-100":
-              return price >= 51 && price <= 100;
-            case "101-500":
-              return price >= 101 && price <= 500;
-            case "501-1000":
-              return price >= 501 && price <= 1000;
-            case "1000+":
-              return price >= 1000;
-            default:
-              return true;
+          if (courseFilters.priceRange.includes("-")) {
+            const [min, max] = courseFilters.priceRange.split("-").map(parseFloat);
+            return price >= min && price <= max;
           }
+          if (courseFilters.priceRange.endsWith("+")) {
+            const min = parseFloat(courseFilters.priceRange.replace("+", "")) || 0;
+            return price >= min;
+          }
+          return true;
         })();
 
       // Status filter
       const matchesStatus =
-        courseFilters.status === "" || course.status === courseFilters.status;
-
+        courseFilters.status === "" || 
+        String(course.status || "").toLowerCase() === courseFilters.status.toLowerCase();
+      
       // Instructor filter
       const matchesInstructor =
         courseFilters.instructor === "" ||
-        course.instructor?.id?.toString() === courseFilters.instructor;
+        (() => {
+          const inst = course.instructor;
+          if (!inst) return false;
+          // Check if instructor is an object with id or just an ID
+          const instId = typeof inst === "object" ? inst.id : inst;
+          return String(instId) === courseFilters.instructor;
+        })();
 
       return (
         matchesSearch &&
@@ -572,6 +578,42 @@ const CoursesTab = ({
     }
   };
 
+ const filterOptions = useMemo(() => {
+    const instructors = courses ? [
+      ...new Set(
+        courses.map((course) => course.instructor?.username).filter(Boolean),
+      ),
+    ] : [];
+
+    // Dynamic price ranges based on course prices
+    const prices = (courses || []).map((c) => parseFloat(c.price) || 0);
+    const maxPrice = Math.max(...prices, 0);
+    
+    let priceRanges = [];
+    if (maxPrice === 0) {
+      priceRanges = [{ value: "0-0", label: "Free" }];
+    } else {
+      // Determine a reasonable step based on max price, ensuring it ends with 0
+      // We aim for approximately 5 ranges
+      let step = Math.ceil(maxPrice / 5 / 10) * 10;
+      if (step === 0) step = 10;
+      
+      for (let i = 0; i < maxPrice; i += step) {
+        const lower = i;
+        const upper = i + step;
+        priceRanges.push({
+          value: `${lower}-${upper}`,
+          label: `PKR ${lower.toFixed(0)} - ${upper.toFixed(0)}`,
+        });
+      }
+    }
+
+    return {
+      instructors: instructors.sort(),
+      priceRanges,
+    };
+  }, [courses]);
+
   return (
     <div className="space-y-6">
       {/* Course Management Header */}
@@ -594,7 +636,7 @@ const CoursesTab = ({
                 <i className="fas fa-tags text-xs text-indigo-400 shrink-0" />
                 <span className="truncate">
                   {courseFilters.category
-                    ? (categories.find((c) => c.id.toString() === courseFilters.category)?.name ?? "Category")
+                    ? (categories.find((c) => c.name.toLowerCase().replace(/\s+/g, "") === courseFilters.category)?.name ?? "Category")
                     : "All Categories"}
                 </span>
               </span>
@@ -622,8 +664,12 @@ const CoursesTab = ({
                       className="flex items-center gap-1 px-2 py-1.5 hover:bg-slate-800/70 group"
                     >
                       <button
-                        onClick={() => { setCourseFilters({ ...courseFilters, category: cat.id.toString() }); setCatDropdownOpen(false); }}
-                        className={`flex-1 text-left text-sm px-1.5 py-1 rounded-lg transition truncate ${courseFilters.category === cat.id.toString() ? "text-indigo-400 font-semibold" : "text-slate-300 group-hover:text-white"}`}
+                        onClick={() => { 
+                          const normalized = cat.name.toLowerCase().replace(/\s+/g, "");
+                          setCourseFilters({ ...courseFilters, category: normalized }); 
+                          setCatDropdownOpen(false); 
+                        }}
+                        className={`flex-1 text-left text-sm px-1.5 py-1 rounded-lg transition truncate ${courseFilters.category === cat.name.toLowerCase().replace(/\s+/g, "") ? "text-indigo-400 font-semibold" : "text-slate-300 group-hover:text-white"}`}
                       >
                         {cat.name}
                       </button>
@@ -665,11 +711,9 @@ const CoursesTab = ({
             onChange={(e) => setCourseFilters({ ...courseFilters, priceRange: e.target.value })}
           >
             <option value="">All Prices</option>
-            <option value="0-50">PKR 0–50</option>
-            <option value="51-100">PKR 51–100</option>
-            <option value="101-500">PKR 101–500</option>
-            <option value="501-1000">PKR 501–1000</option>
-            <option value="1000+">PKR 1000+</option>
+                {filterOptions.priceRanges.map((range) => (
+                  <option key={range.value} value={range.value}>{range.label}</option>
+                ))}
           </FilterSelect>
           <FilterSelect
             value={courseFilters.status}
@@ -1026,7 +1070,7 @@ const CoursesTab = ({
             <h3 className="text-xl font-bold text-white mb-4">
               No Courses Found
             </h3>
-            <p className="text-slate-400 text-center mb-6 max-w-md">
+            <p className="text-slate-400 text-center mb-6 max-w-md mx-auto">
               No courses match your current filter criteria. Try adjusting your
               filters or clearing them to see more results.
             </p>

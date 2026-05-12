@@ -91,15 +91,23 @@ const AdminAttendance = () => {
   };
 
   const isLoading = loadingSessions || loadingAllAttendance;
-
   return (
-    <div className="text-white space-y-6">
-      {/* <div>
-        <h1 className="text-2xl font-black font-poppins">Attendance</h1>
-        <p className="text-slate-400 text-sm mt-1">Session-wise attendance matrix for all courses.</p>
-      </div> */}
+    <div className="text-white space-y-8">
+      {/* Header Actions (Course Filter) - Positioned to align with the global header */}
+      <div className="flex justify-end mb-4 -mt-20 lg:-mt-24 relative z-20">
+        <div className="w-full sm:w-64">
+          <label className="text-[10px] uppercase tracking-widest text-slate-500 font-bold px-0.5 mb-1.5 block uppercase tracking-[0.2em]">Course</label>
+          <FilterSelect
+            value={activeCourseId}
+            onChange={(e) => setCourseId(e.target.value)}
+            className="w-full"
+          >
+            {courses.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
+          </FilterSelect>
+        </div>
+      </div>
 
-      {/* Tabs */}
+      {/* Tabs Row */}
       <div className="flex gap-1 border-b border-slate-800">
         {[
           { id: "student", label: "Student Attendance", icon: "fa-user-graduate" },
@@ -108,28 +116,14 @@ const AdminAttendance = () => {
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
-            className={`flex items-center gap-2 px-5 py-2.5 text-sm font-semibold border-b-2 -mb-px transition ${
-              tab === t.id ? "border-indigo-500 text-white" : "border-transparent text-slate-400 hover:text-white"
+            className={`flex items-center gap-2 px-5 py-3 text-sm font-bold border-b-2 -mb-px transition-all duration-200 ${
+              tab === t.id ? "border-indigo-500 text-white" : "border-transparent text-slate-500 hover:text-white"
             }`}
           >
             <i className={`fas ${t.icon} text-xs`} />
             {t.label}
           </button>
         ))}
-      </div>
-
-      {/* Course filter */}
-      <div className="flex flex-wrap items-end gap-3">
-        <div className="flex flex-col gap-1">
-          <span className="text-[10px] uppercase tracking-widest text-slate-500 font-bold px-0.5">Course</span>
-          <FilterSelect
-            value={activeCourseId}
-            onChange={(e) => setCourseId(e.target.value)}
-            style={{ width: 240 }}
-          >
-            {courses.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
-          </FilterSelect>
-        </div>
       </div>
 
       {/* Stats */}
