@@ -110,8 +110,8 @@ const ApprovalsTab = ({
           !approvalsError &&
           pendingApprovals.length === 0 && (
             <div className="flex flex-col items-center justify-center p-16">
-              <div className="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center mb-6">
-                <i className="fas fa-check-circle text-emerald-400 text-3xl"></i>
+              <div className="w-20 h-20 bg-indigo-500/20 rounded-full flex items-center justify-center mb-6">
+                <i className="fas fa-check-circle text-indigo-400 text-3xl"></i>
               </div>
               <h4 className="text-xl font-bold text-white mb-2">
                 All Caught Up!
@@ -185,7 +185,7 @@ const ApprovalsTab = ({
                           <button
                             onClick={() => handleApprove(user.id, user.username)}
                             disabled={isProcessing[user.id] === "approving"}
-                            className="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 sm:gap-2 flex-1 justify-center"
+                            className="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-indigo-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 sm:gap-2 flex-1 justify-center"
                           >
                             {isProcessing[user.id] === "approving" ? (
                               <React.Fragment key="approving">
@@ -306,7 +306,7 @@ const ApprovalsTab = ({
                           <button
                             onClick={() => handleApprove(user.id, user.username)}
                             disabled={isProcessing[user.id] === "approving"}
-                            className="bg-emerald-600 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                            className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                           >
                             {isProcessing[user.id] === "approving" ? (
                               <React.Fragment key="approving">
@@ -349,7 +349,7 @@ const ApprovalsTab = ({
 
       <ConfirmDialog
         open={confirmDialog.open}
-        variant={confirmDialog.type === "approve" ? "success" : "danger"}
+        variant={confirmDialog.type === "approve" ? "primary" : "danger"}
         title={confirmDialog.type === "approve" ? "Approve User" : "Reject User"}
         message={
           confirmDialog.type === "approve"

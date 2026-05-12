@@ -689,6 +689,24 @@ const AuthModals = () => {
                       {fpLoading && <i className="fas fa-circle-notch fa-spin" />}
                       {fpLoading ? "Verifying…" : "Verify Code"}
                     </button>
+
+                    <div className="text-center">
+                      <p className="text-xs sm:text-sm text-slate-400 font-medium">
+                        Didn't receive code?{" "}
+                        <button
+                          type="button"
+                          onClick={handleFpRequestOtp}
+                          disabled={fpLoading}
+                          className={`text-indigo-400 font-black hover:text-indigo-300 ml-1 transition-colors disabled:text-slate-600 disabled:cursor-not-allowed`}
+                        >
+                          {fpLoading ? (
+                            <i className="fas fa-circle-notch fa-spin"></i>
+                          ) : (
+                            "Resend OTP"
+                          )}
+                        </button>
+                      </p>
+                    </div>
                   </form>
                 )}
 
@@ -1133,25 +1151,21 @@ const AuthModals = () => {
                 </button>
 
                 <div className="text-center">
-                  <button
-                    type="button"
-                    onClick={handleResendOtp}
-                    disabled={resendOtpLoading}
-                    className={`text-sm transition ${
-                      resendOtpLoading
-                        ? "text-slate-600 cursor-not-allowed"
-                        : "text-slate-400 hover:text-white"
-                    }`}
-                  >
-                    {resendOtpLoading ? (
-                      <>
-                        <i className="fas fa-circle-notch fa-spin mr-2"></i>
-                        Sending...
-                      </>
-                    ) : (
-                      "Didn't receive code? Resend OTP"
-                    )}
-                  </button>
+                  <p className="text-xs sm:text-sm text-slate-400 font-medium">
+                    Didn't receive code?{" "}
+                    <button
+                      type="button"
+                      onClick={handleResendOtp}
+                      disabled={resendOtpLoading}
+                      className={`text-indigo-400 font-black hover:text-indigo-300 ml-1 transition-colors disabled:text-slate-600 disabled:cursor-not-allowed`}
+                    >
+                      {resendOtpLoading ? (
+                        <i className="fas fa-circle-notch fa-spin"></i>
+                      ) : (
+                        "Resend OTP"
+                      )}
+                    </button>
+                  </p>
                 </div>
               </form>
             )}

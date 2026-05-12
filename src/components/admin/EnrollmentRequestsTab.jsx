@@ -63,8 +63,8 @@ const EnrollmentRequestsTab = ({
   if (!enrollments?.length) {
     return (
       <div className="flex flex-col items-center justify-center py-16">
-        <div className="w-14 h-14 bg-slate-800 rounded-full flex items-center justify-center mb-4">
-          <i className="fas fa-check-circle text-slate-500 text-xl"></i>
+        <div className="w-14 h-14 bg-indigo-500/10 border border-indigo-500/20 rounded-full flex items-center justify-center mb-4">
+          <i className="fas fa-check-circle text-indigo-400 text-xl"></i>
         </div>
         <p className="text-white font-semibold mb-1">All caught up!</p>
         <p className="text-slate-400 text-sm">No pending enrollment requests.</p>
@@ -128,7 +128,7 @@ const EnrollmentRequestsTab = ({
                 <button
                   onClick={() => handleApprove(enrollment.id, `${enrollment.student_name} — ${enrollment.course_title}`)}
                   disabled={isProcessing}
-                  className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-semibold rounded-xl transition"
+                  className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-semibold rounded-xl transition"
                 >
                   {isProcessing && action === "approve" ? (
                     <i className="fas fa-spinner fa-spin"></i>
@@ -156,7 +156,7 @@ const EnrollmentRequestsTab = ({
       })}
       <ConfirmDialog
         open={confirmDialog.open}
-        variant={confirmDialog.type === "approve" ? "success" : "danger"}
+        variant={confirmDialog.type === "approve" ? "primary" : "danger"}
         title={confirmDialog.type === "approve" ? "Approve Enrollment" : "Reject Enrollment"}
         message={
           confirmDialog.type === "approve"

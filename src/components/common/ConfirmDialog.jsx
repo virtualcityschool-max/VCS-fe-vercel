@@ -19,6 +19,12 @@ const VARIANTS = {
     iconColor: "text-emerald-400",
     confirmCls: "bg-emerald-600 hover:bg-emerald-500 text-white",
   },
+  primary: {
+    icon: "fa-check-circle",
+    iconBg: "bg-indigo-500/20",
+    iconColor: "text-indigo-400",
+    confirmCls: "bg-indigo-600 hover:bg-indigo-500 text-white",
+  },
 };
 
 const ConfirmDialog = ({

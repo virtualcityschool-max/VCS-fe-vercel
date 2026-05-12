@@ -95,8 +95,8 @@ const HireRequestsTab = ({
 
       {!requests?.length ? (
         <div className="flex flex-col items-center justify-center py-16">
-          <div className="w-14 h-14 bg-slate-800 rounded-full flex items-center justify-center mb-4">
-            <i className="fas fa-check-circle text-slate-500 text-xl"></i>
+          <div className="w-14 h-14 bg-indigo-500/10 border border-indigo-500/20 rounded-full flex items-center justify-center mb-4">
+            <i className="fas fa-check-circle text-indigo-400 text-xl"></i>
           </div>
           <p className="text-white font-semibold mb-1">No requests found</p>
           <p className="text-slate-400 text-sm">No hire requests match the selected filter.</p>
@@ -162,7 +162,7 @@ const HireRequestsTab = ({
                       <button
                         onClick={() => setConfirm({ open: true, type: "approve", id: req.id, label: req.full_name })}
                         disabled={isProcessing}
-                        className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-xs font-semibold rounded-xl transition"
+                        className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-xs font-semibold rounded-xl transition"
                       >
                         {isProcessing && action === "approve" ? <i className="fas fa-spinner fa-spin"></i> : <i className="fas fa-check"></i>}
                         Approve
@@ -196,7 +196,7 @@ const HireRequestsTab = ({
 
       <ConfirmDialog
         open={confirm.open}
-        variant={confirm.type === "approve" ? "success" : "danger"}
+        variant={confirm.type === "approve" ? "primary" : "danger"}
         title={confirm.type === "approve" ? "Approve Hire Request" : "Reject Hire Request"}
         message={
           confirm.type === "approve"
@@ -278,7 +278,7 @@ const HireRequestsTab = ({
                 <div className="flex gap-3">
                   <button
                     onClick={() => { setDetailReq(null); setConfirm({ open: true, type: "approve", id: detailReq.id, label: detailReq.full_name }); }}
-                    className="flex-1 flex items-center justify-center gap-2 py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold rounded-xl transition active:scale-95"
+                    className="flex-1 flex items-center justify-center gap-2 py-3 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-xl transition active:scale-95"
                   >
                     <i className="fas fa-check text-xs"></i> Approve
                   </button>

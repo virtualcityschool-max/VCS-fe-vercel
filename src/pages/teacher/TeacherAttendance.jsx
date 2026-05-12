@@ -158,9 +158,22 @@ const TeacherAttendance = () => {
 
   return (
     <div className="text-white px-4 sm:px-6 py-8 space-y-6">
-      <div>
-        <h1 className="text-2xl font-black font-poppins">Attendance</h1>
-        <p className="text-slate-400 text-sm mt-1">Track your sessions and monitor student attendance.</p>
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-2">
+        <div>
+          <h1 className="text-2xl font-black font-poppins">Attendance</h1>
+          <p className="text-slate-400 text-sm mt-1">Track your sessions and monitor student attendance.</p>
+        </div>
+
+        <div className="w-full sm:w-64">
+          <label className="text-[10px] uppercase tracking-widest text-slate-500 font-bold px-0.5 mb-1.5 block">Course</label>
+          <FilterSelect
+            value={activeCourseId}
+            onChange={(e) => setCourseId(e.target.value)}
+            className="w-full"
+          >
+            {myCourses?.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
+          </FilterSelect>
+        </div>
       </div>
 
       {/* Tabs */}
@@ -182,32 +195,17 @@ const TeacherAttendance = () => {
         ))}
       </div>
 
-      {/* Filters + Mark button */}
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div className="flex flex-col gap-1">
-          <span className="text-[10px] uppercase tracking-widest text-slate-500 font-bold px-0.5">Course</span>
-          <FilterSelect
-            value={activeCourseId}
-            onChange={(e) => setCourseId(e.target.value)}
-            style={{ width: 200 }}
+      {tab === "students" && activeCourseId && (
+        <div className="flex justify-end">
+          <button
+            onClick={openMarkModal}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold shadow-lg shadow-indigo-500/20 active:scale-95 transition-all"
           >
-            {myCourses?.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
-          </FilterSelect>
+            <i className="fas fa-clipboard-check text-xs" />
+            Edit Attendance
+          </button>
         </div>
-
-        {tab === "students" && activeCourseId && (
-          <div className="flex flex-col gap-1">
-            <span className="text-[10px] uppercase tracking-widest text-slate-500 font-bold px-0.5 opacity-0 select-none">_</span>
-            <button
-              onClick={openMarkModal}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold shadow-lg shadow-indigo-500/20 active:scale-95 transition-all"
-            >
-              <i className="fas fa-clipboard-check text-xs" />
-              Edit Attendance
-            </button>
-          </div>
-        )}
-      </div>
+      )}
 
       {/* Matrix */}
       {isLoading ? (
