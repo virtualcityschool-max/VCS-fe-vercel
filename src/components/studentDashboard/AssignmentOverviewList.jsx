@@ -1,11 +1,15 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { selectAssignments } from "../../store/slices/studentDashboardSlice";
+import {
+  selectAssignments,
+  selectDashboardQuizzes,
+} from "../../store/slices/studentDashboardSlice";
 
 const AssignmentOverviewList = () => {
   const navigate = useNavigate();
   const assignments = useSelector(selectAssignments);
+  const quizzes = useSelector(selectDashboardQuizzes);
 
   const getStatusConfig = (status) => {
     switch (status) {
@@ -16,6 +20,7 @@ const AssignmentOverviewList = () => {
           label: "Overdue",
         };
       case "graded":
+      case "auto_graded":
         return {
           color: "text-emerald-400 bg-emerald-400/10",
           icon: "fa-check-circle",
@@ -42,28 +47,31 @@ const AssignmentOverviewList = () => {
     }
   };
 
-  const getAssignmentsByStatus = () => {
-    const statusCounts = {};
-    if (!assignments) return statusCounts;
-    assignments.forEach((assignment) => {
-      statusCounts[assignment.status] =
-        (statusCounts[assignment.status] || 0) + 1;
+  const allItems = [
+    ...(assignments || []).map((a) => ({ ...a, itemType: "assignment" })),
+    ...(quizzes || []).map((q) => ({ ...q, itemType: "quiz" })),
+  ].sort((a, b) => new Date(a.due_date) - new Date(b.due_date));
+
+  const getStatusCounts = () => {
+    const counts = {};
+    allItems.forEach((item) => {
+      const status = item.status === "auto_graded" ? "graded" : item.status;
+      counts[status] = (counts[status] || 0) + 1;
     });
-    return statusCounts;
+    return counts;
   };
 
-  const statusCounts = getAssignmentsByStatus();
+  const statusCounts = getStatusCounts();
 
-  if (!assignments || assignments.length === 0) {
+  if (allItems.length === 0) {
     return (
       <div className="bg-slate-900/40 backdrop-blur-xl p-5 rounded-[1.5rem] border border-white/5 shadow-2xl">
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
-            Assignments
+            Assessments
           </h3>
           <i className="fas fa-tasks text-slate-700 text-xs"></i>
         </div>
-
         <div className="text-center py-6">
           <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-3 border border-white/5">
             <i className="fas fa-clipboard-check text-xl text-slate-600"></i>
@@ -72,7 +80,7 @@ const AssignmentOverviewList = () => {
             Workspace Clear
           </h4>
           <p className="text-slate-500 text-[10px] font-medium uppercase tracking-wider">
-            No active assignments
+            No active assessments
           </p>
         </div>
       </div>
@@ -94,7 +102,7 @@ const AssignmentOverviewList = () => {
         </button>
       </div>
 
-      {/* Status Overview - More Compact */}
+      {/* Status Overview */}
       <div className="grid grid-cols-2 gap-3 mb-6">
         {Object.entries(statusCounts).map(([status, count]) => {
           const config = getStatusConfig(status);
@@ -112,23 +120,41 @@ const AssignmentOverviewList = () => {
         })}
       </div>
 
-      {/* Assignment List */}
+      {/* Assessment List */}
       <div className="space-y-3">
-        {assignments.slice(0, 4).map((assignment) => {
-          const config = getStatusConfig(assignment.status);
+        {allItems.slice(0, 4).map((item) => {
+          const config = getStatusConfig(item.status);
+          const isQuiz = item.itemType === "quiz";
 
           return (
             <div
-              key={assignment.id}
-              onClick={() => navigate(`/student/assignments/${assignment.id}`)}
+              key={`${item.itemType}-${item.id}`}
+              onClick={() =>
+                navigate(
+                  isQuiz
+                    ? `/student/quizzes/${item.id}`
+                    : `/student/assignments/${item.id}`
+                )
+              }
               className="group cursor-pointer flex flex-col gap-1 bg-white/5 hover:bg-white/10 rounded-2xl p-3 border border-transparent hover:border-white/5 transition-all duration-300"
             >
               <div className="flex justify-between items-start gap-3">
-                <p className="font-bold text-slate-200 text-xs truncate flex-1 tracking-tight">
-                  {assignment.title}
-                </p>
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <span
+                    className={`shrink-0 px-1.5 py-0.5 rounded-md text-[7px] font-black uppercase tracking-widest border border-white/5 ${
+                      isQuiz
+                        ? "text-violet-400 bg-violet-400/10"
+                        : "text-sky-400 bg-sky-400/10"
+                    }`}
+                  >
+                    {isQuiz ? "Quiz" : "Task"}
+                  </span>
+                  <p className="font-bold text-slate-200 text-xs truncate tracking-tight">
+                    {item.title}
+                  </p>
+                </div>
                 <span
-                  className={`${config.color} px-2 py-0.5 rounded-lg text-[7px] font-black uppercase tracking-widest flex items-center gap-1.5 border border-white/5`}
+                  className={`${config.color} px-2 py-0.5 rounded-lg text-[7px] font-black uppercase tracking-widest flex items-center gap-1.5 border border-white/5 shrink-0`}
                 >
                   <i className={`fas ${config.icon} text-[9px]`}></i>
                   {config.label}
@@ -146,13 +172,13 @@ const AssignmentOverviewList = () => {
       </div>
 
       {/* See All Button */}
-      {assignments.length > 4 && (
+      {allItems.length > 4 && (
         <button
           type="button"
           onClick={() => navigate("/student/assessments")}
           className="w-full mt-6 py-3 bg-white/5 hover:bg-white/10 border border-white/5 rounded-2xl text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-white transition-all active:scale-95 shadow-lg"
         >
-          View Archive ({assignments.length})
+          View Archive ({allItems.length})
         </button>
       )}
     </div>

@@ -4,7 +4,10 @@ const RecentActivity = ({ activities }) => {
   const getActivityIcon = (type) => {
     switch (type) {
       case "grade":
-        return "fas fa-chart-line text-indigo-500";
+      case "assignment_grade":
+        return "fas fa-file-check text-indigo-500";
+      case "quiz_grade":
+        return "fas fa-clipboard-list text-violet-500";
       case "assignment":
         return "fas fa-file-alt text-blue-500";
       case "attendance":
@@ -13,6 +16,18 @@ const RecentActivity = ({ activities }) => {
         return "fas fa-bullhorn text-amber-500";
       default:
         return "fas fa-circle text-slate-500";
+    }
+  };
+
+  const getActivityAccentColor = (type) => {
+    switch (type) {
+      case "quiz_grade":
+        return "group-hover/item:border-violet-500";
+      case "assignment_grade":
+      case "grade":
+        return "group-hover/item:border-indigo-500";
+      default:
+        return "group-hover/item:border-indigo-500";
     }
   };
 
@@ -65,7 +80,7 @@ const RecentActivity = ({ activities }) => {
           <div key={index} className="relative group/item">
             {/* Timeline dot */}
             <div
-              className={`absolute -left-[23px] top-1.5 w-4 h-4 rounded-full bg-slate-900 border-2 border-slate-700 z-10 group-hover/item:border-indigo-500 transition-colors duration-300`}
+              className={`absolute -left-[23px] top-1.5 w-4 h-4 rounded-full bg-slate-900 border-2 border-slate-700 z-10 ${getActivityAccentColor(activity.type)} transition-colors duration-300`}
             >
               <div className={`absolute inset-0.5 rounded-full ${getActivityIcon(
                 activity.type
@@ -76,10 +91,23 @@ const RecentActivity = ({ activities }) => {
             <div className="space-y-2 group/card">
               <div className="flex items-start justify-between">
                 <div className="flex-1 min-w-0 pr-4">
-                  <p className="text-xs font-bold text-slate-200 leading-relaxed mb-1">
-                    <span className="text-indigo-400 font-black">{activity.child}</span>:{" "}
-                    {activity.message}
-                  </p>
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
+                    {(activity.type === "assignment_grade" || activity.type === "quiz_grade") && (
+                      <span
+                        className={`px-1.5 py-0.5 rounded text-[7px] font-black uppercase tracking-widest border border-white/5 ${
+                          activity.type === "quiz_grade"
+                            ? "text-violet-400 bg-violet-400/10"
+                            : "text-indigo-400 bg-indigo-400/10"
+                        }`}
+                      >
+                        {activity.type === "quiz_grade" ? "Quiz" : "Assignment"}
+                      </span>
+                    )}
+                    <p className="text-xs font-bold text-slate-200 leading-relaxed">
+                      <span className={activity.type === "quiz_grade" ? "text-violet-400 font-black" : "text-indigo-400 font-black"}>{activity.child}</span>:{" "}
+                      {activity.message}
+                    </p>
+                  </div>
                   {activity.course && (
                     <p className="text-[10px] text-slate-500 font-medium truncate uppercase tracking-wider">
                       {activity.course}
