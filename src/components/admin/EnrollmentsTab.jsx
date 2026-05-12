@@ -313,15 +313,7 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
             <option value="newest">Newest First</option>
             <option value="oldest">Oldest First</option>
           </FilterSelect>
-          {hasActiveFilters && (
-            <button
-              onClick={() => { setStudentFilter(""); setCourseFilter(""); setTypeFilter("all"); setStatusFilter("all"); setDateSort("newest"); }}
-              className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-slate-700/70 bg-slate-900 hover:bg-rose-500/10 hover:border-rose-500/40 text-slate-400 hover:text-rose-400 text-sm font-medium transition-all duration-150"
-            >
-              <i className="fas fa-times text-xs"></i>
-              <span>Clear</span>
-            </button>
-          )}
+          
           <button
             onClick={handleOpenCreateModal}
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold shadow-lg shadow-indigo-500/20 active:scale-95 transition-all duration-150"
@@ -331,11 +323,20 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
           </button>
           <button
             onClick={onRefresh}
-            className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-slate-700/70 bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white text-sm font-medium transition-all duration-150"
+            className="text-white px-5 py-3 rounded-xl text-sm font-medium shadow-lg active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500"
           >
             <i className="fas fa-sync text-xs"></i>
             <span>Refresh</span>
           </button>
+          {hasActiveFilters && (
+            <button
+              onClick={() => { setStudentFilter(""); setCourseFilter(""); setTypeFilter("all"); setStatusFilter("all"); setDateSort("newest"); }}
+              className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-slate-700/70 bg-slate-900 hover:bg-rose-500/10 hover:border-rose-500/40 text-slate-400 hover:text-rose-400 text-sm font-medium transition-all duration-150"
+            >
+              <i className="fas fa-times text-xs"></i>
+              <span>Clear</span>
+            </button>
+          )}
         </div>
       </div>
 

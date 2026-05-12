@@ -183,7 +183,7 @@ const PublicHome = () => {
             onClick={() => navigate("/courses")}
             className="hidden md:flex text-indigo-400 font-black text-[10px] uppercase tracking-widest hover:text-white transition items-center gap-3 border-b border-indigo-500/20 pb-1"
           >
-            View full Catalog <i className="fas fa-arrow-right text-[8px]"></i>
+            View full Courses <i className="fas fa-arrow-right text-[8px]"></i>
           </button>
         </div>
 

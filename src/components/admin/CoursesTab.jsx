@@ -689,16 +689,7 @@ const CoursesTab = ({
               <option key={user.id} value={user.id}>{user.username}</option>
             ))}
           </FilterSelect>
-          {hasActiveCourseFilters && (
-            <button
-              onClick={resetCourseFilters}
-              title="Clear all filters"
-              className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-slate-700/70 bg-slate-900 hover:bg-rose-500/10 hover:border-rose-500/40 text-slate-400 hover:text-rose-400 text-sm font-medium transition-all duration-150"
-            >
-              <i className="fas fa-times text-xs"></i>
-              <span className="hidden sm:inline">Clear</span>
-            </button>
-          )}
+          
           <button
             onClick={() => setGradingScaleOpen(true)}
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white text-sm font-semibold active:scale-95 transition-all duration-150"
@@ -714,6 +705,16 @@ const CoursesTab = ({
             <span className="hidden sm:inline">Create Course</span>
             <span className="sm:hidden">+</span>
           </button>
+          {hasActiveCourseFilters && (
+            <button
+              onClick={resetCourseFilters}
+              title="Clear all filters"
+              className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-slate-700/70 bg-slate-900 hover:bg-rose-500/10 hover:border-rose-500/40 text-slate-400 hover:text-rose-400 text-sm font-medium transition-all duration-150"
+            >
+              <i className="fas fa-times text-xs"></i>
+              <span className="hidden sm:inline">Clear</span>
+            </button>
+          )}
         </div>
       </div>
 
