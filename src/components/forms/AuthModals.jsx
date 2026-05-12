@@ -14,6 +14,7 @@ import { authService } from "../../services/authService";
 import { normalizeApiError } from "../../utils/errorHandler";
 import { useFieldErrors } from "../../hooks";
 import { showApiError } from "../../utils/apiErrorHandler";
+import { FilterSelect } from "../ui";
 
 const AuthModals = () => {
   const [activeRoleTab, setActiveRoleTab] = useState("student");
@@ -455,12 +456,15 @@ const AuthModals = () => {
 
         {isOpen === "login" ? (
           <div className="p-6 sm:p-10 relative overflow-y-auto flex-1">
-            <h2 className="text-2xl sm:text-3xl font-black font-poppins text-white mb-2 text-center">
-              Secure Login
-            </h2>
-            <p className="text-slate-500 text-xs sm:text-sm mb-8 text-center">
-              Access your VirtualCitySchool terminal.
-            </p>
+            <div className="flex flex-col items-center mb-10">
+              <img src="/assets/logo.png" alt="Virtual City School" className="h-12 sm:h-14 object-contain mb-6" />
+              <h2 className="text-xl sm:text-2xl font-black font-poppins text-white text-center uppercase tracking-[0.15em]">
+                Secure Login
+              </h2>
+              <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-2">
+                Access your learning terminal
+              </p>
+            </div>
 
             <div className="flex bg-slate-950 p-1.5 rounded-2xl border border-white/5 mb-8">
               {["student", "teacher", "parent", "admin"].map((roleOption) => (
@@ -588,10 +592,10 @@ const AuthModals = () => {
                 }`}
               >
                 {isLoading ? (
-                  <>
+                  <div className="flex items-center justify-center gap-2">
                     <i className="fas fa-circle-notch fa-spin"></i>
-                    Authenticating...
-                  </>
+                    <span>Authenticating...</span>
+                  </div>
                 ) : (
                   "LOGIN"
                 )}
@@ -625,7 +629,8 @@ const AuthModals = () => {
 
                 {fpStep === "request" && (
                   <form onSubmit={handleFpRequestOtp} className="space-y-5 flex-1">
-                    <div className="text-center mb-6">
+                    <div className="text-center mb-6 flex flex-col items-center">
+                      <img src="/assets/logo.png" alt="Virtual City School" className="h-10 sm:h-12 object-contain mb-8" />
                       <div className="w-16 h-16 bg-indigo-500/20 rounded-3xl flex items-center justify-center text-2xl mx-auto mb-4">
                         <i className="fas fa-lock text-indigo-400" />
                       </div>
@@ -656,7 +661,8 @@ const AuthModals = () => {
 
                 {fpStep === "verify" && (
                   <form onSubmit={handleFpVerifyOtp} className="space-y-5 flex-1">
-                    <div className="text-center mb-6">
+                    <div className="text-center mb-6 flex flex-col items-center">
+                      <img src="/assets/logo.png" alt="Virtual City School" className="h-10 sm:h-12 object-contain mb-8" />
                       <div className="w-16 h-16 bg-emerald-500/20 rounded-3xl flex items-center justify-center text-2xl mx-auto mb-4">
                         <i className="fas fa-envelope-open-text text-emerald-400" />
                       </div>
@@ -688,7 +694,8 @@ const AuthModals = () => {
 
                 {fpStep === "reset" && (
                   <form onSubmit={handleFpReset} className="space-y-5 flex-1">
-                    <div className="text-center mb-6">
+                    <div className="text-center mb-6 flex flex-col items-center">
+                      <img src="/assets/logo.png" alt="Virtual City School" className="h-10 sm:h-12 object-contain mb-8" />
                       <div className="w-16 h-16 bg-amber-500/20 rounded-3xl flex items-center justify-center text-2xl mx-auto mb-4">
                         <i className="fas fa-key text-amber-400" />
                       </div>
@@ -739,7 +746,8 @@ const AuthModals = () => {
 
                 {fpStep === "success" && (
                   <div className="flex flex-col items-center justify-center flex-1 text-center animate-fadeIn">
-                    <div className="w-20 h-20 bg-emerald-500/20 rounded-3xl flex items-center justify-center text-3xl mb-6">
+                    <img src="/assets/logo.png" alt="Virtual City School" className="h-10 sm:h-12 object-contain mb-8" />
+                    <div className="w-16 h-16 bg-emerald-500/20 rounded-3xl flex items-center justify-center text-2xl mb-6">
                       <i className="fas fa-check-circle text-emerald-400" />
                     </div>
                     <h2 className="text-xl font-black font-poppins text-white mb-2">Password Reset!</h2>
@@ -760,9 +768,14 @@ const AuthModals = () => {
           <div className="p-6 sm:p-10 overflow-y-auto flex-1">
             {registrationStep === "form" && (
               <form onSubmit={handleRegisterSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="md:col-span-2 text-center mb-2">
-                  <h2 className="text-2xl sm:text-3xl font-black font-poppins text-white mb-2">Create Account</h2>
-                  <p className="text-slate-500 text-xs sm:text-sm">Join the VirtualCitySchool terminal.</p>
+                <div className="md:col-span-2 flex flex-col items-center mb-8">
+                  <img src="/assets/logo.png" alt="Virtual City School" className="h-12 sm:h-14 object-contain mb-6" />
+                  <h2 className="text-xl sm:text-2xl font-black font-poppins text-white text-center uppercase tracking-[0.15em]">
+                    Create Account
+                  </h2>
+                  <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-2">
+                    Join the Virtual City School terminal
+                  </p>
                 </div>
                 
                 <div>
@@ -988,26 +1001,22 @@ const AuthModals = () => {
                   >
                     Role
                   </label>
-                  <div className="relative">
-                    <select
-                      id="register-role"
-                      name="register-role"
-                      value={role}
-                      onChange={(e) => {
-                        toastManager.dismiss();
-                        setRole(e.target.value);
-                        clearRegistrationFieldError("role");
-                        dispatch(clearAuthError());
-                      }}
-                      className="w-full appearance-none bg-slate-950 border border-white/5 rounded-2xl px-6 py-4 pr-12 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm cursor-pointer"
-                    >
-                      <option value="">Select Role</option>
-                      <option value="teacher">Teacher</option>
-                      <option value="student">Student</option>
-                      <option value="parent">Parent</option>
-                    </select>
-                    <i className="fas fa-chevron-down absolute right-5 top-1/2 -translate-y-1/2 text-slate-500 text-[10px] pointer-events-none" />
-                  </div>
+                  <FilterSelect
+                    id="register-role"
+                    value={role}
+                    onChange={(e) => {
+                      toastManager.dismiss();
+                      setRole(e.target.value);
+                      clearRegistrationFieldError("role");
+                      dispatch(clearAuthError());
+                    }}
+                    placeholder="Select Role"
+                    className="w-full !bg-slate-950 !border-white/5 !rounded-2xl !px-6 !py-4 focus:ring-2 focus:ring-indigo-500 text-white text-sm"
+                  >
+                    <option value="teacher">Teacher</option>
+                    <option value="student">Student</option>
+                    <option value="parent">Parent</option>
+                  </FilterSelect>
                   {registrationErrors.role && (
                     <p className="text-red-500 text-xs mt-2 animate-shake">
                       {Array.isArray(registrationErrors.role)
@@ -1036,10 +1045,10 @@ const AuthModals = () => {
                     }`}
                   >
                     {isLoading ? (
-                      <>
+                      <div className="flex items-center justify-center gap-2">
                         <i className="fas fa-circle-notch fa-spin"></i>
-                        Registering...
-                      </>
+                        <span>Registering...</span>
+                      </div>
                     ) : (
                       "REGISTER NOW"
                     )}
@@ -1063,11 +1072,12 @@ const AuthModals = () => {
 
             {registrationStep === "otp" && (
               <form onSubmit={handleOtpVerification} className="space-y-5">
-                <div className="text-center mb-8">
-                  <div className="w-20 h-20 bg-emerald-500/20 text-emerald-500 rounded-3xl flex items-center justify-center text-3xl mx-auto mb-6">
+                <div className="text-center mb-8 flex flex-col items-center">
+                  <img src="/assets/logo.png" alt="Virtual City School" className="h-10 sm:h-12 object-contain mb-8" />
+                  <div className="w-16 h-16 bg-emerald-500/20 text-emerald-500 rounded-3xl flex items-center justify-center text-2xl mx-auto mb-6">
                     <i className="fas fa-envelope-open-text"></i>
                   </div>
-                  <h2 className="text-2xl font-black font-poppins text-white mb-4">
+                  <h2 className="text-xl font-black font-poppins text-white mb-2">
                     Check Your Email
                   </h2>
                   <p className="text-slate-400 text-sm leading-relaxed">
@@ -1113,10 +1123,10 @@ const AuthModals = () => {
                   }`}
                 >
                   {isLoading ? (
-                    <>
+                    <div className="flex items-center justify-center gap-2">
                       <i className="fas fa-circle-notch fa-spin"></i>
-                      Verifying...
-                    </>
+                      <span>Verifying...</span>
+                    </div>
                   ) : (
                     "Verify OTP"
                   )}
@@ -1147,8 +1157,9 @@ const AuthModals = () => {
             )}
 
             {registrationStep === "success" && (
-              <div className="text-center py-10 animate-fadeIn">
-                <div className="w-20 h-20 bg-emerald-500/20 text-emerald-500 rounded-3xl flex items-center justify-center text-3xl mx-auto mb-6">
+              <div className="text-center py-10 animate-fadeIn flex flex-col items-center">
+                <img src="/assets/logo.png" alt="Virtual City School" className="h-10 sm:h-12 object-contain mb-10" />
+                <div className="w-16 h-16 bg-emerald-500/20 text-emerald-500 rounded-3xl flex items-center justify-center text-2xl mx-auto mb-6">
                   <i className="fas fa-check-circle"></i>
                 </div>
                 <h2 className="text-2xl font-black font-poppins text-white mb-4">
