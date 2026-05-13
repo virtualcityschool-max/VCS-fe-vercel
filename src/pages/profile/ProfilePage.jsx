@@ -6,6 +6,7 @@ import { toastManager } from "../../utils/toastManager";
 import { showApiError } from "../../utils/apiErrorHandler";
 import { useFieldErrors } from "../../hooks";
 import { validatePhone } from "../../utils/validation";
+import PhoneInput from "../../components/ui/PhoneInput";
 
 // ── Tiny helpers ──────────────────────────────────────────────────────────────
 
@@ -120,10 +121,15 @@ const ProfilePage = () => {
     }
     if (role === "student" && (form.date_of_birth === "" || form.date_of_birth === null)) {
       newErrors.date_of_birth = "Date of birth is required";
+    } else if (form.date_of_birth && new Date(form.date_of_birth) > new Date()) {
+      newErrors.date_of_birth = "Date of birth cannot be in the future";
     }
     if (form.phone !== undefined) {
       const phoneResult = validatePhone(form.phone);
       if (!phoneResult.isValid) newErrors.phone = phoneResult.error;
+    }
+    if (form.linkedin && !/^https?:\/\/(www\.)?linkedin\.com\/.+/.test(form.linkedin)) {
+      newErrors.linkedin = "Please enter a valid LinkedIn URL (e.g. https://linkedin.com/in/username)";
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -269,11 +275,21 @@ const ProfilePage = () => {
                       }}
                       className={`${inputCls} ${errors[key] ? "border-red-500 ring-1 ring-red-500/20" : ""}`}
                     />
+                  ) : type === "tel" ? (
+                    <PhoneInput
+                      value={form[key] || ""}
+                      onChange={(val) => {
+                        setForm((p) => ({ ...p, [key]: val }));
+                        clearFieldError(key);
+                      }}
+                      error={errors[key]}
+                    />
                   ) : (
                     <input
                       type={type}
                       placeholder={placeholder}
                       value={form[key] || ""}
+                      max={type === "date" ? new Date().toISOString().split("T")[0] : undefined}
                       onChange={(e) => {
                         setForm((p) => ({ ...p, [key]: e.target.value }));
                         clearFieldError(key);
@@ -286,7 +302,7 @@ const ProfilePage = () => {
                     {roleProfile[key] ?? <span className="text-slate-600 italic">Not set</span>}
                   </div>
                 )}
-                {editing && errors[key] && (
+                {editing && errors[key] && type !== "tel" && (
                   <p className="mt-1.5 text-[11px] text-red-400 font-medium flex items-center gap-1.5">
                     <i className="fas fa-exclamation-circle" />
                     {getFieldError(key)}

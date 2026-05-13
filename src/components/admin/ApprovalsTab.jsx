@@ -59,64 +59,38 @@ const ApprovalsTab = ({
 
         {/* Loading State */}
         {approvalsLoading && !approvalsError && (
-          <div className="animate-pulse overflow-x-auto">
-            {/* Mobile Card Skeleton */}
-            <div className="lg:hidden divide-y divide-slate-800/50">
-              {[...Array(5)].map((_, index) => (
-                <div key={index} className="p-4 sm:p-6">
-                  <div className="flex items-start gap-3 sm:gap-4 mb-4">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-slate-700 rounded-xl shrink-0"></div>
-                    <div className="flex-1 space-y-2">
-                      <div className="h-4 bg-slate-700 rounded w-32"></div>
-                      <div className="h-3 bg-slate-700 rounded w-48"></div>
-                    </div>
-                  </div>
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div className="h-5 bg-slate-700 rounded-full w-16"></div>
-                    <div className="flex flex-col gap-2">
-                      <div className="h-3 bg-slate-700 rounded w-36"></div>
-                      <div className="flex gap-2">
-                        <div className="h-8 bg-slate-700 rounded-lg flex-1"></div>
-                        <div className="h-8 bg-slate-700 rounded-lg flex-1"></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Desktop Table Skeleton */}
-            <table className="hidden lg:table w-full text-left">
-              <thead className="bg-slate-950/60 border-b border-slate-800">
-                <tr>
-                  <th className="px-8 py-6"><div className="h-3 bg-slate-700 rounded w-28"></div></th>
-                  <th className="px-8 py-6"><div className="h-3 bg-slate-700 rounded w-12"></div></th>
-                  <th className="px-8 py-6"><div className="h-3 bg-slate-700 rounded w-32"></div></th>
-                  <th className="px-8 py-6 text-center"><div className="h-3 bg-slate-700 rounded w-16 mx-auto"></div></th>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="bg-slate-800">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase">User</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase">Role</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase">Registration Date</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/50">
+              <tbody>
                 {[...Array(5)].map((_, index) => (
-                  <tr key={index}>
-                    <td className="px-8 py-6">
-                      <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 bg-slate-700 rounded-xl shrink-0"></div>
+                  <tr key={index} className="border-b border-slate-800 animate-pulse">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-slate-700 rounded-full"></div>
                         <div className="space-y-2">
                           <div className="h-4 bg-slate-700 rounded w-32"></div>
-                          <div className="h-3 bg-slate-700 rounded w-44"></div>
+                          <div className="h-3 bg-slate-700 rounded w-48"></div>
                         </div>
                       </div>
                     </td>
-                    <td className="px-8 py-6">
-                      <div className="h-5 bg-slate-700 rounded-full w-16"></div>
+                    <td className="px-6 py-4">
+                      <div className="h-6 bg-slate-700 rounded w-20"></div>
                     </td>
-                    <td className="px-8 py-6">
-                      <div className="h-4 bg-slate-700 rounded w-36"></div>
+                    <td className="px-6 py-4">
+                      <div className="h-6 bg-slate-700 rounded w-36"></div>
                     </td>
-                    <td className="px-8 py-6">
-                      <div className="flex items-center gap-2 justify-center">
-                        <div className="h-8 bg-slate-700 rounded-xl w-24"></div>
-                        <div className="h-8 bg-slate-700 rounded-xl w-20"></div>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2">
+                        <div className="h-8 bg-slate-700 rounded w-20"></div>
+                        <div className="h-8 bg-slate-700 rounded w-16"></div>
                       </div>
                     </td>
                   </tr>

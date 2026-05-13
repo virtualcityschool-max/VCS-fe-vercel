@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import ConfirmDialog from "../common/ConfirmDialog";
 import { useDispatch } from "react-redux";
-import { Button, Input } from "../ui";
+import { Button, PhoneInput } from "../ui";
 import { useFieldErrors } from "../../hooks";
 import { toastManager } from "../../utils/toastManager";
 import {
@@ -76,14 +76,8 @@ const ParentProfileTab = ({ profile, onUpdate, onRefresh, onCancel, onSaved }) =
   const validateForm = () => {
     const newErrors = {};
 
-    // Phone validation
-    if (!formData.phone?.trim()) {
-      newErrors.phone = "Phone number is required";
-    } else if (formData.phone && !/^\+?[\d\s\-()]+$/.test(formData.phone)) {
-      newErrors.phone =
-        "Phone number must contain only digits, spaces, and basic formatting";
-    } else if (formData.phone && formData.phone.length > 20) {
-      newErrors.phone = "Phone number must not exceed 20 characters";
+    if (!formData.phone || formData.phone.replace(/\D/g, "").length < 5) {
+      newErrors.phone = "Please enter a valid phone number";
     }
 
     // Address validation
@@ -226,13 +220,10 @@ const ParentProfileTab = ({ profile, onUpdate, onRefresh, onCancel, onSaved }) =
             <label className="block text-sm font-medium text-slate-300 mb-2">
               Phone Number
             </label>
-            <Input
-              type="tel"
+            <PhoneInput
               value={formData.phone}
-              onChange={(e) => handleInputChange("phone", e.target.value)}
-              placeholder="+1 (555) 123-4567"
+              onChange={(val) => handleInputChange("phone", val)}
               error={getFieldError("phone")}
-              className="bg-slate-900/60 border-slate-700"
             />
           </div>
           <div>
