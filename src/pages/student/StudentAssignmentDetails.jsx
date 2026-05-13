@@ -5,25 +5,25 @@ import { studentService } from "../../services/studentService";
 import { submitAssignment } from "../../store/slices/studentDashboardSlice";
 import { toastManager } from "../../utils/toastManager";
 import { validateFile, ACCEPT_STRING } from "../../utils/fileValidation";
-import { getStorageUrl, handleFileDownload } from "../../utils/storageUrl";
+import { getStorageUrl } from "../../utils/storageUrl";
+import FileViewerModal from "../../components/common/FileViewerModal";
 
-const getFilename = (url) => {
-  if (!url) return "attachment";
-  return url.split("/").pop() || "attachment";
+const PreviewButton = ({ url, className = "" }) => {
+  const [open, setOpen] = React.useState(false);
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-700/40 hover:bg-slate-700 text-slate-400 hover:text-white text-xs font-semibold transition border border-slate-600/30 ${className}`}
+      >
+        <i className="fas fa-eye text-[10px]" />
+        Preview
+      </button>
+      {open && <FileViewerModal filePath={url} handleClose={() => setOpen(false)} />}
+    </>
+  );
 };
-
-const DownloadButton = ({ url, label = "Download Attachment", className = "" }) => (
-  <a
-    href={url}
-    download={getFilename(url)}
-    target="_blank"
-    rel="noopener noreferrer"
-    className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-400 hover:text-indigo-300 text-sm font-semibold transition border border-indigo-500/30 ${className}`}
-  >
-    <i className="fas fa-download"></i>
-    {label}
-  </a>
-);
 
 const StudentAssignmentDetails = () => {
   const { id } = useParams();
@@ -74,13 +74,14 @@ const StudentAssignmentDetails = () => {
     }
 
     try {
-      await dispatch(
+      const { response } = await dispatch(
         submitAssignment({
           assignmentId: assignment.id,
           submissionData: { text_answer: answer.trim(), file: file },
         }),
       ).unwrap();
 
+      const sub = response.submission ?? response;
       toastManager.success("Assignment submitted successfully");
       setAssignment((prev) =>
         prev
@@ -88,9 +89,9 @@ const StudentAssignmentDetails = () => {
               ...prev,
               is_submitted: true,
               my_submission: {
-                text_answer: answer.trim(),
-                file: null,
-                submitted_at: new Date().toISOString(),
+                text_answer: sub.text_answer ?? answer.trim(),
+                file: sub.file ?? null,
+                submitted_at: sub.submitted_at ?? new Date().toISOString(),
                 is_graded: false,
                 score: null,
                 feedback: null,
@@ -101,7 +102,7 @@ const StudentAssignmentDetails = () => {
       setAnswer("");
       setFile(null);
     } catch (err) {
-      showApiError(err);
+      toastManager.error(err?.message || "Failed to submit assignment");
     }
   };
 
@@ -189,8 +190,8 @@ const StudentAssignmentDetails = () => {
                 {assignment.description}
               </div>
               {assignment.file_url && (
-                <div className="mt-3" className="w-10 text-blue-600 hover:text-blue-800 underline" onClick={()=>handleFileDownload(assignment.file_url)}>
-                  {/* <DownloadButton url={getStorageUrl(assignment.file_url)} label="Download Assignment File" /> */}
+                <div className="mt-3">
+                  <PreviewButton url={getStorageUrl(assignment.file_url)} />
                 </div>
               )}
             </div>
@@ -246,14 +247,10 @@ const StudentAssignmentDetails = () => {
                       <p className="text-slate-500 text-sm italic">No text submitted</p>
                     )}
 
-                    {assignment.my_submission?.file_url && (
-                      <div class="cursor-pointer text-blue-600 hover:text-blue-800 underline" onClick={()=>handleFileDownload(assignment.my_submission.file_url)}>
-                        Download
-                      </div>
-                      // <DownloadButton
-                      //   url={getStorageUrl(assignment.my_submission.file_url)}
-                      //   label="Download My Submission"
-                      // />
+                    {(assignment.my_submission?.file_url || assignment.my_submission?.file) && (
+                      <PreviewButton
+                        url={getStorageUrl(assignment.my_submission.file_url ?? assignment.my_submission.file)}
+                      />
                     )}
 
                     {assignment.my_submission?.submitted_at && (

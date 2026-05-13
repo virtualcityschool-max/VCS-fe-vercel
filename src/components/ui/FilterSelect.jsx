@@ -58,23 +58,21 @@ const FilterSelect = ({
     setOpen((v) => !v);
   };
 
-  // Close on outside click
+  // Close on outside click/touch
   useEffect(() => {
     if (!open) return;
-    const handle = (e) => {
+    const close = (e) => {
       if (triggerRef.current && !triggerRef.current.contains(e.target)) {
         setOpen(false);
         setSearch("");
       }
     };
-    document.addEventListener("mousedown", handle);
-    window.addEventListener("scroll", () => { setOpen(false); setSearch(""); }, { once: true });
-    return () => document.removeEventListener("mousedown", handle);
-  }, [open]);
-
-  // Auto-focus search when dropdown opens
-  useEffect(() => {
-    if (open && searchRef.current) searchRef.current.focus();
+    document.addEventListener("mousedown", close);
+    document.addEventListener("touchstart", close, { passive: true });
+    return () => {
+      document.removeEventListener("mousedown", close);
+      document.removeEventListener("touchstart", close);
+    };
   }, [open]);
 
   const handleSelect = (opt) => {
@@ -88,6 +86,7 @@ const FilterSelect = ({
     <div
       style={{ position: "fixed", top: dropPos.top, left: dropPos.left, width: dropPos.width, minWidth: 180, zIndex: 9999 }}
       onMouseDown={(e) => e.stopPropagation()}
+      onTouchStart={(e) => e.stopPropagation()}
       className="bg-slate-900 border border-slate-700 rounded-xl shadow-2xl overflow-hidden"
     >
       {/* Search */}
@@ -100,8 +99,9 @@ const FilterSelect = ({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search..."
+            style={{ fontSize: 16 }}
             className="w-full bg-slate-800 border border-slate-700/60 rounded-lg pl-7 pr-3 py-1.5
-              text-white text-xs placeholder-slate-500
+              text-white placeholder-slate-500
               focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20"
           />
         </div>
@@ -115,8 +115,8 @@ const FilterSelect = ({
           filtered.map((opt) => (
             <li
               key={opt.value}
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={() => handleSelect(opt)}
+              onMouseDown={(e) => { e.preventDefault(); handleSelect(opt); }}
+              onTouchEnd={(e) => { e.preventDefault(); handleSelect(opt); }}
               className={`px-3 py-2 text-sm transition-colors select-none
                 ${opt.disabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}
                 ${String(opt.value) === String(value ?? "")
