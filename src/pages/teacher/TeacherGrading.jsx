@@ -34,17 +34,18 @@ const PreviewButton = ({ url, className = "" }) => {
         <i className="fas fa-eye text-[10px]" />
         Preview
       </button>
-      {open && <FileViewerModal filePath={url} handleClose={() => setOpen(false)} />}
+      {open && (
+        <FileViewerModal filePath={url} handleClose={() => setOpen(false)} />
+      )}
     </>
   );
 };
 
-
-const TeacherGrading = ({ 
-  externalFilters, 
-  onFiltersChange, 
+const TeacherGrading = ({
+  externalFilters,
+  onFiltersChange,
   hideHeader = false,
-  controlsContainerId 
+  controlsContainerId,
 }) => {
   const [selectedAssignment, setSelectedAssignment] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -137,16 +138,22 @@ const TeacherGrading = ({
     <>
       <FilterSelect
         value={filters.course}
-        onChange={(e) => setFilters((prev) => ({ ...prev, course: e.target.value }))}
+        onChange={(e) =>
+          setFilters((prev) => ({ ...prev, course: e.target.value }))
+        }
       >
         <option value="">All Courses</option>
         {myCourses?.map((course) => (
-          <option key={course.id} value={course.id}>{course.title}</option>
+          <option key={course.id} value={course.id}>
+            {course.title}
+          </option>
         ))}
       </FilterSelect>
       <FilterSelect
         value={filters.status}
-        onChange={(e) => setFilters((prev) => ({ ...prev, status: e.target.value }))}
+        onChange={(e) =>
+          setFilters((prev) => ({ ...prev, status: e.target.value }))
+        }
       >
         <option value="published">Published</option>
         <option value="draft">Draft</option>
@@ -161,7 +168,9 @@ const TeacherGrading = ({
     </>
   );
 
-  const controlsContainer = controlsContainerId ? document.getElementById(controlsContainerId) : null;
+  const controlsContainer = controlsContainerId
+    ? document.getElementById(controlsContainerId)
+    : null;
 
   if (loadingAssignments && !assignments?.length) {
     return (
@@ -184,10 +193,13 @@ const TeacherGrading = ({
     setPrivateStudents([]);
     try {
       const data = await coursesService.getPrivateStudents(courseId);
-      const list = Array.isArray(data) ? data : (data?.results || []);
+      const list = Array.isArray(data) ? data : data?.results || [];
       setPrivateStudents(list);
       if (list.length > 0) {
-        setForm((prev) => ({ ...prev, private_student_ids: [list[0].student_id] }));
+        setForm((prev) => ({
+          ...prev,
+          private_student_ids: [list[0].student_id],
+        }));
       }
     } catch {
       toastManager.error("Failed to load private students");
@@ -215,7 +227,8 @@ const TeacherGrading = ({
     if (selectedDate <= now) return "Due date must be in the future";
 
     if (!form.max_score) return "Total marks is required";
-    if (Number(form.max_score) <= 0) return "Total marks must be greater than 0";
+    if (Number(form.max_score) <= 0)
+      return "Total marks must be greater than 0";
 
     return null;
   };
@@ -229,7 +242,8 @@ const TeacherGrading = ({
 
   return (
     <div className="text-white">
-      {controlsContainer && ReactDOM.createPortal(headerActions, controlsContainer)}
+      {controlsContainer &&
+        ReactDOM.createPortal(headerActions, controlsContainer)}
 
       {!hideHeader && (
         <>
@@ -255,16 +269,22 @@ const TeacherGrading = ({
           <div className="mb-6 flex flex-wrap gap-2 items-center">
             <FilterSelect
               value={filters.course}
-              onChange={(e) => setFilters((prev) => ({ ...prev, course: e.target.value }))}
+              onChange={(e) =>
+                setFilters((prev) => ({ ...prev, course: e.target.value }))
+              }
             >
               <option value="">All Courses</option>
               {myCourses?.map((course) => (
-                <option key={course.id} value={course.id}>{course.title}</option>
+                <option key={course.id} value={course.id}>
+                  {course.title}
+                </option>
               ))}
             </FilterSelect>
             <FilterSelect
               value={filters.status}
-              onChange={(e) => setFilters((prev) => ({ ...prev, status: e.target.value }))}
+              onChange={(e) =>
+                setFilters((prev) => ({ ...prev, status: e.target.value }))
+              }
             >
               <option value="published">Published</option>
               <option value="draft">Draft</option>
@@ -288,19 +308,23 @@ const TeacherGrading = ({
                 {/* Info Section */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 mb-3">
-                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
-                      assignment.is_overdue
-                        ? "bg-rose-500/10 text-rose-400 border-rose-500/20"
-                        : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                    }`}>
-                      <span className={`inline-block w-1.5 h-1.5 rounded-full mr-1.5 ${assignment.is_overdue ? "bg-rose-400 animate-pulse" : "bg-emerald-400"}`}></span>
+                    <span
+                      className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
+                        assignment.is_overdue
+                          ? "bg-rose-500/10 text-rose-400 border-rose-500/20"
+                          : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                      }`}
+                    >
+                      <span
+                        className={`inline-block w-1.5 h-1.5 rounded-full mr-1.5 ${assignment.is_overdue ? "bg-rose-400 animate-pulse" : "bg-emerald-400"}`}
+                      ></span>
                       {assignment.is_overdue ? "Overdue" : "Active"}
                     </span>
                     <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest bg-slate-800/50 px-2 py-1 rounded-md">
                       {assignment.course_title}
                     </span>
                   </div>
-                  
+
                   <h2 className="text-xl font-bold text-white mb-4 group-hover:text-indigo-300 transition-colors">
                     {assignment.title}
                   </h2>
@@ -309,14 +333,20 @@ const TeacherGrading = ({
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800/30 border border-slate-700/30">
                       <i className="fas fa-users text-indigo-400 text-xs" />
                       <span className="text-xs font-semibold text-slate-300">
-                      <span className="text-slate-500 font-normal mr-0.5">Submissions</span>  {assignment.submissions_count} 
+                        <span className="text-slate-500 font-normal mr-0.5">
+                          Submissions
+                        </span>{" "}
+                        {assignment.submissions_count}
                       </span>
                     </div>
-                    
+
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800/30 border border-slate-700/30">
                       <i className="fas fa-star text-amber-400 text-xs" />
                       <span className="text-xs font-semibold text-slate-300">
-                       <span className="text-slate-500 font-normal mr-0.5">Total Marks</span>  {assignment.max_score} 
+                        <span className="text-slate-500 font-normal mr-0.5">
+                          Total Marks
+                        </span>{" "}
+                        {assignment.max_score}
                       </span>
                     </div>
 
@@ -324,7 +354,10 @@ const TeacherGrading = ({
                       <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800/30 border border-slate-700/30">
                         <i className="fas fa-calendar-alt text-rose-400 text-xs" />
                         <span className="text-xs font-semibold text-slate-300">
-                          {new Date(assignment.due_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                          {new Date(assignment.due_date).toLocaleDateString(
+                            undefined,
+                            { month: "short", day: "numeric", year: "numeric" },
+                          )}
                         </span>
                       </div>
                     )}
@@ -332,8 +365,8 @@ const TeacherGrading = ({
 
                   {assignment.file_url && (
                     <div className="mt-5">
-                      <PreviewButton 
-                        url={getStorageUrl(assignment.file_url)} 
+                      <PreviewButton
+                        url={getStorageUrl(assignment.file_url)}
                         className="!bg-indigo-600/10 !border-indigo-500/20 !text-indigo-400 hover:!bg-indigo-600 hover:!text-white shadow-sm"
                       />
                     </div>
@@ -359,7 +392,9 @@ const TeacherGrading = ({
                         setEditForm({
                           title: assignment.title,
                           description: assignment.description || "",
-                          due_date: assignment.due_date ? assignment.due_date.slice(0, 16) : "",
+                          due_date: assignment.due_date
+                            ? assignment.due_date.slice(0, 16)
+                            : "",
                           max_score: String(assignment.max_score),
                           status: assignment.status || "published",
                           file: null,
@@ -387,9 +422,13 @@ const TeacherGrading = ({
                       setAssignmentTotal(assignment.max_score);
                       dispatch(fetchSubmissions(assignment.id));
                     }}
-                    disabled={loadingSubmissions && pendingAssignmentId === assignment.id}
+                    disabled={
+                      loadingSubmissions &&
+                      pendingAssignmentId === assignment.id
+                    }
                   >
-                    {loadingSubmissions && pendingAssignmentId === assignment.id ? (
+                    {loadingSubmissions &&
+                    pendingAssignmentId === assignment.id ? (
                       <i className="fas fa-spinner animate-spin" />
                     ) : (
                       <>
@@ -500,16 +539,23 @@ const TeacherGrading = ({
                   </h3>
 
                   {selectedSubmission.file_url ? (
-                    <PreviewButton url={getStorageUrl(selectedSubmission.file_url)} />
+                    <PreviewButton
+                      url={getStorageUrl(selectedSubmission.file_url)}
+                    />
                   ) : (
-                    <p className="text-slate-500 text-sm italic">No file submitted</p>
+                    <p className="text-slate-500 text-sm italic">
+                      No file submitted
+                    </p>
                   )}
                 </div>
 
                 {/* GRADE FORM */}
                 <GradingForm
                   selectedSubmission={selectedSubmission}
-                  onCancel={() => { setSelectedAssignment(null); dispatch(clearSelectedSubmission()); }}
+                  onCancel={() => {
+                    setSelectedAssignment(null);
+                    dispatch(clearSelectedSubmission());
+                  }}
                   onSubmit={async ({ score, feedback }) => {
                     try {
                       if (selectedSubmission.grade) {
@@ -541,7 +587,9 @@ const TeacherGrading = ({
                       }
 
                       if (selectedAssignmentForSubmissions?.id) {
-                        dispatch(fetchSubmissions(selectedAssignmentForSubmissions.id));
+                        dispatch(
+                          fetchSubmissions(selectedAssignmentForSubmissions.id),
+                        );
                       }
                       setSelectedAssignment(null);
                       dispatch(clearSelectedSubmission());
@@ -563,7 +611,9 @@ const TeacherGrading = ({
           <div className="bg-slate-900 rounded-3xl border border-slate-800 w-full max-w-lg max-h-[90vh] overflow-y-auto">
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800">
-              <h2 className="font-bold text-white text-sm">Assignment Details</h2>
+              <h2 className="font-bold text-white text-sm">
+                Assignment Details
+              </h2>
               <button
                 onClick={() => setViewAssignment(null)}
                 className="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-white transition"
@@ -575,43 +625,69 @@ const TeacherGrading = ({
             <div className="p-6 space-y-5">
               {/* Title */}
               <div>
-                <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Title</p>
-                <p className="text-white font-semibold">{viewAssignment.title}</p>
+                <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">
+                  Title
+                </p>
+                <p className="text-white font-semibold">
+                  {viewAssignment.title}
+                </p>
               </div>
 
               {/* Course */}
               <div>
-                <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Course</p>
-                <p className="text-slate-300 text-sm">{viewAssignment.course_title}</p>
+                <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">
+                  Course
+                </p>
+                <p className="text-slate-300 text-sm">
+                  {viewAssignment.course_title}
+                </p>
               </div>
 
               {/* Description */}
               <div>
-                <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Description</p>
-                <p className="text-slate-300 text-sm whitespace-pre-wrap">{viewAssignment.description || "—"}</p>
+                <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">
+                  Description
+                </p>
+                <p className="text-slate-300 text-sm whitespace-pre-wrap">
+                  {viewAssignment.description || "—"}
+                </p>
               </div>
 
               {/* Meta row */}
               <div className="grid grid-cols-3 gap-3">
                 <div className="bg-slate-800/60 rounded-2xl p-3">
-                  <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Total</p>
-                  <p className="text-white font-bold">{viewAssignment.max_score}</p>
+                  <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">
+                    Total
+                  </p>
+                  <p className="text-white font-bold">
+                    {viewAssignment.max_score}
+                  </p>
                 </div>
                 <div className="bg-slate-800/60 rounded-2xl p-3">
-                  <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Status</p>
-                  <p className={`text-xs font-bold capitalize ${viewAssignment.status === "published" ? "text-emerald-400" : "text-slate-400"}`}>
+                  <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">
+                    Status
+                  </p>
+                  <p
+                    className={`text-xs font-bold capitalize ${viewAssignment.status === "published" ? "text-emerald-400" : "text-slate-400"}`}
+                  >
                     {viewAssignment.status}
                   </p>
                 </div>
                 <div className="bg-slate-800/60 rounded-2xl p-3">
-                  <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Submissions</p>
-                  <p className="text-white font-bold">{viewAssignment.submissions_count}</p>
+                  <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">
+                    Submissions
+                  </p>
+                  <p className="text-white font-bold">
+                    {viewAssignment.submissions_count}
+                  </p>
                 </div>
               </div>
 
               {/* Due date */}
               <div>
-                <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Due Date</p>
+                <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">
+                  Due Date
+                </p>
                 <p className="text-slate-300 text-sm">
                   {viewAssignment.due_date
                     ? new Date(viewAssignment.due_date).toLocaleString()
@@ -622,7 +698,9 @@ const TeacherGrading = ({
               {/* File */}
               {viewAssignment.file_url && (
                 <div>
-                  <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-2">Attachment</p>
+                  <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-2">
+                    Attachment
+                  </p>
                   <PreviewButton url={getStorageUrl(viewAssignment.file_url)} />
                 </div>
               )}
@@ -633,169 +711,242 @@ const TeacherGrading = ({
 
       {/* ── EDIT MODAL ── */}
       {editTarget && editForm && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-900 rounded-3xl border border-slate-800 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-[2rem] p-6 sm:p-10 w-full max-w-5xl max-h-[92vh] overflow-y-auto shadow-2xl transition-all duration-300">
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800">
-              <div>
-                <h2 className="font-bold text-white text-sm">Edit Assignment</h2>
-                <p className="text-[10px] text-slate-500 mt-0.5">{editTarget.course_title}</p>
+            <div className="flex flex-col gap-1 mb-10 pb-6 border-b border-white/5 relative">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h3 className="text-2xl font-black text-white tracking-tight">
+                    Edit Assignment
+                  </h3>
+                  <p className="text-indigo-400 text-xs font-bold uppercase tracking-widest mt-1">
+                    {editTarget.course_title}
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    setEditTarget(null);
+                    setEditForm(null);
+                  }}
+                  className="w-10 h-10 flex items-center justify-center rounded-xl text-slate-500 hover:text-white hover:bg-white/5 transition-all"
+                >
+                  <i className="fas fa-times text-lg"></i>
+                </button>
               </div>
-              <button
-                onClick={() => { setEditTarget(null); setEditForm(null); }}
-                className="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-white transition"
-              >
-                <i className="fas fa-times text-xs" />
-              </button>
             </div>
 
-            <div className="p-6 space-y-4">
-              {/* Title */}
-              <div>
-                <label className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1.5 block">Title</label>
-                <input
-                  type="text"
-                  value={editForm.title}
-                  onChange={(e) => setEditForm((p) => ({ ...p, title: e.target.value.trimStart() }))}
-                  className="w-full p-3 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
-                />
-              </div>
-
-              {/* Description */}
-              <div>
-                <label className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1.5 block">Description</label>
-                <textarea
-                  rows={4}
-                  value={editForm.description}
-                  onChange={(e) => setEditForm((p) => ({ ...p, description: e.target.value }))}
-                  className="w-full p-3 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 resize-none"
-                />
-              </div>
-
-              {/* Due date + Total row */}
-              <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+              {/* Left Column: Core Details */}
+              <div className="space-y-6">
                 <div>
-                  <label className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1.5 block">Due Date</label>
+                  <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">
+                    Assignment Title <span className="text-rose-500">*</span>
+                  </label>
                   <input
-                    type="datetime-local"
-                    value={editForm.due_date}
-                    onChange={(e) => setEditForm((p) => ({ ...p, due_date: e.target.value }))}
-                    className="w-full p-3 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
-                  />
-                </div>
-                <div>
-                  <label className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1.5 block">Total</label>
-                  <input
-                    type="number"
-                    min={1}
-                    value={editForm.max_score}
-                    onChange={(e) => setEditForm((p) => ({ ...p, max_score: e.target.value }))}
-                    className="w-full p-3 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
-                  />
-                </div>
-              </div>
-
-              {/* Status */}
-              <div>
-                <label className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1.5 block">Status</label>
-                <div className="flex gap-2">
-                  {["published", "draft"].map((s) => (
-                    <button
-                      key={s}
-                      type="button"
-                      onClick={() => setEditForm((p) => ({ ...p, status: s }))}
-                      className={`flex-1 py-2.5 rounded-xl text-xs font-semibold transition border ${
-                        editForm.status === s
-                          ? "bg-indigo-600 border-indigo-600 text-white"
-                          : "bg-slate-800 border-slate-700 text-slate-400 hover:text-white"
-                      }`}
-                    >
-                      {s.charAt(0).toUpperCase() + s.slice(1)}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* File */}
-              <div>
-                <label className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1.5 block">
-                  Attachment <span className="normal-case tracking-normal font-normal text-slate-600">(replace existing — optional)</span>
-                </label>
-                {editTarget.file_url && !editForm.file && (
-                  <div className="mb-2">
-                    <PreviewButton url={getStorageUrl(editTarget.file_url)} />
-                  </div>
-                )}
-                <label className="flex items-center gap-3 w-full p-3 rounded-xl bg-slate-800 border border-slate-700 cursor-pointer hover:border-indigo-500 transition group">
-                  <i className="fas fa-paperclip text-slate-500 group-hover:text-indigo-400 transition" />
-                  <span className="text-sm text-slate-400 truncate flex-1">
-                    {editForm.file ? editForm.file.name : "Click to upload new file…"}
-                  </span>
-                  {editForm.file && (
-                    <button
-                      type="button"
-                      onClick={(e) => { e.preventDefault(); setEditForm((p) => ({ ...p, file: null })); }}
-                      className="text-slate-500 hover:text-red-400 transition"
-                    >
-                      <i className="fas fa-times text-xs" />
-                    </button>
-                  )}
-                  <input
-                    type="file"
-                    accept={ACCEPT_STRING}
-                    className="hidden"
-                    onChange={(e) => {
-                      const f = e.target.files?.[0] || null;
-                      e.target.value = "";
-                      if (f && validateFile(f)) setEditForm((p) => ({ ...p, file: f }));
-                    }}
-                  />
-                </label>
-              </div>
-
-              {/* Footer buttons */}
-              <div className="flex gap-3 justify-end pt-2">
-                <button
-                  type="button"
-                  onClick={() => { setEditTarget(null); setEditForm(null); }}
-                  className="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-xl text-sm transition"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  disabled={savingEdit || !editForm.title.trim() || !editForm.max_score}
-                  onClick={async () => {
-                    setSavingEdit(true);
-                    try {
-                      await dispatch(
-                        updateAssignment({
-                          id: editTarget.id,
-                          data: {
-                            title: editForm.title.trim(),
-                            description: editForm.description.trim(),
-                            due_date: editForm.due_date,
-                            max_score: Number(editForm.max_score),
-                            status: editForm.status,
-                            ...(editForm.file ? { file: editForm.file } : {}),
-                          },
-                        })
-                      ).unwrap();
-                      toastManager.success("Assignment updated");
-                      setEditTarget(null);
-                      setEditForm(null);
-                    } catch (err) {
-                      showApiError(err);
-                    } finally {
-                      setSavingEdit(false);
+                    type="text"
+                    value={editForm.title}
+                    onChange={(e) =>
+                      setEditForm((p) => ({
+                        ...p,
+                        title: e.target.value.trimStart(),
+                      }))
                     }
-                  }}
-                  className="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 rounded-xl text-sm font-semibold transition flex items-center gap-2"
-                >
-                  {savingEdit && <i className="fas fa-spinner animate-spin text-xs" />}
-                  Save Changes
-                </button>
+                    className="w-full p-3.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/50 transition-all"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">
+                    Description <span className="text-rose-500">*</span>
+                  </label>
+                  <textarea
+                    rows={6}
+                    value={editForm.description}
+                    onChange={(e) =>
+                      setEditForm((p) => ({
+                        ...p,
+                        description: e.target.value,
+                      }))
+                    }
+                    className="w-full p-3.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/50 transition-all resize-none"
+                  />
+                </div>
               </div>
+
+              {/* Right Column: Configuration & Media */}
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">
+                      Due Date <span className="text-rose-500">*</span>
+                    </label>
+                    <input
+                      type="datetime-local"
+                      value={editForm.due_date}
+                      onChange={(e) =>
+                        setEditForm((p) => ({ ...p, due_date: e.target.value }))
+                      }
+                      className="w-full p-3.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/50 transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">
+                      Total Marks <span className="text-rose-500">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      min={1}
+                      value={editForm.max_score}
+                      onChange={(e) =>
+                        setEditForm((p) => ({
+                          ...p,
+                          max_score: e.target.value,
+                        }))
+                      }
+                      className="w-full p-3.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/50 transition-all"
+                    />
+                  </div>
+                </div>
+
+                {/* <div>
+                  <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">
+                    Assignment Status
+                  </label>
+                  <div className="flex gap-2">
+                    {["published", "draft"].map((s) => (
+                      <button
+                        key={s}
+                        type="button"
+                        onClick={() =>
+                          setEditForm((p) => ({ ...p, status: s }))
+                        }
+                        className={`flex-1 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all border ${
+                          editForm.status === s
+                            ? "bg-indigo-500/10 border-indigo-500/50 text-indigo-400 shadow-[0_0_15px_rgba(99,102,241,0.1)]"
+                            : "bg-slate-800/40 border-slate-700/50 text-slate-500 hover:text-slate-300 hover:border-slate-600"
+                        }`}
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                </div> */}
+
+                <div>
+                  <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">
+                    Attachment{" "}
+                    <span className="ml-1 text-[10px] normal-case tracking-normal font-medium text-slate-600">
+                      (Replace existing — Optional)
+                    </span>
+                  </label>
+
+                  <div className="space-y-3">
+                    {editTarget.file_url && !editForm.file && (
+                      <div className="flex items-center gap-3 p-3 rounded-xl bg-indigo-500/5 border border-indigo-500/20">
+                        <i className="fas fa-file-alt text-indigo-400" />
+                        <span className="text-xs text-slate-300 flex-1 truncate">
+                          Current: {editTarget.file_url.split("/").pop()}
+                        </span>
+                        <PreviewButton
+                          url={getStorageUrl(editTarget.file_url)}
+                          className="!bg-indigo-500/10"
+                        />
+                      </div>
+                    )}
+
+                    <label className="flex items-center gap-4 w-full p-3.5 rounded-xl bg-slate-800/40 border border-dashed border-slate-700 cursor-pointer hover:border-indigo-500/50 hover:bg-slate-800/60 transition-all group">
+                      <div className="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center text-slate-500 group-hover:text-indigo-400 transition-colors">
+                        <i className="fas fa-paperclip text-lg" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <span className="block text-sm text-slate-400 group-hover:text-slate-200 transition-colors truncate">
+                          {editForm.file
+                            ? editForm.file.name
+                            : "Select new file…"}
+                        </span>
+                      </div>
+                      {editForm.file && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setEditForm((p) => ({ ...p, file: null }));
+                          }}
+                          className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-rose-500/10 text-slate-500 hover:text-rose-400 transition-all"
+                        >
+                          <i className="fas fa-times text-xs" />
+                        </button>
+                      )}
+                      <input
+                        type="file"
+                        accept={ACCEPT_STRING}
+                        className="hidden"
+                        onChange={(e) => {
+                          const f = e.target.files?.[0] || null;
+                          e.target.value = "";
+                          if (f && validateFile(f))
+                            setEditForm((p) => ({ ...p, file: f }));
+                        }}
+                      />
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-4 justify-end mt-12 pt-8 border-t border-white/5">
+              <button
+                type="button"
+                onClick={() => {
+                  setEditTarget(null);
+                  setEditForm(null);
+                }}
+                className="px-8 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold uppercase tracking-widest transition-all active:scale-95"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={
+                  savingEdit || !editForm.title.trim() || !editForm.max_score
+                }
+                onClick={async () => {
+                  setSavingEdit(true);
+                  try {
+                    await dispatch(
+                      updateAssignment({
+                        id: editTarget.id,
+                        data: {
+                          title: editForm.title.trim(),
+                          description: editForm.description.trim(),
+                          due_date: editForm.due_date,
+                          max_score: Number(editForm.max_score),
+                          status: editForm.status,
+                          ...(editForm.file ? { file: editForm.file } : {}),
+                        },
+                      }),
+                    ).unwrap();
+                    toastManager.success("Assignment updated");
+                    setEditTarget(null);
+                    setEditForm(null);
+                  } catch (err) {
+                    showApiError(err);
+                  } finally {
+                    setSavingEdit(false);
+                  }
+                }}
+                className="px-10 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold uppercase tracking-widest transition-all active:scale-95 disabled:opacity-50 disabled:active:scale-100 flex items-center gap-2 shadow-lg shadow-indigo-500/20"
+              >
+                {savingEdit ? (
+                  <>
+                    <i className="fas fa-spinner animate-spin text-xs" />{" "}
+                    Saving…
+                  </>
+                ) : (
+                  "Save Changes"
+                )}
+              </button>
             </div>
           </div>
         </div>
@@ -810,13 +961,21 @@ const TeacherGrading = ({
                 <i className="fas fa-trash text-rose-400 text-sm" />
               </div>
               <div>
-                <h3 className="font-bold text-white text-sm">Delete Assignment</h3>
-                <p className="text-slate-400 text-xs mt-0.5">This action cannot be undone</p>
+                <h3 className="font-bold text-white text-sm">
+                  Delete Assignment
+                </h3>
+                <p className="text-slate-400 text-xs mt-0.5">
+                  This action cannot be undone
+                </p>
               </div>
             </div>
 
             <p className="text-slate-300 text-sm">
-              Are you sure you want to delete <span className="font-semibold text-white">"{deleteTarget.title}"</span>? All submissions linked to it will also be removed.
+              Are you sure you want to delete{" "}
+              <span className="font-semibold text-white">
+                "{deleteTarget.title}"
+              </span>
+              ? All submissions linked to it will also be removed.
             </p>
 
             <div className="flex gap-3 justify-end">
@@ -845,7 +1004,9 @@ const TeacherGrading = ({
                 }}
                 className="px-5 py-2 bg-rose-600 hover:bg-rose-500 disabled:opacity-50 rounded-xl text-sm font-semibold transition flex items-center gap-2"
               >
-                {deletingId && <i className="fas fa-spinner animate-spin text-xs" />}
+                {deletingId && (
+                  <i className="fas fa-spinner animate-spin text-xs" />
+                )}
                 Delete
               </button>
             </div>
@@ -855,173 +1016,295 @@ const TeacherGrading = ({
 
       {/* Create Assignment Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-          <div className="bg-slate-900 p-8 rounded-3xl border border-slate-800 w-full max-w-lg">
-            <h2 className="text-lg font-bold mb-4">Create Assignment</h2>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-[2rem] p-6 sm:p-10 w-full max-w-5xl max-h-[92vh] overflow-y-auto shadow-2xl transition-all duration-300">
+            {/* Header */}
+            <div className="flex flex-col gap-1 mb-10 pb-6 border-b border-white/5 relative">
+              <div className="flex justify-between items-center">
+                <h3 className="text-2xl font-black text-white tracking-tight">
+                  Create New Assignment
+                </h3>
+                <button
+                  onClick={() => {
+                    setShowCreateModal(false);
+                    setPrivateStudents([]);
+                    setForm({
+                      course: "",
+                      title: "",
+                      description: "",
+                      due_date: "",
+                      max_score: "",
+                      status: "published",
+                      file: null,
+                      assignmentType: "public",
+                      private_student_ids: [],
+                    });
+                  }}
+                  className="w-10 h-10 flex items-center justify-center rounded-xl text-slate-500 hover:text-white hover:bg-white/5 transition-all"
+                >
+                  <i className="fas fa-times text-lg"></i>
+                </button>
+              </div>
+              <p className="text-slate-500 text-[13px] font-medium leading-relaxed max-w-2xl">
+                Set up a new assignment by choosing the course, defining its
+                scope, and setting a deadline for submissions.
+              </p>
+            </div>
 
-            <FilterSelect
-              value={form.course}
-              onChange={(e) => {
-                const courseId = e.target.value;
-                setForm({ ...form, course: courseId, private_student_ids: [] });
-                if (form.assignmentType === "private" && courseId) {
-                  fetchPrivateStudents(courseId);
-                }
-              }}
-              className="w-full mb-4"
-            >
-              <option value="">Select Course</option>
-              {myCourses?.map((c) => (
-                <option key={c.id} value={c.id}>{c.title}</option>
-              ))}
-            </FilterSelect>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+              {/* Left Column: Basic Info */}
 
-            {/* Public / Private toggle */}
-            <div className="mb-4">
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-widest mb-2">
-                Assignment Type
-              </label>
-              <div className="flex gap-2">
-                {["public", "private"].map((type) => (
-                  <button
-                    key={type}
-                    type="button"
-                    onClick={() => {
-                      setForm({ ...form, assignmentType: type, private_student_ids: [] });
-                      if (type === "private" && form.course) {
-                        fetchPrivateStudents(form.course);
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">
+                    Assignment Title <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Enter a clear, descriptive title"
+                    value={form.title}
+                    onChange={(e) =>
+                      setForm({ ...form, title: e.target.value.trimStart() })
+                    }
+                    className="w-full p-3.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/50 transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">
+                    Course <span className="text-rose-500">*</span>
+                  </label>
+                  <FilterSelect
+                    value={form.course}
+                    onChange={(e) => {
+                      const courseId = e.target.value;
+                      setForm({
+                        ...form,
+                        course: courseId,
+                        private_student_ids: [],
+                      });
+                      if (form.assignmentType === "private" && courseId) {
+                        fetchPrivateStudents(courseId);
                       }
                     }}
-                    className={`flex-1 py-2 rounded-xl text-sm font-semibold transition border ${
-                      form.assignmentType === type
-                        ? type === "private"
-                          ? "bg-amber-600 border-amber-600 text-white"
-                          : "bg-indigo-600 border-indigo-600 text-white"
-                        : "bg-slate-800 border-slate-700 text-slate-400 hover:text-white"
-                    }`}
+                    className="w-full"
                   >
-                    <i className={`fas fa-${type === "public" ? "users" : "lock"} mr-2 text-xs`} />
-                    {type.charAt(0).toUpperCase() + type.slice(1)}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Private students multi-select (only when private) */}
-            {form.assignmentType === "private" && (
-              <div className="mb-4">
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-widest mb-2">
-                  Private Students
-                  {form.private_student_ids.length > 0 && (
-                    <span className="ml-2 normal-case tracking-normal font-normal text-amber-400">
-                      {form.private_student_ids.length} selected
-                    </span>
-                  )}
-                </label>
-                {!form.course ? (
-                  <p className="text-xs text-slate-500 italic py-2">Select a course first</p>
-                ) : loadingPrivateStudents ? (
-                  <div className="h-10 bg-slate-800 rounded-xl animate-pulse" />
-                ) : privateStudents.length === 0 ? (
-                  <p className="text-xs text-slate-500 italic py-2">No private students enrolled in this course</p>
-                ) : (
-                  <select
-                    value={form.private_student_ids[0] ?? ""}
-                    onChange={(e) => setForm({ ...form, private_student_ids: [Number(e.target.value)] })}
-                    className="w-full p-3 rounded-xl bg-slate-800 border border-amber-700/40 text-white text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/50 appearance-none"
-                  >
-                    {privateStudents.map((s) => (
-                      <option key={s.enrollment_id} value={s.student_id}>
-                        {s.username}{s.email ? ` — ${s.email}` : ""}
+                    <option value="">Select Course</option>
+                    {myCourses?.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.title}
                       </option>
                     ))}
-                  </select>
+                  </FilterSelect>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">
+                      Due Date <span className="text-rose-500">*</span>
+                    </label>
+                    <input
+                      type="datetime-local"
+                      value={form.due_date}
+                      onChange={(e) =>
+                        setForm({ ...form, due_date: e.target.value })
+                      }
+                      className="w-full p-3.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/50 transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">
+                      Total Marks <span className="text-rose-500">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      min={1}
+                      placeholder="e.g. 100"
+                      value={form.max_score}
+                      onChange={(e) =>
+                        setForm({ ...form, max_score: e.target.value })
+                      }
+                      className="w-full p-3.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/50 transition-all"
+                    />
+                  </div>
+                </div>
+                {/* <div>
+                  <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">
+                    Assignment Type
+                  </label>
+                  <div className="flex gap-2">
+                    {["public", "private"].map((type) => (
+                      <button
+                        key={type}
+                        type="button"
+                        onClick={() => {
+                          setForm({ ...form, assignmentType: type, private_student_ids: [] });
+                          if (type === "private" && form.course) {
+                            fetchPrivateStudents(form.course);
+                          }
+                        }}
+                        className={`flex-1 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all border ${
+                          form.assignmentType === type
+                            ? type === "private"
+                              ? "bg-amber-500/10 border-amber-500/50 text-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.1)]"
+                              : "bg-indigo-500/10 border-indigo-500/50 text-indigo-400 shadow-[0_0_15px_rgba(99,102,241,0.1)]"
+                            : "bg-slate-800/40 border-slate-700/50 text-slate-500 hover:text-slate-300 hover:border-slate-600"
+                        }`}
+                      >
+                        <i className={`fas fa-${type === "public" ? "users" : "lock"} mr-2 text-[10px]`} />
+                        {type}
+                      </button>
+                    ))}
+                  </div>
+                </div> */}
+
+                {/* Private students multi-select (only when private) */}
+                {form.assignmentType === "private" && (
+                  <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+                    <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">
+                      Private Students
+                      {form.private_student_ids.length > 0 && (
+                        <span className="ml-2 normal-case tracking-normal font-bold text-amber-400">
+                          ({form.private_student_ids.length} selected)
+                        </span>
+                      )}
+                    </label>
+                    {!form.course ? (
+                      <div className="p-4 rounded-xl bg-slate-800/30 border border-slate-700/50 text-xs text-slate-500 italic">
+                        Select a course first to view students
+                      </div>
+                    ) : loadingPrivateStudents ? (
+                      <div className="h-[50px] bg-slate-800/40 rounded-xl animate-pulse" />
+                    ) : privateStudents.length === 0 ? (
+                      <div className="p-4 rounded-xl bg-slate-800/30 border border-slate-700/50 text-xs text-slate-500 italic">
+                        No private students enrolled in this course
+                      </div>
+                    ) : (
+                      <div className="relative">
+                        <select
+                          value={form.private_student_ids[0] ?? ""}
+                          onChange={(e) =>
+                            setForm({
+                              ...form,
+                              private_student_ids: [Number(e.target.value)],
+                            })
+                          }
+                          className="w-full p-3.5 rounded-xl bg-slate-800 border border-amber-500/30 text-white text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 appearance-none transition-all hover:border-amber-500/50"
+                        >
+                          <option value="" disabled>
+                            Select a student
+                          </option>
+                          {privateStudents.map((s) => (
+                            <option key={s.enrollment_id} value={s.student_id}>
+                              {s.username}
+                              {s.email ? ` — ${s.email}` : ""}
+                            </option>
+                          ))}
+                        </select>
+                        <i className="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-600 pointer-events-none text-xs" />
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
-            )}
 
-            <input
-              type="text"
-              placeholder="Title"
-              value={form.title}
-              onChange={(e) =>
-                setForm({ ...form, title: e.target.value.trimStart() })
-              }
-              className="w-full mb-4 p-3 rounded-xl bg-slate-800 border border-slate-700 text-white"
-            />
+              {/* Right Column: Details & Configuration */}
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">
+                    Description <span className="text-rose-500">*</span>
+                  </label>
+                  <textarea
+                    placeholder="Provide clear instructions and learning objectives..."
+                    rows={5}
+                    value={form.description}
+                    onChange={(e) =>
+                      setForm({ ...form, description: e.target.value })
+                    }
+                    className="w-full p-3.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/50 transition-all resize-none"
+                  />
+                </div>
 
-            <textarea
-              placeholder="Description"
-              value={form.description}
-              onChange={(e) =>
-                setForm({ ...form, description: e.target.value })
-              }
-              className="w-full mb-4 p-3 rounded-xl bg-slate-800 border border-slate-700 text-white"
-            />
-            <label className="block text-xs font-semibold text-slate-400 uppercase tracking-widest mb-2">Due Date</label>
-            <input
-              type="datetime-local"
-              value={form.due_date}
-              onChange={(e) => setForm({ ...form, due_date: e.target.value })}
-              className="w-full mb-4 p-3 rounded-xl bg-slate-800 border border-slate-700 text-white"
-            />
-
-            <input
-              type="number"
-              min={1}
-              placeholder="Total marks"
-              value={form.max_score}
-              onChange={(e) => setForm({ ...form, max_score: e.target.value })}
-              className="w-full mb-4 p-3 rounded-xl bg-slate-800 border border-slate-700 text-white"
-            />
-
-            {/* File attachment */}
-            <div className="mb-4">
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-widest mb-2">
-                Attachment <span className="text-slate-600 normal-case tracking-normal font-normal">(PDF or Word — optional)</span>
-              </label>
-              <label className="flex items-center gap-3 w-full p-3 rounded-xl bg-slate-800 border border-slate-700 cursor-pointer hover:border-indigo-500 transition group">
-                <i className="fas fa-paperclip text-slate-500 group-hover:text-indigo-400 transition"></i>
-                <span className="text-sm text-slate-400 truncate flex-1">
-                  {form.file ? form.file.name : "Click to upload file…"}
-                </span>
-                {form.file && (
-                  <button
-                    type="button"
-                    onClick={(e) => { e.preventDefault(); setForm({ ...form, file: null }); }}
-                    className="text-slate-500 hover:text-red-400 transition"
-                  >
-                    <i className="fas fa-times text-xs"></i>
-                  </button>
-                )}
-                <input
-                  type="file"
-                  accept={ACCEPT_STRING}
-                  className="hidden"
-                  onChange={(e) => {
-                    const f = e.target.files?.[0] || null;
-                    e.target.value = "";
-                    if (f && validateFile(f)) setForm({ ...form, file: f });
-                  }}
-                />
-              </label>
+                <div>
+                  <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">
+                    Attachment{" "}
+                    <span className="ml-1 text-[10px] normal-case tracking-normal font-medium text-slate-600">
+                      (PDF, DOC, ZIP — Optional)
+                    </span>
+                  </label>
+                  <label className="flex items-center gap-4 w-full p-3.5 rounded-xl bg-slate-800/40 border border-dashed border-slate-700 cursor-pointer hover:border-indigo-500/50 hover:bg-slate-800/60 transition-all group">
+                    <div className="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center text-slate-500 group-hover:text-indigo-400 transition-colors">
+                      <i className="fas fa-paperclip text-lg" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <span className="block text-sm text-slate-400 group-hover:text-slate-200 transition-colors truncate">
+                        {form.file
+                          ? form.file.name
+                          : "Select a file to attach…"}
+                      </span>
+                      {!form.file && (
+                        <span className="text-[10px] text-slate-600 uppercase font-bold tracking-tighter">
+                          Max 10MB
+                        </span>
+                      )}
+                    </div>
+                    {form.file && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setForm({ ...form, file: null });
+                        }}
+                        className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-rose-500/10 text-slate-500 hover:text-rose-400 transition-all"
+                      >
+                        <i className="fas fa-times text-xs" />
+                      </button>
+                    )}
+                    <input
+                      type="file"
+                      accept={ACCEPT_STRING}
+                      className="hidden"
+                      onChange={(e) => {
+                        const f = e.target.files?.[0] || null;
+                        e.target.value = "";
+                        if (f && validateFile(f)) setForm({ ...form, file: f });
+                      }}
+                    />
+                  </label>
+                </div>
+              </div>
             </div>
 
-            <div className="flex gap-3 justify-end">
+            <div className="flex gap-4 justify-end mt-12 pt-8 border-t border-white/5">
               <button
                 type="button"
-                className="px-4 py-2 bg-slate-700 rounded-xl"
-                onClick={() => { setShowCreateModal(false); setPrivateStudents([]); setForm({ course: "", title: "", description: "", due_date: "", max_score: "", status: "published", file: null, assignmentType: "public", private_student_ids: [] }); }}
+                className="px-8 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold uppercase tracking-widest transition-all active:scale-95"
+                onClick={() => {
+                  setShowCreateModal(false);
+                  setPrivateStudents([]);
+                  setForm({
+                    course: "",
+                    title: "",
+                    description: "",
+                    due_date: "",
+                    max_score: "",
+                    status: "published",
+                    file: null,
+                    assignmentType: "public",
+                    private_student_ids: [],
+                  });
+                }}
               >
                 Cancel
               </button>
 
               <button
-                // disabled={isFormInvalid || savingCreate}
-                className="px-4 py-2 bg-indigo-600 rounded-xl disabled:opacity-50 flex items-center gap-2"
+                disabled={savingCreate}
+                className="px-10 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold uppercase tracking-widest transition-all active:scale-95 disabled:opacity-50 disabled:active:scale-100 flex items-center gap-2 shadow-lg shadow-indigo-500/20"
                 onClick={async () => {
                   const error = validateForm();
-                  if (error) { toastManager.error(error); return; }
+                  if (error) {
+                    toastManager.error(error);
+                    return;
+                  }
 
                   setSavingCreate(true);
                   try {
@@ -1042,11 +1325,23 @@ const TeacherGrading = ({
                     toastManager.success("Assignment created");
                     setShowCreateModal(false);
                     setPrivateStudents([]);
-                    dispatch(fetchAssignments({
-                      ...(filters.course ? { course: filters.course } : {}),
-                      status: filters.status,
-                    }));
-                    setForm({ course: "", title: "", description: "", due_date: "", max_score: "", status: "published", file: null, assignmentType: "public", private_student_ids: [] });
+                    dispatch(
+                      fetchAssignments({
+                        ...(filters.course ? { course: filters.course } : {}),
+                        status: filters.status,
+                      }),
+                    );
+                    setForm({
+                      course: "",
+                      title: "",
+                      description: "",
+                      due_date: "",
+                      max_score: "",
+                      status: "published",
+                      file: null,
+                      assignmentType: "public",
+                      private_student_ids: [],
+                    });
                   } catch (err) {
                     showApiError(err);
                   } finally {
@@ -1054,8 +1349,14 @@ const TeacherGrading = ({
                   }
                 }}
               >
-                {savingCreate && <i className="fas fa-spinner animate-spin text-xs" />}
-                Create
+                {savingCreate ? (
+                  <>
+                    <i className="fas fa-spinner animate-spin text-xs" />{" "}
+                    Processing…
+                  </>
+                ) : (
+                  "Create Assignment"
+                )}
               </button>
             </div>
           </div>

@@ -484,91 +484,115 @@ const TeacherQuizzes = ({
 
   // ── Render helpers ────────────────────────────────────────────────────────
   const renderQuizForm = (onSubmit, isEdit = false) => (
-    <div className="space-y-4">
-      {/* Course */}
-      {!isEdit && (
-        <div>
-          <label className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1.5 block">Course</label>
-          <FilterSelect
-            value={form.course}
-            onChange={(e) => setForm((p) => ({ ...p, course: e.target.value }))}
-            className="w-full"
-          >
-            <option value="">Select Course</option>
-            {myCourses?.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
-          </FilterSelect>
-        </div>
-      )}
+    <div className="space-y-10">
+      {/* Basic Settings Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+        <div className="space-y-6">
+          {!isEdit && (
+            <div>
+              <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">
+                Course <span className="text-rose-500">*</span>
+              </label>
+              <FilterSelect
+                value={form.course}
+                onChange={(e) => setForm((p) => ({ ...p, course: e.target.value }))}
+                className="w-full"
+              >
+                <option value="">Select Course</option>
+                {myCourses?.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
+              </FilterSelect>
+            </div>
+          )}
 
-      {/* Title */}
-      <div>
-        <label className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1.5 block">Title</label>
-        <input
-          type="text"
-          placeholder="Quiz title"
-          value={form.title}
-          onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))}
-          className="w-full p-3 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
-        />
+          <div>
+            <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">
+              Quiz Title <span className="text-rose-500">*</span>
+            </label>
+            <input
+              type="text"
+              placeholder="Enter a descriptive title for this quiz"
+              value={form.title}
+              onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))}
+              className="w-full p-3.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/50 transition-all placeholder:text-slate-600"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">
+              Description <span className="text-slate-600 normal-case tracking-normal font-medium ml-1">(Optional)</span>
+            </label>
+            <textarea
+              rows={4}
+              placeholder="Briefly describe the purpose or topics covered in this quiz..."
+              value={form.description}
+              onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
+              className="w-full p-3.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/50 transition-all resize-none placeholder:text-slate-600"
+            />
+          </div>
+        </div>
+
+        <div className="space-y-6">
+          <div>
+            <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">
+              Total Marks <span className="text-rose-500">*</span>
+            </label>
+            <input
+              type="number"
+              min={1}
+              placeholder="e.g. 50"
+              value={form.total_marks}
+              onChange={(e) => setForm((p) => ({ ...p, total_marks: e.target.value }))}
+              className="w-full p-3.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/50 transition-all placeholder:text-slate-600"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">
+                Publish At <span className="text-rose-500">*</span>
+              </label>
+              <input
+                type="datetime-local"
+                value={form.published_at}
+                onChange={(e) => setForm((p) => ({ ...p, published_at: e.target.value }))}
+                className="w-full p-3.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/50 transition-all"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">
+                Due Date <span className="text-rose-500">*</span>
+              </label>
+              <input
+                type="datetime-local"
+                value={form.due_date}
+                onChange={(e) => setForm((p) => ({ ...p, due_date: e.target.value }))}
+                className="w-full p-3.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/50 transition-all"
+              />
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Description */}
-      <div>
-        <label className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1.5 block">Description</label>
-        <textarea
-          rows={2}
-          placeholder="Optional description"
-          value={form.description}
-          onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
-          className="w-full p-3 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 resize-none"
-        />
-      </div>
-
-      {/* Total marks + dates */}
-      <div className="grid grid-cols-3 gap-3">
-        <div>
-          <label className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1.5 block">Total Marks</label>
-          <input
-            type="number"
-            min={1}
-            placeholder="e.g. 20"
-            value={form.total_marks}
-            onChange={(e) => setForm((p) => ({ ...p, total_marks: e.target.value }))}
-            className="w-full p-3 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
-          />
+      {/* Question Builder Section */}
+      <div className="pt-10 border-t border-white/5">
+        <div className="flex items-center gap-4 mb-6">
+          <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400">
+            <i className="fas fa-list-ol text-lg" />
+          </div>
+          <div>
+            <h4 className="text-sm font-bold text-white uppercase tracking-wider">Question Builder</h4>
+            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Construct your quiz questions below</p>
+          </div>
         </div>
-        <div>
-          <label className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1.5 block">Publish Date</label>
-          <input
-            type="datetime-local"
-            value={form.published_at}
-            onChange={(e) => setForm((p) => ({ ...p, published_at: e.target.value }))}
-            className="w-full p-3 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
-          />
-        </div>
-        <div>
-          <label className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1.5 block">Due Date</label>
-          <input
-            type="datetime-local"
-            value={form.due_date}
-            onChange={(e) => setForm((p) => ({ ...p, due_date: e.target.value }))}
-            className="w-full p-3 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
-          />
-        </div>
-      </div>
-
-      {/* Question builder */}
-      <div>
-        <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-3">Questions</p>
         <QuestionBuilder questions={questions} onChange={setQuestions} />
       </div>
 
-      {/* Footer */}
-      <div className="flex gap-3 justify-end pt-2">
+      {/* Footer Actions */}
+      <div className="flex gap-4 justify-end pt-10 border-t border-white/5">
         <button
           type="button"
           onClick={() => { setShowCreate(false); setEditTarget(null); setForm(emptyForm); setQuestions([defaultQuestion()]); }}
-          className="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-xl text-sm transition"
+          className="px-8 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold uppercase tracking-widest transition-all active:scale-95"
         >
           Cancel
         </button>
@@ -576,10 +600,13 @@ const TeacherQuizzes = ({
           type="button"
           disabled={saving}
           onClick={onSubmit}
-          className="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 rounded-xl text-sm font-semibold transition flex items-center gap-2"
+          className="px-10 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold uppercase tracking-widest transition-all active:scale-95 disabled:opacity-50 disabled:active:scale-100 flex items-center gap-2 shadow-lg shadow-indigo-500/20"
         >
-          {saving && <i className="fas fa-spinner animate-spin text-xs" />}
-          {isEdit ? "Save Changes" : "Create Quiz"}
+          {saving ? (
+            <><i className="fas fa-spinner animate-spin text-xs" /> Processing…</>
+          ) : (
+            isEdit ? "Save Changes" : "Create Quiz"
+          )}
         </button>
       </div>
     </div>
@@ -592,32 +619,31 @@ const TeacherQuizzes = ({
 
       {!hideHeader && (
         <div className="mb-10 flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-black font-poppins mb-2">
-            My Quizes
-          </h1>
-          <p className="text-slate-400 text-sm">
-            Review Quiz and move into grading workflows.
-          </p>
+          <div>
+            <h1 className="text-3xl font-black font-poppins mb-2">My Quizzes</h1>
+            <p className="text-slate-400 text-sm">Review Quizzes and move into grading workflows.</p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            <FilterSelect
+              value={filterCourse}
+              onChange={(e) => setFilterCourse(e.target.value)}
+            >
+              <option value="">All Courses</option>
+              {myCourses?.map((c) => (
+                <option key={c.id} value={c.id}>{c.title}</option>
+              ))}
+            </FilterSelect>
+            <button
+              type="button"
+              onClick={() => { setShowCreate(true); setForm(emptyForm); setQuestions([defaultQuestion()]); }}
+              className="bg-indigo-600 hover:bg-indigo-500 px-5 py-3 rounded-xl text-xs font-bold transition whitespace-nowrap"
+            >
+              + Create Quiz
+            </button>
+          </div>
         </div>
-        <div className="flex flex-wrap items-center gap-2 shrink-0">
-          <FilterSelect
-            value={filterCourse}
-            onChange={(e) => setFilterCourse(e.target.value)}
-          >
-            <option value="">All Courses</option>
-            {myCourses?.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
-          </FilterSelect>
-          <button
-            type="button"
-            onClick={() => { setShowCreate(true); setForm(emptyForm); setQuestions([defaultQuestion()]); }}
-            className="bg-indigo-600 hover:bg-indigo-500 px-5 py-3 rounded-xl text-xs font-bold transition whitespace-nowrap"
-          >
-            + Create Quiz
-          </button>
-        </div>
-      </div>
       )}
+
       {/* Quiz list */}
       {loadingQuizzes && !quizzes?.length ? (
         <div className="flex items-center justify-center py-16 text-white">
@@ -628,31 +654,63 @@ const TeacherQuizzes = ({
           {quizzes.map((quiz) => (
             <div
               key={quiz.id}
-              className="bg-slate-900 p-6 rounded-3xl border border-slate-800 hover:border-indigo-500/40 transition"
+              className="group relative bg-slate-900/40 backdrop-blur-sm p-5 rounded-2xl border border-slate-800/60 hover:border-indigo-500/40 transition-all duration-300 hover:shadow-2xl hover:shadow-indigo-500/5"
             >
-              <div className="flex items-start justify-between gap-4">
+              {/* Subtle gradient accent on hover */}
+              <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl pointer-events-none" />
+
+              <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
+                {/* Info Section */}
                 <div className="flex-1 min-w-0">
-                  <h2 className="font-bold text-white">{quiz.title}</h2>
-                  <p className="text-[10px] text-slate-500 uppercase tracking-widest mt-1">{quiz.course_title}</p>
-                  <p className="text-xs text-slate-400 mt-2">
-                    {quiz.submissions_count ?? 0} submission{quiz.submissions_count !== 1 ? "s" : ""}
-                    &nbsp;·&nbsp; {quiz.total_marks} marks
-                    {quiz.due_date && <>&nbsp;·&nbsp; Due {new Date(quiz.due_date).toLocaleDateString()}</>}
-                  </p>
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
+                      quiz.is_locked
+                        ? "bg-rose-500/10 text-rose-400 border-rose-500/20"
+                        : quiz.is_published
+                          ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                          : "bg-slate-500/10 text-slate-400 border-slate-500/20"
+                    }`}>
+                      <span className={`inline-block w-1.5 h-1.5 rounded-full mr-1.5 ${quiz.is_published && !quiz.is_locked ? "bg-emerald-400 animate-pulse" : quiz.is_locked ? "bg-rose-400" : "bg-slate-400"}`}></span>
+                      {quiz.is_locked ? "Locked" : quiz.is_published ? "Published" : "Draft"}
+                    </span>
+                    <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest bg-slate-800/50 px-2 py-1 rounded-md">
+                      {quiz.course_title}
+                    </span>
+                  </div>
+
+                  <h2 className="text-xl font-bold text-white mb-4 group-hover:text-indigo-300 transition-colors">
+                    {quiz.title}
+                  </h2>
+
+                  <div className="flex flex-wrap items-center gap-3">
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800/30 border border-slate-700/30">
+                      <i className="fas fa-users text-indigo-400 text-xs" />
+                      <span className="text-xs font-semibold text-slate-300">
+                        <span className="text-slate-500 font-normal mr-0.5">Submissions</span> {quiz.submissions_count ?? 0}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800/30 border border-slate-700/30">
+                      <i className="fas fa-star text-amber-400 text-xs" />
+                      <span className="text-xs font-semibold text-slate-300">
+                        <span className="text-slate-500 font-normal mr-0.5">Total Marks</span> {quiz.total_marks}
+                      </span>
+                    </div>
+
+                    {quiz.due_date && (
+                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800/30 border border-slate-700/30">
+                        <i className="fas fa-calendar-alt text-rose-400 text-xs" />
+                        <span className="text-xs font-semibold text-slate-300">
+                          {new Date(quiz.due_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
-                <div className="flex flex-col items-end gap-3 flex-shrink-0">
-                  <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
-                    quiz.is_locked
-                      ? "bg-rose-500/15 text-rose-400"
-                      : quiz.is_published
-                        ? "bg-emerald-500/15 text-emerald-400"
-                        : "bg-slate-500/15 text-slate-400"
-                  }`}>
-                    {quiz.is_locked ? "Locked" : quiz.is_published ? "Published" : "Unpublished"}
-                  </span>
-
-                  <div className="flex items-center gap-1">
+                {/* Actions Section */}
+                <div className="flex flex-row md:flex-col items-center md:items-end gap-4 flex-shrink-0">
+                  <div className="flex items-center gap-2">
                     <button
                       type="button"
                       title="View quiz"
@@ -665,35 +723,36 @@ const TeacherQuizzes = ({
                           toastManager.error("Failed to load quiz detail");
                         }
                       }}
-                      className="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-800 hover:bg-indigo-600/20 text-slate-400 hover:text-indigo-400 border border-slate-700 hover:border-indigo-500/40 transition"
+                      className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-800/50 hover:bg-indigo-600 text-slate-400 hover:text-white border border-slate-700/50 hover:border-indigo-500 transition-all duration-300 shadow-sm"
                     >
-                      <i className="fas fa-eye text-xs" />
+                      <i className="fas fa-eye text-sm" />
                     </button>
                     <button
                       type="button"
                       title="Edit quiz"
                       onClick={() => openEdit(quiz)}
                       disabled={quiz.is_locked}
-                      className="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-800 hover:bg-amber-600/20 text-slate-400 hover:text-amber-400 border border-slate-700 hover:border-amber-500/40 transition disabled:opacity-40"
+                      className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-800/50 hover:bg-amber-600 text-slate-400 hover:text-white border border-slate-700/50 hover:border-amber-500 transition-all duration-300 shadow-sm disabled:opacity-40"
                     >
-                      <i className="fas fa-pencil text-xs" />
+                      <i className="fas fa-pencil text-sm" />
                     </button>
                     <button
                       type="button"
                       title="Delete quiz"
                       onClick={() => setDeleteTarget(quiz)}
                       disabled={quiz.is_locked}
-                      className="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-800 hover:bg-rose-600/20 text-slate-400 hover:text-rose-400 border border-slate-700 hover:border-rose-500/40 transition disabled:opacity-40"
+                      className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-800/50 hover:bg-rose-600 text-slate-400 hover:text-white border border-slate-700/50 hover:border-rose-500 transition-all duration-300 shadow-sm disabled:opacity-40"
                     >
-                      <i className="fas fa-trash text-xs" />
+                      <i className="fas fa-trash text-sm" />
                     </button>
                   </div>
 
                   <button
                     type="button"
+                    className="w-full md:w-auto min-w-[160px] bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-xl text-xs font-bold transition-all duration-300 shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]"
                     onClick={() => openSubmissions(quiz)}
-                    className="bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-xl text-xs font-bold transition"
                   >
+                    <i className="fas fa-tasks text-[10px]" />
                     View Submissions
                   </button>
                 </div>
@@ -709,39 +768,48 @@ const TeacherQuizzes = ({
 
       {/* ── CREATE MODAL ── */}
       {showCreate && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-900 rounded-3xl border border-slate-800 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 sticky top-0 bg-slate-900 z-10">
-              <h2 className="font-bold text-white text-sm">Create Quiz</h2>
-              <button
-                onClick={() => { setShowCreate(false); setForm(emptyForm); setQuestions([defaultQuestion()]); }}
-                className="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-white transition"
-              >
-                <i className="fas fa-times text-xs" />
-              </button>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-[2rem] p-6 sm:p-10 w-full max-w-5xl max-h-[92vh] overflow-y-auto shadow-2xl transition-all duration-300">
+            {/* Header */}
+            <div className="flex flex-col gap-1 mb-10 pb-6 border-b border-white/5 relative">
+              <div className="flex justify-between items-center">
+                <h3 className="text-2xl font-black text-white tracking-tight">Create New Quiz</h3>
+                <button
+                  onClick={() => { setShowCreate(false); setForm(emptyForm); setQuestions([defaultQuestion()]); }}
+                  className="w-10 h-10 flex items-center justify-center rounded-xl text-slate-500 hover:text-white hover:bg-white/5 transition-all"
+                >
+                  <i className="fas fa-times text-lg"></i>
+                </button>
+              </div>
+              <p className="text-slate-500 text-[13px] font-medium leading-relaxed max-w-2xl">
+                Initialize a new evaluation quiz by setting its basic parameters and building the question set.
+              </p>
             </div>
-            <div className="p-6">{renderQuizForm(handleCreate, false)}</div>
+            <div>{renderQuizForm(handleCreate, false)}</div>
           </div>
         </div>
       )}
 
       {/* ── EDIT MODAL ── */}
       {editTarget && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-900 rounded-3xl border border-slate-800 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 sticky top-0 bg-slate-900 z-10">
-              <div>
-                <h2 className="font-bold text-white text-sm">Edit Quiz</h2>
-                <p className="text-[10px] text-slate-500 mt-0.5">{editTarget.course_title}</p>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-[2rem] p-6 sm:p-10 w-full max-w-5xl max-h-[92vh] overflow-y-auto shadow-2xl transition-all duration-300">
+            {/* Header */}
+            <div className="flex flex-col gap-1 mb-10 pb-6 border-b border-white/5 relative">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h3 className="text-2xl font-black text-white tracking-tight">Edit Quiz</h3>
+                  <p className="text-indigo-400 text-xs font-bold uppercase tracking-widest mt-1">{editTarget.course_title}</p>
+                </div>
+                <button
+                  onClick={() => { setEditTarget(null); setForm(emptyForm); setQuestions([defaultQuestion()]); }}
+                  className="w-10 h-10 flex items-center justify-center rounded-xl text-slate-500 hover:text-white hover:bg-white/5 transition-all"
+                >
+                  <i className="fas fa-times text-lg"></i>
+                </button>
               </div>
-              <button
-                onClick={() => { setEditTarget(null); setForm(emptyForm); setQuestions([defaultQuestion()]); }}
-                className="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-white transition"
-              >
-                <i className="fas fa-times text-xs" />
-              </button>
             </div>
-            <div className="p-6">{renderQuizForm(handleEdit, true)}</div>
+            <div>{renderQuizForm(handleEdit, true)}</div>
           </div>
         </div>
       )}
