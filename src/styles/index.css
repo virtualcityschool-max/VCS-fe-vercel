@@ -257,3 +257,16 @@ h3,
 .course-outline-content ul, .course-outline-content ol { color: #94a3b8; padding-left: 1.5rem; margin-bottom: 0.5rem; }
 .course-outline-content strong { color: #e2e8f0; }
 .course-outline-content a { color: #818cf8; }
+ 
+ @keyframes float {
+   0%, 100% { transform: translateY(0); }
+   50% { transform: translateY(-10px); }
+ }
+ 
+ .animate-float {
+   animation: float 4s ease-in-out infinite;
+ }
+ 
+ .perspective-1000 {
+   perspective: 1000px;
+ }

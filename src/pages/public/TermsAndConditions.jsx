@@ -213,9 +213,9 @@ const TermsAndConditions = () => {
                 <h3 className="text-xl font-bold text-white mb-2">Have questions about our terms?</h3>
                 <p className="text-sm text-slate-500">Our legal team is here to clarify any concerns you might have.</p>
               </div>
-              <button className="px-8 py-3 rounded-full border border-indigo-500/30 text-indigo-400 font-bold hover:bg-indigo-500/10 transition-all">
+              {/* <button className="px-8 py-3 rounded-full border border-indigo-500/30 text-indigo-400 font-bold hover:bg-indigo-500/10 transition-all">
                 Contact Legal Support
-              </button>
+              </button> */}
             </div>
 
           </div>

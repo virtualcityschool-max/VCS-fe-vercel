@@ -269,9 +269,9 @@ const PrivacyPolicy = () => {
                 <h3 className="text-xl font-bold text-white mb-2">Questions about your data?</h3>
                 <p className="text-sm text-slate-400">Our Data Protection Officer is available for direct consultation.</p>
               </div>
-              <button className="px-8 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition-all hover:scale-105 active:scale-95 shadow-xl shadow-indigo-600/20">
+              {/* <button className="px-8 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition-all hover:scale-105 active:scale-95 shadow-xl shadow-indigo-600/20">
                 Contact DPO
-              </button>
+              </button> */}
             </div>
 
           </div>
