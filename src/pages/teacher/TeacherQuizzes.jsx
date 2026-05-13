@@ -416,8 +416,9 @@ const TeacherQuizzes = ({
       toastManager.success("Quiz updated");
       setEditTarget(null);
     } catch (e) {
-      const detail = e?.detail || (typeof e === "string" ? e : JSON.stringify(e));
-      toastManager.error(detail || "Failed to update quiz");
+      showApiError(e)
+      // const detail = e?.detail || (typeof e === "string" ? e : JSON.stringify(e));
+      // toastManager.error(detail || "Failed to update quiz");
     } finally {
       setSaving(false);
     }
@@ -431,8 +432,9 @@ const TeacherQuizzes = ({
       toastManager.success("Quiz deleted");
       setDeleteTarget(null);
     } catch (e) {
-      const detail = e?.detail || (typeof e === "string" ? e : JSON.stringify(e));
-      toastManager.error(detail || "Failed to delete quiz");
+      showApiError(e)
+      // const detail = e?.detail || (typeof e === "string" ? e : JSON.stringify(e));
+      // toastManager.error(detail || "Failed to delete quiz");
     } finally {
       setDeletingId(null);
     }
