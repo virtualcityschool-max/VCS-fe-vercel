@@ -195,15 +195,6 @@ const AdminSessionsPage = () => {
 
     if (!formData.scheduled_date) {
       errors.scheduled_date = "Start date is required";
-    } else {
-      const [year, month, day] = formData.scheduled_date.split("-");
-      const scheduled = new Date(year, month - 1, day);
-      const today = new Date();
-      scheduled.setHours(0, 0, 0, 0);
-      today.setHours(0, 0, 0, 0);
-      if (scheduled < today) {
-        errors.scheduled_date = "Scheduled date must be today or in the future";
-      }
     }
 
     if (!formData.recurrence_days?.length) {
@@ -211,8 +202,8 @@ const AdminSessionsPage = () => {
     }
     if (!formData.recurrence_end_date) {
       errors.recurrence_end_date = "Recurrence end date is required";
-    } else if (formData.scheduled_date && formData.recurrence_end_date <= formData.scheduled_date) {
-      errors.recurrence_end_date = "End date must be after start date";
+    } else if (formData.scheduled_date && formData.recurrence_end_date < formData.scheduled_date) {
+      errors.recurrence_end_date = "End date must be on or after start date";
     }
 
     return errors;
