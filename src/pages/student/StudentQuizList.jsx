@@ -70,7 +70,8 @@ const StudentQuizList = ({ hideHeader = false, filterCourse: externalFilterCours
         </div>
       )}
 
-      <div className="space-y-4">
+      {/* Grid Layout */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {quizzes?.length ? (
           quizzes.map((quiz) => {
             const { label, color } = statusConfig(quiz.my_submission);
@@ -82,34 +83,103 @@ const StudentQuizList = ({ hideHeader = false, filterCourse: externalFilterCours
               <div
                 key={quiz.id}
                 onClick={() => navigate(`/student/quizzes/${quiz.id}`)}
-                className="cursor-pointer bg-slate-900 p-6 rounded-3xl border border-slate-800 hover:border-indigo-500 transition"
+                className="group relative cursor-pointer glass p-5 rounded-3xl border-slate-800 hover:border-indigo-500/50 hover-lift transition-all duration-300 overflow-hidden flex flex-col h-full"
               >
-                <div className="flex justify-between items-start gap-4">
-                  <div className="flex-1 min-w-0">
-                    <h2 className="font-bold text-white text-lg">{quiz.title}</h2>
-                    <p className="text-[10px] text-slate-500 uppercase tracking-widest mt-1">{quiz.course_title}</p>
-                    <p className="text-xs text-slate-400 mt-2">
-                      {quiz.total_marks} marks
-                      {quiz.due_date && <> &nbsp;·&nbsp; Due {new Date(quiz.due_date).toLocaleDateString()}</>}
-                      {(quiz.is_overdue && quiz.my_submission?.status == 'missed') && <span className="ml-2 text-rose-400 font-semibold">· Overdue</span>}
+                {/* Subtle gradient overlay on hover */}
+                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                
+                <div className="relative flex flex-col h-full z-10">
+                  {/* Card Header: Icon & Status */}
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 group-hover:scale-110 group-hover:bg-indigo-500 group-hover:text-white transition-all duration-500">
+                      <i className="fas fa-question-circle text-lg" />
+                    </div>
+                    <div className="flex flex-col items-end gap-1.5">
+                      <span className={`${color} px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest shadow-sm backdrop-blur-md border border-white/5 flex-shrink-0`}>
+                        {label}
+                      </span>
+                      {(quiz.is_overdue && quiz.my_submission?.status == 'missed') && (
+                        <span className="text-[8px] text-rose-400 font-black uppercase tracking-tighter animate-pulse">
+                          Overdue
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Card Body: Title & Course */}
+                  <div className="mb-auto">
+                    <p className="text-[9px] text-indigo-400/80 uppercase tracking-[0.2em] font-black mb-1">
+                      {quiz.course_title}
                     </p>
-                    {hasScore && (
-                      <p className="text-xs text-emerald-400 mt-1 font-semibold">
-                        Score: {sub.obtained_marks} / {sub.total_marks ?? quiz.total_marks}
-                        {sub.percentage != null && ` (${sub.percentage}%)`}
-                      </p>
+                    <h2 className="font-bold text-white text-base leading-snug group-hover:text-indigo-200 transition-colors">
+                      {quiz.title}
+                    </h2>
+                  </div>
+
+                  {/* Card Footer: Metadata (Marks & Score) */}
+                  <div className="mt-4 pt-4 border-t border-slate-800/50 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-lg bg-slate-800/50 flex items-center justify-center text-indigo-400/70">
+                          <i className="fas fa-star text-[10px]" />
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-[8px] text-slate-500 uppercase font-black leading-none mb-0.5">Marks</span>
+                          <span className="text-[11px] text-slate-300 font-bold">{quiz.total_marks}</span>
+                        </div>
+                      </div>
+
+                      {hasScore && (
+                        <div className="flex items-center gap-2 text-emerald-400">
+                          <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                            <i className="fas fa-check-circle text-xs" />
+                          </div>
+                          <div className="flex flex-col items-end">
+                            <span className="text-[8px] text-emerald-500/70 uppercase font-black leading-none mb-0.5">Score</span>
+                            <span className="text-[11px] font-black">
+                              {sub.obtained_marks}/{sub.total_marks ?? quiz.total_marks}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {quiz.due_date && (
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-slate-400">
+                          <div className="w-8 h-8 rounded-lg bg-slate-800/50 flex items-center justify-center text-rose-400/70">
+                            <i className="far fa-calendar-alt text-[10px]" />
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="text-[8px] text-slate-500 uppercase font-black leading-none mb-0.5">Due</span>
+                            <span className="text-[11px] font-bold">
+                              {new Date(quiz.due_date).toLocaleDateString(undefined, { 
+                                day: 'numeric', 
+                                month: 'short'
+                              })}
+                            </span>
+                          </div>
+                        </div>
+                        
+                        <div className="w-8 h-8 rounded-full bg-slate-800/50 flex items-center justify-center text-slate-500 group-hover:text-white group-hover:bg-indigo-600 transition-all duration-300">
+                          <i className="fas fa-arrow-right text-[10px]" />
+                        </div>
+                      </div>
                     )}
                   </div>
-                  <span className={`${color} px-3 py-1 rounded text-[10px] font-black uppercase tracking-widest flex-shrink-0`}>
-                    {label}
-                  </span>
                 </div>
               </div>
             );
           })
         ) : (
-          <div className="bg-slate-900 p-6 rounded-3xl border border-slate-800 text-slate-400 text-sm">
-            No quizzes available yet.
+          <div className="col-span-full glass p-12 rounded-[2rem] border-slate-800 text-center">
+            <div className="w-16 h-16 bg-slate-800/50 rounded-2xl flex items-center justify-center text-slate-500 mx-auto mb-4">
+              <i className="fas fa-question-circle text-2xl" />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-2">No Quizzes Available</h3>
+            <p className="text-slate-400 max-w-xs mx-auto">
+              There are no quizzes for this course at the moment. Keep an eye out for updates!
+            </p>
           </div>
         )}
       </div>

@@ -84,19 +84,19 @@ const StudentAssessments = () => {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 mb-8 bg-slate-900 p-1 rounded-2xl border border-slate-800 w-fit">
+      <div className="flex gap-2 mb-10 bg-slate-900/50 backdrop-blur-md p-1.5 rounded-2xl border border-slate-800/50 w-fit">
         {TABS.map((tab) => (
           <button
             key={tab.id}
             type="button"
             onClick={() => switchTab(tab.id)}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
+            className={`flex items-center gap-2.5 px-6 py-3 rounded-[14px] text-sm font-bold transition-all duration-300 ${
               activeTab === tab.id
-                ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20"
-                : "text-slate-400 hover:text-white hover:bg-slate-800"
+                ? "bg-indigo-600 text-white shadow-xl shadow-indigo-500/20 scale-[1.02]"
+                : "text-slate-400 hover:text-white hover:bg-slate-800/50"
             }`}
           >
-            <i className={`${tab.icon} text-xs`} />
+            <i className={`${tab.icon} ${activeTab === tab.id ? "text-white" : "text-indigo-400/70"} text-xs`} />
             {tab.label}
           </button>
         ))}

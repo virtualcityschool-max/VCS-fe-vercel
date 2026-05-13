@@ -140,223 +140,356 @@ const StudentAssignmentDetails = () => {
   const isSubmitted = assignment.is_submitted;
 
   return (
-    <div className="text-white px-6 py-8">
-      <div className="max-w-4xl mx-auto">
-        <button
-          type="button"
-          onClick={() => navigate("/student/assessments?tab=assignments")}
-          className="mb-6 text-sm text-slate-400 hover:text-white transition"
-        >
-          <i className="fas fa-arrow-left mr-2"></i>
-          Back to Assignments
-        </button>
-
-        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-xl">
-          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
+    <div className="text-white px-6 py-10">
+      <div className="max-w-6xl mx-auto">
+        {/* Navigation & Header */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+          <div className="space-y-4">
+            <button
+              type="button"
+              onClick={() => navigate("/student/assessments?tab=assignments")}
+              className="group flex items-center gap-2 text-sm text-slate-500 hover:text-indigo-400 transition-colors"
+            >
+              <div className="w-8 h-8 rounded-full bg-slate-800/50 flex items-center justify-center group-hover:bg-indigo-500/10">
+                <i className="fas fa-arrow-left text-[10px]"></i>
+              </div>
+              Back to Assignments
+            </button>
             <div>
-              <h1 className="text-3xl font-black font-poppins mb-2">
+              <h1 className="text-4xl font-black font-poppins leading-tight">
                 {assignment.title}
               </h1>
-              <p className="text-slate-400 text-sm">
-                {assignment.course_title}
-              </p>
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              <span
-                className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
-                  isOverdue
-                    ? "bg-red-500/10 text-red-400"
-                    : isSubmitted
-                      ? "bg-blue-500/10 text-blue-400"
-                      : "bg-yellow-500/10 text-yellow-400"
-                }`}
-              >
-                {isOverdue ? "Overdue" : isSubmitted ? "Submitted" : "Pending"}
-              </span>
-
-              <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-slate-800 text-slate-300">
-                Total marks: {assignment.max_score}
-              </span>
+              <div className="flex items-center gap-3 mt-2">
+                <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
+                <p className="text-slate-400 font-medium">
+                  {assignment.course_title}
+                </p>
+              </div>
             </div>
           </div>
 
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-sm font-black uppercase tracking-widest text-slate-500 mb-3">
+          <div className="flex items-center gap-3">
+             <div className="flex flex-col items-end">
+                <span className="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1">Status</span>
+                <span
+                  className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg ${
+                    isOverdue
+                      ? "bg-red-500/10 text-red-400 border border-red-500/20"
+                      : isSubmitted
+                        ? "bg-blue-500/10 text-blue-400 border border-blue-500/20"
+                        : "bg-yellow-500/10 text-yellow-400 border border-yellow-500/20"
+                  }`}
+                >
+                  {isOverdue ? "Overdue" : isSubmitted ? "Submitted" : "Pending"}
+                </span>
+             </div>
+          </div>
+        </div>
+
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+          
+          {/* Left Column: Description & Submission */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* Description Card */}
+            <div className="glass p-8 rounded-[2rem] border-slate-800 shadow-2xl relative overflow-hidden group">
+              <div className="absolute top-0 right-0 p-8 opacity-[0.03] pointer-events-none group-hover:opacity-[0.06] transition-opacity">
+                <i className="fas fa-file-alt text-8xl" />
+              </div>
+              
+              <h2 className="text-xs font-black uppercase tracking-[0.25em] text-indigo-400 mb-6 flex items-center gap-3">
+                <div className="w-1.5 h-6 bg-indigo-500 rounded-full" />
                 Description
               </h2>
-              <div className="bg-slate-800/60 border border-slate-700 rounded-2xl p-5 text-slate-300 leading-relaxed whitespace-pre-wrap">
+              
+              <div className="text-slate-300 leading-relaxed whitespace-pre-wrap text-base font-medium">
                 {assignment.description}
               </div>
+              
               {assignment.file_url && (
-                <div className="mt-3">
-                  <PreviewButton url={getStorageUrl(assignment.file_url)} />
+                <div className="mt-8 pt-6 border-t border-slate-800/50">
+                  <p className="text-[10px] text-slate-500 uppercase font-black mb-3">Attachment</p>
+                  <PreviewButton 
+                    url={getStorageUrl(assignment.file_url)} 
+                    className="!bg-indigo-600/10 !text-indigo-400 !border-indigo-500/20 hover:!bg-indigo-600 hover:!text-white"
+                  />
                 </div>
               )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-slate-800/60 border border-slate-700 rounded-2xl p-4">
-                <p className="text-[10px] uppercase tracking-widest text-slate-500 mb-1">
-                  Due Date
-                </p>
-                <p className="text-sm text-white">
-                  {new Date(assignment.due_date).toLocaleString()}
-                </p>
-              </div>
-
-              <div className="bg-slate-800/60 border border-slate-700 rounded-2xl p-4">
-                <p className="text-[10px] uppercase tracking-widest text-slate-500 mb-1">
-                  Posted By
-                </p>
-                <p className="text-sm text-white">
-                  {assignment.created_by_name}
-                </p>
-              </div>
-
-              <div className="bg-slate-800/60 border border-slate-700 rounded-2xl p-4">
-                <p className="text-[10px] uppercase tracking-widest text-slate-500 mb-1">
-                  Course
-                </p>
-                <p className="text-sm text-white">{assignment.course_title}</p>
-              </div>
-            </div>
-
-            <div>
-              <h2 className="text-sm font-black uppercase tracking-widest text-slate-500 mb-3">
-                Submission
+            {/* Submission Section */}
+            <div className="space-y-6">
+              <h2 className="text-xs font-black uppercase tracking-[0.25em] text-indigo-400 px-4 flex items-center gap-3">
+                <div className="w-1.5 h-6 bg-indigo-500 rounded-full" />
+                Your Submission
               </h2>
 
               {isSubmitted ? (
-                <div className="space-y-4">
-                  {/* Submission content */}
-                  <div className="bg-slate-800/60 border border-slate-700 rounded-2xl p-5 space-y-4">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-xs uppercase tracking-widest text-slate-500 font-bold">Your Submission</h3>
-                      <span className="px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-blue-500/10 text-blue-400">
-                        Submitted
-                      </span>
-                    </div>
-
+                <div className="space-y-6">
+                  {/* Submission Card */}
+                  <div className="glass p-8 rounded-[2rem] border-slate-800/50 space-y-6">
                     {assignment.my_submission?.text_answer ? (
-                      <div className="bg-slate-900/60 border border-slate-700 rounded-xl p-4 text-slate-300 text-sm leading-relaxed whitespace-pre-wrap">
+                      <div className="bg-slate-950/50 border border-slate-800/50 rounded-2xl p-6 text-slate-300 text-sm leading-relaxed whitespace-pre-wrap font-medium">
                         {assignment.my_submission.text_answer}
                       </div>
                     ) : (
-                      <p className="text-slate-500 text-sm italic">No text submitted</p>
+                      <div className="flex flex-col items-center justify-center py-8 text-slate-500 border-2 border-dashed border-slate-800 rounded-2xl bg-slate-900/20">
+                         <i className="fas fa-comment-slash text-2xl mb-3 opacity-20" />
+                         <p className="text-sm italic">No text provided with submission</p>
+                      </div>
                     )}
 
-                    {(assignment.my_submission?.file_url || assignment.my_submission?.file) && (
-                      <PreviewButton
-                        url={getStorageUrl(assignment.my_submission.file_url ?? assignment.my_submission.file)}
-                      />
-                    )}
+                    <div className="flex flex-wrap items-center justify-between gap-4">
+                      {(assignment.my_submission?.file_url || assignment.my_submission?.file) && (
+                        <div className="flex flex-col gap-2">
+                          <span className="text-[10px] text-slate-500 uppercase font-black">Submitted File</span>
+                          <PreviewButton
+                            url={getStorageUrl(assignment.my_submission.file_url ?? assignment.my_submission.file)}
+                            className="!bg-emerald-500/10 !text-emerald-400 !border-emerald-500/20"
+                          />
+                        </div>
+                      )}
 
-                    {assignment.my_submission?.submitted_at && (
-                      <p className="text-xs text-slate-500">
-                        <i className="fas fa-clock mr-1"></i>
-                        Submitted on{" "}
-                        {new Date(assignment.my_submission.submitted_at).toLocaleString([], {
-                          year: "numeric",
-                          month: "short",
-                          day: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </p>
-                    )}
+                      {assignment.my_submission?.submitted_at && (
+                        <div className="flex items-center gap-3 bg-slate-800/30 px-4 py-2 rounded-xl border border-slate-800/50">
+                          <i className="fas fa-calendar-check text-indigo-400/70 text-xs"></i>
+                          <div className="flex flex-col">
+                            <span className="text-[9px] text-slate-500 uppercase font-black">Submitted On</span>
+                            <span className="text-xs text-slate-300 font-bold">
+                              {new Date(assignment.my_submission.submitted_at).toLocaleDateString(undefined, { 
+                                day: 'numeric', 
+                                month: 'short', 
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
 
-                  {/* Grade result */}
+                  {/* Grading Feedback Card */}
                   {assignment.my_submission?.is_graded ? (
-                    <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-5 space-y-3">
-                      <div className="flex items-center gap-2">
-                        <i className="fas fa-check-circle text-emerald-400"></i>
-                        <h3 className="text-sm font-bold text-emerald-400">Graded</h3>
-                        {assignment.my_submission.score != null && (
-                          <span className="ml-auto text-white font-black text-lg">
+                    <div className="relative overflow-hidden bg-gradient-to-br from-emerald-500/10 to-transparent border border-emerald-500/20 rounded-[2rem] p-8 space-y-6 shadow-2xl shadow-emerald-500/5">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 shadow-inner">
+                            <i className="fas fa-award text-2xl"></i>
+                          </div>
+                          <div>
+                            <h3 className="text-lg font-black text-emerald-400 leading-none mb-1">Evaluation Complete</h3>
+                            <p className="text-xs text-emerald-500/60 font-bold uppercase tracking-widest">Well done!</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <span className="block text-4xl font-black text-white leading-none">
                             {assignment.my_submission.score}
-                            <span className="text-slate-400 font-normal text-sm">/{assignment.max_score}</span>
                           </span>
-                        )}
+                          <span className="text-xs text-slate-500 font-black uppercase tracking-widest">
+                            / {assignment.max_score} Marks
+                          </span>
+                        </div>
                       </div>
+                      
                       {assignment.my_submission.feedback && (
-                        <div>
-                          <p className="text-xs uppercase tracking-widest text-slate-500 font-bold mb-1">Feedback</p>
-                          <p className="text-slate-300 text-sm leading-relaxed">
+                        <div className="bg-slate-950/30 border border-emerald-500/10 rounded-2xl p-6">
+                          <p className="text-[10px] uppercase tracking-[0.2em] text-emerald-500/50 font-black mb-3">Teacher's Feedback</p>
+                          <p className="text-slate-300 text-base leading-relaxed font-medium">
                             {assignment.my_submission.feedback}
                           </p>
                         </div>
                       )}
                     </div>
                   ) : (
-                    <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-2xl p-4 flex items-center gap-3 text-yellow-300 text-sm">
-                      <i className="fas fa-hourglass-half"></i>
-                      Awaiting grade from your teacher.
+                    <div className="bg-indigo-500/5 border border-indigo-500/20 rounded-[2rem] p-6 flex items-center gap-4 text-indigo-300 shadow-xl">
+                      <div className="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center">
+                        <i className="fas fa-hourglass-half animate-spin-slow"></i>
+                      </div>
+                      <div className="flex flex-col">
+                        <p className="font-black text-sm uppercase tracking-widest">Pending Grading</p>
+                        <p className="text-indigo-400/60 text-xs">Your teacher will review your submission soon.</p>
+                      </div>
                     </div>
                   )}
                 </div>
               ) : isOverdue ? (
-                <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-5 text-red-300">
-                  This assignment is overdue. Submissions are closed.
+                <div className="bg-rose-500/5 border border-rose-500/20 rounded-[2rem] p-10 text-center space-y-4">
+                  <div className="w-16 h-16 bg-rose-500/10 rounded-full flex items-center justify-center text-rose-500 mx-auto shadow-xl">
+                    <i className="fas fa-clock text-3xl animate-pulse"></i>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-black text-white mb-2">Submissions Closed</h3>
+                    <p className="text-rose-400/70 max-w-sm mx-auto text-sm font-medium leading-relaxed">
+                      This assignment is overdue. Unfortunately, the deadline has passed and submissions are no longer accepted.
+                    </p>
+                  </div>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-6">
                   <textarea
                     value={answer}
                     onChange={(e) => setAnswer(e.target.value)}
                     rows={8}
-                    className="w-full bg-slate-800 border border-slate-700 rounded-2xl p-4 text-white placeholder-slate-500 outline-none focus:border-indigo-500"
-                    placeholder="Write your submission here..."
+                    className="w-full glass bg-slate-900/40 border border-slate-800 rounded-[2rem] p-6 text-white placeholder-slate-600 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/5 transition-all text-base"
+                    placeholder="Write your submission response here..."
                   />
-                  <div className="relative">
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept={ACCEPT_STRING}
-                      onChange={handleFileChange}
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                    />
-                    <div className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-sm text-slate-300 cursor-pointer hover:bg-slate-700 transition">
-                      Choose File
+                  
+                  <div className="flex flex-col md:flex-row gap-4">
+                    <div className="flex-1 relative group">
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept={ACCEPT_STRING}
+                        onChange={handleFileChange}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                      />
+                      <div className="w-full bg-slate-800/40 border border-slate-800 rounded-2xl p-4 flex items-center justify-center gap-3 text-sm text-slate-400 group-hover:bg-slate-800 group-hover:text-white group-hover:border-indigo-500/50 transition-all border-dashed border-2">
+                        <i className="fas fa-cloud-upload-alt text-lg text-indigo-400/50 group-hover:scale-110 transition-transform"></i>
+                        <span className="font-bold uppercase tracking-widest text-[10px]">Attach Document</span>
+                      </div>
                     </div>
+
+                    <button
+                      type="button"
+                      onClick={handleSubmit}
+                      disabled={isSubmittingAssignment}
+                      className="bg-indigo-600 hover:bg-indigo-500 text-white px-10 py-4 rounded-2xl font-black transition-all shadow-xl shadow-indigo-600/20 disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-1 active:translate-y-0 text-sm uppercase tracking-widest flex items-center justify-center gap-2"
+                    >
+                      {isSubmittingAssignment ? (
+                        <>
+                          <i className="fas fa-spinner animate-spin"></i>
+                          Submitting...
+                        </>
+                      ) : (
+                        <>
+                          <i className="fas fa-paper-plane text-xs"></i>
+                          Submit Now
+                        </>
+                      )}
+                    </button>
                   </div>
+
                   {file && (
-                    <div className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-slate-700 bg-slate-800/60 px-4 py-3">
-                      <div className="min-w-0">
-                        <p className="text-sm text-slate-200 truncate">
-                          {file.name}
-                        </p>
-                        <p className="text-xs text-slate-500">
-                          {(file.size / (1024 * 1024)).toFixed(2)} MB
-                        </p>
+                    <div className="animate-scaleIn flex items-center justify-between gap-4 rounded-2xl border border-indigo-500/20 bg-indigo-500/5 px-6 py-4 shadow-xl">
+                      <div className="flex items-center gap-4 min-w-0">
+                        <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400">
+                           <i className="fas fa-file-pdf text-xl"></i>
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-sm font-bold text-white truncate">
+                            {file.name}
+                          </p>
+                          <p className="text-[10px] text-slate-500 font-black uppercase">
+                            {(file.size / (1024 * 1024)).toFixed(2)} MB
+                          </p>
+                        </div>
                       </div>
 
                       <button
                         type="button"
                         onClick={handleRemoveFile}
-                        className="shrink-0 rounded-lg bg-red-500/10 px-3 py-2 text-xs font-bold text-red-400 hover:bg-red-500/20 transition"
+                        className="shrink-0 w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center text-rose-500 hover:bg-rose-500 hover:text-white transition-all shadow-sm"
+                        title="Remove file"
                       >
-                        Remove
+                        <i className="fas fa-times text-xs"></i>
                       </button>
                     </div>
                   )}
-
-                  <div className="flex justify-end">
-                    <button
-                      type="button"
-                      onClick={handleSubmit}
-                      disabled={isSubmittingAssignment}
-                      className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-xl font-bold transition disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {isSubmittingAssignment
-                        ? "Submitting..."
-                        : "Submit Assignment"}
-                    </button>
-                  </div>
                 </div>
               )}
+            </div>
+          </div>
+
+          {/* Right Column: Information Sidebar */}
+          <div className="space-y-6">
+            <h2 className="text-xs font-black uppercase tracking-[0.25em] text-indigo-400 px-4 flex items-center gap-3">
+              <div className="w-1.5 h-6 bg-indigo-500 rounded-full" />
+              Information
+            </h2>
+
+            <div className="glass rounded-[2rem] border-slate-800 overflow-hidden divide-y divide-slate-800/50 shadow-2xl">
+              {/* Due Date Info */}
+              <div className="p-6 flex items-center gap-4 group">
+                <div className="w-12 h-12 rounded-2xl bg-rose-500/10 flex items-center justify-center text-rose-400 group-hover:scale-110 transition-transform">
+                  <i className="far fa-calendar-alt text-xl"></i>
+                </div>
+                <div>
+                  <p className="text-[10px] uppercase tracking-widest text-slate-500 font-black mb-1">
+                    Due Date
+                  </p>
+                  <p className="text-sm text-white font-bold leading-none">
+                    {new Date(assignment.due_date).toLocaleDateString(undefined, { 
+                      day: 'numeric', 
+                      month: 'long', 
+                      year: 'numeric' 
+                    })}
+                  </p>
+                  <p className="text-[10px] text-slate-400 mt-1">
+                    {new Date(assignment.due_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </p>
+                </div>
+              </div>
+
+              {/* Marks Info */}
+              <div className="p-6 flex items-center gap-4 group">
+                <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">
+                  <i className="fas fa-star text-xl"></i>
+                </div>
+                <div>
+                  <p className="text-[10px] uppercase tracking-widest text-slate-500 font-black mb-1">
+                    Total Marks
+                  </p>
+                  <p className="text-sm text-white font-bold leading-none">
+                    {assignment.max_score} Points
+                  </p>
+                  <p className="text-[10px] text-slate-400 mt-1">Maximum grade</p>
+                </div>
+              </div>
+
+              {/* Posted By Info */}
+              <div className="p-6 flex items-center gap-4 group">
+                <div className="w-12 h-12 rounded-2xl bg-slate-800/50 flex items-center justify-center text-slate-400 group-hover:scale-110 transition-transform">
+                  <i className="fas fa-user-tie text-xl"></i>
+                </div>
+                <div>
+                  <p className="text-[10px] uppercase tracking-widest text-slate-500 font-black mb-1">
+                    Posted By
+                  </p>
+                  <p className="text-sm text-white font-bold leading-none">
+                    {assignment.created_by_name}
+                  </p>
+                  <p className="text-[10px] text-slate-400 mt-1">Subject Teacher</p>
+                </div>
+              </div>
+
+              {/* Course Info */}
+              <div className="p-6 flex items-center gap-4 group">
+                <div className="w-12 h-12 rounded-2xl bg-slate-800/50 flex items-center justify-center text-slate-400 group-hover:scale-110 transition-transform">
+                  <i className="fas fa-book text-xl"></i>
+                </div>
+                <div>
+                  <p className="text-[10px] uppercase tracking-widest text-slate-500 font-black mb-1">
+                    Subject / Course
+                  </p>
+                  <p className="text-sm text-white font-bold leading-none">
+                    {assignment.course_title}
+                  </p>
+                  <p className="text-[10px] text-slate-400 mt-1">Enrolled Course</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Hint / Helper Card */}
+            <div className="bg-indigo-600/10 border border-indigo-500/20 rounded-[2rem] p-6 relative overflow-hidden group">
+               <div className="relative z-10">
+                  <h4 className="text-xs font-black text-indigo-400 uppercase tracking-widest mb-2">Study Tip</h4>
+                  <p className="text-xs text-indigo-300/80 leading-relaxed font-medium">
+                    Review the description carefully and ensure your file format is correct before submitting. Good luck!
+                  </p>
+               </div>
+               <i className="fas fa-lightbulb absolute -bottom-2 -right-2 text-6xl text-indigo-500/5 group-hover:text-indigo-500/10 transition-colors rotate-12" />
             </div>
           </div>
         </div>
