@@ -94,11 +94,11 @@ const ParentPortal = () => {
     );
   }
 
-  // Empty state — no children linked yet
+  // Empty state — no children linked yet (and no rejected links to show)
   if (
     !dashboardData ||
     !dashboardData.children ||
-    dashboardData.children.length === 0
+    (dashboardData.children.length === 0 && !dashboardData.rejected_child_links?.length)
   ) {
     return (
       <section
@@ -201,31 +201,41 @@ const ParentPortal = () => {
         <div className="grid grid-cols-1 lg:grid-cols-10 gap-8">
           {/* Main Dashboard - Left Column */}
           <div className="lg:col-span-7 space-y-12">
-            {/* Children Cards */}
-            <section>
-              <div className="flex items-center justify-between mb-10">
-                <div className="flex items-center gap-4">
-                  <div className="w-2 h-10 bg-gradient-to-b from-indigo-500 to-blue-500 rounded-full shadow-lg shadow-indigo-500/20"></div>
-                  <div>
-                    <h2 className="text-3xl font-black font-poppins tracking-tight text-white">
-                      Your Children
-                    </h2>
+            {dashboardData.children?.length > 0 ? (
+              <section>
+                <div className="flex items-center justify-between mb-10">
+                  <div className="flex items-center gap-4">
+                    <div className="w-2 h-10 bg-gradient-to-b from-indigo-500 to-blue-500 rounded-full shadow-lg shadow-indigo-500/20"></div>
+                    <div>
+                      <h2 className="text-3xl font-black font-poppins tracking-tight text-white">
+                        Your Children
+                      </h2>
+                    </div>
                   </div>
                 </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  {dashboardData.children.map((child, i) => (
+                    <ChildCard key={child.id} child={child} index={i} />
+                  ))}
+                </div>
+              </section>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-20 text-center">
+                <div className="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mb-4 border border-white/5">
+                  <i className="fas fa-user-plus text-slate-600 text-2xl"></i>
+                </div>
+                <p className="text-slate-400 font-bold mb-1">No children linked yet</p>
+                <p className="text-slate-600 text-sm max-w-xs">Check the panel on the right for the status of your link requests.</p>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {dashboardData.children.map((child, i) => (
-                  <ChildCard key={child.id} child={child} index={i} />
-                ))}
-              </div>
-            </section>
+            )}
           </div>
 
           {/* Sidebar - Right Column */}
           <div className="lg:col-span-3 space-y-8">
-            {/* Pending link requests */}
+            {/* Pending & rejected link requests */}
             <PendingChildLinks
               links={dashboardData.pending_child_links}
+              rejectedLinks={dashboardData.rejected_child_links}
               onRequestNew={() => setIsLinkModalOpen(true)}
             />
             {/* Recent Activity */}

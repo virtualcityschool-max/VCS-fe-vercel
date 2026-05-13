@@ -163,6 +163,28 @@ const UserDetailsPage = () => {
     }
   };
 
+  const handleProfileRefresh = async () => {
+    try {
+      const profileResponse = await adminService.getUserProfile(id);
+      const normalizedProfile = {
+        bio: profileResponse?.bio || "",
+        expertise: profileResponse?.expertise || "",
+        experience_years: profileResponse?.experience_years ?? "",
+        rating: profileResponse?.rating ?? "",
+        linkedin: profileResponse?.linkedin || "",
+        phone: profileResponse?.phone || "",
+        distinctions: profileResponse?.distinctions || [],
+        grade_level: profileResponse?.grade_level || "",
+        date_of_birth: profileResponse?.date_of_birth || "",
+        address: profileResponse?.address || "",
+        children: profileResponse?.children || [],
+      };
+      setUserProfile(normalizedProfile);
+    } catch (error) {
+      showApiError(error);
+    }
+  };
+
   // Loading state
   if (loading) {
     return (
@@ -253,6 +275,7 @@ const UserDetailsPage = () => {
                   <ParentProfileTab
                     profile={{ ...userProfile, id }}
                     onUpdate={handleProfileUpdate}
+                    onRefresh={handleProfileRefresh}
                     onCancel={handleBackToUsers}
                     onSaved={handleBackToUsers}
                   />

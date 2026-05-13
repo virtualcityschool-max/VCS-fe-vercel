@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import ConfirmDialog from "../common/ConfirmDialog";
 import { useDispatch } from "react-redux";
 import { Button, Input } from "../ui";
 import { useFieldErrors } from "../../hooks";
@@ -9,7 +10,6 @@ import {
   linkChildLinksAdmin,
 } from "../../store/slices/childLinksSlice";
 import {
-  selectChildLinksUnlinking,
   selectAvailableStudents,
   selectAvailableStudentsLoading,
   selectAvailableStudentsError,
@@ -20,11 +20,10 @@ import { useParams } from "react-router-dom";
 import { showApiError } from "../../utils/apiErrorHandler";
 import SearchInput from "../ui/SearchInput";
 
-const ParentProfileTab = ({ profile, onUpdate, onCancel, onSaved }) => {
+const ParentProfileTab = ({ profile, onUpdate, onRefresh, onCancel, onSaved }) => {
   const { id } = useParams();
 
   const dispatch = useDispatch();
-  const isUnlinking = useSelector(selectChildLinksUnlinking);
   const availableStudents = useSelector(selectAvailableStudents);
   const availableStudentsLoading = useSelector(selectAvailableStudentsLoading);
   const availableStudentsError = useSelector(selectAvailableStudentsError);
@@ -36,6 +35,8 @@ const ParentProfileTab = ({ profile, onUpdate, onCancel, onSaved }) => {
   });
 
   const [isSaving, setIsSaving] = useState(false);
+  const [unlinkingChildId, setUnlinkingChildId] = useState(null);
+  const [confirmUnlink, setConfirmUnlink] = useState({ open: false, childId: null, childUsername: "" });
   const [selectedStudentIds, setSelectedStudentIds] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -136,14 +137,13 @@ const ParentProfileTab = ({ profile, onUpdate, onCancel, onSaved }) => {
   };
 
   const handleUnlinkChild = async (childId, childUsername) => {
-    const confirmed = window.confirm(
-      `Are you sure you want to unlink ${childUsername}?`,
-    );
+    setConfirmUnlink({ open: true, childId, childUsername });
+  };
 
-    if (!confirmed) {
-      return;
-    }
-
+  const handleConfirmUnlink = async () => {
+    const { childId, childUsername } = confirmUnlink;
+    setConfirmUnlink({ open: false, childId: null, childUsername: "" });
+    setUnlinkingChildId(childId);
     try {
       await dispatch(
         unlinkChildLinksAdmin({
@@ -152,22 +152,19 @@ const ParentProfileTab = ({ profile, onUpdate, onCancel, onSaved }) => {
         }),
       ).unwrap();
 
-      // Show success toast
       toastManager.success(`Successfully unlinked ${childUsername}`);
 
-      // Refresh parent profile
-      if (onUpdate) {
-        onUpdate();
+      if (onRefresh) {
+        await onRefresh();
       }
     } catch (error) {
-      // Show error toast
       showApiError(error);
+    } finally {
+      setUnlinkingChildId(null);
     }
   };
 
   const handleLinkChildren = async () => {
-    console.log("profile", profile);
-    // Validate at least one student selected
     if (selectedStudentIds.length === 0) {
       toastManager.error("Please select at least one student to link.");
       return;
@@ -181,23 +178,18 @@ const ParentProfileTab = ({ profile, onUpdate, onCancel, onSaved }) => {
         }),
       ).unwrap();
 
-      // Show success toast
       toastManager.success(
         `Successfully linked ${selectedStudentIds.length} student(s) to parent.`,
       );
 
-      // Clear selection
       setSelectedStudentIds([]);
 
-      // Refresh parent profile
-      if (onUpdate) {
-        onUpdate();
+      if (onRefresh) {
+        await onRefresh();
       }
 
-      // Refresh available students list
       dispatch(fetchAvailableStudents());
     } catch (error) {
-      // Show error toast
       toastManager.error(
         `Failed to link students: ${error.message || "Unknown error"}`,
       );
@@ -300,10 +292,10 @@ const ParentProfileTab = ({ profile, onUpdate, onCancel, onSaved }) => {
                             onClick={() =>
                               handleUnlinkChild(child.id, child.username)
                             }
-                            disabled={isUnlinking}
+                            disabled={unlinkingChildId === child.id}
                             className="mt-4 w-full sm:w-auto px-4 py-1.5 text-xs font-medium rounded-lg opacity-80 hover:opacity-100 transition-opacity"
                           >
-                            {isUnlinking ? (
+                            {unlinkingChildId === child.id ? (
                               <>
                                 <i className="fas fa-spinner fa-spin mr-2"></i>
                                 Unlinking...
@@ -486,6 +478,17 @@ const ParentProfileTab = ({ profile, onUpdate, onCancel, onSaved }) => {
           </Button>
         </div>
       </form>
+      <ConfirmDialog
+        open={confirmUnlink.open}
+        variant="danger"
+        title="Unlink Child"
+        message={`Are you sure you want to unlink ${confirmUnlink.childUsername}? This will remove the parent-child relationship.`}
+        confirmLabel="Unlink"
+        cancelLabel="Cancel"
+        loading={unlinkingChildId !== null}
+        onConfirm={handleConfirmUnlink}
+        onCancel={() => setConfirmUnlink({ open: false, childId: null, childUsername: "" })}
+      />
     </div>
   );
 };

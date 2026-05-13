@@ -13,12 +13,14 @@ const PublicCourseCard = ({
   onUnenroll 
 }) => {
   const isPending = course.enrollment_status === "pending";
+  const isRejected = course.enrollment_status === "rejected";
   const noSessions = !course.has_session;
 
   const renderCTA = () => {
     let cls = "w-full py-3.5 font-black text-[10px] uppercase tracking-[0.2em] rounded-2xl transition-all active:scale-95 shadow-xl ";
     let label = "";
     let disabled = false;
+    let tooltip = null;
 
     if (enrolled) {
       label = isUnenrolling ? "Unenrolling..." : "Unenroll";
@@ -26,6 +28,11 @@ const PublicCourseCard = ({
       cls += isUnenrolling
         ? "bg-red-600/50 text-red-400 cursor-not-allowed"
         : "bg-red-600/10 border border-red-600/20 text-red-400 hover:bg-red-600 hover:text-white";
+    } else if (isRejected) {
+      label = "Request Rejected";
+      disabled = true;
+      cls += "bg-rose-600/10 border border-rose-500/20 text-rose-400 cursor-not-allowed";
+      tooltip = "Your enrollment request was rejected. Please contact school administration.";
     } else if (isPending) {
       label = "Approval Pending";
       disabled = true;
@@ -34,6 +41,7 @@ const PublicCourseCard = ({
       label = "Enroll Now";
       disabled = true;
       cls += "bg-gradient-to-r from-blue-600/40 to-indigo-600/40 text-white/40 cursor-not-allowed";
+      tooltip = "No sessions available for this course";
     } else if (isEnrolling) {
       label = "Enrolling...";
       disabled = true;
@@ -48,7 +56,7 @@ const PublicCourseCard = ({
         onClick={(e) => {
           e.stopPropagation();
           if (enrolled) onUnenroll(course.id, course.title);
-          else if (!isPending && !noSessions && !isEnrolling) onEnroll(course);
+          else if (!isPending && !isRejected && !noSessions && !isEnrolling) onEnroll(course);
         }}
         disabled={disabled}
         className={cls}
@@ -57,12 +65,12 @@ const PublicCourseCard = ({
       </button>
     );
 
-    if (noSessions) {
+    if (tooltip) {
       return (
         <div className="relative group/tooltip">
           {btn}
-          <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 px-3 py-1.5 bg-slate-800 border border-slate-700 text-white text-[11px] font-medium rounded-lg whitespace-nowrap opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-150 shadow-xl z-10">
-            No sessions available for this course
+          <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 px-3 py-2 bg-slate-800 border border-slate-700 text-white text-[11px] font-medium rounded-lg text-center max-w-[200px] opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-150 shadow-xl z-10">
+            {tooltip}
             <div className="absolute top-full left-1/2 -translate-x-1/2 border-[5px] border-transparent border-t-slate-700"></div>
           </div>
         </div>

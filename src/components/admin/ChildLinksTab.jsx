@@ -139,9 +139,20 @@ const ChildLinksTab = ({
                           {link.parent} → {link.student}
                         </p>
                         <p className="text-[9px] sm:text-xs text-slate-500 uppercase break-all">
-                          Parent ID: {link.parent_id} • Student ID:{" "}
-                          {link.student_id}
+                          Parent ID: {link.parent_id} • Student ID: {link.student_id}
                         </p>
+                        {link.parent_email && (
+                          <p className="text-[9px] sm:text-xs text-slate-500 break-all mt-0.5 flex items-center gap-1">
+                            <i className="fas fa-user text-[8px]"></i>
+                            {link.parent_email}
+                          </p>
+                        )}
+                        {link.student_email && (
+                          <p className="text-[9px] sm:text-xs text-slate-500 break-all mt-0.5 flex items-center gap-1">
+                            <i className="fas fa-user-graduate text-[8px]"></i>
+                            {link.student_email}
+                          </p>
+                        )}
                       </div>
                     </div>
 
@@ -228,9 +239,20 @@ const ChildLinksTab = ({
                               {link.parent} → {link.student}
                             </p>
                             <p className="text-[9px] text-slate-500 uppercase">
-                              Parent ID: {link.parent_id} • Student ID:{" "}
-                              {link.student_id}
+                              Parent ID: {link.parent_id} • Student ID: {link.student_id}
                             </p>
+                            {link.parent_email && (
+                              <p className="text-[10px] text-slate-500 mt-0.5 flex items-center gap-1.5">
+                                <i className="fas fa-user text-[9px]"></i>
+                                {link.parent_email}
+                              </p>
+                            )}
+                            {link.student_email && (
+                              <p className="text-[10px] text-slate-500 mt-0.5 flex items-center gap-1.5">
+                                <i className="fas fa-user-graduate text-[9px]"></i>
+                                {link.student_email}
+                              </p>
+                            )}
                           </div>
                         </div>
                       </td>

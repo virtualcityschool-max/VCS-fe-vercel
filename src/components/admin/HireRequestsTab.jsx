@@ -147,9 +147,14 @@ const HireRequestsTab = ({
                       <div className="w-6 h-6 rounded-lg bg-indigo-500/10 flex items-center justify-center shrink-0">
                         <i className="fas fa-chalkboard-teacher text-indigo-400 text-[10px]"></i>
                       </div>
-                      <p className="text-sm font-bold text-slate-200 truncate">
-                        {req.teacher?.username || `Teacher #${req.teacher?.id}`}
-                      </p>
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold text-slate-200 truncate">
+                          {req.teacher?.username || `Teacher #${req.teacher?.id}`}
+                        </p>
+                        {req.teacher?.email && (
+                          <p className="text-[10px] text-slate-500 truncate">{req.teacher.email}</p>
+                        )}
+                      </div>
                     </div>
                     <div className="space-y-0.5">
                       <p className="text-[10px] text-slate-500 flex items-center gap-1.5">
@@ -263,6 +268,9 @@ const HireRequestsTab = ({
                 <div className="px-6 py-5 space-y-0 divide-y divide-slate-800/60">
                   <DetailRow icon="phone"              label="Phone"             value={detailReq.phone} />
                   <DetailRow icon="chalkboard-teacher" label="Teacher Requested" value={detailReq.teacher?.username || `Teacher #${detailReq.teacher?.id}`} />
+                  {detailReq.teacher?.email && (
+                    <DetailRow icon="envelope" label="Teacher Email" value={detailReq.teacher.email} />
+                  )}
                   <DetailRow icon="calendar-alt"       label="Submitted"         value={detailReq.created_at ? new Date(detailReq.created_at).toLocaleString() : null} />
                   {detailReq.reviewed_at && (
                     <>

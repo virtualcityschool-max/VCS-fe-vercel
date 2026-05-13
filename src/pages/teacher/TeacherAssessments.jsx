@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useSearchParams } from "react-router-dom";
 import { fetchMyCourses } from "../../store/slices/teacherSlice";
 import TeacherGrading from "./TeacherGrading";
 import TeacherQuizzes from "./TeacherQuizzes";
@@ -11,7 +12,9 @@ const TABS = [
 
 const TeacherAssessments = () => {
   const dispatch = useDispatch();
-  const [activeTab, setActiveTab] = useState("assignments");
+  const [searchParams] = useSearchParams();
+  const initialTab = TABS.some((t) => t.id === searchParams.get("tab")) ? searchParams.get("tab") : "assignments";
+  const [activeTab, setActiveTab] = useState(initialTab);
   const { myCourses } = useSelector((s) => s.teachers);
 
   // Filter states lifted to parent for unified layout

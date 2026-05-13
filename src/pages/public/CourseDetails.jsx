@@ -399,6 +399,7 @@ const CourseDetails = () => {
   const isEnrolling = enrollingCourseIds.includes(normalizedCourse.id);
   const isUnenrolling = unenrollingCourseIds.includes(normalizedCourse.id);
   const isPending = normalizedCourse.enrollment_status === "pending";
+  const isRejected = normalizedCourse.enrollment_status === "rejected";
   const noSessions = !normalizedCourse.has_session;
 
   return (
@@ -612,39 +613,50 @@ const CourseDetails = () => {
 
                 {/* CTA Button */}
                 {auth.isLoggedIn && auth.role === "student" ? (
-                  <div className={`relative mb-6 ${noSessions && !enrolled ? "group/tooltip" : ""}`}>
+                  <div className={`relative mb-6 ${(noSessions && !enrolled) || isRejected ? "group/tooltip" : ""}`}>
                     <button
                       onClick={() =>
                         enrolled
                           ? handleUnenrollCourse(normalizedCourse)
-                          : !isPending && handleEnrollCourse()
+                          : !isPending && !isRejected && handleEnrollCourse()
                       }
-                      disabled={isEnrolling || isUnenrolling || isPending || (noSessions && !enrolled)}
+                      disabled={isEnrolling || isUnenrolling || isPending || isRejected || (noSessions && !enrolled)}
                       className={`w-full py-4 font-black text-xs uppercase tracking-[0.2em] rounded-2xl transition-all active:scale-95 ${
                         enrolled
                           ? isUnenrolling
                             ? "bg-red-600/50 text-red-400 cursor-not-allowed"
                             : "bg-red-600/20 border border-red-600/30 text-red-400 hover:bg-red-600 hover:text-white"
-                          : isPending
-                            ? "bg-amber-600/10 border border-amber-500/20 text-amber-400 cursor-not-allowed"
-                            : noSessions
-                              ? "bg-linear-to-r from-blue-600/40 to-cyan-600/40 text-white/40 cursor-not-allowed"
-                              : isEnrolling
-                                ? "bg-slate-600 text-slate-400 cursor-not-allowed"
-                                : "bg-linear-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 border-0 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-300 hover:scale-[1.02] text-white"
+                          : isRejected
+                            ? "bg-rose-600/10 border border-rose-500/20 text-rose-400 cursor-not-allowed"
+                            : isPending
+                              ? "bg-amber-600/10 border border-amber-500/20 text-amber-400 cursor-not-allowed"
+                              : noSessions
+                                ? "bg-linear-to-r from-blue-600/40 to-cyan-600/40 text-white/40 cursor-not-allowed"
+                                : isEnrolling
+                                  ? "bg-slate-600 text-slate-400 cursor-not-allowed"
+                                  : "bg-linear-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 border-0 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-300 hover:scale-[1.02] text-white"
                       }`}
                     >
                       {enrolled
                         ? isUnenrolling
                           ? "Unenrolling..."
                           : "Unenroll"
-                        : isPending
-                          ? "Approval Pending"
-                          : isEnrolling
-                            ? "Enrolling..."
-                            : "Enroll Now"}
+                        : isRejected
+                          ? "Request Rejected"
+                          : isPending
+                            ? "Approval Pending"
+                            : isEnrolling
+                              ? "Enrolling..."
+                              : "Enroll Now"}
                     </button>
-                    {noSessions && !enrolled && (
+                    {isRejected && (
+                      <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 px-3 py-2 bg-slate-800 border border-rose-500/30 text-white text-[11px] font-medium rounded-lg text-center max-w-[220px] opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-150 shadow-xl z-10">
+                        <i className="fas fa-lock text-rose-400 mr-1.5"></i>
+                        Your enrollment request was rejected. Please contact school administration.
+                        <div className="absolute top-full left-1/2 -translate-x-1/2 border-[5px] border-transparent border-t-slate-800"></div>
+                      </div>
+                    )}
+                    {noSessions && !enrolled && !isRejected && (
                       <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 px-3 py-1.5 bg-slate-800 border border-slate-700 text-white text-[11px] font-medium rounded-lg whitespace-nowrap opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-150 shadow-xl z-10">
                         No sessions available for this course
                         <div className="absolute top-full left-1/2 -translate-x-1/2 border-[5px] border-transparent border-t-slate-700"></div>
