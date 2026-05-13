@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { fetchStudentAssignments } from "../../store/slices/studentDashboardSlice";
 import { FilterSelect } from "../../components/ui";
 
-const StudentAssignments = ({ hideHeader = false }) => {
+const StudentAssignments = ({ hideHeader = false, filterCourse: externalFilterCourse }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -12,7 +12,7 @@ const StudentAssignments = ({ hideHeader = false }) => {
     (state) => state.studentDashboard,
   );
 
-  const [filterCourse, setFilterCourse] = useState("");
+  const filterCourse = externalFilterCourse || "";
 
   useEffect(() => {
     dispatch(fetchStudentAssignments(filterCourse ? { course: filterCourse } : {}));
@@ -77,16 +77,21 @@ const StudentAssignments = ({ hideHeader = false }) => {
 
   return (
     <div className={`text-white ${hideHeader ? "" : "px-6 py-8"}`}>
-      {!hideHeader ? (
+      {!hideHeader && (
         <div className="mb-10 flex flex-wrap items-start justify-between gap-4">
           <div>
             <h1 className="text-3xl font-black font-poppins mb-2">All Assignments</h1>
             <p className="text-slate-400 text-sm">View and manage all your assignments in one place.</p>
           </div>
-          {filterRow}
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            <FilterSelect value={filterCourse} onChange={() => {}} style={{ minWidth: 160 }}>
+              <option value="">All Courses</option>
+              {courseOptions.map((c) => (
+                <option key={c.id} value={c.id}>{c.title}</option>
+              ))}
+            </FilterSelect>
+          </div>
         </div>
-      ) : (
-        <div className="mb-5">{filterRow}</div>
       )}
 
       {/* List */}

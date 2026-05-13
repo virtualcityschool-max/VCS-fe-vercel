@@ -1,8 +1,57 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: "SF Pro Display";
+  src: url("/fonts/SF-Pro-Display-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "SF Pro Display";
+  src: url("/fonts/SF-Pro-Display-Medium.otf") format("opentype");
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "SF Pro Display";
+  src: url("/fonts/SF-Pro-Display-Semibold.otf") format("opentype");
+  font-weight: 600;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "SF Pro Display";
+  src: url("/fonts/SF-Pro-Display-Bold.otf") format("opentype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "SF Pro Display";
+  src: url("/fonts/SF-Pro-Display-Black.otf") format("opentype");
+  font-weight: 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "SF Pro Display";
+  src: url("/fonts/SF-Pro-Display-Light.otf") format("opentype");
+  font-weight: 300;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "SF Pro Display";
+  src: url("/fonts/SF-Pro-Display-Thin.otf") format("opentype");
+  font-weight: 100;
+  font-style: normal;
+}
+
 @theme {
-  --font-sans: "Inter", system-ui, sans-serif;
-  --font-poppins: "Poppins", sans-serif;
+  --font-sans: "SF Pro Display", system-ui, sans-serif;
+  --font-poppins: "SF Pro Display", sans-serif;
 }
 
 html,
@@ -11,11 +60,11 @@ body {
 }
 
 :root {
-  --font-inter: "Inter", sans-serif;
+  --font-sf-pro: "SF Pro Display", sans-serif;
   --bg-dark: #020617;
   --text-white: white;
 
-  font-family: var(--font-inter);
+  font-family: var(--font-sf-pro);
   background-color: var(--bg-dark);
   color: var(--text-white);
   margin: 0;

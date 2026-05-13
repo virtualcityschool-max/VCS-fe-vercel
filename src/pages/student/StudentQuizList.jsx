@@ -13,12 +13,12 @@ const statusConfig = (sub) => {
   return { label: sub.status, color: "text-slate-400 bg-slate-500/10" };
 };
 
-const StudentQuizList = ({ hideHeader = false }) => {
+const StudentQuizList = ({ hideHeader = false, filterCourse: externalFilterCourse }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { quizzes, isFetchingQuizzes } = useSelector((s) => s.studentDashboard);
 
-  const [filterCourse, setFilterCourse] = useState("");
+  const filterCourse = externalFilterCourse || "";
 
   useEffect(() => {
     dispatch(fetchStudentQuizzes(filterCourse ? { course: filterCourse } : {}));
@@ -53,16 +53,21 @@ const StudentQuizList = ({ hideHeader = false }) => {
 
   return (
     <div>
-      {!hideHeader ? (
+      {!hideHeader && (
         <div className="mb-10 flex flex-wrap items-start justify-between gap-4">
           <div>
             <h1 className="text-3xl font-black font-poppins mb-2">All Quizzes</h1>
             <p className="text-slate-400 text-sm">View and attempt all your quizzes in one place.</p>
           </div>
-          {filterRow}
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            <FilterSelect value={filterCourse} onChange={() => {}} style={{ minWidth: 160 }}>
+              <option value="">All Courses</option>
+              {courseOptions.map((c) => (
+                <option key={c.id} value={c.id}>{c.title}</option>
+              ))}
+            </FilterSelect>
+          </div>
         </div>
-      ) : (
-        <div className="mb-5">{filterRow}</div>
       )}
 
       <div className="space-y-4">
