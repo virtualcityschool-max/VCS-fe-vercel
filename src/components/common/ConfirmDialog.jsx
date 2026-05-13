@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { createPortal } from "react-dom";
 
 const VARIANTS = {
   danger: {
@@ -51,8 +52,8 @@ const ConfirmDialog = ({
 
   const v = VARIANTS[variant] || VARIANTS.danger;
 
-  return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] p-4" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+  return createPortal(
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] p-4 flex items-center justify-center">
       <div className="bg-slate-900 border border-slate-700 rounded-2xl p-6 w-full max-w-sm shadow-2xl">
         <div className="flex flex-col items-center text-center gap-4">
           <div className={`w-14 h-14 ${v.iconBg} rounded-full flex items-center justify-center`}>
@@ -83,7 +84,8 @@ const ConfirmDialog = ({
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

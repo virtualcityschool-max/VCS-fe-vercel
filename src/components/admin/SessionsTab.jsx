@@ -681,28 +681,45 @@ const SessionsTab = ({
                   <label className="block text-sm font-medium text-slate-300 mb-2">
                     Course <span className="text-red-400">*</span>
                   </label>
-                  <FilterSelect
-                    value={editSessionForm.course_id || ""}
-                    onChange={(e) => {
-                      const selected = courses.find((c) => c.id === Number(e.target.value));
-                      setEditSessionForm({
-                        ...editSessionForm,
-                        course_id: e.target.value,
-                        course_title: selected?.title || "",
-                        teacher_name: selected?.instructor?.username || "",
-                        instructor_id: selected?.instructor?.id || "",
-                      });
-                    }}
-                    className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-                  >
-                    <option value="">Select a course</option>
-                    {courses
-                      .filter((c) => c.status === "published" && (!c.has_session || c.id === Number(editSessionForm.course_id)))
-                      .map((c) => (
-                        <option key={c.id} value={c.id}>{c.title}</option>
-                      ))
-                    }
-                  </FilterSelect>
+                  {(() => {
+                    const editCourseId = Number(editSessionForm.course_id);
+                    const availableOptions = courses.filter(c => c.status === "published" && !c.has_session);
+                    const currentInList = editCourseId && courses.some(c => c.id === editCourseId);
+                    return (
+                      <FilterSelect
+                        value={editSessionForm.course_id || ""}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          const selected = courses.find((c) => c.id === Number(val));
+                          if (selected) {
+                            setEditSessionForm({
+                              ...editSessionForm,
+                              course_id: val,
+                              course_title: selected.title || "",
+                              teacher_name: selected.instructor?.username || "",
+                              instructor_id: selected.instructor?.id || "",
+                            });
+                          } else {
+                            setEditSessionForm({ ...editSessionForm, course_id: val });
+                          }
+                          clearEditSessionFieldError?.("course");
+                        }}
+                        className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                      >
+                        <option value="">Select a course</option>
+                        {editCourseId && !currentInList && (
+                          <option key={`current-${editCourseId}`} value={editCourseId}>
+                            {editSessionForm.course_title || `Course #${editCourseId}`}{editSessionForm.teacher_name ? ` — ${editSessionForm.teacher_name}` : ""}
+                          </option>
+                        )}
+                        {availableOptions.map((c) => (
+                          <option key={c.id} value={c.id}>
+                            {c.title}{c.instructor?.username ? ` — ${c.instructor.username}` : ""}
+                          </option>
+                        ))}
+                      </FilterSelect>
+                    );
+                  })()}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">Instructor</label>
@@ -727,7 +744,7 @@ const SessionsTab = ({
               </div>
 
               {/* Description */}
-              <div>
+              {/* <div>
                 <label className="block text-sm font-medium text-slate-300 mb-2">Description</label>
                 <textarea
                   placeholder="Describe this class session..."
@@ -736,7 +753,7 @@ const SessionsTab = ({
                   rows={3}
                   className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm resize-none"
                 />
-              </div>
+              </div> */}
 
               {/* Start Date | End Date */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

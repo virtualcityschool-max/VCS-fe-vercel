@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Button, Input, Card } from "../ui";
+import { Button, Input, Card, PhoneInput } from "../ui";
 import { useFieldErrors } from "../../hooks";
 import DistinctionsEditor from "./DistinctionsEditor";
 
@@ -86,12 +86,8 @@ const TeacherProfileTab = ({ profile, onUpdate, onCancel, onSaved }) => {
       newErrors.linkedin = "Please enter a valid LinkedIn URL";
     }
 
-    // Phone number validation (basic numeric check)
-    if (formData.phone && !/^\+?[\d\s\-()]+$/.test(formData.phone)) {
-      newErrors.phone =
-        "Phone number must contain only digits, spaces, and basic formatting";
-    } else if (formData.phone && formData.phone.length > 20) {
-      newErrors.phone = "Phone number must not exceed 20 characters";
+    if (formData.phone && formData.phone.replace(/\D/g, "").length < 5) {
+      newErrors.phone = "Please enter a valid phone number";
     }
 
     setErrors(newErrors);
@@ -260,13 +256,10 @@ const TeacherProfileTab = ({ profile, onUpdate, onCancel, onSaved }) => {
                 <i className="fas fa-phone text-xs text-blue-400/60"></i>
                 Phone Number
               </label>
-              <Input
-                type="tel"
+              <PhoneInput
                 value={formData.phone}
-                onChange={(e) => handleInputChange("phone", e.target.value)}
-                placeholder="+1 (555) 123-4567"
+                onChange={(val) => handleInputChange("phone", val)}
                 error={getFieldError("phone")}
-                className="bg-slate-900/60 border-slate-700/50 hover:border-slate-600 transition-all"
               />
             </div>
           </div>
