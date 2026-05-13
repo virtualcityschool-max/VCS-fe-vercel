@@ -804,6 +804,8 @@ export const selectMyEnrollments = (state) => state.studentDashboard.myEnrollmen
 export const selectMyEnrollmentsLoading = (state) => state.studentDashboard.myEnrollmentsLoading;
 export const selectPendingEnrollments = (state) =>
   (state.studentDashboard.myEnrollments || []).filter((e) => e.status === "pending");
+export const selectRejectedEnrollments = (state) =>
+  (state.studentDashboard.myEnrollments || []).filter((e) => e.status === "rejected");
 
 // Filtered selectors
 export const selectFilteredAssignments = createSelector(

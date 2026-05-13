@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import ConfirmDialog from "../common/ConfirmDialog";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchChildGrades,
@@ -94,6 +95,7 @@ const SkeletonLoader = () => (
 const ChildCard = ({ child }) => {
   const dispatch = useDispatch();
   const [isGradesExpanded, setIsGradesExpanded] = useState(false);
+  const [confirmUnlink, setConfirmUnlink] = useState(false);
 
   // Select child-specific data from Redux
   const childGrades = useSelector(selectChildGrades);
@@ -191,19 +193,11 @@ const ChildCard = ({ child }) => {
   };
 
   const handleUnlink = async () => {
-    const confirmed = window.confirm(
-      "Are you sure you want to unlink this child?",
-    );
-    if (!confirmed) return;
-
     try {
       await dispatch(unlinkChildLinks([child.id])).unwrap();
-      // Show success message
       toastManager.success("Child unlinked successfully!");
-      // Refresh parent dashboard by reloading the page
       window.location.reload();
     } catch (error) {
-      // Show error message
       showApiError(error);
     }
   };
@@ -407,7 +401,7 @@ const ChildCard = ({ child }) => {
       {/* Bottom Action - Clear Unlink button aligned at the bottom */}
       <div className="pt-4 border-t border-slate-700 mt-auto">
         <button
-          onClick={handleUnlink}
+          onClick={() => setConfirmUnlink(true)}
           disabled={isUnlinking}
           className="w-full py-2.5 text-xs font-bold uppercase tracking-widest text-rose-400 bg-rose-500/5 hover:bg-rose-500/10 border border-rose-500/20 hover:border-rose-500/40 rounded-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2"
         >
@@ -415,6 +409,18 @@ const ChildCard = ({ child }) => {
           {isUnlinking ? "Unlinking..." : "Unlink Child Profile"}
         </button>
       </div>
+
+      <ConfirmDialog
+        open={confirmUnlink}
+        variant="danger"
+        title="Unlink Child"
+        message={`Are you sure you want to unlink ${child.name || child.username || "this child"}? You will lose access to their dashboard.`}
+        confirmLabel="Unlink"
+        cancelLabel="Cancel"
+        loading={isUnlinking}
+        onConfirm={() => { setConfirmUnlink(false); handleUnlink(); }}
+        onCancel={() => setConfirmUnlink(false)}
+      />
     </div>
   );
 };
