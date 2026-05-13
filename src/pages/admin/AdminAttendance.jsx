@@ -28,25 +28,77 @@ const AdminAttendance = () => {
 
   const [tab,        setTab]        = useState("student");
   const [courseId,   setCourseId]   = useState("");
+  const [dateFilter, setDateFilter] = useState("last7");
   const [editRecord, setEditRecord] = useState(null);
 
   const activeCourseId = courseId || (courses[0] ? String(courses[0].id) : "");
 
-  // Top-level sessions only (no child sessions as separate columns)
-  // const parentSessions = useMemo(
-  //   () => (sessions || []).filter((s) => s.is_child === false || s.is_child == null),
-  //   [sessions]
-  // );
+  // Date Filter logic
+  const dateRange = useMemo(() => {
+    const now = new Date();
+    const start = new Date();
+    const end = new Date();
 
-  // Overall stats from flat attendance list
+    if (dateFilter === "today") {
+      start.setHours(0, 0, 0, 0);
+    } else if (dateFilter === "last7") {
+      start.setDate(now.getDate() - 7);
+    } else if (dateFilter === "last30") {
+      start.setDate(now.getDate() - 30);
+    } else if (dateFilter === "thisMonth") {
+      start.setHours(0, 0, 0, 0);
+      start.setDate(1);
+    } else if (dateFilter === "lastMonth") {
+      start.setMonth(now.getMonth() - 1);
+      start.setDate(1);
+      start.setHours(0, 0, 0, 0);
+      end.setMonth(now.getMonth());
+      end.setDate(0);
+      end.setHours(23, 59, 59, 999);
+    } else {
+      // all
+      return null;
+    }
+    
+    // For all filters except lastMonth, the end is 'now' (effectively)
+    if (dateFilter !== "lastMonth") {
+      end.setTime(now.getTime());
+    }
+
+    return { start, end };
+  }, [dateFilter]);
+
+  // Filtered Sessions & Attendance
+  const filteredSessions = useMemo(() => {
+    const list = sessions || [];
+    const now = new Date();
+    return list.filter((s) => {
+      const d = s.scheduled_at ? new Date(s.scheduled_at) : null;
+      if (!d) return false;
+      if (d > now) return false; // Don't show future
+      if (!dateRange) return true;
+      return d >= dateRange.start && d <= dateRange.end;
+    });
+  }, [sessions, dateRange]);
+
+  const filteredAttendance = useMemo(() => {
+    const list = allAttendance || [];
+    const sessionIds = new Set(filteredSessions.map((s) => s.id));
+    return list.filter((r) => {
+      const sId = r.session?.id ?? r.session_id ?? r.session;
+      return sessionIds.has(sId);
+    });
+  }, [allAttendance, filteredSessions]);
+
+  // Overall stats from filtered list
   const stats = useMemo(() => {
-    const records = allAttendance || [];
+    const records = filteredAttendance || [];
     const present = records.filter((r) => r.status === "present").length;
     const absent  = records.filter((r) => r.status === "absent").length;
     const late    = records.filter((r) => r.status === "late").length;
     const total   = records.length;
     return { total, present, absent, late, rate: total ? Math.round(((present + late) / total) * 100) : 0 };
-  }, [allAttendance]);
+  }, [filteredAttendance]);
 
   // Load courses once
   useEffect(() => {
@@ -93,8 +145,24 @@ const AdminAttendance = () => {
   const isLoading = loadingSessions || loadingAllAttendance;
   return (
     <div className="text-white space-y-8">
-      {/* Header Actions (Course Filter) - Positioned to align with the global header */}
-      <div className="flex justify-end mb-4 -mt-20 lg:-mt-24 relative z-20">
+      {/* Header Actions (Course & Date Filters) - Positioned to align with the global header */}
+      <div className="flex flex-wrap lg:flex-nowrap justify-end gap-4 mb-4 -mt-20 lg:-mt-24 relative z-20">
+        <div className="w-full sm:w-48">
+          <label className="text-[10px] uppercase tracking-widest text-slate-500 font-bold px-0.5 mb-1.5 block uppercase tracking-[0.2em]">Date Range</label>
+          <FilterSelect
+            value={dateFilter}
+            onChange={(e) => setDateFilter(e.target.value)}
+            className="w-full"
+          >
+            <option value="today">Today</option>
+            <option value="last7">Last 7 Days</option>
+            <option value="last30">Last 30 Days</option>
+            <option value="thisMonth">This Month</option>
+            <option value="lastMonth">Last Month</option>
+            <option value="all">All Time</option>
+          </FilterSelect>
+        </div>
+
         <div className="w-full sm:w-64">
           <label className="text-[10px] uppercase tracking-widest text-slate-500 font-bold px-0.5 mb-1.5 block uppercase tracking-[0.2em]">Course</label>
           <FilterSelect
@@ -127,7 +195,7 @@ const AdminAttendance = () => {
       </div>
 
       {/* Stats */}
-      {!isLoading && (allAttendance || []).length > 0 && (
+      {!isLoading && (filteredAttendance || []).length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
             { label: "Total",   value: stats.total,      color: "text-white" },
@@ -150,8 +218,8 @@ const AdminAttendance = () => {
         </div>
       ) : (
         <AttendanceMatrix
-          sessions={sessions}
-          attendanceRecords={allAttendance || []}
+          sessions={filteredSessions}
+          attendanceRecords={filteredAttendance || []}
           participantRole={tab === "teacher" ? "teacher" : "student"}
           onEditRecord={setEditRecord}
         />

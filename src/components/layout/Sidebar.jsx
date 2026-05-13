@@ -162,64 +162,64 @@ const Sidebar = ({
     `}>
 
       {/* ── Header ── */}
-      {isCollapsed ? (
-        <div className="border-b border-slate-800/80 flex-shrink-0 flex items-center justify-between px-3 h-16">
+      <div className={`
+        border-b border-slate-800/80 flex-shrink-0 flex items-center transition-all duration-300 overflow-hidden
+        ${isCollapsed ? "px-3 h-16" : "px-4 h-[110px]"}
+      `}>
+        <div className="relative flex-1 h-full flex items-center min-w-0">
+          {/* Full Logo */}
           <div
-            className="w-9 h-9 flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+            className={`
+              absolute inset-y-0 left-0 flex items-center transition-all duration-300 ease-in-out cursor-pointer hover:opacity-80
+              ${isCollapsed ? "opacity-0 -translate-x-10 pointer-events-none" : "opacity-100 translate-x-0"}
+            `}
+            style={{ width: "170px" }}
             onClick={() => {
-              const dashboardPaths = {
-                admin: "/admin/overview",
-                teacher: "/teacher",
-                student: "/student",
-                parent: "/parent",
-              };
-              navigate(dashboardPaths[role] || "/");
-            }}
-          >
-            <img src="/assets/logo02.png" alt="VCS" className="w-full h-full object-contain" />
-          </div>
-          <button
-            onClick={onToggleCollapse}
-            className="hidden lg:flex items-center justify-center w-7 h-7 rounded-lg
-              text-slate-500 hover:text-white hover:bg-slate-800 transition-all duration-200"
-            title="Expand sidebar"
-          >
-            <i className="fas fa-chevron-right text-xs" />
-          </button>
-        </div>
-      ) : (
-        <div className="border-b border-slate-800/80 flex-shrink-0 flex items-center justify-between px-4 py-3">
-          <div
-            className="w-[170px] h-[90px] flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
-            onClick={() => {
-              const dashboardPaths = {
-                admin: "/admin/overview",
-                teacher: "/teacher",
-                student: "/student",
-                parent: "/parent",
-              };
+              const dashboardPaths = { admin: "/admin/overview", teacher: "/teacher", student: "/student", parent: "/parent" };
               navigate(dashboardPaths[role] || "/");
             }}
           >
             <img src="/assets/logo.png" alt="VCS" className="w-full h-full object-contain" />
           </div>
+
+          {/* Collapsed Logo (Mini) */}
+          <div
+            className={`
+              absolute inset-y-0 left-0 flex items-center transition-all duration-300 ease-in-out cursor-pointer hover:opacity-80
+              ${isCollapsed ? "opacity-100 scale-100" : "opacity-0 scale-75 pointer-events-none"}
+            `}
+            style={{ width: "36px" }}
+            onClick={() => {
+              const dashboardPaths = { admin: "/admin/overview", teacher: "/teacher", student: "/student", parent: "/parent" };
+              navigate(dashboardPaths[role] || "/");
+            }}
+          >
+            <img src="/assets/logo02.png" alt="VCS" className="w-full h-full object-contain" />
+          </div>
+        </div>
+
+        {/* Toggle / Close Buttons */}
+        <div className="flex items-center gap-1 flex-shrink-0">
           <button
             onClick={onToggleCollapse}
-            className="hidden lg:flex items-center justify-center w-7 h-7 rounded-lg flex-shrink-0
+            className="hidden lg:flex items-center justify-center w-8 h-8 rounded-lg
               text-slate-500 hover:text-white hover:bg-slate-800 transition-all duration-200"
-            title="Collapse sidebar"
+            title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
-            <i className="fas fa-chevron-left text-xs" />
+            <i className={`fas fa-chevron-${isCollapsed ? "right" : "left"} text-xs transition-transform duration-300`} />
           </button>
-          <button
-            onClick={onMobileClose}
-            className="lg:hidden flex items-center justify-center w-7 h-7 rounded-lg flex-shrink-0
-              text-slate-400 hover:text-white hover:bg-slate-800 transition-all duration-200"
-          >
-            <i className="fas fa-times text-sm" />
-          </button>
+          
+          {!isCollapsed && (
+            <button
+              onClick={onMobileClose}
+              className="lg:hidden flex items-center justify-center w-8 h-8 rounded-lg
+                text-slate-400 hover:text-white hover:bg-slate-800 transition-all duration-200"
+            >
+              <i className="fas fa-times text-sm" />
+            </button>
+          )}
         </div>
-      )}
+      </div>
 
       {/* ── Nav ── */}
       <div className={`flex-1 py-4 overflow-y-auto overflow-x-hidden ${isCollapsed ? "px-3" : "px-4"}`}>

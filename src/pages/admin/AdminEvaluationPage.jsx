@@ -4,11 +4,14 @@ import { toastManager } from "../../utils/toastManager";
 import EvaluationMatrix from "../../components/common/EvaluationMatrix";
 import { FilterSelect } from "../../components/ui";
 
+import { GradingScaleButton } from "../../components/admin/GradingScaleModal";
+
 const AdminEvaluationPage = () => {
   const [courses, setCourses]                       = useState([]);
   const [selectedCourseId, setSelectedCourseId]     = useState("");
   const [loadingInit, setLoadingInit]               = useState(true);
   const [tab, setTab]                               = useState("public");
+  const [refreshKey, setRefreshKey]                 = useState(0);
 
   const [publicStudents, setPublicStudents]         = useState([]);
   const [loadingPublic, setLoadingPublic]           = useState(false);
@@ -112,40 +115,34 @@ const AdminEvaluationPage = () => {
   const isCompleted    = courseStatus === "completed";
   const isLoading      = loadingPublic || loadingPrivateList;
 
+  const handleGradingScaleUpdate = () => {
+    setRefreshKey(k => k + 1);
+    // Also refetch current data to see updated grades/results from server
+    if (!selectedCourseId) return;
+    if (tab === "public") fetchPublicEvals(selectedCourseId);
+    else if (selectedPrivateId) handlePrivateStudentSelect(selectedPrivateId);
+  };
+
   return (
     <div className="min-h-screen text-white">
-      <div >
-
-        {/* ── Filter bar: tabs left, course right ── */}
-        <div className="flex items-end justify-between gap-4 flex-wrap mb-2">
-          {/* Enrollment type tabs */}
-          {/* <div className="flex flex-col gap-1">
-            <span className="text-[10px] uppercase tracking-widest text-slate-500 font-bold px-0.5">Enrollment Type</span>
-            <div className="flex gap-1 bg-slate-800/60 border border-slate-700 rounded-xl p-1">
-              <button
-                onClick={() => handleTabSwitch("public")}
-                className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-semibold transition ${
-                  tab === "public" ? "bg-indigo-600 text-white" : "text-slate-400 hover:text-white"
-                }`}
-              >
-                <i className="fas fa-users text-[10px]" />
-                Public
-              </button>
-            </div>
-          </div> */}
-
-          {/* Course selector */}
-          <div className="flex flex-col gap-1">
-            <span className="text-[10px] uppercase tracking-widest text-slate-500 font-bold px-0.5">Course</span>
+      {/* Header Actions (Course & Grading Scale) - Positioned to align with the global header */}
+      <div className="flex flex-wrap lg:flex-nowrap justify-end gap-4 mb-4 -mt-20 lg:-mt-24 relative z-20">
+        <div className="flex items-end gap-3">
+          <div className="mb-0.5">
+             <GradingScaleButton onUpdated={handleGradingScaleUpdate} />
+          </div>
+          
+          <div className="w-full sm:w-64">
+            <label className="text-[10px] uppercase tracking-widest text-slate-500 font-bold px-0.5 mb-1.5 block tracking-[0.2em]">Course</label>
             {loadingInit ? (
-              <div className="h-10 w-52 bg-slate-800 rounded-xl animate-pulse" />
+              <div className="h-10 w-full bg-slate-800 rounded-xl animate-pulse" />
             ) : (
               <FilterSelect
                 value={selectedCourseId}
                 onChange={(e) => setSelectedCourseId(e.target.value)}
-                style={{ width: 240 }}
+                className="w-full"
               >
-                <option value="">--</option>
+                <option value="">-- Select Course --</option>
                 {courses.map((c) => (
                   <option key={c.id} value={c.id}>{c.title}</option>
                 ))}
@@ -153,12 +150,12 @@ const AdminEvaluationPage = () => {
             )}
           </div>
         </div>
+      </div>
 
+      <div className="space-y-6 pt-4">
         {/* Course status pill */}
         {selectedCourse && (
           <div className="flex items-center gap-2 text-xs text-slate-500 mb-2">
-            {/* <i className="fas fa-graduation-cap text-slate-600" />
-            <span>{selectedCourse.title}</span> */}
             <span>Course Status: </span>
             {courseStatus && (
               <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold uppercase ${
@@ -229,7 +226,7 @@ const AdminEvaluationPage = () => {
                   </div>
                 )}
               </div>
-              <EvaluationMatrix students={publicStudents} courseStatus={courseStatus} />
+              <EvaluationMatrix key={`public-${refreshKey}`} students={publicStudents} courseStatus={courseStatus} />
             </>
           ) : selectedCourseId ? (
             <div className="bg-slate-900/50 border border-slate-800 border-dashed rounded-3xl p-12 text-center">
@@ -276,7 +273,7 @@ const AdminEvaluationPage = () => {
               ))}
             </div>
           ) : privateEval ? (
-            <EvaluationMatrix students={[privateEval]} courseStatus={courseStatus} />
+            <EvaluationMatrix key={`private-${refreshKey}`} students={[privateEval]} courseStatus={courseStatus} />
           ) : (
             <div className="bg-slate-900/50 border border-slate-800 border-dashed rounded-3xl p-12 text-center">
               <p className="text-slate-400 text-sm">No evaluation data found for this student</p>
