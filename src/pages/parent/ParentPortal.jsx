@@ -94,12 +94,12 @@ const ParentPortal = () => {
     );
   }
 
-  // Empty state — no children linked yet (and no rejected links to show)
-  if (
-    !dashboardData ||
-    !dashboardData.children ||
-    (dashboardData.children.length === 0 && !dashboardData.rejected_child_links?.length)
-  ) {
+  // Empty state — no children linked yet AND no pending/rejected links to show
+  const hasChildren = dashboardData?.children?.length > 0;
+  const hasPending = dashboardData?.pending_child_links?.length > 0;
+  const hasRejected = dashboardData?.rejected_child_links?.length > 0;
+
+  if (!dashboardData || (!hasChildren && !hasPending && !hasRejected)) {
     return (
       <section
         id="parent-view"
@@ -231,15 +231,35 @@ const ParentPortal = () => {
           </div>
 
           {/* Sidebar - Right Column */}
-          <div className="lg:col-span-3 space-y-8">
-            {/* Pending & rejected link requests */}
-            <PendingChildLinks
-              links={dashboardData.pending_child_links}
-              rejectedLinks={dashboardData.rejected_child_links}
-              onRequestNew={() => setIsLinkModalOpen(true)}
-            />
-            {/* Recent Activity */}
-            <RecentActivity activities={dashboardData.recent_activity} />
+          <div className="lg:col-span-3 space-y-12">
+            {/* Request(s) Status Section */}
+            {(dashboardData.pending_child_links?.length > 0 ||
+              dashboardData.rejected_child_links?.length > 0) && (
+              <section>
+                <div className="flex items-center gap-4 mb-10">
+                  <div className="w-1.5 h-8 bg-gradient-to-b from-indigo-500 to-blue-500 rounded-full shadow-lg shadow-indigo-500/20"></div>
+                      <h2 className="text-3xl font-black font-poppins tracking-tight text-white">
+                    Request(s) Status
+                  </h2>
+                </div>
+                <PendingChildLinks
+                  links={dashboardData.pending_child_links}
+                  rejectedLinks={dashboardData.rejected_child_links}
+                  onRequestNew={() => setIsLinkModalOpen(true)}
+                />
+              </section>
+            )}
+
+            {/* Recent Activity Section */}
+            <section>
+              <div className="flex items-center gap-4 mb-8">
+                <div className="w-1.5 h-8 bg-gradient-to-b from-indigo-500 to-blue-500 rounded-full shadow-lg shadow-indigo-500/20"></div>
+                      <h2 className="text-3xl font-black font-poppins tracking-tight text-white">
+                  Recent Activity
+                </h2>
+              </div>
+              <RecentActivity activities={dashboardData.recent_activity} />
+            </section>
           </div>
         </div>
       </div>

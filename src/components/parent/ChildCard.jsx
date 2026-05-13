@@ -206,33 +206,39 @@ const ChildCard = ({ child }) => {
     <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-lg hover:border-indigo-500/30 transition-all duration-300 flex flex-col h-full">
       <div className="flex-grow">
         {/* Header with avatar and badge */}
-      <div className="flex justify-between items-start mb-4">
-        <div className="flex items-center gap-3">
+      <div className="flex justify-between items-start gap-4 mb-6">
+        <div className="flex items-center gap-4 min-w-0">
           {child.avatar ? (
             <img
               src={child.avatar}
               alt={child.username}
-              className="w-16 h-16 rounded-2xl border-2 border-indigo-500 shadow-md"
+              className="w-16 h-16 rounded-2xl border-2 border-indigo-500/30 shadow-xl object-cover shrink-0"
             />
           ) : (
-            <div className="w-16 h-16 bg-indigo-600/20 text-indigo-400 rounded-2xl border-2 border-indigo-500 shadow-md flex items-center justify-center text-xl font-bold">
+            <div className="w-16 h-16 bg-indigo-600/10 text-indigo-400 rounded-2xl border-2 border-indigo-500/30 shadow-xl flex items-center justify-center text-xl font-black shrink-0">
               {getInitials(child.username)}
             </div>
           )}
-          <div>
-            <h3 className="text-xl font-bold text-white">{child.username}</h3>
-            <p className="text-indigo-400 text-xs font-black uppercase tracking-widest">
-              {child.grade_level}
-            </p>
+          <div className="min-w-0">
+            <h3 className="text-xl font-black text-white truncate leading-tight mb-1">{child.username}</h3>
+            <div className="flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></div>
+              <p className="text-indigo-400/80 text-[10px] font-black uppercase tracking-[0.2em] truncate">
+                {child.grade_level || "Student"}
+              </p>
+            </div>
           </div>
         </div>
-        <span
-          className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${getBadgeColor(
-            child.badge,
-          )}`}
-        >
-          {getBadgeText(child.badge)}
-        </span>
+        
+        <div className="shrink-0 pt-1">
+          <span
+            className={`inline-flex items-center px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border whitespace-nowrap shadow-lg ${getBadgeColor(
+              child.badge,
+            )}`}
+          >
+            {getBadgeText(child.badge)}
+          </span>
+        </div>
       </div>
 
       {/* Stats Grid */}

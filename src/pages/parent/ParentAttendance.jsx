@@ -104,12 +104,12 @@ const ParentAttendance = () => {
       </div>
 
       {activeChild && (
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-full bg-indigo-600/30 border border-indigo-500/40 flex items-center justify-center text-[10px] font-bold text-indigo-300">
+        <div className="flex items-center gap-3 px-4 py-2 bg-slate-800/40 rounded-xl border border-white/5 w-fit">
+          <div className="w-6 h-6 rounded-lg bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-[10px] font-black text-indigo-400">
             {(activeChild.username || "?")[0].toUpperCase()}
           </div>
-          <span className="text-sm text-slate-400">
-            Viewing <span className="text-white font-semibold">{activeChild.username || activeChild.name}</span>
+          <span className="text-xs font-medium text-slate-400">
+            Viewing <span className="text-white font-black ml-1">{activeChild.username || activeChild.name}</span>
           </span>
         </div>
       )}

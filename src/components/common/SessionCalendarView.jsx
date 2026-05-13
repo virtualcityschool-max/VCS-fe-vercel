@@ -176,49 +176,50 @@ const SessionCalendarView = ({ sessions = [], loading = false }) => {
                   </div>
                   <span className="text-sm text-slate-300">{ref.teacher_name}</span>
                 </div>
-              )}
-            </div>
-          </div>
-        );
-      })()} */}
-
-      {/* Month navigation */}
-      <div className="flex items-center justify-between bg-slate-900/50 border border-slate-800 rounded-2xl px-5 py-3">
+    <div className="space-y-4 animate-fadeIn">
+      {/* Compact Month navigation bar */}
+      <div className="glass flex items-center justify-between p-1.5 rounded-xl border-slate-800 shadow-xl relative overflow-hidden group">
+        <div className="absolute inset-0 bg-linear-to-r from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+        
         <button
           onClick={() => setCalendarMonth(monthRange[Math.max(0, activeMonthIdx - 1)])}
           disabled={activeMonthIdx === 0}
-          className="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition"
+          className="w-10 h-10 flex items-center justify-center rounded-lg bg-slate-800/50 hover:bg-indigo-500 hover:text-white text-slate-400 disabled:opacity-10 disabled:cursor-not-allowed transition-all duration-300 relative z-10"
         >
           <i className="fas fa-chevron-left text-xs"></i>
         </button>
-        <div className="text-center">
-          <p className="text-lg font-black text-white">
-            {MONTH_NAMES[activeMonthData.month]} {activeMonthData.year}
-          </p>
-          <p className="text-xs text-slate-500">
-            {activeMonthIdx + 1} of {monthRange.length} month{monthRange.length !== 1 ? "s" : ""}
-          </p>
+
+        <div className="text-center relative z-10 py-2">
+          <h2 className="text-lg font-black text-white tracking-tight">
+            {MONTH_NAMES[activeMonthData.month]} <span className="text-indigo-400">{activeMonthData.year}</span>
+          </h2>
+          <div className="flex items-center justify-center gap-2 mt-0.5">
+            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500">
+              {activeMonthIdx + 1} of {monthRange.length} Months
+            </span>
+          </div>
         </div>
+
         <button
           onClick={() => setCalendarMonth(monthRange[Math.min(monthRange.length - 1, activeMonthIdx + 1)])}
           disabled={activeMonthIdx === monthRange.length - 1}
-          className="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition"
+          className="w-10 h-10 flex items-center justify-center rounded-lg bg-slate-800/50 hover:bg-indigo-500 hover:text-white text-slate-400 disabled:opacity-10 disabled:cursor-not-allowed transition-all duration-300 relative z-10"
         >
           <i className="fas fa-chevron-right text-xs"></i>
         </button>
       </div>
 
-      {/* Month tab pills */}
+      {/* Month tab pills (only if needed) */}
       {monthRange.length > 1 && (
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-2 flex-wrap px-1">
           {monthRange.map((m, idx) => (
             <button
               key={`${m.year}-${m.month}`}
               onClick={() => setCalendarMonth(m)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+              className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${
                 idx === activeMonthIdx
-                  ? "bg-indigo-600 text-white"
-                  : "bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white"
+                  ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/20"
+                  : "bg-slate-800/40 text-slate-500 hover:bg-slate-800 hover:text-slate-300 border border-slate-800"
               }`}
             >
               {MONTH_NAMES[m.month].slice(0, 3)} {m.year}
@@ -227,12 +228,12 @@ const SessionCalendarView = ({ sessions = [], loading = false }) => {
         </div>
       )}
 
-      {/* Calendar grid */}
-      <div className="bg-slate-900/50 border border-slate-800 rounded-2xl overflow-hidden">
+      {/* Calendar grid container */}
+      <div className="glass rounded-[2.5rem] border-slate-800 overflow-hidden shadow-2xl backdrop-blur-2xl">
         {/* Day-of-week header */}
-        <div className="grid grid-cols-7 border-b border-slate-800">
+        <div className="grid grid-cols-7 border-b border-slate-800/50 bg-slate-950/40">
           {DAY_LABELS.map((d) => (
-            <div key={d} className="px-2 py-3 text-center text-xs font-black uppercase text-slate-500 bg-slate-950/60">
+            <div key={d} className="px-4 py-5 text-center text-[10px] font-black uppercase tracking-[0.25em] text-slate-500">
               {d}
             </div>
           ))}
@@ -242,7 +243,7 @@ const SessionCalendarView = ({ sessions = [], loading = false }) => {
         <div className="grid grid-cols-7">
           {calendarGrid.map((day, idx) => {
             if (!day) {
-              return <div key={`blank-${idx}`} className="min-h-[100px] border-b border-r border-slate-800/50 bg-slate-900/20" />;
+              return <div key={`blank-${idx}`} className="min-h-[100px] border-b border-r border-slate-800/30 bg-slate-950/20" />;
             }
             const cellKey = `${activeMonthData.year}-${activeMonthData.month}-${day}`;
             const daySessions = sessionsByDate[cellKey] || [];
@@ -251,42 +252,57 @@ const SessionCalendarView = ({ sessions = [], loading = false }) => {
             return (
               <div
                 key={cellKey}
-                className={`min-h-[100px] border-b border-r border-slate-800/50 p-1.5 flex flex-col gap-1 ${
-                  isToday ? "bg-indigo-900/20" : daySessions.length > 0 ? "bg-slate-800/20" : ""
+                className={`min-h-[100px] border-b border-r border-slate-800/30 p-1.5 flex flex-col gap-1.5 transition-colors duration-300 ${
+                  isToday ? "bg-indigo-500/5" : "hover:bg-white/[0.01]"
                 }`}
               >
-                <span className={`text-xs font-bold w-6 h-6 flex items-center justify-center rounded-full self-end ${
-                  isToday ? "bg-indigo-600 text-white" : daySessions.length > 0 ? "text-white" : "text-slate-600"
-                }`}>
-                  {day}
-                </span>
+                <div className="flex justify-between items-center px-1">
+                  {isToday && (
+                    <span className="text-[7px] font-black uppercase tracking-widest text-indigo-400">Today</span>
+                  )}
+                  <span className={`text-[10px] font-black w-6 h-6 flex items-center justify-center rounded-lg ml-auto transition-all duration-300 ${
+                    isToday 
+                      ? "bg-indigo-500 text-white shadow-lg" 
+                      : daySessions.length > 0 ? "text-white bg-slate-800/50" : "text-slate-600"
+                  }`}>
+                    {day}
+                  </span>
+                </div>
 
-                {daySessions.map((session) => (
-                  <div key={session.id} className="bg-white rounded-lg p-2 shadow-sm">
-                    {/* Date + time row */}
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-bold text-indigo-700">
-                        {new Date(session.scheduled_at).toLocaleDateString([], { month: "short", day: "numeric" })}
-                      </span>
-                      <span className="text-xs text-slate-500">{formatTime(session.scheduled_at)}</span>
+                <div className="flex flex-col gap-1.5">
+                  {daySessions.map((session) => (
+                    <div 
+                      key={session.id} 
+                      className="group/session relative overflow-hidden bg-slate-800/40 hover:bg-slate-800 border border-slate-700/50 hover:border-indigo-500/50 p-2 rounded-lg transition-all duration-300 cursor-pointer"
+                    >
+                      <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-indigo-500 opacity-50 group-hover:opacity-100 transition-opacity" />
+                      
+                      <div className="flex items-center justify-between mb-0.5">
+                        <div className="flex items-center gap-1 text-indigo-400/80">
+                          <i className="far fa-clock text-[8px]"></i>
+                          <span className="text-[9px] font-bold">{formatTime(session.scheduled_at)}</span>
+                        </div>
+                      </div>
+
+                      <p className="text-[10px] font-bold text-slate-100 leading-tight line-clamp-1 group-hover:text-indigo-300 transition-colors">
+                        {session.title}
+                      </p>
+
+                      <div className="flex items-center justify-between gap-1 mt-1">
+                        <p className="text-[8px] text-slate-500 truncate font-medium max-w-[60%]">
+                          {session.course?.title || session.course_title || "General"}
+                        </p>
+                        <span className={`text-[7px] font-black uppercase tracking-widest px-1 rounded border border-white/5 ${
+                          session.status === 'live' 
+                            ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
+                            : 'bg-indigo-500/10 text-indigo-400'
+                        }`}>
+                          {session.status || "set"}
+                        </span>
+                      </div>
                     </div>
-
-                    {/* Title */}
-                    <p className="text-xs font-bold text-gray-900 leading-tight line-clamp-2 mb-1">
-                      {session.title}
-                    </p>
-
-                    {/* Course */}
-                    <p className="text-xs text-indigo-600 truncate mb-1.5">
-                      {session.course?.title || session.course_title || "—"}
-                    </p>
-
-                    {/* Status */}
-                    <span className={`inline-block px-1.5 py-0.5 rounded-full text-xs font-medium border ${getStatusCls(session.status)}`}>
-                      {session.status || "scheduled"}
-                    </span>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             );
           })}

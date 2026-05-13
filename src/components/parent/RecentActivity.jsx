@@ -52,9 +52,6 @@ const RecentActivity = ({ activities }) => {
   if (!activities || activities.length === 0) {
     return (
       <div className="bg-[#1e293b]/90 backdrop-blur-xl p-8 rounded-[1.5rem] border border-slate-700/50 shadow-2xl">
-        <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 mb-8">
-          Recent Activity
-        </h3>
         <div className="flex flex-col items-center justify-center py-12">
           <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mb-6 border border-white/5">
             <i className="fas fa-clock text-slate-500 text-xl"></i>
@@ -68,11 +65,8 @@ const RecentActivity = ({ activities }) => {
   }
 
   return (
-    <div className="bg-[#1e293b]/90 backdrop-blur-xl p-8 rounded-[1.5rem] border border-slate-700/50 shadow-2xl">
-      <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 mb-8">
-        Recent Activity
-      </h3>
-      <div className="relative pl-6 space-y-6">
+    <div className="bg-[#1e293b]/90 backdrop-blur-xl p-6 rounded-[1.5rem] border border-slate-700/50 shadow-2xl overflow-hidden flex flex-col">
+      <div className="relative pl-6 space-y-6 max-h-[550px] overflow-y-auto pr-2 custom-scrollbar">
         {/* Timeline line */}
         <div className="absolute left-[7px] top-2 bottom-2 w-[1px] bg-gradient-to-b from-indigo-500/30 via-slate-700 to-transparent"></div>
         
@@ -114,9 +108,6 @@ const RecentActivity = ({ activities }) => {
                     </p>
                   )}
                 </div>
-                {/* <div className={`w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center shrink-0 border border-white/5 group-hover/card:bg-indigo-500/10 group-hover/card:border-indigo-500/20 transition-all duration-300`}>
-                  <i className={`fas ${getActivityIcon(activity.type).split(" ")[1]} ${getActivityIcon(activity.type).split(" ")[2]} text-[10px]`}></i>
-                </div> */}
               </div>
               <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest flex items-center gap-2">
                 <i className="far fa-clock text-[9px]" />

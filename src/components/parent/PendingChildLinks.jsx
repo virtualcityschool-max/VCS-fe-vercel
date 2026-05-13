@@ -50,46 +50,27 @@ const Tooltip = ({ text, children }) => {
   );
 };
 
-const PendingChildLinks = ({ links, rejectedLinks, onRequestNew }) => {
+const PendingChildLinks = ({ links, rejectedLinks }) => {
   const pending = links ?? [];
   const rejected = rejectedLinks ?? [];
 
   if (pending.length === 0 && rejected.length === 0) return null;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* ── Pending section ── */}
       {pending.length > 0 && (
         <div className="bg-[#1e293b]/90 backdrop-blur-xl rounded-[1.5rem] border border-amber-500/20 shadow-2xl overflow-hidden">
-          {/* Header */}
-          <div className="px-6 pt-6 pb-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <div className="w-8 h-8 bg-amber-500/15 rounded-xl flex items-center justify-center border border-amber-500/20">
-                  <i className="fas fa-clock text-amber-400 text-xs"></i>
-                </div>
-                <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-amber-500 rounded-full flex items-center justify-center text-[9px] font-black text-slate-900 animate-pulse">
-                  {pending.length}
-                </span>
-              </div>
-              <div>
-                <h3 className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">
-                  Awaiting Approval
-                </h3>
-                <p className="text-[9px] text-amber-500/70 font-medium mt-0.5">
-                  Link request{pending.length > 1 ? "s" : ""} pending admin review
-                </p>
-              </div>
-            </div>
+          <div className="px-6 pt-6 pb-2">
+             <h3 className="text-[10px] font-black uppercase tracking-[0.25em] text-amber-500/80">
+                Awaiting Approval
+             </h3>
           </div>
-
-          <div className="h-px bg-amber-500/10 mx-6" />
-
           <div className="p-4 space-y-3">
             {pending.map((link) => (
               <div
                 key={link.student_id}
-                className="flex items-center gap-3 bg-slate-800/60 rounded-2xl p-3.5 border border-white/5 hover:border-amber-500/15 transition-all duration-300 group"
+                className="flex items-center gap-3 bg-slate-800/60 rounded-xl p-3.5 border border-white/5 hover:border-amber-500/15 transition-all duration-300 group"
               >
                 <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0 text-sm font-black text-amber-400 group-hover:bg-amber-500/15 transition-colors">
                   {getInitials(link.student_name)}
@@ -125,7 +106,7 @@ const PendingChildLinks = ({ links, rejectedLinks, onRequestNew }) => {
           <div className="px-5 pb-5">
             <div className="bg-amber-500/5 border border-amber-500/10 rounded-xl px-4 py-3 flex items-start gap-3">
               <i className="fas fa-info-circle text-amber-500/60 text-xs mt-0.5 shrink-0" />
-              <p className="text-[10px] text-slate-500 leading-relaxed">
+              <p className="text-[12px] text-slate-500 leading-relaxed">
                 These requests are under review by school administration. You'll get access once approved.
               </p>
             </div>
@@ -136,35 +117,16 @@ const PendingChildLinks = ({ links, rejectedLinks, onRequestNew }) => {
       {/* ── Rejected section ── */}
       {rejected.length > 0 && (
         <div className="bg-[#1e293b]/90 backdrop-blur-xl rounded-[1.5rem] border border-rose-500/20 shadow-2xl overflow-hidden">
-          {/* Header */}
-          <div className="px-6 pt-6 pb-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <div className="w-8 h-8 bg-rose-500/15 rounded-xl flex items-center justify-center border border-rose-500/20">
-                  <i className="fas fa-times-circle text-rose-400 text-xs"></i>
-                </div>
-                <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-rose-500 rounded-full flex items-center justify-center text-[9px] font-black text-white">
-                  {rejected.length}
-                </span>
-              </div>
-              <div>
-                <h3 className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">
-                  Requests Rejected
-                </h3>
-                <p className="text-[9px] text-rose-400/70 font-medium mt-0.5">
-                  Admin review required to re-link
-                </p>
-              </div>
-            </div>
+          <div className="px-6 pt-6 pb-2">
+             <h3 className="text-[10px] font-black uppercase tracking-[0.25em] text-rose-500/80">
+                Requests Rejected
+             </h3>
           </div>
-
-          <div className="h-px bg-rose-500/10 mx-6" />
-
           <div className="p-4 space-y-3">
             {rejected.map((link) => (
               <div
                 key={link.student_id}
-                className="flex items-center gap-3 bg-slate-800/60 rounded-2xl p-3.5 border border-rose-500/10 group"
+                className="flex items-center gap-3 bg-slate-800/60 rounded-xl p-3.5 border border-rose-500/10 group"
               >
                 <div className="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center shrink-0 text-sm font-black text-rose-400">
                   {getInitials(link.student_name)}
@@ -202,7 +164,7 @@ const PendingChildLinks = ({ links, rejectedLinks, onRequestNew }) => {
           <div className="px-5 pb-5">
             <div className="bg-rose-500/5 border border-rose-500/10 rounded-xl px-4 py-3 flex items-start gap-3">
               <i className="fas fa-shield-alt text-rose-500/60 text-xs mt-0.5 shrink-0" />
-              <p className="text-[10px] text-slate-500 leading-relaxed">
+              <p className="text-[12px] text-slate-500 leading-relaxed">
                 These requests were declined. To link this student, please contact your school administrator directly.
               </p>
             </div>

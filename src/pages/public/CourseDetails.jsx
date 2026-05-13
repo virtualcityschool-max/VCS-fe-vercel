@@ -460,14 +460,14 @@ const CourseDetails = () => {
                 </div>
 
                 {/* Floating action buttons */}
-                <div className="absolute bottom-6 left-6 flex gap-3">
+                {/* <div className="absolute bottom-6 left-6 flex gap-3">
                   <button className="w-12 h-12 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/20 hover:bg-white/20 transition-all duration-200 hover:scale-110">
                     <i className="fas fa-heart text-white"></i>
                   </button>
                   <button className="w-12 h-12 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/20 hover:bg-white/20 transition-all duration-200 hover:scale-110">
                     <i className="fas fa-share-alt text-white"></i>
                   </button>
-                </div>
+                </div> */}
               </div>
 
               {/* Course Content */}
