@@ -124,6 +124,23 @@ const CourseProgressGrid = () => {
   const rejectedEnrollments = useSelector(selectRejectedEnrollments);
   
   const [activeTab, setActiveTab] = useState("enrolled");
+  const [hasDefaulted, setHasDefaulted] = useState(false);
+
+  // Automatically select the most relevant tab on initial load
+  React.useEffect(() => {
+    if (hasDefaulted) return;
+
+    if (enrolledCourses.length > 0) {
+      setActiveTab("enrolled");
+      setHasDefaulted(true);
+    } else if (pendingEnrollments.length > 0) {
+      setActiveTab("pending");
+      setHasDefaulted(true);
+    } else if (rejectedEnrollments.length > 0) {
+      setActiveTab("rejected");
+      setHasDefaulted(true);
+    }
+  }, [enrolledCourses.length, pendingEnrollments.length, rejectedEnrollments.length, hasDefaulted]);
 
   const tabs = [
     { id: "enrolled", label: "Enrolled", count: enrolledCourses.length },

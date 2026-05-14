@@ -10,6 +10,7 @@ import {
   selectEnrolledCourses,
   selectNextSession,
   selectAssignments,
+  selectMyEnrollments,
 } from "../../store/slices/studentDashboardSlice";
 import {
   DashboardHeader,
@@ -28,13 +29,15 @@ const StudentPortal = () => {
   const enrolledCourses = useSelector(selectEnrolledCourses);
   const nextSession = useSelector(selectNextSession);
   const assignments = useSelector(selectAssignments);
+  const myEnrollments = useSelector(selectMyEnrollments);
 
   const [hasMounted, setHasMounted] = useState(false);
 
   const isDashboardEmpty = 
     (!enrolledCourses || enrolledCourses.length === 0) &&
     (!nextSession) &&
-    (!assignments || assignments.length === 0);
+    (!assignments || assignments.length === 0) &&
+    (!myEnrollments || myEnrollments.length === 0);
 
   // Ensure component has mounted on client
   useEffect(() => {
