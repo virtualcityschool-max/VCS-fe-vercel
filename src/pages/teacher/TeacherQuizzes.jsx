@@ -654,116 +654,127 @@ const TeacherQuizzes = ({
           <i className="fas fa-spinner animate-spin text-2xl" />
         </div>
       ) : quizzes?.length ? (
-        <div className="space-y-4">
-          {quizzes.map((quiz) => (
-            <div
-              key={quiz.id}
-              className="group relative bg-slate-900/40 backdrop-blur-sm p-5 rounded-2xl border border-slate-800/60 hover:border-indigo-500/40 transition-all duration-300 hover:shadow-2xl hover:shadow-indigo-500/5"
-            >
-              {/* Subtle gradient accent on hover */}
-              <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl pointer-events-none" />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {quizzes.map((quiz) => (
+          <div
+            key={quiz.id}
+            className="group relative glass p-6 rounded-[2rem] border-slate-800/60 hover:border-indigo-500/50 hover-lift transition-all duration-500 overflow-hidden flex flex-col h-full"
+          >
+            {/* Subtle gradient accent on hover */}
+            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-[2rem] pointer-events-none" />
 
-              <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
-                {/* Info Section */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-3 mb-3">
-                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
-                      quiz.is_locked
-                        ? "bg-rose-500/10 text-rose-400 border-rose-500/20"
-                        : quiz.is_published
-                          ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                          : "bg-slate-500/10 text-slate-400 border-slate-500/20"
-                    }`}>
-                      <span className={`inline-block w-1.5 h-1.5 rounded-full mr-1.5 ${quiz.is_published && !quiz.is_locked ? "bg-emerald-400 animate-pulse" : quiz.is_locked ? "bg-rose-400" : "bg-slate-400"}`}></span>
-                      {quiz.is_locked ? "Locked" : quiz.is_published ? "Published" : "Draft"}
-                    </span>
-                    <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest bg-slate-800/50 px-2 py-1 rounded-md">
-                      {quiz.course_title}
-                    </span>
-                  </div>
+            {/* Card Header: Badges and Action Icons */}
+            <div className="relative z-10 flex justify-between items-start mb-5">
+              <div className="flex flex-col gap-2">
+                <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border w-fit ${
+                  quiz.is_locked
+                    ? "bg-rose-500/10 text-rose-400 border-rose-500/20"
+                    : quiz.is_published
+                      ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                      : "bg-slate-500/10 text-slate-400 border-slate-500/20"
+                }`}>
+                  <span className={`inline-block w-1.5 h-1.5 rounded-full mr-1.5 ${quiz.is_published && !quiz.is_locked ? "bg-emerald-400 animate-pulse" : quiz.is_locked ? "bg-rose-400" : "bg-slate-400"}`}></span>
+                  {quiz.is_locked ? "Locked" : quiz.is_published ? "Published" : "Draft"}
+                </span>
+                <p className="text-[9px] text-indigo-400/80 uppercase tracking-[0.2em] font-black">
+                  {quiz.course_title}
+                </p>
+              </div>
 
-                  <h2 className="text-xl font-bold text-white mb-4 group-hover:text-indigo-300 transition-colors">
-                    {quiz.title}
-                  </h2>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  title="View quiz"
+                  onClick={async () => {
+                    setViewQuiz(quiz);
+                    try {
+                      const detail = await teacherService.getQuizById(quiz.id);
+                      setViewQuiz(detail);
+                    } catch {
+                      toastManager.error("Failed to load quiz detail");
+                    }
+                  }}
+                  className="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800/50 hover:bg-indigo-600 text-slate-400 hover:text-white border border-slate-700/50 hover:border-indigo-500 transition-all duration-300"
+                >
+                  <i className="fas fa-eye text-[10px]" />
+                </button>
+                <button
+                  type="button"
+                  title="Edit quiz"
+                  onClick={() => openEdit(quiz)}
+                  disabled={quiz.is_locked}
+                  className="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800/50 hover:bg-amber-600 text-slate-400 hover:text-white border border-slate-700/50 hover:border-amber-500 transition-all duration-300 disabled:opacity-40"
+                >
+                  <i className="fas fa-pencil text-[10px]" />
+                </button>
+                <button
+                  type="button"
+                  title="Delete quiz"
+                  onClick={() => setDeleteTarget(quiz)}
+                  disabled={quiz.is_locked}
+                  className="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800/50 hover:bg-rose-600 text-slate-400 hover:text-white border border-slate-700/50 hover:border-rose-500 transition-all duration-300 disabled:opacity-40"
+                >
+                  <i className="fas fa-trash text-[10px]" />
+                </button>
+              </div>
+            </div>
 
-                  <div className="flex flex-wrap items-center gap-3">
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800/30 border border-slate-700/30">
-                      <i className="fas fa-users text-indigo-400 text-xs" />
-                      <span className="text-xs font-semibold text-slate-300">
-                        <span className="text-slate-500 font-normal mr-0.5">Submissions</span> {quiz.submissions_count ?? 0}
-                      </span>
-                    </div>
+            {/* Card Body: Title & Stats */}
+            <div className="relative z-10 mb-auto">
+              <h2 className="text-lg font-bold text-white mb-4 group-hover:text-indigo-200 transition-colors line-clamp-2">
+                {quiz.title}
+              </h2>
 
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800/30 border border-slate-700/30">
-                      <i className="fas fa-star text-amber-400 text-xs" />
-                      <span className="text-xs font-semibold text-slate-300">
-                        <span className="text-slate-500 font-normal mr-0.5">Total Marks</span> {quiz.total_marks}
-                      </span>
-                    </div>
-
-                    {quiz.due_date && (
-                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800/30 border border-slate-700/30">
-                        <i className="fas fa-calendar-alt text-rose-400 text-xs" />
-                        <span className="text-xs font-semibold text-slate-300">
-                          {new Date(quiz.due_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
-                        </span>
-                      </div>
-                    )}
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                <div className="bg-slate-800/30 border border-slate-700/30 rounded-2xl p-3 flex flex-col">
+                  <span className="text-[8px] text-slate-500 uppercase font-black tracking-widest mb-1">Submissions</span>
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-lg font-black text-indigo-400">{quiz.submissions_count ?? 0}</span>
+                    <span className="text-[10px] text-slate-500 font-bold uppercase">Students</span>
                   </div>
                 </div>
-
-                {/* Actions Section */}
-                <div className="flex flex-row md:flex-col items-center md:items-end gap-4 flex-shrink-0">
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      title="View quiz"
-                      onClick={async () => {
-                        setViewQuiz(quiz);
-                        try {
-                          const detail = await teacherService.getQuizById(quiz.id);
-                          setViewQuiz(detail);
-                        } catch {
-                          toastManager.error("Failed to load quiz detail");
-                        }
-                      }}
-                      className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-800/50 hover:bg-indigo-600 text-slate-400 hover:text-white border border-slate-700/50 hover:border-indigo-500 transition-all duration-300 shadow-sm"
-                    >
-                      <i className="fas fa-eye text-sm" />
-                    </button>
-                    <button
-                      type="button"
-                      title="Edit quiz"
-                      onClick={() => openEdit(quiz)}
-                      disabled={quiz.is_locked}
-                      className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-800/50 hover:bg-amber-600 text-slate-400 hover:text-white border border-slate-700/50 hover:border-amber-500 transition-all duration-300 shadow-sm disabled:opacity-40"
-                    >
-                      <i className="fas fa-pencil text-sm" />
-                    </button>
-                    <button
-                      type="button"
-                      title="Delete quiz"
-                      onClick={() => setDeleteTarget(quiz)}
-                      disabled={quiz.is_locked}
-                      className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-800/50 hover:bg-rose-600 text-slate-400 hover:text-white border border-slate-700/50 hover:border-rose-500 transition-all duration-300 shadow-sm disabled:opacity-40"
-                    >
-                      <i className="fas fa-trash text-sm" />
-                    </button>
+                <div className="bg-slate-800/30 border border-slate-700/30 rounded-2xl p-3 flex flex-col">
+                  <span className="text-[8px] text-slate-500 uppercase font-black tracking-widest mb-1">Total Marks</span>
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-lg font-black text-amber-400">{quiz.total_marks}</span>
+                    <span className="text-[10px] text-slate-500 font-bold uppercase">Points</span>
                   </div>
-
-                  <button
-                    type="button"
-                    className="w-full md:w-auto min-w-[160px] bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-xl text-xs font-bold transition-all duration-300 shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]"
-                    onClick={() => openSubmissions(quiz)}
-                  >
-                    <i className="fas fa-tasks text-[10px]" />
-                    View Submissions
-                  </button>
                 </div>
               </div>
             </div>
-          ))}
-        </div>
+
+            {/* Card Footer: Due Date & Action */}
+            <div className="relative z-10 mt-6 pt-5 border-t border-slate-800/50">
+              <div className="flex items-center justify-between gap-4 mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-slate-800/50 flex items-center justify-center text-rose-400/70 border border-slate-700/50">
+                    <i className="far fa-calendar-alt text-xs" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[9px] text-slate-500 uppercase font-black tracking-widest leading-none mb-1">Deadline</span>
+                    <span className="text-xs text-slate-300 font-bold">
+                      {quiz.due_date ? new Date(quiz.due_date).toLocaleDateString(undefined, { 
+                        day: 'numeric', 
+                        month: 'short',
+                        year: 'numeric'
+                      }) : "No limit"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                className="w-full bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-3.5 rounded-[1.25rem] text-[10px] font-black uppercase tracking-[0.15em] transition-all duration-300 shadow-xl shadow-indigo-600/20 flex items-center justify-center gap-2 group/btn"
+                onClick={() => openSubmissions(quiz)}
+              >
+                <i className="fas fa-tasks text-xs transition-transform group-hover/btn:scale-110" />
+                View Submissions
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
       ) : (
         <div className="bg-slate-900 p-6 rounded-3xl border border-slate-800 text-slate-400 text-sm">
           No quizzes found. Create your first quiz above.

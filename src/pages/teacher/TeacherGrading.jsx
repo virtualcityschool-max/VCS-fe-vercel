@@ -294,156 +294,163 @@ const TeacherGrading = ({
       )}
 
       {/* ASSIGNMENTS LIST */}
-      <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {assignments?.length ? (
           assignments.map((assignment) => (
             <div
               key={assignment.id}
-              className="group relative bg-slate-900/40 backdrop-blur-sm p-5 rounded-2xl border border-slate-800/60 hover:border-indigo-500/40 transition-all duration-300 hover:shadow-2xl hover:shadow-indigo-500/5"
+              className="group relative glass p-6 rounded-[2rem] border-slate-800/60 hover:border-indigo-500/50 hover-lift transition-all duration-500 overflow-hidden flex flex-col h-full"
             >
               {/* Subtle gradient accent on hover */}
-              <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-[2rem] pointer-events-none" />
 
-              <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
-                {/* Info Section */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-3 mb-3">
+              {/* Card Header: Badges and Action Icons */}
+              <div className="relative z-10 flex justify-between items-start mb-5">
+                <div className="flex flex-col gap-2">
+                  <span
+                    className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border w-fit ${
+                      assignment.is_overdue
+                        ? "bg-rose-500/10 text-rose-400 border-rose-500/20"
+                        : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                    }`}
+                  >
                     <span
-                      className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
-                        assignment.is_overdue
-                          ? "bg-rose-500/10 text-rose-400 border-rose-500/20"
-                          : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                      }`}
-                    >
-                      <span
-                        className={`inline-block w-1.5 h-1.5 rounded-full mr-1.5 ${assignment.is_overdue ? "bg-rose-400 animate-pulse" : "bg-emerald-400"}`}
-                      ></span>
-                      {assignment.is_overdue ? "Overdue" : "Active"}
-                    </span>
-                    <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest bg-slate-800/50 px-2 py-1 rounded-md">
-                      {assignment.course_title}
-                    </span>
-                  </div>
-
-                  <h2 className="text-xl font-bold text-white mb-4 group-hover:text-indigo-300 transition-colors">
-                    {assignment.title}
-                  </h2>
-
-                  <div className="flex flex-wrap items-center gap-3">
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800/30 border border-slate-700/30">
-                      <i className="fas fa-users text-indigo-400 text-xs" />
-                      <span className="text-xs font-semibold text-slate-300">
-                        <span className="text-slate-500 font-normal mr-0.5">
-                          Submissions
-                        </span>{" "}
-                        {assignment.submissions_count}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800/30 border border-slate-700/30">
-                      <i className="fas fa-star text-amber-400 text-xs" />
-                      <span className="text-xs font-semibold text-slate-300">
-                        <span className="text-slate-500 font-normal mr-0.5">
-                          Total Marks
-                        </span>{" "}
-                        {assignment.max_score}
-                      </span>
-                    </div>
-
-                    {assignment.due_date && (
-                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800/30 border border-slate-700/30">
-                        <i className="fas fa-calendar-alt text-rose-400 text-xs" />
-                        <span className="text-xs font-semibold text-slate-300">
-                          {new Date(assignment.due_date).toLocaleDateString(
-                            undefined,
-                            { month: "short", day: "numeric", year: "numeric" },
-                          )}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-
-                  {assignment.file_url && (
-                    <div className="mt-5">
-                      <PreviewButton
-                        url={getStorageUrl(assignment.file_url)}
-                        className="!bg-indigo-600/10 !border-indigo-500/20 !text-indigo-400 hover:!bg-indigo-600 hover:!text-white shadow-sm"
-                      />
-                    </div>
-                  )}
+                      className={`inline-block w-1.5 h-1.5 rounded-full mr-1.5 ${assignment.is_overdue ? "bg-rose-400 animate-pulse" : "bg-emerald-400"}`}
+                    ></span>
+                    {assignment.is_overdue ? "Overdue" : "Active"}
+                  </span>
+                  <p className="text-[9px] text-indigo-400/80 uppercase tracking-[0.2em] font-black">
+                    {assignment.course_title}
+                  </p>
                 </div>
 
-                {/* Actions Section */}
-                <div className="flex flex-row md:flex-col items-center md:items-end gap-4 flex-shrink-0">
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      title="View details"
-                      onClick={() => setViewAssignment(assignment)}
-                      className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-800/50 hover:bg-indigo-600 text-slate-400 hover:text-white border border-slate-700/50 hover:border-indigo-500 transition-all duration-300 shadow-sm"
-                    >
-                      <i className="fas fa-eye text-sm" />
-                    </button>
-                    <button
-                      type="button"
-                      title="Edit assignment"
-                      onClick={() => {
-                        setEditTarget(assignment);
-                        setEditForm({
-                          title: assignment.title,
-                          description: assignment.description || "",
-                          due_date: assignment.due_date
-                            ? assignment.due_date.slice(0, 16)
-                            : "",
-                          max_score: String(assignment.max_score),
-                          status: assignment.status || "published",
-                          file: null,
-                        });
-                      }}
-                      className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-800/50 hover:bg-amber-600 text-slate-400 hover:text-white border border-slate-700/50 hover:border-amber-500 transition-all duration-300 shadow-sm"
-                    >
-                      <i className="fas fa-pencil text-sm" />
-                    </button>
-                    <button
-                      type="button"
-                      title="Delete assignment"
-                      onClick={() => setDeleteTarget(assignment)}
-                      className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-800/50 hover:bg-rose-600 text-slate-400 hover:text-white border border-slate-700/50 hover:border-rose-500 transition-all duration-300 shadow-sm"
-                    >
-                      <i className="fas fa-trash text-sm" />
-                    </button>
-                  </div>
-
+                <div className="flex items-center gap-1.5">
                   <button
                     type="button"
-                    className="w-full md:w-auto min-w-[160px] bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-xl text-xs font-bold transition-all duration-300 shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]"
-                    onClick={() => {
-                      setPendingAssignmentId(assignment.id);
-                      setAssignmentTotal(assignment.max_score);
-                      dispatch(fetchSubmissions(assignment.id));
-                    }}
-                    disabled={
-                      loadingSubmissions &&
-                      pendingAssignmentId === assignment.id
-                    }
+                    onClick={() => setViewAssignment(assignment)}
+                    className="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800/50 hover:bg-indigo-600 text-slate-400 hover:text-white border border-slate-700/50 transition-all duration-300"
                   >
-                    {loadingSubmissions &&
-                    pendingAssignmentId === assignment.id ? (
-                      <i className="fas fa-spinner animate-spin" />
-                    ) : (
-                      <>
-                        <i className="fas fa-tasks text-[10px]" />
-                        View Submissions
-                      </>
-                    )}
+                    <i className="fas fa-eye text-[10px]" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditTarget(assignment);
+                      setEditForm({
+                        title: assignment.title,
+                        description: assignment.description || "",
+                        due_date: assignment.due_date
+                          ? assignment.due_date.slice(0, 16)
+                          : "",
+                        max_score: String(assignment.max_score),
+                        status: assignment.status || "published",
+                        file: null,
+                      });
+                    }}
+                    className="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800/50 hover:bg-amber-600 text-slate-400 hover:text-white border border-slate-700/50 transition-all duration-300"
+                  >
+                    <i className="fas fa-pencil text-[10px]" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDeleteTarget(assignment)}
+                    className="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800/50 hover:bg-rose-600 text-slate-400 hover:text-white border border-slate-700/50 transition-all duration-300"
+                  >
+                    <i className="fas fa-trash text-[10px]" />
                   </button>
                 </div>
+              </div>
+
+              {/* Card Body: Title & Meta Info */}
+              <div className="relative z-10 mb-auto">
+                <h2 className="text-lg font-bold text-white mb-4 group-hover:text-indigo-200 transition-colors line-clamp-2">
+                  {assignment.title}
+                </h2>
+
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                  <div className="bg-slate-800/30 border border-slate-700/30 rounded-2xl p-3 flex flex-col">
+                    <span className="text-[8px] text-slate-500 uppercase font-black tracking-widest mb-1">Submissions</span>
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="text-lg font-black text-indigo-400">{assignment.submissions_count}</span>
+                      <span className="text-[10px] text-slate-500 font-bold uppercase">Students</span>
+                    </div>
+                  </div>
+                  <div className="bg-slate-800/30 border border-slate-700/30 rounded-2xl p-3 flex flex-col">
+                    <span className="text-[8px] text-slate-500 uppercase font-black tracking-widest mb-1">Total Marks</span>
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="text-lg font-black text-amber-400">{assignment.max_score}</span>
+                      <span className="text-[10px] text-slate-500 font-bold uppercase">Points</span>
+                    </div>
+                  </div>
+                </div>
+
+                {assignment.file_url && (
+                  <div className="mb-4">
+                    <PreviewButton
+                      url={getStorageUrl(assignment.file_url)}
+                      className="w-full !bg-indigo-600/10 !border-indigo-500/20 !text-indigo-400 hover:!bg-indigo-600 hover:!text-white shadow-sm !rounded-xl"
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Card Footer: Due Date & Action */}
+              <div className="relative z-10 mt-6 pt-5 border-t border-slate-800/50">
+                <div className="flex items-center justify-between gap-4 mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-slate-800/50 flex items-center justify-center text-rose-400/70 border border-slate-700/50">
+                      <i className="far fa-calendar-alt text-xs" />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[9px] text-slate-500 uppercase font-black tracking-widest leading-none mb-1">Deadline</span>
+                      <span className="text-xs text-slate-300 font-bold">
+                        {assignment.due_date ? new Date(assignment.due_date).toLocaleDateString(undefined, { 
+                          day: 'numeric', 
+                          month: 'short',
+                          year: 'numeric'
+                        }) : "No limit"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  className="w-full bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-3.5 rounded-[1.25rem] text-[10px] font-black uppercase tracking-[0.15em] transition-all duration-300 shadow-xl shadow-indigo-600/20 flex items-center justify-center gap-2 group/btn"
+                  onClick={() => {
+                    setPendingAssignmentId(assignment.id);
+                    setAssignmentTotal(assignment.max_score);
+                    dispatch(fetchSubmissions(assignment.id));
+                  }}
+                  disabled={loadingSubmissions && pendingAssignmentId === assignment.id}
+                >
+                  {loadingSubmissions && pendingAssignmentId === assignment.id ? (
+                    <i className="fas fa-spinner animate-spin" />
+                  ) : (
+                    <>
+                      <i className="fas fa-tasks text-xs transition-transform group-hover/btn:scale-110" />
+                      View Submissions
+                    </>
+                  )}
+                </button>
               </div>
             </div>
           ))
         ) : (
-          <div className="bg-slate-900 p-6 rounded-3xl border border-slate-800 text-slate-400 text-sm">
-            No assignments available.
+          <div className="col-span-full bg-slate-900/50 p-16 rounded-[2.5rem] border border-slate-800 border-dashed text-center">
+            <div className="w-20 h-20 bg-slate-800/30 rounded-3xl flex items-center justify-center text-slate-500 mx-auto mb-6">
+              <i className="fas fa-clipboard-list text-3xl" />
+            </div>
+            <h3 className="text-2xl font-bold text-white mb-2">No Assignments Created</h3>
+            <p className="text-slate-400 max-w-sm mx-auto text-sm leading-relaxed">
+              Start by creating your first assignment or quiz for this course to begin tracking student progress.
+            </p>
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="mt-8 px-8 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition-all shadow-lg shadow-indigo-600/20"
+            >
+              + Create Assignment
+            </button>
           </div>
         )}
       </div>
@@ -532,23 +539,6 @@ const TeacherGrading = ({
                   </div>
                 </div>
 
-                {/* FILE */}
-                <div className="mb-6">
-                  <h3 className="text-xs uppercase text-slate-500 mb-2">
-                    Student Attachment
-                  </h3>
-
-                  {selectedSubmission.file_url ? (
-                    <PreviewButton
-                      url={getStorageUrl(selectedSubmission.file_url)}
-                    />
-                  ) : (
-                    <p className="text-slate-500 text-sm italic">
-                      No file submitted
-                    </p>
-                  )}
-                </div>
-
                 {/* GRADE FORM */}
                 <GradingForm
                   selectedSubmission={selectedSubmission}
@@ -598,6 +588,16 @@ const TeacherGrading = ({
                     }
                   }}
                   assignmentMaxScore={assignmentTotal}
+                  extraRowContent={
+                    selectedSubmission.file_url ? (
+                      <PreviewButton 
+                        url={getStorageUrl(selectedSubmission.file_url)} 
+                        className="!bg-indigo-600/10 !text-indigo-400 !border-indigo-500/20 hover:!bg-indigo-600 hover:!text-white"
+                      />
+                    ) : (
+                      <p className="text-slate-500 text-xs italic py-2">No file submitted</p>
+                    )
+                  }
                 />
               </>
             ) : null}

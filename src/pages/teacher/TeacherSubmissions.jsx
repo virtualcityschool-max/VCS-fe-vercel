@@ -374,24 +374,23 @@ const TeacherSubmissions = () => {
                   </div>
                 </div>
 
-                {/* File attachment */}
-                <div className="mb-6">
-                  <h3 className="text-xs uppercase tracking-widest text-slate-500 font-bold mb-2">Student Attachment</h3>
-                  {selectedSubmission.file_url ? (
-                    <DownloadButton url={getStorageUrl(selectedSubmission.file_url)} label="Download Submitted File" />
-                  ) : (
-                    <p className="text-slate-500 text-sm italic">No file submitted</p>
-                  )}
-                </div>
-
-                {/* Divider */}
-                <div className="border-t border-slate-800 mb-6"></div>
-
                 {/* Grading form */}
                 <GradingForm
                   selectedSubmission={selectedSubmission}
                   onCancel={closeGradeModal}
                   onSubmit={handleGradeSubmit}
+                  assignmentMaxScore={selectedSubmission.assignment_max_score || selectedSubmission.max_score}
+                  extraRowContent={
+                    selectedSubmission.file_url ? (
+                      <DownloadButton 
+                        url={getStorageUrl(selectedSubmission.file_url)} 
+                        label="Download File" 
+                        className="!bg-indigo-600/10 !text-indigo-400 !border-indigo-500/20 hover:!bg-indigo-600 hover:!text-white"
+                      />
+                    ) : (
+                      <p className="text-slate-500 text-xs italic py-2">No file submitted</p>
+                    )
+                  }
                 />
               </div>
             )}

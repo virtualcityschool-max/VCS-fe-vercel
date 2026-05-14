@@ -80,14 +80,7 @@ const SearchControls = ({
             <option value="-username">Username Z–A</option>
           </FilterSelect>
          
-          <button
-            onClick={() => onFetchUsers()}
-            className="text-white px-5 py-3 rounded-xl text-sm font-medium shadow-lg active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500"
-            title="Refresh"
-          >
-            <i className="fas fa-sync text-xs"></i>
-            <span className="hidden sm:inline">Refresh</span>
-          </button>
+        
           <button
             onClick={handleCreateUser}
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold shadow-lg shadow-indigo-500/20 active:scale-95 transition-all duration-150"
@@ -95,6 +88,14 @@ const SearchControls = ({
             <i className="fas fa-user-plus text-xs"></i>
             <span className="hidden sm:inline">Create User</span>
             <span className="sm:hidden">+</span>
+          </button>
+            <button
+            onClick={() => onFetchUsers()}
+            className="text-white px-5 py-3 rounded-xl text-sm font-medium shadow-lg active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500"
+            title="Refresh"
+          >
+            <i className="fas fa-sync text-xs"></i>
+            <span className="hidden sm:inline">Refresh</span>
           </button>
           {hasActiveFilters && (
             <button
