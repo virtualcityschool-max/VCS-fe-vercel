@@ -227,7 +227,7 @@ const PublicHome = () => {
             onClick={() => navigate("/courses")}
             className="hidden md:flex text-indigo-400 font-black text-[10px] uppercase tracking-widest hover:text-white transition items-center gap-3 border-b border-indigo-500/20 pb-1"
           >
-            View full Courses <i className="fas fa-arrow-right text-[8px]"></i>
+            View All Courses <i className="fas fa-arrow-right text-[8px]"></i>
           </button>
         </div>
 
@@ -332,7 +332,7 @@ const PublicHome = () => {
               onClick={() => navigate("/teachers")}
               className="hidden md:flex text-cyan-400 font-black text-[10px] uppercase tracking-widest hover:text-white transition items-center gap-3 border-b border-cyan-500/20 pb-1"
             >
-              View full Tutors <i className="fas fa-arrow-right text-[8px]"></i>
+              View All Tutors <i className="fas fa-arrow-right text-[8px]"></i>
             </button>
           </div>
 

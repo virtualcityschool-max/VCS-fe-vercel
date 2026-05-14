@@ -458,18 +458,32 @@ const TeacherQuizzes = ({
     const textQuestions = selectedQuizSubmission.answers?.filter(
       (a) => a.question_type === "TEXT_FORMAT"
     ) ?? [];
-    const grades = textQuestions.map((a) => ({
-      question_id: a.question_id,
-      marks: Number(gradeInputs[a.question_id] ?? 0),
-    }));
 
-    for (const g of grades) {
-      const q = textQuestions.find((a) => a.question_id === g.question_id);
-      if (g.marks < 0) { toastManager.error("Marks cannot be negative"); return; }
-      if (g.marks > (q?.max_marks ?? 0)) {
-        toastManager.error(`Entered marks exceeded the allowed marks for question ${g.question_id}`);
+    const grades = [];
+    for (const q of textQuestions) {
+      const inputVal = gradeInputs[q.question_id];
+      
+      // Validation: Marks are compulsory
+      if ((inputVal === undefined || inputVal === "") && q.obtained_marks === null) {
+        toastManager.error("Please assign marks to all text questions before submitting.");
         return;
       }
+
+      const marks = Number(inputVal ?? q.obtained_marks ?? 0);
+
+      if (isNaN(marks) || marks < 0) {
+        toastManager.error("Marks cannot be negative or invalid");
+        return;
+      }
+      if (marks > (q.max_marks ?? 0)) {
+        toastManager.error(`Marks for "${q.question_text.slice(0, 20)}..." cannot exceed ${q.max_marks}`);
+        return;
+      }
+
+      grades.push({
+        question_id: q.question_id,
+        marks,
+      });
     }
 
     setSaving(true);
@@ -1075,15 +1089,26 @@ const TeacherQuizzes = ({
                           </div>
                           {selectedQuizSubmission.status !== "auto_graded" ? (
                             <div>
-                              <label className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1.5 block">
-                                {selectedQuizSubmission.status === "submitted" ? "Assign Marks" : "Edit Marks"} (max {ans.max_marks})
+                              <label className="text-[10px] uppercase tracking-wider text-slate-500 font-black mb-1.5 block">
+                                {selectedQuizSubmission.status === "submitted" ? "Assign Marks" : "Edit Marks"}{" "}
+                                <span className="text-rose-500">*</span>{" "}
+                                <span className="text-slate-600 font-normal lowercase">(max {ans.max_marks})</span>
                               </label>
                               <input
                                 type="number"
                                 min={0}
                                 max={ans.max_marks}
                                 value={gradeInputs[ans.question_id] ?? (ans.obtained_marks ?? "")}
-                                onChange={(e) => setGradeInputs((p) => ({ ...p, [ans.question_id]: e.target.value }))}
+                                onKeyDown={(e) => {
+                                  if (["e", "E", "-", "+"].includes(e.key)) {
+                                    e.preventDefault();
+                                  }
+                                }}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  if (val !== "" && parseFloat(val) < 0) return;
+                                  setGradeInputs((p) => ({ ...p, [ans.question_id]: val }));
+                                }}
                                 className="w-24 p-2 rounded-lg bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
                               />
                             </div>
