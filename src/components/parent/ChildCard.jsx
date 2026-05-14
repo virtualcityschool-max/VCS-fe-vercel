@@ -3,14 +3,10 @@ import { useNavigate } from "react-router-dom";
 import ConfirmDialog from "../common/ConfirmDialog";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  fetchChildGrades,
   fetchChildAttendance,
 } from "../../store/slices/parentSlice";
 import { toastManager } from "../../utils/toastManager";
 import {
-  selectChildGrades,
-  selectChildGradesLoading,
-  selectChildGradesError,
   selectChildAttendance,
   selectChildAttendanceLoading,
   selectChildAttendanceError,
@@ -18,7 +14,6 @@ import {
 import { unlinkChildLinks } from "../../store/slices/childLinksSlice";
 import {
   selectChildLinksUnlinking,
-  selectChildLinksError,
 } from "../../store/slices/childLinksSlice";
 import { showApiError } from "../../utils/apiErrorHandler";
 
@@ -39,56 +34,15 @@ const SkeletonLoader = () => (
 
     {/* Stats Grid skeleton */}
     <div className="grid grid-cols-2 gap-3 mb-4">
-      <div className="bg-slate-900/50 p-3 rounded-xl border border-slate-700">
-        <div className="w-12 h-3 bg-slate-600 rounded mb-2"></div>
-        <div className="w-16 h-5 bg-slate-600 rounded"></div>
-      </div>
-      <div className="bg-slate-900/50 p-3 rounded-xl border border-slate-700">
-        <div className="w-20 h-3 bg-slate-600 rounded mb-2"></div>
-        <div className="w-16 h-5 bg-slate-600 rounded"></div>
-      </div>
+      <div className="w-full h-20 bg-slate-700 rounded-2xl"></div>
+      <div className="w-full h-20 bg-slate-700 rounded-2xl"></div>
     </div>
 
-    {/* Attendance Details skeleton */}
-    <div className="mb-4">
-      <div className="w-28 h-3 bg-slate-600 rounded mb-2"></div>
-      <div className="flex justify-between">
-        <div className="w-16 h-4 bg-slate-700 rounded"></div>
-        <div className="w-12 h-4 bg-slate-700 rounded"></div>
-        <div className="w-16 h-4 bg-slate-700 rounded"></div>
-      </div>
-    </div>
-
-    {/* Assignment Progress skeleton */}
-    <div className="mb-4">
-      <div className="w-20 h-3 bg-slate-600 rounded mb-2"></div>
-      <div className="flex justify-between mb-2">
-        <div className="w-20 h-4 bg-slate-700 rounded"></div>
-        <div className="w-16 h-4 bg-slate-700 rounded"></div>
-      </div>
-    </div>
-
-    {/* Recent Grades skeleton */}
-    <div className="mb-4">
-      <div className="w-24 h-3 bg-slate-600 rounded mb-2"></div>
-      <div className="space-y-2">
-        <div className="bg-slate-900/30 border border-slate-700 rounded-lg p-2">
-          <div className="w-32 h-3 bg-slate-700 rounded mb-1"></div>
-          <div className="w-24 h-3 bg-slate-700 rounded mb-1"></div>
-          <div className="w-20 h-3 bg-slate-700 rounded"></div>
-        </div>
-        <div className="bg-slate-900/30 border border-slate-700 rounded-lg p-2">
-          <div className="w-28 h-3 bg-slate-700 rounded mb-1"></div>
-          <div className="w-20 h-3 bg-slate-700 rounded mb-1"></div>
-          <div className="w-24 h-3 bg-slate-700 rounded"></div>
-        </div>
-      </div>
-    </div>
-
+    <div className="w-full h-32 bg-slate-700/50 rounded-2xl mb-4"></div>
+    
     {/* Footer skeleton */}
     <div className="pt-3 border-t border-slate-700 flex justify-between items-center">
-      <div className="w-20 h-3 bg-slate-600 rounded"></div>
-      <div className="w-6 h-6 bg-slate-600 rounded"></div>
+      <div className="w-full h-10 bg-slate-700 rounded-xl"></div>
     </div>
   </div>
 );
@@ -96,28 +50,18 @@ const SkeletonLoader = () => (
 const ChildCard = ({ child }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [isGradesExpanded, setIsGradesExpanded] = useState(false);
   const [confirmUnlink, setConfirmUnlink] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
 
   // Select child-specific data from Redux
-  const childGrades = useSelector(selectChildGrades);
   const childAttendance = useSelector(selectChildAttendance);
-  const gradesLoading = useSelector(selectChildGradesLoading(child.id));
   const attendanceLoading = useSelector(selectChildAttendanceLoading(child.id));
-  const gradesError = useSelector(selectChildGradesError(child.id));
   const attendanceError = useSelector(selectChildAttendanceError(child.id));
   const isUnlinking = useSelector(selectChildLinksUnlinking);
-  const childLinksError = useSelector(selectChildLinksError);
 
   // Fetch data on component mount if not already loaded
   useEffect(() => {
     if (!child.id) return;
-
-    // if (!childGrades[child.id]) {
-    //   dispatch(fetchChildGrades(child.id));
-    // }
-
     if (!childAttendance[child.id]) {
       dispatch(fetchChildAttendance(child.id));
     }
@@ -125,12 +69,10 @@ const ChildCard = ({ child }) => {
   }, [child.id]);
 
   // Get data for this specific child
-  const grades = childGrades[child.id];
   const attendance = childAttendance[child.id];
 
   // Show skeleton loader if initial data is loading
-  const isInitialLoading =
-    (gradesLoading || attendanceLoading) && !grades && !attendance;
+  const isInitialLoading = attendanceLoading && !attendance;
 
   // Return skeleton loader if initial loading
   if (isInitialLoading) {
@@ -172,27 +114,11 @@ const ChildCard = ({ child }) => {
     }
   };
 
-  const getGpaColor = (gpa) => {
-    if (gpa >= 3.7) return "text-emerald-400";
-    if (gpa >= 3.0) return "text-blue-400";
-    if (gpa >= 2.5) return "text-amber-500";
-    return "text-rose-500";
-  };
-
   const getAttendanceColor = (percentage) => {
     if (percentage >= 95) return "text-emerald-400";
     if (percentage >= 85) return "text-blue-400";
     if (percentage >= 75) return "text-amber-500";
     return "text-rose-500";
-  };
-
-  const formatDate = (dateString) => {
-    if (!dateString) return "0";
-    return new Date(dateString).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
   };
 
   const handleUnlink = async () => {
@@ -206,8 +132,8 @@ const ChildCard = ({ child }) => {
   };
 
   return (
-    <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-lg hover:border-indigo-500/30 transition-all duration-300 flex flex-col h-full">
-      <div className="flex-grow">
+    <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-lg hover:border-indigo-500/30 transition-all duration-300 flex flex-col h-[600px] group/card">
+      <div className="flex-grow flex flex-col min-h-0">
         {/* Header with avatar and badge */}
       <div className="flex justify-between items-start gap-4 mb-6">
         <div className="flex items-center gap-4 min-w-0">
@@ -265,17 +191,6 @@ const ChildCard = ({ child }) => {
                   <button
                     onClick={() => {
                       setShowDropdown(false);
-                      navigate(`/parent/child/${child.id}`);
-                    }}
-                    className="w-full px-4 py-2 text-left text-xs font-bold text-slate-300 hover:bg-slate-800 flex items-center gap-2 transition-colors"
-                  >
-                    <i className="fas fa-chart-line text-[10px] text-indigo-400"></i>
-                    View Academic Details
-                  </button>
-                  <div className="h-px bg-slate-800 my-1"></div>
-                  <button
-                    onClick={() => {
-                      setShowDropdown(false);
                       setConfirmUnlink(true);
                     }}
                     className="w-full px-4 py-2 text-left text-xs font-bold text-rose-400 hover:bg-rose-500/10 flex items-center gap-2 transition-colors"
@@ -291,33 +206,40 @@ const ChildCard = ({ child }) => {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 gap-3 mb-4">
-        <div className="bg-slate-900/50 p-3 rounded-xl border border-slate-700">
-          <p className="text-[10px] text-slate-500 font-black uppercase mb-1">
-            GPA
+      <div className="grid grid-cols-2 gap-3 mb-6 shrink-0">
+        <div className="bg-slate-900/50 p-4 rounded-2xl border border-slate-700 transition-colors group-hover/card:border-slate-600">
+          <p className="text-[10px] text-slate-500 font-black uppercase mb-1 flex items-center gap-1">
+            Total Courses
           </p>
-          <p className={`text-lg font-black ${getGpaColor(child.gpa)}`}>
-            {child.gpa?.toFixed(2) || "0.00"}
+          <p className="text-xl font-black text-white">
+            {child.courses?.length || 0}
           </p>
         </div>
-        <div className="bg-slate-900/50 p-3 rounded-xl border border-slate-700">
-          <p className="text-[10px] text-slate-500 font-black uppercase mb-1">
-            Attendance
+        <div className="bg-slate-900/50 p-4 rounded-2xl border border-slate-700 transition-colors group-hover/card:border-slate-600 relative">
+          <p className="text-[10px] text-slate-500 font-black uppercase mb-1 flex items-center gap-1">
+            Total Attendance
+            <span className="group/tt relative inline-flex items-center justify-center">
+              <i className="fas fa-info-circle text-[10px] text-slate-400 hover:text-indigo-400 transition-colors cursor-help"></i>
+              {/* Tooltip */}
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-slate-950 text-[9px] font-black uppercase tracking-widest text-slate-400 rounded-lg opacity-0 group-hover/tt:opacity-100 transition-all pointer-events-none whitespace-nowrap border border-white/5 z-30 shadow-2xl translate-y-1 group-hover/tt:translate-y-0">
+                All courses combined attendance
+              </div>
+            </span>
           </p>
+          
           {attendanceLoading ? (
-            <div className="w-6 h-6 bg-slate-700 rounded animate-pulse"></div>
+            <div className="w-8 h-6 bg-slate-700 rounded-lg animate-pulse"></div>
           ) : attendanceError ? (
-            <p className="text-rose-400 text-sm">Error</p>
+            <p className="text-rose-400 text-sm font-black">Error</p>
           ) : (
             <p
-              className={`text-lg font-black ${getAttendanceColor(
-                attendance?.percentage,
-              )}`}
+              className={`text-xl font-black ${
+                (attendance?.percentage || child.attendance?.percentage) >= 95 
+                  ? 'text-emerald-400' 
+                  : getAttendanceColor(attendance?.percentage || child.attendance?.percentage)
+              }`}
             >
-              {attendance?.percentage?.toFixed(1) ||
-                child.attendance?.percentage?.toFixed(1) ||
-                "0"}
-              %
+              {Math.round(attendance?.percentage || child.attendance?.percentage || 0)}%
             </p>
           )}
         </div>
@@ -325,27 +247,30 @@ const ChildCard = ({ child }) => {
 
       {/* Attendance Breakdown */}
       {(attendance || child.attendance) && (
-        <div className="mb-4">
-          <p className="text-[10px] text-slate-500 font-black uppercase mb-2">
+        <div className="mb-6 px-1 shrink-0">
+          <p className="text-[10px] text-slate-500 font-black uppercase mb-3 flex items-center gap-1">
             Attendance Details
+            <span className="group/tt2 relative inline-flex items-center justify-center">
+              <i className="fas fa-info-circle text-[10px] text-slate-400 hover:text-indigo-400 transition-colors cursor-help"></i>
+              {/* Tooltip */}
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-slate-950 text-[9px] font-black uppercase tracking-widest text-slate-400 rounded-lg opacity-0 group-hover/tt2:opacity-100 transition-all pointer-events-none whitespace-nowrap border border-white/5 z-30 shadow-2xl translate-y-1 group-hover/tt2:translate-y-0">
+                Combined attendance of all courses
+              </div>
+            </span>
           </p>
           {attendanceLoading ? (
-            <div className="flex justify-between text-xs">
-              <div className="w-12 h-4 bg-slate-700 rounded animate-pulse"></div>
-              <div className="w-12 h-4 bg-slate-700 rounded animate-pulse"></div>
-              <div className="w-12 h-4 bg-slate-700 rounded animate-pulse"></div>
+            <div className="flex justify-between">
+              {[...Array(3)].map((_, i) => <div key={i} className="w-16 h-4 bg-slate-700 rounded animate-pulse"></div>)}
             </div>
-          ) : attendanceError ? (
-            <p className="text-rose-400 text-xs">No data available</p>
           ) : (
-            <div className="flex justify-between text-xs">
-              <span className="text-emerald-400">
+            <div className="flex justify-between text-xs font-bold">
+              <span className="text-emerald-400/80">
                 Present: {attendance?.present || child.attendance?.present || 0}
               </span>
-              <span className="text-amber-400">
+              <span className="text-amber-400/80">
                 Late: {attendance?.late || child.attendance?.late || 0}
               </span>
-              <span className="text-rose-400">
+              <span className="text-rose-400/80">
                 Absent: {attendance?.absent || child.attendance?.absent || 0}
               </span>
             </div>
@@ -353,107 +278,81 @@ const ChildCard = ({ child }) => {
         </div>
       )}
 
-      {/* Assignment Progress */}
-      <div className="mb-4">
-        <p className="text-[10px] text-slate-500 font-black uppercase mb-2">
-          Assignments
-        </p>
-        <div className="flex justify-between text-xs mb-2">
-          <span className="text-slate-400">
-            Progress: {child.submitted_count}/{child.total_assignments}
-          </span>
-          <span className="text-slate-400">Graded: {child.graded_count}</span>
-        </div>
-        {child.overdue_count > 0 && (
-          <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-2">
-            <p className="text-red-400 text-xs font-bold">
-              {child.overdue_count} Overdue
-            </p>
-          </div>
-        )}
-      </div>
-
-      {/* Recent Grades */}
-      {(grades?.length > 0 || child.recent_grades?.length > 0) && (
-        <div className="mb-4">
-          <p className="text-[10px] text-slate-500 font-black uppercase mb-2">
-            Recent Grades
+      {/* Enrolled Courses Section */}
+      <div className="mb-4 flex flex-col min-h-0">
+        <div className="flex items-center justify-between mb-3 px-1 shrink-0">
+          <p className="text-[10px] text-slate-500 font-black uppercase">
+            Courses
           </p>
-          {gradesLoading ? (
-            <div className="space-y-2">
-              {[...Array(2)].map((_, i) => (
-                <div
-                  key={i}
-                  className="bg-slate-900/30 border border-slate-700 rounded-lg p-2"
-                >
-                  <div className="w-24 h-3 bg-slate-700 rounded animate-pulse mb-1"></div>
-                  <div className="w-16 h-3 bg-slate-700 rounded animate-pulse mb-1"></div>
-                  <div className="w-20 h-3 bg-slate-700 rounded animate-pulse"></div>
-                </div>
-              ))}
-            </div>
-          ) : gradesError ? (
-            <p className="text-rose-400 text-xs">No data available</p>
-          ) : (
-            <div className="space-y-2">
-              {/* Hide button on top when expanded */}
-              {isGradesExpanded && (
-                <button
-                  onClick={() => setIsGradesExpanded(false)}
-                  className="w-full py-1 text-[9px] font-black uppercase tracking-widest text-indigo-400/60 hover:text-indigo-400 flex items-center justify-center gap-2 transition-colors group mb-2"
-                >
-                  Hide Grades <i className="fas fa-chevron-up text-[7px] transition-transform group-hover:-translate-y-0.5"></i>
-                </button>
-              )}
-
-              {/* Grades List */}
-              <div 
-                className={`space-y-2 overflow-y-auto custom-scrollbar transition-all duration-300 ${
-                  isGradesExpanded ? "max-h-[160px]" : ""
-                }`}
-              >
-                {(grades || child.recent_grades || [])
-                  .slice(0, isGradesExpanded ? undefined : 1)
-                  .map((grade, index) => (
-                    <div
-                      key={index}
-                      className="bg-slate-900/30 border border-slate-700 rounded-lg p-2 hover:border-slate-600 transition-colors"
-                    >
-                      <p className="text-xs font-medium text-white truncate">
-                        {grade.assignment}
-                      </p>
-                      <p className="text-xs text-slate-400 truncate">
-                        {grade.course}
-                      </p>
-                      <div className="flex justify-between items-center mt-1">
-                        <span className="text-xs text-indigo-400 font-bold">
-                          {grade.score}/{grade.max_score} ({grade.percentage}%)
-                        </span>
-                        <span className="text-[10px] text-slate-500">
-                          {formatDate(grade.graded_at)}
-                        </span>
-                      </div>
+          <button 
+            onClick={() => navigate(`/parent/child/${child.id}`)}
+            className="text-[9px] font-black uppercase tracking-widest text-indigo-400 hover:text-indigo-300 transition-colors"
+          >
+            View Detail <i className="fas fa-arrow-right text-[7px] ml-1"></i>
+          </button>
+        </div>
+        
+        {/* Scrollable Container */}
+        <div className="flex-grow overflow-y-auto pr-1 custom-scrollbar space-y-2 pb-2">
+          {(child.courses || []).map((course, index) => (
+            <div
+              key={index}
+              className="bg-slate-900/30 border border-slate-700/50 rounded-xl p-3 hover:border-indigo-500/30 transition-all duration-300 group/course"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-[11px] font-black text-slate-200 truncate group-hover/course:text-white transition-colors">
+                    {course.title}
+                  </p>
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1.5">
+                    <div className="flex items-center gap-1.5">
+                       <span className="text-[9px] text-slate-500 font-black uppercase tracking-wider">
+                          Attendance:
+                       </span>
+                       <span className={`text-[9px] font-black ${(course.attendance?.percentage || 0) >= 95 ? "text-emerald-400" : "text-slate-300"}`}>
+                          {course.attendance?.percentage != null ? Math.round(course.attendance.percentage) : "0"}%
+                       </span>
                     </div>
-                  ))}
-              </div>
+                    
+                    <div className="flex items-center gap-1.5">
+                       <span className="text-[9px] text-slate-500 font-black uppercase tracking-wider">
+                          Assignments:
+                       </span>
+                       <span className="text-[9px] font-black text-slate-300">
+                          {course.assignments_submitted || 0}/{course.assignments_total || 0}
+                       </span>
+                    </div>
 
-              {/* View All button at bottom when collapsed */}
-              {!isGradesExpanded && (grades || child.recent_grades || []).length > 1 && (
+                    <div className="flex items-center gap-1.5">
+                       <span className="text-[9px] text-slate-500 font-black uppercase tracking-wider">
+                          Quizzes:
+                       </span>
+                       <span className="text-[9px] font-black text-slate-300">
+                          {course.quizzes_submitted || 0}/{course.quizzes_total || 0}
+                       </span>
+                    </div>
+                  </div>
+                </div>
                 <button
-                  onClick={() => setIsGradesExpanded(true)}
-                  className="w-full py-2 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-indigo-400 flex items-center justify-center gap-2 transition-colors border border-transparent hover:border-slate-700 rounded-lg group"
+                  onClick={() => navigate(`/parent/child/${child.id}`, { state: { activeCourseId: course.id } })}
+                  className="text-[9px] font-black uppercase tracking-widest text-indigo-400 hover:text-indigo-300 flex items-center gap-1 shrink-0 transition-colors"
                 >
-                  View All ({(grades || child.recent_grades || []).length}){" "}
-                  <i className="fas fa-chevron-down text-[8px] transition-transform group-hover:translate-y-0.5"></i>
+                  Details <i className="fas fa-chevron-right text-[7px]"></i>
                 </button>
-              )}
+              </div>
             </div>
+          ))}
+          
+          {(!child.courses || child.courses.length === 0) && (
+            <p className="text-[10px] text-slate-600 font-black uppercase text-center py-4 border border-dashed border-slate-700 rounded-xl">
+              No enrolled courses
+            </p>
           )}
         </div>
-      )}
+      </div>
       </div>
 
-      <div className="pt-4 mt-auto border-t border-slate-700/50">
+      <div className="pt-4 mt-auto border-t border-slate-700/50 shrink-0">
         <button
           onClick={() => navigate(`/parent/child/${child.id}`)}
           className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-[0.98] shadow-lg shadow-indigo-950/20 flex items-center justify-center gap-2"

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchParentChildDetail, selectParentChildDetail } from "../../store/slices/parentSlice";
 import { LoadingSpinner, ErrorMessage } from "../../components/ui";
@@ -11,6 +11,18 @@ const ParentChildDetails = () => {
   const dispatch = useDispatch();
   const { data, loading, error } = useSelector(selectParentChildDetail);
   const { child, summary, courses } = data || {};
+  const sortedCourses = useMemo(() => {
+    if (!courses) return [];
+    return [...courses].sort((a, b) => {
+      const aDone = a.status === 'completed' || a.progress?.percent === 100;
+      const bDone = b.status === 'completed' || b.progress?.percent === 100;
+      if (aDone && !bDone) return 1;
+      if (!aDone && bDone) return -1;
+      return 0;
+    });
+  }, [courses]);
+  const location = useLocation();
+  const stateCourseId = location.state?.activeCourseId;
   const [activeCourseId, setActiveCourseId] = useState(null);
 
   useEffect(() => {
@@ -23,12 +35,19 @@ const ParentChildDetails = () => {
   // Set initial active course when data loads
   useEffect(() => {
     if (courses?.length > 0) {
-      const currentExists = courses.some(c => c.id === activeCourseId);
-      if (!currentExists) {
-        setActiveCourseId(courses[0].id);
+      // Priority 1: ID from navigation state
+      if (stateCourseId && courses.some(c => c.id === stateCourseId) && activeCourseId === null) {
+        setActiveCourseId(stateCourseId);
+      } 
+      // Priority 2: Current selection validation
+      else {
+        const currentExists = courses.some(c => c.id === activeCourseId);
+        if (!currentExists) {
+          setActiveCourseId(courses[0].id);
+        }
       }
     }
-  }, [courses, activeCourseId]);
+  }, [courses, activeCourseId, stateCourseId]);
 
   const activeCourse = useMemo(() => 
     data?.courses?.find(c => c.id === activeCourseId),
@@ -108,9 +127,9 @@ const ParentChildDetails = () => {
             </div>
 
             {/* Overall Stats Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full lg:w-auto">
+            <div className="grid grid-cols-3 md:grid-cols-4 gap-4 w-full lg:w-auto">
               {[
-                { label: "GPA", value: summary.overall_gpa?.toFixed(1), icon: "fa-star", color: "text-amber-400" },
+                // { label: "GPA", value: summary.overall_gpa?.toFixed(1), icon: "fa-star", color: "text-amber-400" },
                 { label: "Attendance", value: `${Math.round(summary.overall_attendance?.percentage)}%`, icon: "fa-calendar-check", color: "text-emerald-400" },
                 { label: "Pending Tasks", value: summary.overdue_assignments + summary.overdue_quizzes, icon: "fa-clock", color: "text-rose-400" },
                 { label: "Completed", value: "85%", icon: "fa-check-circle", color: "text-indigo-400" }
@@ -134,19 +153,27 @@ const ParentChildDetails = () => {
           {/* Tabs Scroller */}
           <div className="bg-slate-900/80 border-b border-white/5 px-8 pt-6">
              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-6">
-               {courses.map((course) => (
-                 <button
-                   key={course.id}
-                   onClick={() => setActiveCourseId(course.id)}
-                   className={`shrink-0 px-6 py-3.5 rounded-2xl text-[11px] font-black uppercase tracking-[0.15em] transition-all relative ${
-                     activeCourseId === course.id 
-                       ? "bg-indigo-600 text-white shadow-lg shadow-indigo-950/50" 
-                       : "bg-slate-800/50 text-slate-500 hover:bg-slate-800 hover:text-slate-300 border border-white/5"
-                   }`}
-                 >
-                   {course.title}
-                 </button>
-               ))}
+               {sortedCourses.map((course) => {
+                 const isCompleted = course.status === 'completed' || course.progress?.percent === 100;
+                 return (
+                   <button
+                     key={course.id}
+                     onClick={() => setActiveCourseId(course.id)}
+                     className={`shrink-0 px-6 py-3.5 rounded-2xl text-[11px] font-black uppercase tracking-[0.15em] transition-all relative flex items-center gap-2 ${
+                       activeCourseId === course.id 
+                         ? "bg-indigo-600 text-white shadow-lg shadow-indigo-950/50" 
+                         : "bg-slate-800/50 text-slate-500 hover:bg-slate-800 hover:text-slate-300 border border-white/5"
+                     }`}
+                   >
+                     {course.title}
+                     {isCompleted && (
+                       <span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[7px] font-black rounded-md border border-emerald-500/20">
+                         COMPLETED
+                       </span>
+                     )}
+                   </button>
+                 );
+               })}
              </div>
           </div>
 
@@ -166,10 +193,6 @@ const ParentChildDetails = () => {
                     <div className="flex items-center gap-2">
                       <i className="far fa-user-circle"></i>
                       <span>Instructor: <span className="text-white">{activeCourse.instructor}</span></span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <i className="far fa-clock"></i>
-                      <span>{activeCourse.recurring_schedule || "No set schedule"}</span>
                     </div>
                   </div>
                 </div>
