@@ -429,7 +429,7 @@ const CourseDetails = () => {
             {/* Course Header Card */}
             <div className="bg-slate-800/40 backdrop-blur-xl rounded-[1.5rem] overflow-hidden border border-slate-700/50 shadow-2xl glass-shine transition-all duration-500">
               {/* Course Thumbnail */}
-              <div className="relative aspect-video overflow-hidden bg-slate-900/50">
+              <div className="relative h-[200px] sm:h-[280px] lg:h-[320px] overflow-hidden bg-slate-900/50">
                 {imageError || !getCourseImage(normalizedCourse) ? (
                   <div className="w-full h-full bg-slate-800" />
                 ) : (
