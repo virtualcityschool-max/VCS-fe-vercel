@@ -3,6 +3,7 @@ import ConfirmDialog from "../common/ConfirmDialog";
 import { useDispatch } from "react-redux";
 import { Button, PhoneInput } from "../ui";
 import { useFieldErrors } from "../../hooks";
+import { validatePhone, normalizePhone } from "../../utils/validation";
 import { toastManager } from "../../utils/toastManager";
 import {
   unlinkChildLinksAdmin,
@@ -76,8 +77,9 @@ const ParentProfileTab = ({ profile, onUpdate, onRefresh, onCancel, onSaved }) =
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData.phone || formData.phone.replace(/\D/g, "").length < 5) {
-      newErrors.phone = "Please enter a valid phone number";
+    if (formData.phone) {
+      const phoneResult = validatePhone(formData.phone);
+      if (!phoneResult.isValid) newErrors.phone = phoneResult.error;
     }
 
     // Address validation
@@ -98,7 +100,11 @@ const ParentProfileTab = ({ profile, onUpdate, onRefresh, onCancel, onSaved }) =
 
     setIsSaving(true);
     try {
-      await onUpdate(formData);
+      const updateData = {
+        ...formData,
+        phone: normalizePhone(formData.phone),
+      };
+      await onUpdate(updateData);
       clearAllErrors();
       if (onSaved) {
         onSaved();
@@ -214,7 +220,7 @@ const ParentProfileTab = ({ profile, onUpdate, onRefresh, onCancel, onSaved }) =
 
   return (
     <div className="space-y-4">
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4 relative z-20">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-2">

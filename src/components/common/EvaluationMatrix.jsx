@@ -145,7 +145,7 @@ const EvaluationMatrix = ({ students = [], courseStatus }) => {
                     {a.title}
                   </div>
                   <div className="text-slate-600 text-[11px] mt-0.5 tracking-normal normal-case font-normal">
-                    Asgmt · Total: {a.max_score}
+                    Assignment · Total: {a.max_score}
                   </div>
                 </th>
               ))}

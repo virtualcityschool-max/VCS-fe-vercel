@@ -191,8 +191,10 @@ const SessionCalendarView = ({ sessions = [], loading = false }) => {
 
         <div className="text-center relative z-10 py-2">
           <h2 className="text-lg font-black text-white tracking-tight">
-            {MONTH_NAMES[activeMonthData.month]} <span className="text-indigo-400">{activeMonthData.year}</span>
-          </h2>
+            {MONTH_NAMES[activeMonthData.month]}&nbsp;&nbsp;
+            <span className="text-indigo-400">
+              {activeMonthData.year}
+            </span>          </h2>
           <div className="flex items-center justify-center gap-2 mt-0.5">
             <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500">
               {activeMonthIdx + 1} of {monthRange.length} Months

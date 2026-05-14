@@ -27,23 +27,31 @@ const tooltipStyle = {
 // ── Stat card with hover tooltip breakdown ───────────────────────────────────
 const StatCardTip = ({ label, value, icon, color, items }) => {
   const colorClasses = {
-    indigo: "from-indigo-500/20 to-indigo-600/20 border-indigo-500/20 text-indigo-400",
-    emerald: "from-emerald-500/20 to-emerald-600/20 border-emerald-500/20 text-emerald-400",
-    amber: "from-amber-500/20 to-amber-600/20 border-amber-500/20 text-amber-400",
-    purple: "from-purple-500/20 to-purple-600/20 border-purple-500/20 text-purple-400",
+    indigo:
+      "from-indigo-500/20 to-indigo-600/20 border-indigo-500/20 text-indigo-400",
+    emerald:
+      "from-emerald-500/20 to-emerald-600/20 border-emerald-500/20 text-emerald-400",
+    amber:
+      "from-amber-500/20 to-amber-600/20 border-amber-500/20 text-amber-400",
+    purple:
+      "from-purple-500/20 to-purple-600/20 border-purple-500/20 text-purple-400",
     rose: "from-rose-500/20 to-rose-600/20 border-rose-500/20 text-rose-400",
     blue: "from-blue-500/20 to-blue-600/20 border-blue-500/20 text-blue-400",
-    pink: "from-pink-500/20 to-pink-600/20 border-pink-500/20 text-pink-400"
+    pink: "from-pink-500/20 to-pink-600/20 border-pink-500/20 text-pink-400",
   };
   return (
     <div className="relative group/tip">
-      <div className={`relative overflow-hidden bg-gradient-to-br ${colorClasses[color]} rounded-xl px-4 py-4 border backdrop-blur-sm transition-all duration-300 group-hover/tip:scale-[1.02] group-hover/tip:shadow-lg cursor-default`}>
+      <div
+        className={`relative overflow-hidden bg-gradient-to-br ${colorClasses[color]} rounded-xl px-4 py-4 border backdrop-blur-sm transition-all duration-300 group-hover/tip:scale-[1.02] group-hover/tip:shadow-lg cursor-default`}
+      >
         <div className="absolute top-0 right-0 w-14 h-14 bg-white/5 rounded-full -mr-6 -mt-6" />
         <div className="relative z-10 flex items-center gap-2.5 mb-2.5">
           <div className="w-7 h-7 bg-white/10 rounded-md flex items-center justify-center flex-shrink-0">
             <i className={`${icon} text-sm`} />
           </div>
-          <p className="text-[10px] uppercase tracking-wider opacity-80 leading-tight">{label}</p>
+          <p className="text-[10px] uppercase tracking-wider opacity-80 leading-tight">
+            {label}
+          </p>
         </div>
         <h3 className="text-2xl font-bold leading-none">{value}</h3>
       </div>
@@ -57,9 +65,18 @@ const StatCardTip = ({ label, value, icon, color, items }) => {
             <div className="bg-slate-900/95 border border-slate-700/50 rounded-xl shadow-2xl backdrop-blur-md overflow-hidden">
               <div className="max-h-[180px] overflow-y-auto custom-scrollbar p-3">
                 {items.map((item) => (
-                  <div key={item.label} className="flex items-center justify-between gap-4 py-1.5 first:pt-0 last:pb-0 border-b border-slate-700/30 last:border-0">
-                    <span className="text-slate-400 text-xs whitespace-nowrap">{item.label}</span>
-                    <span className={`text-xs font-bold tabular-nums ${item.color || "text-white"}`}>{item.value}</span>
+                  <div
+                    key={item.label}
+                    className="flex items-center justify-between gap-4 py-1.5 first:pt-0 last:pb-0 border-b border-slate-700/30 last:border-0"
+                  >
+                    <span className="text-slate-400 text-xs whitespace-nowrap">
+                      {item.label}
+                    </span>
+                    <span
+                      className={`text-xs font-bold tabular-nums ${item.color || "text-white"}`}
+                    >
+                      {item.value}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -170,27 +187,86 @@ const OverviewTab = ({ analytics, analyticsLoading, analyticsError }) => {
           icon="fas fa-users"
           color="indigo"
           items={[
-            { label: "Active",   value: analytics.users.active,            color: "text-emerald-400" },
-            { label: "Inactive", value: analytics.users.inactive,          color: "text-amber-400"   },
-            { label: "Rejected", value: analytics.users.rejected ?? 0,     color: "text-rose-400"    },
+            {
+              label: "Active",
+              value: analytics.users.active,
+              color: "text-emerald-400",
+            },
+            {
+              label: "Inactive",
+              value: analytics.users.inactive,
+              color: "text-amber-400",
+            },
+            {
+              label: "Rejected",
+              value: analytics.users.rejected ?? 0,
+              color: "text-rose-400",
+            },
           ]}
         />
-        <StatCard label="Admins"    value={analytics.users.admins}    icon="fas fa-user-shield"         color="rose"    compact />
-        <StatCard label="Teachers"  value={analytics.users.teachers}  icon="fas fa-chalkboard-teacher"  color="pink"    compact />
-        <StatCard label="Parents"   value={analytics.users.parents}   icon="fas fa-user-friends"        color="amber"  compact />
-        <StatCard label="Students"  value={analytics.users.students}  icon="fas fa-graduation-cap"      color="emerald" compact />
+        <StatCard
+          label="Admins"
+          value={analytics.users.admins}
+          icon="fas fa-user-shield"
+          color="rose"
+          compact
+        />
+        <StatCard
+          label="Teachers"
+          value={analytics.users.teachers}
+          icon="fas fa-chalkboard-teacher"
+          color="pink"
+          compact
+        />
+        <StatCard
+          label="Parents"
+          value={analytics.users.parents}
+          icon="fas fa-user-friends"
+          color="amber"
+          compact
+        />
+        <StatCard
+          label="Students"
+          value={analytics.users.students}
+          icon="fas fa-graduation-cap"
+          color="emerald"
+          compact
+        />
         <StatCardTip
           label="Total Courses"
           value={analytics.courses.total}
           icon="fas fa-book"
           color="purple"
           items={[
-            { label: "Total Enrollments", value: analytics.enrollments.total, color: "text-white" },
-            ...(analytics.enrollments?.by_course || []).map((c) => ({
-              label: c.course?.length > 20 ? c.course.slice(0, 20) + "…" : c.course,
-              value: c.students,
-              color: "text-indigo-400",
-            })),
+            {
+              label: "Total Enrollments",
+              value:
+                analytics.enrollments.active +
+                analytics.enrollments.cancelled +
+                analytics.enrollments.pending +
+                analytics.enrollments.rejected,
+              color: "text-white",
+            },
+            {
+              label: "Active",
+              value: analytics.enrollments.active,
+              color: "text-white",
+            },
+            {
+              label: "Cancelled",
+              value: analytics.enrollments.cancelled,
+              color: "text-white",
+            },
+            {
+              label: "Pending",
+              value: analytics.enrollments.pending,
+              color: "text-white",
+            },
+            {
+              label: "Rejected",
+              value: analytics.enrollments.rejected,
+              color: "text-white",
+            },
           ]}
         />
       </div>
@@ -207,7 +283,9 @@ const OverviewTab = ({ analytics, analyticsLoading, analyticsError }) => {
               Revenue by Course
             </h3>
             <div className="text-right">
-              <p className="text-[10px] uppercase tracking-wider text-slate-500">Total Revenue</p>
+              <p className="text-[10px] uppercase tracking-wider text-slate-500">
+                Total Revenue
+              </p>
               <p className="text-base font-bold text-amber-400">
                 PKR {totalRevenue.toLocaleString()}
               </p>
@@ -229,7 +307,9 @@ const OverviewTab = ({ analytics, analyticsLoading, analyticsError }) => {
               <div className="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center mb-3">
                 <i className="fas fa-coins text-slate-500 text-lg"></i>
               </div>
-              <p className="text-slate-400 text-sm">No revenue data available</p>
+              <p className="text-slate-400 text-sm">
+                No revenue data available
+              </p>
             </div>
           ) : (
             <ResponsiveContainer width="100%" height={260}>
@@ -238,7 +318,13 @@ const OverviewTab = ({ analytics, analyticsLoading, analyticsError }) => {
                 margin={{ top: 4, right: 8, left: 0, bottom: 0 }}
               >
                 <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                <XAxis interval={0} hide={true} dataKey="name" stroke="#94a3b8" tick={{ fontSize: 11 }} />
+                <XAxis
+                  interval={0}
+                  hide={true}
+                  dataKey="name"
+                  stroke="#94a3b8"
+                  tick={{ fontSize: 11 }}
+                />
                 <YAxis
                   stroke="#94a3b8"
                   tick={{ fontSize: 10 }}
@@ -249,13 +335,20 @@ const OverviewTab = ({ analytics, analyticsLoading, analyticsError }) => {
                 <Tooltip
                   {...tooltipStyle}
                   cursor={false}
-                  formatter={(value, name) => [`PKR ${value.toLocaleString()}`, name]}
+                  formatter={(value, name) => [
+                    `PKR ${value.toLocaleString()}`,
+                    name,
+                  ]}
                   labelFormatter={(label, payload) =>
                     payload?.[0]?.payload?.fullName || label
                   }
                 />
                 <Bar dataKey="Revenue" fill="#10b981" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="Lost Revenue" fill="#f43f5e" radius={[4, 4, 0, 0]} />
+                <Bar
+                  dataKey="Lost Revenue"
+                  fill="#f43f5e"
+                  radius={[4, 4, 0, 0]}
+                />
               </BarChart>
             </ResponsiveContainer>
           )}
@@ -284,7 +377,9 @@ const OverviewTab = ({ analytics, analyticsLoading, analyticsError }) => {
               <div className="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center mb-3">
                 <i className="fas fa-user-graduate text-slate-500 text-lg"></i>
               </div>
-              <p className="text-slate-400 text-sm">No enrollment data available</p>
+              <p className="text-slate-400 text-sm">
+                No enrollment data available
+              </p>
             </div>
           ) : (
             <ResponsiveContainer width="100%" height={260}>
@@ -293,8 +388,18 @@ const OverviewTab = ({ analytics, analyticsLoading, analyticsError }) => {
                 margin={{ top: 4, right: 8, left: 0, bottom: 0 }}
               >
                 <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                <XAxis interval={0} hide={true} dataKey="name" stroke="#94a3b8" tick={{ fontSize: 11 }} />
-                <YAxis stroke="#94a3b8" allowDecimals={false} tick={{ fontSize: 10 }} />
+                <XAxis
+                  interval={0}
+                  hide={true}
+                  dataKey="name"
+                  stroke="#94a3b8"
+                  tick={{ fontSize: 11 }}
+                />
+                <YAxis
+                  stroke="#94a3b8"
+                  allowDecimals={false}
+                  tick={{ fontSize: 10 }}
+                />
                 <Tooltip
                   {...tooltipStyle}
                   cursor={false}

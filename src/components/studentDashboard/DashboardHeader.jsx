@@ -19,18 +19,25 @@ const InfoChip = ({ label, value, icon, isMono = false }) => {
   return (
     <button
       onClick={handleCopy}
-      className="group flex items-center gap-2 px-2 py-1 hover:bg-white/5 rounded-lg transition-colors border border-transparent hover:border-white/5"
+      className="group flex items-center gap-2 px-2.5 py-1.5 bg-white/5 border border-white/5 hover:border-indigo-500/30 rounded-lg transition-all duration-200"
       title="Click to copy"
     >
-      <i className={`fas fa-${icon} text-indigo-400/60 text-[10px]`} />
-      <span className="text-[9px] font-bold uppercase tracking-widest text-slate-500 font-inter">
+      <div className="flex items-center justify-center">
+        <i className={`fas fa-${icon} text-indigo-400/60 text-[10px]`} />
+      </div>
+      <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 font-inter leading-none">
         {label}:
       </span>
-      <span className={`text-[11px] ${isMono ? "font-mono" : "font-inter"} font-medium text-slate-300 group-hover:text-white transition-colors`}>
+      <span className={`text-[11px] ${isMono ? "font-mono translate-y-[0.5px]" : "font-inter"} font-semibold text-slate-300 group-hover:text-white transition-colors leading-none`}>
         {value}
       </span>
-      <i className={`fas fa-copy text-[9px] text-white/10 group-hover:text-white/30 transition-opacity ${state === "copied" ? "hidden" : ""}`} />
-      {state === "copied" && <i className="fas fa-check text-[9px] text-green-400 animate-in fade-in zoom-in" />}
+      <div className="w-4 flex items-center justify-center">
+        {state === "copied" ? (
+          <i className="fas fa-check text-[9px] text-green-400 animate-in fade-in zoom-in" />
+        ) : (
+          <i className="fas fa-copy text-[9px] text-white/10 group-hover:text-white/30 transition-opacity" />
+        )}
+      </div>
     </button>
   );
 };
@@ -61,7 +68,7 @@ const DashboardHeader = () => {
           </span>
         </div>
 
-        <div className="space-y-0.5">
+        <div className="flex flex-col justify-center">
           <h1 className="text-xl font-bold font-poppins text-white flex items-center gap-2">
             {formatGreeting()}, {student?.username || "Scholar"}
             <span className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]" />

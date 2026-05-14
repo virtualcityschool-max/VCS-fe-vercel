@@ -5,7 +5,7 @@ import { authService } from "../../services/authService";
 import { toastManager } from "../../utils/toastManager";
 import { showApiError } from "../../utils/apiErrorHandler";
 import { useFieldErrors } from "../../hooks";
-import { validatePhone } from "../../utils/validation";
+import { validatePhone, normalizePhone, formatPhoneDisplay } from "../../utils/validation";
 import PhoneInput from "../../components/ui/PhoneInput";
 
 // ── Tiny helpers ──────────────────────────────────────────────────────────────
@@ -142,7 +142,13 @@ const ProfilePage = () => {
     try {
       const payload = {};
       (FIELDS[role] || []).forEach(({ key, type }) => {
-        const val = form[key];
+        let val = form[key];
+        
+        // Normalize phone numbers to include + and digits only
+        if (type === "tel" && val) {
+          val = normalizePhone(val);
+        }
+
         // Ensure empty values are sent as '' as requested
         if (val === "" || val === null || val === undefined) {
           payload[key] = "";
@@ -299,7 +305,9 @@ const ProfilePage = () => {
                   )
                 ) : (
                   <div className={readCls}>
-                    {roleProfile[key] ?? <span className="text-slate-600 italic">Not set</span>}
+                    {type === "tel" && roleProfile[key] 
+                      ? formatPhoneDisplay(roleProfile[key]) 
+                      : (roleProfile[key] ?? <span className="text-slate-600 italic">Not set</span>)}
                   </div>
                 )}
                 {editing && errors[key] && type !== "tel" && (

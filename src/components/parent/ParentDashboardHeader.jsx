@@ -80,9 +80,6 @@ const ParentDashboardHeader = ({ dashboardData, userName, onLinkRequest }) => {
                 colorClass="text-emerald-400" 
               />
             )}
-            <p className="text-slate-500 text-xs font-medium ml-1 hidden md:block">
-              at VirtualCitySchool
-            </p>
           </div>
         </div>
       </div>

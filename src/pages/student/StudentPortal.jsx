@@ -157,6 +157,10 @@ const StudentPortal = () => {
           </div>
         ) : (
           <div className="space-y-12 lg:space-y-16">
+                    {/* Curriculum Overview */}
+            <div className="pt-4 border-t border-white/5">
+              <CourseProgressGrid />
+            </div>
             {/* Main Dashboard Content */}
             <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 lg:gap-10 items-start">
               {/* Primary Column: Learning Activity */}
@@ -172,10 +176,7 @@ const StudentPortal = () => {
               </div>
             </div>
 
-            {/* Curriculum Overview */}
-            <div className="pt-4 border-t border-white/5">
-              <CourseProgressGrid />
-            </div>
+    
           </div>
         )}
       </div>

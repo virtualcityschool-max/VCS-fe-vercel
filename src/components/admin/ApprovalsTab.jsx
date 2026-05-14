@@ -112,7 +112,7 @@ const ApprovalsTab = ({
                 All Caught Up!
               </h4>
               <p className="text-slate-400 text-sm text-center max-w-md">
-                There are no pending user approvals at the moment. All
+                There are no pending account approvals at the moment. All
                 registration requests have been processed.
               </p>
             </div>

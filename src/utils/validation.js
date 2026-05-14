@@ -54,17 +54,63 @@ export const validatePhone = (phone) => {
   // Strip allowed formatting characters, keeping the optional leading +
   const hasPlus = trimmed.startsWith("+");
   const digitsOnly = trimmed.replace(/[\s\-().+]/g, "");
+  
   if (!/^\d+$/.test(digitsOnly)) {
     return { isValid: false, error: "Phone number may only contain digits, spaces, dashes, or parentheses" };
   }
+  
   if (digitsOnly.length < 7 || digitsOnly.length > 15) {
     return { isValid: false, error: "Phone number must be between 7 and 15 digits" };
   }
+  
   // If a + was present the first digit group is the country code (1–3 digits, must not start with 0)
   if (hasPlus && /^0/.test(digitsOnly)) {
     return { isValid: false, error: "Country code cannot start with 0" };
   }
+  
+  // For standard country code validation, it should start with +
+  if (!hasPlus) {
+    return { isValid: false, error: "Phone number must include a country code (start with +)" };
+  }
+
   return { isValid: true, error: null };
+};
+
+/**
+ * Normalizes a phone number to E.164-like format: +[digits]
+ * @param {string} phone 
+ * @returns {string}
+ */
+export const normalizePhone = (phone) => {
+  if (!phone) return "";
+  const digits = phone.replace(/\D/g, "");
+  if (!digits) return "";
+  return `+${digits}`;
+};
+
+/**
+ * Formats a phone number for display (e.g., +92 300 1234567)
+ * @param {string} phone 
+ * @returns {string}
+ */
+export const formatPhoneDisplay = (phone) => {
+  if (!phone) return "";
+  const normalized = normalizePhone(phone);
+  
+  // Basic formatting: +XX XXXXXXXX
+  // For better formatting, we could match against common dial codes
+  const dialCodes = ["+92", "+44", "+61", "+1", "+971"];
+  for (const code of dialCodes) {
+    if (normalized.startsWith(code)) {
+      const rest = normalized.slice(code.length);
+      if (code === "+92" && rest.length === 10) {
+        return `${code} ${rest.slice(0, 3)} ${rest.slice(3)}`;
+      }
+      return `${code} ${rest}`;
+    }
+  }
+  
+  return normalized;
 };
 
 // Username validation

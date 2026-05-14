@@ -230,7 +230,7 @@ const UserDetailsPage = () => {
         />
 
         {/* Tab Content */}
-        <div className="bg-slate-900/60 border border-slate-800/50 rounded-2xl shadow-2xl backdrop-blur-sm overflow-hidden mt-4">
+        <div className="bg-slate-900/60 border border-slate-800/50 rounded-2xl shadow-2xl backdrop-blur-sm mt-4">
           <UserDetailsTabs
             activeTab={activeTab}
             onTabChange={setActiveTab}

@@ -39,20 +39,37 @@ const GradingForm = ({ selectedSubmission, onSubmit, onCancel, assignmentMaxScor
     >
       <div>
         <label className="block text-sm font-medium text-gray-300 mb-2">
-          Score: (<span className="mb-6 text-sm text-slate-400">Max Score: {assignmentMaxScore}</span>)
+          Score: (<span className="text-sm text-slate-400 font-bold">Max Score: {assignmentMaxScore}</span>)
         </label>
         <input
           type="number"
-          placeholder="Score"
-          value={selectedSubmission ? score : ""}
-          onChange={(e) => { setScore(e.target.value); setScoreError(""); }}
-          className={`w-full p-3 rounded-xl bg-slate-800 border text-white ${scoreError ? "border-red-500 focus:ring-1 focus:ring-red-500" : "border-slate-700"}`}
+          placeholder="Enter score"
+          value={score}
+          onChange={(e) => {
+            const val = e.target.value;
+            // Prevent negative values immediately
+            if (val !== "" && parseFloat(val) < 0) return;
+            
+            setScore(val);
+            setScoreError("");
+          }}
+          onKeyDown={(e) => {
+            // Block negative sign and scientific notation keys
+            if (e.key === "-" || e.key === "e" || e.key === "E") {
+              e.preventDefault();
+            }
+          }}
+          className={`w-full p-3 rounded-xl bg-slate-800 border text-white transition-all ${
+            scoreError 
+              ? "border-red-500 ring-1 ring-red-500/20" 
+              : "border-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/20"
+          }`}
           max={assignmentMaxScore}
           min={0}
           step="0.1"
         />
         {scoreError && (
-          <p className="mt-1.5 text-xs text-red-400 font-medium flex items-center gap-1.5">
+          <p className="mt-2 text-xs text-red-400 font-bold flex items-center gap-1.5 animate-in fade-in slide-in-from-top-1">
             <i className="fas fa-exclamation-circle" />
             {scoreError}
           </p>

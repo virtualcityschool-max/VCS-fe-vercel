@@ -7,6 +7,7 @@ const Footer = ({ variant = "full" }) => {
   const { isLoggedIn } = useSelector((state) => state.auth);
 
   const handleNavigation = (path) => {
+    window.scrollTo(0, 0);
     navigate(path);
   };
 
@@ -28,14 +29,7 @@ const Footer = ({ variant = "full" }) => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
           <div className="col-span-1 md:col-span-2">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center font-black text-white">
-                V
-              </div>
-              <span className="text-xl font-black text-white">
-                VirtualCitySchool
-              </span>
-            </div>
+              <img src="/assets/logo.png" alt="Virtual City School" className="w-40 h-40 object-contain cursor-pointer" onClick={() => handleNavigation("/")} />
             <p className="text-slate-400 text-sm mb-6 max-w-md">
               Next-generation learning platform connecting students with
               world-class teachers for live classes and on-demand mastery

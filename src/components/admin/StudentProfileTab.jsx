@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Button, Input, PhoneInput } from "../ui";
 import { useFieldErrors } from "../../hooks";
+import { validatePhone, normalizePhone } from "../../utils/validation";
 
 const StudentProfileTab = ({ profile, userId, onUpdate, onCancel, onSaved }) => {
   const [formData, setFormData] = useState({
@@ -55,8 +56,9 @@ const StudentProfileTab = ({ profile, userId, onUpdate, onCancel, onSaved }) => 
       newErrors.date_of_birth = "Date of birth cannot be in the future";
     }
 
-    if (formData.phone && formData.phone.replace(/\D/g, "").length < 5) {
-      newErrors.phone = "Please enter a valid phone number";
+    if (formData.phone) {
+      const phoneResult = validatePhone(formData.phone);
+      if (!phoneResult.isValid) newErrors.phone = phoneResult.error;
     }
 
     setErrors(newErrors);
@@ -72,7 +74,11 @@ const StudentProfileTab = ({ profile, userId, onUpdate, onCancel, onSaved }) => 
 
     setIsSaving(true);
     try {
-      await onUpdate(formData);
+      const updateData = {
+        ...formData,
+        phone: normalizePhone(formData.phone),
+      };
+      await onUpdate(updateData);
       clearAllErrors();
       if (onSaved) {
         onSaved();
@@ -118,7 +124,7 @@ const StudentProfileTab = ({ profile, userId, onUpdate, onCancel, onSaved }) => 
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4 relative z-20">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-2">

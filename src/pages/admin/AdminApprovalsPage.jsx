@@ -50,7 +50,12 @@ const AdminApprovalsPage = () => {
   const enrollmentsError = useSelector(selectEnrollmentsError);
   const enrollmentsProcessing = useSelector(selectEnrollmentsProcessing);
 
-  const { adminRequests: hireRequests, adminLoading: hireLoading, adminError: hireError, adminProcessing: hireProcessing } = useSelector((state) => state.hire);
+  const {
+    adminRequests: hireRequests,
+    adminLoading: hireLoading,
+    adminError: hireError,
+    adminProcessing: hireProcessing,
+  } = useSelector((state) => state.hire);
   const [hireStatusFilter, setHireStatusFilter] = useState(undefined);
 
   // Re-fetch all 4 APIs every time this page is visited.
@@ -109,7 +114,9 @@ const AdminApprovalsPage = () => {
 
   const handleApproveEnrollment = async (enrollmentId) => {
     try {
-      await dispatch(actionEnrollment({ enrollmentId, action: "approve" })).unwrap();
+      await dispatch(
+        actionEnrollment({ enrollmentId, action: "approve" }),
+      ).unwrap();
       toastManager.success("Enrollment approved successfully");
     } catch (error) {
       showApiError(error);
@@ -118,7 +125,9 @@ const AdminApprovalsPage = () => {
 
   const handleRejectEnrollment = async (enrollmentId) => {
     try {
-      await dispatch(actionEnrollment({ enrollmentId, action: "reject" })).unwrap();
+      await dispatch(
+        actionEnrollment({ enrollmentId, action: "reject" }),
+      ).unwrap();
       toastManager.success("Enrollment rejected successfully");
     } catch (error) {
       showApiError(error);
@@ -151,28 +160,35 @@ const AdminApprovalsPage = () => {
     dispatch(fetchAdminHireRequests(hireStatusFilter));
   };
 
-  const pendingHireCount = hireRequests?.filter((r) => r.status === "pending").length || 0;
+  const pendingHireCount =
+    hireRequests?.filter((r) => r.status === "pending").length || 0;
 
   const isActiveTabLoading =
-    activeTab === "users" ? approvalsLoading
-    : activeTab === "childLinks" ? childLinksLoading
-    : activeTab === "enrollments" ? enrollmentsLoading
-    : hireLoading;
+    activeTab === "users"
+      ? approvalsLoading
+      : activeTab === "childLinks"
+        ? childLinksLoading
+        : activeTab === "enrollments"
+          ? enrollmentsLoading
+          : hireLoading;
 
   const activeRefreshHandler =
-    activeTab === "users" ? handleRefreshApprovals
-    : activeTab === "childLinks" ? handleRefreshChildLinks
-    : activeTab === "enrollments" ? handleRefreshEnrollments
-    : handleRefreshHireRequests;
+    activeTab === "users"
+      ? handleRefreshApprovals
+      : activeTab === "childLinks"
+        ? handleRefreshChildLinks
+        : activeTab === "enrollments"
+          ? handleRefreshEnrollments
+          : handleRefreshHireRequests;
 
   const activePendingCount =
     activeTab === "users"
       ? pendingApprovals?.length || 0
       : activeTab === "childLinks"
-      ? pendingChildLinks?.length || 0
-      : activeTab === "enrollments"
-      ? pendingEnrollments?.length || 0
-      : pendingHireCount;
+        ? pendingChildLinks?.length || 0
+        : activeTab === "enrollments"
+          ? pendingEnrollments?.length || 0
+          : pendingHireCount;
 
   // Placeholder counts until backend provides processed-today metrics.
   const approvedTodayCount = 0;
@@ -193,29 +209,14 @@ const AdminApprovalsPage = () => {
               }`}
             >
               <i className="fas fa-user-check"></i>
-              User Approvals
+              Account(s) Approvals
               {pendingApprovals?.length > 0 && (
                 <span className="bg-indigo-500 text-white text-xs px-2 py-0.5 rounded-full">
                   {pendingApprovals.length}
                 </span>
               )}
             </button>
-            <button
-              onClick={() => setActiveTab("childLinks")}
-              className={`inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-                activeTab === "childLinks"
-                    ? "bg-indigo-600 text-white shadow-lg"
-                  : "text-slate-400 hover:text-white hover:bg-slate-800/50"
-              }`}
-            >
-              <i className="fas fa-link"></i>
-              Child Link Requests
-              {pendingChildLinks?.length > 0 && (
-                <span className="bg-indigo-500 text-white text-xs px-2 py-0.5 rounded-full">
-                  {pendingChildLinks.length}
-                </span>
-              )}
-            </button>
+
             <button
               onClick={() => setActiveTab("enrollments")}
               className={`inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
@@ -229,6 +230,22 @@ const AdminApprovalsPage = () => {
               {pendingEnrollments?.length > 0 && (
                 <span className="bg-indigo-500 text-white text-xs px-2 py-0.5 rounded-full">
                   {pendingEnrollments.length}
+                </span>
+              )}
+            </button>
+            <button
+              onClick={() => setActiveTab("childLinks")}
+              className={`inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
+                activeTab === "childLinks"
+                  ? "bg-indigo-600 text-white shadow-lg"
+                  : "text-slate-400 hover:text-white hover:bg-slate-800/50"
+              }`}
+            >
+              <i className="fas fa-link"></i>
+              Child Link Requests
+              {pendingChildLinks?.length > 0 && (
+                <span className="bg-indigo-500 text-white text-xs px-2 py-0.5 rounded-full">
+                  {pendingChildLinks.length}
                 </span>
               )}
             </button>
@@ -255,15 +272,21 @@ const AdminApprovalsPage = () => {
             <div className="flex items-center gap-3 flex-wrap text-sm font-semibold">
               <span className="text-amber-300">
                 Pending:{" "}
-                <span className="text-white font-bold">{activePendingCount}</span>
+                <span className="text-white font-bold">
+                  {activePendingCount}
+                </span>
               </span>
               <span className="text-emerald-300">
                 Approved Today:{" "}
-                <span className="text-white font-bold">{approvedTodayCount}</span>
+                <span className="text-white font-bold">
+                  {approvedTodayCount}
+                </span>
               </span>
               <span className="text-rose-300">
                 Rejected Today:{" "}
-                <span className="text-white font-bold">{rejectedTodayCount}</span>
+                <span className="text-white font-bold">
+                  {rejectedTodayCount}
+                </span>
               </span>
             </div>
           ) : (

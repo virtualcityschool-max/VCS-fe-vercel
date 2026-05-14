@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchMyLeads } from "../../store/slices/hireSlice";
+import { formatPhoneDisplay } from "../../utils/validation";
 
 const STATUS_BADGE = {
   pending: "bg-amber-500/20 text-amber-400 border-amber-500/30",
@@ -100,7 +101,7 @@ const TeacherHireLeads = () => {
                       </span>
                     </div>
                     <p className="text-xs text-slate-400 mt-0.5">{lead.email}</p>
-                    {lead.phone && <p className="text-xs text-slate-500">{lead.phone}</p>}
+                    {lead.phone && <p className="text-xs text-slate-500">{formatPhoneDisplay(lead.phone)}</p>}
                     {lead.message && (
                       <p className="text-xs text-slate-400 mt-1 italic">"{lead.message}"</p>
                     )}

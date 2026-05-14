@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Button, Input, Card, PhoneInput } from "../ui";
 import { useFieldErrors } from "../../hooks";
+import { validatePhone, normalizePhone } from "../../utils/validation";
 import DistinctionsEditor from "./DistinctionsEditor";
 
 const TeacherProfileTab = ({ profile, onUpdate, onCancel, onSaved }) => {
@@ -86,8 +87,9 @@ const TeacherProfileTab = ({ profile, onUpdate, onCancel, onSaved }) => {
       newErrors.linkedin = "Please enter a valid LinkedIn URL";
     }
 
-    if (formData.phone && formData.phone.replace(/\D/g, "").length < 5) {
-      newErrors.phone = "Please enter a valid phone number";
+    if (formData.phone) {
+      const phoneResult = validatePhone(formData.phone);
+      if (!phoneResult.isValid) newErrors.phone = phoneResult.error;
     }
 
     setErrors(newErrors);
@@ -109,6 +111,7 @@ const TeacherProfileTab = ({ profile, onUpdate, onCancel, onSaved }) => {
           ? parseInt(formData.experience_years)
           : "",
         rating: formData.rating ? parseFloat(formData.rating) : "",
+        phone: normalizePhone(formData.phone),
       };
 
       await onUpdate(updateData);
@@ -228,7 +231,7 @@ const TeacherProfileTab = ({ profile, onUpdate, onCancel, onSaved }) => {
         </Card>
 
         {/* Connect & Contact Section */}
-        <Card variant="glass" padding="md" className="border-indigo-500/10">
+        <Card variant="glass" padding="md" className="border-indigo-500/10 relative z-20">
           <div className="flex items-center gap-3 mb-5 pb-3 border-b border-white/5">
             <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center text-blue-400">
               <i className="fas fa-link text-sm"></i>
@@ -266,7 +269,7 @@ const TeacherProfileTab = ({ profile, onUpdate, onCancel, onSaved }) => {
         </Card>
 
         {/* Distinctions Section */}
-        <Card variant="glass" padding="md" className="border-indigo-500/10">
+        <Card variant="glass" padding="md" className="border-indigo-500/10 relative z-10">
           <div className="flex items-center gap-3 mb-5 pb-3 border-b border-white/5">
             <div className="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center text-amber-400">
               <i className="fas fa-award text-sm"></i>

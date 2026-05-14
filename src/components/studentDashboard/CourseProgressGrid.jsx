@@ -30,8 +30,8 @@ const CourseCard = ({ course, enrollment, status, onNavigate }) => {
     : null;
 
   return (
-    <div className="bg-slate-900/40 backdrop-blur-xl rounded-[1.5rem] border border-white/5 overflow-hidden group shadow-2xl hover:border-blue-500/20 transition-all duration-500 flex flex-col h-full">
-      <div className="h-32 lg:h-36 bg-slate-800 relative overflow-hidden shrink-0">
+    <div className="bg-slate-900/40 backdrop-blur-xl rounded-[1.25rem] border border-white/5 overflow-hidden group shadow-2xl hover:border-blue-500/20 transition-all duration-500 flex flex-col h-full">
+      <div className="h-20 lg:h-24 bg-slate-800 relative overflow-hidden shrink-0">
         {courseData.thumbnail ? (
           <img
             src={getStorageUrl(courseData.thumbnail)}
@@ -62,30 +62,30 @@ const CourseCard = ({ course, enrollment, status, onNavigate }) => {
         </div>
       </div>
 
-      <div className="p-6 flex flex-col flex-1 min-w-0">
-        <h4 className="text-base font-black mb-2 text-white/90 line-clamp-1 tracking-tight">
+      <div className="p-4 flex flex-col flex-1 min-w-0">
+        <h4 className="text-sm font-black mb-1.5 text-white/90 line-clamp-1 tracking-tight">
           {courseData.title}
         </h4>
-        <p className="text-[11px] text-slate-500 mb-6 line-clamp-2 font-medium leading-relaxed">
+        <p className="text-[10px] text-slate-500 mb-4 line-clamp-2 font-medium leading-relaxed">
           {courseData.description}
         </p>
 
         <div className="mt-auto">
           {isEnrolled ? (
             <>
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Progress</span>
-                <span className="text-[10px] font-black text-white">{progress}%</span>
+              {/* <div className="flex justify-between items-center mb-1.5">
+                <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Progress</span>
+                <span className="text-[9px] font-black text-white">{progress}%</span>
               </div>
-              <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden mb-5">
+              <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden mb-4">
                 <div
                   className={`h-full ${getProgressColor(progress)} transition-all duration-1000 shadow-[0_0_8px_rgba(59,130,246,0.3)]`}
                   style={{ width: `${progress}%` }}
                 ></div>
-              </div>
+              </div> */}
               <button
                 onClick={() => onNavigate(`/courses/${courseData.id}`)}
-                className="w-full bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-blue-900/40 active:scale-95"
+                className="w-full bg-blue-600 hover:bg-blue-500 text-white py-2.5 rounded-xl font-black text-[9px] uppercase tracking-widest transition-all shadow-lg shadow-blue-900/40 active:scale-95"
               >
                 Continue Learning
               </button>
@@ -101,7 +101,7 @@ const CourseCard = ({ course, enrollment, status, onNavigate }) => {
               <button
                 disabled={isRejected}
                 onClick={() => !isRejected && onNavigate("/courses")}
-                className={`w-full py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all ${
+                className={`w-full py-2.5 rounded-xl font-black text-[9px] uppercase tracking-widest transition-all ${
                   isPending 
                   ? "bg-amber-500/10 text-amber-500 border border-amber-500/20 cursor-default" 
                   : "bg-slate-800 text-slate-500 border border-white/5 cursor-not-allowed opacity-50"
@@ -169,7 +169,7 @@ const CourseProgressGrid = () => {
       </div>
 
       {/* Grid Content */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8 min-h-[400px]">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">
         {activeTab === "enrolled" && (
           <>
             {enrolledCourses.map((course) => (
@@ -184,7 +184,7 @@ const CourseProgressGrid = () => {
             {/* Explore more card */}
             <div
               onClick={() => navigate("/courses")}
-              className="bg-slate-900/20 rounded-[1.5rem] border-2 border-dashed border-white/5 flex flex-col items-center justify-center p-8 group cursor-pointer hover:border-blue-500/30 hover:bg-blue-500/5 transition-all duration-300 min-h-[340px]"
+              className="bg-slate-900/20 rounded-[1.25rem] border-2 border-dashed border-white/5 flex flex-col items-center justify-center p-6 group cursor-pointer hover:border-blue-500/30 hover:bg-blue-500/5 transition-all duration-300 min-h-[180px]"
             >
               <div className="w-14 h-14 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:border-blue-500/20 group-hover:bg-blue-500/10 transition-all duration-500 text-slate-500 group-hover:text-blue-400">
                 <i className="fas fa-plus text-xl"></i>

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import ConfirmDialog from "../common/ConfirmDialog";
+import { formatPhoneDisplay } from "../../utils/validation";
 
 const STATUS_BADGE = {
   pending: "bg-amber-500/20 text-amber-400 border-amber-500/30",
@@ -15,7 +16,7 @@ const DetailRow = ({ icon, label, value }) => (
     <div className="flex-1 min-w-0">
       <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">{label}</p>
       <p className="text-sm text-white font-medium break-words whitespace-pre-wrap leading-relaxed">
-        {value || <span className="text-slate-600 italic font-normal">Not provided</span>}
+        {label === "Phone" && value ? formatPhoneDisplay(value) : (value || <span className="text-slate-600 italic font-normal">Not provided</span>)}
       </p>
     </div>
   </div>
@@ -127,7 +128,7 @@ const HireRequestsTab = ({
                     </div>
                     <p className="text-[11px] text-slate-400 truncate mb-1">{req.email}</p>
                     <div className="flex items-center gap-3">
-                      {req.phone && <p className="text-[10px] text-slate-500 flex items-center gap-1"><i className="fas fa-phone-alt text-[8px]"></i> {req.phone}</p>}
+                      {req.phone && <p className="text-[10px] text-slate-500 flex items-center gap-1"><i className="fas fa-phone-alt text-[8px]"></i> {formatPhoneDisplay(req.phone)}</p>}
                     </div>
                     {req.message && (
                       <div className="mt-2 p-2 rounded-lg bg-slate-800/50 border border-slate-700/50">

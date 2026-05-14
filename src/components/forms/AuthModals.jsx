@@ -472,18 +472,18 @@ const AuthModals = () => {
         </button>
 
         {isOpen === "login" ? (
-          <div className="p-6 sm:p-10 relative overflow-y-auto flex-1">
-            <div className="flex flex-col items-center mb-10">
-              <img src="/assets/logo.png" alt="Virtual City School" className="h-12 sm:h-14 object-contain mb-6" />
+          <div className="p-6 sm:p-8 relative overflow-y-auto flex-1 scrollbar-hide">
+            <div className="flex flex-col items-center mb-6">
+              <img src="/assets/logo.png" alt="Virtual City School" className="h-12 sm:h-14 object-contain mb-4" />
               <h2 className="text-xl sm:text-2xl font-black font-poppins text-white text-center uppercase tracking-[0.15em]">
                 Secure Login
               </h2>
-              <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-2">
+              <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-1.5">
                 Access your learning terminal
               </p>
             </div>
 
-            <div className="flex bg-slate-950 p-1.5 rounded-2xl border border-white/5 mb-8">
+            <div className="flex bg-slate-950 p-1.5 rounded-2xl border border-white/5 mb-6">
               {["student", "teacher", "parent", "admin"].map((roleOption) => (
                 <button
                   key={roleOption}
@@ -513,7 +513,7 @@ const AuthModals = () => {
               ))}
             </div>
 
-            <form onSubmit={handleLogin} className="space-y-5" autoComplete="off">
+            <form onSubmit={handleLogin} className="space-y-4" autoComplete="off">
               <div>
                 <label
                   htmlFor="login-email"
@@ -534,7 +534,7 @@ const AuthModals = () => {
                     dispatch(clearAuthError());
                   }}
                   placeholder="e.g. user@email.com"
-                  className="w-full bg-slate-950 border border-white/5 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
+                  className="w-full bg-slate-950 border border-white/5 rounded-2xl px-6 py-3.5 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
                 />
                 {loginErrors.email && (
                   <p className="text-red-500 text-xs mt-2 animate-shake">
@@ -573,7 +573,7 @@ const AuthModals = () => {
                       dispatch(clearAuthError());
                     }}
                     placeholder="••••••••"
-                    className="w-full bg-slate-950 border border-white/5 rounded-2xl px-6 py-4 pr-12 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
+                    className="w-full bg-slate-950 border border-white/5 rounded-2xl px-6 py-3.5 pr-12 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
                   />
                   <button
                     type="button"
@@ -604,7 +604,7 @@ const AuthModals = () => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className={`w-full text-white py-5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all shadow-xl active:scale-95 flex items-center justify-center gap-3 ${
+                className={`w-full text-white py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all shadow-xl active:scale-95 flex items-center justify-center gap-3 ${
                   isLoading
                     ? "bg-indigo-400 cursor-not-allowed"
                     : "bg-indigo-600 hover:bg-indigo-500"
@@ -634,9 +634,8 @@ const AuthModals = () => {
               </div>
             </form>
 
-            {/* ── Forgot Password overlay ── */}
             {fpStep !== "idle" && (
-              <div className="absolute inset-0 bg-slate-900 rounded-[2.5rem] flex flex-col p-6 sm:p-10 z-10">
+              <div className="absolute inset-0 bg-slate-900 rounded-[2.5rem] flex flex-col p-6 sm:p-8 z-10 scrollbar-hide">
                 <button
                   type="button"
                   onClick={() => { setFpStep("idle"); setFpError(""); setFpOtp(""); setFpNewPassword(""); setFpConfirmPassword(""); }}
