@@ -1,6 +1,12 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, Input, Card, FilterSelect, SearchInput } from "../../components/ui";
+import {
+  Button,
+  Input,
+  Card,
+  FilterSelect,
+  SearchInput,
+} from "../../components/ui";
 import ConfirmDialog from "../common/ConfirmDialog";
 
 // Search controls component
@@ -30,20 +36,20 @@ const SearchControls = ({
   );
 
   return (
-    <div className="mb-6 space-y-3">
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+    <div className="mb-6 space-y-4">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         {/* Role tab pills */}
-        <div className="bg-slate-900/60 border border-slate-800/80 rounded-xl p-1 flex flex-wrap items-center gap-1 w-fit">
+        <div className="bg-slate-900/60 border border-slate-800/80 rounded-xl p-1 flex items-center gap-1 w-full lg:w-fit overflow-x-auto no-scrollbar shrink-0">
           {roleTabs.map((tab) => {
             const isActive = usersFilters.role === tab.value;
             return (
               <button
                 key={tab.label}
                 onClick={() => handleFilterChange("role", tab.value)}
-                className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${
+                className={`px-3.5 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all duration-200 whitespace-nowrap ${
                   isActive
                     ? "bg-indigo-600 text-white shadow-md shadow-indigo-500/20"
-                    : "text-slate-400 hover:text-white hover:bg-slate-800"
+                    : "text-slate-500 hover:text-white hover:bg-slate-800"
                 }`}
               >
                 {tab.label}
@@ -52,61 +58,70 @@ const SearchControls = ({
           })}
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <SearchInput
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            onClear={() => setSearchInput("")}
-            placeholder="Search by username or email..."
-            className="w-full sm:w-64"
-          />
-          <FilterSelect
-            style={{ minWidth: "130px" }}
-            value={usersFilters.is_active}
-            onChange={(e) => handleFilterChange("is_active", e.target.value)}
-          >
-            <option value="">All Statuses</option>
-            <option value="true">Active</option>
-            <option value="false">Inactive</option>
-          </FilterSelect>
-          <FilterSelect
-            style={{ minWidth: "140px" }}
-            value={usersFilters.ordering}
-            onChange={(e) => handleFilterChange("ordering", e.target.value)}
-          >
-            <option value="-date_joined">Newest First</option>
-            <option value="date_joined">Oldest First</option>
-            <option value="username">Username A–Z</option>
-            <option value="-username">Username Z–A</option>
-          </FilterSelect>
-         
-        
-          <button
-            onClick={handleCreateUser}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold shadow-lg shadow-indigo-500/20 active:scale-95 transition-all duration-150"
-          >
-            <i className="fas fa-user-plus text-xs"></i>
-            <span className="hidden sm:inline">Create User</span>
-            <span className="sm:hidden">+</span>
-          </button>
-            <button
-            onClick={() => onFetchUsers()}
-            className="text-white px-5 py-3 rounded-xl text-sm font-medium shadow-lg active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500"
-            title="Refresh"
-          >
-            <i className="fas fa-sync text-xs"></i>
-            <span className="hidden sm:inline">Refresh</span>
-          </button>
-          {hasActiveFilters && (
-            <button
-              onClick={onClearFilters}
-              title="Clear all filters"
-              className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-slate-700/70 bg-slate-900 hover:bg-rose-500/10 hover:border-rose-500/40 text-slate-400 hover:text-rose-400 text-sm font-medium transition-all duration-150"
+        {/* Filter Controls Group */}
+        <div className="flex flex-wrap lg:flex-nowrap items-center gap-1.5 flex-1 lg:justify-end">
+          <div className="min-w-[130px] flex-1 lg:flex-none lg:w-40">
+            <SearchInput
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              onClear={() => setSearchInput("")}
+              placeholder="Search users..."
+              className="w-full"
+            />
+          </div>
+
+          <div className="flex items-center gap-1.5 flex-1 sm:flex-none">
+            <FilterSelect
+              style={{ minWidth: "100px" }}
+              className="flex-1 sm:flex-none"
+              value={usersFilters.is_active}
+              onChange={(e) => handleFilterChange("is_active", e.target.value)}
             >
-              <i className="fas fa-times text-xs"></i>
-              <span className="hidden sm:inline">Clear</span>
+              <option value="">Statuses</option>
+              <option value="true">Active</option>
+              <option value="false">Inactive</option>
+            </FilterSelect>
+
+            <FilterSelect
+              style={{ minWidth: "110px" }}
+              className="flex-1 sm:flex-none"
+              value={usersFilters.ordering}
+              onChange={(e) => handleFilterChange("ordering", e.target.value)}
+            >
+              <option value="-date_joined">Newest</option>
+              <option value="date_joined">Oldest</option>
+              <option value="username">A–Z</option>
+            </FilterSelect>
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            {hasActiveFilters && (
+              <button
+                onClick={onClearFilters}
+                title="Clear all filters"
+                className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-slate-700/70 bg-slate-900 hover:bg-rose-500/10 hover:border-rose-500/40 text-slate-400 hover:text-rose-400 text-sm font-medium transition-all duration-150"
+              >
+                <i className="fas fa-times text-xs"></i>
+                <span className="hidden sm:inline">Clear</span>
+              </button>
+            )}
+
+            <button
+              onClick={handleCreateUser}
+              className="h-[40px] px-5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-indigo-600/20 active:scale-95 transition-all flex items-center justify-center gap-2 whitespace-nowrap shrink-0"
+            >
+              <i className="fas fa-user-plus text-[10px]" />
+              <span>Create User</span>
             </button>
-          )}
+            <button
+              onClick={() => onFetchUsers()}
+              className="text-white px-5 py-3 rounded-xl text-sm font-medium shadow-lg active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500"
+              title="Refresh"
+            >
+              <i className="fas fa-sync text-xs"></i>
+              <span className="hidden sm:inline">Refresh</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -149,7 +164,12 @@ const UsersTab = ({
   onCreateUser,
 }) => {
   const navigate = useNavigate();
-  const [confirmDialog, setConfirmDialog] = useState({ open: false, userId: null, isActive: false, user: null });
+  const [confirmDialog, setConfirmDialog] = useState({
+    open: false,
+    userId: null,
+    isActive: false,
+    user: null,
+  });
   const [purgeDialog, setPurgeDialog] = useState({ open: false, userId: null });
   // Debounced search handler - use controlled pattern
   const [localSearchInput, setLocalSearchInput] = useState(
@@ -197,12 +217,22 @@ const UsersTab = ({
     [setUsersFilters],
   );
   const handleDeleteUser = (user) => {
-    setConfirmDialog({ open: true, userId: user.id, isActive: user.is_active, user });
+    setConfirmDialog({
+      open: true,
+      userId: user.id,
+      isActive: user.is_active,
+      user,
+    });
   };
 
   const confirmDeleteUser = async () => {
     const { userId, user } = confirmDialog;
-    setConfirmDialog({ open: false, userId: null, isActive: false, user: null });
+    setConfirmDialog({
+      open: false,
+      userId: null,
+      isActive: false,
+      user: null,
+    });
     try {
       await onUserDelete(userId, user);
     } catch (error) {
@@ -387,8 +417,12 @@ const UsersTab = ({
                             : "bg-emerald-600/10 text-emerald-400 hover:bg-emerald-600/20"
                         }`}
                       >
-                        <i className={`fas ${user.is_active ? "fa-ban" : "fa-check-circle"}`}></i>
-                        <span className="hidden sm:inline">{user.is_active ? "Deactivate" : "Activate"}</span>
+                        <i
+                          className={`fas ${user.is_active ? "fa-ban" : "fa-check-circle"}`}
+                        ></i>
+                        <span className="hidden sm:inline">
+                          {user.is_active ? "Deactivate" : "Activate"}
+                        </span>
                       </button>
                       <button
                         onClick={() => handlePurgeUser(user.id)}
@@ -485,7 +519,9 @@ const UsersTab = ({
                                 : "bg-emerald-600/10 text-emerald-400 hover:bg-emerald-600/20"
                             }`}
                           >
-                            <i className={`fas ${user.is_active ? "fa-ban" : "fa-check-circle"} mr-1`}></i>
+                            <i
+                              className={`fas ${user.is_active ? "fa-ban" : "fa-check-circle"} mr-1`}
+                            ></i>
                             {user.is_active ? "Deactivate" : "Activate"}
                           </button>
                           <button
@@ -519,7 +555,14 @@ const UsersTab = ({
         confirmLabel={confirmDialog.isActive ? "Deactivate" : "Activate"}
         cancelLabel="Cancel"
         onConfirm={confirmDeleteUser}
-        onCancel={() => setConfirmDialog({ open: false, userId: null, isActive: false, user: null })}
+        onCancel={() =>
+          setConfirmDialog({
+            open: false,
+            userId: null,
+            isActive: false,
+            user: null,
+          })
+        }
       />
 
       <ConfirmDialog
