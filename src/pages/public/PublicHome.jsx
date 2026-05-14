@@ -319,13 +319,21 @@ const PublicHome = () => {
 
         {/* Expert Tutors Section */}
         <div className="mt-32 md:mt-48 pb-20">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-black font-poppins tracking-tight text-white mb-4">
-              Expert Tutors at Your Fingertips
-            </h2>
-            <p className="text-slate-400 text-base md:text-lg max-w-2xl mx-auto">
-              1-on-1 personalized mentorship from ivy-league professionals.
-            </p>
+          <div className="flex justify-between items-end mb-16">
+            <div className="text-left">
+              <p className="text-[10px] font-black uppercase tracking-[0.4em] text-cyan-500 mb-2">
+                Mentorship
+              </p>
+              <h2 className="text-3xl md:text-5xl font-black font-poppins tracking-tight text-white">
+                Expert Tutors at Your Fingertips
+              </h2>
+            </div>
+            <button
+              onClick={() => navigate("/teachers")}
+              className="hidden md:flex text-cyan-400 font-black text-[10px] uppercase tracking-widest hover:text-white transition items-center gap-3 border-b border-cyan-500/20 pb-1"
+            >
+              View full Tutors <i className="fas fa-arrow-right text-[8px]"></i>
+            </button>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
