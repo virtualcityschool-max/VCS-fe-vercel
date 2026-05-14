@@ -15,6 +15,7 @@ import { useSubmissionGuard } from "../../utils/requestDeduplicator";
 import { getCourseImage } from "../../utils/courseImageUtils";
 import { setAuthModal, setEnrollmentIntent } from "../../store/slices/uiSlice";
 import EnrollmentTypeModal from "../../components/courses/EnrollmentTypeModal";
+import ConfirmDialog from "../../components/common/ConfirmDialog";
 import { showApiError } from "../../utils/apiErrorHandler";
 import { getStorageUrl } from "../../utils/storageUrl";
 import AuthRequiredModal from "../../components/common/AuthRequiredModal";
@@ -476,14 +477,16 @@ const Marketplace = () => {
       </div>
 
       {/* Enrollment Type Modal */}
-      <EnrollmentTypeModal
-        isOpen={enrollmentModalOpen}
-        onClose={closeEnrollmentModal}
-        onSelect={handleEnrollmentTypeSelect}
-        instructorId={selectedCourse?.instructor?.id || selectedCourse?.instructor_id}
-        teacher={selectedCourse?.instructor}
-        onSlotSelect={callPrivateEnrollmentCall}
-        isEnrolling={selectedCourse ? enrollingCourseIds.includes(selectedCourse.id) : false}
+      <ConfirmDialog
+        open={enrollmentModalOpen}
+        variant="primary"
+        title="Confirm Enrollment"
+        message={`Are you sure you want to enroll in "${selectedCourse?.title}"?`}
+        confirmLabel="Yes, Enroll Now"
+        cancelLabel="Cancel"
+        loading={selectedCourse ? enrollingCourseIds.includes(selectedCourse.id) : false}
+        onConfirm={() => handleEnrollmentTypeSelect("normal")}
+        onCancel={closeEnrollmentModal}
       />
 
       <AuthRequiredModal 

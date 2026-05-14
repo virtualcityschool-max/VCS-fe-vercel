@@ -344,31 +344,75 @@ const PublicHome = () => {
               : teachers.slice(0, 4).map((t) => (
                   <div
                     key={t.id}
-                    className="group bg-slate-900/40 backdrop-blur-3xl border border-slate-800 rounded-[1.5rem] p-8 transition-all duration-300 hover:border-indigo-500/40 hover:shadow-2xl hover:shadow-indigo-500/10 text-center"
+                    className="group relative bg-gradient-to-b from-slate-900/80 to-slate-900 border border-slate-800 rounded-3xl p-5 transition-all duration-300 ease-out hover:border-indigo-500/40 hover:shadow-[0_10px_40px_-10px_rgba(99,102,241,0.35)] hover:-translate-y-[2px] flex flex-col"
                   >
-                    {/* Avatar */}
-                    <div className="relative w-24 h-24 mx-auto mb-6">
-                      <div className="absolute -inset-1 bg-linear-to-tr from-indigo-500 to-cyan-400 rounded-full blur-[2px] opacity-70 group-hover:opacity-100 transition duration-300" />
-                      <div className="relative w-full h-full rounded-full border-2 border-slate-900 overflow-hidden bg-slate-800 flex items-center justify-center">
-                        {t.avatar ? (
-                          <img src={t.avatar} alt={t.teacher_name} className="w-full h-full object-cover" />
+                    {/* Hover glow overlay */}
+                    <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition duration-300 pointer-events-none bg-indigo-500/4" />
+
+                    {/* Top */}
+                    <div className="flex items-center gap-3 mb-4 relative z-10">
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center text-white font-bold text-base shadow-md transition-transform duration-300 group-hover:scale-105 shrink-0">
+                        {t.teacher_name?.[0]?.toUpperCase() || "T"}
+                      </div>
+
+                      <div className="flex-1 min-w-0 text-left">
+                        <h3 className="text-base font-semibold text-white truncate">
+                          {t.teacher_name || "Unnamed teacher"}
+                        </h3>
+                        <p className="text-xs text-slate-400 mt-0.5 truncate">
+                          {t.expertise || "No expertise specified"}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Experience */}
+                    <div className="mb-4 relative z-10 text-left">
+                      <span className="text-xs text-slate-400">
+                        <i className="fas fa-briefcase text-slate-600 mr-1.5" />
+                        {t.experience ?? 0} yrs experience
+                      </span>
+                    </div>
+
+                    {/* Courses */}
+                    <div className="mb-4 relative z-10 flex-1 text-left">
+                      <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-2 font-bold">
+                        Courses
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {t.courses?.length ? (
+                          t.courses.slice(0, 3).map((course) => (
+                            <span
+                              key={course.id}
+                              className="text-xs px-3 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700 hover:border-indigo-500/40 transition"
+                            >
+                              {course.course_name}
+                            </span>
+                          ))
                         ) : (
-                          <span className="text-2xl font-black text-indigo-400">
-                            {t.teacher_name?.[0]?.toUpperCase()}
+                          <span className="text-xs text-slate-500">
+                            No courses available
                           </span>
                         )}
                       </div>
                     </div>
 
-                    <h3 className="text-lg font-bold text-white mb-1 truncate">{t.teacher_name}</h3>
-                    <p className="text-xs text-cyan-400 font-medium mb-4 tracking-wide truncate">{t.expertise || "Tutor"}</p>
-                    
-                    <button
-                      onClick={() => setHireModal(t)}
-                      className="w-full py-3.5 rounded-xl bg-slate-800 border border-slate-700 text-white font-black text-[11px] uppercase tracking-[0.2em] transition-all hover:bg-white hover:text-slate-950 hover:border-white active:scale-95"
-                    >
-                      Hire Tutor
-                    </button>
+                    {/* CTA — pinned to bottom */}
+                    <div className="flex flex-col gap-2 mt-auto relative z-10">
+                      {auth.isLoggedIn && (
+                        <button
+                          onClick={() => navigate(`/teachers/${t.id}`)}
+                          className="w-full py-2.5 rounded-xl bg-slate-900 border border-indigo-600/30 text-indigo-400 hover:bg-indigo-600 hover:text-white font-black text-[11px] uppercase tracking-[0.18em] transition-all active:scale-95"
+                        >
+                          View Profile
+                        </button>
+                      )}
+                      <button
+                        onClick={() => setHireModal(t)}
+                        className="w-full py-2.5 rounded-xl bg-slate-900 border border-blue-600/30 text-blue-500 hover:bg-blue-600 hover:text-white font-black text-[11px] uppercase tracking-[0.18em] transition-all active:scale-95"
+                      >
+                        Hire Tutor
+                      </button>
+                    </div>
                   </div>
                 ))}
           </div>

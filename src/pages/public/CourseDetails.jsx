@@ -27,6 +27,7 @@ import {
 import { getCourseImage } from "../../utils/courseImageUtils";
 import { setAuthModal, setEnrollmentIntent } from "../../store/slices/uiSlice";
 import EnrollmentTypeModal from "../../components/courses/EnrollmentTypeModal";
+import ConfirmDialog from "../../components/common/ConfirmDialog";
 import { getStorageUrl } from "../../utils/storageUrl";
 import FileViewerModal from "../../components/common/FileViewerModal";
 
@@ -799,18 +800,16 @@ const CourseDetails = () => {
       </div>
 
       {/* Enrollment Type Modal */}
-      <EnrollmentTypeModal
-        isOpen={enrollmentModalOpen}
-        onClose={closeEnrollmentModal}
-        onSelect={(type) => {
-          if (type !== "private") {
-            handleEnrollmentTypeSelect(type);
-          }
-        }}
-        instructorId={normalizedCourse.instructor_id}
-        teacher={normalizedCourse.instructor}
-        onSlotSelect={callPrivateEnrollmentCall}
-        isEnrolling={isEnrolling}
+      <ConfirmDialog
+        open={enrollmentModalOpen}
+        variant="primary"
+        title="Confirm Enrollment"
+        message={`Are you sure you want to enroll in "${normalizedCourse?.title}"?`}
+        confirmLabel="Yes, Enroll Now"
+        cancelLabel="Cancel"
+        loading={isEnrolling}
+        onConfirm={() => handleEnrollmentTypeSelect("normal")}
+        onCancel={closeEnrollmentModal}
       />
       {viewerUrl && (
         <FileViewerModal filePath={viewerUrl} handleClose={() => setViewerUrl(null)} />

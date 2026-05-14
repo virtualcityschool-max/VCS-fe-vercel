@@ -42,7 +42,7 @@ const TermsAndConditions = () => {
       {/* Header Space for Navbar */}
       <div className="h-20"></div>
 
-      <div className="max-w-7xl mx-auto px-6 mt-16">
+      <div className="max-w-7xl mx-auto px-6 mt-5">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
           
           {/* Sidebar Navigation */}
