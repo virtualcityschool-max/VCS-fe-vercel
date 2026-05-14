@@ -6,6 +6,8 @@ import {
   fetchStudentDashboard,
 } from "../../store/slices/studentDashboardSlice";
 import { toastManager } from "../../utils/toastManager";
+import { extractApiErrorMessage } from "../../utils/apiErrorHandler";
+import ConfirmDialog from "../common/ConfirmDialog";
 
 const NextSessionCard = () => {
   const dispatch = useDispatch();
@@ -13,6 +15,7 @@ const NextSessionCard = () => {
   const isJoiningSession = useSelector(
     (state) => state.studentDashboard.isJoiningSession,
   );
+  const [tooEarlyOpen, setTooEarlyOpen] = React.useState(false);
 
   const handleJoinSession = async () => {
     const sessionId = nextSession?.id ?? nextSession?.session_id;
@@ -47,8 +50,13 @@ const NextSessionCard = () => {
         toastManager.error("No valid meeting link found");
       }
     } catch (error) {
-      console.error("Failed to join session:", error);
-      toastManager.error("Failed to join session");
+      const msg = extractApiErrorMessage(error);
+      if (msg === "You cannot join before the scheduled time.") {
+        setTooEarlyOpen(true);
+      } else {
+        console.error("Failed to join session:", error);
+        toastManager.error("Failed to join session");
+      }
     }
   };
 
@@ -142,6 +150,17 @@ const NextSessionCard = () => {
           )}
         </button>
       </div>
+
+      <ConfirmDialog
+        open={tooEarlyOpen}
+        variant="primary"
+        title="Too Early to Join"
+        message="You can join 30 minutes earlier only."
+        confirmLabel="Got it"
+        cancelLabel={null}
+        onConfirm={() => setTooEarlyOpen(false)}
+        onCancel={() => setTooEarlyOpen(false)}
+      />
     </div>
   );
 };

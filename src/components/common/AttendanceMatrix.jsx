@@ -120,49 +120,59 @@ const AttendanceMatrix = ({
         <div className="rounded-3xl overflow-x-auto">
           <table className="text-sm border-collapse" style={{ minWidth: "100%" }}>
             <thead>
-              {/* Row 1: sticky name col (rowspan 2) + month group headers + sticky summary col (rowspan 2) */}
-              <tr className="border-b border-slate-800/60 bg-slate-900">
+              {/* Row 1: Top-level SESSIONS header */}
+              <tr className="border-b border-slate-800/40 bg-slate-900">
                 <th
-                  rowSpan={2}
-                  className="sticky left-0 z-20 bg-slate-900 px-5 py-3 text-left text-[10px] uppercase tracking-wider text-slate-500 font-semibold min-w-[185px] border-r border-slate-800"
+                  rowSpan={3}
+                  className="sticky left-0 z-20 bg-slate-900 px-5 py-3 text-left text-[10px] uppercase tracking-widest text-slate-500 font-black min-w-[185px] border-r border-slate-800"
                   style={leftShadow}
                 >
                   {isStudent ? "Student" : "Teacher"}
                 </th>
 
-                {monthGroups.map((g) => (
-                  <th
-                    key={g.key}
-                    colSpan={g.count}
-                    className="px-2 py-2 text-center text-[11px] font-bold text-slate-300 border-r border-slate-800/50 last:border-r-0 whitespace-nowrap"
-                  >
-                    {g.label}&nbsp;&nbsp; <span className="text-[12px] font-normal text-slate-400">{' '}Sessions</span>
-                  </th>
-                ))}
+                <th
+                  colSpan={sortedSessions.length}
+                  className="px-2 py-2 text-center text-[10px] font-black uppercase tracking-[0.3em] text-slate-600 border-r border-slate-800/50"
+                >
+                  Sessions
+                </th>
 
                 <th
-                  rowSpan={2}
-                  className="sticky right-0 z-20 bg-slate-900 px-4 py-3 text-center text-[10px] uppercase tracking-wider text-slate-500 font-semibold border-l border-slate-800"
+                  rowSpan={3}
+                  className="sticky right-0 z-20 bg-slate-900 px-4 py-3 text-center text-[10px] uppercase tracking-widest text-slate-500 font-black border-l border-slate-800"
                   style={{ minWidth: SUMMARY_W, ...rightShadow }}
                 >
                   Summary
                 </th>
               </tr>
 
-              {/* Row 2: per-session day / weekday headers */}
+              {/* Row 2: Month group headers */}
+              <tr className="border-b border-slate-800/60 bg-slate-900">
+                {monthGroups.map((g) => (
+                  <th
+                    key={g.key}
+                    colSpan={g.count}
+                    className="px-2 py-2 text-center text-[11px] font-black text-slate-400 border-r border-slate-800/50 last:border-r-0 whitespace-nowrap uppercase tracking-widest bg-slate-800/30"
+                  >
+                    {g.label}
+                  </th>
+                ))}
+              </tr>
+
+              {/* Row 3: per-session day / weekday headers */}
               <tr className="border-b border-slate-800 bg-slate-900">
                 {sortedSessions.map((s) => {
                   const d = s.scheduled_at ? new Date(s.scheduled_at) : null;
                   return (
                     <th
                       key={s.id}
-                      className="px-1 py-2 text-center min-w-[52px]"
+                      className="px-1 py-3 text-center min-w-[52px] border-r border-slate-800/30 last:border-r-0"
                       title={s.title + (d ? ` — ${d.toLocaleDateString()}` : "")}
                     >
                       {d ? (
                         <>
-                          <div className="text-[12px] font-bold text-slate-300 leading-none">{d.getDate()}</div>
-                          <div className="text-[9px] text-slate-600 uppercase mt-0.5">{d.toLocaleDateString([], { weekday: "short" })}</div>
+                          <div className="text-[13px] font-black text-white leading-none">{d.getDate()}</div>
+                          <div className="text-[8px] text-slate-600 font-black uppercase mt-1 tracking-tighter">{d.toLocaleDateString([], { weekday: "short" })}</div>
                         </>
                       ) : (
                         <span className="text-slate-700 text-[10px]">—</span>

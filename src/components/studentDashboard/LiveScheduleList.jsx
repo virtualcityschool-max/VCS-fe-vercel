@@ -8,7 +8,7 @@ import {
 } from "../../store/slices/studentDashboardSlice";
 import { toastManager } from "../../utils/toastManager";
 import { formatDate, formatScheduleTime } from "../common/StartSession";
-import { showApiError } from "../../utils/apiErrorHandler";
+import { extractApiErrorMessage, showApiError } from "../../utils/apiErrorHandler";
 import ConfirmDialog from "../common/ConfirmDialog";
 
 const LiveScheduleList = () => {
@@ -21,6 +21,7 @@ const LiveScheduleList = () => {
   const [loadingSessionId, setLoadingSessionId] = useState(null);
   const [loadingAction, setLoadingAction] = useState(null); // 'join' | 'end'
   const [endConfirm, setEndConfirm] = useState({ open: false, session: null });
+  const [tooEarlyOpen, setTooEarlyOpen] = useState(false);
 
   const openMeetingLink = (link) => {
     if (!link || !link.startsWith("http")) {
@@ -45,7 +46,12 @@ const LiveScheduleList = () => {
       openMeetingLink(meetingLink);
       dispatch(fetchStudentDashboard());
     } catch (err) {
-      showApiError(err);
+      const msg = extractApiErrorMessage(err);
+      if (msg === "You cannot join before the scheduled time.") {
+        setTooEarlyOpen(true);
+      } else {
+        showApiError(err);
+      }
     } finally {
       setLoadingSessionId(null);
       setLoadingAction(null);
@@ -309,6 +315,17 @@ const LiveScheduleList = () => {
         cancelLabel="Cancel"
         onConfirm={confirmEndSession}
         onCancel={() => setEndConfirm({ open: false, session: null })}
+      />
+
+      <ConfirmDialog
+        open={tooEarlyOpen}
+        variant="primary"
+        title="Too Early to Join"
+        message="You can join 30 minutes earlier only."
+        confirmLabel="Got it"
+        cancelLabel={null}
+        onConfirm={() => setTooEarlyOpen(false)}
+        onCancel={() => setTooEarlyOpen(false)}
       />
     </section>
   );
