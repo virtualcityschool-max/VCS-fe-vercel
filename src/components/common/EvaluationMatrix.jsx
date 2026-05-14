@@ -88,6 +88,12 @@ const EvaluationMatrix = ({ students = [], courseStatus }) => {
     return Array.from(map.values());
   }, [students]);
 
+  const totalCourseMarks = useMemo(() => {
+    const aSum = allAssignments.reduce((sum, a) => sum + (Number(a.max_score) || 0), 0);
+    const qSum = allQuizzes.reduce((sum, q) => sum + (Number(q.max_score) || 0), 0);
+    return aSum + qSum;
+  }, [allAssignments, allQuizzes]);
+
   if (students.length === 0) {
     return (
       <div className="bg-slate-900/50 border border-slate-800 border-dashed rounded-3xl p-12 text-center">
@@ -170,7 +176,7 @@ const EvaluationMatrix = ({ students = [], courseStatus }) => {
                 className="sticky z-20 bg-slate-900 px-4 py-4 text-center text-[10px] uppercase tracking-wider text-slate-500 font-semibold border-l border-slate-800"
                 style={{ right: GRADE_W + OBTAINED_W, minWidth: PERCENTAGE_W, ...rightShadow }}
               >
-                Pct
+                Percentage
               </th>
 
               {/* Fixed right — Obtained */}
@@ -178,7 +184,7 @@ const EvaluationMatrix = ({ students = [], courseStatus }) => {
                 className="sticky z-20 bg-slate-900 px-4 py-4 text-center text-[10px] uppercase tracking-wider text-slate-500 font-semibold border-l border-slate-800"
                 style={{ right: GRADE_W, minWidth: OBTAINED_W }}
               >
-                Obtained
+                Obtained <span className="text-slate-600 normal-case ml-0.5">/ {totalCourseMarks}</span>
               </th>
 
               {/* Fixed right — Grade */}
@@ -293,9 +299,6 @@ const EvaluationMatrix = ({ students = [], courseStatus }) => {
                   >
                     <span className="text-white font-bold tabular-nums">
                       {s.combined_totals?.computed_obtained ?? s.assignment_totals?.computed_obtained ?? "—"}
-                    </span>
-                    <span className="text-slate-500 text-xs tabular-nums">
-                      /{s.combined_totals?.computed_total ?? s.assignment_totals?.computed_total ?? "—"}
                     </span>
                   </td>
 

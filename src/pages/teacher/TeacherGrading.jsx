@@ -149,7 +149,7 @@ const TeacherGrading = ({
           </option>
         ))}
       </FilterSelect>
-      <FilterSelect
+      {/* <FilterSelect
         value={filters.status}
         onChange={(e) =>
           setFilters((prev) => ({ ...prev, status: e.target.value }))
@@ -157,7 +157,7 @@ const TeacherGrading = ({
       >
         <option value="published">Published</option>
         <option value="draft">Draft</option>
-      </FilterSelect>
+      </FilterSelect> */}
       <button
         type="button"
         onClick={() => setShowCreateModal(true)}

@@ -31,7 +31,7 @@ export const fetchMyLeads = createAsyncThunk(
     try {
       return await hireService.getMyLeads(status);
     } catch (error) {
-      return rejectWithValue(error.message || "Failed to load hire leads");
+      return rejectWithValue(error.message || "Failed to load hire request");
     }
   }
 );

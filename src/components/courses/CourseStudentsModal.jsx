@@ -3,6 +3,7 @@ import { useDispatch } from "react-redux";
 import { coursesService } from "../../services/coursesService";
 import { unenrollStudent } from "../../store/slices/adminSlice";
 import { toastManager } from "../../utils/toastManager";
+import { getCourseImage } from "../../utils/courseImageUtils";
 
 const Badge = ({ children, color = "slate" }) => {
   const colors = {
@@ -103,8 +104,13 @@ const CourseStudentsModal = ({ courseId, courseTitle, onClose, canUnenroll }) =>
               ) : course ? (
                 <div className="space-y-5">
                   {/* Course image placeholder */}
-                  <div className="w-full h-32 bg-gradient-to-br from-indigo-600/30 to-purple-600/20 rounded-xl flex items-center justify-center border border-indigo-500/20">
-                    <i className="fas fa-graduation-cap text-indigo-400 text-4xl"></i>
+                  <div className="w-full h-32 rounded-xl overflow-hidden border border-indigo-500/20 shadow-lg relative group/image">
+                    <img 
+                      src={getCourseImage(course)} 
+                      alt={course.title}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-linear-to-t from-slate-900/60 to-transparent"></div>
                   </div>
 
                   {/* Title + status */}

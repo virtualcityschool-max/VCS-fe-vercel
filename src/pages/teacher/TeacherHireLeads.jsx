@@ -22,7 +22,7 @@ const TeacherHireLeads = () => {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h2 className="text-xl font-black font-poppins text-white">Hire Leads</h2>
+          <h2 className="text-xl font-black font-poppins text-white">Hire Request</h2>
           <p className="text-sm text-slate-400 mt-0.5">People who want to hire you as a tutor</p>
         </div>
         <button
@@ -85,43 +85,73 @@ const TeacherHireLeads = () => {
           <p className="text-slate-400 text-sm">Hire requests from potential students will appear here.</p>
         </div>
       ) : (
-        <div className="space-y-3">
-          {myLeads.map((lead) => (
-            <div key={lead.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-5 hover:border-slate-700 transition-colors">
-              <div className="flex flex-col sm:flex-row sm:items-start gap-4">
-                <div className="flex items-start gap-3 flex-1 min-w-0">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-                    {lead.full_name?.[0]?.toUpperCase() || "?"}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <p className="text-sm font-semibold text-white">{lead.full_name}</p>
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border uppercase tracking-wide ${STATUS_BADGE[lead.status] || STATUS_BADGE.pending}`}>
-                        {lead.status}
-                      </span>
-                    </div>
-                    <p className="text-xs text-slate-400 mt-0.5">{lead.email}</p>
-                    {lead.phone && <p className="text-xs text-slate-500">{formatPhoneDisplay(lead.phone)}</p>}
-                    {lead.message && (
-                      <p className="text-xs text-slate-400 mt-1 italic">"{lead.message}"</p>
-                    )}
-                  </div>
-                </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        {myLeads.map((lead) => (
+          <div 
+            key={lead.id} 
+            className="group relative glass p-5 rounded-3xl border-slate-800/60 hover:border-indigo-500/50 hover-lift transition-all duration-500 overflow-hidden flex flex-col h-full"
+          >
+            {/* Subtle gradient accent on hover */}
+            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-3xl pointer-events-none" />
 
-                <div className="text-right flex-shrink-0">
-                  <p className="text-[10px] text-slate-500">
-                    {new Date(lead.created_at).toLocaleDateString()}
-                  </p>
-                  {lead.reviewed_at && (
-                    <p className="text-[10px] text-slate-500 mt-0.5">
-                      Reviewed {new Date(lead.reviewed_at).toLocaleDateString()}
-                    </p>
+            <div className="relative z-10 flex flex-col h-full">
+              {/* Card Header: Avatar & Status */}
+              <div className="flex justify-between items-center mb-4">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-black text-base shadow-lg shadow-indigo-500/10 group-hover:scale-105 transition-transform duration-500">
+                  {lead.full_name?.[0]?.toUpperCase() || "?"}
+                </div>
+                <span className={`text-[8px] font-black px-2.5 py-1 rounded-full border uppercase tracking-wider shadow-sm ${STATUS_BADGE[lead.status] || STATUS_BADGE.pending}`}>
+                  {lead.status}
+                </span>
+              </div>
+
+              {/* Card Body: User Info */}
+              <div className="mb-auto">
+                <h3 className="text-base font-bold text-white mb-0.5 group-hover:text-indigo-200 transition-colors truncate">{lead.full_name}</h3>
+                <div className="space-y-1 mb-4">
+                  <div className="flex items-center gap-2 text-slate-400">
+                    <i className="far fa-envelope text-[9px] text-indigo-400/70" />
+                    <span className="text-[10px] font-medium truncate">{lead.email}</span>
+                  </div>
+                  {lead.phone && (
+                    <div className="flex items-center gap-2 text-slate-400">
+                      <i className="fas fa-phone-alt text-[9px] text-emerald-400/70" />
+                      <span className="text-[10px] font-medium">{formatPhoneDisplay(lead.phone)}</span>
+                    </div>
                   )}
                 </div>
+
+                {lead.message && (
+                  <div className="bg-slate-800/20 border border-slate-700/20 rounded-xl p-3 relative mb-3">
+                    <p className="text-[11px] text-slate-400 leading-snug italic line-clamp-2">
+                      "{lead.message}"
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Card Footer: Timestamps */}
+              <div className="mt-4 pt-4 border-t border-slate-800/50 flex items-center justify-between">
+                <div className="flex flex-col">
+                  <span className="text-[8px] text-slate-500 uppercase font-black tracking-widest leading-none mb-1">Received</span>
+                  <span className="text-[10px] text-slate-300 font-bold">
+                    {new Date(lead.created_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}
+                  </span>
+                </div>
+                
+                {lead.reviewed_at && (
+                  <div className="flex flex-col text-right">
+                    <span className="text-[8px] text-slate-500 uppercase font-black tracking-widest leading-none mb-1">Reviewed</span>
+                    <span className="text-[10px] text-slate-400 font-medium">
+                      {new Date(lead.reviewed_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
+      </div>
       )}
     </div>
   );
