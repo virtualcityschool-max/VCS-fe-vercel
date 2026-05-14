@@ -283,22 +283,11 @@ const StudentAssignmentDetails = () => {
                             <p className="text-xs text-emerald-500/60 font-bold uppercase tracking-widest">Well done!</p>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <span className="block text-4xl font-black text-white leading-none">
-                            {assignment.my_submission.score}
-                          </span>
-                          <span className="text-xs text-slate-500 font-black uppercase tracking-widest">
-                            / {assignment.max_score} Marks
-                          </span>
-                        </div>
                       </div>
                       
                       {assignment.my_submission.feedback && (
-                        <div className="bg-slate-950/30 border border-emerald-500/10 rounded-2xl p-6">
-                          <p className="text-[10px] uppercase tracking-[0.2em] text-emerald-500/50 font-black mb-3">Teacher's Feedback</p>
-                          <p className="text-slate-300 text-base leading-relaxed font-medium">
-                            {assignment.my_submission.feedback}
-                          </p>
+                        <div className="bg-slate-950/30 border border-emerald-500/10 rounded-xl p-4 text-slate-300 text-sm leading-relaxed font-medium">
+                          {assignment.my_submission.feedback}
                         </div>
                       )}
                     </div>
@@ -447,17 +436,28 @@ const StudentAssignmentDetails = () => {
 
               {/* Marks Info */}
               <div className="p-6 flex items-center gap-4 group">
-                <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">
-                  <i className="fas fa-star text-xl"></i>
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform ${
+                  assignment.my_submission?.is_graded ? "bg-emerald-500/10 text-emerald-400" : "bg-indigo-500/10 text-indigo-400"
+                }`}>
+                  <i className={`fas ${assignment.my_submission?.is_graded ? "fa-check-double" : "fa-star"} text-xl`}></i>
                 </div>
                 <div>
                   <p className="text-[10px] uppercase tracking-widest text-slate-500 font-black mb-1">
-                    Total Marks
+                    {assignment.my_submission?.is_graded ? "Marks Obtained" : "Total Marks"}
                   </p>
                   <p className="text-sm text-white font-bold leading-none">
-                    {assignment.max_score} Points
+                    {assignment.my_submission?.is_graded ? (
+                      <span className="flex items-baseline gap-1.5">
+                        <span className="text-emerald-400 text-lg">{assignment.my_submission.score}</span>
+                        <span className="text-slate-600 text-[14px] text-white">/ {assignment.max_score}</span>
+                      </span>
+                    ) : (
+                      `${assignment.max_score} Points`
+                    )}
                   </p>
-                  <p className="text-[10px] text-slate-400 mt-1">Maximum grade</p>
+                  <p className="text-[10px] text-slate-400 mt-1">
+                    {assignment.my_submission?.is_graded ? "Evaluation result" : "Maximum grade"}
+                  </p>
                 </div>
               </div>
 

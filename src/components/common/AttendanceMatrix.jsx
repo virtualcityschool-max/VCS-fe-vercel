@@ -136,7 +136,7 @@ const AttendanceMatrix = ({
                     colSpan={g.count}
                     className="px-2 py-2 text-center text-[11px] font-bold text-slate-300 border-r border-slate-800/50 last:border-r-0 whitespace-nowrap"
                   >
-                    {g.label}
+                    {g.label}&nbsp;&nbsp; <span className="text-[12px] font-normal text-slate-400">{' '}Sessions</span>
                   </th>
                 ))}
 

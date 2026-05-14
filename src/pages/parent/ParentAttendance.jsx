@@ -87,35 +87,29 @@ const ParentAttendance = () => {
 
       {activeChild && (
         <div className="flex items-center gap-4 flex-wrap">
-          <div className="flex items-center gap-3 px-4 py-2 bg-slate-800/40 rounded-xl border border-white/5 w-fit shrink-0">
-            <div className="w-6 h-6 rounded-lg bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-[10px] font-black text-indigo-400">
-              {(activeChild.username || "?")[0].toUpperCase()}
-            </div>
-            <span className="text-xs font-medium text-slate-400">
-              Viewing <span className="text-white font-black ml-1">{activeChild.username || activeChild.name}</span>
-            </span>
-          </div>
-
-          {/* Course Tabs */}
-          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+          {/* Course Tabs - Premium Segmented Control */}
+          <div className="flex items-center p-1 bg-slate-900/80 rounded-2xl border border-white/5 shadow-2xl overflow-x-auto custom-scrollbar max-w-full pb-2">
             {courses.length > 0 ? (
               courses.map((c) => (
                 <button
                   key={c.id}
                   onClick={() => setCourseId(String(c.id))}
-                  className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all whitespace-nowrap border ${
+                  className={`flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.1em] transition-all duration-300 whitespace-nowrap active:scale-95 shrink-0 ${
                     String(courseId) === String(c.id)
-                      ? "bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-600/20 active:scale-95"
-                      : "bg-slate-800/40 border-white/5 text-slate-500 hover:text-slate-300 hover:bg-slate-800/60"
+                      ? "bg-indigo-600 text-white shadow-xl shadow-indigo-600/40"
+                      : "text-slate-500 hover:text-slate-300 hover:bg-white/5"
                   }`}
                 >
-                  {c.title}
+                  <i className={`fas fa-book-open text-[11px] transition-opacity ${
+                    String(courseId) === String(c.id) ? "opacity-100" : "opacity-40"
+                  }`}></i>
+                  <span>{c.title}</span>
                 </button>
               ))
             ) : !isCoursesLoading && (
-              <span className="text-[10px] uppercase tracking-widest text-slate-600 font-bold ml-2 italic">
+              <div className="px-4 py-2 text-[10px] uppercase tracking-widest text-slate-600 font-bold italic">
                 No courses enrolled
-              </span>
+              </div>
             )}
           </div>
         </div>

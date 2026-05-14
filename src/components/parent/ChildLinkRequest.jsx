@@ -75,7 +75,7 @@ const ChildLinkRequest = ({ onSuccess }) => {
           <div className="w-8 h-8 bg-purple-600/20 rounded-lg flex items-center justify-center">
             <i className="fas fa-link text-purple-400 text-sm"></i>
           </div>
-          Request Child Links
+         Request Child Access
         </h2>
         <p className="text-slate-400">
           Enter your child's student ID or email to link them to your account. The request will be sent to the school administration for approval.
@@ -236,7 +236,7 @@ const ChildLinkRequest = ({ onSuccess }) => {
             {linkLoading ? (
               <><i className="fas fa-spinner fa-spin text-xs"></i> Sending…</>
             ) : (
-              <><i className="fas fa-paper-plane text-xs"></i> Send Link Request{entries.length > 1 ? "s" : ""}</>
+              <><i className="fas fa-paper-plane text-xs"></i> Send Access Request{entries.length > 1 ? "s" : ""}</>
             )}
           </button>
         </div>

@@ -88,22 +88,30 @@ const WordViewer = ({ url, filename, ext }) => (
 );
 
 const DownloadOnly = ({ url, filename, iconClass, reason }) => (
-  <div className="absolute inset-0 flex flex-col items-center justify-center gap-5 p-8">
-    <div className="w-16 h-16 rounded-3xl bg-slate-800 border border-slate-700 flex items-center justify-center">
-      <i className={`fas ${iconClass} text-slate-400 text-2xl`} />
+  <div className="absolute inset-0 flex flex-col items-center justify-center p-8 bg-slate-950/40">
+    <div className="bg-slate-900/80 border border-slate-800 rounded-[2rem] p-10 flex flex-col items-center max-w-sm w-full shadow-2xl backdrop-blur-xl animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="w-20 h-20 rounded-3xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mb-6 shadow-inner relative group">
+        <div className="absolute inset-0 bg-indigo-500/5 blur-xl group-hover:bg-indigo-500/10 transition-all rounded-3xl" />
+        <i className={`fas ${iconClass} text-indigo-400 text-3xl relative z-10`} />
+      </div>
+      
+      <div className="text-center mb-8">
+        <h3 className="text-white font-black text-xl mb-2 tracking-tight">No Preview Available</h3>
+        <p className="text-slate-400 text-sm font-medium leading-relaxed">
+          {reason} <br />
+          <span className="text-slate-500 text-xs mt-1 block italic font-normal">Please download the file to view its contents.</span>
+        </p>
+      </div>
+
+      <button
+        type="button"
+        onClick={() => triggerDownload(url, filename)}
+        className="w-full inline-flex items-center justify-center gap-3 px-6 py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-black uppercase tracking-widest transition-all shadow-xl shadow-indigo-600/20 hover:scale-[1.02] active:scale-[0.98]"
+      >
+        <i className="fas fa-download text-xs" />
+        Download File
+      </button>
     </div>
-    <div className="text-center">
-      <p className="text-white font-semibold text-sm mb-1">No Preview Available</p>
-      <p className="text-slate-500 text-xs">{reason}</p>
-    </div>
-    <button
-      type="button"
-      onClick={() => triggerDownload(url, filename)}
-      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold transition"
-    >
-      <i className="fas fa-download" />
-      Download File
-    </button>
   </div>
 );
 // ── Main component ────────────────────────────────────────────────────────────

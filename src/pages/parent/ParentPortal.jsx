@@ -136,7 +136,7 @@ const ParentPortal = () => {
                 onClick={() => setIsLinkModalOpen(true)}
                 className="px-10 py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-indigo-900/40 transition-all hover:scale-[1.02]"
               >
-                <i className="fas fa-link mr-2"></i> Request Child Linking
+                <i className="fas fa-link mr-2"></i> Request Child Access
               </Button>
               {/* <Button 
                 variant="outline"

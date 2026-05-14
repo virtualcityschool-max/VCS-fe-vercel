@@ -90,7 +90,7 @@ const ParentDashboardHeader = ({ dashboardData, userName, onLinkRequest }) => {
           className="bg-indigo-600 hover:bg-indigo-500 text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-indigo-900/40 transition-all hover:scale-[1.02] active:scale-95 group"
         >
           <i className="fas fa-link mr-2 group-hover:rotate-12 transition-transform"></i>
-          Request Child Link
+         Request Child Access
         </Button>
       </div>
     </div>
