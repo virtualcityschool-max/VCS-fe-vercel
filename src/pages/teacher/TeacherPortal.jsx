@@ -217,10 +217,6 @@ const TeacherPortal = () => {
                 <h2 className="text-3xl sm:text-4xl font-black font-poppins tracking-tight text-white">
                   Welcome, {dashboard?.teacher?.username || "Instructor"}!
                 </h2>
-                <p className="text-indigo-300/80 font-medium mt-1 flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-indigo-400 animate-ping"></span>
-                  You have {dashboard?.upcoming_sessions_count || 0} sessions scheduled
-                </p>
               </div>
             </div>
           </div>
