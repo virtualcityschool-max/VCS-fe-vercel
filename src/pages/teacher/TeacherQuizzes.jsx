@@ -15,6 +15,7 @@ import {
 import { teacherService } from "../../services/teacherService";
 import { FilterSelect } from "../../components/ui";
 import { toastManager } from "../../utils/toastManager";
+import { showApiError } from "../../utils/apiErrorHandler";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const defaultOption = () => ({ option_text: "", is_correct: false });
@@ -383,8 +384,9 @@ const TeacherQuizzes = ({
       setForm(emptyForm);
       setQuestions([defaultQuestion()]);
     } catch (e) {
-      const msg = typeof e === "string" ? e : (e?.detail || e?.title?.[0] || e?.questions || JSON.stringify(e));
-      toastManager.error(msg || "Failed to create quiz");
+      // const msg = typeof e === "string" ? e : (e?.detail || e?.title?.[0] || e?.questions || JSON.stringify(e));
+      // toastManager.error(msg || "Failed to create quiz");
+      showApiError(e)
     } finally {
       setSaving(false);
     }
@@ -414,8 +416,9 @@ const TeacherQuizzes = ({
       toastManager.success("Quiz updated");
       setEditTarget(null);
     } catch (e) {
-      const detail = e?.detail || (typeof e === "string" ? e : JSON.stringify(e));
-      toastManager.error(detail || "Failed to update quiz");
+      showApiError(e)
+      // const detail = e?.detail || (typeof e === "string" ? e : JSON.stringify(e));
+      // toastManager.error(detail || "Failed to update quiz");
     } finally {
       setSaving(false);
     }
@@ -429,8 +432,9 @@ const TeacherQuizzes = ({
       toastManager.success("Quiz deleted");
       setDeleteTarget(null);
     } catch (e) {
-      const detail = e?.detail || (typeof e === "string" ? e : JSON.stringify(e));
-      toastManager.error(detail || "Failed to delete quiz");
+      showApiError(e)
+      // const detail = e?.detail || (typeof e === "string" ? e : JSON.stringify(e));
+      // toastManager.error(detail || "Failed to delete quiz");
     } finally {
       setDeletingId(null);
     }

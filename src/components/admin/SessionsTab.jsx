@@ -683,7 +683,7 @@ const SessionsTab = ({
                   </label>
                   {(() => {
                     const editCourseId = Number(editSessionForm.course_id);
-                    const availableOptions = courses.filter(c => c.status === "published" && !c.has_session);
+                    const availableOptions = courses.filter(c => c.status === "published");
                     const currentInList = editCourseId && courses.some(c => c.id === editCourseId);
                     return (
                       <FilterSelect

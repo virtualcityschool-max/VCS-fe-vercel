@@ -25,7 +25,7 @@ const NAV_CONFIG = {
     { label: "Assessments",  to: "/teacher/assessments",    icon: "fas fa-clipboard-check" },
     { label: "My Classes",  to: "/teacher/sessions",       icon: "fas fa-calendar-alt" },
     { label: "Evaluations",  to: "/teacher/evaluations",    icon: "fas fa-chart-bar" },
-    { label: "Hire Leads",   to: "/teacher/hire-leads",     icon: "fas fa-handshake" },
+    { label: "Hire Request",   to: "/teacher/hire-leads",     icon: "fas fa-handshake" },
   ],
   student: [
     { label: "Dashboard",   to: "/student",                 icon: "fas fa-table-columns",  end: true },
