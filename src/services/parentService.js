@@ -9,6 +9,7 @@ const PARENT_ENDPOINTS = {
   ATTENDANCE: "/classroom/attendance/",
   CHILD_COURSES: "/courses/",
   UNLINK_CHILDREN: "/child-links/unlink/",
+  PARENT_CHILD_DETAIL: "/classroom/parent-child-detail/",
 };
 
 export const parentService = {
@@ -19,6 +20,18 @@ export const parentService = {
       return response.data;
     } catch (error) {
       throw handleApiError(error, { context: "Get Parent Dashboard" });
+    }
+  },
+
+  // Get detailed information for a specific child
+  getChildDetail: async (childId) => {
+    try {
+      const response = await axiosInstance.get(PARENT_ENDPOINTS.PARENT_CHILD_DETAIL, {
+        params: { child_id: childId },
+      });
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error, { context: "Get Child Detail" });
     }
   },
 

@@ -47,7 +47,7 @@ const LiveScheduleList = () => {
       dispatch(fetchStudentDashboard());
     } catch (err) {
       const msg = extractApiErrorMessage(err);
-      if (msg === "You cannot join before the scheduled time.") {
+      if ((msg === "You cannot join before the scheduled time.") || (msg === "You can join up to 30 minutes before the scheduled time.")) {
         setTooEarlyOpen(true);
       } else {
         showApiError(err);

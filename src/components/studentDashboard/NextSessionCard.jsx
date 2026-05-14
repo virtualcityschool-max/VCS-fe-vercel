@@ -51,7 +51,7 @@ const NextSessionCard = () => {
       }
     } catch (error) {
       const msg = extractApiErrorMessage(error);
-      if (msg === "You cannot join before the scheduled time.") {
+      if ((msg === "You cannot join before the scheduled time.") || (msg === "You can join up to 30 minutes before the scheduled time.")) {
         setTooEarlyOpen(true);
       } else {
         console.error("Failed to join session:", error);

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import ConfirmDialog from "../common/ConfirmDialog";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -94,6 +95,7 @@ const SkeletonLoader = () => (
 
 const ChildCard = ({ child }) => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [isGradesExpanded, setIsGradesExpanded] = useState(false);
   const [confirmUnlink, setConfirmUnlink] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -259,7 +261,18 @@ const ChildCard = ({ child }) => {
                   className="fixed inset-0 z-10" 
                   onClick={() => setShowDropdown(false)}
                 ></div>
-                <div className="absolute right-0 mt-2 w-48 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-20 py-1.5 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="absolute right-0 mt-2 w-56 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-20 py-1.5 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <button
+                    onClick={() => {
+                      setShowDropdown(false);
+                      navigate(`/parent/child/${child.id}`);
+                    }}
+                    className="w-full px-4 py-2 text-left text-xs font-bold text-slate-300 hover:bg-slate-800 flex items-center gap-2 transition-colors"
+                  >
+                    <i className="fas fa-chart-line text-[10px] text-indigo-400"></i>
+                    View Academic Details
+                  </button>
+                  <div className="h-px bg-slate-800 my-1"></div>
                   <button
                     onClick={() => {
                       setShowDropdown(false);
@@ -440,7 +453,15 @@ const ChildCard = ({ child }) => {
       )}
       </div>
 
-      {/* Removed footer unlink button */}
+      <div className="pt-4 mt-auto border-t border-slate-700/50">
+        <button
+          onClick={() => navigate(`/parent/child/${child.id}`)}
+          className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-[0.98] shadow-lg shadow-indigo-950/20 flex items-center justify-center gap-2"
+        >
+          View Full Report
+          <i className="fas fa-arrow-right text-[8px]"></i>
+        </button>
+      </div>
 
       <ConfirmDialog
         open={confirmUnlink}

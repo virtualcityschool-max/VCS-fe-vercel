@@ -46,8 +46,6 @@ import {
   StudentLayout,
   StudentClasses,
   ParentPortal,
-  Classroom,
-  StudentFeed,
   Marketplace,
   CourseDetails,
   TeacherProfile,
@@ -65,6 +63,7 @@ import {
   ParentLayout,
   ParentAttendance,
   ParentEvaluationPage,
+  ParentChildDetails,
   PrivacyPolicy,
   TermsAndConditions,
 } from "./pages";
@@ -275,6 +274,7 @@ const AppInner = () => {
                 <Route index element={<ParentPortal />} />
                 <Route path="attendance" element={<ParentAttendance />} />
                 <Route path="evaluations" element={<ParentEvaluationPage />} />
+                <Route path="child/:childId" element={<ParentChildDetails />} />
               </Route>
             </Route>
 

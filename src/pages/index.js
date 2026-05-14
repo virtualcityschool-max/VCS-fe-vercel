@@ -56,3 +56,4 @@ export { default as ParentLayout } from "./parent/ParentLayout";
 export { default as ParentPortal } from "./parent/ParentPortal";
 export { default as ParentAttendance } from "./parent/ParentAttendance";
 export { default as ParentEvaluationPage } from "./parent/ParentEvaluationPage";
+export { default as ParentChildDetails } from "./parent/ParentChildDetails";

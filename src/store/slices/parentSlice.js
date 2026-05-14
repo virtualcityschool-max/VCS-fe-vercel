@@ -9,6 +9,11 @@ const initialState = {
     loading: false,
     error: null,
   },
+  childDetail: {
+    data: null,
+    loading: false,
+    error: null,
+  },
   linkChild: {
     loading: false,
     error: null,
@@ -45,6 +50,18 @@ export const fetchParentDashboard = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await parentService.getDashboard();
+      return response;
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  },
+);
+
+export const fetchParentChildDetail = createAsyncThunk(
+  "parent/fetchChildDetail",
+  async (childId, { rejectWithValue }) => {
+    try {
+      const response = await parentService.getChildDetail(childId);
       return response;
     } catch (error) {
       return rejectWithValue(error);
@@ -149,6 +166,19 @@ const parentSlice = createSlice({
         state.dashboard.loading = false;
         state.dashboard.error = action.payload;
       })
+      // Child Detail
+      .addCase(fetchParentChildDetail.pending, (state) => {
+        state.childDetail.loading = true;
+        state.childDetail.error = null;
+      })
+      .addCase(fetchParentChildDetail.fulfilled, (state, action) => {
+        state.childDetail.loading = false;
+        state.childDetail.data = action.payload;
+      })
+      .addCase(fetchParentChildDetail.rejected, (state, action) => {
+        state.childDetail.loading = false;
+        state.childDetail.error = action.payload;
+      })
       // Link Children
       .addCase(linkChildren.pending, (state) => {
         state.linkChild.loading = true;
@@ -246,6 +276,8 @@ export const selectParentDashboardError = (state) =>
 export const selectLinkChild = (state) => state.parent.linkChild;
 export const selectLinkChildLoading = (state) => state.parent.linkChild.loading;
 export const selectLinkChildError = (state) => state.parent.linkChild.error;
+
+export const selectParentChildDetail = (state) => state.parent.childDetail;
 
 // Child grades selectors
 export const selectChildGrades = (state) => state.parent.childGrades.data;
