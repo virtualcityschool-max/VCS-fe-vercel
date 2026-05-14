@@ -132,6 +132,52 @@ const EvaluationMatrix = ({ students = [], courseStatus }) => {
         <table className="w-full text-sm border-collapse">
           {/* ── Header ── */}
           <thead>
+            {/* ── Grouped Top Header ── */}
+            <tr className="border-b border-slate-800">
+              <th
+                className="sticky left-0 z-30 bg-slate-900 px-5 py-2 text-left text-[9px] uppercase tracking-[0.2em] text-slate-600 font-black border-r border-slate-800"
+                style={leftShadow}
+              >
+                Category
+              </th>
+
+              {allAssignments.length > 0 && (
+                <th 
+                  colSpan={allAssignments.length}
+                  className="px-4 py-2 text-center text-[9px] uppercase tracking-[0.2em] text-indigo-400 font-black bg-indigo-500/5 border-r border-slate-800"
+                >
+                  <div className="flex items-center justify-center gap-2">
+                    <i className="fas fa-file-alt text-[10px]"></i>
+                    Assignments
+                  </div>
+                </th>
+              )}
+
+              {allQuizzes.length > 0 && (
+                <th 
+                  colSpan={allQuizzes.length}
+                  className="px-4 py-2 text-center text-[9px] uppercase tracking-[0.2em] text-purple-400 font-black bg-purple-500/5 border-r border-slate-800"
+                >
+                  <div className="flex items-center justify-center gap-2">
+                    <i className="fas fa-question-circle text-[10px]"></i>
+                    Quizzes
+                  </div>
+                </th>
+              )}
+
+              <th 
+                colSpan={3}
+                className="sticky right-0 z-30 bg-slate-900 px-4 py-2 text-center text-[9px] uppercase tracking-[0.2em] text-emerald-400 font-black border-l border-slate-800"
+                style={rightShadow}
+              >
+                <div className="flex items-center justify-center gap-2">
+                  <i className="fas fa-chart-line text-[10px]"></i>
+                  Final Results
+                </div>
+              </th>
+            </tr>
+
+            {/* ── Individual Item Header ── */}
             <tr className="border-b border-slate-800">
               {/* Fixed left — Student */}
               <th
@@ -145,13 +191,13 @@ const EvaluationMatrix = ({ students = [], courseStatus }) => {
               {allAssignments.map((a) => (
                 <th
                   key={`a-${a.id}`}
-                  className="px-4 py-4 text-center text-[10px] uppercase tracking-wider text-slate-500 font-semibold min-w-[130px]"
+                  className="px-4 py-4 text-center text-[10px] uppercase tracking-wider text-slate-500 font-semibold min-w-[130px] border-r border-slate-800/30"
                 >
                   <div className="truncate max-w-[120px] mx-auto text-slate-300 normal-case tracking-normal text-[14px]" title={a.title}>
                     {a.title}
                   </div>
                   <div className="text-slate-600 text-[11px] mt-0.5 tracking-normal normal-case font-normal">
-                    Assignment · Total: {a.max_score}
+                    Total: {a.max_score}
                   </div>
                 </th>
               ))}
@@ -160,13 +206,13 @@ const EvaluationMatrix = ({ students = [], courseStatus }) => {
               {allQuizzes.map((q) => (
                 <th
                   key={`q-${q.id}`}
-                  className="px-4 py-4 text-center text-[10px] uppercase tracking-wider text-slate-500 font-semibold min-w-[130px]"
+                  className="px-4 py-4 text-center text-[10px] uppercase tracking-wider text-slate-500 font-semibold min-w-[130px] border-r border-slate-800/30"
                 >
                   <div className="truncate max-w-[120px] mx-auto text-slate-300 normal-case tracking-normal" title={q.title}>
                     {q.title}
                   </div>
                   <div className="text-slate-600 text-[9px] mt-0.5 tracking-normal normal-case font-normal">
-                    Quiz · Total: {q.max_score}
+                    Total: {q.max_score}
                   </div>
                 </th>
               ))}

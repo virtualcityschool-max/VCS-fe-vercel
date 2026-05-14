@@ -25,6 +25,7 @@ const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
 
   const [formData, setFormData] = useState(EMPTY_FORM);
   const [selectedSlot, setSelectedSlot] = useState(null);
+  const [paymentReceived, setPaymentReceived] = useState(false);
 
   const { formError, clearAllErrors } = useFieldErrors();
 
@@ -33,9 +34,11 @@ const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
     if (isOpen) {
       dispatch(fetchUsers());
       dispatch(fetchCoursesWithSessions());
+      setPaymentReceived(false);
     } else {
       setFormData(EMPTY_FORM);
       setSelectedSlot(null);
+      setPaymentReceived(false);
       clearAllErrors();
     }
   }, [isOpen]);
@@ -201,6 +204,33 @@ const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
             // </div>
           )}
 </>
+          {/* Payment Confirmation */}
+          <div className="pt-2">
+            <label className="flex items-center gap-3 cursor-pointer group py-3 px-4 bg-slate-800/40 rounded-2xl border border-slate-700/50 hover:bg-slate-800/60 transition-all text-left">
+              <div className="relative flex items-center justify-center w-5 h-5 flex-shrink-0">
+                <input
+                  type="checkbox"
+                  className="peer sr-only"
+                  checked={paymentReceived}
+                  onChange={(e) => setPaymentReceived(e.target.checked)}
+                />
+                <div className="absolute inset-0 border-2 border-slate-500 rounded-lg bg-slate-900 transition-all peer-checked:bg-indigo-600 peer-checked:border-indigo-600"></div>
+                <svg 
+                  className="relative w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 transition-all scale-50 peer-checked:scale-100 pointer-events-none z-10" 
+                  fill="none" 
+                  viewBox="0 0 24 24" 
+                  stroke="currentColor" 
+                  strokeWidth="4"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <span className="text-sm text-slate-300 select-none font-semibold leading-snug">
+                I have received the payment for this course
+              </span>
+            </label>
+          </div>
+
           {formError && <p className="text-red-400 text-sm">{formError}</p>}
 
           {/* Footer */}
@@ -214,7 +244,7 @@ const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
             </button>
             <button
               type="submit"
-              disabled={createLoading}
+              disabled={createLoading || !paymentReceived}
               className="px-6 py-2.5 rounded-xl text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition disabled:opacity-50 flex items-center gap-2"
             >
               {createLoading

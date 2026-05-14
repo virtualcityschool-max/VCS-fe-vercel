@@ -67,7 +67,7 @@ const ParentEvaluationPage = () => {
         {/* Filters */}
         <div className="flex flex-wrap items-end gap-3">
           <div className="flex flex-col gap-1">
-            <span className="text-[10px] uppercase tracking-widest text-slate-500 font-bold px-0.5">Child</span>
+            <span className="text-[10px] uppercase tracking-widest text-slate-500 font-bold px-0.5">Child Account</span>
             {dashLoading ? (
               <div className="h-10 bg-slate-800 rounded-xl animate-pulse w-[220px]" />
             ) : (
@@ -78,28 +78,9 @@ const ParentEvaluationPage = () => {
               >
                 {children.map((c) => (
                   <option key={c.id} value={c.id}>
-                    {`${c.username || c.name} (ID: ${c.id})`}
+                    {c.username || c.name}
                   </option>
                 ))}
-              </FilterSelect>
-            )}
-          </div>
-
-          <div className="flex flex-col gap-1">
-            <span className="text-[10px] uppercase tracking-widest text-slate-500 font-bold px-0.5">Course</span>
-            {loading ? (
-              <div className="h-10 bg-slate-800 rounded-xl animate-pulse w-[240px]" />
-            ) : (
-              <FilterSelect
-                value={selectedCourseId}
-                onChange={(e) => setSelectedCourseId(e.target.value)}
-                disabled={courses.length === 0}
-                style={{ width: 240 }}
-              >
-                {courses.length === 0
-                  ? <option value="">No courses available</option>
-                  : courses.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)
-                }
               </FilterSelect>
             )}
           </div>
@@ -107,20 +88,44 @@ const ParentEvaluationPage = () => {
       </div>
 
       {activeChild && (
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-indigo-600/30 border border-indigo-500/40 flex items-center justify-center text-[10px] font-bold text-indigo-300">
+        <div className="flex items-center gap-4 flex-wrap">
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-800/40 rounded-xl border border-white/5 w-fit shrink-0">
+            <div className="w-5 h-5 rounded-lg bg-indigo-600/30 border border-indigo-500/40 flex items-center justify-center text-[10px] font-bold text-indigo-300">
               {(activeChild.username || "?")[0].toUpperCase()}
             </div>
-            <span className="text-sm text-slate-400">
-              Viewing <span className="text-white font-semibold">{activeChild.username || activeChild.name}</span>
+            <span className="text-xs text-slate-400">
+              Viewing <span className="text-white font-black">{activeChild.username || activeChild.name}</span>
             </span>
           </div>
+
+          {/* Course Tabs */}
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+            {courses.length > 0 ? (
+              courses.map((c) => (
+                <button
+                  key={c.id}
+                  onClick={() => setSelectedCourseId(String(c.id))}
+                  className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all whitespace-nowrap border ${
+                    String(selectedCourseId) === String(c.id)
+                      ? "bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-600/20 active:scale-95"
+                      : "bg-slate-800/40 border-white/5 text-slate-500 hover:text-slate-300 hover:bg-slate-800/60"
+                  }`}
+                >
+                  {c.title}
+                </button>
+              ))
+            ) : !loading && (
+              <span className="text-[10px] uppercase tracking-widest text-slate-600 font-bold italic ml-2">
+                No courses available
+              </span>
+            )}
+          </div>
+
           {courseStatus && (
-            <span className={`px-2 py-0.5 rounded-lg text-[10px] font-bold uppercase tracking-wider ${
+            <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest shadow-sm ${
               courseStatus === "completed"
-                ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                : "bg-indigo-500/10 text-indigo-400 border border-indigo-500/20"
+                ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                : "bg-indigo-500/20 text-indigo-400 border border-indigo-500/30"
             }`}>
               {courseStatus}
             </span>

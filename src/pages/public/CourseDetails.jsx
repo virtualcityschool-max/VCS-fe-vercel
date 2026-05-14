@@ -36,6 +36,7 @@ const CourseDetails = () => {
   const dispatch = useDispatch();
   const [imageError, setImageError] = useState(false);
   const [enrollmentModalOpen, setEnrollmentModalOpen] = useState(false);
+  const [paymentSubmitted, setPaymentSubmitted] = useState(false);
   const [viewerUrl, setViewerUrl] = useState(null);
   const submissionGuard = useSubmissionGuard();
   // Get auth state from Redux store
@@ -183,6 +184,7 @@ const CourseDetails = () => {
 
         // Close modal
         setEnrollmentModalOpen(false);
+        setPaymentSubmitted(false);
 
         // Refresh course data to update enrollment status
         dispatch(fetchCourseById(courseId));
@@ -226,6 +228,7 @@ const CourseDetails = () => {
         toastManager.success(successMessage);
 
         setEnrollmentModalOpen(false);
+        setPaymentSubmitted(false);
 
         dispatch(fetchCourseById(courseId));
 
@@ -241,6 +244,7 @@ const CourseDetails = () => {
   // Close enrollment modal
   const closeEnrollmentModal = () => {
     setEnrollmentModalOpen(false);
+    setPaymentSubmitted(false);
   };
 
   // Handle course unenrollment
@@ -808,6 +812,9 @@ const CourseDetails = () => {
         confirmLabel="Yes, Enroll Now"
         cancelLabel="Cancel"
         loading={isEnrolling}
+        checkboxLabel="I have submitted the payment for this course"
+        checkboxChecked={paymentSubmitted}
+        onCheckboxChange={setPaymentSubmitted}
         onConfirm={() => handleEnrollmentTypeSelect("normal")}
         onCancel={closeEnrollmentModal}
       />

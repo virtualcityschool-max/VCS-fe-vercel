@@ -15,6 +15,7 @@ const EnrollmentTypeModal = ({
   const [enrollmentType, setEnrollmentType] = useState("");
   const [pendingSlot, setPendingSlot] = useState(null);
   const [showNormalConfirm, setShowNormalConfirm] = useState(false);
+  const [paymentSubmitted, setPaymentSubmitted] = useState(false);
 
   // Reset all state whenever the modal closes
   useEffect(() => {
@@ -22,6 +23,7 @@ const EnrollmentTypeModal = ({
       setEnrollmentType("");
       setPendingSlot(null);
       setShowNormalConfirm(false);
+      setPaymentSubmitted(false);
     }
   }, [isOpen]);
 
@@ -108,27 +110,34 @@ const EnrollmentTypeModal = ({
                 </div>
               </button>
 
-              {/* Private enrollment */}
-              {/* <button
-                onClick={handlePrivateClick}
-                className={`w-full bg-slate-800 hover:bg-slate-700 border rounded-2xl p-6 text-left transition-all group ${
-                  isPrivate
-                    ? "border-emerald-500/50 ring-1 ring-emerald-500/30"
-                    : "border-white/5"
-                }`}
-              >
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-emerald-500/20 text-emerald-500 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:bg-emerald-500/30 transition">
-                    <i className="fas fa-user-tie text-lg"></i>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-white font-bold text-lg mb-1">Private Enrollment</h3>
-                    <p className="text-slate-400 text-sm">
-                      Enroll directly with the course instructor
-                    </p>
-                  </div>
+              {/* Private enrollment section (commented out for now as per current UI) */}
+            </div>
+
+            {/* Payment Checkbox */}
+            <div className="mt-6">
+              <label className="flex items-center gap-3 cursor-pointer group py-4 px-5 bg-slate-800/40 rounded-3xl border border-white/5 hover:bg-slate-800/60 transition-all text-left">
+                <div className="relative flex items-center justify-center w-5 h-5 flex-shrink-0">
+                  <input
+                    type="checkbox"
+                    className="peer sr-only"
+                    checked={paymentSubmitted}
+                    onChange={(e) => setPaymentSubmitted(e.target.checked)}
+                  />
+                  <div className="absolute inset-0 border-2 border-slate-500 rounded-lg bg-slate-900 transition-all peer-checked:bg-indigo-600 peer-checked:border-indigo-600"></div>
+                  <svg 
+                    className="relative w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 transition-all scale-50 peer-checked:scale-100 pointer-events-none z-10" 
+                    fill="none" 
+                    viewBox="0 0 24 24" 
+                    stroke="currentColor" 
+                    strokeWidth="4"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
                 </div>
-              </button> */}
+                <span className="text-sm text-slate-300 select-none font-semibold leading-snug">
+                  I have submitted the payment for this course
+                </span>
+              </label>
             </div>
 
             {/* Slot selection — only shown when Private is active */}
@@ -147,11 +156,11 @@ const EnrollmentTypeModal = ({
 
                 <button
                   onClick={handleEnrollPrivately}
-                  disabled={!pendingSlot}
+                  disabled={!pendingSlot || !paymentSubmitted}
                   className={`w-full py-4 font-bold rounded-2xl transition-all active:scale-95 ${
-                    pendingSlot
+                    pendingSlot && paymentSubmitted
                       ? "bg-emerald-600 hover:bg-emerald-500 text-white cursor-pointer"
-                      : "bg-slate-700 text-slate-500 cursor-not-allowed"
+                      : "bg-slate-700 text-slate-500 cursor-not-allowed opacity-50"
                   }`}
                 >
                   <i className="fas fa-user-lock mr-2"></i>
@@ -181,6 +190,9 @@ const EnrollmentTypeModal = ({
         confirmLabel="Yes, Enroll"
         cancelLabel="Cancel"
         loading={isEnrolling}
+        checkboxLabel="I have submitted the payment for this course"
+        checkboxChecked={paymentSubmitted}
+        onCheckboxChange={setPaymentSubmitted}
         onConfirm={handleNormalConfirm}
         onCancel={handleNormalCancel}
       />

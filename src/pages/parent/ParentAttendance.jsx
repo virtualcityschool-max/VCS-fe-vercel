@@ -63,54 +63,61 @@ const ParentAttendance = () => {
 
   return (
     <div className="text-white px-4 sm:px-6 py-8 space-y-6">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-black font-poppins">Child Attendance</h1>
-          <p className="text-slate-400 text-sm mt-1">Monitor your child's session attendance.</p>
-        </div>
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-black font-poppins text-white">Child Attendance</h1>
+            <p className="text-slate-400 text-sm mt-1">Monitor your child's session attendance.</p>
+          </div>
 
-        {/* Filters */}
-        <div className="flex flex-wrap items-end gap-3">
-          <div className="flex flex-col gap-1">
-            <span className="text-[10px] uppercase tracking-widest text-slate-500 font-bold px-0.5">Child</span>
+          <div className="flex flex-col gap-1 shrink-0">
+            <span className="text-[10px] uppercase tracking-widest text-slate-500 font-bold px-0.5">Child Account</span>
             <FilterSelect
               value={childId}
               onChange={(e) => { setChildId(e.target.value); setCourseId(""); }}
-              style={{ width: 300 }}
+              style={{ width: 260 }}
             >
               {children.map((c) => (
                 <option key={c.id} value={c.id}>
-                  {`${c.username || c.name} (ID: ${c.id})`}
+                  {c.username || c.name}
                 </option>
               ))}
             </FilterSelect>
           </div>
-
-          <div className="flex flex-col gap-1">
-            <span className="text-[10px] uppercase tracking-widest text-slate-500 font-bold px-0.5">Course</span>
-            <FilterSelect
-              value={courseId}
-              onChange={(e) => setCourseId(e.target.value)}
-              disabled={!courses.length}
-              style={{ width: 200 }}
-            >
-              {courses.length === 0
-                ? <option value="">No courses</option>
-                : courses.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)
-              }
-            </FilterSelect>
-          </div>
         </div>
-      </div>
 
       {activeChild && (
-        <div className="flex items-center gap-3 px-4 py-2 bg-slate-800/40 rounded-xl border border-white/5 w-fit">
-          <div className="w-6 h-6 rounded-lg bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-[10px] font-black text-indigo-400">
-            {(activeChild.username || "?")[0].toUpperCase()}
+        <div className="flex items-center gap-4 flex-wrap">
+          <div className="flex items-center gap-3 px-4 py-2 bg-slate-800/40 rounded-xl border border-white/5 w-fit shrink-0">
+            <div className="w-6 h-6 rounded-lg bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-[10px] font-black text-indigo-400">
+              {(activeChild.username || "?")[0].toUpperCase()}
+            </div>
+            <span className="text-xs font-medium text-slate-400">
+              Viewing <span className="text-white font-black ml-1">{activeChild.username || activeChild.name}</span>
+            </span>
           </div>
-          <span className="text-xs font-medium text-slate-400">
-            Viewing <span className="text-white font-black ml-1">{activeChild.username || activeChild.name}</span>
-          </span>
+
+          {/* Course Tabs */}
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+            {courses.length > 0 ? (
+              courses.map((c) => (
+                <button
+                  key={c.id}
+                  onClick={() => setCourseId(String(c.id))}
+                  className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all whitespace-nowrap border ${
+                    String(courseId) === String(c.id)
+                      ? "bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-600/20 active:scale-95"
+                      : "bg-slate-800/40 border-white/5 text-slate-500 hover:text-slate-300 hover:bg-slate-800/60"
+                  }`}
+                >
+                  {c.title}
+                </button>
+              ))
+            ) : !isCoursesLoading && (
+              <span className="text-[10px] uppercase tracking-widest text-slate-600 font-bold ml-2 italic">
+                No courses enrolled
+              </span>
+            )}
+          </div>
         </div>
       )}
 

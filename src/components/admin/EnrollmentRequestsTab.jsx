@@ -11,13 +11,18 @@ const EnrollmentRequestsTab = ({
   onRefresh,
 }) => {
   const [confirmDialog, setConfirmDialog] = useState({ open: false, type: null, enrollmentId: null, label: "" });
+  const [paymentConfirmed, setPaymentConfirmed] = useState(false);
 
-  const handleApprove = (id, label) => setConfirmDialog({ open: true, type: "approve", enrollmentId: id, label });
+  const handleApprove = (id, label) => {
+    setPaymentConfirmed(false);
+    setConfirmDialog({ open: true, type: "approve", enrollmentId: id, label });
+  };
   const handleReject  = (id, label) => setConfirmDialog({ open: true, type: "reject",  enrollmentId: id, label });
 
   const handleConfirm = () => {
     const { type, enrollmentId } = confirmDialog;
     setConfirmDialog({ open: false, type: null, enrollmentId: null, label: "" });
+    setPaymentConfirmed(false);
     if (type === "approve") onApprove(enrollmentId);
     else if (type === "reject") onReject(enrollmentId);
   };
@@ -166,7 +171,13 @@ const EnrollmentRequestsTab = ({
         confirmLabel={confirmDialog.type === "approve" ? "Approve" : "Reject"}
         cancelLabel="Cancel"
         onConfirm={handleConfirm}
-        onCancel={() => setConfirmDialog({ open: false, type: null, enrollmentId: null, label: "" })}
+        onCancel={() => {
+          setConfirmDialog({ open: false, type: null, enrollmentId: null, label: "" });
+          setPaymentConfirmed(false);
+        }}
+        checkboxLabel={confirmDialog.type === "approve" ? "I have received the payment for this course" : ""}
+        checkboxChecked={paymentConfirmed}
+        onCheckboxChange={setPaymentConfirmed}
       />
     </div>
   );

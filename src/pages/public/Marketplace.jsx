@@ -30,6 +30,7 @@ const Marketplace = () => {
     instructor: "",
   });
   const [enrollmentModalOpen, setEnrollmentModalOpen] = useState(false);
+  const [paymentSubmitted, setPaymentSubmitted] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const submissionGuard = useSubmissionGuard();
@@ -222,6 +223,7 @@ const Marketplace = () => {
           response?.message || `Enrolment request sent`;
         toastManager.success(successMessage);
         setEnrollmentModalOpen(false);
+        setPaymentSubmitted(false);
         setSelectedCourse(null);
         dispatch(fetchAllCourses());
 
@@ -263,6 +265,7 @@ const Marketplace = () => {
         toastManager.success(successMessage);
 
         setEnrollmentModalOpen(false);
+        setPaymentSubmitted(false);
         setSelectedCourse(null);
 
         dispatch(fetchAllCourses());
@@ -279,6 +282,7 @@ const Marketplace = () => {
   // Close enrollment modal
   const closeEnrollmentModal = () => {
     setEnrollmentModalOpen(false);
+    setPaymentSubmitted(false);
     setSelectedCourse(null);
   };
 
@@ -485,6 +489,9 @@ const Marketplace = () => {
         confirmLabel="Yes, Enroll Now"
         cancelLabel="Cancel"
         loading={selectedCourse ? enrollingCourseIds.includes(selectedCourse.id) : false}
+        checkboxLabel="I have submitted the payment for this course"
+        checkboxChecked={paymentSubmitted}
+        onCheckboxChange={setPaymentSubmitted}
         onConfirm={() => handleEnrollmentTypeSelect("normal")}
         onCancel={closeEnrollmentModal}
       />

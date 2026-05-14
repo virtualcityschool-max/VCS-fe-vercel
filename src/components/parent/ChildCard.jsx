@@ -96,6 +96,7 @@ const ChildCard = ({ child }) => {
   const dispatch = useDispatch();
   const [isGradesExpanded, setIsGradesExpanded] = useState(false);
   const [confirmUnlink, setConfirmUnlink] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
 
   // Select child-specific data from Redux
   const childGrades = useSelector(selectChildGrades);
@@ -230,7 +231,7 @@ const ChildCard = ({ child }) => {
           </div>
         </div>
         
-        <div className="shrink-0 pt-1">
+        <div className="flex items-center gap-3 shrink-0 pt-1">
           <span
             className={`inline-flex items-center px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border whitespace-nowrap shadow-lg ${getBadgeColor(
               child.badge,
@@ -238,6 +239,41 @@ const ChildCard = ({ child }) => {
           >
             {getBadgeText(child.badge)}
           </span>
+
+          {/* Dropdown Menu */}
+          <div className="relative">
+            <button
+              onClick={() => setShowDropdown(!showDropdown)}
+              className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all ${
+                showDropdown 
+                  ? "bg-slate-700 text-white" 
+                  : "bg-slate-800/50 text-slate-500 hover:text-white hover:bg-slate-700"
+              }`}
+            >
+              <i className="fas fa-ellipsis-v text-xs"></i>
+            </button>
+
+            {showDropdown && (
+              <>
+                <div 
+                  className="fixed inset-0 z-10" 
+                  onClick={() => setShowDropdown(false)}
+                ></div>
+                <div className="absolute right-0 mt-2 w-48 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-20 py-1.5 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <button
+                    onClick={() => {
+                      setShowDropdown(false);
+                      setConfirmUnlink(true);
+                    }}
+                    className="w-full px-4 py-2 text-left text-xs font-bold text-rose-400 hover:bg-rose-500/10 flex items-center gap-2 transition-colors"
+                  >
+                    <i className="fas fa-user-minus text-[10px]"></i>
+                    Unlink Child Profile
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
@@ -404,17 +440,7 @@ const ChildCard = ({ child }) => {
       )}
       </div>
 
-      {/* Bottom Action - Clear Unlink button aligned at the bottom */}
-      <div className="pt-4 border-t border-slate-700 mt-auto">
-        <button
-          onClick={() => setConfirmUnlink(true)}
-          disabled={isUnlinking}
-          className="w-full py-2.5 text-xs font-bold uppercase tracking-widest text-rose-400 bg-rose-500/5 hover:bg-rose-500/10 border border-rose-500/20 hover:border-rose-500/40 rounded-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-        >
-          <i className="fas fa-user-minus text-[10px]"></i>
-          {isUnlinking ? "Unlinking..." : "Unlink Child Profile"}
-        </button>
-      </div>
+      {/* Removed footer unlink button */}
 
       <ConfirmDialog
         open={confirmUnlink}

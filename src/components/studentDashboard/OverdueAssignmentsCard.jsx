@@ -137,7 +137,7 @@ const OverdueAssignmentsCard = () => {
       </div>
       <div className="min-w-0 flex-1 relative z-10">
         <h3 className="text-lg font-black text-white mb-0.5 tracking-tight group-hover:text-emerald-400 transition-colors">
-          Perfect Score!
+          All Caught Up!
         </h3>
         <p className="text-emerald-500/60 text-[9px] font-black uppercase tracking-[0.2em] leading-none">
           No pending assignments
