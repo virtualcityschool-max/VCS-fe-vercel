@@ -310,7 +310,7 @@ const AppInner = () => {
         {showNavbar && <Footer />}
 
         {/* Global Overlays */}
-        <section className="relative z-50">
+        <section className="relative z-[100]">
           <AuthModals />
           {/* <AIChat /> */}
           <ToastContainer
