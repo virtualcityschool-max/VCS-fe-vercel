@@ -73,7 +73,9 @@ const StudentQuizList = ({ hideHeader = false, filterCourse: externalFilterCours
       {/* Grid Layout */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {quizzes?.length ? (
-          quizzes.map((quiz) => {
+          [...quizzes]
+            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+            .map((quiz) => {
             const { label, color } = statusConfig(quiz.my_submission);
             const sub = quiz.my_submission;
             const isFullyGraded = sub && (sub.status === "graded" || sub.status === "auto_graded");
@@ -94,15 +96,15 @@ const StudentQuizList = ({ hideHeader = false, filterCourse: externalFilterCours
                     <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 group-hover:scale-110 group-hover:bg-indigo-500 group-hover:text-white transition-all duration-500">
                       <i className="fas fa-question-circle text-lg" />
                     </div>
-                    <div className="flex flex-col items-end gap-1.5">
-                      <span className={`${color} px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest shadow-sm backdrop-blur-md border border-white/5 flex-shrink-0`}>
-                        {label}
-                      </span>
+                    <div className="flex flex-row items-center gap-2">
                       {(quiz.is_overdue && quiz.my_submission?.status == 'missed') && (
-                        <span className="text-[8px] text-rose-400 font-black uppercase tracking-tighter animate-pulse">
+                        <span className="text-[8px] text-rose-500 font-black uppercase tracking-tighter animate-pulse">
                           Overdue
                         </span>
                       )}
+                      <span className={`${color} px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest shadow-sm backdrop-blur-md border border-white/5 flex-shrink-0`}>
+                        {label}
+                      </span>
                     </div>
                   </div>
 

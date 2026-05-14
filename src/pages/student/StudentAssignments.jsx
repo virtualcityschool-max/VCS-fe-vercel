@@ -97,7 +97,9 @@ const StudentAssignments = ({ hideHeader = false, filterCourse: externalFilterCo
       {/* Grid Layout */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {assignments?.length ? (
-          assignments.map((assignment) => {
+          [...assignments]
+            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+            .map((assignment) => {
             const config = getStatusConfig(assignment);
 
             return (

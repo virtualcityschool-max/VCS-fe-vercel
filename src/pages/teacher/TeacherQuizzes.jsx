@@ -680,7 +680,7 @@ const TeacherQuizzes = ({
             {/* Card Header: Badges and Action Icons */}
             <div className="relative z-10 flex justify-between items-start mb-5">
               <div className="flex flex-col gap-2">
-                <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border w-fit ${
+                {/* <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border w-fit ${
                   quiz.is_locked
                     ? "bg-rose-500/10 text-rose-400 border-rose-500/20"
                     : quiz.is_published
@@ -689,7 +689,7 @@ const TeacherQuizzes = ({
                 }`}>
                   <span className={`inline-block w-1.5 h-1.5 rounded-full mr-1.5 ${quiz.is_published && !quiz.is_locked ? "bg-emerald-400 animate-pulse" : quiz.is_locked ? "bg-rose-400" : "bg-slate-400"}`}></span>
                   {quiz.is_locked ? "Locked" : quiz.is_published ? "Published" : "Draft"}
-                </span>
+                </span> */}
                 <p className="text-[9px] text-indigo-400/80 uppercase tracking-[0.2em] font-black">
                   {quiz.course_title}
                 </p>
@@ -1092,7 +1092,7 @@ const TeacherQuizzes = ({
                               <label className="text-[10px] uppercase tracking-wider text-slate-500 font-black mb-1.5 block">
                                 {selectedQuizSubmission.status === "submitted" ? "Assign Marks" : "Edit Marks"}{" "}
                                 <span className="text-rose-500">*</span>{" "}
-                                <span className="text-slate-600 font-normal lowercase">(max {ans.max_marks})</span>
+                                <span className="text-slate-600 font-normal">(Total {ans.max_marks})</span>
                               </label>
                               <input
                                 type="number"
