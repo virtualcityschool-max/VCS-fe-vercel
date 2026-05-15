@@ -6,7 +6,7 @@ import { FilterSelect } from "../../components/ui";
 
 const statusConfig = (sub) => {
   if (!sub || sub.status === "pending") return { label: "Pending",    color: "text-yellow-400 bg-yellow-500/10" };
-  if (sub.status === "missed")          return { label: "Missed",     color: "text-red-400 bg-red-500/10" };
+  if (sub.status === "missed")          return { label: "overdue",     color: "text-red-400 bg-red-500/10" };
   if (sub.status === "submitted")       return { label: "Submitted",  color: "text-blue-400 bg-blue-500/10" };
   if (sub.status === "auto_graded")     return { label: "Graded",     color: "text-emerald-400 bg-emerald-500/10" };
   if (sub.status === "graded")          return { label: "Graded",     color: "text-emerald-400 bg-emerald-500/10" };
@@ -111,9 +111,6 @@ const StudentQuizList = ({ hideHeader = false, filterCourse: externalFilterCours
                             <i className="fas fa-question-circle text-lg" />
                           </div>
                           <div className="flex flex-row items-center gap-2">
-                            {(quiz.is_overdue && quiz.my_submission?.status == 'missed') && (
-                              <span className="text-[8px] text-rose-500 font-black uppercase tracking-tighter animate-pulse">Overdue</span>
-                            )}
                             <span className={`${color} px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest shadow-sm backdrop-blur-md border border-white/5`}>
                               {label}
                             </span>
