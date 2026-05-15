@@ -148,7 +148,7 @@ const ParentChildDetails = () => {
       </section>
 
       {/* Course Tabs & Content */}
-      <section className="max-w-7xl mx-auto px-6 -mt-10 relative z-20">
+      <section className="max-w-7xl mx-auto -mt-10 relative z-20">
         <div className="bg-slate-900/50 backdrop-blur-2xl border border-white/5 rounded-[3rem] overflow-hidden shadow-2xl">
           {/* Tabs Scroller */}
           <div className="bg-slate-900/80 border-b border-white/5 px-8 pt-6">
