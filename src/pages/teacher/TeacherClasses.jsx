@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { fetchMyCourses } from "../../store/slices/teacherSlice";
 import { formatCategoryLabel } from "../../constants";
+import { getCourseImage } from "../../utils/courseImageUtils";
 
 const TeacherClasses = () => {
   const dispatch = useDispatch();
@@ -63,49 +64,52 @@ const TeacherClasses = () => {
           myCourses.map((course) => (
             <div
               key={course.id}
-              className="relative group bg-slate-900/40 backdrop-blur-md p-8 rounded-[2.5rem] border border-white/5 hover:border-indigo-500/40 transition-all duration-500 cursor-pointer overflow-hidden shadow-2xl hover:shadow-indigo-500/10"
+              className="relative group bg-slate-900/40 backdrop-blur-md rounded-[2.5rem] border border-white/5 hover:border-indigo-500/40 transition-all duration-500 cursor-pointer overflow-hidden shadow-2xl hover:shadow-indigo-500/10"
               onClick={() => navigate(`/teacher/courses/${course.id}`)}
             >
-              {/* Decorative background element */}
-              <div className="absolute top-0 right-0 w-48 h-48 bg-indigo-500/5 rounded-full blur-3xl -mr-20 -mt-20 group-hover:bg-indigo-500/10 transition-colors"></div>
-              
-              <div className="relative z-10 flex flex-col h-full">
-                <div className="flex items-start justify-between gap-6 mb-6">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-3 mb-2">
-                      <span className="px-3 py-1 bg-indigo-500/10 text-indigo-400 rounded-lg text-[10px] font-black uppercase tracking-widest border border-indigo-500/10">
-                        {formatCategoryLabel(course.category)}
-                      </span>
-                      <span className={`text-[10px] font-black uppercase tracking-widest ${course.status === 'published' ? 'text-emerald-400' : 'text-amber-400'}`}>
-                        {course.status}
-                      </span>
-                    </div>
-                    <h2 className="text-2xl font-black font-poppins text-white group-hover:text-indigo-400 transition-colors leading-tight truncate">
-                      {course.title}
-                    </h2>
+              {/* Thumbnail */}
+              <div className="relative w-full h-44 overflow-hidden">
+                {getCourseImage(course) ? (
+                  <img
+                    src={getCourseImage(course)}
+                    alt={course.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-linear-to-br from-indigo-600/20 via-slate-800 to-slate-900 flex items-center justify-center">
+                    <i className="fas fa-graduation-cap text-5xl text-indigo-500/30"></i>
                   </div>
-                  
-                  <div className="w-14 h-14 bg-slate-950 border border-white/5 rounded-2xl flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform shadow-lg">
-                    <i className="fas fa-graduation-cap text-xl"></i>
-                  </div>
+                )}
+                <div className="absolute inset-0 bg-linear-to-t from-slate-950/80 via-transparent to-transparent" />
+                <div className="absolute top-4 left-4">
+                  <span className="px-3 py-1 bg-black/50 backdrop-blur-md text-indigo-300 rounded-lg text-[10px] font-black uppercase tracking-widest border border-indigo-500/20">
+                    {formatCategoryLabel(course.category)}
+                  </span>
                 </div>
+                <div className="absolute top-4 right-4">
+                  <span className={`px-3 py-1 bg-black/50 backdrop-blur-md rounded-lg text-[10px] font-black uppercase tracking-widest border ${course.status === 'published' ? 'text-emerald-400 border-emerald-500/20' : 'text-amber-400 border-amber-500/20'}`}>
+                    {course.status}
+                  </span>
+                </div>
+              </div>
 
-                <p className="text-slate-400 text-sm leading-relaxed mb-8 line-clamp-2 font-medium">
+              {/* Card Content */}
+              <div className="relative p-6 flex flex-col">
+                <div className="absolute top-0 right-0 w-48 h-48 bg-indigo-500/5 rounded-full blur-3xl -mr-20 -mt-10 group-hover:bg-indigo-500/10 transition-colors pointer-events-none" />
+
+                <h2 className="relative text-xl font-black font-poppins text-white group-hover:text-indigo-400 transition-colors leading-tight mb-2 line-clamp-1">
+                  {course.title}
+                </h2>
+
+                <p className="text-slate-400 text-sm leading-relaxed mb-5 line-clamp-2 font-medium">
                   {course.description || "No description available."}
                 </p>
 
-                <div className="mt-auto flex items-center justify-between pt-6 border-t border-white/5">
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2">
-                      <i className="fas fa-user-graduate text-[10px] text-indigo-500/60"></i>
-                      <span className="text-xs font-bold text-slate-300">{course.total_enrolled} Learners</span>
-                    </div>
-                    {/* <div className="flex items-center gap-2">
-                      <i className="fas fa-star text-[10px] text-yellow-500/60"></i>
-                      <span className="text-xs font-bold text-slate-300">5.0</span>
-                    </div> */}
+                <div className="flex items-center justify-between pt-4 border-t border-white/5">
+                  <div className="flex items-center gap-2">
+                    <i className="fas fa-user-graduate text-[10px] text-indigo-500/60"></i>
+                    <span className="text-xs font-bold text-slate-300">{course.total_enrolled} Learners</span>
                   </div>
-                  
                   <button className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-indigo-400 group-hover:text-white transition-colors">
                     Manage Course
                     <i className="fas fa-arrow-right text-[10px] group-hover:translate-x-1 transition-transform"></i>

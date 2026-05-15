@@ -470,7 +470,6 @@ const TeacherQuizzes = ({
       }
 
       const marks = Number(inputVal ?? q.obtained_marks ?? 0);
-
       if (isNaN(marks) || marks < 0) {
         toastManager.error("Marks cannot be negative or invalid");
         return;

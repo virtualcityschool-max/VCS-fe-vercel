@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { coursesService } from "../../services/coursesService";
 import { toastManager } from "../../utils/toastManager";
 import { formatCategoryLabel } from "../../constants";
+import { getCourseImage } from "../../utils/courseImageUtils";
 
 const Badge = ({ children, color = "slate" }) => {
   const colors = {
@@ -114,52 +115,63 @@ const TeacherCourseDetailPage = () => {
           {/* Subtle mesh background for hero */}
           <div className="absolute inset-0 bg-linear-to-br from-indigo-600/10 via-transparent to-transparent pointer-events-none"></div>
           
-          <div className="flex flex-col lg:flex-row lg:items-center gap-8 relative z-10">
-            <div className="w-20 h-20 bg-linear-to-tr from-indigo-600 to-indigo-400 rounded-3xl flex items-center justify-center flex-shrink-0 shadow-[0_20px_40px_-10px_rgba(79,70,229,0.4)] border border-white/20 transform hover:scale-110 transition-transform duration-500">
-              <i className="fas fa-book text-white text-3xl"></i>
+          <div className="flex flex-col lg:flex-row lg:items-start gap-8 relative z-10">
+            {/* Thumbnail */}
+            <div className="w-full lg:w-72 h-48 lg:h-44 rounded-2xl overflow-hidden flex-shrink-0 shadow-[0_20px_40px_-10px_rgba(79,70,229,0.35)] border border-white/10 relative group/thumb">
+              {getCourseImage(course) ? (
+                <img
+                  src={getCourseImage(course)}
+                  alt={course.title}
+                  className="w-full h-full object-cover group-hover/thumb:scale-105 transition-transform duration-700"
+                />
+              ) : (
+                <div className="w-full h-full bg-linear-to-tr from-indigo-600 to-indigo-400 flex items-center justify-center">
+                  <i className="fas fa-book text-white text-4xl opacity-80"></i>
+                </div>
+              )}
+              <div className="absolute inset-0 bg-linear-to-t from-black/30 to-transparent pointer-events-none" />
             </div>
             
-            <div className="flex-1 min-w-0">
-              <div className="flex flex-wrap items-center gap-4 mb-4">
-                <h1 className="text-3xl md:text-5xl font-black font-poppins text-white leading-tight tracking-tight drop-shadow-sm">
-                  {course.title}
-                </h1>
+            <div className="flex-1 min-w-0 lg:pt-1">
+              <div className="flex flex-wrap items-center gap-3 mb-3">
                 <Badge color={course.status === "published" ? "green" : "slate"}>
                   {course.status}
                 </Badge>
+                <span className="px-3 py-1 bg-indigo-500/10 text-indigo-400 rounded-full text-[10px] font-bold uppercase tracking-widest border border-indigo-500/20">
+                  {formatCategoryLabel(course.category)}
+                </span>
+              </div>
+              <div className="flex flex-wrap items-start gap-4 mb-4">
+                <h1 className="text-3xl md:text-4xl font-black font-poppins text-white leading-tight tracking-tight drop-shadow-sm">
+                  {course.title}
+                </h1>
               </div>
               
               <p className="text-slate-400 text-base md:text-lg leading-relaxed mb-8 max-w-3xl font-medium">
                 {course.description}
               </p>
               
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <MetaTile 
-                  icon="tag" 
-                  label="Category" 
-                  value={formatCategoryLabel(course.category) || "—"} 
-                  delay="0.1s"
-                />
+              <div className="grid grid-cols-3 gap-4">
                 <MetaTile
                   icon="wallet"
                   label="Price"
                   value={course.price ? `PKR ${Number(course.price).toLocaleString()}` : "Free"}
                   valueClass="text-emerald-400"
-                  delay="0.2s"
+                  delay="0.1s"
                 />
                 <MetaTile
                   icon="users"
                   label="Enrolled"
                   value={`${students.length} student${students.length !== 1 ? "s" : ""}`}
                   valueClass="text-indigo-400"
-                  delay="0.3s"
+                  delay="0.2s"
                 />
                 <MetaTile
                   icon="calendar-alt"
                   label="Status"
                   value={course.status === "published" ? "Live" : "Draft"}
                   valueClass={course.status === "published" ? "text-green-400" : "text-slate-400"}
-                  delay="0.4s"
+                  delay="0.3s"
                 />
               </div>
             </div>
