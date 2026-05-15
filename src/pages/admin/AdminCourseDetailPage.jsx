@@ -43,7 +43,7 @@ const MetaTile = ({ icon, label, value, valueClass = "text-white" }) => (
 
 const ConfirmUnenroll = ({ student, onConfirm, onCancel, loading }) => (
   <div
-    className="fixed inset-0 bg-black/70 z-[60] flex items-center justify-center p-4"
+    className="fixed inset-0 bg-black/70 z-[200] flex items-center justify-center p-4"
     onClick={onCancel}
   >
     <div
@@ -448,7 +448,7 @@ const AdminCourseDetailPage = () => {
 
       {/* ── Edit Modal ── */}
       {editModalOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[200] p-4">
           <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-5xl max-h-[92vh] overflow-y-auto">
             <div className="flex justify-between items-center px-6 py-5 border-b border-slate-800 sticky top-0 bg-slate-900 z-10">
               <h3 className="text-lg font-bold text-white">Edit Course</h3>

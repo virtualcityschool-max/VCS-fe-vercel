@@ -165,7 +165,7 @@ const ParentPortal = () => {
 
         {/* Link Modal */}
         {isLinkModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-fadeIn">
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-fadeIn">
             <div className="w-full max-w-2xl animate-springyReveal">
               <div className="flex justify-end mb-4">
                 <button 
@@ -266,7 +266,7 @@ const ParentPortal = () => {
 
       {/* Link Modal */}
       {isLinkModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-fadeIn">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-fadeIn">
           <div className="w-full max-w-2xl animate-springyReveal">
             <div className="flex justify-end mb-4">
               <button 

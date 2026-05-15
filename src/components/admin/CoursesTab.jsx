@@ -78,7 +78,7 @@ const CourseCategoriesModal = ({ onClose, onCategoriesChanged, initialEditId, in
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4">
       <div className="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl w-full max-w-md">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-slate-800">
@@ -879,7 +879,7 @@ const CoursesTab = ({
 
       {/* Create Course Modal */}
       {activeModal === "create-course" && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200] p-4">
           <div className="bg-slate-900 border border-slate-800 rounded-[1.5rem] p-4 sm:p-8 w-full max-w-2xl lg:max-w-6xl max-h-[92vh] overflow-y-auto shadow-2xl transition-all duration-300">
             <div className="flex flex-col gap-1 mb-8 pb-6 border-b border-white/5 relative">
               <div className="flex justify-between items-center">
@@ -936,7 +936,7 @@ const CoursesTab = ({
       {activeModal &&
         typeof activeModal === "object" &&
         activeModal.type === "edit-course" && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200] p-4">
             <div className="bg-slate-900 border border-slate-800 rounded-[1.5rem] p-4 sm:p-8 w-full max-w-2xl lg:max-w-6xl max-h-[92vh] overflow-y-auto shadow-2xl transition-all duration-300">
               <div className="flex flex-col gap-1 mb-8 pb-6 border-b border-white/5 relative">
                 <div className="flex justify-between items-center">
@@ -999,7 +999,7 @@ const CoursesTab = ({
       {activeModal &&
         typeof activeModal === "object" &&
         activeModal.type === "assign-instructor" && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200] p-4">
             <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-xl font-bold text-white">

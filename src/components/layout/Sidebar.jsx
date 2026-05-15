@@ -94,7 +94,7 @@ function NavItem({ label, icon, isCollapsed, badge, isActive, onClick, to, end }
 
       {/* Tooltip — only when collapsed */}
       {isCollapsed && (
-        <div className="pointer-events-none absolute left-[calc(100%+12px)] top-1/2 -translate-y-1/2 z-[300]
+        <div className="pointer-events-none absolute left-[calc(100%+12px)] top-1/2 -translate-y-1/2 z-[60]
           opacity-0 group-hover/item:opacity-100 translate-x-1 group-hover/item:translate-x-0
           transition-all duration-150">
           <div className="bg-slate-800 border border-slate-700 text-white text-xs font-medium px-3 py-1.5 rounded-lg shadow-xl whitespace-nowrap flex items-center gap-2">

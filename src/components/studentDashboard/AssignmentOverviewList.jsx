@@ -178,7 +178,7 @@ const AssignmentOverviewList = () => {
           onClick={() => navigate("/student/assessments")}
           className="w-full mt-6 py-3 bg-white/5 hover:bg-white/10 border border-white/5 rounded-2xl text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-white transition-all active:scale-95 shadow-lg"
         >
-          View Archive ({allItems.length})
+          View All ({allItems.length})
         </button>
       )}
     </div>

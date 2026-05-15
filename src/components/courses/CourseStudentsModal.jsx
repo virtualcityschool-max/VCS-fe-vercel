@@ -61,7 +61,7 @@ const CourseStudentsModal = ({ courseId, courseTitle, onClose, canUnenroll }) =>
     <>
       {/* Main modal */}
       <div
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4"
         onClick={onClose}
       >
         <div
@@ -226,7 +226,7 @@ const CourseStudentsModal = ({ courseId, courseTitle, onClose, canUnenroll }) =>
       {/* Unenroll confirmation */}
       {confirmStudent && (
         <div
-          className="fixed inset-0 bg-black/70 z-[60] flex items-center justify-center p-4"
+          className="fixed inset-0 bg-black/70 z-[200] flex items-center justify-center p-4"
           onClick={() => setConfirmStudent(null)}
         >
           <div

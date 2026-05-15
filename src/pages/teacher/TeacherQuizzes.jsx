@@ -796,7 +796,7 @@ const TeacherQuizzes = ({
 
       {/* ── CREATE MODAL ── */}
       {showCreate && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[200] p-4">
           <div className="bg-slate-900 border border-slate-800 rounded-[2rem] p-6 sm:p-10 w-full max-w-5xl max-h-[92vh] overflow-y-auto shadow-2xl transition-all duration-300">
             {/* Header */}
             <div className="flex flex-col gap-1 mb-10 pb-6 border-b border-white/5 relative">
@@ -820,7 +820,7 @@ const TeacherQuizzes = ({
 
       {/* ── EDIT MODAL ── */}
       {editTarget && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[200] p-4">
           <div className="bg-slate-900 border border-slate-800 rounded-[2rem] p-6 sm:p-10 w-full max-w-5xl max-h-[92vh] overflow-y-auto shadow-2xl transition-all duration-300">
             {/* Header */}
             <div className="flex flex-col gap-1 mb-10 pb-6 border-b border-white/5 relative">
@@ -844,7 +844,7 @@ const TeacherQuizzes = ({
 
       {/* ── VIEW MODAL ── */}
       {viewQuiz && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[200] p-4">
           <div className="bg-slate-900 rounded-3xl border border-slate-800 w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 sticky top-0 bg-slate-900 z-10">
               <h2 className="font-bold text-white text-sm">Quiz Details</h2>
@@ -926,7 +926,7 @@ const TeacherQuizzes = ({
 
       {/* ── DELETE CONFIRM ── */}
       {deleteTarget && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[200] p-4">
           <div className="bg-slate-900 rounded-3xl border border-slate-800 w-full max-w-sm p-6 space-y-5">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-2xl bg-rose-500/15 border border-rose-500/20 flex items-center justify-center flex-shrink-0">
@@ -965,7 +965,7 @@ const TeacherQuizzes = ({
 
       {/* ── SUBMISSIONS MODAL ── */}
       {submissionsQuiz && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[200] p-4">
           <div className="bg-slate-900 rounded-3xl border border-slate-800 w-full max-w-lg max-h-[85vh] flex flex-col">
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 flex-shrink-0">
               <h2 className="font-bold text-white text-sm">Submissions: {submissionsQuiz.title}</h2>
@@ -1029,7 +1029,7 @@ const TeacherQuizzes = ({
 
       {/* ── GRADING / VIEW SUBMISSION MODAL ── */}
       {gradingSubId && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[60] p-4">
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[200] p-4">
           <div className="bg-slate-900 rounded-3xl border border-slate-800 w-full max-w-xl max-h-[90vh] flex flex-col">
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 flex-shrink-0">
               <h2 className="font-bold text-white text-sm">

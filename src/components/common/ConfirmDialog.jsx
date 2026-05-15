@@ -57,7 +57,7 @@ const ConfirmDialog = ({
   const isConfirmDisabled = loading || (checkboxLabel && !checkboxChecked);
 
   return createPortal(
-    <div className="fixed inset-0 bg-slate-950/40 backdrop-blur-md z-[60] p-4 flex items-center justify-center animate-in fade-in duration-300">
+    <div className="fixed inset-0 bg-slate-950/40 backdrop-blur-md z-[200] p-4 flex items-center justify-center animate-in fade-in duration-300">
       <div className="bg-slate-900/90 backdrop-blur-2xl border border-white/10 rounded-[2rem] p-8 w-full max-w-sm shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative overflow-hidden group">
         {/* Subtle background glow */}
         <div className={`absolute -right-10 -top-10 w-24 h-24 ${v.iconBg} rounded-full blur-[40px] opacity-50`}></div>

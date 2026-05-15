@@ -200,7 +200,7 @@ const AppInner = () => {
           </button>
         )}
 
-        <main className="relative z-10">
+        <main className="relative">
           <Routes>
             {/* Public Routes */}
             <Route
@@ -310,7 +310,7 @@ const AppInner = () => {
         {showNavbar && <Footer />}
 
         {/* Global Overlays */}
-        <section className="relative z-[100]">
+        <section className="relative z-[9999]">
           <AuthModals />
           {/* <AIChat /> */}
           <ToastContainer
@@ -321,6 +321,7 @@ const AppInner = () => {
             closeOnClick
             draggable
             theme="dark"
+            style={{ zIndex: 9999 }}
           />
         </section>
       </div>

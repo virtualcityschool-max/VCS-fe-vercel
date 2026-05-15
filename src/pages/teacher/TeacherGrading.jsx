@@ -456,7 +456,7 @@ const TeacherGrading = ({
       </div>
 
       {selectedAssignmentForSubmissions && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[200]">
           <div className="bg-slate-900 p-8 rounded-3xl border border-slate-800 w-full max-w-2xl">
             <h2 className="text-lg font-bold mb-4">
               Submissions: {selectedAssignmentForSubmissions.title}
@@ -510,7 +510,7 @@ const TeacherGrading = ({
 
       {/* Grade Modal */}
       {selectedAssignment && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[200]">
           <div className="bg-slate-900 p-8 rounded-3xl border border-slate-800 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             {loadingSelectedSubmission ? (
               <div className="text-center text-white">
@@ -607,7 +607,7 @@ const TeacherGrading = ({
 
       {/* ── VIEW MODAL ── */}
       {viewAssignment && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[200] p-4">
           <div className="bg-slate-900 rounded-3xl border border-slate-800 w-full max-w-lg max-h-[90vh] overflow-y-auto">
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800">
@@ -711,7 +711,7 @@ const TeacherGrading = ({
 
       {/* ── EDIT MODAL ── */}
       {editTarget && editForm && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[200] p-4">
           <div className="bg-slate-900 border border-slate-800 rounded-[2rem] p-6 sm:p-10 w-full max-w-5xl max-h-[92vh] overflow-y-auto shadow-2xl transition-all duration-300">
             {/* Header */}
             <div className="flex flex-col gap-1 mb-10 pb-6 border-b border-white/5 relative">
@@ -954,7 +954,7 @@ const TeacherGrading = ({
 
       {/* ── DELETE CONFIRM MODAL ── */}
       {deleteTarget && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[200] p-4">
           <div className="bg-slate-900 rounded-3xl border border-slate-800 w-full max-w-sm p-6 space-y-5">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-2xl bg-rose-500/15 border border-rose-500/20 flex items-center justify-center flex-shrink-0">
@@ -1016,7 +1016,7 @@ const TeacherGrading = ({
 
       {/* Create Assignment Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[200] p-4">
           <div className="bg-slate-900 border border-slate-800 rounded-[2rem] p-6 sm:p-10 w-full max-w-5xl max-h-[92vh] overflow-y-auto shadow-2xl transition-all duration-300">
             {/* Header */}
             <div className="flex flex-col gap-1 mb-10 pb-6 border-b border-white/5 relative">

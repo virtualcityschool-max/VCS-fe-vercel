@@ -572,7 +572,7 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
 
       {/* Unenroll Confirmation Modal */}
       {unenrollConfirm && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[200] flex items-center justify-center p-4">
           <div className="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl w-full max-w-md">
             <div className="p-6">
               <div className="flex items-center justify-center w-12 h-12 bg-rose-500/20 rounded-full mx-auto mb-4">

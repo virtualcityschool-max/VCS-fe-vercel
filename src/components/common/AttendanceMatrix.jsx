@@ -197,7 +197,7 @@ const AttendanceMatrix = ({
                   }
                 });
                 const total = sortedSessions.length;
-                const pct   = marked ? Math.round((attended / marked) * 100) : null;
+                const pct   = total ? Math.round((attended / total) * 100) : null;
                 const pctColor = pct == null ? "text-slate-600"
                   : pct >= 75 ? "text-emerald-400"
                   : pct >= 50 ? "text-yellow-400"

@@ -85,9 +85,9 @@ const ParentChildDetails = () => {
   return (
     <div className="min-h-screen bg-[#0f172a] text-white font-inter pb-20">
       {/* Header / Profile Summary */}
-      <section className="relative overflow-hidden pt-12 pb-20 px-6">
+      <section className="relative overflow-hidden pt-12 pb-20">
         <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-600/10 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/3"></div>
-        <div className="max-w-7xl mx-auto relative z-10">
+        <div className="mx-10 relative z-10">
           <button 
             onClick={() => navigate("/parent")}
             className="mb-8 flex items-center gap-2 text-slate-400 hover:text-white transition-colors group"
@@ -98,7 +98,7 @@ const ParentChildDetails = () => {
             <span className="text-xs font-black uppercase tracking-widest">Back to Portal</span>
           </button>
 
-          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
+          <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-8">
             <div className="flex items-center gap-6">
               <div className="relative group">
                 <div className="absolute -inset-1 bg-gradient-to-tr from-indigo-500 to-blue-500 rounded-[2.5rem] blur opacity-25 group-hover:opacity-40 transition duration-1000"></div>
@@ -126,29 +126,51 @@ const ParentChildDetails = () => {
               </div>
             </div>
 
-            {/* Overall Stats Cards */}
-            <div className="grid grid-cols-3 md:grid-cols-4 gap-4 w-full lg:w-auto">
-              {[
-                // { label: "GPA", value: summary.overall_gpa?.toFixed(1), icon: "fa-star", color: "text-amber-400" },
-                { label: "Attendance", value: `${Math.round(summary.overall_attendance?.percentage)}%`, icon: "fa-calendar-check", color: "text-emerald-400" },
-                { label: "Pending Tasks", value: summary.overdue_assignments + summary.overdue_quizzes, icon: "fa-clock", color: "text-rose-400" },
-                { label: "Completed", value: "85%", icon: "fa-check-circle", color: "text-indigo-400" }
-              ].map((stat, i) => (
-                <div key={i} className="bg-slate-800/40 backdrop-blur-xl border border-white/5 rounded-3xl p-5 min-w-[140px]">
-                  <div className="flex items-center justify-between mb-2">
-                    <i className={`fas ${stat.icon} ${stat.color} text-sm`}></i>
-                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">{stat.label}</span>
-                  </div>
-                  <div className="text-xl font-black text-white">{stat.value}</div>
+            {/* Overall Stats Cards — 3 equal cards in one row */}
+            <div className="grid grid-cols-3 gap-3 shrink-0">
+              {/* Attendance */}
+              <div className="flex items-center gap-3 bg-slate-800/50 backdrop-blur-xl border border-emerald-500/20 rounded-2xl px-4 py-4 shadow-lg shadow-emerald-500/5">
+                <div className="w-9 h-9 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <i className="fas fa-calendar-check text-emerald-400 text-sm"></i>
                 </div>
-              ))}
+                <div className="min-w-0">
+                  <p className="text-[9px] font-black uppercase tracking-widest text-slate-500">Attendance</p>
+                  <p className="text-xl font-black text-white leading-none mt-0.5">
+                    {Math.round(summary.overall_attendance?.percentage ?? 0)}%
+                  </p>
+                </div>
+              </div>
+
+              {/* Pending Tasks */}
+              <div className="flex items-center gap-3 bg-slate-800/50 backdrop-blur-xl border border-rose-500/20 rounded-2xl px-4 py-4 shadow-lg shadow-rose-500/5">
+                <div className="w-9 h-9 bg-rose-500/10 border border-rose-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <i className="fas fa-clock text-rose-400 text-sm"></i>
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[9px] font-black uppercase tracking-widest text-slate-500">Pending Tasks</p>
+                  <p className="text-xl font-black text-white leading-none mt-0.5">
+                    {(summary.overdue_assignments ?? 0) + (summary.overdue_quizzes ?? 0)}
+                  </p>
+                </div>
+              </div>
+
+              {/* Completed */}
+              <div className="flex items-center gap-3 bg-slate-800/50 backdrop-blur-xl border border-indigo-500/20 rounded-2xl px-4 py-4 shadow-lg shadow-indigo-500/5">
+                <div className="w-9 h-9 bg-indigo-500/10 border border-indigo-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <i className="fas fa-check-circle text-indigo-400 text-sm"></i>
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[9px] font-black uppercase tracking-widest text-slate-500">Completed</p>
+                  <p className="text-xl font-black text-white leading-none mt-0.5">85%</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Course Tabs & Content */}
-      <section className="max-w-7xl mx-auto -mt-10 relative z-20">
+      <section className="mx-10 -mt-10 relative z-20">
         <div className="bg-slate-900/50 backdrop-blur-2xl border border-white/5 rounded-[3rem] overflow-hidden shadow-2xl">
           {/* Tabs Scroller */}
           <div className="bg-slate-900/80 border-b border-white/5 px-8 pt-6">

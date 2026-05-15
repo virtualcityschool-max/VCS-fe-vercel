@@ -61,7 +61,7 @@ const EnrollmentTypeModal = ({
 
   return (
     <>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-slate-950/80 backdrop-blur-md animate-fadeIn">
+      <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-slate-950/80 backdrop-blur-md animate-fadeIn">
         <div
           className={`bg-slate-900 border border-white/10 w-full rounded-[2.5rem] shadow-2xl overflow-y-auto glass relative ${
             isPrivate ? "max-w-2xl max-h-[90vh]" : "max-w-md"
