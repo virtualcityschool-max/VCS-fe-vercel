@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { Button, FilterSelect, Input } from "../../components/ui";
 import SessionCalendarView from "../common/SessionCalendarView";
+import { clampDate } from "../../utils/validation";
 
 const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MONTH_NAMES = [
@@ -579,7 +580,8 @@ const SessionsTab = ({
                     type="date"
                     value={createSessionForm.scheduled_date}
                     min={new Date().toISOString().split("T")[0]}
-                    onChange={(e) => { setCreateSessionForm({ ...createSessionForm, scheduled_date: e.target.value }); clearCreateSessionFieldError("scheduled_date"); }}
+                    max="9999-12-31"
+                    onChange={(e) => { const v = clampDate(e.target.value); setCreateSessionForm({ ...createSessionForm, scheduled_date: v }); clearCreateSessionFieldError("scheduled_date"); }}
                     className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white focus:outline-none focus:ring-2 text-sm ${createSessionErrors?.scheduled_date ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
                     error={createSessionErrors?.scheduled_date}
                   />
@@ -592,7 +594,8 @@ const SessionsTab = ({
                     type="date"
                     value={createSessionForm.recurrence_end_date}
                     min={createSessionForm.scheduled_date || new Date().toISOString().split("T")[0]}
-                    onChange={(e) => { setCreateSessionForm({ ...createSessionForm, recurrence_end_date: e.target.value }); clearCreateSessionFieldError("recurrence_end_date"); }}
+                    max="9999-12-31"
+                    onChange={(e) => { const v = clampDate(e.target.value); setCreateSessionForm({ ...createSessionForm, recurrence_end_date: v }); clearCreateSessionFieldError("recurrence_end_date"); }}
                     className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white focus:outline-none focus:ring-2 text-sm ${createSessionErrors?.recurrence_end_date ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
                     error={createSessionErrors?.recurrence_end_date}
                   />
@@ -765,7 +768,8 @@ const SessionsTab = ({
                     type="date"
                     value={editSessionForm.start_date || ""}
                     min={new Date().toISOString().split("T")[0]}
-                    onChange={(e) => { setEditSessionForm({ ...editSessionForm, start_date: e.target.value }); clearEditSessionFieldError("start_date"); }}
+                    max="9999-12-31"
+                    onChange={(e) => { const v = clampDate(e.target.value); setEditSessionForm({ ...editSessionForm, start_date: v }); clearEditSessionFieldError("start_date"); }}
                     className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white focus:outline-none focus:ring-2 text-sm [color-scheme:dark] ${editSessionErrors?.start_date ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
                   />
                   {editSessionErrors?.start_date && <p className="text-red-400 text-xs mt-1">{editSessionErrors.start_date}</p>}
@@ -778,7 +782,8 @@ const SessionsTab = ({
                     type="date"
                     value={editSessionForm.recurrence_end_date || ""}
                     min={editSessionForm.start_date || new Date().toISOString().split("T")[0]}
-                    onChange={(e) => { setEditSessionForm({ ...editSessionForm, recurrence_end_date: e.target.value }); clearEditSessionFieldError("recurrence_end_date"); }}
+                    max="9999-12-31"
+                    onChange={(e) => { const v = clampDate(e.target.value); setEditSessionForm({ ...editSessionForm, recurrence_end_date: v }); clearEditSessionFieldError("recurrence_end_date"); }}
                     className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white focus:outline-none focus:ring-2 text-sm [color-scheme:dark] ${editSessionErrors?.recurrence_end_date ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
                   />
                   {editSessionErrors?.recurrence_end_date && <p className="text-red-400 text-xs mt-1">{editSessionErrors.recurrence_end_date}</p>}

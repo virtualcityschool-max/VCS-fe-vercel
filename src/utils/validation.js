@@ -200,6 +200,21 @@ export const validateRegistrationForm = (formData) => {
   };
 };
 
+export const clampDate = (value) => {
+  if (!value) return value;
+  const parts = value.split("-");
+  if (parts.length !== 3) return value;
+  let [year, month, day] = parts;
+  year = year.slice(0, 4);
+  const y = Math.max(1, Math.min(9999, parseInt(year, 10) || 1));
+  year = String(y).padStart(4, "0");
+  const m = Math.max(1, Math.min(12, parseInt(month, 10) || 1));
+  month = String(m).padStart(2, "0");
+  const d = Math.max(1, Math.min(31, parseInt(day, 10) || 1));
+  day = String(d).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
 export const formatLocalISO = (date) => {
     const offset = -date.getTimezoneOffset();
     const absOffset = Math.abs(offset);
