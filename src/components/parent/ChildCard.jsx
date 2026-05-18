@@ -88,33 +88,16 @@ const ChildCard = ({ child }) => {
       .slice(0, 2);
   };
 
-  const getBadgeColor = (badge) => {
-    switch (badge) {
-      case "risk_alert":
-        return "bg-red-500/20 text-red-500 border-red-500/20 animate-pulse";
-      case "excellent_performance":
-        return "bg-emerald-500/20 text-emerald-400 border-emerald-500/20";
-      case "good_performance":
-        return "bg-blue-500/20 text-blue-400 border-blue-500/20";
-      default:
-        return "bg-slate-500/20 text-slate-400 border-slate-500/20";
-    }
+  const BADGE_CONFIG = {
+    risk_alert: { label: "Risk Alert",  cls: "bg-red-500/20 text-red-500 border-red-500/20 animate-pulse" },
+    on_track:   { label: "On Track",    cls: "bg-emerald-500/20 text-emerald-400 border-emerald-500/20" },
   };
 
-  const getBadgeText = (badge) => {
-    switch (badge) {
-      case "risk_alert":
-        return "Risk Alert";
-      case "excellent_performance":
-        return "Excellent Performance";
-      case "good_performance":
-        return "Good Performance";
-      default:
-        return "Normal";
-    }
-  };
+  const fmtPct   = (val) => val == null ? "N/A" : `${Math.round(val)}%`;
+  const fmtCount = (val) => val == null ? "N/A" : val;
 
   const getAttendanceColor = (percentage) => {
+    if (percentage == null) return "text-slate-500";
     if (percentage >= 95) return "text-emerald-400";
     if (percentage >= 85) return "text-blue-400";
     if (percentage >= 75) return "text-amber-500";
@@ -160,13 +143,11 @@ const ChildCard = ({ child }) => {
         </div>
         
         <div className="flex items-center gap-3 shrink-0 pt-1">
-          <span
-            className={`inline-flex items-center px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border whitespace-nowrap shadow-lg ${getBadgeColor(
-              child.badge,
-            )}`}
-          >
-            {getBadgeText(child.badge)}
-          </span>
+          {BADGE_CONFIG[child.badge] && (
+            <span className={`inline-flex items-center px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border whitespace-nowrap shadow-lg ${BADGE_CONFIG[child.badge].cls}`}>
+              {BADGE_CONFIG[child.badge].label}
+            </span>
+          )}
 
           {/* Dropdown Menu */}
           <div className="relative">
@@ -232,14 +213,8 @@ const ChildCard = ({ child }) => {
           ) : attendanceError ? (
             <p className="text-rose-400 text-sm font-black">Error</p>
           ) : (
-            <p
-              className={`text-xl font-black ${
-                (attendance?.percentage || child.attendance?.percentage) >= 95 
-                  ? 'text-emerald-400' 
-                  : getAttendanceColor(attendance?.percentage || child.attendance?.percentage)
-              }`}
-            >
-              {Math.round(attendance?.percentage || child.attendance?.percentage || 0)}%
+            <p className={`text-xl font-black ${getAttendanceColor(attendance?.percentage ?? child.attendance?.percentage ?? null)}`}>
+              {fmtPct(attendance?.percentage ?? child.attendance?.percentage ?? null)}
             </p>
           )}
         </div>
@@ -265,13 +240,13 @@ const ChildCard = ({ child }) => {
           ) : (
             <div className="flex justify-between text-xs font-bold">
               <span className="text-emerald-400/80">
-                Present: {attendance?.present || child.attendance?.present || 0}
+                Present: {fmtCount(attendance?.present ?? child.attendance?.present ?? null)}
               </span>
               <span className="text-amber-400/80">
-                Late: {attendance?.late || child.attendance?.late || 0}
+                Late: {fmtCount(attendance?.late ?? child.attendance?.late ?? null)}
               </span>
               <span className="text-rose-400/80">
-                Absent: {attendance?.absent || child.attendance?.absent || 0}
+                Absent: {fmtCount(attendance?.absent ?? child.attendance?.absent ?? null)}
               </span>
             </div>
           )}
@@ -309,8 +284,8 @@ const ChildCard = ({ child }) => {
                        <span className="text-[9px] text-slate-500 font-black uppercase tracking-wider">
                           Attendance:
                        </span>
-                       <span className={`text-[9px] font-black ${(course.attendance?.percentage || 0) >= 95 ? "text-emerald-400" : "text-slate-300"}`}>
-                          {course.attendance?.percentage != null ? Math.round(course.attendance.percentage) : "0"}%
+                       <span className={`text-[9px] font-black ${getAttendanceColor(course.attendance?.percentage ?? null)}`}>
+                          {fmtPct(course.attendance?.percentage ?? null)}
                        </span>
                     </div>
                     
