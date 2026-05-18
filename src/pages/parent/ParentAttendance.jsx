@@ -2,9 +2,6 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchParentDashboard,
-  fetchChildCourses,
-  selectChildCourses,
-  selectChildCoursesLoading,
 } from "../../store/slices/parentSlice";
 import {
   fetchTeacherSessions,
@@ -17,7 +14,6 @@ const ParentAttendance = () => {
   const dispatch = useDispatch();
 
   const { data: dashboardData, loading: dashLoading } = useSelector((s) => s.parent.dashboard);
-  const childCoursesMap = useSelector(selectChildCourses);
   const { sessions, loadingSessions, allAttendance, loadingAllAttendance } = useSelector((s) => s.teachers);
 
   const children = dashboardData?.children ?? [];
@@ -25,10 +21,9 @@ const ParentAttendance = () => {
   const [childId,  setChildId]  = useState("");
   const [courseId, setCourseId] = useState("");
 
-  const isCoursesLoading = useSelector(selectChildCoursesLoading(childId));
-
-  const courses = childId ? (childCoursesMap[childId] ?? []) : [];
-  const isLoading = dashLoading || isCoursesLoading || loadingSessions || loadingAllAttendance;
+  const activeChild = children.find((c) => String(c.id) === childId);
+  const courses = activeChild?.courses ?? [];
+  const isLoading = dashLoading || loadingSessions || loadingAllAttendance;
 
   // const parentSessions = useMemo(
   //   () => (sessions || []).filter((s) => s.is_child === false || s.is_child == null),
@@ -46,7 +41,6 @@ const ParentAttendance = () => {
   useEffect(() => {
     if (!childId) return;
     setCourseId("");
-    if (!childCoursesMap[childId]) dispatch(fetchChildCourses(childId));
   }, [childId]);
 
   useEffect(() => {
@@ -58,8 +52,6 @@ const ParentAttendance = () => {
     dispatch(fetchTeacherSessions({ course: courseId }));
     dispatch(fetchAllAttendance({ course: courseId, student: childId }));
   }, [dispatch, courseId, childId]);
-
-  const activeChild = children.find((c) => String(c.id) === childId);
 
   return (
     <div className="text-white px-4 sm:px-6 py-8 space-y-6">
@@ -106,7 +98,7 @@ const ParentAttendance = () => {
                   <span>{c.title}</span>
                 </button>
               ))
-            ) : !isCoursesLoading && (
+            ) : (
               <div className="px-4 py-2 text-[10px] uppercase tracking-widest text-slate-600 font-bold italic">
                 No courses enrolled
               </div>
@@ -120,6 +112,12 @@ const ParentAttendance = () => {
           <i className="fas fa-user-friends text-slate-600 text-3xl mb-3" />
           <p className="text-slate-300 font-semibold">No children linked</p>
           <p className="text-slate-500 text-sm mt-1">Link a child account to view attendance.</p>
+        </div>
+      ) : !courseId ? (
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-12 text-center">
+          <i className="fas fa-book-open text-slate-600 text-3xl mb-3" />
+          <p className="text-slate-300 font-semibold">No course selected</p>
+          <p className="text-slate-500 text-sm mt-1">This student is not enrolled in any courses.</p>
         </div>
       ) : isLoading ? (
         <div className="flex items-center justify-center py-20">
