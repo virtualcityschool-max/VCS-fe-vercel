@@ -108,7 +108,7 @@ const FilterSelect = ({
       </div>
 
       {/* Options */}
-      <ul className="max-h-52 overflow-y-auto py-1">
+      <ul className="max-h-52 overflow-y-auto py-1 custom-scrollbar">
         {filtered.length === 0 ? (
           <li className="px-3 py-2.5 text-xs text-slate-500 text-center">No results</li>
         ) : (

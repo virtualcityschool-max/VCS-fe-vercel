@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { Button, FilterSelect, Input } from "../../components/ui";
 import SessionCalendarView from "../common/SessionCalendarView";
-import { clampDate } from "../../utils/validation";
+import { clampDate, formatDate, formatTime } from "../../utils/validation";
 
 const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MONTH_NAMES = [
@@ -164,28 +164,6 @@ const SessionsTab = ({
       return days[new Date(dateString).getDay()];
     } catch {
       return null;
-    }
-  };
-
-  const formatDate = (dateTimeString) => {
-    if (!dateTimeString) return "—";
-    try {
-      return new Date(dateTimeString).toLocaleDateString([], {
-        year: "numeric", month: "short", day: "numeric",
-      });
-    } catch {
-      return "—";
-    }
-  };
-
-  const formatTime = (dateTimeString) => {
-    if (!dateTimeString) return "";
-    try {
-      return new Date(dateTimeString).toLocaleTimeString([], {
-        hour: "2-digit", minute: "2-digit",
-      });
-    } catch {
-      return "";
     }
   };
 
@@ -394,6 +372,9 @@ const SessionsTab = ({
                     </div>
                     <div className="flex flex-wrap gap-2 text-xs text-slate-400 mb-3">
                       <span><i className="fas fa-calendar mr-1 text-indigo-400"></i>{formatDate(session.scheduled_at || session.start_time)}</span>
+                      {formatTime(session.scheduled_at || session.start_time) && (
+                        <span><i className="fas fa-clock mr-1 text-indigo-400"></i>{formatTime(session.scheduled_at || session.start_time)}</span>
+                      )}
                       {session.recurrence_days?.length > 0 ? (
                         <span><i className="fas fa-repeat mr-1 text-purple-400"></i>{session.recurrence_days.join(", ")}</span>
                       ) : (() => {
@@ -434,7 +415,7 @@ const SessionsTab = ({
                     <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Class</th>
                     <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Course</th>
                     <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Teacher</th>
-                    <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Start Date</th>
+                    <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Start Date & Time</th>
                     <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">End Date</th>
                     <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Recurrence</th>
                     <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Status</th>
@@ -447,7 +428,14 @@ const SessionsTab = ({
                       <td className="px-5 py-4 font-semibold text-white text-sm">{session.title}</td>
                       <td className="px-5 py-4 text-slate-300 text-sm">{session.course?.title || session.course_title || "—"}</td>
                       <td className="px-5 py-4 text-slate-300 text-sm">{session.teacher_name || "—"}</td>
-                      <td className="px-5 py-4 text-slate-300 text-sm">{formatDate(session.scheduled_at || session.start_time)}</td>
+                      <td className="px-5 py-4">
+                        <div className="text-slate-300 text-sm">{formatDate(session.scheduled_at || session.start_time)}</div>
+                        {formatTime(session.scheduled_at || session.start_time) && (
+                          <div className="text-slate-500 text-xs mt-0.5">
+                            <i className="fas fa-clock mr-1"></i>{formatTime(session.scheduled_at || session.start_time)}
+                          </div>
+                        )}
+                      </td>
                       <td className="px-5 py-4 text-slate-300 text-sm">{formatDate(session.recurrence_end_date) || "—"}</td>
                       <td className="px-5 py-4">
                         {session.recurrence_days?.length > 0 ? (

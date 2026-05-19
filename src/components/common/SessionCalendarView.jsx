@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { formatTime } from "../../utils/validation";
 
 const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MONTH_NAMES = [
@@ -99,13 +100,6 @@ const SessionCalendarView = ({ sessions = [], loading = false }) => {
     for (let d = 1; d <= daysInMonth; d++) cells.push(d);
     return cells;
   }, [activeMonthData]);
-
-  const formatTime = (str) => {
-    if (!str) return "";
-    try {
-      return new Date(str).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-    } catch { return ""; }
-  };
 
   if (loading) {
     return (

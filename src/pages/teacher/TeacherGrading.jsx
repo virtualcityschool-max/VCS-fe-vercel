@@ -21,6 +21,7 @@ import { FilterSelect } from "../../components/ui";
 import { coursesService } from "../../services/coursesService";
 import { getStorageUrl } from "../../utils/storageUrl";
 import FileViewerModal from "../../components/common/FileViewerModal";
+import { formatLocalISO, toLocalDatetimeInput, formatDate, formatTime, formatDateTime } from "../../utils/validation";
 
 const PreviewButton = ({ url, className = "" }) => {
   const [open, setOpen] = React.useState(false);
@@ -339,9 +340,7 @@ const TeacherGrading = ({
                       setEditForm({
                         title: assignment.title,
                         description: assignment.description || "",
-                        due_date: assignment.due_date
-                          ? assignment.due_date.slice(0, 16)
-                          : "",
+                        due_date: toLocalDatetimeInput(assignment.due_date),
                         max_score: String(assignment.max_score),
                         status: assignment.status || "published",
                         file: null,
@@ -404,11 +403,7 @@ const TeacherGrading = ({
                     <div className="flex flex-col">
                       <span className="text-[9px] text-slate-500 uppercase font-black tracking-widest leading-none mb-1">Deadline</span>
                       <span className="text-xs text-slate-300 font-bold">
-                        {assignment.due_date ? new Date(assignment.due_date).toLocaleDateString(undefined, { 
-                          day: 'numeric', 
-                          month: 'short',
-                          year: 'numeric'
-                        }) : "No limit"}
+                        {assignment.due_date ? formatDateTime(assignment.due_date) : "No limit"}
                       </span>
                     </div>
                   </div>
@@ -473,7 +468,7 @@ const TeacherGrading = ({
                       <p className="text-sm font-bold">{sub.student_name}</p>
                       <p className="text-xs text-slate-400">
                         Submitted at:{" "}
-                        {new Date(sub.submitted_at).toLocaleString()}
+                        {formatDateTime(sub.submitted_at)}
                       </p>
                     </div>
 
@@ -526,7 +521,7 @@ const TeacherGrading = ({
                 {/* SUBMISSION INFO */}
                 <div className="mb-6 text-sm text-slate-400">
                   Submitted at:{" "}
-                  {new Date(selectedSubmission.submitted_at).toLocaleString()}
+                  {formatDateTime(selectedSubmission.submitted_at)}
                 </div>
 
                 {/* TEXT ANSWER */}
@@ -690,7 +685,7 @@ const TeacherGrading = ({
                 </p>
                 <p className="text-slate-300 text-sm">
                   {viewAssignment.due_date
-                    ? new Date(viewAssignment.due_date).toLocaleString()
+                    ? formatDateTime(viewAssignment.due_date)
                     : "—"}
                 </p>
               </div>
@@ -920,7 +915,7 @@ const TeacherGrading = ({
                         data: {
                           title: editForm.title.trim(),
                           description: editForm.description.trim(),
-                          due_date: editForm.due_date,
+                          due_date: formatLocalISO(new Date(editForm.due_date)),
                           max_score: Number(editForm.max_score),
                           status: editForm.status,
                           ...(editForm.file ? { file: editForm.file } : {}),
@@ -1313,7 +1308,7 @@ const TeacherGrading = ({
                         course: Number(form.course),
                         title: form.title.trim(),
                         description: form.description.trim(),
-                        due_date: form.due_date,
+                        due_date: formatLocalISO(new Date(form.due_date)),
                         max_score: Number(form.max_score),
                         status: form.status,
                         ...(form.file ? { file: form.file } : {}),

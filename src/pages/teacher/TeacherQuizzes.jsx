@@ -16,6 +16,7 @@ import { teacherService } from "../../services/teacherService";
 import { FilterSelect } from "../../components/ui";
 import { toastManager } from "../../utils/toastManager";
 import { showApiError } from "../../utils/apiErrorHandler";
+import { formatLocalISO, toLocalDatetimeInput, formatDateTime } from "../../utils/validation";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const defaultOption = () => ({ option_text: "", is_correct: false });
@@ -251,8 +252,8 @@ const buildPayload = (form, questions) => ({
   title: form.title.trim(),
   description: form.description.trim(),
   total_marks: Number(form.total_marks),
-  published_at: form.published_at,
-  due_date: form.due_date,
+  published_at: form.published_at ? formatLocalISO(new Date(form.published_at)) : "",
+  due_date: form.due_date ? formatLocalISO(new Date(form.due_date)) : "",
   questions: questions.map((q) => {
     const base = {
       ...(q.id ? { id: q.id } : {}),
@@ -277,8 +278,8 @@ const quizToForm = (quiz) => ({
   title: quiz.title ?? "",
   description: quiz.description ?? "",
   total_marks: String(quiz.total_marks ?? ""),
-  published_at: quiz.published_at ? quiz.published_at.slice(0, 16) : "",
-  due_date: quiz.due_date ? quiz.due_date.slice(0, 16) : "",
+  published_at: toLocalDatetimeInput(quiz.published_at),
+  due_date: toLocalDatetimeInput(quiz.due_date),
 });
 
 const quizToQuestions = (quiz) =>
@@ -766,11 +767,7 @@ const TeacherQuizzes = ({
                   <div className="flex flex-col">
                     <span className="text-[9px] text-slate-500 uppercase font-black tracking-widest leading-none mb-1">Deadline</span>
                     <span className="text-xs text-slate-300 font-bold">
-                      {quiz.due_date ? new Date(quiz.due_date).toLocaleDateString(undefined, { 
-                        day: 'numeric', 
-                        month: 'short',
-                        year: 'numeric'
-                      }) : "No limit"}
+                      {quiz.due_date ? formatDateTime(quiz.due_date) : "No limit"}
                     </span>
                   </div>
                 </div>
@@ -885,11 +882,11 @@ const TeacherQuizzes = ({
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Publish Date</p>
-                  <p className="text-slate-300 text-sm">{viewQuiz.published_at ? new Date(viewQuiz.published_at).toLocaleString() : "—"}</p>
+                  <p className="text-slate-300 text-sm">{formatDateTime(viewQuiz.published_at)}</p>
                 </div>
                 <div>
                   <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Due Date</p>
-                  <p className="text-slate-300 text-sm">{viewQuiz.due_date ? new Date(viewQuiz.due_date).toLocaleString() : "—"}</p>
+                  <p className="text-slate-300 text-sm">{formatDateTime(viewQuiz.due_date)}</p>
                 </div>
               </div>
               {/* Questions preview */}
@@ -998,7 +995,7 @@ const TeacherQuizzes = ({
                           {sub.obtained_marks != null ? `${sub.obtained_marks} / ${sub.total_marks_snapshot}` : "Not graded"}
                           {sub.percentage != null ? ` (${sub.percentage}%)` : ""}
                         </p>
-                        <p className="text-xs text-slate-500 mt-0.5">{new Date(sub.submitted_at).toLocaleString()}</p>
+                        <p className="text-xs text-slate-500 mt-0.5">{formatDateTime(sub.submitted_at)}</p>
                       </div>
                       <div className="flex flex-col items-end gap-2">
                         <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${statusColor(sub.status)}`}>

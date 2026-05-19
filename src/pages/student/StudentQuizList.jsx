@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { fetchStudentQuizzes } from "../../store/slices/studentDashboardSlice";
 import { FilterSelect } from "../../components/ui";
+import { formatTime } from "../../utils/validation";
 
 const statusConfig = (sub) => {
   if (!sub || sub.status === "pending") return { label: "Pending",    color: "text-yellow-400 bg-yellow-500/10" };
@@ -146,6 +147,9 @@ const StudentQuizList = ({ hideHeader = false, filterCourse: externalFilterCours
                                   <span className="text-[8px] text-slate-500 uppercase font-black leading-none mb-0.5">Due</span>
                                   <span className="text-[11px] font-bold">
                                     {new Date(quiz.due_date).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}
+                                  </span>
+                                  <span className="text-[10px] text-slate-500">
+                                    {formatTime(quiz.due_date)}
                                   </span>
                                 </div>
                               </div>

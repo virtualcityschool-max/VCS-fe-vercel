@@ -13,6 +13,7 @@ import GradingForm from "../../components/teacher/GradingForm";
 import { toastManager } from "../../utils/toastManager";
 import { showApiError } from "../../utils/apiErrorHandler";
 import { getStorageUrl } from "../../utils/storageUrl";
+import { formatDateTime } from "../../utils/validation";
 
 const getFilename = (url) => {
   if (!url) return "attachment";
@@ -94,16 +95,6 @@ const TeacherSubmissions = () => {
     }
   };
 
-  const formatDate = (dateStr) => {
-    if (!dateStr) return "—";
-    return new Date(dateStr).toLocaleDateString([], {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
 
   const getGradeBadge = (sub) => {
     if (!sub.is_graded) {
@@ -255,7 +246,7 @@ const TeacherSubmissions = () => {
                   <div className="flex items-center justify-between mt-2">
                     <p className="text-xs text-slate-500">
                       <i className="fas fa-calendar mr-1"></i>
-                      {formatDate(sub.submitted_at || sub.created_at)}
+                      {formatDateTime(sub.submitted_at || sub.created_at)}
                     </p>
                     <button
                       onClick={() => openGradeModal(sub.id)}
@@ -309,7 +300,7 @@ const TeacherSubmissions = () => {
                         {sub.course_title || sub.assignment?.course_title || "—"}
                       </td>
                       <td className="px-5 py-4 text-slate-400 text-sm">
-                        {formatDate(sub.submitted_at || sub.created_at)}
+                        {formatDateTime(sub.submitted_at || sub.created_at)}
                       </td>
                       <td className="px-5 py-4">{getGradeBadge(sub)}</td>
                       <td className="px-5 py-4">
@@ -353,7 +344,7 @@ const TeacherSubmissions = () => {
                     </h2>
                     <p className="text-xs text-slate-400 mt-1">
                       {selectedSubmission.assignment_title || "Assignment"} •{" "}
-                      Submitted {formatDate(selectedSubmission.submitted_at)}
+                      Submitted {formatDateTime(selectedSubmission.submitted_at)}
                     </p>
                   </div>
                   <button

@@ -6,6 +6,7 @@ import {
   selectMyAttendanceError,
   fetchMyAttendance,
 } from "../../store/slices/studentDashboardSlice";
+import { formatDateTime } from "../../utils/validation";
 
 const MyAttendanceList = () => {
   const dispatch = useDispatch();
@@ -18,22 +19,6 @@ const MyAttendanceList = () => {
     dispatch(fetchMyAttendance());
   }, [dispatch]);
 
-  // Format timestamp to readable format
-  const formatTime = (timestamp) => {
-    if (!timestamp) return "N/A";
-    try {
-      const date = new Date(timestamp);
-      return date.toLocaleString("en-US", {
-        month: "short",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true
-      });
-    } catch {
-      return "Invalid time";
-    }
-  };
 
   // Get status badge styling
   const getStatusBadge = (status) => {
@@ -154,12 +139,12 @@ const MyAttendanceList = () => {
               <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] text-slate-500 font-bold uppercase tracking-wider opacity-60 group-hover:opacity-100 transition-opacity">
                 <div className="flex items-center gap-1.5">
                   <i className="fas fa-sign-in-alt text-emerald-500/60 text-[10px]"></i>
-                  <span>Joined: {formatTime(record.joined_at)}</span>
+                  <span>Joined: {formatDateTime(record.joined_at)}</span>
                 </div>
                 {record.left_at && (
                   <div className="flex items-center gap-1.5">
                     <i className="fas fa-sign-out-alt text-red-500/60 text-[10px]"></i>
-                    <span>Left: {formatTime(record.left_at)}</span>
+                    <span>Left: {formatDateTime(record.left_at)}</span>
                   </div>
                 )}
               </div>

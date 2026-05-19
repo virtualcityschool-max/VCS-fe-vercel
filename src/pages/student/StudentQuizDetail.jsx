@@ -6,6 +6,7 @@ import {
   submitStudentQuiz,
 } from "../../store/slices/studentDashboardSlice";
 import { toastManager } from "../../utils/toastManager";
+import { formatDate, formatDateTime } from "../../utils/validation";
 
 // ── Status helpers ────────────────────────────────────────────────────────────
 const subStatus = (sub) => {
@@ -157,7 +158,7 @@ const StudentQuizDetail = () => {
             </div>
             <div className="bg-slate-800/60 rounded-2xl p-3 text-center">
               <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Submitted</p>
-              <p className="text-white text-xs">{sub.submitted_at ? new Date(sub.submitted_at).toLocaleDateString() : "—"}</p>
+              <p className="text-white text-xs">{sub.submitted_at ? formatDate(sub.submitted_at) : "—"}</p>
             </div>
           </div>
           {(sub.status === "submitted") && (
@@ -328,7 +329,7 @@ const StudentQuizDetail = () => {
           {currentQuiz.due_date && (
             <span className={currentQuiz.is_overdue ? "text-rose-400" : ""}>
               <i className="fas fa-clock mr-1" />
-              Due {new Date(currentQuiz.due_date).toLocaleString()}
+              Due {formatDateTime(currentQuiz.due_date)}
               {currentQuiz.is_overdue && " (Overdue)"}
             </span>
           )}

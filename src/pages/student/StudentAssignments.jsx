@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { fetchStudentAssignments } from "../../store/slices/studentDashboardSlice";
 import { FilterSelect } from "../../components/ui";
+import { formatTime } from "../../utils/validation";
 
 const StudentAssignments = ({ hideHeader = false, filterCourse: externalFilterCourse }) => {
   const dispatch = useDispatch();
@@ -145,6 +146,9 @@ const StudentAssignments = ({ hideHeader = false, filterCourse: externalFilterCo
                               <span className="text-[8px] text-slate-500 uppercase font-black leading-none mb-0.5">Due</span>
                               <span className="text-[11px] text-slate-300 font-bold">
                                 {new Date(assignment.due_date).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}
+                              </span>
+                              <span className="text-[10px] text-slate-500">
+                                {formatTime(assignment.due_date)}
                               </span>
                             </div>
                           </div>

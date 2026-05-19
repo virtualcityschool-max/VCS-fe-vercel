@@ -2,6 +2,7 @@ import React from "react";
 import { useSelector } from "react-redux";
 import { selectOverdueAssignments, selectAssignments, selectDashboardQuizzes } from "../../store/slices/studentDashboardSlice";
 import { useNavigate } from "react-router-dom";
+import { formatDate } from "../../utils/validation";
 
 const OverdueAssignmentsCard = () => {
   const navigate = useNavigate();
@@ -15,15 +16,6 @@ const OverdueAssignmentsCard = () => {
   const totalPending = pendingAssignments.length + pendingQuizzes.length;
   
   const overdueCount = overdueAssignments?.count || 0;
-
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: 'numeric',
-      year: date.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
-    });
-  };
 
   const getOverdueTimeLabel = (dateString) => {
     const dueDate = new Date(dateString);

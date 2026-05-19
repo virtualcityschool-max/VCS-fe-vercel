@@ -215,6 +215,51 @@ export const clampDate = (value) => {
   return `${year}-${month}-${day}`;
 };
 
+// Converts ISO string to "YYYY-MM-DDTHH:mm" in local time — for datetime-local inputs
+export const toLocalDatetimeInput = (isoString) => {
+  if (!isoString) return "";
+  const d = new Date(isoString);
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+};
+
+// "May 15, 2026"
+export const formatDate = (isoString) => {
+  if (!isoString) return "—";
+  try {
+    return new Date(isoString).toLocaleDateString(undefined, {
+      year: "numeric", month: "short", day: "numeric",
+    });
+  } catch {
+    return "—";
+  }
+};
+
+// "12:28 PM"
+export const formatTime = (isoString) => {
+  if (!isoString) return "";
+  try {
+    return new Date(isoString).toLocaleTimeString([], {
+      hour: "2-digit", minute: "2-digit",
+    });
+  } catch {
+    return "";
+  }
+};
+
+// "May 15, 2026, 12:28 PM"
+export const formatDateTime = (isoString) => {
+  if (!isoString) return "—";
+  try {
+    return new Date(isoString).toLocaleString(undefined, {
+      year: "numeric", month: "short", day: "numeric",
+      hour: "2-digit", minute: "2-digit",
+    });
+  } catch {
+    return "—";
+  }
+};
+
 export const formatLocalISO = (date) => {
     const offset = -date.getTimezoneOffset();
     const absOffset = Math.abs(offset);
