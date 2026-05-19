@@ -47,6 +47,72 @@ export const validateEmail = (email) => {
   return { isValid: true, error: null };
 };
 
+// Phone validation — accepts any international number (7–15 digits, optional + prefix and separators)
+export const validatePhone = (phone) => {
+  if (!phone) return { isValid: true, error: null }; // optional field
+  const trimmed = phone.trim();
+  // Strip allowed formatting characters, keeping the optional leading +
+  const hasPlus = trimmed.startsWith("+");
+  const digitsOnly = trimmed.replace(/[\s\-().+]/g, "");
+  
+  if (!/^\d+$/.test(digitsOnly)) {
+    return { isValid: false, error: "Phone number may only contain digits, spaces, dashes, or parentheses" };
+  }
+  
+  if (digitsOnly.length < 7 || digitsOnly.length > 15) {
+    return { isValid: false, error: "Phone number must be between 7 and 15 digits" };
+  }
+  
+  // If a + was present the first digit group is the country code (1–3 digits, must not start with 0)
+  if (hasPlus && /^0/.test(digitsOnly)) {
+    return { isValid: false, error: "Country code cannot start with 0" };
+  }
+  
+  // For standard country code validation, it should start with +
+  if (!hasPlus) {
+    return { isValid: false, error: "Phone number must include a country code (start with +)" };
+  }
+
+  return { isValid: true, error: null };
+};
+
+/**
+ * Normalizes a phone number to E.164-like format: +[digits]
+ * @param {string} phone 
+ * @returns {string}
+ */
+export const normalizePhone = (phone) => {
+  if (!phone) return "";
+  const digits = phone.replace(/\D/g, "");
+  if (!digits) return "";
+  return `+${digits}`;
+};
+
+/**
+ * Formats a phone number for display (e.g., +92 300 1234567)
+ * @param {string} phone 
+ * @returns {string}
+ */
+export const formatPhoneDisplay = (phone) => {
+  if (!phone) return "";
+  const normalized = normalizePhone(phone);
+  
+  // Basic formatting: +XX XXXXXXXX
+  // For better formatting, we could match against common dial codes
+  const dialCodes = ["+92", "+44", "+61", "+1", "+971"];
+  for (const code of dialCodes) {
+    if (normalized.startsWith(code)) {
+      const rest = normalized.slice(code.length);
+      if (code === "+92" && rest.length === 10) {
+        return `${code} ${rest.slice(0, 3)} ${rest.slice(3)}`;
+      }
+      return `${code} ${rest}`;
+    }
+  }
+  
+  return normalized;
+};
+
 // Username validation
 export const validateUsername = (username) => {
   if (!username) {
@@ -133,3 +199,81 @@ export const validateRegistrationForm = (formData) => {
     errors,
   };
 };
+
+export const clampDate = (value) => {
+  if (!value) return value;
+  const parts = value.split("-");
+  if (parts.length !== 3) return value;
+  let [year, month, day] = parts;
+  year = year.slice(0, 4);
+  const y = Math.max(1, Math.min(9999, parseInt(year, 10) || 1));
+  year = String(y).padStart(4, "0");
+  const m = Math.max(1, Math.min(12, parseInt(month, 10) || 1));
+  month = String(m).padStart(2, "0");
+  const d = Math.max(1, Math.min(31, parseInt(day, 10) || 1));
+  day = String(d).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+// Converts ISO string to "YYYY-MM-DDTHH:mm" in local time — for datetime-local inputs
+export const toLocalDatetimeInput = (isoString) => {
+  if (!isoString) return "";
+  const d = new Date(isoString);
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+};
+
+// "May 15, 2026"
+export const formatDate = (isoString) => {
+  if (!isoString) return "—";
+  try {
+    return new Date(isoString).toLocaleDateString(undefined, {
+      year: "numeric", month: "short", day: "numeric",
+    });
+  } catch {
+    return "—";
+  }
+};
+
+// "12:28 PM"
+export const formatTime = (isoString) => {
+  if (!isoString) return "";
+  try {
+    return new Date(isoString).toLocaleTimeString([], {
+      hour: "2-digit", minute: "2-digit",
+    });
+  } catch {
+    return "";
+  }
+};
+
+// "May 15, 2026, 12:28 PM"
+export const formatDateTime = (isoString) => {
+  if (!isoString) return "—";
+  try {
+    return new Date(isoString).toLocaleString(undefined, {
+      year: "numeric", month: "short", day: "numeric",
+      hour: "2-digit", minute: "2-digit",
+    });
+  } catch {
+    return "—";
+  }
+};
+
+export const formatLocalISO = (date) => {
+    const offset = -date.getTimezoneOffset();
+    const absOffset = Math.abs(offset);
+    const hours = Math.floor(absOffset / 60).toString().padStart(2, '0');
+    const mins = (absOffset % 60).toString().padStart(2, '0');
+    const sign = offset >= 0 ? '+' : '-';
+    
+    // Manually build the string so it doesn't convert to UTC
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    const hh = date.getHours().toString().padStart(2, '0');
+    const mm = date.getMinutes().toString().padStart(2, '0');
+    const ss = date.getSeconds().toString().padStart(2, '0');
+
+    return `${year}-${month}-${day}T${hh}:${mm}:${ss}${sign}${hours}:${mins}`;
+}

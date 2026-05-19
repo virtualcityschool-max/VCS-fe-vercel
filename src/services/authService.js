@@ -84,6 +84,9 @@ export const authService = {
         confirm_password: userData.confirmPassword,
         role: userData.role,
       };
+      if (userData.grade_level) {
+        requestData.grade_level = userData.grade_level;
+      }
 
       console.log("Request data being sent to backend:", requestData);
       console.log(
@@ -239,6 +242,16 @@ export const authService = {
       });
 
       // Preserve full backend error response - DO NOT override messages
+      throw error;
+    }
+  },
+
+  // Update role-specific profile (student / teacher / parent)
+  updateRoleProfile: async (role, profileData) => {
+    try {
+      const response = await axiosInstance.patch(`/auth/me/profile/${role}/`, profileData);
+      return response.data;
+    } catch (error) {
       throw error;
     }
   },
@@ -453,15 +466,36 @@ export const authService = {
     }
   },
 
-  // Link child to parent (parent only)
-  linkChild: async (studentIds) => {
-    try {
-      console.log("Linking children:", studentIds);
+  // Forgot Password — Step 1: request OTP
+  forgotPasswordRequestOtp: async (email) => {
+    const response = await axiosInstance.post("/auth/forgot-password/request-otp/", { email });
+    return response.data;
+  },
 
-      const response = await axiosInstance.post("/auth/me/link-child/", {
-        student_ids: studentIds,
-      });
-      console.log("Link Child Response:", response.data);
+  // Forgot Password — Step 2: verify OTP
+  forgotPasswordVerifyOtp: async (email, otp) => {
+    const response = await axiosInstance.post("/auth/forgot-password/verify-otp/", { email, otp });
+    return response.data;
+  },
+
+  // Forgot Password — Step 3: reset password
+  forgotPasswordReset: async (email, newPassword, confirmPassword) => {
+    const response = await axiosInstance.post("/auth/forgot-password/reset/", {
+      email,
+      new_password: newPassword,
+      confirm_password: confirmPassword,
+    });
+    return response.data;
+  },
+
+  // Link child to parent (parent only)
+  linkChild: async ({ student_ids = [], student_emails = [] }) => {
+    try {
+      const body = {};
+      if (student_ids.length)    body.student_ids    = student_ids;
+      if (student_emails.length) body.student_emails = student_emails;
+
+      const response = await axiosInstance.post("/auth/me/link-child/", body);
 
       return {
         success: true,
@@ -469,36 +503,7 @@ export const authService = {
         message: response.data.message || "Link request(s) sent successfully",
       };
     } catch (error) {
-      console.error("Link child error:", {
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message,
-        studentIds: studentIds,
-      });
-
-      if (error.response?.status === 400) {
-        const backendError = error.response?.data;
-        throw {
-          error: backendError?.error || "Invalid link request.",
-          status: 400,
-        };
-      }
-
-      if (error.response?.status === 403) {
-        throw {
-          error: "You don't have permission to link children.",
-          status: 403,
-        };
-      }
-
-      if (error.response?.status === 404) {
-        throw {
-          error: "One or more students not found.",
-          status: 404,
-        };
-      }
-
-      throw new Error(error.message || "Failed to link children");
+      throw error?.response;
     }
   },
 };

@@ -1,10 +1,12 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchUsers,
   createUser,
   deleteUser,
+  purgeUser,
+  toggleUserActive,
   selectUsers,
   fetchAvailableStudents,
   selectAvailableStudents,
@@ -16,6 +18,7 @@ import {
   PasswordValidation,
   PasswordInput,
   MultiSelect,
+  FilterSelect,
 } from "../../components/ui";
 import { useFieldErrors } from "../../hooks";
 import {
@@ -26,18 +29,19 @@ import {
 } from "../../utils/validation";
 import { toastManager } from "../../utils/toastManager";
 import UsersTab from "../../components/admin/UsersTab";
+import { showApiError } from "../../utils/apiErrorHandler";
+
+const DEFAULT_FILTERS = { search: "", role: "", is_active: "", ordering: "-date_joined" };
 
 const AdminUsersPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  // Users filter state
-  const [usersFilters, setUsersFilters] = useState({
-    search: "",
-    role: "",
-    is_active: "",
-    ordering: "-date_joined",
-  });
+  // Restore filters if navigating back from edit, otherwise use defaults
+  const [usersFilters, setUsersFilters] = useState(
+    () => location.state?.filters ?? DEFAULT_FILTERS,
+  );
 
   // Create user form state
   const [createUserForm, setCreateUserForm] = useState({
@@ -69,12 +73,16 @@ const AdminUsersPage = () => {
   const users = useSelector(selectUsers);
   const availableStudents = useSelector(selectAvailableStudents);
 
+  // Stores the last filter values the effect actually fetched with, to detect real changes
+  const prevFilterRef = useRef(null);
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
       isMountedRef.current = false;
     };
   }, []);
+
 
   // Define handleFetchUsers
   const handleFetchUsers = useCallback(() => {
@@ -92,7 +100,6 @@ const AdminUsersPage = () => {
     if (usersFilters.ordering) {
       params.ordering = usersFilters.ordering;
     }
-
     dispatch(fetchUsers(params));
   }, [dispatch, usersFilters]);
 
@@ -112,15 +119,23 @@ const AdminUsersPage = () => {
   //   handleFetchUsers();
   // }, [handleFetchUsers]);
 
-  // Fetch on initial mount + non-search filter changes
+  // Re-fetch when any filter changes (not on mount — AdminLayout owns the initial fetch)
   useEffect(() => {
-    handleFetchUsers();
-  }, [
-    handleFetchUsers,
-    usersFilters.role,
-    usersFilters.is_active,
-    usersFilters.ordering,
-  ]);
+    const current = { role: usersFilters.role, is_active: usersFilters.is_active, ordering: usersFilters.ordering, search: usersFilters.search };
+    const prev = prevFilterRef.current;
+    prevFilterRef.current = current;
+
+    if (prev === null) return;
+
+    if (
+      prev.role !== current.role ||
+      prev.is_active !== current.is_active ||
+      prev.ordering !== current.ordering ||
+      prev.search !== current.search
+    ) {
+      handleFetchUsers();
+    }
+  }, [usersFilters.role, usersFilters.is_active, usersFilters.ordering, usersFilters.search, handleFetchUsers]);
 
   // Fetch available students when create user modal opens
   useEffect(() => {
@@ -129,20 +144,29 @@ const AdminUsersPage = () => {
     }
   }, [activeModal, dispatch]);
 
-  // Handle user deletion
-  const handleDeleteUser = async (userId) => {
+  // Handle active/inactive toggle via PATCH
+  const handleDeleteUser = async (userId, user) => {
     try {
-      await dispatch(deleteUser(userId)).unwrap();
-      toastManager.success("User deleted successfully");
-      handleFetchUsers();
+      await dispatch(toggleUserActive({ userId, user })).unwrap();
+      toastManager.success(user.is_active ? "User deactivated successfully" : "User activated successfully");
     } catch (error) {
-      toastManager.error(error?.message || "Failed to delete user");
+      showApiError(error);
     }
   };
 
-  // Handle user editing - navigate to user details page
+  // Handle user purge (hard-delete — permanent removal)
+  const handlePurgeUser = async (userId) => {
+    try {
+      await dispatch(purgeUser(userId)).unwrap();
+      toastManager.success("User permanently deleted");
+    } catch (error) {
+      showApiError(error);
+    }
+  };
+
+  // Handle user editing - carry current filters so they can be restored on back
   const handleEditUser = (userId) => {
-    navigate(`/admin/users/${userId}`);
+    navigate(`/admin/users/${userId}`, { state: { filters: usersFilters } });
   };
 
   // Shared reset function for create user modal
@@ -241,9 +265,8 @@ const AdminUsersPage = () => {
       toastManager.success("User created successfully");
       resetCreateUserModal();
       setActiveModal(null);
-      handleFetchUsers();
     } catch (error) {
-      handleCreateUserApiError(error, toastManager.error);
+      showApiError(error);
     } finally {
       setIsCreatingUser(false);
     }
@@ -257,6 +280,7 @@ const AdminUsersPage = () => {
         usersFilters={usersFilters}
         setUsersFilters={setUsersFilters}
         onUserDelete={handleDeleteUser}
+        onUserPurge={handlePurgeUser}
         onFetchUsers={handleFetchUsers}
         onUserEdit={handleEditUser}
         onCreateUser={handleCreateUser}
@@ -264,197 +288,158 @@ const AdminUsersPage = () => {
 
       {/* Create User Modal */}
       {activeModal === "create-user" && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-900 rounded-2xl p-6 w-full max-w-md border border-slate-800 shadow-2xl flex flex-col max-h-[80vh]">
-            <h3 className="text-xl font-bold text-white mb-4 shrink-0">
-              Create User
-            </h3>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200] p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-[1.5rem] p-4 sm:p-8 w-full max-w-2xl lg:max-w-4xl max-h-[92vh] overflow-y-auto shadow-2xl transition-all duration-300">
 
-            <div className="space-y-4 overflow-y-auto flex-1 px-1">
+            {/* Header */}
+            <div className="flex justify-between items-start mb-8 pb-6 border-b border-white/5">
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">
-                  Username <span className="text-red-500">*</span>
-                </label>
-                <Input
-                  value={createUserForm.username}
-                  onChange={(e) => {
-                    setCreateUserForm({
-                      ...createUserForm,
-                      username: e.target.value,
-                    });
-                    // Clear field error when user starts typing
-                    if (createUserErrors.username) {
-                      setCreateUserErrors((prev) => ({
-                        ...prev,
-                        username: undefined,
-                      }));
-                    }
-                  }}
-                  className="w-full"
-                  placeholder="Username"
-                  error={createUserErrors.username}
-                />
+                <h3 className="text-xl font-black text-white tracking-tight">Create User</h3>
+                <p className="text-slate-500 text-[12px] font-medium mt-1">Add a new user to the platform</p>
               </div>
+              <button
+                onClick={handleCloseCreateUserModal}
+                className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-white hover:bg-white/5 transition-all"
+              >
+                <i className="fas fa-times text-lg" />
+              </button>
+            </div>
 
+            <div className="space-y-5">
+              {/* Email */}
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">
+                <label className="block text-sm font-medium text-slate-300 mb-1.5">
                   Email <span className="text-red-500">*</span>
                 </label>
                 <Input
                   type="email"
                   value={createUserForm.email}
                   onChange={(e) => {
-                    setCreateUserForm({
-                      ...createUserForm,
-                      email: e.target.value,
-                    });
-                    // Clear field error when user starts typing
-                    if (createUserErrors.email) {
-                      setCreateUserErrors((prev) => ({
-                        ...prev,
-                        email: undefined,
-                      }));
-                    }
+                    setCreateUserForm({ ...createUserForm, email: e.target.value });
+                    if (createUserErrors.email)
+                      setCreateUserErrors((prev) => ({ ...prev, email: undefined }));
                   }}
                   className="w-full"
                   placeholder="Email"
+                  autoComplete="off"
                   error={createUserErrors.email}
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">
-                  First Name
-                </label>
-                <Input
-                  value={createUserForm.first_name}
-                  onChange={(e) => {
-                    setCreateUserForm({
-                      ...createUserForm,
-                      first_name: e.target.value,
-                    });
-                    // Clear field error when user starts typing
-                    if (createUserErrors.first_name) {
-                      setCreateUserErrors((prev) => ({
-                        ...prev,
-                        first_name: undefined,
-                      }));
-                    }
-                  }}
-                  className="w-full"
-                  placeholder="First Name"
-                  error={createUserErrors.first_name}
-                />
+              {/* Username | Role */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-1.5">
+                    Username <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    value={createUserForm.username}
+                    onChange={(e) => {
+                      setCreateUserForm({
+                        ...createUserForm,
+                        username: e.target.value,
+                      });
+                      if (createUserErrors.username)
+                        setCreateUserErrors((prev) => ({
+                          ...prev,
+                          username: undefined,
+                        }));
+                    }}
+                    className="w-full"
+                    placeholder="Username"
+                    autoComplete="off"
+                    error={createUserErrors.username}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-1.5">
+                    Role <span className="text-red-500">*</span>
+                  </label>
+                  <FilterSelect
+                    value={createUserForm.role}
+                    onChange={(e) => {
+                      setCreateUserForm({ ...createUserForm, role: e.target.value });
+                      if (createUserErrors.role)
+                        setCreateUserErrors((prev) => ({
+                          ...prev,
+                          role: undefined,
+                        }));
+                    }}
+                    className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  >
+                    <option value="student">Student</option>
+                    <option value="teacher">Teacher</option>
+                    <option value="parent">Parent</option>
+                    <option value="admin">Admin</option>
+                  </FilterSelect>
+                </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">
-                  Last Name
-                </label>
-                <Input
-                  value={createUserForm.last_name}
-                  onChange={(e) => {
-                    setCreateUserForm({
-                      ...createUserForm,
-                      last_name: e.target.value,
-                    });
-                    // Clear field error when user starts typing
-                    if (createUserErrors.last_name) {
-                      setCreateUserErrors((prev) => ({
-                        ...prev,
-                        last_name: undefined,
-                      }));
-                    }
-                  }}
-                  className="w-full"
-                  placeholder="Last Name"
-                  error={createUserErrors.last_name}
-                />
+              {/* First Name | Last Name */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-1.5">First Name</label>
+                  <Input
+                    value={createUserForm.first_name}
+                    onChange={(e) => { setCreateUserForm({ ...createUserForm, first_name: e.target.value }); if (createUserErrors.first_name) setCreateUserErrors((prev) => ({ ...prev, first_name: undefined })); }}
+                    className="w-full"
+                    placeholder="First Name"
+                    autoComplete="off"
+                    error={createUserErrors.first_name}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-1.5">Last Name</label>
+                  <Input
+                    value={createUserForm.last_name}
+                    onChange={(e) => { setCreateUserForm({ ...createUserForm, last_name: e.target.value }); if (createUserErrors.last_name) setCreateUserErrors((prev) => ({ ...prev, last_name: undefined })); }}
+                    className="w-full"
+                    placeholder="Last Name"
+                    autoComplete="off"
+                    error={createUserErrors.last_name}
+                  />
+                </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">
-                  Role <span className="text-red-500">*</span>
-                </label>
-                <select
-                  value={createUserForm.role}
-                  onChange={(e) => {
-                    setCreateUserForm({
-                      ...createUserForm,
-                      role: e.target.value,
-                    });
-                    // Clear field error when user starts typing
-                    if (createUserErrors.role) {
-                      setCreateUserErrors((prev) => ({
-                        ...prev,
-                        role: undefined,
-                      }));
-                    }
-                  }}
-                  className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                >
-                  <option value="student">Student</option>
-                  <option value="teacher">Teacher</option>
-                  <option value="parent">Parent</option>
-                  <option value="admin">Admin</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">
-                  Password <span className="text-red-500">*</span>
-                </label>
-                <PasswordInput
-                  value={createUserForm.password}
-                  onChange={(e) => {
-                    setCreateUserForm({
-                      ...createUserForm,
-                      password: e.target.value,
-                    });
-                    // Clear field error when user starts typing
-                    if (createUserErrors.password) {
-                      setCreateUserErrors((prev) => ({
-                        ...prev,
-                        password: undefined,
-                      }));
-                    }
-                  }}
-                  placeholder="Password"
-                  error={createUserErrors.password}
-                  showPassword={showPassword}
-                  onTogglePassword={() => setShowPassword(!showPassword)}
-                />
-                {createUserForm.password && (
-                  <PasswordValidation password={createUserForm.password} />
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">
-                  Confirm Password <span className="text-red-500">*</span>
-                </label>
-                <PasswordInput
-                  value={createUserForm.confirm_password}
-                  onChange={(e) => {
-                    setCreateUserForm({
-                      ...createUserForm,
-                      confirm_password: e.target.value,
-                    });
-                    // Clear field error when user starts typing
-                    if (createUserErrors.confirm_password) {
-                      setCreateUserErrors((prev) => ({
-                        ...prev,
-                        confirm_password: undefined,
-                      }));
-                    }
-                  }}
-                  placeholder="Confirm Password"
-                  error={createUserErrors.confirm_password}
-                  showPassword={showConfirmPassword}
-                  onTogglePassword={() =>
-                    setShowConfirmPassword(!showConfirmPassword)
-                  }
-                />
+              {/* Password | Confirm Password */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-1.5">
+                    Password <span className="text-red-500">*</span>
+                  </label>
+                  <PasswordInput
+                    value={createUserForm.password}
+                    onChange={(e) => {
+                      setCreateUserForm({ ...createUserForm, password: e.target.value });
+                      if (createUserErrors.password) setCreateUserErrors((prev) => ({ ...prev, password: undefined }));
+                    }}
+                    placeholder="Password"
+                    autoComplete="new-password"
+                    error={createUserErrors.password}
+                    showPassword={showPassword}
+                    onTogglePassword={() => setShowPassword(!showPassword)}
+                  />
+                  {createUserForm.password && (
+                    <PasswordValidation password={createUserForm.password} />
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-1.5">
+                    Confirm Password <span className="text-red-500">*</span>
+                  </label>
+                  <PasswordInput
+                    value={createUserForm.confirm_password}
+                    onChange={(e) => {
+                      setCreateUserForm({ ...createUserForm, confirm_password: e.target.value });
+                      if (createUserErrors.confirm_password) setCreateUserErrors((prev) => ({ ...prev, confirm_password: undefined }));
+                    }}
+                    placeholder="Confirm Password"
+                    autoComplete="new-password"
+                    error={createUserErrors.confirm_password}
+                    showPassword={showConfirmPassword}
+                    onTogglePassword={() => setShowConfirmPassword(!showConfirmPassword)}
+                  />
+                </div>
               </div>
 
               {createUserForm.role === "parent" && (
@@ -463,17 +448,8 @@ const AdminUsersPage = () => {
                     options={availableStudents.data || []}
                     value={createUserForm.selected_students}
                     onChange={(selectedStudents) => {
-                      setCreateUserForm({
-                        ...createUserForm,
-                        selected_students: selectedStudents,
-                      });
-                      // Clear field error when user starts typing
-                      if (createUserErrors.selected_students) {
-                        setCreateUserErrors((prev) => ({
-                          ...prev,
-                          selected_students: undefined,
-                        }));
-                      }
+                      setCreateUserForm({ ...createUserForm, selected_students: selectedStudents });
+                      if (createUserErrors.selected_students) setCreateUserErrors((prev) => ({ ...prev, selected_students: undefined }));
                     }}
                     label="Select Students"
                     placeholder="Choose students to link..."
@@ -484,30 +460,20 @@ const AdminUsersPage = () => {
               )}
             </div>
 
-            <div className="flex gap-3 mt-6 shrink-0">
-              <Button
-                variant="secondary"
-                onClick={handleCloseCreateUserModal}
-                className="flex-1"
-              >
+            {/* Footer */}
+            <div className="flex justify-end gap-4 pt-8 mt-8 border-t border-white/5">
+              <Button variant="secondary" onClick={handleCloseCreateUserModal}>
                 Cancel
               </Button>
               <Button
                 variant="primary"
                 onClick={() => handleCreateUserSubmit(createUserForm)}
                 disabled={isCreatingUser}
-                className="flex-1"
               >
                 {isCreatingUser ? (
-                  <>
-                    <i className="fas fa-spinner fa-spin mr-2"></i>
-                    Creating...
-                  </>
+                  <><i className="fas fa-spinner fa-spin mr-2"></i>Creating...</>
                 ) : (
-                  <>
-                    <i className="fas fa-user-plus mr-2"></i>
-                    Create User
-                  </>
+                  <><i className="fas fa-user-plus mr-2"></i>Create User</>
                 )}
               </Button>
             </div>

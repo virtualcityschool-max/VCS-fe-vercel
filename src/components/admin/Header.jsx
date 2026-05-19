@@ -1,6 +1,6 @@
 import React from "react";
 
-const Header = ({ activeTab }) => {
+const Header = ({ activeTab, children }) => {
   const getTabInfo = () => {
     switch (activeTab) {
       case "overview":
@@ -30,8 +30,23 @@ const Header = ({ activeTab }) => {
         };
       case "sessions":
         return {
-          title: "Session Management",
-          description: "Create, edit, and manage course sessions",
+          title: "Class Management",
+          description: "Create, edit, and manage course classes",
+        };
+      case "evaluations":
+        return {
+          title: "Evaluations",
+          description: "Review student performance across teachers and courses",
+        };
+      case "attendance":
+        return {
+          title: "Attendance",
+          description: "Session-wise attendance matrix for all courses.",
+        };
+      case "categories":
+        return {
+          title: "Course Categories",
+          description: "Manage course categories for organizing your curriculum",
         };
       default:
         return {
@@ -44,13 +59,18 @@ const Header = ({ activeTab }) => {
   const { title, description } = getTabInfo();
 
   return (
-    <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-2">
+    <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
       <div>
         <h2 className="text-3xl md:text-4xl font-black font-poppins text-white capitalize mb-2">
           {title}
         </h2>
         <p className="text-slate-400 text-sm">{description}</p>
       </div>
+      {children && (
+        <div className="w-full md:w-auto shrink-0">
+          {children}
+        </div>
+      )}
     </header>
   );
 };

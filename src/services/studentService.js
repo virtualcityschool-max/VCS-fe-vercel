@@ -43,7 +43,6 @@ export const studentService = {
       throw new Error("Failed to load courses");
     }
   },
-
   // Get all enrollments
   getAllEnrollments: async () => {
     try {
@@ -52,6 +51,16 @@ export const studentService = {
     } catch (error) {
       console.error("Error fetching enrollments:", error);
       throw new Error("Failed to load enrollments");
+    }
+  },
+
+  // Get my enrollments (active + pending) with status field
+  getMyEnrollments: async () => {
+    try {
+      const response = await axiosInstance.get(`/courses/my-enrollments/`);
+      return response.data;
+    } catch (error) {
+      throw error;
     }
   },
 
@@ -88,6 +97,20 @@ export const studentService = {
       console.error("Error joining live session:", error);
       throw new Error("Failed to join live session.");
     }
+  },
+
+  startSession: async (sessionId) => {
+    const response = await axiosInstance.post(
+      `/classroom/sessions/${sessionId}/join/`,
+    );
+    return response.data;
+  },
+
+  endSession: async (sessionId) => {
+    const response = await axiosInstance.post(
+      `/classroom/sessions/${sessionId}/leave/`,
+    );
+    return response.data;
   },
 
   // Submit assignment
@@ -258,39 +281,28 @@ export const studentService = {
 
   // Normal enrollment
   enrollInCourseNormal: async (courseId) => {
-    try {
-      const response = await axiosInstance.post(`/courses/enroll/`, {
-        course_id: courseId,
-      });
-      return response.data;
-    } catch (error) {
-      console.error("Error enrolling in course (normal):", error);
-      throw new Error("Failed to enroll in course");
-    }
+    const response = await axiosInstance.post(`/courses/enroll/`, { course_id: courseId });
+    return response.data;
   },
 
   // Private enrollment
-  enrollInCoursePrivate: async ({ courseId, teacherId }) => {
-    try {
-      // Validate required parameters
-      if (!courseId) {
-        throw new Error("Course ID is required for private enrollment");
-      }
-      if (!teacherId) {
-        throw new Error("Teacher ID is required for private enrollment");
-      }
+  getTeacherAvailableSlots: async (teacherId) => {
+    const response = await axiosInstance.get(`classroom/teachers/${teacherId}/available-slots/`);
+    return response.data;
+  },
 
-      const response = await axiosInstance.post(
-        `/courses/teachers/${teacherId}/enroll/`,
-        {
-          course_id: courseId,
-        },
-      );
-      return response.data;
-    } catch (error) {
-      console.error("Error enrolling in course (private):", error);
-      throw new Error("Failed to enroll in course");
-    }
+  enrollInCoursePrivate: async ({ courseId, teacherId, preferred_slots }) => {
+    if (!courseId) throw new Error("Course ID is required for private enrollment");
+    if (!teacherId) throw new Error("Teacher ID is required for private enrollment");
+
+    const body = { course_id: courseId };
+    if (preferred_slots) body.preferred_slots = preferred_slots;
+
+    const response = await axiosInstance.post(
+      `/courses/teachers/${teacherId}/enroll/`,
+      body,
+    );
+    return response.data;
   },
 
   // Unenroll from course
@@ -502,11 +514,11 @@ export const studentService = {
   },
 
   // Get student's own attendance records
-  getMyAttendance: async () => {
+  getMyAttendance: async (params = {}) => {
     try {
       console.log("Fetching student attendance records...");
 
-      const response = await axiosInstance.get("/classroom/my-attendance/");
+      const response = await axiosInstance.get("/classroom/attendance/", { params });
 
       console.log("Student attendance response:", response.data);
 
@@ -530,6 +542,27 @@ export const studentService = {
 
       throw new Error(error.message || "Failed to load attendance records");
     }
+  },
+
+  // Quiz APIs
+  getStudentQuizzes: async (params = {}) => {
+    const response = await axiosInstance.get("/quizzes/", { params });
+    return response.data;
+  },
+
+  getStudentQuizById: async (id) => {
+    const response = await axiosInstance.get(`/quizzes/${id}/`);
+    return response.data;
+  },
+
+  submitQuiz: async (quizId, answers) => {
+    const response = await axiosInstance.post(`/quizzes/${quizId}/submit/`, { answers });
+    return response.data;
+  },
+
+  getMyQuizSubmission: async (submissionId) => {
+    const response = await axiosInstance.get(`/quizzes/submissions/${submissionId}/`);
+    return response.data;
   },
 
   // Announcements

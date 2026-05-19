@@ -3,14 +3,10 @@ import StatCard from "./StatCard";
 import {
   BarChart,
   Bar,
-  PieChart,
-  Pie,
-  Cell,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
 } from "recharts";
 
@@ -28,26 +24,104 @@ const tooltipStyle = {
   itemStyle: { color: "#e2e8f0" },
 };
 
+// ── Stat card with hover tooltip breakdown ───────────────────────────────────
+const StatCardTip = ({ label, value, icon, color, items }) => {
+  const colorClasses = {
+    indigo:
+      "from-indigo-500/20 to-indigo-600/20 border-indigo-500/20 text-indigo-400",
+    emerald:
+      "from-emerald-500/20 to-emerald-600/20 border-emerald-500/20 text-emerald-400",
+    amber:
+      "from-amber-500/20 to-amber-600/20 border-amber-500/20 text-amber-400",
+    purple:
+      "from-purple-500/20 to-purple-600/20 border-purple-500/20 text-purple-400",
+    rose: "from-rose-500/20 to-rose-600/20 border-rose-500/20 text-rose-400",
+    blue: "from-blue-500/20 to-blue-600/20 border-blue-500/20 text-blue-400",
+    pink: "from-pink-500/20 to-pink-600/20 border-pink-500/20 text-pink-400",
+  };
+  return (
+    <div className="relative group/tip">
+      <div
+        className={`relative overflow-hidden bg-gradient-to-br ${colorClasses[color]} rounded-xl px-4 py-4 border backdrop-blur-sm transition-all duration-300 group-hover/tip:scale-[1.02] group-hover/tip:shadow-lg cursor-default`}
+      >
+        <div className="absolute top-0 right-0 w-14 h-14 bg-white/5 rounded-full -mr-6 -mt-6" />
+        <div className="relative z-10 flex items-center gap-2.5 mb-2.5">
+          <div className="w-7 h-7 bg-white/10 rounded-md flex items-center justify-center flex-shrink-0">
+            <i className={`${icon} text-sm`} />
+          </div>
+          <p className="text-[10px] uppercase tracking-wider opacity-80 leading-tight">
+            {label}
+          </p>
+        </div>
+        <h3 className="text-2xl font-bold leading-none">{value}</h3>
+      </div>
+
+      {/* Info icon and tooltip breakdown */}
+      {items?.length > 0 && (
+        <div className="absolute top-2.5 right-2.5 z-20 group/info">
+          <i className="fas fa-info-circle text-sm opacity-40 group-hover/info:opacity-100 cursor-pointer transition-opacity" />
+          <div className="pointer-events-auto absolute top-full right-0 mt-2 z-40 opacity-0 invisible group-hover/info:opacity-100 group-hover/info:visible translate-y-[-4px] group-hover/info:translate-y-0 transition-all duration-200 min-w-[200px]">
+            <div className="absolute bottom-full right-3 border-4 border-transparent border-b-slate-900/95" />
+            <div className="bg-slate-900/95 border border-slate-700/50 rounded-xl shadow-2xl backdrop-blur-md overflow-hidden">
+              <div className="max-h-[180px] overflow-y-auto custom-scrollbar p-3">
+                {items.map((item) => (
+                  <div
+                    key={item.label}
+                    className="flex items-center justify-between gap-4 py-1.5 first:pt-0 last:pb-0 border-b border-slate-700/30 last:border-0"
+                  >
+                    <span className="text-slate-400 text-xs whitespace-nowrap">
+                      {item.label}
+                    </span>
+                    <span
+                      className={`text-xs font-bold tabular-nums ${item.color || "text-white"}`}
+                    >
+                      {item.value}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const OverviewTab = ({ analytics, analyticsLoading, analyticsError }) => {
   if (analyticsLoading) {
     return (
-      <div className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[...Array(4)].map((_, i) => (
+      <div className="space-y-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+          {[...Array(8)].map((_, i) => (
             <div
               key={i}
-              className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6 animate-pulse"
+              className="bg-slate-900/50 border border-slate-800 rounded-xl p-3 animate-pulse"
             >
-              <div className="flex items-center justify-between mb-4">
-                <div className="h-4 bg-slate-700 rounded w-20" />
-                <div className="w-12 h-12 bg-slate-700 rounded-xl" />
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-6 h-6 bg-slate-700 rounded-md" />
+                <div className="h-2.5 bg-slate-700 rounded w-14" />
               </div>
-              <div className="h-8 bg-slate-700 rounded w-16" />
+              <div className="h-6 bg-slate-700 rounded w-10" />
+            </div>
+          ))}
+        </div>
+        <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 gap-3">
+          {[...Array(2)].map((_, i) => (
+            <div
+              key={i}
+              className="bg-slate-900/50 border border-slate-800 rounded-xl p-3 animate-pulse"
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-6 h-6 bg-slate-700 rounded-md" />
+                <div className="h-2.5 bg-slate-700 rounded w-14" />
+              </div>
+              <div className="h-6 bg-slate-700 rounded w-10" />
             </div>
           ))}
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {[...Array(4)].map((_, i) => (
+          {[...Array(2)].map((_, i) => (
             <div
               key={i}
               className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6 animate-pulse"
@@ -90,7 +164,7 @@ const OverviewTab = ({ analytics, analyticsLoading, analyticsError }) => {
     name: truncate(item.course),
     fullName: item.course,
     Revenue: item.revenue,
-    "Lost Revenue": item.lost_revenue,
+    // "Lost Revenue": item.lost_revenue,
   }));
 
   const enrollmentData = (analytics.enrollments?.by_course || []).map(
@@ -101,155 +175,123 @@ const OverviewTab = ({ analytics, analyticsLoading, analyticsError }) => {
     }),
   );
 
-  const userPieData = [
-    { name: "Students", value: analytics.users.students, color: "#10b981" },
-    { name: "Teachers", value: analytics.users.teachers, color: "#8b5cf6" },
-    { name: "Parents", value: analytics.users.parents, color: "#f59e0b" },
-    { name: "Admins", value: analytics.users.admins, color: "#ef4444" },
-  ];
+  const totalRevenue = analytics.revenue?.total || 0;
 
   return (
-    <div className="space-y-6 animate-fadeIn">
-      {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard
+    <div className="space-y-4 animate-fadeIn">
+      {/* Row 1 — User stats */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <StatCardTip
           label="Total Users"
           value={analytics.users.total}
           icon="fas fa-users"
-          trend={12}
           color="indigo"
+          items={[
+            {
+              label: "Active",
+              value: analytics.users.active,
+              color: "text-emerald-400",
+            },
+            {
+              label: "Inactive",
+              value: analytics.users.inactive,
+              color: "text-amber-400",
+            },
+            {
+              label: "Rejected",
+              value: analytics.users.rejected ?? 0,
+              color: "text-rose-400",
+            },
+          ]}
         />
         <StatCard
-          label="Students"
-          value={analytics.users.students}
-          icon="fas fa-graduation-cap"
-          trend={8}
-          color="emerald"
+          label="Admins"
+          value={analytics.users.admins}
+          icon="fas fa-user-shield"
+          color="rose"
+          compact
         />
-        <StatCard
-          label="Total Courses"
-          value={analytics.courses.total}
-          icon="fas fa-book"
-          trend={15}
-          color="purple"
-        />
-        <StatCard
-          label="Total Revenue"
-          value={`PKR ${(analytics.revenue?.total || 0).toLocaleString()}`}
-          icon="fas fa-chart-line"
-          trend={23}
-          color="amber"
-        />
-      </div>
-
-      {/* Secondary Metrics */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
         <StatCard
           label="Teachers"
           value={analytics.users.teachers}
           icon="fas fa-chalkboard-teacher"
-          color="blue"
+          color="pink"
+          compact
         />
         <StatCard
           label="Parents"
           value={analytics.users.parents}
           icon="fas fa-user-friends"
-          color="rose"
+          color="amber"
+          compact
         />
         <StatCard
-          label="Active Users"
-          value={analytics.users.active}
-          icon="fas fa-user-check"
-          trend={5}
+          label="Students"
+          value={analytics.users.students}
+          icon="fas fa-graduation-cap"
           color="emerald"
+          compact
         />
-        <StatCard
-          label="Enrollments"
-          value={analytics.enrollments.total}
-          icon="fas fa-user-plus"
-          trend={18}
+        <StatCardTip
+          label="Total Courses"
+          value={analytics.courses.total}
+          icon="fas fa-book"
           color="purple"
+          items={[
+            {
+              label: "Total Enrollments",
+              value:
+                analytics.enrollments.active +
+                analytics.enrollments.cancelled +
+                analytics.enrollments.pending +
+                analytics.enrollments.rejected,
+              color: "text-white",
+            },
+            {
+              label: "Active",
+              value: analytics.enrollments.active,
+              color: "text-white",
+            },
+            {
+              label: "Cancelled",
+              value: analytics.enrollments.cancelled,
+              color: "text-white",
+            },
+            {
+              label: "Pending",
+              value: analytics.enrollments.pending,
+              color: "text-white",
+            },
+            {
+              label: "Rejected",
+              value: analytics.enrollments.rejected,
+              color: "text-white",
+            },
+          ]}
         />
       </div>
 
-      {/* User Distribution + Course Status */}
+      {/* Charts — side by side */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* User Distribution Pie */}
+        {/* Revenue by Course */}
         <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6 backdrop-blur-sm">
-          <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-3">
-            <div className="w-8 h-8 bg-indigo-600/20 rounded-lg flex items-center justify-center">
-              <i className="fas fa-chart-pie text-indigo-400 text-sm"></i>
+          <div className="flex items-center justify-between mb-1">
+            <h3 className="text-lg font-bold text-white flex items-center gap-3">
+              <div className="w-8 h-8 bg-amber-600/20 rounded-lg flex items-center justify-center">
+                <i className="fas fa-coins text-amber-400 text-sm"></i>
+              </div>
+              Revenue by Course
+            </h3>
+            <div className="text-right">
+              <p className="text-[10px] uppercase tracking-wider text-slate-500">
+                Total Revenue
+              </p>
+              <p className="text-base font-bold text-amber-400">
+                PKR {totalRevenue.toLocaleString()}
+              </p>
             </div>
-            User Distribution
-          </h3>
-          <ResponsiveContainer width="100%" height={280}>
-            <PieChart>
-              <Pie
-                data={userPieData}
-                cx="50%"
-                cy="50%"
-                innerRadius={60}
-                outerRadius={100}
-                paddingAngle={2}
-                dataKey="value"
-              >
-                {userPieData.map((entry, i) => (
-                  <Cell key={i} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip {...tooltipStyle} />
-              <Legend wrapperStyle={{ color: "#94a3b8" }} iconType="circle" />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Course Status Bar */}
-        {/* <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6 backdrop-blur-sm">
-          <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-3">
-            <div className="w-8 h-8 bg-purple-600/20 rounded-lg flex items-center justify-center">
-              <i className="fas fa-chart-bar text-purple-400 text-sm"></i>
-            </div>
-            Course Status
-          </h3>
-          <ResponsiveContainer width="100%" height={280}>
-            <BarChart
-              data={[
-                {
-                  name: "Published",
-                  value: analytics.courses.published,
-                  color: "#10b981",
-                },
-                {
-                  name: "Draft",
-                  value: analytics.courses.draft,
-                  color: "#6b7280",
-                },
-              ]}
-            >
-              <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-              <XAxis dataKey="name" stroke="#94a3b8" />
-              <YAxis stroke="#94a3b8" allowDecimals={false} />
-              <Tooltip {...tooltipStyle} />
-              <Bar dataKey="value" radius={[8, 8, 0, 0]}>
-                {[{ color: "#10b981" }, { color: "#6b7280" }].map((e, i) => (
-                  <Cell key={i} fill={e.color} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </div> */}
-      </div>
-
-      {/* Revenue by Course */}
-      <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6 backdrop-blur-sm">
-        <div className="flex items-center justify-between mb-2">
-          <h3 className="text-lg font-bold text-white flex items-center gap-3">
-            <div className="w-8 h-8 bg-amber-600/20 rounded-lg flex items-center justify-center">
-              <i className="fas fa-coins text-amber-400 text-sm"></i>
-            </div>
-            Revenue by Course
-          </h3>
-          <div className="flex items-center gap-4 text-xs text-slate-400">
+          </div>
+          {/* <div className="flex items-center gap-4 text-xs text-slate-400 ml-11 mb-4">
             <span className="flex items-center gap-1.5">
               <span className="w-3 h-3 rounded-sm bg-emerald-500 inline-block"></span>
               Earned
@@ -258,114 +300,119 @@ const OverviewTab = ({ analytics, analyticsLoading, analyticsError }) => {
               <span className="w-3 h-3 rounded-sm bg-rose-500 inline-block"></span>
               Lost
             </span>
-          </div>
+          </div> */}
+
+          {revenueData.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12">
+              <div className="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center mb-3">
+                <i className="fas fa-coins text-slate-500 text-lg"></i>
+              </div>
+              <p className="text-slate-400 text-sm">
+                No revenue data available
+              </p>
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height={260}>
+              <BarChart
+                data={revenueData}
+                margin={{ top: 4, right: 8, left: 0, bottom: 0 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                <XAxis
+                  interval={0}
+                  hide={true}
+                  dataKey="name"
+                  stroke="#94a3b8"
+                  tick={{ fontSize: 11 }}
+                />
+                <YAxis
+                  stroke="#94a3b8"
+                  tick={{ fontSize: 10 }}
+                  tickFormatter={(v) =>
+                    v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v
+                  }
+                />
+                <Tooltip
+                  {...tooltipStyle}
+                  cursor={false}
+                  formatter={(value, name) => [
+                    `PKR ${value.toLocaleString()}`,
+                    name,
+                  ]}
+                  labelFormatter={(label, payload) =>
+                    payload?.[0]?.payload?.fullName || label
+                  }
+                />
+                <Bar dataKey="Revenue" fill="#10b981" radius={[4, 4, 0, 0]} />
+                <Bar
+                  dataKey="Lost Revenue"
+                  fill="#f43f5e"
+                  radius={[4, 4, 0, 0]}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
         </div>
-        <p className="text-xs text-slate-500 mb-5 ml-11">
-          Active enrollment revenue vs cancelled/lost revenue per course
-        </p>
 
-        {revenueData.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12">
-            <div className="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center mb-3">
-              <i className="fas fa-coins text-slate-500 text-lg"></i>
-            </div>
-            <p className="text-slate-400 text-sm">No revenue data available</p>
+        {/* Enrollments by Course */}
+        <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6 backdrop-blur-sm">
+          <div className="flex items-center justify-between mb-1">
+            <h3 className="text-lg font-bold text-white flex items-center gap-3">
+              <div className="w-8 h-8 bg-indigo-600/20 rounded-lg flex items-center justify-center">
+                <i className="fas fa-user-graduate text-indigo-400 text-sm"></i>
+              </div>
+              Enrollments by Course
+            </h3>
+            <span className="text-xs text-slate-400">
+              {analytics.enrollments.active} active /{" "}
+              {analytics.enrollments.cancelled} cancelled
+            </span>
           </div>
-        ) : (
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart
-              data={revenueData}
-              margin={{ top: 4, right: 16, left: 8, bottom: 0 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-              <XAxis
-                dataKey="name"
-                stroke="#94a3b8"
-                tick={{ fontSize: 12 }}
-              />
-              <YAxis
-                stroke="#94a3b8"
-                tick={{ fontSize: 11 }}
-                tickFormatter={(v) =>
-                  v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v
-                }
-              />
-              <Tooltip
-                {...tooltipStyle}
-                formatter={(value, name) => [
-                  `PKR ${value.toLocaleString()}`,
-                  name,
-                ]}
-                labelFormatter={(label, payload) =>
-                  payload?.[0]?.payload?.fullName || label
-                }
-              />
-              <Bar dataKey="Revenue" fill="#10b981" radius={[4, 4, 0, 0]} />
-              <Bar
-                dataKey="Lost Revenue"
-                fill="#f43f5e"
-                radius={[4, 4, 0, 0]}
-              />
-            </BarChart>
-          </ResponsiveContainer>
-        )}
-      </div>
+          <p className="text-xs text-slate-500 mb-4 ml-11">
+            Active students enrolled per course
+          </p>
 
-      {/* Enrollments by Course */}
-      <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6 backdrop-blur-sm">
-        <div className="flex items-center justify-between mb-2">
-          <h3 className="text-lg font-bold text-white flex items-center gap-3">
-            <div className="w-8 h-8 bg-indigo-600/20 rounded-lg flex items-center justify-center">
-              <i className="fas fa-user-graduate text-indigo-400 text-sm"></i>
+          {enrollmentData.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12">
+              <div className="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center mb-3">
+                <i className="fas fa-user-graduate text-slate-500 text-lg"></i>
+              </div>
+              <p className="text-slate-400 text-sm">
+                No enrollment data available
+              </p>
             </div>
-            Enrollments by Course
-          </h3>
-          <span className="text-xs text-slate-400">
-            {analytics.enrollments.active} active /{" "}
-            {analytics.enrollments.cancelled} cancelled
-          </span>
+          ) : (
+            <ResponsiveContainer width="100%" height={260}>
+              <BarChart
+                data={enrollmentData}
+                margin={{ top: 4, right: 8, left: 0, bottom: 0 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                <XAxis
+                  interval={0}
+                  hide={true}
+                  dataKey="name"
+                  stroke="#94a3b8"
+                  tick={{ fontSize: 11 }}
+                />
+                <YAxis
+                  stroke="#94a3b8"
+                  allowDecimals={false}
+                  tick={{ fontSize: 10 }}
+                />
+                <Tooltip
+                  {...tooltipStyle}
+                  cursor={false}
+                  formatter={(value) => [value, "Students"]}
+                  labelFormatter={(label, payload) =>
+                    payload?.[0]?.payload?.fullName || label
+                  }
+                />
+                <Bar dataKey="Students" fill="#6366f1" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
         </div>
-        <p className="text-xs text-slate-500 mb-5 ml-11">
-          Number of active students enrolled per course
-        </p>
-
-        {enrollmentData.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12">
-            <div className="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center mb-3">
-              <i className="fas fa-user-graduate text-slate-500 text-lg"></i>
-            </div>
-            <p className="text-slate-400 text-sm">
-              No enrollment data available
-            </p>
-          </div>
-        ) : (
-          <ResponsiveContainer width="100%" height={280}>
-            <BarChart
-              data={enrollmentData}
-              margin={{ top: 4, right: 16, left: 8, bottom: 0 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-              <XAxis
-                dataKey="name"
-                stroke="#94a3b8"
-                tick={{ fontSize: 12 }}
-              />
-              <YAxis
-                stroke="#94a3b8"
-                allowDecimals={false}
-                tick={{ fontSize: 11 }}
-              />
-              <Tooltip
-                {...tooltipStyle}
-                formatter={(value) => [value, "Students"]}
-                labelFormatter={(label, payload) =>
-                  payload?.[0]?.payload?.fullName || label
-                }
-              />
-              <Bar dataKey="Students" fill="#6366f1" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        )}
       </div>
     </div>
   );

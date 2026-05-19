@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Button, Input } from "../ui";
+import { Button, Input, PhoneInput } from "../ui";
 import { useFieldErrors } from "../../hooks";
+import { validatePhone, normalizePhone } from "../../utils/validation";
 import DistinctionsEditor from "./DistinctionsEditor";
 
 const UserProfileTab = ({ profile, onUpdate }) => {
@@ -75,12 +76,9 @@ const UserProfileTab = ({ profile, onUpdate }) => {
       newErrors.linkedin = "Please enter a valid LinkedIn URL";
     }
 
-    // Phone number validation (basic numeric check)
-    if (formData.phone && !/^\+?[\d\s\-()]+$/.test(formData.phone)) {
-      newErrors.phone =
-        "Phone number must contain only digits, spaces, and basic formatting";
-    } else if (formData.phone && formData.phone.length > 20) {
-      newErrors.phone = "Phone number must not exceed 20 characters";
+    if (formData.phone) {
+      const phoneResult = validatePhone(formData.phone);
+      if (!phoneResult.isValid) newErrors.phone = phoneResult.error;
     }
 
     setErrors(newErrors);
@@ -102,6 +100,7 @@ const UserProfileTab = ({ profile, onUpdate }) => {
           ? parseInt(formData.experience_years)
           : null,
         rating: formData.rating ? parseFloat(formData.rating) : null,
+        phone: normalizePhone(formData.phone),
       };
 
       await onUpdate(updateData);
@@ -129,7 +128,7 @@ const UserProfileTab = ({ profile, onUpdate }) => {
 
   return (
     <div className="space-y-8">
-      <form onSubmit={handleSubmit} className="space-y-8">
+      <form onSubmit={handleSubmit} className="space-y-8 relative z-20">
         {/* Professional Info Section */}
         <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6">
           <h3 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
@@ -187,12 +186,10 @@ const UserProfileTab = ({ profile, onUpdate }) => {
                 <label className="block text-sm font-medium text-slate-300 mb-2">
                   Phone
                 </label>
-                <Input
-                  type="tel"
+                <PhoneInput
                   value={formData.phone}
-                  onChange={(e) => handleInputChange("phone", e.target.value)}
-                  className="w-full bg-slate-800 border-slate-700 text-white"
-                  placeholder="Phone number"
+                  onChange={(val) => handleInputChange("phone", val)}
+                  error={getFieldError("phone")}
                 />
               </div>
 
@@ -217,10 +214,10 @@ const UserProfileTab = ({ profile, onUpdate }) => {
 
         {/* Rating Section */}
         <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6">
-          <h3 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
+          {/* <h3 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
             <i className="fas fa-star text-indigo-400"></i>
             Rating
-          </h3>
+          </h3> */}
 
           <div className="space-y-4">
             <div>

@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
+import ConfirmDialog from "../common/ConfirmDialog";
 import { useDispatch } from "react-redux";
-import { Button, Input } from "../ui";
+import { Button, PhoneInput } from "../ui";
 import { useFieldErrors } from "../../hooks";
+import { validatePhone, normalizePhone } from "../../utils/validation";
 import { toastManager } from "../../utils/toastManager";
 import {
   unlinkChildLinksAdmin,
@@ -9,7 +11,6 @@ import {
   linkChildLinksAdmin,
 } from "../../store/slices/childLinksSlice";
 import {
-  selectChildLinksUnlinking,
   selectAvailableStudents,
   selectAvailableStudentsLoading,
   selectAvailableStudentsError,
@@ -17,12 +18,13 @@ import {
 } from "../../store/slices/childLinksSlice";
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
+import { showApiError } from "../../utils/apiErrorHandler";
+import SearchInput from "../ui/SearchInput";
 
-const ParentProfileTab = ({ profile, onUpdate, onCancel, onSaved }) => {
+const ParentProfileTab = ({ profile, onUpdate, onRefresh, onCancel, onSaved }) => {
   const { id } = useParams();
 
   const dispatch = useDispatch();
-  const isUnlinking = useSelector(selectChildLinksUnlinking);
   const availableStudents = useSelector(selectAvailableStudents);
   const availableStudentsLoading = useSelector(selectAvailableStudentsLoading);
   const availableStudentsError = useSelector(selectAvailableStudentsError);
@@ -34,7 +36,10 @@ const ParentProfileTab = ({ profile, onUpdate, onCancel, onSaved }) => {
   });
 
   const [isSaving, setIsSaving] = useState(false);
+  const [unlinkingChildId, setUnlinkingChildId] = useState(null);
+  const [confirmUnlink, setConfirmUnlink] = useState({ open: false, childId: null, childUsername: "" });
   const [selectedStudentIds, setSelectedStudentIds] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const {
     errors,
@@ -72,14 +77,9 @@ const ParentProfileTab = ({ profile, onUpdate, onCancel, onSaved }) => {
   const validateForm = () => {
     const newErrors = {};
 
-    // Phone validation
-    if (!formData.phone?.trim()) {
-      newErrors.phone = "Phone number is required";
-    } else if (formData.phone && !/^\+?[\d\s\-()]+$/.test(formData.phone)) {
-      newErrors.phone =
-        "Phone number must contain only digits, spaces, and basic formatting";
-    } else if (formData.phone && formData.phone.length > 20) {
-      newErrors.phone = "Phone number must not exceed 20 characters";
+    if (formData.phone) {
+      const phoneResult = validatePhone(formData.phone);
+      if (!phoneResult.isValid) newErrors.phone = phoneResult.error;
     }
 
     // Address validation
@@ -100,7 +100,11 @@ const ParentProfileTab = ({ profile, onUpdate, onCancel, onSaved }) => {
 
     setIsSaving(true);
     try {
-      await onUpdate(formData);
+      const updateData = {
+        ...formData,
+        phone: normalizePhone(formData.phone),
+      };
+      await onUpdate(updateData);
       clearAllErrors();
       if (onSaved) {
         onSaved();
@@ -133,14 +137,13 @@ const ParentProfileTab = ({ profile, onUpdate, onCancel, onSaved }) => {
   };
 
   const handleUnlinkChild = async (childId, childUsername) => {
-    const confirmed = window.confirm(
-      `Are you sure you want to unlink ${childUsername}?`,
-    );
+    setConfirmUnlink({ open: true, childId, childUsername });
+  };
 
-    if (!confirmed) {
-      return;
-    }
-
+  const handleConfirmUnlink = async () => {
+    const { childId, childUsername } = confirmUnlink;
+    setConfirmUnlink({ open: false, childId: null, childUsername: "" });
+    setUnlinkingChildId(childId);
     try {
       await dispatch(
         unlinkChildLinksAdmin({
@@ -149,24 +152,19 @@ const ParentProfileTab = ({ profile, onUpdate, onCancel, onSaved }) => {
         }),
       ).unwrap();
 
-      // Show success toast
       toastManager.success(`Successfully unlinked ${childUsername}`);
 
-      // Refresh parent profile
-      if (onUpdate) {
-        onUpdate();
+      if (onRefresh) {
+        await onRefresh();
       }
     } catch (error) {
-      // Show error toast
-      toastManager.error(
-        `Failed to unlink ${childUsername}: ${error.message || "Unknown error"}`,
-      );
+      showApiError(error);
+    } finally {
+      setUnlinkingChildId(null);
     }
   };
 
   const handleLinkChildren = async () => {
-    console.log("profile", profile);
-    // Validate at least one student selected
     if (selectedStudentIds.length === 0) {
       toastManager.error("Please select at least one student to link.");
       return;
@@ -180,51 +178,58 @@ const ParentProfileTab = ({ profile, onUpdate, onCancel, onSaved }) => {
         }),
       ).unwrap();
 
-      // Show success toast
       toastManager.success(
         `Successfully linked ${selectedStudentIds.length} student(s) to parent.`,
       );
 
-      // Clear selection
       setSelectedStudentIds([]);
 
-      // Refresh parent profile
-      if (onUpdate) {
-        onUpdate();
+      if (onRefresh) {
+        await onRefresh();
       }
 
-      // Refresh available students list
       dispatch(fetchAvailableStudents());
     } catch (error) {
-      // Show error toast
       toastManager.error(
         `Failed to link students: ${error.message || "Unknown error"}`,
       );
     }
   };
 
-  const handleStudentSelectionChange = (e) => {
-    const selectedOptions = Array.from(e.target.selectedOptions, (option) =>
-      Number(option.value),
+
+  const toggleStudentSelection = (studentId) => {
+    setSelectedStudentIds((prev) =>
+      prev.includes(studentId)
+        ? prev.filter((id) => id !== studentId)
+        : [...prev, studentId],
     );
-    setSelectedStudentIds(selectedOptions);
   };
+
+  const filteredStudents = availableStudents.filter((student) => {
+    const searchLower = searchTerm.toLowerCase();
+    const studentName = (
+      student.username ||
+      `${student.first_name || ""} ${student.last_name || ""}`
+    ).toLowerCase();
+    return (
+      studentName.includes(searchLower) ||
+      student.email?.toLowerCase().includes(searchLower) ||
+      student.id?.toString().includes(searchLower)
+    );
+  });
 
   return (
     <div className="space-y-4">
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4 relative z-20">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-2">
               Phone Number
             </label>
-            <Input
-              type="tel"
+            <PhoneInput
               value={formData.phone}
-              onChange={(e) => handleInputChange("phone", e.target.value)}
-              placeholder="+1 (555) 123-4567"
+              onChange={(val) => handleInputChange("phone", val)}
               error={getFieldError("phone")}
-              className="bg-slate-900/60 border-slate-700"
             />
           </div>
           <div>
@@ -257,37 +262,48 @@ const ParentProfileTab = ({ profile, onUpdate, onCancel, onSaved }) => {
                 {profile.children.map((child) => (
                   <div
                     key={child.id}
-                    className="bg-slate-900/60 border border-slate-700 rounded-xl p-4"
+                    className="bg-slate-900/60 border border-slate-700 rounded-xl p-4 hover:border-slate-600 transition-colors group"
                   >
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-green-600/30 rounded-full flex items-center justify-center">
-                        <i className="fas fa-user-graduate text-white text-lg"></i>
+                    <div className="flex items-start gap-4">
+                      <div className="w-10 h-10 bg-green-600/20 rounded-full flex items-center justify-center border border-green-600/30">
+                        <i className="fas fa-user-graduate text-green-500 text-base"></i>
                       </div>
-                      <div className="flex-1">
-                        <p className="font-semibold text-white">{child.username}</p>
-                        <p className="text-xs text-slate-400">Student ID: {child.id}</p>
-                        <Button
-                          type="button"
-                          variant="danger"
-                          size="sm"
-                          onClick={() =>
-                            handleUnlinkChild(child.id, child.username)
-                          }
-                          disabled={isUnlinking}
-                          className="mt-3 px-3 py-1.5 text-sm disabled:opacity-50"
-                        >
-                          {isUnlinking ? (
-                            <>
-                              <i className="fas fa-spinner fa-spin mr-2"></i>
-                              Unlinking...
-                            </>
-                          ) : (
-                            <>
-                              <i className="fas fa-unlink mr-2"></i>
-                              Unlink
-                            </>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-white truncate">{child.username}</p>
+                        <div className="space-y-0.5 mt-1">
+                          <p className="text-[11px] text-slate-400 flex items-center gap-1.5">
+                            <i className="fas fa-id-badge text-[9px]"></i>
+                            ID: {child.id}
+                          </p>
+                          {child.email && (
+                            <p className="text-[11px] text-slate-500 flex items-center gap-1.5 truncate">
+                              <i className="fas fa-envelope text-[9px]"></i>
+                              {child.email}
+                            </p>
                           )}
-                        </Button>
+                        </div>
+                          <Button
+                            type="button"
+                            variant="danger"
+                            size="sm"
+                            onClick={() =>
+                              handleUnlinkChild(child.id, child.username)
+                            }
+                            disabled={unlinkingChildId === child.id}
+                            className="mt-4 w-full sm:w-auto px-4 py-1.5 text-xs font-medium rounded-lg opacity-80 hover:opacity-100 transition-opacity"
+                          >
+                            {unlinkingChildId === child.id ? (
+                              <>
+                                <i className="fas fa-spinner fa-spin mr-2"></i>
+                                Unlinking...
+                              </>
+                            ) : (
+                              <>
+                                <i className="fas fa-unlink mr-2"></i>
+                                Unlink
+                              </>
+                            )}
+                          </Button>
                       </div>
                     </div>
                   </div>
@@ -308,41 +324,101 @@ const ParentProfileTab = ({ profile, onUpdate, onCancel, onSaved }) => {
               </div>
             )}
 
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-3">
-                Available Students
-              </label>
+            <div className="space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <label className="block text-sm font-medium text-slate-300">
+                  Available Students
+                </label>
+                <SearchInput
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onClear={() => setSearchTerm("")}
+                  placeholder="Search by name, ID or email..."
+                  className="w-full sm:w-72"
+                />
+              </div>
+
               {availableStudentsLoading ? (
-                <div className="flex items-center gap-3 text-slate-400">
-                  <i className="fas fa-spinner fa-spin"></i>
+                <div className="flex items-center justify-center py-10 gap-3 text-slate-400 bg-slate-900/20 rounded-xl border border-dashed border-slate-700">
+                  <i className="fas fa-spinner fa-spin text-indigo-500"></i>
                   <span>Loading available students...</span>
                 </div>
               ) : availableStudents.length === 0 ? (
-                <div className="p-4 bg-slate-800/50 border border-slate-600/30 rounded-xl">
+                <div className="p-8 bg-slate-800/20 border border-dashed border-slate-700 rounded-xl text-center">
+                  <i className="fas fa-user-slash text-slate-500 text-3xl mb-3"></i>
                   <p className="text-sm text-slate-400">
                     No available students to link.
                   </p>
                 </div>
               ) : (
-                <>
-                  <select
-                    multiple
-                    value={selectedStudentIds}
-                    onChange={handleStudentSelectionChange}
-                    className="w-full bg-slate-900/60 border border-slate-600/50 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-green-500/20 focus:border-green-500/50 transition-all duration-300"
-                    size="4"
-                  >
-                    {availableStudents.map((student) => (
-                      <option key={student.id} value={student.id}>
-                        {student.email}
-                      </option>
-                    ))}
-                  </select>
-                  <p className="mt-2 text-xs text-slate-400">
-                    Hold Ctrl (Windows) or Cmd (Mac) to select multiple
-                    students.
-                  </p>
-                </>
+                <div className="space-y-3">
+                  <div className="max-h-[350px] overflow-y-auto pr-2 custom-scrollbar space-y-2">
+                    {filteredStudents.length === 0 ? (
+                      <div className="p-6 text-center text-slate-500 text-sm italic">
+                        No students match your search.
+                      </div>
+                    ) : (
+                      filteredStudents.map((student) => (
+                        <div
+                          key={student.id}
+                          onClick={() => toggleStudentSelection(student.id)}
+                          className={`flex items-center gap-4 p-3.5 rounded-xl border transition-all duration-200 cursor-pointer group ${
+                            selectedStudentIds.includes(student.id)
+                              ? "bg-indigo-500/10 border-indigo-500/50 ring-1 ring-indigo-500/20"
+                              : "bg-slate-900/40 border-slate-700/50 hover:border-slate-600 hover:bg-slate-800/40"
+                          }`}
+                        >
+                          <div
+                            className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all duration-200 ${
+                              selectedStudentIds.includes(student.id)
+                                ? "bg-indigo-500 border-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.3)]"
+                                : "border-slate-600 group-hover:border-slate-500 bg-slate-800"
+                            }`}
+                          >
+                            {selectedStudentIds.includes(student.id) && (
+                              <i className="fas fa-check text-[10px] text-white"></i>
+                            )}
+                          </div>
+                          
+                          <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center border border-slate-700 group-hover:border-slate-600 transition-colors">
+                            <i className="fas fa-user-graduate text-slate-400 group-hover:text-slate-300"></i>
+                          </div>
+
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-white truncate">
+                              {student.username || `${student.first_name || ""} ${student.last_name || ""}`.trim() || student.email.split('@')[0]}
+                            </p>
+                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
+                              <span className="flex items-center gap-1.5 text-[11px] text-slate-400">
+                                <i className="fas fa-id-badge text-[9px] text-slate-500"></i>
+                                ID: {student.id}
+                              </span>
+                              <span className="flex items-center gap-1.5 text-[11px] text-slate-400 truncate">
+                                <i className="fas fa-envelope text-[9px] text-slate-500"></i>
+                                {student.email}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                  
+                  <div className="flex items-center justify-between px-2 text-xs text-slate-400">
+                    <span>
+                      {selectedStudentIds.length} student(s) selected
+                    </span>
+                    {selectedStudentIds.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setSelectedStudentIds([])}
+                        className="text-indigo-400 hover:text-indigo-300 transition-colors"
+                      >
+                        Clear Selection
+                      </button>
+                    )}
+                  </div>
+                </div>
               )}
             </div>
 
@@ -399,6 +475,17 @@ const ParentProfileTab = ({ profile, onUpdate, onCancel, onSaved }) => {
           </Button>
         </div>
       </form>
+      <ConfirmDialog
+        open={confirmUnlink.open}
+        variant="danger"
+        title="Unlink Child"
+        message={`Are you sure you want to unlink ${confirmUnlink.childUsername}? This will remove the parent-child relationship.`}
+        confirmLabel="Unlink"
+        cancelLabel="Cancel"
+        loading={unlinkingChildId !== null}
+        onConfirm={handleConfirmUnlink}
+        onCancel={() => setConfirmUnlink({ open: false, childId: null, childUsername: "" })}
+      />
     </div>
   );
 };

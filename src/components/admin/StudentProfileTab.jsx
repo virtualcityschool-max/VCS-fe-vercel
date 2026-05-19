@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { Button, Input } from "../ui";
+import { Button, Input, PhoneInput } from "../ui";
 import { useFieldErrors } from "../../hooks";
+import { validatePhone, normalizePhone } from "../../utils/validation";
 
-const StudentProfileTab = ({ profile, onUpdate, onCancel, onSaved }) => {
+const StudentProfileTab = ({ profile, userId, onUpdate, onCancel, onSaved }) => {
   const [formData, setFormData] = useState({
     grade_level: "",
     date_of_birth: "",
@@ -55,12 +56,9 @@ const StudentProfileTab = ({ profile, onUpdate, onCancel, onSaved }) => {
       newErrors.date_of_birth = "Date of birth cannot be in the future";
     }
 
-    // Phone number validation (basic numeric check)
-    if (formData.phone && !/^\+?[\d\s\-()]+$/.test(formData.phone)) {
-      newErrors.phone =
-        "Phone number must contain only digits, spaces, and basic formatting";
-    } else if (formData.phone && formData.phone.length > 20) {
-      newErrors.phone = "Phone number must not exceed 20 characters";
+    if (formData.phone) {
+      const phoneResult = validatePhone(formData.phone);
+      if (!phoneResult.isValid) newErrors.phone = phoneResult.error;
     }
 
     setErrors(newErrors);
@@ -76,7 +74,11 @@ const StudentProfileTab = ({ profile, onUpdate, onCancel, onSaved }) => {
 
     setIsSaving(true);
     try {
-      await onUpdate(formData);
+      const updateData = {
+        ...formData,
+        phone: normalizePhone(formData.phone),
+      };
+      await onUpdate(updateData);
       clearAllErrors();
       if (onSaved) {
         onSaved();
@@ -111,39 +113,30 @@ const StudentProfileTab = ({ profile, onUpdate, onCancel, onSaved }) => {
 
   return (
     <div className="space-y-4">
-      <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Student ID — read-only */}
+      {userId != null && (
+        <div className="flex items-center gap-3 px-4 py-3 bg-slate-800/40 border border-slate-700/50 rounded-xl">
+          <i className="fas fa-id-badge text-indigo-400 text-sm flex-shrink-0" />
+          <div>
+            <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Student ID</p>
+            <p className="text-white font-semibold text-sm">#{userId}</p>
+          </div>
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-4 relative z-20">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-2">
               Grade Level
             </label>
-            <select
+            <Input
               value={formData.grade_level}
               onChange={(e) => handleInputChange("grade_level", e.target.value)}
-              className={`w-full bg-slate-900/60 border text-white rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 ${
-                errors.grade_level
-                  ? "border-red-500 focus:ring-red-500/20"
-                  : "border-slate-700 focus:ring-indigo-500/30"
-              }`}
-            >
-              <option value="">Select Grade Level</option>
-              <option value="Kindergarten">Kindergarten</option>
-              <option value="Grade 1">Grade 1</option>
-              <option value="Grade 2">Grade 2</option>
-              <option value="Grade 3">Grade 3</option>
-              <option value="Grade 4">Grade 4</option>
-              <option value="Grade 5">Grade 5</option>
-              <option value="Grade 6">Grade 6</option>
-              <option value="Grade 7">Grade 7</option>
-              <option value="Grade 8">Grade 8</option>
-              <option value="Grade 9">Grade 9</option>
-              <option value="Grade 10">Grade 10</option>
-              <option value="Grade 11">Grade 11</option>
-              <option value="Grade 12">Grade 12</option>
-            </select>
-            {errors.grade_level && (
-              <p className="mt-2 text-sm text-red-400">{getFieldError("grade_level")}</p>
-            )}
+              placeholder="e.g. Grade 8, A-Level"
+              error={getFieldError("grade_level")}
+              className="bg-slate-900/60 border-slate-700"
+            />
           </div>
 
           <div>
@@ -165,13 +158,10 @@ const StudentProfileTab = ({ profile, onUpdate, onCancel, onSaved }) => {
           <label className="block text-sm font-medium text-slate-300 mb-2">
             Phone Number
           </label>
-          <Input
-            type="tel"
+          <PhoneInput
             value={formData.phone}
-            onChange={(e) => handleInputChange("phone", e.target.value)}
-            placeholder="+1 (555) 123-4567"
+            onChange={(val) => handleInputChange("phone", val)}
             error={getFieldError("phone")}
-            className="w-full bg-slate-900/60 text-white border-slate-700"
           />
         </div>
 

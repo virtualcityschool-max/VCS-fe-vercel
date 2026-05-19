@@ -10,5 +10,7 @@ export const BACKEND_CATEGORIES = [
 
 // Format category label for display
 export const formatCategoryLabel = (category) => {
-  return category.charAt(0).toUpperCase() + category.slice(1).replace('_', ' ');
+  const str = typeof category === "object" && category !== null ? category.name ?? "" : category ?? "";
+  if (!str) return "";
+  return str.charAt(0).toUpperCase() + str.slice(1).replace('_', ' ');
 };

@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   BrowserRouter,
   Routes,
   Route,
   Navigate,
   Outlet,
+  useLocation,
 } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -13,7 +14,8 @@ import { initializeAuth, logoutUser } from "./store/slices/authSlice";
 import { toastManager } from "./utils/toastManager";
 
 // Components
-import { AIChat, AuthModals, Navbar } from "./components";
+import { AIChat, AuthModals, Navbar, Footer, ScrollToTop } from "./components";
+import Sidebar from "./components/layout/Sidebar";
 
 // Pages
 import {
@@ -22,26 +24,48 @@ import {
   AdminOverviewPage,
   AdminApprovalsPage,
   AdminCoursesPage,
+  AdminCourseDetailPage,
+  ProfilePage,
   AdminUsersPage,
   AdminEnrollmentsPage,
   AdminSessionsPage,
+  AdminAttendancePage,
+  AdminEvaluationPage,
+  AdminCategoriesPage,
   UserDetailsPage,
   StudentPortal,
   TeacherLayout,
   TeacherPortal,
   TeacherClasses,
+  TeacherCourseDetailPage,
   TeacherAttendance,
   TeacherGrading,
+  TeacherAssessments,
+  TeacherSubmissions,
+  TeacherSessionCalendar,
+  StudentLayout,
+  StudentClasses,
   ParentPortal,
-  Classroom,
-  StudentFeed,
   Marketplace,
   CourseDetails,
   TeacherProfile,
   TeacherInternalStudentProfile,
+  TeacherEvaluationPage,
+  TeacherHireLeads,
   TeachersDirectory,
   StudentAssignments,
   StudentAssignmentDetails,
+  StudentAssessments,
+  StudentQuizDetail,
+  StudentAttendance,
+  // StudentExamDetail,
+  StudentEvaluationPage,
+  ParentLayout,
+  ParentAttendance,
+  ParentEvaluationPage,
+  ParentChildDetails,
+  PrivacyPolicy,
+  TermsAndConditions,
 } from "./pages";
 
 // Protected Route Component with Role-Based Access Control
@@ -50,7 +74,6 @@ const ProtectedRoute = ({ allowedRoles = [] }) => {
     (state) => state.auth,
   );
 
-  // Show loading while auth is initializing
   if (!isInitialized) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center">
@@ -64,102 +87,120 @@ const ProtectedRoute = ({ allowedRoles = [] }) => {
     );
   }
 
-  // Redirect to home if not authenticated
-  if (!isLoggedIn) {
-    return <Navigate to="/" replace />;
-  }
+  if (!isLoggedIn) return <Navigate to="/" replace />;
 
-  // Check role-based access if roles are specified
   if (allowedRoles.length > 0 && !allowedRoles.includes(role)) {
-    // Redirect authenticated users to appropriate dashboard based on their role
     const roleRedirects = {
       student: "/student",
       teacher: "/teacher",
       parent: "/parent",
       admin: "/admin",
     };
-
-    const redirectPath = roleRedirects[role] || "/";
-    return <Navigate to={redirectPath} replace />;
+    return <Navigate to={roleRedirects[role] || "/"} replace />;
   }
 
-  // CRITICAL: Must return Outlet for nested routes to render
   return <Outlet />;
 };
 
-const App = () => {
+// Inner app — inside BrowserRouter so useLocation works
+const AppInner = () => {
   const { isLoggedIn, role, isInitialized } = useSelector(
     (state) => state.auth,
   );
-  const dispatch = useDispatch();
+  const { pendingApprovals, pendingEnrollments } = useSelector((state) => state.approvals);
+  const { pendingChildLinks } = useSelector((state) => state.childLinks);
+  const pendingHireCount = useSelector((state) =>
+    (state.hire?.adminRequests || []).filter((r) => r.status === "pending").length
+  );
+  const location = useLocation();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
+    try { return localStorage.getItem("sidebarCollapsed") === "true"; } catch { return false; }
+  });
 
-  // Initialize auth on app startup
-  React.useEffect(() => {
-    if (!isInitialized) {
-      dispatch(initializeAuth());
-    }
-  }, [dispatch, isInitialized]);
-
-  // Handle token refresh events from axiosInstance
-  React.useEffect(() => {
-    const handleTokenRefreshed = (event) => {
-      const { token } = event.detail;
-      console.log("🔄 App: Token refreshed via event");
-      // Update Redux store with new token
-      dispatch({ type: "auth/updateToken", payload: token });
-    };
-
-    const handleAuthLogout = () => {
-      console.log("🔄 App: Logout via event");
-      dispatch(logoutUser());
-    };
-
-    const handleAuthExpired = (event) => {
-      const { message } = event.detail;
-      console.log("🔄 App: Session expired via event");
-
-      // Show user-friendly session expired toast
-      toastManager.error(
-        message || "Your session has expired. Please log in again.",
-      );
-
-      // Clear all toasts and redirect after a short delay
-      setTimeout(() => {
-        toastManager.clear();
-        dispatch(logoutUser());
-      }, 2000);
-    };
-
-    window.addEventListener("token-refreshed", handleTokenRefreshed);
-    window.addEventListener("auth-logout", handleAuthLogout);
-    window.addEventListener("auth-expired", handleAuthExpired);
-
-    return () => {
-      window.removeEventListener("token-refreshed", handleTokenRefreshed);
-      window.removeEventListener("auth-logout", handleAuthLogout);
-      window.removeEventListener("auth-expired", handleAuthExpired);
-    };
-  }, [dispatch]);
-
-  // Debug authentication state
-  React.useEffect(() => {
-    console.log("🔐 App: Auth state updated:", {
-      isLoggedIn,
-      role,
-      isInitialized,
+  const toggleSidebar = () => {
+    setIsSidebarCollapsed((prev) => {
+      const next = !prev;
+      try { localStorage.setItem("sidebarCollapsed", String(next)); } catch {}
+      return next;
     });
-  }, [isLoggedIn, role, isInitialized]);
+  };
+
+  const hasSidebar = isLoggedIn && (role === "admin" || role === "teacher" || role === "student" || role === "parent");
+
+  // Close mobile sidebar on route change
+  useEffect(() => {
+    setIsSidebarOpen(false);
+  }, [location.pathname]);
+
+  // Compute active tab for admin sidebar highlight
+  const getActiveTab = () => {
+    const p = location.pathname;
+    if (p.includes("/admin/overview")) return "overview";
+    if (p.includes("/admin/approvals")) return "approvals";
+    if (p.includes("/admin/courses")) return "courses";
+    if (p.includes("/admin/users") && p.split("/").length <= 4) return "users";
+    if (p.includes("/admin/enrollments")) return "enrollments";
+    if (p.includes("/admin/sessions")) return "sessions";
+    if (p.includes("/admin/attendance")) return "attendance";
+    if (p.includes("/admin/evaluations")) return "evaluations";
+    if (p.includes("/admin/categories")) return "categories";
+    return null;
+  };
+
+  const totalPendingCount =
+    (pendingApprovals?.length || 0) +
+    (pendingChildLinks?.length || 0) +
+    (pendingEnrollments?.length || 0) +
+    pendingHireCount;
+
+  const showNavbar = !isLoggedIn;
 
   return (
-    <BrowserRouter>
-      <div className="min-h-screen bg-slate-950 selection:bg-indigo-500/30 overflow-x-hidden">
-        {/* Header with Navigation */}
-        <header className="relative z-50">
-          <Navbar variant={isLoggedIn ? "default" : "public"} />
-        </header>
+    <div className="min-h-screen bg-slate-950 selection:bg-indigo-500/30 overflow-x-hidden">
+      {/* Unified sidebar for admin / teacher / student */}
+      {hasSidebar && (
+        <Sidebar
+          role={role}
+          isSidebarOpen={isSidebarOpen}
+          onMobileClose={() => setIsSidebarOpen(false)}
+          activeTab={getActiveTab()}
+          pendingApprovalsCount={totalPendingCount}
+          isCollapsed={isSidebarCollapsed}
+          onToggleCollapse={toggleSidebar}
+        />
+      )}
 
-        {/* Main Content Area */}
-        <main className="relative z-10">
+      {/* Mobile overlay */}
+      {hasSidebar && isSidebarOpen && (
+        <div
+          className="lg:hidden fixed inset-0 bg-black/50 z-40"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
+      {/* Content area — offset by sidebar width on desktop */}
+      <div className={hasSidebar ? (isSidebarCollapsed ? "lg:ml-20" : "lg:ml-72") : ""} style={{ transition: "margin-left 0.3s ease" }}>
+        {/* Navbar (hidden on /admin and /teacher routes) */}
+        {showNavbar && (
+          <header className="relative z-50">
+            <Navbar variant={isLoggedIn ? "default" : "public"} />
+          </header>
+        )}
+
+        {/* Floating mobile hamburger (sidebar roles only) */}
+        {hasSidebar && (
+          <button
+            className={`lg:hidden fixed top-4 left-4 z-40 w-10 h-10 bg-slate-900 border border-slate-700 rounded-lg flex items-center justify-center text-slate-400 hover:text-white transition shadow-lg ${
+              isSidebarOpen ? "hidden" : ""
+            }`}
+            onClick={() => setIsSidebarOpen(true)}
+          >
+            <i className="fas fa-bars text-sm"></i>
+          </button>
+        )}
+
+        <main className="relative">
           <Routes>
             {/* Public Routes */}
             <Route
@@ -189,25 +230,23 @@ const App = () => {
             <Route path="/courses/:courseId" element={<CourseDetails />} />
             <Route path="/teachers" element={<TeachersDirectory />} />
             <Route path="/teachers/:id" element={<TeacherProfile />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/terms" element={<TermsAndConditions />} />
 
             {/* Student-Only Routes */}
             <Route element={<ProtectedRoute allowedRoles={["student"]} />}>
-              <Route path="/student" element={<StudentPortal />} />
-              {/* <Route path="/feed" element={<StudentFeed />} /> */}
-              <Route
-                path="/student/assignments"
-                element={<StudentAssignments />}
-              />
-              <Route
-                path="/student/assignments/:id"
-                element={<StudentAssignmentDetails />}
-              />
+              <Route path="/student" element={<StudentLayout />}>
+                <Route index element={<StudentPortal />} />
+                <Route path="classes" element={<StudentClasses />} />
+                <Route path="assessments" element={<StudentAssessments />} />
+                <Route path="assignments" element={<StudentAssignments />} />
+                <Route path="assignments/:id" element={<StudentAssignmentDetails />} />
+                <Route path="quizzes/:id" element={<StudentQuizDetail />} />
+                {/* <Route path="exams/:id"  element={<StudentExamDetail />} /> */}
+                <Route path="attendance" element={<StudentAttendance />} />
+                <Route path="evaluations" element={<StudentEvaluationPage />} />
+              </Route>
             </Route>
-
-            {/* Shared Authenticated Routes */}
-            {/* <Route element={<ProtectedRoute />}>
-              <Route path="/classroom" element={<Classroom />} />
-            </Route> */}
 
             {/* Teacher-Only Routes */}
             <Route element={<ProtectedRoute allowedRoles={["teacher"]} />}>
@@ -215,18 +254,28 @@ const App = () => {
                 <Route index element={<TeacherPortal />} />
                 <Route path="classes" element={<TeacherClasses />} />
                 <Route path="attendance" element={<TeacherAttendance />} />
+                <Route path="assessments" element={<TeacherAssessments />} />
                 <Route path="grading" element={<TeacherGrading />} />
+                <Route path="sessions" element={<TeacherSessionCalendar />} />
+                <Route path="submissions" element={<TeacherSubmissions />} />
+                <Route path="evaluations" element={<TeacherEvaluationPage />} />
+                <Route path="hire-leads" element={<TeacherHireLeads />} />
               </Route>
-
               <Route
                 path="/student/:id"
                 element={<TeacherInternalStudentProfile />}
               />
+              <Route path="/teacher/courses/:courseId" element={<TeacherCourseDetailPage />} />
             </Route>
 
             {/* Parent-Only Routes */}
             <Route element={<ProtectedRoute allowedRoles={["parent"]} />}>
-              <Route path="/parent" element={<ParentPortal />} />
+              <Route path="/parent" element={<ParentLayout />}>
+                <Route index element={<ParentPortal />} />
+                <Route path="attendance" element={<ParentAttendance />} />
+                <Route path="evaluations" element={<ParentEvaluationPage />} />
+                <Route path="child/:childId" element={<ParentChildDetails />} />
+              </Route>
             </Route>
 
             {/* Admin-Only Routes */}
@@ -242,31 +291,83 @@ const App = () => {
                 <Route path="users" element={<AdminUsersPage />} />
                 <Route path="enrollments" element={<AdminEnrollmentsPage />} />
                 <Route path="sessions" element={<AdminSessionsPage />} />
+                <Route path="attendance" element={<AdminAttendancePage />} />
+                <Route path="evaluations" element={<AdminEvaluationPage />} />
+                <Route path="categories" element={<AdminCategoriesPage />} />
               </Route>
               <Route path="/admin/users/:id" element={<UserDetailsPage />} />
+              <Route path="/admin/courses/:courseId" element={<AdminCourseDetailPage />} />
             </Route>
 
-            {/* Catch all route */}
+            {/* Profile — all authenticated roles */}
+            <Route element={<ProtectedRoute allowedRoles={["student", "teacher", "admin", "parent"]} />}>
+              <Route path="/profile" element={<ProfilePage />} />
+            </Route>
+
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
+        {showNavbar && <Footer />}
 
-        {/* Global Overlays and Modals */}
-        <section className="relative z-50">
+        {/* Global Overlays */}
+        <section className="relative z-[9999]">
           <AuthModals />
           {/* <AIChat /> */}
           <ToastContainer
             position="top-right"
             autoClose={4000}
-            hideProgressBar={false}
+            hideProgressBar={true}
             newestOnTop
             closeOnClick
-            pauseOnHover
             draggable
             theme="dark"
+            style={{ zIndex: 9999 }}
           />
         </section>
       </div>
+    </div>
+  );
+};
+
+const App = () => {
+  const dispatch = useDispatch();
+  const { isLoggedIn, role, isInitialized } = useSelector(
+    (state) => state.auth,
+  );
+
+  React.useEffect(() => {
+    if (!isInitialized) dispatch(initializeAuth());
+  }, [dispatch, isInitialized]);
+
+  React.useEffect(() => {
+    const handleTokenRefreshed = (event) => {
+      dispatch({ type: "auth/updateToken", payload: event.detail.token });
+    };
+    const handleAuthLogout = () => dispatch(logoutUser());
+    const handleAuthExpired = (event) => {
+      toastManager.error(
+        event.detail?.message || "Your session has expired. Please log in again.",
+      );
+      setTimeout(() => {
+        toastManager.clear();
+        dispatch(logoutUser());
+      }, 2000);
+    };
+
+    window.addEventListener("token-refreshed", handleTokenRefreshed);
+    window.addEventListener("auth-logout", handleAuthLogout);
+    window.addEventListener("auth-expired", handleAuthExpired);
+    return () => {
+      window.removeEventListener("token-refreshed", handleTokenRefreshed);
+      window.removeEventListener("auth-logout", handleAuthLogout);
+      window.removeEventListener("auth-expired", handleAuthExpired);
+    };
+  }, [dispatch]);
+
+  return (
+    <BrowserRouter>
+      <ScrollToTop />
+      <AppInner />
     </BrowserRouter>
   );
 };

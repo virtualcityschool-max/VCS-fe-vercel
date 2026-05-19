@@ -1,4 +1,4 @@
-import { configureStore } from "@reduxjs/toolkit";
+import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import uiReducer from "./slices/uiSlice";
 import authReducer, { logout } from "./slices/authSlice";
 import studentDashboardReducer from "./slices/studentDashboardSlice";
@@ -9,6 +9,7 @@ import teachersReducer from "./slices/teacherSlice";
 import announcementsReducer from "./slices/announcementsSlice";
 import parentReducer from "./slices/parentSlice";
 import childLinksReducer from "./slices/childLinksSlice";
+import hireReducer from "./slices/hireSlice";
 import { authStorage } from "../utils/authStorage";
 
 // Load auth state from localStorage using authStorage utilities
@@ -57,19 +58,30 @@ const saveAuthState = (authState) => {
 
 const preloadedAuthState = loadAuthState();
 
+const appReducer = combineReducers({
+  ui: uiReducer,
+  auth: authReducer,
+  studentDashboard: studentDashboardReducer,
+  admin: adminReducer,
+  courses: coursesReducer,
+  approvals: approvalsReducer,
+  teachers: teachersReducer,
+  announcements: announcementsReducer,
+  parent: parentReducer,
+  childLinks: childLinksReducer,
+  hire: hireReducer,
+});
+
+// Reset all slices to their initial state when the user logs out
+const rootReducer = (state, action) => {
+  if (action.type === logout.type) {
+    return appReducer(undefined, action);
+  }
+  return appReducer(state, action);
+};
+
 export const store = configureStore({
-  reducer: {
-    ui: uiReducer,
-    auth: authReducer,
-    studentDashboard: studentDashboardReducer,
-    admin: adminReducer,
-    courses: coursesReducer,
-    approvals: approvalsReducer,
-    teachers: teachersReducer,
-    announcements: announcementsReducer,
-    parent: parentReducer,
-    childLinks: childLinksReducer,
-  },
+  reducer: rootReducer,
   preloadedState: preloadedAuthState ? { auth: preloadedAuthState } : undefined,
 });
 

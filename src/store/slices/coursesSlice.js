@@ -1,6 +1,13 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { coursesService } from "../../services/coursesService";
-import { logoutUser } from "./authSlice";
+import { logoutUser, loginUser } from "./authSlice";
+
+const normalizeCategoryField = (obj) => ({
+  ...obj,
+  category: typeof obj?.category === "object" && obj?.category !== null
+    ? obj.category.name ?? null
+    : obj?.category ?? null,
+});
 
 // Async thunks
 export const fetchAllCourses = createAsyncThunk(
@@ -12,6 +19,19 @@ export const fetchAllCourses = createAsyncThunk(
     } catch (error) {
       console.error("Failed to fetch courses:", error);
       return rejectWithValue(error); // Preserve full error object
+    }
+  },
+);
+
+export const fetchCategories = createAsyncThunk(
+  "courses/fetchCategories",
+  async (_, { getState, rejectWithValue }) => {
+    // Skip if already loaded
+    if (getState().courses.categories.length > 0) return null;
+    try {
+      return await coursesService.getCategories();
+    } catch (error) {
+      return rejectWithValue(error.message || "Failed to load categories");
     }
   },
 );
@@ -35,6 +55,8 @@ const initialState = {
   isLoading: false,
   error: null,
   stats: null,
+  categories: [],
+  categoriesLoading: false,
 };
 
 const coursesSlice = createSlice({
@@ -57,7 +79,9 @@ const coursesSlice = createSlice({
       })
       .addCase(fetchAllCourses.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.courses = action.payload;
+        state.courses = Array.isArray(action.payload)
+          ? action.payload.map(normalizeCategoryField)
+          : action.payload;
         state.error = null;
       })
       .addCase(fetchAllCourses.rejected, (state, action) => {
@@ -71,7 +95,7 @@ const coursesSlice = createSlice({
       })
       .addCase(fetchCourseById.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.currentCourse = action.payload;
+        state.currentCourse = action.payload ? normalizeCategoryField(action.payload) : null;
         state.error = null;
       })
       .addCase(fetchCourseById.rejected, (state, action) => {
@@ -79,20 +103,31 @@ const coursesSlice = createSlice({
         state.error = action.payload;
       })
 
-      // Handle logout - clear course enrollment flags
-      .addCase(logoutUser.fulfilled, (state) => {
-        // Reset courses to remove any enrollment flags from previous session
-        state.courses = state.courses.map((course) => ({
-          ...course,
-          is_enrolled: false,
-        }));
-        state.currentCourse = state.currentCourse
-          ? {
-              ...state.currentCourse,
-              is_enrolled: false,
-            }
-          : null;
-      });
+      // Fetch Categories
+      .addCase(fetchCategories.pending, (state) => {
+        state.categoriesLoading = true;
+      })
+      .addCase(fetchCategories.fulfilled, (state, action) => {
+        state.categoriesLoading = false;
+        if (action.payload !== null) {
+          state.categories = Array.isArray(action.payload) ? action.payload : [];
+        }
+      })
+      .addCase(fetchCategories.rejected, (state) => {
+        state.categoriesLoading = false;
+      })
+
+      // Handle login/logout - invalidate courses data to ensure fresh enrollment status
+      .addMatcher(
+        (action) =>
+          action.type === loginUser.fulfilled.type ||
+          action.type === logoutUser.fulfilled.type,
+        (state) => {
+          state.courses = [];
+          state.currentCourse = null;
+          state.error = null;
+        }
+      );
   },
 });
 

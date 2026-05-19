@@ -1,335 +1,259 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { createEnrollment } from "../../store/slices/adminSlice";
-import { fetchUsers } from "../../store/slices/adminSlice";
-import { fetchCourses } from "../../store/slices/adminSlice";
+import {
+  createEnrollment,
+  fetchUsers,
+  fetchCoursesWithSessions,
+} from "../../store/slices/adminSlice";
 import { useFieldErrors } from "../../hooks";
-import { Button, Input } from "../../components/ui";
+import { FilterSelect } from "../../components/ui";
 import { toastManager } from "../../utils/toastManager";
+import TeacherPrivateAvailableSlots from "../TeacherPrivateAvailableSlots";
+import { showApiError } from "../../utils/apiErrorHandler";
+
+const EMPTY_FORM = {
+  student_id: "",
+  course_id: "",
+  enrollment_type: "normal",
+};
 
 const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
   const dispatch = useDispatch();
-  const { users, courses } = useSelector((state) => state.admin);
-  const { loading: createLoading, error: createError } = useSelector(
-    (state) => state.admin.enrollments,
-  );
 
-  const [formData, setFormData] = useState({
-    student_id: "",
-    course_id: "",
-    enrollment_type: "normal",
-    teacher_id: "",
-  });
+  const { users, enrollmentCourses: courses } = useSelector((state) => state.admin);
+  const { loading: createLoading } = useSelector((state) => state.admin.enrollments);
 
-  const {
-    formError,
-    handleApiError,
-    clearAllErrors,
-    getFieldError,
-    hasFieldError,
-  } = useFieldErrors();
+  const [formData, setFormData] = useState(EMPTY_FORM);
+  const [selectedSlot, setSelectedSlot] = useState(null);
+  const [paymentReceived, setPaymentReceived] = useState(false);
 
-  // Fetch users and courses when modal opens
+  const { formError, clearAllErrors } = useFieldErrors();
+
+  // Load data when modal opens; reset when it closes
   useEffect(() => {
     if (isOpen) {
       dispatch(fetchUsers());
-      dispatch(fetchCourses());
+      dispatch(fetchCoursesWithSessions());
+      setPaymentReceived(false);
+    } else {
+      setFormData(EMPTY_FORM);
+      setSelectedSlot(null);
+      setPaymentReceived(false);
+      clearAllErrors();
     }
-  }, [dispatch, isOpen]);
+  }, [isOpen]);
 
-  // Handle form submission
+  const publishedCourses = courses.data?.filter((c) => c.status === "published") || [];
+  const selectedCourse = publishedCourses.find((c) => c.id === parseInt(formData.course_id));
+  const teacherId = selectedCourse?.instructor?.id ?? null;
+  const teacher = users.data?.find((u) => u.id === teacherId) ?? null;
+  const students = users.data?.filter((u) => u.role === "student" && u.is_active) || [];
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     clearAllErrors();
 
-    // Validate form data
     if (!formData.student_id || !formData.course_id) {
       toastManager.error("Please select both student and course");
       return;
     }
 
-    if (formData.enrollment_type === "private" && !formData.teacher_id) {
-      toastManager.error("Please select a teacher for private enrollment");
-      return;
+    if (formData.enrollment_type === "private") {
+      if (!teacherId) {
+        toastManager.error("This course has no instructor assigned");
+        return;
+      }
+      if (!selectedSlot) {
+        toastManager.error("Please select a time slot");
+        return;
+      }
     }
 
-    // Prepare payload based on enrollment type
     const payload = {
       course_id: parseInt(formData.course_id),
       student_id: parseInt(formData.student_id),
     };
 
     if (formData.enrollment_type === "private") {
-      payload.teacher_id = parseInt(formData.teacher_id);
+      payload.teacher_id = teacherId;
+      payload.preferred_slots = [{ days: selectedSlot.days, time: selectedSlot.time }];
     }
 
     try {
       const result = await dispatch(createEnrollment(payload)).unwrap();
-
-      // Success
       toastManager.success(result.message || "Enrollment created successfully");
-      onSuccess && onSuccess();
+      onSuccess?.();
       onClose();
-
-      // Reset form
-      setFormData({
-        student_id: "",
-        course_id: "",
-        enrollment_type: "normal",
-        teacher_id: "",
-      });
     } catch (error) {
-      // Handle error through useFieldErrors hook
-      handleApiError(error, toastManager.error);
+      showApiError(error);
     }
   };
-
-  // Handle input changes
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => {
-      const newData = { ...prev, [name]: value };
-
-      // Clear teacher selection when switching enrollment type or course
-      if (name === "enrollment_type" && value !== prev.enrollment_type) {
-        newData.teacher_id = "";
-      }
-      if (name === "course_id") {
-        newData.teacher_id = "";
-      }
-
-      return newData;
-    });
-
-    // Clear field error when user starts typing
-    if (hasFieldError(name)) {
-      clearAllErrors();
-    }
-  };
-
-  // Filter students only
-  const students = users.data?.filter((user) => user.role === "student") || [];
-
-  // Filter teachers for the selected course
-  const selectedCourse = courses.data?.find(
-    (course) => course.id === parseInt(formData.course_id),
-  );
-
-  // Filter teachers for selected course - ONLY show active teachers assigned to this course
-  const availableTeachers = selectedCourse?.instructor?.id
-    ? users.data?.filter(
-        (user) =>
-          user.role === "teacher" &&
-          user.is_active === true &&
-          user.id === selectedCourse.instructor.id,
-      ) || []
-    : []; // NO fallback to all teachers for private enrollment
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[200] flex items-center justify-center p-4">
+      <div className="bg-slate-900 border border-slate-800 rounded-[1.5rem] p-4 sm:p-8 w-full max-w-2xl lg:max-w-3xl max-h-[92vh] overflow-y-auto shadow-2xl transition-all duration-300">
+
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-slate-700">
-          <h2 className="text-xl font-bold text-white">
-            Create New Enrollment
-          </h2>
+        <div className="flex justify-between items-start mb-8 pb-6 border-b border-white/5">
+          <div>
+            <h2 className="text-xl font-black text-white tracking-tight">Create Enrollment</h2>
+            <p className="text-slate-500 text-[12px] font-medium mt-1">Enroll a student into a published course</p>
+          </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white transition-colors"
+            className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-white hover:bg-white/5 transition-all"
           >
-            <i className="fas fa-times text-xl"></i>
+            <i className="fas fa-times text-lg" />
           </button>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* Student Selection */}
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
-              Student <span className="text-red-500">*</span>
-            </label>
-            <select
-              name="student_id"
-              value={formData.student_id}
-              onChange={handleInputChange}
-              className={`w-full px-4 py-2 bg-slate-800 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-                hasFieldError("student_id")
-                  ? "border-red-500 text-red-400"
-                  : "border-slate-600"
-              }`}
-              disabled={users.loading}
-            >
-              <option value="">Select a student</option>
-              {students.map((student) => (
-                <option key={student.id} value={student.id}>
-                  {student.username} ({student.email})
-                </option>
-              ))}
-            </select>
-            {getFieldError("student_id") && (
-              <p className="mt-1 text-xs text-red-400">
-                {getFieldError("student_id")}
-              </p>
-            )}
-            {users.loading && (
-              <p className="mt-1 text-xs text-slate-400">Loading students...</p>
-            )}
-          </div>
+        <form onSubmit={handleSubmit} className="space-y-5">
 
-          {/* Course Selection */}
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
-              Course <span className="text-red-500">*</span>
-            </label>
-            <select
-              name="course_id"
-              value={formData.course_id}
-              onChange={handleInputChange}
-              className={`w-full px-4 py-2 bg-slate-800 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-                hasFieldError("course_id")
-                  ? "border-red-500 text-red-400"
-                  : "border-slate-600"
-              }`}
-              disabled={courses.loading}
-            >
-              <option value="">Select a course</option>
-              {courses.data?.map((course) => (
-                <option key={course.id} value={course.id}>
-                  {course.title} - {course.category}
-                </option>
-              ))}
-            </select>
-            {getFieldError("course_id") && (
-              <p className="mt-1 text-xs text-red-400">
-                {getFieldError("course_id")}
-              </p>
-            )}
-            {courses.loading && (
-              <p className="mt-1 text-xs text-slate-400">Loading courses...</p>
-            )}
+          {/* Student | Course */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                Student <span className="text-red-400">*</span>
+              </label>
+              <FilterSelect
+                name="student_id"
+                value={formData.student_id}
+                onChange={(e) => setFormData((p) => ({ ...p, student_id: e.target.value }))}
+                className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+              >
+                <option value="">Select a student</option>
+                {students.map((s) => (
+                  <option key={s.id} value={s.id}>{s.username}</option>
+                ))}
+              </FilterSelect>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                Course <span className="text-red-400">*</span>
+              </label>
+              <FilterSelect
+                name="course_id"
+                value={formData.course_id}
+                onChange={(e) => {
+                  setFormData((p) => ({ ...p, course_id: e.target.value }));
+                  setSelectedSlot(null);
+                }}
+                className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+              >
+                <option value="">Select a course</option>
+                {publishedCourses.map((c) => (
+                  <option key={c.id} value={c.id}>{c.title}</option>
+                ))}
+              </FilterSelect>
+            </div>
           </div>
 
           {/* Enrollment Type */}
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
-              Enrollment Type
-            </label>
-            <div className="grid grid-cols-2 gap-4">
-              <label className="flex items-center space-x-3 cursor-pointer">
-                <input
-                  type="radio"
-                  name="enrollment_type"
-                  value="normal"
-                  checked={formData.enrollment_type === "normal"}
-                  onChange={handleInputChange}
-                  className="w-4 h-4 text-indigo-600 bg-slate-800 border-slate-600 focus:ring-indigo-500"
-                />
-                <span className="text-sm text-slate-300">Normal</span>
-              </label>
-              <label className="flex items-center space-x-3 cursor-pointer">
-                <input
-                  type="radio"
-                  name="enrollment_type"
-                  value="private"
-                  checked={formData.enrollment_type === "private"}
-                  onChange={handleInputChange}
-                  className="w-4 h-4 text-indigo-600 bg-slate-800 border-slate-600 focus:ring-indigo-500"
-                />
-                <span className="text-sm text-slate-300">Private</span>
-              </label>
+          {/* <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">Enrollment Type</label>
+            <div className="flex gap-2">
+              {["normal", "private"].map((type) => (
+                <button
+                  key={type}
+                  type="button"
+                  onClick={() => {
+                    setFormData((p) => ({ ...p, enrollment_type: type }));
+                    setSelectedSlot(null);
+                  }}
+                  className={`flex-1 py-2.5 rounded-xl text-sm font-semibold border transition capitalize ${
+                    formData.enrollment_type === type
+                      ? "bg-indigo-600/30 border-indigo-500/60 text-indigo-300"
+                      : "bg-slate-800/60 border-slate-700 text-slate-400 hover:border-slate-600 hover:text-white"
+                  }`}
+                >
+                  {type}
+                </button>
+              ))}
             </div>
+          </div> */}
+
+          {/* Private section */}
+          <>
+          {formData.enrollment_type === "private" && formData.course_id && (
+            <></>
+            // <div className="space-y-4">
+            //   {/* Instructor info */}
+            //   <div className="flex items-center gap-3 px-4 py-3 bg-slate-800/40 border border-slate-700/50 rounded-xl">
+            //     <div className="w-8 h-8 rounded-full bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center shrink-0">
+            //       <i className="fas fa-chalkboard-teacher text-indigo-400 text-xs" />
+            //     </div>
+            //     <div className="min-w-0">
+            //       <p className="text-xs text-slate-500 uppercase tracking-widest font-bold">Instructor</p>
+            //       <p className="text-sm font-semibold text-white truncate">
+            //         {teacher ? teacher.username : <span className="text-slate-500 italic">No instructor assigned</span>}
+            //       </p>
+            //     </div>
+            //   </div>
+
+            //   {teacher && (
+            //     <TeacherPrivateAvailableSlots
+            //       teacher={teacher}
+            //       teacherId={teacherId}
+            //       studentId={formData.student_id}
+            //       onSlotSelect={setSelectedSlot}
+            //     />
+            //   )}
+            // </div>
+          )}
+</>
+          {/* Payment Confirmation */}
+          <div className="pt-2">
+            <label className="flex items-center gap-3 cursor-pointer group py-3 px-4 bg-slate-800/40 rounded-2xl border border-slate-700/50 hover:bg-slate-800/60 transition-all text-left">
+              <div className="relative flex items-center justify-center w-5 h-5 flex-shrink-0">
+                <input
+                  type="checkbox"
+                  className="peer sr-only"
+                  checked={paymentReceived}
+                  onChange={(e) => setPaymentReceived(e.target.checked)}
+                />
+                <div className="absolute inset-0 border-2 border-slate-500 rounded-lg bg-slate-900 transition-all peer-checked:bg-indigo-600 peer-checked:border-indigo-600"></div>
+                <svg 
+                  className="relative w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 transition-all scale-50 peer-checked:scale-100 pointer-events-none z-10" 
+                  fill="none" 
+                  viewBox="0 0 24 24" 
+                  stroke="currentColor" 
+                  strokeWidth="4"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <span className="text-sm text-slate-300 select-none font-semibold leading-snug">
+                I have received the payment for this course
+              </span>
+            </label>
           </div>
 
-          {/* Teacher Selection (only for private enrollment) */}
-          {formData.enrollment_type === "private" && (
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
-                Teacher <span className="text-red-500">*</span>
-              </label>
-              <select
-                name="teacher_id"
-                value={formData.teacher_id}
-                onChange={handleInputChange}
-                className={`w-full px-4 py-2 bg-slate-800 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-                  hasFieldError("teacher_id")
-                    ? "border-red-500 text-red-400"
-                    : "border-slate-600"
-                }`}
-                disabled={!selectedCourse || availableTeachers.length === 0}
-              >
-                <option value="">Select a teacher</option>
-                {availableTeachers.map((teacher) => (
-                  <option key={teacher.id} value={teacher.id}>
-                    {teacher.username} ({teacher.email})
-                  </option>
-                ))}
-              </select>
-              {getFieldError("teacher_id") && (
-                <p className="mt-1 text-xs text-red-400">
-                  {getFieldError("teacher_id")}
-                </p>
-              )}
-              {selectedCourse && availableTeachers.length === 0 && (
-                <p className="mt-1 text-xs text-amber-400">
-                  No active teacher available for this course
-                </p>
-              )}
-              {formData.enrollment_type === "private" &&
-              selectedCourse?.instructor ? (
-                <p className="mt-1 text-xs text-slate-400">
-                  Note: Only the assigned course instructor can teach private
-                  enrollments
-                </p>
-              ) : (
-                <p className="mt-1 text-xs text-slate-400">
-                  Please Select a Course to enable private teacher selection
-                </p>
-              )}
-            </div>
-          )}
+          {formError && <p className="text-red-400 text-sm">{formError}</p>}
 
-          {/* Form Error */}
-          {formError && (
-            <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3">
-              <p className="text-sm text-red-400">{formError}</p>
-            </div>
-          )}
-
-          {/* Backend Error */}
-          {createError && !formError && (
-            <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3">
-              <p className="text-sm text-red-400">
-                {typeof createError === "string"
-                  ? createError
-                  : typeof createError === "object" && createError !== null
-                    ? createError.message ||
-                      createError.error ||
-                      "Failed to create enrollment"
-                    : "Failed to create enrollment"}
-              </p>
-            </div>
-          )}
-
-          {/* Actions */}
-          <div className="flex items-center justify-end space-x-4 pt-4 border-t border-slate-700">
-            <Button
+          {/* Footer */}
+          <div className="flex justify-end gap-4 pt-8 mt-4 border-t border-white/5">
+            <button
               type="button"
               onClick={onClose}
-              variant="secondary"
-              disabled={createLoading}
+              className="px-6 py-2.5 rounded-xl text-sm font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition"
             >
               Cancel
-            </Button>
-            <Button
+            </button>
+            <button
               type="submit"
-              disabled={createLoading || users.loading || courses.loading}
-              loading={createLoading}
+              disabled={createLoading || !paymentReceived}
+              className="px-6 py-2.5 rounded-xl text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition disabled:opacity-50 flex items-center gap-2"
             >
-              {createLoading ? "Creating..." : "Create Enrollment"}
-            </Button>
+              {createLoading
+                ? <><i className="fas fa-spinner fa-spin text-xs" /> Creating…</>
+                : "Create Enrollment"
+              }
+            </button>
           </div>
+
         </form>
       </div>
     </div>

@@ -21,6 +21,10 @@ const ADMIN_ENDPOINTS = {
 
   // Enrollment Management
   ADMIN_ENROLL: "/courses/admin-enroll/",
+  PRIVATE_TEACHER_SLOTS: (id) => `/classroom/teachers/${id}/available-slots/`,
+  PENDING_ENROLLMENTS: "/courses/enrollments/pending/",
+  ENROLLMENT_ACTION: (id) => `/courses/enrollments/${id}/approve/`,
+
 };
 
 // User Management endpoints
@@ -35,7 +39,17 @@ export const adminService = {
       throw handleApiError(error, { context: "Get Users" });
     }
   },
-
+  getTeacherPrivateSlots: async (teacherId, params = {}) => {
+    try {
+      const response = await axiosInstance.get(
+        ADMIN_ENDPOINTS.PRIVATE_TEACHER_SLOTS(teacherId),
+        { params },
+      );
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error, { context: "Get Teacher Slots" });
+    }
+  },
   getUserById: async (userId) => {
     try {
       const response = await axiosInstance.get(
@@ -78,6 +92,18 @@ export const adminService = {
     }
   },
 
+  purgeUser: async (userId) => {
+    try {
+      const response = await axiosInstance.delete(
+        ADMIN_ENDPOINTS.USER_DELETE(userId),
+        { params: { permanent: true } },
+      );
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error, { context: "Purge User" });
+    }
+  },
+
   // User Profile Management
   getUserProfile: async (userId) => {
     try {
@@ -112,7 +138,7 @@ export const adminService = {
       });
     }
   },
-
+  
   getEnrollmentAnalytics: async (params = {}) => {
     try {
       const response = await axiosInstance.get(
@@ -269,7 +295,7 @@ export const adminService = {
       );
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Create Enrollment" });
+      throw error
     }
   },
 
@@ -286,7 +312,7 @@ export const adminService = {
       );
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Unenroll Student" });
+      throw error
     }
   },
 
@@ -360,6 +386,27 @@ export const adminService = {
       return response.data;
     } catch (error) {
       throw handleApiError(error, { context: "Link Children Admin" });
+    }
+  },
+
+  getPendingEnrollments: async () => {
+    try {
+      const response = await axiosInstance.get(ADMIN_ENDPOINTS.PENDING_ENROLLMENTS);
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error, { context: "Get Pending Enrollments" });
+    }
+  },
+
+  actionEnrollment: async (enrollmentId, action) => {
+    try {
+      const response = await axiosInstance.patch(
+        ADMIN_ENDPOINTS.ENROLLMENT_ACTION(enrollmentId),
+        { action },
+      );
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error, { context: "Enrollment Action" });
     }
   },
 };

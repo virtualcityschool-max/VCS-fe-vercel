@@ -1,4 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
+import ConfirmDialog from "../common/ConfirmDialog";
+import { getStorageUrl } from "../../utils/storageUrl";
 
 const ApprovalsTab = ({
   pendingApprovals,
@@ -9,12 +11,21 @@ const ApprovalsTab = ({
   onReject,
   onRefresh,
 }) => {
-  const handleApprove = (userId) => {
-    onApprove(userId);
+  const [confirmDialog, setConfirmDialog] = useState({ open: false, type: null, userId: null, username: "" });
+
+  const handleApprove = (userId, username) => {
+    setConfirmDialog({ open: true, type: "approve", userId, username });
   };
 
-  const handleReject = (userId) => {
-    onReject(userId);
+  const handleReject = (userId, username) => {
+    setConfirmDialog({ open: true, type: "reject", userId, username });
+  };
+
+  const handleConfirm = () => {
+    const { type, userId } = confirmDialog;
+    setConfirmDialog({ open: false, type: null, userId: null, username: "" });
+    if (type === "approve") onApprove(userId);
+    else if (type === "reject") onReject(userId);
   };
 
   return (
@@ -48,49 +59,44 @@ const ApprovalsTab = ({
 
         {/* Loading State */}
         {approvalsLoading && !approvalsError && (
-          <div className="space-y-4">
-            {/* Stats Cards Skeleton */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              {[...Array(3)].map((_, index) => (
-                <div
-                  key={index}
-                  className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6 backdrop-blur-sm animate-pulse"
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="h-4 bg-slate-700 rounded w-24 mb-2"></div>
-                      <div className="h-8 bg-slate-700 rounded w-12"></div>
-                    </div>
-                    <div className="w-12 h-12 bg-slate-700 rounded-xl"></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Approval Cards Skeleton */}
-            <div className="space-y-4">
-              {[...Array(5)].map((_, index) => (
-                <div
-                  key={index}
-                  className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6 backdrop-blur-sm animate-pulse"
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-slate-700 rounded-full"></div>
-                      <div className="space-y-2">
-                        <div className="h-4 bg-slate-700 rounded w-32"></div>
-                        <div className="h-3 bg-slate-700 rounded w-48"></div>
-                        <div className="h-3 bg-slate-700 rounded w-40"></div>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="bg-slate-800">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase">User</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase">Role</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase">Registration Date</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[...Array(5)].map((_, index) => (
+                  <tr key={index} className="border-b border-slate-800 animate-pulse">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-slate-700 rounded-full"></div>
+                        <div className="space-y-2">
+                          <div className="h-4 bg-slate-700 rounded w-32"></div>
+                          <div className="h-3 bg-slate-700 rounded w-48"></div>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="h-8 bg-slate-700 rounded w-16"></div>
-                      <div className="h-8 bg-slate-700 rounded w-16"></div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="h-6 bg-slate-700 rounded w-20"></div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="h-6 bg-slate-700 rounded w-36"></div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2">
+                        <div className="h-8 bg-slate-700 rounded w-20"></div>
+                        <div className="h-8 bg-slate-700 rounded w-16"></div>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
 
@@ -99,14 +105,14 @@ const ApprovalsTab = ({
           !approvalsError &&
           pendingApprovals.length === 0 && (
             <div className="flex flex-col items-center justify-center p-16">
-              <div className="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center mb-6">
-                <i className="fas fa-check-circle text-emerald-400 text-3xl"></i>
+              <div className="w-20 h-20 bg-indigo-500/20 rounded-full flex items-center justify-center mb-6">
+                <i className="fas fa-check-circle text-indigo-400 text-3xl"></i>
               </div>
               <h4 className="text-xl font-bold text-white mb-2">
                 All Caught Up!
               </h4>
               <p className="text-slate-400 text-sm text-center max-w-md">
-                There are no pending user approvals at the moment. All
+                There are no pending account approvals at the moment. All
                 registration requests have been processed.
               </p>
             </div>
@@ -125,21 +131,23 @@ const ApprovalsTab = ({
                     className="p-4 sm:p-6 hover:bg-slate-800/30 transition"
                   >
                     <div className="flex items-start gap-3 sm:gap-4 mb-4">
+                      {user.profile_image?
                       <img
                         src={
-                          user.profile_image ||
-                          `https://i.pravatar.cc/150?u=${user.email}`
+                          getStorageUrl(user.profile_image)
                         }
                         className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl border border-slate-700 shadow-md shrink-0"
                         alt={user.username || user.email}
-                      />
+                      />:
+                       <i className="fas fa-user text-white"></i>
+                      }
                       <div className="flex-1 min-w-0">
                         <p className="font-bold text-white text-sm sm:text-base mb-1">
                           {user.username ||
                             user.first_name + " " + user.last_name ||
                             "Unknown User"}
                         </p>
-                        <p className="text-[9px] sm:text-xs text-slate-500 uppercase break-all">
+                        <p className="text-[9px] sm:text-xs text-slate-500 break-all">
                           {user.email}
                         </p>
                       </div>
@@ -170,9 +178,9 @@ const ApprovalsTab = ({
 
                         <div className="flex gap-2">
                           <button
-                            onClick={() => handleApprove(user.id)}
+                            onClick={() => handleApprove(user.id, user.username)}
                             disabled={isProcessing[user.id] === "approving"}
-                            className="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 sm:gap-2 flex-1 justify-center"
+                            className="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-indigo-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 sm:gap-2 flex-1 justify-center"
                           >
                             {isProcessing[user.id] === "approving" ? (
                               <React.Fragment key="approving">
@@ -191,7 +199,7 @@ const ApprovalsTab = ({
                             )}
                           </button>
                           <button
-                            onClick={() => handleReject(user.id)}
+                            onClick={() => handleReject(user.id, user.username)}
                             disabled={isProcessing[user.id] === "rejecting"}
                             className="bg-red-600 text-white px-3 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-red-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 sm:gap-2 flex-1 justify-center"
                           >
@@ -229,7 +237,7 @@ const ApprovalsTab = ({
                     <th className="px-8 py-6 text-[10px] font-black uppercase text-slate-500">
                       Registration Date
                     </th>
-                    <th className="px-8 py-6 text-[10px] font-black uppercase text-slate-500 text-right">
+                    <th className="px-8 py-6 text-[10px] font-black uppercase text-slate-500 text-center">
                       Actions
                     </th>
                   </tr>
@@ -242,21 +250,26 @@ const ApprovalsTab = ({
                     >
                       <td className="px-8 py-6">
                         <div className="flex items-center gap-4">
+                          <div class="w-10 h-10 rounded-full bg-slate-900 flex items-center justify-center overflow-hidden">
+
+                          {user.profile_image?
                           <img
                             src={
-                              user.profile_image ||
-                              `https://i.pravatar.cc/150?u=${user.email}`
+                              getStorageUrl(user.profile_image)
                             }
                             className="w-10 h-10 rounded-xl border border-slate-700 shadow-md"
                             alt={user.username || user.email}
-                          />
+                          />:
+                           <i className="fas fa-user text-white"></i>
+                          }
+                          </div>
                           <div>
                             <p className="font-bold text-white group-hover:text-indigo-400 transition">
                               {user.username ||
                                 user.first_name + " " + user.last_name ||
                                 "Unknown User"}
                             </p>
-                            <p className="text-[9px] text-slate-500 uppercase">
+                            <p className="text-[11px] text-slate-500">
                               {user.email}
                             </p>
                           </div>
@@ -283,12 +296,12 @@ const ApprovalsTab = ({
                             : "Unknown"}
                         </span>
                       </td>
-                      <td className="px-8 py-6 text-right">
-                        <div className="flex items-center gap-2 justify-end">
+                      <td className="px-8 py-6 text-center">
+                        <div className="flex items-center gap-2 justify-center">
                           <button
-                            onClick={() => handleApprove(user.id)}
+                            onClick={() => handleApprove(user.id, user.username)}
                             disabled={isProcessing[user.id] === "approving"}
-                            className="bg-emerald-600 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                            className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                           >
                             {isProcessing[user.id] === "approving" ? (
                               <React.Fragment key="approving">
@@ -303,7 +316,7 @@ const ApprovalsTab = ({
                             )}
                           </button>
                           <button
-                            onClick={() => handleReject(user.id)}
+                            onClick={() => handleReject(user.id, user.username)}
                             disabled={isProcessing[user.id] === "rejecting"}
                             className="bg-red-600 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                           >
@@ -328,6 +341,21 @@ const ApprovalsTab = ({
             </div>
           )}
       </div>
+
+      <ConfirmDialog
+        open={confirmDialog.open}
+        variant={confirmDialog.type === "approve" ? "primary" : "danger"}
+        title={confirmDialog.type === "approve" ? "Approve User" : "Reject User"}
+        message={
+          confirmDialog.type === "approve"
+            ? `Are you sure you want to approve "${confirmDialog.username}"? They will gain access to the platform.`
+            : `Are you sure you want to reject "${confirmDialog.username}"? This will deny their registration.`
+        }
+        confirmLabel={confirmDialog.type === "approve" ? "Approve" : "Reject"}
+        cancelLabel="Cancel"
+        onConfirm={handleConfirm}
+        onCancel={() => setConfirmDialog({ open: false, type: null, userId: null, username: "" })}
+      />
     </>
   );
 };

@@ -17,7 +17,7 @@ import {
 import BreadcrumbNavigation from "../../components/ui/BreadcrumbNavigation";
 import BackButton from "../../components/ui/BackButton";
 import { toastManager } from "../../utils/toastManager";
-import { getUserFriendlyMessage } from "../../utils/errorHandler";
+import { showApiError } from "../../utils/apiErrorHandler";
 import { useSubmissionGuard } from "../../utils/requestDeduplicator";
 import {
   useDateFormat,
@@ -25,16 +25,20 @@ import {
   useTextFormat,
 } from "../../hooks/useFormat";
 import { getCourseImage } from "../../utils/courseImageUtils";
-import { setAuthModal } from "../../store/slices/uiSlice";
+import { setAuthModal, setEnrollmentIntent } from "../../store/slices/uiSlice";
 import EnrollmentTypeModal from "../../components/courses/EnrollmentTypeModal";
+import ConfirmDialog from "../../components/common/ConfirmDialog";
+import { getStorageUrl } from "../../utils/storageUrl";
+import FileViewerModal from "../../components/common/FileViewerModal";
 
 const CourseDetails = () => {
   const { courseId } = useParams();
   const dispatch = useDispatch();
   const [imageError, setImageError] = useState(false);
   const [enrollmentModalOpen, setEnrollmentModalOpen] = useState(false);
+  const [paymentSubmitted, setPaymentSubmitted] = useState(false);
+  const [viewerUrl, setViewerUrl] = useState(null);
   const submissionGuard = useSubmissionGuard();
-
   // Get auth state from Redux store
   const auth = useSelector((state) => state.auth);
 
@@ -48,6 +52,8 @@ const CourseDetails = () => {
   // Get student dashboard state for enrollment tracking
   const { enrollingCourseIds, unenrollingCourseIds, enrolledCourses } =
     useSelector((state) => state.studentDashboard);
+
+  const { enrollmentIntent } = useSelector((state) => state.ui);
 
   // Formatting hooks
   const { formatDate } = useDateFormat();
@@ -72,6 +78,8 @@ const CourseDetails = () => {
     setImageError(false);
   }, [courseId]);
 
+
+
   // Normalize course data for safe rendering
   const normalizedCourse = React.useMemo(() => {
     if (!course) return null;
@@ -81,7 +89,7 @@ const CourseDetails = () => {
       title: course.title || "Untitled Course",
       description: course.description || "No description available.",
       thumbnail: course.thumbnail,
-      category: course.category || "general",
+      category: (typeof course.category === "object" && course.category !== null ? course.category.name : course.category) || "general",
       price: course.price || "0.00",
       status: course.status || "draft",
       instructor_id: course.instructor_id,
@@ -89,6 +97,10 @@ const CourseDetails = () => {
       schedule: course.schedule,
       created_at: course.created_at,
       updated_at: course.updated_at,
+      outline: course.outline || null,
+      attachment: course.attachment || null,
+      has_session: course.has_session ?? true,
+      enrollment_status: course.enrollment_status,
     };
   }, [course, courseId]);
 
@@ -122,6 +134,18 @@ const CourseDetails = () => {
     setEnrollmentModalOpen(true);
   };
 
+  // Handle post-login enrollment intent
+  useEffect(() => {
+    if (auth.isLoggedIn && auth.role === "student" && enrollmentIntent && normalizedCourse) {
+      if (enrollmentIntent.courseId === normalizedCourse.id) {
+        // Automatically open enrollment modal
+        handleEnrollCourse();
+        // Clear intent
+        dispatch(setEnrollmentIntent(null));
+      }
+    }
+  }, [auth.isLoggedIn, auth.role, enrollmentIntent, normalizedCourse, dispatch]);
+
   // Handle enrollment type selection
   const handleEnrollmentTypeSelect = async (type) => {
     if (!normalizedCourse) return;
@@ -135,7 +159,8 @@ const CourseDetails = () => {
 
         if (type === "normal") {
           response = await dispatch(enrollInCourseNormal(courseId)).unwrap();
-        } else if (type === "private") {
+        } 
+        else if (type === "private") {
           const instructorId =
             normalizedCourse.instructor?.id || normalizedCourse.instructor_id;
           if (!instructorId) {
@@ -154,11 +179,12 @@ const CourseDetails = () => {
 
         // Show success message (use backend message if available)
         const successMessage =
-          response?.message || `Successfully enrolled in ${courseTitle}`;
+          response?.message || `Successfully made enrollment request for ${courseTitle}`;
         toastManager.success(successMessage);
 
         // Close modal
         setEnrollmentModalOpen(false);
+        setPaymentSubmitted(false);
 
         // Refresh course data to update enrollment status
         dispatch(fetchCourseById(courseId));
@@ -168,10 +194,49 @@ const CourseDetails = () => {
           dispatch(fetchStudentDashboard());
         }
       } catch (error) {
-        // Handle errors safely
-        const errorMessage =
-          error?.response?.data?.error || getUserFriendlyMessage(error);
-        toastManager.error(errorMessage);
+        showApiError(error);
+      }
+    });
+  };
+  const callPrivateEnrollmentCall = async (slot) => {
+    if (!slot || !normalizedCourse) return;
+
+    const courseId = normalizedCourse.id;
+    const courseTitle = normalizedCourse.title;
+
+    await submissionGuard.guard(async () => {
+      try {
+        const instructorId =
+          normalizedCourse.instructor?.id || normalizedCourse.instructor_id;
+        if (!instructorId) {
+          toastManager.error(
+            "Private enrollment not available - no instructor assigned",
+          );
+          return;
+        }
+
+        const response = await dispatch(
+          enrollInCoursePrivate({
+            courseId,
+            teacherId: instructorId,
+            preferred_slots: [{ days: slot.days, time: slot.time }],
+          }),
+        ).unwrap();
+
+        const successMessage =
+          response?.message || `Successfully made enrollment request for ${courseTitle}`;
+        toastManager.success(successMessage);
+
+        setEnrollmentModalOpen(false);
+        setPaymentSubmitted(false);
+
+        dispatch(fetchCourseById(courseId));
+
+        if (auth.role === "student") {
+          dispatch(fetchStudentDashboard());
+        }
+      } catch (error) {
+        showApiError(error);
       }
     });
   };
@@ -179,6 +244,7 @@ const CourseDetails = () => {
   // Close enrollment modal
   const closeEnrollmentModal = () => {
     setEnrollmentModalOpen(false);
+    setPaymentSubmitted(false);
   };
 
   // Handle course unenrollment
@@ -217,8 +283,7 @@ const CourseDetails = () => {
           dispatch(fetchStudentDashboard());
         }
       } catch (error) {
-        const errorMessage = getUserFriendlyMessage(error);
-        toastManager.error(errorMessage);
+        showApiError(error);
       }
     });
   };
@@ -338,9 +403,12 @@ const CourseDetails = () => {
   const enrolled = isCourseEnrolled(normalizedCourse);
   const isEnrolling = enrollingCourseIds.includes(normalizedCourse.id);
   const isUnenrolling = unenrollingCourseIds.includes(normalizedCourse.id);
+  const isPending = normalizedCourse.enrollment_status === "pending";
+  const isRejected = normalizedCourse.enrollment_status === "rejected";
+  const noSessions = !normalizedCourse.has_session;
 
   return (
-    <section className="min-h-screen bg-[#0f172a] text-white font-inter relative overflow-hidden">
+    <section className="min-h-screen bg-[#0f172a] text-white font-inter relative overflow-hidden animate-fadeIn">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-20%] left-[-10%] w-[40%] h-[40%] bg-blue-600/10 blur-[120px] rounded-full animate-pulse"></div>
@@ -349,7 +417,7 @@ const CourseDetails = () => {
       </div>
 
       {/* Breadcrumb Navigation */}
-      <div className="max-w-7xl mx-auto px-6 py-8 relative z-10">
+      <div className="max-w-7xl mx-auto px-6 py-8 relative z-10 animate-springyReveal">
         <BreadcrumbNavigation
           items={[
             { label: "Home", to: "/", icon: "fas fa-home" },
@@ -359,19 +427,16 @@ const CourseDetails = () => {
         />
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 pb-20 relative z-10">
+      <div className="max-w-7xl mx-auto px-6 pb-20 relative z-10 animate-springyReveal" style={{ animationDelay: '0.15s' }}>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
           {/* Main Content - 2 columns */}
           <div className="lg:col-span-2 space-y-8">
             {/* Course Header Card */}
-            <div className="bg-slate-800/40 backdrop-blur-xl rounded-4xl overflow-hidden border border-slate-700/50 shadow-2xl hover:shadow-blue-500/10 transition-all duration-500">
+            <div className="bg-slate-800/40 backdrop-blur-xl rounded-[1.5rem] overflow-hidden border border-slate-700/50 shadow-2xl glass-shine transition-all duration-500">
               {/* Course Thumbnail */}
-              <div className="relative aspect-video overflow-hidden bg-slate-900/50">
-                {imageError ? (
-                  <div className="w-full h-full flex items-center justify-center bg-linear-to-br from-blue-600/20 via-purple-600/20 to-teal-600/20 relative overflow-hidden">
-                    <div className="absolute inset-0 bg-linear-to-br from-blue-500/10 to-purple-500/10 animate-pulse"></div>
-                    <i className="fas fa-book text-slate-400 text-5xl relative z-10"></i>
-                  </div>
+              <div className="relative h-[200px] sm:h-[280px] lg:h-[320px] overflow-hidden bg-slate-900/50">
+                {imageError || !getCourseImage(normalizedCourse) ? (
+                  <div className="w-full h-full bg-slate-800" />
                 ) : (
                   <img
                     src={getCourseImage(normalizedCourse)}
@@ -400,14 +465,14 @@ const CourseDetails = () => {
                 </div>
 
                 {/* Floating action buttons */}
-                <div className="absolute bottom-6 left-6 flex gap-3">
+                {/* <div className="absolute bottom-6 left-6 flex gap-3">
                   <button className="w-12 h-12 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/20 hover:bg-white/20 transition-all duration-200 hover:scale-110">
                     <i className="fas fa-heart text-white"></i>
                   </button>
                   <button className="w-12 h-12 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/20 hover:bg-white/20 transition-all duration-200 hover:scale-110">
                     <i className="fas fa-share-alt text-white"></i>
                   </button>
-                </div>
+                </div> */}
               </div>
 
               {/* Course Content */}
@@ -458,6 +523,49 @@ const CourseDetails = () => {
                   </div>
                 </div>
 
+                {/* Course Outline */}
+                {normalizedCourse.outline &&
+                  normalizedCourse.outline.replace(/<[^>]*>/g, "").trim() && (
+                  <div className="mb-8">
+                    <h2 className="text-2xl font-bold font-poppins mb-6 flex items-center gap-3">
+                      <div className="w-8 h-8 bg-indigo-500/20 rounded-lg flex items-center justify-center">
+                        <i className="fas fa-list-alt text-indigo-400 text-sm"></i>
+                      </div>
+                      Course Outline
+                    </h2>
+                    <div className="bg-slate-800/30 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50">
+                      <div
+                        className="course-outline-content"
+                        dangerouslySetInnerHTML={{ __html: normalizedCourse.outline }}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Attachment */}
+                {normalizedCourse.attachment && (
+                  <div className="mb-8">
+                    <h2 className="text-2xl font-bold font-poppins mb-6 flex items-center gap-3">
+                      <div className="w-8 h-8 bg-amber-500/20 rounded-lg flex items-center justify-center">
+                        <i className="fas fa-paperclip text-amber-400 text-sm"></i>
+                      </div>
+                      Course Attachment
+                    </h2>
+                    <button
+                      onClick={() => setViewerUrl(getStorageUrl(normalizedCourse.attachment))}
+                      className="inline-flex items-center gap-4 px-6 py-4 bg-slate-800/40 hover:bg-slate-700/50 backdrop-blur-sm border border-slate-700/50 hover:border-indigo-500/30 rounded-2xl text-white font-medium transition-all duration-200 group"
+                    >
+                      <div className="w-10 h-10 bg-indigo-500/20 group-hover:bg-indigo-500/30 rounded-xl flex items-center justify-center transition-colors">
+                        <i className="fas fa-eye text-indigo-400"></i>
+                      </div>
+                      <div>
+                        <p className="text-xs text-slate-400">Click to preview course material</p>
+                      </div>
+                      <i className="fas fa-arrow-right text-slate-500 group-hover:text-indigo-400 group-hover:translate-x-1 transition-all ml-auto"></i>
+                    </button>
+                  </div>
+                )}
+
                 {/* Course Schedule */}
                 {normalizedCourse.schedule && (
                   <div className="mb-8">
@@ -490,7 +598,7 @@ const CourseDetails = () => {
           {/* Sidebar - 1 column */}
           <div className="space-y-6">
             {/* Price and CTA Card */}
-            <div className="bg-slate-800/40 backdrop-blur-xl rounded-4xl overflow-hidden border border-slate-700/50 shadow-2xl hover:shadow-blue-500/10 transition-all duration-500 sticky top-6">
+            <div className="bg-slate-800/40 backdrop-blur-xl rounded-[1.5rem] overflow-hidden border border-slate-700/50 shadow-2xl hover:shadow-blue-500/10 transition-all duration-500 sticky top-6">
               <div className="p-8">
                 {/* Price Display */}
                 <div className="text-center mb-8">
@@ -510,31 +618,56 @@ const CourseDetails = () => {
 
                 {/* CTA Button */}
                 {auth.isLoggedIn && auth.role === "student" ? (
-                  <button
-                    onClick={() =>
-                      enrolled
-                        ? handleUnenrollCourse(normalizedCourse)
-                        : handleEnrollCourse()
-                    }
-                    disabled={isEnrolling || isUnenrolling}
-                    className={`w-full mb-6 py-4 font-black text-xs uppercase tracking-[0.2em] rounded-2xl transition-all active:scale-95 ${
-                      enrolled
+                  <div className={`relative mb-6 ${(noSessions && !enrolled) || isRejected ? "group/tooltip" : ""}`}>
+                    <button
+                      onClick={() =>
+                        enrolled
+                          ? handleUnenrollCourse(normalizedCourse)
+                          : !isPending && !isRejected && handleEnrollCourse()
+                      }
+                      disabled={isEnrolling || isUnenrolling || isPending || isRejected || (noSessions && !enrolled)}
+                      className={`w-full py-4 font-black text-xs uppercase tracking-[0.2em] rounded-2xl transition-all active:scale-95 ${
+                        enrolled
+                          ? isUnenrolling
+                            ? "bg-red-600/50 text-red-400 cursor-not-allowed"
+                            : "bg-red-600/20 border border-red-600/30 text-red-400 hover:bg-red-600 hover:text-white"
+                          : isRejected
+                            ? "bg-rose-600/10 border border-rose-500/20 text-rose-400 cursor-not-allowed"
+                            : isPending
+                              ? "bg-amber-600/10 border border-amber-500/20 text-amber-400 cursor-not-allowed"
+                              : noSessions
+                                ? "bg-linear-to-r from-blue-600/40 to-cyan-600/40 text-white/40 cursor-not-allowed"
+                                : isEnrolling
+                                  ? "bg-slate-600 text-slate-400 cursor-not-allowed"
+                                  : "bg-linear-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 border-0 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-300 hover:scale-[1.02] text-white"
+                      }`}
+                    >
+                      {enrolled
                         ? isUnenrolling
-                          ? "bg-red-600/50 text-red-400 cursor-not-allowed"
-                          : "bg-red-600/20 border border-red-600/30 text-red-400 hover:bg-red-600 hover:text-white"
-                        : isEnrolling
-                          ? "bg-slate-600 text-slate-400 cursor-not-allowed"
-                          : "bg-linear-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 border-0 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-300 hover:scale-[1.02] text-white"
-                    }`}
-                  >
-                    {enrolled
-                      ? isUnenrolling
-                        ? "Unenrolling..."
-                        : "Unenroll"
-                      : isEnrolling
-                        ? "Enrolling..."
-                        : "Enroll Now"}
-                  </button>
+                          ? "Unenrolling..."
+                          : "Unenroll"
+                        : isRejected
+                          ? "Request Rejected"
+                          : isPending
+                            ? "Approval Pending"
+                            : isEnrolling
+                              ? "Enrolling..."
+                              : "Enroll Now"}
+                    </button>
+                    {isRejected && (
+                      <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 px-3 py-2 bg-slate-800 border border-rose-500/30 text-white text-[11px] font-medium rounded-lg text-center max-w-[220px] opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-150 shadow-xl z-10">
+                        <i className="fas fa-lock text-rose-400 mr-1.5"></i>
+                        Your enrollment request was rejected. Please contact school administration.
+                        <div className="absolute top-full left-1/2 -translate-x-1/2 border-[5px] border-transparent border-t-slate-800"></div>
+                      </div>
+                    )}
+                    {noSessions && !enrolled && !isRejected && (
+                      <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 px-3 py-1.5 bg-slate-800 border border-slate-700 text-white text-[11px] font-medium rounded-lg whitespace-nowrap opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-150 shadow-xl z-10">
+                        No sessions available for this course
+                        <div className="absolute top-full left-1/2 -translate-x-1/2 border-[5px] border-transparent border-t-slate-700"></div>
+                      </div>
+                    )}
+                  </div>
                 ) : auth.isLoggedIn ? (
                   <div className="text-center py-4 mb-6">
                     <p className="text-slate-400 text-sm mb-4">
@@ -550,16 +683,35 @@ const CourseDetails = () => {
                     </Button>
                   </div>
                 ) : (
-                  <div className="mb-6">
+                  <div className={`mb-6 relative ${noSessions ? "group/tooltip" : ""}`}>
                     <Button
                       variant="primary"
                       size="lg"
-                      className="w-full bg-linear-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 border-0 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-300 hover:scale-[1.02] group"
-                      onClick={() => dispatch(setAuthModal("login"))}
+                      disabled={noSessions}
+                      className={`w-full border-0 shadow-lg transition-all duration-300 group ${
+                        noSessions
+                          ? "bg-linear-to-r from-blue-600/40 to-cyan-600/40 text-white/40 cursor-not-allowed shadow-none"
+                          : "bg-linear-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 shadow-blue-500/25 hover:shadow-blue-500/40 hover:scale-[1.02]"
+                      }`}
+                      onClick={() => {
+                        if (!noSessions) {
+                          dispatch(setEnrollmentIntent({ 
+                            courseId: normalizedCourse.id, 
+                            courseTitle: normalizedCourse.title 
+                          }));
+                          dispatch(setAuthModal("login"));
+                        }
+                      }}
                     >
-                      <i className="fas fa-sign-in-alt mr-2 group-hover:translate-x-1 transition-transform"></i>
+                      <i className={`fas fa-sign-in-alt mr-2 ${!noSessions ? "group-hover:translate-x-1 transition-transform" : ""}`}></i>
                       Login to Enroll
                     </Button>
+                    {noSessions && (
+                      <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 px-3 py-1.5 bg-slate-800 border border-slate-700 text-white text-[11px] font-medium rounded-lg whitespace-nowrap opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-150 shadow-xl z-10">
+                        No sessions available for this course
+                        <div className="absolute top-full left-1/2 -translate-x-1/2 border-[5px] border-transparent border-t-slate-700"></div>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -652,11 +804,23 @@ const CourseDetails = () => {
       </div>
 
       {/* Enrollment Type Modal */}
-      <EnrollmentTypeModal
-        isOpen={enrollmentModalOpen}
-        onClose={closeEnrollmentModal}
-        onSelect={handleEnrollmentTypeSelect}
+      <ConfirmDialog
+        open={enrollmentModalOpen}
+        variant="primary"
+        title="Confirm Enrollment"
+        message={`Are you sure you want to enroll in "${normalizedCourse?.title}"?`}
+        confirmLabel="Yes, Enroll Now"
+        cancelLabel="Cancel"
+        loading={isEnrolling}
+        checkboxLabel="I have submitted the payment for this course"
+        checkboxChecked={paymentSubmitted}
+        onCheckboxChange={setPaymentSubmitted}
+        onConfirm={() => handleEnrollmentTypeSelect("normal")}
+        onCancel={closeEnrollmentModal}
       />
+      {viewerUrl && (
+        <FileViewerModal filePath={viewerUrl} handleClose={() => setViewerUrl(null)} />
+      )}
     </section>
   );
 };

@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState } from "react";
+import ConfirmDialog from "../common/ConfirmDialog";
 
 const ChildLinksTab = ({
   pendingChildLinks,
@@ -9,12 +10,21 @@ const ChildLinksTab = ({
   onReject,
   onRefresh,
 }) => {
-  const handleApprove = (linkId) => {
-    onApprove(linkId);
+  const [confirmDialog, setConfirmDialog] = useState({ open: false, type: null, linkId: null, label: "" });
+
+  const handleApprove = (linkId, label) => {
+    setConfirmDialog({ open: true, type: "approve", linkId, label });
   };
 
-  const handleReject = (linkId) => {
-    onReject(linkId);
+  const handleReject = (linkId, label) => {
+    setConfirmDialog({ open: true, type: "reject", linkId, label });
+  };
+
+  const handleConfirm = () => {
+    const { type, linkId } = confirmDialog;
+    setConfirmDialog({ open: false, type: null, linkId: null, label: "" });
+    if (type === "approve") onApprove(linkId);
+    else if (type === "reject") onReject(linkId);
   };
 
   const formatDate = (dateString) => {
@@ -95,8 +105,8 @@ const ChildLinksTab = ({
           !childLinksError &&
           pendingChildLinks.length === 0 && (
             <div className="flex flex-col items-center justify-center p-16">
-              <div className="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center mb-6">
-                <i className="fas fa-check-circle text-emerald-400 text-3xl"></i>
+              <div className="w-20 h-20 bg-indigo-500/20 rounded-full flex items-center justify-center mb-6">
+                <i className="fas fa-check-circle text-indigo-400 text-3xl"></i>
               </div>
               <h4 className="text-xl font-bold text-white mb-2">
                 All Caught Up!
@@ -121,17 +131,28 @@ const ChildLinksTab = ({
                     className="p-4 sm:p-6 hover:bg-slate-800/30 transition"
                   >
                     <div className="flex items-start gap-3 sm:gap-4 mb-4">
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-linear-to-br from-purple-500/20 to-purple-600/20 border border-purple-500/20 flex items-center justify-center shrink-0">
-                        <i className="fas fa-link text-purple-400 text-sm"></i>
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl border border-indigo-500 flex items-center justify-center shrink-0">
+                        <i className="fas fa-link text-indigo-500 text-sm"></i>
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-bold text-white text-sm sm:text-base mb-1">
                           {link.parent} → {link.student}
                         </p>
                         <p className="text-[9px] sm:text-xs text-slate-500 uppercase break-all">
-                          Parent ID: {link.parent_id} • Student ID:{" "}
-                          {link.student_id}
+                          Parent ID: {link.parent_id} • Student ID: {link.student_id}
                         </p>
+                        {link.parent_email && (
+                          <p className="text-[9px] sm:text-xs text-slate-500 break-all mt-0.5 flex items-center gap-1">
+                            <i className="fas fa-user text-[8px]"></i>
+                            {link.parent_email}
+                          </p>
+                        )}
+                        {link.student_email && (
+                          <p className="text-[9px] sm:text-xs text-slate-500 break-all mt-0.5 flex items-center gap-1">
+                            <i className="fas fa-user-graduate text-[8px]"></i>
+                            {link.student_email}
+                          </p>
+                        )}
                       </div>
                     </div>
 
@@ -144,9 +165,9 @@ const ChildLinksTab = ({
 
                       <div className="flex gap-2">
                         <button
-                          onClick={() => handleApprove(link.link_id)}
+                          onClick={() => handleApprove(link.link_id, `${link.parent} → ${link.student}`)}
                           disabled={isProcessing[link.link_id] === "approving"}
-                          className="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 sm:gap-2 flex-1 justify-center"
+                          className="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-indigo-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 sm:gap-2 flex-1 justify-center"
                         >
                           {isProcessing[link.link_id] === "approving" ? (
                             <React.Fragment key="approving">
@@ -163,7 +184,7 @@ const ChildLinksTab = ({
                           )}
                         </button>
                         <button
-                          onClick={() => handleReject(link.link_id)}
+                          onClick={() => handleReject(link.link_id, `${link.parent} → ${link.student}`)}
                           disabled={isProcessing[link.link_id] === "rejecting"}
                           className="bg-red-600 text-white px-3 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-red-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 sm:gap-2 flex-1 justify-center"
                         >
@@ -191,13 +212,13 @@ const ChildLinksTab = ({
               <table className="hidden lg:table w-full text-left">
                 <thead className="bg-slate-950/60 border-b border-slate-800">
                   <tr key="child-links-header">
-                    <th className="px-8 py-6 text-[10px] font-black uppercase text-slate-500">
+                    <th className="px-8 py-6 text-[10px] font-black uppercase text-slate-500  text-start">
                       Link Information
                     </th>
-                    <th className="px-8 py-6 text-[10px] font-black uppercase text-slate-500">
+                    <th className="px-8 py-6 text-[10px] font-black uppercase text-slate-500 text-start">
                       Requested At
                     </th>
-                    <th className="px-8 py-6 text-[10px] font-black uppercase text-slate-500 text-right">
+                    <th className="px-8 py-6 text-[10px] font-black uppercase text-slate-500 text-center">
                       Actions
                     </th>
                   </tr>
@@ -209,18 +230,29 @@ const ChildLinksTab = ({
                       className="hover:bg-slate-800/30 transition group"
                     >
                       <td className="px-8 py-6">
-                        <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-xl bg-linear-to-br from-purple-500/20 to-purple-600/20 border border-purple-500/20 flex items-center justify-center">
-                            <i className="fas fa-link text-purple-400 text-sm"></i>
+                        <div className="flex items-center justify-start gap-4">
+                          <div className="w-10 h-10 rounded-xl border border-indigo-500 flex items-center justify-center">
+                            <i className="fas fa-link text-indigo-500 text-sm"></i>
                           </div>
                           <div>
                             <p className="font-bold text-white group-hover:text-purple-400 transition">
                               {link.parent} → {link.student}
                             </p>
                             <p className="text-[9px] text-slate-500 uppercase">
-                              Parent ID: {link.parent_id} • Student ID:{" "}
-                              {link.student_id}
+                              Parent ID: {link.parent_id} • Student ID: {link.student_id}
                             </p>
+                            {link.parent_email && (
+                              <p className="text-[10px] text-slate-500 mt-0.5 flex items-center gap-1.5">
+                                <i className="fas fa-user text-[9px]"></i>
+                                {link.parent_email}
+                              </p>
+                            )}
+                            {link.student_email && (
+                              <p className="text-[10px] text-slate-500 mt-0.5 flex items-center gap-1.5">
+                                <i className="fas fa-user-graduate text-[9px]"></i>
+                                {link.student_email}
+                              </p>
+                            )}
                           </div>
                         </div>
                       </td>
@@ -229,14 +261,14 @@ const ChildLinksTab = ({
                           {formatDate(link.requested_at)}
                         </span>
                       </td>
-                      <td className="px-8 py-6 text-right">
-                        <div className="flex items-center gap-2 justify-end">
+                      <td className="px-8 py-6 text-center">
+                        <div className="flex items-center gap-2 justify-center">
                           <button
-                            onClick={() => handleApprove(link.link_id)}
+                            onClick={() => handleApprove(link.link_id, `${link.parent} → ${link.student}`)}
                             disabled={
                               isProcessing[link.link_id] === "approving"
                             }
-                            className="bg-emerald-600 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                            className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                           >
                             {isProcessing[link.link_id] === "approving" ? (
                               <React.Fragment key="approving">
@@ -251,7 +283,7 @@ const ChildLinksTab = ({
                             )}
                           </button>
                           <button
-                            onClick={() => handleReject(link.link_id)}
+                            onClick={() => handleReject(link.link_id, `${link.parent} → ${link.student}`)}
                             disabled={
                               isProcessing[link.link_id] === "rejecting"
                             }
@@ -278,6 +310,21 @@ const ChildLinksTab = ({
             </div>
           )}
       </div>
+
+      <ConfirmDialog
+        open={confirmDialog.open}
+        variant={confirmDialog.type === "approve" ? "primary" : "danger"}
+        title={confirmDialog.type === "approve" ? "Approve Child Link" : "Reject Child Link"}
+        message={
+          confirmDialog.type === "approve"
+            ? `Approve the parent-child link for "${confirmDialog.label}"?`
+            : `Reject the parent-child link for "${confirmDialog.label}"?`
+        }
+        confirmLabel={confirmDialog.type === "approve" ? "Approve" : "Reject"}
+        cancelLabel="Cancel"
+        onConfirm={handleConfirm}
+        onCancel={() => setConfirmDialog({ open: false, type: null, linkId: null, label: "" })}
+      />
     </>
   );
 };

@@ -8,6 +8,8 @@ import {
   selectSessions,
   selectCourses,
   fetchCourses,
+  fetchUsers,
+  selectUsers,
   fetchAvailableStudents,
   selectAvailableStudents,
 } from "../../store/slices/adminSlice";
@@ -16,8 +18,10 @@ import { Button, Input, Card } from "../../components/ui";
 import { useFieldErrors } from "../../hooks";
 import { normalizeApiError } from "../../utils/errorHandler";
 import { toastManager } from "../../utils/toastManager";
+import ConfirmDialog from "../../components/common/ConfirmDialog";
 import SessionsTab from "../../components/admin/SessionsTab";
-
+import { showApiError } from "../../utils/apiErrorHandler";
+import { formatLocalISO } from "../../utils/validation";
 const AdminSessionsPage = () => {
   const dispatch = useDispatch();
 
@@ -25,6 +29,8 @@ const AdminSessionsPage = () => {
   const [editingSession, setEditingSession] = useState(null);
   const [loadingSessionIds, setLoadingSessionIds] = useState(new Set());
   const [updatingSessionId, setUpdatingSessionId] = useState(null);
+  const [isCreatingSession, setIsCreatingSession] = useState(false);
+  const [confirmDialog, setConfirmDialog] = useState({ open: false, sessionId: null, sessionTitle: "" });
 
   // Private students state for course-specific dropdown
   const [privateStudents, setPrivateStudents] = useState([]);
@@ -33,22 +39,31 @@ const AdminSessionsPage = () => {
 
   // Session form states
   const [createSessionForm, setCreateSessionForm] = useState({
-    course_id: "",
+    course: "",
     title: "",
-    start_time: "",
-    session_type: "group",
-    private_student_id: "",
+    time: "",
+    scheduled_date: "",
+    is_recurring: true,
+    recurrence_days: [],
+    recurrence_end_date: "",
+    instructor_id: "",
+    instructor_username: "",
   });
 
   const [editSessionForm, setEditSessionForm] = useState({});
   const [showSessionFilters, setShowSessionFilters] = useState(false);
   const [sessionFilters, setSessionFilters] = useState({
     search: "",
+    teacher: "",
+    course: "",
+    view: "",
+    status: "",
   });
 
   // Get data from Redux store
   const sessions = useSelector(selectSessions);
   const courses = useSelector(selectCourses);
+  const teachers = useSelector(selectUsers);
   const availableStudents = useSelector(selectAvailableStudents);
 
   // Error handling
@@ -68,21 +83,36 @@ const AdminSessionsPage = () => {
     clearAllErrors: clearAllEditSessionErrors,
   } = useFieldErrors({});
 
-  // Fetch courses on component mount (sessions fetched by AdminLayout)
+  // Fetch supporting data on mount
   useEffect(() => {
-    dispatch(fetchCourses()); // For course dropdown
-    dispatch(fetchAvailableStudents()); // For private session student selection
+    dispatch(fetchCourses());
+    dispatch(fetchUsers({ role: "teacher" }));
+    dispatch(fetchAvailableStudents());
   }, [dispatch]);
+
+  // Re-fetch sessions when server-side filters change
+  useEffect(() => {
+    const params = {};
+    if (sessionFilters.teacher) params.teacher = sessionFilters.teacher;
+    if (sessionFilters.course) params.course = sessionFilters.course;
+    if (sessionFilters.view) params.view = sessionFilters.view;
+    if (sessionFilters.status) params.status = sessionFilters.status;
+    dispatch(fetchSessions(params));
+  }, [dispatch, sessionFilters.teacher, sessionFilters.course, sessionFilters.view, sessionFilters.status]);
 
   // Reset create session form when modal opens/closes
   useEffect(() => {
     if (activeModal === "create-session") {
       setCreateSessionForm({
-        course_id: "",
+        course: "",
         title: "",
-        start_time: "",
-        session_type: "group",
-        private_student_id: "",
+        time: "",
+        scheduled_date: "",
+        is_recurring: true,
+        recurrence_days: [],
+        recurrence_end_date: "",
+        instructor_id: "",
+        instructor_username: "",
       });
       clearAllCreateSessionErrors();
     } else if (activeModal === null) {
@@ -90,159 +120,90 @@ const AdminSessionsPage = () => {
     }
   }, [activeModal, clearAllCreateSessionErrors]);
 
-  // Fetch private students when course and session type change
+
+  // Clear edit form when modal closes
   useEffect(() => {
-    const fetchPrivateStudents = async () => {
-      if (
-        createSessionForm.session_type === "private" &&
-        createSessionForm.course_id
-      ) {
-        try {
-          setPrivateStudentsLoading(true);
-          setPrivateStudentsError(null);
-          const students = await adminSessionService.getPrivateStudentsByCourse(
-            createSessionForm.course_id,
-          );
-          setPrivateStudents(students);
-        } catch (error) {
-          console.error("Error fetching private students:", error);
-          setPrivateStudentsError("Failed to fetch private students");
-          setPrivateStudents([]);
-        } finally {
-          setPrivateStudentsLoading(false);
-        }
-      } else {
-        // Clear private students when not needed
-        setPrivateStudents([]);
-        setPrivateStudentsError(null);
-      }
-    };
-
-    fetchPrivateStudents();
-  }, [createSessionForm.course_id, createSessionForm.session_type]);
-
-  // Reset private_student_id when course or session type changes
-  useEffect(() => {
-    if (createSessionForm.private_student_id) {
-      setCreateSessionForm((prev) => ({
-        ...prev,
-        private_student_id: "",
-      }));
-    }
-  }, [createSessionForm.course_id, createSessionForm.session_type]);
-
-  // Reset edit session form when edit modal opens/closes
-  useEffect(() => {
-    if (
-      activeModal &&
-      typeof activeModal === "object" &&
-      activeModal.type === "edit-session"
-    ) {
-      if (editingSession) {
-        // Convert datetime format for HTML datetime-local inputs
-        const formatDateTimeForInput = (dateTimeString) => {
-          if (!dateTimeString) return "";
-          try {
-            const date = new Date(dateTimeString);
-            // Format as YYYY-MM-DDTHH:MM for datetime-local input
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, "0");
-            const day = String(date.getDate()).padStart(2, "0");
-            const hours = String(date.getHours()).padStart(2, "0");
-            const minutes = String(date.getMinutes()).padStart(2, "0");
-            return `${year}-${month}-${day}T${hours}:${minutes}`;
-          } catch {
-            return "";
-          }
-        };
-
-        setEditSessionForm({
-          course_id: editingSession.course_id || "",
-          title: editingSession.title || "",
-          start_time: formatDateTimeForInput(editingSession.start_time),
-          meeting_link: editingSession.meeting_link || "",
-        });
-      }
-    } else {
-      // Clear form and errors when modal is closed
+    if (activeModal === null) {
       setEditSessionForm({});
       clearAllEditSessionErrors();
     }
-  }, [activeModal, editingSession, clearAllEditSessionErrors]);
+  }, [activeModal, clearAllEditSessionErrors]);
 
   // Fetch detailed session data for editing
-  const fetchSessionDetailsForEdit = async (sessionId) => {
-    try {
-      // For now, we'll use the session data from the list
-      // In a real implementation, you might want to fetch detailed data
-      const session = sessions?.data?.find((s) => s.id === sessionId);
-      if (session) {
-        setEditingSession(session);
-        // Set the edit form immediately to avoid race condition
-        // Convert datetime format for HTML datetime-local inputs
-        const formatDateTimeForInput = (dateTimeString) => {
-          if (!dateTimeString) return "";
-          try {
-            const date = new Date(dateTimeString);
-            // Format as YYYY-MM-DDTHH:MM for datetime-local input
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, "0");
-            const day = String(date.getDate()).padStart(2, "0");
-            const hours = String(date.getHours()).padStart(2, "0");
-            const minutes = String(date.getMinutes()).padStart(2, "0");
-            return `${year}-${month}-${day}T${hours}:${minutes}`;
-          } catch {
-            return "";
-          }
-        };
+  const fetchSessionDetailsForEdit = (sessionId) => {
+    const session = sessions?.data?.find((s) => s.id === sessionId);
 
-        setEditSessionForm({
-          course_id: session.course_id || "",
-          title: session.title || "",
-          start_time: formatDateTimeForInput(session.start_time),
-          meeting_link: session.meeting_link || "",
-        });
-        setActiveModal({
-          type: "edit-session",
-          sessionId: sessionId,
-        });
-      } else {
-        toastManager.error("Session not found");
-      }
-    } catch (error) {
-      console.error("Error fetching session details:", error);
-      toastManager.error("Failed to load session details");
+    if (!session) {
+      toastManager.error("Session not found");
+      return;
     }
+
+    if (session.is_child === true) {
+      toastManager.error("Child sessions cannot be edited. Edit the parent session instead.");
+      return;
+    }
+
+    if ((session.enrollment_count ?? 0) >= 1) {
+      toastManager.error("Cannot edit: this session has active enrollments.");
+      return;
+    }
+
+    // Parse scheduled datetime into separate date + time for the form.
+    // Parse directly from the ISO string to preserve the original offset (e.g. +05:00)
+    // instead of letting JS convert it to local/UTC time.
+    const rawDateTime = session.start_time || session.scheduled_at;
+    let startDate = "";
+    let startTime = "";
+    if (rawDateTime) {
+      const match = rawDateTime.match(/^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})/);
+      if (match) {
+        startDate = match[1];
+        startTime = match[2];
+      }
+    }
+
+    setEditingSession(session);
+
+    setEditSessionForm({
+      course_id: session.course?.id || session.course_id || "",
+      course_title: session.course?.title || session.course_title || "",
+      teacher_name: session.teacher_name || "",
+      instructor_id: session.instructor_id || session.teacher,
+      title: session.title || "",
+      description: session.description || "",
+      start_date: startDate,
+      time: startTime,
+      recurrence_days: session.recurrence_days || [],
+      recurrence_end_date: session.recurrence_end_date || "",
+    });
+    setActiveModal({ type: "edit-session", sessionId });
   };
 
   // Validation functions
   const validateCreateSessionForm = (formData) => {
     const errors = {};
 
-    if (!formData.course_id) {
-      errors.course_id = "Course is required";
-    }
+    if (!formData.course) errors.course = "Course is required";
 
-    if (!formData.title.trim()) {
-      errors.title = "Session title is required";
+    if (!formData.title?.trim()) {
+      errors.title = "Class title is required";
     } else if (formData.title.trim().length < 3) {
       errors.title = "Title must be at least 3 characters";
     }
 
-    if (!formData.start_time) {
-      errors.start_time = "Start time is required";
-    } else {
-      // Check if start time is in the past
-      const startTime = new Date(formData.start_time);
-      const now = new Date();
-      if (startTime < now) {
-        errors.start_time = "Scheduled time must be in the future";
-      }
+    if (!formData.time) errors.time = "Class time is required";
+
+    if (!formData.scheduled_date) {
+      errors.scheduled_date = "Start date is required";
     }
 
-    if (formData.session_type === "private" && !formData.private_student_id) {
-      errors.private_student_id =
-        "Student selection is required for private sessions";
+    if (!formData.recurrence_days?.length) {
+      errors.recurrence_days = "Select at least one recurring day";
+    }
+    if (!formData.recurrence_end_date) {
+      errors.recurrence_end_date = "Recurrence end date is required";
+    } else if (formData.scheduled_date && formData.recurrence_end_date < formData.scheduled_date) {
+      errors.recurrence_end_date = "End date must be on or after start date";
     }
 
     return errors;
@@ -251,35 +212,27 @@ const AdminSessionsPage = () => {
   const validateEditSessionForm = (formData) => {
     const errors = {};
 
-    if (!formData.course_id) {
-      errors.course_id = "Course is required";
-    }
+    if (!formData.title?.trim()) errors.title = "Session title is required";
+    else if (formData.title.trim().length < 5) errors.title = "Title must be at least 5 characters";
 
-    if (!formData.title?.trim()) {
-      errors.title = "Session title is required";
-    } else if (formData.title.trim().length < 3) {
-      errors.title = "Title must be at least 3 characters";
-    }
-
-    if (!formData.start_time) {
-      errors.start_time = "Start time is required";
+    if (!formData.start_date) {
+      errors.start_date = "Start date is required";
     } else {
-      // Check if start time is in the past
-      const startTime = new Date(formData.start_time);
-      const now = new Date();
-      if (startTime < now) {
-        errors.start_time = "Scheduled time must be in the future";
-      }
+      const d = new Date(formData.start_date);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      d.setHours(0, 0, 0, 0);
+      if (d < today) errors.start_date = "Start date must be today or in the future";
     }
 
-    if (!formData.meeting_link?.trim()) {
-      errors.meeting_link = "Meeting link is required";
-    } else {
-      try {
-        new URL(formData.meeting_link);
-      } catch {
-        errors.meeting_link = "Please enter a valid URL";
-      }
+    if (!formData.time) errors.time = "Class time is required";
+
+    if (!formData.recurrence_days?.length) errors.recurrence_days = "Select at least one recurring day";
+
+    if (!formData.recurrence_end_date) {
+      errors.recurrence_end_date = "Recurrence end date is required";
+    } else if (formData.start_date && formData.recurrence_end_date <= formData.start_date) {
+      errors.recurrence_end_date = "End date must be after start date";
     }
 
     return errors;
@@ -287,10 +240,12 @@ const AdminSessionsPage = () => {
 
   // Handle session creation
   const handleCreateSession = async (sessionData) => {
-    // Clear previous errors first
     clearAllCreateSessionErrors();
 
-    // Run frontend validation
+    const selectedCourse = courses?.data?.find(
+      (c) => c.id === Number(sessionData.course),
+    );
+
     const validationErrors = validateCreateSessionForm(sessionData);
     if (Object.keys(validationErrors).length > 0) {
       setCreateSessionErrors(validationErrors);
@@ -298,42 +253,49 @@ const AdminSessionsPage = () => {
       return;
     }
 
-    // Find selected course and extract instructor_id
-    const selectedCourse = courses?.data?.find(
-      (c) => c.id === Number(sessionData.course_id),
-    );
     const instructor_id = selectedCourse?.instructor?.id;
-
     if (!instructor_id) {
-      toastManager.error("Course instructor not found");
+      toastManager.error("Selected course has no instructor assigned");
       return;
     }
-
-    // Create payload with instructor_id and conditional private_student_id
+const localDate = new Date(`${sessionData.scheduled_date}T${sessionData.time}`);
     const payload = {
-      ...sessionData,
+      course: Number(sessionData.course),
       instructor_id,
-      private_student_id:
-        sessionData.session_type === "private"
-          ? sessionData.private_student_id
-          : undefined,
+      title: sessionData.title,
+      scheduled_at: formatLocalISO(localDate),
+      // time: sessionData.time,
+      is_recurring: sessionData.is_recurring,
+      recurrence_days: sessionData.is_recurring ? (sessionData.recurrence_days || []) : [],
+      recurrence_end_date: sessionData.recurrence_end_date,
     };
-
     try {
+      setIsCreatingSession(true);
       await dispatch(createSession(payload)).unwrap();
-      toastManager.success("Session created successfully");
+      toastManager.success("Class created successfully");
       setActiveModal(null);
-      dispatch(fetchSessions());
+      const params = {};
+      if (sessionFilters.teacher) params.teacher = sessionFilters.teacher;
+      if (sessionFilters.course) params.course = sessionFilters.course;
+      if (sessionFilters.view) params.view = sessionFilters.view;
+      if (sessionFilters.status) params.status = sessionFilters.status;
+      dispatch(fetchSessions(params));
       setCreateSessionForm({
-        course_id: "",
+        course: "",
         title: "",
-        start_time: "",
-        session_type: "group",
-        private_student_id: "",
+        time: "",
+        scheduled_date: "",
+        is_recurring: true,
+        recurrence_days: [],
+        recurrence_end_date: "",
+        instructor_id: "",
+        instructor_username: "",
       });
       clearAllCreateSessionErrors();
     } catch (error) {
-      handleCreateSessionApiError(error);
+      showApiError(error);
+    } finally {
+      setIsCreatingSession(false);
     }
   };
 
@@ -344,59 +306,86 @@ const AdminSessionsPage = () => {
       return;
     }
 
-    // Clear previous errors first
     clearAllEditSessionErrors();
 
-    // Run frontend validation
     const frontendErrors = validateEditSessionForm(sessionData);
     setEditSessionErrors(frontendErrors);
-
     if (Object.keys(frontendErrors).length > 0) {
       toastManager.error("Please fix highlighted fields");
       return;
     }
 
     setUpdatingSessionId(editingSession.id);
+
+    // Omit instructor_id — it is read-only in the edit form and re-sending it
+    // triggers the backend's instructor-overlap validator against itself.
+    // Course is editable and included when changed.
+    // The backend must exclude the current session from its overlap check.
+    const payload = {
+      title: sessionData.title,
+      description: sessionData.description || "",
+      is_recurring: true,
+      recurrence_days: sessionData.recurrence_days || [],
+      recurrence_end_date: sessionData.recurrence_end_date,
+    };
+    if (sessionData.course_id) {
+      payload.course = Number(sessionData.course_id);
+    }
+    if (sessionData.instructor_id) {
+      payload.instructor_id = Number(sessionData.instructor_id);
+    }
+    if (sessionData.start_date && sessionData.time) {
+      const localDate = new Date(`${sessionData.start_date}T${sessionData.time}`);
+      payload.scheduled_at = formatLocalISO(localDate);
+    }
+
     try {
-      await dispatch(
-        updateSession({ sessionId: editingSession.id, sessionData }),
-      ).unwrap();
+      await dispatch(updateSession({ sessionId: editingSession.id, sessionData: payload })).unwrap();
       toastManager.success("Session updated successfully");
       setActiveModal(null);
-      dispatch(fetchSessions());
+      const params = {};
+      if (sessionFilters.teacher) params.teacher = sessionFilters.teacher;
+      if (sessionFilters.course) params.course = sessionFilters.course;
+      if (sessionFilters.view) params.view = sessionFilters.view;
+      if (sessionFilters.status) params.status = sessionFilters.status;
+      dispatch(fetchSessions(params));
     } catch (error) {
-      const hadFieldErrors = handleEditSessionApiError(
-        error,
-        toastManager.error,
-      );
-      if (!hadFieldErrors) {
-        const normalizedError = normalizeApiError(error);
-        toastManager.error(normalizedError.message);
-      }
+      showApiError(error);
     } finally {
       setUpdatingSessionId(null);
     }
   };
 
   // Handle session deletion
-  const handleDeleteSession = async (sessionId) => {
+  const handleDeleteSession = (sessionId) => {
     const session = sessions?.data?.find((s) => s.id === sessionId);
     const sessionTitle = session?.title || "this session";
 
-    const confirmed = window.confirm(
-      `Are you sure you want to delete "${sessionTitle}"? This action cannot be undone.`,
-    );
+    if ((session?.enrollment_count ?? 0) >= 1) {
+      toastManager.error("Cannot delete session as enrollment exists against this session.");
+      return;
+    }
 
-    if (!confirmed) return;
+    setConfirmDialog({ open: true, sessionId, sessionTitle });
+  };
+
+  const confirmDeleteSession = async () => {
+    const { sessionId } = confirmDialog;
+    setConfirmDialog({ open: false, sessionId: null, sessionTitle: "" });
 
     setLoadingSessionIds((prev) => new Set(prev).add(sessionId));
     try {
       await dispatch(deleteSession(sessionId)).unwrap();
       toastManager.success("Session deleted successfully");
-      dispatch(fetchSessions());
+      const params = {};
+      if (sessionFilters.teacher) params.teacher = sessionFilters.teacher;
+      if (sessionFilters.course) params.course = sessionFilters.course;
+      if (sessionFilters.view) params.view = sessionFilters.view;
+      if (sessionFilters.status) params.status = sessionFilters.status;
+      dispatch(fetchSessions(params));
+      dispatch(fetchCourses());
     } catch (error) {
-      const normalizedError = normalizeApiError(error);
-      toastManager.error(normalizedError.message);
+      showApiError(error);
     } finally {
       setLoadingSessionIds((prev) => {
         const newSet = new Set(prev);
@@ -407,6 +396,7 @@ const AdminSessionsPage = () => {
   };
 
   return (
+    <>
     <SessionsTab
       sessions={sessions?.data || []}
       courses={courses?.data || []}
@@ -417,6 +407,7 @@ const AdminSessionsPage = () => {
       loading={sessions?.loading || false}
       loadingSessionIds={loadingSessionIds}
       updatingSessionId={updatingSessionId}
+      isCreatingSession={isCreatingSession}
       editSessionForm={editSessionForm}
       setEditSessionForm={setEditSessionForm}
       createSessionForm={createSessionForm}
@@ -436,7 +427,20 @@ const AdminSessionsPage = () => {
       setShowSessionFilters={setShowSessionFilters}
       sessionFilters={sessionFilters}
       setSessionFilters={setSessionFilters}
+      teachers={teachers?.data || []}
     />
+
+    <ConfirmDialog
+      open={confirmDialog.open}
+      variant="danger"
+      title="Delete Class"
+      message={`Are you sure you want to delete "${confirmDialog.sessionTitle}"? This action cannot be undone.`}
+      confirmLabel="Delete"
+      cancelLabel="Cancel"
+      onConfirm={confirmDeleteSession}
+      onCancel={() => setConfirmDialog({ open: false, sessionId: null, sessionTitle: "" })}
+    />
+    </>
   );
 };
 

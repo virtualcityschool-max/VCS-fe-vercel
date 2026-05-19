@@ -56,8 +56,44 @@ const getAssignments = async (params = {}) => {
 };
 
 const createAssignment = async (data) => {
-  const response = await axiosInstance.post("/assignments/", data);
+  const { file, ...rest } = data;
+  if (file) {
+    const formData = new FormData();
+    Object.entries(rest).forEach(([k, v]) => formData.append(k, v));
+    formData.append("file", file);
+    const response = await axiosInstance.post("/assignments/", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return response.data;
+  }
+  const response = await axiosInstance.post("/assignments/", rest);
   return response.data;
+};
+
+const getAssignmentById = async (id) => {
+  const response = await axiosInstance.get(`/assignments/${id}/`);
+  return response.data;
+};
+
+const updateAssignment = async (id, data) => {
+  const { file, ...rest } = data;
+  if (file) {
+    const formData = new FormData();
+    Object.entries(rest).forEach(([k, v]) => {
+      if (v !== undefined && v !== null) formData.append(k, v);
+    });
+    formData.append("file", file);
+    const response = await axiosInstance.patch(`/assignments/${id}/`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return response.data;
+  }
+  const response = await axiosInstance.patch(`/assignments/${id}/`, rest);
+  return response.data;
+};
+
+const deleteAssignment = async (id) => {
+  await axiosInstance.delete(`/assignments/${id}/`);
 };
 
 const getSubmissions = async (assignmentId) => {
@@ -90,13 +126,60 @@ const getSubmissionById = async (submissionId) => {
   return response.data;
 };
 
+const getAllSubmissions = async (params = {}) => {
+  const query = {};
+  if (params.course) query.course = params.course;
+  const response = await axiosInstance.get("/assignments/submissions/all/", { params: query });
+  return response.data;
+};
+
+// ── Quiz APIs ─────────────────────────────────────────────────────────────────
+const getQuizzes = async (params = {}) => {
+  const response = await axiosInstance.get("/quizzes/", { params });
+  return response.data;
+};
+
+const createQuiz = async (data) => {
+  const response = await axiosInstance.post("/quizzes/", data);
+  return response.data;
+};
+
+const getQuizById = async (id) => {
+  const response = await axiosInstance.get(`/quizzes/${id}/`);
+  return response.data;
+};
+
+const updateQuiz = async (id, data) => {
+  const response = await axiosInstance.patch(`/quizzes/${id}/`, data);
+  return response.data;
+};
+
+const deleteQuiz = async (id) => {
+  await axiosInstance.delete(`/quizzes/${id}/`);
+};
+
+const getQuizSubmissions = async (quizId) => {
+  const response = await axiosInstance.get(`/quizzes/${quizId}/submissions/`);
+  return response.data;
+};
+
+const getQuizSubmissionById = async (submissionId) => {
+  const response = await axiosInstance.get(`/quizzes/submissions/${submissionId}/`);
+  return response.data;
+};
+
+const gradeQuizSubmission = async (submissionId, grades) => {
+  const response = await axiosInstance.patch(`/quizzes/submissions/${submissionId}/grade/`, { grades });
+  return response.data;
+};
+
 const createAnnouncement = async (data) => {
   const response = await axiosInstance.post("/messaging/announcements/", data);
   return response.data;
 };
 
-const getTeacherSessions = async () => {
-  const response = await axiosInstance.get("/classroom/sessions/");
+const getTeacherSessions = async (params = {}) => {
+  const response = await axiosInstance.get("/classroom/sessions/", { params });
   return response.data;
 };
 
@@ -110,6 +193,27 @@ const getSessionAttendance = async (sessionId) => {
 const updateSessionAttendance = async (sessionId, attendanceId, data) => {
   const response = await axiosInstance.patch(
     `/classroom/sessions/${sessionId}/attendance/${attendanceId}/`,
+    data,
+  );
+  return response.data;
+};
+
+const getAllAttendance = async (params = {}) => {
+  const response = await axiosInstance.get("/classroom/attendance/", { params });
+  return response.data;
+};
+
+const bulkMarkAttendance = async (sessionId, records) => {
+  const response = await axiosInstance.post(
+    `/classroom/sessions/${sessionId}/attendance/bulk/`,
+    { records },
+  );
+  return response.data;
+};
+
+const updateStudentAttendance = async (sessionId, studentId, data) => {
+  const response = await axiosInstance.patch(
+    `/classroom/sessions/${sessionId}/attendance/${studentId}/`,
     data,
   );
   return response.data;
@@ -148,14 +252,29 @@ export const teacherService = {
   getMyCourses,
   getAssignments,
   createAssignment,
+  getAssignmentById,
+  updateAssignment,
+  deleteAssignment,
   getSubmissions,
   getSubmissionById,
+  getAllSubmissions,
   gradeSubmission,
   updateSubmissionGrade,
+  getQuizzes,
+  createQuiz,
+  getQuizById,
+  updateQuiz,
+  deleteQuiz,
+  getQuizSubmissions,
+  getQuizSubmissionById,
+  gradeQuizSubmission,
   createAnnouncement,
   getTeacherSessions,
   getSessionAttendance,
   updateSessionAttendance,
+  getAllAttendance,
+  bulkMarkAttendance,
+  updateStudentAttendance,
   joinLiveSession,
   startSession,
   endSession,

@@ -2,6 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   authModal: { type: null, intendedRole: null },
+  enrollmentIntent: null, // { courseId: string, courseTitle: string }
 };
 
 const uiSlice = createSlice({
@@ -18,9 +19,12 @@ const uiSlice = createSlice({
         };
       }
     },
+    setEnrollmentIntent: (state, action) => {
+      state.enrollmentIntent = action.payload;
+    },
   },
 });
 
-export const { setAuthModal } = uiSlice.actions;
+export const { setAuthModal, setEnrollmentIntent } = uiSlice.actions;
 
 export default uiSlice.reducer;

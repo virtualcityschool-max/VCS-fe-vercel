@@ -5,6 +5,7 @@ import {
 } from "@reduxjs/toolkit";
 import { studentService } from "../../services/studentService";
 import { logoutUser } from "./authSlice";
+import { extractApiErrorMessage } from "../../utils/apiErrorHandler";
 
 // Async thunks
 export const fetchStudentDashboard = createAsyncThunk(
@@ -55,6 +56,32 @@ export const joinLiveSession = createAsyncThunk(
   },
 );
 
+export const startStudentSession = createAsyncThunk(
+  "studentDashboard/startSession",
+  async (sessionId, { rejectWithValue }) => {
+    try {
+      return await studentService.startSession(sessionId);
+    } catch (error) {
+      return rejectWithValue(
+        error?.response?.data?.error || error?.message || "Failed to start session",
+      );
+    }
+  },
+);
+
+export const endStudentSession = createAsyncThunk(
+  "studentDashboard/endSession",
+  async (sessionId, { rejectWithValue }) => {
+    try {
+      return await studentService.endSession(sessionId);
+    } catch (error) {
+      return rejectWithValue(
+        error?.response?.data?.error || error?.message || "Failed to end session",
+      );
+    }
+  },
+);
+
 export const submitAssignment = createAsyncThunk(
   "studentDashboard/submitAssignment",
   async ({ assignmentId, submissionData }, { rejectWithValue }) => {
@@ -97,30 +124,23 @@ export const enrollInCourseNormal = createAsyncThunk(
       const response = await studentService.enrollInCourseNormal(courseId);
       return { courseId, response };
     } catch (error) {
-      return rejectWithValue(
-        typeof error === "string"
-          ? error
-          : error?.message || "An error occurred",
-      );
+      return rejectWithValue(extractApiErrorMessage(error));
     }
   },
 );
 
 export const enrollInCoursePrivate = createAsyncThunk(
   "studentDashboard/enrollInCoursePrivate",
-  async ({ courseId, teacherId }, { rejectWithValue }) => {
+  async ({ courseId, teacherId, preferred_slots }, { rejectWithValue }) => {
     try {
       const response = await studentService.enrollInCoursePrivate({
         courseId,
         teacherId,
+        preferred_slots,
       });
       return { courseId, response };
     } catch (error) {
-      return rejectWithValue(
-        typeof error === "string"
-          ? error
-          : error?.message || "An error occurred",
-      );
+      return rejectWithValue(extractApiErrorMessage(error));
     }
   },
 );
@@ -239,9 +259,9 @@ export const fetchSessionAttendance = createAsyncThunk(
 
 export const fetchMyAttendance = createAsyncThunk(
   "studentDashboard/fetchMyAttendance",
-  async (_, { rejectWithValue }) => {
+  async (params = {}, { rejectWithValue }) => {
     try {
-      const attendance = await studentService.getMyAttendance();
+      const attendance = await studentService.getMyAttendance(params);
       return attendance;
     } catch (error) {
       return rejectWithValue(
@@ -249,6 +269,50 @@ export const fetchMyAttendance = createAsyncThunk(
           ? error
           : error?.message || "An error occurred",
       );
+    }
+  },
+);
+
+export const fetchStudentQuizzes = createAsyncThunk(
+  "studentDashboard/fetchStudentQuizzes",
+  async (params = {}, { rejectWithValue }) => {
+    try {
+      return await studentService.getStudentQuizzes(params);
+    } catch (error) {
+      return rejectWithValue(error?.message || "Failed to fetch quizzes");
+    }
+  },
+);
+
+export const fetchStudentQuizById = createAsyncThunk(
+  "studentDashboard/fetchStudentQuizById",
+  async (id, { rejectWithValue }) => {
+    try {
+      return await studentService.getStudentQuizById(id);
+    } catch (error) {
+      return rejectWithValue(error?.message || "Failed to fetch quiz");
+    }
+  },
+);
+
+export const fetchMyEnrollments = createAsyncThunk(
+  "studentDashboard/fetchMyEnrollments",
+  async (_, { rejectWithValue }) => {
+    try {
+      return await studentService.getMyEnrollments();
+    } catch (error) {
+      return rejectWithValue(error?.message || "Failed to load enrollments");
+    }
+  },
+);
+
+export const submitStudentQuiz = createAsyncThunk(
+  "studentDashboard/submitStudentQuiz",
+  async ({ quizId, answers }, { rejectWithValue }) => {
+    try {
+      return await studentService.submitQuiz(quizId, answers);
+    } catch (error) {
+      return rejectWithValue(error?.response?.data || error?.message || "Failed to submit quiz");
     }
   },
 );
@@ -280,6 +344,21 @@ const initialState = {
     status: "all", // all, overdue, pending, submitted, graded
     course: "all",
   },
+
+  // My enrollments (active + pending from /courses/my-enrollments/)
+  myEnrollments: [],
+  myEnrollmentsLoading: false,
+
+  // Quiz state
+  quizzes: [],
+  isFetchingQuizzes: false,
+  currentQuiz: null,
+  isFetchingCurrentQuiz: false,
+  isSubmittingQuiz: false,
+  quizSubmitError: null,
+
+  // Specific error states for isolation
+  myAttendanceError: null,
 };
 
 // Slice
@@ -353,6 +432,7 @@ const studentDashboardSlice = createSlice({
         state.liveSchedule = action.payload.live_schedule || [];
         state.enrolledCourses = action.payload.enrolled_courses || [];
         state.assignments = action.payload.assignments || [];
+        state.quizzes = action.payload.quizzes || [];
         state.lastFetched = new Date().toISOString();
       })
       .addCase(fetchStudentDashboard.rejected, (state, action) => {
@@ -371,7 +451,31 @@ const studentDashboardSlice = createSlice({
       })
       .addCase(joinLiveSession.rejected, (state, action) => {
         state.isJoiningSession = false;
-        state.error = action.payload;
+        // Don't set global error, let component handle it via toast
+      })
+
+      // Start Student Session
+      .addCase(startStudentSession.pending, (state) => {
+        state.isJoiningSession = true;
+      })
+      .addCase(startStudentSession.fulfilled, (state) => {
+        state.isJoiningSession = false;
+      })
+      .addCase(startStudentSession.rejected, (state, action) => {
+        state.isJoiningSession = false;
+        // Handled via toast in component
+      })
+
+      // End Student Session
+      .addCase(endStudentSession.pending, (state) => {
+        state.isJoiningSession = true;
+      })
+      .addCase(endStudentSession.fulfilled, (state) => {
+        state.isJoiningSession = false;
+      })
+      .addCase(endStudentSession.rejected, (state, action) => {
+        state.isJoiningSession = false;
+        // Handled via toast in component
       })
 
       // Submit Assignment
@@ -565,16 +669,68 @@ const studentDashboardSlice = createSlice({
       // Fetch My Attendance
       .addCase(fetchMyAttendance.pending, (state) => {
         state.isFetchingMyAttendance = true;
-        state.error = null;
+        state.myAttendanceError = null;
       })
       .addCase(fetchMyAttendance.fulfilled, (state, action) => {
         state.isFetchingMyAttendance = false;
-        state.error = null;
+        state.myAttendanceError = null;
         state.myAttendance = action.payload.results || action.payload;
       })
       .addCase(fetchMyAttendance.rejected, (state, action) => {
         state.isFetchingMyAttendance = false;
-        state.error = action.payload;
+        state.myAttendanceError = action.payload;
+      })
+
+      // QUIZZES
+      .addCase(fetchStudentQuizzes.pending, (state) => {
+        state.isFetchingQuizzes = true;
+      })
+      .addCase(fetchStudentQuizzes.fulfilled, (state, action) => {
+        state.isFetchingQuizzes = false;
+        state.quizzes = Array.isArray(action.payload) ? action.payload : [];
+      })
+      .addCase(fetchStudentQuizzes.rejected, (state) => {
+        state.isFetchingQuizzes = false;
+      })
+      .addCase(fetchStudentQuizById.pending, (state) => {
+        state.isFetchingCurrentQuiz = true;
+        state.currentQuiz = null;
+      })
+      .addCase(fetchStudentQuizById.fulfilled, (state, action) => {
+        state.isFetchingCurrentQuiz = false;
+        state.currentQuiz = action.payload;
+      })
+      .addCase(fetchStudentQuizById.rejected, (state) => {
+        state.isFetchingCurrentQuiz = false;
+      })
+      .addCase(submitStudentQuiz.pending, (state) => {
+        state.isSubmittingQuiz = true;
+        state.quizSubmitError = null;
+      })
+      .addCase(submitStudentQuiz.fulfilled, (state, action) => {
+        state.isSubmittingQuiz = false;
+        if (state.currentQuiz) {
+          state.currentQuiz = {
+            ...state.currentQuiz,
+            my_submission: action.payload,
+          };
+        }
+      })
+      .addCase(submitStudentQuiz.rejected, (state, action) => {
+        state.isSubmittingQuiz = false;
+        state.quizSubmitError = action.payload;
+      })
+
+      // Fetch My Enrollments
+      .addCase(fetchMyEnrollments.pending, (state) => {
+        state.myEnrollmentsLoading = true;
+      })
+      .addCase(fetchMyEnrollments.fulfilled, (state, action) => {
+        state.myEnrollmentsLoading = false;
+        state.myEnrollments = Array.isArray(action.payload) ? action.payload : [];
+      })
+      .addCase(fetchMyEnrollments.rejected, (state) => {
+        state.myEnrollmentsLoading = false;
       })
 
       // Handle logout - clear all student-specific data
@@ -603,6 +759,8 @@ const studentDashboardSlice = createSlice({
         state.isFetchingMyAttendance = false;
         state.enrollingCourseIds = [];
         state.unenrollingCourseIds = [];
+        state.myEnrollments = [];
+        state.myEnrollmentsLoading = false;
       });
   },
 });
@@ -618,6 +776,7 @@ export const selectLiveSchedule = (state) =>
 export const selectEnrolledCourses = (state) =>
   state.studentDashboard.enrolledCourses;
 export const selectAssignments = (state) => state.studentDashboard.assignments;
+export const selectDashboardQuizzes = (state) => state.studentDashboard.quizzes;
 export const selectGrades = (state) => state.studentDashboard.grades;
 export const selectSubmissions = (state) => state.studentDashboard.submissions;
 export const selectSessions = (state) => state.studentDashboard.sessions;
@@ -639,8 +798,14 @@ export const selectAttendanceLoading = (state) =>
   state.studentDashboard.isFetchingAttendance;
 export const selectMyAttendance = (state) =>
   state.studentDashboard.myAttendance;
-export const selectMyAttendanceLoading = (state) =>
-  state.studentDashboard.isFetchingMyAttendance;
+export const selectMyAttendanceLoading = (state) => state.studentDashboard.isFetchingMyAttendance;
+export const selectMyAttendanceError = (state) => state.studentDashboard.myAttendanceError;
+export const selectMyEnrollments = (state) => state.studentDashboard.myEnrollments;
+export const selectMyEnrollmentsLoading = (state) => state.studentDashboard.myEnrollmentsLoading;
+export const selectPendingEnrollments = (state) =>
+  (state.studentDashboard.myEnrollments || []).filter((e) => e.status === "pending");
+export const selectRejectedEnrollments = (state) =>
+  (state.studentDashboard.myEnrollments || []).filter((e) => e.status === "rejected");
 
 // Filtered selectors
 export const selectFilteredAssignments = createSelector(

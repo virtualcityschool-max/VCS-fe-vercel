@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Button, Input, PasswordValidation, PasswordInput } from "../ui";
+import { Button, Input, PasswordValidation, PasswordInput, FilterSelect } from "../ui";
 import { validateEmail, validatePassword } from "../../utils/validation";
 import { useFieldErrors } from "../../hooks";
 
@@ -180,7 +180,7 @@ const UserAccountTab = ({ user, onUpdate, onCancel, onSaved }) => {
               <label className="block text-sm font-medium text-slate-300 mb-2">
                 Role
               </label>
-              <select
+              <FilterSelect
                 value={formData.role}
                 onChange={(e) => handleInputChange("role", e.target.value)}
                 className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -189,7 +189,7 @@ const UserAccountTab = ({ user, onUpdate, onCancel, onSaved }) => {
                 <option value="teacher">Teacher</option>
                 <option value="parent">Parent</option>
                 <option value="admin">Admin</option>
-              </select>
+              </FilterSelect>
             </div>
 
             <div>

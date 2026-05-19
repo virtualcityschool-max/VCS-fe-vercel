@@ -5,7 +5,7 @@ import { logoutUser } from "../../store/slices/authSlice";
 import { ROLES, ROUTES } from "../../constants";
 import { toastManager } from "../../utils/toastManager";
 
-const UserProfileDropdown = () => {
+const UserProfileDropdown = ({ dropUp = false, isCollapsed = false }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
   const dispatch = useDispatch();
@@ -42,18 +42,11 @@ const UserProfileDropdown = () => {
   const handleSignOut = async () => {
     setIsDropdownOpen(false);
 
-    const toastId = toastManager.loading("Signing out...");
+    // const toastId = toastManager.loading("Signing out...");
 
     try {
       const result = await dispatch(logoutUser()).unwrap();
-      toastManager.dismiss(toastId);
-
-      // Show appropriate message based on backend logout success
-      if (result.backendLogoutSuccess) {
-        toastManager.success("Logged out successfully");
-      } else {
-        toastManager.info("Logged out locally (backend unavailable)");
-      }
+      // toastManager.dismiss(toastId);
 
       // Always navigate to home regardless of backend success
       navigate("/");
@@ -75,8 +68,7 @@ const UserProfileDropdown = () => {
 
   const handleProfile = () => {
     setIsDropdownOpen(false);
-    // Navigate to profile page when implemented
-    toastManager.success("Profile page coming soon!");
+    navigate("/profile");
   };
 
   // Close dropdown when clicking outside
@@ -96,22 +88,26 @@ const UserProfileDropdown = () => {
       {/* Profile Button */}
       <button
         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-        className="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-800/50 transition-all duration-200 group"
+        className={`flex items-center gap-3 p-2 rounded-xl hover:bg-slate-800/50 transition-all duration-200 group ${
+          dropUp && !isCollapsed ? "w-full" : isCollapsed ? "justify-center w-full px-0" : ""
+        }`}
         aria-label="User menu"
         aria-expanded={isDropdownOpen}
       >
-        {/* User Info */}
-        <div className="text-right hidden sm:block">
-          <p className="text-sm font-semibold text-white leading-none mb-1">
-            {auth.username || "User"}
-          </p>
-          <p className="text-xs text-indigo-400 font-medium uppercase tracking-wider leading-none">
-            {getRoleLabel()}
-          </p>
-        </div>
+        {/* User Info — hidden when collapsed */}
+        {!isCollapsed && (
+          <div className={`min-w-0 ${dropUp ? "text-left flex-1" : "text-right hidden sm:block"}`}>
+            <p className="text-sm font-semibold text-white leading-none mb-1 truncate">
+              {auth.username || "User"}
+            </p>
+            <p className="text-xs text-indigo-400 font-medium uppercase tracking-wider leading-none truncate">
+              {getRoleLabel()}
+            </p>
+          </div>
+        )}
 
         {/* Circular Avatar */}
-        <div className="relative">
+        <div className="relative flex-shrink-0">
           <div className="w-10 h-10 rounded-full bg-linear-to-br from-indigo-500 to-purple-600 p-0.5 group-hover:from-indigo-400 group-hover:to-purple-500 transition-all duration-200 shadow-lg group-hover:shadow-indigo-500/25">
             <div className="w-full h-full rounded-full bg-slate-900 flex items-center justify-center overflow-hidden">
               {auth.user?.avatar ? (
@@ -131,27 +127,35 @@ const UserProfileDropdown = () => {
           <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-slate-900"></div>
         </div>
 
-        {/* Dropdown Arrow */}
-        <svg
-          className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
-            isDropdownOpen ? "rotate-180" : ""
-          }`}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M19 9l-7 7-7-7"
-          />
-        </svg>
+        {/* Dropdown Arrow — hidden when collapsed */}
+        {!isCollapsed && (
+          <svg
+            className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
+              isDropdownOpen ? "rotate-180" : ""
+            }`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+        )}
       </button>
 
       {/* Dropdown Menu */}
       {isDropdownOpen && (
-        <div className="absolute right-0 mt-2 w-64 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl overflow-hidden z-50 animate-fadeIn">
+        <div className={`absolute ${
+          isCollapsed
+            ? "bottom-0 left-[calc(100%+12px)]"
+            : dropUp
+            ? "bottom-full mb-2 left-0"
+            : "right-0 mt-2"
+        } w-64 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl overflow-hidden z-[300] animate-fadeIn`}>
           {/* User Info Header */}
           <div className="p-4 border-b border-slate-700 bg-linear-to-r from-slate-800 to-slate-900">
             <div className="flex items-center gap-3">
@@ -174,8 +178,8 @@ const UserProfileDropdown = () => {
                 <p className="text-sm font-semibold text-white truncate">
                   {auth.username || "User"}
                 </p>
-                <p className="text-xs text-slate-400">{auth.user?.email}</p>
-                <p className="text-xs text-indigo-400 font-medium uppercase tracking-wider mt-1">
+                <p className="text-xs text-slate-400 truncate">{auth.user?.email}</p>
+                <p className="text-xs text-indigo-400 font-medium uppercase tracking-wider mt-1 truncate">
                   {getRoleLabel()}
                 </p>
               </div>
@@ -184,7 +188,7 @@ const UserProfileDropdown = () => {
 
           {/* Menu Items */}
           <div className="py-2">
-            <button
+            {/* <button
               onClick={handleDashboard}
               className="w-full px-4 py-3 text-left text-sm text-slate-300 hover:bg-slate-800 hover:text-white transition-colors duration-150 flex items-center gap-3"
             >
@@ -202,8 +206,21 @@ const UserProfileDropdown = () => {
                 />
               </svg>
               Dashboard
+            </button> */}
+            {/* <button
+              onClick={() => { setIsDropdownOpen(false); navigate("/teachers"); }}
+              className="w-full px-4 py-3 text-left text-sm text-slate-300 hover:bg-slate-800 hover:text-white transition-colors duration-150 flex items-center gap-3"
+            >
+              <i className="fas fa-user-graduate"></i>
+              Teachers
             </button>
-
+            <button
+              onClick={() => { setIsDropdownOpen(false); navigate("/courses"); }}
+              className="w-full px-4 py-3 text-left text-sm text-slate-300 hover:bg-slate-800 hover:text-white transition-colors duration-150 flex items-center gap-3"
+            >
+              <i className="fas fa-book-open"></i>
+              Courses
+            </button> */}
             <button
               onClick={handleProfile}
               className="w-full px-4 py-3 text-left text-sm text-slate-300 hover:bg-slate-800 hover:text-white transition-colors duration-150 flex items-center gap-3"
@@ -246,6 +263,7 @@ const UserProfileDropdown = () => {
               Sign Out
             </button>
           </div>
+
         </div>
       )}
     </div>

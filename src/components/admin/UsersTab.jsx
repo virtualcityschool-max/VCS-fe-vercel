@@ -1,6 +1,13 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, Input, Card } from "../../components/ui";
+import {
+  Button,
+  Input,
+  Card,
+  FilterSelect,
+  SearchInput,
+} from "../../components/ui";
+import ConfirmDialog from "../common/ConfirmDialog";
 
 // Search controls component
 const SearchControls = ({
@@ -14,10 +21,10 @@ const SearchControls = ({
 }) => {
   const roleTabs = [
     { value: "", label: "All" },
-    { value: "admin", label: "Admin" },
-    { value: "teacher", label: "Teacher" },
-    { value: "student", label: "Student" },
-    { value: "parent", label: "Parent" },
+    { value: "admin", label: "Admin(s)" },
+    { value: "teacher", label: "Teacher(s)" },
+    { value: "student", label: "Student(s)" },
+    { value: "parent", label: "Parent(s)" },
   ];
 
   // Check if any filters are applied
@@ -29,19 +36,20 @@ const SearchControls = ({
   );
 
   return (
-    <div className="mb-6 space-y-3">
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
-        <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-1 flex flex-wrap items-center gap-1 w-fit">
+    <div className="mb-6 space-y-4">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        {/* Role tab pills */}
+        <div className="bg-slate-900/60 border border-slate-800/80 rounded-xl p-1 flex items-center gap-1 w-full lg:w-fit overflow-x-auto no-scrollbar shrink-0">
           {roleTabs.map((tab) => {
             const isActive = usersFilters.role === tab.value;
             return (
               <button
                 key={tab.label}
                 onClick={() => handleFilterChange("role", tab.value)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${
+                className={`px-3.5 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all duration-200 whitespace-nowrap ${
                   isActive
-                    ? "bg-indigo-600 text-white shadow-md"
-                    : "text-slate-300 hover:text-white hover:bg-slate-800/70"
+                    ? "bg-indigo-600 text-white shadow-md shadow-indigo-500/20"
+                    : "text-slate-500 hover:text-white hover:bg-slate-800"
                 }`}
               >
                 {tab.label}
@@ -50,70 +58,70 @@ const SearchControls = ({
           })}
         </div>
 
-        <div className="flex flex-col lg:flex-row lg:items-center gap-3 lg:gap-4 w-full lg:w-auto max-w-2xl lg:max-w-none">
-          <div className="relative flex-1 lg:flex-initial min-w-0">
-            <Input
-              type="text"
-              placeholder="Search by username or email..."
+        {/* Filter Controls Group */}
+        <div className="flex flex-wrap lg:flex-nowrap items-center gap-1.5 flex-1 lg:justify-end">
+          <div className="min-w-[130px] flex-1 lg:flex-none lg:w-40">
+            <SearchInput
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              className="pl-10 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full lg:w-64"
+              onClear={() => setSearchInput("")}
+              placeholder="Search users..."
+              className="w-full"
             />
-            <i className="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
           </div>
-          <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
-            <select
+
+          <div className="flex items-center gap-1.5 flex-1 sm:flex-none">
+            <FilterSelect
+              style={{ minWidth: "100px" }}
+              className="flex-1 sm:flex-none"
               value={usersFilters.is_active}
               onChange={(e) => handleFilterChange("is_active", e.target.value)}
-              className="px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
-              <option value="">All Statuses</option>
+              <option value="">Statuses</option>
               <option value="true">Active</option>
               <option value="false">Inactive</option>
-            </select>
-            <select
+            </FilterSelect>
+
+            <FilterSelect
+              style={{ minWidth: "110px" }}
+              className="flex-1 sm:flex-none"
               value={usersFilters.ordering}
               onChange={(e) => handleFilterChange("ordering", e.target.value)}
-              className="px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
-              <option value="-date_joined">Newest First</option>
-              <option value="date_joined">Oldest First</option>
-              <option value="username">Username A-Z</option>
-              <option value="-username">Username Z-A</option>
-            </select>
+              <option value="-date_joined">Newest</option>
+              <option value="date_joined">Oldest</option>
+              <option value="username">A–Z</option>
+            </FilterSelect>
+          </div>
+
+          <div className="flex items-center gap-1.5">
             {hasActiveFilters && (
               <button
                 onClick={onClearFilters}
-                className="bg-orange-600 hover:bg-orange-500 text-white px-3 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2"
                 title="Clear all filters"
+                className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-slate-700/70 bg-slate-900 hover:bg-rose-500/10 hover:border-rose-500/40 text-slate-400 hover:text-rose-400 text-sm font-medium transition-all duration-150"
               >
-                <i className="fas fa-times"></i>
+                <i className="fas fa-times text-xs"></i>
                 <span className="hidden sm:inline">Clear</span>
               </button>
             )}
-            <button
-              onClick={() => onFetchUsers()}
-              className="bg-slate-700 hover:bg-slate-600 text-white px-3 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 sm:hidden"
-            >
-              <i className="fas fa-sync"></i>
-              <span className="ml-2">Refresh</span>
-            </button>
+
             <button
               onClick={handleCreateUser}
-              className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-lg active:scale-95 transition items-center justify-center gap-2"
+              className="h-[40px] px-5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-indigo-600/20 active:scale-95 transition-all flex items-center justify-center gap-2 whitespace-nowrap shrink-0"
             >
-              <i className="fas fa-user-plus text-sm"></i>
-              <span className="hidden sm:inline ml-2">Create User</span>
-              <span className="sm:hidden">+</span>
+              <i className="fas fa-user-plus text-[10px]" />
+              <span>Create User</span>
+            </button>
+            <button
+              onClick={() => onFetchUsers()}
+              className="text-white px-5 py-3 rounded-xl text-sm font-medium shadow-lg active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500"
+              title="Refresh"
+            >
+              <i className="fas fa-sync text-xs"></i>
+              <span className="hidden sm:inline">Refresh</span>
             </button>
           </div>
-          <button
-            onClick={() => onFetchUsers()}
-            className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 sm:flex"
-          >
-            <i className="fas fa-sync"></i>
-            <span className="ml-2">Refresh</span>
-          </button>
         </div>
       </div>
 
@@ -150,10 +158,19 @@ const UsersTab = ({
   usersFilters,
   setUsersFilters,
   onUserDelete,
+  onUserPurge,
   onFetchUsers,
+  onUserEdit,
   onCreateUser,
 }) => {
   const navigate = useNavigate();
+  const [confirmDialog, setConfirmDialog] = useState({
+    open: false,
+    userId: null,
+    isActive: false,
+    user: null,
+  });
+  const [purgeDialog, setPurgeDialog] = useState({ open: false, userId: null });
   // Debounced search handler - use controlled pattern
   const [localSearchInput, setLocalSearchInput] = useState(
     usersFilters.search || "",
@@ -199,18 +216,47 @@ const UsersTab = ({
     },
     [setUsersFilters],
   );
-  const handleDeleteUser = async (userId) => {
-    if (window.confirm("Are you sure you want to delete this user?")) {
-      try {
-        await onUserDelete(userId);
-      } catch (error) {
-        console.error("Failed to delete user:", error);
-      }
+  const handleDeleteUser = (user) => {
+    setConfirmDialog({
+      open: true,
+      userId: user.id,
+      isActive: user.is_active,
+      user,
+    });
+  };
+
+  const confirmDeleteUser = async () => {
+    const { userId, user } = confirmDialog;
+    setConfirmDialog({
+      open: false,
+      userId: null,
+      isActive: false,
+      user: null,
+    });
+    try {
+      await onUserDelete(userId, user);
+    } catch (error) {
+      console.error("Failed to toggle user status:", error);
+    }
+  };
+
+  const handlePurgeUser = (userId) => {
+    setPurgeDialog({ open: true, userId });
+  };
+
+  const confirmPurgeUser = async () => {
+    const { userId } = purgeDialog;
+    setPurgeDialog({ open: false, userId: null });
+    try {
+      await onUserPurge(userId);
+    } catch (error) {
+      console.error("Failed to purge user:", error);
     }
   };
 
   const handleEditUser = (userId) => {
-    navigate(`/admin/users/${userId}`);
+    if (onUserEdit) onUserEdit(userId);
+    else navigate(`/admin/users/${userId}`);
   };
 
   const handleCreateUser = () => {
@@ -360,12 +406,28 @@ const UsersTab = ({
                         onClick={() => handleEditUser(user.id)}
                         className="bg-slate-700/50 text-slate-300 px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium hover:bg-slate-600/50 transition flex items-center gap-1 flex-1 justify-center"
                       >
-                        <i className="fas fa-eye"></i>
-                        <span className="hidden sm:inline">View</span>
+                        <i className="fas fa-edit"></i>
+                        <span className="hidden sm:inline">Edit</span>
                       </button>
                       <button
-                        onClick={() => handleDeleteUser(user.id)}
-                        className="bg-red-600/10 text-red-400 px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium hover:bg-red-600/20 transition flex items-center gap-1 flex-1 justify-center"
+                        onClick={() => handleDeleteUser(user)}
+                        className={`px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition flex items-center gap-1 flex-1 justify-center ${
+                          user.is_active
+                            ? "bg-amber-600/10 text-amber-400 hover:bg-amber-600/20"
+                            : "bg-emerald-600/10 text-emerald-400 hover:bg-emerald-600/20"
+                        }`}
+                      >
+                        <i
+                          className={`fas ${user.is_active ? "fa-ban" : "fa-check-circle"}`}
+                        ></i>
+                        <span className="hidden sm:inline">
+                          {user.is_active ? "Deactivate" : "Activate"}
+                        </span>
+                      </button>
+                      <button
+                        onClick={() => handlePurgeUser(user.id)}
+                        className="bg-red-900/20 text-red-400 px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium hover:bg-red-900/40 transition flex items-center gap-1 flex-1 justify-center"
+                        title="Permanently delete"
                       >
                         <i className="fas fa-trash"></i>
                         <span className="hidden sm:inline">Delete</span>
@@ -445,12 +507,27 @@ const UsersTab = ({
                             onClick={() => handleEditUser(user.id)}
                             className="bg-slate-700/50 text-slate-300 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-slate-600/50 transition"
                           >
-                            <i className="fas fa-eye mr-1"></i>
-                            View
+                            <i className="fas fa-edit mr-1"></i>
+                            Edit
                           </button>
                           <button
-                            onClick={() => handleDeleteUser(user.id)}
-                            className="bg-red-600/10 text-red-400 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-red-600/20 transition"
+                            onClick={() => handleDeleteUser(user)}
+                            style={{ minWidth: "100px" }}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition text-center ${
+                              user.is_active
+                                ? "bg-amber-600/10 text-amber-400 hover:bg-amber-600/20"
+                                : "bg-emerald-600/10 text-emerald-400 hover:bg-emerald-600/20"
+                            }`}
+                          >
+                            <i
+                              className={`fas ${user.is_active ? "fa-ban" : "fa-check-circle"} mr-1`}
+                            ></i>
+                            {user.is_active ? "Deactivate" : "Activate"}
+                          </button>
+                          <button
+                            onClick={() => handlePurgeUser(user.id)}
+                            className="bg-red-900/20 text-red-400 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-red-900/40 transition"
+                            title="Permanently delete"
                           >
                             <i className="fas fa-trash mr-1"></i>
                             Delete
@@ -465,6 +542,39 @@ const UsersTab = ({
           </div>
         </>
       )}
+
+      <ConfirmDialog
+        open={confirmDialog.open}
+        variant={confirmDialog.isActive ? "warning" : "success"}
+        title={confirmDialog.isActive ? "Deactivate User" : "Activate User"}
+        message={
+          confirmDialog.isActive
+            ? "Are you sure you want to deactivate this user? They will lose access to the platform."
+            : "Are you sure you want to activate this user? They will regain access to the platform."
+        }
+        confirmLabel={confirmDialog.isActive ? "Deactivate" : "Activate"}
+        cancelLabel="Cancel"
+        onConfirm={confirmDeleteUser}
+        onCancel={() =>
+          setConfirmDialog({
+            open: false,
+            userId: null,
+            isActive: false,
+            user: null,
+          })
+        }
+      />
+
+      <ConfirmDialog
+        open={purgeDialog.open}
+        variant="danger"
+        title="Delete User Permanently"
+        message="This will permanently remove the user record and cannot be undone. This action is irreversible."
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        onConfirm={confirmPurgeUser}
+        onCancel={() => setPurgeDialog({ open: false, userId: null })}
+      />
     </div>
   );
 };

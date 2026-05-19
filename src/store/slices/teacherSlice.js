@@ -8,11 +8,7 @@ export const fetchTeachers = createAsyncThunk(
       const data = await teacherService.getTeachers(params);
       return data;
     } catch (error) {
-      return rejectWithValue(
-        error?.response?.data?.error ||
-          error?.message ||
-          "Failed to fetch teachers",
-      );
+      return rejectWithValue(error);
     }
   },
 );
@@ -29,11 +25,7 @@ export const fetchTeacherById = createAsyncThunk(
       const data = await teacherService.getTeacherById(id);
       return data;
     } catch (error) {
-      return rejectWithValue(
-        error?.response?.data?.error ||
-          error?.message ||
-          "Failed to fetch teacher",
-      );
+      return rejectWithValue(error);
     }
   },
 );
@@ -45,11 +37,7 @@ export const fetchTeacherDashboard = createAsyncThunk(
       const data = await teacherService.getTeacherDashboard();
       return data;
     } catch (error) {
-      return rejectWithValue(
-        error?.response?.data?.error ||
-          error?.message ||
-          "Failed to fetch dashboard",
-      );
+      return rejectWithValue(error);
     }
   },
 );
@@ -61,11 +49,7 @@ export const fetchMyCourses = createAsyncThunk(
       const data = await teacherService.getMyCourses();
       return data;
     } catch (error) {
-      return rejectWithValue(
-        error?.response?.data?.error ||
-          error?.message ||
-          "Failed to fetch courses",
-      );
+      return rejectWithValue(error);
     }
   },
 );
@@ -77,11 +61,7 @@ export const fetchAssignments = createAsyncThunk(
       const data = await teacherService.getAssignments(params);
       return data;
     } catch (error) {
-      return rejectWithValue(
-        error?.response?.data?.error ||
-          error?.message ||
-          "Failed to fetch assignments",
-      );
+      return rejectWithValue(error);
     }
   },
 );
@@ -92,7 +72,42 @@ export const createAssignment = createAsyncThunk(
     try {
       return await teacherService.createAssignment(payload);
     } catch (err) {
-      return rejectWithValue(err?.message || "Failed to create");
+      return rejectWithValue(err);
+    }
+  },
+);
+
+export const updateAssignment = createAsyncThunk(
+  "teachers/updateAssignment",
+  async ({ id, data }, { rejectWithValue }) => {
+    try {
+      return await teacherService.updateAssignment(id, data);
+    } catch (err) {
+      return rejectWithValue(err);
+    }
+  },
+);
+
+export const deleteAssignment = createAsyncThunk(
+  "teachers/deleteAssignment",
+  async (id, { rejectWithValue }) => {
+    try {
+      await teacherService.deleteAssignment(id);
+      return id;
+    } catch (err) {
+      return rejectWithValue(err);
+    }
+  },
+);
+
+export const fetchAllSubmissions = createAsyncThunk(
+  "teachers/fetchAllSubmissions",
+  async (params = {}, { rejectWithValue }) => {
+    try {
+      const data = await teacherService.getAllSubmissions(params);
+      return data;
+    } catch (error) {
+      return rejectWithValue(error);
     }
   },
 );
@@ -104,9 +119,7 @@ export const fetchSubmissions = createAsyncThunk(
       const data = await teacherService.getSubmissions(assignmentId);
       return data;
     } catch (error) {
-      return rejectWithValue(
-        error?.response?.data?.error || "Failed to fetch submissions",
-      );
+      return rejectWithValue(error);
     }
   },
 );
@@ -118,7 +131,7 @@ export const gradeSubmission = createAsyncThunk(
       const result = await teacherService.gradeSubmission(submissionId, data);
       return { submissionId, grade: result };
     } catch (err) {
-      return rejectWithValue(err?.message || "Failed to grade");
+      return rejectWithValue(err);
     }
   },
 );
@@ -133,9 +146,7 @@ export const updateSubmissionsGrade = createAsyncThunk(
       );
       return { submissionId, grade: result };
     } catch (err) {
-      return rejectWithValue(
-        err?.message || "Failed to update submissions grade",
-      );
+      return rejectWithValue(err);
     }
   },
 );
@@ -147,27 +158,97 @@ export const fetchSubmissionById = createAsyncThunk(
       const data = await teacherService.getSubmissionById(submissionId);
       return data;
     } catch (error) {
-      return rejectWithValue(
-        error?.response?.data?.error ||
-          error?.message ||
-          "Failed to fetch submission details",
-      );
+      return rejectWithValue(error);
+    }
+  },
+);
+
+export const fetchQuizzes = createAsyncThunk(
+  "teachers/fetchQuizzes",
+  async (params = {}, { rejectWithValue }) => {
+    try {
+      return await teacherService.getQuizzes(params);
+    } catch (err) {
+      return rejectWithValue(err);
+    }
+  },
+);
+
+export const createQuiz = createAsyncThunk(
+  "teachers/createQuiz",
+  async (data, { rejectWithValue }) => {
+    try {
+      return await teacherService.createQuiz(data);
+    } catch (err) {
+      return rejectWithValue(err);
+    }
+  },
+);
+
+export const updateQuiz = createAsyncThunk(
+  "teachers/updateQuiz",
+  async ({ id, data }, { rejectWithValue }) => {
+    try {
+      return await teacherService.updateQuiz(id, data);
+    } catch (err) {
+      return rejectWithValue(err);
+    }
+  },
+);
+
+export const deleteQuiz = createAsyncThunk(
+  "teachers/deleteQuiz",
+  async (id, { rejectWithValue }) => {
+    try {
+      await teacherService.deleteQuiz(id);
+      return id;
+    } catch (err) {
+      return rejectWithValue(err);
+    }
+  },
+);
+
+export const fetchQuizSubmissions = createAsyncThunk(
+  "teachers/fetchQuizSubmissions",
+  async (quizId, { rejectWithValue }) => {
+    try {
+      return await teacherService.getQuizSubmissions(quizId);
+    } catch (err) {
+      return rejectWithValue(err);
+    }
+  },
+);
+
+export const fetchQuizSubmissionById = createAsyncThunk(
+  "teachers/fetchQuizSubmissionById",
+  async (submissionId, { rejectWithValue }) => {
+    try {
+      return await teacherService.getQuizSubmissionById(submissionId);
+    } catch (err) {
+      return rejectWithValue(err);
+    }
+  },
+);
+
+export const gradeQuizTextAnswers = createAsyncThunk(
+  "teachers/gradeQuizTextAnswers",
+  async ({ submissionId, grades }, { rejectWithValue }) => {
+    try {
+      return await teacherService.gradeQuizSubmission(submissionId, grades);
+    } catch (err) {
+      return rejectWithValue(err);
     }
   },
 );
 
 export const fetchTeacherSessions = createAsyncThunk(
   "teachers/fetchTeacherSessions",
-  async (_, { rejectWithValue }) => {
+  async (params = {}, { rejectWithValue }) => {
     try {
-      const data = await teacherService.getTeacherSessions();
+      const data = await teacherService.getTeacherSessions(params);
       return data;
     } catch (error) {
-      return rejectWithValue(
-        error?.response?.data?.error ||
-          error?.message ||
-          "Failed to fetch sessions",
-      );
+      return rejectWithValue(error);
     }
   },
 );
@@ -179,11 +260,7 @@ export const fetchSessionAttendance = createAsyncThunk(
       const data = await teacherService.getSessionAttendance(sessionId);
       return data;
     } catch (error) {
-      return rejectWithValue(
-        error?.response?.data?.error ||
-          error?.message ||
-          "Failed to fetch attendance",
-      );
+      return rejectWithValue(error);
     }
   },
 );
@@ -199,11 +276,7 @@ export const updateSessionAttendance = createAsyncThunk(
       );
       return { attendanceId, data: result };
     } catch (error) {
-      return rejectWithValue(
-        error?.response?.data?.error ||
-          error?.message ||
-          "Failed to update attendance",
-      );
+      return rejectWithValue(error);
     }
   },
 );
@@ -215,11 +288,7 @@ export const joinLiveSession = createAsyncThunk(
       const result = await teacherService.joinLiveSession(sessionId);
       return result;
     } catch (error) {
-      return rejectWithValue(
-        error?.response?.data?.error ||
-          error?.message ||
-          "Failed to join live session",
-      );
+      return rejectWithValue(error);
     }
   },
 );
@@ -230,11 +299,40 @@ export const startLiveSession = createAsyncThunk(
     try {
       return await teacherService.startSession(sessionId);
     } catch (error) {
-      return rejectWithValue(
-        error?.response?.data?.error ||
-          error?.message ||
-          "Failed to start session",
-      );
+      return rejectWithValue(error);
+    }
+  },
+);
+
+export const fetchAllAttendance = createAsyncThunk(
+  "teachers/fetchAllAttendance",
+  async (params = {}, { rejectWithValue }) => {
+    try {
+      return await teacherService.getAllAttendance(params);
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  },
+);
+
+export const bulkMarkAttendance = createAsyncThunk(
+  "teachers/bulkMarkAttendance",
+  async ({ sessionId, records }, { rejectWithValue }) => {
+    try {
+      return await teacherService.bulkMarkAttendance(sessionId, records);
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  },
+);
+
+export const updateStudentAttendance = createAsyncThunk(
+  "teachers/updateStudentAttendance",
+  async ({ sessionId, studentId, data }, { rejectWithValue }) => {
+    try {
+      return await teacherService.updateStudentAttendance(sessionId, studentId, data);
+    } catch (error) {
+      return rejectWithValue(error);
     }
   },
 );
@@ -245,11 +343,7 @@ export const endLiveSession = createAsyncThunk(
     try {
       return await teacherService.endSession(sessionId);
     } catch (error) {
-      return rejectWithValue(
-        error?.response?.data?.error ||
-          error?.message ||
-          "Failed to end session",
-      );
+      return rejectWithValue(error);
     }
   },
 );
@@ -278,6 +372,16 @@ const initialState = {
   errorAssignments: null,
   errorCreateAssignment: null,
 
+  allSubmissions: [],
+  loadingAllSubmissions: false,
+  errorAllSubmissions: null,
+
+  allAttendance: [],
+  loadingAllAttendance: false,
+  errorAllAttendance: null,
+  markingBulkAttendance: false,
+  patchingStudentAttendance: false,
+
   submissions: [],
   loadingSubmissions: false,
   errorSubmissions: null,
@@ -301,12 +405,31 @@ const initialState = {
   // session joining state
   isJoiningSession: false,
   joiningSessionError: null,
+
+  // quiz state
+  quizzes: [],
+  loadingQuizzes: false,
+  errorQuizzes: null,
+  quizSubmissions: [],
+  loadingQuizSubmissions: false,
+  selectedQuizSubmission: null,
+  loadingSelectedQuizSubmission: false,
+  errorSelectedQuizSubmission: null,
 };
 
 const teacherSlice = createSlice({
   name: "teachers",
   initialState,
-  reducers: {},
+  reducers: {
+    clearSelectedSubmission(state) {
+      state.selectedSubmission = null;
+      state.loadingSelectedSubmission = false;
+    },
+    clearSelectedQuizSubmission(state) {
+      state.selectedQuizSubmission = null;
+      state.loadingSelectedQuizSubmission = false;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchTeachers.pending, (state) => {
@@ -355,7 +478,13 @@ const teacherSlice = createSlice({
       })
       .addCase(fetchMyCourses.fulfilled, (state, action) => {
         state.loadingCourses = false;
-        state.myCourses = Array.isArray(action.payload) ? action.payload : [];
+        const raw = Array.isArray(action.payload) ? action.payload : [];
+        state.myCourses = raw.map((c) => ({
+          ...c,
+          category: typeof c.category === "object" && c.category !== null
+            ? c.category.name ?? null
+            : c.category ?? null,
+        }));
       })
       .addCase(fetchMyCourses.rejected, (state, action) => {
         state.loadingCourses = false;
@@ -388,6 +517,32 @@ const teacherSlice = createSlice({
       .addCase(createAssignment.rejected, (state, action) => {
         state.loadingCreateAssignment = false;
         state.errorCreateAssignment = action.payload;
+      })
+
+      // UPDATE ASSIGNMENT
+      .addCase(updateAssignment.fulfilled, (state, action) => {
+        state.assignments = state.assignments.map((a) =>
+          a.id === action.payload.id ? action.payload : a
+        );
+      })
+
+      // DELETE ASSIGNMENT
+      .addCase(deleteAssignment.fulfilled, (state, action) => {
+        state.assignments = state.assignments.filter((a) => a.id !== action.payload);
+      })
+
+      // ALL SUBMISSIONS
+      .addCase(fetchAllSubmissions.pending, (state) => {
+        state.loadingAllSubmissions = true;
+        state.errorAllSubmissions = null;
+      })
+      .addCase(fetchAllSubmissions.fulfilled, (state, action) => {
+        state.loadingAllSubmissions = false;
+        state.allSubmissions = Array.isArray(action.payload) ? action.payload : [];
+      })
+      .addCase(fetchAllSubmissions.rejected, (state, action) => {
+        state.loadingAllSubmissions = false;
+        state.errorAllSubmissions = action.payload;
       })
 
       // SUBMISSIONS
@@ -550,8 +705,106 @@ const teacherSlice = createSlice({
       .addCase(endLiveSession.rejected, (state, action) => {
         state.isJoiningSession = false;
         state.joiningSessionError = action.payload;
+      })
+
+      // FETCH ALL ATTENDANCE
+      .addCase(fetchAllAttendance.pending, (state) => {
+        state.loadingAllAttendance = true;
+        state.errorAllAttendance = null;
+      })
+      .addCase(fetchAllAttendance.fulfilled, (state, action) => {
+        state.loadingAllAttendance = false;
+        state.allAttendance = action.payload?.results ?? action.payload ?? [];
+      })
+      .addCase(fetchAllAttendance.rejected, (state, action) => {
+        state.loadingAllAttendance = false;
+        state.errorAllAttendance = action.payload;
+      })
+
+      // BULK MARK ATTENDANCE
+      .addCase(bulkMarkAttendance.pending, (state) => {
+        state.markingBulkAttendance = true;
+      })
+      .addCase(bulkMarkAttendance.fulfilled, (state) => {
+        state.markingBulkAttendance = false;
+      })
+      .addCase(bulkMarkAttendance.rejected, (state) => {
+        state.markingBulkAttendance = false;
+      })
+
+      // UPDATE STUDENT ATTENDANCE (PATCH)
+      .addCase(updateStudentAttendance.pending, (state) => {
+        state.patchingStudentAttendance = true;
+      })
+      .addCase(updateStudentAttendance.fulfilled, (state, action) => {
+        state.patchingStudentAttendance = false;
+        const updated = action.payload;
+        if (updated?.id) {
+          state.allAttendance = state.allAttendance.map((r) =>
+            r.id === updated.id ? { ...r, ...updated } : r
+          );
+        }
+      })
+      .addCase(updateStudentAttendance.rejected, (state) => {
+        state.patchingStudentAttendance = false;
+      })
+
+      // QUIZZES
+      .addCase(fetchQuizzes.pending, (state) => {
+        state.loadingQuizzes = true;
+        state.errorQuizzes = null;
+      })
+      .addCase(fetchQuizzes.fulfilled, (state, action) => {
+        state.loadingQuizzes = false;
+        state.quizzes = Array.isArray(action.payload) ? action.payload : [];
+      })
+      .addCase(fetchQuizzes.rejected, (state, action) => {
+        state.loadingQuizzes = false;
+        state.errorQuizzes = action.payload;
+      })
+      .addCase(createQuiz.fulfilled, (state, action) => {
+        state.quizzes.unshift(action.payload);
+      })
+      .addCase(updateQuiz.fulfilled, (state, action) => {
+        state.quizzes = state.quizzes.map((q) =>
+          q.id === action.payload.id ? action.payload : q
+        );
+      })
+      .addCase(deleteQuiz.fulfilled, (state, action) => {
+        state.quizzes = state.quizzes.filter((q) => q.id !== action.payload);
+      })
+      .addCase(fetchQuizSubmissions.pending, (state) => {
+        state.loadingQuizSubmissions = true;
+      })
+      .addCase(fetchQuizSubmissions.fulfilled, (state, action) => {
+        state.loadingQuizSubmissions = false;
+        state.quizSubmissions = Array.isArray(action.payload) ? action.payload : [];
+      })
+      .addCase(fetchQuizSubmissions.rejected, (state) => {
+        state.loadingQuizSubmissions = false;
+      })
+      .addCase(fetchQuizSubmissionById.pending, (state) => {
+        state.loadingSelectedQuizSubmission = true;
+        state.errorSelectedQuizSubmission = null;
+      })
+      .addCase(fetchQuizSubmissionById.fulfilled, (state, action) => {
+        state.loadingSelectedQuizSubmission = false;
+        state.selectedQuizSubmission = action.payload;
+      })
+      .addCase(fetchQuizSubmissionById.rejected, (state, action) => {
+        state.loadingSelectedQuizSubmission = false;
+        state.errorSelectedQuizSubmission = action.payload;
+      })
+      .addCase(gradeQuizTextAnswers.fulfilled, (state, action) => {
+        state.selectedQuizSubmission = action.payload;
+        if (action.payload?.id) {
+          state.quizSubmissions = state.quizSubmissions.map((s) =>
+            s.id === action.payload.id ? { ...s, status: action.payload.status, obtained_marks: action.payload.obtained_marks } : s
+          );
+        }
       });
   },
 });
 
+export const { clearSelectedSubmission, clearSelectedQuizSubmission } = teacherSlice.actions;
 export default teacherSlice.reducer;

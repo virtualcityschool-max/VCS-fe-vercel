@@ -2,9 +2,9 @@ import axiosInstance from "../utils/axiosInstance";
 
 export const coursesService = {
   // Get all courses
-  getAllCourses: async () => {
+  getAllCourses: async (params) => {
     try {
-      const response = await axiosInstance.get(`/courses/`);
+      const response = await axiosInstance.get(`/courses/`,{params});
       return response.data;
     } catch (error) {
       console.error("Get courses error:", {
@@ -12,6 +12,16 @@ export const coursesService = {
         data: error.response?.data,
         message: error.message,
       });
+      throw error;
+    }
+  },
+
+  // Get courses that have at least one session (for enrollment dropdown)
+  getCoursesWithSessions: async () => {
+    try {
+      const response = await axiosInstance.get(`/courses/`, { params: { has_session: true } });
+      return response.data;
+    } catch (error) {
       throw error;
     }
   },
@@ -112,6 +122,76 @@ export const coursesService = {
         data: error.response?.data,
         message: error.message,
       });
+      throw error;
+    }
+  },
+
+  // ── Course Categories ──────────────────────────────────────────
+  getCategories: async () => {
+    try {
+      const response = await axiosInstance.get("/courses/categories/");
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // send full desired list; backend creates/updates/deletes to match
+  syncCategories: async (list) => {
+    try {
+      const response = await axiosInstance.post("/courses/categories/sync/", list);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Get grading scale (public, no auth)
+  getGradingScale: async () => {
+    try {
+      const response = await axiosInstance.get("/courses/grading-scale/");
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Update grading scale (admin only, send only changed fields)
+  updateGradingScale: async (data) => {
+    try {
+      const response = await axiosInstance.patch("/courses/grading-scale/", data);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Get evaluations (teacher/admin)
+  getEvaluations: async (params = {}) => {
+    try {
+      const response = await axiosInstance.get("/courses/evaluations/", { params });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Get evaluations for the current user (student sees own; parent sees linked children)
+  getMyEvaluations: async (params = {}) => {
+    try {
+      const response = await axiosInstance.get("/courses/my-evaluation/", { params });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Get privately enrolled students for a course
+  getPrivateStudents: async (courseId) => {
+    try {
+      const response = await axiosInstance.get(`/courses/${courseId}/private-students/`);
+      return response.data;
+    } catch (error) {
       throw error;
     }
   },

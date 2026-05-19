@@ -1,20 +1,25 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { fetchAllCourses } from "../../store/slices/coursesSlice";
+import { fetchAllCourses, fetchCategories } from "../../store/slices/coursesSlice";
 import {
   enrollInCourseNormal,
   enrollInCoursePrivate,
   unenrollFromCourse,
   fetchStudentDashboard,
 } from "../../store/slices/studentDashboardSlice";
-import { Button, Input } from "../../components/ui";
+import { Button, Input, FilterSelect, SearchInput } from "../../components/ui";
 import { toastManager } from "../../utils/toastManager";
-import { BACKEND_CATEGORIES, formatCategoryLabel } from "../../constants";
+import { formatCategoryLabel } from "../../constants";
 import { useSubmissionGuard } from "../../utils/requestDeduplicator";
 import { getCourseImage } from "../../utils/courseImageUtils";
-import { setAuthModal } from "../../store/slices/uiSlice";
+import { setAuthModal, setEnrollmentIntent } from "../../store/slices/uiSlice";
 import EnrollmentTypeModal from "../../components/courses/EnrollmentTypeModal";
+import ConfirmDialog from "../../components/common/ConfirmDialog";
+import { showApiError } from "../../utils/apiErrorHandler";
+import { getStorageUrl } from "../../utils/storageUrl";
+import AuthRequiredModal from "../../components/common/AuthRequiredModal";
+import PublicCourseCard from "../../components/courses/PublicCourseCard";
 
 const Marketplace = () => {
   const dispatch = useDispatch();
@@ -25,6 +30,8 @@ const Marketplace = () => {
     instructor: "",
   });
   const [enrollmentModalOpen, setEnrollmentModalOpen] = useState(false);
+  const [paymentSubmitted, setPaymentSubmitted] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const submissionGuard = useSubmissionGuard();
 
@@ -32,59 +39,55 @@ const Marketplace = () => {
   const auth = useSelector((state) => state.auth);
 
   // Get courses data from Redux store
-  const { courses, isLoading, error } = useSelector((state) => state.courses);
+  const { courses, isLoading, error, categories } = useSelector((state) => state.courses);
 
   // Get student dashboard state for enrollment tracking
   const { enrollingCourseIds, unenrollingCourseIds, enrolledCourses } =
     useSelector((state) => state.studentDashboard);
 
-  // Fetch courses on component mount
-  useEffect(() => {
-    if (courses?.length <= 0) {
-      dispatch(fetchAllCourses());
-    }
+  const { enrollmentIntent } = useSelector((state) => state.ui);
 
-    // Fetch student dashboard if user is logged in as student
-    if (auth.isLoggedIn && auth.role === "student") {
-      dispatch(fetchStudentDashboard());
-    }
+  useEffect(() => {
+    if (courses?.length <= 0) dispatch(fetchAllCourses());
+    dispatch(fetchCategories());
+    if (auth.isLoggedIn && auth.role === "student") dispatch(fetchStudentDashboard());
   }, [dispatch, auth.isLoggedIn, auth.role]);
 
-  // Get unique values for filter options
+
+
   const filterOptions = useMemo(() => {
-    if (!courses || courses.length === 0) {
-      return {
-        categories: BACKEND_CATEGORIES,
-        instructors: [],
-        priceRanges: [
-          { value: "0-50", label: "Free - PKR 50" },
-          { value: "51-100", label: "PKR 51 - 100" },
-          { value: "101-500", label: "PKR 101 - 500" },
-          { value: "501-1000", label: "PKR 501 - 1000" },
-          { value: "1000+", label: "PKR 1000+" },
-        ],
-      };
-    }
-
-    // Use backend categories for consistency
-    const categories = BACKEND_CATEGORIES;
-
-    const instructors = [
+    const instructors = courses ? [
       ...new Set(
         courses.map((course) => course.instructor?.username).filter(Boolean),
       ),
-    ];
+    ] : [];
+
+    // Dynamic price ranges based on course prices
+    const prices = (courses || []).map((c) => parseFloat(c.price) || 0);
+    const maxPrice = Math.max(...prices, 0);
+    
+    let priceRanges = [];
+    if (maxPrice === 0) {
+      priceRanges = [{ value: "0-0", label: "Free" }];
+    } else {
+      // Determine a reasonable step based on max price, ensuring it ends with 0
+      // We aim for approximately 5 ranges
+      let step = Math.ceil(maxPrice / 5 / 10) * 10;
+      if (step === 0) step = 10;
+      
+      for (let i = 0; i < maxPrice; i += step) {
+        const lower = i;
+        const upper = i + step;
+        priceRanges.push({
+          value: `${lower}-${upper}`,
+          label: `PKR ${lower.toFixed(0)} - ${upper.toFixed(0)}`,
+        });
+      }
+    }
 
     return {
-      categories: categories.sort(),
       instructors: instructors.sort(),
-      priceRanges: [
-        { value: "0-50", label: "Free - PKR 50" },
-        { value: "51-100", label: "PKR 51 - 100" },
-        { value: "101-500", label: "PKR 101 - 500" },
-        { value: "501-1000", label: "PKR 501 - 1000" },
-        { value: "1000+", label: "PKR 1000+" },
-      ],
+      priceRanges,
     };
   }, [courses]);
 
@@ -100,32 +103,21 @@ const Marketplace = () => {
         course.instructor?.username
           ?.toLowerCase()
           .includes(searchTerm.toLowerCase()) ||
-        course.category?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (typeof course.category === "string" ? course.category : course.category?.name ?? "")?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         course.description?.toLowerCase().includes(searchTerm.toLowerCase());
 
       // Category filter
       const matchesCategory =
-        filters.category === "" || course.category === filters.category;
+        filters.category === "" || (typeof course.category === "object" ? course.category?.name : course.category) === filters.category;
 
       // Price range filter
       const matchesPrice =
         filters.priceRange === "" ||
         (() => {
           const price = parseFloat(course.price) || 0;
-          switch (filters.priceRange) {
-            case "0-50":
-              return price >= 0 && price <= 50;
-            case "51-100":
-              return price >= 51 && price <= 100;
-            case "101-500":
-              return price >= 101 && price <= 500;
-            case "501-1000":
-              return price >= 501 && price <= 1000;
-            case "1000+":
-              return price >= 1000;
-            default:
-              return true;
-          }
+          const [min, max] = filters.priceRange.split("-").map(parseFloat);
+          if (min === 0) return price >= 0 && price <= max;
+          return price > min && price <= max;
         })();
 
       // Instructor filter
@@ -188,7 +180,11 @@ const Marketplace = () => {
   // Handle course enrollment
   const handleEnrollCourse = (course) => {
     if (!auth.isLoggedIn) {
-      dispatch(setAuthModal("login"));
+      dispatch(setEnrollmentIntent({ 
+        courseId: course.id, 
+        courseTitle: course.title 
+      }));
+      setAuthModalOpen(true);
       return;
     }
 
@@ -202,57 +198,83 @@ const Marketplace = () => {
     setEnrollmentModalOpen(true);
   };
 
-  // Handle enrollment type selection
+  // Handle post-login enrollment intent
+  useEffect(() => {
+    if (auth.isLoggedIn && auth.role === "student" && enrollmentIntent) {
+      const course = courses.find(c => c.id === enrollmentIntent.courseId);
+      if (course) {
+        handleEnrollCourse(course);
+        dispatch(setEnrollmentIntent(null));
+      }
+    }
+  }, [auth.isLoggedIn, auth.role, enrollmentIntent, courses, dispatch]);
+
+  // Handle normal enrollment type selection only — private is handled by callPrivateEnrollmentCall
   const handleEnrollmentTypeSelect = async (type) => {
-    if (!selectedCourse) return;
+    if (type !== "normal" || !selectedCourse) return;
 
     const courseId = selectedCourse.id;
     const courseTitle = selectedCourse.title;
 
     await submissionGuard.guard(async () => {
       try {
-        let response;
-
-        if (type === "normal") {
-          response = await dispatch(enrollInCourseNormal(courseId)).unwrap();
-        } else if (type === "private") {
-          const instructorId =
-            selectedCourse.instructor?.id || selectedCourse.instructor_id;
-          if (!instructorId) {
-            toastManager.error(
-              "Private enrollment not available - no instructor assigned",
-            );
-            return;
-          }
-          response = await dispatch(
-            enrollInCoursePrivate({
-              courseId,
-              teacherId: instructorId,
-            }),
-          ).unwrap();
-        }
-
-        // Show success message (use backend message if available)
+        const response = await dispatch(enrollInCourseNormal(courseId)).unwrap();
         const successMessage =
-          response?.message || `Successfully enrolled in ${courseTitle}`;
+          response?.message || `Enrolment request sent`;
         toastManager.success(successMessage);
-
-        // Close modal
         setEnrollmentModalOpen(false);
+        setPaymentSubmitted(false);
         setSelectedCourse(null);
-
-        // Refresh courses to update enrollment status
         dispatch(fetchAllCourses());
 
-        // Always refresh student dashboard to sync enrollment state
         if (auth.role === "student") {
           dispatch(fetchStudentDashboard());
         }
       } catch (error) {
-        // Handle errors safely
-        const errorMessage =
-          error?.response?.data?.error || error.message || "An error occurred";
-        toastManager.error(errorMessage);
+        showApiError(error);
+      }
+    });
+  };
+
+  // Handle private enrollment after a slot is selected in the modal
+  const callPrivateEnrollmentCall = async (slot) => {
+    if (!slot || !selectedCourse) return;
+
+    const courseId = selectedCourse.id;
+    const courseTitle = selectedCourse.title;
+    const instructorId =
+      selectedCourse.instructor?.id || selectedCourse.instructor_id;
+
+    if (!instructorId) {
+      toastManager.error("Private enrollment not available - no instructor assigned");
+      return;
+    }
+
+    await submissionGuard.guard(async () => {
+      try {
+        const response = await dispatch(
+          enrollInCoursePrivate({
+            courseId,
+            teacherId: instructorId,
+            preferred_slots: [{ days: slot.days, time: slot.time }],
+          }),
+        ).unwrap();
+
+        const successMessage =
+          response?.message || `Successfully made enrollment request for ${courseTitle}`;
+        toastManager.success(successMessage);
+
+        setEnrollmentModalOpen(false);
+        setPaymentSubmitted(false);
+        setSelectedCourse(null);
+
+        dispatch(fetchAllCourses());
+
+        if (auth.role === "student") {
+          dispatch(fetchStudentDashboard());
+        }
+      } catch (error) {
+        showApiError(error);
       }
     });
   };
@@ -260,6 +282,7 @@ const Marketplace = () => {
   // Close enrollment modal
   const closeEnrollmentModal = () => {
     setEnrollmentModalOpen(false);
+    setPaymentSubmitted(false);
     setSelectedCourse(null);
   };
 
@@ -284,16 +307,10 @@ const Marketplace = () => {
       return;
     }
 
-    console.log("unenroll debug", {
-      courseId,
-      user: auth?.user,
-      enrolledCourses,
-    });
-
     await submissionGuard.guard(async () => {
       try {
         await dispatch(unenrollFromCourse(courseId)).unwrap();
-        toastManager.success(`Successfully unenrolled from ${courseTitle}`);
+        toastManager.success(`Successfully unenrolledfrom course ${courseTitle}`);
 
         // Refresh courses to update enrollment status
         dispatch(fetchAllCourses());
@@ -303,8 +320,7 @@ const Marketplace = () => {
           dispatch(fetchStudentDashboard());
         }
       } catch (error) {
-        const errorMessage = error.message || "An error occurred";
-        toastManager.error(errorMessage);
+        showApiError(error);
       }
     });
   };
@@ -320,35 +336,6 @@ const Marketplace = () => {
                 <i className="fas fa-spinner text-blue-500 text-2xl animate-spin"></i>
               </div>
               <p className="text-white text-lg">Loading courses...</p>
-            </div>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  // Error state
-  if (error) {
-    return (
-      <section className="min-h-screen bg-[#0f172a] text-white font-inter">
-        <div className="max-w-7xl mx-auto px-6 py-20">
-          <div className="flex items-center justify-center min-h-[60vh]">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-red-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i className="fas fa-exclamation-triangle text-red-500 text-2xl"></i>
-              </div>
-              <p className="text-white text-lg mb-4">Unable to load courses</p>
-              <p className="text-slate-400 text-sm mb-6">
-                {typeof error === "string"
-                  ? error
-                  : error?.message || "Failed to load courses"}
-              </p>
-              <button
-                onClick={() => dispatch(fetchAllCourses())}
-                className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-xl font-bold transition"
-              >
-                Try Again
-              </button>
             </div>
           </div>
         </div>
@@ -380,76 +367,67 @@ const Marketplace = () => {
   return (
     <section
       id="classes-view"
-      className="min-h-screen bg-[#0f172a] text-white font-inter"
+      className="min-h-screen bg-[#0f172a] text-white font-inter animate-fadeIn"
     >
       {/* Compact Search + Filters Bar */}
-      <div className="relative overflow-hidden border-b border-slate-800/50">
+      <div className="relative overflow-hidden border-b border-slate-800/50 animate-fadeIn">
         <div className="max-w-7xl mx-auto px-6 py-5 relative z-10">
           <div className="text-center mb-4">
-            <h1 className="text-2xl md:text-3xl font-black font-poppins leading-tight tracking-tight">
+            <h1 className="text-2xl md:text-3xl font-black font-poppins leading-tight tracking-tight animate-scaleIn">
               Expand your <span className="text-blue-500">potential</span>.
             </h1>
           </div>
           <form
             onSubmit={handleSearch}
-            className="grid grid-cols-1 md:grid-cols-10 gap-3 max-w-6xl mx-auto"
+            className="grid grid-cols-1 md:grid-cols-10 gap-3 max-w-6xl mx-auto animate-springyReveal"
           >
             <div className="md:col-span-4">
-              <Input
-                type="text"
+              <SearchInput
                 id="course-search"
                 name="course-search"
-                placeholder="Search topics..."
+                placeholder="Search courses..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="h-11 bg-transparent border-slate-700 text-sm"
+                onClear={() => setSearchTerm("")}
+                className="w-full"
+                inputClassName="h-11"
               />
             </div>
             <div className="md:col-span-2">
-              <select
+              <FilterSelect
                 value={filters.category}
                 onChange={(e) => handleFilterChange("category", e.target.value)}
-                className="w-full h-11 bg-slate-800/80 border border-slate-700 rounded-xl px-3 text-white text-sm focus:ring-2 focus:ring-blue-500/20 outline-none focus:border-blue-500 transition"
+                className="w-full h-11"
               >
                 <option value="">All Categories</option>
-                {filterOptions.categories.map((category) => (
-                  <option key={category} value={category}>
-                    {formatCategoryLabel(category)}
-                  </option>
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.name}>{formatCategoryLabel(cat.name)}</option>
                 ))}
-              </select>
+              </FilterSelect>
             </div>
             <div className="md:col-span-2">
-              <select
+              <FilterSelect
                 value={filters.priceRange}
-                onChange={(e) =>
-                  handleFilterChange("priceRange", e.target.value)
-                }
-                className="w-full h-11 bg-slate-800/80 border border-slate-700 rounded-xl px-3 text-white text-sm focus:ring-2 focus:ring-blue-500/20 outline-none focus:border-blue-500 transition"
+                onChange={(e) => handleFilterChange("priceRange", e.target.value)}
+                className="w-full h-11"
               >
                 <option value="">All Prices</option>
                 {filterOptions.priceRanges.map((range) => (
-                  <option key={range.value} value={range.value}>
-                    {range.label}
-                  </option>
+                  <option key={range.value} value={range.value}>{range.label}</option>
                 ))}
-              </select>
+              </FilterSelect>
             </div>
             <div className="md:col-span-2">
-              <select
+              <FilterSelect
                 value={filters.instructor}
-                onChange={(e) =>
-                  handleFilterChange("instructor", e.target.value)
-                }
-                className="w-full h-11 bg-slate-800/80 border border-slate-700 rounded-xl px-3 text-white text-sm focus:ring-2 focus:ring-blue-500/20 outline-none focus:border-blue-500 transition"
+                onChange={(e) => handleFilterChange("instructor", e.target.value)}
+                className="w-full h-11"
               >
                 <option value="">All Teachers</option>
                 {filterOptions.instructors.map((instructor) => (
-                  <option key={instructor} value={instructor}>
-                    {instructor}
-                  </option>
+                  <option key={instructor} value={instructor}>{instructor}</option>
                 ))}
-              </select>
+              </FilterSelect>
             </div>
           </form>
         </div>
@@ -487,113 +465,41 @@ const Marketplace = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredCourses.map((course, idx) => (
-                <div
+                <PublicCourseCard
                   key={course.id || idx}
-                  className="bg-slate-800/50 backdrop-blur-md rounded-[2.5rem] overflow-hidden border border-slate-700/50 shadow-2xl group hover:border-blue-500/40 transition-all flex flex-col"
-                >
-                  <div className="relative h-32 overflow-hidden">
-                    <Link to={`/courses/${course.id}`}>
-                      <img
-                        src={getCourseImage(course, idx)}
-                        className="w-full h-full object-cover group-hover:scale-110 transition duration-700 opacity-80 group-hover:opacity-100"
-                        alt={course.title || "Course"}
-                      />
-                    </Link>
-                    {course.status === "published" && (
-                      <div className="absolute top-4 right-4 bg-green-600 text-white px-3 py-1 rounded-full text-xs font-bold">
-                        Published
-                      </div>
-                    )}
-                  </div>
-                  <div className="p-5 flex-1 flex flex-col">
-                    <Link to={`/courses/${course.id}`}>
-                      <h3 className="text-lg font-bold font-poppins mb-3 leading-tight group-hover:text-blue-400 transition cursor-pointer min-h-10">
-                        {course.title || "Untitled Course"}
-                      </h3>
-                    </Link>
-                    <div className="flex items-center gap-3 mb-3">
-                      <img
-                        src={
-                          course.instructor?.avatar ||
-                          `https://i.pravatar.cc/150?u=${course.instructor?.username || idx}`
-                        }
-                        className="w-8 h-8 rounded-full border border-slate-700 shadow-md"
-                        alt={course.instructor?.username || "Instructor"}
-                      />
-                      <span className="text-xs text-slate-400 font-bold group-hover:text-slate-200 transition">
-                        {course.instructor?.username || "Unknown Instructor"}
-                      </span>
-                    </div>
-                    {course.category && (
-                      <div className="mb-3">
-                        <span className="text-xs text-slate-500 uppercase tracking-widest">
-                          {course.category}
-                        </span>
-                      </div>
-                    )}
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-base font-bold text-blue-400">
-                        PKR {course.price || "0.00"}
-                      </span>
-                      <div className="flex items-center gap-1">
-                        <i className="fas fa-star text-yellow-400 text-xs"></i>
-                        <span className="text-xs text-slate-400">
-                          {course.rating || "0.00"}
-                        </span>
-                      </div>
-                    </div>
-                    {course.instructor?.expertise && (
-                      <div className="mb-3">
-                        <span className="text-xs text-slate-500">
-                          Expertise: {course.instructor.expertise}
-                        </span>
-                      </div>
-                    )}
-                    {(() => {
-                      const enrolled = isCourseEnrolled(course);
-                      return (
-                        <button
-                          onClick={() =>
-                            enrolled
-                              ? handleUnenrollCourse(course.id, course.title)
-                              : handleEnrollCourse(course)
-                          }
-                          disabled={
-                            enrollingCourseIds.includes(course.id) ||
-                            unenrollingCourseIds.includes(course.id)
-                          }
-                          className={`w-full mt-auto py-2.5 font-black text-[11px] uppercase tracking-[0.18em] rounded-xl transition-all active:scale-95 ${
-                            enrolled
-                              ? unenrollingCourseIds.includes(course.id)
-                                ? "bg-red-600/50 text-red-400 cursor-not-allowed"
-                                : "bg-red-600/20 border border-red-600/30 text-red-400 hover:bg-red-600 hover:text-white"
-                              : enrollingCourseIds.includes(course.id)
-                                ? "bg-slate-600 text-slate-400 cursor-not-allowed"
-                                : "bg-slate-900 border border-blue-600/30 text-blue-500 hover:bg-blue-600 hover:text-white"
-                          }`}
-                        >
-                          {enrolled
-                            ? unenrollingCourseIds.includes(course.id)
-                              ? "Unenrolling..."
-                              : "Unenroll"
-                            : enrollingCourseIds.includes(course.id)
-                              ? "Enrolling..."
-                              : "Enroll Now"}
-                        </button>
-                      );
-                    })()}
-                  </div>
-                </div>
+                  course={course}
+                  index={idx}
+                  enrolled={isCourseEnrolled(course)}
+                  isEnrolling={enrollingCourseIds.includes(course.id)}
+                  isUnenrolling={unenrollingCourseIds.includes(course.id)}
+                  onEnroll={handleEnrollCourse}
+                  onUnenroll={handleUnenrollCourse}
+                />
               ))}
             </div>
         </main>
       </div>
 
       {/* Enrollment Type Modal */}
-      <EnrollmentTypeModal
-        isOpen={enrollmentModalOpen}
-        onClose={closeEnrollmentModal}
-        onSelect={handleEnrollmentTypeSelect}
+      <ConfirmDialog
+        open={enrollmentModalOpen}
+        variant="primary"
+        title="Confirm Enrollment"
+        message={`Are you sure you want to enroll in "${selectedCourse?.title}"?`}
+        confirmLabel="Yes, Enroll Now"
+        cancelLabel="Cancel"
+        loading={selectedCourse ? enrollingCourseIds.includes(selectedCourse.id) : false}
+        checkboxLabel="I have submitted the payment for this course"
+        checkboxChecked={paymentSubmitted}
+        onCheckboxChange={setPaymentSubmitted}
+        onConfirm={() => handleEnrollmentTypeSelect("normal")}
+        onCancel={closeEnrollmentModal}
+      />
+
+      <AuthRequiredModal 
+        isOpen={authModalOpen} 
+        onClose={() => setAuthModalOpen(false)} 
+        message="Please sign in or create an account to enroll in courses and track your progress."
       />
     </section>
   );

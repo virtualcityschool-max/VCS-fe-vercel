@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { authService } from "../../services/authService";
+import { adminService } from "../../services/adminService";
 
 // Async thunks
 export const fetchPendingApprovals = createAsyncThunk(
@@ -51,11 +52,40 @@ export const rejectUser = createAsyncThunk(
   },
 );
 
+export const fetchPendingEnrollments = createAsyncThunk(
+  "approvals/fetchPendingEnrollments",
+  async (_, { rejectWithValue }) => {
+    try {
+      return await adminService.getPendingEnrollments();
+    } catch (error) {
+      return rejectWithValue(error.message || "Failed to load pending enrollments");
+    }
+  },
+);
+
+export const actionEnrollment = createAsyncThunk(
+  "approvals/actionEnrollment",
+  async ({ enrollmentId, action }, { rejectWithValue, dispatch }) => {
+    try {
+      const result = await adminService.actionEnrollment(enrollmentId, action);
+      dispatch(fetchPendingEnrollments());
+      return { enrollmentId, result };
+    } catch (error) {
+      return rejectWithValue(error.message || `Failed to ${action} enrollment`);
+    }
+  },
+);
+
 const initialState = {
   pendingApprovals: [],
-  isLoading: false, // Will be set to true in AdminDashboard if approvals tab is active
-  isProcessing: {}, // Track individual user processing state
+  isLoading: false,
+  isProcessing: {},
   error: null,
+  // enrollment requests
+  pendingEnrollments: [],
+  enrollmentsLoading: false,
+  enrollmentsProcessing: {},
+  enrollmentsError: null,
 };
 
 const approvalsSlice = createSlice({
@@ -122,6 +152,36 @@ const approvalsSlice = createSlice({
         const userId = action.meta.arg;
         delete state.isProcessing[userId];
         state.error = action.payload;
+      })
+      // Fetch Pending Enrollments
+      .addCase(fetchPendingEnrollments.pending, (state) => {
+        state.enrollmentsLoading = true;
+        state.enrollmentsError = null;
+      })
+      .addCase(fetchPendingEnrollments.fulfilled, (state, action) => {
+        state.enrollmentsLoading = false;
+        state.pendingEnrollments = action.payload;
+      })
+      .addCase(fetchPendingEnrollments.rejected, (state, action) => {
+        state.enrollmentsLoading = false;
+        state.enrollmentsError = action.payload;
+      })
+      // Action Enrollment (approve/reject)
+      .addCase(actionEnrollment.pending, (state, action) => {
+        const { enrollmentId } = action.meta.arg;
+        state.enrollmentsProcessing[enrollmentId] = action.meta.arg.action;
+      })
+      .addCase(actionEnrollment.fulfilled, (state, action) => {
+        const { enrollmentId } = action.meta.arg;
+        delete state.enrollmentsProcessing[enrollmentId];
+        state.pendingEnrollments = state.pendingEnrollments.filter(
+          (e) => e.id !== enrollmentId,
+        );
+      })
+      .addCase(actionEnrollment.rejected, (state, action) => {
+        const { enrollmentId } = action.meta.arg;
+        delete state.enrollmentsProcessing[enrollmentId];
+        state.enrollmentsError = action.payload;
       });
   },
 });
@@ -139,5 +199,10 @@ export const selectApprovalsLoading = (state) => state.approvals.isLoading;
 export const selectApprovalsError = (state) => state.approvals.error;
 export const selectUserProcessingState = (state, userId) =>
   state.approvals.isProcessing[userId];
+
+export const selectPendingEnrollments = (state) => state.approvals.pendingEnrollments;
+export const selectEnrollmentsLoading = (state) => state.approvals.enrollmentsLoading;
+export const selectEnrollmentsError = (state) => state.approvals.enrollmentsError;
+export const selectEnrollmentsProcessing = (state) => state.approvals.enrollmentsProcessing;
 
 export default approvalsSlice.reducer;

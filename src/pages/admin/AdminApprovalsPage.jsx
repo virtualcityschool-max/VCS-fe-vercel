@@ -4,15 +4,28 @@ import {
   fetchPendingApprovals,
   approveUser,
   rejectUser,
+  fetchPendingEnrollments,
+  actionEnrollment,
+  selectPendingEnrollments,
+  selectEnrollmentsLoading,
+  selectEnrollmentsError,
+  selectEnrollmentsProcessing,
 } from "../../store/slices/approvalsSlice";
 import {
   fetchPendingChildLinks,
   approveChildLink,
   rejectChildLink,
 } from "../../store/slices/childLinksSlice";
+import {
+  fetchAdminHireRequests,
+  actionHireRequest,
+} from "../../store/slices/hireSlice";
 import { toastManager } from "../../utils/toastManager";
 import ApprovalsTab from "../../components/admin/ApprovalsTab";
 import ChildLinksTab from "../../components/admin/ChildLinksTab";
+import EnrollmentRequestsTab from "../../components/admin/EnrollmentRequestsTab";
+import HireRequestsTab from "../../components/admin/HireRequestsTab";
+import { showApiError } from "../../utils/apiErrorHandler";
 
 const AdminApprovalsPage = () => {
   const dispatch = useDispatch();
@@ -32,21 +45,35 @@ const AdminApprovalsPage = () => {
     isProcessing: childLinksProcessing,
   } = useSelector((state) => state.childLinks);
 
-  // Fetch pending approvals when component mounts or tab changes
+  const pendingEnrollments = useSelector(selectPendingEnrollments);
+  const enrollmentsLoading = useSelector(selectEnrollmentsLoading);
+  const enrollmentsError = useSelector(selectEnrollmentsError);
+  const enrollmentsProcessing = useSelector(selectEnrollmentsProcessing);
+
+  const {
+    adminRequests: hireRequests,
+    adminLoading: hireLoading,
+    adminError: hireError,
+    adminProcessing: hireProcessing,
+  } = useSelector((state) => state.hire);
+  const [hireStatusFilter, setHireStatusFilter] = useState(undefined);
+
+  // Re-fetch all 4 APIs every time this page is visited.
+  // AdminLayout only fetches once on mount; navigating away and back
+  // would otherwise show stale data.
   useEffect(() => {
-    if (activeTab === "users") {
-      dispatch(fetchPendingApprovals());
-    } else if (activeTab === "childLinks") {
-      dispatch(fetchPendingChildLinks());
-    }
-  }, [dispatch, activeTab]);
+    dispatch(fetchPendingApprovals());
+    dispatch(fetchPendingChildLinks());
+    dispatch(fetchPendingEnrollments());
+    dispatch(fetchAdminHireRequests(hireStatusFilter));
+  }, [dispatch]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleApprove = async (userId) => {
     try {
       await dispatch(approveUser(userId)).unwrap();
       toastManager.success("User approved successfully");
     } catch (error) {
-      toastManager.error(error || "Failed to approve user");
+      showApiError(error);
     }
   };
 
@@ -55,7 +82,7 @@ const AdminApprovalsPage = () => {
       await dispatch(rejectUser(userId)).unwrap();
       toastManager.success("User rejected successfully");
     } catch (error) {
-      toastManager.error(error || "Failed to reject user");
+      showApiError(error);
     }
   };
 
@@ -68,7 +95,7 @@ const AdminApprovalsPage = () => {
       await dispatch(approveChildLink(linkId)).unwrap();
       toastManager.success("Child link approved successfully");
     } catch (error) {
-      toastManager.error(error || "Failed to approve child link");
+      showApiError(error);
     }
   };
 
@@ -77,7 +104,7 @@ const AdminApprovalsPage = () => {
       await dispatch(rejectChildLink(linkId)).unwrap();
       toastManager.success("Child link rejected successfully");
     } catch (error) {
-      toastManager.error(error || "Failed to reject child link");
+      showApiError(error);
     }
   };
 
@@ -85,16 +112,83 @@ const AdminApprovalsPage = () => {
     dispatch(fetchPendingChildLinks());
   };
 
+  const handleApproveEnrollment = async (enrollmentId) => {
+    try {
+      await dispatch(
+        actionEnrollment({ enrollmentId, action: "approve" }),
+      ).unwrap();
+      toastManager.success("Enrollment approved successfully");
+    } catch (error) {
+      showApiError(error);
+    }
+  };
+
+  const handleRejectEnrollment = async (enrollmentId) => {
+    try {
+      await dispatch(
+        actionEnrollment({ enrollmentId, action: "reject" }),
+      ).unwrap();
+      toastManager.success("Enrollment rejected successfully");
+    } catch (error) {
+      showApiError(error);
+    }
+  };
+
+  const handleRefreshEnrollments = () => {
+    dispatch(fetchPendingEnrollments());
+  };
+
+  const handleApproveHireRequest = async (id) => {
+    try {
+      await dispatch(actionHireRequest({ id, action: "approve" })).unwrap();
+      toastManager.success("Hire request approved");
+    } catch (error) {
+      showApiError(error);
+    }
+  };
+
+  const handleRejectHireRequest = async (id) => {
+    try {
+      await dispatch(actionHireRequest({ id, action: "reject" })).unwrap();
+      toastManager.success("Hire request rejected");
+    } catch (error) {
+      showApiError(error);
+    }
+  };
+
+  const handleRefreshHireRequests = () => {
+    dispatch(fetchAdminHireRequests(hireStatusFilter));
+  };
+
+  const pendingHireCount =
+    hireRequests?.filter((r) => r.status === "pending").length || 0;
+
   const isActiveTabLoading =
-    activeTab === "users" ? approvalsLoading : childLinksLoading;
+    activeTab === "users"
+      ? approvalsLoading
+      : activeTab === "childLinks"
+        ? childLinksLoading
+        : activeTab === "enrollments"
+          ? enrollmentsLoading
+          : hireLoading;
 
   const activeRefreshHandler =
-    activeTab === "users" ? handleRefreshApprovals : handleRefreshChildLinks;
+    activeTab === "users"
+      ? handleRefreshApprovals
+      : activeTab === "childLinks"
+        ? handleRefreshChildLinks
+        : activeTab === "enrollments"
+          ? handleRefreshEnrollments
+          : handleRefreshHireRequests;
 
   const activePendingCount =
     activeTab === "users"
       ? pendingApprovals?.length || 0
-      : pendingChildLinks?.length || 0;
+      : activeTab === "childLinks"
+        ? pendingChildLinks?.length || 0
+        : activeTab === "enrollments"
+          ? pendingEnrollments?.length || 0
+          : pendingHireCount;
 
   // Placeholder counts until backend provides processed-today metrics.
   const approvedTodayCount = 0;
@@ -115,10 +209,27 @@ const AdminApprovalsPage = () => {
               }`}
             >
               <i className="fas fa-user-check"></i>
-              User Approvals
+              Account(s) Approvals
               {pendingApprovals?.length > 0 && (
                 <span className="bg-indigo-500 text-white text-xs px-2 py-0.5 rounded-full">
                   {pendingApprovals.length}
+                </span>
+              )}
+            </button>
+
+            <button
+              onClick={() => setActiveTab("enrollments")}
+              className={`inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
+                activeTab === "enrollments"
+                  ? "bg-indigo-600 text-white shadow-lg"
+                  : "text-slate-400 hover:text-white hover:bg-slate-800/50"
+              }`}
+            >
+              <i className="fas fa-user-graduate"></i>
+              Enrollment Requests
+              {pendingEnrollments?.length > 0 && (
+                <span className="bg-indigo-500 text-white text-xs px-2 py-0.5 rounded-full">
+                  {pendingEnrollments.length}
                 </span>
               )}
             </button>
@@ -126,15 +237,31 @@ const AdminApprovalsPage = () => {
               onClick={() => setActiveTab("childLinks")}
               className={`inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
                 activeTab === "childLinks"
-                    ? "bg-indigo-600 text-white shadow-lg"
+                  ? "bg-indigo-600 text-white shadow-lg"
                   : "text-slate-400 hover:text-white hover:bg-slate-800/50"
               }`}
             >
               <i className="fas fa-link"></i>
               Child Link Requests
               {pendingChildLinks?.length > 0 && (
-                <span className="bg-purple-500 text-white text-xs px-2 py-0.5 rounded-full">
+                <span className="bg-indigo-500 text-white text-xs px-2 py-0.5 rounded-full">
                   {pendingChildLinks.length}
+                </span>
+              )}
+            </button>
+            <button
+              onClick={() => setActiveTab("hireRequests")}
+              className={`inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
+                activeTab === "hireRequests"
+                  ? "bg-indigo-600 text-white shadow-lg"
+                  : "text-slate-400 hover:text-white hover:bg-slate-800/50"
+              }`}
+            >
+              <i className="fas fa-handshake"></i>
+              Teacher Hire Requests
+              {pendingHireCount > 0 && (
+                <span className="bg-indigo-500 text-white text-xs px-2 py-0.5 rounded-full">
+                  {pendingHireCount}
                 </span>
               )}
             </button>
@@ -145,20 +272,26 @@ const AdminApprovalsPage = () => {
             <div className="flex items-center gap-3 flex-wrap text-sm font-semibold">
               <span className="text-amber-300">
                 Pending:{" "}
-                <span className="text-white font-bold">{activePendingCount}</span>
+                <span className="text-white font-bold">
+                  {activePendingCount}
+                </span>
               </span>
               <span className="text-emerald-300">
                 Approved Today:{" "}
-                <span className="text-white font-bold">{approvedTodayCount}</span>
+                <span className="text-white font-bold">
+                  {approvedTodayCount}
+                </span>
               </span>
               <span className="text-rose-300">
                 Rejected Today:{" "}
-                <span className="text-white font-bold">{rejectedTodayCount}</span>
+                <span className="text-white font-bold">
+                  {rejectedTodayCount}
+                </span>
               </span>
             </div>
           ) : (
             <span className="text-sm font-semibold text-amber-300">
-              Pending Requests:{" "}
+              Pending:{" "}
               <span className="text-white font-bold">{activePendingCount}</span>
             </span>
           )}
@@ -197,6 +330,32 @@ const AdminApprovalsPage = () => {
           onApprove={handleApproveChildLink}
           onReject={handleRejectChildLink}
           onRefresh={handleRefreshChildLinks}
+        />
+      )}
+
+      {activeTab === "enrollments" && (
+        <EnrollmentRequestsTab
+          enrollments={pendingEnrollments}
+          loading={enrollmentsLoading}
+          error={enrollmentsError}
+          processing={enrollmentsProcessing}
+          onApprove={handleApproveEnrollment}
+          onReject={handleRejectEnrollment}
+          onRefresh={handleRefreshEnrollments}
+        />
+      )}
+
+      {activeTab === "hireRequests" && (
+        <HireRequestsTab
+          requests={hireRequests}
+          loading={hireLoading}
+          error={hireError}
+          processing={hireProcessing}
+          onApprove={handleApproveHireRequest}
+          onReject={handleRejectHireRequest}
+          onRefresh={handleRefreshHireRequests}
+          statusFilter={hireStatusFilter}
+          onStatusFilterChange={setHireStatusFilter}
         />
       )}
     </div>

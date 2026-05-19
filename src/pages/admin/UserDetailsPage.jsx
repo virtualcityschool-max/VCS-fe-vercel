@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import ConfirmDialog from "../../components/common/ConfirmDialog";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { updateUser, purgeUser } from "../../store/slices/adminSlice";
 import { adminService } from "../../services/adminService";
 import { toastManager } from "../../utils/toastManager";
+import { showApiError } from "../../utils/apiErrorHandler";
 import {
   UserDetailsHeader,
   UserDetailsTabs,
@@ -35,12 +39,15 @@ const getDisplayName = (user) => {
 const UserDetailsPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const dispatch = useDispatch();
 
   const [activeTab, setActiveTab] = useState("account");
   const [userData, setUserData] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   // Fetch user data and profile on component mount
   useEffect(() => {
@@ -110,35 +117,33 @@ const UserDetailsPage = () => {
   }, [id]);
 
   const handleBackToUsers = () => {
-    navigate("/admin/users");
+    navigate("/admin/users", { state: { skipFetch: true, filters: location.state?.filters } });
   };
 
-  const handleDeleteUser = async () => {
+  const handleDeleteUser = () => {
     if (!userData) return;
+    setConfirmDelete(true);
+  };
 
-    const confirmed = window.confirm(
-      `Are you sure you want to delete "${getDisplayName(userData)}"? This action cannot be undone.`,
-    );
-
-    if (!confirmed) return;
-
+  const confirmDeleteUser = async () => {
+    setConfirmDelete(false);
     try {
-      await adminService.deleteUser(userData.id);
+      await dispatch(purgeUser(userData.id)).unwrap();
       toastManager.success("User deleted successfully");
-      navigate("/admin/users");
+      navigate("/admin/users", { state: { skipFetch: true, filters: location.state?.filters } });
     } catch (error) {
-      toastManager.error(error.message || "Failed to delete user");
+      showApiError(error);
     }
   };
 
   const handleUserUpdate = async (updatedData) => {
     try {
-      const updatedUser = await adminService.updateUser(id, updatedData);
+      const updatedUser = await dispatch(updateUser({ userId: id, userData: updatedData })).unwrap();
       setUserData(updatedUser);
       toastManager.success("Account updated successfully");
       return updatedUser;
     } catch (error) {
-      toastManager.error(error.message || "Failed to update account");
+      showApiError(error);
       throw error;
     }
   };
@@ -153,8 +158,30 @@ const UserDetailsPage = () => {
       toastManager.success("Profile updated successfully");
       return updatedProfileData;
     } catch (error) {
-      toastManager.error(error.message || "Failed to update profile");
+      showApiError(error);
       throw error;
+    }
+  };
+
+  const handleProfileRefresh = async () => {
+    try {
+      const profileResponse = await adminService.getUserProfile(id);
+      const normalizedProfile = {
+        bio: profileResponse?.bio || "",
+        expertise: profileResponse?.expertise || "",
+        experience_years: profileResponse?.experience_years ?? "",
+        rating: profileResponse?.rating ?? "",
+        linkedin: profileResponse?.linkedin || "",
+        phone: profileResponse?.phone || "",
+        distinctions: profileResponse?.distinctions || [],
+        grade_level: profileResponse?.grade_level || "",
+        date_of_birth: profileResponse?.date_of_birth || "",
+        address: profileResponse?.address || "",
+        children: profileResponse?.children || [],
+      };
+      setUserProfile(normalizedProfile);
+    } catch (error) {
+      showApiError(error);
     }
   };
 
@@ -203,7 +230,7 @@ const UserDetailsPage = () => {
         />
 
         {/* Tab Content */}
-        <div className="bg-slate-900/60 border border-slate-800/50 rounded-2xl shadow-2xl backdrop-blur-sm overflow-hidden mt-4">
+        <div className="bg-slate-900/60 border border-slate-800/50 rounded-2xl shadow-2xl backdrop-blur-sm mt-4">
           <UserDetailsTabs
             activeTab={activeTab}
             onTabChange={setActiveTab}
@@ -235,6 +262,7 @@ const UserDetailsPage = () => {
                 <div className="pt-2 border-t border-slate-800">
                   <StudentProfileTab
                     profile={userProfile}
+                    userId={userData?.id}
                     onUpdate={handleProfileUpdate}
                     onCancel={handleBackToUsers}
                     onSaved={handleBackToUsers}
@@ -247,6 +275,7 @@ const UserDetailsPage = () => {
                   <ParentProfileTab
                     profile={{ ...userProfile, id }}
                     onUpdate={handleProfileUpdate}
+                    onRefresh={handleProfileRefresh}
                     onCancel={handleBackToUsers}
                     onSaved={handleBackToUsers}
                   />
@@ -256,6 +285,17 @@ const UserDetailsPage = () => {
           </div>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={confirmDelete}
+        variant="danger"
+        title="Delete User"
+        message={`Are you sure you want to delete "${userData ? getDisplayName(userData) : "this user"}"? This action cannot be undone.`}
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        onConfirm={confirmDeleteUser}
+        onCancel={() => setConfirmDelete(false)}
+      />
     </div>
   );
 };

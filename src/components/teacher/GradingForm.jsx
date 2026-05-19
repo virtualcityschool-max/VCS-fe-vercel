@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-const GradingForm = ({ selectedSubmission, onSubmit, onCancel }) => {
+const GradingForm = ({ selectedSubmission, onSubmit, onCancel, assignmentMaxScore, extraRowContent }) => {
   // Use the selectedSubmission.id as key to force component reset
   const [score, setScore] = useState(
     () => selectedSubmission?.grade?.score?.toString() || "",
@@ -8,13 +8,27 @@ const GradingForm = ({ selectedSubmission, onSubmit, onCancel }) => {
   const [feedback, setFeedback] = useState(
     () => selectedSubmission?.grade?.feedback || "",
   );
+  const [scoreError, setScoreError] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit({
-      score: parseFloat(score) || 0,
-      feedback,
-    });
+
+    if (score === "" || score === null || score === undefined) {
+      setScoreError("Score is required — enter 0 or higher");
+      return;
+    }
+    const numeric = parseFloat(score);
+    if (isNaN(numeric) || numeric < 0) {
+      setScoreError("Score must be 0 or greater");
+      return;
+    }
+    if (assignmentMaxScore !== undefined && assignmentMaxScore !== null && numeric > parseFloat(assignmentMaxScore)) {
+      setScoreError(`Score cannot exceed max marks (${assignmentMaxScore})`);
+      return;
+    }
+
+    setScoreError("");
+    onSubmit({ score: numeric, feedback });
   };
 
   return (
@@ -23,20 +37,57 @@ const GradingForm = ({ selectedSubmission, onSubmit, onCancel }) => {
       className="space-y-4"
       key={selectedSubmission?.id}
     >
-      <div>
-        <label className="block text-sm font-medium text-gray-300 mb-2">
-          Score
-        </label>
-        <input
-          type="number"
-          placeholder="Score"
-          value={selectedSubmission ? score || "" : ""}
-          onChange={(e) => setScore(e.target.value)}
-          className="w-full p-3 rounded-xl bg-slate-800 border border-slate-700 text-white"
-          max={100}
-          min={0}
-          step="0.1"
-        />
+      <div className="flex flex-wrap items-start gap-10">
+        {/* Score Column */}
+        <div className="w-32 shrink-0">
+          <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2.5">
+            Score <span className="text-slate-600 font-normal ml-1">/ {assignmentMaxScore}</span>
+          </label>
+          <div className="relative">
+            <input
+              type="number"
+              placeholder="0.0"
+              value={score}
+              onChange={(e) => {
+                const val = e.target.value;
+                if (val !== "" && parseFloat(val) < 0) return;
+                setScore(val);
+                setScoreError("");
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "-" || e.key === "e" || e.key === "E") {
+                  e.preventDefault();
+                }
+              }}
+              className={`w-full p-2 rounded-xl bg-slate-800 border text-white font-black text-center transition-all ${
+                scoreError 
+                  ? "border-red-500 ring-1 ring-red-500/20" 
+                  : "border-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/20"
+              }`}
+              max={assignmentMaxScore}
+              min={0}
+              step="0.1"
+            />
+          </div>
+          {scoreError && (
+            <p className="mt-2 text-[10px] text-red-400 font-bold flex items-center gap-1.5 leading-tight">
+              <i className="fas fa-exclamation-circle" />
+              {scoreError}
+            </p>
+          )}
+        </div>
+
+        {/* Attachment Column */}
+        {extraRowContent && (
+          <div className="flex-1">
+            <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2.5">
+              Student Attachment
+            </label>
+            <div className="flex items-center min-h-[38px]">
+              {extraRowContent}
+            </div>
+          </div>
+        )}
       </div>
 
       <div>
@@ -64,7 +115,7 @@ const GradingForm = ({ selectedSubmission, onSubmit, onCancel }) => {
         )}
         <button
           type="submit"
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-xl transition-colors"
+          className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-black uppercase tracking-widest py-2.5 px-8 rounded-xl transition-all active:scale-95 shadow-lg shadow-blue-600/20"
         >
           {selectedSubmission?.grade ? "Update Grade" : "Grade Submission"}
         </button>

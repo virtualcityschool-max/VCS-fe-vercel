@@ -71,6 +71,13 @@ const initialState = {
     error: null,
   },
 
+  // Courses filtered by has_session=true (for enrollment dropdown)
+  enrollmentCourses: {
+    data: [],
+    loading: false,
+    error: null,
+  },
+
   // Sessions
   sessions: {
     data: [],
@@ -135,15 +142,56 @@ export const deleteUser = createAsyncThunk(
   },
 );
 
+export const purgeUser = createAsyncThunk(
+  "admin/purgeUser",
+  async (userId, { rejectWithValue }) => {
+    try {
+      await adminService.purgeUser(userId);
+      return userId;
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  },
+);
+
+export const toggleUserActive = createAsyncThunk(
+  "admin/toggleUserActive",
+  async ({ userId, user }, { rejectWithValue }) => {
+    try {
+      const result = await adminService.updateUser(userId, {
+        email: user.email,
+        is_active: !user.is_active,
+        is_staff: user.is_staff ?? false,
+        role: user.role,
+        username: user.username,
+      });
+      return result;
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  },
+);
+
 // Course Management Thunks
 export const fetchCourses = createAsyncThunk(
   "admin/fetchCourses",
-  async (_, { rejectWithValue }) => {
+  async (params = {}, { rejectWithValue }) => {
     try {
-      const response = await coursesService.getAllCourses();
+      const response = await coursesService.getAllCourses(params);
       return response;
     } catch (error) {
       return rejectWithValue(error); // Preserve full error object
+    }
+  },
+);
+
+export const fetchCoursesWithSessions = createAsyncThunk(
+  "admin/fetchCoursesWithSessions",
+  async (_, { rejectWithValue }) => {
+    try {
+      return await coursesService.getCoursesWithSessions();
+    } catch (error) {
+      return rejectWithValue(error);
     }
   },
 );
@@ -497,6 +545,17 @@ const adminSlice = createSlice({
         state.users.data = state.users.data.filter(
           (user) => user.id !== action.payload,
         );
+      })
+      .addCase(purgeUser.fulfilled, (state, action) => {
+        state.users.data = state.users.data.filter(
+          (user) => user.id !== action.payload,
+        );
+      })
+      .addCase(toggleUserActive.fulfilled, (state, action) => {
+        const index = state.users.data.findIndex((u) => u.id === action.payload.id);
+        if (index !== -1) {
+          state.users.data[index] = action.payload;
+        }
       });
 
     // Courses
@@ -516,6 +575,9 @@ const adminSlice = createSlice({
         );
         const coursesWithTimestamps = coursesData.map((course) => ({
           ...course,
+          category: typeof course.category === "object" && course.category !== null
+            ? course.category.name ?? null
+            : course.category ?? null,
           updated_at:
             course.updated_at ||
             course.modified_at ||
@@ -530,6 +592,19 @@ const adminSlice = createSlice({
       .addCase(fetchCourses.rejected, (state, action) => {
         state.courses.loading = false;
         state.courses.error = action.payload;
+      })
+      .addCase(fetchCoursesWithSessions.pending, (state) => {
+        state.enrollmentCourses.loading = true;
+        state.enrollmentCourses.error = null;
+      })
+      .addCase(fetchCoursesWithSessions.fulfilled, (state, action) => {
+        state.enrollmentCourses.loading = false;
+        const data = action.payload.data?.data || action.payload.data || action.payload;
+        state.enrollmentCourses.data = Array.isArray(data) ? data : [];
+      })
+      .addCase(fetchCoursesWithSessions.rejected, (state, action) => {
+        state.enrollmentCourses.loading = false;
+        state.enrollmentCourses.error = action.payload;
       })
       .addCase(createCourse.fulfilled, (state, action) => {
         state.courses.data.unshift(action.payload);
@@ -647,35 +722,47 @@ const adminSlice = createSlice({
       })
       .addCase(fetchEnrollments.fulfilled, (state, action) => {
         state.enrollments.loading = false;
-        state.enrollments.data = action.payload.results || action.payload || [];
+        const raw = action.payload.results || action.payload || [];
+        state.enrollments.data = raw.map((enrollment) => ({
+          ...enrollment,
+          course: enrollment.course
+            ? {
+                ...enrollment.course,
+                category: typeof enrollment.course.category === "object" && enrollment.course.category !== null
+                  ? enrollment.course.category.name ?? null
+                  : enrollment.course.category ?? null,
+              }
+            : enrollment.course,
+        }));
       })
       .addCase(fetchEnrollments.rejected, (state, action) => {
         state.enrollments.loading = false;
         state.enrollments.error = action.payload;
       })
       .addCase(createEnrollment.pending, (state) => {
-        // Don't change loading state here to avoid interfering with list loading
-        // Clear previous enrollment errors
-        state.enrollments.error = null;
+        // intentionally left blank — modal handles its own loading state
       })
       .addCase(createEnrollment.fulfilled, (state, action) => {
-        // Add the new enrollment to the beginning of the list
         if (action.payload && state.enrollments.data) {
-          state.enrollments.data.unshift(action.payload);
+          const p = action.payload;
+          state.enrollments.data.unshift({
+            id: p.enrollment_id,
+            student: p.student,
+            course: p.course,
+            is_private: p.is_private,
+            status: "active",
+            enrolled_at: new Date().toISOString(),
+          });
         }
       })
-      .addCase(createEnrollment.rejected, (state, action) => {
-        // Store only safe error message for the modal to display
-        // This prevents crashes from complex error objects
-        if (typeof action.payload === "string") {
-          state.enrollments.error = action.payload;
-        } else if (action.payload?.message) {
-          state.enrollments.error = action.payload.message;
-        } else if (action.payload?.error) {
-          state.enrollments.error = action.payload.error;
-        } else {
-          state.enrollments.error = "Failed to create enrollment";
-        }
+      .addCase(createEnrollment.rejected, () => {
+        // error is surfaced via .unwrap() in the modal — do not touch enrollments.error
+      })
+      .addCase(unenrollStudent.fulfilled, (state, action) => {
+        const { courseId, studentId } = action.meta.arg;
+        state.enrollments.data = state.enrollments.data.filter(
+          (e) => !(e.course?.id === courseId && e.student?.id === studentId),
+        );
       });
 
     // Sessions
