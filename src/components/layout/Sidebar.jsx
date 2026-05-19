@@ -6,6 +6,73 @@ import UserProfileDropdown from "./UserProfileDropdown";
 
 const MOBILE_BREAKPOINT = 1024;
 
+const TZ_LABEL = {
+  "Asia/Dubai":       "Dubai",
+  "Asia/Karachi":     "Pakistan",
+  "Europe/London":    "London",
+  "America/New_York": "New York",
+};
+
+const TimezoneIndicator = ({ isCollapsed }) => {
+  const timezone = useSelector((s) => s.auth.profile?.timezone) || undefined;
+  const [now, setNow] = useState(new Date());
+
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 30000);
+    return () => clearInterval(id);
+  }, []);
+
+  const time = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", ...(timezone ? { timeZone: timezone } : {}) });
+  const label = timezone ? (TZ_LABEL[timezone] ?? timezone) : "Local";
+
+  if (isCollapsed) {
+    return (
+      <div className="flex justify-center pb-3 group/tz relative">
+        <div className="flex flex-col items-center gap-0.5 px-1 py-1.5 rounded-lg hover:bg-slate-800/60 transition-colors cursor-default">
+          <i className="fas fa-globe text-indigo-400 text-[11px]" />
+          <span className="text-white text-[9px] font-bold tabular-nums leading-none">{time}</span>
+          <span className="text-slate-500 text-[8px] font-semibold leading-none">{label}</span>
+        </div>
+        {/* Tooltip — slides in from the right */}
+        <div className="pointer-events-none absolute left-[calc(100%+12px)] top-1/2 -translate-y-1/2 z-[60]
+          opacity-0 group-hover/tz:opacity-100 translate-x-2 group-hover/tz:translate-x-0
+          transition-all duration-150 whitespace-nowrap">
+          <div className="relative bg-slate-800 border border-slate-700 rounded-lg shadow-xl px-3 py-2 w-48">
+            <span className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-slate-700" />
+            <p className="text-white text-xs font-semibold mb-1">All times in {label}</p>
+            <p className="text-slate-400 text-[10px] leading-snug whitespace-normal">To change, go to your Profile settings.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mx-4 mb-3 rounded-xl bg-slate-800/60 border border-slate-700/40 select-none px-3 py-2.5 group/tz relative cursor-default">
+      <p className="text-[9px] uppercase tracking-widest text-slate-500 font-semibold mb-1.5 flex items-center gap-1.5">
+        <i className="fas fa-globe text-indigo-400" />
+        All times shown in
+      </p>
+      <div className="flex items-center justify-between">
+        <span className="text-white text-xs font-bold">{label}</span>
+        <span className="text-indigo-300 text-xs font-bold tabular-nums">{time}</span>
+      </div>
+      {/* Tooltip — slides up from below the card */}
+      <div className="pointer-events-none absolute bottom-[calc(100%+8px)] left-0 right-0 z-[60]
+        opacity-0 group-hover/tz:opacity-100 translate-y-2 group-hover/tz:translate-y-0
+        transition-all duration-150">
+        <div className="relative bg-slate-800 border border-slate-700 rounded-lg shadow-xl px-3 py-2">
+          <span className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-700" />
+          <p className="text-slate-300 text-[10px] leading-snug flex items-start gap-1.5">
+            <i className="fas fa-circle-info text-indigo-400 mt-0.5 flex-shrink-0" />
+            To change the timezone, go to your <span className="text-white font-semibold">&nbsp;Profile settings.</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const NAV_CONFIG = {
   admin: [
     { id: "overview",    label: "Overview",     icon: "fas fa-chart-line",    to: "/admin/overview" },
@@ -334,6 +401,9 @@ const Sidebar = ({
           )}
         </div>
       )}
+
+      {/* ── Timezone Indicator ── */}
+      <TimezoneIndicator isCollapsed={isCollapsed} />
 
       {/* ── Footer: UserProfileDropdown ── */}
       <div className="border-t border-slate-800/80 flex-shrink-0 p-4 overflow-visible relative">

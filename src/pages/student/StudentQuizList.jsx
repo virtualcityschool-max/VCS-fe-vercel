@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { fetchStudentQuizzes } from "../../store/slices/studentDashboardSlice";
 import { FilterSelect } from "../../components/ui";
-import { formatTime } from "../../utils/validation";
+import { useDateFormatters } from "../../hooks";
 
 const statusConfig = (sub) => {
   if (!sub || sub.status === "pending") return { label: "Pending",    color: "text-yellow-400 bg-yellow-500/10" };
@@ -17,6 +17,7 @@ const statusConfig = (sub) => {
 const StudentQuizList = ({ hideHeader = false, filterCourse: externalFilterCourse }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { formatTime } = useDateFormatters();
   const { quizzes, isFetchingQuizzes } = useSelector((s) => s.studentDashboard);
 
   const filterCourse = externalFilterCourse || "";

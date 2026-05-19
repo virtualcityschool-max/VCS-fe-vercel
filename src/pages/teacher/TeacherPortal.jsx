@@ -15,11 +15,13 @@ import CourseStudentsModal from "../../components/courses/CourseStudentsModal";
 import { showApiError } from "../../utils/apiErrorHandler";
 import ConfirmDialog from "../../components/common/ConfirmDialog";
 import { getWindowLabel, isWithinSessionWindow } from "../../components/common/StartSession";
+import { useDateFormatters } from "../../hooks";
 
 
 const TeacherPortal = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { timezone, formatDate, formatTime } = useDateFormatters();
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [courseId, setCourseId] = useState("");
@@ -253,7 +255,7 @@ const TeacherPortal = () => {
                   const today = new Date();
                   const end = new Date(today);
                   end.setDate(end.getDate() + 6);
-                  const fmt = (d) => d.toLocaleDateString([], { month: "short", day: "numeric" });
+                  const fmt = (d) => d.toLocaleDateString([], { month: "short", day: "numeric", ...(timezone ? { timeZone: timezone } : {}) });
                   return <p className="text-sm text-slate-500 font-medium mt-1 ml-11">{fmt(today)} – {fmt(end)}</p>;
                 })()}
               </div>
@@ -266,8 +268,8 @@ const TeacherPortal = () => {
               {dashboard?.todays_schedule?.length ? (
                 dashboard.todays_schedule.map((session) => {
                   const schedDate = new Date(session.schedule_at);
-                  const dayLabel = schedDate.toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" });
-                  const timeLabel = schedDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+                  const dayLabel = schedDate.toLocaleDateString([], { weekday: "short", month: "short", day: "numeric", ...(timezone ? { timeZone: timezone } : {}) });
+                  const timeLabel = formatTime(session.schedule_at);
                   const isLive = session.status === "live";
 
                   return (
@@ -495,7 +497,7 @@ const TeacherPortal = () => {
                       </div>
                       <div className="text-right">
                         <p className="text-[9px] text-slate-500 uppercase font-black tracking-widest mb-1">Due Date</p>
-                        <p className="text-sm font-black text-white">{new Date(a.due_date).toLocaleDateString()}</p>
+                        <p className="text-sm font-black text-white">{formatDate(a.due_date)}</p>
                       </div>
                     </div>
                   </div>

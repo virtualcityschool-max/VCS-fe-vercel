@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { formatTime } from "../../utils/validation";
+import { useDateFormatters } from "../../hooks";
 
 const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MONTH_NAMES = [
@@ -23,6 +23,7 @@ const getStatusCls = (status) => {
 };
 
 const SessionCalendarView = ({ sessions = [], loading = false }) => {
+  const { formatTime } = useDateFormatters();
   const [calendarMonth, setCalendarMonth] = useState(null);
 
   // Parent sessions (is_child === false) drive the date range when present

@@ -3,11 +3,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { fetchStudentAssignments } from "../../store/slices/studentDashboardSlice";
 import { FilterSelect } from "../../components/ui";
-import { formatTime } from "../../utils/validation";
+import { useDateFormatters } from "../../hooks";
 
 const StudentAssignments = ({ hideHeader = false, filterCourse: externalFilterCourse }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { formatTime } = useDateFormatters();
 
   const { assignments, error, isFetchingAssignments } = useSelector(
     (state) => state.studentDashboard,

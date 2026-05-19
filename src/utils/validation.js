@@ -215,46 +215,77 @@ export const clampDate = (value) => {
   return `${year}-${month}-${day}`;
 };
 
-// Converts ISO string to "YYYY-MM-DDTHH:mm" in local time — for datetime-local inputs
-export const toLocalDatetimeInput = (isoString) => {
+// Returns "+05:00" / "-04:00" style offset for the given timezone at the given moment.
+// Classic trick: parse the same instant formatted in UTC vs the target tz — local offset cancels.
+const getOffsetStr = (timeZone, forDate = new Date()) => {
+  const utcDate = new Date(forDate.toLocaleString("en-US", { timeZone: "UTC" }));
+  const tzDate  = new Date(forDate.toLocaleString("en-US", { timeZone }));
+  const diff    = Math.round((tzDate - utcDate) / 60000);
+  const sign    = diff >= 0 ? "+" : "-";
+  const abs     = Math.abs(diff);
+  return `${sign}${String(Math.floor(abs / 60)).padStart(2, "0")}:${String(abs % 60).padStart(2, "0")}`;
+};
+
+// Converts ISO string to "YYYY-MM-DDTHH:mm" for a datetime-local input.
+// Pass timeZone (e.g. "Asia/Karachi") to display in that timezone; omit for browser local.
+export const toLocalDatetimeInput = (isoString, timeZone) => {
   if (!isoString) return "";
   const d = new Date(isoString);
+  if (timeZone) {
+    const parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone,
+      year: "numeric", month: "2-digit", day: "2-digit",
+      hour: "2-digit", minute: "2-digit", hour12: false,
+    }).formatToParts(d);
+    const get  = (type) => parts.find((p) => p.type === type)?.value ?? "00";
+    const hour = get("hour") === "24" ? "00" : get("hour");
+    return `${get("year")}-${get("month")}-${get("day")}T${hour}:${get("minute")}`;
+  }
   const pad = (n) => String(n).padStart(2, "0");
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 };
 
-// "May 15, 2026"
-export const formatDate = (isoString) => {
+// Converts a datetime-local input value ("YYYY-MM-DDTHH:mm") to an ISO string
+// with the correct offset for the given timezone (or browser local if omitted).
+export const formatTimezoneISO = (localString, timeZone) => {
+  if (!localString) return "";
+  if (!timeZone) return formatLocalISO(new Date(localString));
+  const offsetStr = getOffsetStr(timeZone, new Date(localString));
+  const [datePart, timePart] = localString.split("T");
+  return `${datePart}T${timePart.slice(0, 5)}:00${offsetStr}`;
+};
+
+// "May 15, 2026"  — pass timeZone (e.g. "Asia/Karachi") to override browser locale
+export const formatDate = (isoString, timeZone) => {
   if (!isoString) return "—";
   try {
-    return new Date(isoString).toLocaleDateString(undefined, {
-      year: "numeric", month: "short", day: "numeric",
-    });
+    const opts = { year: "numeric", month: "short", day: "numeric" };
+    if (timeZone) opts.timeZone = timeZone;
+    return new Date(isoString).toLocaleDateString(undefined, opts);
   } catch {
     return "—";
   }
 };
 
 // "12:28 PM"
-export const formatTime = (isoString) => {
+export const formatTime = (isoString, timeZone) => {
   if (!isoString) return "";
   try {
-    return new Date(isoString).toLocaleTimeString([], {
-      hour: "2-digit", minute: "2-digit",
-    });
+    const opts = { hour: "2-digit", minute: "2-digit" };
+    if (timeZone) opts.timeZone = timeZone;
+    return new Date(isoString).toLocaleTimeString([], opts);
   } catch {
     return "";
   }
 };
 
 // "May 15, 2026, 12:28 PM"
-export const formatDateTime = (isoString) => {
+export const formatDateTime = (isoString, timeZone) => {
   if (!isoString) return "—";
   try {
-    return new Date(isoString).toLocaleString(undefined, {
-      year: "numeric", month: "short", day: "numeric",
-      hour: "2-digit", minute: "2-digit",
-    });
+    const opts = { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" };
+    if (timeZone) opts.timeZone = timeZone;
+    return new Date(isoString).toLocaleString(undefined, opts);
   } catch {
     return "—";
   }
