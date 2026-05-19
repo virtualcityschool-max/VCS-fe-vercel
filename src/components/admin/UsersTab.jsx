@@ -359,24 +359,28 @@ const UsersTab = ({
               {users?.map((user) => (
                 <div
                   key={user.id}
-                  className="p-4 sm:p-6 hover:bg-slate-800/30 transition"
+                  className={`p-4 sm:p-6 transition ${user.is_superuser ? "bg-amber-500/[0.04] border-l-2 border-amber-500/40" : "hover:bg-slate-800/30"}`}
                 >
                   <div className="flex items-start gap-3 sm:gap-4 mb-4">
                     <div className="relative">
                       <div
-                        className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center ${getRoleColor(
-                          user.role,
-                        )}`}
+                        className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center ${getRoleColor(user.role)}`}
                       >
-                        <i className="fas fa-user text-white"></i>
+                        <i className={`fas ${user.is_superuser ? "fa-crown text-amber-400" : "fa-user text-white"}`}></i>
                       </div>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-bold text-white text-sm sm:text-base mb-1">
-                        {user.username ||
-                          user.first_name + " " + user.last_name ||
-                          "Unknown User"}
-                      </p>
+                      <div className="flex items-center gap-2 flex-wrap mb-1">
+                        <p className="font-bold text-white text-sm sm:text-base">
+                          {user.username || user.first_name + " " + user.last_name || "Unknown User"}
+                        </p>
+                        {user.is_superuser && (
+                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-amber-500/15 border border-amber-500/30 text-amber-400 text-[9px] font-black uppercase tracking-wider">
+                            <i className="fas fa-crown text-[8px]" />
+                            Super Admin
+                          </span>
+                        )}
+                      </div>
                       <p className="text-[9px] sm:text-xs text-slate-500 uppercase break-all">
                         {user.email}
                       </p>
@@ -385,54 +389,51 @@ const UsersTab = ({
 
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div className="flex items-center gap-2">
-                      <span
-                        className={`px-2 py-1 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest ${getRoleColor(
-                          user.role,
-                        )}`}
-                      >
+                      <span className={`px-2 py-1 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest ${getRoleColor(user.role)}`}>
                         {user.role}
                       </span>
-                      <span
-                        className={`px-2 py-1 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest ${getStatusColor(
-                          user.is_active,
-                        )}`}
-                      >
+                      <span className={`px-2 py-1 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest ${getStatusColor(user.is_active)}`}>
                         {user.is_active ? "Active" : "Inactive"}
                       </span>
                     </div>
 
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleEditUser(user.id)}
-                        className="bg-slate-700/50 text-slate-300 px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium hover:bg-slate-600/50 transition flex items-center gap-1 flex-1 justify-center"
-                      >
-                        <i className="fas fa-edit"></i>
-                        <span className="hidden sm:inline">Edit</span>
-                      </button>
-                      <button
-                        onClick={() => handleDeleteUser(user)}
-                        className={`px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition flex items-center gap-1 flex-1 justify-center ${
-                          user.is_active
-                            ? "bg-amber-600/10 text-amber-400 hover:bg-amber-600/20"
-                            : "bg-emerald-600/10 text-emerald-400 hover:bg-emerald-600/20"
-                        }`}
-                      >
-                        <i
-                          className={`fas ${user.is_active ? "fa-ban" : "fa-check-circle"}`}
-                        ></i>
-                        <span className="hidden sm:inline">
-                          {user.is_active ? "Deactivate" : "Activate"}
-                        </span>
-                      </button>
-                      <button
-                        onClick={() => handlePurgeUser(user.id)}
-                        className="bg-red-900/20 text-red-400 px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium hover:bg-red-900/40 transition flex items-center gap-1 flex-1 justify-center"
-                        title="Permanently delete"
-                      >
-                        <i className="fas fa-trash"></i>
-                        <span className="hidden sm:inline">Delete</span>
-                      </button>
-                    </div>
+                    {user.is_superuser ? (
+                      <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/20 self-start sm:self-auto">
+                        <i className="fas fa-lock text-amber-500/70 text-xs" />
+                        <span className="text-amber-600/90 text-xs font-semibold">System Protected</span>
+                      </div>
+                    ) : (
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleEditUser(user.id)}
+                          className="bg-slate-700/50 text-slate-300 px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium hover:bg-slate-600/50 transition flex items-center gap-1 flex-1 justify-center"
+                        >
+                          <i className="fas fa-edit"></i>
+                          <span className="hidden sm:inline">Edit</span>
+                        </button>
+                        <button
+                          onClick={() => handleDeleteUser(user)}
+                          className={`px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition flex items-center gap-1 flex-1 justify-center ${
+                            user.is_active
+                              ? "bg-amber-600/10 text-amber-400 hover:bg-amber-600/20"
+                              : "bg-emerald-600/10 text-emerald-400 hover:bg-emerald-600/20"
+                          }`}
+                        >
+                          <i className={`fas ${user.is_active ? "fa-ban" : "fa-check-circle"}`}></i>
+                          <span className="hidden sm:inline">
+                            {user.is_active ? "Deactivate" : "Activate"}
+                          </span>
+                        </button>
+                        <button
+                          onClick={() => handlePurgeUser(user.id)}
+                          className="bg-red-900/20 text-red-400 px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium hover:bg-red-900/40 transition flex items-center gap-1 flex-1 justify-center"
+                          title="Permanently delete"
+                        >
+                          <i className="fas fa-trash"></i>
+                          <span className="hidden sm:inline">Delete</span>
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
@@ -459,80 +460,80 @@ const UsersTab = ({
                 </thead>
                 <tbody>
                   {users?.map((user) => (
-                    <tr key={user.id} className="border-b border-slate-800">
+                    <tr
+                      key={user.id}
+                      className={`border-b border-slate-800 ${user.is_superuser ? "bg-amber-500/[0.04]" : "hover:bg-slate-800/20 transition"}`}
+                    >
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="relative">
-                            <div
-                              className={`w-10 h-10 rounded-full flex items-center justify-center ${getRoleColor(
-                                user.role,
-                              )}`}
-                            >
-                              <i className="fas fa-user text-white"></i>
-                            </div>
+                          <div
+                            className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${getRoleColor(user.role)}`}
+                          >
+                            <i className={`fas ${user.is_superuser ? "fa-crown text-amber-400" : "fa-user text-white"}`}></i>
                           </div>
                           <div>
-                            <p className="font-medium text-white">
-                              {user.username ||
-                                user.first_name + " " + user.last_name ||
-                                "Unknown User"}
-                            </p>
-                            <p className="text-sm text-slate-400">
-                              {user.email}
-                            </p>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <p className="font-medium text-white">
+                                {user.username || user.first_name + " " + user.last_name || "Unknown User"}
+                              </p>
+                              {user.is_superuser && (
+                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-amber-500/15 border border-amber-500/30 text-amber-400 text-[9px] font-black uppercase tracking-wider">
+                                  <i className="fas fa-crown text-[8px]" />
+                                  Super Admin
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-sm text-slate-400">{user.email}</p>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <span
-                          className={`px-2 py-1 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest ${getRoleColor(
-                            user.role,
-                          )}`}
-                        >
+                        <span className={`px-2 py-1 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest ${getRoleColor(user.role)}`}>
                           {user.role}
                         </span>
                       </td>
                       <td className="px-6 py-4">
-                        <span
-                          className={`px-2 py-1 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest ${getStatusColor(
-                            user.is_active,
-                          )}`}
-                        >
+                        <span className={`px-2 py-1 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest ${getStatusColor(user.is_active)}`}>
                           {user.is_active ? "Active" : "Inactive"}
                         </span>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => handleEditUser(user.id)}
-                            className="bg-slate-700/50 text-slate-300 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-slate-600/50 transition"
-                          >
-                            <i className="fas fa-edit mr-1"></i>
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleDeleteUser(user)}
-                            style={{ minWidth: "100px" }}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition text-center ${
-                              user.is_active
-                                ? "bg-amber-600/10 text-amber-400 hover:bg-amber-600/20"
-                                : "bg-emerald-600/10 text-emerald-400 hover:bg-emerald-600/20"
-                            }`}
-                          >
-                            <i
-                              className={`fas ${user.is_active ? "fa-ban" : "fa-check-circle"} mr-1`}
-                            ></i>
-                            {user.is_active ? "Deactivate" : "Activate"}
-                          </button>
-                          <button
-                            onClick={() => handlePurgeUser(user.id)}
-                            className="bg-red-900/20 text-red-400 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-red-900/40 transition"
-                            title="Permanently delete"
-                          >
-                            <i className="fas fa-trash mr-1"></i>
-                            Delete
-                          </button>
-                        </div>
+                        {user.is_superuser ? (
+                          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 w-fit">
+                            <i className="fas fa-lock text-amber-500/70 text-xs" />
+                            <span className="text-amber-600/90 text-xs font-semibold">System Protected</span>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => handleEditUser(user.id)}
+                              className="bg-slate-700/50 text-slate-300 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-slate-600/50 transition"
+                            >
+                              <i className="fas fa-edit mr-1"></i>
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleDeleteUser(user)}
+                              style={{ minWidth: "100px" }}
+                              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition text-center ${
+                                user.is_active
+                                  ? "bg-amber-600/10 text-amber-400 hover:bg-amber-600/20"
+                                  : "bg-emerald-600/10 text-emerald-400 hover:bg-emerald-600/20"
+                              }`}
+                            >
+                              <i className={`fas ${user.is_active ? "fa-ban" : "fa-check-circle"} mr-1`}></i>
+                              {user.is_active ? "Deactivate" : "Activate"}
+                            </button>
+                            <button
+                              onClick={() => handlePurgeUser(user.id)}
+                              className="bg-red-900/20 text-red-400 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-red-900/40 transition"
+                              title="Permanently delete"
+                            >
+                              <i className="fas fa-trash mr-1"></i>
+                              Delete
+                            </button>
+                          </div>
+                        )}
                       </td>
                     </tr>
                   ))}
