@@ -1,0 +1,316 @@
+import { useEffect, useState, useCallback } from "react";
+import { Link } from "react-router-dom";
+import { availabilityService } from "../../services/availabilityService";
+
+const fmt12 = (t) => {
+  if (!t) return "";
+  const [h, m] = t.split(":").map(Number);
+  const suffix = h >= 12 ? "PM" : "AM";
+  return `${h % 12 || 12}:${String(m).padStart(2, "0")} ${suffix}`;
+};
+
+const fmtDate = (d) =>
+  new Date(d + "T00:00:00").toLocaleDateString(undefined, {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+
+const isUpcoming = (date) => new Date(date + "T23:59:59") >= new Date();
+
+const StudentTutors = () => {
+  const [slots, setSlots] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [filter, setFilter] = useState("all"); // all | upcoming | past
+  const [searchQuery, setSearchQuery] = useState("");
+  const [dateFilter, setDateFilter] = useState("");
+
+  const loadSlots = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await availabilityService.getMyBookings();
+      setSlots(Array.isArray(data) ? data : []);
+    } catch {
+      setError("Failed to load your booked sessions. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadSlots();
+  }, [loadSlots]);
+
+  // Group slots by teacher
+  const filtered = slots.filter((s) => {
+    if (filter === "upcoming" && !isUpcoming(s.date)) return false;
+    if (filter === "past" && isUpcoming(s.date)) return false;
+    if (dateFilter && s.date !== dateFilter) return false;
+    if (searchQuery && !(s.teacher_name || "").toLowerCase().includes(searchQuery.toLowerCase())) return false;
+    return true;
+  });
+
+  const hasActiveFilters = searchQuery || dateFilter || filter !== "all";
+
+  const grouped = filtered.reduce((acc, slot) => {
+    const key = slot.teacher_name || "Unknown Teacher";
+    const teacherId = slot.teacher_id || slot.teacher;
+    if (!acc[key]) acc[key] = { teacherId, slots: [] };
+    acc[key].slots.push(slot);
+    return acc;
+  }, {});
+
+  const upcomingCount = slots.filter((s) => isUpcoming(s.date)).length;
+  const pastCount = slots.length - upcomingCount;
+
+  return (
+    <div className="min-h-screen bg-slate-950 text-white pb-24">
+      {/* Header */}
+      <div className="border-b border-slate-800/80 bg-slate-950/95 backdrop-blur sticky top-0 z-10">
+        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between gap-4 flex-wrap">
+          <div>
+            <h1 className="text-lg font-semibold tracking-tight">My Tutors</h1>
+            <p className="text-slate-500 text-xs mt-0.5">
+              Your booked 1-on-1 tutoring sessions
+            </p>
+          </div>
+          {!loading && (
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2">
+                <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse" />
+                <span className="text-xs font-bold text-slate-200 tabular-nums">{upcomingCount}</span>
+                <span className="text-[9px] text-slate-600 uppercase tracking-widest font-bold">upcoming</span>
+              </div>
+              <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2">
+                <span className="w-2 h-2 rounded-full bg-slate-600" />
+                <span className="text-xs font-bold text-slate-200 tabular-nums">{pastCount}</span>
+                <span className="text-[9px] text-slate-600 uppercase tracking-widest font-bold">past</span>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="max-w-4xl mx-auto px-6 py-8">
+        {/* Filters */}
+        {!loading && !error && slots.length > 0 && (
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-7">
+            {/* Status filter pills */}
+            <div className="flex items-center gap-1 bg-slate-900 border border-slate-800 rounded-xl p-1 shrink-0">
+              {["all", "upcoming", "past"].map((f) => (
+                <button
+                  key={f}
+                  onClick={() => setFilter(f)}
+                  className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition ${
+                    filter === f
+                      ? "bg-indigo-600 text-white"
+                      : "text-slate-500 hover:text-slate-300"
+                  }`}
+                >
+                  {f}
+                </button>
+              ))}
+            </div>
+
+            {/* Tutor name search */}
+            <div className="relative flex-1 min-w-0 w-full sm:max-w-xs">
+              <i className="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-600 text-xs pointer-events-none" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search tutor name…"
+                className="w-full h-9 pl-8 pr-8 rounded-xl bg-slate-900 border border-slate-800 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500/60 transition"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-600 hover:text-slate-300 transition"
+                >
+                  <i className="fas fa-times text-xs" />
+                </button>
+              )}
+            </div>
+
+            {/* Date filter */}
+            <div className="relative shrink-0 w-full sm:w-auto">
+              <i className="fas fa-calendar-alt absolute left-3 top-1/2 -translate-y-1/2 text-slate-600 text-xs pointer-events-none" />
+              <input
+                type="date"
+                value={dateFilter}
+                onChange={(e) => setDateFilter(e.target.value)}
+                className="h-9 pl-8 pr-3 rounded-xl bg-slate-900 border border-slate-800 text-sm text-slate-300 focus:outline-none focus:border-indigo-500/60 transition appearance-none w-full sm:w-auto [color-scheme:dark]"
+              />
+              {dateFilter && (
+                <button
+                  onClick={() => setDateFilter("")}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-600 hover:text-slate-300 transition"
+                >
+                  <i className="fas fa-times text-xs" />
+                </button>
+              )}
+            </div>
+
+            {/* Clear all */}
+            {hasActiveFilters && (filter !== "all" || searchQuery || dateFilter) && (
+              <button
+                onClick={() => { setFilter("all"); setSearchQuery(""); setDateFilter(""); }}
+                className="text-[10px] text-slate-600 hover:text-slate-400 font-bold uppercase tracking-wider transition shrink-0"
+              >
+                Clear all
+              </button>
+            )}
+          </div>
+        )}
+
+        {loading ? (
+          <div className="flex flex-col items-center py-32">
+            <i className="fas fa-spinner fa-spin text-2xl text-slate-700 mb-3" />
+            <p className="text-slate-600 text-sm">Loading your sessions…</p>
+          </div>
+        ) : error ? (
+          <div className="bg-rose-500/10 border border-rose-500/20 rounded-2xl p-8 text-center text-rose-400">
+            <i className="fas fa-exclamation-circle text-2xl mb-3 block" />
+            <p className="text-sm font-semibold mb-4">{error}</p>
+            <button
+              onClick={loadSlots}
+              className="px-4 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-rose-400 text-xs font-bold transition"
+            >
+              Try again
+            </button>
+          </div>
+        ) : slots.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-32 text-center space-y-5">
+            <div className="w-20 h-20 rounded-3xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mx-auto">
+              <i className="fas fa-chalkboard-teacher text-indigo-400 text-3xl" />
+            </div>
+            <div>
+              <h2 className="text-xl font-semibold text-white mb-2">No tutoring sessions yet</h2>
+              <p className="text-slate-500 text-sm max-w-sm mx-auto">
+                Browse teachers and book a 1-on-1 tutoring slot to get started.
+              </p>
+            </div>
+            <Link
+              to="/teachers"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm transition shadow-lg shadow-indigo-500/20"
+            >
+              <i className="fas fa-search" />
+              Browse Teachers
+            </Link>
+          </div>
+        ) : Object.keys(grouped).length === 0 ? (
+          <div className="border border-dashed border-slate-800 rounded-3xl py-20 text-center">
+            <i className="fas fa-calendar-times text-slate-800 text-4xl block mb-3" />
+            <p className="text-slate-600 text-sm mb-3">
+              {searchQuery
+                ? `No sessions found for "${searchQuery}".`
+                : dateFilter
+                ? `No sessions on ${new Date(dateFilter + "T00:00:00").toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" })}.`
+                : `No ${filter !== "all" ? filter : ""} sessions.`}
+            </p>
+            {hasActiveFilters && (
+              <button
+                onClick={() => { setFilter("all"); setSearchQuery(""); setDateFilter(""); }}
+                className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold transition"
+              >
+                Clear filters
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="space-y-8">
+            {Object.entries(grouped).map(([teacherName, { teacherId, slots: teacherSlots }]) => {
+              const upcoming = teacherSlots.filter((s) => isUpcoming(s.date));
+              const past = teacherSlots.filter((s) => !isUpcoming(s.date));
+              const initial = teacherName[0]?.toUpperCase() || "T";
+
+              return (
+                <div key={teacherName} className="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden">
+                  {/* Teacher header */}
+                  <div className="flex items-center justify-between gap-4 px-6 py-5 border-b border-slate-800">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white text-lg font-black shrink-0 shadow-lg">
+                        {initial}
+                      </div>
+                      <div>
+                        <h2 className="font-bold text-white text-base">{teacherName}</h2>
+                        <p className="text-xs text-slate-500 mt-0.5">
+                          {teacherSlots.length} session{teacherSlots.length !== 1 ? "s" : ""} booked
+                          {upcoming.length > 0 && (
+                            <span className="ml-2 text-indigo-400 font-semibold">
+                              · {upcoming.length} upcoming
+                            </span>
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                    {teacherId && (
+                      <Link
+                        to={`/teachers/${teacherId}`}
+                        className="shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-700 text-slate-400 hover:text-white hover:border-slate-600 transition text-xs font-bold"
+                      >
+                        <i className="fas fa-external-link-alt text-[10px]" />
+                        View Profile
+                      </Link>
+                    )}
+                  </div>
+
+                  {/* Slot list */}
+                  <div className="divide-y divide-slate-800/60">
+                    {teacherSlots
+                      .slice()
+                      .sort((a, b) => a.date.localeCompare(b.date) || a.start_time.localeCompare(b.start_time))
+                      .map((slot) => {
+                        const upcoming = isUpcoming(slot.date);
+                        return (
+                          <div key={slot.id} className="flex items-center justify-between gap-4 px-6 py-4 flex-wrap">
+                            <div className="flex items-center gap-4">
+                              {/* Date badge */}
+                              <div className={`w-10 h-10 rounded-xl flex flex-col items-center justify-center shrink-0 border ${
+                                upcoming
+                                  ? "bg-indigo-500/10 border-indigo-500/20"
+                                  : "bg-slate-800/60 border-slate-700/40"
+                              }`}>
+                                <span className={`text-[10px] font-black ${upcoming ? "text-indigo-400" : "text-slate-600"}`}>
+                                  {new Date(slot.date + "T00:00:00").toLocaleDateString(undefined, { month: "short" }).toUpperCase()}
+                                </span>
+                                <span className={`text-sm font-black leading-tight ${upcoming ? "text-indigo-300" : "text-slate-500"}`}>
+                                  {new Date(slot.date + "T00:00:00").getDate()}
+                                </span>
+                              </div>
+                              <div>
+                                <p className="text-sm font-semibold text-white">
+                                  {fmt12(slot.start_time)} – {fmt12(slot.end_time)}
+                                </p>
+                                <p className="text-xs text-slate-500 mt-0.5">
+                                  {fmtDate(slot.date)}
+                                </p>
+                              </div>
+                            </div>
+
+                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${
+                              upcoming
+                                ? "bg-indigo-500/10 border-indigo-500/20 text-indigo-300"
+                                : "bg-slate-800/60 border-slate-700/40 text-slate-500"
+                            }`}>
+                              <span className={`w-1.5 h-1.5 rounded-full ${upcoming ? "bg-indigo-400 animate-pulse" : "bg-slate-600"}`} />
+                              {upcoming ? "Upcoming" : "Completed"}
+                            </span>
+                          </div>
+                        );
+                      })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default StudentTutors;

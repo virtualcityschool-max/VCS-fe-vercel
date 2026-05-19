@@ -207,13 +207,18 @@ const AuthModals = () => {
         case "admin":
           navigate("/admin", { replace: true });
           break;
-        case "student":
-          if (enrollmentIntent) {
+        case "student": {
+          const hireIntentId = sessionStorage.getItem("vcs_hire_intent");
+          if (hireIntentId) {
+            // DO NOT clear sessionStorage here — TeacherProfile.jsx reads and clears it
+            navigate(`/teachers/${hireIntentId}`, { replace: true });
+          } else if (enrollmentIntent) {
             navigate(`/courses/${enrollmentIntent.courseId}`, { replace: true });
           } else {
             navigate("/student", { replace: true });
           }
           break;
+        }
         case "teacher":
           navigate("/teacher", { replace: true });
           break;

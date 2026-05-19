@@ -2,20 +2,38 @@ import { useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchTeachers } from "../../store/slices/teacherSlice";
+import { setAuthModal } from "../../store/slices/uiSlice";
 import { SearchInput } from "../../components/ui";
 import { useAuth } from "../../hooks/useAuth";
 import HireTutorModal from "../../components/public/HireTutorModal";
+import AuthRequiredModal from "../../components/common/AuthRequiredModal";
+
+const HIRE_INTENT_KEY = "vcs_hire_intent";
 
 const TeachersDirectory = () => {
   const [hasFetched, setHasFetched] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [hireModal, setHireModal] = useState(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const navigate = useNavigate();
   const abortControllerRef = useRef(null);
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isStudent } = useAuth();
 
   const dispatch = useDispatch();
   const { teachers, loading, error } = useSelector((state) => state.teachers);
+
+  const handleHireClick = (teacher) => {
+    if (!isAuthenticated) {
+      sessionStorage.setItem(HIRE_INTENT_KEY, String(teacher.id));
+      setShowAuthModal(true);
+      return;
+    }
+    if (isStudent) {
+      navigate(`/teachers/${teacher.id}`);
+      return;
+    }
+    setHireModal(teacher);
+  };
 
   useEffect(() => {
     // Cancel any ongoing request
@@ -195,7 +213,7 @@ const TeachersDirectory = () => {
                       </button>
                     )}
                     <button
-                      onClick={() => setHireModal(teacher)}
+                      onClick={() => handleHireClick(teacher)}
                       className="w-full py-2.5 rounded-xl bg-slate-900 border border-blue-600/30 text-blue-500 hover:bg-blue-600 hover:text-white font-black text-[11px] uppercase tracking-[0.18em] transition-all active:scale-95"
                     >
                       Hire Tutor
@@ -207,6 +225,12 @@ const TeachersDirectory = () => {
           )}
         </div>
       </div>
+      <AuthRequiredModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        title="Login Required"
+        message="Please log in or create a student account to book a tutoring session with this teacher."
+      />
     </section>
   );
 };

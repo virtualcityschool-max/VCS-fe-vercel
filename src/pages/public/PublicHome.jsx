@@ -407,7 +407,17 @@ const PublicHome = () => {
                         </button>
                       )}
                       <button
-                        onClick={() => setHireModal(t)}
+                        onClick={() => {
+                          if (!auth.isLoggedIn) {
+                            dispatch(setAuthModal({ type: "login", intendedRole: "student" }));
+                            return;
+                          }
+                          if (auth.role === "student") {
+                            navigate(`/teachers/${t.id}`);
+                            return;
+                          }
+                          setHireModal(t);
+                        }}
                         className="w-full py-2.5 rounded-xl bg-slate-900 border border-blue-600/30 text-blue-500 hover:bg-blue-600 hover:text-white font-black text-[11px] uppercase tracking-[0.18em] transition-all active:scale-95"
                       >
                         Hire Tutor

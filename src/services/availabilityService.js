@@ -1,0 +1,49 @@
+import axiosInstance from "../utils/axiosInstance";
+
+const generateSlots = async (dateRanges) => {
+  const response = await axiosInstance.post("/availability/slots/generate/", {
+    date_ranges: dateRanges,
+  });
+  return response.data;
+};
+
+const getMySlots = async (params = {}) => {
+  const response = await axiosInstance.get("/availability/slots/my-slots/", { params });
+  return response.data;
+};
+
+const deleteSlot = async (slotId) => {
+  const response = await axiosInstance.delete(`/availability/slots/${slotId}/`);
+  return response.data;
+};
+
+const getTeacherAvailableSlots = async (teacherId) => {
+  const response = await axiosInstance.get(`/availability/slots/teacher/${teacherId}/`);
+  return response.data;
+};
+
+const bookSlot = async (slotId, note = "") => {
+  const response = await axiosInstance.post(`/availability/slots/${slotId}/book/`, { note });
+  return response.data;
+};
+
+const getChildBookedSlots = async (childId) => {
+  const params = childId ? { child_id: childId } : {};
+  const response = await axiosInstance.get("/availability/slots/child-slots/", { params });
+  return response.data;
+};
+
+const getMyBookings = async () => {
+  const response = await axiosInstance.get("/availability/slots/my-bookings/");
+  return response.data;
+};
+
+export const availabilityService = {
+  generateSlots,
+  getMySlots,
+  deleteSlot,
+  getTeacherAvailableSlots,
+  bookSlot,
+  getChildBookedSlots,
+  getMyBookings,
+};
