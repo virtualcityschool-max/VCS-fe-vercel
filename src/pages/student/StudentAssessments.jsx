@@ -59,13 +59,13 @@ const StudentAssessments = () => {
   return (
     <div className="text-white px-6 py-8">
       {/* Header */}
-      <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
+      <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-black font-poppins mb-2">Assessments</h1>
           <p className="text-slate-400 text-sm">View and manage all your assignments and quizzes.</p>
         </div>
         
-        <div className="flex flex-wrap items-center gap-2 shrink-0">
+        <div className="flex flex-wrap items-center  gap-2 shrink-0">
           {coursesLoading ? (
             <div className="h-10 w-48 bg-slate-800 rounded-xl animate-pulse" />
           ) : (
