@@ -649,9 +649,6 @@ const AuthModals = () => {
                   <form onSubmit={handleFpRequestOtp} className="space-y-5 flex-1">
                     <div className="text-center mb-6 flex flex-col items-center">
                       <img src="/assets/logo.png" alt="Virtual City School" className="h-10 sm:h-12 object-contain mb-8" />
-                      <div className="w-16 h-16 bg-indigo-500/20 rounded-3xl flex items-center justify-center text-2xl mx-auto mb-4">
-                        <i className="fas fa-lock text-indigo-400" />
-                      </div>
                       <h2 className="text-xl font-black font-poppins text-white mb-1">Forgot Password</h2>
                       <p className="text-slate-400 text-xs">Enter your email to receive a reset code</p>
                     </div>

@@ -297,6 +297,9 @@ const OverviewTab = ({ analytics, analyticsLoading, analyticsError }) => {
               </p>
             </div>
           </div>
+          <p className="text-xs text-slate-500 mb-4 ml-11">
+            Total earnings generated per course
+          </p>
           {/* <div className="flex items-center gap-4 text-xs text-slate-400 ml-11 mb-4">
             <span className="flex items-center gap-1.5">
               <span className="w-3 h-3 rounded-sm bg-emerald-500 inline-block"></span>
