@@ -57,7 +57,7 @@ const StudentAssessments = () => {
   };
 
   return (
-    <div className="text-white px-6 py-8">
+    <div className="p-6 lg:p-12 space-y-6">
       {/* Header */}
       <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
         <div>

@@ -14,14 +14,34 @@ import {
 const truncate = (str, n = 12) =>
   str?.length > n ? str.slice(0, n) + "…" : str;
 
-const tooltipStyle = {
-  contentStyle: {
-    backgroundColor: "#1e293b",
-    border: "1px solid #334155",
-    borderRadius: "8px",
-  },
-  labelStyle: { color: "#e2e8f0" },
-  itemStyle: { color: "#e2e8f0" },
+const RevenueTooltip = ({ active, payload }) => {
+  if (!active || !payload?.length) return null;
+  const { fullName, Revenue } = payload[0].payload;
+  return (
+    <div className="bg-slate-900 border border-slate-700 rounded-xl shadow-2xl px-4 py-3 min-w-[160px]">
+      <p className="font-bold text-white text-sm leading-snug mb-2">{fullName}</p>
+      <div className="flex items-center justify-between gap-4">
+        <span className="text-[10px] uppercase tracking-wider text-slate-400">Revenue</span>
+        <span className="text-xs font-semibold text-amber-400">
+          PKR {Revenue?.toLocaleString()}
+        </span>
+      </div>
+    </div>
+  );
+};
+
+const EnrollmentTooltip = ({ active, payload }) => {
+  if (!active || !payload?.length) return null;
+  const { fullName, Students } = payload[0].payload;
+  return (
+    <div className="bg-slate-900 border border-slate-700 rounded-xl shadow-2xl px-4 py-3 min-w-[160px]">
+      <p className="font-bold text-white text-sm leading-snug mb-2">{fullName}</p>
+      <div className="flex items-center justify-between gap-4">
+        <span className="text-[10px] uppercase tracking-wider text-slate-400">Students</span>
+        <span className="text-xs font-semibold text-indigo-400">{Students}</span>
+      </div>
+    </div>
+  );
 };
 
 // ── Stat card with hover tooltip breakdown ───────────────────────────────────
@@ -92,22 +112,8 @@ const OverviewTab = ({ analytics, analyticsLoading, analyticsError }) => {
   if (analyticsLoading) {
     return (
       <div className="space-y-3">
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
-          {[...Array(8)].map((_, i) => (
-            <div
-              key={i}
-              className="bg-slate-900/50 border border-slate-800 rounded-xl p-3 animate-pulse"
-            >
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-6 h-6 bg-slate-700 rounded-md" />
-                <div className="h-2.5 bg-slate-700 rounded w-14" />
-              </div>
-              <div className="h-6 bg-slate-700 rounded w-10" />
-            </div>
-          ))}
-        </div>
-        <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 gap-3">
-          {[...Array(2)].map((_, i) => (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          {[...Array(6)].map((_, i) => (
             <div
               key={i}
               className="bg-slate-900/50 border border-slate-800 rounded-xl p-3 animate-pulse"
@@ -332,17 +338,7 @@ const OverviewTab = ({ analytics, analyticsLoading, analyticsError }) => {
                     v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v
                   }
                 />
-                <Tooltip
-                  {...tooltipStyle}
-                  cursor={false}
-                  formatter={(value, name) => [
-                    `PKR ${value.toLocaleString()}`,
-                    name,
-                  ]}
-                  labelFormatter={(label, payload) =>
-                    payload?.[0]?.payload?.fullName || label
-                  }
-                />
+                <Tooltip content={<RevenueTooltip />} cursor={false} />
                 <Bar dataKey="Revenue" fill="#10b981" radius={[4, 4, 0, 0]} />
                 <Bar
                   dataKey="Lost Revenue"
@@ -400,14 +396,7 @@ const OverviewTab = ({ analytics, analyticsLoading, analyticsError }) => {
                   allowDecimals={false}
                   tick={{ fontSize: 10 }}
                 />
-                <Tooltip
-                  {...tooltipStyle}
-                  cursor={false}
-                  formatter={(value) => [value, "Students"]}
-                  labelFormatter={(label, payload) =>
-                    payload?.[0]?.payload?.fullName || label
-                  }
-                />
+                <Tooltip content={<EnrollmentTooltip />} cursor={false} />
                 <Bar dataKey="Students" fill="#6366f1" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>

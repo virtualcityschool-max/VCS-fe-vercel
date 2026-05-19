@@ -299,7 +299,7 @@ const StudentQuizDetail = () => {
   );
 
   return (
-    <div className="text-white px-6 py-8 max-w-2xl mx-auto">
+    <div className="p-6 lg:p-12 space-y-6 max-w-2xl mx-auto">
       {/* Back */}
       <button
         type="button"
