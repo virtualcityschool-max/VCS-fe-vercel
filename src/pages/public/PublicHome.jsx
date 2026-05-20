@@ -153,7 +153,7 @@ const PublicHome = () => {
             </div>
 
             {/* Floating Stat Card */}
-            <div className="absolute -bottom-6 -left-6 z-20 bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-5 shadow-2xl animate-float">
+            {/* <div className="absolute -bottom-6 -left-6 z-20 bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-5 shadow-2xl animate-float">
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 rounded-lg bg-cyan-500/20 flex items-center justify-center shrink-0">
                   <i className="fas fa-bolt text-cyan-400 text-sm" />
@@ -165,7 +165,7 @@ const PublicHome = () => {
                   </p>
                 </div>
               </div>
-            </div>
+            </div> */}
 
             {/* Background Decorative Glow */}
             <div className="absolute -inset-4 bg-cyan-500/5 blur-[80px] rounded-full pointer-events-none -z-10" />
