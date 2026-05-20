@@ -7,13 +7,14 @@ import {
   fetchStudentDashboard,
 } from "../../store/slices/studentDashboardSlice";
 import { toastManager } from "../../utils/toastManager";
-import { formatDate, formatScheduleTime } from "../common/StartSession";
+import { useDateFormatters } from "../../hooks/useDateFormatters";
 import { extractApiErrorMessage, showApiError } from "../../utils/apiErrorHandler";
 import ConfirmDialog from "../common/ConfirmDialog";
 
 const LiveScheduleList = () => {
   const dispatch = useDispatch();
   const liveSchedule = useSelector(selectLiveSchedule);
+  const { formatDate, formatTime } = useDateFormatters();
   const isJoiningSession = useSelector(
     (state) => state.studentDashboard.isJoiningSession,
   );
@@ -202,7 +203,7 @@ const LiveScheduleList = () => {
                   </div>
                   <div className="flex items-center gap-1.5">
                     <i className="fas fa-clock text-indigo-400/60"></i>
-                    <span>{formatScheduleTime(session.scheduled_at)}</span>
+                    <span>{formatTime(session.scheduled_at)}</span>
                   </div>
                   {/* {session.recurring_schedule && (
                     <div className="flex items-center gap-1">
