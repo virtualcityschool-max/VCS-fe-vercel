@@ -45,7 +45,6 @@ const PreviewButton = ({ url, className = "" }) => {
 const TeacherGrading = ({
   externalFilters,
   onFiltersChange,
-  hideHeader = false,
   controlsContainerId,
 }) => {
   const { formatDate, formatTime, formatDateTime, toDatetimeInput, toPayloadISO } = useDateFormatters();
@@ -244,54 +243,6 @@ const TeacherGrading = ({
     <div className="text-white">
       {controlsContainer &&
         ReactDOM.createPortal(headerActions, controlsContainer)}
-
-      {!hideHeader && (
-        <>
-          <div className="mb-10 flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-black font-poppins mb-2">
-                My Assignments
-              </h1>
-              <p className="text-slate-400 text-sm">
-                Review assignments and move into grading workflows.
-              </p>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setShowCreateModal(true)}
-              className="bg-indigo-600 hover:bg-indigo-500 px-5 py-3 rounded-xl text-xs font-bold"
-            >
-              + Create Assignment
-            </button>
-          </div>
-
-          <div className="mb-6 flex flex-wrap gap-2 items-center">
-            <FilterSelect
-              value={filters.course}
-              onChange={(e) =>
-                setFilters((prev) => ({ ...prev, course: e.target.value }))
-              }
-            >
-              <option value="">All Courses</option>
-              {myCourses?.map((course) => (
-                <option key={course.id} value={course.id}>
-                  {course.title}
-                </option>
-              ))}
-            </FilterSelect>
-            <FilterSelect
-              value={filters.status}
-              onChange={(e) =>
-                setFilters((prev) => ({ ...prev, status: e.target.value }))
-              }
-            >
-              <option value="published">Published</option>
-              <option value="draft">Draft</option>
-            </FilterSelect>
-          </div>
-        </>
-      )}
 
       {/* ASSIGNMENTS LIST */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

@@ -32,7 +32,7 @@ const TeacherAssessments = () => {
       {/* 1) Main Heading & 2) Subheading */}
       <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-6">
         <div>
-          <h1 className="text-3xl font-black font-poppins">My Assignments</h1>
+          <h1 className="text-3xl font-black font-poppins">My Assessments</h1>
           <p className="text-slate-400 text-sm mt-1">Manage, review, and grade your students' assessments.</p>
         </div>
 
@@ -66,16 +66,14 @@ const TeacherAssessments = () => {
         {activeTab === "assignments" && (
           <TeacherGrading 
             externalFilters={filters} 
-            onFiltersChange={setFilters} 
-            hideHeader={true}
+            onFiltersChange={setFilters}
             controlsContainerId="assessment-controls-portal"
           />
         )}
         {activeTab === "quizzes" && (
           <TeacherQuizzes 
             externalFilters={filters} 
-            onFiltersChange={setFilters} 
-            hideHeader={true}
+            onFiltersChange={setFilters}
             controlsContainerId="assessment-controls-portal"
           />
         )}
