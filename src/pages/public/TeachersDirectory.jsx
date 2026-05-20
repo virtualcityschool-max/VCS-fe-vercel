@@ -29,7 +29,7 @@ const TeachersDirectory = () => {
       return;
     }
     if (isStudent) {
-      navigate(`/teachers/${teacher.id}`);
+      navigate(`/teachers/${teacher.id}`, { state: { openSlots: true } });
       return;
     }
     setHireModal(teacher);

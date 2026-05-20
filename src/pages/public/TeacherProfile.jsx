@@ -1,4 +1,4 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { fetchTeacherById } from "../../store/slices/teacherSlice";
@@ -238,6 +238,7 @@ const BookingModal = ({ teacherName, slots, onClose, onBooked }) => {
 // ── Main component ─────────────────────────────────────────────────────────────
 const TeacherProfile = () => {
   const { id } = useParams();
+  const location = useLocation();
   const dispatch = useDispatch();
   const abortControllerRef = useRef(null);
 
@@ -300,6 +301,13 @@ const TeacherProfile = () => {
     intentHandled.current = true;
     setOpenModalOnLoad(true);
   }, [isLoggedIn, role, id]);
+
+  // Auto-open booking modal when navigated from TeachersDirectory with openSlots flag
+  useEffect(() => {
+    if (!isLoggedIn || role !== "student" || !location.state?.openSlots || intentHandled.current) return;
+    intentHandled.current = true;
+    setOpenModalOnLoad(true);
+  }, [isLoggedIn, role, location.state?.openSlots]);
 
   // Open modal once slots are ready (used by the post-login intent path)
   useEffect(() => {
