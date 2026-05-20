@@ -8,13 +8,14 @@ import {
 } from "../../store/slices/studentDashboardSlice";
 import { toastManager } from "../../utils/toastManager";
 import { useDateFormatters } from "../../hooks/useDateFormatters";
+import { getWindowLabel } from "../../utils/helper/StartSession";
 import { extractApiErrorMessage, showApiError } from "../../utils/apiErrorHandler";
 import ConfirmDialog from "../common/ConfirmDialog";
 
 const LiveScheduleList = () => {
   const dispatch = useDispatch();
   const liveSchedule = useSelector(selectLiveSchedule);
-  const { formatDate, formatTime } = useDateFormatters();
+  const { formatDate, formatTime, timezone } = useDateFormatters();
   const isJoiningSession = useSelector(
     (state) => state.studentDashboard.isJoiningSession,
   );
@@ -283,23 +284,29 @@ const LiveScheduleList = () => {
                     </button>
                   </>
                 ) : (
-                  <button
-                    onClick={() => handleJoinSession(session)}
-                    disabled={isThisLoading || isJoiningSession}
-                    className="bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-blue-900/40 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-w-[150px]"
-                  >
-                    {isThisLoading ? (
-                      <>
-                        <i className="fas fa-spinner fa-spin"></i>
-                        <span>Joining...</span>
-                      </>
-                    ) : (
-                      <>
-                        <i className="fas fa-play text-[10px]"></i>
-                        <span>Join Session</span>
-                      </>
-                    )}
-                  </button>
+                  <div className="relative group/tooltip">
+                    <button
+                      onClick={() => handleJoinSession(session)}
+                      disabled={isThisLoading || isJoiningSession}
+                      className="bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-blue-900/40 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-w-[150px]"
+                    >
+                      {isThisLoading ? (
+                        <>
+                          <i className="fas fa-spinner fa-spin"></i>
+                          <span>Joining...</span>
+                        </>
+                      ) : (
+                        <>
+                          <i className="fas fa-play text-[10px]"></i>
+                          <span>Join Session</span>
+                        </>
+                      )}
+                    </button>
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 px-4 py-2 bg-slate-800 border border-white/10 text-white text-[10px] rounded-xl whitespace-nowrap opacity-0 group-hover/tooltip:opacity-100 transition-all pointer-events-none z-20 shadow-2xl">
+                      <p className="text-slate-400 font-bold uppercase mb-0.5">Join Window</p>
+                      <p className="font-black text-white">{getWindowLabel(session.scheduled_at, timezone) || "Check schedule"}</p>
+                    </div>
+                  </div>
                 )}
               </div>
             </div>

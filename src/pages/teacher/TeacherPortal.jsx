@@ -14,7 +14,7 @@ import { toastManager } from "../../utils/toastManager";
 import CourseStudentsModal from "../../components/courses/CourseStudentsModal";
 import { showApiError } from "../../utils/apiErrorHandler";
 import ConfirmDialog from "../../components/common/ConfirmDialog";
-import { getWindowLabel, isWithinSessionWindow } from "../../components/common/StartSession";
+import { getWindowLabel, isWithinSessionWindow } from "../../utils/helper/StartSession";
 import { useDateFormatters } from "../../hooks";
 
 
@@ -318,7 +318,7 @@ const TeacherPortal = () => {
                         <div className="flex items-center gap-3">
                           {session.status === "scheduled" && (() => {
                             let canStart = true;
-                            const windowLabel = getWindowLabel(session.schedule_at);
+                            const windowLabel = getWindowLabel(session.schedule_at, timezone);
                             return (
                               <div className="relative group/tooltip">
                                 <button

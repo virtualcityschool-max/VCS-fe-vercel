@@ -9,14 +9,12 @@ const DAY_MAP = { SUN: 0, MON: 1, TUE: 2, WED: 3, THU: 4, FRI: 5, SAT: 6 };
     }
     return false;
   };
-  export const getWindowLabel = (scheduleAt) => {
+  export const getWindowLabel = (scheduleAt, timeZone) => {
     if (scheduleAt) {
-      const scheduled = new Date(scheduleAt);
-      // windowStart is now exactly the scheduled time
-      const windowStart = new Date(scheduled.getTime()); 
-      // windowEnd is 60 minutes later
-      const windowEnd = new Date(scheduled.getTime() + 60 * 60 * 1000);
-      return `${windowStart.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} – ${windowEnd.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
+      const windowStart = new Date(scheduleAt);
+      const windowEnd = new Date(windowStart.getTime() + 60 * 60 * 1000);
+      const opts = { hour: "2-digit", minute: "2-digit", ...(timeZone ? { timeZone } : {}) };
+      return `${windowStart.toLocaleTimeString([], opts)} – ${windowEnd.toLocaleTimeString([], opts)}`;
     }
     return "";
   };
