@@ -416,7 +416,7 @@ const CoursesTab = ({
     <div className="space-y-6">
       {/* Course Management Header */}
       <div className="mb-6">
-        <div className="flex flex-wrap items-center gap-2 justify-end">
+        <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2 sm:justify-end">
           <SearchInput
             value={courseFilters.search}
             onChange={(e) => setCourseFilters({ ...courseFilters, search: e.target.value })}
@@ -424,6 +424,8 @@ const CoursesTab = ({
             placeholder="Search courses..."
             className="w-full sm:w-56"
           />
+          {/* 2-per-row on mobile for category + selects */}
+          <div className="grid grid-cols-2 sm:contents gap-2">
           {/* Category filter dropdown with inline add/edit/delete */}
           <div className="relative" ref={catDropdownRef}>
             <button
@@ -505,6 +507,7 @@ const CoursesTab = ({
           </div>
 
           <FilterSelect
+            className="w-full sm:w-auto"
             value={courseFilters.priceRange}
             onChange={(e) => setCourseFilters({ ...courseFilters, priceRange: e.target.value })}
           >
@@ -514,6 +517,7 @@ const CoursesTab = ({
                 ))}
           </FilterSelect>
           <FilterSelect
+            className="w-full sm:w-auto"
             value={courseFilters.status}
             onChange={(e) => setCourseFilters({ ...courseFilters, status: e.target.value })}
           >
@@ -523,6 +527,7 @@ const CoursesTab = ({
             <option value="completed">Completed</option>
           </FilterSelect>
           <FilterSelect
+            className="w-full sm:w-auto"
             value={courseFilters.instructor}
             onChange={(e) => setCourseFilters({ ...courseFilters, instructor: e.target.value })}
           >
@@ -531,26 +536,28 @@ const CoursesTab = ({
               <option key={user.id} value={user.id}>{user.username}</option>
             ))}
           </FilterSelect>
-          
-          <GradingScaleButton />
-          <button
-            onClick={() => setActiveModal("create-course")}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold shadow-lg shadow-indigo-500/20 active:scale-95 transition-all duration-150"
-          >
-            <i className="fas fa-plus text-xs"></i>
-            <span className="hidden sm:inline">Create Course</span>
-            <span className="sm:hidden">+</span>
-          </button>
-          {hasActiveCourseFilters && (
+          </div>{/* end 2-col grid */}
+
+          <div className="flex items-center gap-2 flex-wrap">
+            <GradingScaleButton />
             <button
-              onClick={resetCourseFilters}
-              title="Clear all filters"
-              className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-slate-700/70 bg-slate-900 hover:bg-rose-500/10 hover:border-rose-500/40 text-slate-400 hover:text-rose-400 text-sm font-medium transition-all duration-150"
+              onClick={() => setActiveModal("create-course")}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold shadow-lg shadow-indigo-500/20 active:scale-95 transition-all duration-150"
             >
-              <i className="fas fa-times text-xs"></i>
-              <span className="hidden sm:inline">Clear</span>
+              <i className="fas fa-plus text-xs"></i>
+              <span>Create Course</span>
             </button>
-          )}
+            {hasActiveCourseFilters && (
+              <button
+                onClick={resetCourseFilters}
+                title="Clear all filters"
+                className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-slate-700/70 bg-slate-900 hover:bg-rose-500/10 hover:border-rose-500/40 text-slate-400 hover:text-rose-400 text-sm font-medium transition-all duration-150"
+              >
+                <i className="fas fa-times text-xs"></i>
+                <span className="hidden sm:inline">Clear</span>
+              </button>
+            )}
+          </div>
         </div>
       </div>
 

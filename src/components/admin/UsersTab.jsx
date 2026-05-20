@@ -59,21 +59,18 @@ const SearchControls = ({
         </div>
 
         {/* Filter Controls Group */}
-        <div className="flex flex-wrap lg:flex-nowrap items-center gap-1.5 flex-1 lg:justify-end">
-          <div className="min-w-[130px] flex-1 lg:flex-none lg:w-40">
-            <SearchInput
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              onClear={() => setSearchInput("")}
-              placeholder="Search users..."
-              className="w-full"
-            />
-          </div>
+        <div className="flex flex-col sm:flex-row sm:flex-wrap lg:flex-nowrap items-stretch sm:items-center gap-1.5 flex-1 sm:justify-end">
+          <SearchInput
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            onClear={() => setSearchInput("")}
+            placeholder="Search users..."
+            className="w-full sm:w-40 lg:w-40"
+          />
 
-          <div className="flex items-center gap-1.5 flex-1 sm:flex-none">
+          <div className="grid grid-cols-2 sm:contents gap-1.5">
             <FilterSelect
-              style={{ minWidth: "100px" }}
-              className="flex-1 sm:flex-none"
+              className="w-full sm:w-auto"
               value={usersFilters.is_active}
               onChange={(e) => handleFilterChange("is_active", e.target.value)}
             >
@@ -83,8 +80,7 @@ const SearchControls = ({
             </FilterSelect>
 
             <FilterSelect
-              style={{ minWidth: "110px" }}
-              className="flex-1 sm:flex-none"
+              className="w-full sm:w-auto"
               value={usersFilters.ordering}
               onChange={(e) => handleFilterChange("ordering", e.target.value)}
             >
@@ -94,7 +90,7 @@ const SearchControls = ({
             </FilterSelect>
           </div>
 
-          <div className="flex items-center gap-1.5">
+          <div className="flex flex-wrap items-center gap-1.5">
             {hasActiveFilters && (
               <button
                 onClick={onClearFilters}

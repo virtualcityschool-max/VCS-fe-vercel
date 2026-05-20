@@ -146,7 +146,7 @@ const AdminAttendance = () => {
   return (
     <div className="text-white space-y-8">
       {/* Header Actions (Course & Date Filters) - Positioned to align with the global header */}
-      <div className="flex flex-wrap lg:flex-nowrap justify-end gap-4 mb-4 -mt-20 lg:-mt-24 relative z-20">
+      <div className="flex flex-col sm:flex-row sm:flex-wrap lg:flex-nowrap sm:justify-end gap-3 mb-4 mt-2 sm:-mt-20 lg:-mt-24 relative z-20">
         <div className="w-full sm:w-48">
           <label className="text-[10px] uppercase tracking-widest text-slate-500 font-bold px-0.5 mb-1.5 block uppercase tracking-[0.2em]">Date Range</label>
           <FilterSelect
@@ -176,7 +176,7 @@ const AdminAttendance = () => {
       </div>
 
       {/* Tabs Row */}
-      <div className="flex gap-1 border-b border-slate-800">
+      <div className="flex gap-1 border-b border-slate-800 overflow-x-auto no-scrollbar">
         {[
           { id: "student", label: "Student Attendance", icon: "fa-user-graduate" },
           { id: "teacher", label: "Teacher Attendance", icon: "fa-chalkboard-teacher" },
@@ -184,7 +184,7 @@ const AdminAttendance = () => {
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
-            className={`flex items-center gap-2 px-5 py-3 text-sm font-bold border-b-2 -mb-px transition-all duration-200 ${
+            className={`flex items-center gap-2 px-5 py-3 text-sm font-bold border-b-2 -mb-px transition-all duration-200 whitespace-nowrap shrink-0 ${
               tab === t.id ? "border-indigo-500 text-white" : "border-transparent text-slate-500 hover:text-white"
             }`}
           >

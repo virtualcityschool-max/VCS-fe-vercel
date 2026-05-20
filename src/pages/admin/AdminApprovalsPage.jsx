@@ -197,9 +197,9 @@ const AdminApprovalsPage = () => {
   return (
     <div className="space-y-6">
       {/* Tab Navigation */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-1 backdrop-blur-sm">
-          <div className="flex flex-wrap items-center gap-1">
+      <div className="flex flex-col gap-3">
+        <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-1 backdrop-blur-sm overflow-x-auto no-scrollbar">
+          <div className="flex items-center gap-1 min-w-max">
             <button
               onClick={() => setActiveTab("users")}
               className={`inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
@@ -267,7 +267,7 @@ const AdminApprovalsPage = () => {
             </button>
           </div>
         </div>
-        <div className="flex items-center justify-end gap-3 flex-wrap">
+        <div className="flex items-center gap-3 flex-wrap">
           {activeTab === "users" ? (
             <div className="flex items-center gap-3 flex-wrap text-sm font-semibold">
               <span className="text-amber-300">

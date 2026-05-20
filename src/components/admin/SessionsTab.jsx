@@ -194,8 +194,8 @@ const SessionsTab = ({
     <div className="space-y-6">
       {/* ── Header bar ── */}
       <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-        {/* View toggle */}
-        <div className="flex bg-slate-800 border border-slate-700 rounded-lg overflow-hidden shrink-0">
+        {/* View toggle — hidden on mobile (calendar-only on mobile) */}
+        <div className="hidden sm:flex bg-slate-800 border border-slate-700 rounded-lg overflow-hidden shrink-0">
           <button
             onClick={() => setView("table")}
             className={`px-3 py-2 text-sm font-medium transition flex items-center gap-1.5 ${view === "table" ? "bg-indigo-600 text-white" : "text-slate-400 hover:text-white"}`}
@@ -211,7 +211,7 @@ const SessionsTab = ({
             <span className="hidden sm:inline">Calendar</span>
           </button>
         </div>
-        <div className="flex gap-3 ml-auto">
+        <div className="w-full sm:w-auto grid grid-cols-2 sm:flex sm:flex-wrap sm:items-center gap-2 sm:ml-auto">
 
         {/* Month nav — inline, only in calendar view with data */}
         {/* {view === "calendar" && activeMonthData && (
@@ -238,7 +238,7 @@ const SessionsTab = ({
 
         {/* Date range — only in calendar view when range is known */}
         {view === "calendar" && calendarStart && calendarEnd && (
-          <div className="flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 shrink-0">
+          <div className="col-span-2 sm:col-auto flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 shrink-0">
             <i className="fas fa-calendar-alt text-indigo-400 text-xs"></i>
             <span className="text-xs font-semibold text-white">
               {calendarStart.toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" })}
@@ -250,63 +250,47 @@ const SessionsTab = ({
           </div>
         )}
 
-        {/* Status filter */}
-        <div className="flex items-center gap-2 shrink-0">
-          {/* <span className="text-xs font-semibold text-slate-500 hidden sm:inline">Status</span> */}
-          <FilterSelect
-            style={{ minWidth: "130px" }}
-            value={sessionFilters.status}
-            onChange={(e) => setSessionFilters({ ...sessionFilters, status: e.target.value })}
-          >
-            <option value="">All Status</option>
-            <option value="scheduled">Scheduled</option>
-            <option value="live">Live</option>
-            <option value="ended">Ended</option>
-          </FilterSelect>
-        </div>
+        <FilterSelect
+          className="w-full sm:w-auto"
+          value={sessionFilters.status}
+          onChange={(e) => setSessionFilters({ ...sessionFilters, status: e.target.value })}
+        >
+          <option value="">All Status</option>
+          <option value="scheduled">Scheduled</option>
+          <option value="live">Live</option>
+          <option value="ended">Ended</option>
+        </FilterSelect>
 
-        {/* View filter */}
-        <div className="flex items-center gap-2 shrink-0">
-          {/* <span className="text-xs font-semibold text-slate-500 hidden sm:inline">Session Type</span> */}
-          <FilterSelect
-            style={{ minWidth: "130px" }}
-            value={sessionFilters.view}
-            onChange={(e) => setSessionFilters({ ...sessionFilters, view: e.target.value })}
-          >
-            <option value="">All Sessions</option>
-            <option value="parent">Parent Session</option>
-          </FilterSelect>
-        </div>
+        <FilterSelect
+          className="w-full sm:w-auto"
+          value={sessionFilters.view}
+          onChange={(e) => setSessionFilters({ ...sessionFilters, view: e.target.value })}
+        >
+          <option value="">All Sessions</option>
+          <option value="parent">Parent Session</option>
+        </FilterSelect>
 
-        {/* Course filter */}
-        <div className="flex items-center gap-2 shrink-0">
-          {/* <span className="text-xs font-semibold text-slate-500 hidden sm:inline">Course</span> */}
-          <FilterSelect
-            style={{ minWidth: "180px" }}
-            value={sessionFilters.course}
-            onChange={(e) => setSessionFilters({ ...sessionFilters, course: e.target.value })}
-          >
-            <option value="">All Courses</option>
-            {courses?.map((c) => (
-              <option key={c.id} value={c.id}>{c.title}</option>
-            ))}
-          </FilterSelect>
-        </div>
+        <FilterSelect
+          className="w-full sm:w-auto"
+          value={sessionFilters.course}
+          onChange={(e) => setSessionFilters({ ...sessionFilters, course: e.target.value })}
+        >
+          <option value="">All Courses</option>
+          {courses?.map((c) => (
+            <option key={c.id} value={c.id}>{c.title}</option>
+          ))}
+        </FilterSelect>
 
-        {/* Instructor filter */}
-        <div className="flex items-center gap-2 shrink-0">
-          {/* <span className="text-xs font-semibold text-slate-500 hidden sm:inline">Instructor</span> */}
-          <FilterSelect
-            style={{ minWidth: "160px" }}
-            value={sessionFilters.teacher}
-            onChange={(e) => setSessionFilters({ ...sessionFilters, teacher: e.target.value })}
-          >
-            <option value="">All Teachers</option>
-            {teachers.map((t) => (
-              <option key={t.id} value={t.id}>{t.username}</option>
-            ))}
-          </FilterSelect>
-        </div>
+        <FilterSelect
+          className="w-full sm:w-auto"
+          value={sessionFilters.teacher}
+          onChange={(e) => setSessionFilters({ ...sessionFilters, teacher: e.target.value })}
+        >
+          <option value="">All Teachers</option>
+          {teachers.map((t) => (
+            <option key={t.id} value={t.id}>{t.username}</option>
+          ))}
+        </FilterSelect>
       </div>
 
         {/* Create Class — pushed to the right */}
@@ -319,8 +303,8 @@ const SessionsTab = ({
         </button>
       </div>
 
-      {/* ── TABLE VIEW ── */}
-      {view === "table" && (
+      {/* ── TABLE VIEW ── (always on mobile, toggled on sm+) */}
+      <div className={view === "calendar" ? "sm:hidden" : ""}>
         <div className="bg-slate-900/50 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-sm">
           {loading ? (
             <div className="overflow-x-auto">
@@ -482,11 +466,13 @@ const SessionsTab = ({
             </div>
           )}
         </div>
-      )}
+      </div>
 
-      {/* ── CALENDAR VIEW ── */}
+      {/* ── CALENDAR VIEW ── (hidden on mobile) */}
       {view === "calendar" && (
-        <SessionCalendarView sessions={filteredSessions} loading={loading} />
+        <div className="hidden sm:block">
+          <SessionCalendarView sessions={filteredSessions} loading={loading} />
+        </div>
       )}
 
       {/* ── CREATE CLASS MODAL ── */}

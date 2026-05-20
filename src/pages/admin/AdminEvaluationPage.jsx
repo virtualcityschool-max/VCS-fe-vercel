@@ -126,12 +126,12 @@ const AdminEvaluationPage = () => {
   return (
     <div className="min-h-screen text-white">
       {/* Header Actions (Course & Grading Scale) - Positioned to align with the global header */}
-      <div className="flex flex-wrap lg:flex-nowrap justify-end gap-4 mb-4 -mt-20 lg:-mt-24 relative z-20">
-        <div className="flex items-end gap-3">
-          <div className="mb-0.5">
+      <div className="flex flex-col sm:flex-row sm:flex-wrap lg:flex-nowrap sm:justify-end gap-3 mb-4 mt-2 sm:-mt-20 lg:-mt-24 relative z-20">
+        <div className="flex flex-col sm:flex-row sm:items-end gap-3">
+          <div className="sm:mb-0.5">
              <GradingScaleButton onUpdated={handleGradingScaleUpdate} />
           </div>
-          
+
           <div className="w-full sm:w-64">
             <label className="text-[10px] uppercase tracking-widest text-slate-500 font-bold px-0.5 mb-1.5 block tracking-[0.2em]">Course</label>
             {loadingInit ? (
@@ -173,7 +173,7 @@ const AdminEvaluationPage = () => {
 
         {/* Private student dropdown */}
         {tab === "private" && selectedCourseId && (
-          <div className="flex flex-col gap-1 max-w-xs">
+          <div className="flex flex-col gap-1 w-full sm:max-w-xs">
             <span className="text-[10px] uppercase tracking-widest text-slate-500 font-bold px-0.5">Student</span>
             {loadingPrivateList ? (
               <div className="h-10 bg-slate-800 rounded-xl animate-pulse" />
@@ -181,7 +181,7 @@ const AdminEvaluationPage = () => {
               <FilterSelect
                 value={selectedPrivateId}
                 onChange={(e) => handlePrivateStudentSelect(e.target.value)}
-                style={{ width: 260 }}
+                className="w-full"
               >
                 <option value="">
                   {privateList.length === 0 ? "No private students" : "— Select a student —"}

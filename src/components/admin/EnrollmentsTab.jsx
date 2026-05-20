@@ -280,63 +280,62 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
     <div className="space-y-6">
       {/* Header with Filters */}
       <div className="mb-6">
-        <div className="flex flex-wrap items-center gap-2 justify-end">
-          <SearchInput
-            value={studentFilter}
-            onChange={(e) => setStudentFilter(e.target.value)}
-            onClear={() => setStudentFilter("")}
-            placeholder="Filter by student..."
-            icon="fas fa-user"
-            className="w-full sm:w-44"
-          />
-          <SearchInput
-            value={courseFilter}
-            onChange={(e) => setCourseFilter(e.target.value)}
-            onClear={() => setCourseFilter("")}
-            placeholder="Filter by course..."
-            icon="fas fa-book"
-            className="w-full sm:w-44"
-          />
-          {/* <FilterSelect value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
-            <option value="all">All Types</option>
-            <option value="normal">Normal</option>
-            <option value="private">Private</option>
-          </FilterSelect> */}
-          <FilterSelect value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-            <option value="all">All Statuses</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-            <option value="cancelled">Cancelled</option>
-            <option value="pending">Pending</option>
-          </FilterSelect>
-          <FilterSelect value={dateSort} onChange={(e) => setDateSort(e.target.value)}>
-            <option value="newest">Newest First</option>
-            <option value="oldest">Oldest First</option>
-          </FilterSelect>
-          
-          <button
-            onClick={handleOpenCreateModal}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold shadow-lg shadow-indigo-500/20 active:scale-95 transition-all duration-150"
-          >
-            <i className="fas fa-plus text-xs"></i>
-            <span>Create Enrollment</span>
-          </button>
-          <button
-            onClick={onRefresh}
-            className="text-white px-5 py-3 rounded-xl text-sm font-medium shadow-lg active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500"
-          >
-            <i className="fas fa-sync text-xs"></i>
-            <span>Refresh</span>
-          </button>
-          {hasActiveFilters && (
+        <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2 sm:justify-end">
+          <div className="grid grid-cols-2 sm:contents gap-2">
+            <SearchInput
+              value={studentFilter}
+              onChange={(e) => setStudentFilter(e.target.value)}
+              onClear={() => setStudentFilter("")}
+              placeholder="Filter by student..."
+              icon="fas fa-user"
+              className="w-full"
+            />
+            <SearchInput
+              value={courseFilter}
+              onChange={(e) => setCourseFilter(e.target.value)}
+              onClear={() => setCourseFilter("")}
+              placeholder="Filter by course..."
+              icon="fas fa-book"
+              className="w-full"
+            />
+            <FilterSelect className="w-full sm:w-auto" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+              <option value="all">All Statuses</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+              <option value="cancelled">Cancelled</option>
+              <option value="pending">Pending</option>
+            </FilterSelect>
+            <FilterSelect className="w-full sm:w-auto" value={dateSort} onChange={(e) => setDateSort(e.target.value)}>
+              <option value="newest">Newest First</option>
+              <option value="oldest">Oldest First</option>
+            </FilterSelect>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 sm:contents">
             <button
-              onClick={() => { setStudentFilter(""); setCourseFilter(""); setTypeFilter("all"); setStatusFilter("all"); setDateSort("newest"); }}
-              className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-slate-700/70 bg-slate-900 hover:bg-rose-500/10 hover:border-rose-500/40 text-slate-400 hover:text-rose-400 text-sm font-medium transition-all duration-150"
+              onClick={handleOpenCreateModal}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold shadow-lg shadow-indigo-500/20 active:scale-95 transition-all duration-150"
             >
-              <i className="fas fa-times text-xs"></i>
-              <span>Clear</span>
+              <i className="fas fa-plus text-xs"></i>
+              <span>Create Enrollment</span>
             </button>
-          )}
+            <button
+              onClick={onRefresh}
+              className="text-white px-5 py-3 rounded-xl text-sm font-medium shadow-lg active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500"
+            >
+              <i className="fas fa-sync text-xs"></i>
+              <span>Refresh</span>
+            </button>
+            {hasActiveFilters && (
+              <button
+                onClick={() => { setStudentFilter(""); setCourseFilter(""); setTypeFilter("all"); setStatusFilter("all"); setDateSort("newest"); }}
+                className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-slate-700/70 bg-slate-900 hover:bg-rose-500/10 hover:border-rose-500/40 text-slate-400 hover:text-rose-400 text-sm font-medium transition-all duration-150"
+              >
+                <i className="fas fa-times text-xs"></i>
+                <span>Clear</span>
+              </button>
+            )}
+          </div>
         </div>
       </div>
 

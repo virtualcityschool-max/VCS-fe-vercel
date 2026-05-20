@@ -189,12 +189,12 @@ const AdminCategoriesPage = () => {
                               </div>
                             </div>
                           ) : confirmDeleteId === cat.id ? (
-                            <div className="flex items-center justify-between bg-red-500/5 border border-red-500/20 px-5 py-3 rounded-2xl animate-in zoom-in-95 duration-200">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-red-500/5 border border-red-500/20 px-5 py-3 rounded-2xl animate-in zoom-in-95 duration-200">
                               <div className="flex items-center gap-3">
                                  <i className="fas fa-exclamation-triangle text-red-500 text-xs" />
-                                 <span className="text-xs text-red-400 font-black uppercase tracking-widest">Delete "{cat.name}"?</span>
+                                 <span className="text-xs text-red-400 font-black uppercase tracking-widest break-all">Delete "{cat.name}"?</span>
                               </div>
-                              <div className="flex items-center gap-3">
+                              <div className="flex items-center gap-3 shrink-0">
                                 <button
                                   onClick={() => handleDelete(cat.id)}
                                   disabled={saving}

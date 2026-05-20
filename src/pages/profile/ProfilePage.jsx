@@ -206,7 +206,7 @@ const ProfilePage = () => {
   // ── Loading ────────────────────────────────────────────────────────────────
   if (loading) {
     return (
-      <div className="min-h-screen p-6 lg:p-10">
+      <div className="min-h-screen p-6 md:p-12 pt-16 lg:pt-12">
         <div className="max-w-2xl mx-auto animate-pulse space-y-6">
           <div className="h-40 bg-slate-800 rounded-3xl" />
           <div className="h-80 bg-slate-800 rounded-3xl" />
@@ -216,12 +216,12 @@ const ProfilePage = () => {
   }
 
   return (
-    <div className="min-h-screen text-white p-6 lg:p-10">
+    <div className="min-h-screen p-6 md:p-12 pt-16 lg:pt-12">
       <div className="max-w-2xl mx-auto space-y-6">
 
         {/* ── Header card ──────────────────────────────────────────────────── */}
         <div className="bg-gradient-to-br from-indigo-600/20 to-slate-900 border border-indigo-500/20 rounded-3xl p-6 lg:p-8">
-          <div className="flex items-center gap-5">
+          <div className="flex items-start gap-4 sm:gap-5">
             {/* Avatar */}
             <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center flex-shrink-0 shadow-xl shadow-indigo-500/20">
               {profile?.avatar ? (
@@ -231,34 +231,36 @@ const ProfilePage = () => {
               )}
             </div>
 
-            {/* Info */}
-            <div className="flex-1 min-w-0">
-              <div className="flex flex-wrap items-center gap-2 mb-1">
-                <h1 className="text-xl font-black font-poppins text-white truncate">
-                  {profile?.username || username}
-                </h1>
-                <span className={`text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full border ${ROLE_COLOR[role]}`}>
-                  {ROLE_LABEL[role]}
-                </span>
+            {/* Info + Edit button */}
+            <div className="flex-1 min-w-0 flex flex-col gap-3 sm:flex-row sm:items-center">
+              <div className="flex-1 min-w-0">
+                <div className="flex flex-wrap items-center gap-2 mb-1">
+                  <h1 className="text-xl font-black font-poppins text-white truncate">
+                    {profile?.username || username}
+                  </h1>
+                  <span className={`text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full border ${ROLE_COLOR[role]}`}>
+                    {ROLE_LABEL[role]}
+                  </span>
+                </div>
+                <p className="text-slate-400 text-sm truncate">{profile?.email}</p>
+                {profile?.date_joined && (
+                  <p className="text-slate-600 text-xs mt-1">
+                    Joined {new Date(profile.date_joined).toLocaleDateString("en-US", { month: "long", year: "numeric" })}
+                  </p>
+                )}
               </div>
-              <p className="text-slate-400 text-sm truncate">{profile?.email}</p>
-              {profile?.date_joined && (
-                <p className="text-slate-600 text-xs mt-1">
-                  Joined {new Date(profile.date_joined).toLocaleDateString("en-US", { month: "long", year: "numeric" })}
-                </p>
+
+              {/* Edit toggle */}
+              {!editing && (
+                <button
+                  onClick={() => setEditing(true)}
+                  className="self-start flex-shrink-0 flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-semibold transition active:scale-95"
+                >
+                  <i className="fas fa-pen text-xs" />
+                  Edit
+                </button>
               )}
             </div>
-
-            {/* Edit / Save toggle */}
-            {!editing && (
-              <button
-                onClick={() => setEditing(true)}
-                className="flex-shrink-0 flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-semibold transition active:scale-95"
-              >
-                <i className="fas fa-pen text-xs" />
-                Edit
-              </button>
-            )}
           </div>
 
           {/* Teacher rating pill */}
