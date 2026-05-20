@@ -170,7 +170,7 @@ const StudentAssignmentDetails = () => {
 
           <div className="flex items-center gap-3">
              <div className="flex flex-col items-end">
-                <span className="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1">Status</span>
+                {/* <span className="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1">Status</span> */}
                 <span
                   className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg ${
                     isOverdue

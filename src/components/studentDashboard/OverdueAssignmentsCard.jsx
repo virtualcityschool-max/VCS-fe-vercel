@@ -2,10 +2,11 @@ import React from "react";
 import { useSelector } from "react-redux";
 import { selectOverdueAssignments, selectAssignments, selectDashboardQuizzes } from "../../store/slices/studentDashboardSlice";
 import { useNavigate } from "react-router-dom";
-import { formatDate } from "../../utils/validation";
+import { useDateFormatters } from "../../hooks";
 
 const OverdueAssignmentsCard = () => {
   const navigate = useNavigate();
+  const { formatDate } = useDateFormatters();
   const overdueAssignments = useSelector(selectOverdueAssignments);
   const allAssignments = useSelector(selectAssignments);
   const allQuizzes = useSelector(selectDashboardQuizzes);

@@ -17,9 +17,11 @@ import {
 } from "../../components/common/attendanceShared";
 import { FilterSelect } from "../../components/ui";
 import { toastManager } from "../../utils/toastManager";
+import { useDateFormatters } from "../../hooks";
 
 const TeacherAttendance = () => {
   const dispatch  = useDispatch();
+  const { timezone, formatTime } = useDateFormatters();
 
   const {
     myCourses, allAttendance, loadingAllAttendance,
@@ -277,7 +279,7 @@ const TeacherAttendance = () => {
                       <option value="">— Select a session —</option>
                       {allSessions.map((s) => (
                         <option key={s.id} value={s.id}>
-                          {s.title}{s.scheduled_at ? ` — ${new Date(s.scheduled_at).toLocaleDateString([], { month: "short", day: "numeric" })}` : ""}
+                          {s.title}{s.scheduled_at ? ` — ${new Date(s.scheduled_at).toLocaleDateString([], { month: "short", day: "numeric", ...(timezone ? { timeZone: timezone } : {}) })}` : ""}
                         </option>
                       ))}
                     </select>
@@ -350,13 +352,13 @@ const TeacherAttendance = () => {
                                   {s.joinedAt && (
                                     <span className="text-[10px] text-slate-500 flex items-center gap-1">
                                       <i className="fas fa-sign-in-alt text-emerald-500/70" />
-                                      {new Date(s.joinedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                                      {formatTime(s.joinedAt)}
                                     </span>
                                   )}
                                   {s.leftAt && (
                                     <span className="text-[10px] text-slate-500 flex items-center gap-1">
                                       <i className="fas fa-sign-out-alt text-rose-500/70" />
-                                      {new Date(s.leftAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                                      {formatTime(s.leftAt)}
                                     </span>
                                   )}
                                 </div>

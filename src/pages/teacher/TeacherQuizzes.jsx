@@ -16,7 +16,8 @@ import { teacherService } from "../../services/teacherService";
 import { FilterSelect } from "../../components/ui";
 import { toastManager } from "../../utils/toastManager";
 import { showApiError } from "../../utils/apiErrorHandler";
-import { formatLocalISO, toLocalDatetimeInput, formatDateTime } from "../../utils/validation";
+import { toLocalDatetimeInput, formatTimezoneISO } from "../../utils/validation";
+import { useDateFormatters } from "../../hooks";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const defaultOption = () => ({ option_text: "", is_correct: false });
@@ -247,13 +248,13 @@ const validateQuizForm = (form, questions) => {
 };
 
 // ── Build payload from form state ─────────────────────────────────────────────
-const buildPayload = (form, questions) => ({
+const buildPayload = (form, questions, timezone) => ({
   course: Number(form.course),
   title: form.title.trim(),
   description: form.description.trim(),
   total_marks: Number(form.total_marks),
-  published_at: form.published_at ? formatLocalISO(new Date(form.published_at)) : "",
-  due_date: form.due_date ? formatLocalISO(new Date(form.due_date)) : "",
+  published_at: form.published_at ? formatTimezoneISO(form.published_at, timezone) : "",
+  due_date: form.due_date ? formatTimezoneISO(form.due_date, timezone) : "",
   questions: questions.map((q) => {
     const base = {
       ...(q.id ? { id: q.id } : {}),
@@ -273,13 +274,13 @@ const buildPayload = (form, questions) => ({
 });
 
 // ── Populate form from quiz object (for edit) ─────────────────────────────────
-const quizToForm = (quiz) => ({
+const quizToForm = (quiz, timezone) => ({
   course: String(quiz.course ?? ""),
   title: quiz.title ?? "",
   description: quiz.description ?? "",
   total_marks: String(quiz.total_marks ?? ""),
-  published_at: toLocalDatetimeInput(quiz.published_at),
-  due_date: toLocalDatetimeInput(quiz.due_date),
+  published_at: toLocalDatetimeInput(quiz.published_at, timezone),
+  due_date: toLocalDatetimeInput(quiz.due_date, timezone),
 });
 
 const quizToQuestions = (quiz) =>
@@ -305,6 +306,7 @@ const TeacherQuizzes = ({
   controlsContainerId 
 }) => {
   const dispatch = useDispatch();
+  const { formatDateTime, timezone } = useDateFormatters();
   const {
     quizzes,
     loadingQuizzes,
@@ -379,7 +381,7 @@ const TeacherQuizzes = ({
     if (err) { toastManager.error(err); return; }
     setSaving(true);
     try {
-      await dispatch(createQuiz(buildPayload(form, questions))).unwrap();
+      await dispatch(createQuiz(buildPayload(form, questions, timezone))).unwrap();
       toastManager.success("Quiz created");
       setShowCreate(false);
       setForm(emptyForm);
@@ -396,12 +398,12 @@ const TeacherQuizzes = ({
   // ── Edit ──────────────────────────────────────────────────────────────────
   const openEdit = async (quiz) => {
     setEditTarget(quiz);
-    setForm(quizToForm(quiz));
+    setForm(quizToForm(quiz, timezone));
     setQuestions(quizToQuestions(quiz));
     try {
       const detail = await teacherService.getQuizById(quiz.id);
       setEditTarget(detail);
-      setForm(quizToForm(detail));
+      setForm(quizToForm(detail, timezone));
       setQuestions(quizToQuestions(detail));
     } catch {
       toastManager.error("Failed to load quiz detail");
@@ -413,7 +415,7 @@ const TeacherQuizzes = ({
     if (err) { toastManager.error(err); return; }
     setSaving(true);
     try {
-      await dispatch(updateQuiz({ id: editTarget.id, data: buildPayload(form, questions) })).unwrap();
+      await dispatch(updateQuiz({ id: editTarget.id, data: buildPayload(form, questions, timezone) })).unwrap();
       toastManager.success("Quiz updated");
       setEditTarget(null);
     } catch (e) {

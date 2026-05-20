@@ -13,7 +13,7 @@ import GradingForm from "../../components/teacher/GradingForm";
 import { toastManager } from "../../utils/toastManager";
 import { showApiError } from "../../utils/apiErrorHandler";
 import { getStorageUrl } from "../../utils/storageUrl";
-import { formatDateTime } from "../../utils/validation";
+import { useDateFormatters } from "../../hooks";
 
 const getFilename = (url) => {
   if (!url) return "attachment";
@@ -35,6 +35,7 @@ const DownloadButton = ({ url, label = "Download Attachment", className = "" }) 
 
 const TeacherSubmissions = () => {
   const dispatch = useDispatch();
+  const { formatDateTime } = useDateFormatters();
   const {
     allSubmissions,
     loadingAllSubmissions,

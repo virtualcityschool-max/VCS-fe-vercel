@@ -6,10 +6,11 @@ import {
   selectMyAttendanceError,
   fetchMyAttendance,
 } from "../../store/slices/studentDashboardSlice";
-import { formatDateTime } from "../../utils/validation";
+import { useDateFormatters } from "../../hooks";
 
 const MyAttendanceList = () => {
   const dispatch = useDispatch();
+  const { formatDateTime } = useDateFormatters();
   const attendance = useSelector(selectMyAttendance);
   const isLoading = useSelector(selectMyAttendanceLoading);
   const error = useSelector(selectMyAttendanceError);

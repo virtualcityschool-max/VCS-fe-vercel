@@ -1,7 +1,8 @@
 import React, { useMemo, useState } from "react";
 import { Button, FilterSelect, Input } from "../../components/ui";
 import SessionCalendarView from "../common/SessionCalendarView";
-import { clampDate, formatDate, formatTime } from "../../utils/validation";
+import { clampDate } from "../../utils/validation";
+import { useDateFormatters } from "../../hooks";
 
 const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MONTH_NAMES = [
@@ -36,6 +37,7 @@ const SessionsTab = ({
   sessionFilters,
   setSessionFilters,
 }) => {
+  const { formatDate, formatTime } = useDateFormatters();
   const [view, setView] = useState("table");
   const [calendarMonth, setCalendarMonth] = useState(null); // { year, month } — null = auto from data
 

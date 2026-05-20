@@ -26,7 +26,7 @@ const TeacherSessionCalendar = () => {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-white">My Sessions</h1>
+          <h1 className="text-2xl font-black text-white">My Classes</h1>
           <p className="text-slate-400 text-sm mt-0.5">Your scheduled classes in calendar view</p>
         </div>
 

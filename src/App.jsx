@@ -52,6 +52,7 @@ import {
   TeacherInternalStudentProfile,
   TeacherEvaluationPage,
   TeacherHireLeads,
+  TeacherAvailabilityPage,
   TeachersDirectory,
   StudentAssignments,
   StudentAssignmentDetails,
@@ -60,6 +61,7 @@ import {
   StudentAttendance,
   // StudentExamDetail,
   StudentEvaluationPage,
+  StudentTutors,
   ParentLayout,
   ParentAttendance,
   ParentEvaluationPage,
@@ -245,6 +247,7 @@ const AppInner = () => {
                 {/* <Route path="exams/:id"  element={<StudentExamDetail />} /> */}
                 <Route path="attendance" element={<StudentAttendance />} />
                 <Route path="evaluations" element={<StudentEvaluationPage />} />
+                <Route path="tutors" element={<StudentTutors />} />
               </Route>
             </Route>
 
@@ -260,6 +263,7 @@ const AppInner = () => {
                 <Route path="submissions" element={<TeacherSubmissions />} />
                 <Route path="evaluations" element={<TeacherEvaluationPage />} />
                 <Route path="hire-leads" element={<TeacherHireLeads />} />
+                <Route path="availability" element={<TeacherAvailabilityPage />} />
               </Route>
               <Route
                 path="/student/:id"

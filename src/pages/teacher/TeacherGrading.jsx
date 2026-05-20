@@ -21,7 +21,7 @@ import { FilterSelect } from "../../components/ui";
 import { coursesService } from "../../services/coursesService";
 import { getStorageUrl } from "../../utils/storageUrl";
 import FileViewerModal from "../../components/common/FileViewerModal";
-import { formatLocalISO, toLocalDatetimeInput, formatDate, formatTime, formatDateTime } from "../../utils/validation";
+import { useDateFormatters } from "../../hooks";
 
 const PreviewButton = ({ url, className = "" }) => {
   const [open, setOpen] = React.useState(false);
@@ -48,6 +48,7 @@ const TeacherGrading = ({
   hideHeader = false,
   controlsContainerId,
 }) => {
+  const { formatDate, formatTime, formatDateTime, toDatetimeInput, toPayloadISO } = useDateFormatters();
   const [selectedAssignment, setSelectedAssignment] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [internalFilters, setInternalFilters] = useState({
@@ -340,7 +341,7 @@ const TeacherGrading = ({
                       setEditForm({
                         title: assignment.title,
                         description: assignment.description || "",
-                        due_date: toLocalDatetimeInput(assignment.due_date),
+                        due_date: toDatetimeInput(assignment.due_date),
                         max_score: String(assignment.max_score),
                         status: assignment.status || "published",
                         file: null,
@@ -915,7 +916,7 @@ const TeacherGrading = ({
                         data: {
                           title: editForm.title.trim(),
                           description: editForm.description.trim(),
-                          due_date: formatLocalISO(new Date(editForm.due_date)),
+                          due_date: toPayloadISO(editForm.due_date),
                           max_score: Number(editForm.max_score),
                           status: editForm.status,
                           ...(editForm.file ? { file: editForm.file } : {}),
@@ -1308,7 +1309,7 @@ const TeacherGrading = ({
                         course: Number(form.course),
                         title: form.title.trim(),
                         description: form.description.trim(),
-                        due_date: formatLocalISO(new Date(form.due_date)),
+                        due_date: toPayloadISO(form.due_date),
                         max_score: Number(form.max_score),
                         status: form.status,
                         ...(form.file ? { file: form.file } : {}),

@@ -6,7 +6,7 @@ import {
   submitStudentQuiz,
 } from "../../store/slices/studentDashboardSlice";
 import { toastManager } from "../../utils/toastManager";
-import { formatDate, formatDateTime } from "../../utils/validation";
+import { useDateFormatters } from "../../hooks";
 
 // ── Status helpers ────────────────────────────────────────────────────────────
 const subStatus = (sub) => {
@@ -29,6 +29,7 @@ const StudentQuizDetail = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { formatDate, formatDateTime } = useDateFormatters();
 
   const { currentQuiz, isFetchingCurrentQuiz, isSubmittingQuiz } = useSelector(
     (s) => s.studentDashboard
@@ -299,7 +300,7 @@ const StudentQuizDetail = () => {
   );
 
   return (
-    <div className="text-white px-6 py-8 max-w-2xl mx-auto">
+    <div className="p-6 lg:p-12 space-y-6 max-w-2xl mx-auto">
       {/* Back */}
       <button
         type="button"

@@ -38,6 +38,16 @@ const Field = ({ label, icon, children }) => (
 const inputCls = "w-full px-4 py-3 bg-slate-800/60 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm transition";
 const readCls  = "w-full px-4 py-3 bg-slate-800/30 border border-slate-700/40 rounded-xl text-slate-300 text-sm";
 
+// ── Timezone options ─────────────────────────────────────────────────────────
+
+const TIMEZONES = [
+  { label: "Browser (Local)", value: "" },
+  { label: "Dubai",           value: "Asia/Dubai" },
+  { label: "Pakistan",        value: "Asia/Karachi" },
+  { label: "London",          value: "Europe/London" },
+  { label: "New York",        value: "America/New_York" },
+];
+
 // ── Role field configs ────────────────────────────────────────────────────────
 
 const FIELDS = {
@@ -107,8 +117,11 @@ const ProfilePage = () => {
   const initForm = (data) => {
     const rp = getRoleProfile(data);
     const fields = FIELDS[role] || [];
-    const initial = {};
-    fields.forEach(({ key }) => { initial[key] = rp[key] ?? ""; });
+    const initial = { timezone: data?.timezone ?? "" };
+    fields.forEach(({ key, type }) => {
+      const val = rp[key] ?? "";
+      initial[key] = type === "tel" && val ? normalizePhone(val) : val;
+    });
     setForm(initial);
   };
 
@@ -140,23 +153,23 @@ const ProfilePage = () => {
 
     setSaving(true);
     try {
-      const payload = {};
-      (FIELDS[role] || []).forEach(({ key, type }) => {
-        let val = form[key];
-        
-        // Normalize phone numbers to include + and digits only
-        if (type === "tel" && val) {
-          val = normalizePhone(val);
-        }
+      // Always save timezone at the user level
+      await authService.updateProfile({ timezone: form.timezone || "" });
 
-        // Ensure empty values are sent as '' as requested
-        if (val === "" || val === null || val === undefined) {
-          payload[key] = "";
-        } else {
-          payload[key] = type === "number" ? Number(val) : val;
-        }
-      });
-      await authService.updateRoleProfile(role, payload);
+      // Save role-specific fields (not applicable for admin)
+      if (role !== "admin") {
+        const payload = {};
+        (FIELDS[role] || []).forEach(({ key, type }) => {
+          let val = form[key];
+          if (type === "tel" && val) val = normalizePhone(val);
+          if (val === "" || val === null || val === undefined) {
+            payload[key] = "";
+          } else {
+            payload[key] = type === "number" ? Number(val) : val;
+          }
+        });
+        await authService.updateRoleProfile(role, payload);
+      }
       toastManager.success("Profile updated successfully");
       setEditing(false);
       clearAllErrors();
@@ -237,7 +250,7 @@ const ProfilePage = () => {
             </div>
 
             {/* Edit / Save toggle */}
-            {fields.length > 0 && !editing && (
+            {!editing && (
               <button
                 onClick={() => setEditing(true)}
                 className="flex-shrink-0 flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-semibold transition active:scale-95"
@@ -259,99 +272,117 @@ const ProfilePage = () => {
           )} */}
         </div>
 
-        {/* ── Role profile fields ───────────────────────────────────────────── */}
-        {fields.length > 0 && (
-          <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6 lg:p-8 space-y-5">
-            <h2 className="text-sm font-bold uppercase tracking-widest text-slate-500">
-              Profile Details
-            </h2>
+        {/* ── Role profile fields + Timezone ───────────────────────────────── */}
+        <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6 lg:p-8 space-y-5">
+          <h2 className="text-sm font-bold uppercase tracking-widest text-slate-500">
+            Profile Details
+          </h2>
 
-            {fields.map(({ key, label, icon, type, placeholder, required }) => (
-              <Field key={key} label={label} icon={icon}>
-                <div required={required}>
-                {editing ? (
-                  type === "textarea" ? (
-                    <textarea
-                      rows={4}
-                      placeholder={placeholder}
-                      value={form[key] || ""}
-                      onChange={(e) => {
-                        setForm((p) => ({ ...p, [key]: e.target.value }));
-                        clearFieldError(key);
-                      }}
-                      className={`${inputCls} ${errors[key] ? "border-red-500 ring-1 ring-red-500/20" : ""}`}
-                    />
-                  ) : type === "tel" ? (
-                    <PhoneInput
-                      value={form[key] || ""}
-                      onChange={(val) => {
-                        setForm((p) => ({ ...p, [key]: val }));
-                        clearFieldError(key);
-                      }}
-                      error={errors[key]}
-                    />
-                  ) : (
-                    <input
-                      type={type}
-                      placeholder={placeholder}
-                      value={form[key] || ""}
-                      max={type === "date" ? new Date().toISOString().split("T")[0] : undefined}
-                      onChange={(e) => {
-                        setForm((p) => ({ ...p, [key]: e.target.value }));
-                        clearFieldError(key);
-                      }}
-                      className={`${inputCls} ${errors[key] ? "border-red-500 ring-1 ring-red-500/20" : ""}`}
-                    />
-                  )
+          {fields.map(({ key, label, icon, type, placeholder, required }) => (
+            <Field key={key} label={label} icon={icon}>
+              <div required={required}>
+              {editing ? (
+                type === "textarea" ? (
+                  <textarea
+                    rows={4}
+                    placeholder={placeholder}
+                    value={form[key] || ""}
+                    onChange={(e) => {
+                      setForm((p) => ({ ...p, [key]: e.target.value }));
+                      clearFieldError(key);
+                    }}
+                    className={`${inputCls} ${errors[key] ? "border-red-500 ring-1 ring-red-500/20" : ""}`}
+                  />
+                ) : type === "tel" ? (
+                  <PhoneInput
+                    value={form[key] || ""}
+                    onChange={(val) => {
+                      setForm((p) => ({ ...p, [key]: val }));
+                      clearFieldError(key);
+                    }}
+                    error={errors[key]}
+                  />
                 ) : (
-                  <div className={readCls}>
-                    {type === "tel" && roleProfile[key] 
-                      ? formatPhoneDisplay(roleProfile[key]) 
-                      : (roleProfile[key] ?? <span className="text-slate-600 italic">Not set</span>)}
-                  </div>
-                )}
-                {editing && errors[key] && type !== "tel" && (
-                  <p className="mt-1.5 text-[11px] text-red-400 font-medium flex items-center gap-1.5">
-                    <i className="fas fa-exclamation-circle" />
-                    {getFieldError(key)}
-                  </p>
-                )}
+                  <input
+                    type={type}
+                    placeholder={placeholder}
+                    value={form[key] || ""}
+                    max={type === "date" ? new Date().toISOString().split("T")[0] : undefined}
+                    onChange={(e) => {
+                      setForm((p) => ({ ...p, [key]: e.target.value }));
+                      clearFieldError(key);
+                    }}
+                    className={`${inputCls} ${errors[key] ? "border-red-500 ring-1 ring-red-500/20" : ""}`}
+                  />
+                )
+              ) : (
+                <div className={readCls}>
+                  {type === "tel" && roleProfile[key]
+                    ? formatPhoneDisplay(roleProfile[key])
+                    : (roleProfile[key] ?? <span className="text-slate-600 italic">Not set</span>)}
                 </div>
-              </Field>
-            ))}
-
-            {/* Action buttons */}
-            {editing && (
-              <div className="flex gap-3 pt-2">
-                <button
-                  onClick={handleCancel}
-                  className="flex-1 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-xl text-sm font-semibold transition"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSave}
-                  disabled={saving}
-                  className="flex-1 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-semibold transition disabled:opacity-50 active:scale-95"
-                >
-                  {saving ? (
-                    <><i className="fas fa-spinner fa-spin mr-2" />Saving…</>
-                  ) : (
-                    <><i className="fas fa-check mr-2" />Save Changes</>
-                  )}
-                </button>
+              )}
+              {editing && errors[key] && type !== "tel" && (
+                <p className="mt-1.5 text-[11px] text-red-400 font-medium flex items-center gap-1.5">
+                  <i className="fas fa-exclamation-circle" />
+                  {getFieldError(key)}
+                </p>
+              )}
               </div>
-            )}
-          </div>
-        )}
+            </Field>
+          ))}
 
-        {/* Admin — read-only note */}
-        {role === "admin" && (
-          <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6 text-center text-slate-500 text-sm">
-            <i className="fas fa-shield-alt text-slate-600 text-2xl mb-3 block" />
-            Administrator accounts are managed by the system.
-          </div>
-        )}
+          {/* Timezone — shown for all roles */}
+          <Field label="Timezone" icon="globe">
+            <div>
+              {editing ? (
+                <select
+                  value={form.timezone || ""}
+                  onChange={(e) => setForm((p) => ({ ...p, timezone: e.target.value }))}
+                  className={`${inputCls} appearance-none`}
+                >
+                  {TIMEZONES.map((tz) => (
+                    <option key={tz.value} value={tz.value}>
+                      {tz.value ? `${tz.label}: ${tz.value}` : tz.label}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <div className={readCls}>
+                  {(() => {
+                    const match = TIMEZONES.find((t) => t.value === (profile?.timezone ?? ""));
+                    return match?.value
+                      ? `${match.label}: ${match.value}`
+                      : match?.label ?? "Browser (Local)";
+                  })()}
+                </div>
+              )}
+            </div>
+          </Field>
+
+          {/* Action buttons */}
+          {editing && (
+            <div className="flex gap-3 pt-2">
+              <button
+                onClick={handleCancel}
+                className="flex-1 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-xl text-sm font-semibold transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSave}
+                disabled={saving}
+                className="flex-1 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-semibold transition disabled:opacity-50 active:scale-95"
+              >
+                {saving ? (
+                  <><i className="fas fa-spinner fa-spin mr-2" />Saving…</>
+                ) : (
+                  <><i className="fas fa-check mr-2" />Save Changes</>
+                )}
+              </button>
+            </div>
+          )}
+        </div>
 
         {/* Account info */}
         <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6 space-y-3">

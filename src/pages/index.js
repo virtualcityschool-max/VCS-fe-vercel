@@ -19,6 +19,7 @@ export { default as StudentAssessments } from "./student/StudentAssessments";
 export { default as StudentQuizDetail } from "./student/StudentQuizDetail";
 export { default as StudentAttendance } from "./student/StudentAttendance";
 export { default as StudentEvaluationPage } from "./student/StudentEvaluationPage";
+export { default as StudentTutors } from "./student/StudentTutors";
 
 // Teacher Pages
 export { default as TeacherLayout } from "./teacher/TeacherLayout";
@@ -33,6 +34,7 @@ export { default as TeacherSessionCalendar } from "./teacher/TeacherSessionCalen
 export { default as TeacherInternalStudentProfile } from "./teacher/TeacherInternalStudentProfile";
 export { default as TeacherEvaluationPage } from "./teacher/TeacherEvaluationPage";
 export { default as TeacherHireLeads } from "./teacher/TeacherHireLeads";
+export { default as TeacherAvailabilityPage } from "./teacher/TeacherAvailabilityPage";
 
 // Admin Pages
 export { default as AdminLayout } from "../components/admin/AdminLayout";

@@ -4,6 +4,19 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchParentChildDetail, selectParentChildDetail } from "../../store/slices/parentSlice";
 import { LoadingSpinner, ErrorMessage } from "../../components/ui";
 import AttendanceMatrix from "../../components/common/AttendanceMatrix";
+import { availabilityService } from "../../services/availabilityService";
+
+const fmt12 = (t) => {
+  if (!t) return "";
+  const [h, m] = t.split(":").map(Number);
+  const suffix = h >= 12 ? "PM" : "AM";
+  return `${h % 12 || 12}:${String(m).padStart(2, "0")} ${suffix}`;
+};
+
+const fmtDate = (d) =>
+  new Date(d + "T00:00:00").toLocaleDateString(undefined, {
+    weekday: "short", month: "short", day: "numeric", year: "numeric",
+  });
 
 const ParentChildDetails = () => {
   const { childId } = useParams();
@@ -11,6 +24,18 @@ const ParentChildDetails = () => {
   const dispatch = useDispatch();
   const { data, loading, error } = useSelector(selectParentChildDetail);
   const { child, summary, courses } = data || {};
+
+  const [bookedSlots, setBookedSlots] = useState([]);
+  const [slotsLoading, setSlotsLoading] = useState(true);
+
+  useEffect(() => {
+    if (!childId) return;
+    setSlotsLoading(true);
+    availabilityService.getChildBookedSlots(childId)
+      .then((d) => setBookedSlots(d || []))
+      .catch(() => setBookedSlots([]))
+      .finally(() => setSlotsLoading(false));
+  }, [childId]);
   const sortedCourses = useMemo(() => {
     if (!courses) return [];
     return [...courses].sort((a, b) => {
@@ -293,6 +318,57 @@ const ParentChildDetails = () => {
                   </div>
                 </section>
               </div>
+
+              {/* Booked Tutoring Slots */}
+              <section className="space-y-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-1.5 h-8 bg-indigo-500 rounded-full"></div>
+                  <h3 className="text-xl font-black uppercase tracking-widest">Booked Tutoring Slots</h3>
+                </div>
+                {slotsLoading ? (
+                  <div className="flex items-center gap-3 text-slate-500 text-sm py-4">
+                    <i className="fas fa-spinner fa-spin" />
+                    Loading slots…
+                  </div>
+                ) : bookedSlots.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-10 bg-slate-800/20 border border-slate-800/50 border-dashed rounded-[2rem]">
+                    <i className="fas fa-calendar-xmark text-slate-700 text-2xl mb-3"></i>
+                    <p className="text-slate-600 text-xs font-bold uppercase tracking-widest">No tutoring slots booked yet</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {bookedSlots.map((slot) => (
+                      <div
+                        key={slot.id}
+                        className="bg-slate-800/40 border border-indigo-500/15 rounded-2xl p-5 space-y-3"
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <p className="text-sm font-bold text-white">
+                              {fmt12(slot.start_time)} – {fmt12(slot.end_time)}
+                            </p>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mt-0.5">
+                              {fmtDate(slot.date)}
+                            </p>
+                          </div>
+                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-300 text-[9px] font-black uppercase tracking-wider">
+                            <i className="fas fa-check-circle text-[8px]" /> Booked
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 bg-slate-900/50 rounded-xl px-3 py-2">
+                          <div className="w-6 h-6 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-300 text-xs font-black flex-shrink-0">
+                            {slot.teacher_name?.[0]?.toUpperCase()}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-xs font-bold text-slate-200 truncate">{slot.teacher_name}</p>
+                            <p className="text-[10px] text-slate-500 truncate">{slot.teacher_email}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
 
               {/* Evaluation / Grading Summary */}
               <section className="bg-slate-800/40 border border-white/5 rounded-[2rem] p-10 mt-12">

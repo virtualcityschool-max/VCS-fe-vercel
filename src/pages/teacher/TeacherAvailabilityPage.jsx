@@ -1,0 +1,832 @@
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { availabilityService } from "../../services/availabilityService";
+import { toastManager } from "../../utils/toastManager";
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+const fmt12 = (t) => {
+  if (!t) return "";
+  const [h, m] = t.split(":").map(Number);
+  const suffix = h >= 12 ? "PM" : "AM";
+  return `${h % 12 || 12}:${String(m).padStart(2, "0")} ${suffix}`;
+};
+
+const fmtDate = (d) =>
+  new Date(d + "T00:00:00").toLocaleDateString(undefined, {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+
+const today = () => new Date().toISOString().slice(0, 10);
+
+const calcWindowSlots = (start, end) => {
+  if (!start || !end || start >= end) return 0;
+  const [sh, sm] = start.split(":").map(Number);
+  const [eh, em] = end.split(":").map(Number);
+  return Math.max(0, Math.floor((eh * 60 + em - (sh * 60 + sm)) / 60));
+};
+
+const calcEntrySlots = (entry) =>
+  entry.time_windows.reduce((n, w) => n + calcWindowSlots(w.start, w.end), 0);
+
+const calcTotalSlots = (entries) =>
+  entries.reduce((n, e) => n + calcEntrySlots(e), 0);
+
+const TIME_PRESETS = [
+  { label: "Morning", start: "09:00", end: "12:00" },
+  { label: "Afternoon", start: "12:00", end: "17:00" },
+  { label: "Evening", start: "17:00", end: "20:00" },
+  { label: "Full Day", start: "09:00", end: "17:00" },
+];
+
+const newEntry = () => ({
+  id: crypto.randomUUID(),
+  date: "",
+  time_windows: [{ id: crypto.randomUUID(), start: "09:00", end: "17:00" }],
+});
+
+// ── Time window row ───────────────────────────────────────────────────────────
+
+const TimeWindowRow = ({ window, onChange, onRemove, canRemove }) => {
+  const slotCount = calcWindowSlots(window.start, window.end);
+  const activePreset = TIME_PRESETS.find(
+    (p) => p.start === window.start && p.end === window.end
+  );
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-2.5 bg-slate-800/80 border border-slate-700/60 rounded-xl px-3 py-2.5 flex-1 min-w-[130px]">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
+          <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 shrink-0">
+            From
+          </span>
+          <input
+            type="time"
+            value={window.start}
+            onChange={(e) => onChange({ ...window, start: e.target.value })}
+            className="bg-transparent text-white text-sm font-semibold outline-none flex-1 min-w-0 cursor-pointer"
+          />
+        </div>
+
+        <i className="fas fa-arrow-right text-slate-600 text-[10px] shrink-0" />
+
+        <div className="flex items-center gap-2.5 bg-slate-800/80 border border-slate-700/60 rounded-xl px-3 py-2.5 flex-1 min-w-[130px]">
+          <span className="w-2 h-2 rounded-full bg-rose-400 shrink-0" />
+          <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 shrink-0">
+            Until
+          </span>
+          <input
+            type="time"
+            value={window.end}
+            onChange={(e) => onChange({ ...window, end: e.target.value })}
+            className="bg-transparent text-white text-sm font-semibold outline-none flex-1 min-w-0 cursor-pointer"
+          />
+        </div>
+
+        {slotCount > 0 && (
+          <span className="shrink-0 bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-[10px] font-black px-2.5 py-1.5 rounded-lg tabular-nums">
+            {slotCount} slot{slotCount !== 1 ? "s" : ""}
+          </span>
+        )}
+
+        {canRemove && (
+          <button
+            onClick={onRemove}
+            className="shrink-0 w-8 h-8 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/10 hover:border-rose-500/30 text-rose-400 transition flex items-center justify-center"
+          >
+            <i className="fas fa-times text-xs" />
+          </button>
+        )}
+      </div>
+
+      {/* Preset chips */}
+      <div className="flex gap-2 flex-wrap">
+        {TIME_PRESETS.map((p) => (
+          <button
+            key={p.label}
+            onClick={() => onChange({ ...window, start: p.start, end: p.end })}
+            className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest transition border ${
+              activePreset?.label === p.label
+                ? "bg-indigo-500/20 border-indigo-500/40 text-indigo-300"
+                : "border-slate-700/50 text-slate-600 hover:text-slate-300 hover:border-slate-600"
+            }`}
+          >
+            {p.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// ── Date entry card ───────────────────────────────────────────────────────────
+
+const DateEntryCard = ({ entry, onChange, onRemove, canRemove, index }) => {
+  const addWindow = () =>
+    onChange({
+      ...entry,
+      time_windows: [
+        ...entry.time_windows,
+        { id: crypto.randomUUID(), start: "09:00", end: "12:00" },
+      ],
+    });
+
+  const updateWindow = (winId, updated) =>
+    onChange({
+      ...entry,
+      time_windows: entry.time_windows.map((w) => (w.id === winId ? updated : w)),
+    });
+
+  const removeWindow = (winId) =>
+    onChange({
+      ...entry,
+      time_windows: entry.time_windows.filter((w) => w.id !== winId),
+    });
+
+  const totalSlots = calcEntrySlots(entry);
+
+  return (
+    <div className="relative bg-slate-800/50 border border-slate-700/50 rounded-2xl overflow-hidden">
+      <div className="h-[2px] w-full bg-gradient-to-r from-indigo-500 via-violet-500 to-indigo-500/0" />
+
+      <div className="p-5 space-y-4">
+        {/* Header row */}
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <div className="flex items-center gap-3">
+            <div className="w-7 h-7 rounded-lg bg-indigo-500/15 border border-indigo-500/20 flex items-center justify-center shrink-0">
+              <span className="text-indigo-400 text-xs font-black">{index + 1}</span>
+            </div>
+            <div>
+              <label className="text-[9px] font-black uppercase tracking-widest text-slate-600 block mb-1">
+                Date
+              </label>
+              <input
+                type="date"
+                min={today()}
+                value={entry.date}
+                onChange={(e) => onChange({ ...entry, date: e.target.value })}
+                className="bg-slate-700/60 border border-slate-600/60 focus:border-indigo-500/60 rounded-xl px-3 py-1.5 text-white text-sm font-semibold outline-none transition cursor-pointer"
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {totalSlots > 0 && (
+              <span className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-black px-2.5 py-1.5 rounded-lg tabular-nums">
+                ~{totalSlots} slot{totalSlots !== 1 ? "s" : ""}
+              </span>
+            )}
+            {canRemove && (
+              <button
+                onClick={onRemove}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/10 hover:border-rose-500/30 text-rose-400 transition text-[11px] font-bold"
+              >
+                <i className="fas fa-trash-alt text-[9px]" />
+                Remove
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="h-px bg-slate-700/50" />
+
+        <div className="space-y-4">
+          <p className="text-[9px] font-black uppercase tracking-widest text-slate-600 flex items-center gap-2">
+            <i className="fas fa-clock" />
+            Time Windows
+          </p>
+
+          {entry.time_windows.map((w) => (
+            <TimeWindowRow
+              key={w.id}
+              window={w}
+              onChange={(updated) => updateWindow(w.id, updated)}
+              onRemove={() => removeWindow(w.id)}
+              canRemove={entry.time_windows.length > 1}
+            />
+          ))}
+
+          <button
+            onClick={addWindow}
+            className="flex items-center gap-2 text-indigo-400 hover:text-indigo-300 text-xs font-bold transition"
+          >
+            <i className="fas fa-plus-circle" />
+            Add time window
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ── Create Availability Modal ─────────────────────────────────────────────────
+
+// Extract the most specific human-readable message from a DRF error response
+const extractApiError = (err) => {
+  if (!err?.response) {
+    return "Network error. Please check your connection and try again.";
+  }
+  const d = err.response.data;
+  if (!d) return `Server error (${err.response.status}). Please try again.`;
+  if (typeof d === "string") return d;
+  // DRF field errors — date_ranges is our main field
+  if (d.date_ranges) {
+    const v = d.date_ranges;
+    return Array.isArray(v) ? v[0] : String(v);
+  }
+  if (d.non_field_errors) {
+    const v = d.non_field_errors;
+    return Array.isArray(v) ? v[0] : String(v);
+  }
+  if (d.detail) return String(d.detail);
+  if (d.message) return String(d.message);
+  // Last resort: first string value in the object
+  const first = Object.values(d).find((v) => v);
+  if (first) return Array.isArray(first) ? first[0] : String(first);
+  return `Server error (${err.response.status}). Please try again.`;
+};
+
+const CreateAvailabilityModal = ({ onClose, onCreated }) => {
+  const [entries, setEntries] = useState([newEntry()]);
+  const [generating, setGenerating] = useState(false);
+  // result: the successful API response (used for conflict/duplicate display)
+  const [result, setResult] = useState(null);
+  // inlineError: shown prominently inside the modal when nothing was created
+  const [inlineError, setInlineError] = useState(null);
+
+  const previewCount = useMemo(() => calcTotalSlots(entries), [entries]);
+
+  const addEntry = () => setEntries((prev) => [...prev, newEntry()]);
+
+  const updateEntry = (id, updated) =>
+    setEntries((prev) => prev.map((e) => (e.id === id ? updated : e)));
+
+  const removeEntry = (id) =>
+    setEntries((prev) => prev.filter((e) => e.id !== id));
+
+  const validate = () => {
+    for (const entry of entries) {
+      if (!entry.date) return "Please select a date for all entries.";
+      const entryDate = new Date(entry.date + "T00:00:00");
+      const todayDate = new Date(new Date().toISOString().slice(0, 10) + "T00:00:00");
+      if (entryDate < todayDate)
+        return `Date ${entry.date} is in the past. Only today or future dates are allowed.`;
+      for (const w of entry.time_windows) {
+        if (!w.start || !w.end) return "All time windows need a start and end time.";
+        if (w.start >= w.end)
+          return `Start time must be before end time (${entry.date}).`;
+        // Warn if window < 1 hour
+        const [sh, sm] = w.start.split(":").map(Number);
+        const [eh, em] = w.end.split(":").map(Number);
+        if ((eh * 60 + em) - (sh * 60 + sm) < 60)
+          return `Time window on ${entry.date} must be at least 1 hour to create a slot.`;
+      }
+    }
+    return null;
+  };
+
+  const handleGenerate = async () => {
+    const validationErr = validate();
+    if (validationErr) {
+      setInlineError({ type: "validation", message: validationErr });
+      return;
+    }
+    setGenerating(true);
+    setResult(null);
+    setInlineError(null);
+    try {
+      const payload = entries.map((e) => ({
+        date: e.date,
+        time_windows: e.time_windows.map(({ start, end }) => ({ start, end })),
+      }));
+      const data = await availabilityService.generateSlots(payload);
+      setResult(data);
+
+      if (data.created > 0) {
+        const extras = [];
+        if (data.skipped_duplicate > 0)
+          extras.push(`${data.skipped_duplicate} already existed`);
+        if (data.session_conflicts_count > 0)
+          extras.push(`${data.session_conflicts_count} skipped due to class conflicts`);
+        toastManager.success(
+          `${data.created} slot${data.created > 1 ? "s" : ""} created!` +
+            (extras.length ? ` (${extras.join(", ")})` : "")
+        );
+        onCreated();
+        onClose();
+        return;
+      }
+
+      // created === 0 — explain exactly why with inline feedback
+      const dups = data.skipped_duplicate ?? 0;
+      const conflicts = data.session_conflicts_count ?? 0;
+
+      if (dups > 0 && conflicts === 0) {
+        setInlineError({
+          type: "duplicate",
+          message: `${dups} slot${dups > 1 ? "s" : ""} already exist${dups === 1 ? "s" : ""} for the times you selected. Choose different dates or times.`,
+        });
+      } else if (conflicts > 0 && dups === 0) {
+        setInlineError({
+          type: "conflict",
+          message: `All selected times overlap with your scheduled classes (${conflicts} conflict${conflicts > 1 ? "s" : ""}). See the details below.`,
+        });
+      } else if (dups > 0 || conflicts > 0) {
+        setInlineError({
+          type: "mixed",
+          message: `No new slots created — ${dups > 0 ? `${dups} already exist` : ""}${dups > 0 && conflicts > 0 ? " and " : ""}${conflicts > 0 ? `${conflicts} conflict with your classes` : ""}. Adjust dates or times and try again.`,
+        });
+      } else {
+        setInlineError({
+          type: "unknown",
+          message: "No slots were created. Please verify your dates and times and try again.",
+        });
+      }
+    } catch (err) {
+      setInlineError({ type: "error", message: extractApiError(err) });
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-[900] flex items-start justify-center bg-black/70 backdrop-blur-sm overflow-y-auto py-8 px-4">
+      <div className="w-full max-w-2xl bg-slate-900 border border-slate-700/70 rounded-3xl shadow-2xl overflow-hidden my-auto">
+        {/* Modal header */}
+        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-800">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
+              <i className="fas fa-calendar-plus text-indigo-400" />
+            </div>
+            <div>
+              <h2 className="text-base font-semibold text-white">Create Availability</h2>
+              <p className="text-slate-500 text-xs mt-0.5">
+                Set dates &amp; time ranges — hourly slots are generated automatically
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition shrink-0"
+          >
+            <i className="fas fa-times text-sm" />
+          </button>
+        </div>
+
+        {/* Modal body */}
+        <div className="px-6 py-5 space-y-4 max-h-[60vh] overflow-y-auto">
+          {/* ── Inline error / feedback banner ── */}
+          {inlineError && (
+            <div
+              className={`rounded-2xl border p-4 flex gap-3 ${
+                inlineError.type === "conflict"
+                  ? "bg-amber-500/10 border-amber-500/20"
+                  : "bg-rose-500/10 border-rose-500/20"
+              }`}
+            >
+              <div
+                className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
+                  inlineError.type === "conflict"
+                    ? "bg-amber-500/20 text-amber-400"
+                    : "bg-rose-500/20 text-rose-400"
+                }`}
+              >
+                <i
+                  className={`fas text-sm ${
+                    inlineError.type === "error" || inlineError.type === "validation"
+                      ? "fa-exclamation-circle"
+                      : inlineError.type === "conflict"
+                      ? "fa-exclamation-triangle"
+                      : "fa-info-circle"
+                  }`}
+                />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p
+                  className={`text-sm font-semibold mb-0.5 ${
+                    inlineError.type === "conflict" ? "text-amber-300" : "text-rose-300"
+                  }`}
+                >
+                  {inlineError.type === "error" || inlineError.type === "validation"
+                    ? "Could not create slots"
+                    : inlineError.type === "duplicate"
+                    ? "Slots already exist"
+                    : inlineError.type === "conflict"
+                    ? "Class schedule conflict"
+                    : "Nothing was created"}
+                </p>
+                <p
+                  className={`text-xs leading-relaxed ${
+                    inlineError.type === "conflict" ? "text-amber-400/80" : "text-rose-400/80"
+                  }`}
+                >
+                  {inlineError.message}
+                </p>
+              </div>
+              <button
+                onClick={() => setInlineError(null)}
+                className="shrink-0 text-slate-600 hover:text-slate-400 transition mt-0.5"
+              >
+                <i className="fas fa-times text-xs" />
+              </button>
+            </div>
+          )}
+
+          {entries.map((entry, idx) => (
+            <DateEntryCard
+              key={entry.id}
+              entry={entry}
+              index={idx}
+              onChange={(updated) => { updateEntry(entry.id, updated); setInlineError(null); }}
+              onRemove={() => removeEntry(entry.id)}
+              canRemove={entries.length > 1}
+            />
+          ))}
+
+          <button
+            onClick={addEntry}
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl border border-dashed border-slate-700 text-slate-500 hover:border-indigo-500/40 hover:text-indigo-400 transition text-xs font-bold"
+          >
+            <i className="fas fa-plus" />
+            Add Another Date
+          </button>
+
+          {/* Class conflict detail list */}
+          {result?.session_conflicts?.length > 0 && (
+            <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4 space-y-3">
+              <p className="text-[10px] font-black uppercase tracking-widest text-amber-400 flex items-center gap-2">
+                <i className="fas fa-calendar-times" />
+                Skipped — your classes occupy these times:
+              </p>
+              <div className="space-y-2">
+                {result.session_conflicts.map((c, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center gap-2 flex-wrap text-[11px] text-slate-400 bg-slate-800/60 rounded-xl px-3 py-2.5"
+                  >
+                    <span className="font-bold text-slate-200">{fmtDate(c.date)}</span>
+                    <span className="text-slate-500">•</span>
+                    <span className="tabular-nums">{fmt12(c.start_time)} – {fmt12(c.end_time)}</span>
+                    <span className="text-slate-600">•</span>
+                    <span className="text-amber-400/80 italic truncate">
+                      &ldquo;{c.session_title}&rdquo;
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Modal footer */}
+        <div className="px-6 py-4 border-t border-slate-800 flex items-center gap-3">
+          <button
+            onClick={onClose}
+            className="flex-1 py-3 rounded-xl border border-slate-700 text-slate-400 hover:text-white hover:border-slate-600 font-semibold text-sm transition"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleGenerate}
+            disabled={generating}
+            className="flex-[2] flex items-center justify-center gap-3 py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 disabled:cursor-not-allowed font-bold text-sm transition shadow-lg shadow-indigo-500/20"
+          >
+            {generating ? (
+              <>
+                <i className="fas fa-spinner fa-spin" />
+                Generating…
+              </>
+            ) : (
+              <>
+                <i className="fas fa-magic" />
+                Create Hourly Slots
+                {previewCount > 0 && (
+                  <span className="bg-white/15 text-white text-[10px] font-black px-2.5 py-1 rounded-full tabular-nums">
+                    ~{previewCount}
+                  </span>
+                )}
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ── Status badge ──────────────────────────────────────────────────────────────
+
+const StatusBadge = ({ status }) =>
+  status === "booked" ? (
+    <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-300 text-[9px] font-black uppercase tracking-widest">
+      <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
+      Booked
+    </span>
+  ) : (
+    <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-[9px] font-black uppercase tracking-widest">
+      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+      Open
+    </span>
+  );
+
+// ── Slot card ─────────────────────────────────────────────────────────────────
+
+const SlotCard = ({ slot, onDelete, deletingId }) => {
+  const isBooked = slot.status === "booked";
+  const isDeleting = deletingId === slot.id;
+
+  return (
+    <div
+      className={`relative rounded-2xl border overflow-hidden transition group ${
+        isBooked
+          ? "bg-gradient-to-b from-amber-500/[0.05] to-slate-900/80 border-amber-500/20"
+          : "bg-slate-900 border-slate-700/50 hover:border-slate-600/70"
+      }`}
+    >
+      <div
+        className={`h-[2px] w-full ${
+          isBooked
+            ? "bg-gradient-to-r from-amber-400/50 to-amber-400/0"
+            : "bg-gradient-to-r from-indigo-500/30 to-indigo-500/0"
+        }`}
+      />
+
+      <div className="p-4">
+        <div className="flex items-start justify-between gap-2 mb-3">
+          <div>
+            <p className="text-sm font-bold text-white tabular-nums">
+              {fmt12(slot.start_time)}
+              <span className="text-slate-500 font-normal mx-1">–</span>
+              {fmt12(slot.end_time)}
+            </p>
+            <p className="text-[10px] text-slate-600 mt-0.5 font-medium">1 hr session</p>
+          </div>
+          <StatusBadge status={slot.status} />
+        </div>
+
+        {isBooked && slot.booked_by_name && (
+          <div className="flex items-center gap-2.5 bg-slate-800/80 rounded-xl px-3 py-2.5 mb-2">
+            <div className="w-7 h-7 rounded-full bg-indigo-500/20 border border-indigo-500/20 flex items-center justify-center text-indigo-300 text-xs font-black shrink-0">
+              {slot.booked_by_name[0]?.toUpperCase()}
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs font-bold text-slate-200 truncate">{slot.booked_by_name}</p>
+              {slot.booked_by_email && (
+                <p className="text-[10px] text-slate-500 truncate">{slot.booked_by_email}</p>
+              )}
+            </div>
+          </div>
+        )}
+
+        {!isBooked && (
+          <button
+            onClick={() => onDelete(slot.id)}
+            disabled={isDeleting}
+            className="w-full mt-1 flex items-center justify-center gap-2 py-1.5 rounded-xl text-slate-700 hover:text-rose-400 transition text-[11px] font-bold opacity-0 group-hover:opacity-100"
+          >
+            {isDeleting ? (
+              <i className="fas fa-spinner fa-spin" />
+            ) : (
+              <>
+                <i className="fas fa-trash-alt text-[10px]" />
+                Delete
+              </>
+            )}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// ── Main page ─────────────────────────────────────────────────────────────────
+
+const TeacherAvailabilityPage = () => {
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [slots, setSlots] = useState([]);
+  const [loadingSlots, setLoadingSlots] = useState(true);
+  const [slotsError, setSlotsError] = useState(null);
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [deletingId, setDeletingId] = useState(null);
+
+  const loadSlots = useCallback(async () => {
+    setLoadingSlots(true);
+    setSlotsError(null);
+    try {
+      const data = await availabilityService.getMySlots();
+      setSlots(data);
+    } catch {
+      setSlotsError("Failed to load your slots. Please refresh.");
+    } finally {
+      setLoadingSlots(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadSlots();
+  }, [loadSlots]);
+
+  const handleDelete = async (slotId) => {
+    setDeletingId(slotId);
+    try {
+      await availabilityService.deleteSlot(slotId);
+      toastManager.success("Slot deleted.");
+      setSlots((prev) => prev.filter((s) => s.id !== slotId));
+    } catch (err) {
+      toastManager.error(err?.response?.data?.error || "Failed to delete slot.");
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const filtered = slots.filter(
+    (s) => statusFilter === "all" || s.status === statusFilter
+  );
+  const grouped = filtered.reduce((acc, slot) => {
+    if (!acc[slot.date]) acc[slot.date] = [];
+    acc[slot.date].push(slot);
+    return acc;
+  }, {});
+
+  const availableCount = slots.filter((s) => s.status === "available").length;
+  const bookedCount = slots.filter((s) => s.status === "booked").length;
+
+  return (
+    <div className="min-h-screen bg-slate-950 text-white pb-24">
+      {/* Sticky header */}
+      <div className="border-b border-slate-800/80 bg-slate-950/95 backdrop-blur sticky top-0 z-10">
+        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between gap-4 flex-wrap">
+          <div>
+            <h1 className="text-lg font-semibold tracking-tight">Availability</h1>
+            <p className="text-slate-500 text-xs mt-0.5">
+              Manage your tutoring slots
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            {/* Stats */}
+            {!loadingSlots && (
+              <div className="hidden sm:flex items-center gap-2">
+                <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="text-xs font-bold text-slate-200 tabular-nums">{availableCount}</span>
+                  <span className="text-[9px] text-slate-600 uppercase tracking-widest font-bold">open</span>
+                </div>
+                <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2">
+                  <span className="w-2 h-2 rounded-full bg-amber-400" />
+                  <span className="text-xs font-bold text-slate-200 tabular-nums">{bookedCount}</span>
+                  <span className="text-[9px] text-slate-600 uppercase tracking-widest font-bold">booked</span>
+                </div>
+              </div>
+            )}
+
+            {/* Primary CTA */}
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm transition shadow-lg shadow-indigo-500/20"
+            >
+              <i className="fas fa-plus text-xs" />
+              Create Slots
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Page body — slots grid only */}
+      <div className="max-w-5xl mx-auto px-6 py-8">
+
+        {/* Empty hero — first time */}
+        {!loadingSlots && !slotsError && slots.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-32 text-center space-y-5">
+            <div className="w-20 h-20 rounded-3xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mx-auto">
+              <i className="fas fa-calendar-plus text-indigo-400 text-3xl" />
+            </div>
+            <div>
+              <h2 className="text-xl font-semibold text-white mb-2">No slots yet</h2>
+              <p className="text-slate-500 text-sm max-w-sm mx-auto">
+                Create your availability and students will be able to book 1-on-1 tutoring sessions with you.
+              </p>
+            </div>
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm transition shadow-lg shadow-indigo-500/20"
+            >
+              <i className="fas fa-calendar-plus" />
+              Create Availability Slots
+            </button>
+          </div>
+        )}
+
+        {/* Slot list */}
+        {(loadingSlots || slotsError || slots.length > 0) && (
+          <div className="space-y-6">
+            {/* Filter bar */}
+            {!loadingSlots && !slotsError && slots.length > 0 && (
+              <div className="flex items-center justify-between gap-4 flex-wrap">
+                <p className="text-slate-500 text-sm">
+                  {slots.length} total slot{slots.length !== 1 ? "s" : ""}
+                </p>
+                <div className="flex items-center gap-1 bg-slate-900 border border-slate-800 rounded-xl p-1">
+                  {["all", "available", "booked"].map((f) => (
+                    <button
+                      key={f}
+                      onClick={() => setStatusFilter(f)}
+                      className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition ${
+                        statusFilter === f
+                          ? "bg-indigo-600 text-white"
+                          : "text-slate-500 hover:text-slate-300"
+                      }`}
+                    >
+                      {f}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {loadingSlots ? (
+              <div className="flex flex-col items-center py-32">
+                <i className="fas fa-spinner fa-spin text-2xl text-slate-700 mb-3" />
+                <p className="text-slate-600 text-sm">Loading your slots…</p>
+              </div>
+            ) : slotsError ? (
+              <div className="bg-rose-500/10 border border-rose-500/20 rounded-2xl p-8 text-center text-rose-400">
+                <i className="fas fa-exclamation-circle text-2xl mb-3 block" />
+                <p className="text-sm font-semibold mb-4">{slotsError}</p>
+                <button
+                  onClick={loadSlots}
+                  className="px-4 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-rose-400 text-xs font-bold transition"
+                >
+                  Try again
+                </button>
+              </div>
+            ) : Object.keys(grouped).length === 0 ? (
+              <div className="border border-dashed border-slate-800 rounded-3xl py-20 text-center space-y-2">
+                <i className="fas fa-calendar-times text-slate-800 text-4xl block" />
+                <p className="text-slate-600 text-sm font-semibold">
+                  No {statusFilter !== "all" ? statusFilter : ""} slots.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-8">
+                {Object.entries(grouped)
+                  .sort(([a], [b]) => a.localeCompare(b))
+                  .map(([date, daySlots]) => {
+                    const dayBooked = daySlots.filter((s) => s.status === "booked").length;
+                    const dayOpen = daySlots.filter((s) => s.status === "available").length;
+                    return (
+                      <div key={date}>
+                        <div className="flex items-center gap-4 mb-4">
+                          <div className="h-px flex-1 bg-slate-800" />
+                          <div className="flex items-center gap-2.5 shrink-0">
+                            <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                              {fmtDate(date)}
+                            </span>
+                            {dayOpen > 0 && (
+                              <span className="text-[9px] font-black bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 rounded-full px-2 py-0.5">
+                                {dayOpen} open
+                              </span>
+                            )}
+                            {dayBooked > 0 && (
+                              <span className="text-[9px] font-black bg-amber-500/10 border border-amber-500/20 text-amber-500 rounded-full px-2 py-0.5">
+                                {dayBooked} booked
+                              </span>
+                            )}
+                          </div>
+                          <div className="h-px flex-1 bg-slate-800" />
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                          {daySlots.map((slot) => (
+                            <SlotCard
+                              key={slot.id}
+                              slot={slot}
+                              onDelete={handleDelete}
+                              deletingId={deletingId}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Create modal */}
+      {showCreateModal && (
+        <CreateAvailabilityModal
+          onClose={() => setShowCreateModal(false)}
+          onCreated={loadSlots}
+        />
+      )}
+    </div>
+  );
+};
+
+export default TeacherAvailabilityPage;
