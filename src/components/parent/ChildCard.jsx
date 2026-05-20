@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ConfirmDialog from "../common/ConfirmDialog";
 import { useDispatch, useSelector } from "react-redux";
+import { availabilityService } from "../../services/availabilityService";
 import {
   fetchChildAttendance,
 } from "../../store/slices/parentSlice";
@@ -47,11 +48,29 @@ const SkeletonLoader = () => (
   </div>
 );
 
+const fmt12 = (t) => {
+  if (!t) return "";
+  const [h, m] = t.split(":").map(Number);
+  const suffix = h >= 12 ? "PM" : "AM";
+  return `${h % 12 || 12}:${String(m).padStart(2, "0")} ${suffix}`;
+};
+const isUpcoming = (date) => new Date(date + "T23:59:59") >= new Date();
+
 const ChildCard = ({ child }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [confirmUnlink, setConfirmUnlink] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [bookedSlots, setBookedSlots] = useState([]);
+
+  useEffect(() => {
+    if (!child.id) return;
+    availabilityService.getChildBookedSlots(child.id)
+      .then((d) => setBookedSlots(Array.isArray(d) ? d : []))
+      .catch(() => setBookedSlots([]));
+  }, [child.id]);
+
+  const upcomingSlots = bookedSlots.filter((s) => isUpcoming(s.date));
 
   // Select child-specific data from Redux
   const childAttendance = useSelector(selectChildAttendance);
@@ -250,6 +269,32 @@ const ChildCard = ({ child }) => {
               </span>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Tutoring Slots (compact, max 2) */}
+      {upcomingSlots.length > 0 && (
+        <div className="mb-3 shrink-0">
+          <div className="flex items-center justify-between mb-1.5 px-1">
+            <p className="text-[10px] text-slate-500 font-black uppercase flex items-center gap-1.5">
+              <i className="fas fa-chalkboard-teacher text-indigo-400 text-[9px]" />
+              Tutoring
+            </p>
+            <span className="text-[9px] font-black text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 rounded-full px-2 py-0.5">
+              {upcomingSlots.length} upcoming
+            </span>
+          </div>
+          <div className="space-y-1">
+            {upcomingSlots.slice(0, 2).map((s) => (
+              <div key={s.id} className="flex items-center gap-2 bg-indigo-500/5 border border-indigo-500/15 rounded-lg px-2.5 py-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse shrink-0" />
+                <span className="text-[10px] font-bold text-slate-300 truncate flex-1">{s.teacher_name}</span>
+                <span className="text-[9px] text-indigo-400 font-black tabular-nums shrink-0">
+                  {new Date(s.date + "T00:00:00").toLocaleDateString(undefined, { month: "short", day: "numeric" })} · {fmt12(s.start_time)}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
