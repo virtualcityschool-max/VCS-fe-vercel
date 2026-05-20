@@ -4,7 +4,7 @@ import { useFieldErrors } from "../../hooks";
 import { validatePhone, normalizePhone } from "../../utils/validation";
 import DistinctionsEditor from "./DistinctionsEditor";
 
-const TeacherProfileTab = ({ profile, onUpdate, onCancel, onSaved }) => {
+const TeacherProfileTab = ({ profile, onUpdate, onCancel, onSaved, readOnly = false }) => {
   const [formData, setFormData] = useState({
     bio: "",
     expertise: "",
@@ -108,7 +108,8 @@ const TeacherProfileTab = ({ profile, onUpdate, onCancel, onSaved }) => {
             onChange={(e) => handleInputChange("bio", e.target.value)}
             rows={3}
             placeholder="Brief professional biography…"
-            className={`w-full bg-slate-800 border rounded-lg px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none resize-none transition ${
+            disabled={readOnly}
+            className={`w-full bg-slate-800 border rounded-lg px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none resize-none transition disabled:opacity-60 disabled:cursor-default ${
               errors.bio
                 ? "border-rose-500/60"
                 : "border-slate-700 hover:border-slate-600 focus:border-indigo-500/60"
@@ -127,6 +128,7 @@ const TeacherProfileTab = ({ profile, onUpdate, onCancel, onSaved }) => {
               placeholder="e.g. Mathematics"
               error={getFieldError("expertise")}
               className="w-full bg-slate-800 text-white"
+              disabled={readOnly}
             />
           </div>
           <div>
@@ -138,6 +140,7 @@ const TeacherProfileTab = ({ profile, onUpdate, onCancel, onSaved }) => {
               placeholder="e.g. 5"
               error={getFieldError("experience_years")}
               className="w-full bg-slate-800 text-white"
+              disabled={readOnly}
             />
           </div>
           {/* <div>
@@ -166,6 +169,7 @@ const TeacherProfileTab = ({ profile, onUpdate, onCancel, onSaved }) => {
               value={formData.phone}
               onChange={(val) => handleInputChange("phone", val)}
               error={getFieldError("phone")}
+              disabled={readOnly}
             />
           </div>
           <div>
@@ -177,6 +181,7 @@ const TeacherProfileTab = ({ profile, onUpdate, onCancel, onSaved }) => {
               placeholder="https://linkedin.com/in/username"
               error={getFieldError("linkedin")}
               className="w-full bg-slate-800 text-white"
+              disabled={readOnly}
             />
           </div>
         </div>
@@ -186,23 +191,26 @@ const TeacherProfileTab = ({ profile, onUpdate, onCancel, onSaved }) => {
           <label className="block text-sm font-medium text-slate-300 mb-2">Achievements &amp; Distinctions</label>
           <DistinctionsEditor
             distinctions={formData.distinctions}
-            onChange={(d) => handleInputChange("distinctions", d)}
+            onChange={(d) => !readOnly && handleInputChange("distinctions", d)}
+            readOnly={readOnly}
           />
         </div>
 
         {/* Actions */}
-        <div className="flex flex-col sm:flex-row gap-3 sm:justify-end pt-1">
-          <Button type="button" variant="secondary" onClick={handleCancel} className="w-full sm:w-auto">
-            Cancel
-          </Button>
-          <Button type="submit" disabled={isSaving} className="w-full sm:w-auto">
-            {isSaving ? (
-              <><i className="fas fa-spinner fa-spin mr-2" />Saving...</>
-            ) : (
-              <><i className="fas fa-save mr-2" />Save Profile</>
-            )}
-          </Button>
-        </div>
+        {!readOnly && (
+          <div className="flex flex-col sm:flex-row gap-3 sm:justify-end pt-1">
+            <Button type="button" variant="secondary" onClick={handleCancel} className="w-full sm:w-auto">
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isSaving} className="w-full sm:w-auto">
+              {isSaving ? (
+                <><i className="fas fa-spinner fa-spin mr-2" />Saving...</>
+              ) : (
+                <><i className="fas fa-save mr-2" />Save Profile</>
+              )}
+            </Button>
+          </div>
+        )}
       </form>
     </div>
   );

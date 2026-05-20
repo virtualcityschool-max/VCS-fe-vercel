@@ -157,6 +157,7 @@ const UsersTab = ({
   onUserPurge,
   onFetchUsers,
   onUserEdit,
+  onUserView,
   onCreateUser,
 }) => {
   const navigate = useNavigate();
@@ -248,6 +249,11 @@ const UsersTab = ({
     } catch (error) {
       console.error("Failed to purge user:", error);
     }
+  };
+
+  const handleViewUser = (userId) => {
+    if (onUserView) onUserView(userId);
+    else navigate(`/admin/users/${userId}`, { state: { viewOnly: true } });
   };
 
   const handleEditUser = (userId) => {
@@ -401,6 +407,14 @@ const UsersTab = ({
                     ) : (
                       <div className="flex gap-2">
                         <button
+                          onClick={() => handleViewUser(user.id)}
+                          className="bg-slate-700/50 text-slate-400 px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium hover:bg-slate-600/50 hover:text-slate-200 transition flex items-center gap-1 flex-1 justify-center"
+                          title="View user"
+                        >
+                          <i className="fas fa-eye"></i>
+                          <span className="hidden sm:inline">View</span>
+                        </button>
+                        <button
                           onClick={() => handleEditUser(user.id)}
                           className="bg-slate-700/50 text-slate-300 px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium hover:bg-slate-600/50 transition flex items-center gap-1 flex-1 justify-center"
                         >
@@ -501,6 +515,14 @@ const UsersTab = ({
                           </div>
                         ) : (
                           <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => handleViewUser(user.id)}
+                              className="bg-slate-700/50 text-slate-400 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-slate-600/50 hover:text-slate-200 transition"
+                              title="View user"
+                            >
+                              <i className="fas fa-eye mr-1"></i>
+                              View
+                            </button>
                             <button
                               onClick={() => handleEditUser(user.id)}
                               className="bg-slate-700/50 text-slate-300 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-slate-600/50 transition"

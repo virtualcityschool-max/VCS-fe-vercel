@@ -21,7 +21,7 @@ import { useParams } from "react-router-dom";
 import { showApiError } from "../../utils/apiErrorHandler";
 import SearchInput from "../ui/SearchInput";
 
-const ParentProfileTab = ({ profile, onUpdate, onRefresh, onCancel, onSaved }) => {
+const ParentProfileTab = ({ profile, onUpdate, onRefresh, onCancel, onSaved, readOnly = false }) => {
   const { id } = useParams();
 
   const dispatch = useDispatch();
@@ -230,6 +230,7 @@ const ParentProfileTab = ({ profile, onUpdate, onRefresh, onCancel, onSaved }) =
               value={formData.phone}
               onChange={(val) => handleInputChange("phone", val)}
               error={getFieldError("phone")}
+              disabled={readOnly}
             />
           </div>
           <div>
@@ -239,7 +240,8 @@ const ParentProfileTab = ({ profile, onUpdate, onRefresh, onCancel, onSaved }) =
             <textarea
               value={formData.address}
               onChange={(e) => handleInputChange("address", e.target.value)}
-              className={`w-full bg-slate-900/60 border text-white rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 resize-none ${
+              disabled={readOnly}
+              className={`w-full bg-slate-900/60 border text-white rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 resize-none disabled:opacity-60 disabled:cursor-default ${
                 errors.address
                   ? "border-red-500 focus:ring-red-500/20"
                   : "border-slate-700 focus:ring-indigo-500/30"
@@ -447,33 +449,35 @@ const ParentProfileTab = ({ profile, onUpdate, onRefresh, onCancel, onSaved }) =
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-3 sm:justify-end">
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={handleCancel}
-            className="w-full sm:w-auto"
-          >
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            disabled={isSaving}
-            className="w-full sm:w-auto"
-          >
-            {isSaving ? (
-              <>
-                <i className="fas fa-spinner fa-spin mr-2"></i>
-                Saving...
-              </>
-            ) : (
-              <>
-                <i className="fas fa-save mr-2"></i>
-                Save Profile
-              </>
-            )}
-          </Button>
-        </div>
+        {!readOnly && (
+          <div className="flex flex-col sm:flex-row gap-3 sm:justify-end">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={handleCancel}
+              className="w-full sm:w-auto"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={isSaving}
+              className="w-full sm:w-auto"
+            >
+              {isSaving ? (
+                <>
+                  <i className="fas fa-spinner fa-spin mr-2"></i>
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <i className="fas fa-save mr-2"></i>
+                  Save Profile
+                </>
+              )}
+            </Button>
+          </div>
+        )}
       </form>
       <ConfirmDialog
         open={confirmUnlink.open}

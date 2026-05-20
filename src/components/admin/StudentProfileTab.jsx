@@ -25,7 +25,7 @@ const StatusBadge = ({ status }) => {
   );
 };
 
-const StudentProfileTab = ({ profile, userId, onUpdate, onCancel, onSaved }) => {
+const StudentProfileTab = ({ profile, userId, onUpdate, onCancel, onSaved, readOnly = false }) => {
   const [formData, setFormData] = useState({
     grade_level: "",
     date_of_birth: "",
@@ -160,6 +160,7 @@ const StudentProfileTab = ({ profile, userId, onUpdate, onCancel, onSaved }) => 
               placeholder="e.g. Grade 8, A-Level"
               error={getFieldError("grade_level")}
               className="bg-slate-900/60 border-slate-700"
+              disabled={readOnly}
             />
           </div>
 
@@ -174,6 +175,7 @@ const StudentProfileTab = ({ profile, userId, onUpdate, onCancel, onSaved }) => 
               max={new Date().toISOString().split("T")[0]}
               error={getFieldError("date_of_birth")}
               className="w-full bg-slate-900/60 text-white border-slate-700"
+              disabled={readOnly}
             />
           </div>
         </div>
@@ -186,36 +188,39 @@ const StudentProfileTab = ({ profile, userId, onUpdate, onCancel, onSaved }) => 
             value={formData.phone}
             onChange={(val) => handleInputChange("phone", val)}
             error={getFieldError("phone")}
+            disabled={readOnly}
           />
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-3 sm:justify-end">
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={handleCancel}
-            className="w-full sm:w-auto"
-          >
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            disabled={isSaving}
-            className="w-full sm:w-auto"
-          >
-            {isSaving ? (
-              <>
-                <i className="fas fa-spinner fa-spin mr-2"></i>
-                Saving...
-              </>
-            ) : (
-              <>
-                <i className="fas fa-save mr-2"></i>
-                Save Profile
-              </>
-            )}
-          </Button>
-        </div>
+        {!readOnly && (
+          <div className="flex flex-col sm:flex-row gap-3 sm:justify-end">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={handleCancel}
+              className="w-full sm:w-auto"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={isSaving}
+              className="w-full sm:w-auto"
+            >
+              {isSaving ? (
+                <>
+                  <i className="fas fa-spinner fa-spin mr-2"></i>
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <i className="fas fa-save mr-2"></i>
+                  Save Profile
+                </>
+              )}
+            </Button>
+          </div>
+        )}
       </form>
 
       {/* Linked parents — outside main form */}
