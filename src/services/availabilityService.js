@@ -1,8 +1,11 @@
 import axiosInstance from "../utils/axiosInstance";
+import store from "../store";
 
 const generateSlots = async (dateRanges) => {
+  const timezone = store.getState().auth.profile?.timezone || null;
   const response = await axiosInstance.post("/availability/slots/generate/", {
     date_ranges: dateRanges,
+    ...(timezone ? { timezone } : {}),
   });
   return response.data;
 };

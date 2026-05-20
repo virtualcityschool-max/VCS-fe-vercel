@@ -19,7 +19,10 @@ const fmtDate = (d) =>
     year: "numeric",
   });
 
-const today = () => new Date().toISOString().slice(0, 10);
+const today = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+};
 
 const calcWindowSlots = (start, end) => {
   if (!start || !end || start >= end) return 0;
@@ -51,73 +54,53 @@ const newEntry = () => ({
 
 const TimeWindowRow = ({ window, onChange, onRemove, canRemove }) => {
   const slotCount = calcWindowSlots(window.start, window.end);
-  const activePreset = TIME_PRESETS.find(
-    (p) => p.start === window.start && p.end === window.end
-  );
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center gap-2 flex-wrap">
-        <div className="flex items-center gap-2.5 bg-slate-800/80 border border-slate-700/60 rounded-xl px-3 py-2.5 flex-1 min-w-[130px]">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
-          <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 shrink-0">
-            From
-          </span>
-          <input
-            type="time"
-            value={window.start}
-            onChange={(e) => onChange({ ...window, start: e.target.value })}
-            className="bg-transparent text-white text-sm font-semibold outline-none flex-1 min-w-0 cursor-pointer"
-          />
-        </div>
-
-        <i className="fas fa-arrow-right text-slate-600 text-[10px] shrink-0" />
-
-        <div className="flex items-center gap-2.5 bg-slate-800/80 border border-slate-700/60 rounded-xl px-3 py-2.5 flex-1 min-w-[130px]">
-          <span className="w-2 h-2 rounded-full bg-rose-400 shrink-0" />
-          <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 shrink-0">
-            Until
-          </span>
-          <input
-            type="time"
-            value={window.end}
-            onChange={(e) => onChange({ ...window, end: e.target.value })}
-            className="bg-transparent text-white text-sm font-semibold outline-none flex-1 min-w-0 cursor-pointer"
-          />
-        </div>
-
-        {slotCount > 0 && (
-          <span className="shrink-0 bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-[10px] font-black px-2.5 py-1.5 rounded-lg tabular-nums">
-            {slotCount} slot{slotCount !== 1 ? "s" : ""}
-          </span>
-        )}
-
-        {canRemove && (
-          <button
-            onClick={onRemove}
-            className="shrink-0 w-8 h-8 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/10 hover:border-rose-500/30 text-rose-400 transition flex items-center justify-center"
-          >
-            <i className="fas fa-times text-xs" />
-          </button>
-        )}
+    <div className="flex items-center gap-2 flex-wrap">
+      <div className="flex items-center gap-2.5 bg-slate-800/80 border border-slate-700/60 rounded-xl px-3 py-2.5 flex-1 min-w-[130px]">
+        <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
+        <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 shrink-0">
+          From
+        </span>
+        <input
+          type="time"
+          value={window.start}
+          onChange={(e) => onChange({ ...window, start: e.target.value })}
+          className="bg-transparent text-white text-sm font-semibold outline-none flex-1 min-w-0 cursor-pointer"
+          style={{ colorScheme: "dark" }}
+        />
       </div>
 
-      {/* Preset chips */}
-      <div className="flex gap-2 flex-wrap">
-        {TIME_PRESETS.map((p) => (
-          <button
-            key={p.label}
-            onClick={() => onChange({ ...window, start: p.start, end: p.end })}
-            className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest transition border ${
-              activePreset?.label === p.label
-                ? "bg-indigo-500/20 border-indigo-500/40 text-indigo-300"
-                : "border-slate-700/50 text-slate-600 hover:text-slate-300 hover:border-slate-600"
-            }`}
-          >
-            {p.label}
-          </button>
-        ))}
+      <i className="fas fa-arrow-right text-slate-600 text-[10px] shrink-0" />
+
+      <div className="flex items-center gap-2.5 bg-slate-800/80 border border-slate-700/60 rounded-xl px-3 py-2.5 flex-1 min-w-[130px]">
+        <span className="w-2 h-2 rounded-full bg-rose-400 shrink-0" />
+        <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 shrink-0">
+          Until
+        </span>
+        <input
+          type="time"
+          value={window.end}
+          onChange={(e) => onChange({ ...window, end: e.target.value })}
+          className="bg-transparent text-white text-sm font-semibold outline-none flex-1 min-w-0 cursor-pointer"
+          style={{ colorScheme: "dark" }}
+        />
       </div>
+
+      {slotCount > 0 && (
+        <span className="shrink-0 bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-[10px] font-black px-2.5 py-1.5 rounded-lg tabular-nums">
+          {slotCount} slot{slotCount !== 1 ? "s" : ""}
+        </span>
+      )}
+
+      {canRemove && (
+        <button
+          onClick={onRemove}
+          className="shrink-0 w-8 h-8 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/10 hover:border-rose-500/30 text-rose-400 transition flex items-center justify-center"
+        >
+          <i className="fas fa-times text-xs" />
+        </button>
+      )}
     </div>
   );
 };
@@ -169,11 +152,19 @@ const DateEntryCard = ({ entry, onChange, onRemove, canRemove, index }) => {
                 value={entry.date}
                 onChange={(e) => onChange({ ...entry, date: e.target.value })}
                 className="bg-slate-700/60 border border-slate-600/60 focus:border-indigo-500/60 rounded-xl px-3 py-1.5 text-white text-sm font-semibold outline-none transition cursor-pointer"
+                style={{ colorScheme: "dark" }}
               />
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <button
+              onClick={addWindow}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/10 hover:border-indigo-500/30 text-indigo-400 transition text-[11px] font-bold"
+            >
+              <i className="fas fa-plus-circle text-[9px]" />
+              Add time window
+            </button>
             {totalSlots > 0 && (
               <span className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-black px-2.5 py-1.5 rounded-lg tabular-nums">
                 ~{totalSlots} slot{totalSlots !== 1 ? "s" : ""}
@@ -194,10 +185,35 @@ const DateEntryCard = ({ entry, onChange, onRemove, canRemove, index }) => {
         <div className="h-px bg-slate-700/50" />
 
         <div className="space-y-4">
-          <p className="text-[9px] font-black uppercase tracking-widest text-slate-600 flex items-center gap-2">
-            <i className="fas fa-clock" />
-            Time Windows
-          </p>
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <p className="text-[9px] font-black uppercase tracking-widest text-slate-600 flex items-center gap-2">
+              <i className="fas fa-clock" />
+              Time Windows
+            </p>
+            <div className="flex gap-2 flex-wrap items-center">
+              {TIME_PRESETS.map((p) => {
+                const isActive = entry.time_windows.length === 1 && 
+                                 entry.time_windows[0].start === p.start && 
+                                 entry.time_windows[0].end === p.end;
+                return (
+                  <button
+                    key={p.label}
+                    onClick={() => onChange({
+                      ...entry,
+                      time_windows: [{ id: entry.time_windows[0]?.id || crypto.randomUUID(), start: p.start, end: p.end }]
+                    })}
+                    className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest transition border ${
+                      isActive
+                        ? "bg-indigo-500/20 border-indigo-500/40 text-indigo-300"
+                        : "border-slate-700/50 text-slate-600 hover:text-slate-300 hover:border-slate-600"
+                    }`}
+                  >
+                    {p.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
 
           {entry.time_windows.map((w) => (
             <TimeWindowRow
@@ -208,14 +224,6 @@ const DateEntryCard = ({ entry, onChange, onRemove, canRemove, index }) => {
               canRemove={entry.time_windows.length > 1}
             />
           ))}
-
-          <button
-            onClick={addWindow}
-            className="flex items-center gap-2 text-indigo-400 hover:text-indigo-300 text-xs font-bold transition"
-          >
-            <i className="fas fa-plus-circle" />
-            Add time window
-          </button>
         </div>
       </div>
     </div>
@@ -249,15 +257,47 @@ const extractApiError = (err) => {
   return `Server error (${err.response.status}). Please try again.`;
 };
 
+const localDateStr = (d) => {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+};
+
+const getDatesInRange = (from, to) => {
+  const dates = [];
+  const cur = new Date(from + "T00:00:00");
+  const end = new Date(to + "T00:00:00");
+  while (cur <= end && dates.length < 60) {
+    dates.push(localDateStr(cur));
+    cur.setDate(cur.getDate() + 1);
+  }
+  return dates;
+};
+
 const CreateAvailabilityModal = ({ onClose, onCreated }) => {
-  const [entries, setEntries] = useState([newEntry()]);
+  const [entries, setEntries] = useState([]);
+  const [rangeFrom, setRangeFrom] = useState("");
+  const [rangeTo, setRangeTo] = useState("");
   const [generating, setGenerating] = useState(false);
-  // result: the successful API response (used for conflict/duplicate display)
   const [result, setResult] = useState(null);
-  // inlineError: shown prominently inside the modal when nothing was created
   const [inlineError, setInlineError] = useState(null);
 
   const previewCount = useMemo(() => calcTotalSlots(entries), [entries]);
+
+  const rangeDates = useMemo(
+    () => (rangeFrom && rangeTo && rangeFrom <= rangeTo ? getDatesInRange(rangeFrom, rangeTo) : []),
+    [rangeFrom, rangeTo]
+  );
+
+  useEffect(() => {
+    if (rangeDates.length > 0) {
+      setEntries(rangeDates.map((date) => ({ ...newEntry(), date })));
+      setInlineError(null);
+    } else {
+      setEntries([]);
+    }
+  }, [rangeDates]);
 
   const addEntry = () => setEntries((prev) => [...prev, newEntry()]);
 
@@ -378,60 +418,147 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
 
         {/* Modal body */}
         <div className="px-6 py-5 space-y-4 max-h-[60vh] overflow-y-auto">
+          {/* ── Date range picker ── */}
+          <div className="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-5">
+            <p className="text-[9px] font-black uppercase tracking-widest text-slate-600 mb-4 flex items-center gap-2">
+              <i className="fas fa-calendar-alt" />
+              Select Date Range
+            </p>
+            <div className="flex items-center gap-3 flex-wrap">
+              <div>
+                <label className="text-[9px] font-black uppercase tracking-widest text-slate-600 block mb-1.5">
+                  From
+                </label>
+                <input
+                  type="date"
+                  min={today()}
+                  value={rangeFrom}
+                  onChange={(e) => {
+                    setRangeFrom(e.target.value);
+                    if (rangeTo && e.target.value > rangeTo) setRangeTo("");
+                  }}
+                  className="bg-slate-700/60 border border-slate-600/60 focus:border-indigo-500/60 rounded-xl px-3 py-1.5 text-white text-sm font-semibold outline-none transition cursor-pointer"
+                  style={{ colorScheme: "dark" }}
+                />
+              </div>
+              <i className="fas fa-arrow-right text-slate-600 text-xs mt-5 shrink-0" />
+              <div>
+                <label className="text-[9px] font-black uppercase tracking-widest text-slate-600 block mb-1.5">
+                  To
+                </label>
+                <input
+                  type="date"
+                  min={rangeFrom || today()}
+                  value={rangeTo}
+                  onChange={(e) => setRangeTo(e.target.value)}
+                  className="bg-slate-700/60 border border-slate-600/60 focus:border-indigo-500/60 rounded-xl px-3 py-1.5 text-white text-sm font-semibold outline-none transition cursor-pointer"
+                  style={{ colorScheme: "dark" }}
+                />
+              </div>
+              {rangeDates.length > 0 && (
+                <div className="ml-auto flex items-center gap-2 bg-indigo-500/10 border border-indigo-500/20 rounded-xl px-3 py-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
+                  <span className="text-indigo-300 text-xs font-black tabular-nums">
+                    {rangeDates.length} date{rangeDates.length !== 1 ? "s" : ""}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+
           {/* ── Inline error / feedback banner ── */}
           {inlineError && (
             <div
-              className={`rounded-2xl border p-4 flex gap-3 ${
-                inlineError.type === "conflict"
+              className={`rounded-2xl border overflow-hidden ${
+                inlineError.type === "conflict" || inlineError.type === "mixed"
                   ? "bg-amber-500/10 border-amber-500/20"
                   : "bg-rose-500/10 border-rose-500/20"
               }`}
             >
-              <div
-                className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
-                  inlineError.type === "conflict"
-                    ? "bg-amber-500/20 text-amber-400"
-                    : "bg-rose-500/20 text-rose-400"
-                }`}
-              >
-                <i
-                  className={`fas text-sm ${
-                    inlineError.type === "error" || inlineError.type === "validation"
-                      ? "fa-exclamation-circle"
+              {/* Banner header */}
+              <div className="flex gap-3 p-4">
+                <div
+                  className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
+                    inlineError.type === "conflict" || inlineError.type === "mixed"
+                      ? "bg-amber-500/20 text-amber-400"
+                      : "bg-rose-500/20 text-rose-400"
+                  }`}
+                >
+                  <i
+                    className={`fas text-sm ${
+                      inlineError.type === "error" || inlineError.type === "validation"
+                        ? "fa-exclamation-circle"
+                        : inlineError.type === "conflict" || inlineError.type === "mixed"
+                        ? "fa-exclamation-triangle"
+                        : "fa-info-circle"
+                    }`}
+                  />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p
+                    className={`text-sm font-semibold mb-0.5 ${
+                      inlineError.type === "conflict" || inlineError.type === "mixed"
+                        ? "text-amber-300"
+                        : "text-rose-300"
+                    }`}
+                  >
+                    {inlineError.type === "error" || inlineError.type === "validation"
+                      ? "Could not create slots"
+                      : inlineError.type === "duplicate"
+                      ? "Slots already exist"
                       : inlineError.type === "conflict"
-                      ? "fa-exclamation-triangle"
-                      : "fa-info-circle"
-                  }`}
-                />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p
-                  className={`text-sm font-semibold mb-0.5 ${
-                    inlineError.type === "conflict" ? "text-amber-300" : "text-rose-300"
-                  }`}
+                      ? "You already have sessions at these times"
+                      : inlineError.type === "mixed"
+                      ? "Some times are blocked by existing sessions"
+                      : "Nothing was created"}
+                  </p>
+                  <p
+                    className={`text-xs leading-relaxed ${
+                      inlineError.type === "conflict" || inlineError.type === "mixed"
+                        ? "text-amber-400/80"
+                        : "text-rose-400/80"
+                    }`}
+                  >
+                    {inlineError.message}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setInlineError(null)}
+                  className="shrink-0 text-slate-600 hover:text-slate-400 transition mt-0.5"
                 >
-                  {inlineError.type === "error" || inlineError.type === "validation"
-                    ? "Could not create slots"
-                    : inlineError.type === "duplicate"
-                    ? "Slots already exist"
-                    : inlineError.type === "conflict"
-                    ? "Class schedule conflict"
-                    : "Nothing was created"}
-                </p>
-                <p
-                  className={`text-xs leading-relaxed ${
-                    inlineError.type === "conflict" ? "text-amber-400/80" : "text-rose-400/80"
-                  }`}
-                >
-                  {inlineError.message}
-                </p>
+                  <i className="fas fa-times text-xs" />
+                </button>
               </div>
-              <button
-                onClick={() => setInlineError(null)}
-                className="shrink-0 text-slate-600 hover:text-slate-400 transition mt-0.5"
-              >
-                <i className="fas fa-times text-xs" />
-              </button>
+
+              {/* Per-conflict rows — only for conflict/mixed types */}
+              {(inlineError.type === "conflict" || inlineError.type === "mixed") &&
+                result?.session_conflicts?.length > 0 && (
+                  <div className="border-t border-amber-500/20 divide-y divide-amber-500/10">
+                    {result.session_conflicts.map((c, i) => (
+                      <div
+                        key={i}
+                        className="flex items-center gap-3 px-4 py-3 flex-wrap"
+                      >
+                        <div className="w-7 h-7 rounded-lg bg-amber-500/15 border border-amber-500/20 flex items-center justify-center shrink-0">
+                          <i className="fas fa-calendar-times text-amber-400 text-[10px]" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-bold text-amber-200">
+                            {fmtDate(c.date)}
+                            <span className="text-amber-500 font-normal mx-1.5">·</span>
+                            <span className="tabular-nums">{fmt12(c.start_time)} – {fmt12(c.end_time)}</span>
+                          </p>
+                          <p className="text-[10px] text-amber-500/70 italic mt-0.5 truncate">
+                            Session: &ldquo;{c.session_title}&rdquo;
+                          </p>
+                        </div>
+                        <span className="shrink-0 text-[9px] font-black uppercase tracking-widest bg-amber-500/10 border border-amber-500/20 text-amber-500 rounded-full px-2 py-0.5">
+                          blocked
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
             </div>
           )}
 
@@ -454,31 +581,6 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
             Add Another Date
           </button>
 
-          {/* Class conflict detail list */}
-          {result?.session_conflicts?.length > 0 && (
-            <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4 space-y-3">
-              <p className="text-[10px] font-black uppercase tracking-widest text-amber-400 flex items-center gap-2">
-                <i className="fas fa-calendar-times" />
-                Skipped — your classes occupy these times:
-              </p>
-              <div className="space-y-2">
-                {result.session_conflicts.map((c, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center gap-2 flex-wrap text-[11px] text-slate-400 bg-slate-800/60 rounded-xl px-3 py-2.5"
-                  >
-                    <span className="font-bold text-slate-200">{fmtDate(c.date)}</span>
-                    <span className="text-slate-500">•</span>
-                    <span className="tabular-nums">{fmt12(c.start_time)} – {fmt12(c.end_time)}</span>
-                    <span className="text-slate-600">•</span>
-                    <span className="text-amber-400/80 italic truncate">
-                      &ldquo;{c.session_title}&rdquo;
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Modal footer */}

@@ -123,6 +123,8 @@ const ParentChildDetails = () => {
             <span className="text-xs font-black uppercase tracking-widest">Back to Portal</span>
           </button>
 
+          
+
           <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-8">
             <div className="flex items-center gap-6">
               <div className="relative group">
@@ -146,10 +148,26 @@ const ParentChildDetails = () => {
                     Grade {child.grade_level}
                   </span>
                   <span className="w-1 h-1 bg-slate-700 rounded-full"></span>
-                  <span className="text-slate-500 text-xs font-bold">{summary.courses_count} Enrolled Courses</span>
+                  <span className="text-slate-500 text-xs font-bold">{summary?.courses_count ?? 0} Enrolled Courses</span>
                 </div>
               </div>
             </div>
+
+            {/* Booked tutoring slots strip */}
+            {!slotsLoading && bookedSlots.filter(s => new Date(s.date + "T23:59:59") >= new Date()).length > 0 && (
+              <div className="lg:hidden w-full bg-indigo-500/5 border border-indigo-500/15 rounded-2xl px-4 py-3">
+                <p className="text-[9px] font-black uppercase tracking-widest text-indigo-400 mb-2 flex items-center gap-1.5">
+                  <i className="fas fa-chalkboard-teacher" /> Upcoming Tutoring
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {bookedSlots.filter(s => new Date(s.date + "T23:59:59") >= new Date()).slice(0, 3).map(s => (
+                    <span key={s.id} className="text-[10px] font-bold text-slate-300 bg-slate-800/80 border border-slate-700 rounded-lg px-2.5 py-1.5">
+                      {s.teacher_name} · {new Date(s.date + "T00:00:00").toLocaleDateString(undefined, { month: "short", day: "numeric" })} {fmt12(s.start_time)}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Overall Stats Cards — 3 equal cards in one row */}
             <div className="grid grid-cols-3 gap-3 shrink-0">
@@ -161,7 +179,7 @@ const ParentChildDetails = () => {
                 <div className="min-w-0">
                   <p className="text-[9px] font-black uppercase tracking-widest text-slate-500">Attendance</p>
                   <p className="text-xl font-black text-white leading-none mt-0.5">
-                    {Math.round(summary.overall_attendance?.percentage ?? 0)}%
+                    {Math.round(summary?.overall_attendance?.percentage ?? 0)}%
                   </p>
                 </div>
               </div>
@@ -174,7 +192,7 @@ const ParentChildDetails = () => {
                 <div className="min-w-0">
                   <p className="text-[9px] font-black uppercase tracking-widest text-slate-500">Pending Tasks</p>
                   <p className="text-xl font-black text-white leading-none mt-0.5">
-                    {(summary.overdue_assignments ?? 0) + (summary.overdue_quizzes ?? 0)}
+                    {(summary?.overdue_assignments ?? 0) + (summary?.overdue_quizzes ?? 0)}
                   </p>
                 </div>
               </div>
@@ -191,6 +209,26 @@ const ParentChildDetails = () => {
               </div>
             </div>
           </div>
+          {/* Desktop tutoring strip — shown above the row */}
+          {!slotsLoading && bookedSlots.filter(s => new Date(s.date + "T23:59:59") >= new Date()).length > 0 && (
+            <div className="hidden lg:flex items-center gap-3 bg-indigo-500/5 border border-indigo-500/15 rounded-2xl px-5 py-3 mt-5 flex-wrap">
+              <span className="text-[9px] font-black uppercase tracking-widest text-indigo-400 flex items-center gap-1.5 shrink-0">
+                <i className="fas fa-chalkboard-teacher" /> Booked Tutoring Sessions
+              </span>
+              <div className="flex flex-wrap gap-2">
+                {bookedSlots.filter(s => new Date(s.date + "T23:59:59") >= new Date()).map(s => (
+                  <span key={s.id} className="flex items-center gap-1.5 text-[10px] font-bold text-slate-300 bg-slate-800/80 border border-indigo-500/10 rounded-lg px-2.5 py-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse shrink-0" />
+                    <span className="text-indigo-300">{s.teacher_name}</span>
+                    <span className="text-slate-600">·</span>
+                    {new Date(s.date + "T00:00:00").toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })}
+                    <span className="text-slate-600">·</span>
+                    <span className="tabular-nums">{fmt12(s.start_time)}–{fmt12(s.end_time)}</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </section>
 

@@ -25,6 +25,10 @@ const ADMIN_ENDPOINTS = {
   PENDING_ENROLLMENTS: "/courses/enrollments/pending/",
   ENROLLMENT_ACTION: (id) => `/courses/enrollments/${id}/approve/`,
 
+  // Teacher Slot Management (admin)
+  ADMIN_TEACHER_SLOTS: (teacherId) => `/availability/slots/admin/teacher/${teacherId}/`,
+  ADMIN_DELETE_SLOT: (slotId) => `/availability/slots/admin/${slotId}/`,
+
 };
 
 // User Management endpoints
@@ -407,6 +411,24 @@ export const adminService = {
       return response.data;
     } catch (error) {
       throw handleApiError(error, { context: "Enrollment Action" });
+    }
+  },
+
+  getTeacherSlots: async (teacherId) => {
+    try {
+      const response = await axiosInstance.get(ADMIN_ENDPOINTS.ADMIN_TEACHER_SLOTS(teacherId));
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error, { context: "Get Teacher Slots" });
+    }
+  },
+
+  adminDeleteSlot: async (slotId) => {
+    try {
+      const response = await axiosInstance.delete(ADMIN_ENDPOINTS.ADMIN_DELETE_SLOT(slotId));
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error, { context: "Admin Delete Slot" });
     }
   },
 };

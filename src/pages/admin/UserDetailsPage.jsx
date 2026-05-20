@@ -13,6 +13,7 @@ import {
   TeacherProfileTab,
   StudentProfileTab,
   ParentProfileTab,
+  TeacherSlotsSection,
 } from "../../components/admin";
 
 // Utility function to validate user ID
@@ -89,6 +90,7 @@ const UserDetailsPage = () => {
             // Add student-specific fields
             grade_level: profileResponse?.grade_level || "",
             date_of_birth: profileResponse?.date_of_birth || "",
+            parents: profileResponse?.parents || [],
             // Add parent-specific fields
             address: profileResponse?.address || "",
             children: profileResponse?.children || [],
@@ -176,6 +178,7 @@ const UserDetailsPage = () => {
         distinctions: profileResponse?.distinctions || [],
         grade_level: profileResponse?.grade_level || "",
         date_of_birth: profileResponse?.date_of_birth || "",
+        parents: profileResponse?.parents || [],
         address: profileResponse?.address || "",
         children: profileResponse?.children || [],
       };
@@ -255,6 +258,7 @@ const UserDetailsPage = () => {
                     onCancel={handleBackToUsers}
                     onSaved={handleBackToUsers}
                   />
+                  <TeacherSlotsSection teacherId={userData.id} />
                 </div>
               )}
 
