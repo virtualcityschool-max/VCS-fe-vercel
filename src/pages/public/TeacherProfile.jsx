@@ -63,7 +63,7 @@ const BookingModal = ({ teacherName, slots, onClose, onBooked }) => {
 
   return (
     <div className="fixed inset-0 z-[9000] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-      <div className="w-full max-w-lg bg-slate-900 border border-slate-700/70 rounded-3xl shadow-2xl overflow-hidden">
+      <div className="w-full max-w-3xl bg-slate-900 border border-slate-700/70 rounded-3xl shadow-2xl overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-slate-800">
           <div className="flex items-center gap-3">
@@ -111,33 +111,35 @@ const BookingModal = ({ teacherName, slots, onClose, onBooked }) => {
                   No available slots at the moment. Check back later.
                 </div>
               ) : (
-                Object.entries(grouped)
-                  .sort(([a], [b]) => a.localeCompare(b))
-                  .map(([date, daySlots]) => (
-                    <div key={date}>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-3">
-                        {fmtDate(date)}
-                      </p>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                        {daySlots.map((slot) => (
-                          <button
-                            key={slot.id}
-                            onClick={() => setSelected(slot.id)}
-                            className={`rounded-xl border px-3 py-3 text-sm font-bold transition ${
-                              selected === slot.id
-                                ? "bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-500/20"
-                                : "bg-slate-800/60 border-slate-700/60 text-slate-300 hover:border-indigo-500/40 hover:text-white"
-                            }`}
-                          >
-                            {fmt12(slot.start_time)}
-                            <span className="text-[10px] font-normal opacity-70 block">
-                              – {fmt12(slot.end_time)}
-                            </span>
-                          </button>
-                        ))}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {Object.entries(grouped)
+                    .sort(([a], [b]) => a.localeCompare(b))
+                    .map(([date, daySlots]) => (
+                      <div key={date}>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-3">
+                          {fmtDate(date)}
+                        </p>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                          {daySlots.map((slot) => (
+                            <button
+                              key={slot.id}
+                              onClick={() => setSelected(slot.id)}
+                              className={`cursor-pointer rounded-xl border px-3 py-3 text-sm font-bold transition ${
+                                selected === slot.id
+                                  ? "bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-500/20"
+                                  : "bg-slate-800/60 border-slate-700/60 text-slate-300 hover:border-indigo-500/40 hover:text-white"
+                              }`}
+                            >
+                              {fmt12(slot.start_time)}
+                              <span className="text-[10px] font-normal opacity-70 block">
+                                – {fmt12(slot.end_time)}
+                              </span>
+                            </button>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  ))
+                    ))}
+                </div>
               )}
             </div>
 
@@ -662,7 +664,7 @@ const TeacherProfile = () => {
                 </p>
               </div>
 
-              <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 text-center shadow-xl">
+              {/* <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 text-center shadow-xl">
                 <p className="text-3xl font-semibold text-yellow-400 mb-2 flex items-center justify-center gap-2">
                   {ratingValue.toFixed(1)}
                   <i className="fas fa-star text-sm"></i>
@@ -670,7 +672,7 @@ const TeacherProfile = () => {
                 <p className="text-[10px] uppercase tracking-[0.22em] text-slate-500 font-bold">
                   Global Rating
                 </p>
-              </div>
+              </div> */}
             </div>
 
             <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-xl">

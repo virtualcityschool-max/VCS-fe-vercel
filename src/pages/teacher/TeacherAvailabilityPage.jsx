@@ -56,51 +56,39 @@ const TimeWindowRow = ({ window, onChange, onRemove, canRemove }) => {
   const slotCount = calcWindowSlots(window.start, window.end);
 
   return (
-    <div className="flex items-center gap-2 flex-wrap">
-      <div className="flex items-center gap-2.5 bg-slate-800/80 border border-slate-700/60 rounded-xl px-3 py-2.5 flex-1 min-w-[130px]">
-        <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
-        <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 shrink-0">
-          From
-        </span>
-        <input
-          type="time"
-          value={window.start}
-          onChange={(e) => onChange({ ...window, start: e.target.value })}
-          className="bg-transparent text-white text-sm font-semibold outline-none flex-1 min-w-0 cursor-pointer"
-          style={{ colorScheme: "dark" }}
-        />
+    <div className="bg-slate-900/40 border border-slate-700/40 rounded-xl p-3">
+      <div className={`grid gap-2 items-center ${canRemove ? "grid-cols-[1fr_1fr_auto]" : "grid-cols-2"}`}>
+        <div className="flex items-center gap-1.5 bg-slate-800/80 border border-slate-700/60 rounded-xl px-2.5 py-2 min-w-0">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
+          <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 shrink-0">From</span>
+          <input
+            type="time"
+            value={window.start}
+            onChange={(e) => onChange({ ...window, start: e.target.value })}
+            className="bg-transparent text-white text-sm font-semibold outline-none w-full min-w-0 cursor-pointer"
+            style={{ colorScheme: "dark" }}
+          />
+        </div>
+        <div className="flex items-center gap-1.5 bg-slate-800/80 border border-slate-700/60 rounded-xl px-2.5 py-2 min-w-0">
+          <span className="w-1.5 h-1.5 rounded-full bg-rose-400 shrink-0" />
+          <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 shrink-0">Until</span>
+          <input
+            type="time"
+            value={window.end}
+            onChange={(e) => onChange({ ...window, end: e.target.value })}
+            className="bg-transparent text-white text-sm font-semibold outline-none w-full min-w-0 cursor-pointer"
+            style={{ colorScheme: "dark" }}
+          />
+        </div>
+        {canRemove && (
+          <button
+            onClick={onRemove}
+            className="w-7 h-7 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/10 hover:border-rose-500/30 text-rose-400 transition flex items-center justify-center shrink-0"
+          >
+            <i className="fas fa-times text-[10px]" />
+          </button>
+        )}
       </div>
-
-      <i className="fas fa-arrow-right text-slate-600 text-[10px] shrink-0" />
-
-      <div className="flex items-center gap-2.5 bg-slate-800/80 border border-slate-700/60 rounded-xl px-3 py-2.5 flex-1 min-w-[130px]">
-        <span className="w-2 h-2 rounded-full bg-rose-400 shrink-0" />
-        <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 shrink-0">
-          Until
-        </span>
-        <input
-          type="time"
-          value={window.end}
-          onChange={(e) => onChange({ ...window, end: e.target.value })}
-          className="bg-transparent text-white text-sm font-semibold outline-none flex-1 min-w-0 cursor-pointer"
-          style={{ colorScheme: "dark" }}
-        />
-      </div>
-
-      {slotCount > 0 && (
-        <span className="shrink-0 bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-[10px] font-black px-2.5 py-1.5 rounded-lg tabular-nums">
-          {slotCount} slot{slotCount !== 1 ? "s" : ""}
-        </span>
-      )}
-
-      {canRemove && (
-        <button
-          onClick={onRemove}
-          className="shrink-0 w-8 h-8 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/10 hover:border-rose-500/30 text-rose-400 transition flex items-center justify-center"
-        >
-          <i className="fas fa-times text-xs" />
-        </button>
-      )}
     </div>
   );
 };
@@ -132,54 +120,53 @@ const DateEntryCard = ({ entry, onChange, onRemove, canRemove, index }) => {
   const totalSlots = calcEntrySlots(entry);
 
   return (
-    <div className="relative bg-slate-800/50 border border-slate-700/50 rounded-2xl overflow-hidden">
+    <div className="relative bg-slate-800/50 border border-slate-600 rounded-2xl overflow-hidden">
       <div className="h-[2px] w-full bg-gradient-to-r from-indigo-500 via-violet-500 to-indigo-500/0" />
 
       <div className="p-5 space-y-4">
-        {/* Header row */}
-        <div className="flex items-center justify-between gap-3 flex-wrap">
-          <div className="flex items-center gap-3">
-            <div className="w-7 h-7 rounded-lg bg-indigo-500/15 border border-indigo-500/20 flex items-center justify-center shrink-0">
-              <span className="text-indigo-400 text-xs font-black">{index + 1}</span>
-            </div>
-            <div>
-              <label className="text-[9px] font-black uppercase tracking-widest text-slate-600 block mb-1">
-                Date
-              </label>
-              <input
-                type="date"
-                min={today()}
-                value={entry.date}
-                onChange={(e) => onChange({ ...entry, date: e.target.value })}
-                className="bg-slate-700/60 border border-slate-600/60 focus:border-indigo-500/60 rounded-xl px-3 py-1.5 text-white text-sm font-semibold outline-none transition cursor-pointer"
-                style={{ colorScheme: "dark" }}
-              />
-            </div>
+        {/* Row 1: index + date + slot count */}
+        <div className="flex items-center gap-3">
+          <div className="w-7 h-7 rounded-lg bg-indigo-500/15 border border-indigo-500/20 flex items-center justify-center shrink-0">
+            <span className="text-indigo-400 text-xs font-black">{index + 1}</span>
           </div>
+          <div>
+            <label className="text-[9px] font-black uppercase tracking-widest text-slate-600 block mb-1">
+              Date
+            </label>
+            <input
+              type="date"
+              min={today()}
+              value={entry.date}
+              onChange={(e) => onChange({ ...entry, date: e.target.value })}
+              className="bg-slate-700/60 border border-slate-600/60 focus:border-indigo-500/60 rounded-xl px-3 py-1.5 text-white text-sm font-semibold outline-none transition cursor-pointer"
+              style={{ colorScheme: "dark" }}
+            />
+          </div>
+          {totalSlots > 0 && (
+            <span className="ml-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-black px-2.5 py-1.5 rounded-lg tabular-nums self-end mb-0.5">
+              ~{totalSlots} slot{totalSlots !== 1 ? "s" : ""}
+            </span>
+          )}
+        </div>
 
-          <div className="flex items-center gap-2 flex-wrap">
+        {/* Row 2: time window actions */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={addWindow}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/10 hover:border-indigo-500/30 text-indigo-400 transition text-[11px] font-bold"
+          >
+            <i className="fas fa-plus-circle text-[9px]" />
+            Add time window
+          </button>
+          {canRemove && (
             <button
-              onClick={addWindow}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/10 hover:border-indigo-500/30 text-indigo-400 transition text-[11px] font-bold"
+              onClick={onRemove}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/10 hover:border-rose-500/30 text-rose-400 transition text-[11px] font-bold"
             >
-              <i className="fas fa-plus-circle text-[9px]" />
-              Add time window
+              <i className="fas fa-trash-alt text-[9px]" />
+              Remove
             </button>
-            {totalSlots > 0 && (
-              <span className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-black px-2.5 py-1.5 rounded-lg tabular-nums">
-                ~{totalSlots} slot{totalSlots !== 1 ? "s" : ""}
-              </span>
-            )}
-            {canRemove && (
-              <button
-                onClick={onRemove}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/10 hover:border-rose-500/30 text-rose-400 transition text-[11px] font-bold"
-              >
-                <i className="fas fa-trash-alt text-[9px]" />
-                Remove
-              </button>
-            )}
-          </div>
+          )}
         </div>
 
         <div className="h-px bg-slate-700/50" />
@@ -394,7 +381,7 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
 
   return (
     <div className="fixed inset-0 z-[900] flex items-start justify-center bg-black/70 backdrop-blur-sm overflow-y-auto py-8 px-4">
-      <div className="w-full max-w-2xl bg-slate-900 border border-slate-700/70 rounded-3xl shadow-2xl overflow-hidden my-auto">
+      <div className="w-full max-w-4xl bg-slate-900 border border-slate-700/70 rounded-3xl shadow-2xl overflow-hidden my-auto">
         {/* Modal header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-slate-800">
           <div className="flex items-center gap-3">
@@ -562,24 +549,26 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
             </div>
           )}
 
-          {entries.map((entry, idx) => (
-            <DateEntryCard
-              key={entry.id}
-              entry={entry}
-              index={idx}
-              onChange={(updated) => { updateEntry(entry.id, updated); setInlineError(null); }}
-              onRemove={() => removeEntry(entry.id)}
-              canRemove={entries.length > 1}
-            />
-          ))}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {entries.map((entry, idx) => (
+              <DateEntryCard
+                key={entry.id}
+                entry={entry}
+                index={idx}
+                onChange={(updated) => { updateEntry(entry.id, updated); setInlineError(null); }}
+                onRemove={() => removeEntry(entry.id)}
+                canRemove={entries.length > 1}
+              />
+            ))}
 
-          <button
-            onClick={addEntry}
-            className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl border border-dashed border-slate-700 text-slate-500 hover:border-indigo-500/40 hover:text-indigo-400 transition text-xs font-bold"
-          >
-            <i className="fas fa-plus" />
-            Add Another Date
-          </button>
+            <button
+              onClick={addEntry}
+              className="flex items-center justify-center gap-2 py-3 rounded-2xl border border-dashed border-slate-700 text-slate-500 hover:border-indigo-500/40 hover:text-indigo-400 transition text-xs font-bold min-h-[80px]"
+            >
+              <i className="fas fa-plus" />
+              Add Another Date
+            </button>
+          </div>
 
         </div>
 
@@ -634,15 +623,145 @@ const StatusBadge = ({ status }) =>
     </span>
   );
 
+// ── Edit slot modal ───────────────────────────────────────────────────────────
+
+const EditSlotModal = ({ slot, onClose, onSaved }) => {
+  const [date, setDate] = useState(slot.date);
+  const [startTime, setStartTime] = useState(slot.start_time.slice(0, 5));
+  const [endTime, setEndTime] = useState(slot.end_time.slice(0, 5));
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(null);
+
+  const handleSave = async () => {
+    if (!date) { setError("Date is required."); return; }
+    if (!startTime || !endTime) { setError("Both start and end times are required."); return; }
+    if (startTime >= endTime) { setError("Start time must be before end time."); return; }
+    setSaving(true);
+    setError(null);
+    try {
+      const updated = await availabilityService.updateSlot(slot.id, {
+        date,
+        start_time: startTime,
+        end_time: endTime,
+      });
+      toastManager.success("Slot updated.");
+      onSaved(updated);
+      onClose();
+    } catch (err) {
+      setError(err?.response?.data?.error || "Failed to update slot.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-[9000] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+      <div className="w-full max-w-sm bg-slate-900 border border-slate-700/70 rounded-3xl shadow-2xl overflow-hidden">
+        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-800">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
+              <i className="fas fa-pencil-alt text-indigo-400 text-sm" />
+            </div>
+            <div>
+              <h2 className="text-base font-semibold text-white">Edit Slot</h2>
+              <p className="text-slate-500 text-xs mt-0.5">{fmtDate(slot.date)}</p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition"
+          >
+            <i className="fas fa-times text-sm" />
+          </button>
+        </div>
+
+        <div className="px-6 py-5 space-y-4">
+          {error && (
+            <div className="bg-rose-500/10 border border-rose-500/20 rounded-xl px-4 py-3 text-rose-400 text-sm">
+              {error}
+            </div>
+          )}
+
+          {/* Date */}
+          <div>
+            <label className="text-[9px] font-black uppercase tracking-widest text-slate-600 block mb-1.5">
+              Date
+            </label>
+            <input
+              type="date"
+              min={today()}
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="w-full bg-slate-800 border border-slate-700 focus:border-indigo-500/60 rounded-xl px-3 py-2.5 text-white text-sm font-semibold outline-none transition"
+              style={{ colorScheme: "dark" }}
+            />
+          </div>
+
+          {/* Time range */}
+          <div className="flex items-end gap-3">
+            <div className="flex-1">
+              <label className="text-[9px] font-black uppercase tracking-widest text-slate-600 block mb-1.5">
+                Start
+              </label>
+              <input
+                type="time"
+                value={startTime}
+                onChange={(e) => setStartTime(e.target.value)}
+                className="w-full bg-slate-800 border border-slate-700 focus:border-indigo-500/60 rounded-xl px-3 py-2.5 text-white text-sm font-semibold outline-none transition"
+                style={{ colorScheme: "dark" }}
+              />
+            </div>
+            <i className="fas fa-arrow-right text-slate-600 text-xs mb-3 shrink-0" />
+            <div className="flex-1">
+              <label className="text-[9px] font-black uppercase tracking-widest text-slate-600 block mb-1.5">
+                End
+              </label>
+              <input
+                type="time"
+                value={endTime}
+                onChange={(e) => setEndTime(e.target.value)}
+                className="w-full bg-slate-800 border border-slate-700 focus:border-indigo-500/60 rounded-xl px-3 py-2.5 text-white text-sm font-semibold outline-none transition"
+                style={{ colorScheme: "dark" }}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="px-6 py-4 border-t border-slate-800 flex gap-3">
+          <button
+            onClick={onClose}
+            className="flex-1 py-2.5 rounded-xl border border-slate-700 text-slate-400 hover:text-white hover:border-slate-600 font-semibold text-sm transition"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 text-white font-bold text-sm transition flex items-center justify-center gap-2"
+          >
+            {saving ? (
+              <>
+                <i className="fas fa-spinner fa-spin" /> Saving…
+              </>
+            ) : (
+              "Save Changes"
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // ── Slot card ─────────────────────────────────────────────────────────────────
 
-const SlotCard = ({ slot, onDelete, deletingId }) => {
+const SlotCard = ({ slot, onDelete, onEdit, deletingId }) => {
   const isBooked = slot.status === "booked";
   const isDeleting = deletingId === slot.id;
 
   return (
     <div
-      className={`relative rounded-2xl border overflow-hidden transition group ${
+      className={`relative rounded-2xl border overflow-hidden transition ${
         isBooked
           ? "bg-gradient-to-b from-amber-500/[0.05] to-slate-900/80 border-amber-500/20"
           : "bg-slate-900 border-slate-700/50 hover:border-slate-600/70"
@@ -657,6 +776,7 @@ const SlotCard = ({ slot, onDelete, deletingId }) => {
       />
 
       <div className="p-4">
+        {/* Time row + action icons */}
         <div className="flex items-start justify-between gap-2 mb-3">
           <div>
             <p className="text-sm font-bold text-white tabular-nums">
@@ -666,11 +786,46 @@ const SlotCard = ({ slot, onDelete, deletingId }) => {
             </p>
             <p className="text-[10px] text-slate-600 mt-0.5 font-medium">1 hr session</p>
           </div>
-          <StatusBadge status={slot.status} />
+
+          <div className="flex items-center gap-1.5 shrink-0">
+            {/* Edit button — only for unbooked slots */}
+            <button
+              onClick={() => !isBooked && onEdit(slot)}
+              disabled={isBooked}
+              title={isBooked ? "Cannot edit a booked slot" : "Edit slot time"}
+              className={`w-7 h-7 rounded-lg flex items-center justify-center transition text-xs ${
+                isBooked
+                  ? "bg-slate-800/40 text-slate-700 cursor-not-allowed"
+                  : "bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/10 hover:border-indigo-500/30 text-indigo-400"
+              }`}
+            >
+              <i className="fas fa-pencil-alt text-[10px]" />
+            </button>
+
+            {/* Delete button */}
+            <button
+              onClick={() => !isBooked && onDelete(slot.id)}
+              disabled={isBooked || isDeleting}
+              title={isBooked ? "Cannot delete a booked slot" : "Delete slot"}
+              className={`w-7 h-7 rounded-lg flex items-center justify-center transition text-xs ${
+                isBooked
+                  ? "bg-slate-800/40 text-slate-700 cursor-not-allowed"
+                  : "bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/10 hover:border-rose-500/30 text-rose-400"
+              }`}
+            >
+              {isDeleting ? (
+                <i className="fas fa-spinner fa-spin text-[10px]" />
+              ) : (
+                <i className="fas fa-trash-alt text-[10px]" />
+              )}
+            </button>
+          </div>
         </div>
 
+        <StatusBadge status={slot.status} />
+
         {isBooked && slot.booked_by_name && (
-          <div className="flex items-center gap-2.5 bg-slate-800/80 rounded-xl px-3 py-2.5 mb-2">
+          <div className="flex items-center gap-2.5 bg-slate-800/80 rounded-xl px-3 py-2.5 mt-3">
             <div className="w-7 h-7 rounded-full bg-indigo-500/20 border border-indigo-500/20 flex items-center justify-center text-indigo-300 text-xs font-black shrink-0">
               {slot.booked_by_name[0]?.toUpperCase()}
             </div>
@@ -681,23 +836,6 @@ const SlotCard = ({ slot, onDelete, deletingId }) => {
               )}
             </div>
           </div>
-        )}
-
-        {!isBooked && (
-          <button
-            onClick={() => onDelete(slot.id)}
-            disabled={isDeleting}
-            className="w-full mt-1 flex items-center justify-center gap-2 py-1.5 rounded-xl text-slate-700 hover:text-rose-400 transition text-[11px] font-bold opacity-0 group-hover:opacity-100"
-          >
-            {isDeleting ? (
-              <i className="fas fa-spinner fa-spin" />
-            ) : (
-              <>
-                <i className="fas fa-trash-alt text-[10px]" />
-                Delete
-              </>
-            )}
-          </button>
         )}
       </div>
     </div>
@@ -713,6 +851,7 @@ const TeacherAvailabilityPage = () => {
   const [slotsError, setSlotsError] = useState(null);
   const [statusFilter, setStatusFilter] = useState("all");
   const [deletingId, setDeletingId] = useState(null);
+  const [editingSlot, setEditingSlot] = useState(null);
 
   const loadSlots = useCallback(async () => {
     setLoadingSlots(true);
@@ -744,6 +883,10 @@ const TeacherAvailabilityPage = () => {
     }
   };
 
+  const handleSlotUpdated = (updatedSlot) => {
+    setSlots((prev) => prev.map((s) => (s.id === updatedSlot.id ? updatedSlot : s)));
+  };
+
   const filtered = slots.filter(
     (s) => statusFilter === "all" || s.status === statusFilter
   );
@@ -757,48 +900,46 @@ const TeacherAvailabilityPage = () => {
   const bookedCount = slots.filter((s) => s.status === "booked").length;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white pb-24">
-      {/* Sticky header */}
-      <div className="border-b border-slate-800/80 bg-slate-950/95 backdrop-blur sticky top-0 z-10">
-        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between gap-4 flex-wrap">
-          <div>
-            <h1 className="text-lg font-semibold tracking-tight">Availability</h1>
-            <p className="text-slate-500 text-xs mt-0.5">
+    <div className="text-white space-y-10 pb-12 animate-fadeIn">
+      {/* Page header — matches TeacherClasses style */}
+      <div className="relative px-2 flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-4xl font-black font-poppins tracking-tight mb-2">Availability</h1>
+          <div className="flex items-center gap-3">
+            <span className="w-12 h-1 bg-indigo-500 rounded-full" />
+            <p className="text-slate-500 text-sm font-medium tracking-wide">
               Manage your tutoring slots
             </p>
           </div>
+        </div>
 
-          <div className="flex items-center gap-3">
-            {/* Stats */}
-            {!loadingSlots && (
-              <div className="hidden sm:flex items-center gap-2">
-                <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span className="text-xs font-bold text-slate-200 tabular-nums">{availableCount}</span>
-                  <span className="text-[9px] text-slate-600 uppercase tracking-widest font-bold">open</span>
-                </div>
-                <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2">
-                  <span className="w-2 h-2 rounded-full bg-amber-400" />
-                  <span className="text-xs font-bold text-slate-200 tabular-nums">{bookedCount}</span>
-                  <span className="text-[9px] text-slate-600 uppercase tracking-widest font-bold">booked</span>
-                </div>
+        <div className="flex items-center gap-3">
+          {!loadingSlots && (
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-xs font-bold text-slate-200 tabular-nums">{availableCount}</span>
+                <span className="text-[9px] text-slate-600 uppercase tracking-widest font-bold">open</span>
               </div>
-            )}
-
-            {/* Primary CTA */}
-            <button
-              onClick={() => setShowCreateModal(true)}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm transition shadow-lg shadow-indigo-500/20"
-            >
-              <i className="fas fa-plus text-xs" />
-              Create Slots
-            </button>
-          </div>
+              <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2">
+                <span className="w-2 h-2 rounded-full bg-amber-400" />
+                <span className="text-xs font-bold text-slate-200 tabular-nums">{bookedCount}</span>
+                <span className="text-[9px] text-slate-600 uppercase tracking-widest font-bold">booked</span>
+              </div>
+            </div>
+          )}
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm transition shadow-lg shadow-indigo-500/20"
+          >
+            <i className="fas fa-plus text-xs" />
+            Create Slots
+          </button>
         </div>
       </div>
 
-      {/* Page body — slots grid only */}
-      <div className="max-w-5xl mx-auto px-6 py-8">
+      {/* Page body */}
+      <div>
 
         {/* Empty hero — first time */}
         {!loadingSlots && !slotsError && slots.length === 0 && (
@@ -901,12 +1042,13 @@ const TeacherAvailabilityPage = () => {
                           <div className="h-px flex-1 bg-slate-800" />
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                           {daySlots.map((slot) => (
                             <SlotCard
                               key={slot.id}
                               slot={slot}
                               onDelete={handleDelete}
+                              onEdit={setEditingSlot}
                               deletingId={deletingId}
                             />
                           ))}
@@ -925,6 +1067,15 @@ const TeacherAvailabilityPage = () => {
         <CreateAvailabilityModal
           onClose={() => setShowCreateModal(false)}
           onCreated={loadSlots}
+        />
+      )}
+
+      {/* Edit slot modal */}
+      {editingSlot && (
+        <EditSlotModal
+          slot={editingSlot}
+          onClose={() => setEditingSlot(null)}
+          onSaved={handleSlotUpdated}
         />
       )}
     </div>

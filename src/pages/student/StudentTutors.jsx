@@ -67,16 +67,14 @@ const StudentTutors = () => {
   const pastCount = slots.length - upcomingCount;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white pb-24">
-      {/* Header */}
-      <div className="border-b border-slate-800/80 bg-slate-950/95 backdrop-blur sticky top-0 z-10">
-        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between gap-4 flex-wrap">
-          <div>
-            <h1 className="text-lg font-semibold tracking-tight">My Tutors</h1>
-            <p className="text-slate-500 text-xs mt-0.5">
-              Your booked 1-on-1 tutoring sessions
-            </p>
-          </div>
+    <div className="text-white px-6 py-8 pb-24 space-y-8 animate-fadeIn">
+      {/* Page header — matches StudentClasses/StudentAssignments style */}
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-3xl font-black font-poppins mb-2">My Tutors</h1>
+          <p className="text-slate-400 text-sm">Your booked 1-on-1 tutoring sessions</p>
+        </div>
+        <div className="flex items-center gap-3 flex-wrap">
           {!loading && (
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2">
@@ -91,10 +89,17 @@ const StudentTutors = () => {
               </div>
             </div>
           )}
+          <Link
+            to="/teachers"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm transition shadow-lg shadow-indigo-500/20"
+          >
+            <i className="fas fa-search text-xs" />
+            Browse More Tutors
+          </Link>
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-6 py-8">
+      <div>
         {/* Filters */}
         {!loading && !error && slots.length > 0 && (
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-7">
@@ -221,7 +226,7 @@ const StudentTutors = () => {
             )}
           </div>
         ) : (
-          <div className="space-y-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {Object.entries(grouped).map(([teacherName, { teacherId, slots: teacherSlots }]) => {
               const upcoming = teacherSlots.filter((s) => isUpcoming(s.date));
               const past = teacherSlots.filter((s) => !isUpcoming(s.date));
@@ -250,10 +255,11 @@ const StudentTutors = () => {
                     {teacherId && (
                       <Link
                         to={`/teachers/${teacherId}`}
-                        className="shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-700 text-slate-400 hover:text-white hover:border-slate-600 transition text-xs font-bold"
+                        state={{ openSlots: true }}
+                        className="shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white transition text-xs font-bold shadow shadow-indigo-500/20"
                       >
-                        <i className="fas fa-external-link-alt text-[10px]" />
-                        View Profile
+                        <i className="fas fa-calendar-plus text-[10px]" />
+                        Book More Slots
                       </Link>
                     )}
                   </div>
@@ -312,5 +318,6 @@ const StudentTutors = () => {
     </div>
   );
 };
+
 
 export default StudentTutors;

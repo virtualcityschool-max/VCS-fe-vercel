@@ -148,38 +148,6 @@ const StudentProfileTab = ({ profile, userId, onUpdate, onCancel, onSaved }) => 
         </div>
       )}
 
-      {/* Linked parents */}
-      <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl overflow-hidden">
-        <div className="flex items-center gap-2 px-4 py-2.5 bg-slate-800/60 border-b border-slate-700/50">
-          <i className="fas fa-user-friends text-indigo-400 text-xs" />
-          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Linked Parents</span>
-          <span className="ml-auto text-[10px] text-slate-600 tabular-nums">{parents.length} linked</span>
-        </div>
-        {parents.length === 0 ? (
-          <div className="flex items-center gap-2 px-4 py-3">
-            <i className="fas fa-unlink text-slate-700 text-xs" />
-            <span className="text-xs text-slate-600">No parents linked to this student.</span>
-          </div>
-        ) : (
-          <div className="divide-y divide-slate-700/30">
-            {parents.map((p) => (
-              <div key={p.id} className="flex items-center gap-3 px-4 py-2.5">
-                <div className="w-7 h-7 rounded-lg bg-indigo-500/15 border border-indigo-500/20 flex items-center justify-center shrink-0">
-                  <span className="text-indigo-400 text-xs font-black">
-                    {p.username?.[0]?.toUpperCase() || "P"}
-                  </span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-white truncate">{p.username}</p>
-                  <p className="text-[11px] text-slate-500 truncate">{p.email}</p>
-                </div>
-                <StatusBadge status={p.status} />
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
       <form onSubmit={handleSubmit} className="space-y-4 relative z-20">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
@@ -249,6 +217,44 @@ const StudentProfileTab = ({ profile, userId, onUpdate, onCancel, onSaved }) => 
           </Button>
         </div>
       </form>
+
+      {/* Linked parents — outside main form */}
+      <div className="mt-6 pt-6 border-t border-slate-700/60">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-8 h-8 rounded-lg bg-indigo-500/20 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+            <i className="fas fa-user-friends text-sm" />
+          </div>
+          <div>
+            <h3 className="text-base font-semibold text-white">Linked Parents</h3>
+            <p className="text-[10px] text-slate-500 mt-0.5">{parents.length} linked</p>
+          </div>
+        </div>
+        <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl overflow-hidden">
+          {parents.length === 0 ? (
+            <div className="flex items-center gap-2 px-4 py-4">
+              <i className="fas fa-unlink text-slate-700 text-xs" />
+              <span className="text-xs text-slate-600">No parents linked to this student.</span>
+            </div>
+          ) : (
+            <div className="divide-y divide-slate-700/30">
+              {parents.map((p) => (
+                <div key={p.id} className="flex items-center gap-3 px-4 py-2.5">
+                  <div className="w-7 h-7 rounded-lg bg-indigo-500/15 border border-indigo-500/20 flex items-center justify-center shrink-0">
+                    <span className="text-indigo-400 text-xs font-black">
+                      {p.username?.[0]?.toUpperCase() || "P"}
+                    </span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-white truncate">{p.username}</p>
+                    <p className="text-[11px] text-slate-500 truncate">{p.email}</p>
+                  </div>
+                  <StatusBadge status={p.status} />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

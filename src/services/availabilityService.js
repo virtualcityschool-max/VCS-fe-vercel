@@ -20,6 +20,11 @@ const deleteSlot = async (slotId) => {
   return response.data;
 };
 
+const updateSlot = async (slotId, data) => {
+  const response = await axiosInstance.patch(`/availability/slots/${slotId}/`, data);
+  return response.data;
+};
+
 const getTeacherAvailableSlots = async (teacherId) => {
   const response = await axiosInstance.get(`/availability/slots/teacher/${teacherId}/`);
   return response.data;
@@ -45,6 +50,7 @@ export const availabilityService = {
   generateSlots,
   getMySlots,
   deleteSlot,
+  updateSlot,
   getTeacherAvailableSlots,
   bookSlot,
   getChildBookedSlots,
