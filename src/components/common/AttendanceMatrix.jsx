@@ -11,23 +11,15 @@ const CELL = {
 
 const leftShadow  = { boxShadow: "4px 0 8px rgba(0,0,0,0.4)" };
 const rightShadow = { boxShadow: "-4px 0 8px rgba(0,0,0,0.4)" };
-const SUMMARY_W = 110;
+const SUMMARY_W = 85;
 
 // ── AttendanceMatrix ──────────────────────────────────────────────────────────
-/**
- * Props:
- *   sessions          – array from GET /classroom/sessions/?course=id (top-level only)
- *   attendanceRecords – array from GET /classroom/attendance/?course=id&participant_role=…
- *   participantRole   – "student" | "teacher"
- *   onEditRecord      – optional (record) => void  (only called for marked cells)
- */
 const AttendanceMatrix = ({
   sessions          = [],
   attendanceRecords = [],
   participantRole   = "student",
   onEditRecord,
 }) => {
-  // Sort sessions chronologically
   const sortedSessions = useMemo(() =>
     [...sessions].sort((a, b) => {
       const da = a.scheduled_at ? new Date(a.scheduled_at) : 0;
@@ -36,7 +28,6 @@ const AttendanceMatrix = ({
     })
   , [sessions]);
 
-  // Group sessions by "Month Year" for the colspan header row
   const monthGroups = useMemo(() => {
     const groups = [];
     sortedSessions.forEach((s) => {
@@ -51,8 +42,6 @@ const AttendanceMatrix = ({
     return groups;
   }, [sortedSessions]);
 
-  // O(1) lookup: `${participantId}_${sessionId}` → record
-  // The backend always stores the participant's ID in r.student regardless of participant_role.
   const lookupMap = useMemo(() => {
     const map = {};
     attendanceRecords.forEach((r) => {
@@ -63,7 +52,6 @@ const AttendanceMatrix = ({
     return map;
   }, [attendanceRecords]);
 
-  // Unique participants — preserve order from records
   const participants = useMemo(() => {
     const map = new Map();
     attendanceRecords.forEach((r) => {
@@ -74,7 +62,6 @@ const AttendanceMatrix = ({
     return Array.from(map.values());
   }, [attendanceRecords, participantRole]);
 
-  // ── Empty states ──────────────────────────────────────────────────────────
   if (!sortedSessions.length) {
     return (
       <div className="bg-slate-900/50 border border-slate-800 border-dashed rounded-3xl p-12 text-center">
@@ -116,11 +103,105 @@ const AttendanceMatrix = ({
         </span>
       </div>
 
-      <div className="bg-slate-900/50 border border-slate-800 rounded-3xl">
+      {/* ── Mobile card view (< md) ────────────────────────────────────────── */}
+      <div className="md:hidden space-y-2">
+        {participants.map((p) => {
+          let attended = 0;
+          sortedSessions.forEach((s) => {
+            const r = lookupMap[`${p.id}_${s.id}`];
+            if (r && (r.status === "present" || r.status === "late")) attended++;
+          });
+          const total    = sortedSessions.length;
+          const pct      = total ? Math.round((attended / total) * 100) : null;
+          const pctColor = pct == null ? "text-slate-600"
+            : pct >= 75 ? "text-emerald-400"
+            : pct >= 50 ? "text-yellow-400"
+            : "text-rose-400";
+
+          return (
+            <div key={p.id} className="bg-slate-800/40 border border-slate-700/50 rounded-2xl overflow-hidden">
+
+              {/* Participant header */}
+              <div className="flex items-center justify-between px-4 py-3 bg-slate-800/30 border-b border-slate-700/50">
+                <div className="flex items-center gap-2.5">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${isStudent ? "bg-indigo-600/20" : "bg-violet-600/20"}`}>
+                    <span className={`text-sm font-bold ${isStudent ? "text-indigo-400" : "text-violet-400"}`}>
+                      {(p.name || "?").charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                  <p className="text-white text-sm font-semibold">{p.name}</p>
+                </div>
+                <div className="text-right">
+                  <p className={`text-sm font-bold tabular-nums ${pctColor}`}>
+                    {pct != null ? `${pct}%` : "—"}
+                  </p>
+                  <p className="text-[11px] text-slate-500">{attended}/{total} sessions</p>
+                </div>
+              </div>
+
+              {/* Session chips grouped by month */}
+              <div className="px-4 py-3 space-y-3">
+                {monthGroups.map((group, gIdx) => {
+                  const startIdx    = monthGroups.slice(0, gIdx).reduce((sum, g) => sum + g.count, 0);
+                  const groupSessions = sortedSessions.slice(startIdx, startIdx + group.count);
+
+                  return (
+                    <div key={group.key}>
+                      <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-2">
+                        {group.label}
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {groupSessions.map((s) => {
+                          const record   = lookupMap[`${p.id}_${s.id}`];
+                          const cfg      = record ? CELL[record.status] : null;
+                          const d        = s.scheduled_at ? new Date(s.scheduled_at) : null;
+                          const editable = !!onEditRecord && !!record;
+
+                          return (
+                            <div
+                              key={s.id}
+                              title={s.title + (d ? ` — ${d.toLocaleDateString()}` : "")}
+                              onClick={() => editable && onEditRecord(record)}
+                              className={`flex flex-col items-center justify-center w-10 h-10 rounded-xl border select-none
+                                ${cfg ? cfg.cls : "bg-slate-800/60 text-slate-600 border-slate-700/50"}
+                                ${editable ? "cursor-pointer active:scale-95 transition-transform" : ""}
+                              `}
+                            >
+                              {d ? (
+                                <>
+                                  <span className="text-[12px] font-black leading-none">{d.getDate()}</span>
+                                  <span className="text-[7px] font-bold uppercase opacity-70 mt-0.5">
+                                    {d.toLocaleDateString([], { weekday: "short" })}
+                                  </span>
+                                </>
+                              ) : (
+                                <span className="text-[10px]">—</span>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+
+        {onEditRecord && (
+          <p className="text-[10px] text-slate-600 italic px-1">
+            Tap a session chip to edit attendance
+          </p>
+        )}
+      </div>
+
+      {/* ── Desktop table (md+) ───────────────────────────────────────────── */}
+      <div className="hidden md:block bg-slate-900/50 border border-slate-800 rounded-3xl">
         <div className="rounded-3xl overflow-x-auto">
           <table className="text-sm border-collapse" style={{ minWidth: "100%" }}>
             <thead>
-              {/* Row 1: Top-level SESSIONS header */}
+              {/* Row 1: top-level SESSIONS header */}
               <tr className="border-b border-slate-800/40 bg-slate-900">
                 <th
                   rowSpan={3}
@@ -146,7 +227,7 @@ const AttendanceMatrix = ({
                 </th>
               </tr>
 
-              {/* Row 2: Month group headers */}
+              {/* Row 2: month group headers */}
               <tr className="border-b border-slate-800/60 bg-slate-900">
                 {monthGroups.map((g) => (
                   <th
@@ -159,7 +240,7 @@ const AttendanceMatrix = ({
                 ))}
               </tr>
 
-              {/* Row 3: per-session day / weekday headers */}
+              {/* Row 3: per-session day / weekday */}
               <tr className="border-b border-slate-800 bg-slate-900">
                 {sortedSessions.map((s) => {
                   const d = s.scheduled_at ? new Date(s.scheduled_at) : null;
@@ -172,7 +253,9 @@ const AttendanceMatrix = ({
                       {d ? (
                         <>
                           <div className="text-[13px] font-black text-white leading-none">{d.getDate()}</div>
-                          <div className="text-[8px] text-slate-600 font-black uppercase mt-1 tracking-tighter">{d.toLocaleDateString([], { weekday: "short" })}</div>
+                          <div className="text-[8px] text-slate-600 font-black uppercase mt-1 tracking-tighter">
+                            {d.toLocaleDateString([], { weekday: "short" })}
+                          </div>
                         </>
                       ) : (
                         <span className="text-slate-700 text-[10px]">—</span>
@@ -185,7 +268,6 @@ const AttendanceMatrix = ({
 
             <tbody>
               {participants.map((p) => {
-                // Per-row counts
                 let attended = 0, absent = 0, late = 0, marked = 0;
                 sortedSessions.forEach((s) => {
                   const r = lookupMap[`${p.id}_${s.id}`];
@@ -196,8 +278,8 @@ const AttendanceMatrix = ({
                     else if (r.status === "late") { late++; attended++; }
                   }
                 });
-                const total = sortedSessions.length;
-                const pct   = total ? Math.round((attended / total) * 100) : null;
+                const total    = sortedSessions.length;
+                const pct      = total ? Math.round((attended / total) * 100) : null;
                 const pctColor = pct == null ? "text-slate-600"
                   : pct >= 75 ? "text-emerald-400"
                   : pct >= 50 ? "text-yellow-400"
@@ -205,7 +287,6 @@ const AttendanceMatrix = ({
 
                 return (
                   <tr key={p.id} className="border-b border-slate-800/40 last:border-0 group">
-                    {/* Sticky name cell */}
                     <td
                       className="sticky left-0 z-10 bg-slate-900 group-hover:bg-slate-800 px-5 py-3 border-r border-slate-800/50 transition-colors"
                       style={leftShadow}
@@ -220,13 +301,12 @@ const AttendanceMatrix = ({
                       </div>
                     </td>
 
-                    {/* Per-session cells */}
                     {sortedSessions.map((s) => {
                       const record   = lookupMap[`${p.id}_${s.id}`];
                       const cfg      = record ? CELL[record.status] : null;
                       const editable = !!onEditRecord && !!record;
 
-                      const fmtTime = (ts) => ts
+                      const fmtTime  = (ts) => ts
                         ? new Date(ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
                         : null;
                       const joinedStr = fmtTime(record?.joined_at);
@@ -247,14 +327,12 @@ const AttendanceMatrix = ({
                               <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-40 opacity-0 group-hover/cell:opacity-100 -translate-y-0.5 group-hover/cell:translate-y-0 transition-all duration-150 whitespace-nowrap">
                                 <div className="bg-slate-800 border border-slate-700 rounded-xl shadow-2xl px-3 py-2 text-left text-[11px] space-y-1 min-w-[120px]">
                                   <p className="font-bold capitalize text-white">{record.status}</p>
-                                    <p className="text-slate-400 flex items-center gap-1.5">
-                                      {/* <i className="fas fa-sign-in-alt text-emerald-400 text-[10px]" /> */}
-                                      Joined At: {joinedStr ? joinedStr : "—"}
-                                    </p>
-                                    <p className="text-slate-400 flex items-center gap-1.5">
-                                      {/* <i className="fas fa-sign-out-alt text-rose-400 text-[10px]" /> */}
-                                      Left At: {leftStr ? leftStr : "—"}
-                                    </p>
+                                  <p className="text-slate-400 flex items-center gap-1.5">
+                                    Joined At: {joinedStr ?? "—"}
+                                  </p>
+                                  <p className="text-slate-400 flex items-center gap-1.5">
+                                    Left At: {leftStr ?? "—"}
+                                  </p>
                                   {record.note && (
                                     <p className="text-slate-500 italic border-t border-slate-700 pt-1 max-w-[180px] whitespace-normal leading-relaxed">
                                       {record.note}
@@ -271,7 +349,6 @@ const AttendanceMatrix = ({
                       );
                     })}
 
-                    {/* Sticky summary cell */}
                     <td
                       className="sticky right-0 z-10 bg-slate-900 group-hover:bg-slate-800 px-4 py-3 text-center border-l border-slate-800/50 transition-colors"
                       style={{ minWidth: SUMMARY_W, ...rightShadow }}
