@@ -21,9 +21,10 @@ import { toastManager } from "../../utils/toastManager";
 import ConfirmDialog from "../../components/common/ConfirmDialog";
 import SessionsTab from "../../components/admin/SessionsTab";
 import { showApiError } from "../../utils/apiErrorHandler";
-import { formatLocalISO } from "../../utils/validation";
+import { useDateFormatters } from "../../hooks";
 const AdminSessionsPage = () => {
   const dispatch = useDispatch();
+  const { timezone, toPayloadISO } = useDateFormatters();
 
   const [activeModal, setActiveModal] = useState(null);
   const [editingSession, setEditingSession] = useState(null);
@@ -218,11 +219,10 @@ const AdminSessionsPage = () => {
     if (!formData.start_date) {
       errors.start_date = "Start date is required";
     } else {
-      const d = new Date(formData.start_date);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      d.setHours(0, 0, 0, 0);
-      if (d < today) errors.start_date = "Start date must be today or in the future";
+      const todayStr = timezone
+        ? new Intl.DateTimeFormat("en-CA", { timeZone: timezone, year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date())
+        : new Date().toLocaleDateString("en-CA");
+      if (formData.start_date < todayStr) errors.start_date = "Start date must be today or in the future";
     }
 
     if (!formData.time) errors.time = "Class time is required";
@@ -258,12 +258,11 @@ const AdminSessionsPage = () => {
       toastManager.error("Selected course has no instructor assigned");
       return;
     }
-const localDate = new Date(`${sessionData.scheduled_date}T${sessionData.time}`);
     const payload = {
       course: Number(sessionData.course),
       instructor_id,
       title: sessionData.title,
-      scheduled_at: formatLocalISO(localDate),
+      scheduled_at: toPayloadISO(`${sessionData.scheduled_date}T${sessionData.time}`),
       // time: sessionData.time,
       is_recurring: sessionData.is_recurring,
       recurrence_days: sessionData.is_recurring ? (sessionData.recurrence_days || []) : [],
@@ -335,8 +334,7 @@ const localDate = new Date(`${sessionData.scheduled_date}T${sessionData.time}`);
       payload.instructor_id = Number(sessionData.instructor_id);
     }
     if (sessionData.start_date && sessionData.time) {
-      const localDate = new Date(`${sessionData.start_date}T${sessionData.time}`);
-      payload.scheduled_at = formatLocalISO(localDate);
+      payload.scheduled_at = toPayloadISO(`${sessionData.start_date}T${sessionData.time}`);
     }
 
     try {

@@ -16,7 +16,7 @@ import { teacherService } from "../../services/teacherService";
 import { FilterSelect } from "../../components/ui";
 import { toastManager } from "../../utils/toastManager";
 import { showApiError } from "../../utils/apiErrorHandler";
-import { toLocalDatetimeInput, formatTimezoneISO } from "../../utils/validation";
+import { toLocalDatetimeInput, formatTimezoneISO, formatLocalISO } from "../../utils/validation";
 import { useDateFormatters } from "../../hooks";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -205,16 +205,16 @@ const QuestionBuilder = ({ questions, onChange }) => {
 };
 
 // ── Quiz form validation ──────────────────────────────────────────────────────
-const validateQuizForm = (form, questions) => {
+const validateQuizForm = (form, questions, timezone) => {
   if (!form.course)         return "Please select a course";
   if (!form.title.trim())   return "Title is required";
   if (!form.total_marks)    return "Total marks is required";
   if (!form.published_at)   return "Publish date is required";
   if (!form.due_date)       return "Due date is required";
 
-  const now = new Date();
-  const pub = new Date(form.published_at);
-  const due = new Date(form.due_date);
+  const toISO = (localStr) => formatTimezoneISO(localStr, timezone) || formatLocalISO(new Date(localStr));
+  const pub = new Date(toISO(form.published_at));
+  const due = new Date(toISO(form.due_date));
 
   if (pub < new Date(Date.now() - 60 * 1000)) return "Publish date cannot be in the past";
   if (due <= pub)  return "Due date must be after publish date";
@@ -377,7 +377,7 @@ const TeacherQuizzes = ({
 
   // ── Create ────────────────────────────────────────────────────────────────
   const handleCreate = async () => {
-    const err = validateQuizForm(form, questions);
+    const err = validateQuizForm(form, questions, timezone);
     if (err) { toastManager.error(err); return; }
     setSaving(true);
     try {
@@ -411,7 +411,7 @@ const TeacherQuizzes = ({
   };
 
   const handleEdit = async () => {
-    const err = validateQuizForm(form, questions);
+    const err = validateQuizForm(form, questions, timezone);
     if (err) { toastManager.error(err); return; }
     setSaving(true);
     try {

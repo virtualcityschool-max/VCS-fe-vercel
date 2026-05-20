@@ -223,10 +223,8 @@ const TeacherGrading = ({
 
     if (!form.due_date) return "Due date is required";
 
-    const selectedDate = new Date(form.due_date);
-    const now = new Date();
-
-    if (selectedDate <= now) return "Due date must be in the future";
+    const selectedDate = new Date(toPayloadISO(form.due_date));
+    if (selectedDate <= new Date()) return "Due date must be in the future";
 
     if (!form.max_score) return "Total marks is required";
     if (Number(form.max_score) <= 0)
