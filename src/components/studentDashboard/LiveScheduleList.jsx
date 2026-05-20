@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import {
   selectLiveSchedule,
   startStudentSession,
@@ -11,19 +12,50 @@ import { useDateFormatters } from "../../hooks/useDateFormatters";
 import { getWindowLabel } from "../../utils/helper/StartSession";
 import { extractApiErrorMessage, showApiError } from "../../utils/apiErrorHandler";
 import ConfirmDialog from "../common/ConfirmDialog";
+import { availabilityService } from "../../services/availabilityService";
+
+const fmt12 = (t) => {
+  if (!t) return "";
+  const [h, m] = t.split(":").map(Number);
+  const suffix = h >= 12 ? "PM" : "AM";
+  return `${h % 12 || 12}:${String(m).padStart(2, "0")} ${suffix}`;
+};
+
+const fmtDate = (d) =>
+  new Date(d + "T00:00:00").toLocaleDateString(undefined, {
+    weekday: "short", month: "short", day: "numeric",
+  });
 
 const LiveScheduleList = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const liveSchedule = useSelector(selectLiveSchedule);
   const { formatDate, formatTime, timezone } = useDateFormatters();
   const isJoiningSession = useSelector(
     (state) => state.studentDashboard.isJoiningSession,
   );
 
+  const [activeTab, setActiveTab] = useState("classes");
+  const [tutorSlots, setTutorSlots] = useState([]);
+  const [slotsLoading, setSlotsLoading] = useState(false);
+
   const [loadingSessionId, setLoadingSessionId] = useState(null);
   const [loadingAction, setLoadingAction] = useState(null); // 'join' | 'end'
   const [endConfirm, setEndConfirm] = useState({ open: false, session: null });
   const [tooEarlyOpen, setTooEarlyOpen] = useState(false);
+
+  useEffect(() => {
+    setSlotsLoading(true);
+    availabilityService.getMyBookings()
+      .then((data) => {
+        const upcoming = (Array.isArray(data) ? data : [])
+          .filter((s) => new Date(s.date + "T23:59:59") >= new Date())
+          .sort((a, b) => a.date.localeCompare(b.date) || a.start_time.localeCompare(b.start_time));
+        setTutorSlots(upcoming);
+      })
+      .catch(() => setTutorSlots([]))
+      .finally(() => setSlotsLoading(false));
+  }, []);
 
   const openMeetingLink = (link) => {
     if (!link || !link.startsWith("http")) {
@@ -117,16 +149,138 @@ const LiveScheduleList = () => {
   const fmtDay = (d) => d.toLocaleDateString([], { month: "short", day: "numeric" });
   const scheduleRangeLabel = `${fmtDay(today)} – ${fmtDay(end)}`;
 
-  if (!liveSchedule || liveSchedule.length === 0) {
-    return (
-      <section>
-        <div className="mb-6 border-b border-white/5 pb-4 flex items-center justify-between">
-          <h2 className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 flex items-center gap-3">
-            <span className="w-1.5 h-1.5 bg-slate-700 rounded-full"></span>
+  const hasLive = liveSchedule && liveSchedule.length > 0;
+
+  return (
+    <section>
+      {/* Section header + tabs */}
+      <div className="mb-6 border-b border-white/5 pb-4 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-4">
+          <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 flex items-center gap-3">
+            {hasLive && activeTab === "classes"
+              ? <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-ping" />
+              : <span className="w-1.5 h-1.5 bg-slate-700 rounded-full" />}
             Upcoming Sessions
           </h2>
-          <span className="text-[10px] text-slate-600 font-semibold">{scheduleRangeLabel}</span>
+          {/* Tabs */}
+          <div className="flex items-center gap-1 bg-slate-900/60 border border-white/5 rounded-xl p-1">
+            <button
+              onClick={() => setActiveTab("classes")}
+              className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
+                activeTab === "classes"
+                  ? "bg-blue-600 text-white shadow-lg shadow-blue-900/30"
+                  : "text-slate-500 hover:text-slate-300"
+              }`}
+            >
+              <i className="fas fa-chalkboard mr-1.5" />
+              Classes
+            </button>
+            <button
+              onClick={() => setActiveTab("tutors")}
+              className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 ${
+                activeTab === "tutors"
+                  ? "bg-indigo-600 text-white shadow-lg shadow-indigo-900/30"
+                  : "text-slate-500 hover:text-slate-300"
+              }`}
+            >
+              <i className="fas fa-user-graduate mr-1.5" />
+              Tutors
+              {tutorSlots.length > 0 && (
+                <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-full ${
+                  activeTab === "tutors" ? "bg-white/20 text-white" : "bg-indigo-500/20 text-indigo-400"
+                }`}>
+                  {tutorSlots.length}
+                </span>
+              )}
+            </button>
+          </div>
         </div>
+        {activeTab === "classes" && (
+          <span className="text-[10px] text-slate-600 font-semibold">{scheduleRangeLabel}</span>
+        )}
+      </div>
+
+      {/* ── Tutors tab ── */}
+      {activeTab === "tutors" && (
+        <div>
+          {slotsLoading ? (
+            <div className="flex items-center gap-3 text-slate-500 text-xs py-8 justify-center">
+              <i className="fas fa-spinner fa-spin" />
+              Loading tutoring sessions…
+            </div>
+          ) : tutorSlots.length === 0 ? (
+            <div className="bg-slate-900/40 backdrop-blur-xl p-8 rounded-[1.5rem] border border-white/5 text-center">
+              <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/5">
+                <i className="fas fa-chalkboard-teacher text-xl text-slate-600" />
+              </div>
+              <h3 className="text-sm font-black text-white/80 mb-1">No Upcoming Tutoring Sessions</h3>
+              <p className="text-slate-500 text-[10px] font-medium uppercase tracking-wider mb-4">
+                Book a session with a tutor to get started
+              </p>
+              <button
+                onClick={() => navigate("/teachers")}
+                className="inline-flex items-center gap-2 px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-black text-[10px] uppercase tracking-widest transition-all"
+              >
+                <i className="fas fa-search" />
+                Find a Tutor
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {tutorSlots.map((slot) => (
+                <div
+                  key={slot.id}
+                  className="bg-slate-900/40 backdrop-blur-xl p-5 rounded-[1.5rem] border border-white/5 flex flex-col md:flex-row items-center gap-6 hover:bg-white/5 transition-all duration-300 group shadow-2xl relative overflow-hidden"
+                >
+                  {/* Teacher avatar */}
+                  <div className="flex-shrink-0 w-16 h-16 rounded-2xl border border-indigo-500/20 bg-indigo-500/10 flex items-center justify-center text-indigo-400 font-black text-xl shadow-lg">
+                    {slot.teacher_name?.[0]?.toUpperCase() || "T"}
+                  </div>
+
+                  {/* Info */}
+                  <div className="flex-1 min-w-0 relative z-10 text-center md:text-left">
+                    <h4 className="text-lg font-black text-white group-hover:text-indigo-400 transition-colors tracking-tight mb-0.5">
+                      {slot.teacher_name}
+                    </h4>
+                    {slot.teacher_email && (
+                      <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mb-3 opacity-60">
+                        {slot.teacher_email}
+                      </p>
+                    )}
+                    <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-[11px] text-slate-400 font-bold uppercase tracking-wider">
+                      <div className="flex items-center gap-1.5">
+                        <i className="fas fa-calendar text-indigo-400/60" />
+                        <span>{fmtDate(slot.date)}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <i className="fas fa-clock text-indigo-400/60" />
+                        <span>{fmt12(slot.start_time)} – {fmt12(slot.end_time)}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Badge + action */}
+                  <div className="flex-shrink-0 flex flex-col items-center gap-3 relative z-10">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-[9px] font-black uppercase tracking-widest">
+                      <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
+                      Tutoring
+                    </span>
+                    <button
+                      onClick={() => navigate(`/teachers/${slot.teacher_id}`, { state: { openSlots: true } })}
+                      className="px-5 py-2 rounded-xl bg-indigo-600/10 hover:bg-indigo-600 border border-indigo-500/20 text-indigo-400 hover:text-white font-black text-[10px] uppercase tracking-widest transition-all"
+                    >
+                      View Tutor
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Classes tab ── */}
+      {activeTab === "classes" && !hasLive && (
         <div className="bg-slate-900/40 backdrop-blur-xl p-8 rounded-[1.5rem] border border-white/5 text-center shadow-2xl transition-all duration-500 hover:border-white/10">
           <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/5">
             <i className="fas fa-calendar-times text-xl text-slate-600"></i>
@@ -138,19 +292,9 @@ const LiveScheduleList = () => {
             Check back later for upcoming live sessions
           </p>
         </div>
-      </section>
-    );
-  }
+      )}
 
-  return (
-    <section>
-      <div className="mb-6 border-b border-white/5 pb-4 flex items-center justify-between">
-        <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 flex items-center gap-3">
-          <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-ping"></span>
-          Upcoming Sessions
-        </h2>
-        <span className="text-[10px] text-slate-600 font-semibold">{scheduleRangeLabel}</span>
-      </div>
+      {activeTab === "classes" && hasLive && (
       <div className="space-y-4">
         {liveSchedule.map((session) => {
           const sessionId = session?.session_id ?? session?.id;
@@ -313,6 +457,7 @@ const LiveScheduleList = () => {
           );
         })}
       </div>
+      )}
 
       <ConfirmDialog
         open={endConfirm.open}

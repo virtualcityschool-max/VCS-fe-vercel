@@ -20,12 +20,90 @@ const fmtDate = (d) =>
 
 const isUpcoming = (date) => new Date(date + "T23:59:59") >= new Date();
 
+// ── Compact slot card ─────────────────────────────────────────────────────────
+const SlotCard = ({ slot, onDelete, deleting }) => {
+  const isBooked = slot.status === "booked";
+  const isDel = deleting === slot.id;
+
+  return (
+    <div
+      className={`relative rounded-xl border overflow-hidden transition ${
+        isBooked
+          ? "bg-gradient-to-b from-amber-500/[0.06] to-slate-900/80 border-amber-500/20"
+          : "bg-slate-900 border-slate-700/50 hover:border-slate-600/70"
+      }`}
+    >
+      <div
+        className={`h-[2px] w-full ${
+          isBooked
+            ? "bg-gradient-to-r from-amber-400/50 to-amber-400/0"
+            : "bg-gradient-to-r from-indigo-500/30 to-indigo-500/0"
+        }`}
+      />
+
+      <div className="p-3">
+        {/* Time + delete */}
+        <div className="flex items-start justify-between gap-1.5 mb-2">
+          <div>
+            <p className="text-xs font-bold text-white tabular-nums leading-tight">
+              {fmt12(slot.start_time)}
+              <span className="text-slate-500 font-normal mx-1">–</span>
+              {fmt12(slot.end_time)}
+            </p>
+            <p className="text-[9px] text-slate-600 mt-0.5 font-medium">1 hr</p>
+          </div>
+          <button
+            onClick={() => onDelete(slot)}
+            disabled={isDel}
+            title="Delete slot"
+            className="shrink-0 w-6 h-6 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/10 hover:border-rose-500/30 text-rose-400 transition flex items-center justify-center disabled:opacity-40"
+          >
+            {isDel
+              ? <i className="fas fa-spinner fa-spin text-[9px]" />
+              : <i className="fas fa-trash-alt text-[9px]" />}
+          </button>
+        </div>
+
+        {/* Status badge */}
+        {isBooked ? (
+          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-300 text-[8px] font-black uppercase tracking-widest">
+            <span className="w-1 h-1 rounded-full bg-amber-400 shrink-0" />
+            Booked
+          </span>
+        ) : (
+          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-[8px] font-black uppercase tracking-widest">
+            <span className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+            Open
+          </span>
+        )}
+
+        {/* Booked-by info */}
+        {isBooked && slot.booked_by_name && (
+          <div className="flex items-center gap-1.5 mt-2 bg-slate-800/80 rounded-lg px-2 py-1.5">
+            <div className="w-5 h-5 rounded-md bg-indigo-500/20 border border-indigo-500/20 flex items-center justify-center text-indigo-300 text-[9px] font-black shrink-0">
+              {slot.booked_by_name[0]?.toUpperCase()}
+            </div>
+            <div className="min-w-0">
+              <p className="text-[10px] font-bold text-slate-200 truncate">{slot.booked_by_name}</p>
+              {slot.booked_by_email && (
+                <p className="text-[9px] text-slate-500 truncate">{slot.booked_by_email}</p>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// ── Main section ──────────────────────────────────────────────────────────────
 const TeacherSlotsSection = ({ teacherId }) => {
   const [slots, setSlots] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [confirmSlot, setConfirmSlot] = useState(null); // slot object to delete
-  const [deleting, setDeleting] = useState(null); // slot id being deleted
+  const [confirmSlot, setConfirmSlot] = useState(null);
+  const [deleting, setDeleting] = useState(null);
+  const [filter, setFilter] = useState("all"); // all | available | booked
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -62,8 +140,9 @@ const TeacherSlotsSection = ({ teacherId }) => {
     }
   };
 
-  // Group by date
-  const grouped = slots.reduce((acc, s) => {
+  const filtered = filter === "all" ? slots : slots.filter((s) => s.status === filter);
+
+  const grouped = filtered.reduce((acc, s) => {
     if (!acc[s.date]) acc[s.date] = [];
     acc[s.date].push(s);
     return acc;
@@ -73,25 +152,46 @@ const TeacherSlotsSection = ({ teacherId }) => {
   const bookedCount = slots.filter((s) => s.status === "booked").length;
 
   return (
-    <div className="mt-8">
+    <div className="mt-8 pt-8 border-t border-slate-700/60">
       {/* Section header */}
-      <div className="flex items-center justify-between gap-4 mb-5 pb-4 border-b border-slate-800">
+      <div className="flex items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-violet-500/20 flex items-center justify-center text-violet-400">
+          <div className="w-8 h-8 rounded-lg bg-violet-500/20 border border-violet-500/20 flex items-center justify-center text-violet-400">
             <i className="fas fa-calendar-check text-sm" />
           </div>
-          <h3 className="text-base font-semibold text-white">Availability Slots</h3>
+          <div>
+            <h3 className="text-base font-semibold text-white">Availability Slots</h3>
+            {!loading && !error && (
+              <p className="text-[10px] text-slate-500 mt-0.5">
+                {slots.length} total · {availableCount} open · {bookedCount} booked
+              </p>
+            )}
+          </div>
         </div>
         {!loading && !error && slots.length > 0 && (
           <div className="flex items-center gap-2">
-            <span className="flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5 text-[10px] font-black text-slate-300 uppercase tracking-widest">
+            <button
+              onClick={() => setFilter(filter === "available" ? "all" : "available")}
+              className={`flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-[10px] font-black uppercase tracking-widest transition cursor-pointer border ${
+                filter === "available"
+                  ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-300"
+                  : "bg-slate-800 border-slate-700 text-slate-300 hover:border-emerald-500/30 hover:text-emerald-400"
+              }`}
+            >
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
               {availableCount} open
-            </span>
-            <span className="flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5 text-[10px] font-black text-slate-300 uppercase tracking-widest">
+            </button>
+            <button
+              onClick={() => setFilter(filter === "booked" ? "all" : "booked")}
+              className={`flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-[10px] font-black uppercase tracking-widest transition cursor-pointer border ${
+                filter === "booked"
+                  ? "bg-amber-500/20 border-amber-500/40 text-amber-300"
+                  : "bg-slate-800 border-slate-700 text-slate-300 hover:border-amber-500/30 hover:text-amber-400"
+              }`}
+            >
               <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
               {bookedCount} booked
-            </span>
+            </button>
           </div>
         )}
       </div>
@@ -117,83 +217,59 @@ const TeacherSlotsSection = ({ teacherId }) => {
           <p className="text-slate-600 text-sm">No availability slots created yet.</p>
         </div>
       ) : (
-        <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl overflow-hidden">
+        <div className="space-y-8">
           {Object.entries(grouped)
             .sort(([a], [b]) => a.localeCompare(b))
-            .map(([date, daySlots], gi) => {
+            .map(([date, daySlots]) => {
               const upcoming = isUpcoming(date);
+              const dayOpen = daySlots.filter((s) => s.status === "available").length;
+              const dayBooked = daySlots.filter((s) => s.status === "booked").length;
               return (
                 <div key={date}>
-                  {/* Date row */}
-                  <div className={`flex items-center gap-2 px-3 py-1.5 ${gi > 0 ? "border-t border-slate-700/50" : ""} bg-slate-800/60`}>
-                    <i className={`fas fa-calendar-day text-[9px] ${upcoming ? "text-indigo-400" : "text-slate-600"}`} />
-                    <span className={`text-[10px] font-black uppercase tracking-widest ${upcoming ? "text-slate-300" : "text-slate-600"}`}>
-                      {fmtDate(date)}
-                    </span>
-                    {!upcoming && (
-                      <span className="text-[8px] font-black bg-slate-700 text-slate-500 rounded px-1.5 py-0.5 uppercase tracking-widest">past</span>
-                    )}
-                    <span className="ml-auto text-[9px] text-slate-600 tabular-nums">{daySlots.length} slot{daySlots.length !== 1 ? "s" : ""}</span>
+                  {/* Date header */}
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="h-px flex-1 bg-slate-800" />
+                    <div className="flex items-center gap-2.5 shrink-0">
+                      <span className={`text-[10px] font-black uppercase tracking-widest ${upcoming ? "text-slate-400" : "text-slate-600"}`}>
+                        {fmtDate(date)}
+                      </span>
+                      {!upcoming && (
+                        <span className="text-[8px] font-black bg-slate-800 text-slate-600 rounded px-1.5 py-0.5 uppercase tracking-widest border border-slate-700">
+                          past
+                        </span>
+                      )}
+                      {dayOpen > 0 && (
+                        <span className="text-[9px] font-black bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 rounded-full px-2 py-0.5">
+                          {dayOpen} open
+                        </span>
+                      )}
+                      {dayBooked > 0 && (
+                        <span className="text-[9px] font-black bg-amber-500/10 border border-amber-500/20 text-amber-500 rounded-full px-2 py-0.5">
+                          {dayBooked} booked
+                        </span>
+                      )}
+                    </div>
+                    <div className="h-px flex-1 bg-slate-800" />
                   </div>
 
-                  {/* Slot rows */}
-                  {daySlots.map((slot) => {
-                    const isBooked = slot.status === "booked";
-                    const isDel = deleting === slot.id;
-                    return (
-                      <div
+                  {/* Slot cards grid */}
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                    {daySlots.map((slot) => (
+                      <SlotCard
                         key={slot.id}
-                        className={`flex items-center gap-3 px-3 py-2 border-t border-slate-700/30 ${isBooked ? "bg-amber-500/[0.03]" : ""}`}
-                      >
-                        {/* Time */}
-                        <span className="text-xs font-bold text-white tabular-nums w-36 shrink-0">
-                          {fmt12(slot.start_time)}<span className="text-slate-600 mx-1">–</span>{fmt12(slot.end_time)}
-                        </span>
-
-                        {/* Status dot */}
-                        {isBooked ? (
-                          <span className="flex items-center gap-1 text-[9px] font-black text-amber-400 uppercase tracking-widest shrink-0">
-                            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
-                            Booked
-                          </span>
-                        ) : (
-                          <span className="flex items-center gap-1 text-[9px] font-black text-emerald-400 uppercase tracking-widest shrink-0">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
-                            Open
-                          </span>
-                        )}
-
-                        {/* Booked-by info */}
-                        {isBooked && slot.booked_by_name && (
-                          <span className="text-[11px] text-slate-500 truncate flex-1">
-                            <i className="fas fa-user text-[9px] mr-1" />
-                            {slot.booked_by_name}
-                            {slot.booked_by_email && <span className="text-slate-600 ml-1">· {slot.booked_by_email}</span>}
-                          </span>
-                        )}
-                        {!isBooked && <span className="flex-1" />}
-
-                        {/* Delete */}
-                        <button
-                          onClick={() => setConfirmSlot(slot)}
-                          disabled={isDel}
-                          title="Delete slot"
-                          className="shrink-0 w-6 h-6 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/10 hover:border-rose-500/30 text-rose-400 transition flex items-center justify-center disabled:opacity-40"
-                        >
-                          {isDel
-                            ? <i className="fas fa-spinner fa-spin text-[9px]" />
-                            : <i className="fas fa-trash-alt text-[9px]" />}
-                        </button>
-                      </div>
-                    );
-                  })}
+                        slot={slot}
+                        onDelete={setConfirmSlot}
+                        deleting={deleting}
+                      />
+                    ))}
+                  </div>
                 </div>
               );
             })}
         </div>
       )}
 
-      {/* Confirm dialog — portalled to body so fixed positioning is always viewport-relative */}
+      {/* Confirm delete dialog — portalled to body */}
       {confirmSlot && createPortal(
         <div className="fixed inset-0 z-[950] flex items-center justify-center bg-black/70 backdrop-blur-sm px-4">
           <div className="w-full max-w-sm bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden">

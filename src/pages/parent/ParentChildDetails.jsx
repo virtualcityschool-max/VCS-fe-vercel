@@ -267,16 +267,14 @@ const ParentChildDetails = () => {
             <div className="p-8 md:p-12 space-y-16 animate-fadeIn">
               {/* Course Info Header */}
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 pb-12 border-b border-white/5">
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20">
-                      <i className="fas fa-graduation-cap text-indigo-400 text-lg"></i>
-                    </div>
-                    <h2 className="text-2xl font-black font-poppins tracking-tight">{activeCourse.title}</h2>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20 shrink-0">
+                    <i className="fas fa-graduation-cap text-indigo-400 text-lg"></i>
                   </div>
-                  <div className="flex items-center gap-6 text-slate-400 text-sm font-medium">
-                    <div className="flex items-center gap-2">
-                      <i className="far fa-user-circle"></i>
+                  <div>
+                    <h2 className="text-2xl font-black font-poppins tracking-tight">{activeCourse.title}</h2>
+                    <div className="flex items-center gap-2 text-slate-400 text-sm font-medium mt-1">
+                      <i className="far fa-user-circle text-xs"></i>
                       <span>Instructor: <span className="text-white">{activeCourse.instructor}</span></span>
                     </div>
                   </div>

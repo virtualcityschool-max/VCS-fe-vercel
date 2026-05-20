@@ -43,6 +43,7 @@ const UserDetailsPage = () => {
   const location = useLocation();
   const dispatch = useDispatch();
 
+  const viewOnly = location.state?.viewOnly === true;
   const [activeTab, setActiveTab] = useState("account");
   const [userData, setUserData] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
@@ -234,6 +235,21 @@ const UserDetailsPage = () => {
 
         {/* Tab Content */}
         <div className="bg-slate-900/60 border border-slate-800/50 rounded-2xl shadow-2xl backdrop-blur-sm mt-4">
+          {viewOnly && (
+            <div className="flex items-center justify-between gap-3 px-5 py-3 bg-indigo-500/10 border-b border-indigo-500/20">
+              <div className="flex items-center gap-2 text-indigo-300 text-xs font-bold">
+                <i className="fas fa-eye" />
+                <span>View Only — no changes can be made</span>
+              </div>
+              <button
+                onClick={() => navigate(`/admin/users/${id}`, { state: { filters: location.state?.filters } })}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-black uppercase tracking-widest transition"
+              >
+                <i className="fas fa-edit text-[9px]" />
+                Switch to Edit
+              </button>
+            </div>
+          )}
           <UserDetailsTabs
             activeTab={activeTab}
             onTabChange={setActiveTab}
@@ -247,6 +263,7 @@ const UserDetailsPage = () => {
                 onUpdate={handleUserUpdate}
                 onCancel={handleBackToUsers}
                 onSaved={handleBackToUsers}
+                readOnly={viewOnly}
               />
               )}
 
@@ -257,6 +274,7 @@ const UserDetailsPage = () => {
                     onUpdate={handleProfileUpdate}
                     onCancel={handleBackToUsers}
                     onSaved={handleBackToUsers}
+                    readOnly={viewOnly}
                   />
                   <TeacherSlotsSection teacherId={userData.id} />
                 </div>
@@ -270,6 +288,7 @@ const UserDetailsPage = () => {
                     onUpdate={handleProfileUpdate}
                     onCancel={handleBackToUsers}
                     onSaved={handleBackToUsers}
+                    readOnly={viewOnly}
                   />
                 </div>
               )}
@@ -282,6 +301,7 @@ const UserDetailsPage = () => {
                     onRefresh={handleProfileRefresh}
                     onCancel={handleBackToUsers}
                     onSaved={handleBackToUsers}
+                    readOnly={viewOnly}
                   />
                 </div>
               )}

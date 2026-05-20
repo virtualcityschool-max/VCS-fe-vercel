@@ -3,7 +3,7 @@ import { Button, Input, PasswordValidation, PasswordInput, FilterSelect } from "
 import { validateEmail, validatePassword } from "../../utils/validation";
 import { useFieldErrors } from "../../hooks";
 
-const UserAccountTab = ({ user, onUpdate, onCancel, onSaved }) => {
+const UserAccountTab = ({ user, onUpdate, onCancel, onSaved, readOnly = false }) => {
   const [formData, setFormData] = useState({
     username: user?.username || "",
     email: user?.email || "",
@@ -159,6 +159,7 @@ const UserAccountTab = ({ user, onUpdate, onCancel, onSaved }) => {
                 className="w-full bg-slate-800 text-white"
                 placeholder="Username"
                 error={getFieldError("username")}
+                disabled={readOnly}
               />
             </div>
 
@@ -173,6 +174,7 @@ const UserAccountTab = ({ user, onUpdate, onCancel, onSaved }) => {
                 className="w-full bg-slate-800 text-white"
                 placeholder="Email"
                 error={getFieldError("email")}
+                disabled={readOnly}
               />
             </div>
 
@@ -184,6 +186,7 @@ const UserAccountTab = ({ user, onUpdate, onCancel, onSaved }) => {
                 value={formData.role}
                 onChange={(e) => handleInputChange("role", e.target.value)}
                 className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                disabled={readOnly}
               >
                 <option value="student">Student</option>
                 <option value="teacher">Teacher</option>
@@ -206,13 +209,14 @@ const UserAccountTab = ({ user, onUpdate, onCancel, onSaved }) => {
         </div>
 
         <div className="flex items-center gap-2 py-1">
-          <p className="text-sm font-medium text-white">Activate Account</p>
+          <p className="text-sm font-medium text-white">Account Status</p>
           <button
             type="button"
-            onClick={() => handleInputChange("is_active", !formData.is_active)}
+            onClick={() => !readOnly && handleInputChange("is_active", !formData.is_active)}
+            disabled={readOnly}
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
               formData.is_active ? "bg-indigo-600" : "bg-slate-600"
-            }`}
+            } ${readOnly ? "opacity-60 cursor-default" : ""}`}
           >
             <span
               className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
@@ -220,74 +224,80 @@ const UserAccountTab = ({ user, onUpdate, onCancel, onSaved }) => {
               }`}
             />
           </button>
+          <span className={`text-xs font-semibold ${formData.is_active ? "text-emerald-400" : "text-slate-500"}`}>
+            {formData.is_active ? "Active" : "Inactive"}
+          </span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
-                New Password
-              </label>
-              <PasswordInput
-                value={formData.password}
-                onChange={(e) => handleInputChange("password", e.target.value)}
-                placeholder="Leave blank to keep current"
-                error={getFieldError("password")}
-                showPassword={showPassword}
-                onTogglePassword={() => setShowPassword(!showPassword)}
-              />
-              {formData.password && (
-                <PasswordValidation password={formData.password} />
+        {!readOnly && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  New Password
+                </label>
+                <PasswordInput
+                  value={formData.password}
+                  onChange={(e) => handleInputChange("password", e.target.value)}
+                  placeholder="Leave blank to keep current"
+                  error={getFieldError("password")}
+                  showPassword={showPassword}
+                  onTogglePassword={() => setShowPassword(!showPassword)}
+                />
+                {formData.password && (
+                  <PasswordValidation password={formData.password} />
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  Confirm Password
+                </label>
+                <PasswordInput
+                  value={formData.confirm_password}
+                  onChange={(e) =>
+                    handleInputChange("confirm_password", e.target.value)
+                  }
+                  placeholder="Repeat new password"
+                  error={getFieldError("confirm_password")}
+                  showPassword={showConfirmPassword}
+                  onTogglePassword={() =>
+                    setShowConfirmPassword(!showConfirmPassword)
+                  }
+                />
+              </div>
+          </div>
+        )}
+
+        {!readOnly && (
+          <div className="flex flex-col sm:flex-row gap-3 sm:justify-end pt-1">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={handleCancel}
+              className="w-full sm:w-auto"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="primary"
+              disabled={isSaving}
+              className="w-full sm:w-auto"
+            >
+              {isSaving ? (
+                <>
+                  <i className="fas fa-spinner fa-spin mr-2"></i>
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <i className="fas fa-save mr-2"></i>
+                  Save Account
+                </>
               )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
-                Confirm Password
-              </label>
-              <PasswordInput
-                value={formData.confirm_password}
-                onChange={(e) =>
-                  handleInputChange("confirm_password", e.target.value)
-                }
-                placeholder="Repeat new password"
-                error={getFieldError("confirm_password")}
-                showPassword={showConfirmPassword}
-                onTogglePassword={() =>
-                  setShowConfirmPassword(!showConfirmPassword)
-                }
-              />
-            </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-3 sm:justify-end pt-1">
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={handleCancel}
-            className="w-full sm:w-auto"
-          >
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            variant="primary"
-            disabled={isSaving}
-            className="w-full sm:w-auto"
-          >
-            {isSaving ? (
-              <>
-                <i className="fas fa-spinner fa-spin mr-2"></i>
-                Saving...
-              </>
-            ) : (
-              <>
-                <i className="fas fa-save mr-2"></i>
-                Save Account
-              </>
-            )}
-          </Button>
-        </div>
+            </Button>
+          </div>
+        )}
       </form>
     </div>
   );

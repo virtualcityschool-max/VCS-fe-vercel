@@ -93,18 +93,18 @@ const TeachersDirectory = () => {
   }, [dispatch, searchQuery]);
 
   return (
-    <section id="teachers-view" className="bg-slate-950 text-white font-inter">
+    <section id="teachers-view" className="bg-slate-950 text-white font-inter animate-fadeIn">
       {hireModal && (
         <HireTutorModal teacher={hireModal} onClose={() => setHireModal(null)} />
       )}
-      <div className="relative overflow-hidden border-b border-slate-800/50">
+      <div className="relative overflow-hidden border-b border-slate-800/50 animate-fadeIn">
         <div className="max-w-7xl mx-auto px-6 py-5 relative z-10">
           <div className="text-center mb-4">
-            <h1 className="text-2xl md:text-3xl font-black font-poppins leading-tight tracking-tight">
+            <h1 className="text-2xl md:text-3xl font-black font-poppins leading-tight tracking-tight animate-scaleIn">
               Find your <span className="text-indigo-500">Mentor</span>
             </h1>
           </div>
-          <div className="max-w-xl mx-auto">
+          <div className="max-w-xl mx-auto animate-springyReveal" style={{ animationDelay: '0.1s' }}>
             <SearchInput
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -147,10 +147,11 @@ const TeachersDirectory = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {teachers.map((teacher) => (
+              {teachers.map((teacher, index) => (
                 <div
                   key={teacher.id}
-                  className="group relative bg-gradient-to-b from-slate-900/80 to-slate-900 border border-slate-800 rounded-3xl p-5 transition-all duration-300 ease-out hover:border-indigo-500/40 hover:shadow-[0_10px_40px_-10px_rgba(99,102,241,0.35)] hover:-translate-y-[2px] flex flex-col"
+                  style={{ animationDelay: `${0.1 + index * 0.07}s` }}
+                  className="group relative bg-gradient-to-b from-slate-900/80 to-slate-900 border border-slate-800 rounded-3xl p-5 transition-all duration-300 ease-out hover:border-indigo-500/40 hover:shadow-[0_10px_40px_-10px_rgba(99,102,241,0.35)] hover:-translate-y-[2px] flex flex-col animate-springyReveal opacity-0"
                 >
                   {/* Hover glow overlay */}
                   <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition duration-300 pointer-events-none bg-indigo-500/4" />

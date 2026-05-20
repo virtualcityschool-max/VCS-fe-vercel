@@ -164,6 +164,10 @@ const AdminUsersPage = () => {
     }
   };
 
+  const handleViewUser = (userId) => {
+    navigate(`/admin/users/${userId}`, { state: { viewOnly: true, filters: usersFilters } });
+  };
+
   // Handle user editing - carry current filters so they can be restored on back
   const handleEditUser = (userId) => {
     navigate(`/admin/users/${userId}`, { state: { filters: usersFilters } });
@@ -282,6 +286,7 @@ const AdminUsersPage = () => {
         onUserDelete={handleDeleteUser}
         onUserPurge={handlePurgeUser}
         onFetchUsers={handleFetchUsers}
+        onUserView={handleViewUser}
         onUserEdit={handleEditUser}
         onCreateUser={handleCreateUser}
       />
