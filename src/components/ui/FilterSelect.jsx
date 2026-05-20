@@ -84,7 +84,7 @@ const FilterSelect = ({
 
   const dropdown = open && (
     <div
-      style={{ position: "fixed", top: dropPos.top, left: dropPos.left, width: dropPos.width, minWidth: 180, zIndex: 9999 }}
+      style={{ position: "fixed", top: dropPos.top, left: dropPos.left, width: dropPos.width, zIndex: 9999 }}
       onMouseDown={(e) => e.stopPropagation()}
       onTouchStart={(e) => e.stopPropagation()}
       className="bg-slate-900 border border-slate-700 rounded-xl shadow-2xl overflow-hidden"
