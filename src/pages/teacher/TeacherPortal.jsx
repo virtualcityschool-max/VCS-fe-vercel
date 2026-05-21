@@ -16,6 +16,19 @@ import { showApiError } from "../../utils/apiErrorHandler";
 import ConfirmDialog from "../../components/common/ConfirmDialog";
 import { getWindowLabel, isWithinSessionWindow } from "../../utils/helper/StartSession";
 import { useDateFormatters } from "../../hooks";
+import { availabilityService } from "../../services/availabilityService";
+
+const fmt12 = (t) => {
+  if (!t) return "";
+  const [h, m] = t.split(":").map(Number);
+  const suffix = h >= 12 ? "PM" : "AM";
+  return `${h % 12 || 12}:${String(m).padStart(2, "0")} ${suffix}`;
+};
+
+const fmtSlotDate = (d) =>
+  new Date(d + "T00:00:00").toLocaleDateString(undefined, {
+    weekday: "short", month: "short", day: "numeric",
+  });
 
 
 const TeacherPortal = () => {
@@ -29,6 +42,9 @@ const TeacherPortal = () => {
   const [isAnnouncementModalOpen, setIsAnnouncementModalOpen] = useState(false);
   const [studentsModal, setStudentsModal] = useState(null);
   const [endSessionConfirm, setEndSessionConfirm] = useState({ open: false, sessionId: null });
+  const [activeSessionTab, setActiveSessionTab] = useState("classes");
+  const [bookedSlots, setBookedSlots] = useState([]);
+  const [bookedSlotsLoading, setBookedSlotsLoading] = useState(false);
 
   const {
     dashboard,
@@ -132,6 +148,21 @@ const TeacherPortal = () => {
       showApiError(err);
     }
   };
+
+  useEffect(() => {
+    setBookedSlotsLoading(true);
+    availabilityService.getMySlots()
+      .then((data) => {
+        const all = Array.isArray(data) ? data : (data?.results || []);
+        const upcoming = all
+          .filter((s) => s.status === "booked")
+          .filter((s) => new Date(s.date + "T23:59:59") >= new Date())
+          .sort((a, b) => a.date.localeCompare(b.date) || a.start_time.localeCompare(b.start_time));
+        setBookedSlots(upcoming);
+      })
+      .catch(() => setBookedSlots([]))
+      .finally(() => setBookedSlotsLoading(false));
+  }, []);
 
   useEffect(() => {
     dispatch(fetchTeacherDashboard());
@@ -243,7 +274,7 @@ const TeacherPortal = () => {
           
           {/* Sessions Section */}
           <section className="space-y-6">
-            <div className="flex items-end justify-between px-2">
+            <div className="flex flex-wrap items-end justify-between gap-3 px-2">
               <div>
                 <h3 className="text-2xl font-black font-poppins tracking-tight flex items-center gap-3">
                   <span className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center text-emerald-400 text-sm border border-emerald-500/20">
@@ -251,7 +282,7 @@ const TeacherPortal = () => {
                   </span>
                   Upcoming Sessions
                 </h3>
-                {(() => {
+                {activeSessionTab === "classes" && (() => {
                   const today = new Date();
                   const end = new Date(today);
                   end.setDate(end.getDate() + 6);
@@ -259,11 +290,120 @@ const TeacherPortal = () => {
                   return <p className="text-sm text-slate-500 font-medium mt-1 ml-11">{fmt(today)} – {fmt(end)}</p>;
                 })()}
               </div>
-              <div className="px-4 py-1.5 bg-slate-800/50 rounded-full border border-white/5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                {dashboard?.todays_schedule?.length || 0} Total
+              <div className="flex items-center gap-3">
+                {/* Tabs */}
+                <div className="flex items-center gap-1 bg-slate-900/60 border border-white/5 rounded-xl p-1">
+                  <button
+                    onClick={() => setActiveSessionTab("classes")}
+                    className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 ${
+                      activeSessionTab === "classes"
+                        ? "bg-emerald-600 text-white shadow-lg shadow-emerald-900/30"
+                        : "text-slate-500 hover:text-slate-300"
+                    }`}
+                  >
+                    <i className="fas fa-chalkboard" />
+                    Classes
+                    <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-full ${
+                      activeSessionTab === "classes" ? "bg-white/20 text-white" : "bg-slate-700 text-slate-400"
+                    }`}>
+                      {dashboard?.todays_schedule?.length || 0}
+                    </span>
+                  </button>
+                  <button
+                    onClick={() => setActiveSessionTab("booked")}
+                    className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 ${
+                      activeSessionTab === "booked"
+                        ? "bg-indigo-600 text-white shadow-lg shadow-indigo-900/30"
+                        : "text-slate-500 hover:text-slate-300"
+                    }`}
+                  >
+                    <i className="fas fa-user-clock" />
+                    Booked Students
+                    {bookedSlots.length > 0 && (
+                      <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-full ${
+                        activeSessionTab === "booked" ? "bg-white/20 text-white" : "bg-indigo-500/20 text-indigo-400"
+                      }`}>
+                        {bookedSlots.length}
+                      </span>
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
 
+            {/* ── Booked Students tab ── */}
+            {activeSessionTab === "booked" && (
+              <div>
+                {bookedSlotsLoading ? (
+                  <div className="flex items-center gap-3 text-slate-500 text-xs py-8 justify-center">
+                    <i className="fas fa-spinner fa-spin" />
+                    Loading booked sessions…
+                  </div>
+                ) : bookedSlots.length === 0 ? (
+                  <div className="bg-slate-900/30 backdrop-blur-md p-12 rounded-[2rem] border border-white/5 text-center flex flex-col items-center gap-4">
+                    <div className="w-16 h-16 rounded-full bg-slate-800 flex items-center justify-center text-slate-600 text-2xl">
+                      <i className="fas fa-user-clock"></i>
+                    </div>
+                    <div>
+                      <p className="text-slate-400 font-bold text-lg">No Booked Sessions</p>
+                      <p className="text-slate-500 text-sm">Students haven't booked any upcoming tutoring slots.</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {bookedSlots.map((slot) => (
+                      <div
+                        key={slot.id}
+                        className="relative group bg-slate-900/40 backdrop-blur-md p-5 rounded-3xl border border-white/5 hover:border-indigo-500/30 transition-all duration-300 flex flex-col sm:flex-row sm:items-center gap-6 shadow-2xl overflow-hidden"
+                      >
+                        {/* Student avatar */}
+                        <div className="flex-shrink-0 w-14 h-14 rounded-2xl border border-indigo-500/20 bg-indigo-500/10 flex items-center justify-center text-indigo-400 font-black text-xl shadow-lg">
+                          {slot.booked_by_name?.[0]?.toUpperCase() || "S"}
+                        </div>
+
+                        {/* Info */}
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-lg font-black text-white group-hover:text-indigo-400 transition-colors tracking-tight mb-0.5">
+                            {slot.booked_by_name || "Student"}
+                          </h4>
+                          {slot.booked_by_email && (
+                            <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mb-3 opacity-60">
+                              {slot.booked_by_email}
+                            </p>
+                          )}
+                          <div className="flex flex-wrap items-center gap-4 text-[11px] text-slate-400 font-bold uppercase tracking-wider">
+                            <div className="flex items-center gap-1.5">
+                              <i className="fas fa-calendar text-indigo-400/60" />
+                              <span>{fmtSlotDate(slot.date)}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <i className="fas fa-clock text-indigo-400/60" />
+                              <span>{fmt12(slot.start_time)} – {fmt12(slot.end_time)}</span>
+                            </div>
+                          </div>
+                          {slot.note && (
+                            <p className="mt-2 text-[11px] text-slate-500 italic truncate max-w-sm">
+                              "{slot.note}"
+                            </p>
+                          )}
+                        </div>
+
+                        {/* Badge */}
+                        <div className="flex-shrink-0">
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-[9px] font-black uppercase tracking-widest">
+                            <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
+                            Tutoring
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ── Classes tab ── */}
+            {activeSessionTab === "classes" && (
             <div className="space-y-4">
               {dashboard?.todays_schedule?.length ? (
                 dashboard.todays_schedule.map((session) => {
@@ -391,6 +531,7 @@ const TeacherPortal = () => {
                 </div>
               )}
             </div>
+            )}
           </section>
 
           {/* My Courses Section */}

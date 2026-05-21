@@ -67,7 +67,7 @@ const StudentTutors = () => {
   const pastCount = slots.length - upcomingCount;
 
   return (
-    <div className="text-white px-6 py-8 pb-24 space-y-8 animate-fadeIn">
+    <div className="text-white px-6 py-4 pb-24 space-y-8 animate-fadeIn">
       {/* Page header — matches StudentClasses/StudentAssignments style */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>

@@ -32,7 +32,7 @@ const StudentEvaluationPage = () => {
   const courseStatus = selectedResult?.course?.status;
 
   return (
-    <div className="min-h-screen text-white p-6 lg:p-8">
+    <div className="min-h-screen text-white p-3 sm:p-6 lg:p-8">
       <div className="mx-auto space-y-6">
 
         <div className="flex flex-wrap items-start justify-between gap-4">
@@ -40,11 +40,11 @@ const StudentEvaluationPage = () => {
             <h1 className="text-2xl font-black font-poppins text-white">My Evaluations</h1>
             <p className="text-slate-400 text-sm mt-1">View your assignment scores and final grades</p>
           </div>
-          <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <div className="flex items-center gap-2 w-full sm:w-auto min-w-0">
             {loading ? (
               <div className="h-10 w-48 bg-slate-800 rounded-xl animate-pulse" />
             ) : (
-              <div className="flex items-center p-1 bg-slate-900/80 rounded-2xl border border-white/5 shadow-2xl overflow-x-auto custom-scrollbar max-w-full pb-2">
+              <div className="flex items-center p-1 bg-slate-900/80 rounded-2xl border border-white/5 shadow-2xl overflow-x-auto custom-scrollbar w-full pb-2">
                 {courses.length > 0 ? (
                   courses.map((c) => (
                     <button

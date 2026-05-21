@@ -166,7 +166,7 @@ const LiveScheduleList = () => {
           <div className="flex items-center gap-1 bg-slate-900/60 border border-white/5 rounded-xl p-1">
             <button
               onClick={() => setActiveTab("classes")}
-              className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
+              className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${
                 activeTab === "classes"
                   ? "bg-blue-600 text-white shadow-lg shadow-blue-900/30"
                   : "text-slate-500 hover:text-slate-300"
@@ -177,7 +177,7 @@ const LiveScheduleList = () => {
             </button>
             <button
               onClick={() => setActiveTab("tutors")}
-              className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 ${
                 activeTab === "tutors"
                   ? "bg-indigo-600 text-white shadow-lg shadow-indigo-900/30"
                   : "text-slate-500 hover:text-slate-300"

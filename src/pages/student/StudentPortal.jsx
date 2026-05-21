@@ -129,7 +129,7 @@ const StudentPortal = () => {
   return (
     <section
       id="student-view"
-      className="min-h-screen bg-[#0f172a] text-white font-inter"
+      className="min-h-screen bg-[#0f172a] text-white font-inter py-8"
     >
       <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
         {/* Dashboard Header */}

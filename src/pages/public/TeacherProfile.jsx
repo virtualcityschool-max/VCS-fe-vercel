@@ -765,7 +765,7 @@ const TeacherProfile = () => {
           </div>
 
           {/* Rating breakdown */}
-          <div className="space-y-6">
+          {/* <div className="space-y-6">
             <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-xl">
               <h3 className="text-xs font-bold uppercase tracking-[0.24em] text-slate-500 mb-6">
                 Rating Breakdown
@@ -803,7 +803,7 @@ const TeacherProfile = () => {
                 )}
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
 
         {/* Reviews */}

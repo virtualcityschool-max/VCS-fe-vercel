@@ -226,12 +226,13 @@ const SessionCalendarView = ({ sessions = [], loading = false }) => {
       )}
 
       {/* Calendar grid container */}
-      <div className="glass rounded-[2.5rem] border-slate-800 overflow-hidden shadow-2xl backdrop-blur-2xl">
+      <div className="glass rounded-2xl sm:rounded-[2.5rem] border-slate-800 overflow-hidden shadow-2xl backdrop-blur-2xl">
         {/* Day-of-week header */}
         <div className="grid grid-cols-7 border-b border-slate-800/50 bg-slate-950/40">
           {DAY_LABELS.map((d) => (
-            <div key={d} className="px-4 py-5 text-center text-[10px] font-black uppercase tracking-[0.25em] text-slate-500">
-              {d}
+            <div key={d} className="px-0 py-2 sm:px-4 sm:py-5 text-center text-[8px] sm:text-[10px] font-black uppercase tracking-tight sm:tracking-[0.25em] text-slate-500">
+              <span className="hidden sm:inline">{d}</span>
+              <span className="sm:hidden">{d.slice(0, 2)}</span>
             </div>
           ))}
         </div>
@@ -240,7 +241,7 @@ const SessionCalendarView = ({ sessions = [], loading = false }) => {
         <div className="grid grid-cols-7">
           {calendarGrid.map((day, idx) => {
             if (!day) {
-              return <div key={`blank-${idx}`} className="min-h-[100px] border-b border-r border-slate-800/30 bg-slate-950/20" />;
+              return <div key={`blank-${idx}`} className="min-h-[60px] sm:min-h-[100px] border-b border-r border-slate-800/30 bg-slate-950/20" />;
             }
             const cellKey = `${activeMonthData.year}-${activeMonthData.month}-${day}`;
             const daySessions = sessionsByDate[cellKey] || [];
@@ -249,7 +250,7 @@ const SessionCalendarView = ({ sessions = [], loading = false }) => {
             return (
               <div
                 key={cellKey}
-                className={`min-h-[100px] border-b border-r border-slate-800/30 p-1.5 flex flex-col gap-1.5 transition-colors duration-300 ${
+                className={`min-h-[60px] sm:min-h-[100px] border-b border-r border-slate-800/30 p-1 sm:p-1.5 flex flex-col gap-1 sm:gap-1.5 transition-colors duration-300 ${
                   isToday ? "bg-indigo-500/5" : "hover:bg-white/[0.01]"
                 }`}
               >
@@ -257,7 +258,7 @@ const SessionCalendarView = ({ sessions = [], loading = false }) => {
                   {isToday && (
                     <span className="text-[7px] font-black uppercase tracking-widest text-indigo-400">Today</span>
                   )}
-                  <span className={`text-[10px] font-black w-6 h-6 flex items-center justify-center rounded-lg ml-auto transition-all duration-300 ${
+                  <span className={`text-[9px] sm:text-[10px] font-black w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center rounded-lg ml-auto transition-all duration-300 ${
                     isToday 
                       ? "bg-indigo-500 text-white shadow-lg" 
                       : daySessions.length > 0 ? "text-white bg-slate-800/50" : "text-slate-600"
@@ -270,28 +271,26 @@ const SessionCalendarView = ({ sessions = [], loading = false }) => {
                   {daySessions.map((session) => (
                     <div 
                       key={session.id} 
-                      className="group/session relative overflow-hidden bg-slate-800/40 hover:bg-slate-800 border border-slate-700/50 hover:border-indigo-500/50 p-2 rounded-lg transition-all duration-300 cursor-pointer"
+                      className="group/session relative overflow-hidden bg-slate-800/40 hover:bg-slate-800 border border-slate-700/50 hover:border-indigo-500/50 p-1 sm:p-2 rounded-lg transition-all duration-300 cursor-pointer"
                     >
                       <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-indigo-500 opacity-50 group-hover:opacity-100 transition-opacity" />
                       
-                      <div className="flex items-center justify-between mb-0.5">
-                        <div className="flex items-center gap-1 text-indigo-400/80">
-                          <i className="far fa-clock text-[8px]"></i>
-                          <span className="text-[9px] font-bold">{formatTime(session.scheduled_at)}</span>
-                        </div>
+                      <div className="flex items-center gap-1 text-indigo-400/80 mb-0.5">
+                        <i className="far fa-clock text-[7px] sm:text-[8px]"></i>
+                        <span className="text-[8px] sm:text-[9px] font-bold">{formatTime(session.scheduled_at)}</span>
                       </div>
 
-                      <p className="text-[10px] font-bold text-slate-100 leading-tight line-clamp-1 group-hover:text-indigo-300 transition-colors">
+                      <p className="text-[9px] sm:text-[10px] font-bold text-slate-100 leading-tight line-clamp-1 group-hover:text-indigo-300 transition-colors">
                         {session.title}
                       </p>
 
-                      <div className="flex items-center justify-between gap-1 mt-1">
-                        <p className="text-[8px] text-slate-500 truncate font-medium max-w-[60%]">
+                      <div className="flex items-center justify-between gap-1 mt-0.5 sm:mt-1">
+                        <p className="hidden sm:block text-[8px] text-slate-500 truncate font-medium max-w-[60%]">
                           {session.course?.title || session.course_title || "General"}
                         </p>
                         <span className={`text-[7px] font-black uppercase tracking-widest px-1 rounded border border-white/5 ${
-                          session.status === 'live' 
-                            ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
+                          session.status === 'live'
+                            ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
                             : 'bg-indigo-500/10 text-indigo-400'
                         }`}>
                           {session.status || "set"}

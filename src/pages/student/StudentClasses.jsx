@@ -41,7 +41,7 @@ const StudentClasses = () => {
   const sessionList = Array.isArray(sessions) ? sessions : [];
 
   return (
-    <div className="p-6 lg:p-12 space-y-6">
+    <div className="p-3 sm:p-6 lg:p-12 space-y-6 py-4">
       {/* Header + filter */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
