@@ -13,8 +13,8 @@ import {
   TeacherProfileTab,
   StudentProfileTab,
   ParentProfileTab,
-  TeacherSlotsSection,
 } from "../../components/admin";
+import TeacherSlotsCalendarSection from "../../components/admin/TeacherSlotsCalendarSection";
 
 // Utility function to validate user ID
 const isValidUserId = (id) => {
@@ -276,7 +276,12 @@ const UserDetailsPage = () => {
                     onSaved={handleBackToUsers}
                     readOnly={viewOnly}
                   />
-                  <TeacherSlotsSection teacherId={userData.id} />
+                </div>
+              )}
+
+              {activeTab === "availability-slots" && userData?.role === "teacher" && (
+                <div className="pt-2 border-t border-slate-800">
+                  <TeacherSlotsCalendarSection teacherId={userData.id} />
                 </div>
               )}
 

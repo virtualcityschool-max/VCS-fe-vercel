@@ -70,6 +70,14 @@ const LiveScheduleList = () => {
     }
   };
 
+  // Returns true when now is within 30 min before start through 1 hr after start
+  const isSlotJoinable = (slot) => {
+    const slotStart = new Date(slot.date + "T" + slot.start_time);
+    const now = Date.now();
+    return now >= slotStart.getTime() - 30 * 60 * 1000 &&
+           now <= slotStart.getTime() + 60 * 60 * 1000;
+  };
+
   const handleJoinSession = async (session) => {
     const sessionId = session?.session_id ?? session?.id;
     setLoadingSessionId(sessionId);
@@ -259,18 +267,41 @@ const LiveScheduleList = () => {
                     </div>
                   </div>
 
-                  {/* Badge + action */}
+                  {/* Badge + actions */}
                   <div className="flex-shrink-0 flex flex-col items-center gap-3 relative z-10">
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-[9px] font-black uppercase tracking-widest">
-                      <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
-                      Tutoring
-                    </span>
-                    <button
+
+                    {/* Join Session button (meeting link available) */}
+                    {slot.meeting_link && (
+                      isSlotJoinable(slot) ? (
+                        <button
+                          onClick={() => openMeetingLink(slot.meeting_link)}
+                          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black text-[10px] uppercase tracking-widest shadow-lg shadow-blue-900/40 transition-all active:scale-95"
+                        >
+                          <i className="fas fa-video text-[9px]" />
+                          Join Session
+                        </button>
+                      ) : (
+                        <div className="relative group/tip">
+                          <button
+                            disabled
+                            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-800 border border-white/5 text-slate-500 font-black text-[10px] uppercase tracking-widest cursor-not-allowed opacity-60"
+                          >
+                            <i className="fas fa-video text-[9px]" />
+                            Join Session
+                          </button>
+                          <div className="absolute bottom-full right-0 mb-2 px-3 py-1.5 bg-slate-800 border border-white/10 text-white text-[10px] rounded-xl whitespace-nowrap opacity-0 group-hover/tip:opacity-100 transition-all pointer-events-none z-20 shadow-xl">
+                            Available 30 min before the session
+                          </div>
+                        </div>
+                      )
+                    )}
+
+                    {/* <button
                       onClick={() => navigate(`/teachers/${slot.teacher_id}`, { state: { openSlots: true } })}
                       className="px-5 py-2 rounded-xl bg-indigo-600/10 hover:bg-indigo-600 border border-indigo-500/20 text-indigo-400 hover:text-white font-black text-[10px] uppercase tracking-widest transition-all"
                     >
                       View Tutor
-                    </button>
+                    </button> */}
                   </div>
                 </div>
               ))}
@@ -446,7 +477,7 @@ const LiveScheduleList = () => {
                         </>
                       )}
                     </button>
-                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 px-4 py-2 bg-slate-800 border border-white/10 text-white text-[10px] rounded-xl whitespace-nowrap opacity-0 group-hover/tooltip:opacity-100 transition-all pointer-events-none z-20 shadow-2xl">
+                    <div className="absolute bottom-full right-0 mb-3 px-4 py-2 bg-slate-800 border border-white/10 text-white text-[10px] rounded-xl whitespace-nowrap opacity-0 group-hover/tooltip:opacity-100 transition-all pointer-events-none z-20 shadow-2xl">
                       <p className="text-slate-400 font-bold uppercase mb-0.5">Join Window</p>
                       <p className="font-black text-white">{getWindowLabel(session.scheduled_at, timezone) || "Check schedule"}</p>
                     </div>

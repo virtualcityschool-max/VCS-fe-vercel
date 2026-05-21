@@ -111,15 +111,15 @@ const BookingModal = ({ teacherName, slots, onClose, onBooked }) => {
                   No available slots at the moment. Check back later.
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 gap-6">
                   {Object.entries(grouped)
                     .sort(([a], [b]) => a.localeCompare(b))
                     .map(([date, daySlots]) => (
                       <div key={date}>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-3">
+                        <p className="text-sm font-black uppercase tracking-widest text-slate-300 mb-3 text-center">
                           {fmtDate(date)}
                         </p>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                        <div className="grid grid-cols-4 gap-2">
                           {daySlots.map((slot) => (
                             <button
                               key={slot.id}

@@ -128,7 +128,7 @@ const NAV_CONFIG = {
     { label: "My Classes",   to: "/teacher/sessions",         icon: "fas fa-calendar-alt" },
     { label: "Available Slots", to: "/teacher/availability",     icon: "fas fa-calendar-plus" },
     { label: "Evaluations",  to: "/teacher/evaluations",      icon: "fas fa-chart-bar" },
-    { label: "Hire Request", to: "/teacher/hire-leads",       icon: "fas fa-handshake" },
+    // { label: "Hire Request", to: "/teacher/hire-leads",       icon: "fas fa-handshake" },
   ],
   student: [
     { label: "Dashboard",   to: "/student",                 icon: "fas fa-table-columns",  end: true },

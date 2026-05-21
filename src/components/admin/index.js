@@ -15,3 +15,4 @@ export { default as StudentProfileTab } from "./StudentProfileTab";
 export { default as ParentProfileTab } from "./ParentProfileTab";
 export { default as DistinctionsEditor } from "./DistinctionsEditor";
 export { default as TeacherSlotsSection } from "./TeacherSlotsSection";
+export { default as TeacherSlotsCalendarSection } from "./TeacherSlotsCalendarSection";
