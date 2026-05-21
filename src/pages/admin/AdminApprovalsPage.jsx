@@ -197,8 +197,8 @@ const AdminApprovalsPage = () => {
   return (
     <div className="space-y-6">
       {/* Tab Navigation */}
-      <div className="flex flex-col gap-3">
-        <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-1 backdrop-blur-sm overflow-x-auto no-scrollbar">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-1 backdrop-blur-sm w-fit max-w-full overflow-x-auto no-scrollbar">
           <div className="flex items-center gap-1 min-w-max">
             <button
               onClick={() => setActiveTab("users")}

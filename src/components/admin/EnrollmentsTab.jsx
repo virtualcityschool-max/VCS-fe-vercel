@@ -288,7 +288,7 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
               onClear={() => setStudentFilter("")}
               placeholder="Filter by student..."
               icon="fas fa-user"
-              className="w-full"
+              className="w-full sm:w-44"
             />
             <SearchInput
               value={courseFilter}
@@ -296,7 +296,7 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
               onClear={() => setCourseFilter("")}
               placeholder="Filter by course..."
               icon="fas fa-book"
-              className="w-full"
+              className="w-full sm:w-44"
             />
             <FilterSelect className="w-full sm:w-auto" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
               <option value="all">All Statuses</option>

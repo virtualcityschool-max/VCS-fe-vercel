@@ -1,4 +1,6 @@
 import React, { useMemo } from "react";
+import { useSelector } from "react-redux";
+import { formatTime } from "../../utils/validation";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const getId = (v) => (v && typeof v === "object") ? v.id : v;
@@ -20,6 +22,7 @@ const AttendanceMatrix = ({
   participantRole   = "student",
   onEditRecord,
 }) => {
+  const timezone = useSelector((s) => s.auth.profile?.timezone) || undefined;
   const sortedSessions = useMemo(() =>
     [...sessions].sort((a, b) => {
       const da = a.scheduled_at ? new Date(a.scheduled_at) : 0;
@@ -306,11 +309,8 @@ const AttendanceMatrix = ({
                       const cfg      = record ? CELL[record.status] : null;
                       const editable = !!onEditRecord && !!record;
 
-                      const fmtTime  = (ts) => ts
-                        ? new Date(ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-                        : null;
-                      const joinedStr = fmtTime(record?.joined_at);
-                      const leftStr   = fmtTime(record?.left_at);
+                      const joinedStr = record?.joined_at ? formatTime(record.joined_at, timezone) : null;
+                      const leftStr   = record?.left_at   ? formatTime(record.left_at,   timezone) : null;
 
                       return (
                         <td
