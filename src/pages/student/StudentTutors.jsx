@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { availabilityService } from "../../services/availabilityService";
+import { toastManager } from "../../utils/toastManager";
 
 const fmt12 = (t) => {
   if (!t) return "";
@@ -18,6 +19,17 @@ const fmtDate = (d) =>
   });
 
 const isUpcoming = (date) => new Date(date + "T23:59:59") >= new Date();
+
+const isSlotJoinable = (slot) => {
+  const start = new Date(slot.date + "T" + slot.start_time);
+  const now = Date.now();
+  return now >= start.getTime() - 30 * 60 * 1000 && now <= start.getTime() + 60 * 60 * 1000;
+};
+
+const openMeetLink = (link) => {
+  if (!link || !link.startsWith("http")) { toastManager.error("No valid meeting link"); return; }
+  try { new URL(link); window.open(link, "_blank", "noopener,noreferrer"); } catch { toastManager.error("Invalid meeting link"); }
+};
 
 const StudentTutors = () => {
   const [slots, setSlots] = useState([]);
@@ -226,6 +238,15 @@ const StudentTutors = () => {
             )}
           </div>
         ) : (
+          <div className="space-y-6">
+          <div className="flex items-center gap-3">
+            <div className="h-px flex-1 bg-slate-800" />
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+              <span className="text-[10px] font-black uppercase tracking-widest text-amber-300">Booked Slot Sessions</span>
+            </div>
+            <div className="h-px flex-1 bg-slate-800" />
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {Object.entries(grouped).map(([teacherName, { teacherId, slots: teacherSlots }]) => {
               const upcoming = teacherSlots.filter((s) => isUpcoming(s.date));
@@ -234,6 +255,8 @@ const StudentTutors = () => {
 
               return (
                 <div key={teacherName} className="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden">
+                  {/* Top accent line */}
+                  <div className="h-[3px] w-full bg-gradient-to-r from-amber-400/70 via-amber-400/30 to-transparent" />
                   {/* Teacher header */}
                   <div className="flex items-center justify-between gap-4 px-6 py-5 border-b border-slate-800">
                     <div className="flex items-center gap-4">
@@ -271,10 +294,12 @@ const StudentTutors = () => {
                       .sort((a, b) => a.date.localeCompare(b.date) || a.start_time.localeCompare(b.start_time))
                       .map((slot) => {
                         const upcoming = isUpcoming(slot.date);
+                        const joinable = upcoming && isSlotJoinable(slot);
+                        const hasMeet = !!slot.meeting_link;
                         return (
-                          <div key={slot.id} className="flex items-center justify-between gap-4 px-6 py-4 flex-wrap">
+                          <div key={slot.id} className="flex items-center justify-between gap-3 px-6 py-4 flex-wrap">
+                            {/* Left: date badge + time */}
                             <div className="flex items-center gap-4">
-                              {/* Date badge */}
                               <div className={`w-10 h-10 rounded-xl flex flex-col items-center justify-center shrink-0 border ${
                                 upcoming
                                   ? "bg-indigo-500/10 border-indigo-500/20"
@@ -291,20 +316,47 @@ const StudentTutors = () => {
                                 <p className="text-sm font-semibold text-white">
                                   {fmt12(slot.start_time)} – {fmt12(slot.end_time)}
                                 </p>
-                                <p className="text-xs text-slate-500 mt-0.5">
-                                  {fmtDate(slot.date)}
-                                </p>
+                                <p className="text-xs text-slate-500 mt-0.5">{fmtDate(slot.date)}</p>
                               </div>
                             </div>
 
-                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${
-                              upcoming
-                                ? "bg-indigo-500/10 border-indigo-500/20 text-indigo-300"
-                                : "bg-slate-800/60 border-slate-700/40 text-slate-500"
-                            }`}>
-                              <span className={`w-1.5 h-1.5 rounded-full ${upcoming ? "bg-indigo-400 animate-pulse" : "bg-slate-600"}`} />
-                              {upcoming ? "Upcoming" : "Completed"}
-                            </span>
+                            {/* Right: status badge + join button */}
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${
+                                upcoming
+                                  ? "bg-indigo-500/10 border-indigo-500/20 text-indigo-300"
+                                  : "bg-slate-800/60 border-slate-700/40 text-slate-500"
+                              }`}>
+                                <span className={`w-1.5 h-1.5 rounded-full ${upcoming ? "bg-indigo-400 animate-pulse" : "bg-slate-600"}`} />
+                                {upcoming ? "Upcoming" : "Completed"}
+                              </span>
+
+                              {/* Join Session CTA — only for upcoming slots with a meet link */}
+                              {upcoming && hasMeet && (
+                                joinable ? (
+                                  <button
+                                    onClick={() => openMeetLink(slot.meeting_link)}
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black text-[10px] uppercase tracking-widest shadow shadow-blue-900/40 transition-all active:scale-95"
+                                  >
+                                    <i className="fas fa-video text-[9px]" />
+                                    Join
+                                  </button>
+                                ) : (
+                                  <div className="relative group/tip">
+                                    <button
+                                      disabled
+                                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 border border-white/5 text-slate-500 font-black text-[10px] uppercase tracking-widest cursor-not-allowed opacity-60"
+                                    >
+                                      <i className="fas fa-video text-[9px]" />
+                                      Join
+                                    </button>
+                                    <div className="absolute bottom-full right-0 mb-2 px-3 py-1.5 bg-slate-800 border border-white/10 text-white text-[10px] rounded-xl whitespace-nowrap opacity-0 group-hover/tip:opacity-100 transition-all pointer-events-none z-20 shadow-xl">
+                                      Available 30 min before the session
+                                    </div>
+                                  </div>
+                                )
+                              )}
+                            </div>
                           </div>
                         );
                       })}
@@ -312,6 +364,7 @@ const StudentTutors = () => {
                 </div>
               );
             })}
+          </div>
           </div>
         )}
       </div>

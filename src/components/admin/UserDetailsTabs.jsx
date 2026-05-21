@@ -12,6 +12,15 @@ const UserDetailsTabs = ({ activeTab, onTabChange, userRole }) => {
     });
   }
 
+  // Add availability slots tab for teachers
+  if (userRole === "teacher") {
+    tabs.push({
+      id: "availability-slots",
+      label: "Availability Slots",
+      icon: "fas fa-calendar-check",
+    });
+  }
+
   return (
     <div className="border-b border-slate-700/50 bg-slate-900/30 backdrop-blur-sm rounded-t-2xl">
       <nav className="flex space-x-1 p-1">

@@ -20,6 +20,7 @@ import {
   AssignmentOverviewList,
   MyAttendanceList,
 } from "../../components/studentDashboard";
+import { availabilityService } from "../../services/availabilityService";
 
 const StudentPortal = () => {
   const dispatch = useDispatch();
@@ -32,12 +33,15 @@ const StudentPortal = () => {
   const myEnrollments = useSelector(selectMyEnrollments);
 
   const [hasMounted, setHasMounted] = useState(false);
+  const [hasTutorSlots, setHasTutorSlots] = useState(false);
 
-  const isDashboardEmpty = 
-    (!enrolledCourses || enrolledCourses.length === 0) &&
-    (!nextSession) &&
-    (!assignments || assignments.length === 0) &&
-    (!myEnrollments || myEnrollments.length === 0);
+  const hasCourseData =
+    (enrolledCourses && enrolledCourses.length > 0) ||
+    nextSession ||
+    (assignments && assignments.length > 0) ||
+    (myEnrollments && myEnrollments.length > 0);
+
+  const isDashboardEmpty = !hasCourseData && !hasTutorSlots;
 
   // Ensure component has mounted on client
   useEffect(() => {
@@ -49,6 +53,15 @@ const StudentPortal = () => {
     if (hasMounted) {
       dispatch(fetchStudentDashboard());
       dispatch(fetchMyEnrollments());
+      // Check for booked tutoring slots so the empty state is not shown when a student
+      // only has tutoring sessions (no enrolled courses)
+      availabilityService.getMyBookings()
+        .then((data) => {
+          const upcoming = (Array.isArray(data) ? data : [])
+            .filter((s) => new Date(s.date + "T23:59:59") >= new Date());
+          setHasTutorSlots(upcoming.length > 0);
+        })
+        .catch(() => {});
     }
   }, [dispatch, hasMounted]);
 
@@ -156,6 +169,32 @@ const StudentPortal = () => {
                 <i className="fas fa-compass text-xl group-hover/btn:rotate-45 transition-transform duration-500"></i>
                 Explore Courses Now
               </button>
+            </div>
+          </div>
+        ) : !hasCourseData && hasTutorSlots ? (
+          /* Student has tutoring slots but no enrolled courses — show sessions + CTA */
+          <div className="space-y-8">
+            <LiveScheduleList />
+            <div className="relative group overflow-hidden rounded-[2.5rem] border border-white/5 bg-slate-900/40 backdrop-blur-xl p-10 text-center shadow-2xl transition-all duration-500 hover:border-blue-500/10">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/10 rounded-full blur-[100px] -mr-32 -mt-32" />
+              <div className="relative z-10 max-w-xl mx-auto">
+                <div className="w-16 h-16 bg-blue-600/10 rounded-[1.5rem] border border-blue-500/20 flex items-center justify-center mx-auto mb-6">
+                  <i className="fas fa-rocket text-2xl text-blue-400"></i>
+                </div>
+                <h3 className="text-2xl font-black text-white mb-3 font-poppins tracking-tight">
+                  Ready to <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">Level Up</span>?
+                </h3>
+                <p className="text-slate-400 text-sm font-medium mb-8 leading-relaxed">
+                  You have tutoring sessions lined up. Enrol in a course to unlock the full dashboard — attendance, assignments, and more.
+                </p>
+                <button
+                  onClick={() => navigate('/courses')}
+                  className="inline-flex items-center gap-3 px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all shadow-xl shadow-blue-900/40 active:scale-95"
+                >
+                  <i className="fas fa-compass"></i>
+                  Explore Courses
+                </button>
+              </div>
             </div>
           </div>
         ) : (

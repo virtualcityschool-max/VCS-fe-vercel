@@ -25,6 +25,18 @@ const fmt12 = (t) => {
   return `${h % 12 || 12}:${String(m).padStart(2, "0")} ${suffix}`;
 };
 
+const isSlotJoinable = (slot) => {
+  const slotStart = new Date(slot.date + "T" + slot.start_time);
+  const now = Date.now();
+  return now >= slotStart.getTime() - 30 * 60 * 1000 &&
+         now <= slotStart.getTime() + 60 * 60 * 1000;
+};
+
+const openMeetLink = (link) => {
+  if (!link || !link.startsWith("http")) return;
+  try { new URL(link); window.open(link, "_blank", "noopener,noreferrer"); } catch {}
+};
+
 const fmtSlotDate = (d) =>
   new Date(d + "T00:00:00").toLocaleDateString(undefined, {
     weekday: "short", month: "short", day: "numeric",
@@ -318,7 +330,7 @@ const TeacherPortal = () => {
                     }`}
                   >
                     <i className="fas fa-user-clock" />
-                    Booked Students
+                    Personalized Sessions
                     {bookedSlots.length > 0 && (
                       <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-full ${
                         activeSessionTab === "booked" ? "bg-white/20 text-white" : "bg-indigo-500/20 text-indigo-400"
@@ -388,12 +400,32 @@ const TeacherPortal = () => {
                           )}
                         </div>
 
-                        {/* Badge */}
-                        <div className="flex-shrink-0">
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-[9px] font-black uppercase tracking-widest">
-                            <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
-                            Tutoring
-                          </span>
+                        {/* Badge + Join */}
+                        <div className="flex-shrink-0 flex flex-col items-center gap-3">
+                          {slot.meeting_link && (
+                            isSlotJoinable(slot) ? (
+                              <button
+                                onClick={() => openMeetLink(slot.meeting_link)}
+                                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black text-[10px] uppercase tracking-widest shadow-lg shadow-blue-900/40 transition-all active:scale-95"
+                              >
+                                <i className="fas fa-video text-[9px]" />
+                                Join Session
+                              </button>
+                            ) : (
+                              <div className="relative group/tip">
+                                <button
+                                  disabled
+                                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-800 border border-white/5 text-slate-500 font-black text-[10px] uppercase tracking-widest cursor-not-allowed opacity-60"
+                                >
+                                  <i className="fas fa-video text-[9px]" />
+                                  Join Session
+                                </button>
+                                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-slate-800 border border-white/10 text-white text-[10px] rounded-xl whitespace-nowrap opacity-0 group-hover/tip:opacity-100 transition-all pointer-events-none z-20 shadow-xl">
+                                  Available 30 min before the session
+                                </div>
+                              </div>
+                            )
+                          )}
                         </div>
                       </div>
                     ))}

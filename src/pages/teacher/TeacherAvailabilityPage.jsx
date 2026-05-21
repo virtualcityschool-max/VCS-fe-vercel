@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { availabilityService } from "../../services/availabilityService";
 import { toastManager } from "../../utils/toastManager";
+import SlotCalendarView from "../../components/common/SlotCalendarView";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -156,7 +157,7 @@ const DateEntryCard = ({ entry, onChange, onRemove, canRemove, index }) => {
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/10 hover:border-indigo-500/30 text-indigo-400 transition text-[11px] font-bold"
           >
             <i className="fas fa-plus-circle text-[9px]" />
-            Add time window
+            Add time range
           </button>
           {canRemove && (
             <button
@@ -175,7 +176,7 @@ const DateEntryCard = ({ entry, onChange, onRemove, canRemove, index }) => {
           <div className="flex items-center justify-between flex-wrap gap-2">
             <p className="text-[9px] font-black uppercase tracking-widest text-slate-600 flex items-center gap-2">
               <i className="fas fa-clock" />
-              Time Windows
+              Time Range
             </p>
             <div className="flex gap-2 flex-wrap items-center">
               {TIME_PRESETS.map((p) => {
@@ -251,6 +252,22 @@ const localDateStr = (d) => {
   return `${y}-${m}-${day}`;
 };
 
+const getSundayOfWeek = (dateStr) => {
+  const d = new Date(dateStr + "T00:00:00");
+  d.setDate(d.getDate() - d.getDay());
+  return localDateStr(d);
+};
+
+const getWeekDates = (sundayStr) => {
+  const dates = [];
+  const d = new Date(sundayStr + "T00:00:00");
+  for (let i = 0; i < 7; i++) {
+    dates.push(localDateStr(new Date(d)));
+    d.setDate(d.getDate() + 1);
+  }
+  return dates;
+};
+
 const getDatesInRange = (from, to) => {
   const dates = [];
   const cur = new Date(from + "T00:00:00");
@@ -269,8 +286,42 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
   const [generating, setGenerating] = useState(false);
   const [result, setResult] = useState(null);
   const [inlineError, setInlineError] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [currentWeekSunday, setCurrentWeekSunday] = useState(null);
+  const [recurring, setRecurring] = useState(false);
 
   const previewCount = useMemo(() => calcTotalSlots(entries), [entries]);
+
+  const rangeDatesSet = useMemo(() => new Set(
+    rangeFrom && rangeTo && rangeFrom <= rangeTo ? getDatesInRange(rangeFrom, rangeTo) : []
+  ), [rangeFrom, rangeTo]);
+
+  const weekDates = useMemo(
+    () => (currentWeekSunday ? getWeekDates(currentWeekSunday) : []),
+    [currentWeekSunday]
+  );
+
+  const weekLabel = useMemo(() => {
+    if (!weekDates.length) return "";
+    const first = new Date(weekDates[0] + "T00:00:00");
+    const last  = new Date(weekDates[6] + "T00:00:00");
+    const opts = { month: "short", day: "numeric" };
+    return `${first.toLocaleDateString(undefined, opts)} – ${last.toLocaleDateString(undefined, opts)}`;
+  }, [weekDates]);
+
+  const canGoPrev = useMemo(() => {
+    if (!currentWeekSunday || !rangeDatesSet.size) return false;
+    const firstInRange = [...rangeDatesSet].sort()[0];
+    return getSundayOfWeek(firstInRange) < currentWeekSunday;
+  }, [currentWeekSunday, rangeDatesSet]);
+
+  const canGoNext = useMemo(() => {
+    if (!currentWeekSunday || !rangeDatesSet.size) return false;
+    const d = new Date(currentWeekSunday + "T00:00:00");
+    d.setDate(d.getDate() + 7);
+    const nextSunday = localDateStr(d);
+    return [...rangeDatesSet].some(date => date >= nextSunday);
+  }, [currentWeekSunday, rangeDatesSet]);
 
   const rangeDates = useMemo(
     () => (rangeFrom && rangeTo && rangeFrom <= rangeTo ? getDatesInRange(rangeFrom, rangeTo) : []),
@@ -279,10 +330,15 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
 
   useEffect(() => {
     if (rangeDates.length > 0) {
-      setEntries(rangeDates.map((date) => ({ ...newEntry(), date })));
+      const first = rangeDates[0];
+      setEntries([{ ...newEntry(), date: first }]); // first day pre-selected with default window
+      setSelectedDate(first);
       setInlineError(null);
+      setCurrentWeekSunday(getSundayOfWeek(first));
     } else {
       setEntries([]);
+      setSelectedDate(null);
+      setCurrentWeekSunday(null);
     }
   }, [rangeDates]);
 
@@ -294,7 +350,66 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
   const removeEntry = (id) =>
     setEntries((prev) => prev.filter((e) => e.id !== id));
 
+  // Recurring-aware update: when recurring ON, propagate time_windows to all same-weekday entries
+  const updateEntryRecurring = (id, updated) => {
+    if (!recurring) {
+      setEntries(prev => prev.map(e => e.id === id ? updated : e));
+      return;
+    }
+    const dow = new Date(updated.date + "T00:00:00").getDay();
+    setEntries(prev => prev.map(e => {
+      if (e.id === id) return updated;
+      if (new Date(e.date + "T00:00:00").getDay() === dow) {
+        return { ...e, time_windows: updated.time_windows.map(w => ({ ...w, id: crypto.randomUUID() })) };
+      }
+      return e;
+    }));
+  };
+
+  // Recurring-aware remove: when recurring ON, remove all same-weekday entries
+  const removeEntryRecurring = (id) => {
+    if (!recurring) {
+      setEntries(prev => prev.filter(e => e.id !== id));
+      setSelectedDate(null);
+      return;
+    }
+    const entry = entries.find(e => e.id === id);
+    if (!entry) return;
+    const dow = new Date(entry.date + "T00:00:00").getDay();
+    setEntries(prev => prev.filter(e => new Date(e.date + "T00:00:00").getDay() !== dow));
+    setSelectedDate(null);
+  };
+
+  // Toggle recurring: when turning ON, immediately expand existing entries to all same-weekday dates
+  const handleToggleRecurring = () => {
+    const next = !recurring;
+    setRecurring(next);
+    if (next && rangeDates.length > 0) {
+      setEntries(prev => {
+        if (!prev.length) return prev;
+        const existingDates = new Set(prev.map(e => e.date));
+        const toAdd = [];
+        prev.forEach(entry => {
+          const dow = new Date(entry.date + "T00:00:00").getDay();
+          rangeDates.forEach(d => {
+            if (!existingDates.has(d) && new Date(d + "T00:00:00").getDay() === dow) {
+              existingDates.add(d);
+              toAdd.push({
+                ...newEntry(),
+                date: d,
+                time_windows: entry.time_windows.map(w => ({ ...w, id: crypto.randomUUID() })),
+              });
+            }
+          });
+        });
+        if (!toAdd.length) return prev;
+        return [...prev, ...toAdd].sort((a, b) => a.date.localeCompare(b.date));
+      });
+    }
+  };
+
   const validate = () => {
+    if (entries.length === 0) return "Please click at least one day to configure before creating slots.";
     for (const entry of entries) {
       if (!entry.date) return "Please select a date for all entries.";
       const entryDate = new Date(entry.date + "T00:00:00");
@@ -302,7 +417,7 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
       if (entryDate < todayDate)
         return `Date ${entry.date} is in the past. Only today or future dates are allowed.`;
       for (const w of entry.time_windows) {
-        if (!w.start || !w.end) return "All time windows need a start and end time.";
+        if (!w.start || !w.end) return "All time ranges need a start and end time.";
         if (w.start >= w.end)
           return `Start time must be before end time (${entry.date}).`;
         // Warn if window < 1 hour
@@ -406,50 +521,46 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
         {/* Modal body */}
         <div className="px-6 py-5 space-y-4 max-h-[60vh] overflow-y-auto">
           {/* ── Date range picker ── */}
-          <div className="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-5">
-            <p className="text-[9px] font-black uppercase tracking-widest text-slate-600 mb-4 flex items-center gap-2">
-              <i className="fas fa-calendar-alt" />
-              Select Date Range
-            </p>
-            <div className="flex items-center gap-3 flex-wrap">
-              <div>
-                <label className="text-[9px] font-black uppercase tracking-widest text-slate-600 block mb-1.5">
-                  From
-                </label>
-                <input
-                  type="date"
-                  min={today()}
-                  value={rangeFrom}
-                  onChange={(e) => {
-                    setRangeFrom(e.target.value);
-                    if (rangeTo && e.target.value > rangeTo) setRangeTo("");
-                  }}
-                  className="bg-slate-700/60 border border-slate-600/60 focus:border-indigo-500/60 rounded-xl px-3 py-1.5 text-white text-sm font-semibold outline-none transition cursor-pointer"
-                  style={{ colorScheme: "dark" }}
-                />
-              </div>
-              <i className="fas fa-arrow-right text-slate-600 text-xs mt-5 shrink-0" />
-              <div>
-                <label className="text-[9px] font-black uppercase tracking-widest text-slate-600 block mb-1.5">
-                  To
-                </label>
-                <input
-                  type="date"
-                  min={rangeFrom || today()}
-                  value={rangeTo}
-                  onChange={(e) => setRangeTo(e.target.value)}
-                  className="bg-slate-700/60 border border-slate-600/60 focus:border-indigo-500/60 rounded-xl px-3 py-1.5 text-white text-sm font-semibold outline-none transition cursor-pointer"
-                  style={{ colorScheme: "dark" }}
-                />
+          <div className="bg-slate-800/50 border border-slate-700/50 rounded-2xl px-5 py-4">
+            {/* Card header */}
+            <div className="relative flex items-center justify-center mb-4">
+              <div className="flex items-center gap-2">
+                <i className="fas fa-calendar-alt text-indigo-400 text-xs" />
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Add Date Range</span>
               </div>
               {rangeDates.length > 0 && (
-                <div className="ml-auto flex items-center gap-2 bg-indigo-500/10 border border-indigo-500/20 rounded-xl px-3 py-2">
+                <div className="absolute right-0 flex items-center gap-1.5 bg-indigo-500/10 border border-indigo-500/20 rounded-lg px-2.5 py-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
-                  <span className="text-indigo-300 text-xs font-black tabular-nums">
+                  <span className="text-indigo-300 text-[10px] font-black tabular-nums">
                     {rangeDates.length} date{rangeDates.length !== 1 ? "s" : ""}
                   </span>
                 </div>
               )}
+            </div>
+            {/* Pickers row — centered */}
+            <div className="flex items-center justify-center gap-3 flex-wrap">
+              <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 shrink-0">From</label>
+              <input
+                type="date"
+                min={today()}
+                value={rangeFrom}
+                onChange={(e) => {
+                  setRangeFrom(e.target.value);
+                  if (rangeTo && e.target.value > rangeTo) setRangeTo("");
+                }}
+                className="bg-slate-700/60 border border-slate-600/60 focus:border-indigo-500/60 rounded-xl px-3 py-1.5 text-white text-sm font-semibold outline-none transition cursor-pointer"
+                style={{ colorScheme: "dark" }}
+              />
+              <i className="fas fa-arrow-right text-slate-600 text-xs shrink-0" />
+              <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 shrink-0">To</label>
+              <input
+                type="date"
+                min={rangeFrom || today()}
+                value={rangeTo}
+                onChange={(e) => setRangeTo(e.target.value)}
+                className="bg-slate-700/60 border border-slate-600/60 focus:border-indigo-500/60 rounded-xl px-3 py-1.5 text-white text-sm font-semibold outline-none transition cursor-pointer"
+                style={{ colorScheme: "dark" }}
+              />
             </div>
           </div>
 
@@ -549,26 +660,281 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
             </div>
           )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {entries.map((entry, idx) => (
-              <DateEntryCard
-                key={entry.id}
-                entry={entry}
-                index={idx}
-                onChange={(updated) => { updateEntry(entry.id, updated); setInlineError(null); }}
-                onRemove={() => removeEntry(entry.id)}
-                canRemove={entries.length > 1}
-              />
-            ))}
+          {/* ── Week navigator + day config ── */}
+          {rangeDates.length > 0 && currentWeekSunday && (
+            <div className="space-y-3">
+              {/* Week strip */}
+              <div className="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-4 space-y-3">
+                {/* Header: label + recurring toggle */}
+                <div className="flex items-center justify-between">
+                  <p className="text-[9px] font-black uppercase tracking-widest text-slate-600 flex items-center gap-2">
+                    <i className="fas fa-calendar-week" />
+                    Select Days
+                  </p>
+                  <label className="flex items-center gap-2 cursor-pointer select-none">
+                    <span className={`text-[10px] font-bold transition-colors ${recurring ? "text-indigo-400" : "text-slate-500"}`}>
+                      <i className="fas fa-sync text-[8px] mr-1" />
+                      Recurring
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleToggleRecurring}
+                      className={`relative inline-flex items-center h-[22px] w-10 rounded-full border-2 border-transparent transition-colors duration-200 shrink-0 cursor-pointer focus:outline-none ${recurring ? "bg-indigo-600" : "bg-slate-700"}`}
+                    >
+                      <span className={`inline-block h-[14px] w-[14px] rounded-full bg-white shadow-sm transition-transform duration-200 ${recurring ? "translate-x-[18px]" : "translate-x-0"}`} />
+                    </button>
+                  </label>
+                </div>
 
-            <button
-              onClick={addEntry}
-              className="flex items-center justify-center gap-2 py-3 rounded-2xl border border-dashed border-slate-700 text-slate-500 hover:border-indigo-500/40 hover:text-indigo-400 transition text-xs font-bold min-h-[80px]"
-            >
-              <i className="fas fa-plus" />
-              Add Another Date
-            </button>
-          </div>
+                <div className="flex items-center gap-2">
+                  {/* Prev week */}
+                  <button
+                    onClick={() => {
+                      const d = new Date(currentWeekSunday + "T00:00:00");
+                      d.setDate(d.getDate() - 7);
+                      setCurrentWeekSunday(localDateStr(d));
+                    }}
+                    disabled={!canGoPrev}
+                    className="w-9 h-9 rounded-xl bg-slate-700/60 hover:bg-slate-600 disabled:opacity-20 disabled:cursor-not-allowed text-slate-400 hover:text-white flex items-center justify-center transition shrink-0"
+                  >
+                    <i className="fas fa-chevron-left text-xs" />
+                  </button>
+
+                  {/* Day tiles */}
+                  <div className="flex-1 grid grid-cols-7 gap-1">
+                    {weekDates.map((date) => {
+                      const d = new Date(date + "T00:00:00");
+                      const dayShort = d.toLocaleDateString("en-US", { weekday: "short" });
+                      const dayNum = d.getDate();
+                      const inRange = rangeDatesSet.has(date);
+                      const isSelected = date === selectedDate;
+                      const entry = entries.find(e => e.date === date);
+                      const hasEntry = !!entry;
+                      const slotCount = entry ? calcEntrySlots(entry) : 0;
+
+                      // Days outside the selected range: visible but disabled
+                      if (!inRange) {
+                        return (
+                          <div key={date} className="flex flex-col items-center py-2.5 px-1 rounded-xl opacity-25 cursor-default select-none">
+                            <span className="text-[9px] font-black uppercase tracking-wide leading-none text-slate-500">
+                              {dayShort}
+                            </span>
+                            <span className="text-base font-black mt-1 leading-none text-slate-600">
+                              {dayNum}
+                            </span>
+                            <span className="text-[8px] mt-1 leading-none text-transparent">·</span>
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <button
+                          key={date}
+                          onClick={() => {
+                            if (!hasEntry) {
+                              if (recurring) {
+                                const dow = new Date(date + "T00:00:00").getDay();
+                                const sameDayDates = [...rangeDatesSet]
+                                  .filter(d => new Date(d + "T00:00:00").getDay() === dow)
+                                  .sort();
+                                setEntries(prev => {
+                                  const existingDates = new Set(prev.map(e => e.date));
+                                  const toAdd = sameDayDates
+                                    .filter(d => !existingDates.has(d))
+                                    .map(d => ({ ...newEntry(), date: d }));
+                                  return [...prev, ...toAdd].sort((a, b) => a.date.localeCompare(b.date));
+                                });
+                              } else {
+                                setEntries(prev =>
+                                  [...prev, { ...newEntry(), date }].sort((a, b) => a.date.localeCompare(b.date))
+                                );
+                              }
+                              setInlineError(null);
+                            }
+                            setSelectedDate(date);
+                          }}
+                          className={`flex flex-col items-center py-2.5 px-1 rounded-xl transition-all ${
+                            isSelected
+                              ? "bg-indigo-600 shadow-lg shadow-indigo-600/25"
+                              : hasEntry
+                              ? "bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/15 cursor-pointer"
+                              : "bg-slate-700/30 hover:bg-slate-700/60 cursor-pointer"
+                          }`}
+                        >
+                          <span className={`text-[9px] font-black uppercase tracking-wide leading-none ${
+                            isSelected ? "text-indigo-200" : hasEntry ? "text-emerald-500/70" : "text-slate-500"
+                          }`}>
+                            {dayShort}
+                          </span>
+                          <span className={`text-base font-black mt-1 leading-none ${
+                            isSelected ? "text-white" : hasEntry ? "text-emerald-300" : "text-slate-400"
+                          }`}>
+                            {dayNum}
+                          </span>
+                          <span className={`text-[8px] font-bold tabular-nums mt-1 leading-none ${
+                            isSelected ? "text-indigo-200" : hasEntry ? "text-emerald-400" : "text-slate-600"
+                          }`}>
+                            {hasEntry ? `~${slotCount}` : "+"}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Next week */}
+                  <button
+                    onClick={() => {
+                      const d = new Date(currentWeekSunday + "T00:00:00");
+                      d.setDate(d.getDate() + 7);
+                      setCurrentWeekSunday(localDateStr(d));
+                    }}
+                    disabled={!canGoNext}
+                    className="w-9 h-9 rounded-xl bg-slate-700/60 hover:bg-slate-600 disabled:opacity-20 disabled:cursor-not-allowed text-slate-400 hover:text-white flex items-center justify-center transition shrink-0"
+                  >
+                    <i className="fas fa-chevron-right text-xs" />
+                  </button>
+                </div>
+
+                {/* Week range label */}
+                <p className="text-center text-[10px] font-bold text-slate-600 uppercase tracking-widest">
+                  {weekLabel}
+                </p>
+              </div>
+
+              {/* Hint when no days selected yet */}
+              {entries.length === 0 && !selectedDate && (
+                <div className="flex items-center gap-3 px-4 py-3 bg-slate-800/30 border border-slate-700/30 rounded-xl">
+                  <i className="fas fa-hand-pointer text-indigo-400/60 text-sm shrink-0" />
+                  <p className="text-[11px] text-slate-500 font-medium">
+                    Click any highlighted day to add it and configure its time range.
+                  </p>
+                </div>
+              )}
+
+              {/* Selected day config panel */}
+              {selectedDate && (() => {
+                const entry = entries.find(e => e.date === selectedDate);
+                if (!entry) return null;
+                const slotCount = calcEntrySlots(entry);
+
+                const dow = new Date(entry.date + "T00:00:00").getDay();
+                const dowName = new Date(entry.date + "T00:00:00").toLocaleDateString("en-US", { weekday: "long" });
+
+                const addWindow = () =>
+                  updateEntryRecurring(entry.id, {
+                    ...entry,
+                    time_windows: [...entry.time_windows, { id: crypto.randomUUID(), start: "09:00", end: "12:00" }],
+                  });
+
+                const updateWindow = (winId, updated) =>
+                  updateEntryRecurring(entry.id, {
+                    ...entry,
+                    time_windows: entry.time_windows.map(w => w.id === winId ? updated : w),
+                  });
+
+                const removeWindow = (winId) =>
+                  updateEntryRecurring(entry.id, {
+                    ...entry,
+                    time_windows: entry.time_windows.filter(w => w.id !== winId),
+                  });
+
+                return (
+                  <div className="relative bg-slate-800/50 border border-slate-600 rounded-2xl overflow-hidden">
+                    <div className="h-[2px] w-full bg-gradient-to-r from-indigo-500 via-violet-500 to-indigo-500/0" />
+                    <div className="p-5 space-y-4">
+                      {/* Day header */}
+                      <div className="flex items-center justify-between flex-wrap gap-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-xl bg-indigo-500/15 border border-indigo-500/20 flex items-center justify-center shrink-0">
+                            <i className="fas fa-calendar-day text-indigo-400" />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <p className="text-sm font-black text-white">{fmtDate(selectedDate)}</p>
+                              {recurring && (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-indigo-500/15 border border-indigo-500/25 text-indigo-400 text-[8px] font-black uppercase tracking-widest">
+                                  <i className="fas fa-sync text-[7px]" />
+                                  All {dowName}s
+                                </span>
+                              )}
+                            </div>
+                            <p className={`text-[10px] font-bold mt-0.5 ${slotCount > 0 ? "text-emerald-400" : "text-slate-600"}`}>
+                              {slotCount > 0 ? `~${slotCount} slot${slotCount !== 1 ? "s" : ""}` : "No slots yet"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={addWindow}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/10 hover:border-indigo-500/30 text-indigo-400 transition text-[11px] font-bold"
+                          >
+                            <i className="fas fa-plus-circle text-[9px]" />
+                            Add time window
+                          </button>
+                          <button
+                            onClick={() => { removeEntryRecurring(entry.id); setInlineError(null); }}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/10 hover:border-rose-500/30 text-rose-400 transition text-[11px] font-bold"
+                          >
+                            <i className="fas fa-trash-alt text-[9px]" />
+                            {recurring ? `Remove all ${dowName}s` : "Remove"}
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="h-px bg-slate-700/50" />
+
+                      {/* Presets + time windows */}
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between flex-wrap gap-2">
+                          <p className="text-[9px] font-black uppercase tracking-widest text-slate-600 flex items-center gap-2">
+                            <i className="fas fa-clock" />
+                            Time Windows
+                          </p>
+                          <div className="flex gap-1.5 flex-wrap">
+                            {TIME_PRESETS.map((p) => {
+                              const isActive =
+                                entry.time_windows.length === 1 &&
+                                entry.time_windows[0].start === p.start &&
+                                entry.time_windows[0].end === p.end;
+                              return (
+                                <button
+                                  key={p.label}
+                                  onClick={() => {
+                                    updateEntryRecurring(entry.id, {
+                                      ...entry,
+                                      time_windows: [{ id: entry.time_windows[0]?.id || crypto.randomUUID(), start: p.start, end: p.end }],
+                                    });
+                                    setInlineError(null);
+                                  }}
+                                  className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest transition border ${
+                                    isActive
+                                      ? "bg-indigo-500/20 border-indigo-500/40 text-indigo-300"
+                                      : "border-slate-700/50 text-slate-600 hover:text-slate-300 hover:border-slate-600"
+                                  }`}
+                                >
+                                  {p.label}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        {entry.time_windows.map((w) => (
+                          <TimeWindowRow
+                            key={w.id}
+                            window={w}
+                            onChange={(updated) => { updateWindow(w.id, updated); setInlineError(null); }}
+                            onRemove={() => removeWindow(w.id)}
+                            canRemove={entry.time_windows.length > 1}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+          )}
 
         </div>
 
@@ -890,11 +1256,6 @@ const TeacherAvailabilityPage = () => {
   const filtered = slots.filter(
     (s) => statusFilter === "all" || s.status === statusFilter
   );
-  const grouped = filtered.reduce((acc, slot) => {
-    if (!acc[slot.date]) acc[slot.date] = [];
-    acc[slot.date].push(slot);
-    return acc;
-  }, {});
 
   const availableCount = slots.filter((s) => s.status === "available").length;
   const bookedCount = slots.filter((s) => s.status === "booked").length;
@@ -963,7 +1324,7 @@ const TeacherAvailabilityPage = () => {
           </div>
         )}
 
-        {/* Slot list */}
+        {/* Slot calendar */}
         {(loadingSlots || slotsError || slots.length > 0) && (
           <div className="space-y-6">
             {/* Filter bar */}
@@ -1006,57 +1367,13 @@ const TeacherAvailabilityPage = () => {
                   Try again
                 </button>
               </div>
-            ) : Object.keys(grouped).length === 0 ? (
-              <div className="border border-dashed border-slate-800 rounded-3xl py-20 text-center space-y-2">
-                <i className="fas fa-calendar-times text-slate-800 text-4xl block" />
-                <p className="text-slate-600 text-sm font-semibold">
-                  No {statusFilter !== "all" ? statusFilter : ""} slots.
-                </p>
-              </div>
             ) : (
-              <div className="space-y-8">
-                {Object.entries(grouped)
-                  .sort(([a], [b]) => a.localeCompare(b))
-                  .map(([date, daySlots]) => {
-                    const dayBooked = daySlots.filter((s) => s.status === "booked").length;
-                    const dayOpen = daySlots.filter((s) => s.status === "available").length;
-                    return (
-                      <div key={date}>
-                        <div className="flex items-center gap-4 mb-4">
-                          <div className="h-px flex-1 bg-slate-800" />
-                          <div className="flex items-center gap-2.5 shrink-0">
-                            <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">
-                              {fmtDate(date)}
-                            </span>
-                            {dayOpen > 0 && (
-                              <span className="text-[9px] font-black bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 rounded-full px-2 py-0.5">
-                                {dayOpen} open
-                              </span>
-                            )}
-                            {dayBooked > 0 && (
-                              <span className="text-[9px] font-black bg-amber-500/10 border border-amber-500/20 text-amber-500 rounded-full px-2 py-0.5">
-                                {dayBooked} booked
-                              </span>
-                            )}
-                          </div>
-                          <div className="h-px flex-1 bg-slate-800" />
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                          {daySlots.map((slot) => (
-                            <SlotCard
-                              key={slot.id}
-                              slot={slot}
-                              onDelete={handleDelete}
-                              onEdit={setEditingSlot}
-                              deletingId={deletingId}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    );
-                  })}
-              </div>
+              <SlotCalendarView
+                slots={filtered}
+                onDelete={handleDelete}
+                onEdit={setEditingSlot}
+                deletingId={deletingId}
+              />
             )}
           </div>
         )}
