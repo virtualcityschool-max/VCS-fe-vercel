@@ -7,6 +7,7 @@ import { showApiError } from "../../utils/apiErrorHandler";
 import { useFieldErrors } from "../../hooks";
 import { validatePhone, normalizePhone, formatPhoneDisplay } from "../../utils/validation";
 import PhoneInput from "../../components/ui/PhoneInput";
+import FilterSelect from "../../components/ui/FilterSelect";
 
 // ── Tiny helpers ──────────────────────────────────────────────────────────────
 
@@ -345,24 +346,24 @@ const ProfilePage = () => {
           <Field label="Timezone" icon="globe">
             <div>
               {editing ? (
-                <select
+                <FilterSelect
                   value={form.timezone || ""}
                   onChange={(e) => setForm((p) => ({ ...p, timezone: e.target.value }))}
-                  className={`${inputCls} appearance-none`}
+                  placeholder="Select timezone..."
                 >
                   {TIMEZONES.map((tz) => (
                     <option key={tz.value} value={tz.value}>
-                      {tz.value ? `${tz.label}: ${tz.value}` : `Browser (${Intl.DateTimeFormat().resolvedOptions().timeZone})`}
+                      {tz.value ? `${tz.label}: ${tz.value}` : `${Intl.DateTimeFormat().resolvedOptions().timeZone} (Browser)`}
                     </option>
                   ))}
-                </select>
+                </FilterSelect>
               ) : (
                 <div className={readCls}>
                   {(() => {
                     const match = TIMEZONES.find((t) => t.value === (profile?.timezone ?? ""));
                     return match?.value
                       ? `${match.label}: ${match.value}`
-                      : `Browser (${Intl.DateTimeFormat().resolvedOptions().timeZone})`;
+                      : `${Intl.DateTimeFormat().resolvedOptions().timeZone} (Browser)`;
                   })()}
                 </div>
               )}
