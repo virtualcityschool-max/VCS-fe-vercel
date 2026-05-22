@@ -4,7 +4,10 @@ const ADMIN_CONTACT = {
   phone:    "+92 336 1062993",
   whatsapp: "https://wa.me/923361062993",
   email:    "admin@virtualcityschool.com",
-  address:  "469, Block G3 Phase 2 Johar Town, Lahore, 54000, Pakistan",
+  bankName: "HBL (Habib Bank Limited)",
+  accountTitle: "Virtual City School",
+  accountNumber: "1234-5678-9012-3456",
+  iban: "PK36HABB0000123456789012",
 };
 
 const EnrollmentTypeModal = ({
@@ -94,14 +97,23 @@ const EnrollmentTypeModal = ({
                 </a>
               </div>
 
-              {/* Address */}
+              {/* Bank Details */}
               <div className="flex items-start gap-4 p-4 bg-slate-800/50 rounded-2xl border border-white/5">
                 <div className="w-10 h-10 bg-amber-500/20 rounded-xl flex items-center justify-center flex-shrink-0 border border-amber-500/20 mt-0.5">
-                  <i className="fas fa-map-marker-alt text-amber-400 text-sm" />
+                  <i className="fas fa-university text-amber-400 text-sm" />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-0.5">Address</p>
-                  <p className="text-white font-semibold text-sm leading-snug">{ADMIN_CONTACT.address}</p>
+                <div className="flex-1 min-w-0 space-y-1">
+                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">Bank Transfer</p>
+                  <p className="text-white font-semibold text-sm">{ADMIN_CONTACT.bankName}</p>
+                  <p className="text-slate-400 text-xs">
+                    <span className="text-slate-500">Account Title: </span>{ADMIN_CONTACT.accountTitle}
+                  </p>
+                  <p className="text-slate-400 text-xs">
+                    <span className="text-slate-500">Account No: </span>{ADMIN_CONTACT.accountNumber}
+                  </p>
+                  <p className="text-slate-400 text-xs">
+                    <span className="text-slate-500">IBAN: </span>{ADMIN_CONTACT.iban}
+                  </p>
                 </div>
               </div>
             </div>
