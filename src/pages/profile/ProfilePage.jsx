@@ -41,11 +41,18 @@ const readCls  = "w-full px-4 py-3 bg-slate-800/30 border border-slate-700/40 ro
 // ── Timezone options ─────────────────────────────────────────────────────────
 
 const TIMEZONES = [
-  { label: "Browser (Local)", value: "" },
+  { label: "Auto-Detected",   value: "" },
   { label: "Dubai",           value: "Asia/Dubai" },
   { label: "Pakistan",        value: "Asia/Karachi" },
   { label: "London",          value: "Europe/London" },
   { label: "New York",        value: "America/New_York" },
+  { label: "France",          value: "Europe/Paris" },
+  { label: "Russia",          value: "Europe/Moscow" },
+  { label: "Australia",       value: "Australia/Sydney" },
+  { label: "Antarctica",      value: "Antarctica/McMurdo" },
+  { label: "Canada",          value: "America/Toronto" },
+  { label: "Denmark",         value: "Europe/Copenhagen" },
+  { label: "New Zealand",     value: "Pacific/Auckland" },
 ];
 
 // ── Role field configs ────────────────────────────────────────────────────────
@@ -345,7 +352,7 @@ const ProfilePage = () => {
                 >
                   {TIMEZONES.map((tz) => (
                     <option key={tz.value} value={tz.value}>
-                      {tz.value ? `${tz.label}: ${tz.value}` : tz.label}
+                      {tz.value ? `${tz.label}: ${tz.value}` : `Browser (${Intl.DateTimeFormat().resolvedOptions().timeZone})`}
                     </option>
                   ))}
                 </select>
@@ -355,7 +362,7 @@ const ProfilePage = () => {
                     const match = TIMEZONES.find((t) => t.value === (profile?.timezone ?? ""));
                     return match?.value
                       ? `${match.label}: ${match.value}`
-                      : match?.label ?? "Browser (Local)";
+                      : `Browser (${Intl.DateTimeFormat().resolvedOptions().timeZone})`;
                   })()}
                 </div>
               )}

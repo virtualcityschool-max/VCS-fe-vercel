@@ -154,7 +154,7 @@ const LiveScheduleList = () => {
   const today = new Date();
   const end = new Date(today);
   end.setDate(end.getDate() + 6);
-  const fmtDay = (d) => d.toLocaleDateString([], { month: "short", day: "numeric" });
+  const fmtDay = (d) => d.toLocaleDateString([], { month: "short", day: "numeric", ...(timezone ? { timeZone: timezone } : {}) });
   const scheduleRangeLabel = `${fmtDay(today)} – ${fmtDay(end)}`;
 
   const hasLive = liveSchedule && liveSchedule.length > 0;
