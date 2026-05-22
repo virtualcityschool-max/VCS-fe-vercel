@@ -163,13 +163,16 @@ const LiveScheduleList = () => {
     <section>
       {/* Section header + tabs */}
       <div className="mb-6 border-b border-white/5 pb-4 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-4">
-          <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 flex items-center gap-3">
-            {hasLive && activeTab === "classes"
-              ? <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-ping" />
-              : <span className="w-1.5 h-1.5 bg-slate-700 rounded-full" />}
-            Upcoming Sessions
-          </h2>
+        <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 flex items-center gap-3">
+          {hasLive && activeTab === "classes"
+            ? <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-ping" />
+            : <span className="w-1.5 h-1.5 bg-slate-700 rounded-full" />}
+          Upcoming Sessions
+        </h2>
+        <div className="flex items-center gap-3">
+          {activeTab === "classes" && (
+            <span className="text-[10px] text-slate-600 font-semibold">{scheduleRangeLabel}</span>
+          )}
           {/* Tabs */}
           <div className="flex items-center gap-1 bg-slate-900/60 border border-white/5 rounded-xl p-1">
             <button
@@ -192,7 +195,7 @@ const LiveScheduleList = () => {
               }`}
             >
               <i className="fas fa-user-graduate mr-1.5" />
-              Tutors
+              Reserved Sessions
               {tutorSlots.length > 0 && (
                 <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-full ${
                   activeTab === "tutors" ? "bg-white/20 text-white" : "bg-indigo-500/20 text-indigo-400"
@@ -203,9 +206,6 @@ const LiveScheduleList = () => {
             </button>
           </div>
         </div>
-        {activeTab === "classes" && (
-          <span className="text-[10px] text-slate-600 font-semibold">{scheduleRangeLabel}</span>
-        )}
       </div>
 
       {/* ── Tutors tab ── */}
@@ -272,28 +272,21 @@ const LiveScheduleList = () => {
 
                     {/* Join Session button (meeting link available) */}
                     {slot.meeting_link && (
-                      isSlotJoinable(slot) ? (
+                      <div className="relative group/tip">
                         <button
-                          onClick={() => openMeetingLink(slot.meeting_link)}
+                          onClick={() => {
+                            if (!isSlotJoinable(slot)) { setTooEarlyOpen(true); return; }
+                            openMeetingLink(slot.meeting_link);
+                          }}
                           className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black text-[10px] uppercase tracking-widest shadow-lg shadow-blue-900/40 transition-all active:scale-95"
                         >
                           <i className="fas fa-video text-[9px]" />
                           Join Session
                         </button>
-                      ) : (
-                        <div className="relative group/tip">
-                          <button
-                            disabled
-                            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-800 border border-white/5 text-slate-500 font-black text-[10px] uppercase tracking-widest cursor-not-allowed opacity-60"
-                          >
-                            <i className="fas fa-video text-[9px]" />
-                            Join Session
-                          </button>
-                          <div className="absolute bottom-full right-0 mb-2 px-3 py-1.5 bg-slate-800 border border-white/10 text-white text-[10px] rounded-xl whitespace-nowrap opacity-0 group-hover/tip:opacity-100 transition-all pointer-events-none z-20 shadow-xl">
-                            Available 30 min before the session
-                          </div>
+                        <div className="absolute bottom-full right-0 mb-2 px-3 py-1.5 bg-slate-800 border border-white/10 text-white text-[10px] rounded-xl whitespace-nowrap opacity-0 group-hover/tip:opacity-100 transition-all pointer-events-none z-20 shadow-xl">
+                          Available 30 min before the session
                         </div>
-                      )
+                      </div>
                     )}
 
                     {/* <button

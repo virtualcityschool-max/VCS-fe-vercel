@@ -664,7 +664,7 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
           {rangeDates.length > 0 && currentWeekSunday && (
             <div className="space-y-3">
               {/* Week strip */}
-              <div className="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-4 space-y-3">
+              <div className="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-3 space-y-2">
                 {/* Header: label + recurring toggle */}
                 <div className="flex items-center justify-between">
                   <p className="text-[9px] font-black uppercase tracking-widest text-slate-600 flex items-center gap-2">
@@ -701,11 +701,12 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
                   </button>
 
                   {/* Day tiles */}
-                  <div className="flex-1 grid grid-cols-7 gap-1">
+                  <div className="flex-1 grid grid-cols-7 gap-0.5">
                     {weekDates.map((date) => {
                       const d = new Date(date + "T00:00:00");
                       const dayShort = d.toLocaleDateString("en-US", { weekday: "short" });
                       const dayNum = d.getDate();
+                      const isWeekend = d.getDay() === 0 || d.getDay() === 6;
                       const inRange = rangeDatesSet.has(date);
                       const isSelected = date === selectedDate;
                       const entry = entries.find(e => e.date === date);
@@ -715,11 +716,11 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
                       // Days outside the selected range: visible but disabled
                       if (!inRange) {
                         return (
-                          <div key={date} className="flex flex-col items-center py-2.5 px-1 rounded-xl opacity-25 cursor-default select-none">
+                          <div key={date} className={`flex flex-col items-center py-1.5 px-0.5 rounded-lg cursor-default select-none ${isWeekend ? "opacity-15" : "opacity-25"}`}>
                             <span className="text-[9px] font-black uppercase tracking-wide leading-none text-slate-500">
                               {dayShort}
                             </span>
-                            <span className="text-base font-black mt-1 leading-none text-slate-600">
+                            <span className="text-sm font-black mt-1 leading-none text-slate-600">
                               {dayNum}
                             </span>
                             <span className="text-[8px] mt-1 leading-none text-transparent">·</span>
@@ -753,11 +754,13 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
                             }
                             setSelectedDate(date);
                           }}
-                          className={`flex flex-col items-center py-2.5 px-1 rounded-xl transition-all ${
+                          className={`flex flex-col items-center py-1.5 px-0.5 rounded-lg transition-all ${
                             isSelected
                               ? "bg-indigo-600 shadow-lg shadow-indigo-600/25"
                               : hasEntry
                               ? "bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/15 cursor-pointer"
+                              : isWeekend
+                              ? "bg-slate-700/15 hover:bg-slate-700/40 cursor-pointer opacity-60"
                               : "bg-slate-700/30 hover:bg-slate-700/60 cursor-pointer"
                           }`}
                         >
@@ -766,12 +769,12 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
                           }`}>
                             {dayShort}
                           </span>
-                          <span className={`text-base font-black mt-1 leading-none ${
+                          <span className={`text-sm font-black mt-0.5 leading-none ${
                             isSelected ? "text-white" : hasEntry ? "text-emerald-300" : "text-slate-400"
                           }`}>
                             {dayNum}
                           </span>
-                          <span className={`text-[8px] font-bold tabular-nums mt-1 leading-none ${
+                          <span className={`text-[8px] font-bold tabular-nums mt-0.5 leading-none ${
                             isSelected ? "text-indigo-200" : hasEntry ? "text-emerald-400" : "text-slate-600"
                           }`}>
                             {hasEntry ? `~${slotCount}` : "+"}
@@ -1265,9 +1268,8 @@ const TeacherAvailabilityPage = () => {
       {/* Page header — matches TeacherClasses style */}
       <div className="relative px-2 flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-4xl font-black font-poppins tracking-tight mb-2">Availability</h1>
+          <h1 className="text-4xl font-black font-poppins tracking-tight mb-2">Slots Management</h1>
           <div className="flex items-center gap-3">
-            <span className="w-12 h-1 bg-indigo-500 rounded-full" />
             <p className="text-slate-500 text-sm font-medium tracking-wide">
               Manage your tutoring slots
             </p>

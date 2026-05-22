@@ -121,7 +121,7 @@ const TeacherEvaluationPage = () => {
   const isCompleted    = courseStatus === "completed";
 
   return (
-    <div className="min-h-screen text-white p-6 lg:p-8">
+    <div className="min-h-screen text-white px-6">
       <div className="mx-auto space-y-6">
 
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">

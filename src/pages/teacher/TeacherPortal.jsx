@@ -57,6 +57,7 @@ const TeacherPortal = () => {
   const [activeSessionTab, setActiveSessionTab] = useState("classes");
   const [bookedSlots, setBookedSlots] = useState([]);
   const [bookedSlotsLoading, setBookedSlotsLoading] = useState(false);
+  const [tooEarlyOpen, setTooEarlyOpen] = useState(false);
 
   const {
     dashboard,
@@ -330,7 +331,7 @@ const TeacherPortal = () => {
                     }`}
                   >
                     <i className="fas fa-user-clock" />
-                    Personalized Sessions
+                    Reserved Sessions
                     {bookedSlots.length > 0 && (
                       <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-full ${
                         activeSessionTab === "booked" ? "bg-white/20 text-white" : "bg-indigo-500/20 text-indigo-400"
@@ -403,28 +404,21 @@ const TeacherPortal = () => {
                         {/* Badge + Join */}
                         <div className="flex-shrink-0 flex flex-col items-center gap-3">
                           {slot.meeting_link && (
-                            isSlotJoinable(slot) ? (
+                            <div className="relative group/tip">
                               <button
-                                onClick={() => openMeetLink(slot.meeting_link)}
+                                onClick={() => {
+                                  if (!isSlotJoinable(slot)) { setTooEarlyOpen(true); return; }
+                                  openMeetLink(slot.meeting_link);
+                                }}
                                 className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black text-[10px] uppercase tracking-widest shadow-lg shadow-blue-900/40 transition-all active:scale-95"
                               >
                                 <i className="fas fa-video text-[9px]" />
                                 Join Session
                               </button>
-                            ) : (
-                              <div className="relative group/tip">
-                                <button
-                                  disabled
-                                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-800 border border-white/5 text-slate-500 font-black text-[10px] uppercase tracking-widest cursor-not-allowed opacity-60"
-                                >
-                                  <i className="fas fa-video text-[9px]" />
-                                  Join Session
-                                </button>
-                                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-slate-800 border border-white/10 text-white text-[10px] rounded-xl whitespace-nowrap opacity-0 group-hover/tip:opacity-100 transition-all pointer-events-none z-20 shadow-xl">
-                                  Available 30 min before the session
-                                </div>
+                              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-slate-800 border border-white/10 text-white text-[10px] rounded-xl whitespace-nowrap opacity-0 group-hover/tip:opacity-100 transition-all pointer-events-none z-20 shadow-xl">
+                                Available 30 min before the session
                               </div>
-                            )
+                            </div>
                           )}
                         </div>
                       </div>
@@ -791,6 +785,17 @@ const TeacherPortal = () => {
         cancelLabel="Abort"
         onConfirm={confirmEndSession}
         onCancel={() => setEndSessionConfirm({ open: false, sessionId: null })}
+      />
+
+      <ConfirmDialog
+        open={tooEarlyOpen}
+        variant="primary"
+        title="Too Early to Join"
+        message="You can join 30 minutes earlier only."
+        confirmLabel="Got it"
+        cancelLabel={null}
+        onConfirm={() => setTooEarlyOpen(false)}
+        onCancel={() => setTooEarlyOpen(false)}
       />
     </div>
   );
