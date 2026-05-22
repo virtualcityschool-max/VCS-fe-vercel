@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { availabilityService } from "../../services/availabilityService";
 import { toastManager } from "../../utils/toastManager";
+import ConfirmDialog from "../../components/common/ConfirmDialog";
 
 const fmt12 = (t) => {
   if (!t) return "";
@@ -38,6 +39,7 @@ const StudentTutors = () => {
   const [filter, setFilter] = useState("all"); // all | upcoming | past
   const [searchQuery, setSearchQuery] = useState("");
   const [dateFilter, setDateFilter] = useState("");
+  const [tooEarlyOpen, setTooEarlyOpen] = useState(false);
 
   const loadSlots = useCallback(async () => {
     setLoading(true);
@@ -333,28 +335,21 @@ const StudentTutors = () => {
 
                               {/* Join Session CTA — only for upcoming slots with a meet link */}
                               {upcoming && hasMeet && (
-                                joinable ? (
+                                <div className="relative group/tip">
                                   <button
-                                    onClick={() => openMeetLink(slot.meeting_link)}
+                                    onClick={() => {
+                                      if (!joinable) { setTooEarlyOpen(true); return; }
+                                      openMeetLink(slot.meeting_link);
+                                    }}
                                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black text-[10px] uppercase tracking-widest shadow shadow-blue-900/40 transition-all active:scale-95"
                                   >
                                     <i className="fas fa-video text-[9px]" />
                                     Join
                                   </button>
-                                ) : (
-                                  <div className="relative group/tip">
-                                    <button
-                                      disabled
-                                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 border border-white/5 text-slate-500 font-black text-[10px] uppercase tracking-widest cursor-not-allowed opacity-60"
-                                    >
-                                      <i className="fas fa-video text-[9px]" />
-                                      Join
-                                    </button>
-                                    <div className="absolute bottom-full right-0 mb-2 px-3 py-1.5 bg-slate-800 border border-white/10 text-white text-[10px] rounded-xl whitespace-nowrap opacity-0 group-hover/tip:opacity-100 transition-all pointer-events-none z-20 shadow-xl">
-                                      Available 30 min before the session
-                                    </div>
+                                  <div className="absolute bottom-full right-0 mb-2 px-3 py-1.5 bg-slate-800 border border-white/10 text-white text-[10px] rounded-xl whitespace-nowrap opacity-0 group-hover/tip:opacity-100 transition-all pointer-events-none z-20 shadow-xl">
+                                    Available 30 min before the session
                                   </div>
-                                )
+                                </div>
                               )}
                             </div>
                           </div>
@@ -368,6 +363,17 @@ const StudentTutors = () => {
           </div>
         )}
       </div>
+
+      <ConfirmDialog
+        open={tooEarlyOpen}
+        variant="primary"
+        title="Too Early to Join"
+        message="You can join 30 minutes earlier only."
+        confirmLabel="Got it"
+        cancelLabel={null}
+        onConfirm={() => setTooEarlyOpen(false)}
+        onCancel={() => setTooEarlyOpen(false)}
+      />
     </div>
   );
 };

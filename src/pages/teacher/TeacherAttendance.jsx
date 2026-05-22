@@ -159,7 +159,7 @@ const TeacherAttendance = () => {
   // ── Render ────────────────────────────────────────────────────────────────────
 
   return (
-    <div className="text-white px-4 sm:px-6 py-8 space-y-6">
+    <div className="text-white px-4 sm:px-6 space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-2">
         <div>
           <h1 className="text-2xl font-black font-poppins">Attendance</h1>
