@@ -32,13 +32,13 @@ const Navbar = ({ variant = "default" }) => {
                 onClick={() => navigate("/courses")}
                 className="text-sm font-bold text-slate-400 hover:text-white transition"
               >
-                Browse Courses
+                Explore Courses
               </button>
               <button
                 onClick={() => navigate("/teachers")}
                 className="text-sm font-bold text-slate-400 hover:text-white transition"
               >
-                Find Tutors
+                Meet Our Tutors
               </button>
             </div>
           </div>

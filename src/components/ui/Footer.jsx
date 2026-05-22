@@ -53,7 +53,7 @@ const Footer = ({ variant = "full" }) => {
                     onClick={() => handleNavigation("/courses")}
                     className="text-slate-400 hover:text-white transition cursor-pointer text-sm"
                   >
-                    Browse Courses
+                    Explore Courses
                   </button>
                 </li>
                 <li>
