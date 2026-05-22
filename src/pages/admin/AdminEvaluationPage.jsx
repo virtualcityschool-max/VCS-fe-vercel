@@ -231,9 +231,9 @@ const AdminEvaluationPage = () => {
           ) : selectedCourseId ? (
             <div className="bg-slate-900/50 border border-slate-800 border-dashed rounded-3xl p-12 text-center">
               <div className="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-3">
-                <i className="fas fa-inbox text-slate-500 text-xl" />
+                <i className="fas fa-user-graduate text-slate-500 text-xl" />
               </div>
-              <p className="text-slate-400 text-sm">No Data Found</p>
+              <p className="text-slate-400 text-sm">No students are enrolled in this course yet</p>
             </div>
           ) : (
             <div className="bg-slate-900/50 border border-slate-800 border-dashed rounded-3xl p-12 text-center">
@@ -276,7 +276,10 @@ const AdminEvaluationPage = () => {
             <EvaluationMatrix key={`private-${refreshKey}`} students={[privateEval]} courseStatus={courseStatus} />
           ) : (
             <div className="bg-slate-900/50 border border-slate-800 border-dashed rounded-3xl p-12 text-center">
-              <p className="text-slate-400 text-sm">No evaluation data found for this student</p>
+              <div className="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-3">
+                <i className="fas fa-clipboard-list text-slate-500 text-xl" />
+              </div>
+              <p className="text-slate-400 text-sm">No evaluations have been submitted for this student yet</p>
             </div>
           )
         )}
