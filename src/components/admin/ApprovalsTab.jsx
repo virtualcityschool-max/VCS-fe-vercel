@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import ConfirmDialog from "../common/ConfirmDialog";
 import { getStorageUrl } from "../../utils/storageUrl";
+import { useDateFormatters } from "../../hooks/useDateFormatters";
 
 const ApprovalsTab = ({
   pendingApprovals,
@@ -12,6 +13,7 @@ const ApprovalsTab = ({
   onRefresh,
 }) => {
   const [confirmDialog, setConfirmDialog] = useState({ open: false, type: null, userId: null, username: "" });
+  const { timezone } = useDateFormatters();
 
   const handleApprove = (userId, username) => {
     setConfirmDialog({ open: true, type: "approve", userId, username });
@@ -163,16 +165,7 @@ const ApprovalsTab = ({
                       <div className="flex flex-col gap-2">
                         <span className="text-slate-400 text-xs">
                           {user.date_joined
-                            ? new Date(user.date_joined).toLocaleString(
-                                "en-US",
-                                {
-                                  year: "numeric",
-                                  month: "short",
-                                  day: "numeric",
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                },
-                              )
+                            ? new Date(user.date_joined).toLocaleString("en-US", { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", ...(timezone ? { timeZone: timezone } : {}) })
                             : "Unknown"}
                         </span>
 
@@ -283,16 +276,7 @@ const ApprovalsTab = ({
                       <td className="px-8 py-6">
                         <span className="text-slate-400 text-sm">
                           {user.date_joined
-                            ? new Date(user.date_joined).toLocaleString(
-                                "en-US",
-                                {
-                                  year: "numeric",
-                                  month: "short",
-                                  day: "numeric",
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                },
-                              )
+                            ? new Date(user.date_joined).toLocaleString("en-US", { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", ...(timezone ? { timeZone: timezone } : {}) })
                             : "Unknown"}
                         </span>
                       </td>

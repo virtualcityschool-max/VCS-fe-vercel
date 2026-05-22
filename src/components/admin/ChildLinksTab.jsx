@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import ConfirmDialog from "../common/ConfirmDialog";
+import { useDateFormatters } from "../../hooks/useDateFormatters";
 
 const ChildLinksTab = ({
   pendingChildLinks,
@@ -11,6 +12,7 @@ const ChildLinksTab = ({
   onRefresh,
 }) => {
   const [confirmDialog, setConfirmDialog] = useState({ open: false, type: null, linkId: null, label: "" });
+  const { timezone } = useDateFormatters();
 
   const handleApprove = (linkId, label) => {
     setConfirmDialog({ open: true, type: "approve", linkId, label });
@@ -35,6 +37,7 @@ const ChildLinksTab = ({
         day: "numeric",
         hour: "2-digit",
         minute: "2-digit",
+        ...(timezone ? { timeZone: timezone } : {}),
       });
     } catch (error) {
       return error;
