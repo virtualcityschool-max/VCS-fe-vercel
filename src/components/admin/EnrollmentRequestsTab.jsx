@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import ConfirmDialog from "../common/ConfirmDialog";
+import { useDateFormatters } from "../../hooks/useDateFormatters";
 
 const EnrollmentRequestsTab = ({
   enrollments,
@@ -12,6 +13,7 @@ const EnrollmentRequestsTab = ({
 }) => {
   const [confirmDialog, setConfirmDialog] = useState({ open: false, type: null, enrollmentId: null, label: "" });
   const [paymentConfirmed, setPaymentConfirmed] = useState(false);
+  const { timezone } = useDateFormatters();
 
   const handleApprove = (id, label) => {
     setPaymentConfirmed(false);
@@ -124,7 +126,7 @@ const EnrollmentRequestsTab = ({
                   </p>
                 )}
                 <p className="text-[10px] text-slate-600 mt-1">
-                  {new Date(enrollment.enrolled_at).toLocaleString()}
+                  {new Date(enrollment.enrolled_at).toLocaleString("en-US", { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", ...(timezone ? { timeZone: timezone } : {}) })}
                 </p>
               </div>
 
