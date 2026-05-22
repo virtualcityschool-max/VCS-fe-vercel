@@ -61,7 +61,7 @@ const Footer = ({ variant = "full" }) => {
                     onClick={() => handleNavigation("/teachers")}
                     className="text-slate-400 hover:text-white cursor-pointer transition text-sm"
                   >
-                    Find Teachers
+                    Meet Our Tutors
                   </button>
                 </li>
                 {isLoggedIn && (
