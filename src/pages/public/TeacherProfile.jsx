@@ -571,7 +571,7 @@ const TeacherProfile = () => {
                 )}
               </button>
 
-              {teacherDetails.linkedin && isValidLinkedInUrl(teacherDetails.linkedin) ? (
+              {/* {teacherDetails.linkedin && isValidLinkedInUrl(teacherDetails.linkedin) ? (
                 <a
                   href={teacherDetails.linkedin}
                   target="_blank"
@@ -580,7 +580,7 @@ const TeacherProfile = () => {
                 >
                   View LinkedIn
                 </a>
-              ) : null}
+              ) : null} */}
 
               {/* Slot availability summary for students */}
               {isLoggedIn && role === "student" && slotsLoaded && (

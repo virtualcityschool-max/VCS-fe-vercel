@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { useDateFormatters } from "../../hooks/useDateFormatters";
 
 const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MONTH_NAMES = [
@@ -36,6 +37,7 @@ const openMeetLink = (link) => {
 
 // Popup shown when clicking a booked slot on the calendar
 const SlotPopup = ({ slot, onClose }) => {
+  const { formatDate, formatTime } = useDateFormatters();
   const joinable = isSlotJoinable(slot);
   const hasMeet = !!slot.meeting_link;
 
@@ -58,7 +60,7 @@ const SlotPopup = ({ slot, onClose }) => {
               <div>
                 <p className="text-xs font-black text-white">Booked Session</p>
                 <p className="text-[10px] text-slate-500 mt-0.5">
-                  {new Date(slot.date + "T00:00:00").toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}
+                  {formatDate(slot.date + "T" + slot.start_time)}
                 </p>
               </div>
             </div>
@@ -71,7 +73,7 @@ const SlotPopup = ({ slot, onClose }) => {
           <div className="bg-slate-800/60 rounded-2xl px-4 py-3 space-y-2 mb-5">
             <div className="flex items-center gap-2 text-sm">
               <i className="fas fa-clock text-indigo-400/70 w-4 text-center" />
-              <span className="font-bold text-white">{fmt12(slot.start_time)} – {fmt12(slot.end_time)}</span>
+              <span className="font-bold text-white">{formatTime(slot.date + "T" + slot.start_time)} – {formatTime(slot.date + "T" + slot.end_time)}</span>
             </div>
             {slot.booked_by_name && (
               <div className="flex items-center gap-2 text-sm">
@@ -126,6 +128,7 @@ const SlotPopup = ({ slot, onClose }) => {
 };
 
 const SlotCalendarView = ({ slots = [], loading = false, onDelete, onEdit, deletingId, allowDeleteBooked = false }) => {
+  const { formatTime } = useDateFormatters();
   const [calendarMonth, setCalendarMonth] = useState(null);
   const [popupSlot, setPopupSlot] = useState(null);
 
@@ -358,7 +361,7 @@ const SlotCalendarView = ({ slots = [], loading = false, onDelete, onEdit, delet
                           <div className={`flex items-center gap-0.5 ${isBooked ? "text-amber-400/70" : "text-indigo-400/70"}`}>
                             <i className="far fa-clock text-[6px] sm:text-[7px]" />
                             <span className="text-[7px] sm:text-[8px] font-semibold tabular-nums">
-                              {fmt12(slot.start_time)}
+                              {formatTime(slot.date + "T" + slot.start_time)}
                             </span>
                           </div>
                           <span className={`shrink-0 text-[6px] sm:text-[7px] font-black uppercase tracking-widest px-1 py-0.5 rounded border ${

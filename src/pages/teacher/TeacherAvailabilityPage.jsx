@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { createPortal } from "react-dom";
 import { availabilityService } from "../../services/availabilityService";
 import { toastManager } from "../../utils/toastManager";
 import SlotCalendarView from "../../components/common/SlotCalendarView";
+import { useDateFormatters } from "../../hooks/useDateFormatters";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -280,6 +282,7 @@ const getDatesInRange = (from, to) => {
 };
 
 const CreateAvailabilityModal = ({ onClose, onCreated }) => {
+  const { formatDate, formatTime } = useDateFormatters();
   const [entries, setEntries] = useState([]);
   const [rangeFrom, setRangeFrom] = useState("");
   const [rangeTo, setRangeTo] = useState("");
@@ -642,9 +645,9 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-xs font-bold text-amber-200">
-                            {fmtDate(c.date)}
+                            {formatDate(c.date + "T" + c.start_time)}
                             <span className="text-amber-500 font-normal mx-1.5">·</span>
-                            <span className="tabular-nums">{fmt12(c.start_time)} – {fmt12(c.end_time)}</span>
+                            <span className="tabular-nums">{formatTime(c.date + "T" + c.start_time)} – {formatTime(c.date + "T" + c.end_time)}</span>
                           </p>
                           <p className="text-[10px] text-amber-500/70 italic mt-0.5 truncate">
                             Session: &ldquo;{c.session_title}&rdquo;
@@ -672,7 +675,7 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
                     Select Days
                   </p>
                   <label className="flex items-center gap-2 cursor-pointer select-none">
-                    <span className={`text-[10px] font-bold transition-colors ${recurring ? "text-indigo-400" : "text-slate-500"}`}>
+                    <span className={`text-[12px] font-bold transition-colors ${recurring ? "text-indigo-400" : "text-slate-500"}`}>
                       <i className="fas fa-sync text-[8px] mr-1" />
                       Recurring
                     </span>
@@ -777,7 +780,7 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
                           <span className={`text-[8px] font-bold tabular-nums mt-0.5 leading-none ${
                             isSelected ? "text-indigo-200" : hasEntry ? "text-emerald-400" : "text-slate-600"
                           }`}>
-                            {hasEntry ? `~${slotCount}` : "+"}
+                            {hasEntry ? `~${slotCount} slots` : "+"}
                           </span>
                         </button>
                       );
@@ -853,7 +856,7 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
                           </div>
                           <div>
                             <div className="flex items-center gap-2">
-                              <p className="text-sm font-black text-white">{fmtDate(selectedDate)}</p>
+                              <p className="text-sm font-black text-white">{formatDate(selectedDate + "T00:00:00")}</p>
                               {recurring && (
                                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-indigo-500/15 border border-indigo-500/25 text-indigo-400 text-[8px] font-black uppercase tracking-widest">
                                   <i className="fas fa-sync text-[7px]" />
@@ -872,7 +875,7 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
                             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/10 hover:border-indigo-500/30 text-indigo-400 transition text-[11px] font-bold"
                           >
                             <i className="fas fa-plus-circle text-[9px]" />
-                            Add time window
+                            Add time range
                           </button>
                           <button
                             onClick={() => { removeEntryRecurring(entry.id); setInlineError(null); }}
@@ -891,7 +894,7 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
                         <div className="flex items-center justify-between flex-wrap gap-2">
                           <p className="text-[9px] font-black uppercase tracking-widest text-slate-600 flex items-center gap-2">
                             <i className="fas fa-clock" />
-                            Time Windows
+                            Time range
                           </p>
                           <div className="flex gap-1.5 flex-wrap">
                             {TIME_PRESETS.map((p) => {
@@ -995,6 +998,7 @@ const StatusBadge = ({ status }) =>
 // ── Edit slot modal ───────────────────────────────────────────────────────────
 
 const EditSlotModal = ({ slot, onClose, onSaved }) => {
+  const { formatDate } = useDateFormatters();
   const [date, setDate] = useState(slot.date);
   const [startTime, setStartTime] = useState(slot.start_time.slice(0, 5));
   const [endTime, setEndTime] = useState(slot.end_time.slice(0, 5));
@@ -1033,7 +1037,7 @@ const EditSlotModal = ({ slot, onClose, onSaved }) => {
             </div>
             <div>
               <h2 className="text-base font-semibold text-white">Edit Slot</h2>
-              <p className="text-slate-500 text-xs mt-0.5">{fmtDate(slot.date)}</p>
+              <p className="text-slate-500 text-xs mt-0.5">{formatDate(slot.date + "T00:00:00")}</p>
             </div>
           </div>
           <button
@@ -1125,6 +1129,7 @@ const EditSlotModal = ({ slot, onClose, onSaved }) => {
 // ── Slot card ─────────────────────────────────────────────────────────────────
 
 const SlotCard = ({ slot, onDelete, onEdit, deletingId }) => {
+  const { formatTime } = useDateFormatters();
   const isBooked = slot.status === "booked";
   const isDeleting = deletingId === slot.id;
 
@@ -1149,9 +1154,9 @@ const SlotCard = ({ slot, onDelete, onEdit, deletingId }) => {
         <div className="flex items-start justify-between gap-2 mb-3">
           <div>
             <p className="text-sm font-bold text-white tabular-nums">
-              {fmt12(slot.start_time)}
+              {formatTime(slot.date + "T" + slot.start_time)}
               <span className="text-slate-500 font-normal mx-1">–</span>
-              {fmt12(slot.end_time)}
+              {formatTime(slot.date + "T" + slot.end_time)}
             </p>
             <p className="text-[10px] text-slate-600 mt-0.5 font-medium">1 hr session</p>
           </div>
@@ -1381,21 +1386,23 @@ const TeacherAvailabilityPage = () => {
         )}
       </div>
 
-      {/* Create modal */}
-      {showCreateModal && (
+      {/* Create modal — portalled to body to escape layout stacking context */}
+      {showCreateModal && createPortal(
         <CreateAvailabilityModal
           onClose={() => setShowCreateModal(false)}
           onCreated={loadSlots}
-        />
+        />,
+        document.body
       )}
 
-      {/* Edit slot modal */}
-      {editingSlot && (
+      {/* Edit slot modal — portalled to body */}
+      {editingSlot && createPortal(
         <EditSlotModal
           slot={editingSlot}
           onClose={() => setEditingSlot(null)}
           onSaved={handleSlotUpdated}
-        />
+        />,
+        document.body
       )}
     </div>
   );

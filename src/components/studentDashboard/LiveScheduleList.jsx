@@ -258,11 +258,11 @@ const LiveScheduleList = () => {
                     <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-[11px] text-slate-400 font-bold uppercase tracking-wider">
                       <div className="flex items-center gap-1.5">
                         <i className="fas fa-calendar text-indigo-400/60" />
-                        <span>{fmtDate(slot.date)}</span>
+                        <span>{formatDate(slot.date + "T" + slot.start_time)}</span>
                       </div>
                       <div className="flex items-center gap-1.5">
                         <i className="fas fa-clock text-indigo-400/60" />
-                        <span>{fmt12(slot.start_time)} – {fmt12(slot.end_time)}</span>
+                        <span>{formatTime(slot.date + "T" + slot.start_time)} – {formatTime(slot.date + "T" + slot.end_time)}</span>
                       </div>
                     </div>
                   </div>
