@@ -328,75 +328,127 @@ const TeacherSubmissions = () => {
 
       {/* Grade modal */}
       {gradingId && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[200] p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[200] p-4">
+          <div className="bg-slate-900 border border-slate-800/80 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl shadow-black/50">
             {loadingSelectedSubmission || !selectedSubmission ? (
-              <div className="p-16 flex flex-col items-center justify-center text-white gap-3">
-                <i className="fas fa-spinner animate-spin text-2xl text-indigo-400"></i>
+              <div className="p-16 flex flex-col items-center justify-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
+                  <i className="fas fa-spinner animate-spin text-indigo-400 text-lg"></i>
+                </div>
                 <p className="text-slate-400 text-sm">Loading submission…</p>
               </div>
             ) : (
-              <div className="p-8">
-                {/* Modal header */}
-                <div className="flex items-start justify-between mb-6">
-                  <div>
-                    <h2 className="text-lg font-bold text-white">
-                      {selectedSubmission.student_name}'s Submission
-                    </h2>
-                    <p className="text-xs text-slate-400 mt-1">
-                      {selectedSubmission.assignment_title || "Assignment"} •{" "}
-                      Submitted {formatDateTime(selectedSubmission.submitted_at)}
-                    </p>
+              <>
+                {/* Header */}
+                <div className="relative px-6 pt-6 pb-5">
+                  <div className="absolute inset-0 rounded-t-2xl bg-gradient-to-br from-indigo-900/20 via-transparent to-transparent pointer-events-none" />
+                  <div className="relative flex items-start gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-indigo-600/20 border border-indigo-500/20 flex items-center justify-center text-lg font-black text-indigo-300 shrink-0">
+                      {(selectedSubmission.student_name || "?")[0].toUpperCase()}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h2 className="text-base font-bold text-white truncate">
+                        {selectedSubmission.student_name || "Student"}'s Submission
+                      </h2>
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5">
+                        {selectedSubmission.assignment_title && (
+                          <span className="text-xs text-slate-400 flex items-center gap-1.5">
+                            <i className="fas fa-file-alt text-indigo-400/70 text-[10px]" />
+                            {selectedSubmission.assignment_title}
+                          </span>
+                        )}
+                        {(selectedSubmission.assignment_max_score || selectedSubmission.max_score) && (
+                          <span className="text-xs text-slate-500 flex items-center gap-1.5">
+                            <i className="fas fa-star text-yellow-500/60 text-[10px]" />
+                            {selectedSubmission.assignment_max_score || selectedSubmission.max_score} pts
+                          </span>
+                        )}
+                        <span className="text-xs text-slate-500 flex items-center gap-1.5">
+                          <i className="fas fa-clock text-[10px]" />
+                          {formatDateTime(selectedSubmission.submitted_at)}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      {selectedSubmission.is_graded ? (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-bold rounded-full">
+                          <i className="fas fa-check-circle text-[9px]" />
+                          Graded
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 text-[11px] font-bold rounded-full">
+                          <i className="fas fa-hourglass-half text-[9px]" />
+                          Pending
+                        </span>
+                      )}
+                      <button
+                        onClick={closeGradeModal}
+                        className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-white hover:bg-slate-700/60 transition-all"
+                      >
+                        <i className="fas fa-times text-sm"></i>
+                      </button>
+                    </div>
                   </div>
-                  <button
-                    onClick={closeGradeModal}
-                    className="text-slate-500 hover:text-white transition"
-                  >
-                    <i className="fas fa-times text-lg"></i>
-                  </button>
                 </div>
 
-                {/* Student Submission card */}
-                <div className="mb-5 bg-slate-800/50 border border-slate-700/60 rounded-2xl overflow-hidden">
-                  <div className="flex items-center gap-2 px-4 py-3 bg-slate-800 border-b border-slate-700/60">
-                    <i className="fas fa-user-edit text-indigo-400 text-xs"></i>
-                    <span className="text-[11px] font-bold uppercase tracking-widest text-slate-300">Student Submission</span>
-                  </div>
-                  <div className="p-4 space-y-4">
-                    <div>
-                      <h3 className="text-xs uppercase text-slate-500 mb-2">Answer</h3>
-                      <div className="bg-slate-900/60 border border-slate-700/50 rounded-xl p-4 text-slate-300 text-sm leading-relaxed whitespace-pre-wrap min-h-[52px]">
+                <div className="border-t border-slate-800/60" />
+
+                {/* Body */}
+                <div className="p-6 space-y-5">
+                  {/* Text answer + Attachment side by side */}
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}>
+                    {/* Text answer */}
+                    <div style={{ flex: "1 1 200px" }} className="rounded-xl overflow-hidden border border-slate-700/50 bg-slate-800/50">
+                      <div className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 border-b border-slate-700/50">
+                        <div className="w-6 h-6 rounded-md bg-indigo-500/15 flex items-center justify-center">
+                          <i className="fas fa-pencil-alt text-indigo-400 text-[10px]" />
+                        </div>
+                        <span className="text-[11px] font-black uppercase tracking-widest text-slate-400">Text Answer</span>
+                      </div>
+                      <div className="p-4 text-slate-300 text-sm leading-relaxed whitespace-pre-wrap min-h-[96px]">
                         {selectedSubmission.text_answer || (
                           <span className="text-slate-500 italic">No text submitted</span>
                         )}
                       </div>
                     </div>
-                    <div>
-                      <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2.5">
-                        Student Attachment
-                      </label>
-                      {selectedSubmission.file_url ? (
-                        <DownloadButton
-                          url={getStorageUrl(selectedSubmission.file_url)}
-                          label="Download File"
-                          className="!bg-indigo-600/10 !text-indigo-400 !border-indigo-500/20 hover:!bg-indigo-600 hover:!text-white"
-                        />
-                      ) : (
-                        <p className="text-slate-500 text-xs italic py-2">No file submitted</p>
-                      )}
+
+                    {/* Attachment */}
+                    <div style={{ flex: "1 1 200px" }} className="rounded-xl overflow-hidden border border-slate-700/50 bg-slate-800/50">
+                      <div className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 border-b border-slate-700/50">
+                        <div className="w-6 h-6 rounded-md bg-emerald-500/15 flex items-center justify-center">
+                          <i className="fas fa-paperclip text-emerald-400 text-[10px]" />
+                        </div>
+                        <span className="text-[11px] font-black uppercase tracking-widest text-slate-400">Attachment</span>
+                      </div>
+                      <div className="p-4 min-h-[96px] flex items-center">
+                        {selectedSubmission.file_url ? (
+                          <DownloadButton
+                            url={getStorageUrl(selectedSubmission.file_url)}
+                            label="Download File"
+                          />
+                        ) : (
+                          <p className="text-slate-500 text-xs italic">No file attached</p>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Grading form */}
-                <GradingForm
-                  selectedSubmission={selectedSubmission}
-                  onCancel={closeGradeModal}
-                  onSubmit={handleGradeSubmit}
-                  assignmentMaxScore={selectedSubmission.assignment_max_score || selectedSubmission.max_score}
-                  extraRowContent={null}
-                />
-              </div>
+                  {/* Grading section */}
+                  <div className="border-t border-slate-800/60 pt-5">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-4 flex items-center gap-2">
+                      <i className="fas fa-graduation-cap text-indigo-400/70" />
+                      {selectedSubmission.grade ? "Update Grade" : "Grade This Submission"}
+                    </p>
+                    <GradingForm
+                      selectedSubmission={selectedSubmission}
+                      onCancel={closeGradeModal}
+                      onSubmit={handleGradeSubmit}
+                      assignmentMaxScore={selectedSubmission.assignment_max_score || selectedSubmission.max_score}
+                      extraRowContent={null}
+                    />
+                  </div>
+                </div>
+              </>
             )}
           </div>
         </div>

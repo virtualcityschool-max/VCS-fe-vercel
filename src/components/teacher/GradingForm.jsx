@@ -32,21 +32,17 @@ const GradingForm = ({ selectedSubmission, onSubmit, onCancel, assignmentMaxScor
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="space-y-4"
-      key={selectedSubmission?.id}
-    >
-      <div className="flex flex-wrap items-start gap-10">
-        {/* Score Column */}
-        <div className="w-32 shrink-0">
-          <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2.5">
-            Score <span className="text-slate-600 font-normal ml-1">/ {assignmentMaxScore}</span>
+    <form onSubmit={handleSubmit} className="space-y-5" key={selectedSubmission?.id}>
+      <div className="grid grid-cols-1 sm:grid-cols-[auto_1fr] gap-4 items-start">
+        {/* Score */}
+        <div>
+          <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">
+            Score
           </label>
-          <div className="relative">
+          <div className="flex items-center gap-2.5">
             <input
               type="number"
-              placeholder="0.0"
+              placeholder="—"
               value={score}
               onChange={(e) => {
                 const val = e.target.value;
@@ -55,56 +51,61 @@ const GradingForm = ({ selectedSubmission, onSubmit, onCancel, assignmentMaxScor
                 setScoreError("");
               }}
               onKeyDown={(e) => {
-                if (e.key === "-" || e.key === "e" || e.key === "E") {
-                  e.preventDefault();
-                }
+                if (e.key === "-" || e.key === "e" || e.key === "E") e.preventDefault();
               }}
-              className={`w-full p-2 rounded-xl bg-slate-800 border text-white font-black text-center transition-all ${
-                scoreError 
-                  ? "border-red-500 ring-1 ring-red-500/20" 
+              className={`w-24 py-2.5 px-3 rounded-xl bg-slate-900 border text-white font-black text-center text-lg outline-none transition-all ${
+                scoreError
+                  ? "border-red-500 ring-1 ring-red-500/20"
                   : "border-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/20"
               }`}
               max={assignmentMaxScore}
               min={0}
               step="0.1"
             />
+            {assignmentMaxScore != null && (
+              <span className="text-slate-500 text-sm font-semibold whitespace-nowrap">
+                / {assignmentMaxScore}
+              </span>
+            )}
           </div>
           {scoreError && (
-            <p className="mt-2 text-[10px] text-red-400 font-bold flex items-center gap-1.5 leading-tight">
+            <p className="mt-2 text-[10px] text-red-400 font-bold flex items-center gap-1.5">
               <i className="fas fa-exclamation-circle" />
               {scoreError}
             </p>
           )}
         </div>
-      </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-300 mb-2">
-          Feedback
-        </label>
-        <textarea
-          placeholder="Feedback"
-          value={selectedSubmission ? feedback || "" : ""}
-          onChange={(e) => setFeedback(e.target.value)}
-          className="w-full mb-4 p-3 rounded-xl bg-slate-800 border border-slate-700 text-white"
-          rows="4"
-        />
+        {/* Feedback */}
+        <div>
+          <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">
+            Feedback
+          </label>
+          <textarea
+            placeholder="Write your feedback for the student…"
+            value={selectedSubmission ? feedback || "" : ""}
+            onChange={(e) => setFeedback(e.target.value)}
+            className="w-full p-3 rounded-xl bg-slate-900 border border-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/20 text-white text-sm placeholder:text-slate-600 outline-none transition-all resize-none"
+            rows={4}
+          />
+        </div>
       </div>
 
       <div className="flex gap-3 justify-end">
         {onCancel && (
           <button
             type="button"
-            className="px-4 py-2 bg-slate-700 rounded-xl"
             onClick={onCancel}
+            className="px-5 py-2.5 rounded-xl border border-slate-700 bg-slate-800/50 text-slate-300 hover:text-white hover:bg-slate-700 text-sm font-semibold transition-all"
           >
             Cancel
           </button>
         )}
         <button
           type="submit"
-          className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-black uppercase tracking-widest py-2.5 px-8 rounded-xl transition-all active:scale-95 shadow-lg shadow-blue-600/20"
+          className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold transition-all active:scale-95 shadow-lg shadow-indigo-600/20 flex items-center gap-2"
         >
+          <i className={`fas ${selectedSubmission?.grade ? "fa-sync-alt" : "fa-check"} text-xs`} />
           {selectedSubmission?.grade ? "Update Grade" : "Grade Submission"}
         </button>
       </div>

@@ -475,7 +475,7 @@ const TeacherGrading = ({
                 </div>
 
                 {/* TEXT ANSWER */}
-                <div >
+                <div className="grid grid-cols-1 sm:grid-cols-[auto_1fr] gap-4 items-start">
                   <div className="mb-6">
                     <h3 className="text-xs uppercase text-slate-500 mb-2">
                       Answer

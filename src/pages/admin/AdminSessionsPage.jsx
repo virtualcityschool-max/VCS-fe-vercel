@@ -24,7 +24,7 @@ import { showApiError } from "../../utils/apiErrorHandler";
 import { useDateFormatters } from "../../hooks";
 const AdminSessionsPage = () => {
   const dispatch = useDispatch();
-  const { timezone, toPayloadISO } = useDateFormatters();
+  const { timezone, toPayloadISO, toDatetimeInput } = useDateFormatters();
 
   const [activeModal, setActiveModal] = useState(null);
   const [editingSession, setEditingSession] = useState(null);
@@ -149,17 +149,13 @@ const AdminSessionsPage = () => {
       return;
     }
 
-    // Parse scheduled datetime into separate date + time for the form.
-    // Parse directly from the ISO string to preserve the original offset (e.g. +05:00)
-    // instead of letting JS convert it to local/UTC time.
     const rawDateTime = session.start_time || session.scheduled_at;
     let startDate = "";
     let startTime = "";
     if (rawDateTime) {
-      const match = rawDateTime.match(/^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})/);
-      if (match) {
-        startDate = match[1];
-        startTime = match[2];
+      const localDT = toDatetimeInput(rawDateTime); // converts to user's timezone (e.g. "2026-05-23T11:30")
+      if (localDT?.includes("T")) {
+        [startDate, startTime] = localDT.split("T");
       }
     }
 
