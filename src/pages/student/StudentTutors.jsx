@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { availabilityService } from "../../services/availabilityService";
 import { toastManager } from "../../utils/toastManager";
 import ConfirmDialog from "../../components/common/ConfirmDialog";
+import { useDateFormatters } from "../../hooks/useDateFormatters";
 
 const fmt12 = (t) => {
   if (!t) return "";
@@ -33,6 +34,7 @@ const openMeetLink = (link) => {
 };
 
 const StudentTutors = () => {
+  const { formatDate, formatTime } = useDateFormatters();
   const [slots, setSlots] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -116,7 +118,7 @@ const StudentTutors = () => {
       <div>
         {/* Filters */}
         {!loading && !error && slots.length > 0 && (
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-7">
+          <div className="flex flex-wrap items-center gap-3 mb-7">
             {/* Status filter pills */}
             <div className="flex items-center gap-1 bg-slate-900 border border-slate-800 rounded-xl p-1 shrink-0">
               {["all", "upcoming", "past"].map((f) => (
@@ -134,54 +136,57 @@ const StudentTutors = () => {
               ))}
             </div>
 
-            {/* Tutor name search */}
-            <div className="relative flex-1 min-w-0 w-full sm:max-w-xs">
-              <i className="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-600 text-xs pointer-events-none" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search tutor name…"
-                className="w-full h-9 pl-8 pr-8 rounded-xl bg-slate-900 border border-slate-800 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500/60 transition"
-              />
-              {searchQuery && (
+            {/* Search + date filter pushed to the end */}
+            <div className="ml-auto flex items-center gap-3 flex-wrap">
+              {/* Tutor name search */}
+              <div className="relative">
+                <i className="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-600 text-xs pointer-events-none" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search tutor name…"
+                  className="h-9 w-52 pl-8 pr-8 rounded-xl bg-slate-900 border border-slate-800 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500/60 transition"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-600 hover:text-slate-300 transition"
+                  >
+                    <i className="fas fa-times text-xs" />
+                  </button>
+                )}
+              </div>
+
+              {/* Date filter */}
+              <div className="relative shrink-0">
+                <i className="fas fa-calendar-alt absolute left-3 top-1/2 -translate-y-1/2 text-slate-600 text-xs pointer-events-none" />
+                <input
+                  type="date"
+                  value={dateFilter}
+                  onChange={(e) => setDateFilter(e.target.value)}
+                  className="h-9 pl-8 pr-3 rounded-xl bg-slate-900 border border-slate-800 text-sm text-slate-300 focus:outline-none focus:border-indigo-500/60 transition appearance-none [color-scheme:dark]"
+                />
+                {dateFilter && (
+                  <button
+                    onClick={() => setDateFilter("")}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-600 hover:text-slate-300 transition"
+                  >
+                    <i className="fas fa-times text-xs" />
+                  </button>
+                )}
+              </div>
+
+              {/* Clear all */}
+              {hasActiveFilters && (filter !== "all" || searchQuery || dateFilter) && (
                 <button
-                  onClick={() => setSearchQuery("")}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-600 hover:text-slate-300 transition"
+                  onClick={() => { setFilter("all"); setSearchQuery(""); setDateFilter(""); }}
+                  className="text-[10px] text-slate-600 hover:text-slate-400 font-bold uppercase tracking-wider transition shrink-0"
                 >
-                  <i className="fas fa-times text-xs" />
+                  Clear all
                 </button>
               )}
             </div>
-
-            {/* Date filter */}
-            <div className="relative shrink-0 w-full sm:w-auto">
-              <i className="fas fa-calendar-alt absolute left-3 top-1/2 -translate-y-1/2 text-slate-600 text-xs pointer-events-none" />
-              <input
-                type="date"
-                value={dateFilter}
-                onChange={(e) => setDateFilter(e.target.value)}
-                className="h-9 pl-8 pr-3 rounded-xl bg-slate-900 border border-slate-800 text-sm text-slate-300 focus:outline-none focus:border-indigo-500/60 transition appearance-none w-full sm:w-auto [color-scheme:dark]"
-              />
-              {dateFilter && (
-                <button
-                  onClick={() => setDateFilter("")}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-600 hover:text-slate-300 transition"
-                >
-                  <i className="fas fa-times text-xs" />
-                </button>
-              )}
-            </div>
-
-            {/* Clear all */}
-            {hasActiveFilters && (filter !== "all" || searchQuery || dateFilter) && (
-              <button
-                onClick={() => { setFilter("all"); setSearchQuery(""); setDateFilter(""); }}
-                className="text-[10px] text-slate-600 hover:text-slate-400 font-bold uppercase tracking-wider transition shrink-0"
-              >
-                Clear all
-              </button>
-            )}
           </div>
         )}
 
@@ -316,9 +321,9 @@ const StudentTutors = () => {
                               </div>
                               <div>
                                 <p className="text-sm font-semibold text-white">
-                                  {fmt12(slot.start_time)} – {fmt12(slot.end_time)}
+                                  {formatTime(slot.date + "T" + slot.start_time)} – {formatTime(slot.date + "T" + slot.end_time)}
                                 </p>
-                                <p className="text-xs text-slate-500 mt-0.5">{fmtDate(slot.date)}</p>
+                                <p className="text-xs text-slate-500 mt-0.5">{formatDate(slot.date + "T" + slot.start_time)}</p>
                               </div>
                             </div>
 

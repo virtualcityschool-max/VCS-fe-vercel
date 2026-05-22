@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { adminService } from "../../services/adminService";
 import { toastManager } from "../../utils/toastManager";
 import SlotCalendarView from "../common/SlotCalendarView";
+import { useDateFormatters } from "../../hooks/useDateFormatters";
 
 const fmt12 = (t) => {
   if (!t) return "";
@@ -20,6 +21,7 @@ const fmtDate = (d) =>
   });
 
 const TeacherSlotsCalendarSection = ({ teacherId }) => {
+  const { formatDate, formatTime } = useDateFormatters();
   const [slots, setSlots] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -155,10 +157,10 @@ const TeacherSlotsCalendarSection = ({ teacherId }) => {
             <div className="px-6 py-5 space-y-3">
               <p className="text-sm text-slate-300">
                 You are about to delete the slot on{" "}
-                <span className="font-semibold text-white">{fmtDate(confirmSlot.date)}</span>{" "}
+                <span className="font-semibold text-white">{formatDate(confirmSlot.date + "T" + confirmSlot.start_time)}</span>{" "}
                 from{" "}
                 <span className="font-semibold text-white tabular-nums">
-                  {fmt12(confirmSlot.start_time)} – {fmt12(confirmSlot.end_time)}
+                  {formatTime(confirmSlot.date + "T" + confirmSlot.start_time)} – {formatTime(confirmSlot.date + "T" + confirmSlot.end_time)}
                 </span>.
               </p>
               {confirmSlot.booked_by_name ? (

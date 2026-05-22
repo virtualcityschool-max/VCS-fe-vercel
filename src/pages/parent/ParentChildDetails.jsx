@@ -7,6 +7,7 @@ import AttendanceMatrix from "../../components/common/AttendanceMatrix";
 import EvaluationMatrix from "../../components/common/EvaluationMatrix";
 import { availabilityService } from "../../services/availabilityService";
 import { coursesService } from "../../services/coursesService";
+import { useDateFormatters } from "../../hooks/useDateFormatters";
 
 const fmt12 = (t) => {
   if (!t) return "";
@@ -21,6 +22,7 @@ const fmtDate = (d) =>
   });
 
 const ParentChildDetails = () => {
+  const { formatTime, timezone } = useDateFormatters();
   const { childId } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -373,11 +375,12 @@ const ParentChildDetails = () => {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {bookedSlots.map((slot) => {
-                const d = new Date(slot.date + "T00:00:00");
-                const mon = d.toLocaleDateString(undefined, { month: "short" });
-                const day = d.getDate();
-                const weekday = d.toLocaleDateString(undefined, { weekday: "short" });
-                const isUpcoming = d >= new Date(new Date().setHours(0,0,0,0));
+                const d = new Date(slot.date + "T" + slot.start_time);
+                const tzOpts = timezone ? { timeZone: timezone } : {};
+                const mon = d.toLocaleDateString(undefined, { month: "short", ...tzOpts });
+                const day = d.toLocaleDateString(undefined, { day: "numeric", ...tzOpts });
+                const weekday = d.toLocaleDateString(undefined, { weekday: "short", ...tzOpts });
+                const isUpcoming = new Date(slot.date + "T23:59:59") >= new Date();
                 return (
                   <div
                     key={slot.id}
@@ -400,7 +403,7 @@ const ParentChildDetails = () => {
                       <div className="flex items-center justify-between gap-2">
                         <span className="text-[10px] text-slate-400 tabular-nums font-medium">
                           <i className="fas fa-clock text-[8px] mr-1 text-slate-500" />
-                          {fmt12(slot.start_time)} – {fmt12(slot.end_time)}
+                          {formatTime(slot.date + "T" + slot.start_time)} – {formatTime(slot.date + "T" + slot.end_time)}
                         </span>
                         <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-wider border shrink-0 ${
                           isUpcoming

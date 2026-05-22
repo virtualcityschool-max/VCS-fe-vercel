@@ -9,6 +9,7 @@ import {
   selectChildLinksUnlinking,
 } from "../../store/slices/childLinksSlice";
 import { showApiError } from "../../utils/apiErrorHandler";
+import { useDateFormatters } from "../../hooks/useDateFormatters";
 
 
 const fmt12 = (t) => {
@@ -20,6 +21,7 @@ const fmt12 = (t) => {
 const isUpcoming = (date) => new Date(date + "T23:59:59") >= new Date();
 
 const ChildCard = ({ child }) => {
+  const { formatTime, timezone } = useDateFormatters();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [confirmUnlink, setConfirmUnlink] = useState(false);
@@ -263,7 +265,7 @@ const ChildCard = ({ child }) => {
                       {s.teacher_name}
                     </p>
                     <p className="text-[9px] text-indigo-400 font-black tabular-nums mt-0.5">
-                      {new Date(s.date + "T00:00:00").toLocaleDateString(undefined, { month: "short", day: "numeric" })} · {fmt12(s.start_time)}
+                      {new Date(s.date + "T" + s.start_time).toLocaleDateString(undefined, { month: "short", day: "numeric", ...(timezone ? { timeZone: timezone } : {}) })} · {formatTime(s.date + "T" + s.start_time)}
                     </p>
                   </div>
                   <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse shrink-0" />
