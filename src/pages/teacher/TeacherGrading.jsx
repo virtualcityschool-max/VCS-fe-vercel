@@ -475,12 +475,27 @@ const TeacherGrading = ({
                 </div>
 
                 {/* TEXT ANSWER */}
-                <div className="mb-6">
-                  <h3 className="text-xs uppercase text-slate-500 mb-2">
-                    Answer
-                  </h3>
-                  <div className="bg-slate-800 p-4 rounded-xl">
-                    {selectedSubmission.text_answer || "No text submitted"}
+                <div >
+                  <div className="mb-6">
+                    <h3 className="text-xs uppercase text-slate-500 mb-2">
+                      Answer
+                    </h3>
+                    <div className="bg-slate-800 p-4 rounded-xl">
+                      {selectedSubmission.text_answer || "No text submitted"}
+                    </div>
+                  </div>
+                  <div className="mb-6">
+                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2.5">
+                      Student Attachment
+                    </label>
+                    {selectedSubmission.file_url ? (
+                        <PreviewButton 
+                          url={getStorageUrl(selectedSubmission.file_url)} 
+                          className="!bg-indigo-600/10 !text-indigo-400 !border-indigo-500/20 hover:!bg-indigo-600 hover:!text-white"
+                        />
+                      ) : (
+                        <p className="text-slate-500 text-xs italic py-2">No file submitted</p>
+                      )}
                   </div>
                 </div>
 

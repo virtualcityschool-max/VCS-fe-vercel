@@ -76,18 +76,6 @@ const GradingForm = ({ selectedSubmission, onSubmit, onCancel, assignmentMaxScor
             </p>
           )}
         </div>
-
-        {/* Attachment Column */}
-        {extraRowContent && (
-          <div className="flex-1">
-            <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2.5">
-              Student Attachment
-            </label>
-            <div className="flex items-center min-h-[38px]">
-              {extraRowContent}
-            </div>
-          </div>
-        )}
       </div>
 
       <div>

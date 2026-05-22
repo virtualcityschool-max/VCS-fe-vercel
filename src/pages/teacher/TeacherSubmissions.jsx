@@ -356,13 +356,35 @@ const TeacherSubmissions = () => {
                   </button>
                 </div>
 
-                {/* Text answer */}
-                <div className="mb-6">
-                  <h3 className="text-xs uppercase tracking-widest text-slate-500 font-bold mb-2">Answer</h3>
-                  <div className="bg-slate-800 border border-slate-700 rounded-xl p-4 text-slate-300 text-sm leading-relaxed whitespace-pre-wrap">
-                    {selectedSubmission.text_answer || (
-                      <span className="text-slate-500 italic">No text submitted</span>
-                    )}
+                {/* Student Submission card */}
+                <div className="mb-5 bg-slate-800/50 border border-slate-700/60 rounded-2xl overflow-hidden">
+                  <div className="flex items-center gap-2 px-4 py-3 bg-slate-800 border-b border-slate-700/60">
+                    <i className="fas fa-user-edit text-indigo-400 text-xs"></i>
+                    <span className="text-[11px] font-bold uppercase tracking-widest text-slate-300">Student Submission</span>
+                  </div>
+                  <div className="p-4 space-y-4">
+                    <div>
+                      <h3 className="text-xs uppercase text-slate-500 mb-2">Answer</h3>
+                      <div className="bg-slate-900/60 border border-slate-700/50 rounded-xl p-4 text-slate-300 text-sm leading-relaxed whitespace-pre-wrap min-h-[52px]">
+                        {selectedSubmission.text_answer || (
+                          <span className="text-slate-500 italic">No text submitted</span>
+                        )}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2.5">
+                        Student Attachment
+                      </label>
+                      {selectedSubmission.file_url ? (
+                        <DownloadButton
+                          url={getStorageUrl(selectedSubmission.file_url)}
+                          label="Download File"
+                          className="!bg-indigo-600/10 !text-indigo-400 !border-indigo-500/20 hover:!bg-indigo-600 hover:!text-white"
+                        />
+                      ) : (
+                        <p className="text-slate-500 text-xs italic py-2">No file submitted</p>
+                      )}
+                    </div>
                   </div>
                 </div>
 
@@ -372,17 +394,7 @@ const TeacherSubmissions = () => {
                   onCancel={closeGradeModal}
                   onSubmit={handleGradeSubmit}
                   assignmentMaxScore={selectedSubmission.assignment_max_score || selectedSubmission.max_score}
-                  extraRowContent={
-                    selectedSubmission.file_url ? (
-                      <DownloadButton 
-                        url={getStorageUrl(selectedSubmission.file_url)} 
-                        label="Download File" 
-                        className="!bg-indigo-600/10 !text-indigo-400 !border-indigo-500/20 hover:!bg-indigo-600 hover:!text-white"
-                      />
-                    ) : (
-                      <p className="text-slate-500 text-xs italic py-2">No file submitted</p>
-                    )
-                  }
+                  extraRowContent={null}
                 />
               </div>
             )}
