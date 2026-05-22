@@ -57,7 +57,7 @@ const AdminSessionsPage = () => {
     search: "",
     teacher: "",
     course: "",
-    view: "",
+    view: "parent",
     status: "",
   });
 

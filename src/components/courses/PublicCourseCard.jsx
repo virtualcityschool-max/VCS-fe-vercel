@@ -3,14 +3,16 @@ import { Link } from "react-router-dom";
 import { getCourseImage } from "../../utils/courseImageUtils";
 import { getStorageUrl } from "../../utils/storageUrl";
 
-const PublicCourseCard = ({ 
-  course, 
-  index, 
-  enrolled, 
-  isEnrolling, 
-  isUnenrolling, 
-  onEnroll, 
-  onUnenroll 
+const PublicCourseCard = ({
+  course,
+  index,
+  enrolled,
+  isEnrolling,
+  isUnenrolling,
+  isWithdrawing,
+  onEnroll,
+  onUnenroll,
+  onWithdraw,
 }) => {
   const isPending = course.enrollment_status === "pending";
   const isRejected = course.enrollment_status === "rejected";
@@ -34,9 +36,14 @@ const PublicCourseCard = ({
       cls += "bg-rose-600/10 border border-rose-500/20 text-rose-400 cursor-not-allowed";
       tooltip = "Your enrollment request was rejected. Please contact school administration.";
     } else if (isPending) {
-      label = "Approval Pending";
-      disabled = true;
-      cls += "bg-amber-600/10 border border-amber-500/20 text-amber-400 cursor-not-allowed";
+      if (isWithdrawing) {
+        label = "Cancelling...";
+        disabled = true;
+        cls += "bg-amber-600/10 border border-amber-500/20 text-amber-400 cursor-not-allowed";
+      } else {
+        label = "Cancel Request";
+        cls += "bg-amber-600/10 border border-amber-500/20 text-amber-400 hover:bg-amber-600 hover:text-white hover:border-transparent";
+      }
     } else if (noSessions) {
       label = "Enroll Now";
       disabled = true;
@@ -56,6 +63,7 @@ const PublicCourseCard = ({
         onClick={(e) => {
           e.stopPropagation();
           if (enrolled) onUnenroll(course.id, course.title);
+          else if (isPending && !isWithdrawing) onWithdraw?.(course.id, course.title);
           else if (!isPending && !isRejected && !noSessions && !isEnrolling) onEnroll(course);
         }}
         disabled={disabled}

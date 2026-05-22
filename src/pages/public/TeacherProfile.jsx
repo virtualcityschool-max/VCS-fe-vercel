@@ -77,7 +77,7 @@ const BookingModal = ({ teacherName, slots, onClose, onBooked }) => {
             )}
             <div>
               <h2 className="text-base font-semibold text-white">
-                {step === 1 ? "Book a Tutoring Slot" : "Add a Message"}
+                {step === 1 ? "Book a Session" : "Add a Message"}
               </h2>
               <p className="text-slate-500 text-xs mt-0.5">
                 {step === 1
@@ -556,7 +556,7 @@ const TeacherProfile = () => {
                 ) : isLoggedIn && role === "student" ? (
                   <>
                     <i className="fas fa-calendar-check" />
-                    Book a Tutoring Slot
+                    Book a Session
                     {slotsLoaded && availableSlots.length > 0 && (
                       <span className="bg-white/20 text-white text-[10px] font-black px-2 py-0.5 rounded-full">
                         {availableSlots.length}

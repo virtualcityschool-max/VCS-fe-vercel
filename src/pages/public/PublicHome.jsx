@@ -3,9 +3,10 @@ import { useNavigate, Link } from "react-router-dom";
 import { fetchAllCourses } from "../../store/slices/coursesSlice";
 import { useEffect, useState, useMemo } from "react";
 import { setAuthModal, setEnrollmentIntent } from "../../store/slices/uiSlice";
-import { fetchStudentDashboard, unenrollFromCourse } from "../../store/slices/studentDashboardSlice";
+import { fetchStudentDashboard, unenrollFromCourse, withdrawEnrollment } from "../../store/slices/studentDashboardSlice";
 import { fetchTeachers } from "../../store/slices/teacherSlice";
 import AuthRequiredModal from "../../components/common/AuthRequiredModal";
+import ConfirmDialog from "../../components/common/ConfirmDialog";
 import HireTutorModal from "../../components/public/HireTutorModal";
 import PublicCourseCard from "../../components/courses/PublicCourseCard";
 import { toastManager } from "../../utils/toastManager";
@@ -18,9 +19,10 @@ const PublicHome = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [hireModal, setHireModal] = useState(null);
+  const [withdrawConfirm, setWithdrawConfirm] = useState({ open: false, courseId: null, courseTitle: "" });
 
   const { courses, isLoading: coursesLoading } = useSelector((state) => state.courses);
-  const { enrolledCourses, enrollingCourseIds } = useSelector((state) => state.studentDashboard);
+  const { enrolledCourses, enrollingCourseIds, withdrawingCourseIds } = useSelector((state) => state.studentDashboard);
   const { enrollmentIntent } = useSelector((state) => state.ui);
   const { teachers, loading: teachersLoading } = useSelector((state) => state.teachers);
 
@@ -67,6 +69,23 @@ const PublicHome = () => {
       toastManager.success(`Unenrolled from ${courseTitle}`);
       dispatch(fetchAllCourses());
       dispatch(fetchStudentDashboard());
+    } catch (error) {
+      showApiError(error);
+    }
+  };
+
+  // Handle withdraw enrollment request
+  const handleWithdrawEnrollment = (courseId, courseTitle) => {
+    setWithdrawConfirm({ open: true, courseId, courseTitle });
+  };
+
+  const confirmWithdrawEnrollment = async () => {
+    const { courseId } = withdrawConfirm;
+    setWithdrawConfirm({ open: false, courseId: null, courseTitle: "" });
+    try {
+      await dispatch(withdrawEnrollment(courseId)).unwrap();
+      toastManager.success("Enrollment request cancelled");
+      dispatch(fetchAllCourses());
     } catch (error) {
       showApiError(error);
     }
@@ -243,8 +262,10 @@ const PublicHome = () => {
                 index={i}
                 enrolled={false}
                 isEnrolling={enrollingCourseIds.includes(course.id)}
+                isWithdrawing={withdrawingCourseIds.includes(course.id)}
                 onEnroll={handleEnrollClick}
                 onUnenroll={handleUnenrollCourse}
+                onWithdraw={handleWithdrawEnrollment}
               />
           ))
           }
@@ -434,10 +455,22 @@ const PublicHome = () => {
       )}
 
 
-      <AuthRequiredModal 
-        isOpen={authModalOpen} 
-        onClose={() => setAuthModalOpen(false)} 
+      <AuthRequiredModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
         message="Create an account or log in to start your journey with this course and access all features."
+      />
+
+      <ConfirmDialog
+        open={withdrawConfirm.open}
+        variant="danger"
+        title="Cancel Enrollment Request"
+        message={`Are you sure you want to cancel your enrollment request for "${withdrawConfirm.courseTitle}"?`}
+        confirmLabel="Yes, Cancel Request"
+        cancelLabel="Keep Request"
+        loading={withdrawingCourseIds.includes(withdrawConfirm.courseId)}
+        onConfirm={confirmWithdrawEnrollment}
+        onCancel={() => setWithdrawConfirm({ open: false, courseId: null, courseTitle: "" })}
       />
     </main>
   );

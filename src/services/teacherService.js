@@ -220,16 +220,9 @@ const updateStudentAttendance = async (sessionId, studentId, data) => {
 };
 
 const joinLiveSession = async (sessionId) => {
-  const response = await axiosInstance.get(`/classroom/sessions/${sessionId}/`);
+  const response = await axiosInstance.post(`/classroom/sessions/${sessionId}/join/`);
   return response.data;
 };
-
-// const joinLiveSession = async (sessionId) => {
-//   const response = await axiosInstance.post(
-//     `/classroom/sessions/${sessionId}/join/`,
-//   );
-//   return response.data;
-// };
 
 const startSession = async (sessionId) => {
   const response = await axiosInstance.patch(

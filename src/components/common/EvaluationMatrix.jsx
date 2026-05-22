@@ -1,5 +1,4 @@
-import React, { useMemo, useState, useEffect } from "react";
-import { coursesService } from "../../services/coursesService";
+import React, { useMemo } from "react";
 
 // ── Badges ────────────────────────────────────────────────────────────────────
 const PendingBadge = () => (
@@ -35,15 +34,10 @@ const GRADE_W      = 90;
 const OBTAINED_W   = 85;
 const PERCENTAGE_W = 75;
 
-const EvaluationMatrix = ({ students = [], courseStatus }) => {
+const EvaluationMatrix = ({ students = [], courseStatus, gradingScale: gradingScaleProp }) => {
   const isCompleted = courseStatus === "completed";
-  const [gradingScale, setGradingScale] = useState([]);
-
-  useEffect(() => {
-    coursesService.getGradingScale()
-      .then((data) => setGradingScale(data?.scales || []))
-      .catch(() => {});
-  }, []);
+  const gradingScale = gradingScaleProp?.scales || [];
+  const isGlobalScale = gradingScaleProp?.is_global_scale ?? true;
 
   const allAssignments = useMemo(() => {
     const map = new Map();
@@ -92,19 +86,27 @@ const EvaluationMatrix = ({ students = [], courseStatus }) => {
 
       {/* ── Grading scale strip ── */}
       {gradingScale.length > 0 && (
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-[10px] uppercase tracking-widest text-slate-500 font-bold shrink-0">Grading Scale</span>
-          <div className="flex items-center gap-1.5 flex-wrap">
-            {gradingScale.map((s) => (
-              <div
-                key={s.grade}
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-bold whitespace-nowrap ${GRADE_STYLE[s.grade] ?? "bg-slate-700/50 text-slate-400 border-slate-600/30"}`}
-              >
-                <span>{s.grade}</span>
-                <span className="font-normal opacity-70">{s.range}</span>
-              </div>
-            ))}
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-[10px] uppercase tracking-widest text-slate-500 font-bold shrink-0">Grading Scale</span>
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {gradingScale.map((s) => (
+                <div
+                  key={s.grade}
+                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-bold whitespace-nowrap ${GRADE_STYLE[s.grade] ?? "bg-slate-700/50 text-slate-400 border-slate-600/30"}`}
+                >
+                  <span>{s.grade}</span>
+                  <span className="font-normal opacity-70">{s.range}</span>
+                </div>
+              ))}
+            </div>
           </div>
+          {!isGlobalScale && (
+            <div className="flex items-center gap-2 px-3 py-2 bg-amber-500/10 border border-amber-500/20 rounded-xl w-fit">
+              <i className="fas fa-history text-amber-400 text-xs" />
+              <span className="text-amber-400 text-[11px] font-bold">This course uses an older grading scale — results were graded under this scale at the time of completion.</span>
+            </div>
+          )}
         </div>
       )}
 

@@ -12,6 +12,7 @@ const TeacherEvaluationPage = () => {
   const [tab, setTab]                       = useState("public");
 
   const [publicStudents, setPublicStudents] = useState([]);
+  const [gradingScale, setGradingScale]     = useState(null);
   const [loadingPublic, setLoadingPublic]   = useState(false);
 
   const [privateList, setPrivateList]             = useState([]);
@@ -64,6 +65,7 @@ const TeacherEvaluationPage = () => {
         .flatMap((r) => r.students || [])
         .filter((s) => !s.is_private_enrollment);
       setPublicStudents(students);
+      setGradingScale(results[0]?.grading_scale || null);
     } catch {
       toastManager.error("Failed to load evaluations");
       setPublicStudents([]);
@@ -247,7 +249,7 @@ const TeacherEvaluationPage = () => {
                   )}
                 </div>
               )}
-              <EvaluationMatrix students={publicStudents} courseStatus={courseStatus} />
+              <EvaluationMatrix students={publicStudents} courseStatus={courseStatus} gradingScale={gradingScale} />
             </>
           )
         )}
@@ -268,7 +270,7 @@ const TeacherEvaluationPage = () => {
               ))}
             </div>
           ) : privateEval ? (
-            <EvaluationMatrix students={[privateEval]} courseStatus={courseStatus} />
+            <EvaluationMatrix students={[privateEval]} courseStatus={courseStatus} gradingScale={gradingScale} />
           ) : (
             <div className="bg-slate-900/50 border border-slate-800 border-dashed rounded-3xl p-12 text-center">
               <p className="text-slate-400 text-sm">No evaluation data found for this student</p>

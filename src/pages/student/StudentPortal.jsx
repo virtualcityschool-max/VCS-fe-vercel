@@ -157,7 +157,7 @@ const StudentPortal = () => {
                 <i className="fas fa-rocket text-4xl text-blue-400 group-hover:animate-bounce"></i>
               </div>
               <h2 className="text-3xl lg:text-5xl font-black text-white mb-6 tracking-tight font-poppins">
-                Ready to <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">Launch</span> Your Journey?
+                Ready to <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">Ready</span> to explore and learn??
               </h2>
               <p className="text-slate-400 text-lg lg:text-xl font-medium mb-12 leading-relaxed opacity-80">
                 Your personalized learning workspace is set up and ready. <br className="hidden md:block" /> Start by enrolling in a course to unlock your dashboard's full power.

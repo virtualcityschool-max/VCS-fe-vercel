@@ -12,7 +12,7 @@ import {
 import { createAnnouncement } from "../../store/slices/announcementsSlice";
 import { toastManager } from "../../utils/toastManager";
 import CourseStudentsModal from "../../components/courses/CourseStudentsModal";
-import { showApiError } from "../../utils/apiErrorHandler";
+import { showApiError, extractApiErrorMessage } from "../../utils/apiErrorHandler";
 import ConfirmDialog from "../../components/common/ConfirmDialog";
 import { getWindowLabel, isWithinSessionWindow } from "../../utils/helper/StartSession";
 import { useDateFormatters } from "../../hooks";
@@ -121,7 +121,7 @@ const TeacherPortal = () => {
 
       await dispatch(fetchTeacherDashboard()).unwrap();
     } catch (err) {
-      showApiError(err);
+      setTooEarlyOpen(true);
     }
   };
 
@@ -142,7 +142,12 @@ const TeacherPortal = () => {
       }
       await dispatch(fetchTeacherDashboard()).unwrap();
     } catch (err) {
-      showApiError(err);
+      const msg = extractApiErrorMessage(err);
+      if (msg === "You cannot join before the scheduled time." || msg === "You can join up to 30 minutes before the scheduled time.") {
+        setTooEarlyOpen(true);
+      } else {
+        showApiError(err);
+      }
     }
   };
 

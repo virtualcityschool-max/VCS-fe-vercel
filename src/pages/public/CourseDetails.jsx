@@ -804,19 +804,12 @@ const CourseDetails = () => {
       </div>
 
       {/* Enrollment Type Modal */}
-      <ConfirmDialog
-        open={enrollmentModalOpen}
-        variant="primary"
-        title="Confirm Enrollment"
-        message={`Are you sure you want to enroll in "${normalizedCourse?.title}"?`}
-        confirmLabel="Yes, Enroll Now"
-        cancelLabel="Cancel"
-        loading={isEnrolling}
-        checkboxLabel="I have submitted the payment for this course"
-        checkboxChecked={paymentSubmitted}
-        onCheckboxChange={setPaymentSubmitted}
+      <EnrollmentTypeModal
+        isOpen={enrollmentModalOpen}
+        course={normalizedCourse}
+        isEnrolling={isEnrolling}
         onConfirm={() => handleEnrollmentTypeSelect("normal")}
-        onCancel={closeEnrollmentModal}
+        onClose={closeEnrollmentModal}
       />
       {viewerUrl && (
         <FileViewerModal filePath={viewerUrl} handleClose={() => setViewerUrl(null)} />

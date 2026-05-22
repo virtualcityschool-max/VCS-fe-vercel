@@ -1,202 +1,199 @@
 import React, { useState, useEffect } from "react";
-import TeacherPrivateAvailableSlots from "../TeacherPrivateAvailableSlots";
-import ConfirmDialog from "../common/ConfirmDialog";
-import { studentService } from "../../services/studentService";
+
+const ADMIN_CONTACT = {
+  phone:    "+92 336 1062993",
+  whatsapp: "https://wa.me/923361062993",
+  email:    "admin@virtualcityschool.com",
+  address:  "469, Block G3 Phase 2 Johar Town, Lahore, 54000, Pakistan",
+};
 
 const EnrollmentTypeModal = ({
   isOpen,
   onClose,
-  onSelect,
-  instructorId,
-  teacher,
-  onSlotSelect,
+  onConfirm,
+  course,
   isEnrolling = false,
 }) => {
-  const [enrollmentType, setEnrollmentType] = useState("");
-  const [pendingSlot, setPendingSlot] = useState(null);
-  const [showNormalConfirm, setShowNormalConfirm] = useState(false);
-  const [paymentSubmitted, setPaymentSubmitted] = useState(false);
+  const [step, setStep] = useState(1);
+  const [agreed, setAgreed] = useState(false);
 
-  // Reset all state whenever the modal closes
   useEffect(() => {
     if (!isOpen) {
-      setEnrollmentType("");
-      setPendingSlot(null);
-      setShowNormalConfirm(false);
-      setPaymentSubmitted(false);
+      setStep(1);
+      setAgreed(false);
     }
   }, [isOpen]);
 
-  const handleNormalClick = () => {
-    setEnrollmentType("normal");
-    setPendingSlot(null);
-    setShowNormalConfirm(true);
-  };
-
-  const handleNormalConfirm = () => {
-    onSelect("normal");
-  };
-
-  const handleNormalCancel = () => {
-    setShowNormalConfirm(false);
-    setEnrollmentType("");
-  };
-
-  const handlePrivateClick = () => {
-    setEnrollmentType("private");
-    setPendingSlot(null);
-    setShowNormalConfirm(false);
-    onSelect("private");
-  };
-
-  const handleEnrollPrivately = () => {
-    if (pendingSlot && onSlotSelect) {
-      onSlotSelect(pendingSlot);
-    }
-  };
-
-  const isPrivate = enrollmentType === "private";
-
   if (!isOpen) return null;
 
-  return (
-    <>
-      <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-slate-950/80 backdrop-blur-md animate-fadeIn">
-        <div
-          className={`bg-slate-900 border border-white/10 w-full rounded-[2.5rem] shadow-2xl overflow-y-auto glass relative ${
-            isPrivate ? "max-w-2xl max-h-[90vh]" : "max-w-md"
-          }`}
-        >
-          <button
-            onClick={onClose}
-            className="absolute top-6 right-6 text-slate-500 hover:text-white transition z-10"
-          >
-            <i className="fas fa-times text-xl"></i>
-          </button>
+  const price = course?.price ? `PKR ${Number(course.price).toLocaleString()}` : "the course fee";
+  const title = course?.title || "this course";
 
-          <div className="p-6 sm:p-10">
-            <div className="text-center mb-8">
-              <div className="w-20 h-20 bg-indigo-500/20 text-indigo-500 rounded-3xl flex items-center justify-center text-3xl mx-auto mb-6">
-                <i className="fas fa-graduation-cap"></i>
+  return (
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fadeIn">
+      <div className="bg-slate-900 border border-white/10 w-full max-w-md rounded-[2rem] shadow-2xl relative">
+        {/* Close */}
+        <button
+          onClick={onClose}
+          className="absolute top-5 right-5 text-slate-500 hover:text-white transition z-10"
+        >
+          <i className="fas fa-times text-lg" />
+        </button>
+
+        {/* ── STEP 1: Payment Info ── */}
+        {step === 1 && (
+          <div className="p-7 sm:p-9">
+            {/* Header */}
+            <div className="text-center mb-7">
+              <div className="w-16 h-16 bg-emerald-500/15 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-4 border border-emerald-500/20">
+                <i className="fas fa-credit-card text-emerald-400" />
               </div>
-              <h2 className="text-2xl sm:text-3xl font-black font-poppins text-white mb-2">
-                Select Enrollment Type
-              </h2>
-              <p className="text-slate-500 text-xs sm:text-sm">
-                Choose how you want to enroll in this course
+              <h2 className="text-xl font-black font-poppins text-white mb-1">Payment Details</h2>
+              <p className="text-slate-400 text-sm">
+                Please transfer the course fee to the details below, then proceed to confirm your enrollment.
               </p>
             </div>
 
-            <div className="space-y-4">
-              {/* Normal enrollment */}
-              <button
-                onClick={handleNormalClick}
-                className={`w-full bg-slate-800 hover:bg-slate-700 border rounded-2xl p-6 text-left transition-all group ${
-                  enrollmentType === "normal"
-                    ? "border-blue-500/50 ring-1 ring-blue-500/30"
-                    : "border-white/5"
-                }`}
-              >
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-blue-500/20 text-blue-500 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:bg-blue-500/30 transition">
-                    <i className="fas fa-globe text-lg"></i>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-white font-bold text-lg mb-1">Standard Enrollment</h3>
-                    <p className="text-slate-400 text-sm">
-                      Enroll directly in the course through the public marketplace
-                    </p>
-                  </div>
+            {/* Contact cards */}
+            <div className="space-y-3 mb-7">
+              {/* Phone / WhatsApp */}
+              <div className="flex items-center gap-4 p-4 bg-slate-800/50 rounded-2xl border border-white/5">
+                <div className="w-10 h-10 bg-indigo-600/20 rounded-xl flex items-center justify-center flex-shrink-0 border border-indigo-500/20">
+                  <i className="fas fa-phone text-indigo-400 text-sm" />
                 </div>
-              </button>
-
-              {/* Private enrollment section (commented out for now as per current UI) */}
-            </div>
-
-            {/* Payment Checkbox */}
-            <div className="mt-6">
-              <label className="flex items-center gap-3 cursor-pointer group py-4 px-5 bg-slate-800/40 rounded-3xl border border-white/5 hover:bg-slate-800/60 transition-all text-left">
-                <div className="relative flex items-center justify-center w-5 h-5 flex-shrink-0">
-                  <input
-                    type="checkbox"
-                    className="peer sr-only"
-                    checked={paymentSubmitted}
-                    onChange={(e) => setPaymentSubmitted(e.target.checked)}
-                  />
-                  <div className="absolute inset-0 border-2 border-slate-500 rounded-lg bg-slate-900 transition-all peer-checked:bg-indigo-600 peer-checked:border-indigo-600"></div>
-                  <svg 
-                    className="relative w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 transition-all scale-50 peer-checked:scale-100 pointer-events-none z-10" 
-                    fill="none" 
-                    viewBox="0 0 24 24" 
-                    stroke="currentColor" 
-                    strokeWidth="4"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-0.5">Phone</p>
+                  <p className="text-white font-semibold text-sm">{ADMIN_CONTACT.phone}</p>
                 </div>
-                <span className="text-sm text-slate-300 select-none font-semibold leading-snug">
-                  I have submitted the payment for this course
-                </span>
-              </label>
-            </div>
-
-            {/* Slot selection — only shown when Private is active */}
-            {isPrivate && (
-              <div className="mt-6 space-y-4">
-                <p className="text-slate-400 text-sm text-center">
-                  Select an available slot to continue
-                </p>
-
-                <TeacherPrivateAvailableSlots
-                  teacher={teacher}
-                  teacherId={instructorId}
-                  fetchSlotsFn={studentService.getTeacherAvailableSlots}
-                  onSlotSelect={setPendingSlot}
-                />
-
-                <button
-                  onClick={handleEnrollPrivately}
-                  disabled={!pendingSlot || !paymentSubmitted}
-                  className={`w-full py-4 font-bold rounded-2xl transition-all active:scale-95 ${
-                    pendingSlot && paymentSubmitted
-                      ? "bg-emerald-600 hover:bg-emerald-500 text-white cursor-pointer"
-                      : "bg-slate-700 text-slate-500 cursor-not-allowed opacity-50"
-                  }`}
+                <a
+                  href={ADMIN_CONTACT.whatsapp}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="Chat on WhatsApp"
+                  className="w-9 h-9 bg-emerald-600/20 hover:bg-emerald-500 border border-emerald-500/30 hover:border-emerald-500 rounded-xl flex items-center justify-center transition-all group flex-shrink-0"
                 >
-                  <i className="fas fa-user-lock mr-2"></i>
-                  Enroll Privately
-                </button>
+                  <i className="fab fa-whatsapp text-emerald-400 group-hover:text-white text-base transition-colors" />
+                </a>
               </div>
-            )}
 
-            <div className="mt-8 text-center">
+              {/* Email */}
+              <div className="flex items-center gap-4 p-4 bg-slate-800/50 rounded-2xl border border-white/5">
+                <div className="w-10 h-10 bg-sky-600/20 rounded-xl flex items-center justify-center flex-shrink-0 border border-sky-500/20">
+                  <i className="fas fa-envelope text-sky-400 text-sm" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-0.5">Email</p>
+                  <p className="text-white font-semibold text-sm truncate">{ADMIN_CONTACT.email}</p>
+                </div>
+                <a
+                  href={`mailto:${ADMIN_CONTACT.email}`}
+                  title="Send Email"
+                  className="w-9 h-9 bg-sky-600/20 hover:bg-sky-500 border border-sky-500/30 hover:border-sky-500 rounded-xl flex items-center justify-center transition-all group flex-shrink-0"
+                >
+                  <i className="fas fa-envelope text-sky-400 group-hover:text-white text-sm transition-colors" />
+                </a>
+              </div>
+
+              {/* Address */}
+              <div className="flex items-start gap-4 p-4 bg-slate-800/50 rounded-2xl border border-white/5">
+                <div className="w-10 h-10 bg-amber-500/20 rounded-xl flex items-center justify-center flex-shrink-0 border border-amber-500/20 mt-0.5">
+                  <i className="fas fa-map-marker-alt text-amber-400 text-sm" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-0.5">Address</p>
+                  <p className="text-white font-semibold text-sm leading-snug">{ADMIN_CONTACT.address}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-3">
               <button
                 onClick={onClose}
-                className="text-slate-500 hover:text-white text-sm transition"
+                className="flex-1 py-3 rounded-xl text-sm font-bold text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 border border-white/5 transition-all"
               >
                 Cancel
               </button>
+              <button
+                onClick={() => setStep(2)}
+                className="flex-1 py-3 rounded-xl text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-500 transition-all flex items-center justify-center gap-2"
+              >
+                Next
+                <i className="fas fa-arrow-right text-xs" />
+              </button>
             </div>
           </div>
-        </div>
-      </div>
+        )}
 
-      {/* Normal enrollment confirmation */}
-      <ConfirmDialog
-        open={showNormalConfirm}
-        variant="success"
-        title="Confirm Standard Enrollment"
-        message="Are you sure you want to enroll in this course publicly through the marketplace?"
-        confirmLabel="Yes, Enroll"
-        cancelLabel="Cancel"
-        loading={isEnrolling}
-        checkboxLabel="I have submitted the payment for this course"
-        checkboxChecked={paymentSubmitted}
-        onCheckboxChange={setPaymentSubmitted}
-        onConfirm={handleNormalConfirm}
-        onCancel={handleNormalCancel}
-      />
-    </>
+        {/* ── STEP 2: Confirm Payment ── */}
+        {step === 2 && (
+          <div className="p-7 sm:p-9">
+            {/* Header */}
+            <div className="text-center mb-7">
+              <div className="w-16 h-16 bg-indigo-500/15 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-4 border border-indigo-500/20">
+                <i className="fas fa-graduation-cap text-indigo-400" />
+              </div>
+              <h2 className="text-xl font-black font-poppins text-white mb-1">Confirm Enrollment</h2>
+              <p className="text-slate-400 text-sm">
+                Please confirm your payment to complete the enrollment request.
+              </p>
+            </div>
+
+            {/* Course fee info */}
+            <div className="p-4 bg-indigo-600/10 border border-indigo-500/20 rounded-2xl mb-6 text-center">
+              <p className="text-slate-400 text-xs font-semibold uppercase tracking-widest mb-1">Course Fee</p>
+              <p className="text-white font-black text-2xl">{price}</p>
+              <p className="text-indigo-400 text-xs mt-1 font-medium truncate">{title}</p>
+            </div>
+
+            {/* Agreement checkbox */}
+            <label className="flex items-start gap-3 cursor-pointer group p-4 bg-slate-800/40 rounded-2xl border border-white/5 hover:bg-slate-800/60 transition-all mb-6">
+              <div className="relative flex items-center justify-center w-5 h-5 flex-shrink-0 mt-0.5">
+                <input
+                  type="checkbox"
+                  className="peer sr-only"
+                  checked={agreed}
+                  onChange={(e) => setAgreed(e.target.checked)}
+                />
+                <div className="absolute inset-0 border-2 border-slate-500 rounded-md bg-slate-900 transition-all peer-checked:bg-indigo-600 peer-checked:border-indigo-600" />
+                <svg className="relative w-3 h-3 text-white opacity-0 peer-checked:opacity-100 transition-all scale-50 peer-checked:scale-100 pointer-events-none z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="4">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <span className="text-sm text-slate-300 font-semibold leading-snug select-none">
+                I agree to pay <span className="text-white font-black">{price}</span> as fee for <span className="text-indigo-400 font-bold">{title}</span>
+              </span>
+            </label>
+
+            {/* Actions */}
+            <div className="flex gap-3">
+              <button
+                onClick={() => setStep(1)}
+                className="flex-1 py-3 rounded-xl text-sm font-bold text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 border border-white/5 transition-all flex items-center justify-center gap-2"
+              >
+                <i className="fas fa-arrow-left text-xs" />
+                Back
+              </button>
+              <button
+                onClick={onConfirm}
+                disabled={!agreed || isEnrolling}
+                className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 ${
+                  agreed && !isEnrolling
+                    ? "bg-indigo-600 hover:bg-indigo-500 text-white"
+                    : "bg-slate-700 text-slate-500 cursor-not-allowed"
+                }`}
+              >
+                {isEnrolling ? (
+                  <><i className="fas fa-spinner fa-spin text-xs" /> Enrolling...</>
+                ) : (
+                  <><i className="fas fa-check text-xs" /> Confirm Enrollment</>
+                )}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
   );
 };
 

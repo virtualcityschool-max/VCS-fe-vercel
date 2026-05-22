@@ -300,7 +300,7 @@ const SlotCalendarView = ({ slots = [], loading = false, onDelete, onEdit, delet
             return (
               <div
                 key={cellKey}
-                className={`min-h-[60px] sm:min-h-[100px] border-b border-r border-slate-800/30 p-1 sm:p-1.5 flex flex-col gap-1 sm:gap-1.5 transition-colors duration-300 ${
+                className={`min-h-[60px] max-h-[60px] sm:min-h-[100px] sm:max-h-[100px] overflow-y-auto custom-scrollbar border-b border-r border-slate-800/30 p-1 sm:p-1.5 flex flex-col gap-1 sm:gap-1.5 transition-colors duration-300 ${
                   isToday ? "bg-indigo-500/5" : "hover:bg-white/[0.01]"
                 }`}
               >

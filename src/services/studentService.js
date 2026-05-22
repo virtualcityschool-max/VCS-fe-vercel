@@ -305,6 +305,17 @@ export const studentService = {
     return response.data;
   },
 
+  // Withdraw pending enrollment request
+  withdrawEnrollment: async (courseId) => {
+    try {
+      const response = await axiosInstance.delete(`/courses/${courseId}/withdraw/`);
+      return response.data;
+    } catch (error) {
+      console.error("Error withdrawing enrollment request:", error);
+      throw new Error("Failed to withdraw enrollment request");
+    }
+  },
+
   // Unenroll from course
   unenrollFromCourse: async (courseId) => {
     try {

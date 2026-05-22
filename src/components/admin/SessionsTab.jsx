@@ -263,15 +263,6 @@ const SessionsTab = ({
 
         <FilterSelect
           className="w-full sm:w-auto"
-          value={sessionFilters.view}
-          onChange={(e) => setSessionFilters({ ...sessionFilters, view: e.target.value })}
-        >
-          <option value="">All Sessions</option>
-          <option value="parent">Parent Session</option>
-        </FilterSelect>
-
-        <FilterSelect
-          className="w-full sm:w-auto"
           value={sessionFilters.course}
           onChange={(e) => setSessionFilters({ ...sessionFilters, course: e.target.value })}
         >

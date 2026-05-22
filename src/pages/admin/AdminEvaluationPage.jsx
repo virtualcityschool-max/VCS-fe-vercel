@@ -14,6 +14,7 @@ const AdminEvaluationPage = () => {
   const [refreshKey, setRefreshKey]                 = useState(0);
 
   const [publicStudents, setPublicStudents]         = useState([]);
+  const [gradingScale, setGradingScale]             = useState(null);
   const [loadingPublic, setLoadingPublic]           = useState(false);
 
   const [privateList, setPrivateList]               = useState([]);
@@ -63,6 +64,7 @@ const AdminEvaluationPage = () => {
         .flatMap((r) => r.students || [])
         .filter((s) => !s.is_private_enrollment);
       setPublicStudents(students);
+      setGradingScale(results[0]?.grading_scale || null);
     } catch {
       toastManager.error("Failed to load evaluations");
       setPublicStudents([]);
@@ -226,7 +228,7 @@ const AdminEvaluationPage = () => {
                   </div>
                 )}
               </div>
-              <EvaluationMatrix key={`public-${refreshKey}`} students={publicStudents} courseStatus={courseStatus} />
+              <EvaluationMatrix key={`public-${refreshKey}`} students={publicStudents} courseStatus={courseStatus} gradingScale={gradingScale} />
             </>
           ) : selectedCourseId ? (
             <div className="bg-slate-900/50 border border-slate-800 border-dashed rounded-3xl p-12 text-center">
@@ -273,7 +275,7 @@ const AdminEvaluationPage = () => {
               ))}
             </div>
           ) : privateEval ? (
-            <EvaluationMatrix key={`private-${refreshKey}`} students={[privateEval]} courseStatus={courseStatus} />
+            <EvaluationMatrix key={`private-${refreshKey}`} students={[privateEval]} courseStatus={courseStatus} gradingScale={gradingScale} />
           ) : (
             <div className="bg-slate-900/50 border border-slate-800 border-dashed rounded-3xl p-12 text-center">
               <div className="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-3">

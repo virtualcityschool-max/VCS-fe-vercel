@@ -289,7 +289,7 @@ const StudentTutors = () => {
                         className="shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white transition text-xs font-bold shadow shadow-indigo-500/20"
                       >
                         <i className="fas fa-calendar-plus text-[10px]" />
-                        Book More Slots
+                        Book More Sessions
                       </Link>
                     )}
                   </div>

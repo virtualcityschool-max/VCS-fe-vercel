@@ -255,6 +255,7 @@ const AdminUsersPage = () => {
       role: userData.role,
       first_name: userData.first_name?.trim() || "",
       last_name: userData.last_name?.trim() || "",
+      is_active: true,
     };
 
     if (userData.role === "parent" && userData.selected_students?.length > 0) {

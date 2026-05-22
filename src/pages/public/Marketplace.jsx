@@ -6,6 +6,7 @@ import {
   enrollInCourseNormal,
   enrollInCoursePrivate,
   unenrollFromCourse,
+  withdrawEnrollment,
   fetchStudentDashboard,
 } from "../../store/slices/studentDashboardSlice";
 import { Button, Input, FilterSelect, SearchInput } from "../../components/ui";
@@ -32,6 +33,7 @@ const Marketplace = () => {
   const [enrollmentModalOpen, setEnrollmentModalOpen] = useState(false);
   const [paymentSubmitted, setPaymentSubmitted] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [withdrawConfirm, setWithdrawConfirm] = useState({ open: false, courseId: null, courseTitle: "" });
   const [selectedCourse, setSelectedCourse] = useState(null);
   const submissionGuard = useSubmissionGuard();
 
@@ -42,7 +44,7 @@ const Marketplace = () => {
   const { courses, isLoading, error, categories } = useSelector((state) => state.courses);
 
   // Get student dashboard state for enrollment tracking
-  const { enrollingCourseIds, unenrollingCourseIds, enrolledCourses } =
+  const { enrollingCourseIds, unenrollingCourseIds, withdrawingCourseIds, enrolledCourses } =
     useSelector((state) => state.studentDashboard);
 
   const { enrollmentIntent } = useSelector((state) => state.ui);
@@ -325,6 +327,23 @@ const Marketplace = () => {
     });
   };
 
+  // Handle withdraw enrollment request
+  const handleWithdrawEnrollment = (courseId, courseTitle) => {
+    setWithdrawConfirm({ open: true, courseId, courseTitle });
+  };
+
+  const confirmWithdrawEnrollment = async () => {
+    const { courseId } = withdrawConfirm;
+    setWithdrawConfirm({ open: false, courseId: null, courseTitle: "" });
+    try {
+      await dispatch(withdrawEnrollment(courseId)).unwrap();
+      toastManager.success("Enrollment request cancelled");
+      dispatch(fetchAllCourses());
+    } catch (error) {
+      showApiError(error);
+    }
+  };
+
   // Loading state
   if (isLoading) {
     return (
@@ -472,8 +491,10 @@ const Marketplace = () => {
                   enrolled={isCourseEnrolled(course)}
                   isEnrolling={enrollingCourseIds.includes(course.id)}
                   isUnenrolling={unenrollingCourseIds.includes(course.id)}
+                  isWithdrawing={withdrawingCourseIds.includes(course.id)}
                   onEnroll={handleEnrollCourse}
                   onUnenroll={handleUnenrollCourse}
+                  onWithdraw={handleWithdrawEnrollment}
                 />
               ))}
             </div>
@@ -481,25 +502,30 @@ const Marketplace = () => {
       </div>
 
       {/* Enrollment Type Modal */}
-      <ConfirmDialog
-        open={enrollmentModalOpen}
-        variant="primary"
-        title="Confirm Enrollment"
-        message={`Are you sure you want to enroll in "${selectedCourse?.title}"?`}
-        confirmLabel="Yes, Enroll Now"
-        cancelLabel="Cancel"
-        loading={selectedCourse ? enrollingCourseIds.includes(selectedCourse.id) : false}
-        checkboxLabel="I have submitted the payment for this course"
-        checkboxChecked={paymentSubmitted}
-        onCheckboxChange={setPaymentSubmitted}
+      <EnrollmentTypeModal
+        isOpen={enrollmentModalOpen}
+        course={selectedCourse}
+        isEnrolling={selectedCourse ? enrollingCourseIds.includes(selectedCourse.id) : false}
         onConfirm={() => handleEnrollmentTypeSelect("normal")}
-        onCancel={closeEnrollmentModal}
+        onClose={closeEnrollmentModal}
       />
 
-      <AuthRequiredModal 
-        isOpen={authModalOpen} 
-        onClose={() => setAuthModalOpen(false)} 
+      <AuthRequiredModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
         message="Please sign in or create an account to enroll in courses and track your progress."
+      />
+
+      <ConfirmDialog
+        open={withdrawConfirm.open}
+        variant="danger"
+        title="Cancel Enrollment Request"
+        message={`Are you sure you want to cancel your enrollment request for "${withdrawConfirm.courseTitle}"?`}
+        confirmLabel="Yes, Cancel Request"
+        cancelLabel="Keep Request"
+        loading={withdrawingCourseIds.includes(withdrawConfirm.courseId)}
+        onConfirm={confirmWithdrawEnrollment}
+        onCancel={() => setWithdrawConfirm({ open: false, courseId: null, courseTitle: "" })}
       />
     </section>
   );

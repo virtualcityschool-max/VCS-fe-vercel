@@ -313,6 +313,20 @@ const AppInner = () => {
         </main>
         {showNavbar && <Footer />}
 
+        {/* Floating WhatsApp support button */}
+        <a
+          href="https://wa.me/923361062993"
+          target="_blank"
+          rel="noopener noreferrer"
+          title="24/7 Support on WhatsApp"
+          className="fixed bottom-6 right-6 z-[9998] group flex items-center gap-0 hover:gap-3 bg-emerald-500 hover:bg-emerald-400 text-white rounded-full shadow-[0_8px_30px_rgba(16,185,129,0.5)] hover:shadow-[0_8px_40px_rgba(16,185,129,0.7)] transition-all duration-300 overflow-hidden w-14 h-14 hover:w-auto hover:px-5"
+        >
+          <i className="fab fa-whatsapp text-2xl flex-shrink-0 mx-auto group-hover:mx-0 transition-all duration-300" />
+          <span className="text-sm font-black tracking-wide whitespace-nowrap max-w-0 group-hover:max-w-xs opacity-0 group-hover:opacity-100 transition-all duration-300 overflow-hidden">
+            24/7 Support
+          </span>
+        </a>
+
         {/* Global Overlays */}
         <section className="relative z-[9999]">
           <AuthModals />

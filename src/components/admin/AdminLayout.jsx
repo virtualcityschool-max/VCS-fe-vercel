@@ -62,7 +62,7 @@ const AdminLayout = () => {
   }, [dispatch, activeTab]);
 
   React.useEffect(() => {
-    if (activeTab === "sessions") dispatch(fetchSessions());
+    if (activeTab === "sessions") dispatch(fetchSessions({ view: "parent" }));
   }, [dispatch, activeTab]);
 
   if (activeTab === null) return <Outlet />;
