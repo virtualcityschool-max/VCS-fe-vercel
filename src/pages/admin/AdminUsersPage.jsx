@@ -119,6 +119,14 @@ const AdminUsersPage = () => {
   //   handleFetchUsers();
   // }, [handleFetchUsers]);
 
+  // On mount: if we arrived with filters from dashboard navigation, fetch immediately with those filters
+  useEffect(() => {
+    if (location.state?.filters) {
+      handleFetchUsers();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Re-fetch when any filter changes (not on mount — AdminLayout owns the initial fetch)
   useEffect(() => {
     const current = { role: usersFilters.role, is_active: usersFilters.is_active, ordering: usersFilters.ordering, search: usersFilters.search };

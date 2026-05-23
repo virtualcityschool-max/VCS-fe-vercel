@@ -30,7 +30,7 @@ const LiveScheduleList = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const liveSchedule = useSelector(selectLiveSchedule);
-  const { formatDate, formatTime, timezone } = useDateFormatters();
+  const { formatDate, formatTime, timezone, timezoneAbbr } = useDateFormatters();
   const isJoiningSession = useSelector(
     (state) => state.studentDashboard.isJoiningSession,
   );
@@ -57,15 +57,18 @@ const LiveScheduleList = () => {
       .finally(() => setSlotsLoading(false));
   }, []);
 
-  const openMeetingLink = (link) => {
+  const openMeetingLink = (link, win) => {
     if (!link || !link.startsWith("http")) {
+      win?.close();
       toastManager.error("No valid meeting link found");
       return;
     }
     try {
       new URL(link);
-      window.open(link, "_blank", "noopener,noreferrer");
+      if (win) win.location.href = link;
+      else window.open(link, "_blank", "noopener,noreferrer");
     } catch {
+      win?.close();
       toastManager.error("Invalid meeting link format");
     }
   };
@@ -79,15 +82,21 @@ const LiveScheduleList = () => {
   };
 
   const handleJoinSession = async (session) => {
+    if (!isSlotJoinable(session)) {
+      setTooEarlyOpen(true);
+      return;
+    }
     const sessionId = session?.session_id ?? session?.id;
     setLoadingSessionId(sessionId);
     setLoadingAction("join");
+    const meetWin = window.open("", "_blank");
     try {
       const result = await dispatch(startStudentSession(sessionId)).unwrap();
       const meetingLink = result?.meeting_link || session?.meeting_link;
-      openMeetingLink(meetingLink);
+      openMeetingLink(meetingLink, meetWin);
       dispatch(fetchStudentDashboard());
     } catch (err) {
+      meetWin?.close();
       const msg = extractApiErrorMessage(err);
       if ((msg === "You cannot join before the scheduled time.") || (msg === "You can join up to 30 minutes before the scheduled time.")) {
         setTooEarlyOpen(true);
@@ -262,7 +271,7 @@ const LiveScheduleList = () => {
                       </div>
                       <div className="flex items-center gap-1.5">
                         <i className="fas fa-clock text-indigo-400/60" />
-                        <span>{formatTime(slot.date + "T" + slot.start_time)} – {formatTime(slot.date + "T" + slot.end_time)}</span>
+                        <span>{formatTime(slot.date + "T" + slot.start_time)} – {formatTime(slot.date + "T" + slot.end_time)}{timezoneAbbr && ` ${timezoneAbbr}`}</span>
                       </div>
                     </div>
                   </div>
@@ -372,7 +381,7 @@ const LiveScheduleList = () => {
                   </div>
                   <div className="flex items-center gap-1.5">
                     <i className="fas fa-clock text-indigo-400/60"></i>
-                    <span>{formatTime(session.scheduled_at)}</span>
+                    <span>{formatTime(session.scheduled_at)}{timezoneAbbr && ` ${timezoneAbbr}`}</span>
                   </div>
                   {/* {session.recurring_schedule && (
                     <div className="flex items-center gap-1">
@@ -472,7 +481,7 @@ const LiveScheduleList = () => {
                     </button>
                     <div className="absolute bottom-full right-0 mb-3 px-4 py-2 bg-slate-800 border border-white/10 text-white text-[10px] rounded-xl whitespace-nowrap opacity-0 group-hover/tooltip:opacity-100 transition-all pointer-events-none z-20 shadow-2xl">
                       <p className="text-slate-400 font-bold uppercase mb-0.5">Join Window</p>
-                      <p className="font-black text-white">{getWindowLabel(session.scheduled_at, timezone) || "Check schedule"}</p>
+                      <p className="font-black text-white">{getWindowLabel(session.scheduled_at, timezone, timezoneAbbr) || "Check schedule"}</p>
                     </div>
                   </div>
                 )}

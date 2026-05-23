@@ -267,6 +267,18 @@ export const formatDate = (isoString, timeZone) => {
   }
 };
 
+// "AST", "PKT", "EST" — short timezone label; falls back to browser local if timeZone is omitted
+export const getTimezoneAbbr = (timeZone) => {
+  try {
+    const opts = { timeZoneName: "short", ...(timeZone ? { timeZone } : {}) };
+    return new Intl.DateTimeFormat("en", opts)
+      .formatToParts(new Date())
+      .find((p) => p.type === "timeZoneName")?.value || "";
+  } catch {
+    return "";
+  }
+};
+
 // "12:28 PM"
 export const formatTime = (isoString, timeZone) => {
   if (!isoString) return "";

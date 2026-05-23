@@ -89,7 +89,12 @@ const ProtectedRoute = ({ allowedRoles = [] }) => {
     );
   }
 
-  if (!isLoggedIn) return <Navigate to="/" replace />;
+  if (!isLoggedIn) {
+    if (allowedRoles.length === 1 && allowedRoles[0] === "admin") {
+      return <Navigate to="/?adminLogin=true" replace />;
+    }
+    return <Navigate to="/" replace />;
+  }
 
   if (allowedRoles.length > 0 && !allowedRoles.includes(role)) {
     const roleRedirects = {

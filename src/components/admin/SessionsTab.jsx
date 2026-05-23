@@ -37,7 +37,7 @@ const SessionsTab = ({
   sessionFilters,
   setSessionFilters,
 }) => {
-  const { formatDate, formatTime } = useDateFormatters();
+  const { formatDate, formatTime, timezoneAbbr } = useDateFormatters();
   const [view, setView] = useState("table");
   const [calendarMonth, setCalendarMonth] = useState(null); // { year, month } — null = auto from data
 
@@ -152,6 +152,14 @@ const SessionsTab = ({
 
   const handleUpdateSession = async (e) => {
     e.preventDefault();
+    if (
+      editSessionForm.start_date &&
+      editSessionForm.recurrence_end_date &&
+      editSessionForm.start_date > editSessionForm.recurrence_end_date
+    ) {
+      setEditSessionErrors({ recurrence_end_date: "End date cannot be before start date" });
+      return;
+    }
     try {
       await onSessionUpdate(editSessionForm);
     } catch (error) {
@@ -350,7 +358,7 @@ const SessionsTab = ({
                     <div className="flex flex-wrap gap-2 text-xs text-slate-400 mb-3">
                       <span><i className="fas fa-calendar mr-1 text-indigo-400"></i>{formatDate(session.scheduled_at || session.start_time)}</span>
                       {formatTime(session.scheduled_at || session.start_time) && (
-                        <span><i className="fas fa-clock mr-1 text-indigo-400"></i>{formatTime(session.scheduled_at || session.start_time)}</span>
+                        <span><i className="fas fa-clock mr-1 text-indigo-400"></i>{formatTime(session.scheduled_at || session.start_time)}{timezoneAbbr && ` ${timezoneAbbr}`}</span>
                       )}
                       {session.recurrence_days?.length > 0 ? (
                         <span><i className="fas fa-repeat mr-1 text-purple-400"></i>{session.recurrence_days.join(", ")}</span>
@@ -405,7 +413,7 @@ const SessionsTab = ({
                         <div className="text-slate-300 text-sm">{formatDate(session.scheduled_at || session.start_time)}</div>
                         {formatTime(session.scheduled_at || session.start_time) && (
                           <div className="text-slate-500 text-xs mt-0.5">
-                            <i className="fas fa-clock mr-1"></i>{formatTime(session.scheduled_at || session.start_time)}
+                            <i className="fas fa-clock mr-1"></i>{formatTime(session.scheduled_at || session.start_time)}{timezoneAbbr && ` ${timezoneAbbr}`}
                           </div>
                         )}
                       </td>

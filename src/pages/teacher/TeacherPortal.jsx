@@ -46,7 +46,7 @@ const fmtSlotDate = (d) =>
 const TeacherPortal = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { timezone, formatDate, formatTime } = useDateFormatters();
+  const { timezone, formatDate, formatTime, timezoneAbbr } = useDateFormatters();
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [courseId, setCourseId] = useState("");
@@ -102,8 +102,13 @@ const TeacherPortal = () => {
   };
 
   const handleStartSession = async (session) => {
+    if (!isWithinSessionWindow(session?.schedule_at)) {
+      setTooEarlyOpen(true);
+      return;
+    }
     const sessionId = session?.id ?? session?.session_id;
     const fallbackLink = session?.meeting_link;
+    const meetWin = window.open("", "_blank");
     try {
       const result = await dispatch(startLiveSession(sessionId)).unwrap();
       const meetingLink = result?.meeting_link || fallbackLink;
@@ -111,21 +116,25 @@ const TeacherPortal = () => {
       if (meetingLink && meetingLink.startsWith("http")) {
         try {
           new URL(meetingLink);
-          window.open(meetingLink, "_blank", "noopener,noreferrer");
+          if (meetWin) meetWin.location.href = meetingLink;
         } catch {
+          meetWin?.close();
           toastManager.error("Invalid meeting link format");
         }
       } else {
+        meetWin?.close();
         toastManager.error("No valid meeting link found");
       }
 
       await dispatch(fetchTeacherDashboard()).unwrap();
     } catch (err) {
+      meetWin?.close();
       setTooEarlyOpen(true);
     }
   };
 
   const handleJoinSession = async (sessionId) => {
+    const meetWin = window.open("", "_blank");
     try {
       const result = await dispatch(joinLiveSession(sessionId)).unwrap();
       const meetingLink = result?.meeting_link;
@@ -133,15 +142,18 @@ const TeacherPortal = () => {
       if (meetingLink && meetingLink.startsWith("http")) {
         try {
           new URL(meetingLink);
-          window.open(meetingLink, "_blank", "noopener,noreferrer");
+          if (meetWin) meetWin.location.href = meetingLink;
         } catch {
+          meetWin?.close();
           toastManager.error("Invalid meeting link format");
         }
       } else {
+        meetWin?.close();
         toastManager.error("No valid meeting link found");
       }
       await dispatch(fetchTeacherDashboard()).unwrap();
     } catch (err) {
+      meetWin?.close();
       const msg = extractApiErrorMessage(err);
       if (msg === "You cannot join before the scheduled time." || msg === "You can join up to 30 minutes before the scheduled time.") {
         setTooEarlyOpen(true);
@@ -396,7 +408,7 @@ const TeacherPortal = () => {
                             </div>
                             <div className="flex items-center gap-1.5">
                               <i className="fas fa-clock text-indigo-400/60" />
-                              <span>{formatTime(slot.date + "T" + slot.start_time)} – {formatTime(slot.date + "T" + slot.end_time)}</span>
+                              <span>{formatTime(slot.date + "T" + slot.start_time)} – {formatTime(slot.date + "T" + slot.end_time)}{timezoneAbbr && ` ${timezoneAbbr}`}</span>
                             </div>
                           </div>
                           {slot.note && (
@@ -440,7 +452,7 @@ const TeacherPortal = () => {
                 dashboard.todays_schedule.map((session) => {
                   const schedDate = new Date(session.schedule_at);
                   const dayLabel = schedDate.toLocaleDateString([], { weekday: "short", month: "short", day: "numeric", ...(timezone ? { timeZone: timezone } : {}) });
-                  const timeLabel = formatTime(session.schedule_at);
+                  const timeLabel = formatTime(session.schedule_at) + (timezoneAbbr ? ` ${timezoneAbbr}` : "");
                   const isLive = session.status === "live";
 
                   return (
@@ -489,7 +501,7 @@ const TeacherPortal = () => {
                         <div className="flex items-center gap-3">
                           {session.status === "scheduled" && (() => {
                             let canStart = true;
-                            const windowLabel = getWindowLabel(session.schedule_at, timezone);
+                            const windowLabel = getWindowLabel(session.schedule_at, timezone, timezoneAbbr);
                             return (
                               <div className="relative group/tooltip">
                                 <button

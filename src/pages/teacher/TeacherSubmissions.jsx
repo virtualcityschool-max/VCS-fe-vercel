@@ -395,25 +395,30 @@ const TeacherSubmissions = () => {
 
                 {/* Body */}
                 <div className="p-6 space-y-5">
-                  {/* Text answer + Attachment side by side */}
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}>
+                  {/* Text answer + Attachment */}
+                  <div className="space-y-4">
                     {/* Text answer */}
-                    <div style={{ flex: "1 1 200px" }} className="rounded-xl overflow-hidden border border-slate-700/50 bg-slate-800/50">
+                    <div className="w-full rounded-xl overflow-hidden border border-slate-700/50 bg-slate-800/50">
                       <div className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 border-b border-slate-700/50">
                         <div className="w-6 h-6 rounded-md bg-indigo-500/15 flex items-center justify-center">
                           <i className="fas fa-pencil-alt text-indigo-400 text-[10px]" />
                         </div>
                         <span className="text-[11px] font-black uppercase tracking-widest text-slate-400">Text Answer</span>
                       </div>
-                      <div className="p-4 text-slate-300 text-sm leading-relaxed whitespace-pre-wrap min-h-[96px]">
-                        {selectedSubmission.text_answer || (
-                          <span className="text-slate-500 italic">No text submitted</span>
+                      <div className="p-4 min-h-[96px]">
+                        {selectedSubmission.text_answer ? (
+                          <div
+                            className="submission-content text-sm leading-relaxed"
+                            dangerouslySetInnerHTML={{ __html: selectedSubmission.text_answer }}
+                          />
+                        ) : (
+                          <span className="text-slate-500 italic text-sm">No text submitted</span>
                         )}
                       </div>
                     </div>
 
                     {/* Attachment */}
-                    <div style={{ flex: "1 1 200px" }} className="rounded-xl overflow-hidden border border-slate-700/50 bg-slate-800/50">
+                    <div className="w-full rounded-xl overflow-hidden border border-slate-700/50 bg-slate-800/50">
                       <div className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 border-b border-slate-700/50">
                         <div className="w-6 h-6 rounded-md bg-emerald-500/15 flex items-center justify-center">
                           <i className="fas fa-paperclip text-emerald-400 text-[10px]" />

@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import StatCard from "./StatCard";
 import {
   BarChart,
@@ -45,7 +46,7 @@ const EnrollmentTooltip = ({ active, payload }) => {
 };
 
 // ── Stat card with hover tooltip breakdown ───────────────────────────────────
-const StatCardTip = ({ label, value, icon, color, items }) => {
+const StatCardTip = ({ label, value, icon, color, items, onClick }) => {
   const colorClasses = {
     indigo:
       "from-indigo-500/20 to-indigo-600/20 border-indigo-500/20 text-indigo-400",
@@ -62,7 +63,8 @@ const StatCardTip = ({ label, value, icon, color, items }) => {
   return (
     <div className="relative group/tip">
       <div
-        className={`relative overflow-hidden bg-gradient-to-br ${colorClasses[color]} rounded-xl px-4 py-4 border backdrop-blur-sm transition-all duration-300 group-hover/tip:scale-[1.02] group-hover/tip:shadow-lg cursor-default`}
+        onClick={onClick}
+        className={`relative overflow-hidden bg-gradient-to-br ${colorClasses[color]} rounded-xl px-4 py-4 border backdrop-blur-sm transition-all duration-300 group-hover/tip:scale-[1.02] group-hover/tip:shadow-lg ${onClick ? "cursor-pointer" : "cursor-default"}`}
       >
         <div className="absolute top-0 right-0 w-14 h-14 bg-white/5 rounded-full -mr-6 -mt-6" />
         <div className="relative z-10 flex items-center gap-2.5 mb-2.5">
@@ -108,7 +110,12 @@ const StatCardTip = ({ label, value, icon, color, items }) => {
   );
 };
 
+const USER_FILTERS_BASE = { search: "", is_active: "", ordering: "-date_joined" };
+const toUsersTab = (navigate, role = "") =>
+  () => navigate("/admin/users", { state: { filters: { ...USER_FILTERS_BASE, role } } });
+
 const OverviewTab = ({ analytics, analyticsLoading, analyticsError }) => {
+  const navigate = useNavigate();
   if (analyticsLoading) {
     return (
       <div className="space-y-3">
@@ -192,6 +199,7 @@ const OverviewTab = ({ analytics, analyticsLoading, analyticsError }) => {
           value={analytics.users.total}
           icon="fas fa-users"
           color="indigo"
+          onClick={toUsersTab(navigate)}
           items={[
             {
               label: "Active",
@@ -216,6 +224,7 @@ const OverviewTab = ({ analytics, analyticsLoading, analyticsError }) => {
           icon="fas fa-user-shield"
           color="rose"
           compact
+          onClick={toUsersTab(navigate, "admin")}
         />
         <StatCard
           label="Teachers"
@@ -223,6 +232,7 @@ const OverviewTab = ({ analytics, analyticsLoading, analyticsError }) => {
           icon="fas fa-chalkboard-teacher"
           color="pink"
           compact
+          onClick={toUsersTab(navigate, "teacher")}
         />
         <StatCard
           label="Parents"
@@ -230,6 +240,7 @@ const OverviewTab = ({ analytics, analyticsLoading, analyticsError }) => {
           icon="fas fa-user-friends"
           color="amber"
           compact
+          onClick={toUsersTab(navigate, "parent")}
         />
         <StatCard
           label="Students"
@@ -237,12 +248,14 @@ const OverviewTab = ({ analytics, analyticsLoading, analyticsError }) => {
           icon="fas fa-graduation-cap"
           color="emerald"
           compact
+          onClick={toUsersTab(navigate, "student")}
         />
         <StatCardTip
           label="Total Courses"
           value={analytics.courses.total}
           icon="fas fa-book"
           color="purple"
+          onClick={() => navigate("/admin/courses")}
           items={[
             {
               label: "Total Enrollments",

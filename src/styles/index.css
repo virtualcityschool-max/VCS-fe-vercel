@@ -260,6 +260,18 @@ h3,
 .course-outline-content strong { color: #e2e8f0; }
 .course-outline-content a { color: #818cf8; }
 .course-outline-content .ql-ui { display: none; }
+
+/* Submission answer rendered HTML */
+.submission-content h1,
+.submission-content h2,
+.submission-content h3 { color: #f1f5f9; font-family: var(--font-poppins); margin-bottom: 0.5rem; }
+.submission-content p { color: #cbd5e1; line-height: 1.7; margin-bottom: 0.5rem; }
+.submission-content ul { list-style-type: disc !important; padding-left: 1.5rem; margin-bottom: 1rem; color: #cbd5e1; }
+.submission-content ol { list-style-type: decimal !important; padding-left: 1.5rem; margin-bottom: 1rem; color: #cbd5e1; }
+.submission-content li { margin-bottom: 0.25rem; }
+.submission-content strong { color: #e2e8f0; }
+.submission-content a { color: #818cf8; }
+.submission-content .ql-ui { display: none; }
  
  @keyframes float {
    0%, 100% { transform: translateY(0); }

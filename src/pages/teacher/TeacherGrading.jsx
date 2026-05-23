@@ -337,7 +337,7 @@ const TeacherGrading = ({
                   <div className="mb-4">
                     <PreviewButton
                       url={getStorageUrl(assignment.file_url)}
-                      className="w-full !bg-indigo-600/10 !border-indigo-500/20 !text-indigo-400 hover:!bg-indigo-600 hover:!text-white shadow-sm !rounded-xl"
+                      className="!bg-indigo-600/10 !border-indigo-500/20 !text-indigo-400 hover:!bg-indigo-600 hover:!text-white shadow-sm !rounded-xl"
                     />
                   </div>
                 )}
@@ -481,7 +481,14 @@ const TeacherGrading = ({
                       Answer
                     </h3>
                     <div className="bg-slate-800 p-4 rounded-xl">
-                      {selectedSubmission.text_answer || "No text submitted"}
+                      {selectedSubmission.text_answer ? (
+                        <div
+                          className="submission-content text-sm leading-relaxed"
+                          dangerouslySetInnerHTML={{ __html: selectedSubmission.text_answer }}
+                        />
+                      ) : (
+                        <span className="text-slate-500 italic text-sm">No text submitted</span>
+                      )}
                     </div>
                   </div>
                   <div className="mb-6">

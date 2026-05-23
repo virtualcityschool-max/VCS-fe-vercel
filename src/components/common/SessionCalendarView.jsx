@@ -23,7 +23,7 @@ const getStatusCls = (status) => {
 };
 
 const SessionCalendarView = ({ sessions = [], loading = false }) => {
-  const { formatTime } = useDateFormatters();
+  const { formatTime, timezoneAbbr } = useDateFormatters();
   const [calendarMonth, setCalendarMonth] = useState(null);
 
   // Parent sessions (is_child === false) drive the date range when present
@@ -275,9 +275,12 @@ const SessionCalendarView = ({ sessions = [], loading = false }) => {
                     >
                       <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-indigo-500 opacity-50 group-hover:opacity-100 transition-opacity" />
                       
-                      <div className="flex items-center gap-1 text-indigo-400/80 mb-0.5">
-                        <i className="far fa-clock text-[7px] sm:text-[8px]"></i>
-                        <span className="text-[8px] sm:text-[9px] font-bold">{formatTime(session.scheduled_at)}</span>
+                      <div className="flex items-center justify-between gap-1 mb-0.5">
+                        <div className="flex items-center gap-1 text-indigo-400/80">
+                          <i className="far fa-clock text-[7px] sm:text-[8px]"></i>
+                          <span className="text-[8px] sm:text-[9px] font-bold">{formatTime(session.scheduled_at)}</span>
+                        </div>
+                        {timezoneAbbr && <span className="text-[6px] sm:text-[7px] font-black uppercase tracking-wide px-1 py-0.5 rounded bg-slate-700/60 border border-slate-600/40 text-slate-400">{timezoneAbbr}</span>}
                       </div>
 
                       <p className="text-[9px] sm:text-[10px] font-bold text-slate-100 leading-tight line-clamp-1 group-hover:text-indigo-300 transition-colors">

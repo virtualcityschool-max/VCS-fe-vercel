@@ -34,7 +34,7 @@ const openMeetLink = (link) => {
 };
 
 const StudentTutors = () => {
-  const { formatDate, formatTime } = useDateFormatters();
+  const { formatDate, formatTime, timezoneAbbr } = useDateFormatters();
   const [slots, setSlots] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -321,7 +321,7 @@ const StudentTutors = () => {
                               </div>
                               <div>
                                 <p className="text-sm font-semibold text-white">
-                                  {formatTime(slot.date + "T" + slot.start_time)} – {formatTime(slot.date + "T" + slot.end_time)}
+                                  {formatTime(slot.date + "T" + slot.start_time)} – {formatTime(slot.date + "T" + slot.end_time)}{timezoneAbbr && ` ${timezoneAbbr}`}
                                 </p>
                                 <p className="text-xs text-slate-500 mt-0.5">{formatDate(slot.date + "T" + slot.start_time)}</p>
                               </div>

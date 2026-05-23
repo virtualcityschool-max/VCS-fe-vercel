@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useSearchParams } from "react-router-dom";
 import { setAuthModal } from "../../store/slices/uiSlice";
 import { useAuth, useNavigation } from "../../hooks";
 import Button from "../ui/Button";
@@ -9,8 +10,12 @@ const Navbar = ({ variant = "default" }) => {
   const dispatch = useDispatch();
   const { isLoggedIn } = useAuth();
   const { navigate, isActivePath } = useNavigation();
+  const [searchParams] = useSearchParams();
+  const isAdminLoginMode = searchParams.get("adminLogin") === "true";
 
   const handleSetAuthModal = (modal) => dispatch(setAuthModal(modal));
+  const handleLoginClick = () =>
+    handleSetAuthModal(isAdminLoginMode ? { type: "login", adminMode: true } : "login");
 
   // Public variant (for PublicHome)
   if (variant === "public") {
@@ -49,7 +54,7 @@ const Navbar = ({ variant = "default" }) => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => handleSetAuthModal("login")}
+                  onClick={handleLoginClick}
                 >
                   Login
                 </Button>

@@ -144,11 +144,6 @@ const AdminSessionsPage = () => {
       return;
     }
 
-    if ((session.enrollment_count ?? 0) >= 1) {
-      toastManager.error("Cannot edit: this session has active enrollments.");
-      return;
-    }
-
     const rawDateTime = session.start_time || session.scheduled_at;
     let startDate = "";
     let startTime = "";
@@ -354,11 +349,6 @@ const AdminSessionsPage = () => {
   const handleDeleteSession = (sessionId) => {
     const session = sessions?.data?.find((s) => s.id === sessionId);
     const sessionTitle = session?.title || "this session";
-
-    if ((session?.enrollment_count ?? 0) >= 1) {
-      toastManager.error("Cannot delete session as enrollment exists against this session.");
-      return;
-    }
 
     setConfirmDialog({ open: true, sessionId, sessionTitle });
   };

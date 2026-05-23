@@ -21,7 +21,7 @@ const fmtDate = (d) =>
   });
 
 const TeacherSlotsCalendarSection = ({ teacherId }) => {
-  const { formatDate, formatTime } = useDateFormatters();
+  const { formatDate, formatTime, timezoneAbbr } = useDateFormatters();
   const [slots, setSlots] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -160,7 +160,7 @@ const TeacherSlotsCalendarSection = ({ teacherId }) => {
                 <span className="font-semibold text-white">{formatDate(confirmSlot.date + "T" + confirmSlot.start_time)}</span>{" "}
                 from{" "}
                 <span className="font-semibold text-white tabular-nums">
-                  {formatTime(confirmSlot.date + "T" + confirmSlot.start_time)} – {formatTime(confirmSlot.date + "T" + confirmSlot.end_time)}
+                  {formatTime(confirmSlot.date + "T" + confirmSlot.start_time)} – {formatTime(confirmSlot.date + "T" + confirmSlot.end_time)}{timezoneAbbr && ` ${timezoneAbbr}`}
                 </span>.
               </p>
               {confirmSlot.booked_by_name ? (

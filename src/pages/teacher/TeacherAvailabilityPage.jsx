@@ -282,7 +282,7 @@ const getDatesInRange = (from, to) => {
 };
 
 const CreateAvailabilityModal = ({ onClose, onCreated }) => {
-  const { formatDate, formatTime } = useDateFormatters();
+  const { formatDate, formatTime, timezoneAbbr } = useDateFormatters();
   const [entries, setEntries] = useState([]);
   const [rangeFrom, setRangeFrom] = useState("");
   const [rangeTo, setRangeTo] = useState("");
@@ -647,7 +647,7 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
                           <p className="text-xs font-bold text-amber-200">
                             {formatDate(c.date + "T" + c.start_time)}
                             <span className="text-amber-500 font-normal mx-1.5">·</span>
-                            <span className="tabular-nums">{formatTime(c.date + "T" + c.start_time)} – {formatTime(c.date + "T" + c.end_time)}</span>
+                            <span className="tabular-nums">{formatTime(c.date + "T" + c.start_time)} – {formatTime(c.date + "T" + c.end_time)}{timezoneAbbr && ` ${timezoneAbbr}`}</span>
                           </p>
                           <p className="text-[10px] text-amber-500/70 italic mt-0.5 truncate">
                             Session: &ldquo;{c.session_title}&rdquo;
@@ -1129,7 +1129,7 @@ const EditSlotModal = ({ slot, onClose, onSaved }) => {
 // ── Slot card ─────────────────────────────────────────────────────────────────
 
 const SlotCard = ({ slot, onDelete, onEdit, deletingId }) => {
-  const { formatTime } = useDateFormatters();
+  const { formatTime, timezoneAbbr } = useDateFormatters();
   const isBooked = slot.status === "booked";
   const isDeleting = deletingId === slot.id;
 
@@ -1156,7 +1156,7 @@ const SlotCard = ({ slot, onDelete, onEdit, deletingId }) => {
             <p className="text-sm font-bold text-white tabular-nums">
               {formatTime(slot.date + "T" + slot.start_time)}
               <span className="text-slate-500 font-normal mx-1">–</span>
-              {formatTime(slot.date + "T" + slot.end_time)}
+              {formatTime(slot.date + "T" + slot.end_time)}{timezoneAbbr && ` ${timezoneAbbr}`}
             </p>
             <p className="text-[10px] text-slate-600 mt-0.5 font-medium">1 hr session</p>
           </div>

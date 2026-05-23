@@ -22,7 +22,7 @@ const fmtDate = (d) =>
   });
 
 const ParentChildDetails = () => {
-  const { formatTime, timezone } = useDateFormatters();
+  const { formatTime, timezone, timezoneAbbr } = useDateFormatters();
   const { childId } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -403,7 +403,7 @@ const ParentChildDetails = () => {
                       <div className="flex items-center justify-between gap-2">
                         <span className="text-[10px] text-slate-400 tabular-nums font-medium">
                           <i className="fas fa-clock text-[8px] mr-1 text-slate-500" />
-                          {formatTime(slot.date + "T" + slot.start_time)} – {formatTime(slot.date + "T" + slot.end_time)}
+                          {formatTime(slot.date + "T" + slot.start_time)} – {formatTime(slot.date + "T" + slot.end_time)}{timezoneAbbr && ` ${timezoneAbbr}`}
                         </span>
                         <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-wider border shrink-0 ${
                           isUpcoming

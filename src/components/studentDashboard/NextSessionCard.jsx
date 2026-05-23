@@ -32,24 +32,27 @@ const NextSessionCard = () => {
       return;
     }
 
+    const meetWin = window.open("", "_blank");
     try {
       const result = await dispatch(joinLiveSession(sessionId)).unwrap();
 
       const meetingLink = result?.meeting_link;
 
       if (meetingLink && meetingLink.startsWith("http")) {
-        // Validate URL format
         try {
           new URL(meetingLink);
-          window.open(meetingLink, "_blank", "noopener,noreferrer");
+          if (meetWin) meetWin.location.href = meetingLink;
         } catch (urlError) {
+          meetWin?.close();
           toastManager.error("Invalid meeting link format");
           console.log("URL Error:", urlError);
         }
       } else {
+        meetWin?.close();
         toastManager.error("No valid meeting link found");
       }
     } catch (error) {
+      meetWin?.close();
       const msg = extractApiErrorMessage(error);
       if ((msg === "You cannot join before the scheduled time.") || (msg === "You can join up to 30 minutes before the scheduled time.")) {
         setTooEarlyOpen(true);

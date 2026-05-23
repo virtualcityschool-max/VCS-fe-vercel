@@ -70,12 +70,13 @@ const AuthModals = () => {
 
   const dispatch = useDispatch();
   const { authModal, enrollmentIntent } = useSelector((state) => state.ui);
-  const { isLoading, resendOtpLoading } = useSelector((state) => state.auth);
+  const { isLoading, resendOtpLoading, isInitialized, isLoggedIn } = useSelector((state) => state.auth);
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const isOpen = authModal.type;
   const intendedRole = authModal.intendedRole;
+  const adminMode = authModal.adminMode;
 
   // Comprehensive reset function
   const resetAllStates = () => {
@@ -126,6 +127,13 @@ const AuthModals = () => {
     dispatch(setAuthModal(null));
   };
 
+  // Auto-open admin login modal when URL has ?adminLogin=true (only when not already logged in)
+  React.useEffect(() => {
+    if (!isOpen && isInitialized && !isLoggedIn && searchParams.get("adminLogin") === "true") {
+      dispatch(setAuthModal({ type: "login", adminMode: true }));
+    }
+  }, [searchParams, isOpen, isInitialized, isLoggedIn, dispatch]);
+
   React.useEffect(() => {
     if (isOpen) {
       setEmail("");
@@ -154,14 +162,17 @@ const AuthModals = () => {
       setFpError("");
 
       const urlRole = searchParams.get("role");
-      if (intendedRole) {
+      if (adminMode) {
+        setActiveRoleTab("admin");
+      } else if (intendedRole) {
         setActiveRoleTab(intendedRole);
-      } else if (urlRole && ["student", "teacher", "parent", "admin"].includes(urlRole)) {
+      } else if (urlRole && ["student", "teacher", "parent"].includes(urlRole)) {
         setActiveRoleTab(urlRole);
       }
     }
   }, [
     isOpen,
+    adminMode,
     intendedRole,
     searchParams,
     dispatch,
@@ -481,42 +492,42 @@ const AuthModals = () => {
             <div className="flex flex-col items-center mb-6">
               <img src="/assets/logo.png" alt="Virtual City School" className="h-12 sm:h-14 object-contain mb-4" />
               <h2 className="text-xl sm:text-2xl font-black font-poppins text-white text-center uppercase tracking-[0.15em]">
-                Secure Login
+                {adminMode ? "Admin Login" : "Secure Login"}
               </h2>
               <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-1.5">
-                Access your learning terminal
+                {adminMode ? "Admin portal access only" : "Access your learning terminal"}
               </p>
             </div>
 
-            <div className="flex bg-slate-950 p-1.5 rounded-2xl border border-white/5 mb-6">
-              {["student", "teacher", "parent", "admin"].map((roleOption) => (
-                <button
-                  key={roleOption}
-                  type="button"
-                  onClick={() => {
-                    // Reset form states but keep the selected role
-                    setEmail("");
-                    setPassword("");
-                    setShowLoginPassword(false);
-                    clearAllLoginErrors();
-                    dispatch(clearAuthError());
-                    // Set the new role
-                    setActiveRoleTab(roleOption);
-                    setSearchParams((prev) => {
-                      prev.set("role", roleOption);
-                      return prev;
-                    });
-                  }}
-                  className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
-                    activeRoleTab === roleOption
-                      ? "bg-indigo-600 text-white shadow-lg"
-                      : "text-slate-500 hover:text-slate-300"
-                  }`}
-                >
-                  {roleOption}
-                </button>
-              ))}
-            </div>
+            {!adminMode && (
+              <div className="flex bg-slate-950 p-1.5 rounded-2xl border border-white/5 mb-6">
+                {["student", "teacher", "parent"].map((roleOption) => (
+                  <button
+                    key={roleOption}
+                    type="button"
+                    onClick={() => {
+                      setEmail("");
+                      setPassword("");
+                      setShowLoginPassword(false);
+                      clearAllLoginErrors();
+                      dispatch(clearAuthError());
+                      setActiveRoleTab(roleOption);
+                      setSearchParams((prev) => {
+                        prev.set("role", roleOption);
+                        return prev;
+                      });
+                    }}
+                    className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                      activeRoleTab === roleOption
+                        ? "bg-indigo-600 text-white shadow-lg"
+                        : "text-slate-500 hover:text-slate-300"
+                    }`}
+                  >
+                    {roleOption}
+                  </button>
+                ))}
+              </div>
+            )}
 
             <form onSubmit={handleLogin} className="space-y-4" autoComplete="off">
               <div>
