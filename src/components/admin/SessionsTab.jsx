@@ -20,6 +20,7 @@ const SessionsTab = ({
   isCreatingSession = false,
   editSessionForm,
   setEditSessionForm,
+  originalEditForm,
   createSessionForm,
   setCreateSessionForm,
   createSessionErrors,
@@ -141,6 +142,19 @@ const SessionsTab = ({
     [sessionFilters.search],
   );
 
+  // True when the user has only edited the title (no schedule fields changed)
+  const onlyTitleChanged = useMemo(() => {
+    if (!originalEditForm || Object.keys(originalEditForm).length === 0) return false;
+    return (
+      editSessionForm.start_date === originalEditForm.start_date &&
+      editSessionForm.time === originalEditForm.time &&
+      editSessionForm.recurrence_end_date === originalEditForm.recurrence_end_date &&
+      String(editSessionForm.course_id) === String(originalEditForm.course_id) &&
+      JSON.stringify([...(editSessionForm.recurrence_days || [])].sort()) ===
+        JSON.stringify([...(originalEditForm.recurrence_days || [])].sort())
+    );
+  }, [editSessionForm, originalEditForm]);
+
   const handleCreateSession = async (e) => {
     e.preventDefault();
     try {
@@ -152,14 +166,6 @@ const SessionsTab = ({
 
   const handleUpdateSession = async (e) => {
     e.preventDefault();
-    if (
-      editSessionForm.start_date &&
-      editSessionForm.recurrence_end_date &&
-      editSessionForm.start_date > editSessionForm.recurrence_end_date
-    ) {
-      setEditSessionErrors({ recurrence_end_date: "End date cannot be before start date" });
-      return;
-    }
     try {
       await onSessionUpdate(editSessionForm);
     } catch (error) {
@@ -734,8 +740,7 @@ const SessionsTab = ({
                   <input
                     type="date"
                     value={editSessionForm.start_date || ""}
-                    min={new Date().toISOString().split("T")[0]}
-                    max="9999-12-31"
+                    {...(!onlyTitleChanged && { min: new Date().toISOString().split("T")[0], max: "9999-12-31" })}
                     onChange={(e) => { const v = clampDate(e.target.value); setEditSessionForm({ ...editSessionForm, start_date: v }); clearEditSessionFieldError("start_date"); }}
                     className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white focus:outline-none focus:ring-2 text-sm [color-scheme:dark] ${editSessionErrors?.start_date ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
                   />
@@ -748,8 +753,7 @@ const SessionsTab = ({
                   <input
                     type="date"
                     value={editSessionForm.recurrence_end_date || ""}
-                    min={editSessionForm.start_date || new Date().toISOString().split("T")[0]}
-                    max="9999-12-31"
+                    {...(!onlyTitleChanged && { min: editSessionForm.start_date || new Date().toISOString().split("T")[0], max: "9999-12-31" })}
                     onChange={(e) => { const v = clampDate(e.target.value); setEditSessionForm({ ...editSessionForm, recurrence_end_date: v }); clearEditSessionFieldError("recurrence_end_date"); }}
                     className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white focus:outline-none focus:ring-2 text-sm [color-scheme:dark] ${editSessionErrors?.recurrence_end_date ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
                   />

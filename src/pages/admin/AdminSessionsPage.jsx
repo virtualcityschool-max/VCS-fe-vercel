@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchSessions,
@@ -52,6 +52,7 @@ const AdminSessionsPage = () => {
   });
 
   const [editSessionForm, setEditSessionForm] = useState({});
+  const originalEditFormRef = useRef({});
   const [showSessionFilters, setShowSessionFilters] = useState(false);
   const [sessionFilters, setSessionFilters] = useState({
     search: "",
@@ -156,7 +157,7 @@ const AdminSessionsPage = () => {
 
     setEditingSession(session);
 
-    setEditSessionForm({
+    const formSnapshot = {
       course_id: session.course?.id || session.course_id || "",
       course_title: session.course?.title || session.course_title || "",
       teacher_name: session.teacher_name || "",
@@ -167,7 +168,9 @@ const AdminSessionsPage = () => {
       time: startTime,
       recurrence_days: session.recurrence_days || [],
       recurrence_end_date: session.recurrence_end_date || "",
-    });
+    };
+    originalEditFormRef.current = formSnapshot;
+    setEditSessionForm(formSnapshot);
     setActiveModal({ type: "edit-session", sessionId });
   };
 
@@ -289,6 +292,15 @@ const AdminSessionsPage = () => {
     }
   };
 
+  const refreshSessions = () => {
+    const params = {};
+    if (sessionFilters.teacher) params.teacher = sessionFilters.teacher;
+    if (sessionFilters.course) params.course = sessionFilters.course;
+    if (sessionFilters.view) params.view = sessionFilters.view;
+    if (sessionFilters.status) params.status = sessionFilters.status;
+    dispatch(fetchSessions(params));
+  };
+
   // Handle session update
   const handleUpdateSession = async (sessionData) => {
     if (!editingSession) {
@@ -298,6 +310,43 @@ const AdminSessionsPage = () => {
 
     clearAllEditSessionErrors();
 
+    const orig = originalEditFormRef.current;
+    const scheduleFieldsChanged =
+      sessionData.start_date !== orig.start_date ||
+      sessionData.time !== orig.time ||
+      sessionData.recurrence_end_date !== orig.recurrence_end_date ||
+      String(sessionData.course_id) !== String(orig.course_id) ||
+      JSON.stringify([...(sessionData.recurrence_days || [])].sort()) !==
+        JSON.stringify([...(orig.recurrence_days || [])].sort());
+
+    if (!scheduleFieldsChanged) {
+      // Only title (or description) changed — validate title only, send minimal payload
+      const titleErrors = {};
+      if (!sessionData.title?.trim()) {
+        titleErrors.title = "Session title is required";
+      } else if (sessionData.title.trim().length < 5) {
+        titleErrors.title = "Title must be at least 5 characters";
+      }
+      if (Object.keys(titleErrors).length > 0) {
+        setEditSessionErrors(titleErrors);
+        toastManager.error("Please fix highlighted fields");
+        return;
+      }
+      setUpdatingSessionId(editingSession.id);
+      try {
+        await dispatch(updateSession({ sessionId: editingSession.id, sessionData: { title: sessionData.title } })).unwrap();
+        toastManager.success("Session updated successfully");
+        setActiveModal(null);
+        refreshSessions();
+      } catch (error) {
+        showApiError(error);
+      } finally {
+        setUpdatingSessionId(null);
+      }
+      return;
+    }
+
+    // Schedule fields changed — full validation
     const frontendErrors = validateEditSessionForm(sessionData);
     setEditSessionErrors(frontendErrors);
     if (Object.keys(frontendErrors).length > 0) {
@@ -307,10 +356,6 @@ const AdminSessionsPage = () => {
 
     setUpdatingSessionId(editingSession.id);
 
-    // Omit instructor_id — it is read-only in the edit form and re-sending it
-    // triggers the backend's instructor-overlap validator against itself.
-    // Course is editable and included when changed.
-    // The backend must exclude the current session from its overlap check.
     const payload = {
       title: sessionData.title,
       description: sessionData.description || "",
@@ -318,12 +363,8 @@ const AdminSessionsPage = () => {
       recurrence_days: sessionData.recurrence_days || [],
       recurrence_end_date: sessionData.recurrence_end_date,
     };
-    if (sessionData.course_id) {
-      payload.course = Number(sessionData.course_id);
-    }
-    if (sessionData.instructor_id) {
-      payload.instructor_id = Number(sessionData.instructor_id);
-    }
+    if (sessionData.course_id) payload.course = Number(sessionData.course_id);
+    if (sessionData.instructor_id) payload.instructor_id = Number(sessionData.instructor_id);
     if (sessionData.start_date && sessionData.time) {
       payload.scheduled_at = toPayloadISO(`${sessionData.start_date}T${sessionData.time}`);
     }
@@ -332,12 +373,7 @@ const AdminSessionsPage = () => {
       await dispatch(updateSession({ sessionId: editingSession.id, sessionData: payload })).unwrap();
       toastManager.success("Session updated successfully");
       setActiveModal(null);
-      const params = {};
-      if (sessionFilters.teacher) params.teacher = sessionFilters.teacher;
-      if (sessionFilters.course) params.course = sessionFilters.course;
-      if (sessionFilters.view) params.view = sessionFilters.view;
-      if (sessionFilters.status) params.status = sessionFilters.status;
-      dispatch(fetchSessions(params));
+      refreshSessions();
     } catch (error) {
       showApiError(error);
     } finally {
@@ -394,6 +430,7 @@ const AdminSessionsPage = () => {
       isCreatingSession={isCreatingSession}
       editSessionForm={editSessionForm}
       setEditSessionForm={setEditSessionForm}
+      originalEditForm={originalEditFormRef.current}
       createSessionForm={createSessionForm}
       setCreateSessionForm={setCreateSessionForm}
       createSessionErrors={createSessionErrors}
