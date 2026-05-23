@@ -363,19 +363,15 @@ const SessionsTab = ({
                       )}
                     </div>
                     <div className="flex gap-2">
-                      {!session.is_child && (() => {
-                        const hasEnrollments = (session.enrollment_count ?? 0) >= 1;
-                        return (
-                          <button
-                            onClick={() => !hasEnrollments && onSessionEdit(session.id)}
-                            disabled={hasEnrollments}
-                            title={hasEnrollments ? "Cannot edit: session has active enrollments" : "Edit session"}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-medium flex-1 flex items-center justify-center gap-1 transition ${hasEnrollments ? "bg-slate-800/30 text-slate-600 cursor-not-allowed" : "bg-slate-700/50 text-slate-300 hover:bg-slate-600/50"}`}
-                          >
-                            <i className="fas fa-edit"></i> Edit
-                          </button>
-                        );
-                      })()}
+                      {!session.is_child && (
+                        <button
+                          onClick={() => onSessionEdit(session.id)}
+                          title="Edit session"
+                          className="px-3 py-1.5 rounded-lg text-xs font-medium flex-1 flex items-center justify-center gap-1 transition bg-slate-700/50 text-slate-300 hover:bg-slate-600/50"
+                        >
+                          <i className="fas fa-edit"></i> Edit
+                        </button>
+                      )}
                       <button onClick={() => onSessionDelete(session.id)} disabled={loadingSessionIds.has(session.id)} className="bg-red-600/10 text-red-400 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-red-600/20 transition disabled:opacity-50 flex-1 flex items-center justify-center gap-1">
                         <i className="fas fa-trash"></i>
                         {loadingSessionIds.has(session.id) ? "Deleting…" : "Delete"}
@@ -431,19 +427,15 @@ const SessionsTab = ({
                       <td className="px-5 py-4">{getStatusBadge(session.status)}</td>
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-2 justify-end">
-                          {!session.is_child && (() => {
-                            const hasEnrollments = (session.enrollment_count ?? 0) >= 1;
-                            return (
-                              <button
-                                onClick={() => !hasEnrollments && onSessionEdit(session.id)}
-                                disabled={hasEnrollments}
-                                title={hasEnrollments ? "Cannot edit: session has active enrollments" : "Edit session"}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${hasEnrollments ? "bg-slate-800/30 text-slate-600 cursor-not-allowed" : "bg-slate-700/50 text-slate-300 hover:bg-slate-600/50"}`}
-                              >
-                                <i className="fas fa-edit mr-1"></i>Edit
-                              </button>
-                            );
-                          })()}
+                          {!session.is_child && (
+                            <button
+                              onClick={() => onSessionEdit(session.id)}
+                              title="Edit session"
+                              className="px-3 py-1.5 rounded-lg text-xs font-medium transition bg-slate-700/50 text-slate-300 hover:bg-slate-600/50"
+                            >
+                              <i className="fas fa-edit mr-1"></i>Edit
+                            </button>
+                          )}
                           <button onClick={() => onSessionDelete(session.id)} disabled={loadingSessionIds.has(session.id)} className="bg-red-600/10 text-red-400 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-red-600/20 transition disabled:opacity-50">
                             <i className="fas fa-trash mr-1"></i>
                             {loadingSessionIds.has(session.id) ? "Deleting…" : "Delete"}
