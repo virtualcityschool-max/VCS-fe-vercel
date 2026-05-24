@@ -36,7 +36,7 @@ const StudentAssignmentDetails = () => {
   const { isSubmittingAssignment } = useSelector(
     (state) => state.studentDashboard,
   );
-  const { formatDateTime } = useDateFormatters();
+  const { formatDate, formatTime, formatDateTime } = useDateFormatters();
 
   const [assignment, setAssignment] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -420,14 +420,10 @@ const StudentAssignmentDetails = () => {
                     Due Date
                   </p>
                   <p className="text-sm text-white font-bold leading-none">
-                    {new Date(assignment.due_date).toLocaleDateString(undefined, { 
-                      day: 'numeric', 
-                      month: 'long', 
-                      year: 'numeric' 
-                    })}
+                    {formatDate(assignment.due_date)}
                   </p>
                   <p className="text-[10px] text-slate-400 mt-1">
-                    {new Date(assignment.due_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    {formatTime(assignment.due_date)}
                   </p>
                 </div>
               </div>

@@ -8,7 +8,7 @@ import { useDateFormatters } from "../../hooks";
 const StudentAssignments = ({ hideHeader = false, filterCourse: externalFilterCourse }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { formatTime } = useDateFormatters();
+  const { formatDate, formatTime } = useDateFormatters();
 
   const { assignments, error, isFetchingAssignments } = useSelector(
     (state) => state.studentDashboard,
@@ -146,7 +146,7 @@ const StudentAssignments = ({ hideHeader = false, filterCourse: externalFilterCo
                             <div className="flex flex-col">
                               <span className="text-[8px] text-slate-500 uppercase font-black leading-none mb-0.5">Due</span>
                               <span className="text-[11px] text-slate-300 font-bold">
-                                {new Date(assignment.due_date).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}
+                                {formatDate(assignment.due_date)}
                               </span>
                               <span className="text-[10px] text-slate-500">
                                 {formatTime(assignment.due_date)}
