@@ -9,7 +9,7 @@ import {
 } from "../../store/slices/studentDashboardSlice";
 import { toastManager } from "../../utils/toastManager";
 import { useDateFormatters } from "../../hooks/useDateFormatters";
-import { getWindowLabel } from "../../utils/helper/StartSession";
+import { getWindowLabel, isWithinSessionWindow } from "../../utils/helper/StartSession";
 import { extractApiErrorMessage, showApiError } from "../../utils/apiErrorHandler";
 import ConfirmDialog from "../common/ConfirmDialog";
 import { availabilityService } from "../../services/availabilityService";
@@ -82,7 +82,7 @@ const LiveScheduleList = () => {
   };
 
   const handleJoinSession = async (session) => {
-    if (!isSlotJoinable(session)) {
+    if (!isWithinSessionWindow(session.scheduled_at)) {
       setTooEarlyOpen(true);
       return;
     }
