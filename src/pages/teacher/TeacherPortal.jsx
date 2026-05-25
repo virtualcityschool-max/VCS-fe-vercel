@@ -134,7 +134,6 @@ const TeacherPortal = () => {
   };
 
   const handleJoinSession = async (sessionId,meeting_link) => {
-    debugger
     if(meeting_link) {
       const meetWin = window.open(meeting_link, "_blank");
     }
