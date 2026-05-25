@@ -133,34 +133,37 @@ const TeacherPortal = () => {
     }
   };
 
-  const handleJoinSession = async (sessionId) => {
-    const meetWin = window.open("", "_blank");
-    try {
-      const result = await dispatch(joinLiveSession(sessionId)).unwrap();
-      const meetingLink = result?.meeting_link;
-
-      if (meetingLink && meetingLink.startsWith("http")) {
-        try {
-          new URL(meetingLink);
-          if (meetWin) meetWin.location.href = meetingLink;
-        } catch {
-          meetWin?.close();
-          toastManager.error("Invalid meeting link format");
-        }
-      } else {
-        meetWin?.close();
-        toastManager.error("No valid meeting link found");
-      }
-      await dispatch(fetchTeacherDashboard()).unwrap();
-    } catch (err) {
-      meetWin?.close();
-      const msg = extractApiErrorMessage(err);
-      if (msg === "You cannot join before the scheduled time." || msg === "You can join up to 30 minutes before the scheduled time.") {
-        setTooEarlyOpen(true);
-      } else {
-        showApiError(err);
-      }
+  const handleJoinSession = async (sessionId,meeting_link) => {
+    debugger
+    if(meeting_link) {
+      const meetWin = window.open(meeting_link, "_blank");
     }
+    // try {
+    //   const result = await dispatch(joinLiveSession(sessionId)).unwrap();
+    //   const meetingLink = result?.meeting_link;
+
+    //   if (meetingLink && meetingLink.startsWith("http")) {
+    //     try {
+    //       new URL(meetingLink);
+    //       if (meetWin) meetWin.location.href = meetingLink;
+    //     } catch {
+    //       meetWin?.close();
+    //       toastManager.error("Invalid meeting link format");
+    //     }
+    //   } else {
+    //     meetWin?.close();
+    //     toastManager.error("No valid meeting link found");
+    //   }
+    //   await dispatch(fetchTeacherDashboard()).unwrap();
+    // } catch (err) {
+    //   meetWin?.close();
+    //   const msg = extractApiErrorMessage(err);
+    //   if (msg === "You cannot join before the scheduled time." || msg === "You can join up to 30 minutes before the scheduled time.") {
+    //     setTooEarlyOpen(true);
+    //   } else {
+    //     showApiError(err);
+    //   }
+    // }
   };
 
   const handleEndSession = (sessionId) => {
@@ -529,7 +532,7 @@ const TeacherPortal = () => {
                           {isLive && (
                             <div className="flex items-center gap-2">
                               <button
-                                onClick={() => handleJoinSession(session.id)}
+                                onClick={() => handleJoinSession(session.id,session.meeting_link)}
                                 disabled={isJoiningSession}
                                 className="flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-black uppercase tracking-widest transition-all bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/20 hover:scale-105 active:scale-95"
                               >
