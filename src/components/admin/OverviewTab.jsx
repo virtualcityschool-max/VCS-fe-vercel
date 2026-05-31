@@ -112,7 +112,7 @@ const StatCardTip = ({ label, value, icon, color, items, onClick }) => {
 
 const USER_FILTERS_BASE = { search: "", is_active: "", ordering: "-date_joined" };
 const toUsersTab = (navigate, role = "") =>
-  () => navigate("/admin/users", { state: { filters: { ...USER_FILTERS_BASE, role } } });
+  () => navigate("/admin/users", { state: { filters: { ...USER_FILTERS_BASE, role }, skipFetch: true } });
 
 const OverviewTab = ({ analytics, analyticsLoading, analyticsError }) => {
   const navigate = useNavigate();
