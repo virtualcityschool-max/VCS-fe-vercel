@@ -271,9 +271,10 @@ export const formatDate = (isoString, timeZone) => {
 export const getTimezoneAbbr = (timeZone) => {
   try {
     const opts = { timeZoneName: "short", ...(timeZone ? { timeZone } : {}) };
-    return new Intl.DateTimeFormat("en", opts)
+    const value = new Intl.DateTimeFormat("en", opts)
       .formatToParts(new Date())
       .find((p) => p.type === "timeZoneName")?.value || "";
+    return value.replace(/^GMT/, "UTC");
   } catch {
     return "";
   }
