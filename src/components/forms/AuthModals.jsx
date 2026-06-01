@@ -216,7 +216,7 @@ const AuthModals = () => {
       const userRole = user.role || activeRoleTab;
       switch (userRole) {
         case "admin":
-          navigate("/admin", { replace: true });
+          navigate("/admin/overview", { replace: true });
           break;
         case "student": {
           const hireIntentId = sessionStorage.getItem("vcs_hire_intent");
