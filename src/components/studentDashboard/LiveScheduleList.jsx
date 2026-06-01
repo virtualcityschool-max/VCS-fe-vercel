@@ -13,6 +13,7 @@ import { getWindowLabel, isWithinSessionWindow } from "../../utils/helper/StartS
 import { extractApiErrorMessage, showApiError } from "../../utils/apiErrorHandler";
 import ConfirmDialog from "../common/ConfirmDialog";
 import { availabilityService } from "../../services/availabilityService";
+import TimezoneTag from "../ui/TimezoneTag";
 
 const fmt12 = (t) => {
   if (!t) return "";
@@ -271,7 +272,7 @@ const LiveScheduleList = () => {
                       </div>
                       <div className="flex items-center gap-1.5">
                         <i className="fas fa-clock text-indigo-400/60" />
-                        <span>{formatTime(slot.date + "T" + slot.start_time)} – {formatTime(slot.date + "T" + slot.end_time)}{timezoneAbbr && ` ${timezoneAbbr}`}</span>
+                        <span>{formatTime(slot.date + "T" + slot.start_time)} – {formatTime(slot.date + "T" + slot.end_time)}{" "}<TimezoneTag /></span>
                       </div>
                     </div>
                   </div>
@@ -336,7 +337,7 @@ const LiveScheduleList = () => {
           return (
             <div
               key={sessionId}
-              className="bg-slate-900/40 backdrop-blur-xl p-5 rounded-[1.5rem] border border-white/5 flex flex-col md:flex-row items-center gap-6 hover:bg-white/5 transition-all duration-300 group shadow-2xl relative overflow-hidden"
+              className="bg-slate-900/40 backdrop-blur-xl p-5 rounded-[1.5rem] border border-white/5 flex flex-col md:flex-row items-center gap-6 hover:bg-white/5 transition-all duration-300 group shadow-2xl relative"
             >
               {/* Dynamic Glow Effect */}
               {session.has_joined && (
@@ -381,7 +382,7 @@ const LiveScheduleList = () => {
                   </div>
                   <div className="flex items-center gap-1.5">
                     <i className="fas fa-clock text-indigo-400/60"></i>
-                    <span>{formatTime(session.scheduled_at)}{timezoneAbbr && ` ${timezoneAbbr}`}</span>
+                    <span>{formatTime(session.scheduled_at)}{" "}<TimezoneTag /></span>
                   </div>
                   {/* {session.recurring_schedule && (
                     <div className="flex items-center gap-1">
@@ -479,8 +480,9 @@ const LiveScheduleList = () => {
                         </>
                       )}
                     </button>
-                    <div className="absolute bottom-full right-0 mb-3 px-4 py-2 bg-slate-800 border border-white/10 text-white text-[10px] rounded-xl whitespace-nowrap opacity-0 group-hover/tooltip:opacity-100 transition-all pointer-events-none z-20 shadow-2xl">
-                      <p className="text-slate-400 font-bold uppercase mb-0.5">Join Window</p>
+                    <div className="absolute bottom-full right-0 mb-2 px-4 py-2.5 bg-slate-900 border border-white/10 text-white text-[10px] rounded-xl whitespace-nowrap opacity-0 group-hover/tooltip:opacity-100 transition-all pointer-events-none z-[9999] shadow-2xl">
+                      <div className="absolute top-full right-4 border-[5px] border-transparent border-t-slate-900" />
+                      <p className="text-slate-400 font-bold uppercase tracking-widest mb-0.5">Join Window</p>
                       <p className="font-black text-white">{getWindowLabel(session.scheduled_at, timezone, timezoneAbbr) || "Check schedule"}</p>
                     </div>
                   </div>

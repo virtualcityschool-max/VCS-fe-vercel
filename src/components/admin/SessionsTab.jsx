@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Button, FilterSelect, Input } from "../../components/ui";
+import { Button, FilterSelect, Input, TimezoneTag } from "../../components/ui";
 import SessionCalendarView from "../common/SessionCalendarView";
 import { clampDate } from "../../utils/validation";
 import { useDateFormatters } from "../../hooks";
@@ -364,7 +364,7 @@ const SessionsTab = ({
                     <div className="flex flex-wrap gap-2 text-xs text-slate-400 mb-3">
                       <span><i className="fas fa-calendar mr-1 text-indigo-400"></i>{formatDate(session.scheduled_at || session.start_time)}</span>
                       {formatTime(session.scheduled_at || session.start_time) && (
-                        <span><i className="fas fa-clock mr-1 text-indigo-400"></i>{formatTime(session.scheduled_at || session.start_time)}{timezoneAbbr && ` ${timezoneAbbr}`}</span>
+                        <span><i className="fas fa-clock mr-1 text-indigo-400"></i>{formatTime(session.scheduled_at || session.start_time)}{" "}<TimezoneTag /></span>
                       )}
                       {session.recurrence_days?.length > 0 ? (
                         <span><i className="fas fa-repeat mr-1 text-purple-400"></i>{session.recurrence_days.join(", ")}</span>
@@ -419,7 +419,7 @@ const SessionsTab = ({
                         <div className="text-slate-300 text-sm">{formatDate(session.scheduled_at || session.start_time)}</div>
                         {formatTime(session.scheduled_at || session.start_time) && (
                           <div className="text-slate-500 text-xs mt-0.5">
-                            <i className="fas fa-clock mr-1"></i>{formatTime(session.scheduled_at || session.start_time)}{timezoneAbbr && ` ${timezoneAbbr}`}
+                            <i className="fas fa-clock mr-1"></i>{formatTime(session.scheduled_at || session.start_time)}{" "}<TimezoneTag />
                           </div>
                         )}
                       </td>
@@ -617,6 +617,10 @@ const SessionsTab = ({
                     className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white focus:outline-none focus:ring-2 text-sm [color-scheme:dark] ${createSessionErrors?.time ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
                   />
                   {createSessionErrors?.time && <p className="text-red-400 text-xs mt-1">{createSessionErrors.time}</p>}
+                  <p className="text-slate-500 text-xs mt-1.5 flex items-center gap-1">
+                    <i className="fas fa-globe text-[10px]"></i>
+                    Sessions will be scheduled in <TimezoneTag className="text-indigo-400 font-semibold" />
+                  </p>
                 </div>
               </div>
 
@@ -800,6 +804,10 @@ const SessionsTab = ({
                     className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white focus:outline-none focus:ring-2 text-sm [color-scheme:dark] ${editSessionErrors?.time ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
                   />
                   {editSessionErrors?.time && <p className="text-red-400 text-xs mt-1">{editSessionErrors.time}</p>}
+                  <p className="text-slate-500 text-xs mt-1.5 flex items-center gap-1">
+                    <i className="fas fa-globe text-[10px]"></i>
+                    Sessions will be scheduled in <TimezoneTag className="text-indigo-400 font-semibold" />
+                  </p>
                 </div>
               </div>
 

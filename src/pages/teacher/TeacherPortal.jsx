@@ -17,6 +17,7 @@ import ConfirmDialog from "../../components/common/ConfirmDialog";
 import { getWindowLabel, isWithinSessionWindow } from "../../utils/helper/StartSession";
 import { useDateFormatters } from "../../hooks";
 import { availabilityService } from "../../services/availabilityService";
+import TimezoneTag from "../../components/ui/TimezoneTag";
 
 const fmt12 = (t) => {
   if (!t) return "";
@@ -410,7 +411,7 @@ const TeacherPortal = () => {
                             </div>
                             <div className="flex items-center gap-1.5">
                               <i className="fas fa-clock text-indigo-400/60" />
-                              <span>{formatTime(slot.date + "T" + slot.start_time)} – {formatTime(slot.date + "T" + slot.end_time)}{timezoneAbbr && ` ${timezoneAbbr}`}</span>
+                              <span>{formatTime(slot.date + "T" + slot.start_time)} – {formatTime(slot.date + "T" + slot.end_time)}{" "}<TimezoneTag /></span>
                             </div>
                           </div>
                           {slot.note && (

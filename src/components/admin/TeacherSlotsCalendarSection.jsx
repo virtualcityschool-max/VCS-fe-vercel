@@ -4,6 +4,7 @@ import { adminService } from "../../services/adminService";
 import { toastManager } from "../../utils/toastManager";
 import SlotCalendarView from "../common/SlotCalendarView";
 import { useDateFormatters } from "../../hooks/useDateFormatters";
+import TimezoneTag from "../ui/TimezoneTag";
 
 const fmt12 = (t) => {
   if (!t) return "";
@@ -160,7 +161,7 @@ const TeacherSlotsCalendarSection = ({ teacherId }) => {
                 <span className="font-semibold text-white">{formatDate(confirmSlot.date + "T" + confirmSlot.start_time)}</span>{" "}
                 from{" "}
                 <span className="font-semibold text-white tabular-nums">
-                  {formatTime(confirmSlot.date + "T" + confirmSlot.start_time)} – {formatTime(confirmSlot.date + "T" + confirmSlot.end_time)}{timezoneAbbr && ` ${timezoneAbbr}`}
+                  {formatTime(confirmSlot.date + "T" + confirmSlot.start_time)} – {formatTime(confirmSlot.date + "T" + confirmSlot.end_time)}{" "}<TimezoneTag />
                 </span>.
               </p>
               {confirmSlot.booked_by_name ? (

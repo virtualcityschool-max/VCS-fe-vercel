@@ -4,6 +4,7 @@ import { availabilityService } from "../../services/availabilityService";
 import { toastManager } from "../../utils/toastManager";
 import ConfirmDialog from "../../components/common/ConfirmDialog";
 import { useDateFormatters } from "../../hooks/useDateFormatters";
+import TimezoneTag from "../../components/ui/TimezoneTag";
 
 const fmt12 = (t) => {
   if (!t) return "";
@@ -321,7 +322,7 @@ const StudentTutors = () => {
                               </div>
                               <div>
                                 <p className="text-sm font-semibold text-white">
-                                  {formatTime(slot.date + "T" + slot.start_time)} – {formatTime(slot.date + "T" + slot.end_time)}{timezoneAbbr && ` ${timezoneAbbr}`}
+                                  {formatTime(slot.date + "T" + slot.start_time)} – {formatTime(slot.date + "T" + slot.end_time)}{" "}<TimezoneTag />
                                 </p>
                                 <p className="text-xs text-slate-500 mt-0.5">{formatDate(slot.date + "T" + slot.start_time)}</p>
                               </div>

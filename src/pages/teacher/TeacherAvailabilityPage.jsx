@@ -4,6 +4,7 @@ import { availabilityService } from "../../services/availabilityService";
 import { toastManager } from "../../utils/toastManager";
 import SlotCalendarView from "../../components/common/SlotCalendarView";
 import { useDateFormatters } from "../../hooks/useDateFormatters";
+import TimezoneTag from "../../components/ui/TimezoneTag";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -647,7 +648,7 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
                           <p className="text-xs font-bold text-amber-200">
                             {formatDate(c.date + "T" + c.start_time)}
                             <span className="text-amber-500 font-normal mx-1.5">·</span>
-                            <span className="tabular-nums">{formatTime(c.date + "T" + c.start_time)} – {formatTime(c.date + "T" + c.end_time)}{timezoneAbbr && ` ${timezoneAbbr}`}</span>
+                            <span className="tabular-nums">{formatTime(c.date + "T" + c.start_time)} – {formatTime(c.date + "T" + c.end_time)}{" "}<TimezoneTag /></span>
                           </p>
                           <p className="text-[10px] text-amber-500/70 italic mt-0.5 truncate">
                             Session: &ldquo;{c.session_title}&rdquo;
@@ -1156,7 +1157,7 @@ const SlotCard = ({ slot, onDelete, onEdit, deletingId }) => {
             <p className="text-sm font-bold text-white tabular-nums">
               {formatTime(slot.date + "T" + slot.start_time)}
               <span className="text-slate-500 font-normal mx-1">–</span>
-              {formatTime(slot.date + "T" + slot.end_time)}{timezoneAbbr && ` ${timezoneAbbr}`}
+              {formatTime(slot.date + "T" + slot.end_time)}{" "}<TimezoneTag />
             </p>
             <p className="text-[10px] text-slate-600 mt-0.5 font-medium">1 hr session</p>
           </div>

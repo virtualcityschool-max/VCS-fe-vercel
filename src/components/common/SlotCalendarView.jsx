@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { useDateFormatters } from "../../hooks/useDateFormatters";
+import TimezoneTag from "../ui/TimezoneTag";
 
 const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MONTH_NAMES = [
@@ -73,7 +74,7 @@ const SlotPopup = ({ slot, onClose }) => {
           <div className="bg-slate-800/60 rounded-2xl px-4 py-3 space-y-2 mb-5">
             <div className="flex items-center gap-2 text-sm">
               <i className="fas fa-clock text-indigo-400/70 w-4 text-center" />
-              <span className="font-bold text-white">{formatTime(slot.date + "T" + slot.start_time)} – {formatTime(slot.date + "T" + slot.end_time)}{timezoneAbbr && ` ${timezoneAbbr}`}</span>
+              <span className="font-bold text-white">{formatTime(slot.date + "T" + slot.start_time)} – {formatTime(slot.date + "T" + slot.end_time)}{" "}<TimezoneTag /></span>
             </div>
             {slot.booked_by_name && (
               <div className="flex items-center gap-2 text-sm">
@@ -361,7 +362,7 @@ const SlotCalendarView = ({ slots = [], loading = false, onDelete, onEdit, delet
                           <div className={`flex items-center gap-0.5 ${isBooked ? "text-amber-400/70" : "text-indigo-400/70"}`}>
                             <i className="far fa-clock text-[6px] sm:text-[7px]" />
                             <span className="text-[7px] sm:text-[8px] font-semibold tabular-nums">
-                              {formatTime(slot.date + "T" + slot.start_time)}{timezoneAbbr && ` ${timezoneAbbr}`}
+                              {formatTime(slot.date + "T" + slot.start_time)}{" "}<TimezoneTag />
                             </span>
                           </div>
                           <span className={`shrink-0 text-[6px] sm:text-[7px] font-black uppercase tracking-widest px-1 py-0.5 rounded border ${

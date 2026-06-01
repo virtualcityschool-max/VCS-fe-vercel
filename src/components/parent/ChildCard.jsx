@@ -10,6 +10,7 @@ import {
 } from "../../store/slices/childLinksSlice";
 import { showApiError } from "../../utils/apiErrorHandler";
 import { useDateFormatters } from "../../hooks/useDateFormatters";
+import TimezoneTag from "../ui/TimezoneTag";
 
 
 const fmt12 = (t) => {
@@ -265,7 +266,7 @@ const ChildCard = ({ child }) => {
                       {s.teacher_name}
                     </p>
                     <p className="text-[9px] text-indigo-400 font-black tabular-nums mt-0.5">
-                      {new Date(s.date + "T" + s.start_time).toLocaleDateString(undefined, { month: "short", day: "numeric", ...(timezone ? { timeZone: timezone } : {}) })} · {formatTime(s.date + "T" + s.start_time)}{timezoneAbbr && ` ${timezoneAbbr}`}
+                      {new Date(s.date + "T" + s.start_time).toLocaleDateString(undefined, { month: "short", day: "numeric", ...(timezone ? { timeZone: timezone } : {}) })} · {formatTime(s.date + "T" + s.start_time)}{" "}<TimezoneTag />
                     </p>
                   </div>
                   <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse shrink-0" />

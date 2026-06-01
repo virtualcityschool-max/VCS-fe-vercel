@@ -8,6 +8,7 @@ import EvaluationMatrix from "../../components/common/EvaluationMatrix";
 import { availabilityService } from "../../services/availabilityService";
 import { coursesService } from "../../services/coursesService";
 import { useDateFormatters } from "../../hooks/useDateFormatters";
+import TimezoneTag from "../../components/ui/TimezoneTag";
 
 const fmt12 = (t) => {
   if (!t) return "";
@@ -403,7 +404,7 @@ const ParentChildDetails = () => {
                       <div className="flex items-center justify-between gap-2">
                         <span className="text-[10px] text-slate-400 tabular-nums font-medium">
                           <i className="fas fa-clock text-[8px] mr-1 text-slate-500" />
-                          {formatTime(slot.date + "T" + slot.start_time)} – {formatTime(slot.date + "T" + slot.end_time)}{timezoneAbbr && ` ${timezoneAbbr}`}
+                          {formatTime(slot.date + "T" + slot.start_time)} – {formatTime(slot.date + "T" + slot.end_time)}{" "}<TimezoneTag />
                         </span>
                         <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-wider border shrink-0 ${
                           isUpcoming

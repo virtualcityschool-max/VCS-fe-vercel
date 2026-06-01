@@ -1,7 +1,9 @@
 import React, { useMemo, useState } from "react";
 import { useDateFormatters } from "../../hooks";
+import TimezoneTag from "../ui/TimezoneTag";
 
 const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const DAY_NAME_TO_NUM = { SUN: 0, MON: 1, TUE: 2, WED: 3, THU: 4, FRI: 5, SAT: 6 };
 const MONTH_NAMES = [
   "January","February","March","April","May","June",
   "July","August","September","October","November","December",
@@ -81,13 +83,46 @@ const SessionCalendarView = ({ sessions = [], loading = false }) => {
 
   const sessionsByDate = useMemo(() => {
     const map = {};
+
     sessions.forEach((s) => {
       if (!s.scheduled_at) return;
-      const d = new Date(s.scheduled_at);
-      const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-      if (!map[key]) map[key] = [];
-      map[key].push(s);
+
+      const start   = new Date(s.scheduled_at);
+      const days    = Array.isArray(s.recurrence_days) ? s.recurrence_days : [];
+      const endDate = s.recurrence_end_date
+        ? new Date(s.recurrence_end_date.includes("T") ? s.recurrence_end_date : `${s.recurrence_end_date}T23:59:59`)
+        : null;
+
+      if (days.length > 0 && endDate) {
+        const dayNums = new Set(
+          days.map((d) => DAY_NAME_TO_NUM[d.toUpperCase()]).filter((n) => n !== undefined)
+        );
+
+        // Walk day by day from start → end, placing a card on each matching weekday
+        const cur = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+        const end = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
+
+        while (cur <= end) {
+          if (dayNums.has(cur.getDay())) {
+            const key = `${cur.getFullYear()}-${cur.getMonth()}-${cur.getDate()}`;
+            if (!map[key]) map[key] = [];
+            // Avoid duplicate entries for the same session on the same day
+            if (!map[key].some((e) => e.id === s.id)) {
+              map[key].push(s);
+            }
+          }
+          cur.setDate(cur.getDate() + 1);
+        }
+      } else {
+        // Non-recurring: place on its single scheduled date
+        const key = `${start.getFullYear()}-${start.getMonth()}-${start.getDate()}`;
+        if (!map[key]) map[key] = [];
+        if (!map[key].some((e) => e.id === s.id)) {
+          map[key].push(s);
+        }
+      }
     });
+
     return map;
   }, [sessions]);
 
@@ -269,21 +304,21 @@ const SessionCalendarView = ({ sessions = [], loading = false }) => {
 
                 <div className="flex flex-col gap-1.5">
                   {daySessions.map((session) => (
-                    <div 
-                      key={session.id} 
-                      className="group/session relative overflow-hidden bg-slate-800/40 hover:bg-slate-800 border border-slate-700/50 hover:border-indigo-500/50 p-1 sm:p-2 rounded-lg transition-all duration-300 cursor-pointer"
+                    <div
+                      key={session.id}
+                      className="group/session relative bg-slate-800/40 hover:bg-slate-800 border border-slate-700/50 hover:border-indigo-500/50 p-1 sm:p-2 rounded-lg transition-all duration-300 cursor-pointer"
                     >
-                      <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-indigo-500 opacity-50 group-hover:opacity-100 transition-opacity" />
-                      
+                      <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-indigo-500 opacity-50 group-hover/session:opacity-100 transition-opacity rounded-l-lg" />
+
                       <div className="flex items-center justify-between gap-1 mb-0.5">
                         <div className="flex items-center gap-1 text-indigo-400/80">
                           <i className="far fa-clock text-[7px] sm:text-[8px]"></i>
                           <span className="text-[8px] sm:text-[9px] font-bold">{formatTime(session.scheduled_at)}</span>
                         </div>
-                        {timezoneAbbr && <span className="text-[6px] sm:text-[7px] font-black uppercase tracking-wide px-1 py-0.5 rounded bg-slate-700/60 border border-slate-600/40 text-slate-400">{timezoneAbbr}</span>}
+                        <TimezoneTag className="text-[6px] sm:text-[7px] font-black uppercase tracking-wide px-1 py-0.5 rounded bg-slate-700/60 border border-slate-600/40 text-slate-400" />
                       </div>
 
-                      <p className="text-[9px] sm:text-[10px] font-bold text-slate-100 leading-tight line-clamp-1 group-hover:text-indigo-300 transition-colors">
+                      <p className="text-[9px] sm:text-[10px] font-bold text-slate-100 leading-tight line-clamp-1 group-hover/session:text-indigo-300 transition-colors">
                         {session.title}
                       </p>
 
@@ -299,6 +334,7 @@ const SessionCalendarView = ({ sessions = [], loading = false }) => {
                           {session.status || "set"}
                         </span>
                       </div>
+
                     </div>
                   ))}
                 </div>

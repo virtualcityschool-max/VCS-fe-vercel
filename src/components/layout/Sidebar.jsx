@@ -3,21 +3,9 @@ import { useNavigate, NavLink } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchUnreadAnnouncementsCount, fetchMyAnnouncements } from "../../store/slices/announcementsSlice";
 import UserProfileDropdown from "./UserProfileDropdown";
+import { getTimezoneAbbr } from "../../utils/validation";
 
 const MOBILE_BREAKPOINT = 1024;
-
-const getUTCOffset = (timezone, date) => {
-  try {
-    const utc = new Date(date.toLocaleString("en-US", { timeZone: "UTC" }));
-    const tz  = new Date(date.toLocaleString("en-US", { timeZone: timezone }));
-    const diff = Math.round((tz - utc) / 60000);
-    const sign = diff >= 0 ? "+" : "-";
-    const abs  = Math.abs(diff);
-    const h    = Math.floor(abs / 60);
-    const m    = abs % 60;
-    return m === 0 ? `UTC${sign}${h}` : `UTC${sign}${h}:${String(m).padStart(2, "0")}`;
-  } catch { return "UTC"; }
-};
 
 const TimezoneIndicator = ({ isCollapsed }) => {
   const navigate  = useNavigate();
@@ -32,7 +20,7 @@ const TimezoneIndicator = ({ isCollapsed }) => {
   const fmt        = (opts) => now.toLocaleString("en-US", { ...(timezone ? { timeZone: timezone } : {}), ...opts });
   const time       = fmt({ hour: "2-digit", minute: "2-digit" });
   const date       = fmt({ weekday: "short", month: "short", day: "numeric" });
-  const offset     = timezone ? getUTCOffset(timezone, now) : getUTCOffset(Intl.DateTimeFormat().resolvedOptions().timeZone, now);
+  const abbr       = getTimezoneAbbr(timezone);
   // e.g. "Asia/Dubai" → "Dubai", "America/New_York" → "New York"
   const city      = timezone ? timezone.split("/").pop().replace(/_/g, " ") : "Auto-Detected";
   const displayTz = timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -86,7 +74,7 @@ const TimezoneIndicator = ({ isCollapsed }) => {
         <div className="flex items-end justify-between">
           <div>
             <p className="text-white text-xs font-bold leading-none">{displayTz}</p>
-            <p className="text-slate-500 text-[10px] font-medium mt-0.5">{offset}</p>
+            <p className="text-slate-500 text-[10px] font-medium mt-0.5">{abbr}</p>
           </div>
           <span className="text-indigo-300 text-sm font-black tabular-nums leading-none">{time}</span>
         </div>
