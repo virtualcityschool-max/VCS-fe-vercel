@@ -13,7 +13,8 @@ const CELL = {
 
 const leftShadow  = { boxShadow: "4px 0 8px rgba(0,0,0,0.4)" };
 const rightShadow = { boxShadow: "-4px 0 8px rgba(0,0,0,0.4)" };
-const SUMMARY_W = 85;
+const STUDENT_W = 200;
+const SUMMARY_W = 200;
 
 // ── AttendanceMatrix ──────────────────────────────────────────────────────────
 const AttendanceMatrix = ({
@@ -219,8 +220,8 @@ const AttendanceMatrix = ({
               <tr className="border-b border-slate-800/40 bg-slate-900">
                 <th
                   rowSpan={3}
-                  className="sticky left-0 z-20 bg-slate-900 px-5 py-3 text-left text-[10px] uppercase tracking-widest text-slate-500 font-black min-w-[185px] border-r border-slate-800"
-                  style={leftShadow}
+                  className="sticky left-0 z-20 bg-slate-900 px-3 py-3 text-center text-[10px] uppercase tracking-widest text-slate-500 font-black border-r border-slate-800"
+                  style={{ width: STUDENT_W, minWidth: STUDENT_W, maxWidth: STUDENT_W, ...leftShadow }}
                 >
                   {isStudent ? "Student" : "Teacher"}
                 </th>
@@ -234,8 +235,8 @@ const AttendanceMatrix = ({
 
                 <th
                   rowSpan={3}
-                  className="sticky right-0 z-20 bg-slate-900 px-4 py-3 text-center text-[10px] uppercase tracking-widest text-slate-500 font-black border-l border-slate-800"
-                  style={{ minWidth: SUMMARY_W, ...rightShadow }}
+                  className="sticky right-0 z-20 bg-slate-900 px-2 py-3 text-center text-[10px] uppercase tracking-widest text-slate-500 font-black border-l border-slate-800"
+                  style={{ width: SUMMARY_W, minWidth: SUMMARY_W, maxWidth: SUMMARY_W, ...rightShadow }}
                 >
                   Summary
                 </th>
@@ -300,16 +301,16 @@ const AttendanceMatrix = ({
                 return (
                   <tr key={p.id} className="border-b border-slate-800/40 last:border-0 group">
                     <td
-                      className="sticky left-0 z-10 bg-slate-900 group-hover:bg-slate-800 px-5 py-3 border-r border-slate-800/50 transition-colors"
-                      style={leftShadow}
+                      className="sticky left-0 z-10 bg-slate-900 group-hover:bg-slate-800 px-3 py-3 border-r border-slate-800/50 transition-colors"
+                      style={{ width: STUDENT_W, minWidth: STUDENT_W, maxWidth: STUDENT_W, ...leftShadow }}
                     >
-                      <div className="flex items-center gap-2.5">
-                        <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ${isStudent ? "bg-indigo-600/20" : "bg-violet-600/20"}`}>
-                          <span className={`text-xs font-bold ${isStudent ? "text-indigo-400" : "text-violet-400"}`}>
+                      <div className="flex items-center justify-center gap-2">
+                        <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${isStudent ? "bg-indigo-600/20" : "bg-violet-600/20"}`}>
+                          <span className={`text-[10px] font-bold ${isStudent ? "text-indigo-400" : "text-violet-400"}`}>
                             {(p.name || "?").charAt(0).toUpperCase()}
                           </span>
                         </div>
-                        <p className="text-white text-xs font-semibold truncate max-w-[120px]">{p.name}</p>
+                        <p className="text-white text-[11px] font-semibold truncate">{p.name}</p>
                       </div>
                     </td>
 
@@ -334,7 +335,7 @@ const AttendanceMatrix = ({
                               </span>
                               {/* Hover tooltip */}
                               <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-40 opacity-0 group-hover/cell:opacity-100 -translate-y-0.5 group-hover/cell:translate-y-0 transition-all duration-150 whitespace-nowrap">
-                                <div className="bg-slate-800 border border-slate-700 rounded-xl shadow-2xl px-3 py-2 text-left text-[11px] space-y-1 min-w-[120px]">
+                                <div className="bg-slate-800 border border-slate-700 rounded-xl shadow-2xl px-3 py-2 text-center text-[11px] space-y-1 min-w-[200px]">
                                   <p className="font-bold capitalize text-white">{record?.status ?? "absent"}</p>
                                   <p className="text-slate-400 flex items-center gap-1.5">
                                     Joined At: {joinedStr ?? "—"}
@@ -359,8 +360,8 @@ const AttendanceMatrix = ({
                     })}
 
                     <td
-                      className="sticky right-0 z-10 bg-slate-900 group-hover:bg-slate-800 px-4 py-3 text-center border-l border-slate-800/50 transition-colors"
-                      style={{ minWidth: SUMMARY_W, ...rightShadow }}
+                      className="sticky right-0 z-10 bg-slate-900 group-hover:bg-slate-800 px-2 py-3 text-center border-l border-slate-800/50 transition-colors"
+                      style={{ width: SUMMARY_W, minWidth: SUMMARY_W, maxWidth: SUMMARY_W, ...rightShadow }}
                     >
                       <div className="text-xs font-bold text-white tabular-nums leading-none">
                         {attended}<span className="text-slate-500 font-normal">/{total}</span>

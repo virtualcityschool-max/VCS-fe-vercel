@@ -30,6 +30,7 @@ const GradeBadge = ({ grade }) => {
 const leftShadow  = { boxShadow: "4px 0 8px rgba(0,0,0,0.4)" };
 const rightShadow = { boxShadow: "-4px 0 8px rgba(0,0,0,0.4)" };
 
+const STUDENT_W    = 200;
 const GRADE_W      = 90;
 const OBTAINED_W   = 85;
 const PERCENTAGE_W = 75;
@@ -214,8 +215,8 @@ const EvaluationMatrix = ({ students = [], courseStatus, gradingScale: gradingSc
             <thead>
               <tr className="border-b border-slate-800">
                 <th
-                  className="sticky left-0 z-30 bg-slate-900 px-5 py-2 text-left text-[9px] uppercase tracking-[0.2em] text-slate-600 font-black border-r border-slate-800"
-                  style={leftShadow}
+                  className="sticky left-0 z-30 bg-slate-900 px-3 py-2 text-center text-[9px] uppercase tracking-[0.2em] text-slate-600 font-black border-r border-slate-800"
+                  style={{ width: STUDENT_W, minWidth: STUDENT_W, maxWidth: STUDENT_W, ...leftShadow }}
                 >
                   Category
                 </th>
@@ -259,8 +260,8 @@ const EvaluationMatrix = ({ students = [], courseStatus, gradingScale: gradingSc
               {/* ── Column headers ── */}
               <tr className="border-b border-slate-800">
                 <th
-                  className="sticky left-0 z-20 bg-slate-900 px-5 py-4 text-left text-[10px] uppercase tracking-wider text-slate-500 font-semibold min-w-[190px] border-r border-slate-800"
-                  style={leftShadow}
+                  className="sticky left-0 z-20 bg-slate-900 px-3 py-4 text-center text-[10px] uppercase tracking-wider text-slate-500 font-semibold border-r border-slate-800"
+                  style={{ width: STUDENT_W, minWidth: STUDENT_W, maxWidth: STUDENT_W, ...leftShadow }}
                 >
                   Student
                 </th>
@@ -270,7 +271,7 @@ const EvaluationMatrix = ({ students = [], courseStatus, gradingScale: gradingSc
                     key={`a-${a.id}`}
                     className="px-4 py-4 text-center text-[10px] uppercase tracking-wider text-slate-500 font-semibold min-w-[130px] border-r border-slate-800/30"
                   >
-                    <div className="truncate max-w-[120px] mx-auto text-slate-300 normal-case tracking-normal text-[14px]" title={a.title}>
+                    <div className="truncate max-w-[200px] mx-auto text-slate-300 normal-case tracking-normal text-[14px]" title={a.title}>
                       {a.title}
                     </div>
                     <div className="text-slate-600 text-[11px] mt-0.5 tracking-normal normal-case font-normal">
@@ -284,7 +285,7 @@ const EvaluationMatrix = ({ students = [], courseStatus, gradingScale: gradingSc
                     key={`q-${q.id}`}
                     className="px-4 py-4 text-center text-[10px] uppercase tracking-wider text-slate-500 font-semibold min-w-[130px] border-r border-slate-800/30"
                   >
-                    <div className="truncate max-w-[120px] mx-auto text-slate-300 normal-case tracking-normal" title={q.title}>
+                    <div className="truncate max-w-[200px] mx-auto text-slate-300 normal-case tracking-normal" title={q.title}>
                       {q.title}
                     </div>
                     <div className="text-slate-600 text-[9px] mt-0.5 tracking-normal normal-case font-normal">
@@ -339,18 +340,18 @@ const EvaluationMatrix = ({ students = [], courseStatus, gradingScale: gradingSc
                     className="border-b border-slate-800/40 last:border-0 group"
                   >
                     <td
-                      className="sticky left-0 z-10 bg-slate-900 group-hover:bg-slate-800 px-5 py-3.5 border-r border-slate-800/50 transition-colors"
-                      style={leftShadow}
+                      className="sticky left-0 z-10 bg-slate-900 group-hover:bg-slate-800 px-3 py-3.5 border-r border-slate-800/50 transition-colors"
+                      style={{ width: STUDENT_W, minWidth: STUDENT_W, maxWidth: STUDENT_W, ...leftShadow }}
                     >
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-7 h-7 rounded-full bg-indigo-600/20 flex items-center justify-center flex-shrink-0">
-                          <span className="text-indigo-400 text-xs font-bold">
+                      <div className="flex items-center justify-center gap-2">
+                        <div className="w-6 h-6 rounded-full bg-indigo-600/20 flex items-center justify-center flex-shrink-0">
+                          <span className="text-indigo-400 text-[10px] font-bold">
                             {s.student?.username?.charAt(0)?.toUpperCase()}
                           </span>
                         </div>
                         <div className="min-w-0">
-                          <p className="text-white text-xs font-semibold truncate">{s.student?.username}</p>
-                          <p className="text-slate-500 text-[10px] truncate">{s.student?.email}</p>
+                          <p className="text-white text-[11px] font-semibold truncate">{s.student?.username}</p>
+                          <p className="text-slate-500 text-[9px] truncate">{s.student?.email}</p>
                         </div>
                       </div>
                     </td>
