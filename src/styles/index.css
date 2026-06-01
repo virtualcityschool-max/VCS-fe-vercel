@@ -106,6 +106,29 @@ h3,
   background: rgba(99, 102, 241, 0.5);
 }
 
+.scrollbar-blue::-webkit-scrollbar {
+  height: 3px;
+}
+
+.scrollbar-blue::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.6);
+  border-radius: 10px;
+}
+
+.scrollbar-blue::-webkit-scrollbar-thumb {
+  background: #2563eb;
+  border-radius: 10px;
+}
+
+.scrollbar-blue::-webkit-scrollbar-thumb:hover {
+  background: #3b82f6;
+}
+
+.scrollbar-blue {
+  scrollbar-width: thin;
+  scrollbar-color: #2563eb rgba(15, 23, 42, 0.6);
+}
+
 @keyframes slideDown {
   from {
     transform: translateY(-20px);

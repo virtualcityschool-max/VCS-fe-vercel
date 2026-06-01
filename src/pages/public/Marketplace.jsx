@@ -22,11 +22,16 @@ import { getStorageUrl } from "../../utils/storageUrl";
 import AuthRequiredModal from "../../components/common/AuthRequiredModal";
 import PublicCourseCard from "../../components/courses/PublicCourseCard";
 
+const PREVIEW_LIMIT = 8;
+
+const getCategoryName = (course) =>
+  typeof course.category === "object" ? course.category?.name : course.category;
+
 const Marketplace = () => {
   const dispatch = useDispatch();
+  const [activeCategory, setActiveCategory] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState({
-    category: "",
     priceRange: "",
     instructor: "",
   });
@@ -93,26 +98,17 @@ const Marketplace = () => {
     };
   }, [courses]);
 
-  // Filter courses based on search term and filters
+  // Filter courses (category handled by tabs, not here)
   const filteredCourses = useMemo(() => {
     if (!courses || courses.length === 0) return [];
-
     return courses.filter((course) => {
-      // Search filter (title, instructor, category, description)
       const matchesSearch =
         searchTerm === "" ||
         course.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        course.instructor?.username
-          ?.toLowerCase()
-          .includes(searchTerm.toLowerCase()) ||
-        (typeof course.category === "string" ? course.category : course.category?.name ?? "")?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        course.instructor?.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (getCategoryName(course) ?? "").toLowerCase().includes(searchTerm.toLowerCase()) ||
         course.description?.toLowerCase().includes(searchTerm.toLowerCase());
 
-      // Category filter
-      const matchesCategory =
-        filters.category === "" || (typeof course.category === "object" ? course.category?.name : course.category) === filters.category;
-
-      // Price range filter
       const matchesPrice =
         filters.priceRange === "" ||
         (() => {
@@ -122,40 +118,40 @@ const Marketplace = () => {
           return price > min && price <= max;
         })();
 
-      // Instructor filter
       const matchesInstructor =
         filters.instructor === "" ||
         course.instructor?.username === filters.instructor;
 
-      return (
-        matchesSearch && matchesCategory && matchesPrice && matchesInstructor
-      );
+      return matchesSearch && matchesPrice && matchesInstructor;
     });
   }, [courses, searchTerm, filters]);
 
-  // Check if any filters are active
-  const hasActiveFilters = useMemo(() => {
-    return (
-      searchTerm !== "" || Object.values(filters).some((value) => value !== "")
-    );
-  }, [searchTerm, filters]);
+  // Courses visible in the active tab
+  const visibleCourses = useMemo(() => {
+    if (activeCategory === "all") return filteredCourses;
+    const cat = categories.find((c) => String(c.id) === String(activeCategory));
+    if (!cat) return filteredCourses;
+    return filteredCourses.filter((c) => getCategoryName(c) === cat.name);
+  }, [filteredCourses, activeCategory, categories]);
 
-  // Reset all filters
+  // Categories that have at least one visible course (for tabs)
+  const activeCats = useMemo(() =>
+    categories.filter((cat) =>
+      filteredCourses.some((c) => getCategoryName(c) === cat.name)
+    ), [categories, filteredCourses]);
+
+  const hasActiveFilters = useMemo(() =>
+    searchTerm !== "" || Object.values(filters).some((v) => v !== ""),
+  [searchTerm, filters]);
+
   const resetFilters = () => {
     setSearchTerm("");
-    setFilters({
-      category: "",
-      priceRange: "",
-      instructor: "",
-    });
+    setFilters({ priceRange: "", instructor: "" });
+    setActiveCategory("all");
   };
 
-  // Handle filter changes
   const handleFilterChange = (filterName, value) => {
-    setFilters((prev) => ({
-      ...prev,
-      [filterName]: value,
-    }));
+    setFilters((prev) => ({ ...prev, [filterName]: value }));
   };
 
   // Derive enrollment state using both course.is_enrolled and enrolledCourses
@@ -388,7 +384,7 @@ const Marketplace = () => {
       id="classes-view"
       className="min-h-screen bg-[#0f172a] text-white font-inter animate-fadeIn"
     >
-      {/* Compact Search + Filters Bar */}
+      {/* Search + Filters Bar */}
       <div className="relative overflow-hidden border-b border-slate-800/50 animate-fadeIn">
         <div className="max-w-7xl mx-auto px-6 py-5 relative z-10">
           <div className="text-center mb-4">
@@ -396,10 +392,7 @@ const Marketplace = () => {
               Expand your <span className="text-blue-500">potential</span>.
             </h1>
           </div>
-          <form
-            onSubmit={handleSearch}
-            className="grid grid-cols-1 md:grid-cols-10 gap-3 max-w-6xl mx-auto animate-springyReveal"
-          >
+          <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-8 gap-3 max-w-4xl mx-auto animate-springyReveal">
             <div className="md:col-span-4">
               <SearchInput
                 id="course-search"
@@ -413,23 +406,7 @@ const Marketplace = () => {
               />
             </div>
             <div className="md:col-span-2">
-              <FilterSelect
-                value={filters.category}
-                onChange={(e) => handleFilterChange("category", e.target.value)}
-                className="w-full h-11"
-              >
-                <option value="">All Categories</option>
-                {categories.map((cat) => (
-                  <option key={cat.id} value={cat.name}>{formatCategoryLabel(cat.name)}</option>
-                ))}
-              </FilterSelect>
-            </div>
-            <div className="md:col-span-2">
-              <FilterSelect
-                value={filters.priceRange}
-                onChange={(e) => handleFilterChange("priceRange", e.target.value)}
-                className="w-full h-11"
-              >
+              <FilterSelect value={filters.priceRange} onChange={(e) => handleFilterChange("priceRange", e.target.value)} className="w-full h-11">
                 <option value="">All Prices</option>
                 {filterOptions.priceRanges.map((range) => (
                   <option key={range.value} value={range.value}>{range.label}</option>
@@ -437,11 +414,7 @@ const Marketplace = () => {
               </FilterSelect>
             </div>
             <div className="md:col-span-2">
-              <FilterSelect
-                value={filters.instructor}
-                onChange={(e) => handleFilterChange("instructor", e.target.value)}
-                className="w-full h-11"
-              >
+              <FilterSelect value={filters.instructor} onChange={(e) => handleFilterChange("instructor", e.target.value)} className="w-full h-11">
                 <option value="">All Teachers</option>
                 {filterOptions.instructors.map((instructor) => (
                   <option key={instructor} value={instructor}>{instructor}</option>
@@ -452,52 +425,133 @@ const Marketplace = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 pt-6 pb-16">
+      {/* Category tabs */}
+      <div className="border-b border-slate-800/50 sticky top-0 z-30 bg-[#0f172a]/95 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-blue py-2">
+            <button
+              onClick={() => setActiveCategory("all")}
+              className={`flex-shrink-0 px-3 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide transition-all ${
+                activeCategory === "all"
+                  ? "bg-blue-600 text-white"
+                  : "text-slate-400 hover:text-white hover:bg-slate-800"
+              }`}
+            >
+              All
+            </button>
+            {activeCats.map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => setActiveCategory(String(cat.id))}
+                className={`flex-shrink-0 px-3 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide transition-all whitespace-nowrap ${
+                  activeCategory === String(cat.id)
+                    ? "bg-blue-600 text-white"
+                    : "text-slate-400 hover:text-white hover:bg-slate-800"
+                }`}
+              >
+                {formatCategoryLabel(cat.name)}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-6 pt-8 pb-16">
         <main>
-          {hasActiveFilters && (
-            <div className="flex items-center justify-between mb-4 px-1">
-              <span className="text-sm text-slate-400">
-                Showing {filteredCourses.length} result
-                {filteredCourses.length !== 1 ? "s" : ""}
-              </span>
+
+          {/* No results */}
+          {visibleCourses.length === 0 && (
+            <div className="text-center py-16">
+              <div className="w-16 h-16 bg-slate-700/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i className="fas fa-search text-slate-400 text-2xl"></i>
+              </div>
+              <p className="text-slate-400 text-lg mb-4">No courses found</p>
+              {hasActiveFilters && (
+                <Button variant="outline" size="md" onClick={resetFilters} className="mt-2">
+                  <i className="fas fa-redo mr-2"></i>Clear Filters
+                </Button>
+              )}
             </div>
           )}
-            {filteredCourses.length === 0 && hasActiveFilters && (
-              <div className="text-center py-12">
-                <div className="w-16 h-16 bg-slate-700/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <i className="fas fa-search text-slate-400 text-2xl"></i>
-                </div>
-                <p className="text-slate-400 text-lg mb-4">
-                  No courses found matching your criteria
-                </p>
-                <Button
-                  variant="outline"
-                  size="md"
-                  onClick={resetFilters}
-                  className="mt-2"
-                >
-                  <i className="fas fa-redo mr-2"></i>
-                  Clear Filters
-                </Button>
-              </div>
-            )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredCourses.map((course, idx) => (
-                <PublicCourseCard
-                  key={course.id || idx}
-                  course={course}
-                  index={idx}
-                  enrolled={isCourseEnrolled(course)}
-                  isEnrolling={enrollingCourseIds.includes(course.id)}
-                  isUnenrolling={unenrollingCourseIds.includes(course.id)}
-                  isWithdrawing={withdrawingCourseIds.includes(course.id)}
-                  onEnroll={handleEnrollCourse}
-                  onUnenroll={handleUnenrollCourse}
-                  onWithdraw={handleWithdrawEnrollment}
-                />
-              ))}
+          {/* ── All tab: grouped by category ── */}
+          {activeCategory === "all" && visibleCourses.length > 0 && (
+            <div className="space-y-12">
+              {activeCats.map((cat) => {
+                const catCourses = filteredCourses.filter((c) => getCategoryName(c) === cat.name);
+                if (!catCourses.length) return null;
+                const preview = catCourses.slice(0, PREVIEW_LIMIT);
+                const hasMore = catCourses.length > PREVIEW_LIMIT;
+                return (
+                  <section key={cat.id}>
+                    <div className="flex items-center justify-between mb-5">
+                      <h2 className="text-lg font-black text-white tracking-tight">
+                        {formatCategoryLabel(cat.name)}
+                        <span className="ml-2 text-slate-600 text-sm font-medium">({catCourses.length})</span>
+                      </h2>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
+                      {preview.map((course, idx) => (
+                        <PublicCourseCard
+                          key={course.id || idx}
+                          course={course}
+                          index={idx}
+                          enrolled={isCourseEnrolled(course)}
+                          isEnrolling={enrollingCourseIds.includes(course.id)}
+                          isUnenrolling={unenrollingCourseIds.includes(course.id)}
+                          isWithdrawing={withdrawingCourseIds.includes(course.id)}
+                          onEnroll={handleEnrollCourse}
+                          onUnenroll={handleUnenrollCourse}
+                          onWithdraw={handleWithdrawEnrollment}
+                        />
+                      ))}
+                    </div>
+                    {hasMore && (
+                      <div className="mt-5 text-right">
+                        <button
+                          onClick={() => setActiveCategory(String(cat.id))}
+                          className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 text-sm font-semibold transition-colors"
+                        >
+                          Show all {catCourses.length} courses
+                          <i className="fas fa-arrow-right text-xs" />
+                        </button>
+                      </div>
+                    )}
+                  </section>
+                );
+              })}
             </div>
+          )}
+
+          {/* ── Single category tab ── */}
+          {activeCategory !== "all" && visibleCourses.length > 0 && (() => {
+            const cat = categories.find((c) => String(c.id) === activeCategory);
+            return (
+              <section>
+                <h2 className="text-lg font-black text-white tracking-tight mb-6">
+                  {formatCategoryLabel(cat?.name || "")}
+                  <span className="ml-2 text-slate-600 text-sm font-medium">({visibleCourses.length})</span>
+                </h2>
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
+                  {visibleCourses.map((course, idx) => (
+                    <PublicCourseCard
+                      key={course.id || idx}
+                      course={course}
+                      index={idx}
+                      enrolled={isCourseEnrolled(course)}
+                      isEnrolling={enrollingCourseIds.includes(course.id)}
+                      isUnenrolling={unenrollingCourseIds.includes(course.id)}
+                      isWithdrawing={withdrawingCourseIds.includes(course.id)}
+                      onEnroll={handleEnrollCourse}
+                      onUnenroll={handleUnenrollCourse}
+                      onWithdraw={handleWithdrawEnrollment}
+                    />
+                  ))}
+                </div>
+              </section>
+            );
+          })()}
+
         </main>
       </div>
 
