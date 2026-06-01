@@ -270,11 +270,17 @@ export const formatDate = (isoString, timeZone) => {
 // "AST", "PKT", "EST" — short timezone label; falls back to browser local if timeZone is omitted
 export const getTimezoneAbbr = (timeZone) => {
   try {
-    const opts = { timeZoneName: "short", ...(timeZone ? { timeZone } : {}) };
-    const value = new Intl.DateTimeFormat("en", opts)
-      .formatToParts(new Date())
-      .find((p) => p.type === "timeZoneName")?.value || "";
-    return value.replace(/^GMT/, "UTC");
+    const now = new Date();
+    const tz = timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const utcMs = new Date(now.toLocaleString("en-US", { timeZone: "UTC" }));
+    const tzMs  = new Date(now.toLocaleString("en-US", { timeZone: tz }));
+    const diff  = (tzMs - utcMs) / 60000;
+    const sign  = diff >= 0 ? "+" : "-";
+    const h     = Math.floor(Math.abs(diff) / 60);
+    const m     = Math.abs(diff) % 60;
+    return m === 0
+      ? `UTC${sign}${h}`
+      : `UTC${sign}${h}:${String(m).padStart(2, "0")}`;
   } catch {
     return "";
   }
