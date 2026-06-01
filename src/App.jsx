@@ -11,6 +11,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useSelector, useDispatch } from "react-redux";
 import { initializeAuth, logoutUser } from "./store/slices/authSlice";
+import { setAuthModal } from "./store/slices/uiSlice";
 import { toastManager } from "./utils/toastManager";
 
 // Components
@@ -101,8 +102,46 @@ const ProtectedRoute = ({ allowedRoles = [] }) => {
       student: "/student",
       teacher: "/teacher",
       parent: "/parent",
-      admin: "/admin",
+      admin: "/admin/overview",
     };
+    return <Navigate to={roleRedirects[role] || "/"} replace />;
+  }
+
+  return <Outlet />;
+};
+
+// Gate for /admin routes: keeps URL at /admin, opens admin login modal once if not logged in
+const AdminAuthGate = () => {
+  const { isLoggedIn, isInitialized, role } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
+  const hasOpenedRef = React.useRef(false);
+
+  React.useEffect(() => {
+    if (isInitialized && !isLoggedIn && !hasOpenedRef.current) {
+      hasOpenedRef.current = true;
+      dispatch(setAuthModal({ type: "login", adminMode: true }));
+    }
+  }, [isInitialized, isLoggedIn, dispatch]);
+
+  if (!isInitialized) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-blue-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i className="fas fa-spinner text-blue-500 text-2xl animate-spin"></i>
+          </div>
+          <p className="text-white text-lg">Initializing...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isLoggedIn) {
+    return <PublicHome />;
+  }
+
+  if (role !== "admin") {
+    const roleRedirects = { student: "/student", teacher: "/teacher", parent: "/parent" };
     return <Navigate to={roleRedirects[role] || "/"} replace />;
   }
 
@@ -221,7 +260,7 @@ const AppInner = () => {
                         : role === "teacher"
                           ? "/teacher"
                           : role === "admin"
-                            ? "/admin"
+                            ? "/admin/overview"
                             : role === "parent"
                               ? "/parent"
                               : "/"
@@ -288,7 +327,7 @@ const AppInner = () => {
             </Route>
 
             {/* Admin-Only Routes */}
-            <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
+            <Route element={<AdminAuthGate />}>
               <Route path="/admin" element={<AdminLayout />}>
                 <Route
                   index
