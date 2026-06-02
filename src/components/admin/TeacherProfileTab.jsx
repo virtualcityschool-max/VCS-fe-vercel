@@ -7,6 +7,7 @@ import DistinctionsEditor from "./DistinctionsEditor";
 const TeacherProfileTab = ({ profile, onUpdate, onCancel, onSaved, readOnly = false }) => {
   const [formData, setFormData] = useState({
     bio: "",
+    qualification: "",
     expertise: "",
     experience_years: "",
     rating: "",
@@ -23,13 +24,14 @@ const TeacherProfileTab = ({ profile, onUpdate, onCancel, onSaved, readOnly = fa
   useEffect(() => {
     if (profile) {
       setFormData({
-        bio: profile.bio || "",
-        expertise: profile.expertise || "",
-        experience_years: profile.experience_years || "",
-        rating: profile.rating || "",
-        linkedin: profile.linkedin || "",
-        phone: profile.phone || "",
-        distinctions: profile.distinctions || [],
+        bio: profile.bio ?? "",
+        qualification: profile.qualification ?? "",
+        expertise: profile.expertise ?? "",
+        experience_years: profile.experience_years ?? "",
+        rating: profile.rating ?? "",
+        linkedin: profile.linkedin ?? "",
+        phone: profile.phone ?? "",
+        distinctions: profile.distinctions ?? [],
       });
     }
   }, [profile]);
@@ -84,13 +86,14 @@ const TeacherProfileTab = ({ profile, onUpdate, onCancel, onSaved, readOnly = fa
 
   const handleCancel = () => {
     setFormData({
-      bio: profile?.bio || "",
-      expertise: profile?.expertise || "",
-      experience_years: profile?.experience_years || "",
-      rating: profile?.rating || "",
-      linkedin: profile?.linkedin || "",
-      phone: profile?.phone || "",
-      distinctions: profile?.distinctions || [],
+      bio: profile?.bio ?? "",
+      qualification: profile?.qualification ?? "",
+      expertise: profile?.expertise ?? "",
+      experience_years: profile?.experience_years ?? "",
+      rating: profile?.rating ?? "",
+      linkedin: profile?.linkedin ?? "",
+      phone: profile?.phone ?? "",
+      distinctions: profile?.distinctions ?? [],
     });
     clearAllErrors();
     if (onCancel) onCancel();
@@ -118,7 +121,7 @@ const TeacherProfileTab = ({ profile, onUpdate, onCancel, onSaved, readOnly = fa
           {errors.bio && <p className="mt-1 text-xs text-rose-400">{getFieldError("bio")}</p>}
         </div>
 
-        {/* Expertise · Experience · Rating — 3 col */}
+        {/* Expertise · Experience · Qualification — 3 col */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-2">Expertise</label>
@@ -139,6 +142,17 @@ const TeacherProfileTab = ({ profile, onUpdate, onCancel, onSaved, readOnly = fa
               onChange={(e) => handleInputChange("experience_years", e.target.value)}
               placeholder="e.g. 5"
               error={getFieldError("experience_years")}
+              className="w-full bg-slate-800 text-white"
+              disabled={readOnly}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">Qualification</label>
+            <Input
+              value={formData.qualification}
+              onChange={(e) => handleInputChange("qualification", e.target.value)}
+              placeholder="e.g. MSc Computer Science"
+              error={getFieldError("qualification")}
               className="w-full bg-slate-800 text-white"
               disabled={readOnly}
             />

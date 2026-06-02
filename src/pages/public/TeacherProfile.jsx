@@ -8,6 +8,7 @@ import BackButton from "../../components/ui/BackButton";
 import { availabilityService } from "../../services/availabilityService";
 import { toastManager } from "../../utils/toastManager";
 import AuthRequiredModal from "../../components/common/AuthRequiredModal";
+import { getStorageUrl } from "../../utils/storageUrl";
 
 const HIRE_INTENT_KEY = "vcs_hire_intent";
 
@@ -497,8 +498,16 @@ const TeacherProfile = () => {
           <div className="relative z-10 flex flex-col lg:flex-row gap-8 lg:items-center">
             {/* Avatar */}
             <div className="shrink-0 mx-auto lg:mx-0">
-              <div className="w-28 h-28 sm:w-36 sm:h-36 rounded-3xl bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center text-white text-4xl sm:text-5xl font-bold shadow-xl border border-indigo-400/20">
-                {teacherDetails.teacher_name?.[0]?.toUpperCase() || "T"}
+              <div className="w-28 h-28 sm:w-36 sm:h-36 rounded-3xl bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center text-white text-4xl sm:text-5xl font-bold shadow-xl border border-indigo-400/20 overflow-hidden">
+                {teacherDetails.avatar ? (
+                  <img
+                    src={getStorageUrl(teacherDetails.avatar)}
+                    alt={teacherDetails.teacher_name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  teacherDetails.teacher_name?.[0]?.toUpperCase() || "T"
+                )}
               </div>
             </div>
 
@@ -515,31 +524,41 @@ const TeacherProfile = () => {
                 </span>
               </div>
 
-              <p className="text-slate-400 text-sm sm:text-base max-w-2xl mx-auto lg:mx-0 mb-5">
-                {teacherDetails.bio || "No teacher bio available."}
-              </p>
+              {teacherDetails.bio && (
+                <p className="text-slate-400 text-sm max-w-2xl mx-auto lg:mx-0 mb-6 leading-relaxed">
+                  {teacherDetails.bio}
+                </p>
+              )}
 
+              {/* Info pills */}
               <div className="flex flex-wrap justify-center lg:justify-start gap-3">
-                <span className="rounded-xl border border-slate-700 bg-slate-900/70 px-4 py-2 text-xs font-semibold text-slate-300">
-                  {teacherDetails.experience_years ?? 0} years experience
-                </span>
+                <div className="flex items-center gap-2 bg-slate-800/60 border border-slate-700/60 rounded-2xl px-4 py-2.5">
+                  <i className="fas fa-briefcase text-indigo-400 text-xs" />
+                  <div>
+                    <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold leading-none mb-0.5">Experience</p>
+                    <p className="text-sm font-semibold text-white leading-none">{teacherDetails.experience_years ?? 0} year{(teacherDetails.experience_years ?? 0) === 1 ? "" : "s"}</p>
+                  </div>
+                </div>
 
-                <span className="rounded-xl border border-slate-700 bg-slate-900/70 px-4 py-2 text-xs font-semibold text-slate-300">
-                  {activeCourses} active course{activeCourses === 1 ? "" : "s"}
-                </span>
+                {teacherDetails.qualification && (
+                  <div className="flex items-center gap-2 bg-slate-800/60 border border-slate-700/60 rounded-2xl px-4 py-2.5">
+                    <i className="fas fa-graduation-cap text-indigo-400 text-xs" />
+                    <div>
+                      <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold leading-none mb-0.5">Qualification</p>
+                      <p className="text-sm font-semibold text-white leading-none">{teacherDetails.qualification}</p>
+                    </div>
+                  </div>
+                )}
 
-                <span className="rounded-xl border border-slate-700 bg-slate-900/70 px-4 py-2 text-xs font-semibold text-slate-300">
-                  {totalStudents} student{totalStudents === 1 ? "" : "s"}
-                </span>
-
-                {expertiseList.slice(0, 2).map((tag) => (
-                  <span
-                    key={tag}
-                    className="rounded-xl border border-slate-700 bg-slate-900/70 px-4 py-2 text-xs font-semibold text-slate-300"
-                  >
-                    {tag}
-                  </span>
-                ))}
+                {expertiseList.length > 0 && (
+                  <div className="flex items-center gap-2 bg-slate-800/60 border border-slate-700/60 rounded-2xl px-4 py-2.5">
+                    <i className="fas fa-star text-indigo-400 text-xs" />
+                    <div>
+                      <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold leading-none mb-0.5">Expertise</p>
+                      <p className="text-sm font-semibold text-white leading-none">{expertiseList.join(", ")}</p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -598,261 +617,76 @@ const TeacherProfile = () => {
           </div>
         </div>
 
-        {/* Top Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* About / Bio / Expertise */}
-          <div className="lg:col-span-2">
-            <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 sm:p-10 shadow-xl h-full">
-              <h2 className="text-2xl font-semibold mb-8 flex items-center gap-3">
-                <i className="fas fa-user-tie text-indigo-400"></i>
-                Teacher Profile
-              </h2>
-
-              <div className="space-y-8">
-                <div>
-                  <h3 className="text-sm font-semibold text-slate-200 mb-3">
-                    About
-                  </h3>
-                  <p className="text-slate-400 leading-relaxed">
-                    {teacherDetails.bio || "No bio available for this teacher."}
-                  </p>
-                </div>
-
-                <div>
-                  <h3 className="text-sm font-semibold text-slate-200 mb-3">
-                    Expertise
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {expertiseList.length ? (
-                      expertiseList.map((item) => (
-                        <span
-                          key={item}
-                          className="rounded-full border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs text-slate-300"
-                        >
-                          {item}
-                        </span>
-                      ))
-                    ) : (
-                      <p className="text-slate-500 text-sm">Not specified</p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="rounded-3xl border border-indigo-500/10 bg-indigo-500/[0.04] p-6">
-                  <p className="text-slate-300 leading-relaxed italic">
-                    “Dedicated to helping learners gain practical mastery
-                    through structured teaching, clarity, and real-world
-                    guidance.”
-                  </p>
-                  <p className="mt-4 text-[10px] font-bold uppercase tracking-[0.22em] text-indigo-300">
-                    Teaching Philosophy
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Stats + Distinctions */}
-          <div className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 text-center shadow-xl">
-                <p className="text-3xl font-semibold text-white mb-2">
-                  {totalStudents}
-                </p>
-                <p className="text-[10px] uppercase tracking-[0.22em] text-slate-500 font-bold">
-                  Learners
-                </p>
-              </div>
-
-              {/* <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 text-center shadow-xl">
-                <p className="text-3xl font-semibold text-yellow-400 mb-2 flex items-center justify-center gap-2">
-                  {ratingValue.toFixed(1)}
-                  <i className="fas fa-star text-sm"></i>
-                </p>
-                <p className="text-[10px] uppercase tracking-[0.22em] text-slate-500 font-bold">
-                  Global Rating
-                </p>
-              </div> */}
-            </div>
-
-            <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-xl">
-              <h3 className="text-xs font-bold uppercase tracking-[0.24em] text-slate-500 mb-6">
-                Distinctions
-              </h3>
-
-              {teacherDetails.distinctions?.length ? (
-                <ul className="space-y-5">
-                  {teacherDetails.distinctions.map((cert, idx) => (
-                    <li
-                      key={`${cert.title}-${idx}`}
-                      className="flex items-start gap-4"
-                    >
-                      <div className="w-11 h-11 rounded-2xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center shrink-0">
-                        <i className="fas fa-award"></i>
-                      </div>
-
-                      <div>
-                        <p className="font-semibold text-slate-200 text-sm">
-                          {cert.title}
-                        </p>
-                        <p className="text-xs text-slate-500 mt-1 uppercase tracking-[0.18em]">
-                          {cert.org}
-                        </p>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-slate-500 text-sm">No distinctions listed</p>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Courses + Rating Breakdown */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Courses + Distinctions */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
           {/* Courses */}
-          <div className="lg:col-span-2">
-            <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 sm:p-10 shadow-xl h-full">
-              <div className="flex items-center justify-between mb-8 gap-4 flex-wrap">
-                <h2 className="text-2xl font-semibold flex items-center gap-3">
-                  <i className="fas fa-book-open text-indigo-400"></i>
-                  Courses
-                </h2>
-
-                <span className="text-xs uppercase tracking-[0.18em] text-slate-500 font-bold">
-                  {teacherDetails.courses?.length || 0} total
-                </span>
-              </div>
-
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl shadow-xl flex flex-col" style={{height: "280px"}}>
+            <div className="flex items-center justify-between px-6 pt-6 pb-4 flex-shrink-0">
+              <h2 className="text-xl font-semibold flex items-center gap-3">
+                <i className="fas fa-book-open text-indigo-400"></i>
+                Courses
+              </h2>
+              <span className="text-xs uppercase tracking-[0.18em] text-slate-500 font-bold">
+                {teacherDetails.courses?.length || 0} total
+              </span>
+            </div>
+            <div className="flex-1 overflow-y-auto px-6 pb-6 space-y-3 custom-scrollbar">
               {teacherDetails.courses?.length ? (
-                <div className="space-y-4">
-                  {teacherDetails.courses.map((course) => (
-                    <Link
-                      key={course.id}
-                      to={`/courses/${course.id}`}
-                      className="block rounded-2xl border border-slate-800 bg-slate-950/70 p-5 transition hover:bg-slate-800 cursor-pointer"
-                    >
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                        <div>
-                          <p className="text-sm font-semibold text-white">
-                            {course.course_name}
-                          </p>
-                          <p className="text-xs text-slate-500 mt-1">
-                            {course.enrolled_students} enrolled student
-                            {course.enrolled_students === 1 ? "" : "s"} • Rating{" "}
-                            {Number(course.rating || 0).toFixed(1)}
-                          </p>
-                        </div>
-
-                        <span
-                          className={`inline-flex rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] border ${
-                            course.status === "published"
-                              ? "border-green-500/20 bg-green-500/10 text-green-300"
-                              : "border-slate-700 bg-slate-800 text-slate-400"
-                          }`}
-                        >
-                          {course.status}
-                        </span>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
+                teacherDetails.courses.map((course) => (
+                  <Link
+                    key={course.id}
+                    to={`/courses/${course.id}`}
+                    className="block rounded-2xl border border-slate-800 bg-slate-950/70 p-4 transition hover:bg-slate-800"
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-sm font-semibold text-white truncate">{course.course_name}</p>
+                      <span className={`flex-shrink-0 inline-flex rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider border ${
+                        course.status === "published"
+                          ? "border-green-500/20 bg-green-500/10 text-green-300"
+                          : "border-slate-700 bg-slate-800 text-slate-400"
+                      }`}>
+                        {course.status}
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-500 mt-1">
+                      {course.enrolled_students} student{course.enrolled_students === 1 ? "" : "s"}
+                    </p>
+                  </Link>
+                ))
               ) : (
                 <p className="text-slate-500 text-sm">No courses available</p>
               )}
             </div>
           </div>
 
-          {/* Rating breakdown */}
-          {/* <div className="space-y-6">
-            <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-xl">
-              <h3 className="text-xs font-bold uppercase tracking-[0.24em] text-slate-500 mb-6">
-                Rating Breakdown
-              </h3>
-
-              <div className="mb-6">
-                <p className="text-4xl font-semibold text-white">
-                  {ratingValue.toFixed(1)}
-                </p>
-                <p className="text-sm text-slate-500 mt-1">
-                  Based on {totalReviews} review{totalReviews === 1 ? "" : "s"}
-                </p>
-              </div>
-
-              <div className="space-y-3">
-                {teacherDetails.rating_breakdown?.stars?.length ? (
-                  teacherDetails.rating_breakdown.stars.map((item) => (
-                    <div key={item.star} className="flex items-center gap-3">
-                      <span className="w-10 text-xs text-slate-400">
-                        {item.star}★
-                      </span>
-                      <div className="flex-1 h-2 rounded-full bg-slate-800 overflow-hidden">
-                        <div
-                          className="h-full bg-indigo-500 rounded-full"
-                          style={{ width: `${item.percentage}%` }}
-                        />
-                      </div>
-                      <span className="w-10 text-right text-xs text-slate-500">
-                        {item.count}
-                      </span>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-slate-500 text-sm">No ratings yet</p>
-                )}
-              </div>
-            </div>
-          </div> */}
-        </div>
-
-        {/* Reviews */}
-        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 sm:p-10 shadow-xl">
-          <div className="flex items-center justify-between mb-8 gap-4 flex-wrap">
-            <h2 className="text-2xl font-semibold flex items-center gap-3">
-              <i className="fas fa-comment-dots text-indigo-400"></i>
-              Recent Reviews
+          {/* Distinctions */}
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl shadow-xl flex flex-col" style={{height: "280px"}}>
+            <h2 className="text-xl font-semibold px-6 pt-6 pb-4 flex-shrink-0 flex items-center gap-3">
+              <i className="fas fa-award text-indigo-400"></i>
+              Distinctions
             </h2>
-
-            <span className="text-xs uppercase tracking-[0.18em] text-slate-500 font-bold">
-              {teacherDetails.recent_reviews?.length || 0} shown
-            </span>
-          </div>
-
-          {teacherDetails.recent_reviews?.length ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {teacherDetails.recent_reviews.map((review, idx) => (
-                <div
-                  key={`${review.student_name}-${idx}`}
-                  className="rounded-2xl border border-slate-800 bg-slate-950/70 p-6"
-                >
-                  <div className="flex items-center justify-between gap-3 mb-3">
-                    <p className="text-sm font-semibold text-white">
-                      {review.student_name}
-                    </p>
-                    <span className="text-yellow-400 text-sm font-medium">
-                      ★ {review.rating}
-                    </span>
-                  </div>
-
-                  <p className="text-slate-300 text-sm leading-relaxed mb-4">
-                    {review.comment}
-                  </p>
-
-                  <div className="text-xs text-slate-500 space-y-1">
-                    <p>{review.course_title}</p>
-                    <p>
-                      {review.created_at
-                        ? new Date(review.created_at).toLocaleDateString()
-                        : "Date not available"}
-                    </p>
-                  </div>
-                </div>
-              ))}
+            <div className="flex-1 overflow-y-auto px-6 pb-6 custom-scrollbar">
+              {teacherDetails.distinctions?.length ? (
+              <ul className="space-y-5">
+                {teacherDetails.distinctions.map((cert, idx) => (
+                  <li key={`${cert.title}-${idx}`} className="flex items-start gap-4">
+                    <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center shrink-0">
+                      <i className="fas fa-award" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-slate-200 text-sm">{cert.title}</p>
+                      <p className="text-xs text-slate-500 mt-0.5 uppercase tracking-wider">{cert.org}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className="h-full flex items-center justify-center">
+                <p className="text-slate-500 text-sm">No distinctions listed</p>
+              </div>
+            )}
             </div>
-          ) : (
-            <p className="text-slate-500 text-sm">No reviews available yet</p>
-          )}
+          </div>
         </div>
 
         {/* Available Slots Preview (students who are logged in) */}

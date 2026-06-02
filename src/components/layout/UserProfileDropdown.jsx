@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { logoutUser } from "../../store/slices/authSlice";
 import { ROLES, ROUTES } from "../../constants";
 import { toastManager } from "../../utils/toastManager";
+import { getStorageUrl } from "../../utils/storageUrl";
 
 const UserProfileDropdown = ({ dropUp = false, isCollapsed = false }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -112,7 +113,7 @@ const UserProfileDropdown = ({ dropUp = false, isCollapsed = false }) => {
             <div className="w-full h-full rounded-full bg-slate-900 flex items-center justify-center overflow-hidden">
               {auth.user?.avatar ? (
                 <img
-                  src={auth.user.avatar}
+                  src={getStorageUrl(auth.user.avatar)}
                   alt="User Avatar"
                   className="w-full h-full object-cover"
                 />
@@ -163,7 +164,7 @@ const UserProfileDropdown = ({ dropUp = false, isCollapsed = false }) => {
                 <div className="w-full h-full rounded-full bg-slate-900 flex items-center justify-center overflow-hidden">
                   {auth.user?.avatar ? (
                     <img
-                      src={auth.user.avatar}
+                      src={getStorageUrl(auth.user.avatar)}
                       alt="User Avatar"
                       className="w-full h-full object-cover"
                     />

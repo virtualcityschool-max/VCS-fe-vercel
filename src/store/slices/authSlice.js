@@ -104,6 +104,7 @@ export const loginUser = createAsyncThunk(
           username: profile.username || user.username,
           email: profile.email || user.email,
           role: profile.role || user.role,
+          avatar: profile.avatar || null,
         };
 
         authStorage.setStoredAuthUser(normalizedUser);
@@ -298,6 +299,7 @@ const authSlice = createSlice({
             username: action.payload.profile.username,
             email: action.payload.profile.email,
             role: action.payload.profile.role,
+            avatar: action.payload.profile.avatar || null,
           };
           state.token = authStorage.getAccessToken();
         } else {
@@ -331,6 +333,7 @@ const authSlice = createSlice({
           username: action.payload.username,
           email: action.payload.email,
           role: action.payload.role,
+          avatar: action.payload.avatar || null,
         };
       })
       .addCase(fetchUserProfile.rejected, (state, action) => {

@@ -493,17 +493,16 @@ const CourseDetails = () => {
                       </div>
                     )}
 
-                    {normalizedCourse.instructor_id && (
-                      <div className="flex items-center gap-3 bg-white/5 backdrop-blur-sm px-4 py-2 rounded-full border border-white/10">
-                        <img
-                          src={`https://i.pravatar.cc/150?u=instructor_${normalizedCourse.instructor_id}`}
-                          className="w-6 h-6 rounded-full border-2 border-white/20"
-                          alt="Instructor"
-                        />
-                        <span className="text-slate-300">
-                          Instructor #{normalizedCourse.instructor_id}
+                    {(normalizedCourse.instructor?.id || normalizedCourse.instructor_id) && (
+                      <Link
+                        to={`/teachers/${normalizedCourse.instructor?.id || normalizedCourse.instructor_id}`}
+                        className="flex items-center gap-2 bg-white/5 backdrop-blur-sm px-4 py-2 rounded-full border border-white/10 hover:border-indigo-500/40 hover:bg-indigo-500/10 transition-colors"
+                      >
+                        <i className="fas fa-chalkboard-teacher text-indigo-400 text-xs" />
+                        <span className="text-slate-300 font-medium">
+                          {normalizedCourse.instructor?.username || `Instructor #${normalizedCourse.instructor_id}`}
                         </span>
-                      </div>
+                      </Link>
                     )}
                   </div>
                 </div>

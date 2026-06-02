@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchUserProfile } from "../../store/slices/authSlice";
 import { fetchCategories } from "../../store/slices/coursesSlice";
@@ -9,6 +9,7 @@ import { useFieldErrors } from "../../hooks";
 import { validatePhone, normalizePhone, formatPhoneDisplay } from "../../utils/validation";
 import PhoneInput from "../../components/ui/PhoneInput";
 import FilterSelect from "../../components/ui/FilterSelect";
+import { getStorageUrl } from "../../utils/storageUrl";
 
 // ── Tiny helpers ──────────────────────────────────────────────────────────────
 
@@ -62,6 +63,7 @@ const TIMEZONES = [
 const FIELDS = {
   teacher: [
     { key: "bio",              label: "Bio",               icon: "align-left",    type: "textarea",  placeholder: "Tell students about yourself…" },
+    { key: "qualification",    label: "Qualification",     icon: "graduation-cap", type: "text",     placeholder: "e.g. MSc Computer Science, PhD Physics" },
     { key: "expertise",        label: "Expertise",         icon: "star",          type: "text",      placeholder: "e.g. Mathematics, Physics" },
     { key: "experience_years", label: "Years of Experience", icon: "briefcase",   type: "number",    placeholder: "0", required: true },
     { key: "linkedin",         label: "LinkedIn URL",      icon: "linkedin",      type: "url",       placeholder: "https://linkedin.com/in/…" },
@@ -85,11 +87,14 @@ const ProfilePage = () => {
   const { role, profile: authProfile, username } = useSelector((s) => s.auth);
   const { categories } = useSelector((s) => s.courses);
 
+  const avatarInputRef = useRef(null);
+
   const [profile, setProfile] = useState(null);
-  const [loading, setLoading]   = useState(true);
-  const [editing, setEditing]   = useState(false);
-  const [saving, setSaving]     = useState(false);
-  const [form, setForm]         = useState({});
+  const [loading, setLoading]       = useState(true);
+  const [editing, setEditing]       = useState(false);
+  const [saving, setSaving]         = useState(false);
+  const [form, setForm]             = useState({});
+  const [avatarUploading, setAvatarUploading] = useState(false);
 
   const {
     errors,
@@ -206,6 +211,26 @@ const ProfilePage = () => {
     clearAllErrors();
   };
 
+  const handleAvatarUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const fd = new FormData();
+    fd.append("avatar", file);
+    setAvatarUploading(true);
+    try {
+      await authService.updateProfile(fd);
+      const fresh = await authService.getMe();
+      setProfile(fresh);
+      dispatch(fetchUserProfile());
+      toastManager.success("Profile photo updated");
+    } catch {
+      toastManager.error("Failed to upload photo");
+    } finally {
+      setAvatarUploading(false);
+      if (avatarInputRef.current) avatarInputRef.current.value = "";
+    }
+  };
+
   // ── Derived ────────────────────────────────────────────────────────────────
   const initials = username
     ? username.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2)
@@ -248,11 +273,53 @@ const ProfilePage = () => {
         <div className="bg-gradient-to-br from-indigo-600/20 to-slate-900 border border-indigo-500/20 rounded-3xl p-6 lg:p-8">
           <div className="flex items-start gap-4 sm:gap-5">
             {/* Avatar */}
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center flex-shrink-0 shadow-xl shadow-indigo-500/20">
-              {profile?.avatar ? (
-                <img src={profile.avatar} alt="avatar" className="w-full h-full object-cover rounded-2xl" />
-              ) : (
-                <span className="text-white text-2xl font-black">{initials}</span>
+            <div className="relative flex-shrink-0 group">
+              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-xl shadow-indigo-500/20 overflow-hidden">
+                {profile?.avatar ? (
+                  <img src={getStorageUrl(profile.avatar)} alt="avatar" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-white text-2xl font-black">{initials}</span>
+                )}
+              </div>
+
+              {role === "teacher" && (
+                <>
+                  {/* Upload overlay — spinner while uploading, camera on hover */}
+                  <button
+                    type="button"
+                    onClick={() => !avatarUploading && avatarInputRef.current?.click()}
+                    className={`absolute inset-0 rounded-2xl flex flex-col items-center justify-center gap-1 transition-opacity
+                      ${avatarUploading
+                        ? "bg-black/70 opacity-100 cursor-wait"
+                        : "bg-black/60 opacity-0 group-hover:opacity-100 cursor-pointer"}`}
+                  >
+                    {avatarUploading
+                      ? <i className="fas fa-spinner fa-spin text-white text-xl" />
+                      : <i className="fas fa-camera text-white text-lg" />}
+                    <span className="text-white text-[9px] font-black uppercase tracking-widest">
+                      {avatarUploading ? "Uploading…" : "Change"}
+                    </span>
+                  </button>
+
+                  {/* Small edit badge — visible when in editing mode */}
+                  {editing && !avatarUploading && (
+                    <button
+                      type="button"
+                      onClick={() => avatarInputRef.current?.click()}
+                      className="absolute -bottom-1.5 -right-1.5 w-6 h-6 rounded-full bg-indigo-600 hover:bg-indigo-500 border-2 border-slate-900 flex items-center justify-center transition-colors shadow-lg"
+                    >
+                      <i className="fas fa-pen text-white text-[8px]" />
+                    </button>
+                  )}
+
+                  <input
+                    ref={avatarInputRef}
+                    type="file"
+                    accept=".jpg,.jpeg,.png,.webp"
+                    className="hidden"
+                    onChange={handleAvatarUpload}
+                  />
+                </>
               )}
             </div>
 
@@ -426,6 +493,38 @@ const ProfilePage = () => {
             </div>
           )}
         </div>
+
+        {/* Assigned courses — teachers only */}
+        {role === "teacher" && (
+          <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6">
+            <h2 className="text-sm font-bold uppercase tracking-widest text-slate-500 mb-4">
+              Assigned Courses
+            </h2>
+            {(roleProfile?.assigned_courses?.length ?? 0) === 0 ? (
+              <p className="text-slate-600 text-sm italic">No courses assigned yet.</p>
+            ) : (
+              <div className="space-y-2">
+                {roleProfile.assigned_courses.map((course) => (
+                  <div key={course.id} className="flex items-center justify-between gap-3 py-2.5 border-b border-slate-800 last:border-0">
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-white truncate">{course.title}</p>
+                      <p className="text-xs text-slate-500 truncate mt-0.5">{course.category__name}</p>
+                    </div>
+                    <span className={`flex-shrink-0 text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full border ${
+                      course.status === "published"
+                        ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                        : course.status === "completed"
+                        ? "bg-slate-500/10 text-slate-400 border-slate-600/20"
+                        : "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                    }`}>
+                      {course.status}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Account info */}
         <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6 space-y-3">

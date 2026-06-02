@@ -121,9 +121,19 @@ const PublicCourseCard = ({
           </h3>
         </Link>
 
-        <span className="text-[9px] text-slate-500 truncate">
-          {course.instructor?.username || "Instructor"}
-        </span>
+        {course.instructor?.id ? (
+          <Link
+            to={`/teachers/${course.instructor.id}`}
+            onClick={(e) => e.stopPropagation()}
+            className="text-[9px] text-slate-500 hover:text-blue-400 transition-colors truncate block"
+          >
+            {course.instructor.username || "Instructor"}
+          </Link>
+        ) : (
+          <span className="text-[9px] text-slate-500 truncate">
+            {course.instructor?.username || "Instructor"}
+          </span>
+        )}
 
         <div className="mt-auto pt-1.5 border-t border-white/5 space-y-1">
           <p className="text-[9px] font-black text-white">PKR {course.price || "0"}</p>
