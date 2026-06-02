@@ -231,7 +231,7 @@ const StudentTutors = () => {
             <i className="fas fa-calendar-times text-slate-800 text-4xl block mb-3" />
             <p className="text-slate-600 text-sm mb-3">
               {searchQuery
-                ? `No sessions found for "${searchQuery}".`
+                ? `No Attendance found for "${searchQuery}".`
                 : dateFilter
                 ? `No sessions on ${new Date(dateFilter + "T00:00:00").toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" })}.`
                 : `No ${filter !== "all" ? filter : ""} sessions.`}

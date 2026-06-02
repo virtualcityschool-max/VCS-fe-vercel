@@ -106,7 +106,7 @@ const NAV_CONFIG = {
     { id: "enrollments", label: "Enrollments",  icon: "fas fa-user-graduate", to: "/admin/enrollments" },
     { id: "attendance",  label: "Attendance",   icon: "fas fa-calendar-check", to: "/admin/attendance" },
     { id: "evaluations", label: "Evaluations",  icon: "fas fa-chart-bar",      to: "/admin/evaluations" },
-    { id: "categories",  label: "Categories",   icon: "fas fa-tags",           to: "/admin/categories" },
+    { id: "levels",  label: "Levels",   icon: "fas fa-tags",           to: "/admin/course-levels" },
   ],
   teacher: [
     { label: "Dashboard",    to: "/teacher",                  icon: "fas fa-table-columns",   end: true },

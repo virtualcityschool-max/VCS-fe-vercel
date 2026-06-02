@@ -383,7 +383,7 @@ const UsersTab = ({
                           </span>
                         )}
                       </div>
-                      <p className="text-[9px] sm:text-xs text-slate-500 uppercase break-all">
+                      <p className="text-[9px] sm:text-xs text-slate-500 break-all">
                         {user.email}
                       </p>
                     </div>

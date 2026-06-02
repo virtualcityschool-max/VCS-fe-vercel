@@ -72,7 +72,7 @@ const AttendanceMatrix = ({
         <div className="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-3">
           <i className="fas fa-calendar-times text-slate-500 text-xl" />
         </div>
-        <p className="text-slate-400 text-sm">No sessions found for this course</p>
+        <p className="text-slate-400 text-sm">No Attendance found for this course</p>
       </div>
     );
   }

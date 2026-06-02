@@ -10,6 +10,7 @@ import {
   verifyOtp,
   resendOtp,
 } from "../../store/slices/authSlice";
+import { fetchCategories } from "../../store/slices/coursesSlice";
 import { authService } from "../../services/authService";
 import { normalizeApiError } from "../../utils/errorHandler";
 import { useFieldErrors } from "../../hooks";
@@ -71,6 +72,7 @@ const AuthModals = () => {
   const dispatch = useDispatch();
   const { authModal, enrollmentIntent } = useSelector((state) => state.ui);
   const { isLoading, resendOtpLoading, isInitialized, isLoggedIn } = useSelector((state) => state.auth);
+  const { categories, categoriesLoading } = useSelector((state) => state.courses);
   const [logoutCounter, setLogoutCounter] = useState(0);
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -182,7 +184,11 @@ const AuthModals = () => {
         setActiveRoleTab(intendedRole);
       } else if (urlRole && ["student", "teacher", "parent"].includes(urlRole)) {
         setActiveRoleTab(urlRole);
+      } else {
+        setActiveRoleTab("student");
       }
+
+      dispatch(fetchCategories());
     }
   }, [
     isOpen,
@@ -296,6 +302,8 @@ const AuthModals = () => {
 
     if (!role) newErrors.role = "Please select a role";
 
+    if (role === "student" && !gradeLevel) newErrors.gradeLevel = "Please select a course level";
+
     if (Object.keys(newErrors).length > 0) {
       setRegistrationErrors(newErrors);
       return;
@@ -303,8 +311,8 @@ const AuthModals = () => {
 
     try {
       const registerPayload = { email, username, password, confirmPassword, role };
-      if (role === "student" && gradeLevel.trim()) {
-        registerPayload.grade_level = gradeLevel.trim();
+      if (role === "student" && gradeLevel) {
+        registerPayload.grade_level = gradeLevel;
       }
       const response = await dispatch(registerUser(registerPayload)).unwrap();
 
@@ -1089,23 +1097,27 @@ const AuthModals = () => {
 
                 {role === "student" && (
                   <div>
-                    <label
-                      htmlFor="register-grade"
-                      className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 flex items-center gap-2"
-                    >
-                      Grade Level
-                      <span className="text-slate-600 normal-case font-medium tracking-normal text-[9px]">(optional)</span>
+                    <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block">
+                      Grade Level <span className="text-red-500">*</span>
                     </label>
-                    <input
-                      id="register-grade"
-                      name="register-grade"
-                      type="text"
-                      autoComplete="off"
+                    <FilterSelect
                       value={gradeLevel}
                       onChange={(e) => setGradeLevel(e.target.value)}
-                      placeholder="e.g. Grade 8, A-Level"
-                      className="w-full bg-slate-950 border border-white/5 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
-                    />
+                      placeholder={categoriesLoading ? "Loading levels…" : "Select course level"}
+                      disabled={categoriesLoading}
+                      className="w-full !bg-slate-950 !border-white/5 !rounded-2xl !px-6 !py-4 focus:ring-2 focus:ring-indigo-500 text-white text-sm"
+                    >
+                      {categories.map((cat) => (
+                        <option key={cat.id} value={String(cat.id)}>{cat.name}</option>
+                      ))}
+                    </FilterSelect>
+                    {registrationErrors.gradeLevel && (
+                      <p className="text-red-500 text-xs mt-2 animate-shake">
+                        {Array.isArray(registrationErrors.gradeLevel)
+                          ? registrationErrors.gradeLevel[0]
+                          : registrationErrors.gradeLevel}
+                      </p>
+                    )}
                   </div>
                 )}
 

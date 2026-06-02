@@ -43,10 +43,10 @@ const Header = ({ activeTab, children }) => {
           title: "Attendance",
           description: "Session-wise attendance matrix for all courses.",
         };
-      case "categories":
+      case "levels":
         return {
-          title: "Course Categories",
-          description: "Manage course categories for organizing your curriculum",
+          title: "Course Levels",
+          description: "Manage course levels for organizing your curriculum",
         };
       default:
         return {

@@ -121,7 +121,7 @@ const AdminCategoriesPage = () => {
                       <i className="fas fa-layer-group text-xs" />
                    </div>
                    <h3 className="text-xs font-black text-white uppercase tracking-widest">
-                     Categories Repository
+                     Course Levels Repository
                    </h3>
                 </div>
                 <div className="px-4 py-1.5 bg-slate-950/50 rounded-full text-[10px] font-black text-slate-500 border border-slate-800 uppercase tracking-widest">

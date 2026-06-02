@@ -430,7 +430,7 @@ const CoursesTab = ({
           <div className="relative" ref={catDropdownRef}>
             <button
               onClick={() => setCatDropdownOpen((o) => !o)}
-              className="flex items-center gap-2 px-3 py-2 bg-slate-800/60 border border-slate-700/70 text-slate-300 hover:text-white rounded-xl text-sm font-medium transition-all w-full sm:w-auto sm:min-w-[160px] justify-between"
+              className="flex items-center gap-2 px-3 py-2 bg-slate-800/60 border border-slate-700/70 text-slate-300 hover:text-white rounded-xl text-sm font-medium transition-all w-full sm:w-[160px] justify-between"
             >
               <span className="flex items-center gap-1.5 truncate">
                 <i className="fas fa-tags text-xs text-indigo-400 shrink-0" />
@@ -444,7 +444,7 @@ const CoursesTab = ({
             </button>
 
             {catDropdownOpen && (
-              <div className="absolute top-full right-0 sm:left-0 sm:right-auto mt-1.5 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-30 w-56 overflow-hidden">
+              <div className="absolute top-full right-0 sm:left-0 sm:right-auto mt-1.5 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-30 w-full overflow-hidden">
                 {/* All Categories — fixed, not scrolled */}
                 <button
                   onClick={() => { setCourseFilters({ ...courseFilters, category: "" }); setCatDropdownOpen(false); }}
@@ -507,7 +507,7 @@ const CoursesTab = ({
           </div>
 
           <FilterSelect
-            className="w-full sm:w-auto"
+            className="w-full sm:w-[160px]"
             value={courseFilters.priceRange}
             onChange={(e) => setCourseFilters({ ...courseFilters, priceRange: e.target.value })}
           >
@@ -517,7 +517,7 @@ const CoursesTab = ({
                 ))}
           </FilterSelect>
           <FilterSelect
-            className="w-full sm:w-auto"
+            className="w-full sm:w-[160px]"
             value={courseFilters.status}
             onChange={(e) => setCourseFilters({ ...courseFilters, status: e.target.value })}
           >
@@ -527,7 +527,7 @@ const CoursesTab = ({
             <option value="completed">Completed</option>
           </FilterSelect>
           <FilterSelect
-            className="w-full sm:w-auto"
+            className="w-full sm:w-[160px]"
             value={courseFilters.instructor}
             onChange={(e) => setCourseFilters({ ...courseFilters, instructor: e.target.value })}
           >

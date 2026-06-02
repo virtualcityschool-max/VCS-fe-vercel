@@ -190,7 +190,7 @@ const AppInner = () => {
     if (p.includes("/admin/sessions")) return "sessions";
     if (p.includes("/admin/attendance")) return "attendance";
     if (p.includes("/admin/evaluations")) return "evaluations";
-    if (p.includes("/admin/categories")) return "categories";
+    if (p.includes("/admin/course-levels")) return "levels";
     return null;
   };
 
@@ -341,7 +341,7 @@ const AppInner = () => {
                 <Route path="sessions" element={<AdminSessionsPage />} />
                 <Route path="attendance" element={<AdminAttendancePage />} />
                 <Route path="evaluations" element={<AdminEvaluationPage />} />
-                <Route path="categories" element={<AdminCategoriesPage />} />
+                <Route path="course-levels" element={<AdminCategoriesPage />} />
               </Route>
               <Route path="/admin/users/:id" element={<UserDetailsPage />} />
               <Route path="/admin/courses/:courseId" element={<AdminCourseDetailPage />} />
