@@ -91,7 +91,7 @@ const AdminCategoriesPage = () => {
                     onChange={(e) => setNewName(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleAdd()}
                     disabled={saving}
-                    placeholder="Enter category name..."
+                    placeholder="Enter level name..."
                     className="w-full bg-slate-950/50 border border-slate-800 rounded-2xl pl-5 pr-14 py-4 text-white placeholder:text-slate-700 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500/50 transition-all text-sm font-medium disabled:opacity-50"
                   />
                   <button
