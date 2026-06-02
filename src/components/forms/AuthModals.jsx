@@ -136,15 +136,23 @@ const AuthModals = () => {
 
   // Reset the login form key whenever the user logs out so autofill suggestions are cleared
   const prevLoggedInRef = React.useRef(isLoggedIn);
+  const justLoggedOutRef = React.useRef(false);
   React.useEffect(() => {
     if (prevLoggedInRef.current && !isLoggedIn) {
       resetLoginKey();
+      justLoggedOutRef.current = true;
     }
     prevLoggedInRef.current = isLoggedIn;
   }, [isLoggedIn]);
 
   // Auto-open admin login modal when URL has ?adminLogin=true (only when not already logged in)
+  // Skip if the user just logged out — ProtectedRoute transiently redirects to /?adminLogin=true
+  // before navigate("/") cleans the URL, which would otherwise reopen the admin modal.
   React.useEffect(() => {
+    if (justLoggedOutRef.current) {
+      justLoggedOutRef.current = false;
+      return;
+    }
     if (!isOpen && isInitialized && !isLoggedIn && searchParams.get("adminLogin") === "true") {
       dispatch(setAuthModal({ type: "login", adminMode: true }));
     }

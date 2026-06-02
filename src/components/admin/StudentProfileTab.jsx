@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from "react";
-import { Button, Input, PhoneInput } from "../ui";
+import React, { useState, useEffect, useMemo } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { Button, Input, PhoneInput, FilterSelect } from "../ui";
 import { useFieldErrors } from "../../hooks";
 import { validatePhone, normalizePhone } from "../../utils/validation";
+import { fetchCategories } from "../../store/slices/coursesSlice";
 
 const StatusBadge = ({ status }) => {
   if (status === "approved")
@@ -26,6 +28,11 @@ const StatusBadge = ({ status }) => {
 };
 
 const StudentProfileTab = ({ profile, userId, onUpdate, onCancel, onSaved, readOnly = false }) => {
+  const dispatch = useDispatch();
+  const { categories } = useSelector((state) => state.courses);
+
+  useEffect(() => { dispatch(fetchCategories()); }, [dispatch]);
+
   const [formData, setFormData] = useState({
     grade_level: "",
     date_of_birth: "",
@@ -67,7 +74,7 @@ const StudentProfileTab = ({ profile, userId, onUpdate, onCancel, onSaved, readO
     const newErrors = {};
 
     // Grade level validation
-    if (!formData.grade_level?.trim()) {
+    if (!formData.grade_level) {
       newErrors.grade_level = "Grade level is required";
     }
 
@@ -133,6 +140,16 @@ const StudentProfileTab = ({ profile, userId, onUpdate, onCancel, onSaved, readO
     }
   };
 
+  // Resolve stored grade_level to a category ID for the dropdown.
+  // Handles both new format (ID) and legacy format (category name string).
+  const gradeLevelId = useMemo(() => {
+    if (!formData.grade_level || !categories.length) return "";
+    const raw = String(formData.grade_level);
+    if (categories.some((c) => String(c.id) === raw)) return raw;
+    const byName = categories.find((c) => c.name === raw);
+    return byName ? String(byName.id) : "";
+  }, [formData.grade_level, categories]);
+
   const parents = profile?.parents || [];
 
   return (
@@ -154,14 +171,19 @@ const StudentProfileTab = ({ profile, userId, onUpdate, onCancel, onSaved, readO
             <label className="block text-sm font-medium text-slate-300 mb-2">
               Grade Level
             </label>
-            <Input
-              value={formData.grade_level}
+            <FilterSelect
+              value={gradeLevelId}
               onChange={(e) => handleInputChange("grade_level", e.target.value)}
-              placeholder="e.g. Grade 8, A-Level"
-              error={getFieldError("grade_level")}
-              className="bg-slate-900/60 border-slate-700"
+              placeholder="Select grade level"
               disabled={readOnly}
-            />
+            >
+              {categories.map((cat) => (
+                <option key={cat.id} value={String(cat.id)}>{cat.name}</option>
+              ))}
+            </FilterSelect>
+            {getFieldError("grade_level") && (
+              <p className="text-red-400 text-xs mt-1">{getFieldError("grade_level")}</p>
+            )}
           </div>
 
           <div>

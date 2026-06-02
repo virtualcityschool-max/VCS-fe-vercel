@@ -443,7 +443,7 @@ const Marketplace = () => {
               <button
                 key={cat.id}
                 onClick={() => setActiveCategory(String(cat.id))}
-                className={`flex-shrink-0 px-3 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide transition-all whitespace-nowrap ${
+                className={`flex-shrink-0 max-w-[120px] truncate px-3 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide transition-all ${
                   activeCategory === String(cat.id)
                     ? "bg-blue-600 text-white"
                     : "text-slate-400 hover:text-white hover:bg-slate-800"
@@ -456,7 +456,7 @@ const Marketplace = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 pt-8 pb-16">
+      <div className="max-w-7xl mx-auto px-6 pt-4 pb-16">
         <main>
 
           {/* No results */}
@@ -476,19 +476,28 @@ const Marketplace = () => {
 
           {/* ── All tab: grouped by category ── */}
           {activeCategory === "all" && visibleCourses.length > 0 && (
-            <div className="space-y-12">
+            <div className="space-y-6">
               {activeCats.map((cat) => {
                 const catCourses = filteredCourses.filter((c) => getCategoryName(c) === cat.name);
                 if (!catCourses.length) return null;
                 const preview = catCourses.slice(0, PREVIEW_LIMIT);
                 const hasMore = catCourses.length > PREVIEW_LIMIT;
                 return (
-                  <section key={cat.id}>
+                  <section key={cat.id} className="mb-2">
                     <div className="flex items-center justify-between mb-5">
                       <h2 className="text-lg font-black text-white tracking-tight">
                         {formatCategoryLabel(cat.name)}
                         <span className="ml-2 text-slate-600 text-sm font-medium">({catCourses.length})</span>
                       </h2>
+                      {hasMore && (
+                        <button
+                          onClick={() => { setActiveCategory(String(cat.id)); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                          className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 text-sm font-semibold transition-colors flex-shrink-0"
+                        >
+                          Show all {catCourses.length}
+                          <i className="fas fa-arrow-right text-xs" />
+                        </button>
+                      )}
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
                       {preview.map((course, idx) => (
@@ -506,17 +515,7 @@ const Marketplace = () => {
                         />
                       ))}
                     </div>
-                    {hasMore && (
-                      <div className="mt-5 text-right">
-                        <button
-                          onClick={() => setActiveCategory(String(cat.id))}
-                          className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 text-sm font-semibold transition-colors"
-                        >
-                          Show all {catCourses.length} courses
-                          <i className="fas fa-arrow-right text-xs" />
-                        </button>
-                      </div>
-                    )}
+                    <hr className="mt-4 border-slate-800/60" />
                   </section>
                 );
               })}

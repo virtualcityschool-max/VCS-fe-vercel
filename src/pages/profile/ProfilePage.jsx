@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchUserProfile } from "../../store/slices/authSlice";
+import { fetchCategories } from "../../store/slices/coursesSlice";
 import { authService } from "../../services/authService";
 import { toastManager } from "../../utils/toastManager";
 import { showApiError } from "../../utils/apiErrorHandler";
@@ -67,7 +68,7 @@ const FIELDS = {
     { key: "phone",            label: "Phone",             icon: "phone",         type: "tel",       placeholder: "+1-800-5551234" },
   ],
   student: [
-    { key: "grade_level",   label: "Grade Level",   icon: "graduation-cap", type: "text", placeholder: "e.g. Grade 8, A-Level" },
+    { key: "grade_level",   label: "Grade Level",   icon: "graduation-cap", type: "select" },
     { key: "phone",         label: "Phone",         icon: "phone",          type: "tel",  placeholder: "+1-800-5551234" },
     { key: "date_of_birth", label: "Date of Birth", icon: "calendar-alt",   type: "date", placeholder: "", required: true },
   ],
@@ -82,6 +83,7 @@ const FIELDS = {
 const ProfilePage = () => {
   const dispatch = useDispatch();
   const { role, profile: authProfile, username } = useSelector((s) => s.auth);
+  const { categories } = useSelector((s) => s.courses);
 
   const [profile, setProfile] = useState(null);
   const [loading, setLoading]   = useState(true);
@@ -99,6 +101,7 @@ const ProfilePage = () => {
 
   // ── Fetch full profile ──────────────────────────────────────────────────────
   useEffect(() => {
+    dispatch(fetchCategories());
     const load = async () => {
       setLoading(true);
       try {
@@ -112,7 +115,7 @@ const ProfilePage = () => {
       }
     };
     load();
-  }, []);
+  }, [dispatch]);
 
   const getRoleProfile = (data) => {
     if (!data) return {};
@@ -210,6 +213,20 @@ const ProfilePage = () => {
 
   const roleProfile = getRoleProfile(profile);
   const fields = FIELDS[role] || [];
+
+  // Resolve grade_level to a category ID (handles legacy name strings too)
+  const gradeLevelId = useMemo(() => {
+    const raw = String(form.grade_level ?? "");
+    if (!raw || !categories.length) return raw;
+    if (categories.some((c) => String(c.id) === raw)) return raw;
+    const byName = categories.find((c) => c.name === raw);
+    return byName ? String(byName.id) : raw;
+  }, [form.grade_level, categories]);
+
+  const gradeLevelName = useMemo(() => {
+    const match = categories.find((c) => String(c.id) === gradeLevelId);
+    return match ? match.name : (roleProfile?.grade_level ?? null);
+  }, [gradeLevelId, categories, roleProfile]);
 
   // ── Loading ────────────────────────────────────────────────────────────────
   if (loading) {
@@ -312,6 +329,20 @@ const ProfilePage = () => {
                     }}
                     error={errors[key]}
                   />
+                ) : type === "select" ? (
+                  <FilterSelect
+                    value={key === "grade_level" ? gradeLevelId : (form[key] || "")}
+                    onChange={(e) => {
+                      setForm((p) => ({ ...p, [key]: e.target.value }));
+                      clearFieldError(key);
+                    }}
+                    placeholder="Select level"
+                    className={errors[key] ? "border-red-500" : ""}
+                  >
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={String(cat.id)}>{cat.name}</option>
+                    ))}
+                  </FilterSelect>
                 ) : (
                   <input
                     type={type}
@@ -329,6 +360,8 @@ const ProfilePage = () => {
                 <div className={readCls}>
                   {type === "tel" && roleProfile[key]
                     ? formatPhoneDisplay(roleProfile[key])
+                    : type === "select" && key === "grade_level"
+                    ? (gradeLevelName ?? <span className="text-slate-600 italic">Not set</span>)
                     : (roleProfile[key] ?? <span className="text-slate-600 italic">Not set</span>)}
                 </div>
               )}
