@@ -106,14 +106,14 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
             <label className="block text-[11px] uppercase tracking-widest font-black text-slate-500 mb-2">
-              Category <span className="text-red-400">*</span>
+              Level <span className="text-red-400">*</span>
             </label>
             <FilterSelect
               value={formData.category || ""}
               onChange={(e) => onChange("category", e.target.value)}
               className={fieldClass(errors.category)}
             >
-              <option value="">Select category</option>
+              <option value="">Select level</option>
               {categories.map((cat) => (
                 <option key={cat.id} value={String(cat.id)}>{cat.name}</option>
               ))}

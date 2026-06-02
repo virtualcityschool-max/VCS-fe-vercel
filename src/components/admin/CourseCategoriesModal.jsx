@@ -79,9 +79,9 @@ const CourseCategoriesModal = ({ onClose, onCategoriesChanged, initialEditId, in
           <div>
             <h3 className="text-base font-bold text-white flex items-center gap-2">
               <i className="fas fa-tags text-indigo-400 text-sm" />
-              Course Categories
+              Course Levels
             </h3>
-            <p className="text-xs text-slate-500 mt-0.5">Add, rename, or delete course categories</p>
+            <p className="text-xs text-slate-500 mt-0.5">Add, rename, or delete course levels</p>
           </div>
           <button
             onClick={onClose}

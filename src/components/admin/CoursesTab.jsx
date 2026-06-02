@@ -85,9 +85,9 @@ const CourseCategoriesModal = ({ onClose, onCategoriesChanged, initialEditId, in
           <div>
             <h3 className="text-base font-bold text-white flex items-center gap-2">
               <i className="fas fa-tags text-indigo-400 text-sm" />
-              Course Categories
+              Course Levels
             </h3>
-            <p className="text-xs text-slate-500 mt-0.5">Add, rename, or delete course categories</p>
+            <p className="text-xs text-slate-500 mt-0.5">Add, rename, or delete course levels</p>
           </div>
           <button
             onClick={onClose}
@@ -437,7 +437,7 @@ const CoursesTab = ({
                 <span className="truncate">
                   {courseFilters.category
                     ? (categories.find((c) => c.name.toLowerCase().replace(/\s+/g, "") === courseFilters.category)?.name ?? "Category")
-                    : "All Categories"}
+                    : "All levels"}
                 </span>
               </span>
               <i className={`fas fa-chevron-down text-xs text-slate-500 shrink-0 transition-transform duration-200 ${catDropdownOpen ? "rotate-180" : ""}`} />
@@ -451,7 +451,7 @@ const CoursesTab = ({
                   className={`w-full text-left px-3 py-2.5 text-sm transition flex items-center gap-2 ${courseFilters.category === "" ? "text-indigo-400 bg-indigo-500/10" : "text-slate-300 hover:bg-slate-800 hover:text-white"}`}
                 >
                   <i className="fas fa-border-all text-xs opacity-60" />
-                  All Categories
+                  All Levels
                 </button>
 
                 {categories.length > 0 && <div className="border-t border-slate-800" />}
@@ -752,7 +752,7 @@ const CoursesTab = ({
                     Instructor
                   </th>
                   <th className="px-6 py-4 text-xs font-black uppercase text-slate-500">
-                    Category
+                    Level
                   </th>
                   <th className="px-6 py-4 text-xs font-black uppercase text-slate-500">
                     Price
