@@ -224,6 +224,7 @@ const PublicHome = () => {
                     enrolled={true}
                     onEnroll={handleEnrollClick}
                     onUnenroll={handleUnenrollCourse}
+                    variant="large"
                   />
                 ))}
               </div>
@@ -266,6 +267,7 @@ const PublicHome = () => {
                 onEnroll={handleEnrollClick}
                 onUnenroll={handleUnenrollCourse}
                 onWithdraw={handleWithdrawEnrollment}
+                variant="large"
               />
           ))
           }

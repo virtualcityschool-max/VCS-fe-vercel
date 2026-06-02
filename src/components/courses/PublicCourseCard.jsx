@@ -13,13 +13,15 @@ const PublicCourseCard = ({
   onEnroll,
   onUnenroll,
   onWithdraw,
+  variant = "compact",
 }) => {
+  const large = variant === "large";
   const isPending = course.enrollment_status === "pending";
   const isRejected = course.enrollment_status === "rejected";
   const noSessions = !course.has_session;
 
   const renderCTA = () => {
-    let cls = "w-full py-2 font-black text-[9px] uppercase tracking-[0.15em] rounded-xl transition-all active:scale-95 ";
+    let cls = `w-full ${large ? "py-2.5 text-[10px]" : "py-2 text-[9px]"} font-black uppercase tracking-[0.15em] rounded-xl transition-all active:scale-95 `;
     let label = "";
     let disabled = false;
     let tooltip = null;
@@ -94,29 +96,29 @@ const PublicCourseCard = ({
       className="bg-[#1a2235]/60 backdrop-blur-xl rounded-2xl overflow-hidden border border-white/5 shadow-lg group flex flex-col animate-springyReveal opacity-0 glass-shine hover-lift"
     >
       {/* Image */}
-      <div className="relative h-20 overflow-hidden bg-slate-900/50 shrink-0">
+      <div className={`relative ${large ? "h-36" : "h-20"} overflow-hidden bg-slate-900/50 shrink-0`}>
         <Link to={`/courses/${course.id}`} className="block h-full">
           {getCourseImage(course, index) ? (
             <img
               src={getCourseImage(course, index)}
-              className="w-full h-full object-cover group-hover:scale-105 transition duration-700 opacity-70 group-hover:opacity-100"
+              className={`w-full h-full object-cover group-hover:scale-105 transition duration-700 ${large ? "opacity-75" : "opacity-70"} group-hover:opacity-100`}
               alt={course.title || "Course"}
             />
           ) : (
             <div className="w-full h-full bg-slate-800 flex items-center justify-center">
-              <i className="fas fa-book-open text-slate-700 text-xl"></i>
+              <i className={`fas fa-book-open text-slate-700 ${large ? "text-3xl" : "text-xl"}`}></i>
             </div>
           )}
         </Link>
         {course.status === "published" && (
-          <div className="absolute top-1.5 right-1.5 z-10 w-1.5 h-1.5 bg-green-500 rounded-full shadow-[0_0_6px_rgba(34,197,94,0.8)] animate-pulse" />
+          <div className={`absolute ${large ? "top-2 right-2 w-2 h-2" : "top-1.5 right-1.5 w-1.5 h-1.5"} z-10 bg-green-500 rounded-full shadow-[0_0_6px_rgba(34,197,94,0.8)] animate-pulse`} />
         )}
       </div>
 
       {/* Content */}
-      <div className="p-2 flex-1 flex flex-col gap-1.5">
+      <div className={`${large ? "p-4 gap-2" : "p-2 gap-1.5"} flex-1 flex flex-col`}>
         <Link to={`/courses/${course.id}`}>
-          <h3 className="text-[10px] font-black leading-tight group-hover:text-blue-400 transition-colors line-clamp-2">
+          <h3 className={`${large ? "text-sm" : "text-[10px]"} font-black leading-tight group-hover:text-blue-400 transition-colors line-clamp-2`}>
             {course.title || "Untitled Course"}
           </h3>
         </Link>
@@ -125,18 +127,18 @@ const PublicCourseCard = ({
           <Link
             to={`/teachers/${course.instructor.id}`}
             onClick={(e) => e.stopPropagation()}
-            className="text-[9px] text-slate-500 hover:text-blue-400 transition-colors truncate block"
+            className={`${large ? "text-xs" : "text-[9px]"} text-slate-500 hover:text-blue-400 transition-colors truncate block`}
           >
             {course.instructor.username || "Instructor"}
           </Link>
         ) : (
-          <span className="text-[9px] text-slate-500 truncate">
+          <span className={`${large ? "text-xs" : "text-[9px]"} text-slate-500 truncate`}>
             {course.instructor?.username || "Instructor"}
           </span>
         )}
 
-        <div className="mt-auto pt-1.5 border-t border-white/5 space-y-1">
-          <p className="text-[9px] font-black text-white">PKR {course.price || "0"}</p>
+        <div className={`mt-auto ${large ? "pt-3" : "pt-1.5"} border-t border-white/5 space-y-1`}>
+          <p className={`${large ? "text-sm" : "text-[9px]"} font-black text-white`}>PKR {course.price || "0"}</p>
           {renderCTA()}
         </div>
       </div>

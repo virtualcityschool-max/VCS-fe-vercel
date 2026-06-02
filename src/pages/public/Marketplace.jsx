@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { fetchAllCourses, fetchCategories } from "../../store/slices/coursesSlice";
@@ -41,6 +41,7 @@ const Marketplace = () => {
   const [withdrawConfirm, setWithdrawConfirm] = useState({ open: false, courseId: null, courseTitle: "" });
   const [selectedCourse, setSelectedCourse] = useState(null);
   const submissionGuard = useSubmissionGuard();
+  const [tooltip, setTooltip] = useState({ visible: false, text: "", x: 0, y: 0 });
 
   // Get auth state from Redux store
   const auth = useSelector((state) => state.auth);
@@ -431,7 +432,7 @@ const Marketplace = () => {
           <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-blue py-2">
             <button
               onClick={() => setActiveCategory("all")}
-              className={`flex-shrink-0 px-3 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide transition-all ${
+              className={`flex-shrink-0 px-3 py-0.5 rounded-full text-xs font-bold uppercase tracking-wide transition-all cursor-pointer ${
                 activeCategory === "all"
                   ? "bg-blue-600 text-white"
                   : "text-slate-400 hover:text-white hover:bg-slate-800"
@@ -443,7 +444,12 @@ const Marketplace = () => {
               <button
                 key={cat.id}
                 onClick={() => setActiveCategory(String(cat.id))}
-                className={`flex-shrink-0 max-w-[120px] truncate px-3 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide transition-all ${
+                onMouseEnter={(e) => {
+                  const r = e.currentTarget.getBoundingClientRect();
+                  setTooltip({ visible: true, text: cat.name, x: r.left + r.width / 2, y: r.top - 8 });
+                }}
+                onMouseLeave={() => setTooltip((t) => ({ ...t, visible: false }))}
+                className={`flex-shrink-0 max-w-[120px] truncate px-3 py-0.5 rounded-full text-xs font-bold uppercase tracking-wide transition-all cursor-pointer ${
                   activeCategory === String(cat.id)
                     ? "bg-blue-600 text-white"
                     : "text-slate-400 hover:text-white hover:bg-slate-800"
@@ -580,6 +586,16 @@ const Marketplace = () => {
         onConfirm={confirmWithdrawEnrollment}
         onCancel={() => setWithdrawConfirm({ open: false, courseId: null, courseTitle: "" })}
       />
+      {/* Fixed category tooltip — escapes overflow-x-auto boundary */}
+      {tooltip.visible && (
+        <div
+          className="fixed z-[9999] pointer-events-none px-2.5 py-1.5 bg-slate-800 border border-slate-700 text-white text-[11px] font-medium rounded-lg whitespace-nowrap shadow-xl -translate-x-1/2 -translate-y-full"
+          style={{ left: tooltip.x, top: tooltip.y }}
+        >
+          {tooltip.text}
+          <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-700" />
+        </div>
+      )}
     </section>
   );
 };
