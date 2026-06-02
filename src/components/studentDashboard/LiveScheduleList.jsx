@@ -14,6 +14,7 @@ import { extractApiErrorMessage, showApiError } from "../../utils/apiErrorHandle
 import ConfirmDialog from "../common/ConfirmDialog";
 import { availabilityService } from "../../services/availabilityService";
 import TimezoneTag from "../ui/TimezoneTag";
+import SessionCountdown from "../common/SessionCountdown";
 
 const fmt12 = (t) => {
   if (!t) return "";
@@ -275,6 +276,9 @@ const LiveScheduleList = () => {
                         <span>{formatTime(slot.date + "T" + slot.start_time)} – {formatTime(slot.date + "T" + slot.end_time)}{" "}<TimezoneTag /></span>
                       </div>
                     </div>
+                    <div className="mt-2 flex justify-center md:justify-start">
+                      <SessionCountdown scheduledAt={slot.date + "T" + slot.start_time} status="scheduled" />
+                    </div>
                   </div>
 
                   {/* Badge + actions */}
@@ -391,6 +395,13 @@ const LiveScheduleList = () => {
                     </div>
                   )} */}
                 </div>
+
+                {/* Countdown */}
+                {!session.has_joined && session.status !== "ended" && !session.left_at && (
+                  <div className="mb-3">
+                    <SessionCountdown scheduledAt={session.scheduled_at} status={session.status} />
+                  </div>
+                )}
 
                 {/* Attendance Rate - Slim */}
                 {session.attendance_rate !== null && (

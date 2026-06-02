@@ -183,6 +183,21 @@ const getTeacherSessions = async (params = {}) => {
   return response.data;
 };
 
+const createSession = async (data) => {
+  const response = await axiosInstance.post("/classroom/sessions/", data);
+  return response.data;
+};
+
+const updateSession = async (id, data) => {
+  const response = await axiosInstance.patch(`/classroom/sessions/${id}/`, data);
+  return response.data;
+};
+
+const deleteSession = async (id) => {
+  await axiosInstance.delete(`/classroom/sessions/${id}/`);
+  return id;
+};
+
 const getSessionAttendance = async (sessionId) => {
   const response = await axiosInstance.get(
     `/classroom/sessions/${sessionId}/attendance/`,
@@ -263,6 +278,9 @@ export const teacherService = {
   gradeQuizSubmission,
   createAnnouncement,
   getTeacherSessions,
+  createSession,
+  updateSession,
+  deleteSession,
   getSessionAttendance,
   updateSessionAttendance,
   getAllAttendance,

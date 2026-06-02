@@ -18,6 +18,7 @@ import { getWindowLabel, isWithinSessionWindow } from "../../utils/helper/StartS
 import { useDateFormatters } from "../../hooks";
 import { availabilityService } from "../../services/availabilityService";
 import TimezoneTag from "../../components/ui/TimezoneTag";
+import SessionCountdown from "../../components/common/SessionCountdown";
 
 const fmt12 = (t) => {
   if (!t) return "";
@@ -414,6 +415,9 @@ const TeacherPortal = () => {
                               <span>{formatTime(slot.date + "T" + slot.start_time)} – {formatTime(slot.date + "T" + slot.end_time)}{" "}<TimezoneTag /></span>
                             </div>
                           </div>
+                          <div className="mt-2">
+                            <SessionCountdown scheduledAt={slot.date + "T" + slot.start_time} status="scheduled" />
+                          </div>
                           {slot.note && (
                             <p className="mt-2 text-[11px] text-slate-500 italic truncate max-w-sm">
                               "{slot.note}"
@@ -498,6 +502,11 @@ const TeacherPortal = () => {
                             <i className="fas fa-users text-indigo-500/50"></i>
                             {session.total_learners} Learners
                           </p>
+                          {session.status === "scheduled" && (
+                            <div className="mt-2">
+                              <SessionCountdown scheduledAt={session.schedule_at} status={session.status} />
+                            </div>
+                          )}
                         </div>
 
                         {/* Actions */}
