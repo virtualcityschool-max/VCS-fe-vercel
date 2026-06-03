@@ -253,8 +253,18 @@ const LiveScheduleList = () => {
                   className="bg-slate-900/40 backdrop-blur-xl p-5 rounded-[1.5rem] border border-white/5 flex flex-col md:flex-row items-center gap-6 hover:bg-white/5 transition-all duration-300 group shadow-2xl relative overflow-hidden"
                 >
                   {/* Teacher avatar */}
-                  <div className="flex-shrink-0 w-16 h-16 rounded-2xl border border-indigo-500/20 bg-indigo-500/10 flex items-center justify-center text-indigo-400 font-black text-xl shadow-lg">
-                    {slot.teacher_name?.[0]?.toUpperCase() || "T"}
+                  <div className="flex-shrink-0 w-16 h-16 rounded-2xl border border-indigo-500/20 overflow-hidden shadow-lg">
+                    {getStorageUrl(slot.teacher_avatar) ? (
+                      <img
+                        src={getStorageUrl(slot.teacher_avatar)}
+                        alt={slot.teacher_name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-indigo-500/10 flex items-center justify-center text-indigo-400 font-black text-xl">
+                        {slot.teacher_name?.[0]?.toUpperCase() || "T"}
+                      </div>
+                    )}
                   </div>
 
                   {/* Info */}
