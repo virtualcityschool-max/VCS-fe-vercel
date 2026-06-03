@@ -206,10 +206,28 @@ const BLANK_FORM = {
 
 function extractFieldErrors(err) {
   const data = err?.response?.data ?? err?.data ?? err ?? {};
+
   if (typeof data === "string") return { _general: data };
+
+  // Django custom format: { error: "Validation failed.", details: { field: [...] } }
+  if (data.error && data.details && typeof data.details === "object") {
+    const out = { _general: data.error };
+    for (const [k, v] of Object.entries(data.details)) {
+      out[k] = Array.isArray(v) ? v[0] : String(v);
+    }
+    return out;
+  }
+
+  // DRF detail string: { detail: "..." }
+  if (data.detail) return { _general: String(data.detail) };
+
+  // Simple error string: { error: "..." }
+  if (data.error && typeof data.error === "string") return { _general: data.error };
+
+  // Field-level errors: { field: ["msg", ...] }
   const out = {};
   for (const [k, v] of Object.entries(data)) {
-    out[k] = Array.isArray(v) ? v[0] : String(v);
+    out[k] = Array.isArray(v) ? v[0] : typeof v === "string" ? v : JSON.stringify(v);
   }
   return out;
 }
@@ -302,7 +320,7 @@ const TeacherSessionCalendar = () => {
       dispatch(fetchTeacherSessions(courseFilter ? { course: courseFilter } : {}));
     } catch (err) {
       const errs = extractFieldErrors(err);
-      if (errs._general) toastManager.error(errs._general);
+      toastManager.error(errs._general || "Please fix the errors below.");
       setCreateErrors(errs);
     }
   };
@@ -329,7 +347,7 @@ const TeacherSessionCalendar = () => {
       dispatch(fetchTeacherSessions(courseFilter ? { course: courseFilter } : {}));
     } catch (err) {
       const errs = extractFieldErrors(err);
-      if (errs._general) toastManager.error(errs._general);
+      toastManager.error(errs._general || "Please fix the errors below.");
       setEditErrors(errs);
     }
   };
