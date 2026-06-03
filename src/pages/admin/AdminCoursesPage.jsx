@@ -286,7 +286,7 @@ const AdminCoursesPage = () => {
 
     try {
       await dispatch(assignInstructor({ courseId, instructorId })).unwrap();
-      toastManager.success("Instructor assigned successfully");
+      toastManager.success("Tutor assigned successfully");
       setActiveModal(null);
     } catch (error) {
       showApiError(error);

@@ -416,7 +416,7 @@ const Marketplace = () => {
             </div>
             <div className="md:col-span-2">
               <FilterSelect value={filters.instructor} onChange={(e) => handleFilterChange("instructor", e.target.value)} className="w-full h-11">
-                <option value="">All Teachers</option>
+                <option value="">All Tutors</option>
                 {filterOptions.instructors.map((instructor) => (
                   <option key={instructor} value={instructor}>{instructor}</option>
                 ))}

@@ -467,7 +467,7 @@ const StudentAssignmentDetails = () => {
                   <p className="text-sm text-white font-bold leading-none">
                     {assignment.created_by_name}
                   </p>
-                  <p className="text-[10px] text-slate-400 mt-1">Subject Teacher</p>
+                  <p className="text-[10px] text-slate-400 mt-1">Subject Tutor</p>
                 </div>
               </div>
 

@@ -223,7 +223,7 @@ const AttendanceMatrix = ({
                   className="sticky left-0 z-20 bg-slate-900 px-3 py-3 text-center text-[10px] uppercase tracking-widest text-slate-500 font-black border-r border-slate-800"
                   style={{ width: STUDENT_W, minWidth: STUDENT_W, maxWidth: STUDENT_W, ...leftShadow }}
                 >
-                  {isStudent ? "Student" : "Teacher"}
+                  {isStudent ? "Student" : "Tutor"}
                 </th>
 
                 <th

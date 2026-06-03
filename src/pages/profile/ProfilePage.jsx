@@ -15,9 +15,9 @@ import { getStorageUrl } from "../../utils/storageUrl";
 
 const ROLE_LABEL = {
   admin: "Administrator",
-  teacher: "Instructor",
+  teacher: "Tutor",
   student: "Student",
-  parent: "Parent",
+  parent: "Guardian",
 };
 
 const ROLE_COLOR = {

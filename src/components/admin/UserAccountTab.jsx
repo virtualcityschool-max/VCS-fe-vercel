@@ -189,8 +189,8 @@ const UserAccountTab = ({ user, onUpdate, onCancel, onSaved, readOnly = false })
                 disabled={readOnly}
               >
                 <option value="student">Student</option>
-                <option value="teacher">Teacher</option>
-                <option value="parent">Parent</option>
+                <option value="teacher">Tutor</option>
+                <option value="parent">Guardian</option>
                 <option value="admin">Admin</option>
               </FilterSelect>
             </div>

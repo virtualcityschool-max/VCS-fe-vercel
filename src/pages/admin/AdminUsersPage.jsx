@@ -382,8 +382,8 @@ const AdminUsersPage = () => {
                     className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   >
                     <option value="student">Student</option>
-                    <option value="teacher">Teacher</option>
-                    <option value="parent">Parent</option>
+                    <option value="teacher">Tutor</option>
+                    <option value="parent">Guardian</option>
                     <option value="admin">Admin</option>
                   </FilterSelect>
                 </div>

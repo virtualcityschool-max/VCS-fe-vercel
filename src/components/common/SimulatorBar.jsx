@@ -22,13 +22,13 @@ const SimulatorBar = () => {
     },
     {
       id: "/teacher",
-      label: "Teacher",
+      label: "Tutor",
       icon: "fa-chalkboard-teacher",
       roles: ["teacher"],
     },
     {
       id: "/parent",
-      label: "Parent",
+      label: "Guardian",
       icon: "fa-user-friends",
       roles: ["parent"],
     },

@@ -131,7 +131,7 @@ const CourseStudentsModal = ({ courseId, courseTitle, onClose, canUnenroll }) =>
                   {/* Meta grid */}
                   <div className="grid grid-cols-2 gap-3">
                     <div className="bg-slate-800/50 rounded-xl p-3 border border-slate-700/40">
-                      <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Instructor</p>
+                      <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Tutor</p>
                       <p className="text-white text-sm font-medium truncate">
                         {course.instructor?.username || "—"}
                       </p>

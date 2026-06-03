@@ -82,7 +82,7 @@ const Classroom = () => {
                       Dr. Samuel Okoro
                     </p>
                     <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-                      Instructor • Sharing Screen
+                      Tutor • Sharing Screen
                     </p>
                   </div>
                 </div>

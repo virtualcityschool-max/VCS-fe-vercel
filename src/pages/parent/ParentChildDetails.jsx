@@ -247,7 +247,7 @@ const ParentChildDetails = () => {
                     <h2 className="text-base sm:text-xl font-black font-poppins tracking-tight">{activeCourse.title}</h2>
                     <div className="flex items-center gap-2 text-slate-400 text-xs sm:text-sm font-medium mt-0.5">
                       <i className="far fa-user-circle text-xs"></i>
-                      <span>Instructor: <span className="text-white">{activeCourse.instructor}</span></span>
+                      <span>Tutor: <span className="text-white">{activeCourse.instructor}</span></span>
                     </div>
                   </div>
                 </div>

@@ -1090,9 +1090,9 @@ const AuthModals = () => {
                     placeholder="Select Role"
                     className="w-full !bg-slate-950 !border-white/5 !rounded-2xl !px-6 !py-4 focus:ring-2 focus:ring-indigo-500 text-white text-sm"
                   >
-                    <option value="teacher">Teacher</option>
+                    <option value="teacher">Tutor</option>
                     <option value="student">Student</option>
-                    <option value="parent">Parent</option>
+                    <option value="parent">Guardian</option>
                   </FilterSelect>
                   {registrationErrors.role && (
                     <p className="text-red-500 text-xs mt-2 animate-shake">

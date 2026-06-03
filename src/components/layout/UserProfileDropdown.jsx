@@ -18,11 +18,11 @@ const UserProfileDropdown = ({ dropUp = false, isCollapsed = false }) => {
       case ROLES.ADMIN:
         return "Administrator";
       case ROLES.TEACHER:
-        return "Instructor";
+        return "Tutor";
       case ROLES.STUDENT:
         return "Student";
       case ROLES.PARENT:
-        return "Parent";
+        return "Guardian";
       default:
         return "User";
     }
@@ -213,7 +213,7 @@ const UserProfileDropdown = ({ dropUp = false, isCollapsed = false }) => {
               className="w-full px-4 py-3 text-left text-sm text-slate-300 hover:bg-slate-800 hover:text-white transition-colors duration-150 flex items-center gap-3"
             >
               <i className="fas fa-user-graduate"></i>
-              Teachers
+              Tutors
             </button>
             <button
               onClick={() => { setIsDropdownOpen(false); navigate("/courses"); }}

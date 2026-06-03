@@ -291,7 +291,7 @@ const SessionsTab = ({
           value={sessionFilters.teacher}
           onChange={(e) => setSessionFilters({ ...sessionFilters, teacher: e.target.value })}
         >
-          <option value="">All Teachers</option>
+          <option value="">All Tutors</option>
           {teachers.map((t) => (
             <option key={t.id} value={t.id}>{t.username}</option>
           ))}
@@ -316,7 +316,7 @@ const SessionsTab = ({
               <table className="w-full text-left">
                 <thead className="bg-slate-950/60 border-b border-slate-800">
                   <tr>
-                    {["Class", "Course", "Teacher", "Start Date", "Recurrence", "End Date", "Status", "Actions"].map((h) => (
+                    {["Class", "Course", "Tutor", "Start Date", "Recurrence", "End Date", "Status", "Actions"].map((h) => (
                       <th key={h} className="px-5 py-4 text-xs font-black uppercase text-slate-500">{h}</th>
                     ))}
                   </tr>
@@ -401,7 +401,7 @@ const SessionsTab = ({
                   <tr>
                     <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Class</th>
                     <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Course</th>
-                    <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Teacher</th>
+                    <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Tutor</th>
                     <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Start Date & Time</th>
                     <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">End Date</th>
                     <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Recurrence</th>
@@ -517,7 +517,7 @@ const SessionsTab = ({
                   {createSessionErrors?.course && <p className="text-red-400 text-xs mt-1">{createSessionErrors.course}</p>}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">Instructor</label>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">Tutor</label>
                   <input
                     type="text"
                     value={createSessionForm.instructor_username || ""}
@@ -702,7 +702,7 @@ const SessionsTab = ({
                   })()}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">Instructor</label>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">Tutor</label>
                   <input type="text" value={editSessionForm.teacher_name || ""} disabled
                     className="w-full px-3 py-2.5 bg-slate-700/50 border border-slate-600/50 rounded-xl text-slate-400 text-sm cursor-not-allowed" />
                 </div>

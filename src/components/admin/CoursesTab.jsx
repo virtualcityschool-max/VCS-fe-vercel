@@ -531,7 +531,7 @@ const CoursesTab = ({
             value={courseFilters.instructor}
             onChange={(e) => setCourseFilters({ ...courseFilters, instructor: e.target.value })}
           >
-            <option value="">All Instructors</option>
+            <option value="">All Tutors</option>
             {users?.map((user) => (
               <option key={user.id} value={user.id}>{user.username}</option>
             ))}
@@ -579,7 +579,7 @@ const CoursesTab = ({
                     Course
                   </th>
                   <th className="px-6 py-4 text-xs font-black uppercase text-slate-500">
-                    Instructor
+                    Tutor
                   </th>
                   <th className="px-6 py-4 text-xs font-black uppercase text-slate-500">
                     Category
@@ -720,7 +720,7 @@ const CoursesTab = ({
                           className="bg-blue-600/10 text-blue-400 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-blue-600 hover:text-white transition flex items-center gap-2 flex-1"
                         >
                           <i className="fas fa-user-plus"></i>
-                          <span>Assign Instructor</span>
+                          <span>Assign Tutor</span>
                         </button>
                         <button
                           onClick={() => onCourseDelete(course.id)}
@@ -749,7 +749,7 @@ const CoursesTab = ({
                     Course
                   </th>
                   <th className="px-6 py-4 text-xs font-black uppercase text-slate-500">
-                    Instructor
+                    Tutor
                   </th>
                   <th className="px-6 py-4 text-xs font-black uppercase text-slate-500">
                     Level
@@ -1010,7 +1010,7 @@ const CoursesTab = ({
             <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-xl font-bold text-white">
-                  Assign Instructor
+                  Assign Tutor
                 </h3>
                 <button
                   onClick={() => setActiveModal(null)}
@@ -1036,7 +1036,7 @@ const CoursesTab = ({
               >
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Select Instructor <span className="text-red-400">*</span>
+                    Select Tutor <span className="text-red-400">*</span>
                   </label>
                   <select
                     value={editCourseForm.instructor_id}
@@ -1071,7 +1071,7 @@ const CoursesTab = ({
                     type="submit"
                     className="bg-indigo-600 hover:bg-indigo-500"
                   >
-                    Assign Instructor
+                    Assign Tutor
                   </Button>
                 </div>
               </form>

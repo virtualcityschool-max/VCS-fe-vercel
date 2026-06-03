@@ -223,7 +223,7 @@ const StudentTutors = () => {
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm transition shadow-lg shadow-indigo-500/20"
             >
               <i className="fas fa-search" />
-              Browse Teachers
+              Browse Tutors
             </Link>
           </div>
         ) : Object.keys(grouped).length === 0 ? (

@@ -154,7 +154,7 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
         {/* Instructor */}
         <div>
           <label className="block text-sm font-medium text-slate-300 mb-2">
-            Instructor <span className="text-red-400">*</span>
+            Tutor <span className="text-red-400">*</span>
           </label>
           {mode === "edit" && (formData.has_session || formData.enrolled_students_count) ? (
             <>
@@ -168,7 +168,7 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
                 disabled
                 className="w-full px-3 py-2 bg-slate-700/40 border border-slate-700/40 rounded-lg text-slate-400 cursor-not-allowed text-sm"
               />
-              <p className="text-[10px] text-slate-500 mt-1">Instructor cannot be changed once a class has been created for this course.</p>
+              <p className="text-[10px] text-slate-500 mt-1">Tutor cannot be changed once a class has been created for this course.</p>
             </>
           ) : (
             <>

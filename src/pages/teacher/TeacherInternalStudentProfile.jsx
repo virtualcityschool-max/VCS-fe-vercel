@@ -16,7 +16,7 @@ const TeacherInternalStudentProfile = () => {
             className="flex items-center gap-2 text-slate-400 hover:text-white transition group font-bold text-sm"
           >
             <i className="fas fa-arrow-left transition group-hover:-translate-x-1"></i>
-            Back to Teacher Dashboard
+            Back to Tutor Dashboard
           </button>
           <div className="h-6 w-px bg-slate-800"></div>
           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
@@ -115,7 +115,7 @@ const TeacherInternalStudentProfile = () => {
               <div className="flex justify-between items-center mb-10">
                 <h3 className="text-xl font-bold font-poppins text-white flex items-center gap-3">
                   <i className="fas fa-sticky-note text-yellow-500"></i>{" "}
-                  Confidential Teacher Notes
+                  Confidential Tutor Notes
                 </h3>
                 <button className="text-indigo-400 font-black text-[10px] uppercase tracking-widest flex items-center gap-2 hover:text-white transition">
                   <div className="w-6 h-6 rounded-lg bg-indigo-600/20 flex items-center justify-center">

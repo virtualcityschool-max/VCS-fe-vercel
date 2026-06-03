@@ -22,9 +22,9 @@ const SearchControls = ({
   const roleTabs = [
     { value: "", label: "All" },
     { value: "admin", label: "Admin(s)" },
-    { value: "teacher", label: "Teacher(s)" },
+    { value: "teacher", label: "Tutor(s)" },
     { value: "student", label: "Student(s)" },
-    { value: "parent", label: "Parent(s)" },
+    { value: "parent", label: "Guardian(s)" },
   ];
 
   // Check if any filters are applied
@@ -127,13 +127,13 @@ const SearchControls = ({
           Admin
         </span>
         <span className="px-2 py-1 rounded-full font-bold uppercase tracking-wider bg-blue-500/20 text-blue-400 border border-blue-500/20">
-          Teacher
+          Tutor
         </span>
         <span className="px-2 py-1 rounded-full font-bold uppercase tracking-wider bg-green-500/20 text-green-400 border border-green-500/20">
           Student
         </span>
         <span className="px-2 py-1 rounded-full font-bold uppercase tracking-wider bg-purple-500/20 text-purple-400 border border-purple-500/20">
-          Parent
+          Guardian
         </span>
         <span className="text-slate-500 mx-1">|</span>
         <span className="text-slate-400 font-medium mr-1">Status</span>

@@ -282,7 +282,7 @@ const TeacherPortal = () => {
               </div>
               <div>
                 <h2 className="text-3xl sm:text-4xl font-black font-poppins tracking-tight text-white">
-                  Welcome, {dashboard?.teacher?.username || "Instructor"}!
+                  Welcome, {dashboard?.teacher?.username || "Tutor"}!
                 </h2>
               </div>
             </div>

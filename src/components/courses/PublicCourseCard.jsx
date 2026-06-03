@@ -129,11 +129,11 @@ const PublicCourseCard = ({
             onClick={(e) => e.stopPropagation()}
             className={`${large ? "text-xs" : "text-[9px]"} text-slate-500 hover:text-blue-400 transition-colors truncate block`}
           >
-            {course.instructor.username || "Instructor"}
+            {course.instructor.username || "Tutor"}
           </Link>
         ) : (
           <span className={`${large ? "text-xs" : "text-[9px]"} text-slate-500 truncate`}>
-            {course.instructor?.username || "Instructor"}
+            {course.instructor?.username || "Tutor"}
           </span>
         )}
 
