@@ -6,6 +6,7 @@ export { default as TeachersDirectory } from "./public/TeachersDirectory";
 export { default as TeacherProfile } from "./public/TeacherProfile";
 export { default as PrivacyPolicy } from "./public/PrivacyPolicy";
 export { default as TermsAndConditions } from "./public/TermsAndConditions";
+export { default as AboutPage } from "./public/AboutPage";
 
 // Student Pages
 export { default as StudentLayout } from "./student/StudentLayout";

@@ -69,7 +69,9 @@ import {
   ParentChildDetails,
   PrivacyPolicy,
   TermsAndConditions,
+  AboutPage,
 } from "./pages";
+import AdminAboutPage from "./pages/admin/AdminAboutPage";
 
 // Protected Route Component with Role-Based Access Control
 const ProtectedRoute = ({ allowedRoles = [] }) => {
@@ -278,6 +280,7 @@ const AppInner = () => {
             <Route path="/teachers/:id" element={<TeacherProfile />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/terms" element={<TermsAndConditions />} />
+            <Route path="/about" element={<AboutPage />} />
 
             {/* Student-Only Routes */}
             <Route element={<ProtectedRoute allowedRoles={["student"]} />}>
@@ -342,6 +345,7 @@ const AppInner = () => {
                 <Route path="attendance" element={<AdminAttendancePage />} />
                 <Route path="evaluations" element={<AdminEvaluationPage />} />
                 <Route path="course-levels" element={<AdminCategoriesPage />} />
+                <Route path="about" element={<AdminAboutPage />} />
               </Route>
               <Route path="/admin/users/:id" element={<UserDetailsPage />} />
               <Route path="/admin/courses/:courseId" element={<AdminCourseDetailPage />} />

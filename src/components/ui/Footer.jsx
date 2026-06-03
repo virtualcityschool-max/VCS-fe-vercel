@@ -119,6 +119,12 @@ const Footer = ({ variant = "full" }) => {
             </p>
             <div className="flex gap-6">
               <button
+                onClick={() => handleNavigation("/about")}
+                className="text-slate-400 hover:text-white cursor-pointer transition text-sm"
+              >
+                About
+              </button>
+              <button
                 onClick={() => handleNavigation("/privacy-policy")}
                 className="text-slate-400 hover:text-white cursor-pointer transition text-sm"
               >

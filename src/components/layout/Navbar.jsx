@@ -150,6 +150,14 @@ const Navbar = ({ variant = "default" }) => {
             >
               Catalog
             </button> */}
+            <button
+              onClick={() => navigate("/about")}
+              className={`text-slate-400 font-medium text-xs sm:text-sm hover:text-white transition cursor-pointer ${
+                isActivePath("/about") ? "text-white" : ""
+              }`}
+            >
+              About Us
+            </button>
           </div>
         </div>
         <div className="flex items-center gap-2 sm:gap-4 shrink-0 ml-4">
