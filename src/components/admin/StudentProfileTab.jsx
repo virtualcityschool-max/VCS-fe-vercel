@@ -27,7 +27,7 @@ const StatusBadge = ({ status }) => {
   );
 };
 
-const StudentProfileTab = ({ profile, userId, onUpdate, onCancel, onSaved, readOnly = false }) => {
+const StudentProfileTab = ({ profile, userId, rollNo, onUpdate, onCancel, onSaved, readOnly = false }) => {
   const dispatch = useDispatch();
   const { categories } = useSelector((state) => state.courses);
 
@@ -154,14 +154,27 @@ const StudentProfileTab = ({ profile, userId, onUpdate, onCancel, onSaved, readO
 
   return (
     <div className="space-y-4">
-      {/* Student ID — read-only */}
-      {userId != null && (
-        <div className="flex items-center gap-3 px-4 py-3 bg-slate-800/40 border border-slate-700/50 rounded-xl">
-          <i className="fas fa-id-badge text-indigo-400 text-sm flex-shrink-0" />
-          <div>
-            <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Student ID</p>
-            <p className="text-white font-semibold text-sm">#{userId}</p>
-          </div>
+      {/* Student ID / Roll No — read-only */}
+      {(userId != null || rollNo != null) && (
+        <div className="flex items-center gap-4 px-4 py-3 bg-slate-800/40 border border-slate-700/50 rounded-xl">
+          {userId != null && (
+            <div className="flex items-center gap-3">
+              <i className="fas fa-id-badge text-indigo-400 text-sm flex-shrink-0" />
+              <div>
+                <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Student ID</p>
+                <p className="text-white font-semibold text-sm">#{userId}</p>
+              </div>
+            </div>
+          )}
+          {rollNo != null && (
+            <div className="flex items-center gap-3 border-l border-slate-700/50 pl-4">
+              <i className="fas fa-hashtag text-indigo-400 text-sm flex-shrink-0" />
+              <div>
+                <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Roll No</p>
+                <p className="text-white font-semibold text-sm font-mono">{rollNo}</p>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

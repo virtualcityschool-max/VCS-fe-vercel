@@ -290,6 +290,7 @@ const UserDetailsPage = () => {
                   <StudentProfileTab
                     profile={userProfile}
                     userId={userData?.id}
+                    rollNo={userData?.roll_no}
                     onUpdate={handleProfileUpdate}
                     onCancel={handleBackToUsers}
                     onSaved={handleBackToUsers}
