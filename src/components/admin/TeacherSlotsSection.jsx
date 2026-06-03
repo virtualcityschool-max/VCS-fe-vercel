@@ -53,10 +53,14 @@ const SlotCard = ({ slot, onDelete, deleting }) => {
             <p className="text-[9px] text-slate-600 mt-0.5 font-medium">1 hr</p>
           </div>
           <button
-            onClick={() => onDelete(slot)}
-            disabled={isDel}
-            title="Delete slot"
-            className="shrink-0 w-6 h-6 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/10 hover:border-rose-500/30 text-rose-400 transition flex items-center justify-center disabled:opacity-40"
+            onClick={() => !isBooked && onDelete(slot)}
+            disabled={isBooked || isDel}
+            title={isBooked ? "Cannot delete a booked slot" : "Delete slot"}
+            className={`shrink-0 w-6 h-6 rounded-lg border transition flex items-center justify-center disabled:opacity-40 ${
+              isBooked
+                ? "bg-slate-800/40 border-slate-700/30 text-slate-700 cursor-not-allowed"
+                : "bg-rose-500/10 hover:bg-rose-500/20 border-rose-500/10 hover:border-rose-500/30 text-rose-400"
+            }`}
           >
             {isDel
               ? <i className="fas fa-spinner fa-spin text-[9px]" />

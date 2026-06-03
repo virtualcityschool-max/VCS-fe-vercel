@@ -138,7 +138,6 @@ const TeacherSlotsCalendarSection = ({ teacherId }) => {
           loading={loading}
           onDelete={handleDeleteRequest}
           deletingId={deletingId}
-          allowDeleteBooked
         />
       )}
 

@@ -51,7 +51,7 @@ const StudentTutors = () => {
       const data = await availabilityService.getMyBookings();
       setSlots(Array.isArray(data) ? data : []);
     } catch {
-      setError("Failed to load your booked sessions. Please try again.");
+      setError("Failed to load your booked slots. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -89,7 +89,7 @@ const StudentTutors = () => {
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-3xl font-black font-poppins mb-2">My Tutors</h1>
-          <p className="text-slate-400 text-sm">Your booked 1-on-1 tutoring sessions</p>
+          <p className="text-slate-400 text-sm">Your booked 1-on-1 tutoring slots</p>
         </div>
         <div className="flex items-center gap-3 flex-wrap">
           {!loading && (
@@ -213,7 +213,7 @@ const StudentTutors = () => {
               <i className="fas fa-chalkboard-teacher text-indigo-400 text-3xl" />
             </div>
             <div>
-              <h2 className="text-xl font-semibold text-white mb-2">No tutoring sessions yet</h2>
+              <h2 className="text-xl font-semibold text-white mb-2">No tutoring slots yet</h2>
               <p className="text-slate-500 text-sm max-w-sm mx-auto">
                 Browse teachers and book a 1-on-1 tutoring slot to get started.
               </p>
@@ -251,7 +251,7 @@ const StudentTutors = () => {
             <div className="h-px flex-1 bg-slate-800" />
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20">
               <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-              <span className="text-[10px] font-black uppercase tracking-widest text-amber-300">Booked Slot Sessions</span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-amber-300">Booked Slots</span>
             </div>
             <div className="h-px flex-1 bg-slate-800" />
           </div>
@@ -274,7 +274,7 @@ const StudentTutors = () => {
                       <div>
                         <h2 className="font-bold text-white text-base">{teacherName}</h2>
                         <p className="text-xs text-slate-500 mt-0.5">
-                          {teacherSlots.length} session{teacherSlots.length !== 1 ? "s" : ""} booked
+                          {teacherSlots.length} slot{teacherSlots.length !== 1 ? "s" : ""} booked
                           {upcoming.length > 0 && (
                             <span className="ml-2 text-indigo-400 font-semibold">
                               · {upcoming.length} upcoming

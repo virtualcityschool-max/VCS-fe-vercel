@@ -352,7 +352,7 @@ const TeacherPortal = () => {
                     }`}
                   >
                     <i className="fas fa-user-clock" />
-                    Reserved Sessions
+                    Reserved Slots
                     {bookedSlots.length > 0 && (
                       <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-full ${
                         activeSessionTab === "booked" ? "bg-white/20 text-white" : "bg-indigo-500/20 text-indigo-400"
@@ -371,7 +371,7 @@ const TeacherPortal = () => {
                 {bookedSlotsLoading ? (
                   <div className="flex items-center gap-3 text-slate-500 text-xs py-8 justify-center">
                     <i className="fas fa-spinner fa-spin" />
-                    Loading booked sessions…
+                    Loading booked slots…
                   </div>
                 ) : bookedSlots.length === 0 ? (
                   <div className="bg-slate-900/30 backdrop-blur-md p-12 rounded-[2rem] border border-white/5 text-center flex flex-col items-center gap-4">
@@ -379,7 +379,7 @@ const TeacherPortal = () => {
                       <i className="fas fa-user-clock"></i>
                     </div>
                     <div>
-                      <p className="text-slate-400 font-bold text-lg">No Booked Sessions</p>
+                      <p className="text-slate-400 font-bold text-lg">No Booked Slots</p>
                       <p className="text-slate-500 text-sm">Students haven't booked any upcoming tutoring slots.</p>
                     </div>
                   </div>
@@ -484,10 +484,13 @@ const TeacherPortal = () => {
 
                         {/* Info */}
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-3 mb-1">
+                          <div className="flex items-center gap-3 mb-1 flex-wrap">
                             <h4 className="font-bold text-lg text-white group-hover:text-indigo-400 transition truncate">
                               {session.title}
                             </h4>
+                            {!session.is_recurring && (
+                              <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-violet-500/20 text-violet-300 border border-violet-500/20">Special Session</span>
+                            )}
                             {isLive && (
                               <span className="flex items-center gap-1.5 px-2.5 py-1 bg-rose-500/20 text-rose-400 rounded-full text-[10px] font-black uppercase tracking-tighter border border-rose-500/20">
                                 <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>

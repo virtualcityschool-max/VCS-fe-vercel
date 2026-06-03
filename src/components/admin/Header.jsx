@@ -30,8 +30,8 @@ const Header = ({ activeTab, children }) => {
         };
       case "sessions":
         return {
-          title: "Class Management",
-          description: "Create, edit, and manage course classes",
+          title: "Session Management",
+          description: "Create, edit, and manage course sessions",
         };
       case "evaluations":
         return {

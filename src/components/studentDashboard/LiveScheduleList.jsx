@@ -206,7 +206,7 @@ const LiveScheduleList = () => {
               }`}
             >
               <i className="fas fa-user-graduate mr-1.5" />
-              Reserved Sessions
+              Reserved Slots
               {tutorSlots.length > 0 && (
                 <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-full ${
                   activeTab === "tutors" ? "bg-white/20 text-white" : "bg-indigo-500/20 text-indigo-400"
@@ -225,14 +225,14 @@ const LiveScheduleList = () => {
           {slotsLoading ? (
             <div className="flex items-center gap-3 text-slate-500 text-xs py-8 justify-center">
               <i className="fas fa-spinner fa-spin" />
-              Loading tutoring sessions…
+              Loading tutoring slots…
             </div>
           ) : tutorSlots.length === 0 ? (
             <div className="bg-slate-900/40 backdrop-blur-xl p-8 rounded-[1.5rem] border border-white/5 text-center">
               <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/5">
                 <i className="fas fa-chalkboard-teacher text-xl text-slate-600" />
               </div>
-              <h3 className="text-sm font-black text-white/80 mb-1">No Upcoming Tutoring Sessions</h3>
+              <h3 className="text-sm font-black text-white/80 mb-1">No Upcoming Tutoring Slots</h3>
               <p className="text-slate-500 text-[10px] font-medium uppercase tracking-wider mb-4">
                 Book a session with a tutor to get started
               </p>
@@ -369,6 +369,9 @@ const LiveScheduleList = () => {
                   <h4 className="text-lg font-black text-white group-hover:text-blue-400 transition-colors truncate tracking-tight">
                     {session.course_title}
                   </h4>
+                  {!session.is_recurring && (
+                    <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-violet-500/20 text-violet-300 border border-violet-500/20">Special Session</span>
+                  )}
                   {getStatusBadge(session)}
                 </div>
                 <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mb-3 opacity-60">

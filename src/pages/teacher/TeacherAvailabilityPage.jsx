@@ -483,7 +483,7 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
       } else if (dups > 0 || conflicts > 0) {
         setInlineError({
           type: "mixed",
-          message: `No new slots created — ${dups > 0 ? `${dups} already exist` : ""}${dups > 0 && conflicts > 0 ? " and " : ""}${conflicts > 0 ? `${conflicts} conflict with your classes` : ""}. Adjust dates or times and try again.`,
+          message: `No new slots created — ${dups > 0 ? `${dups} already exist` : ""}${dups > 0 && conflicts > 0 ? " and " : ""}${conflicts > 0 ? `${conflicts} conflict with your sessions` : ""}. Adjust dates or times and try again.`,
         });
       } else {
         setInlineError({
@@ -1159,7 +1159,7 @@ const SlotCard = ({ slot, onDelete, onEdit, deletingId }) => {
               <span className="text-slate-500 font-normal mx-1">–</span>
               {formatTime(slot.date + "T" + slot.end_time)}{" "}<TimezoneTag />
             </p>
-            <p className="text-[10px] text-slate-600 mt-0.5 font-medium">1 hr session</p>
+            <p className="text-[10px] text-slate-600 mt-0.5 font-medium">1 hr slot</p>
           </div>
 
           <div className="flex items-center gap-1.5 shrink-0">
@@ -1319,7 +1319,7 @@ const TeacherAvailabilityPage = () => {
             <div>
               <h2 className="text-xl font-semibold text-white mb-2">No slots yet</h2>
               <p className="text-slate-500 text-sm max-w-sm mx-auto">
-                Create your availability and students will be able to book 1-on-1 tutoring sessions with you.
+                Create your availability and students will be able to book 1-on-1 tutoring slots with you.
               </p>
             </div>
             <button

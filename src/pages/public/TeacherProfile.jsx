@@ -749,7 +749,7 @@ const TeacherProfile = () => {
             </div>
             <h2 className="text-2xl font-semibold mb-3">Book a 1-on-1 Tutoring Session</h2>
             <p className="text-slate-400 text-sm max-w-md mx-auto mb-6">
-              {teacherDetails.teacher_name} offers private tutoring sessions. Log in as a student to view available time slots and book instantly.
+              {teacherDetails.teacher_name} offers private tutoring slots. Log in as a student to view available time slots and book instantly.
             </p>
             <button
               onClick={handleHireClick}
@@ -778,7 +778,7 @@ const TeacherProfile = () => {
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
         title="Login Required"
-        message="Please log in or create a student account to book a 1-on-1 tutoring session."
+        message="Please log in or create a student account to book a 1-on-1 tutoring slot."
       />
     </section>
   );

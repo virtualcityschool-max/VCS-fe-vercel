@@ -185,7 +185,7 @@ const StudentPortal = () => {
                   Ready to <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">Level Up</span>?
                 </h3>
                 <p className="text-slate-400 text-sm font-medium mb-8 leading-relaxed">
-                  You have tutoring sessions lined up. Enrol in a course to unlock the full dashboard — attendance, assignments, and more.
+                  You have tutoring slots lined up. Enrol in a course to unlock the full dashboard — attendance, assignments, and more.
                 </p>
                 <button
                   onClick={() => navigate('/courses')}

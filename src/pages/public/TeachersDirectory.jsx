@@ -236,7 +236,7 @@ const TeachersDirectory = () => {
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
         title="Login Required"
-        message="Please log in or create a student account to book a tutoring session with this teacher."
+        message="Please log in or create a student account to book a tutoring slot with this tutor."
       />
     </section>
   );

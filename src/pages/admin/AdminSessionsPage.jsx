@@ -33,6 +33,11 @@ const AdminSessionsPage = () => {
   const [isCreatingSession, setIsCreatingSession] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState({ open: false, sessionId: null, sessionTitle: "" });
 
+  // Scheduling mode for create form
+  const [createMode, setCreateMode] = useState("scheduled"); // "now" | "delayed" | "scheduled"
+  const [delayHours, setDelayHours] = useState(0);
+  const [delayMins,  setDelayMins]  = useState(30);
+
   // Private students state for course-specific dropdown
   const [privateStudents, setPrivateStudents] = useState([]);
   const [privateStudentsLoading, setPrivateStudentsLoading] = useState(false);
@@ -105,6 +110,9 @@ const AdminSessionsPage = () => {
   // Reset create session form when modal opens/closes
   useEffect(() => {
     if (activeModal === "create-session") {
+      setCreateMode("scheduled");
+      setDelayHours(0);
+      setDelayMins(30);
       setCreateSessionForm({
         course: "",
         title: "",
@@ -175,30 +183,30 @@ const AdminSessionsPage = () => {
   };
 
   // Validation functions
-  const validateCreateSessionForm = (formData) => {
+  const validateCreateSessionForm = (formData, mode = "scheduled") => {
     const errors = {};
 
     if (!formData.course) errors.course = "Course is required";
 
     if (!formData.title?.trim()) {
-      errors.title = "Class title is required";
+      errors.title = "Session title is required";
     } else if (formData.title.trim().length < 3) {
       errors.title = "Title must be at least 3 characters";
     }
 
-    if (!formData.time) errors.time = "Class time is required";
-
-    if (!formData.scheduled_date) {
-      errors.scheduled_date = "Start date is required";
-    }
-
-    if (!formData.recurrence_days?.length) {
-      errors.recurrence_days = "Select at least one recurring day";
-    }
-    if (!formData.recurrence_end_date) {
-      errors.recurrence_end_date = "Recurrence end date is required";
-    } else if (formData.scheduled_date && formData.recurrence_end_date < formData.scheduled_date) {
-      errors.recurrence_end_date = "End date must be on or after start date";
+    if (mode === "scheduled") {
+      if (!formData.time) errors.time = "Session time is required";
+      if (!formData.scheduled_date) errors.scheduled_date = "Start date is required";
+      if (!formData.recurrence_days?.length) errors.recurrence_days = "Select at least one recurring day";
+      if (!formData.recurrence_end_date) {
+        errors.recurrence_end_date = "Recurrence end date is required";
+      } else if (formData.scheduled_date && formData.recurrence_end_date < formData.scheduled_date) {
+        errors.recurrence_end_date = "End date must be on or after start date";
+      }
+    } else if (mode === "delayed") {
+      if (Number(delayHours) === 0 && Number(delayMins) === 0) {
+        errors.delay = "Set at least 1 minute delay";
+      }
     }
 
     return errors;
@@ -219,7 +227,7 @@ const AdminSessionsPage = () => {
       if (formData.start_date < todayStr) errors.start_date = "Start date must be today or in the future";
     }
 
-    if (!formData.time) errors.time = "Class time is required";
+    if (!formData.time) errors.time = "Session time is required";
 
     if (!formData.recurrence_days?.length) errors.recurrence_days = "Select at least one recurring day";
 
@@ -240,7 +248,7 @@ const AdminSessionsPage = () => {
       (c) => c.id === Number(sessionData.course),
     );
 
-    const validationErrors = validateCreateSessionForm(sessionData);
+    const validationErrors = validateCreateSessionForm(sessionData, createMode);
     if (Object.keys(validationErrors).length > 0) {
       setCreateSessionErrors(validationErrors);
       toastManager.error("Please fix highlighted fields");
@@ -249,23 +257,51 @@ const AdminSessionsPage = () => {
 
     const instructor_id = selectedCourse?.instructor?.id;
     if (!instructor_id) {
-      toastManager.error("Selected course has no instructor assigned");
+      toastManager.error("Selected course has no tutor assigned");
       return;
     }
-    const payload = {
-      course: Number(sessionData.course),
-      instructor_id,
-      title: sessionData.title,
-      scheduled_at: toPayloadISO(`${sessionData.scheduled_date}T${sessionData.time}`),
-      // time: sessionData.time,
-      is_recurring: sessionData.is_recurring,
-      recurrence_days: sessionData.is_recurring ? (sessionData.recurrence_days || []) : [],
-      recurrence_end_date: sessionData.recurrence_end_date,
+
+    const pad = (n) => String(n).padStart(2, "0");
+    const localNow = (offsetMs = 0) => {
+      const d = new Date(Date.now() + offsetMs);
+      return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
     };
+
+    let payload;
+    if (createMode === "now") {
+      payload = {
+        course: Number(sessionData.course),
+        instructor_id,
+        title: sessionData.title,
+        scheduled_at: toPayloadISO(localNow()),
+        is_recurring: false,
+        recurrence_days: [],
+      };
+    } else if (createMode === "delayed") {
+      const offsetMs = (Number(delayHours) * 60 + Number(delayMins)) * 60 * 1000;
+      payload = {
+        course: Number(sessionData.course),
+        instructor_id,
+        title: sessionData.title,
+        scheduled_at: toPayloadISO(localNow(offsetMs)),
+        is_recurring: false,
+        recurrence_days: [],
+      };
+    } else {
+      payload = {
+        course: Number(sessionData.course),
+        instructor_id,
+        title: sessionData.title,
+        scheduled_at: toPayloadISO(`${sessionData.scheduled_date}T${sessionData.time}`),
+        is_recurring: sessionData.is_recurring,
+        recurrence_days: sessionData.is_recurring ? (sessionData.recurrence_days || []) : [],
+        recurrence_end_date: sessionData.recurrence_end_date,
+      };
+    }
     try {
       setIsCreatingSession(true);
       await dispatch(createSession(payload)).unwrap();
-      toastManager.success("Class created successfully");
+      toastManager.success("Session created successfully");
       setActiveModal(null);
       const params = {};
       if (sessionFilters.teacher) params.teacher = sessionFilters.teacher;
@@ -444,6 +480,12 @@ const AdminSessionsPage = () => {
       onSessionEdit={fetchSessionDetailsForEdit}
       activeModal={activeModal}
       setActiveModal={setActiveModal}
+      createMode={createMode}
+      setCreateMode={setCreateMode}
+      delayHours={delayHours}
+      setDelayHours={setDelayHours}
+      delayMins={delayMins}
+      setDelayMins={setDelayMins}
       showSessionFilters={showSessionFilters}
       setShowSessionFilters={setShowSessionFilters}
       sessionFilters={sessionFilters}
@@ -454,7 +496,7 @@ const AdminSessionsPage = () => {
     <ConfirmDialog
       open={confirmDialog.open}
       variant="danger"
-      title="Delete Class"
+      title="Delete Session"
       message={`Are you sure you want to delete "${confirmDialog.sessionTitle}"? This action cannot be undone.`}
       confirmLabel="Delete"
       cancelLabel="Cancel"
