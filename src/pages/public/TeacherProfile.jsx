@@ -413,7 +413,7 @@ const TeacherProfile = () => {
           <p className="text-slate-400 text-sm mb-6">{error}</p>
           <BackButton
             to="/teachers"
-            label="Back to Teachers"
+            label="Back to Tutors"
             className="w-full"
           />
         </div>
@@ -428,13 +428,13 @@ const TeacherProfile = () => {
           <div className="w-14 h-14 rounded-2xl bg-slate-500/10 text-slate-400 flex items-center justify-center mx-auto mb-4 text-2xl">
             <i className="fas fa-user"></i>
           </div>
-          <h2 className="text-xl font-semibold mb-2">Teacher not found</h2>
+          <h2 className="text-xl font-semibold mb-2">Tutor not found</h2>
           <p className="text-slate-400 text-sm mb-6">
             The requested teacher profile could not be loaded.
           </p>
           <BackButton
             to="/teachers"
-            label="Back to Teachers"
+            label="Back to Tutors"
             className="w-full"
           />
         </div>
@@ -479,10 +479,10 @@ const TeacherProfile = () => {
         <BreadcrumbNavigation
           items={[
             { label: "Home", to: "/", icon: "fas fa-home" },
-            { label: "Teachers", to: "/teachers" },
+            { label: "Tutors", to: "/teachers" },
             {
               label: (
-                teacherDetails.teacher_name || "Unnamed Teacher"
+                teacherDetails.teacher_name || "Unnamed Tutor"
               ).substring(0, 25),
             },
           ]}
@@ -520,7 +520,7 @@ const TeacherProfile = () => {
 
                 <span className="inline-flex items-center justify-center gap-2 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-4 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-indigo-300">
                   <i className="fas fa-check-circle"></i>
-                  Verified Teacher
+                  Verified Tutor
                 </span>
               </div>
 
@@ -765,7 +765,7 @@ const TeacherProfile = () => {
       {/* Booking Modal */}
       {showBookModal && (
         <BookingModal
-          teacherName={teacherDetails.teacher_name || "Teacher"}
+          teacherName={teacherDetails.teacher_name || "Tutor"}
           slots={availableSlots}
           onClose={() => setShowBookModal(false)}
           onBooked={() => {

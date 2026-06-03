@@ -140,7 +140,7 @@ const Navbar = ({ variant = "default" }) => {
                 isActivePath("/teachers") ? "text-white" : ""
               }`}
             >
-              Teachers
+              Tutors
             </button>
             <button
               onClick={() => navigate("/courses")}

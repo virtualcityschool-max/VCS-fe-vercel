@@ -265,7 +265,7 @@ const StudentProfileTab = ({ profile, userId, rollNo, onUpdate, onCancel, onSave
             <i className="fas fa-user-friends text-sm" />
           </div>
           <div>
-            <h3 className="text-base font-semibold text-white">Linked Parents</h3>
+            <h3 className="text-base font-semibold text-white">Linked Guardians</h3>
             <p className="text-[10px] text-slate-500 mt-0.5">{parents.length} linked</p>
           </div>
         </div>

@@ -51,7 +51,7 @@ const HireTutorModal = ({ teacher, onClose }) => {
           <div>
             <h3 className="text-base font-bold text-white">Hire Tutor</h3>
             <p className="text-xs text-slate-400 mt-0.5">
-              {teacher.teacher_name || "Unnamed Teacher"}
+              {teacher.teacher_name || "Unnamed Tutor"}
             </p>
           </div>
           <button onClick={onClose} className="text-slate-400 hover:text-white transition">

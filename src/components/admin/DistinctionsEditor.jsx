@@ -90,7 +90,7 @@ const DistinctionsEditor = ({ distinctions, onChange }) => {
                   }))
                 }
                 className="w-full px-3 py-1.5 bg-slate-700 border border-slate-600 rounded text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                placeholder="e.g., Best Teacher"
+                placeholder="e.g., Best Tutor"
               />
             </div>
 

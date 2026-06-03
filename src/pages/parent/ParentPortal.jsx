@@ -15,7 +15,7 @@ const ParentPortal = () => {
     error,
   } = useSelector((state) => state.parent.dashboard);
 
-  const userName = auth.user?.username || "Parent";
+  const userName = auth.user?.username || "Guardian";
 
   // Fetch dashboard data on component mount
   useEffect(() => {

@@ -135,9 +135,9 @@ const NAV_CONFIG = {
 
 const PORTAL_LABEL = {
   admin:   "Admin Portal",
-  teacher: "Teacher Portal",
+  teacher: "Tutor Portal",
   student: "Student Portal",
-  parent:  "Parent Portal",
+  parent:  "Guardian Portal",
 };
 
 // ── Unified nav item — works for all roles ────────────────────────────────────

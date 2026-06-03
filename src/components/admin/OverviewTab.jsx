@@ -227,7 +227,7 @@ const OverviewTab = ({ analytics, analyticsLoading, analyticsError }) => {
           onClick={toUsersTab(navigate, "admin")}
         />
         <StatCard
-          label="Teachers"
+          label="Tutors"
           value={analytics.users.teachers}
           icon="fas fa-chalkboard-teacher"
           color="pink"
@@ -235,7 +235,7 @@ const OverviewTab = ({ analytics, analyticsLoading, analyticsError }) => {
           onClick={toUsersTab(navigate, "teacher")}
         />
         <StatCard
-          label="Parents"
+          label="Guardians"
           value={analytics.users.parents}
           icon="fas fa-user-friends"
           color="amber"
