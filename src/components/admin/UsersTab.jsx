@@ -8,6 +8,7 @@ import {
   SearchInput,
 } from "../../components/ui";
 import ConfirmDialog from "../common/ConfirmDialog";
+import { getStorageUrl } from "../../utils/storageUrl";
 
 // Search controls component
 const SearchControls = ({
@@ -365,11 +366,19 @@ const UsersTab = ({
                 >
                   <div className="flex items-start gap-3 sm:gap-4 mb-4">
                     <div className="relative">
-                      <div
-                        className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center ${getRoleColor(user.role)}`}
-                      >
-                        <i className={`fas ${user.is_superuser ? "fa-crown text-amber-400" : "fa-user text-white"}`}></i>
-                      </div>
+                      {getStorageUrl(user.avatar) ? (
+                        <img
+                          src={getStorageUrl(user.avatar)}
+                          alt={user.username}
+                          className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover flex-shrink-0"
+                        />
+                      ) : (
+                        <div
+                          className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center ${getRoleColor(user.role)}`}
+                        >
+                          <i className={`fas ${user.is_superuser ? "fa-crown text-amber-400" : "fa-user text-white"}`}></i>
+                        </div>
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap mb-1">
@@ -476,11 +485,19 @@ const UsersTab = ({
                     >
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div
-                            className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${getRoleColor(user.role)}`}
-                          >
-                            <i className={`fas ${user.is_superuser ? "fa-crown text-amber-400" : "fa-user text-white"}`}></i>
-                          </div>
+                          {getStorageUrl(user.avatar) ? (
+                            <img
+                              src={getStorageUrl(user.avatar)}
+                              alt={user.username}
+                              className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+                            />
+                          ) : (
+                            <div
+                              className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${getRoleColor(user.role)}`}
+                            >
+                              <i className={`fas ${user.is_superuser ? "fa-crown text-amber-400" : "fa-user text-white"}`}></i>
+                            </div>
+                          )}
                           <div>
                             <div className="flex items-center gap-2 flex-wrap">
                               <p className="font-medium text-white">

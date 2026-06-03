@@ -364,7 +364,7 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
                 </div>
                 {enrollment.student_roll_no && (
                   <div className="text-xs text-slate-500 font-mono mt-0.5">
-                    Roll: {enrollment.student_roll_no}
+                    Roll#: {enrollment.student_roll_no}
                   </div>
                 )}
               </div>
@@ -474,7 +474,7 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
                       </div>
                       {enrollment.student_roll_no && (
                         <div className="text-xs text-slate-500 font-mono mt-0.5">
-                          Roll: {enrollment.student_roll_no}
+                          Roll#: {enrollment.student_roll_no}
                         </div>
                       )}
                     </div>

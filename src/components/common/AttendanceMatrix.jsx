@@ -147,7 +147,7 @@ const AttendanceMatrix = ({
                   </div>
                   <div>
                     <p className="text-white text-sm font-semibold">{p.name}</p>
-                    {p.rollNo && <p className="text-slate-500 text-[10px] font-mono">Roll: {p.rollNo}</p>}
+                    {p.rollNo && <p className="text-slate-500 text-[10px] font-mono">Roll#: {p.rollNo}</p>}
                   </div>
                 </div>
                 <div className="text-right">
@@ -316,7 +316,7 @@ const AttendanceMatrix = ({
                         </div>
                         <div className="min-w-0">
                           <p className="text-white text-[11px] font-semibold truncate">{p.name}</p>
-                          {p.rollNo && <p className="text-slate-500 text-[9px] font-mono">Roll: {p.rollNo}</p>}
+                          {p.rollNo && <p className="text-slate-500 text-[9px] font-mono">Roll#: {p.rollNo}</p>}
                         </div>
                       </div>
                     </td>

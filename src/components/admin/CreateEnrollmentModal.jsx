@@ -223,7 +223,7 @@ const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
                             <p className="font-medium">{s.username}</p>
                             <p className="text-slate-500 text-[11px] mt-0.5 font-normal">
                               {s.email}
-                              {s.roll_no != null && <span className="ml-2 text-slate-600 font-mono">· Roll: {s.roll_no}</span>}
+                              {s.roll_no != null && <span className="ml-2 text-slate-600 font-mono">· Roll#: {s.roll_no}</span>}
                             </p>
                           </li>
                         ))
