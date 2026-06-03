@@ -606,7 +606,7 @@ const CourseDetails = () => {
                     <div className="relative text-3xl lg:text-4xl font-black bg-linear-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent wrap-break-word max-w-full">
                       {formatCurrency(
                         parseFloat(normalizedCourse.price) || 0,
-                        "PKR",
+                        "USD",
                       )}
                     </div>
                   </div>

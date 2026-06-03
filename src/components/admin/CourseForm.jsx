@@ -137,7 +137,7 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
           </div>
           <div>
             <label className="block text-[11px] uppercase tracking-widest font-black text-slate-500 mb-2">
-              Price (PKR) <span className="text-red-400">*</span>
+              Price (USD) <span className="text-red-400">*</span>
             </label>
             <Input
               type="number"

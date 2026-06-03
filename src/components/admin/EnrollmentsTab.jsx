@@ -373,8 +373,7 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
                   {enrollment.course?.title || "Unknown Course"}
                 </div>
                 <div className="text-xs text-slate-500">
-                  {(typeof enrollment.course?.category === "object" ? enrollment.course?.category?.name : enrollment.course?.category) || "No category"} • PKR{" "}
-                  {enrollment.course?.price || "0"}
+                  {(typeof enrollment.course?.category === "object" ? enrollment.course?.category?.name : enrollment.course?.category) || "No category"} • ${(enrollment.course?.price || 0).toLocaleString("en-US")} USD
                 </div>
               </div>
 
@@ -475,8 +474,7 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
                         {enrollment.course?.title || "Unknown Course"}
                       </div>
                       <div className="text-sm text-slate-400">
-                        {(typeof enrollment.course?.category === "object" ? enrollment.course?.category?.name : enrollment.course?.category) || "No category"} • PKR{" "}
-                        {enrollment.course?.price || "0"}
+                        {(typeof enrollment.course?.category === "object" ? enrollment.course?.category?.name : enrollment.course?.category) || "No category"} • ${(enrollment.course?.price || 0).toLocaleString("en-US")} USD
                       </div>
                     </div>
                   </td>

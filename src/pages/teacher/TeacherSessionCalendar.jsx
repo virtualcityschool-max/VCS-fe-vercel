@@ -15,7 +15,7 @@ import { useDateFormatters } from "../../hooks";
 import { toastManager } from "../../utils/toastManager";
 import { clampDate } from "../../utils/validation";
 
-const DAYS = ["MON", "TUE", "WED", "THU", "FRI"];
+const DAYS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
 
 function toggleDay(form, setForm, day) {
   const days = form.recurrence_days ?? [];

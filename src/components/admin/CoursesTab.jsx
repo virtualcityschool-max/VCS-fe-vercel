@@ -401,7 +401,7 @@ const CoursesTab = ({
         const upper = i + step;
         priceRanges.push({
           value: `${lower}-${upper}`,
-          label: `PKR ${lower.toFixed(0)} - ${upper.toFixed(0)}`,
+          label: `$${lower.toFixed(0)} – $${upper.toFixed(0)} USD`,
         });
       }
     }
@@ -678,7 +678,7 @@ const CoursesTab = ({
                       </div>
                       <div className="flex items-center gap-2">
                         <i className="fas fa-dollar-sign text-amber-400"></i>
-                        <span>PKR {course.price?.toLocaleString()}</span>
+                        <span>${(course.price || 0).toLocaleString("en-US")} USD</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <i
@@ -810,7 +810,7 @@ const CoursesTab = ({
                     </td>
                     <td className="px-6 py-4">
                       <span className="text-white font-medium">
-                        PKR {course.price?.toLocaleString()}
+                        ${(course.price || 0).toLocaleString("en-US")} USD
                       </span>
                     </td>
                     <td className="px-6 py-4">

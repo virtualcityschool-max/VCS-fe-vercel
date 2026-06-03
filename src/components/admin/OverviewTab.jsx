@@ -24,7 +24,7 @@ const RevenueTooltip = ({ active, payload }) => {
       <div className="flex items-center justify-between gap-4">
         <span className="text-[10px] uppercase tracking-wider text-slate-400">Revenue</span>
         <span className="text-xs font-semibold text-amber-400">
-          PKR {Revenue?.toLocaleString()}
+          ${(Revenue || 0).toLocaleString("en-US")} USD
         </span>
       </div>
     </div>
@@ -306,7 +306,7 @@ const OverviewTab = ({ analytics, analyticsLoading, analyticsError }) => {
                 Total Revenue
               </p>
               <p className="text-base font-bold text-amber-400">
-                PKR {totalRevenue.toLocaleString()}
+                ${totalRevenue.toLocaleString("en-US")} USD
               </p>
             </div>
           </div>

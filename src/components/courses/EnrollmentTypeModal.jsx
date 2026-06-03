@@ -29,7 +29,7 @@ const EnrollmentTypeModal = ({
 
   if (!isOpen) return null;
 
-  const price = course?.price ? `PKR ${Number(course.price).toLocaleString()}` : "the course fee";
+  const price = course?.price ? `$${Number(course.price).toLocaleString("en-US")} USD` : "the course fee";
   const title = course?.title || "this course";
 
   return (

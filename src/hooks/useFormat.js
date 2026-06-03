@@ -108,7 +108,7 @@ export const useDateFormat = () => {
 
 // Format numbers with various options
 export const useNumberFormat = () => {
-  const formatCurrency = (amount, currency = "PKR", options = {}) => {
+  const formatCurrency = (amount, currency = "USD", options = {}) => {
     if (amount === null || amount === undefined) return "N/A";
 
     try {
@@ -119,7 +119,7 @@ export const useNumberFormat = () => {
       }).format(amount);
     } catch (error) {
       console.error("Currency formatting error:", error);
-      return "PKR 0.00";
+      return "$0.00";
     }
   };
 

@@ -315,7 +315,7 @@ const AdminCourseDetailPage = () => {
                 <MetaTile
                   icon="wallet"
                   label="Price"
-                  value={course.price ? `PKR ${Number(course.price).toLocaleString()}` : "Free"}
+                  value={course.price ? `$${Number(course.price).toLocaleString("en-US")} USD` : "Free"}
                   valueClass="text-emerald-400"
                 />
                 <MetaTile

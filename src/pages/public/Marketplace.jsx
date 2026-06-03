@@ -88,7 +88,7 @@ const Marketplace = () => {
         const upper = i + step;
         priceRanges.push({
           value: `${lower}-${upper}`,
-          label: `PKR ${lower.toFixed(0)} - ${upper.toFixed(0)}`,
+          label: `$${lower.toFixed(0)} – $${upper.toFixed(0)} USD`,
         });
       }
     }

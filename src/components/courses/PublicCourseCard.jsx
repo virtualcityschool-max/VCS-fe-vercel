@@ -138,7 +138,7 @@ const PublicCourseCard = ({
         )}
 
         <div className={`mt-auto ${large ? "pt-3" : "pt-1.5"} border-t border-white/5 space-y-1`}>
-          <p className={`${large ? "text-sm" : "text-[9px]"} font-black text-white`}>PKR {course.price || "0"}</p>
+          <p className={`${large ? "text-sm" : "text-[9px]"} font-black text-white`}>${(course.price || 0).toLocaleString("en-US")} USD</p>
           {renderCTA()}
         </div>
       </div>

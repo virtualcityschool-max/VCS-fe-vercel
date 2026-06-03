@@ -178,7 +178,7 @@ const TeacherCourseDetailPage = () => {
                 {course.description}
               </p>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <MetaTile icon="wallet"          label="Price"       value={course.price ? `PKR ${Number(course.price).toLocaleString()}` : "Free"} valueClass="text-emerald-400" delay="0.1s" />
+                <MetaTile icon="wallet"          label="Price"       value={course.price ? `$${Number(course.price).toLocaleString("en-US")} USD` : "Free"} valueClass="text-emerald-400" delay="0.1s" />
                 <MetaTile icon="users"           label="Enrolled"    value={`${students.length} student${students.length !== 1 ? "s" : ""}`}        valueClass="text-indigo-400" delay="0.2s" />
                 <MetaTile icon="clipboard-list"  label="Assignments" value={assignments.length}                                                      valueClass="text-amber-400"  delay="0.3s" />
                 <MetaTile icon="question-circle" label="Quizzes"     value={quizzes.length}                                                          valueClass="text-violet-400" delay="0.4s" />

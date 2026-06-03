@@ -710,7 +710,6 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
                       const d = new Date(date + "T00:00:00");
                       const dayShort = d.toLocaleDateString("en-US", { weekday: "short" });
                       const dayNum = d.getDate();
-                      const isWeekend = d.getDay() === 0 || d.getDay() === 6;
                       const inRange = rangeDatesSet.has(date);
                       const isSelected = date === selectedDate;
                       const entry = entries.find(e => e.date === date);
@@ -720,7 +719,7 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
                       // Days outside the selected range: visible but disabled
                       if (!inRange) {
                         return (
-                          <div key={date} className={`flex flex-col items-center py-1.5 px-0.5 rounded-lg cursor-default select-none ${isWeekend ? "opacity-15" : "opacity-25"}`}>
+                          <div key={date} className="flex flex-col items-center py-1.5 px-0.5 rounded-lg cursor-default select-none opacity-25">
                             <span className="text-[9px] font-black uppercase tracking-wide leading-none text-slate-500">
                               {dayShort}
                             </span>
@@ -763,8 +762,6 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
                               ? "bg-indigo-600 shadow-lg shadow-indigo-600/25"
                               : hasEntry
                               ? "bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/15 cursor-pointer"
-                              : isWeekend
-                              ? "bg-slate-700/15 hover:bg-slate-700/40 cursor-pointer opacity-60"
                               : "bg-slate-700/30 hover:bg-slate-700/60 cursor-pointer"
                           }`}
                         >

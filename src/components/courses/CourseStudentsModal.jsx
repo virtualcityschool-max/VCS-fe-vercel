@@ -145,7 +145,7 @@ const CourseStudentsModal = ({ courseId, courseTitle, onClose, canUnenroll }) =>
                     <div className="bg-slate-800/50 rounded-xl p-3 border border-slate-700/40">
                       <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Price</p>
                       <p className="text-emerald-400 text-sm font-bold">
-                        {course.price ? `PKR ${Number(course.price).toLocaleString()}` : "Free"}
+                        {course.price ? `$${Number(course.price).toLocaleString("en-US")} USD` : "Free"}
                       </p>
                     </div>
                     <div className="bg-slate-800/50 rounded-xl p-3 border border-slate-700/40">
