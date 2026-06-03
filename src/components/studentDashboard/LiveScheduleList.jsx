@@ -11,6 +11,7 @@ import { toastManager } from "../../utils/toastManager";
 import { useDateFormatters } from "../../hooks/useDateFormatters";
 import { getWindowLabel, isWithinSessionWindow } from "../../utils/helper/StartSession";
 import { extractApiErrorMessage, showApiError } from "../../utils/apiErrorHandler";
+import { getStorageUrl } from "../../utils/storageUrl";
 import ConfirmDialog from "../common/ConfirmDialog";
 import { availabilityService } from "../../services/availabilityService";
 import TimezoneTag from "../ui/TimezoneTag";
@@ -350,9 +351,9 @@ const LiveScheduleList = () => {
 
               {/* Instructor Avatar - Compact */}
               <div className="flex-shrink-0 relative z-10">
-                {session.instructor_avatar ? (
+                {getStorageUrl(session.instructor_avatar) ? (
                   <img
-                    src={session.instructor_avatar}
+                    src={getStorageUrl(session.instructor_avatar)}
                     alt={session.instructor_name}
                     className="w-16 h-16 rounded-2xl border border-white/10 object-cover shadow-lg"
                   />
