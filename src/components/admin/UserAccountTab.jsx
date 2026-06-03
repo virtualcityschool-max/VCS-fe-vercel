@@ -1,9 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Button, Input, PasswordValidation, PasswordInput, FilterSelect } from "../ui";
 import { validateEmail, validatePassword } from "../../utils/validation";
 import { useFieldErrors } from "../../hooks";
+import { getStorageUrl } from "../../utils/storageUrl";
+import { adminService } from "../../services/adminService";
+import { toastManager } from "../../utils/toastManager";
 
-const UserAccountTab = ({ user, onUpdate, onCancel, onSaved, readOnly = false }) => {
+const MAX_AVATAR_MB = 2;
+const ACCEPTED_TYPES = ["image/jpeg", "image/png"];
+
+const UserAccountTab = ({ user, onUpdate, onCancel, onSaved, onAvatarUpdated, readOnly = false }) => {
   const [formData, setFormData] = useState({
     username: user?.username || "",
     email: user?.email || "",
@@ -17,6 +23,41 @@ const UserAccountTab = ({ user, onUpdate, onCancel, onSaved, readOnly = false })
   const [isSaving, setIsSaving] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // ── Avatar ─────────────────────────────────────────────────────────────────
+  const [avatarPreview, setAvatarPreview] = useState(null); // local blob URL
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const avatarInputRef = useRef(null);
+
+  const handleAvatarChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!ACCEPTED_TYPES.includes(file.type)) {
+      toastManager.error("Only JPG and PNG files are accepted.");
+      return;
+    }
+    if (file.size > MAX_AVATAR_MB * 1024 * 1024) {
+      toastManager.error(`Photo must be smaller than ${MAX_AVATAR_MB} MB.`);
+      return;
+    }
+    // Local preview
+    setAvatarPreview(URL.createObjectURL(file));
+    setAvatarUploading(true);
+    try {
+      const updated = await adminService.updateUserAvatar(user.id, file);
+      toastManager.success("Profile photo updated.");
+      if (onAvatarUpdated) onAvatarUpdated(updated);
+    } catch {
+      toastManager.error("Failed to upload photo. Please try again.");
+      setAvatarPreview(null);
+    } finally {
+      setAvatarUploading(false);
+      if (avatarInputRef.current) avatarInputRef.current.value = "";
+    }
+  };
+
+  const currentAvatar = avatarPreview || getStorageUrl(user?.avatar);
+  const initials = (user?.username || "U").slice(0, 2).toUpperCase();
 
   const {
     errors,
@@ -147,6 +188,64 @@ const UserAccountTab = ({ user, onUpdate, onCancel, onSaved, readOnly = false })
 
   return (
     <div className="space-y-4">
+
+      {/* ── Avatar section ──────────────────────────────────────────────────── */}
+      <div className="flex items-center gap-5 p-4 bg-slate-800/40 border border-slate-700/50 rounded-2xl">
+        {/* Avatar circle */}
+        <div className="relative group flex-shrink-0">
+          <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-slate-600 bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
+            {currentAvatar ? (
+              <img src={currentAvatar} alt="avatar" className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-white text-2xl font-black">{initials}</span>
+            )}
+            {avatarUploading && (
+              <div className="absolute inset-0 bg-black/60 flex items-center justify-center rounded-full">
+                <i className="fas fa-spinner fa-spin text-white text-lg" />
+              </div>
+            )}
+          </div>
+
+          {/* Upload overlay — only shown when not readOnly */}
+          {!readOnly && !avatarUploading && (
+            <button
+              type="button"
+              onClick={() => avatarInputRef.current?.click()}
+              className="absolute inset-0 rounded-full bg-black/60 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center gap-0.5 transition-opacity cursor-pointer"
+            >
+              <i className="fas fa-camera text-white text-sm" />
+              <span className="text-white text-[8px] font-black uppercase tracking-widest">Change</span>
+            </button>
+          )}
+
+          <input
+            ref={avatarInputRef}
+            type="file"
+            accept=".jpg,.jpeg,.png"
+            className="hidden"
+            onChange={handleAvatarChange}
+          />
+        </div>
+
+        {/* Info */}
+        <div>
+          <p className="text-sm font-semibold text-white mb-0.5">{user?.username || "User"}</p>
+          <p className="text-xs text-slate-500 capitalize mb-2">{user?.role || "—"}</p>
+          {!readOnly && (
+            <button
+              type="button"
+              onClick={() => avatarInputRef.current?.click()}
+              disabled={avatarUploading}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/30 text-indigo-300 text-[10px] font-black uppercase tracking-widest transition disabled:opacity-50"
+            >
+              <i className="fas fa-upload text-[9px]" />
+              {avatarUploading ? "Uploading…" : "Upload Photo"}
+            </button>
+          )}
+          <p className="text-[9px] text-slate-600 mt-1.5">JPG or PNG · Max 2 MB · Displays as 200×200px</p>
+        </div>
+      </div>
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
             <div>

@@ -282,8 +282,7 @@ const ProfilePage = () => {
                 )}
               </div>
 
-              {role === "teacher" && (
-                <>
+              <>
                   {/* Upload overlay — spinner while uploading, camera on hover */}
                   <button
                     type="button"
@@ -319,8 +318,7 @@ const ProfilePage = () => {
                     className="hidden"
                     onChange={handleAvatarUpload}
                   />
-                </>
-              )}
+              </>
             </div>
 
             {/* Info + Edit button */}

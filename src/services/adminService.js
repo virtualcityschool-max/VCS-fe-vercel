@@ -85,6 +85,20 @@ export const adminService = {
     }
   },
 
+  updateUserAvatar: async (userId, file) => {
+    try {
+      const fd = new FormData();
+      fd.append("avatar", file);
+      const response = await axiosInstance.patch(
+        ADMIN_ENDPOINTS.USER_UPDATE(userId),
+        fd,
+      );
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error, { context: "Update Avatar" });
+    }
+  },
+
   deleteUser: async (userId) => {
     try {
       const response = await axiosInstance.delete(
