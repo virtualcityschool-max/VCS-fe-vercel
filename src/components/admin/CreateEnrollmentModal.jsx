@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
+import { createPortal } from "react-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
   createEnrollment,
@@ -26,6 +27,10 @@ const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
   const [formData, setFormData] = useState(EMPTY_FORM);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [paymentReceived, setPaymentReceived] = useState(false);
+  const [studentDropdownOpen, setStudentDropdownOpen] = useState(false);
+  const [studentSearch, setStudentSearch] = useState("");
+  const [studentDropPos, setStudentDropPos] = useState({ top: 0, left: 0, width: 0 });
+  const studentTriggerRef = useRef(null);
 
   const { formError, clearAllErrors } = useFieldErrors();
 
@@ -39,6 +44,8 @@ const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
       setFormData(EMPTY_FORM);
       setSelectedSlot(null);
       setPaymentReceived(false);
+      setStudentDropdownOpen(false);
+      setStudentSearch("");
       clearAllErrors();
     }
   }, [isOpen]);
@@ -48,6 +55,46 @@ const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
   const teacherId = selectedCourse?.instructor?.id ?? null;
   const teacher = users.data?.find((u) => u.id === teacherId) ?? null;
   const students = users.data?.filter((u) => u.role === "student" && u.is_active) || [];
+  const selectedStudent = students.find((s) => String(s.id) === String(formData.student_id)) ?? null;
+  const filteredStudents = useMemo(() => {
+    const q = studentSearch.trim().toLowerCase();
+    if (!q) return students;
+    return students.filter((s) =>
+      s.username?.toLowerCase().includes(q) ||
+      s.email?.toLowerCase().includes(q) ||
+      String(s.roll_no ?? "").includes(q)
+    );
+  }, [students, studentSearch]);
+
+  const openStudentDropdown = () => {
+    if (!studentTriggerRef.current) return;
+    const rect = studentTriggerRef.current.getBoundingClientRect();
+    const dropHeight = Math.min(240, students.length * 50 + 60);
+    const openBelow = (window.innerHeight - rect.bottom) >= dropHeight || (window.innerHeight - rect.bottom) >= rect.top;
+    setStudentDropPos({
+      top: openBelow ? rect.bottom + 4 : rect.top - dropHeight - 4,
+      left: rect.left,
+      width: rect.width,
+    });
+    setStudentDropdownOpen(true);
+  };
+
+  // Close student dropdown on outside click
+  useEffect(() => {
+    if (!studentDropdownOpen) return;
+    const close = (e) => {
+      if (studentTriggerRef.current && !studentTriggerRef.current.contains(e.target)) {
+        setStudentDropdownOpen(false);
+        setStudentSearch("");
+      }
+    };
+    document.addEventListener("mousedown", close);
+    document.addEventListener("touchstart", close, { passive: true });
+    return () => {
+      document.removeEventListener("mousedown", close);
+      document.removeEventListener("touchstart", close);
+    };
+  }, [studentDropdownOpen]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -113,21 +160,79 @@ const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
 
           {/* Student | Course */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
+            <div ref={studentTriggerRef} className="relative">
               <label className="block text-sm font-medium text-slate-300 mb-2">
                 Student <span className="text-red-400">*</span>
               </label>
-              <FilterSelect
-                name="student_id"
-                value={formData.student_id}
-                onChange={(e) => setFormData((p) => ({ ...p, student_id: e.target.value }))}
-                className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+              {/* Trigger — matches FilterSelect visuals exactly */}
+              <button
+                type="button"
+                onClick={() => studentDropdownOpen ? (setStudentDropdownOpen(false), setStudentSearch("")) : openStudentDropdown()}
+                className={`w-full flex items-center justify-between gap-2 bg-slate-900 border rounded-xl pl-3.5 pr-3 py-2.5 text-sm font-medium transition-all duration-150 cursor-pointer
+                  ${studentDropdownOpen
+                    ? "border-indigo-500/60 ring-2 ring-indigo-500/15"
+                    : "border-slate-700/70 hover:border-slate-600 hover:bg-slate-800/70"
+                  }`}
               >
-                <option value="">Select a student</option>
-                {students.map((s) => (
-                  <option key={s.id} value={s.id}>{s.username}</option>
-                ))}
-              </FilterSelect>
+                <span className={`truncate ${selectedStudent ? "text-white" : "text-slate-500"}`}>
+                  {selectedStudent ? selectedStudent.username : "Select a student"}
+                </span>
+                <i className={`fas fa-chevron-down text-slate-500 text-[10px] flex-shrink-0 transition-transform duration-150 ${studentDropdownOpen ? "rotate-180" : ""}`} />
+              </button>
+
+              {/* Portal dropdown — matches FilterSelect structure */}
+              {typeof document !== "undefined" && createPortal(
+                studentDropdownOpen && (
+                  <div
+                    style={{ position: "fixed", top: studentDropPos.top, left: studentDropPos.left, width: studentDropPos.width, zIndex: 9999 }}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onTouchStart={(e) => e.stopPropagation()}
+                    className="bg-slate-900 border border-slate-700 rounded-xl shadow-2xl overflow-hidden"
+                  >
+                    {/* Search */}
+                    <div className="px-2 pt-2 pb-1.5 border-b border-slate-800">
+                      <div className="relative">
+                        <i className="fas fa-search absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500 text-[10px] pointer-events-none" />
+                        <input
+                          autoFocus
+                          type="text"
+                          value={studentSearch}
+                          onChange={(e) => setStudentSearch(e.target.value)}
+                          placeholder="Search..."
+                          style={{ fontSize: 16 }}
+                          className="w-full bg-slate-800 border border-slate-700/60 rounded-lg pl-7 pr-3 py-1.5 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20"
+                        />
+                      </div>
+                    </div>
+                    {/* Options */}
+                    <ul className="max-h-52 overflow-y-auto py-1 custom-scrollbar">
+                      {filteredStudents.length === 0 ? (
+                        <li className="px-3 py-2.5 text-xs text-slate-500 text-center">No results</li>
+                      ) : (
+                        filteredStudents.map((s) => (
+                          <li
+                            key={s.id}
+                            onMouseDown={(e) => { e.preventDefault(); setFormData((p) => ({ ...p, student_id: String(s.id) })); setStudentDropdownOpen(false); setStudentSearch(""); }}
+                            onTouchEnd={(e) => { e.preventDefault(); setFormData((p) => ({ ...p, student_id: String(s.id) })); setStudentDropdownOpen(false); setStudentSearch(""); }}
+                            className={`px-3 py-2 text-sm transition-colors select-none cursor-pointer
+                              ${String(formData.student_id) === String(s.id)
+                                ? "bg-indigo-600/20 text-indigo-300 font-semibold"
+                                : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                              }`}
+                          >
+                            <p className="font-medium">{s.username}</p>
+                            <p className="text-slate-500 text-[11px] mt-0.5 font-normal">
+                              {s.email}
+                              {s.roll_no != null && <span className="ml-2 text-slate-600 font-mono">· Roll#: {s.roll_no}</span>}
+                            </p>
+                          </li>
+                        ))
+                      )}
+                    </ul>
+                  </div>
+                ),
+                document.body
+              )}
             </div>
 
             <div>

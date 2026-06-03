@@ -134,6 +134,7 @@ const EvaluationMatrix = ({ students = [], courseStatus, gradingScale: gradingSc
                   <div className="min-w-0">
                     <p className="text-white text-sm font-semibold truncate">{s.student?.username}</p>
                     <p className="text-slate-500 text-[11px] truncate">{s.student?.email}</p>
+                    {s.student?.roll_no && <p className="text-slate-600 text-[10px] font-mono">Roll#: {s.student.roll_no}</p>}
                   </div>
                 </div>
                 <div className="shrink-0 ml-3">
@@ -352,6 +353,7 @@ const EvaluationMatrix = ({ students = [], courseStatus, gradingScale: gradingSc
                         <div className="min-w-0">
                           <p className="text-white text-[11px] font-semibold truncate">{s.student?.username}</p>
                           <p className="text-slate-500 text-[9px] truncate">{s.student?.email}</p>
+                          {s.student?.roll_no && <p className="text-slate-600 text-[9px] font-mono">Roll#: {s.student.roll_no}</p>}
                         </div>
                       </div>
                     </td>

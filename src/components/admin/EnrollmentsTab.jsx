@@ -362,6 +362,11 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
                 <div className="text-xs text-slate-500 break-all">
                   {enrollment.student?.email || "No email"}
                 </div>
+                {enrollment.student_roll_no && (
+                  <div className="text-xs text-slate-500 font-mono mt-0.5">
+                    Roll#: {enrollment.student_roll_no}
+                  </div>
+                )}
               </div>
 
               {/* Course Info */}
@@ -466,6 +471,11 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
                       <div className="text-sm text-slate-400">
                         {enrollment.student?.email || "No email"}
                       </div>
+                      {enrollment.student_roll_no && (
+                        <div className="text-xs text-slate-500 font-mono mt-0.5">
+                          Roll#: {enrollment.student_roll_no}
+                        </div>
+                      )}
                     </div>
                   </td>
                   <td className="px-6 py-4">

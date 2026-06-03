@@ -5,6 +5,7 @@ import { toastManager } from "../../utils/toastManager";
 import ConfirmDialog from "../../components/common/ConfirmDialog";
 import { useDateFormatters } from "../../hooks/useDateFormatters";
 import TimezoneTag from "../../components/ui/TimezoneTag";
+import { getStorageUrl } from "../../utils/storageUrl";
 
 const fmt12 = (t) => {
   if (!t) return "";
@@ -75,7 +76,7 @@ const StudentTutors = () => {
   const grouped = filtered.reduce((acc, slot) => {
     const key = slot.teacher_name || "Unknown Teacher";
     const teacherId = slot.teacher_id || slot.teacher;
-    if (!acc[key]) acc[key] = { teacherId, slots: [] };
+    if (!acc[key]) acc[key] = { teacherId, teacherAvatar: slot.teacher_avatar, slots: [] };
     acc[key].slots.push(slot);
     return acc;
   }, {});
@@ -256,10 +257,11 @@ const StudentTutors = () => {
             <div className="h-px flex-1 bg-slate-800" />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {Object.entries(grouped).map(([teacherName, { teacherId, slots: teacherSlots }]) => {
+            {Object.entries(grouped).map(([teacherName, { teacherId, teacherAvatar, slots: teacherSlots }]) => {
               const upcoming = teacherSlots.filter((s) => isUpcoming(s.date));
               const past = teacherSlots.filter((s) => !isUpcoming(s.date));
               const initial = teacherName[0]?.toUpperCase() || "T";
+              const avatarUrl = getStorageUrl(teacherAvatar);
 
               return (
                 <div key={teacherName} className="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden">
@@ -268,8 +270,14 @@ const StudentTutors = () => {
                   {/* Teacher header */}
                   <div className="flex items-center justify-between gap-4 px-6 py-5 border-b border-slate-800">
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white text-lg font-black shrink-0 shadow-lg">
-                        {initial}
+                      <div className="w-12 h-12 rounded-2xl overflow-hidden shrink-0 shadow-lg">
+                        {avatarUrl ? (
+                          <img src={avatarUrl} alt={teacherName} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white text-lg font-black">
+                            {initial}
+                          </div>
+                        )}
                       </div>
                       <div>
                         <h2 className="font-bold text-white text-base">{teacherName}</h2>

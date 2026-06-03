@@ -59,9 +59,10 @@ const AttendanceMatrix = ({
   const participants = useMemo(() => {
     const map = new Map();
     attendanceRecords.forEach((r) => {
-      const id   = getId(r.student);
-      const name = participantRole === "student" ? r.student_name : r.teacher_name;
-      if (id != null && !map.has(id)) map.set(id, { id, name: name || `#${id}` });
+      const id      = getId(r.student);
+      const name    = participantRole === "student" ? r.student_name : r.teacher_name;
+      const rollNo  = participantRole === "student" ? r.student_roll_no : undefined;
+      if (id != null && !map.has(id)) map.set(id, { id, name: name || `#${id}`, rollNo });
     });
     return Array.from(map.values());
   }, [attendanceRecords, participantRole]);
@@ -144,7 +145,10 @@ const AttendanceMatrix = ({
                       {(p.name || "?").charAt(0).toUpperCase()}
                     </span>
                   </div>
-                  <p className="text-white text-sm font-semibold">{p.name}</p>
+                  <div>
+                    <p className="text-white text-sm font-semibold">{p.name}</p>
+                    {p.rollNo && <p className="text-slate-500 text-[10px] font-mono">Roll#: {p.rollNo}</p>}
+                  </div>
                 </div>
                 <div className="text-right">
                   <p className={`text-sm font-bold tabular-nums ${pctColor}`}>
@@ -310,7 +314,10 @@ const AttendanceMatrix = ({
                             {(p.name || "?").charAt(0).toUpperCase()}
                           </span>
                         </div>
-                        <p className="text-white text-[11px] font-semibold truncate">{p.name}</p>
+                        <div className="min-w-0">
+                          <p className="text-white text-[11px] font-semibold truncate">{p.name}</p>
+                          {p.rollNo && <p className="text-slate-500 text-[9px] font-mono">Roll#: {p.rollNo}</p>}
+                        </div>
                       </div>
                     </td>
 

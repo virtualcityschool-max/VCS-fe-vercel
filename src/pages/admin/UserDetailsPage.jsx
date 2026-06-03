@@ -83,6 +83,7 @@ const UserDetailsPage = () => {
           const normalizedProfile = {
             bio: profileResponse?.bio || "",
             expertise: profileResponse?.expertise || "",
+            qualification: profileResponse?.qualification || "",
             experience_years: profileResponse?.experience_years ?? "",
             rating: profileResponse?.rating ?? "",
             linkedin: profileResponse?.linkedin || "",
@@ -172,6 +173,7 @@ const UserDetailsPage = () => {
       const normalizedProfile = {
         bio: profileResponse?.bio || "",
         expertise: profileResponse?.expertise || "",
+        qualification: profileResponse?.qualification || "",
         experience_years: profileResponse?.experience_years ?? "",
         rating: profileResponse?.rating ?? "",
         linkedin: profileResponse?.linkedin || "",
@@ -290,6 +292,7 @@ const UserDetailsPage = () => {
                   <StudentProfileTab
                     profile={userProfile}
                     userId={userData?.id}
+                    rollNo={userData?.roll_no}
                     onUpdate={handleProfileUpdate}
                     onCancel={handleBackToUsers}
                     onSaved={handleBackToUsers}
