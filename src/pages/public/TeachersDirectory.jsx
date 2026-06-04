@@ -102,7 +102,7 @@ const TeachersDirectory = () => {
         <div className="max-w-7xl mx-auto px-6 py-5 relative z-10">
           <div className="text-center mb-4">
             <h1 className="text-2xl md:text-3xl font-black font-poppins leading-tight tracking-tight animate-scaleIn">
-              Find your <span className="text-indigo-500">Mentor</span>
+              Find your <span className="text-indigo-500">Tutor</span>
             </h1>
           </div>
           <div className="max-w-xl mx-auto animate-springyReveal" style={{ animationDelay: '0.1s' }}>
