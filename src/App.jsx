@@ -60,7 +60,6 @@ import {
   StudentAssessments,
   StudentQuizDetail,
   StudentAttendance,
-  // StudentExamDetail,
   StudentEvaluationPage,
   StudentTutors,
   ParentLayout,
@@ -72,6 +71,8 @@ import {
   AboutPage,
 } from "./pages";
 import AdminAboutPage from "./pages/admin/AdminAboutPage";
+import AdminTrainingPage from "./pages/admin/AdminTrainingPage";
+import TeacherTrainingPage from "./pages/teacher/TeacherTrainingPage";
 
 // Protected Route Component with Role-Based Access Control
 const ProtectedRoute = ({ allowedRoles = [] }) => {
@@ -311,6 +312,7 @@ const AppInner = () => {
                 <Route path="evaluations" element={<TeacherEvaluationPage />} />
                 <Route path="hire-leads" element={<TeacherHireLeads />} />
                 <Route path="availability" element={<TeacherAvailabilityPage />} />
+                <Route path="training" element={<TeacherTrainingPage />} />
               </Route>
               <Route
                 path="/student/:id"
@@ -346,6 +348,7 @@ const AppInner = () => {
                 <Route path="evaluations" element={<AdminEvaluationPage />} />
                 <Route path="course-levels" element={<AdminCategoriesPage />} />
                 <Route path="about" element={<AdminAboutPage />} />
+                <Route path="training" element={<AdminTrainingPage />} />
               </Route>
               <Route path="/admin/users/:id" element={<UserDetailsPage />} />
               <Route path="/admin/courses/:courseId" element={<AdminCourseDetailPage />} />
