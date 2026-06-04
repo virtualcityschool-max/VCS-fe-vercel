@@ -44,9 +44,10 @@ const readCls  = "w-full px-4 py-3 bg-slate-800/30 border border-slate-700/40 ro
 // ── Timezone options ─────────────────────────────────────────────────────────
 
 const TIMEZONES = [
-  { label: "Auto-Detected",   value: "" },
-  { label: "Dubai",           value: "Asia/Dubai" },
-  { label: "Pakistan",        value: "Asia/Karachi" },
+  { label: "Auto-Detected",              value: "" },
+  { label: "Saudi Arabia — AST", value: "Asia/Riyadh" },
+  { label: "UAE / Dubai — GST",  value: "Asia/Dubai" },
+  { label: "Pakistan — PKT",     value: "Asia/Karachi" },
   { label: "London",          value: "Europe/London" },
   { label: "New York",        value: "America/New_York" },
   { label: "France",          value: "Europe/Paris" },
