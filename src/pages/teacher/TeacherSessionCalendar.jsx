@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { selectPlatformSettings } from "../../store/slices/platformSettingsSlice";
 import {
   fetchTeacherSessions,
   fetchMyCourses,
@@ -251,6 +252,7 @@ const TeacherSessionCalendar = () => {
     updatingSessionId,
     deletingSessionIds,
   } = useSelector((state) => state.teachers);
+  const ps = useSelector(selectPlatformSettings);
 
   const [view, setView] = useState("table");
   const [courseFilter, setCourseFilter] = useState("");
@@ -265,7 +267,7 @@ const TeacherSessionCalendar = () => {
 
   // ── scheduling mode for create form ──────────────────────
   // "now" = Start Now, "delayed" = Delayed Start, "scheduled" = date+time picker
-  const [createMode, setCreateMode] = useState("scheduled");
+  const [createMode, setCreateMode] = useState(() => ps.session_default_start_type || "scheduled");
   const [delayHours, setDelayHours] = useState(0);
   const [delayMins,  setDelayMins]  = useState(30);
 
@@ -409,7 +411,7 @@ const TeacherSessionCalendar = () => {
           <p className="text-slate-400 text-sm mt-0.5">Manage and schedule your course sessions</p>
         </div>
         <button
-          onClick={() => { setCreateForm(BLANK_FORM); setCreateErrors({}); setCreateMode("scheduled"); setDelayHours(0); setDelayMins(30); setModal("create"); }}
+          onClick={() => { setCreateForm(BLANK_FORM); setCreateErrors({}); setCreateMode(ps.session_default_start_type || "scheduled"); setDelayHours(0); setDelayMins(30); setModal("create"); }}
           className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-black uppercase tracking-widest transition-all shadow-lg shadow-indigo-900/40 active:scale-95"
         >
           <i className="fas fa-plus text-xs"></i>
@@ -502,7 +504,7 @@ const TeacherSessionCalendar = () => {
               <p className="text-white font-bold mb-1">No sessions yet</p>
               <p className="text-slate-500 text-sm mb-4">Create your first session to get started.</p>
               <button
-                onClick={() => { setCreateForm(BLANK_FORM); setCreateErrors({}); setCreateMode("scheduled"); setDelayHours(0); setDelayMins(30); setModal("create"); }}
+                onClick={() => { setCreateForm(BLANK_FORM); setCreateErrors({}); setCreateMode(ps.session_default_start_type || "scheduled"); setDelayHours(0); setDelayMins(30); setModal("create"); }}
                 className="inline-flex items-center gap-2 px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-bold transition"
               >
                 <i className="fas fa-plus text-xs"></i> Create First Class

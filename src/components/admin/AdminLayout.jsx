@@ -32,6 +32,10 @@ const AdminLayout = () => {
     if (path.includes("/admin/evaluations")) return "evaluations";
     if (path.includes("/admin/attendance")) return "attendance";
     if (path.includes("/admin/course-levels")) return "levels";
+    // These pages manage their own heading — skip the shared Header
+    if (path.includes("/admin/about"))    return null;
+    if (path.includes("/admin/settings")) return null;
+    if (path.includes("/admin/training")) return null;
     return "overview";
   };
 
@@ -65,11 +69,9 @@ const AdminLayout = () => {
     if (activeTab === "sessions") dispatch(fetchSessions({ view: "parent" }));
   }, [dispatch, activeTab]);
 
-  if (activeTab === null) return <Outlet />;
-
   return (
     <section className="min-h-screen bg-slate-950 text-white font-inter p-6 md:p-12 pt-16 lg:pt-12">
-      <Header activeTab={activeTab} />
+      {activeTab !== null && <Header activeTab={activeTab} />}
       <Outlet />
     </section>
   );

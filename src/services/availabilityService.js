@@ -46,6 +46,31 @@ const getMyBookings = async () => {
   return response.data;
 };
 
+const requestCancellation = async (slotId, reason = "") => {
+  const response = await axiosInstance.post(`/availability/slots/${slotId}/cancel-request/`, { reason });
+  return response.data;
+};
+
+const getMyCancellationRequests = async () => {
+  const response = await axiosInstance.get("/availability/cancel-requests/my/");
+  return response.data;
+};
+
+const getGuardianCancellationRequests = async () => {
+  const response = await axiosInstance.get("/availability/cancel-requests/");
+  return response.data;
+};
+
+const resolveCancellationRequest = async (reqId, action, note = "") => {
+  const response = await axiosInstance.patch(`/availability/cancel-requests/${reqId}/resolve/`, { action, note });
+  return response.data;
+};
+
+const withdrawCancellationRequest = async (reqId) => {
+  const response = await axiosInstance.delete(`/availability/cancel-requests/${reqId}/withdraw/`);
+  return response.data;
+};
+
 export const availabilityService = {
   generateSlots,
   getMySlots,
@@ -55,4 +80,9 @@ export const availabilityService = {
   bookSlot,
   getChildBookedSlots,
   getMyBookings,
+  requestCancellation,
+  getMyCancellationRequests,
+  getGuardianCancellationRequests,
+  resolveCancellationRequest,
+  withdrawCancellationRequest,
 };

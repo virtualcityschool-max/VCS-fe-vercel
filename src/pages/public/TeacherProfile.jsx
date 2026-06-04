@@ -262,7 +262,12 @@ const TeacherProfile = () => {
     setLoadingSlots(true);
     try {
       const data = await availabilityService.getTeacherAvailableSlots(id);
-      setAvailableSlots(data.slots || []);
+      const now = new Date();
+      const future = (data.slots || []).filter(s => {
+        const slotStart = new Date(s.date + "T" + s.start_time);
+        return slotStart > now;
+      });
+      setAvailableSlots(future);
     } catch {
       setAvailableSlots([]);
     } finally {

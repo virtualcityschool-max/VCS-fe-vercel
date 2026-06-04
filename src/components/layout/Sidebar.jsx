@@ -107,7 +107,8 @@ const NAV_CONFIG = {
     { id: "attendance",  label: "Attendance",   icon: "fas fa-calendar-check", to: "/admin/attendance" },
     { id: "evaluations", label: "Evaluations",  icon: "fas fa-chart-bar",      to: "/admin/evaluations" },
     { id: "levels",  label: "Levels",   icon: "fas fa-tags",           to: "/admin/course-levels" },
-    { id: "about",   label: "About Us", icon: "fas fa-info-circle",    to: "/admin/about" },
+    { id: "about",    label: "About Us",          icon: "fas fa-info-circle", to: "/admin/about" },
+    { id: "settings", label: "Platform Settings",  icon: "fas fa-sliders-h",   to: "/admin/settings" },
   ],
   teacher: [
     { label: "Dashboard",    to: "/teacher",                  icon: "fas fa-table-columns",   end: true },

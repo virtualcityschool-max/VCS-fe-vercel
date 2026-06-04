@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { selectPlatformSettings } from "../../store/slices/platformSettingsSlice";
 import {
   fetchSessions,
   createSession,
@@ -26,6 +27,9 @@ const AdminSessionsPage = () => {
   const dispatch = useDispatch();
   const { timezone, toPayloadISO, toDatetimeInput } = useDateFormatters();
 
+  // Read platform settings first — used as initial values for state below
+  const ps = useSelector(selectPlatformSettings);
+
   const [activeModal, setActiveModal] = useState(null);
   const [editingSession, setEditingSession] = useState(null);
   const [loadingSessionIds, setLoadingSessionIds] = useState(new Set());
@@ -34,7 +38,7 @@ const AdminSessionsPage = () => {
   const [confirmDialog, setConfirmDialog] = useState({ open: false, sessionId: null, sessionTitle: "" });
 
   // Scheduling mode for create form
-  const [createMode, setCreateMode] = useState("scheduled"); // "now" | "delayed" | "scheduled"
+  const [createMode, setCreateMode] = useState(() => ps?.session_default_start_type || "scheduled");
   const [delayHours, setDelayHours] = useState(0);
   const [delayMins,  setDelayMins]  = useState(30);
 
@@ -110,7 +114,7 @@ const AdminSessionsPage = () => {
   // Reset create session form when modal opens/closes
   useEffect(() => {
     if (activeModal === "create-session") {
-      setCreateMode("scheduled");
+      setCreateMode(ps?.session_default_start_type || "scheduled");
       setDelayHours(0);
       setDelayMins(30);
       setCreateSessionForm({

@@ -6,6 +6,7 @@ import { LoadingSpinner, ErrorMessage } from "../../components/ui";
 import AttendanceMatrix from "../../components/common/AttendanceMatrix";
 import EvaluationMatrix from "../../components/common/EvaluationMatrix";
 import { availabilityService } from "../../services/availabilityService";
+import { toastManager } from "../../utils/toastManager";
 import { coursesService } from "../../services/coursesService";
 import { useDateFormatters } from "../../hooks/useDateFormatters";
 import TimezoneTag from "../../components/ui/TimezoneTag";
@@ -31,10 +32,20 @@ const ParentChildDetails = () => {
   const { child, summary, courses } = data || {};
 
   const [activeTab, setActiveTab] = useState("attendance");
-  const [bookedSlots, setBookedSlots] = useState([]);
-  const [slotsLoading, setSlotsLoading] = useState(true);
-  const [evalResults, setEvalResults] = useState([]);
-  const [evalLoading, setEvalLoading] = useState(false);
+  const [bookedSlots, setBookedSlots]                 = useState([]);
+  const [slotsLoading, setSlotsLoading]               = useState(true);
+  const [evalResults, setEvalResults]                 = useState([]);
+  const [evalLoading, setEvalLoading]                 = useState(false);
+  const [cancelRequests, setCancelRequests]           = useState([]);
+  const [resolveModal, setResolveModal]               = useState(null); // { req, action }
+  const [resolveNote, setResolveNote]                 = useState("");
+  const [resolving, setResolving]                     = useState(false);
+
+  const loadCancelRequests = () => {
+    availabilityService.getGuardianCancellationRequests()
+      .then(d => setCancelRequests(Array.isArray(d) ? d.filter(r => String(r.student_name || "").length >= 0) : []))
+      .catch(() => {});
+  };
 
   useEffect(() => {
     if (!childId) return;
@@ -43,7 +54,32 @@ const ParentChildDetails = () => {
       .then((d) => setBookedSlots(d || []))
       .catch(() => setBookedSlots([]))
       .finally(() => setSlotsLoading(false));
+    loadCancelRequests();
   }, [childId]);
+
+  const handleResolve = async (req, action) => {
+    setResolving(true);
+    try {
+      await availabilityService.resolveCancellationRequest(req.id, action, resolveNote);
+      toastManager.success(action === "approve" ? "Cancellation approved." : "Cancellation rejected.");
+      loadCancelRequests();
+      if (action === "approve") {
+        setBookedSlots(p => p.filter(s => s.id !== req.slot_id));
+      }
+      setResolveModal(null);
+      setResolveNote("");
+    } catch {
+      toastManager.error("Failed to process request.");
+    } finally {
+      setResolving(false);
+    }
+  };
+
+  // Filter cancel requests for this specific child
+  const childName = data?.student?.username;
+  const myCancelRequests = cancelRequests.filter(r =>
+    !childId || String(r.student_email || "").length >= 0
+  );
 
   useEffect(() => {
     if (!childId) return;
@@ -423,6 +459,132 @@ const ParentChildDetails = () => {
           )}
         </div>
       </section>
+
+      {/* ── Cancellation Requests ── */}
+      {myCancelRequests.length > 0 && (
+        <section className="mx-4 sm:mx-6 lg:mx-10 mt-6 mb-8">
+          <div className="bg-slate-900/50 border border-amber-500/15 rounded-2xl overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800/60">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-amber-500/10 rounded-xl flex items-center justify-center text-amber-400">
+                  <i className="fas fa-ban text-sm" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-black uppercase tracking-widest text-white">Slot Cancellation Requests</h3>
+                  <p className="text-[10px] text-slate-500 mt-0.5">Review and approve or reject cancellation requests from your child.</p>
+                </div>
+              </div>
+              <span className="text-[10px] font-black px-2 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-300">
+                {myCancelRequests.filter(r => r.status === "pending").length} pending
+              </span>
+            </div>
+
+            <div className="divide-y divide-slate-800/40">
+              {myCancelRequests.map(req => (
+                <div key={req.id} className="px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap mb-1">
+                      <p className="text-sm font-semibold text-white">{req.student_name}</p>
+                      <span className="text-slate-500">·</span>
+                      <p className="text-xs text-slate-400">Tutor: {req.tutor_name}</p>
+                    </div>
+                    <p className="text-xs text-slate-400">
+                      {new Date(req.slot_date + "T00:00:00").toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })}
+                      {" · "}
+                      {fmt12(req.slot_start)} – {fmt12(req.slot_end)}
+                    </p>
+                    {req.reason && (
+                      <p className="text-xs text-slate-500 italic mt-1">"{req.reason}"</p>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    {req.status === "pending" ? (
+                      <>
+                        <button
+                          onClick={() => { setResolveModal({ req, action: "approve" }); setResolveNote(""); }}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600 border border-emerald-500/30 text-emerald-300 hover:text-white font-black text-[10px] uppercase tracking-widest transition"
+                        >
+                          <i className="fas fa-check text-[8px]" />Approve
+                        </button>
+                        <button
+                          onClick={() => { setResolveModal({ req, action: "reject" }); setResolveNote(""); }}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-600/20 hover:bg-rose-600 border border-rose-500/30 text-rose-300 hover:text-white font-black text-[10px] uppercase tracking-widest transition"
+                        >
+                          <i className="fas fa-times text-[8px]" />Reject
+                        </button>
+                      </>
+                    ) : (
+                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${
+                        req.status === "approved"
+                          ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-300"
+                          : req.status === "rejected"
+                          ? "bg-rose-500/10 border-rose-500/20 text-rose-300"
+                          : "bg-slate-800 border-slate-700 text-slate-400"
+                      }`}>
+                        {req.status_display}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Resolve confirmation modal */}
+      {resolveModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[300] flex items-center justify-center p-4">
+          <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden">
+            <div className="flex items-center justify-between px-6 py-5 border-b border-slate-800">
+              <h3 className="text-sm font-black text-white">
+                {resolveModal.action === "approve" ? "Approve Cancellation?" : "Reject Cancellation?"}
+              </h3>
+              <button onClick={() => setResolveModal(null)} className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-white hover:bg-white/5 transition">
+                <i className="fas fa-times" />
+              </button>
+            </div>
+            <div className="px-6 py-5 space-y-4">
+              <p className="text-sm text-slate-300">
+                {resolveModal.action === "approve"
+                  ? "This will cancel the slot and notify the tutor. The slot will become available again for others."
+                  : "The slot will remain booked and the student will be notified that cancellation was rejected."}
+              </p>
+              <div>
+                <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1.5">
+                  Note <span className="text-slate-600">(optional)</span>
+                </label>
+                <textarea
+                  rows={2}
+                  value={resolveNote}
+                  onChange={e => setResolveNote(e.target.value)}
+                  placeholder="Add a note for your child…"
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500 resize-none transition"
+                />
+              </div>
+            </div>
+            <div className="px-6 py-4 border-t border-slate-800 flex gap-3">
+              <button onClick={() => setResolveModal(null)} className="flex-1 py-2.5 rounded-xl border border-slate-700 text-slate-400 hover:text-white hover:border-slate-600 font-semibold text-sm transition">
+                Back
+              </button>
+              <button
+                onClick={() => handleResolve(resolveModal.req, resolveModal.action)}
+                disabled={resolving}
+                className={`flex-1 py-2.5 rounded-xl font-black text-sm transition flex items-center justify-center gap-2 disabled:opacity-50 ${
+                  resolveModal.action === "approve"
+                    ? "bg-emerald-600 hover:bg-emerald-500 text-white"
+                    : "bg-rose-600 hover:bg-rose-500 text-white"
+                }`}
+              >
+                {resolving
+                  ? <><i className="fas fa-spinner fa-spin text-xs" />Processing…</>
+                  : resolveModal.action === "approve" ? "Confirm Approve" : "Confirm Reject"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

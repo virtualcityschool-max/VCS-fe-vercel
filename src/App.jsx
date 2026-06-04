@@ -12,6 +12,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { useSelector, useDispatch } from "react-redux";
 import { initializeAuth, logoutUser } from "./store/slices/authSlice";
 import { setAuthModal } from "./store/slices/uiSlice";
+import { fetchPlatformSettings } from "./store/slices/platformSettingsSlice";
 import { toastManager } from "./utils/toastManager";
 
 // Components
@@ -72,6 +73,7 @@ import {
   AboutPage,
 } from "./pages";
 import AdminAboutPage from "./pages/admin/AdminAboutPage";
+import AdminPlatformSettingsPage from "./pages/admin/AdminPlatformSettingsPage";
 
 // Protected Route Component with Role-Based Access Control
 const ProtectedRoute = ({ allowedRoles = [] }) => {
@@ -346,6 +348,7 @@ const AppInner = () => {
                 <Route path="evaluations" element={<AdminEvaluationPage />} />
                 <Route path="course-levels" element={<AdminCategoriesPage />} />
                 <Route path="about" element={<AdminAboutPage />} />
+                <Route path="settings" element={<AdminPlatformSettingsPage />} />
               </Route>
               <Route path="/admin/users/:id" element={<UserDetailsPage />} />
               <Route path="/admin/courses/:courseId" element={<AdminCourseDetailPage />} />
@@ -404,6 +407,9 @@ const App = () => {
   React.useEffect(() => {
     if (!isInitialized) dispatch(initializeAuth());
   }, [dispatch, isInitialized]);
+
+  // Fetch platform settings once on startup so form defaults are available
+  React.useEffect(() => { dispatch(fetchPlatformSettings()); }, [dispatch]);
 
   React.useEffect(() => {
     const handleTokenRefreshed = (event) => {

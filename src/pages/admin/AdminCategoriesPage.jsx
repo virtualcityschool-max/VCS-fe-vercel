@@ -44,7 +44,9 @@ const AdminCategoriesPage = () => {
   const handleAdd = async () => {
     const name = newName.trim();
     if (!name || saving) return;
-    const updated = [...categories, { name }].sort((a, b) => a.name.localeCompare(b.name));
+    const updated = [...categories, { name }].sort((a, b) =>
+      (a.sort_order ?? 99) - (b.sort_order ?? 99) || a.name.localeCompare(b.name)
+    );
     if (await sync(updated)) {
       setNewName("");
       toastManager.success("Category added");

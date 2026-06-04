@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import ReactDOM from "react-dom";
 import { useDispatch, useSelector } from "react-redux";
+import { selectPlatformSettings } from "../../store/slices/platformSettingsSlice";
 import {
   fetchQuizzes,
   createQuiz,
@@ -21,10 +22,11 @@ import { useDateFormatters } from "../../hooks";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const defaultOption = () => ({ option_text: "", is_correct: false });
-const defaultQuestion = () => ({
+// max_marks is filled by platform setting at component level — see makeDefaultQuestion()
+const defaultQuestion = (marksPerQuestion = 1) => ({
   question_text: "",
   question_type: "SINGLE_CHOICE",
-  max_marks: "",
+  max_marks: String(marksPerQuestion),
   options: [defaultOption(), defaultOption(), defaultOption(), defaultOption()],
 });
 
@@ -316,6 +318,7 @@ const TeacherQuizzes = ({
     selectedQuizSubmission,
     loadingSelectedQuizSubmission,
   } = useSelector((s) => s.teachers);
+  const ps = useSelector(selectPlatformSettings); // platform settings
 
   const [internalFilters, setInternalFilters] = useState({
     course: "",
@@ -341,10 +344,26 @@ const TeacherQuizzes = ({
   const [gradeInputs, setGradeInputs] = useState({});
   const [saving, setSaving] = useState(false);
 
-  // Create / Edit form state
-  const emptyForm = { course: "", title: "", description: "", total_marks: "", published_at: "", due_date: "" };
-  const [form, setForm]           = useState(emptyForm);
-  const [questions, setQuestions] = useState([defaultQuestion()]);
+  // Build default form values from platform settings
+  const makeEmptyForm = () => {
+    const now = new Date();
+    const dueDate = new Date(now);
+    dueDate.setDate(dueDate.getDate() + (ps.quiz_submission_days || 2));
+    const pad = (n) => String(n).padStart(2, "0");
+    const fmtLocal = (d) =>
+      `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    return {
+      course: "",
+      title: "",
+      description: "",
+      total_marks: "",
+      published_at: ps.quiz_publish_immediately ? fmtLocal(now) : "",
+      due_date:     fmtLocal(dueDate),
+    };
+  };
+
+  const [form, setForm]           = useState(makeEmptyForm);
+  const [questions, setQuestions] = useState(() => [defaultQuestion(ps.quiz_marks_per_question)]);
 
   useEffect(() => {
     if (!myCourses?.length) dispatch(fetchMyCourses());
@@ -365,7 +384,7 @@ const TeacherQuizzes = ({
       </FilterSelect>
       <button
         type="button"
-        onClick={() => { setShowCreate(true); setForm(emptyForm); setQuestions([defaultQuestion()]); }}
+        onClick={() => { setShowCreate(true); setForm(makeEmptyForm()); setQuestions([defaultQuestion(ps.quiz_marks_per_question)]); }}
         className="bg-indigo-600 hover:bg-indigo-500 px-5 py-3 rounded-xl text-xs font-bold transition whitespace-nowrap"
       >
         + Create Quiz
@@ -384,8 +403,8 @@ const TeacherQuizzes = ({
       await dispatch(createQuiz(buildPayload(form, questions, timezone))).unwrap();
       toastManager.success("Quiz created");
       setShowCreate(false);
-      setForm(emptyForm);
-      setQuestions([defaultQuestion()]);
+      setForm(makeEmptyForm());
+      setQuestions([defaultQuestion(ps.quiz_marks_per_question)]);
     } catch (e) {
       // const msg = typeof e === "string" ? e : (e?.detail || e?.title?.[0] || e?.questions || JSON.stringify(e));
       // toastManager.error(msg || "Failed to create quiz");
@@ -611,7 +630,7 @@ const TeacherQuizzes = ({
       <div className="flex gap-4 justify-end pt-10 border-t border-white/5">
         <button
           type="button"
-          onClick={() => { setShowCreate(false); setEditTarget(null); setForm(emptyForm); setQuestions([defaultQuestion()]); }}
+          onClick={() => { setShowCreate(false); setEditTarget(null); setForm(makeEmptyForm()); setQuestions([defaultQuestion(ps.quiz_marks_per_question)]); }}
           className="px-8 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold uppercase tracking-widest transition-all active:scale-95"
         >
           Cancel
@@ -774,7 +793,7 @@ const TeacherQuizzes = ({
               <div className="flex justify-between items-center">
                 <h3 className="text-2xl font-black text-white tracking-tight">Create New Quiz</h3>
                 <button
-                  onClick={() => { setShowCreate(false); setForm(emptyForm); setQuestions([defaultQuestion()]); }}
+                  onClick={() => { setShowCreate(false); setForm(makeEmptyForm()); setQuestions([defaultQuestion(ps.quiz_marks_per_question)]); }}
                   className="w-10 h-10 flex items-center justify-center rounded-xl text-slate-500 hover:text-white hover:bg-white/5 transition-all"
                 >
                   <i className="fas fa-times text-lg"></i>
@@ -801,7 +820,7 @@ const TeacherQuizzes = ({
                   <p className="text-indigo-400 text-xs font-bold uppercase tracking-widest mt-1">{editTarget.course_title}</p>
                 </div>
                 <button
-                  onClick={() => { setEditTarget(null); setForm(emptyForm); setQuestions([defaultQuestion()]); }}
+                  onClick={() => { setEditTarget(null); setForm(makeEmptyForm()); setQuestions([defaultQuestion(ps.quiz_marks_per_question)]); }}
                   className="w-10 h-10 flex items-center justify-center rounded-xl text-slate-500 hover:text-white hover:bg-white/5 transition-all"
                 >
                   <i className="fas fa-times text-lg"></i>
