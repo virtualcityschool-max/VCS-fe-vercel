@@ -724,8 +724,8 @@ const SessionsTab = ({
                   className="px-6 py-2.5 rounded-xl text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition disabled:opacity-50 flex items-center gap-2">
                   {isCreatingSession
                     ? <><i className="fas fa-spinner fa-spin text-xs"></i>Creating…</>
-                    : createMode === "now"     ? "Launch Session"
-                    : createMode === "delayed" ? "Schedule Session"
+                    : createMode === "now"     ? "Start Session"
+                    : createMode === "delayed" ? "Create Session"
                     :                           "Create Session"}
                 </button>
               </div>
