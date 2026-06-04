@@ -204,11 +204,13 @@ const ParentChildDetails = () => {
                 <h1 className="text-2xl sm:text-4xl font-black font-poppins tracking-tight bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent truncate">
                   {child.username}
                 </h1>
+                {child.grade_level && (
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="px-3 py-1 bg-indigo-500/10 border border-indigo-500/20 rounded-full text-[10px] font-black uppercase tracking-widest text-indigo-400">
                     Grade {child.grade_level}
                   </span>
                 </div>
+                )}
               </div>
             </div>
 

@@ -270,6 +270,9 @@ const UsersTab = ({
     }
   };
 
+  const ROLE_DISPLAY = { teacher: "Tutor", parent: "Guardian", student: "Student", admin: "Admin" };
+  const displayRole  = (r) => ROLE_DISPLAY[r] || r;
+
   const getRoleColor = (role) => {
     switch (role) {
       case "admin":
@@ -401,7 +404,7 @@ const UsersTab = ({
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div className="flex items-center gap-2">
                       <span className={`px-2 py-1 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest ${getRoleColor(user.role)}`}>
-                        {user.role}
+                        {displayRole(user.role)}
                       </span>
                       <span className={`px-2 py-1 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest ${getStatusColor(user.is_active)}`}>
                         {user.is_active ? "Active" : "Inactive"}
@@ -516,7 +519,7 @@ const UsersTab = ({
                       </td>
                       <td className="px-6 py-4">
                         <span className={`px-2 py-1 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest ${getRoleColor(user.role)}`}>
-                          {user.role}
+                          {displayRole(user.role)}
                         </span>
                       </td>
                       <td className="px-6 py-4">

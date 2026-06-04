@@ -531,7 +531,11 @@ const AuthModals = () => {
 
             {!adminMode && (
               <div className="flex bg-slate-950 p-1.5 rounded-2xl border border-white/5 mb-6">
-                {["student", "teacher", "parent"].map((roleOption) => (
+                {[
+                  { value: "student", label: "Student" },
+                  { value: "teacher", label: "Tutor"   },
+                  { value: "parent",  label: "Guardian" },
+                ].map(({ value: roleOption, label: roleLabel }) => (
                   <button
                     key={roleOption}
                     type="button"
@@ -553,7 +557,7 @@ const AuthModals = () => {
                         : "text-slate-500 hover:text-slate-300"
                     }`}
                   >
-                    {roleOption}
+                    {roleLabel}
                   </button>
                 ))}
               </div>
