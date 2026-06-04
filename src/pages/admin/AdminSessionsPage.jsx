@@ -233,8 +233,8 @@ const AdminSessionsPage = () => {
 
     if (!formData.recurrence_end_date) {
       errors.recurrence_end_date = "Recurrence end date is required";
-    } else if (formData.start_date && formData.recurrence_end_date <= formData.start_date) {
-      errors.recurrence_end_date = "End date must be after start date";
+    } else if (formData.start_date && formData.recurrence_end_date < formData.start_date) {
+      errors.recurrence_end_date = "End date cannot be before start date";
     }
 
     return errors;
