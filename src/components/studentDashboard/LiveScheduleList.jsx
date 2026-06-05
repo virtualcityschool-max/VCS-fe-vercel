@@ -386,7 +386,7 @@ const LiveScheduleList = () => {
                   {getStatusBadge(session)}
                 </div>
                 <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mb-3 opacity-60">
-                  Instructor: {session.instructor_name}
+                  Tutor: {session.instructor_name}
                 </p>
 
                 {/* Schedule Info */}

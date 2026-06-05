@@ -36,7 +36,7 @@ const Header = ({ activeTab, children }) => {
       case "evaluations":
         return {
           title: "Evaluations",
-          description: "Review student performance across teachers and courses",
+          description: "Review student performance across tutors and courses",
         };
       case "attendance":
         return {

@@ -106,7 +106,6 @@ const AttendanceMatrix = ({
     <div className="space-y-3">
       {/* Legend */}
       <div className="flex items-center gap-4 flex-wrap px-1">
-        <span className="text-[10px] uppercase tracking-widest text-slate-500 font-bold shrink-0">Legend</span>
         {Object.entries(CELL).map(([status, cfg]) => (
           <span key={status} className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-bold ${cfg.cls}`}>
             <span>{cfg.letter}</span>

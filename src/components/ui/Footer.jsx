@@ -38,7 +38,7 @@ const Footer = ({ variant = "full" }) => {
             />
             <p className="text-slate-400 text-sm leading-relaxed">
               Next-generation learning platform connecting students with
-              world-class teachers for live classes and on-demand mastery modules.
+              world-class tutors for live classes and on-demand mastery modules.
             </p>
           </div>
 

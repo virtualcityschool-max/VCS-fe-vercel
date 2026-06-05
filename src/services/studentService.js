@@ -293,7 +293,7 @@ export const studentService = {
 
   enrollInCoursePrivate: async ({ courseId, teacherId, preferred_slots }) => {
     if (!courseId) throw new Error("Course ID is required for private enrollment");
-    if (!teacherId) throw new Error("Teacher ID is required for private enrollment");
+    if (!teacherId) throw new Error("Tutor ID is required for private enrollment");
 
     const body = { course_id: courseId };
     if (preferred_slots) body.preferred_slots = preferred_slots;

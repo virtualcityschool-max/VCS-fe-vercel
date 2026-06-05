@@ -110,7 +110,7 @@ const TeachersDirectory = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onClear={() => setSearchQuery("")}
-              placeholder="Search teachers or courses..."
+              placeholder="Search tutors or courses..."
               className="w-full"
               inputClassName="h-10 text-xs sm:text-sm"
             />

@@ -158,7 +158,7 @@ const ApprovalsTab = ({
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                       <div className="flex items-center gap-2">
                         <span className="bg-slate-700/50 text-slate-300 px-2 sm:px-3 py-1 rounded-full text-[8px] sm:text-xs font-black uppercase border border-slate-600">
-                          {user.role || "user"}
+                          {{ teacher: "Tutor", parent: "Guardian" }[user.role] || user.role || "user"}
                         </span>
                       </div>
 
@@ -270,7 +270,7 @@ const ApprovalsTab = ({
                       </td>
                       <td className="px-8 py-6">
                         <span className="bg-slate-700/50 text-slate-300 px-3 py-1 rounded-full text-[8px] font-black uppercase border border-slate-600">
-                          {user.role || "user"}
+                          {{ teacher: "Tutor", parent: "Guardian" }[user.role] || user.role || "user"}
                         </span>
                       </td>
                       <td className="px-8 py-6">

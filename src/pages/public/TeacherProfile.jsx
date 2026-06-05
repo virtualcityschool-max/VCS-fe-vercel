@@ -189,7 +189,7 @@ const BookingModal = ({ teacherName, slots, onClose, onBooked }) => {
               {/* Note textarea */}
               <div>
                 <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 block mb-2">
-                  Message to teacher{" "}
+                  Message to Tutor{" "}
                   <span className="text-slate-700 font-normal normal-case tracking-normal">
                     (optional)
                   </span>
@@ -197,7 +197,7 @@ const BookingModal = ({ teacherName, slots, onClose, onBooked }) => {
                 <textarea
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
-                  placeholder="Tell the teacher what you'd like to work on, your current level, or any questions…"
+                  placeholder="Tell the Tutor what you'd like to work on, your current level, or any questions…"
                   rows={4}
                   maxLength={500}
                   className="w-full bg-slate-800 border border-slate-700 focus:border-indigo-500/60 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 outline-none resize-none transition"
@@ -520,7 +520,7 @@ const TeacherProfile = () => {
             <div className="flex-1 text-center lg:text-left">
               <div className="flex flex-col lg:flex-row lg:items-center gap-3 mb-3">
                 <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight">
-                  {teacherDetails.teacher_name || "Unnamed Teacher"}
+                  {teacherDetails.teacher_name || "Unnamed Tutor"}
                 </h1>
 
                 <span className="inline-flex items-center justify-center gap-2 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-4 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-indigo-300">

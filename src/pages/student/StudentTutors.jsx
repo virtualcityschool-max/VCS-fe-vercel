@@ -121,7 +121,7 @@ const StudentTutors = () => {
   const hasActiveFilters = searchQuery || dateFilter || (filter !== "all" && filter !== "cancelled");
 
   const grouped = filtered.reduce((acc, slot) => {
-    const key = slot.teacher_name || "Unknown Teacher";
+    const key = slot.teacher_name || "Unknown Tutor";
     const teacherId = slot.teacher_id || slot.teacher;
     if (!acc[key]) acc[key] = { teacherId, teacherAvatar: slot.teacher_avatar, slots: [] };
     acc[key].slots.push(slot);

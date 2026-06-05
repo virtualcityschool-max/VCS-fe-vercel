@@ -179,7 +179,7 @@ const AdminAttendance = () => {
       <div className="flex gap-1 border-b border-slate-800 overflow-x-auto no-scrollbar">
         {[
           { id: "student", label: "Student Attendance", icon: "fa-user-graduate" },
-          { id: "teacher", label: "Teacher Attendance", icon: "fa-chalkboard-teacher" },
+          { id: "teacher", label: "Tutor Attendance", icon: "fa-chalkboard-teacher" },
         ].map((t) => (
           <button
             key={t.id}
