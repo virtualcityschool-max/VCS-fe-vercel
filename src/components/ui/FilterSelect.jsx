@@ -16,16 +16,36 @@ const FilterSelect = ({
   const triggerRef = useRef(null);
   const searchRef  = useRef(null);
 
-  // Parse <option> children → [{ value, label, disabled }]
+  // Parse <option> and <optgroup> children → flat list with group-header entries
   const options = useMemo(() => {
     const list = [];
     React.Children.forEach(children, (child) => {
-      if (!child || child.type !== "option") return;
-      list.push({
-        value:    String(child.props.value ?? ""),
-        label:    String(child.props.children ?? ""),
-        disabled: !!child.props.disabled,
-      });
+      if (!child) return;
+      if (child.type === "option") {
+        list.push({
+          value:   String(child.props.value ?? ""),
+          label:   String(child.props.children ?? ""),
+          disabled: !!child.props.disabled,
+          isGroup: false,
+        });
+      } else if (child.type === "optgroup") {
+        // Group header — shown as a non-selectable divider
+        list.push({
+          value:   `__grp__${child.props.label}`,
+          label:   child.props.label,
+          disabled: true,
+          isGroup: true,
+        });
+        React.Children.forEach(child.props.children, (opt) => {
+          if (!opt || opt.type !== "option") return;
+          list.push({
+            value:   String(opt.props.value ?? ""),
+            label:   String(opt.props.children ?? ""),
+            disabled: !!opt.props.disabled,
+            isGroup: false,
+          });
+        });
+      }
     });
     return list;
   }, [children]);
@@ -35,7 +55,8 @@ const FilterSelect = ({
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return options;
-    return options.filter((o) => o.label.toLowerCase().includes(q));
+    // When searching: hide group headers entirely, only show matching real options
+    return options.filter((o) => !o.isGroup && o.label.toLowerCase().includes(q));
   }, [options, search]);
 
   const computePos = () => {
@@ -112,21 +133,28 @@ const FilterSelect = ({
         {filtered.length === 0 ? (
           <li className="px-3 py-2.5 text-xs text-slate-500 text-center">No results</li>
         ) : (
-          filtered.map((opt) => (
-            <li
-              key={opt.value}
-              onMouseDown={(e) => { e.preventDefault(); handleSelect(opt); }}
-              onTouchEnd={(e) => { e.preventDefault(); handleSelect(opt); }}
-              className={`px-3 py-2 text-sm transition-colors select-none
-                ${opt.disabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}
-                ${String(opt.value) === String(value ?? "")
-                  ? "bg-indigo-600/20 text-indigo-300 font-semibold"
-                  : "text-slate-300 hover:bg-slate-800 hover:text-white"
-                }`}
-            >
-              {opt.label}
-            </li>
-          ))
+          filtered.map((opt) =>
+            opt.isGroup ? (
+              <li key={opt.value}
+                className="px-3 py-1.5 text-[9px] font-black uppercase tracking-widest text-slate-500 bg-slate-950/60 select-none pointer-events-none">
+                {opt.label.replace(/─+\s*/g, "")}
+              </li>
+            ) : (
+              <li
+                key={opt.value}
+                onMouseDown={(e) => { e.preventDefault(); handleSelect(opt); }}
+                onTouchEnd={(e) => { e.preventDefault(); handleSelect(opt); }}
+                className={`px-3 py-2 text-sm transition-colors select-none
+                  ${opt.disabled ? "opacity-40 cursor-not-allowed text-slate-400 italic" : "cursor-pointer"}
+                  ${String(opt.value) === String(value ?? "")
+                    ? "bg-indigo-600/20 text-indigo-300 font-semibold"
+                    : opt.disabled ? "" : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                  }`}
+              >
+                {opt.label}
+              </li>
+            )
+          )
         )}
       </ul>
     </div>

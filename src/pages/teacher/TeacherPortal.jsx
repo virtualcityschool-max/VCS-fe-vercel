@@ -27,6 +27,14 @@ const fmt12 = (t) => {
   return `${h % 12 || 12}:${String(m).padStart(2, "0")} ${suffix}`;
 };
 
+const fmtDate = (d) => {
+  if (!d) return "";
+  const [y, mo, day] = d.split("-").map(Number);
+  return new Date(y, mo - 1, day).toLocaleDateString(undefined, {
+    weekday: "short", month: "short", day: "numeric", year: "numeric",
+  });
+};
+
 const isSlotJoinable = (slot) => {
   const slotStart = new Date(slot.date + "T" + slot.start_time);
   const now = Date.now();
@@ -408,11 +416,11 @@ const TeacherPortal = () => {
                           <div className="flex flex-wrap items-center gap-4 text-[11px] text-slate-400 font-bold uppercase tracking-wider">
                             <div className="flex items-center gap-1.5">
                               <i className="fas fa-calendar text-indigo-400/60" />
-                              <span>{formatDate(slot.date + "T" + slot.start_time)}</span>
+                              <span>{fmtDate(slot.date)}</span>
                             </div>
                             <div className="flex items-center gap-1.5">
                               <i className="fas fa-clock text-indigo-400/60" />
-                              <span>{formatTime(slot.date + "T" + slot.start_time)} – {formatTime(slot.date + "T" + slot.end_time)}{" "}<TimezoneTag /></span>
+                              <span>{fmt12(slot.start_time)} – {fmt12(slot.end_time)}{" "}<TimezoneTag /></span>
                             </div>
                           </div>
                           <div className="mt-2">

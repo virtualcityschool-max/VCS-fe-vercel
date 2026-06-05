@@ -69,17 +69,12 @@ const AdminPlatformSettingsPage = () => {
   return (
     <div className="text-white space-y-8 pb-16 animate-fadeIn">
       {/* Header */}
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-3xl font-black font-poppins tracking-tight">Platform Settings</h1>
-          <p className="text-slate-500 text-sm mt-1">Configure default values that pre-fill creation forms across the portal.</p>
-        </div>
-        <button onClick={handleSave} disabled={saving}
-          className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 text-white font-black text-sm rounded-xl transition shadow-lg shadow-indigo-900/30 active:scale-95">
-          {saving ? <><i className="fas fa-spinner fa-spin text-xs" />Saving…</> : <><i className="fas fa-save text-xs" />Save Settings</>}
-        </button>
+      <div>
+        <h1 className="text-3xl font-black font-poppins tracking-tight">Platform Settings</h1>
+        <p className="text-slate-500 text-sm mt-1">Configure default values that pre-fill creation forms across the portal.</p>
       </div>
 
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Quiz defaults */}
       <div className="bg-slate-900/50 border border-slate-800 rounded-2xl overflow-hidden">
         <div className="px-6 py-4 border-b border-slate-800 flex items-center gap-3">
@@ -156,6 +151,8 @@ const AdminPlatformSettingsPage = () => {
             </div>
           </Row>
         </div>
+      </div>
+
       </div>
 
       <div className="flex justify-end">

@@ -9,6 +9,7 @@ import { availabilityService } from "../../services/availabilityService";
 import { toastManager } from "../../utils/toastManager";
 import AuthRequiredModal from "../../components/common/AuthRequiredModal";
 import { getStorageUrl } from "../../utils/storageUrl";
+import GmailNotice from "../../components/common/GmailNotice";
 
 const HIRE_INTENT_KEY = "vcs_hire_intent";
 
@@ -186,10 +187,13 @@ const BookingModal = ({ teacherName, slots, onClose, onBooked }) => {
                 </div>
               )}
 
+              {/* Gmail notice */}
+              <GmailNotice />
+
               {/* Note textarea */}
               <div>
                 <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 block mb-2">
-                  Message to teacher{" "}
+                  Message to Tutor{" "}
                   <span className="text-slate-700 font-normal normal-case tracking-normal">
                     (optional)
                   </span>
@@ -197,7 +201,7 @@ const BookingModal = ({ teacherName, slots, onClose, onBooked }) => {
                 <textarea
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
-                  placeholder="Tell the teacher what you'd like to work on, your current level, or any questions…"
+                  placeholder="Tell the Tutor what you'd like to work on, your current level, or any questions…"
                   rows={4}
                   maxLength={500}
                   className="w-full bg-slate-800 border border-slate-700 focus:border-indigo-500/60 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 outline-none resize-none transition"
@@ -496,11 +500,9 @@ const TeacherProfile = () => {
 
       <div className="max-w-7xl mx-auto px-6 pb-6 space-y-8">
         {/* Header */}
-        <div className="relative overflow-hidden rounded-3xl border border-slate-800 bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 p-8 sm:p-10 shadow-2xl">
-          <div className="absolute inset-0 pointer-events-none bg-indigo-500/[0.03]" />
-          <div className="absolute -top-16 -right-16 w-64 h-64 bg-indigo-600/10 blur-3xl rounded-full pointer-events-none" />
+        <div className="rounded-3xl border border-slate-800 bg-slate-900 p-8 sm:p-10 shadow-xl">
+          <div className="flex flex-col lg:flex-row gap-8 lg:items-center">
 
-          <div className="relative z-10 flex flex-col lg:flex-row gap-8 lg:items-center">
             {/* Avatar */}
             <div className="shrink-0 mx-auto lg:mx-0">
               <div className="w-28 h-28 sm:w-36 sm:h-36 rounded-3xl bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center text-white text-4xl sm:text-5xl font-bold shadow-xl border border-indigo-400/20 overflow-hidden">
@@ -520,11 +522,10 @@ const TeacherProfile = () => {
             <div className="flex-1 text-center lg:text-left">
               <div className="flex flex-col lg:flex-row lg:items-center gap-3 mb-3">
                 <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight">
-                  {teacherDetails.teacher_name || "Unnamed Teacher"}
+                  {teacherDetails.teacher_name || "Unnamed Tutor"}
                 </h1>
-
                 <span className="inline-flex items-center justify-center gap-2 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-4 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-indigo-300">
-                  <i className="fas fa-check-circle"></i>
+                  <i className="fas fa-check-circle" />
                   Verified Tutor
                 </span>
               </div>
@@ -569,7 +570,6 @@ const TeacherProfile = () => {
 
             {/* CTA */}
             <div className="w-full lg:w-72 flex flex-col gap-3">
-              {/* Book a Slot */}
               <button
                 onClick={handleHireClick}
                 disabled={loadingSlots}
@@ -595,18 +595,6 @@ const TeacherProfile = () => {
                 )}
               </button>
 
-              {/* {teacherDetails.linkedin && isValidLinkedInUrl(teacherDetails.linkedin) ? (
-                <a
-                  href={teacherDetails.linkedin}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full rounded-2xl border border-slate-800 bg-slate-950 px-6 py-4 text-center text-xs font-semibold uppercase tracking-[0.18em] text-slate-400 transition hover:border-slate-700 hover:text-white"
-                >
-                  View LinkedIn
-                </a>
-              ) : null} */}
-
-              {/* Slot availability summary for students */}
               {isLoggedIn && role === "student" && slotsLoaded && (
                 <div className={`rounded-xl border px-4 py-3 text-xs font-semibold text-center ${
                   availableSlots.length > 0

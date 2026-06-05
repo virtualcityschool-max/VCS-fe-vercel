@@ -50,7 +50,7 @@ const PublicCourseCard = ({
       label = "Enroll Now";
       disabled = true;
       cls += "bg-gradient-to-r from-blue-600/40 to-indigo-600/40 text-white/40 cursor-not-allowed";
-      tooltip = "No sessions available for this course";
+      // tooltip = "No sessions available for this course";
     } else if (isEnrolling) {
       label = "Enrolling...";
       disabled = true;

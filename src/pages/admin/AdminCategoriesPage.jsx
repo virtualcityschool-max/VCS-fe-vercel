@@ -156,7 +156,7 @@ const AdminCategoriesPage = () => {
                     {categories.map((cat, index) => (
                       <div
                         key={cat.id || `temp-${index}`}
-                        className="group flex items-center gap-6 px-8 py-5 hover:bg-white/[0.01] transition-all duration-300"
+                        className="group flex items-center gap-4 px-6 py-2.5 hover:bg-white/[0.01] transition-all duration-300"
                       >
                         {/* Status Marker */}
                         <div className="w-1.5 h-1.5 rounded-full bg-slate-700 group-hover:bg-indigo-500 transition-all duration-500" />

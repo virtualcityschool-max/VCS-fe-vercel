@@ -702,12 +702,12 @@ const CourseDetails = () => {
                         <div className="absolute top-full left-1/2 -translate-x-1/2 border-[5px] border-transparent border-t-slate-800"></div>
                       </div>
                     )}
-                    {noSessions && !enrolled && !isRejected && (
+                    {/* {noSessions && !enrolled && !isRejected && (
                       <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 px-3 py-1.5 bg-slate-800 border border-slate-700 text-white text-[11px] font-medium rounded-lg whitespace-nowrap opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-150 shadow-xl z-10">
                         No sessions available for this course
                         <div className="absolute top-full left-1/2 -translate-x-1/2 border-[5px] border-transparent border-t-slate-700"></div>
                       </div>
-                    )}
+                    )} */}
                   </div>
                 ) : auth.isLoggedIn ? (
                   <div className="text-center py-4 mb-6">
@@ -747,12 +747,12 @@ const CourseDetails = () => {
                       <i className={`fas fa-sign-in-alt mr-2 ${!noSessions ? "group-hover:translate-x-1 transition-transform" : ""}`}></i>
                       Login to Enroll
                     </Button>
-                    {noSessions && (
+                    {/* {noSessions && (
                       <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 px-3 py-1.5 bg-slate-800 border border-slate-700 text-white text-[11px] font-medium rounded-lg whitespace-nowrap opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-150 shadow-xl z-10">
                         No sessions available for this course
                         <div className="absolute top-full left-1/2 -translate-x-1/2 border-[5px] border-transparent border-t-slate-700"></div>
                       </div>
-                    )}
+                    )} */}
                   </div>
                 )}
 

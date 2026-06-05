@@ -18,6 +18,16 @@ import { clampDate } from "../../utils/validation";
 
 const DAYS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
 
+/** Why a course is ineligible for a new scheduled session, or null if eligible. */
+function scheduledCourseReason(c) {
+  if (c.status === "draft")     return "Not published yet";
+  if (c.status === "completed") return "Course already completed";
+  if (c.status === "archived")  return "Course is archived";
+  if (c.status !== "published") return `Status: ${c.status}`;
+  if (c.has_session)            return "Already has a recurring session";
+  return null;
+}
+
 function toggleDay(form, setForm, day) {
   const days = form.recurrence_days ?? [];
   setForm({
@@ -55,12 +65,29 @@ function SessionForm({ form, setForm, errors, clearError, isCreate, courses }) {
             }`}
           >
             <option value="">Select your course</option>
-            {courses.map((c) => (
-              <option key={c.id} value={c.id}>{c.title}</option>
-            ))}
+            {courses.filter(c => scheduledCourseReason(c) === null).length > 0 && (
+              <optgroup label="─── Available ───">
+                {courses.filter(c => scheduledCourseReason(c) === null).map(c => (
+                  <option key={c.id} value={c.id}>{c.title}</option>
+                ))}
+              </optgroup>
+            )}
+            {courses.filter(c => scheduledCourseReason(c) !== null).length > 0 && (
+              <optgroup label="─── Unavailable ───">
+                {courses.filter(c => scheduledCourseReason(c) !== null).map(c => (
+                  <option key={c.id} value={c.id} disabled>{`${c.title} (${scheduledCourseReason(c)})`}</option>
+                ))}
+              </optgroup>
+            )}
           </FilterSelect>
           {(isCreate ? errors.course : errors.course_id) && (
             <p className="text-red-400 text-xs mt-1">{isCreate ? errors.course : errors.course_id}</p>
+          )}
+          {courses.some(c => scheduledCourseReason(c) !== null) && (
+            <p className="text-[10px] text-slate-500 mt-1.5 flex items-center gap-1">
+              <i className="fas fa-info-circle text-slate-600" />
+              Greyed-out courses are either not published or already have a recurring session.
+            </p>
           )}
         </div>
 
@@ -285,6 +312,8 @@ const TeacherSessionCalendar = () => {
   const publishedCourses = (Array.isArray(myCourses) ? myCourses : []).filter(
     (c) => c.status === "published",
   );
+  // All courses passed to SessionForm so ineligible ones show as disabled with reason
+  const allCourses = Array.isArray(myCourses) ? myCourses : [];
 
   const sessionList = (Array.isArray(sessions) ? sessions : []).filter((s) => !s.is_child);
 
@@ -538,7 +567,7 @@ const TeacherSessionCalendar = () => {
                       )}
                     </div>
                     <div className="flex gap-2">
-                      {!s.is_child && (
+                      {!s.is_child && s.is_recurring && (
                         <button
                           onClick={() => openEdit(s)}
                           className="px-3 py-1.5 rounded-lg text-xs font-medium flex-1 flex items-center justify-center gap-1 bg-slate-700/50 text-slate-300 hover:bg-slate-600/50 transition"
@@ -601,7 +630,7 @@ const TeacherSessionCalendar = () => {
                       </td>
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-2 justify-end">
-                          {!s.is_child && (
+                          {!s.is_child && s.is_recurring && (
                             <button
                               onClick={() => openEdit(s)}
                               className="px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-700/50 text-slate-300 hover:bg-slate-600/50 transition"
@@ -771,14 +800,21 @@ const TeacherSessionCalendar = () => {
 
               {/* ── Scheduled: full form ── */}
               {createMode === "scheduled" && (
-                <SessionForm
-                  form={createForm}
-                  setForm={setCreateForm}
-                  errors={createErrors}
-                  clearError={(k) => setCreateErrors((p) => { const n = { ...p }; delete n[k]; return n; })}
-                  isCreate
-                  courses={publishedCourses}
-                />
+                <>
+                  <div className="flex items-center gap-2">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-indigo-500/10 border border-indigo-500/20 text-indigo-300">
+                      <i className="fas fa-clock text-[9px]" /> Hourly · Recurring
+                    </span>
+                  </div>
+                  <SessionForm
+                    form={createForm}
+                    setForm={setCreateForm}
+                    errors={createErrors}
+                    clearError={(k) => setCreateErrors((p) => { const n = { ...p }; delete n[k]; return n; })}
+                    isCreate
+                    courses={allCourses}
+                  />
+                </>
               )}
 
               <div className="flex justify-end gap-3 pt-6 border-t border-white/5">
@@ -816,7 +852,7 @@ const TeacherSessionCalendar = () => {
                 errors={editErrors}
                 clearError={(k) => setEditErrors((p) => { const n = { ...p }; delete n[k]; return n; })}
                 isCreate={false}
-                courses={publishedCourses}
+                courses={allCourses}
               />
               <div className="flex justify-end gap-3 pt-6 border-t border-white/5">
                 <button type="button" onClick={() => setModal(null)} className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">Cancel</button>

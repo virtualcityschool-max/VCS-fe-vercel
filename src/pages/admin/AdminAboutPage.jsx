@@ -9,7 +9,7 @@ const BLANK = {
   social_linkedin: "", social_youtube: "",
 };
 
-const Field = ({ label, name, value, onChange, multiline = false, type = "text", hint }) => (
+const Field = ({ label, name, value, onChange, multiline = false, type = "text", hint, inputMode }) => (
   <div>
     <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1.5">{label}</label>
     {multiline ? (
@@ -21,6 +21,7 @@ const Field = ({ label, name, value, onChange, multiline = false, type = "text",
     ) : (
       <input
         type={type} name={name} value={value} onChange={onChange}
+        inputMode={inputMode}
         className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500 transition"
         placeholder={`Enter ${label.toLowerCase()}…`}
       />
@@ -44,6 +45,12 @@ const AdminAboutPage = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm(p => ({ ...p, [name]: value }));
+  };
+
+  const handlePhoneChange = (e) => {
+    const { name, value } = e.target;
+    const filtered = value.replace(/[^\d+\-() ]/g, "");
+    setForm(p => ({ ...p, [name]: filtered }));
   };
 
   const handleSave = async () => {
@@ -70,18 +77,9 @@ const AdminAboutPage = () => {
     <div className="text-white space-y-10 pb-16 animate-fadeIn">
 
       {/* Header */}
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-3xl font-black font-poppins tracking-tight">About Us — CMS</h1>
-          <p className="text-slate-500 text-sm mt-1">All fields here populate the public /about page. Changes are live immediately after saving.</p>
-        </div>
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 text-white font-black text-sm rounded-xl transition shadow-lg shadow-indigo-900/30 active:scale-95"
-        >
-          {saving ? <><i className="fas fa-spinner fa-spin text-xs" />Saving…</> : <><i className="fas fa-save text-xs" />Save Changes</>}
-        </button>
+      <div>
+        <h1 className="text-3xl font-black font-poppins tracking-tight">About Us — CMS</h1>
+        <p className="text-slate-500 text-sm mt-1">All fields here populate the public /about page. Changes are live immediately after saving.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -127,8 +125,8 @@ const AdminAboutPage = () => {
             </div>
             <h2 className="text-sm font-black text-white uppercase tracking-widest">Contact Details</h2>
           </div>
-          <Field label="WhatsApp Number" name="contact_whatsapp" value={form.contact_whatsapp} onChange={handleChange} hint="Include country code, e.g. +971501234567" />
-          <Field label="Phone Number" name="contact_phone" value={form.contact_phone} onChange={handleChange} />
+          <Field label="WhatsApp Number" name="contact_whatsapp" value={form.contact_whatsapp} onChange={handlePhoneChange} hint="Include country code, e.g. +971501234567" inputMode="tel" />
+          <Field label="Phone Number" name="contact_phone" value={form.contact_phone} onChange={handlePhoneChange} inputMode="tel" />
           <Field label="Email Address" name="contact_email" value={form.contact_email} onChange={handleChange} type="email" />
           <Field label="Office Address" name="contact_address" value={form.contact_address} onChange={handleChange} multiline />
         </div>

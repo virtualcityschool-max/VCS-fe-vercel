@@ -121,7 +121,7 @@ const StudentTutors = () => {
   const hasActiveFilters = searchQuery || dateFilter || (filter !== "all" && filter !== "cancelled");
 
   const grouped = filtered.reduce((acc, slot) => {
-    const key = slot.teacher_name || "Unknown Teacher";
+    const key = slot.teacher_name || "Unknown Tutor";
     const teacherId = slot.teacher_id || slot.teacher;
     if (!acc[key]) acc[key] = { teacherId, teacherAvatar: slot.teacher_avatar, slots: [] };
     acc[key].slots.push(slot);
@@ -438,9 +438,9 @@ const StudentTutors = () => {
                               </div>
                               <div>
                                 <p className="text-sm font-semibold text-white">
-                                  {formatTime(slot.date + "T" + slot.start_time)} – {formatTime(slot.date + "T" + slot.end_time)}{" "}<TimezoneTag />
+                                  {fmt12(slot.start_time)} – {fmt12(slot.end_time)}{" "}<TimezoneTag />
                                 </p>
-                                <p className="text-xs text-slate-500 mt-0.5">{formatDate(slot.date + "T" + slot.start_time)}</p>
+                                <p className="text-xs text-slate-500 mt-0.5">{fmtDate(slot.date)}</p>
                               </div>
                             </div>
 

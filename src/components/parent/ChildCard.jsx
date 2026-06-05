@@ -19,6 +19,11 @@ const fmt12 = (t) => {
   const suffix = h >= 12 ? "PM" : "AM";
   return `${h % 12 || 12}:${String(m).padStart(2, "0")} ${suffix}`;
 };
+const fmtDate = (d) => {
+  if (!d) return "";
+  const [y, mo, day] = d.split("-").map(Number);
+  return new Date(y, mo - 1, day).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+};
 const isUpcoming = (date) => new Date(date + "T23:59:59") >= new Date();
 
 const ChildCard = ({ child }) => {
@@ -266,7 +271,7 @@ const ChildCard = ({ child }) => {
                       {s.teacher_name}
                     </p>
                     <p className="text-[9px] text-indigo-400 font-black tabular-nums mt-0.5">
-                      {new Date(s.date + "T" + s.start_time).toLocaleDateString(undefined, { month: "short", day: "numeric", ...(timezone ? { timeZone: timezone } : {}) })} · {formatTime(s.date + "T" + s.start_time)}{" "}<TimezoneTag />
+                      {fmtDate(s.date)} · {fmt12(s.start_time)}{" "}<TimezoneTag />
                     </p>
                   </div>
                   <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse shrink-0" />

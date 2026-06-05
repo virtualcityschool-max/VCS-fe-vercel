@@ -4,6 +4,41 @@ import SessionCalendarView from "../common/SessionCalendarView";
 import { clampDate } from "../../utils/validation";
 import { useDateFormatters } from "../../hooks";
 
+/** Why a course is ineligible for a NEW SCHEDULED (recurring) session, or null if eligible. */
+const scheduledCourseReason = (c) => {
+  if (c.status === "draft")     return "Not published yet";
+  if (c.status === "completed") return "Course already completed";
+  if (c.status === "archived")  return "Course is archived";
+  if (c.status !== "published") return `Status: ${c.status}`;
+  if (c.has_session)            return "Already has a recurring session";
+  return null;
+};
+
+/** Renders grouped <option> list: eligible on top, disabled ineligible below. */
+const ScheduledCourseOptions = ({ courses = [] }) => {
+  const eligible   = courses.filter(c => scheduledCourseReason(c) === null);
+  const ineligible = courses.filter(c => scheduledCourseReason(c) !== null);
+  return (
+    <>
+      <option value="">Select a course</option>
+      {eligible.length > 0 && (
+        <optgroup label="─── Available ───">
+          {eligible.map(c => (
+            <option key={c.id} value={c.id}>{c.title}</option>
+          ))}
+        </optgroup>
+      )}
+      {ineligible.length > 0 && (
+        <optgroup label="─── Unavailable ───">
+          {ineligible.map(c => (
+            <option key={c.id} value={c.id} disabled>{`${c.title} (${scheduledCourseReason(c)})`}</option>
+          ))}
+        </optgroup>
+      )}
+    </>
+  );
+};
+
 const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MONTH_NAMES = [
   "January","February","March","April","May","June",
@@ -386,7 +421,7 @@ const SessionsTab = ({
                       )}
                     </div>
                     <div className="flex gap-2">
-                      {!session.is_child && (
+                      {!session.is_child && session.is_recurring && (
                         <button
                           onClick={() => onSessionEdit(session.id)}
                           title="Edit session"
@@ -455,7 +490,7 @@ const SessionsTab = ({
                       <td className="px-5 py-4">{getStatusBadge(session.status)}</td>
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-2 justify-end">
-                          {!session.is_child && (
+                          {!session.is_child && session.is_recurring && (
                             <button
                               onClick={() => onSessionEdit(session.id)}
                               title="Edit session"
@@ -616,6 +651,13 @@ const SessionsTab = ({
               {/* ── Scheduled: full form ── */}
               {createMode === "scheduled" && (
                 <div className="space-y-5">
+                  {/* Hourly chip */}
+                  <div className="flex items-center gap-2">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-indigo-500/10 border border-indigo-500/20 text-indigo-300">
+                      <i className="fas fa-clock text-[9px]" /> Hourly · Recurring
+                    </span>
+                  </div>
+
                   {/* Course | Tutor */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
@@ -623,18 +665,35 @@ const SessionsTab = ({
                       <FilterSelect
                         value={createSessionForm.course}
                         onChange={(e) => {
-                          const selectedCourse = courses?.find((c) => c.id === Number(e.target.value) && c.status === "published" && !c.has_session);
+                          const selectedCourse = courses?.find((c) => c.id === Number(e.target.value) && scheduledCourseReason(c) === null);
                           setCreateSessionForm({ ...createSessionForm, course: e.target.value, instructor_id: selectedCourse?.instructor?.id || "", instructor_username: selectedCourse?.instructor?.username || "" });
                           clearCreateSessionFieldError("course");
                         }}
                         className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white focus:outline-none focus:ring-2 text-sm ${createSessionErrors?.course ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
                       >
                         <option value="">Select a course</option>
-                        {courses?.filter((c) => c.status === "published" && !c.has_session).map((course) => (
-                          <option key={course.id} value={course.id}>{course.title}</option>
-                        ))}
+                        {(courses || []).filter(c => scheduledCourseReason(c) === null).length > 0 && (
+                          <optgroup label="─── Available ───">
+                            {(courses || []).filter(c => scheduledCourseReason(c) === null).map(c => (
+                              <option key={c.id} value={c.id}>{c.title}</option>
+                            ))}
+                          </optgroup>
+                        )}
+                        {(courses || []).filter(c => scheduledCourseReason(c) !== null).length > 0 && (
+                          <optgroup label="─── Unavailable ───">
+                            {(courses || []).filter(c => scheduledCourseReason(c) !== null).map(c => (
+                              <option key={c.id} value={c.id} disabled>{`${c.title} (${scheduledCourseReason(c)})`}</option>
+                            ))}
+                          </optgroup>
+                        )}
                       </FilterSelect>
                       {createSessionErrors?.course && <p className="text-red-400 text-xs mt-1">{createSessionErrors.course}</p>}
+                      {(courses || []).some(c => scheduledCourseReason(c) !== null) && (
+                        <p className="text-[10px] text-slate-500 mt-1.5 flex items-center gap-1">
+                          <i className="fas fa-info-circle text-slate-600" />
+                          Greyed-out courses are either not published or already have a recurring session.
+                        </p>
+                      )}
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-slate-300 mb-2">Tutor</label>

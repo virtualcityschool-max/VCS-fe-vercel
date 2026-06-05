@@ -51,7 +51,7 @@ export const adminService = {
       );
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Get Teacher Slots" });
+      throw handleApiError(error, { context: "Get Tutor Slots" });
     }
   },
   getUserById: async (userId) => {
@@ -433,7 +433,7 @@ export const adminService = {
       const response = await axiosInstance.get(ADMIN_ENDPOINTS.ADMIN_TEACHER_SLOTS(teacherId));
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Get Teacher Slots" });
+      throw handleApiError(error, { context: "Get Tutor Slots" });
     }
   },
 
