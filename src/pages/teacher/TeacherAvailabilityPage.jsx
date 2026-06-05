@@ -657,7 +657,7 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
                             <span className="tabular-nums">{fmt12(c.start_time)} – {fmt12(c.end_time)}{" "}<TimezoneTag /></span>
                           </p>
                           <p className="text-[10px] text-amber-500/70 italic mt-0.5 truncate">
-                            Session: &ldquo;{c.session_title}&rdquo;{c.session_time ? ` · ${fmt12(c.session_time)}` : ""}
+                            Session: &ldquo;{c.session_title}&rdquo;
                           </p>
                         </div>
                         <span className="shrink-0 text-[9px] font-black uppercase tracking-widest bg-amber-500/10 border border-amber-500/20 text-amber-500 rounded-full px-2 py-0.5">
