@@ -190,6 +190,24 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
             </>
           )}
         </div>
+        {/* Gumroad Product Permalink */}
+        <div>
+          <label className="block text-sm font-medium text-slate-300 mb-1">
+            Gumroad Product Permalink
+            <span className="text-slate-500 text-[10px] uppercase font-black ml-2 opacity-50">optional — for paid courses</span>
+          </label>
+          <p className="text-slate-500 text-[11px] mb-2">
+            Paste the full Gumroad product URL or just the short code after <span className="text-slate-400 font-mono">gumroad.com/l/</span>. When set, students must pay via Gumroad before their enrollment request is submitted.
+          </p>
+          <Input
+            type="text"
+            placeholder="e.g. mcrqh  or  https://gumroad.com/l/mcrqh"
+            value={formData.gumroad_product_permalink || ""}
+            onChange={(e) => onChange("gumroad_product_permalink", e.target.value.trim())}
+            className={fieldClass(errors.gumroad_product_permalink)}
+          />
+          <FieldError error={errors.gumroad_product_permalink} />
+        </div>
       </div>
 
       {/* Right Column: Content & Media */}

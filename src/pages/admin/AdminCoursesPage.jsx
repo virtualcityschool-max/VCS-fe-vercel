@@ -43,6 +43,7 @@ const AdminCoursesPage = () => {
     outline: "",
     attachment: null,
     thumbnail: null,
+    gumroad_product_permalink: "",
   });
 
   const [editCourseForm, setEditCourseForm] = useState({});
@@ -131,6 +132,7 @@ const AdminCoursesPage = () => {
           thumbnail: null,
           thumbnail_url: editingCourse.thumbnail || null,
           has_session: editingCourse.has_session ?? false,
+          gumroad_product_permalink: editingCourse.gumroad_product_permalink || "",
         });
       }
     } else {
@@ -208,6 +210,7 @@ const AdminCoursesPage = () => {
     if (formData.outline) fd.append("outline", formData.outline);
     if (formData.attachment instanceof File) fd.append("attachment", formData.attachment);
     if (formData.thumbnail instanceof File) fd.append("thumbnail", formData.thumbnail);
+    if (formData.gumroad_product_permalink) fd.append("gumroad_product_permalink", formData.gumroad_product_permalink);
     return fd;
   };
 

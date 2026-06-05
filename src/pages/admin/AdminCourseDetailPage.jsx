@@ -142,6 +142,7 @@ const AdminCourseDetailPage = () => {
       attachment_url: course.attachment || null,
       thumbnail: null,
       thumbnail_url: course.thumbnail || null,
+      gumroad_product_permalink: course.gumroad_product_permalink || "",
     });
     setEditModalOpen(true);
   };
@@ -176,6 +177,7 @@ const AdminCourseDetailPage = () => {
     if (formData.outline) fd.append("outline", formData.outline);
     if (formData.attachment instanceof File) fd.append("attachment", formData.attachment);
     if (formData.thumbnail instanceof File) fd.append("thumbnail", formData.thumbnail);
+    fd.append("gumroad_product_permalink", formData.gumroad_product_permalink || "");
     return fd;
   };
 

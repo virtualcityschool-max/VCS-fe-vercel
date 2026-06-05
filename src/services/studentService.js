@@ -285,6 +285,12 @@ export const studentService = {
     return response.data;
   },
 
+  // Initiate Gumroad checkout for a paid course
+  initiateCheckout: async (courseId) => {
+    const response = await axiosInstance.post(`/courses/${courseId}/initiate-checkout/`);
+    return response.data;
+  },
+
   // Private enrollment
   getTeacherAvailableSlots: async (teacherId) => {
     const response = await axiosInstance.get(`classroom/teachers/${teacherId}/available-slots/`);

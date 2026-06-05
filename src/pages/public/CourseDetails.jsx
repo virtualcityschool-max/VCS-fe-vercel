@@ -30,6 +30,7 @@ import EnrollmentTypeModal from "../../components/courses/EnrollmentTypeModal";
 import ConfirmDialog from "../../components/common/ConfirmDialog";
 import { getStorageUrl } from "../../utils/storageUrl";
 import FileViewerModal from "../../components/common/FileViewerModal";
+import { studentService } from "../../services/studentService";
 
 const CourseDetails = () => {
   const { courseId } = useParams();
@@ -38,6 +39,7 @@ const CourseDetails = () => {
   const [enrollmentModalOpen, setEnrollmentModalOpen] = useState(false);
   const [paymentSubmitted, setPaymentSubmitted] = useState(false);
   const [viewerUrl, setViewerUrl] = useState(null);
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
   const submissionGuard = useSubmissionGuard();
   // Get auth state from Redux store
   const auth = useSelector((state) => state.auth);
@@ -101,6 +103,7 @@ const CourseDetails = () => {
       attachment: course.attachment || null,
       has_session: course.has_session ?? true,
       enrollment_status: course.enrollment_status,
+      gumroad_product_permalink: course.gumroad_product_permalink || null,
     };
   }, [course, courseId]);
 
@@ -118,8 +121,21 @@ const CourseDetails = () => {
     return false;
   };
 
+  // Poll backend after Gumroad checkout opens — webhook may take a few seconds.
+  // Only fetches student dashboard (not fetchCourseById) to avoid triggering
+  // the page-level isLoading state which causes the whole page to re-render.
+  const startEnrollmentPolling = (courseId) => {
+    toastManager.success("Checkout opened! Complete your payment — this page will update automatically.");
+    let attempts = 0;
+    const poll = setInterval(() => {
+      attempts++;
+      dispatch(fetchStudentDashboard());
+      if (attempts >= 10) clearInterval(poll); // poll for ~30 seconds
+    }, 3000);
+  };
+
   // Handle course enrollment
-  const handleEnrollCourse = () => {
+  const handleEnrollCourse = async () => {
     if (!auth.isLoggedIn) {
       dispatch(setAuthModal("login"));
       return;
@@ -130,7 +146,29 @@ const CourseDetails = () => {
       return;
     }
 
-    // Show enrollment modal
+    // Paid course — open Gumroad checkout in a centered popup
+    if (normalizedCourse?.gumroad_product_permalink) {
+      // Open popup synchronously BEFORE the await — browsers block popups
+      // opened after async calls since they're no longer inside a user gesture
+      const w = 700, h = 620;
+      const left = Math.round(window.screenX + (window.outerWidth - w) / 2);
+      const top  = Math.round(window.screenY + (window.outerHeight - h) / 2);
+      const popup = window.open("about:blank", "gumroad_checkout", `width=${w},height=${h},left=${left},top=${top},scrollbars=yes,resizable=yes`);
+      try {
+        setIsCheckingOut(true);
+        const data = await studentService.initiateCheckout(normalizedCourse.id);
+        if (popup) popup.location.href = data.checkout_url;
+        startEnrollmentPolling(normalizedCourse.id);
+      } catch (error) {
+        if (popup) popup.close();
+        showApiError(error);
+      } finally {
+        setIsCheckingOut(false);
+      }
+      return;
+    }
+
+    // Free course — show enrollment modal
     setEnrollmentModalOpen(true);
   };
 
@@ -624,7 +662,7 @@ const CourseDetails = () => {
                           ? handleUnenrollCourse(normalizedCourse)
                           : !isPending && !isRejected && handleEnrollCourse()
                       }
-                      disabled={isEnrolling || isUnenrolling || isPending || isRejected || (noSessions && !enrolled)}
+                      disabled={isEnrolling || isUnenrolling || isPending || isRejected || isCheckingOut || (noSessions && !enrolled)}
                       className={`w-full py-4 font-black text-xs uppercase tracking-[0.2em] rounded-2xl transition-all active:scale-95 ${
                         enrolled
                           ? isUnenrolling
@@ -636,7 +674,7 @@ const CourseDetails = () => {
                               ? "bg-amber-600/10 border border-amber-500/20 text-amber-400 cursor-not-allowed"
                               : noSessions
                                 ? "bg-linear-to-r from-blue-600/40 to-cyan-600/40 text-white/40 cursor-not-allowed"
-                                : isEnrolling
+                                : isEnrolling || isCheckingOut
                                   ? "bg-slate-600 text-slate-400 cursor-not-allowed"
                                   : "bg-linear-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 border-0 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-300 hover:scale-[1.02] text-white"
                       }`}
@@ -649,9 +687,13 @@ const CourseDetails = () => {
                           ? "Request Rejected"
                           : isPending
                             ? "Approval Pending"
-                            : isEnrolling
-                              ? "Enrolling..."
-                              : "Enroll Now"}
+                            : isCheckingOut
+                              ? <><i className="fas fa-spinner fa-spin mr-1" />Opening Checkout...</>
+                              : isEnrolling
+                                ? "Enrolling..."
+                                : normalizedCourse?.gumroad_product_permalink
+                                  ? <><i className="fas fa-lock-open mr-1.5" />Pay & Enroll</>
+                                  : "Enroll Now"}
                     </button>
                     {isRejected && (
                       <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 px-3 py-2 bg-slate-800 border border-rose-500/30 text-white text-[11px] font-medium rounded-lg text-center max-w-[220px] opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-150 shadow-xl z-10">

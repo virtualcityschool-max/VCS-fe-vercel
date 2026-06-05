@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { fetchAllCourses, fetchCategories } from "../../store/slices/coursesSlice";
@@ -21,6 +21,7 @@ import { showApiError } from "../../utils/apiErrorHandler";
 import { getStorageUrl } from "../../utils/storageUrl";
 import AuthRequiredModal from "../../components/common/AuthRequiredModal";
 import PublicCourseCard from "../../components/courses/PublicCourseCard";
+import { studentService } from "../../services/studentService";
 
 const PREVIEW_LIMIT = 8;
 
@@ -38,6 +39,7 @@ const Marketplace = () => {
   const [enrollmentModalOpen, setEnrollmentModalOpen] = useState(false);
   const [paymentSubmitted, setPaymentSubmitted] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [withdrawConfirm, setWithdrawConfirm] = useState({ open: false, courseId: null, courseTitle: "" });
   const [selectedCourse, setSelectedCourse] = useState(null);
   const submissionGuard = useSubmissionGuard();
@@ -177,11 +179,11 @@ const Marketplace = () => {
   };
 
   // Handle course enrollment
-  const handleEnrollCourse = (course) => {
+  const handleEnrollCourse = async (course) => {
     if (!auth.isLoggedIn) {
-      dispatch(setEnrollmentIntent({ 
-        courseId: course.id, 
-        courseTitle: course.title 
+      dispatch(setEnrollmentIntent({
+        courseId: course.id,
+        courseTitle: course.title
       }));
       setAuthModalOpen(true);
       return;
@@ -192,7 +194,38 @@ const Marketplace = () => {
       return;
     }
 
-    // Show enrollment modal
+    // Paid course — open Gumroad checkout in a centered popup
+    if (course.gumroad_product_permalink) {
+      // Open popup synchronously BEFORE the await — browsers block popups
+      // opened after async calls since they're no longer inside a user gesture
+      const w = 700, h = 620;
+      const left = Math.round(window.screenX + (window.outerWidth - w) / 2);
+      const top  = Math.round(window.screenY + (window.outerHeight - h) / 2);
+      const popup = window.open("about:blank", "gumroad_checkout", `width=${w},height=${h},left=${left},top=${top},scrollbars=yes,resizable=yes`);
+      try {
+        setIsCheckingOut(true);
+        setSelectedCourse(course);
+        const data = await studentService.initiateCheckout(course.id);
+        if (popup) popup.location.href = data.checkout_url;
+        // Poll dashboard only — avoids fetchAllCourses triggering page-level loading state
+        let attempts = 0;
+        const poll = setInterval(() => {
+          attempts++;
+          if (auth.role === "student") dispatch(fetchStudentDashboard());
+          if (attempts >= 10) clearInterval(poll);
+        }, 3000);
+        toastManager.success("Checkout opened! Complete your payment — this page will update automatically.");
+      } catch (error) {
+        if (popup) popup.close();
+        showApiError(error);
+      } finally {
+        setIsCheckingOut(false);
+        setSelectedCourse(null);
+      }
+      return;
+    }
+
+    // Free course — show enrollment modal
     setSelectedCourse(course);
     setEnrollmentModalOpen(true);
   };
