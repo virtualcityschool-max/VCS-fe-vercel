@@ -438,9 +438,9 @@ const StudentTutors = () => {
                               </div>
                               <div>
                                 <p className="text-sm font-semibold text-white">
-                                  {formatTime(slot.date + "T" + slot.start_time)} – {formatTime(slot.date + "T" + slot.end_time)}{" "}<TimezoneTag />
+                                  {fmt12(slot.start_time)} – {fmt12(slot.end_time)}{" "}<TimezoneTag />
                                 </p>
-                                <p className="text-xs text-slate-500 mt-0.5">{formatDate(slot.date + "T" + slot.start_time)}</p>
+                                <p className="text-xs text-slate-500 mt-0.5">{fmtDate(slot.date)}</p>
                               </div>
                             </div>
 

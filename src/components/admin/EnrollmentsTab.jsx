@@ -286,7 +286,7 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
               value={studentFilter}
               onChange={(e) => setStudentFilter(e.target.value)}
               onClear={() => setStudentFilter("")}
-              placeholder="Filter by student..."
+              placeholder="Search by student..."
               icon="fas fa-user"
               className="w-full sm:w-44"
             />
@@ -294,7 +294,7 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
               value={courseFilter}
               onChange={(e) => setCourseFilter(e.target.value)}
               onClear={() => setCourseFilter("")}
-              placeholder="Filter by course..."
+              placeholder="Search by course..."
               icon="fas fa-book"
               className="w-full sm:w-44"
             />

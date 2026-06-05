@@ -283,7 +283,7 @@ const getDatesInRange = (from, to) => {
 };
 
 const CreateAvailabilityModal = ({ onClose, onCreated }) => {
-  const { formatDate, formatTime, timezoneAbbr } = useDateFormatters();
+  const { timezoneAbbr } = useDateFormatters();
   const [entries, setEntries] = useState([]);
   const [rangeFrom, setRangeFrom] = useState("");
   const [rangeTo, setRangeTo] = useState("");
@@ -511,6 +511,12 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
               <h2 className="text-base font-semibold text-white">Create Availability</h2>
               <p className="text-slate-500 text-xs mt-0.5">
                 Set dates &amp; time ranges — hourly slots are generated automatically
+                {timezoneAbbr && (
+                  <span className="ml-2 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-bold">
+                    <i className="fas fa-globe text-[8px]" />
+                    {timezoneAbbr}
+                  </span>
+                )}
               </p>
             </div>
           </div>
@@ -646,12 +652,12 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-xs font-bold text-amber-200">
-                            {formatDate(c.date + "T" + c.start_time)}
+                            {fmtDate(c.date)}
                             <span className="text-amber-500 font-normal mx-1.5">·</span>
-                            <span className="tabular-nums">{formatTime(c.date + "T" + c.start_time)} – {formatTime(c.date + "T" + c.end_time)}{" "}<TimezoneTag /></span>
+                            <span className="tabular-nums">{fmt12(c.start_time)} – {fmt12(c.end_time)}{" "}<TimezoneTag /></span>
                           </p>
                           <p className="text-[10px] text-amber-500/70 italic mt-0.5 truncate">
-                            Session: &ldquo;{c.session_title}&rdquo;
+                            Session: &ldquo;{c.session_title}&rdquo;{c.session_time ? ` · ${fmt12(c.session_time)}` : ""}
                           </p>
                         </div>
                         <span className="shrink-0 text-[9px] font-black uppercase tracking-widest bg-amber-500/10 border border-amber-500/20 text-amber-500 rounded-full px-2 py-0.5">
@@ -854,7 +860,7 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
                           </div>
                           <div>
                             <div className="flex items-center gap-2">
-                              <p className="text-sm font-black text-white">{formatDate(selectedDate + "T00:00:00")}</p>
+                              <p className="text-sm font-black text-white">{fmtDate(selectedDate)}</p>
                               {recurring && (
                                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-indigo-500/15 border border-indigo-500/25 text-indigo-400 text-[8px] font-black uppercase tracking-widest">
                                   <i className="fas fa-sync text-[7px]" />
@@ -996,7 +1002,6 @@ const StatusBadge = ({ status }) =>
 // ── Edit slot modal ───────────────────────────────────────────────────────────
 
 const EditSlotModal = ({ slot, onClose, onSaved }) => {
-  const { formatDate } = useDateFormatters();
   const [date, setDate] = useState(slot.date);
   const [startTime, setStartTime] = useState(slot.start_time.slice(0, 5));
   const [endTime, setEndTime] = useState(slot.end_time.slice(0, 5));
@@ -1035,7 +1040,7 @@ const EditSlotModal = ({ slot, onClose, onSaved }) => {
             </div>
             <div>
               <h2 className="text-base font-semibold text-white">Edit Slot</h2>
-              <p className="text-slate-500 text-xs mt-0.5">{formatDate(slot.date + "T00:00:00")}</p>
+              <p className="text-slate-500 text-xs mt-0.5">{fmtDate(slot.date)}</p>
             </div>
           </div>
           <button
@@ -1127,7 +1132,7 @@ const EditSlotModal = ({ slot, onClose, onSaved }) => {
 // ── Slot card ─────────────────────────────────────────────────────────────────
 
 const SlotCard = ({ slot, onDelete, onEdit, deletingId }) => {
-  const { formatTime, timezoneAbbr } = useDateFormatters();
+  const { timezoneAbbr } = useDateFormatters();
   const isBooked = slot.status === "booked";
   const isDeleting = deletingId === slot.id;
 
@@ -1152,9 +1157,9 @@ const SlotCard = ({ slot, onDelete, onEdit, deletingId }) => {
         <div className="flex items-start justify-between gap-2 mb-3">
           <div>
             <p className="text-sm font-bold text-white tabular-nums">
-              {formatTime(slot.date + "T" + slot.start_time)}
+              {fmt12(slot.start_time)}
               <span className="text-slate-500 font-normal mx-1">–</span>
-              {formatTime(slot.date + "T" + slot.end_time)}{" "}<TimezoneTag />
+              {fmt12(slot.end_time)}{" "}<TimezoneTag />
             </p>
             <p className="text-[10px] text-slate-600 mt-0.5 font-medium">1 hr slot</p>
           </div>

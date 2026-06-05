@@ -136,13 +136,13 @@ const LiveScheduleList = () => {
   };
 
   const getStatusBadge = (session) => {
-    if (session.has_joined) {
-      return (
-        <span className="bg-red-600/10 text-red-400 px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-[0.15em] border border-red-500/10 animate-pulse">
-          Live Now
-        </span>
-      );
-    }
+    // if (session.has_joined) {
+    //   return (
+    //     <span className="bg-red-600/10 text-red-400 px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-[0.15em] border border-red-500/10 animate-pulse">
+    //       Live Now
+    //     </span>
+    //   );
+    // }
     if (session.left_at) {
       return (
         <span className="bg-slate-800/50 text-slate-500 px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-[0.15em] border border-white/5">
@@ -282,11 +282,11 @@ const LiveScheduleList = () => {
                     <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-[11px] text-slate-400 font-bold uppercase tracking-wider">
                       <div className="flex items-center gap-1.5">
                         <i className="fas fa-calendar text-indigo-400/60" />
-                        <span>{formatDate(slot.date + "T" + slot.start_time)}</span>
+                        <span>{fmtDate(slot.date)}</span>
                       </div>
                       <div className="flex items-center gap-1.5">
                         <i className="fas fa-clock text-indigo-400/60" />
-                        <span>{formatTime(slot.date + "T" + slot.start_time)} – {formatTime(slot.date + "T" + slot.end_time)}{" "}<TimezoneTag /></span>
+                        <span>{fmt12(slot.start_time)} – {fmt12(slot.end_time)}{" "}<TimezoneTag /></span>
                       </div>
                     </div>
                     <div className="mt-2 flex justify-center md:justify-start">
@@ -423,12 +423,12 @@ const LiveScheduleList = () => {
                 {/* Attendance Rate - Slim */}
                 {session.attendance_rate !== null && (
                   <div className="w-full max-w-[200px] mx-auto md:mx-0">
-                    <div className="flex justify-between text-[10px] font-black uppercase tracking-[0.15em] mb-1.5">
+                    {/* <div className="flex justify-between text-[10px] font-black uppercase tracking-[0.15em] mb-1.5">
                       <span className="text-slate-500 opacity-60">Attendance Rate</span>
                       <span className={getAttendanceColor(session.attendance_rate)}>
                         {session.attendance_rate}%
                       </span>
-                    </div>
+                    </div> */}
                     <div className="h-1 bg-white/5 rounded-full overflow-hidden">
                       <div
                         className={`h-full transition-all duration-1000 ${session.attendance_rate >= 90

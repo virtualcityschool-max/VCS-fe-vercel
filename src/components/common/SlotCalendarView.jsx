@@ -15,6 +15,14 @@ const fmt12 = (t) => {
   return `${h % 12 || 12}:${String(m).padStart(2, "0")} ${suffix}`;
 };
 
+const fmtDate = (d) => {
+  if (!d) return "";
+  const [y, mo, day] = d.split("-").map(Number);
+  return new Date(y, mo - 1, day).toLocaleDateString(undefined, {
+    weekday: "short", month: "short", day: "numeric", year: "numeric",
+  });
+};
+
 const todayKey = (() => {
   const t = new Date();
   return `${t.getFullYear()}-${t.getMonth()}-${t.getDate()}`;
@@ -38,7 +46,7 @@ const openMeetLink = (link) => {
 
 // Popup shown when clicking a booked slot on the calendar
 const SlotPopup = ({ slot, onClose }) => {
-  const { formatDate, formatTime, timezoneAbbr } = useDateFormatters();
+  const { timezoneAbbr } = useDateFormatters();
   const joinable = isSlotJoinable(slot);
   const hasMeet = !!slot.meeting_link;
 
@@ -61,7 +69,7 @@ const SlotPopup = ({ slot, onClose }) => {
               <div>
                 <p className="text-xs font-black text-white">Booked Session</p>
                 <p className="text-[10px] text-slate-500 mt-0.5">
-                  {formatDate(slot.date + "T" + slot.start_time)}
+                  {fmtDate(slot.date)}
                 </p>
               </div>
             </div>
@@ -74,7 +82,7 @@ const SlotPopup = ({ slot, onClose }) => {
           <div className="bg-slate-800/60 rounded-2xl px-4 py-3 space-y-2 mb-5">
             <div className="flex items-center gap-2 text-sm">
               <i className="fas fa-clock text-indigo-400/70 w-4 text-center" />
-              <span className="font-bold text-white">{formatTime(slot.date + "T" + slot.start_time)} – {formatTime(slot.date + "T" + slot.end_time)}{" "}<TimezoneTag /></span>
+              <span className="font-bold text-white">{fmt12(slot.start_time)} – {fmt12(slot.end_time)}{" "}<TimezoneTag /></span>
             </div>
             {slot.booked_by_name && (
               <div className="flex items-center gap-2 text-sm">
@@ -362,7 +370,7 @@ const SlotCalendarView = ({ slots = [], loading = false, onDelete, onEdit, delet
                           <div className={`flex items-center gap-0.5 ${isBooked ? "text-amber-400/70" : "text-indigo-400/70"}`}>
                             <i className="far fa-clock text-[6px] sm:text-[7px]" />
                             <span className="text-[7px] sm:text-[8px] font-semibold tabular-nums">
-                              {formatTime(slot.date + "T" + slot.start_time)}{" "}<TimezoneTag />
+                              {fmt12(slot.start_time)}{" "}<TimezoneTag />
                             </span>
                           </div>
                           <span className={`shrink-0 text-[6px] sm:text-[7px] font-black uppercase tracking-widest px-1 py-0.5 rounded border ${

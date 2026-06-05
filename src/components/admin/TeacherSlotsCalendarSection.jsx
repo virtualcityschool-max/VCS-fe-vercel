@@ -22,7 +22,7 @@ const fmtDate = (d) =>
   });
 
 const TeacherSlotsCalendarSection = ({ teacherId }) => {
-  const { formatDate, formatTime, timezoneAbbr } = useDateFormatters();
+  const { timezoneAbbr } = useDateFormatters();
   const [slots, setSlots] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -157,10 +157,10 @@ const TeacherSlotsCalendarSection = ({ teacherId }) => {
             <div className="px-6 py-5 space-y-3">
               <p className="text-sm text-slate-300">
                 You are about to delete the slot on{" "}
-                <span className="font-semibold text-white">{formatDate(confirmSlot.date + "T" + confirmSlot.start_time)}</span>{" "}
+                <span className="font-semibold text-white">{fmtDate(confirmSlot.date)}</span>{" "}
                 from{" "}
                 <span className="font-semibold text-white tabular-nums">
-                  {formatTime(confirmSlot.date + "T" + confirmSlot.start_time)} – {formatTime(confirmSlot.date + "T" + confirmSlot.end_time)}{" "}<TimezoneTag />
+                  {fmt12(confirmSlot.start_time)} – {fmt12(confirmSlot.end_time)}{" "}<TimezoneTag />
                 </span>.
               </p>
               {confirmSlot.booked_by_name ? (

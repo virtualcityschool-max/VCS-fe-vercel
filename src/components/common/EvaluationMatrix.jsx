@@ -133,8 +133,12 @@ const EvaluationMatrix = ({ students = [], courseStatus, gradingScale: gradingSc
                   </div>
                   <div className="min-w-0">
                     <p className="text-white text-sm font-semibold truncate">{s.student?.username}</p>
-                    <p className="text-slate-500 text-[11px] truncate">{s.student?.email}</p>
-                    {s.student?.roll_no && <p className="text-slate-600 text-[10px] font-mono">Roll#: {s.student.roll_no}</p>}
+                    <p className="text-indigo-300 text-[11px] truncate">{s.student?.email}</p>
+                    {s.student?.roll_no && (
+                      <p className="text-[10px] font-mono mt-0.5">
+                        <span className="bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded font-bold">Roll# {s.student.roll_no}</span>
+                      </p>
+                    )}
                   </div>
                 </div>
                 <div className="shrink-0 ml-3">
@@ -352,8 +356,12 @@ const EvaluationMatrix = ({ students = [], courseStatus, gradingScale: gradingSc
                         </div>
                         <div className="min-w-0">
                           <p className="text-white text-[11px] font-semibold truncate">{s.student?.username}</p>
-                          <p className="text-slate-500 text-[9px] truncate">{s.student?.email}</p>
-                          {s.student?.roll_no && <p className="text-slate-600 text-[9px] font-mono">Roll#: {s.student.roll_no}</p>}
+                          <p className="text-indigo-300 text-[9px] truncate">{s.student?.email}</p>
+                          {s.student?.roll_no && (
+                            <span className="inline-block mt-0.5 bg-indigo-500/20 text-indigo-300 text-[8px] font-bold font-mono px-1.5 py-0.5 rounded">
+                              Roll# {s.student.roll_no}
+                            </span>
+                          )}
                         </div>
                       </div>
                     </td>
