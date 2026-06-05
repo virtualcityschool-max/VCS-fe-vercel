@@ -1,4 +1,5 @@
 import React, { useMemo } from "react";
+import GmailNotice from "../common/GmailNotice";
 import { useSelector, useDispatch } from "react-redux";
 import {
   selectNextSession,
@@ -147,6 +148,9 @@ const NextSessionCard = () => {
             </>
           )}
         </button>
+        <div className="mt-2 px-1">
+          <GmailNotice compact />
+        </div>
       </div>
 
       <ConfirmDialog

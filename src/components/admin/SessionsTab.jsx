@@ -421,7 +421,7 @@ const SessionsTab = ({
                       )}
                     </div>
                     <div className="flex gap-2">
-                      {!session.is_child && (
+                      {!session.is_child && session.is_recurring && (
                         <button
                           onClick={() => onSessionEdit(session.id)}
                           title="Edit session"
@@ -490,7 +490,7 @@ const SessionsTab = ({
                       <td className="px-5 py-4">{getStatusBadge(session.status)}</td>
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-2 justify-end">
-                          {!session.is_child && (
+                          {!session.is_child && session.is_recurring && (
                             <button
                               onClick={() => onSessionEdit(session.id)}
                               title="Edit session"

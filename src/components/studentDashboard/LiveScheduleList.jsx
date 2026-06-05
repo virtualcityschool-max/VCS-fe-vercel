@@ -16,6 +16,7 @@ import ConfirmDialog from "../common/ConfirmDialog";
 import { availabilityService } from "../../services/availabilityService";
 import TimezoneTag from "../ui/TimezoneTag";
 import SessionCountdown from "../common/SessionCountdown";
+import GmailNotice from "../common/GmailNotice";
 
 const fmt12 = (t) => {
   if (!t) return "";
@@ -247,6 +248,7 @@ const LiveScheduleList = () => {
             </div>
           ) : (
             <div className="space-y-4">
+              <GmailNotice />
               {tutorSlots.map((slot) => (
                 <div
                   key={slot.id}
@@ -345,6 +347,7 @@ const LiveScheduleList = () => {
 
       {activeTab === "classes" && hasLive && (
       <div className="space-y-4">
+        <GmailNotice />
         {liveSchedule.map((session) => {
           const sessionId = session?.session_id ?? session?.id;
           const isThisLoading = loadingSessionId === sessionId;

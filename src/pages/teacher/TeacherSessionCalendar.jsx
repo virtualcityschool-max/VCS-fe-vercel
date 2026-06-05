@@ -567,7 +567,7 @@ const TeacherSessionCalendar = () => {
                       )}
                     </div>
                     <div className="flex gap-2">
-                      {!s.is_child && (
+                      {!s.is_child && s.is_recurring && (
                         <button
                           onClick={() => openEdit(s)}
                           className="px-3 py-1.5 rounded-lg text-xs font-medium flex-1 flex items-center justify-center gap-1 bg-slate-700/50 text-slate-300 hover:bg-slate-600/50 transition"
@@ -630,7 +630,7 @@ const TeacherSessionCalendar = () => {
                       </td>
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-2 justify-end">
-                          {!s.is_child && (
+                          {!s.is_child && s.is_recurring && (
                             <button
                               onClick={() => openEdit(s)}
                               className="px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-700/50 text-slate-300 hover:bg-slate-600/50 transition"

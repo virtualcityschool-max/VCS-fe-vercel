@@ -9,6 +9,7 @@ import { availabilityService } from "../../services/availabilityService";
 import { toastManager } from "../../utils/toastManager";
 import AuthRequiredModal from "../../components/common/AuthRequiredModal";
 import { getStorageUrl } from "../../utils/storageUrl";
+import GmailNotice from "../../components/common/GmailNotice";
 
 const HIRE_INTENT_KEY = "vcs_hire_intent";
 
@@ -185,6 +186,9 @@ const BookingModal = ({ teacherName, slots, onClose, onBooked }) => {
                   </p>
                 </div>
               )}
+
+              {/* Gmail notice */}
+              <GmailNotice />
 
               {/* Note textarea */}
               <div>
