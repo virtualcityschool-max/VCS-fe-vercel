@@ -420,15 +420,15 @@ const LiveScheduleList = () => {
                   </div>
                 )}
 
-                {/* Attendance Rate - Slim */}
+                {/* Attendance Rate - Slim
                 {session.attendance_rate !== null && (
                   <div className="w-full max-w-[200px] mx-auto md:mx-0">
-                    {/* <div className="flex justify-between text-[10px] font-black uppercase tracking-[0.15em] mb-1.5">
+                    <div className="flex justify-between text-[10px] font-black uppercase tracking-[0.15em] mb-1.5">
                       <span className="text-slate-500 opacity-60">Attendance Rate</span>
                       <span className={getAttendanceColor(session.attendance_rate)}>
                         {session.attendance_rate}%
                       </span>
-                    </div> */}
+                    </div>
                     <div className="h-1 bg-white/5 rounded-full overflow-hidden">
                       <div
                         className={`h-full transition-all duration-1000 ${session.attendance_rate >= 90
@@ -443,7 +443,7 @@ const LiveScheduleList = () => {
                       ></div>
                     </div>
                   </div>
-                )}
+                )} */}
               </div>
 
               {/* Action Buttons - Compact */}
