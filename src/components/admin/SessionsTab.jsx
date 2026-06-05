@@ -425,14 +425,13 @@ const SessionsTab = ({
                         <button
                           onClick={() => onSessionEdit(session.id)}
                           title="Edit session"
-                          className="px-3 py-1.5 rounded-lg text-xs font-medium flex-1 flex items-center justify-center gap-1 transition bg-slate-700/50 text-slate-300 hover:bg-slate-600/50"
+                          className="w-8 h-8 flex items-center justify-center bg-slate-700/50 text-slate-300 rounded-lg hover:bg-slate-600/50 transition"
                         >
-                          <i className="fas fa-edit"></i> Edit
+                          <i className="fas fa-edit text-xs"></i>
                         </button>
                       )}
-                      <button onClick={() => onSessionDelete(session.id)} disabled={loadingSessionIds.has(session.id)} className="bg-red-600/10 text-red-400 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-red-600/20 transition disabled:opacity-50 flex-1 flex items-center justify-center gap-1">
-                        <i className="fas fa-trash"></i>
-                        {loadingSessionIds.has(session.id) ? "Deleting…" : "Delete"}
+                      <button onClick={() => onSessionDelete(session.id)} disabled={loadingSessionIds.has(session.id)} title="Delete session" className="w-8 h-8 flex items-center justify-center bg-red-600/10 text-red-400 rounded-lg hover:bg-red-600/20 transition disabled:opacity-50">
+                        {loadingSessionIds.has(session.id) ? <i className="fas fa-spinner fa-spin text-xs"></i> : <i className="fas fa-trash text-xs"></i>}
                       </button>
                     </div>
                   </div>
@@ -494,14 +493,13 @@ const SessionsTab = ({
                             <button
                               onClick={() => onSessionEdit(session.id)}
                               title="Edit session"
-                              className="px-3 py-1.5 rounded-lg text-xs font-medium transition bg-slate-700/50 text-slate-300 hover:bg-slate-600/50"
+                              className="w-8 h-8 flex items-center justify-center bg-slate-700/50 text-slate-300 rounded-lg hover:bg-slate-600/50 transition"
                             >
-                              <i className="fas fa-edit mr-1"></i>Edit
+                              <i className="fas fa-edit text-xs"></i>
                             </button>
                           )}
-                          <button onClick={() => onSessionDelete(session.id)} disabled={loadingSessionIds.has(session.id)} className="bg-red-600/10 text-red-400 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-red-600/20 transition disabled:opacity-50">
-                            <i className="fas fa-trash mr-1"></i>
-                            {loadingSessionIds.has(session.id) ? "Deleting…" : "Delete"}
+                          <button onClick={() => onSessionDelete(session.id)} disabled={loadingSessionIds.has(session.id)} title="Delete session" className="w-8 h-8 flex items-center justify-center bg-red-600/10 text-red-400 rounded-lg hover:bg-red-600/20 transition disabled:opacity-50">
+                            {loadingSessionIds.has(session.id) ? <i className="fas fa-spinner fa-spin text-xs"></i> : <i className="fas fa-trash text-xs"></i>}
                           </button>
                         </div>
                       </td>

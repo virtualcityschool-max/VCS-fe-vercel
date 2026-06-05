@@ -836,20 +836,20 @@ const CoursesTab = ({
                       >
                         <button
                           onClick={() => onCourseEdit(course.id)}
-                          className="bg-slate-700/50 text-slate-300 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-slate-600/50 transition"
+                          className="w-8 h-8 flex items-center justify-center bg-slate-700/50 text-slate-300 rounded-lg hover:bg-slate-600/50 transition"
+                          title="Edit course"
                         >
-                          <i className="fas fa-edit mr-1"></i>
-                          Edit
+                          <i className="fas fa-edit text-xs"></i>
                         </button>
                         <button
                           onClick={() => onCourseDelete(course.id)}
                           disabled={loadingCourseIds.has(course.id)}
-                          className="bg-red-600/10 text-red-400 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-red-600/20 transition disabled:opacity-50"
+                          className="w-8 h-8 flex items-center justify-center bg-red-600/10 text-red-400 rounded-lg hover:bg-red-600/20 transition disabled:opacity-50"
+                          title="Delete course"
                         >
-                          <i className="fas fa-trash mr-1"></i>
                           {loadingCourseIds.has(course.id)
-                            ? "Deleting..."
-                            : "Delete"}
+                            ? <i className="fas fa-spinner fa-spin text-xs"></i>
+                            : <i className="fas fa-trash text-xs"></i>}
                         </button>
                       </div>
                     </td>
