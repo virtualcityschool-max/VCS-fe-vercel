@@ -123,7 +123,8 @@ const TeacherPortal = () => {
     }
     const sessionId = session?.id ?? session?.session_id;
     const fallbackLink = session?.meeting_link;
-    const meetWin = window.open("", "_blank");
+    const isMobile = /Mobi|Android|iPad|iPhone|iPod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    const meetWin = isMobile ? null : window.open("", "_blank");
     try {
       const result = await dispatch(startLiveSession(sessionId)).unwrap();
       const meetingLink = result?.meeting_link || fallbackLink;
@@ -132,6 +133,7 @@ const TeacherPortal = () => {
         try {
           new URL(meetingLink);
           if (meetWin) meetWin.location.href = meetingLink;
+          else window.open(meetingLink, "_blank", "noopener,noreferrer");
         } catch {
           meetWin?.close();
           toastManager.error("Invalid meeting link format");

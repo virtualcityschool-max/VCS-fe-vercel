@@ -34,7 +34,8 @@ const NextSessionCard = () => {
       return;
     }
 
-    const meetWin = window.open("", "_blank");
+    const isMobile = /Mobi|Android|iPad|iPhone|iPod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    const meetWin = isMobile ? null : window.open("", "_blank");
     try {
       const result = await dispatch(joinLiveSession(sessionId)).unwrap();
 
@@ -44,10 +45,10 @@ const NextSessionCard = () => {
         try {
           new URL(meetingLink);
           if (meetWin) meetWin.location.href = meetingLink;
+          else window.open(meetingLink, "_blank", "noopener,noreferrer");
         } catch (urlError) {
           meetWin?.close();
           toastManager.error("Invalid meeting link format");
-          console.log("URL Error:", urlError);
         }
       } else {
         meetWin?.close();

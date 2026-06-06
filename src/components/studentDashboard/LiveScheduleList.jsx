@@ -98,7 +98,8 @@ const LiveScheduleList = () => {
     const sessionId = session?.session_id ?? session?.id;
     setLoadingSessionId(sessionId);
     setLoadingAction("join");
-    const meetWin = window.open("", "_blank");
+    const isMobile = /Mobi|Android|iPad|iPhone|iPod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    const meetWin = isMobile ? null : window.open("", "_blank");
     try {
       const result = await dispatch(startStudentSession(sessionId)).unwrap();
       const meetingLink = result?.meeting_link || session?.meeting_link;
