@@ -277,7 +277,7 @@ const AdminSessionsPage = () => {
         course: Number(sessionData.course),
         instructor_id,
         title: sessionData.title,
-        scheduled_at: toPayloadISO(localNow()),
+        scheduled_at: toPayloadISO(toDatetimeInput(new Date().toISOString())),
         is_recurring: false,
         recurrence_days: [],
       };
@@ -287,7 +287,7 @@ const AdminSessionsPage = () => {
         course: Number(sessionData.course),
         instructor_id,
         title: sessionData.title,
-        scheduled_at: toPayloadISO(localNow(offsetMs)),
+        scheduled_at: toPayloadISO(toDatetimeInput(new Date(Date.now() + offsetMs).toISOString())),
         is_recurring: false,
         recurrence_days: [],
       };

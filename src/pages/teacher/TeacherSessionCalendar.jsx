@@ -269,7 +269,7 @@ const STATUS_BADGE = {
 
 const TeacherSessionCalendar = () => {
   const dispatch = useDispatch();
-  const { formatDate, formatTime, timezoneAbbr, toPayloadISO } = useDateFormatters();
+  const { formatDate, formatTime, timezoneAbbr, toPayloadISO, toDatetimeInput } = useDateFormatters();
 
   const {
     sessions,
@@ -339,11 +339,7 @@ const TeacherSessionCalendar = () => {
 
   // ── create ────────────────────────────────────────────────
 
-  const localISONow = (offsetMs = 0) => {
-    const d = new Date(Date.now() + offsetMs);
-    const pad = (n) => String(n).padStart(2, "0");
-    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-  };
+  const localISONow = (offsetMs = 0) => toDatetimeInput(new Date(Date.now() + offsetMs).toISOString());
 
   const handleCreate = async (e) => {
     e.preventDefault();
