@@ -144,7 +144,12 @@ const TeacherPortal = () => {
       await dispatch(fetchTeacherDashboard()).unwrap();
     } catch (err) {
       meetWin?.close();
-      setTooEarlyOpen(true);
+      const msg = extractApiErrorMessage(err);
+      if (msg === "You cannot join before the scheduled time." || msg === "You can join up to 30 minutes before the scheduled time.") {
+        setTooEarlyOpen(true);
+      } else {
+        showApiError(err);
+      }
     }
   };
 

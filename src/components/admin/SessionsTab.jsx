@@ -10,7 +10,7 @@ const scheduledCourseReason = (c) => {
   if (c.status === "completed") return "Course already completed";
   if (c.status === "archived")  return "Course is archived";
   if (c.status !== "published") return `Status: ${c.status}`;
-  if (c.has_session)            return "Already has a recurring session";
+  if (c.has_session && c.upcoming_session !== false) return "Already has a recurring session";
   return null;
 };
 
@@ -686,12 +686,18 @@ const SessionsTab = ({
                         )}
                       </FilterSelect>
                       {createSessionErrors?.course && <p className="text-red-400 text-xs mt-1">{createSessionErrors.course}</p>}
-                      {(courses || []).some(c => scheduledCourseReason(c) !== null) && (
-                        <p className="text-[10px] text-slate-500 mt-1.5 flex items-center gap-1">
-                          <i className="fas fa-info-circle text-slate-600" />
-                          Greyed-out courses are either not published or already have a recurring session.
-                        </p>
-                      )}
+                      {(() => {
+                        const sel = (courses || []).find(c => String(c.id) === String(createSessionForm.course));
+                        if (sel?.has_session && sel?.upcoming_session === false) {
+                          return (
+                            <p className="text-[10px] text-blue-400 mt-1.5 flex items-center gap-1">
+                              <i className="fas fa-info-circle" />
+                              No upcoming session — you can create a new one.
+                            </p>
+                          );
+                        }
+                        return null;
+                      })()}
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-slate-300 mb-2">Tutor</label>
