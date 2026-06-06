@@ -14,7 +14,7 @@ import { toastManager } from "../../utils/toastManager";
 import CourseStudentsModal from "../../components/courses/CourseStudentsModal";
 import { showApiError, extractApiErrorMessage } from "../../utils/apiErrorHandler";
 import ConfirmDialog from "../../components/common/ConfirmDialog";
-import { getWindowLabel, isWithinSessionWindow } from "../../utils/helper/StartSession";
+import { getWindowLabel, isWithinSessionWindow, isSessionExpired } from "../../utils/helper/StartSession";
 import { useDateFormatters } from "../../hooks";
 import { availabilityService } from "../../services/availabilityService";
 import TimezoneTag from "../../components/ui/TimezoneTag";
@@ -68,6 +68,7 @@ const TeacherPortal = () => {
   const [bookedSlots, setBookedSlots] = useState([]);
   const [bookedSlotsLoading, setBookedSlotsLoading] = useState(false);
   const [tooEarlyOpen, setTooEarlyOpen] = useState(false);
+  const [sessionExpiredOpen, setSessionExpiredOpen] = useState(false);
 
   const {
     dashboard,
@@ -112,6 +113,10 @@ const TeacherPortal = () => {
   };
 
   const handleStartSession = async (session) => {
+    if (isSessionExpired(session?.schedule_at)) {
+      setSessionExpiredOpen(true);
+      return;
+    }
     if (!isWithinSessionWindow(session?.schedule_at)) {
       setTooEarlyOpen(true);
       return;
@@ -143,7 +148,11 @@ const TeacherPortal = () => {
     }
   };
 
-  const handleJoinSession = async (sessionId,meeting_link) => {
+  const handleJoinSession = async (sessionId, meeting_link, schedule_at) => {
+    if (isSessionExpired(schedule_at)) {
+      setSessionExpiredOpen(true);
+      return;
+    }
     if(meeting_link) {
       const meetWin = window.open(meeting_link, "_blank");
     }
@@ -175,7 +184,11 @@ const TeacherPortal = () => {
     // }
   };
 
-  const handleEndSession = (sessionId) => {
+  const handleEndSession = (sessionId, schedule_at) => {
+    if (isSessionExpired(schedule_at)) {
+      setSessionExpiredOpen(true);
+      return;
+    }
     setEndSessionConfirm({ open: true, sessionId });
   };
 
@@ -552,7 +565,7 @@ const TeacherPortal = () => {
                           {isLive && (
                             <div className="flex items-center gap-2">
                               <button
-                                onClick={() => handleJoinSession(session.id,session.meeting_link)}
+                                onClick={() => handleJoinSession(session.id, session.meeting_link, session.schedule_at)}
                                 disabled={isJoiningSession}
                                 className="flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-black uppercase tracking-widest transition-all bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/20 hover:scale-105 active:scale-95"
                               >
@@ -560,7 +573,7 @@ const TeacherPortal = () => {
                                 <span>Join</span>
                               </button>
                               <button
-                                onClick={() => handleEndSession(session.id)}
+                                onClick={() => handleEndSession(session.id, session.schedule_at)}
                                 disabled={isJoiningSession}
                                 className="bg-slate-800 hover:bg-rose-600 hover:text-white text-rose-500 p-3 rounded-2xl transition-all border border-white/5 active:scale-95"
                               >
@@ -836,6 +849,17 @@ const TeacherPortal = () => {
         cancelLabel={null}
         onConfirm={() => setTooEarlyOpen(false)}
         onCancel={() => setTooEarlyOpen(false)}
+      />
+
+      <ConfirmDialog
+        open={sessionExpiredOpen}
+        variant="warning"
+        title="Session Time Has Passed"
+        message="This session's time has already passed. The session window (1 hour from the scheduled time) has ended."
+        confirmLabel="Got it"
+        cancelLabel={null}
+        onConfirm={() => setSessionExpiredOpen(false)}
+        onCancel={() => setSessionExpiredOpen(false)}
       />
     </div>
   );

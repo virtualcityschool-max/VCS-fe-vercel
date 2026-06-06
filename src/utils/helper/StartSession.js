@@ -9,6 +9,11 @@ const DAY_MAP = { SUN: 0, MON: 1, TUE: 2, WED: 3, THU: 4, FRI: 5, SAT: 6 };
     }
     return false;
   };
+
+  export const isSessionExpired = (scheduleAt) => {
+    if (!scheduleAt) return false;
+    return Date.now() > new Date(scheduleAt).getTime() + 60 * 60 * 1000;
+  };
   export const getWindowLabel = (scheduleAt, timeZone, abbr = "") => {
     if (scheduleAt) {
       const windowStart = new Date(scheduleAt);

@@ -9,7 +9,7 @@ import {
 } from "../../store/slices/studentDashboardSlice";
 import { toastManager } from "../../utils/toastManager";
 import { useDateFormatters } from "../../hooks/useDateFormatters";
-import { getWindowLabel, isWithinSessionWindow } from "../../utils/helper/StartSession";
+import { getWindowLabel, isWithinSessionWindow, isSessionExpired } from "../../utils/helper/StartSession";
 import { extractApiErrorMessage, showApiError } from "../../utils/apiErrorHandler";
 import { getStorageUrl } from "../../utils/storageUrl";
 import ConfirmDialog from "../common/ConfirmDialog";
@@ -47,6 +47,7 @@ const LiveScheduleList = () => {
   const [loadingAction, setLoadingAction] = useState(null); // 'join' | 'end'
   const [endConfirm, setEndConfirm] = useState({ open: false, session: null });
   const [tooEarlyOpen, setTooEarlyOpen] = useState(false);
+  const [sessionExpiredOpen, setSessionExpiredOpen] = useState(false);
 
   useEffect(() => {
     setSlotsLoading(true);
@@ -86,6 +87,10 @@ const LiveScheduleList = () => {
   };
 
   const handleJoinSession = async (session) => {
+    if (isSessionExpired(session.scheduled_at)) {
+      setSessionExpiredOpen(true);
+      return;
+    }
     if (!isWithinSessionWindow(session.scheduled_at)) {
       setTooEarlyOpen(true);
       return;
@@ -114,6 +119,10 @@ const LiveScheduleList = () => {
   };
 
   const handleEndSession = (session) => {
+    if (isSessionExpired(session.scheduled_at)) {
+      setSessionExpiredOpen(true);
+      return;
+    }
     setEndConfirm({ open: true, session });
   };
 
@@ -302,6 +311,8 @@ const LiveScheduleList = () => {
                       <div className="relative group/tip">
                         <button
                           onClick={() => {
+                            const slotStart = new Date(slot.date + "T" + slot.start_time);
+                            if (Date.now() > slotStart.getTime() + 60 * 60 * 1000) { setSessionExpiredOpen(true); return; }
                             if (!isSlotJoinable(slot)) { setTooEarlyOpen(true); return; }
                             openMeetingLink(slot.meeting_link);
                           }}
@@ -542,6 +553,17 @@ const LiveScheduleList = () => {
         cancelLabel={null}
         onConfirm={() => setTooEarlyOpen(false)}
         onCancel={() => setTooEarlyOpen(false)}
+      />
+
+      <ConfirmDialog
+        open={sessionExpiredOpen}
+        variant="warning"
+        title="Session Time Has Passed"
+        message="This session's time has already passed. The session window (1 hour from the scheduled time) has ended."
+        confirmLabel="Got it"
+        cancelLabel={null}
+        onConfirm={() => setSessionExpiredOpen(false)}
+        onCancel={() => setSessionExpiredOpen(false)}
       />
     </section>
   );
