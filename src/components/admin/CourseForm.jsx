@@ -205,6 +205,7 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
             value={formData.gumroad_product_permalink || ""}
             onChange={(e) => onChange("gumroad_product_permalink", e.target.value.trim())}
             className={fieldClass(errors.gumroad_product_permalink)}
+            disabled
           />
           <FieldError error={errors.gumroad_product_permalink} />
         </div>
