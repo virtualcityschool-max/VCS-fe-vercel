@@ -420,39 +420,35 @@ const UsersTab = ({
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleViewUser(user.id)}
-                          className="bg-slate-700/50 text-slate-400 px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium hover:bg-slate-600/50 hover:text-slate-200 transition flex items-center gap-1 flex-1 justify-center"
+                          className="w-8 h-8 flex items-center justify-center bg-slate-700/50 text-slate-400 rounded-lg hover:bg-slate-600/50 hover:text-slate-200 transition"
                           title="View user"
                         >
-                          <i className="fas fa-eye"></i>
-                          <span className="hidden sm:inline">View</span>
+                          <i className="fas fa-eye text-xs"></i>
                         </button>
                         <button
                           onClick={() => handleEditUser(user.id)}
-                          className="bg-slate-700/50 text-slate-300 px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium hover:bg-slate-600/50 transition flex items-center gap-1 flex-1 justify-center"
+                          className="w-8 h-8 flex items-center justify-center bg-slate-700/50 text-slate-300 rounded-lg hover:bg-slate-600/50 transition"
+                          title="Edit user"
                         >
-                          <i className="fas fa-edit"></i>
-                          <span className="hidden sm:inline">Edit</span>
+                          <i className="fas fa-edit text-xs"></i>
+                        </button>
+                        <button
+                          onClick={() => handlePurgeUser(user.id)}
+                          className="w-8 h-8 flex items-center justify-center bg-red-900/20 text-red-400 rounded-lg hover:bg-red-900/40 transition"
+                          title="Permanently delete"
+                        >
+                          <i className="fas fa-trash text-xs"></i>
                         </button>
                         <button
                           onClick={() => handleDeleteUser(user)}
-                          className={`px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition flex items-center gap-1 flex-1 justify-center ${
+                          className={`px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition flex items-center gap-1 justify-center ${
                             user.is_active
                               ? "bg-amber-600/10 text-amber-400 hover:bg-amber-600/20"
                               : "bg-emerald-600/10 text-emerald-400 hover:bg-emerald-600/20"
                           }`}
                         >
                           <i className={`fas ${user.is_active ? "fa-ban" : "fa-check-circle"}`}></i>
-                          <span className="hidden sm:inline">
-                            {user.is_active ? "Deactivate" : "Activate"}
-                          </span>
-                        </button>
-                        <button
-                          onClick={() => handlePurgeUser(user.id)}
-                          className="bg-red-900/20 text-red-400 px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium hover:bg-red-900/40 transition flex items-center gap-1 flex-1 justify-center"
-                          title="Permanently delete"
-                        >
-                          <i className="fas fa-trash"></i>
-                          <span className="hidden sm:inline">Delete</span>
+                          {user.is_active ? "Deactivate" : "Activate"}
                         </button>
                       </div>
                     )}
@@ -537,18 +533,24 @@ const UsersTab = ({
                           <div className="flex items-center gap-2">
                             <button
                               onClick={() => handleViewUser(user.id)}
-                              className="bg-slate-700/50 text-slate-400 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-slate-600/50 hover:text-slate-200 transition"
+                              className="w-8 h-8 flex items-center justify-center bg-slate-700/50 text-slate-400 rounded-lg hover:bg-slate-600/50 hover:text-slate-200 transition"
                               title="View user"
                             >
-                              <i className="fas fa-eye mr-1"></i>
-                              View
+                              <i className="fas fa-eye text-xs"></i>
                             </button>
                             <button
                               onClick={() => handleEditUser(user.id)}
-                              className="bg-slate-700/50 text-slate-300 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-slate-600/50 transition"
+                              className="w-8 h-8 flex items-center justify-center bg-slate-700/50 text-slate-300 rounded-lg hover:bg-slate-600/50 transition"
+                              title="Edit user"
                             >
-                              <i className="fas fa-edit mr-1"></i>
-                              Edit
+                              <i className="fas fa-edit text-xs"></i>
+                            </button>
+                            <button
+                              onClick={() => handlePurgeUser(user.id)}
+                              className="w-8 h-8 flex items-center justify-center bg-red-900/20 text-red-400 rounded-lg hover:bg-red-900/40 transition"
+                              title="Permanently delete"
+                            >
+                              <i className="fas fa-trash text-xs"></i>
                             </button>
                             <button
                               onClick={() => handleDeleteUser(user)}
@@ -561,14 +563,6 @@ const UsersTab = ({
                             >
                               <i className={`fas ${user.is_active ? "fa-ban" : "fa-check-circle"} mr-1`}></i>
                               {user.is_active ? "Deactivate" : "Activate"}
-                            </button>
-                            <button
-                              onClick={() => handlePurgeUser(user.id)}
-                              className="bg-red-900/20 text-red-400 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-red-900/40 transition"
-                              title="Permanently delete"
-                            >
-                              <i className="fas fa-trash mr-1"></i>
-                              Delete
                             </button>
                           </div>
                         )}
