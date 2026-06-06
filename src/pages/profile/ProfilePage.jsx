@@ -224,8 +224,8 @@ const ProfilePage = () => {
       setProfile(fresh);
       dispatch(fetchUserProfile());
       toastManager.success("Profile photo updated");
-    } catch {
-      toastManager.error("Failed to upload photo");
+    } catch (err) {
+      showApiError(err);
     } finally {
       setAvatarUploading(false);
       if (avatarInputRef.current) avatarInputRef.current.value = "";
