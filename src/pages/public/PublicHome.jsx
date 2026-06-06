@@ -123,21 +123,25 @@ const PublicHome = () => {
       </div>
 
       {/* Hero Section */}
-      <section className="relative z-10 max-w-7xl mx-auto px-6 pt-20 md:pt-32">
+      <section className="relative z-10 max-w-7xl mx-auto px-6 pt-10 md:pt-20">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           {/* Left Content */}
           <div className="text-left animate-fadeIn">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-[10px] font-black uppercase tracking-[0.2em] text-cyan-400 mb-8">
-              Prestige & Technology
+              Gulf's Premier Online School
             </div>
             
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-black font-poppins mb-6 leading-[1.1] tracking-tight text-white">
-              Master the Future <br className="hidden md:block" />
-              at our <span className="text-cyan-400">Digital Campus</span>
+              Your Borderless <br className="hidden md:block" />
+              <span className="text-cyan-400">Digital Classroom</span> Starts Here
             </h1>
             
             <p className="text-slate-400 text-base md:text-lg max-w-lg leading-relaxed mb-10">
-              Experience a high-performance intellectual environment where cutting-edge technology meets traditional academic excellence. Unlimited discovery starts here.
+              Learn Without Borders.<br /><br />
+              Virtual City School is a premium online learning platform for Cambridge students across the UAE, Saudi Arabia, Qatar, Kuwait, Bahrain, Oman, Canada, the UK, Australia, Malaysia, Singapore, Pakistan, and beyond — offering Grade 1 to A2 Level programmes with expert teachers and live classes.<br /><br />
+              Beyond academics, we build future-ready students through specialist courses in Artificial Intelligence, Emerging Technologies, Leadership, Interpersonal Skills, and Grooming.<br /><br />
+              Through our VCS Scholar Programme, deserving students get access to quality education — and you can sponsor a child's learning journey to make it possible.<br />
+              Unlimited discovery starts here.
             </p>
 
             <div className="flex flex-wrap gap-4">
