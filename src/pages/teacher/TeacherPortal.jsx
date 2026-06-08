@@ -344,13 +344,6 @@ const TeacherPortal = () => {
                   </span>
                   Upcoming Sessions
                 </h3>
-                {activeSessionTab === "classes" && (() => {
-                  const today = new Date();
-                  const end = new Date(today);
-                  end.setDate(end.getDate() + 6);
-                  const fmt = (d) => d.toLocaleDateString([], { month: "short", day: "numeric", ...(timezone ? { timeZone: timezone } : {}) });
-                  return <p className="text-sm text-slate-500 font-medium mt-1 ml-11">{fmt(today)} – {fmt(end)}</p>;
-                })()}
               </div>
               <div className="flex items-center gap-3">
                 {/* Tabs */}
@@ -412,7 +405,7 @@ const TeacherPortal = () => {
                     </div>
                   </div>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="max-h-[480px] overflow-y-auto custom-scrollbar pr-1 space-y-4">
                     {bookedSlots.map((slot) => (
                       <div
                         key={slot.id}
@@ -482,7 +475,7 @@ const TeacherPortal = () => {
 
             {/* ── Classes tab ── */}
             {activeSessionTab === "classes" && (
-            <div className="space-y-4">
+            <div className="max-h-[480px] overflow-y-auto custom-scrollbar pr-1 space-y-4">
               {dashboard?.todays_schedule?.length ? (
                 dashboard.todays_schedule.map((session) => {
                   const schedDate = new Date(session.schedule_at);
@@ -612,7 +605,7 @@ const TeacherPortal = () => {
                   </div>
                   <div>
                     <p className="text-slate-400 font-bold text-lg">No sessions scheduled</p>
-                    <p className="text-slate-500 text-sm">Your schedule for the next 7 days is currently clear.</p>
+                    <p className="text-slate-500 text-sm">You have no upcoming sessions scheduled.</p>
                   </div>
                 </div>
               )}

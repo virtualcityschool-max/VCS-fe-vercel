@@ -174,12 +174,6 @@ const LiveScheduleList = () => {
     return "text-red-400";
   };
 
-  const today = new Date();
-  const end = new Date(today);
-  end.setDate(end.getDate() + 6);
-  const fmtDay = (d) => d.toLocaleDateString([], { month: "short", day: "numeric", ...(timezone ? { timeZone: timezone } : {}) });
-  const scheduleRangeLabel = `${fmtDay(today)} – ${fmtDay(end)}`;
-
   const hasLive = liveSchedule && liveSchedule.length > 0;
 
   return (
@@ -193,9 +187,6 @@ const LiveScheduleList = () => {
           Upcoming Sessions
         </h2>
         <div className="flex items-center gap-3">
-          {activeTab === "classes" && (
-            <span className="text-[10px] text-slate-600 font-semibold">{scheduleRangeLabel}</span>
-          )}
           {/* Tabs */}
           <div className="flex items-center gap-1 bg-slate-900/60 border border-white/5 rounded-xl p-1">
             <button
@@ -257,7 +248,7 @@ const LiveScheduleList = () => {
               </button>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="max-h-[480px] overflow-y-auto custom-scrollbar pr-1 space-y-4">
               <GmailNotice />
               {tutorSlots.map((slot) => (
                 <div
@@ -349,16 +340,16 @@ const LiveScheduleList = () => {
             <i className="fas fa-calendar-times text-xl text-slate-600"></i>
           </div>
           <h3 className="text-sm font-black text-white/80 mb-1">
-            No Live Sessions Scheduled
+            No Sessions Scheduled
           </h3>
           <p className="text-slate-500 text-[10px] font-medium uppercase tracking-wider">
-            Check back later for upcoming live sessions
+            You have no upcoming sessions scheduled.
           </p>
         </div>
       )}
 
       {activeTab === "classes" && hasLive && (
-      <div className="space-y-4">
+      <div className="max-h-[480px] overflow-y-auto custom-scrollbar pr-1 space-y-4">
         <GmailNotice />
         {liveSchedule.map((session) => {
           const sessionId = session?.session_id ?? session?.id;
