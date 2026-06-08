@@ -378,7 +378,8 @@ const TeacherSessionCalendar = () => {
       dispatch(fetchTeacherSessions(courseFilter ? { course: courseFilter } : {}));
     } catch (err) {
       const errs = extractFieldErrors(err);
-      toastManager.error(errs._general || "Please fix the errors below.");
+      const msg = errs._general || Object.values(errs).find(Boolean) || "Please fix the errors below.";
+      toastManager.error(msg);
       setCreateErrors(errs);
     }
   };
@@ -405,7 +406,8 @@ const TeacherSessionCalendar = () => {
       dispatch(fetchTeacherSessions(courseFilter ? { course: courseFilter } : {}));
     } catch (err) {
       const errs = extractFieldErrors(err);
-      toastManager.error(errs._general || "Please fix the errors below.");
+      const msg = errs._general || Object.values(errs).find(Boolean) || "Please fix the errors below.";
+      toastManager.error(msg);
       setEditErrors(errs);
     }
   };
@@ -790,7 +792,11 @@ const TeacherSessionCalendar = () => {
                     </div>
                   )}
 
-                  {createErrors._general && <p className="text-red-400 text-sm font-medium">{createErrors._general}</p>}
+                  {(createErrors._general || createErrors.instructor_id) && (
+                    <p className="text-red-400 text-sm font-medium">
+                      {createErrors._general || createErrors.instructor_id}
+                    </p>
+                  )}
                 </div>
               )}
 
