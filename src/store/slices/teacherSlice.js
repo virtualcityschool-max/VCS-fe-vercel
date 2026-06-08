@@ -372,9 +372,9 @@ export const updateTeacherSession = createAsyncThunk(
 
 export const deleteTeacherSession = createAsyncThunk(
   "teachers/deleteTeacherSession",
-  async (id, { rejectWithValue }) => {
+  async ({ id, deletePast = false }, { rejectWithValue }) => {
     try {
-      await teacherService.deleteSession(id);
+      await teacherService.deleteSession(id, deletePast);
       return id;
     } catch (error) {
       return rejectWithValue(error);
@@ -871,14 +871,14 @@ const teacherSlice = createSlice({
 
       // DELETE SESSION (teacher)
       .addCase(deleteTeacherSession.pending, (state, action) => {
-        state.deletingSessionIds = [...state.deletingSessionIds, action.meta.arg];
+        state.deletingSessionIds = [...state.deletingSessionIds, action.meta.arg.id];
       })
       .addCase(deleteTeacherSession.fulfilled, (state, action) => {
         state.deletingSessionIds = state.deletingSessionIds.filter((id) => id !== action.payload);
         state.sessions = state.sessions.filter((s) => s.id !== action.payload);
       })
       .addCase(deleteTeacherSession.rejected, (state, action) => {
-        state.deletingSessionIds = state.deletingSessionIds.filter((id) => id !== action.meta.arg);
+        state.deletingSessionIds = state.deletingSessionIds.filter((id) => id !== action.meta.arg.id);
       });
   },
 });

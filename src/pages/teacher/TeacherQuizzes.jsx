@@ -51,7 +51,7 @@ const statusLabel = (status) => {
 };
 
 // ── Question Builder ──────────────────────────────────────────────────────────
-const QuestionBuilder = ({ questions, onChange }) => {
+const QuestionBuilder = ({ questions, onChange, marksPerQuestion = 1 }) => {
   const setQuestion = (idx, patch) =>
     onChange(questions.map((q, i) => (i === idx ? { ...q, ...patch } : q)));
 
@@ -88,7 +88,7 @@ const QuestionBuilder = ({ questions, onChange }) => {
 
   const removeQuestion = (idx) => onChange(questions.filter((_, i) => i !== idx));
 
-  const addQuestion = () => onChange([...questions, defaultQuestion()]);
+  const addQuestion = () => onChange([...questions, defaultQuestion(marksPerQuestion)]);
 
   return (
     <div className="space-y-5">
@@ -207,19 +207,24 @@ const QuestionBuilder = ({ questions, onChange }) => {
 };
 
 // ── Quiz form validation ──────────────────────────────────────────────────────
-const validateQuizForm = (form, questions, timezone) => {
+const validateQuizForm = (form, questions, timezone, publishImmediately = false) => {
   if (!form.course)         return "Please select a course";
   if (!form.title.trim())   return "Title is required";
   if (!form.total_marks)    return "Total marks is required";
-  if (!form.published_at)   return "Publish date is required";
+  if (!publishImmediately && !form.published_at) return "Publish date is required";
   if (!form.due_date)       return "Due date is required";
 
   const toISO = (localStr) => formatTimezoneISO(localStr, timezone) || formatLocalISO(new Date(localStr));
-  const pub = new Date(toISO(form.published_at));
   const due = new Date(toISO(form.due_date));
 
-  if (pub < new Date(Date.now() - 60 * 1000)) return "Publish date cannot be in the past";
-  if (due <= pub)  return "Due date must be after publish date";
+  if (publishImmediately) {
+    const pubNowPlus2 = new Date(Date.now() + 2 * 60 * 1000);
+    if (due <= pubNowPlus2) return "Due date must be after publish date";
+  } else {
+    const pub = new Date(toISO(form.published_at));
+    if (pub < new Date(Date.now() - 60 * 1000)) return "Publish date cannot be in the past";
+    if (due <= pub) return "Due date must be after publish date";
+  }
 
   if (!questions.length) return "Add at least one question";
 
@@ -250,12 +255,14 @@ const validateQuizForm = (form, questions, timezone) => {
 };
 
 // ── Build payload from form state ─────────────────────────────────────────────
-const buildPayload = (form, questions, timezone) => ({
+const buildPayload = (form, questions, timezone, publishImmediately = false) => ({
   course: Number(form.course),
   title: form.title.trim(),
   description: form.description.trim(),
   total_marks: Number(form.total_marks),
-  published_at: form.published_at ? formatTimezoneISO(form.published_at, timezone) : "",
+  published_at: publishImmediately
+    ? new Date(Date.now() + 2 * 60 * 1000).toISOString()
+    : (form.published_at ? formatTimezoneISO(form.published_at, timezone) : ""),
   due_date: form.due_date ? formatTimezoneISO(form.due_date, timezone) : "",
   questions: questions.map((q) => {
     const base = {
@@ -357,13 +364,22 @@ const TeacherQuizzes = ({
       title: "",
       description: "",
       total_marks: "",
-      published_at: ps.quiz_publish_immediately ? fmtLocal(now) : "",
+      published_at: "",
       due_date:     fmtLocal(dueDate),
     };
   };
 
-  const [form, setForm]           = useState(makeEmptyForm);
-  const [questions, setQuestions] = useState(() => [defaultQuestion(ps.quiz_marks_per_question)]);
+  const defaultMarks = Number(ps.quiz_marks_per_question) || 1;
+
+  const resetQuizState = () => {
+    setForm(makeEmptyForm());
+    setQuestions([defaultQuestion(defaultMarks)]);
+    setPublishImmediately(!!ps.quiz_publish_immediately);
+  };
+
+  const [form, setForm]                     = useState(makeEmptyForm);
+  const [questions, setQuestions]           = useState(() => [defaultQuestion(defaultMarks)]);
+  const [publishImmediately, setPublishImmediately] = useState(() => !!ps.quiz_publish_immediately);
 
   useEffect(() => {
     if (!myCourses?.length) dispatch(fetchMyCourses());
@@ -384,7 +400,7 @@ const TeacherQuizzes = ({
       </FilterSelect>
       <button
         type="button"
-        onClick={() => { setShowCreate(true); setForm(makeEmptyForm()); setQuestions([defaultQuestion(ps.quiz_marks_per_question)]); }}
+        onClick={() => { resetQuizState(); setShowCreate(true); }}
         className="bg-indigo-600 hover:bg-indigo-500 px-5 py-3 rounded-xl text-xs font-bold transition whitespace-nowrap"
       >
         + Create Quiz
@@ -396,19 +412,16 @@ const TeacherQuizzes = ({
 
   // ── Create ────────────────────────────────────────────────────────────────
   const handleCreate = async () => {
-    const err = validateQuizForm(form, questions, timezone);
+    const err = validateQuizForm(form, questions, timezone, publishImmediately);
     if (err) { toastManager.error(err); return; }
     setSaving(true);
     try {
-      await dispatch(createQuiz(buildPayload(form, questions, timezone))).unwrap();
+      await dispatch(createQuiz(buildPayload(form, questions, timezone, publishImmediately))).unwrap();
       toastManager.success("Quiz created");
       setShowCreate(false);
-      setForm(makeEmptyForm());
-      setQuestions([defaultQuestion(ps.quiz_marks_per_question)]);
+      resetQuizState();
     } catch (e) {
-      // const msg = typeof e === "string" ? e : (e?.detail || e?.title?.[0] || e?.questions || JSON.stringify(e));
-      // toastManager.error(msg || "Failed to create quiz");
-      showApiError(e)
+      showApiError(e);
     } finally {
       setSaving(false);
     }
@@ -416,6 +429,7 @@ const TeacherQuizzes = ({
 
   // ── Edit ──────────────────────────────────────────────────────────────────
   const openEdit = async (quiz) => {
+    setPublishImmediately(false);
     setEditTarget(quiz);
     setForm(quizToForm(quiz, timezone));
     setQuestions(quizToQuestions(quiz));
@@ -430,17 +444,15 @@ const TeacherQuizzes = ({
   };
 
   const handleEdit = async () => {
-    const err = validateQuizForm(form, questions, timezone);
+    const err = validateQuizForm(form, questions, timezone, false);
     if (err) { toastManager.error(err); return; }
     setSaving(true);
     try {
-      await dispatch(updateQuiz({ id: editTarget.id, data: buildPayload(form, questions, timezone) })).unwrap();
+      await dispatch(updateQuiz({ id: editTarget.id, data: buildPayload(form, questions, timezone, false) })).unwrap();
       toastManager.success("Quiz updated");
       setEditTarget(null);
     } catch (e) {
-      showApiError(e)
-      // const detail = e?.detail || (typeof e === "string" ? e : JSON.stringify(e));
-      // toastManager.error(detail || "Failed to update quiz");
+      showApiError(e);
     } finally {
       setSaving(false);
     }
@@ -585,30 +597,75 @@ const TeacherQuizzes = ({
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">
-                Publish At <span className="text-rose-500">*</span>
-              </label>
-              <input
-                type="datetime-local"
-                value={form.published_at}
-                onChange={(e) => setForm((p) => ({ ...p, published_at: e.target.value }))}
-                className="w-full p-3.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/50 transition-all"
-              />
+          {isEdit ? (
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">
+                  Publish At <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="datetime-local"
+                  value={form.published_at}
+                  onChange={(e) => setForm((p) => ({ ...p, published_at: e.target.value }))}
+                  className="w-full p-3.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/50 transition-all"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">
+                  Due Date <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="datetime-local"
+                  value={form.due_date}
+                  onChange={(e) => setForm((p) => ({ ...p, due_date: e.target.value }))}
+                  className="w-full p-3.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/50 transition-all"
+                />
+              </div>
             </div>
-            <div>
-              <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">
-                Due Date <span className="text-rose-500">*</span>
+          ) : (
+            <div className="space-y-4">
+              <label className="flex items-center gap-3 cursor-pointer py-3 px-4 bg-white/5 rounded-xl border border-white/5 hover:bg-white/10 transition-all">
+                <div className="relative w-9 h-5 flex-shrink-0">
+                  <input
+                    type="checkbox"
+                    className="peer sr-only"
+                    checked={publishImmediately}
+                    onChange={(e) => setPublishImmediately(e.target.checked)}
+                  />
+                  <div className="w-9 h-5 bg-slate-700 peer-checked:bg-indigo-600 rounded-full transition-all" />
+                  <div className="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full transition-all peer-checked:translate-x-4 pointer-events-none" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-slate-300">Publish immediately</p>
+                  <p className="text-[10px] text-slate-500">Quiz goes live ~2 minutes after creation</p>
+                </div>
               </label>
-              <input
-                type="datetime-local"
-                value={form.due_date}
-                onChange={(e) => setForm((p) => ({ ...p, due_date: e.target.value }))}
-                className="w-full p-3.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/50 transition-all"
-              />
+              {!publishImmediately && (
+                <div>
+                  <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">
+                    Publish At <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={form.published_at}
+                    onChange={(e) => setForm((p) => ({ ...p, published_at: e.target.value }))}
+                    className="w-full p-3.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/50 transition-all"
+                  />
+                </div>
+              )}
+              <div>
+                <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">
+                  Due Date <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="datetime-local"
+                  value={form.due_date}
+                  onChange={(e) => setForm((p) => ({ ...p, due_date: e.target.value }))}
+                  className="w-full p-3.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/50 transition-all"
+                />
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
 
@@ -623,14 +680,14 @@ const TeacherQuizzes = ({
             <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Construct your quiz questions below</p>
           </div>
         </div>
-        <QuestionBuilder questions={questions} onChange={setQuestions} />
+        <QuestionBuilder questions={questions} onChange={setQuestions} marksPerQuestion={defaultMarks} />
       </div>
 
       {/* Footer Actions */}
       <div className="flex gap-4 justify-end pt-10 border-t border-white/5">
         <button
           type="button"
-          onClick={() => { setShowCreate(false); setEditTarget(null); setForm(makeEmptyForm()); setQuestions([defaultQuestion(ps.quiz_marks_per_question)]); }}
+          onClick={() => { setShowCreate(false); setEditTarget(null); resetQuizState(); }}
           className="px-8 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold uppercase tracking-widest transition-all active:scale-95"
         >
           Cancel
@@ -793,7 +850,7 @@ const TeacherQuizzes = ({
               <div className="flex justify-between items-center">
                 <h3 className="text-2xl font-black text-white tracking-tight">Create New Quiz</h3>
                 <button
-                  onClick={() => { setShowCreate(false); setForm(makeEmptyForm()); setQuestions([defaultQuestion(ps.quiz_marks_per_question)]); }}
+                  onClick={() => { setShowCreate(false); resetQuizState(); }}
                   className="w-10 h-10 flex items-center justify-center rounded-xl text-slate-500 hover:text-white hover:bg-white/5 transition-all"
                 >
                   <i className="fas fa-times text-lg"></i>
@@ -820,7 +877,7 @@ const TeacherQuizzes = ({
                   <p className="text-indigo-400 text-xs font-bold uppercase tracking-widest mt-1">{editTarget.course_title}</p>
                 </div>
                 <button
-                  onClick={() => { setEditTarget(null); setForm(makeEmptyForm()); setQuestions([defaultQuestion(ps.quiz_marks_per_question)]); }}
+                  onClick={() => { setEditTarget(null); resetQuizState(); }}
                   className="w-10 h-10 flex items-center justify-center rounded-xl text-slate-500 hover:text-white hover:bg-white/5 transition-all"
                 >
                   <i className="fas fa-times text-lg"></i>

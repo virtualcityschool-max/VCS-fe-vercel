@@ -28,8 +28,10 @@ const adminSessionService = {
   },
 
   // Delete a session
-  deleteSession: async (sessionId) => {
-    await axiosInstance.delete(`/classroom/sessions/${sessionId}/`);
+  deleteSession: async (sessionId, deletePast = false) => {
+    await axiosInstance.delete(`/classroom/sessions/${sessionId}/`, {
+      params: { delete_past: deletePast },
+    });
     return sessionId;
   },
 

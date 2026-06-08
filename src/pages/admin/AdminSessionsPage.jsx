@@ -36,6 +36,7 @@ const AdminSessionsPage = () => {
   const [updatingSessionId, setUpdatingSessionId] = useState(null);
   const [isCreatingSession, setIsCreatingSession] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState({ open: false, sessionId: null, sessionTitle: "" });
+  const [deletePast, setDeletePast] = useState(false);
 
   // Scheduling mode for create form
   const [createMode, setCreateMode] = useState(() => ps?.session_default_start_type || "scheduled");
@@ -432,17 +433,15 @@ const AdminSessionsPage = () => {
   const confirmDeleteSession = async () => {
     const { sessionId } = confirmDialog;
     setConfirmDialog({ open: false, sessionId: null, sessionTitle: "" });
+    const deletingPast = deletePast;
+    setDeletePast(false);
 
     setLoadingSessionIds((prev) => new Set(prev).add(sessionId));
     try {
-      await dispatch(deleteSession(sessionId)).unwrap();
-      toastManager.success("Session deleted successfully");
-      const params = {};
-      if (sessionFilters.teacher) params.teacher = sessionFilters.teacher;
-      if (sessionFilters.course) params.course = sessionFilters.course;
-      if (sessionFilters.view) params.view = sessionFilters.view;
-      if (sessionFilters.status) params.status = sessionFilters.status;
-      dispatch(fetchSessions(params));
+      await dispatch(deleteSession({ sessionId, deletePast: deletingPast })).unwrap();
+      toastManager.success(
+        deletingPast ? "Session and all history deleted" : "Future sessions deleted"
+      );
       dispatch(fetchCourses());
     } catch (error) {
       showApiError(error);
@@ -501,11 +500,14 @@ const AdminSessionsPage = () => {
       open={confirmDialog.open}
       variant="danger"
       title="Delete Session"
-      message={`Are you sure you want to delete "${confirmDialog.sessionTitle}"? This action cannot be undone.`}
+      message={`Delete "${confirmDialog.sessionTitle}"? Future scheduled sessions will be removed. Past sessions and attendance are kept by default.`}
       confirmLabel="Delete"
       cancelLabel="Cancel"
+      checkboxLabel="Also delete past sessions & attendance"
+      checkboxChecked={deletePast}
+      onCheckboxChange={setDeletePast}
       onConfirm={confirmDeleteSession}
-      onCancel={() => setConfirmDialog({ open: false, sessionId: null, sessionTitle: "" })}
+      onCancel={() => { setConfirmDialog({ open: false, sessionId: null, sessionTitle: "" }); setDeletePast(false); }}
     />
     </>
   );

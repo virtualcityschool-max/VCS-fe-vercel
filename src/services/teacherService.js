@@ -193,8 +193,10 @@ const updateSession = async (id, data) => {
   return response.data;
 };
 
-const deleteSession = async (id) => {
-  await axiosInstance.delete(`/classroom/sessions/${id}/`);
+const deleteSession = async (id, deletePast = false) => {
+  await axiosInstance.delete(`/classroom/sessions/${id}/`, {
+    params: { delete_past: deletePast },
+  });
   return id;
 };
 

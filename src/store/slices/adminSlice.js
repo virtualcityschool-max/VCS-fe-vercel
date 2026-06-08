@@ -432,9 +432,9 @@ export const updateSession = createAsyncThunk(
 
 export const deleteSession = createAsyncThunk(
   "admin/deleteSession",
-  async (sessionId, { rejectWithValue }) => {
+  async ({ sessionId, deletePast = false }, { rejectWithValue }) => {
     try {
-      await adminSessionService.deleteSession(sessionId);
+      await adminSessionService.deleteSession(sessionId, deletePast);
       return sessionId;
     } catch (error) {
       return rejectWithValue(error.message || "Failed to delete session");

@@ -287,6 +287,7 @@ const TeacherSessionCalendar = () => {
 
   const [modal, setModal]       = useState(null); // null | "create" | { type:"edit", session }
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deletePast, setDeletePast]     = useState(false);
   const [createForm, setCreateForm] = useState(BLANK_FORM);
   const [editForm, setEditForm]     = useState({});
   const [createErrors, setCreateErrors] = useState({});
@@ -417,12 +418,15 @@ const TeacherSessionCalendar = () => {
   const confirmDelete = async () => {
     if (!deleteTarget) return;
     try {
-      await dispatch(deleteTeacherSession(deleteTarget.id)).unwrap();
-      toastManager.success("Session deleted");
+      await dispatch(deleteTeacherSession({ id: deleteTarget.id, deletePast })).unwrap();
+      toastManager.success(
+        deletePast ? "Session and all history deleted" : "Future sessions deleted"
+      );
     } catch {
       toastManager.error("Failed to delete session");
     } finally {
       setDeleteTarget(null);
+      setDeletePast(false);
     }
   };
 
@@ -872,12 +876,20 @@ const TeacherSessionCalendar = () => {
         open={!!deleteTarget}
         variant="warning"
         title="Delete Session"
-        message={`Delete "${deleteTarget?.title}"? This will remove all child sessions in the series and cannot be undone.`}
+        message={`Delete "${deleteTarget?.title}"? Future scheduled sessions in this series will be removed. Past sessions and attendance are kept by default.`}
         confirmLabel="Delete"
         cancelLabel="Cancel"
         loading={deleteTarget ? deletingSessionIds.includes(deleteTarget.id) : false}
+        checkboxLabel="Also delete past sessions & attendance"
+        checkboxChecked={deletePast}
+        onCheckboxChange={setDeletePast}
         onConfirm={confirmDelete}
-        onCancel={() => !deletingSessionIds.includes(deleteTarget?.id) && setDeleteTarget(null)}
+        onCancel={() => {
+          if (!deletingSessionIds.includes(deleteTarget?.id)) {
+            setDeleteTarget(null);
+            setDeletePast(false);
+          }
+        }}
       />
     </div>
   );
