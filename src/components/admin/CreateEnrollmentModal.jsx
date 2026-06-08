@@ -250,7 +250,7 @@ const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
               >
                 <option value="">Select a course</option>
                 {publishedCourses.map((c) => (
-                  <option key={c.id} value={c.id}>{c.title}</option>
+                  <option key={c.id} value={c.id}>{c.title}{c.instructor?.username ? ` — ${c.instructor.username}` : ""}{c.instructor?.email ? ` (${c.instructor.email})` : ""}</option>
                 ))}
               </FilterSelect>
             </div>

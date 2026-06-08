@@ -183,7 +183,7 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
               >
                 <option value="">Select an instructor</option>
                 {users.map((user) => (
-                  <option key={user.id} value={user.id}>{user.username}</option>
+                  <option key={user.id} value={user.id}>{user.username}{user.email ? ` — ${user.email}` : ""}</option>
                 ))}
               </FilterSelect>
               <FieldError error={errors.instructor_id} />

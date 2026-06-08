@@ -9,6 +9,8 @@ import {
 } from "../../components/ui";
 import ConfirmDialog from "../common/ConfirmDialog";
 import { getStorageUrl } from "../../utils/storageUrl";
+import { coursesService } from "../../services/coursesService";
+import { toastManager } from "../../utils/toastManager";
 
 // Search controls component
 const SearchControls = ({
@@ -214,7 +216,24 @@ const UsersTab = ({
     },
     [setUsersFilters],
   );
-  const handleDeleteUser = (user) => {
+  const checkTeacherHasCourses = async (userId) => {
+    try {
+      const data = await coursesService.getAllCourses({ instructor: userId });
+      const list = Array.isArray(data) ? data : (data?.results || data?.data || []);
+      return list.length > 0;
+    } catch {
+      return false;
+    }
+  };
+
+  const handleDeleteUser = async (user) => {
+    if (user.role === "teacher") {
+      const hasCourses = await checkTeacherHasCourses(user.id);
+      if (hasCourses) {
+        toastManager.error("This tutor has courses assigned. Remove or reassign their courses before deactivating.");
+        return;
+      }
+    }
     setConfirmDialog({
       open: true,
       userId: user.id,
@@ -238,8 +257,15 @@ const UsersTab = ({
     }
   };
 
-  const handlePurgeUser = (userId) => {
-    setPurgeDialog({ open: true, userId });
+  const handlePurgeUser = async (user) => {
+    if (user.role === "teacher") {
+      const hasCourses = await checkTeacherHasCourses(user.id);
+      if (hasCourses) {
+        toastManager.error("This tutor has courses assigned. Remove or reassign their courses before deleting.");
+        return;
+      }
+    }
+    setPurgeDialog({ open: true, userId: user.id });
   };
 
   const confirmPurgeUser = async () => {
@@ -433,7 +459,7 @@ const UsersTab = ({
                           <i className="fas fa-edit text-xs"></i>
                         </button>
                         <button
-                          onClick={() => handlePurgeUser(user.id)}
+                          onClick={() => handlePurgeUser(user)}
                           className="w-8 h-8 flex items-center justify-center bg-red-900/20 text-red-400 rounded-lg hover:bg-red-900/40 transition"
                           title="Permanently delete"
                         >
@@ -546,7 +572,7 @@ const UsersTab = ({
                               <i className="fas fa-edit text-xs"></i>
                             </button>
                             <button
-                              onClick={() => handlePurgeUser(user.id)}
+                              onClick={() => handlePurgeUser(user)}
                               className="w-8 h-8 flex items-center justify-center bg-red-900/20 text-red-400 rounded-lg hover:bg-red-900/40 transition"
                               title="Permanently delete"
                             >

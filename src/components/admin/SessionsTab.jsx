@@ -582,7 +582,7 @@ const SessionsTab = ({
                       >
                         <option value="">Select a course</option>
                         {courses?.filter((c) => c.status === "published").map((c) => (
-                          <option key={c.id} value={c.id}>{c.title}</option>
+                          <option key={c.id} value={c.id}>{c.title}{c.instructor?.username ? ` — ${c.instructor.username}` : ""}{c.instructor?.email ? ` (${c.instructor.email})` : ""}</option>
                         ))}
                       </FilterSelect>
                       {createSessionErrors?.course && <p className="text-red-400 text-xs mt-1">{createSessionErrors.course}</p>}
@@ -673,14 +673,14 @@ const SessionsTab = ({
                         {(courses || []).filter(c => scheduledCourseReason(c) === null).length > 0 && (
                           <optgroup label="─── Available ───">
                             {(courses || []).filter(c => scheduledCourseReason(c) === null).map(c => (
-                              <option key={c.id} value={c.id}>{c.title}</option>
+                              <option key={c.id} value={c.id}>{c.title}{c.instructor?.username ? ` — ${c.instructor.username}` : ""}{c.instructor?.email ? ` (${c.instructor.email})` : ""}</option>
                             ))}
                           </optgroup>
                         )}
                         {(courses || []).filter(c => scheduledCourseReason(c) !== null).length > 0 && (
                           <optgroup label="─── Unavailable ───">
                             {(courses || []).filter(c => scheduledCourseReason(c) !== null).map(c => (
-                              <option key={c.id} value={c.id} disabled>{`${c.title} (${scheduledCourseReason(c)})`}</option>
+                              <option key={c.id} value={c.id} disabled>{`${c.title}${c.instructor?.username ? ` — ${c.instructor.username}` : ""}${c.instructor?.email ? ` (${c.instructor.email})` : ""} (${scheduledCourseReason(c)})`}</option>
                             ))}
                           </optgroup>
                         )}
@@ -854,7 +854,7 @@ const SessionsTab = ({
                         )}
                         {availableOptions.map((c) => (
                           <option key={c.id} value={c.id}>
-                            {c.title}{c.instructor?.username ? ` — ${c.instructor.username}` : ""}
+                            {c.title}{c.instructor?.username ? ` — ${c.instructor.username}` : ""}{c.instructor?.email ? ` (${c.instructor.email})` : ""}
                           </option>
                         ))}
                       </FilterSelect>
