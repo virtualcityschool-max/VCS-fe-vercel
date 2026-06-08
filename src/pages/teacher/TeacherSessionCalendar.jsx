@@ -125,25 +125,32 @@ function SessionForm({ form, setForm, errors, clearError, isCreate, courses }) {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-slate-300 mb-2">
-            Start Date <span className="text-red-400">*</span>
+            Start Date {isCreate && <span className="text-red-400">*</span>}
           </label>
-          <Input
-            type="date"
-            value={isCreate ? form.scheduled_date : form.start_date}
-            min={new Date().toISOString().split("T")[0]}
-            max="9999-12-31"
-            onChange={(e) => {
-              const v = clampDate(e.target.value);
-              setForm({ ...form, [isCreate ? "scheduled_date" : "start_date"]: v });
-              clearError(isCreate ? "scheduled_date" : "start_date");
-            }}
-            className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white focus:outline-none focus:ring-2 text-sm ${
-              (isCreate ? errors.scheduled_date : errors.start_date)
-                ? "border-red-500 focus:ring-red-500"
-                : "border-slate-700 focus:ring-indigo-500"
-            }`}
-            error={isCreate ? errors.scheduled_date : errors.start_date}
-          />
+          {isCreate ? (
+            <Input
+              type="date"
+              value={form.scheduled_date}
+              min={new Date().toISOString().split("T")[0]}
+              max="9999-12-31"
+              onChange={(e) => {
+                const v = clampDate(e.target.value);
+                setForm({ ...form, scheduled_date: v });
+                clearError("scheduled_date");
+              }}
+              className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white focus:outline-none focus:ring-2 text-sm ${
+                errors.scheduled_date ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"
+              }`}
+              error={errors.scheduled_date}
+            />
+          ) : (
+            <input
+              type="date"
+              value={form.start_date}
+              disabled
+              className="w-full px-3 py-2.5 bg-slate-800/50 border border-slate-700 rounded-xl text-slate-400 text-sm [color-scheme:dark] cursor-not-allowed opacity-60"
+            />
+          )}
         </div>
         <div>
           <label className="block text-sm font-medium text-slate-300 mb-2">
@@ -152,7 +159,7 @@ function SessionForm({ form, setForm, errors, clearError, isCreate, courses }) {
           <Input
             type="date"
             value={form.recurrence_end_date}
-            min={(isCreate ? form.scheduled_date : form.start_date) || new Date().toISOString().split("T")[0]}
+            min={isCreate ? (form.scheduled_date || new Date().toISOString().split("T")[0]) : form.start_date}
             max="9999-12-31"
             onChange={(e) => {
               const v = clampDate(e.target.value);
@@ -287,6 +294,7 @@ const TeacherSessionCalendar = () => {
 
   const [modal, setModal]       = useState(null); // null | "create" | { type:"edit", session }
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deletePast, setDeletePast]     = useState(false);
   const [createForm, setCreateForm] = useState(BLANK_FORM);
   const [editForm, setEditForm]     = useState({});
   const [createErrors, setCreateErrors] = useState({});
@@ -417,12 +425,15 @@ const TeacherSessionCalendar = () => {
   const confirmDelete = async () => {
     if (!deleteTarget) return;
     try {
-      await dispatch(deleteTeacherSession(deleteTarget.id)).unwrap();
-      toastManager.success("Session deleted");
+      await dispatch(deleteTeacherSession({ id: deleteTarget.id, deletePast })).unwrap();
+      toastManager.success(
+        deletePast ? "Session and all history deleted" : "Future sessions deleted"
+      );
     } catch {
       toastManager.error("Failed to delete session");
     } finally {
       setDeleteTarget(null);
+      setDeletePast(false);
     }
   };
 
@@ -872,12 +883,20 @@ const TeacherSessionCalendar = () => {
         open={!!deleteTarget}
         variant="warning"
         title="Delete Session"
-        message={`Delete "${deleteTarget?.title}"? This will remove all child sessions in the series and cannot be undone.`}
+        message={`Delete "${deleteTarget?.title}"? Future scheduled sessions in this series will be removed. Past sessions and attendance are kept by default.`}
         confirmLabel="Delete"
         cancelLabel="Cancel"
         loading={deleteTarget ? deletingSessionIds.includes(deleteTarget.id) : false}
+        checkboxLabel="Also delete past sessions & attendance"
+        checkboxChecked={deletePast}
+        onCheckboxChange={setDeletePast}
         onConfirm={confirmDelete}
-        onCancel={() => !deletingSessionIds.includes(deleteTarget?.id) && setDeleteTarget(null)}
+        onCancel={() => {
+          if (!deletingSessionIds.includes(deleteTarget?.id)) {
+            setDeleteTarget(null);
+            setDeletePast(false);
+          }
+        }}
       />
     </div>
   );
