@@ -13,6 +13,7 @@ import AttendanceMatrix from "../../components/common/AttendanceMatrix";
 import AttendanceEditModal from "../../components/common/AttendanceEditModal";
 import { FilterSelect } from "../../components/ui";
 import { toastManager } from "../../utils/toastManager";
+import { coursesService } from "../../services/coursesService";
 
 const AdminAttendance = () => {
   const dispatch = useDispatch();
@@ -26,10 +27,11 @@ const AdminAttendance = () => {
 
   const courses = coursesState?.data ?? [];
 
-  const [tab,        setTab]        = useState("student");
-  const [courseId,   setCourseId]   = useState("");
-  const [dateFilter, setDateFilter] = useState("last7");
-  const [editRecord, setEditRecord] = useState(null);
+  const [tab,               setTab]               = useState("student");
+  const [courseId,          setCourseId]          = useState("");
+  const [dateFilter,        setDateFilter]        = useState("last7");
+  const [editRecord,        setEditRecord]        = useState(null);
+  const [courseEnrollments, setCourseEnrollments] = useState([]);
 
   const activeCourseId = courseId || (courses[0] ? String(courses[0].id) : "");
 
@@ -110,6 +112,14 @@ const AdminAttendance = () => {
     if (!activeCourseId) return;
     dispatch(fetchTeacherSessions({ course: activeCourseId }));
   }, [activeCourseId, dispatch]);
+
+  // Fetch enrolled students for the matrix
+  useEffect(() => {
+    if (!activeCourseId) { setCourseEnrollments([]); return; }
+    coursesService.getCourseEnrollments(activeCourseId)
+      .then((data) => setCourseEnrollments(Array.isArray(data) ? data : (data?.results || [])))
+      .catch(() => setCourseEnrollments([]));
+  }, [activeCourseId]);
 
   // Fetch attendance whenever course OR tab changes
   useEffect(() => {
@@ -220,6 +230,7 @@ const AdminAttendance = () => {
         <AttendanceMatrix
           sessions={filteredSessions}
           attendanceRecords={filteredAttendance || []}
+          enrolledStudents={tab === "student" ? courseEnrollments : []}
           participantRole={tab === "teacher" ? "teacher" : "student"}
           onEditRecord={setEditRecord}
         />

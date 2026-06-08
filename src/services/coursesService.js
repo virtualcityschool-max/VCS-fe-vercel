@@ -196,6 +196,16 @@ export const coursesService = {
     }
   },
 
+  // Get enrolled students for a specific course
+  getCourseEnrollments: async (courseId) => {
+    try {
+      const response = await axiosInstance.get(`/courses/${courseId}/enrollments/`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
   // Get all enrollments
   getAllEnrollments: async () => {
     try {

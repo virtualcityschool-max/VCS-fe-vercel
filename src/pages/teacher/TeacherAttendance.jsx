@@ -22,6 +22,7 @@ import { useDateFormatters } from "../../hooks";
 const TeacherAttendance = () => {
   const dispatch  = useDispatch();
   const { timezone, formatTime } = useDateFormatters();
+  const profile   = useSelector((s) => s.auth.profile);
 
   const {
     myCourses, allAttendance, loadingAllAttendance,
@@ -39,6 +40,7 @@ const TeacherAttendance = () => {
   const [markStatuses,       setMarkStatuses]       = useState({});
   const [selectedStudentIds, setSelectedStudentIds] = useState(new Set());
   const [enrolledStudents,   setEnrolledStudents]   = useState([]);
+  const [courseEnrollments,  setCourseEnrollments]  = useState([]);
 
   const activeCourseId = courseId || (myCourses?.[0] ? String(myCourses[0].id) : "");
 
@@ -58,6 +60,13 @@ const TeacherAttendance = () => {
     coursesService.getCourseById(activeCourseId)
       .then((data) => setEnrolledStudents(data?.enrolled_students || []))
       .catch(() => setEnrolledStudents([]));
+  }, [activeCourseId]);
+
+  useEffect(() => {
+    if (!activeCourseId) { setCourseEnrollments([]); return; }
+    coursesService.getCourseEnrollments(activeCourseId)
+      .then((data) => setCourseEnrollments(Array.isArray(data) ? data : (data?.results || [])))
+      .catch(() => setCourseEnrollments([]));
   }, [activeCourseId]);
 
   useEffect(() => {
@@ -220,6 +229,11 @@ const TeacherAttendance = () => {
           attendanceRecords={(allAttendance || []).filter(
             (r) => r.participant_role === (tab === "mine" ? "teacher" : "student")
           )}
+          enrolledStudents={
+            tab === "students"
+              ? courseEnrollments
+              : profile?.id ? [{ id: profile.id, username: profile.username }] : []
+          }
           participantRole={tab === "mine" ? "teacher" : "student"}
           onEditRecord={tab === "students" ? setEditRecord : undefined}
         />

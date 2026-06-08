@@ -20,6 +20,7 @@ const SUMMARY_W = 200;
 const AttendanceMatrix = ({
   sessions          = [],
   attendanceRecords = [],
+  enrolledStudents  = [],
   participantRole   = "student",
   onEditRecord,
 }) => {
@@ -58,14 +59,28 @@ const AttendanceMatrix = ({
 
   const participants = useMemo(() => {
     const map = new Map();
+    // Populate from attendance records first (they carry name/rollNo)
     attendanceRecords.forEach((r) => {
-      const id      = getId(r.student);
-      const name    = participantRole === "student" ? r.student_name : r.teacher_name;
-      const rollNo  = participantRole === "student" ? r.student_roll_no : undefined;
+      const id     = getId(r.student);
+      const name   = participantRole === "student" ? r.student_name : r.teacher_name;
+      const rollNo = participantRole === "student" ? r.student_roll_no : undefined;
       if (id != null && !map.has(id)) map.set(id, { id, name: name || `#${id}`, rollNo });
     });
+    // Add participants who have no records yet (fallback from enrolledStudents)
+    if (enrolledStudents.length > 0) {
+      enrolledStudents.forEach((item) => {
+        const s    = item.student || item;
+        const id   = s.id;
+        const name = s.username
+          || [s.first_name, s.last_name].filter(Boolean).join(" ")
+          || `#${id}`;
+        if (id != null && !map.has(id)) {
+          map.set(id, { id, name, rollNo: s.roll_no });
+        }
+      });
+    }
     return Array.from(map.values());
-  }, [attendanceRecords, participantRole]);
+  }, [attendanceRecords, participantRole, enrolledStudents]);
 
   if (!sortedSessions.length) {
     return (
@@ -114,7 +129,7 @@ const AttendanceMatrix = ({
         ))}
         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-bold bg-slate-800 text-slate-500 border-slate-700">
           <span>—</span>
-          <span className="font-normal opacity-70">Upcoming</span>
+          <span className="font-normal opacity-70">Not Recorded</span>
         </span>
       </div>
 
@@ -170,10 +185,11 @@ const AttendanceMatrix = ({
                       </p>
                       <div className="flex flex-wrap gap-1.5">
                         {groupSessions.map((s) => {
-                          const record   = lookupMap[`${p.id}_${s.id}`];
-                          const cfg      = record ? CELL[record.status] : (isPast(s) ? CELL.absent : null);
-                          const d        = s.scheduled_at ? new Date(s.scheduled_at) : null;
-                          const editable = !!onEditRecord && !!record;
+                          const record     = lookupMap[`${p.id}_${s.id}`];
+                          const cfg        = record?.status ? CELL[record.status] : null;
+                          const isNoRecord = (!record || !record.status) && isPast(s);
+                          const d          = s.scheduled_at ? new Date(s.scheduled_at) : null;
+                          const editable   = !!onEditRecord && !!record?.status;
 
                           return (
                             <div
@@ -185,16 +201,20 @@ const AttendanceMatrix = ({
                                 ${editable ? "cursor-pointer active:scale-95 transition-transform" : ""}
                               `}
                             >
-                              {d ? (
-                                <>
-                                  <span className="text-[12px] font-black leading-none">{d.getDate()}</span>
-                                  <span className="text-[7px] font-bold uppercase opacity-70 mt-0.5">
-                                    {d.toLocaleDateString([], { weekday: "short" })}
-                                  </span>
-                                </>
-                              ) : (
-                                <span className="text-[10px]">—</span>
-                              )}
+                              {cfg ? (
+                                d ? (
+                                  <>
+                                    <span className="text-[12px] font-black leading-none">{d.getDate()}</span>
+                                    <span className="text-[7px] font-bold uppercase opacity-70 mt-0.5">
+                                      {d.toLocaleDateString([], { weekday: "short" })}
+                                    </span>
+                                  </>
+                                ) : (
+                                  <span className="text-[10px]">—</span>
+                                )
+                              ) : isNoRecord ? (
+                                <span className="text-[12px] text-slate-600 select-none">—</span>
+                              ) : null}
                             </div>
                           );
                         })}
@@ -321,9 +341,10 @@ const AttendanceMatrix = ({
                     </td>
 
                     {sortedSessions.map((s) => {
-                      const record   = lookupMap[`${p.id}_${s.id}`];
-                      const cfg      = record ? CELL[record.status] : (isPast(s) ? CELL.absent : null);
-                      const editable = !!onEditRecord && !!record;
+                      const record     = lookupMap[`${p.id}_${s.id}`];
+                      const cfg        = record?.status ? CELL[record.status] : null;
+                      const isNoRecord = (!record || !record.status) && isPast(s);
+                      const editable   = !!onEditRecord && !!record?.status;
 
                       const joinedStr = record?.joined_at ? formatTime(record.joined_at, timezone) : null;
                       const leftStr   = record?.left_at   ? formatTime(record.left_at,   timezone) : null;
@@ -342,7 +363,7 @@ const AttendanceMatrix = ({
                               {/* Hover tooltip */}
                               <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-40 opacity-0 group-hover/cell:opacity-100 -translate-y-0.5 group-hover/cell:translate-y-0 transition-all duration-150 whitespace-nowrap">
                                 <div className="bg-slate-800 border border-slate-700 rounded-xl shadow-2xl px-3 py-2 text-center text-[11px] space-y-1 min-w-[200px]">
-                                  <p className="font-bold capitalize text-white">{record?.status ?? "absent"}</p>
+                                  <p className="font-bold capitalize text-white">{record?.status}</p>
                                   <p className="text-slate-400 flex items-center gap-1.5">
                                     Joined At: {joinedStr ?? "—"}
                                   </p>
@@ -358,9 +379,9 @@ const AttendanceMatrix = ({
                                 <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-px border-4 border-transparent border-t-slate-700" />
                               </div>
                             </div>
-                          ) : (
-                            <span className="text-slate-700 text-xs select-none">—</span>
-                          )}
+                          ) : isNoRecord ? (
+                            <span className="text-slate-600 text-xs select-none">—</span>
+                          ) : null}
                         </td>
                       );
                     })}
