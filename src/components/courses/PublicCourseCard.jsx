@@ -46,11 +46,6 @@ const PublicCourseCard = ({
         label = "Cancel Request";
         cls += "bg-amber-600/10 border border-amber-500/20 text-amber-400 hover:bg-amber-600 hover:text-white hover:border-transparent";
       }
-    } else if (noSessions) {
-      label = "Enroll Now";
-      disabled = true;
-      cls += "bg-gradient-to-r from-blue-600/40 to-indigo-600/40 text-white/40 cursor-not-allowed";
-      // tooltip = "No sessions available for this course";
     } else if (isEnrolling) {
       label = "Enrolling...";
       disabled = true;
@@ -66,7 +61,7 @@ const PublicCourseCard = ({
           e.stopPropagation();
           if (enrolled) onUnenroll(course.id, course.title);
           else if (isPending && !isWithdrawing) onWithdraw?.(course.id, course.title);
-          else if (!isPending && !isRejected && !noSessions && !isEnrolling) onEnroll(course);
+          else if (!isPending && !isRejected && !isEnrolling) onEnroll(course);
         }}
         disabled={disabled}
         className={cls}

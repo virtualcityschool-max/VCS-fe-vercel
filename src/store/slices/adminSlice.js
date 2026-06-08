@@ -71,7 +71,7 @@ const initialState = {
     error: null,
   },
 
-  // Courses filtered by has_session=true (for enrollment dropdown)
+  // Courses for enrollment dropdown
   enrollmentCourses: {
     data: [],
     loading: false,
