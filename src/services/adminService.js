@@ -74,15 +74,11 @@ export const adminService = {
   },
 
   updateUser: async (userId, userData) => {
-    try {
-      const response = await axiosInstance.patch(
-        ADMIN_ENDPOINTS.USER_UPDATE(userId),
-        userData,
-      );
-      return response.data;
-    } catch (error) {
-      throw handleApiError(error, { context: "Update User" });
-    }
+    const response = await axiosInstance.patch(
+      ADMIN_ENDPOINTS.USER_UPDATE(userId),
+      userData,
+    );
+    return response.data;
   },
 
   updateUserAvatar: async (userId, file) => {
