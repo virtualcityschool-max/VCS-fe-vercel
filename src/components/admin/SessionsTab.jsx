@@ -442,7 +442,7 @@ const SessionsTab = ({
               <table className="hidden lg:table w-full text-left">
                 <thead className="bg-slate-950/60 border-b border-slate-800">
                   <tr>
-                    <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Class</th>
+                    <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Session</th>
                     <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Course</th>
                     <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Tutor</th>
                     <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Start Date & Time</th>

@@ -283,7 +283,7 @@ const AdminCoursesPage = () => {
   // Handle instructor assignment
   const handleAssignInstructor = async (courseId, instructorId) => {
     if (!instructorId) {
-      toastManager.error("Please select an instructor");
+      toastManager.error("Please select an tutor");
       return;
     }
 

@@ -181,7 +181,7 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
                 onChange={(e) => onChange("instructor_id", e.target.value)}
                 className={fieldClass(errors.instructor_id)}
               >
-                <option value="">Select an instructor</option>
+                <option value="">Select an tutor</option>
                 {users.map((user) => (
                   <option key={user.id} value={user.id}>{user.username}</option>
                 ))}
