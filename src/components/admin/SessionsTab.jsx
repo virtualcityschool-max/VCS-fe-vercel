@@ -899,16 +899,14 @@ const SessionsTab = ({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Start Date <span className="text-red-400">*</span>
+                    Start Date
                   </label>
                   <input
                     type="date"
                     value={editSessionForm.start_date || ""}
-                    {...(!onlyTitleChanged && { min: new Date().toISOString().split("T")[0], max: "9999-12-31" })}
-                    onChange={(e) => { const v = clampDate(e.target.value); setEditSessionForm({ ...editSessionForm, start_date: v }); clearEditSessionFieldError("start_date"); }}
-                    className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white focus:outline-none focus:ring-2 text-sm [color-scheme:dark] ${editSessionErrors?.start_date ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
+                    disabled
+                    className="w-full px-3 py-2.5 bg-slate-800/50 border border-slate-700 rounded-xl text-slate-400 text-sm [color-scheme:dark] cursor-not-allowed opacity-60"
                   />
-                  {editSessionErrors?.start_date && <p className="text-red-400 text-xs mt-1">{editSessionErrors.start_date}</p>}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">
@@ -917,7 +915,7 @@ const SessionsTab = ({
                   <input
                     type="date"
                     value={editSessionForm.recurrence_end_date || ""}
-                    {...(!onlyTitleChanged && { min: editSessionForm.start_date || new Date().toISOString().split("T")[0], max: "9999-12-31" })}
+                    {...(!onlyTitleChanged && { min: editSessionForm.start_date, max: "9999-12-31" })}
                     onChange={(e) => { const v = clampDate(e.target.value); setEditSessionForm({ ...editSessionForm, recurrence_end_date: v }); clearEditSessionFieldError("recurrence_end_date"); }}
                     className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white focus:outline-none focus:ring-2 text-sm [color-scheme:dark] ${editSessionErrors?.recurrence_end_date ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
                   />

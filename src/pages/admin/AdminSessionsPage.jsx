@@ -223,15 +223,6 @@ const AdminSessionsPage = () => {
     if (!formData.title?.trim()) errors.title = "Session title is required";
     else if (formData.title.trim().length < 5) errors.title = "Title must be at least 5 characters";
 
-    if (!formData.start_date) {
-      errors.start_date = "Start date is required";
-    } else {
-      const todayStr = timezone
-        ? new Intl.DateTimeFormat("en-CA", { timeZone: timezone, year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date())
-        : new Date().toLocaleDateString("en-CA");
-      if (formData.start_date < todayStr) errors.start_date = "Start date must be today or in the future";
-    }
-
     if (!formData.time) errors.time = "Session time is required";
 
     if (!formData.recurrence_days?.length) errors.recurrence_days = "Select at least one recurring day";
