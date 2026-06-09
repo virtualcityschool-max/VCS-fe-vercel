@@ -102,7 +102,7 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
           <FieldError error={errors.description} />
         </div>
 
-        {/* Category + Status + Price */}
+        {/* Category + Status + Pricing toggle */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
             <label className="block text-[11px] uppercase tracking-widest font-black text-slate-500 mb-2">
@@ -137,19 +137,59 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
           </div>
           <div>
             <label className="block text-[11px] uppercase tracking-widest font-black text-slate-500 mb-2">
-              Price (USD) <span className="text-red-400">*</span>
+              Pricing
             </label>
-            <Input
-              type="number"
-              placeholder="0"
-              max="10000000"
-              value={formData.price || ""}
-              onChange={(e) => onChange("price", e.target.value)}
-              className={fieldClass(errors.price)}
-            />
-            <FieldError error={errors.price} />
+            <div className="flex rounded-lg overflow-hidden border border-slate-700">
+              <button
+                type="button"
+                onClick={() => { onChange("is_paid", false); onChange("price", "0"); onChange("gumroad_product_permalink", ""); }}
+                className={`flex-1 py-2 text-xs font-black uppercase tracking-widest transition ${!formData.is_paid ? "bg-indigo-600 text-white" : "bg-slate-800 text-slate-400 hover:text-slate-300"}`}
+              >
+                Free
+              </button>
+              <button
+                type="button"
+                onClick={() => onChange("is_paid", true)}
+                className={`flex-1 py-2 text-xs font-black uppercase tracking-widest transition ${formData.is_paid ? "bg-indigo-600 text-white" : "bg-slate-800 text-slate-400 hover:text-slate-300"}`}
+              >
+                Paid
+              </button>
+            </div>
           </div>
         </div>
+
+        {/* Price + Gumroad — only shown for paid courses */}
+        {formData.is_paid && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-[11px] uppercase tracking-widest font-black text-slate-500 mb-2">
+                Price (USD) <span className="text-red-400">*</span>
+              </label>
+              <Input
+                type="number"
+                placeholder="0"
+                max="10000000"
+                value={formData.price || ""}
+                onChange={(e) => onChange("price", e.target.value)}
+                className={fieldClass(errors.price)}
+              />
+              <FieldError error={errors.price} />
+            </div>
+            <div>
+              <label className="block text-[11px] uppercase tracking-widest font-black text-slate-500 mb-2">
+                Gumroad Permalink <span className="text-red-400">*</span>
+              </label>
+              <Input
+                type="text"
+                placeholder="e.g. mcrqh or https://gumroad.com/l/mcrqh"
+                value={formData.gumroad_product_permalink || ""}
+                onChange={(e) => onChange("gumroad_product_permalink", e.target.value.trim())}
+                className={fieldClass(errors.gumroad_product_permalink)}
+              />
+              <FieldError error={errors.gumroad_product_permalink} />
+            </div>
+          </div>
+        )}
 
         {/* Instructor */}
         <div>
@@ -189,25 +229,6 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
               <FieldError error={errors.instructor_id} />
             </>
           )}
-        </div>
-        {/* Gumroad Product Permalink */}
-        <div>
-          <label className="block text-sm font-medium text-slate-300 mb-1">
-            Gumroad Product Permalink
-            <span className="text-slate-500 text-[10px] uppercase font-black ml-2 opacity-50">optional — for paid courses</span>
-          </label>
-          <p className="text-slate-500 text-[11px] mb-2">
-            Paste the full Gumroad product URL or just the short code after <span className="text-slate-400 font-mono">gumroad.com/l/</span>. When set, students must pay via Gumroad before their enrollment request is submitted.
-          </p>
-          <Input
-            type="text"
-            placeholder="e.g. mcrqh  or  https://gumroad.com/l/mcrqh"
-            value={formData.gumroad_product_permalink || ""}
-            onChange={(e) => onChange("gumroad_product_permalink", e.target.value.trim())}
-            className={fieldClass(errors.gumroad_product_permalink)}
-            disabled
-          />
-          <FieldError error={errors.gumroad_product_permalink} />
         </div>
       </div>
 

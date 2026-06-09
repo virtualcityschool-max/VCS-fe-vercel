@@ -35,6 +35,7 @@ const AdminCoursesPage = () => {
     title: "",
     description: "",
     category: "",
+    is_paid: false,
     price: "",
     status: "draft",
     instructor_id: "",
@@ -91,6 +92,7 @@ const AdminCoursesPage = () => {
         title: "",
         description: "",
         category: "",
+        is_paid: false,
         price: "",
         status: "draft",
         instructor_id: "",
@@ -99,6 +101,7 @@ const AdminCoursesPage = () => {
         outline: "",
         attachment: null,
         thumbnail: null,
+        gumroad_product_permalink: "",
       });
       clearAllCreateCourseErrors();
     } else if (activeModal === null) {
@@ -118,6 +121,7 @@ const AdminCoursesPage = () => {
           title: editingCourse.title || "",
           description: editingCourse.description || "",
           category: editingCourse.category?.id?.toString() || editingCourse.category || "",
+          is_paid: editingCourse.is_paid || false,
           price: editingCourse.price || "",
           status: editingCourse.status || "draft",
           instructor_id:
@@ -174,9 +178,14 @@ const AdminCoursesPage = () => {
       errors.category = "Course category is required";
     }
 
-    const price = Number(formData.price);
-    if (formData.price === "" || !Number.isInteger(price) || price < 0) {
-      errors.price = "Price must be a valid non-decimal positive number";
+    if (formData.is_paid) {
+      const price = Number(formData.price);
+      if (formData.price === "" || !Number.isInteger(price) || price <= 0) {
+        errors.price = "Price must be a positive whole number for paid courses";
+      }
+      if (!formData.gumroad_product_permalink?.trim()) {
+        errors.gumroad_product_permalink = "Gumroad permalink is required for paid courses";
+      }
     }
 
     if (!formData.status) {
@@ -203,14 +212,15 @@ const AdminCoursesPage = () => {
     fd.append("title", formData.title);
     fd.append("description", formData.description);
     if (formData.category) fd.append("category", Number(formData.category));
-    fd.append("price", Number(formData.price));
+    fd.append("is_paid", formData.is_paid ? "true" : "false");
+    fd.append("price", formData.is_paid ? Number(formData.price) : 0);
     fd.append("status", formData.status);
     fd.append("instructor_id", Number(formData.instructor_id));
     fd.append("schedule", JSON.stringify({ days: formData.days_of_recurring, time: formData.time }));
     if (formData.outline) fd.append("outline", formData.outline);
     if (formData.attachment instanceof File) fd.append("attachment", formData.attachment);
     if (formData.thumbnail instanceof File) fd.append("thumbnail", formData.thumbnail);
-    if (formData.gumroad_product_permalink) fd.append("gumroad_product_permalink", formData.gumroad_product_permalink);
+    fd.append("gumroad_product_permalink", formData.is_paid ? (formData.gumroad_product_permalink || "") : "");
     return fd;
   };
 
@@ -234,6 +244,7 @@ const AdminCoursesPage = () => {
         title: "",
         description: "",
         category: "",
+        is_paid: false,
         price: "",
         status: "draft",
         instructor_id: "",
@@ -242,6 +253,7 @@ const AdminCoursesPage = () => {
         outline: "",
         attachment: null,
         thumbnail: null,
+        gumroad_product_permalink: "",
       });
       clearAllCreateCourseErrors();
     } catch (error) {

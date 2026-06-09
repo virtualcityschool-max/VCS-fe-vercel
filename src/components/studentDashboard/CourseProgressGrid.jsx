@@ -44,8 +44,19 @@ const CourseCard = ({ course, enrollment, status, onNavigate }) => {
           </div>
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent"></div>
-        
-        {/* Status Badge in corner */}
+
+        {/* Paid/Free badge — top left */}
+        <div className="absolute top-2 left-2">
+          <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wide backdrop-blur-md ${
+            courseData.is_paid
+              ? "bg-amber-500/20 text-amber-400 border border-amber-500/30"
+              : "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+          }`}>
+            {courseData.is_paid ? "Paid" : "Free"}
+          </span>
+        </div>
+
+        {/* Status Badge — top right */}
         <div className="absolute top-4 right-4">
            {isPending && (
              <span className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/10 backdrop-blur-md border border-amber-500/20 rounded-xl text-amber-400 text-[8px] font-black uppercase tracking-widest">

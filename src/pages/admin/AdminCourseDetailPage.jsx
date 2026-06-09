@@ -131,6 +131,7 @@ const AdminCourseDetailPage = () => {
       title: course.title || "",
       description: course.description || "",
       category: course.category?.id?.toString() || course.category || "",
+      is_paid: course.is_paid || false,
       price: course.price || "",
       status: course.status || "draft",
       instructor_id: course.instructor?.id || "",
@@ -158,8 +159,11 @@ const AdminCourseDetailPage = () => {
     if (!formData.description?.trim()) errors.description = "Description is required";
     else if (formData.description.trim().length < 10) errors.description = "Description must be at least 10 characters";
     if (!formData.category) errors.category = "Category is required";
-    const price = Number(formData.price);
-    if (formData.price === "" || !Number.isInteger(price) || price < 0) errors.price = "Price must be a valid non-decimal positive number";
+    if (formData.is_paid) {
+      const price = Number(formData.price);
+      if (formData.price === "" || !Number.isInteger(price) || price <= 0) errors.price = "Price must be a positive whole number for paid courses";
+      if (!formData.gumroad_product_permalink?.trim()) errors.gumroad_product_permalink = "Gumroad permalink is required for paid courses";
+    }
     if (!formData.status) errors.status = "Status is required";
     if (!formData.instructor_id) errors.instructor_id = "Tutor is required";
     return errors;
@@ -170,14 +174,15 @@ const AdminCourseDetailPage = () => {
     fd.append("title", formData.title);
     fd.append("description", formData.description);
     if (formData.category) fd.append("category", Number(formData.category));
-    fd.append("price", Number(formData.price));
+    fd.append("is_paid", formData.is_paid ? "true" : "false");
+    fd.append("price", formData.is_paid ? Number(formData.price) : 0);
     fd.append("status", formData.status);
     fd.append("instructor_id", Number(formData.instructor_id));
     fd.append("schedule", JSON.stringify({ days: formData.days_of_recurring || [], time: formData.time || "" }));
     if (formData.outline) fd.append("outline", formData.outline);
     if (formData.attachment instanceof File) fd.append("attachment", formData.attachment);
     if (formData.thumbnail instanceof File) fd.append("thumbnail", formData.thumbnail);
-    fd.append("gumroad_product_permalink", formData.gumroad_product_permalink || "");
+    fd.append("gumroad_product_permalink", formData.is_paid ? (formData.gumroad_product_permalink || "") : "");
     return fd;
   };
 

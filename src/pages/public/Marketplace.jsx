@@ -194,40 +194,23 @@ const Marketplace = () => {
       return;
     }
 
-    // Paid course — open Gumroad checkout in a centered popup
-    if (course.gumroad_product_permalink) {
-      // Open popup synchronously BEFORE the await — browsers block popups
-      // opened after async calls since they're no longer inside a user gesture
-      const w = 700, h = 620;
-      const left = Math.round(window.screenX + (window.outerWidth - w) / 2);
-      const top  = Math.round(window.screenY + (window.outerHeight - h) / 2);
-      const popup = window.open("about:blank", "gumroad_checkout", `width=${w},height=${h},left=${left},top=${top},scrollbars=yes,resizable=yes`);
-      try {
-        setIsCheckingOut(true);
-        setSelectedCourse(course);
-        const data = await studentService.initiateCheckout(course.id);
-        if (popup) popup.location.href = data.checkout_url;
-        // Poll dashboard only — avoids fetchAllCourses triggering page-level loading state
-        let attempts = 0;
-        const poll = setInterval(() => {
-          attempts++;
-          if (auth.role === "student") dispatch(fetchStudentDashboard());
-          if (attempts >= 10) clearInterval(poll);
-        }, 3000);
-        toastManager.success("Checkout opened! Complete your payment — this page will update automatically.");
-      } catch (error) {
-        if (popup) popup.close();
-        showApiError(error);
-      } finally {
-        setIsCheckingOut(false);
-        setSelectedCourse(null);
-      }
-      return;
-    }
-
-    // Free course — show enrollment modal
+    // Always show confirmation modal first (paid or free)
     setSelectedCourse(course);
     setEnrollmentModalOpen(true);
+  };
+
+  // Called when student confirms on paid modal — redirect to Gumroad
+  const handleCheckout = async () => {
+    if (!selectedCourse) return;
+    try {
+      setIsCheckingOut(true);
+      const data = await studentService.initiateCheckout(selectedCourse.id);
+      window.location.href = data.checkout_url;
+    } catch (error) {
+      showApiError(error);
+      setIsCheckingOut(false);
+      setSelectedCourse(null);
+    }
   };
 
   // Handle post-login enrollment intent
@@ -597,8 +580,9 @@ const Marketplace = () => {
       <EnrollmentTypeModal
         isOpen={enrollmentModalOpen}
         course={selectedCourse}
-        isEnrolling={selectedCourse ? enrollingCourseIds.includes(selectedCourse.id) : false}
-        onConfirm={() => handleEnrollmentTypeSelect("normal")}
+        isPaid={selectedCourse?.is_paid || false}
+        isLoading={selectedCourse?.is_paid ? isCheckingOut : (selectedCourse ? enrollingCourseIds.includes(selectedCourse.id) : false)}
+        onConfirm={selectedCourse?.is_paid ? handleCheckout : () => handleEnrollmentTypeSelect("normal")}
         onClose={closeEnrollmentModal}
       />
 

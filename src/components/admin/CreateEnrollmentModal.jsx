@@ -9,13 +9,11 @@ import {
 import { useFieldErrors } from "../../hooks";
 import { FilterSelect } from "../../components/ui";
 import { toastManager } from "../../utils/toastManager";
-import TeacherPrivateAvailableSlots from "../TeacherPrivateAvailableSlots";
 import { showApiError } from "../../utils/apiErrorHandler";
 
 const EMPTY_FORM = {
   student_id: "",
   course_id: "",
-  enrollment_type: "normal",
 };
 
 const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
@@ -25,8 +23,6 @@ const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
   const { loading: createLoading } = useSelector((state) => state.admin.enrollments);
 
   const [formData, setFormData] = useState(EMPTY_FORM);
-  const [selectedSlot, setSelectedSlot] = useState(null);
-  const [paymentReceived, setPaymentReceived] = useState(false);
   const [studentDropdownOpen, setStudentDropdownOpen] = useState(false);
   const [studentSearch, setStudentSearch] = useState("");
   const [studentDropPos, setStudentDropPos] = useState({ top: 0, left: 0, width: 0 });
@@ -34,16 +30,12 @@ const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
 
   const { formError, clearAllErrors } = useFieldErrors();
 
-  // Load data when modal opens; reset when it closes
   useEffect(() => {
     if (isOpen) {
       dispatch(fetchUsers());
       dispatch(fetchCoursesWithSessions());
-      setPaymentReceived(false);
     } else {
       setFormData(EMPTY_FORM);
-      setSelectedSlot(null);
-      setPaymentReceived(false);
       setStudentDropdownOpen(false);
       setStudentSearch("");
       clearAllErrors();
@@ -51,9 +43,6 @@ const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
   }, [isOpen]);
 
   const publishedCourses = courses.data?.filter((c) => c.status === "published") || [];
-  const selectedCourse = publishedCourses.find((c) => c.id === parseInt(formData.course_id));
-  const teacherId = selectedCourse?.instructor?.id ?? null;
-  const teacher = users.data?.find((u) => u.id === teacherId) ?? null;
   const students = users.data?.filter((u) => u.role === "student" && u.is_active) || [];
   const selectedStudent = students.find((s) => String(s.id) === String(formData.student_id)) ?? null;
   const filteredStudents = useMemo(() => {
@@ -79,7 +68,6 @@ const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
     setStudentDropdownOpen(true);
   };
 
-  // Close student dropdown on outside click
   useEffect(() => {
     if (!studentDropdownOpen) return;
     const close = (e) => {
@@ -105,26 +93,10 @@ const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
       return;
     }
 
-    if (formData.enrollment_type === "private") {
-      if (!teacherId) {
-        toastManager.error("This course has no instructor assigned");
-        return;
-      }
-      if (!selectedSlot) {
-        toastManager.error("Please select a time slot");
-        return;
-      }
-    }
-
     const payload = {
       course_id: parseInt(formData.course_id),
       student_id: parseInt(formData.student_id),
     };
-
-    if (formData.enrollment_type === "private") {
-      payload.teacher_id = teacherId;
-      payload.preferred_slots = [{ days: selectedSlot.days, time: selectedSlot.time }];
-    }
 
     try {
       const result = await dispatch(createEnrollment(payload)).unwrap();
@@ -140,7 +112,7 @@ const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[200] flex items-center justify-center p-4">
-      <div className="bg-slate-900 border border-slate-800 rounded-[1.5rem] p-4 sm:p-8 w-full max-w-2xl lg:max-w-3xl max-h-[92vh] overflow-y-auto shadow-2xl transition-all duration-300">
+      <div className="bg-slate-900 border border-slate-800 rounded-[1.5rem] p-4 sm:p-8 w-full max-w-2xl max-h-[92vh] overflow-y-auto shadow-2xl">
 
         {/* Header */}
         <div className="flex justify-between items-start mb-8 pb-6 border-b border-white/5">
@@ -164,7 +136,6 @@ const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
               <label className="block text-sm font-medium text-slate-300 mb-2">
                 Student <span className="text-red-400">*</span>
               </label>
-              {/* Trigger — matches FilterSelect visuals exactly */}
               <button
                 type="button"
                 onClick={() => studentDropdownOpen ? (setStudentDropdownOpen(false), setStudentSearch("")) : openStudentDropdown()}
@@ -180,7 +151,6 @@ const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
                 <i className={`fas fa-chevron-down text-slate-500 text-[10px] flex-shrink-0 transition-transform duration-150 ${studentDropdownOpen ? "rotate-180" : ""}`} />
               </button>
 
-              {/* Portal dropdown — matches FilterSelect structure */}
               {typeof document !== "undefined" && createPortal(
                 studentDropdownOpen && (
                   <div
@@ -189,7 +159,6 @@ const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
                     onTouchStart={(e) => e.stopPropagation()}
                     className="bg-slate-900 border border-slate-700 rounded-xl shadow-2xl overflow-hidden"
                   >
-                    {/* Search */}
                     <div className="px-2 pt-2 pb-1.5 border-b border-slate-800">
                       <div className="relative">
                         <i className="fas fa-search absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500 text-[10px] pointer-events-none" />
@@ -204,7 +173,6 @@ const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
                         />
                       </div>
                     </div>
-                    {/* Options */}
                     <ul className="max-h-52 overflow-y-auto py-1 custom-scrollbar">
                       {filteredStudents.length === 0 ? (
                         <li className="px-3 py-2.5 text-xs text-slate-500 text-center">No results</li>
@@ -242,10 +210,7 @@ const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
               <FilterSelect
                 name="course_id"
                 value={formData.course_id}
-                onChange={(e) => {
-                  setFormData((p) => ({ ...p, course_id: e.target.value }));
-                  setSelectedSlot(null);
-                }}
+                onChange={(e) => setFormData((p) => ({ ...p, course_id: e.target.value }))}
                 className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
               >
                 <option value="">Select a course</option>
@@ -254,86 +219,6 @@ const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
                 ))}
               </FilterSelect>
             </div>
-          </div>
-
-          {/* Enrollment Type */}
-          {/* <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">Enrollment Type</label>
-            <div className="flex gap-2">
-              {["normal", "private"].map((type) => (
-                <button
-                  key={type}
-                  type="button"
-                  onClick={() => {
-                    setFormData((p) => ({ ...p, enrollment_type: type }));
-                    setSelectedSlot(null);
-                  }}
-                  className={`flex-1 py-2.5 rounded-xl text-sm font-semibold border transition capitalize ${
-                    formData.enrollment_type === type
-                      ? "bg-indigo-600/30 border-indigo-500/60 text-indigo-300"
-                      : "bg-slate-800/60 border-slate-700 text-slate-400 hover:border-slate-600 hover:text-white"
-                  }`}
-                >
-                  {type}
-                </button>
-              ))}
-            </div>
-          </div> */}
-
-          {/* Private section */}
-          <>
-          {formData.enrollment_type === "private" && formData.course_id && (
-            <></>
-            // <div className="space-y-4">
-            //   {/* Instructor info */}
-            //   <div className="flex items-center gap-3 px-4 py-3 bg-slate-800/40 border border-slate-700/50 rounded-xl">
-            //     <div className="w-8 h-8 rounded-full bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center shrink-0">
-            //       <i className="fas fa-chalkboard-teacher text-indigo-400 text-xs" />
-            //     </div>
-            //     <div className="min-w-0">
-            //       <p className="text-xs text-slate-500 uppercase tracking-widest font-bold">Instructor</p>
-            //       <p className="text-sm font-semibold text-white truncate">
-            //         {teacher ? teacher.username : <span className="text-slate-500 italic">No instructor assigned</span>}
-            //       </p>
-            //     </div>
-            //   </div>
-
-            //   {teacher && (
-            //     <TeacherPrivateAvailableSlots
-            //       teacher={teacher}
-            //       teacherId={teacherId}
-            //       studentId={formData.student_id}
-            //       onSlotSelect={setSelectedSlot}
-            //     />
-            //   )}
-            // </div>
-          )}
-</>
-          {/* Payment Confirmation */}
-          <div className="pt-2">
-            <label className="flex items-center gap-3 cursor-pointer group py-3 px-4 bg-slate-800/40 rounded-2xl border border-slate-700/50 hover:bg-slate-800/60 transition-all text-left">
-              <div className="relative flex items-center justify-center w-5 h-5 flex-shrink-0">
-                <input
-                  type="checkbox"
-                  className="peer sr-only"
-                  checked={paymentReceived}
-                  onChange={(e) => setPaymentReceived(e.target.checked)}
-                />
-                <div className="absolute inset-0 border-2 border-slate-500 rounded-lg bg-slate-900 transition-all peer-checked:bg-indigo-600 peer-checked:border-indigo-600"></div>
-                <svg 
-                  className="relative w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 transition-all scale-50 peer-checked:scale-100 pointer-events-none z-10" 
-                  fill="none" 
-                  viewBox="0 0 24 24" 
-                  stroke="currentColor" 
-                  strokeWidth="4"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <span className="text-sm text-slate-300 select-none font-semibold leading-snug">
-                I have received the payment for this course
-              </span>
-            </label>
           </div>
 
           {formError && <p className="text-red-400 text-sm">{formError}</p>}
@@ -349,12 +234,12 @@ const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
             </button>
             <button
               type="submit"
-              disabled={createLoading || !paymentReceived}
+              disabled={createLoading}
               className="px-6 py-2.5 rounded-xl text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition disabled:opacity-50 flex items-center gap-2"
             >
               {createLoading
                 ? <><i className="fas fa-spinner fa-spin text-xs" /> Creating…</>
-                : "Create Enrollment"
+                : "Enroll Student"
               }
             </button>
           </div>

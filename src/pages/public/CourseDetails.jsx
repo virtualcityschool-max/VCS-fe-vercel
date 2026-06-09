@@ -103,6 +103,7 @@ const CourseDetails = () => {
       attachment: course.attachment || null,
       has_session: course.has_session ?? true,
       enrollment_status: course.enrollment_status,
+      is_paid: course.is_paid ?? false,
       gumroad_product_permalink: course.gumroad_product_permalink || null,
     };
   }, [course, courseId]);
@@ -121,20 +122,8 @@ const CourseDetails = () => {
     return false;
   };
 
-  // Poll backend after Gumroad checkout opens — webhook may take a few seconds.
-  // Only fetches student dashboard (not fetchCourseById) to avoid triggering
-  // the page-level isLoading state which causes the whole page to re-render.
-  const startEnrollmentPolling = (courseId) => {
-    toastManager.success("Checkout opened! Complete your payment — this page will update automatically.");
-    let attempts = 0;
-    const poll = setInterval(() => {
-      attempts++;
-      dispatch(fetchStudentDashboard());
-      if (attempts >= 10) clearInterval(poll); // poll for ~30 seconds
-    }, 3000);
-  };
 
-  // Handle course enrollment
+  // Handle course enrollment — always show confirmation modal first
   const handleEnrollCourse = async () => {
     if (!auth.isLoggedIn) {
       dispatch(setAuthModal("login"));
@@ -146,30 +135,19 @@ const CourseDetails = () => {
       return;
     }
 
-    // Paid course — open Gumroad checkout in a centered popup
-    if (normalizedCourse?.gumroad_product_permalink) {
-      // Open popup synchronously BEFORE the await — browsers block popups
-      // opened after async calls since they're no longer inside a user gesture
-      const w = 700, h = 620;
-      const left = Math.round(window.screenX + (window.outerWidth - w) / 2);
-      const top  = Math.round(window.screenY + (window.outerHeight - h) / 2);
-      const popup = window.open("about:blank", "gumroad_checkout", `width=${w},height=${h},left=${left},top=${top},scrollbars=yes,resizable=yes`);
-      try {
-        setIsCheckingOut(true);
-        const data = await studentService.initiateCheckout(normalizedCourse.id);
-        if (popup) popup.location.href = data.checkout_url;
-        startEnrollmentPolling(normalizedCourse.id);
-      } catch (error) {
-        if (popup) popup.close();
-        showApiError(error);
-      } finally {
-        setIsCheckingOut(false);
-      }
-      return;
-    }
-
-    // Free course — show enrollment modal
     setEnrollmentModalOpen(true);
+  };
+
+  // Called when student confirms on paid modal — redirect to Gumroad
+  const handleCheckout = async () => {
+    try {
+      setIsCheckingOut(true);
+      const data = await studentService.initiateCheckout(normalizedCourse.id);
+      window.location.href = data.checkout_url;
+    } catch (error) {
+      showApiError(error);
+      setIsCheckingOut(false);
+    }
   };
 
   // Handle post-login enrollment intent
@@ -689,7 +667,7 @@ const CourseDetails = () => {
                               ? <><i className="fas fa-spinner fa-spin mr-1" />Opening Checkout...</>
                               : isEnrolling
                                 ? "Enrolling..."
-                                : normalizedCourse?.gumroad_product_permalink
+                                : normalizedCourse?.is_paid
                                   ? <><i className="fas fa-lock-open mr-1.5" />Pay & Enroll</>
                                   : "Enroll Now"}
                     </button>
@@ -839,8 +817,9 @@ const CourseDetails = () => {
       <EnrollmentTypeModal
         isOpen={enrollmentModalOpen}
         course={normalizedCourse}
-        isEnrolling={isEnrolling}
-        onConfirm={() => handleEnrollmentTypeSelect("normal")}
+        isPaid={normalizedCourse?.is_paid || false}
+        isLoading={normalizedCourse?.is_paid ? isCheckingOut : isEnrolling}
+        onConfirm={normalizedCourse?.is_paid ? handleCheckout : () => handleEnrollmentTypeSelect("normal")}
         onClose={closeEnrollmentModal}
       />
       {viewerUrl && (

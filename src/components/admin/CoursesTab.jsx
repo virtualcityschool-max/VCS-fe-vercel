@@ -588,6 +588,9 @@ const CoursesTab = ({
                     Price
                   </th>
                   <th className="px-6 py-4 text-xs font-black uppercase text-slate-500">
+                    Type
+                  </th>
+                  <th className="px-6 py-4 text-xs font-black uppercase text-slate-500">
                     Status
                   </th>
                   <th className="px-6 py-4 text-xs font-black uppercase text-slate-500 text-right">
@@ -615,6 +618,9 @@ const CoursesTab = ({
                     </td>
                     <td className="px-6 py-4">
                       <div className="h-4 bg-slate-700 rounded w-16"></div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="h-6 bg-slate-700 rounded w-14"></div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="h-6 bg-slate-700 rounded w-16"></div>
@@ -678,8 +684,17 @@ const CoursesTab = ({
                       </div>
                       <div className="flex items-center gap-2">
                         <i className="fas fa-dollar-sign text-amber-400"></i>
-                        <span>${(course.price || 0).toLocaleString("en-US")} USD</span>
+                        <span>{course.is_paid ? `$${(course.price || 0).toLocaleString("en-US")} USD` : "Free"}</span>
                       </div>
+                      <span
+                        className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wide ${
+                          course.is_paid
+                            ? "bg-amber-500/15 text-amber-400 border border-amber-500/20"
+                            : "bg-emerald-500/15 text-emerald-400 border border-emerald-500/20"
+                        }`}
+                      >
+                        {course.is_paid ? "Paid" : "Free"}
+                      </span>
                       <div className="flex items-center gap-2">
                         <i
                           className={`fas fa-circle text-xs ${
@@ -758,6 +773,9 @@ const CoursesTab = ({
                     Price
                   </th>
                   <th className="px-6 py-4 text-xs font-black uppercase text-slate-500">
+                    Type
+                  </th>
+                  <th className="px-6 py-4 text-xs font-black uppercase text-slate-500">
                     Status
                   </th>
                   <th className="px-6 py-4 text-xs font-black uppercase text-slate-500">
@@ -810,7 +828,18 @@ const CoursesTab = ({
                     </td>
                     <td className="px-6 py-4">
                       <span className="text-white font-medium">
-                        ${(course.price || 0).toLocaleString("en-US")} USD
+                        {course.is_paid ? `$${(course.price || 0).toLocaleString("en-US")} USD` : "—"}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-black uppercase tracking-wide ${
+                          course.is_paid
+                            ? "bg-amber-500/15 text-amber-400 border border-amber-500/20"
+                            : "bg-emerald-500/15 text-emerald-400 border border-emerald-500/20"
+                        }`}
+                      >
+                        {course.is_paid ? "Paid" : "Free"}
                       </span>
                     </td>
                     <td className="px-6 py-4">

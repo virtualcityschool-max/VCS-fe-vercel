@@ -38,7 +38,11 @@ const PublicCourseCard = ({
       cls += "bg-rose-600/10 border border-rose-500/20 text-rose-400 cursor-not-allowed";
       tooltip = "Your enrollment request was rejected. Please contact school administration.";
     } else if (isPending) {
-      if (isWithdrawing) {
+      if (course.is_paid) {
+        label = "Approval Pending";
+        disabled = true;
+        cls += "bg-amber-600/10 border border-amber-500/20 text-amber-400 cursor-not-allowed";
+      } else if (isWithdrawing) {
         label = "Cancelling...";
         disabled = true;
         cls += "bg-amber-600/10 border border-amber-500/20 text-amber-400 cursor-not-allowed";
@@ -60,7 +64,7 @@ const PublicCourseCard = ({
         onClick={(e) => {
           e.stopPropagation();
           if (enrolled) onUnenroll(course.id, course.title);
-          else if (isPending && !isWithdrawing) onWithdraw?.(course.id, course.title);
+          else if (isPending && !isWithdrawing && !course.is_paid) onWithdraw?.(course.id, course.title);
           else if (!isPending && !isRejected && !isEnrolling) onEnroll(course);
         }}
         disabled={disabled}
@@ -108,6 +112,13 @@ const PublicCourseCard = ({
         {course.status === "published" && (
           <div className={`absolute ${large ? "top-2 right-2 w-2 h-2" : "top-1.5 right-1.5 w-1.5 h-1.5"} z-10 bg-green-500 rounded-full shadow-[0_0_6px_rgba(34,197,94,0.8)] animate-pulse`} />
         )}
+        <div className={`absolute ${large ? "top-2 left-2 px-2 py-0.5 text-[9px]" : "top-1.5 left-1.5 px-1.5 py-0.5 text-[8px]"} rounded-full font-black uppercase tracking-wide z-10 ${
+          course.is_paid
+            ? "bg-amber-500/20 text-amber-400 border border-amber-500/30"
+            : "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+        }`}>
+          {course.is_paid ? "Paid" : "Free"}
+        </div>
       </div>
 
       {/* Content */}
@@ -133,7 +144,9 @@ const PublicCourseCard = ({
         )}
 
         <div className={`mt-auto ${large ? "pt-3" : "pt-1.5"} border-t border-white/5 space-y-1`}>
-          <p className={`${large ? "text-sm" : "text-[9px]"} font-black text-white`}>${(course.price || 0).toLocaleString("en-US")} USD</p>
+          <p className={`${large ? "text-sm" : "text-[9px]"} font-black ${course.is_paid ? "text-white" : "text-emerald-400"}`}>
+            {course.is_paid ? `$${(course.price || 0).toLocaleString("en-US")} USD` : "Free"}
+          </p>
           {renderCTA()}
         </div>
       </div>
