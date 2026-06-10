@@ -26,6 +26,7 @@ import ChildLinksTab from "../../components/admin/ChildLinksTab";
 import EnrollmentRequestsTab from "../../components/admin/EnrollmentRequestsTab";
 import HireRequestsTab from "../../components/admin/HireRequestsTab";
 import { showApiError } from "../../utils/apiErrorHandler";
+import { adminService } from "../../services/adminService";
 
 const AdminApprovalsPage = () => {
   const dispatch = useDispatch();
@@ -77,10 +78,14 @@ const AdminApprovalsPage = () => {
     }
   };
 
-  const handleReject = async (userId) => {
+  const handleReject = async (userId, shouldDeleteUser) => {
     try {
       await dispatch(rejectUser(userId)).unwrap();
       toastManager.success("User rejected successfully");
+      if (shouldDeleteUser) {
+        await adminService.purgeUser(userId);
+        toastManager.success("User permanently deleted");
+      }
     } catch (error) {
       showApiError(error);
     }
@@ -123,12 +128,16 @@ const AdminApprovalsPage = () => {
     }
   };
 
-  const handleRejectEnrollment = async (enrollmentId) => {
+  const handleRejectEnrollment = async (enrollmentId, shouldDeleteUser, studentId) => {
     try {
       await dispatch(
         actionEnrollment({ enrollmentId, action: "reject" }),
       ).unwrap();
       toastManager.success("Enrollment rejected successfully");
+      if (shouldDeleteUser && studentId) {
+        await adminService.purgeUser(studentId);
+        toastManager.success("User permanently deleted");
+      }
     } catch (error) {
       showApiError(error);
     }

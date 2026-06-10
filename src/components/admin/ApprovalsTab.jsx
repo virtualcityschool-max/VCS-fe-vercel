@@ -13,6 +13,7 @@ const ApprovalsTab = ({
   onRefresh,
 }) => {
   const [confirmDialog, setConfirmDialog] = useState({ open: false, type: null, userId: null, username: "" });
+  const [deleteUser, setDeleteUser] = useState(false);
   const { timezone } = useDateFormatters();
 
   const handleApprove = (userId, username) => {
@@ -20,14 +21,17 @@ const ApprovalsTab = ({
   };
 
   const handleReject = (userId, username) => {
+    setDeleteUser(false);
     setConfirmDialog({ open: true, type: "reject", userId, username });
   };
 
   const handleConfirm = () => {
     const { type, userId } = confirmDialog;
+    const shouldDelete = deleteUser;
     setConfirmDialog({ open: false, type: null, userId: null, username: "" });
+    setDeleteUser(false);
     if (type === "approve") onApprove(userId);
-    else if (type === "reject") onReject(userId);
+    else if (type === "reject") onReject(userId, shouldDelete);
   };
 
   return (
@@ -338,7 +342,13 @@ const ApprovalsTab = ({
         confirmLabel={confirmDialog.type === "approve" ? "Approve" : "Reject"}
         cancelLabel="Cancel"
         onConfirm={handleConfirm}
-        onCancel={() => setConfirmDialog({ open: false, type: null, userId: null, username: "" })}
+        onCancel={() => {
+          setConfirmDialog({ open: false, type: null, userId: null, username: "" });
+          setDeleteUser(false);
+        }}
+        checkboxLabel={confirmDialog.type === "reject" ? "Permanently delete this user" : ""}
+        checkboxChecked={deleteUser}
+        onCheckboxChange={setDeleteUser}
       />
     </>
   );

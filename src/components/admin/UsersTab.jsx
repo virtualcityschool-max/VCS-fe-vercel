@@ -227,13 +227,13 @@ const UsersTab = ({
   };
 
   const handleDeleteUser = async (user) => {
-    if (user.role === "teacher") {
-      const hasCourses = await checkTeacherHasCourses(user.id);
-      if (hasCourses) {
-        toastManager.error("This tutor has courses assigned. Remove or reassign their courses before deactivating.");
-        return;
-      }
-    }
+    // if (user.role === "teacher") {
+    //   const hasCourses = await checkTeacherHasCourses(user.id);
+    //   if (hasCourses) {
+    //     toastManager.error("This tutor has courses assigned. Remove or reassign their courses before deactivating.");
+    //     return;
+    //   }
+    // }
     setConfirmDialog({
       open: true,
       userId: user.id,
@@ -258,13 +258,13 @@ const UsersTab = ({
   };
 
   const handlePurgeUser = async (user) => {
-    if (user.role === "teacher") {
-      const hasCourses = await checkTeacherHasCourses(user.id);
-      if (hasCourses) {
-        toastManager.error("This tutor has courses assigned. Remove or reassign their courses before deleting.");
-        return;
-      }
-    }
+    // if (user.role === "teacher") {
+    //   const hasCourses = await checkTeacherHasCourses(user.id);
+    //   if (hasCourses) {
+    //     toastManager.error("This tutor has courses assigned. Remove or reassign their courses before deleting.");
+    //     return;
+    //   }
+    // }
     setPurgeDialog({ open: true, userId: user.id });
   };
 
