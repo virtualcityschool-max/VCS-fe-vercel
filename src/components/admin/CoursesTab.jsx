@@ -582,7 +582,7 @@ const CoursesTab = ({
                     Tutor
                   </th>
                   <th className="px-6 py-4 text-xs font-black uppercase text-slate-500">
-                    Category
+                    Level
                   </th>
                   <th className="px-6 py-4 text-xs font-black uppercase text-slate-500">
                     Price
@@ -822,7 +822,7 @@ const CoursesTab = ({
                       )}
                     </td>
                     <td className="px-6 py-4">
-                      <span className="bg-slate-700/50 text-slate-300 px-2 py-1 rounded-full text-xs font-medium border border-slate-600 md:text-nowrap">
+                      <span className="bg-slate-700/50 text-slate-300 px-2 py-1 rounded-full text-xs font-medium border border-slate-600 md:whitespace-nowrap">
                         {course.category?.name ?? course.category}
                       </span>
                     </td>
