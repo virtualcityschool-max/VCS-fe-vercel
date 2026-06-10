@@ -30,7 +30,7 @@ const TeacherProfileTab = ({ profile, onUpdate, onCancel, onSaved, readOnly = fa
         experience_years: profile.experience_years ?? "",
         rating: profile.rating ?? "",
         linkedin: profile.linkedin ?? "",
-        phone: profile.phone ?? "",
+        phone: normalizePhone(profile.phone ?? ""),
         distinctions: profile.distinctions ?? [],
       });
     }
