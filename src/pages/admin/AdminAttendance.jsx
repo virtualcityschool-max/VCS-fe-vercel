@@ -206,12 +206,11 @@ const AdminAttendance = () => {
 
       {/* Stats */}
       {!isLoading && (filteredAttendance || []).length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-3 gap-3">
           {[
-            { label: "Total",   value: stats.total,      color: "text-white" },
-            { label: "Present", value: stats.present,    color: "text-emerald-400" },
-            { label: "Absent",  value: stats.absent,     color: "text-rose-400" },
-            { label: "Rate",    value: `${stats.rate}%`, color: stats.rate >= 75 ? "text-emerald-400" : "text-rose-400" },
+            { label: "Total",   value: stats.total,   color: "text-white" },
+            { label: "Present", value: stats.present, color: "text-emerald-400" },
+            { label: "Absent",  value: stats.absent,  color: "text-rose-400" },
           ].map((s) => (
             <div key={s.label} className="bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-center">
               <p className={`text-2xl font-black ${s.color}`}>{s.value}</p>
