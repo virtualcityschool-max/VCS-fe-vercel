@@ -17,6 +17,7 @@ import ConfirmDialog from "../../components/common/ConfirmDialog";
 import CourseForm from "../../components/admin/CourseForm";
 import { showApiError } from "../../utils/apiErrorHandler";
 import { useFieldErrors } from "../../hooks";
+import QuillViewer from "../../components/common/QuillViewer";
 
 const Badge = ({ children, color = "slate" }) => {
   const colors = {
@@ -364,7 +365,7 @@ const AdminCourseDetailPage = () => {
                   </div>
                   <h2 className="text-base font-bold text-white">Course Outline</h2>
                 </div>
-                <div className="course-outline-content" dangerouslySetInnerHTML={{ __html: course.outline }} />
+                <QuillViewer value={course.outline} />
               </div>
             )}
 

@@ -31,6 +31,7 @@ import ConfirmDialog from "../../components/common/ConfirmDialog";
 import { getStorageUrl } from "../../utils/storageUrl";
 import FileViewerModal from "../../components/common/FileViewerModal";
 import { studentService } from "../../services/studentService";
+import QuillViewer from "../../components/common/QuillViewer";
 
 const CourseDetails = () => {
   const { courseId } = useParams();
@@ -549,10 +550,7 @@ const CourseDetails = () => {
                       Course Outline
                     </h2>
                     <div className="bg-slate-800/30 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50">
-                      <div
-                        className="course-outline-content"
-                        dangerouslySetInnerHTML={{ __html: normalizedCourse.outline }}
-                      />
+                      <QuillViewer value={normalizedCourse.outline} />
                     </div>
                   </div>
                 )}

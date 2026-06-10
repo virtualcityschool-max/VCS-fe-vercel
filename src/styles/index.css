@@ -296,7 +296,13 @@ h3,
 .submission-content a { color: #818cf8; }
 .submission-content .ql-ui { display: none; }
  
- @keyframes float {
+/* QuillViewer — read-only Quill instance, no border or background */
+.ql-viewer-root.ql-container.ql-snow {
+  background: transparent !important;
+  border-color: transparent !important;
+}
+
+@keyframes float {
    0%, 100% { transform: translateY(0); }
    50% { transform: translateY(-10px); }
  }
