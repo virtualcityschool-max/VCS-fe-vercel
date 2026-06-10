@@ -327,7 +327,7 @@ const AttendanceMatrix = ({
                       className="sticky left-0 z-10 bg-slate-900 group-hover:bg-slate-800 px-3 py-3 border-r border-slate-800/50 transition-colors"
                       style={{ width: STUDENT_W, minWidth: STUDENT_W, maxWidth: STUDENT_W, ...leftShadow }}
                     >
-                      <div className="flex items-center justify-center gap-2">
+                      <div className="flex items-center justify-start gap-2">
                         <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${isStudent ? "bg-indigo-600/20" : "bg-violet-600/20"}`}>
                           <span className={`text-[10px] font-bold ${isStudent ? "text-indigo-400" : "text-violet-400"}`}>
                             {(p.name || "?").charAt(0).toUpperCase()}
