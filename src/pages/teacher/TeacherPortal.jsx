@@ -486,7 +486,7 @@ const TeacherPortal = () => {
                   return (
                     <div
                       key={session.id}
-                      className={`relative group bg-slate-900/40 backdrop-blur-md p-5 rounded-3xl border transition-all duration-300 ${
+                      className={`relative group bg-slate-900/40 backdrop-blur-md p-10 rounded-3xl border transition-all duration-300 ${
                         isLive ? "border-indigo-500/50 shadow-[0_0_40px_rgba(79,70,229,0.1)]" : "border-white/5 hover:border-white/10"
                       }`}
                     >
