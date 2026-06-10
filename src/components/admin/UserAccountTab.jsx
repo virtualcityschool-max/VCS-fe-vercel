@@ -285,7 +285,7 @@ const UserAccountTab = ({ user, onUpdate, onCancel, onSaved, onAvatarUpdated, re
                 value={formData.role}
                 onChange={(e) => handleInputChange("role", e.target.value)}
                 className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                disabled={readOnly}
+                disabled
               >
                 <option value="student">Student</option>
                 <option value="teacher">Tutor</option>
