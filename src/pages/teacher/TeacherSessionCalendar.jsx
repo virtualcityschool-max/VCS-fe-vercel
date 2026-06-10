@@ -11,6 +11,7 @@ import {
 import SessionCalendarView from "../../components/common/SessionCalendarView";
 import ConfirmDialog from "../../components/common/ConfirmDialog";
 import { FilterSelect, Input } from "../../components/ui";
+import CourseSelect from "../../components/common/CourseSelect";
 import TimezoneTag from "../../components/ui/TimezoneTag";
 import { useDateFormatters } from "../../hooks";
 import { toastManager } from "../../utils/toastManager";
@@ -24,7 +25,7 @@ function scheduledCourseReason(c) {
   if (c.status === "completed") return "Course already completed";
   if (c.status === "archived")  return "Course is archived";
   if (c.status !== "published") return `Status: ${c.status}`;
-  if (c.has_session)            return "Already has a recurring session";
+  if (c.has_session && c.upcoming_session !== false) return "Already has a recurring session";
   return null;
 }
 
@@ -47,46 +48,41 @@ function SessionForm({ form, setForm, errors, clearError, isCreate, courses }) {
           <label className="block text-sm font-medium text-slate-300 mb-2">
             Course <span className="text-red-400">*</span>
           </label>
-          <FilterSelect
+          <CourseSelect
+            courses={courses}
             value={isCreate ? form.course : form.course_id}
-            onChange={(e) => {
+            onChange={(c) => {
               if (isCreate) {
-                setForm({ ...form, course: e.target.value });
+                setForm({ ...form, course: String(c.id) });
               } else {
-                const c = courses.find((x) => x.id === Number(e.target.value));
-                setForm({ ...form, course_id: e.target.value, course_title: c?.title ?? "" });
+                setForm({ ...form, course_id: String(c.id), course_title: c.title ?? "" });
               }
               clearError(isCreate ? "course" : "course_id");
             }}
-            className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white focus:outline-none focus:ring-2 text-sm ${
-              (isCreate ? errors.course : errors.course_id)
-                ? "border-red-500 focus:ring-red-500"
-                : "border-slate-700 focus:ring-indigo-500"
-            }`}
-          >
-            <option value="">Select your course</option>
-            {courses.filter(c => scheduledCourseReason(c) === null).length > 0 && (
-              <optgroup label="─── Available ───">
-                {courses.filter(c => scheduledCourseReason(c) === null).map(c => (
-                  <option key={c.id} value={c.id}>{c.title}</option>
-                ))}
-              </optgroup>
-            )}
-            {courses.filter(c => scheduledCourseReason(c) !== null).length > 0 && (
-              <optgroup label="─── Unavailable ───">
-                {courses.filter(c => scheduledCourseReason(c) !== null).map(c => (
-                  <option key={c.id} value={c.id} disabled>{`${c.title} (${scheduledCourseReason(c)})`}</option>
-                ))}
-              </optgroup>
-            )}
-          </FilterSelect>
+            error={isCreate ? errors.course : errors.course_id}
+            placeholder="Select your course"
+            getDisabledReason={scheduledCourseReason}
+          />
           {(isCreate ? errors.course : errors.course_id) && (
             <p className="text-red-400 text-xs mt-1">{isCreate ? errors.course : errors.course_id}</p>
           )}
+          {(() => {
+            const courseId = isCreate ? form.course : form.course_id;
+            const sel = courses.find(c => String(c.id) === String(courseId));
+            if (sel?.has_session && sel?.upcoming_session === false) {
+              return (
+                <p className="text-[10px] text-blue-400 mt-1.5 flex items-center gap-1">
+                  <i className="fas fa-info-circle" />
+                  No upcoming session — you can create a new one.
+                </p>
+              );
+            }
+            return null;
+          })()}
           {courses.some(c => scheduledCourseReason(c) !== null) && (
             <p className="text-[10px] text-slate-500 mt-1.5 flex items-center gap-1">
               <i className="fas fa-info-circle text-slate-600" />
-              Greyed-out courses are either not published or already have a recurring session.
+              Unavailable courses are either not published or already have a recurring session.
             </p>
           )}
         </div>

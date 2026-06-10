@@ -1,8 +1,9 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useRef, useEffect } from "react";
 import { Button, FilterSelect, Input, TimezoneTag } from "../../components/ui";
 import SessionCalendarView from "../common/SessionCalendarView";
 import { clampDate } from "../../utils/validation";
 import { useDateFormatters } from "../../hooks";
+import CourseSelect from "../common/CourseSelect";
 
 /** Why a course is ineligible for a NEW SCHEDULED (recurring) session, or null if eligible. */
 const scheduledCourseReason = (c) => {
@@ -571,25 +572,22 @@ const SessionsTab = ({
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-slate-300 mb-2">Course <span className="text-red-400">*</span></label>
-                      <FilterSelect
+                      <CourseSelect
+                        courses={courses?.filter(c => c.status === "published") || []}
                         value={createSessionForm.course}
-                        onChange={(e) => {
-                          const c = courses?.find((c) => c.id === Number(e.target.value) && c.status === "published");
-                          setCreateSessionForm({ ...createSessionForm, course: e.target.value, instructor_id: c?.instructor?.id || "", instructor_username: c?.instructor?.username || "" });
+                        error={createSessionErrors?.course}
+                        onChange={(c) => {
+                          setCreateSessionForm({ ...createSessionForm, course: String(c.id), instructor_id: c.instructor?.id || "", instructor_username: c.instructor?.username || "", instructor_email: c.instructor?.email || "" });
                           clearCreateSessionFieldError("course");
                         }}
-                        className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white focus:outline-none focus:ring-2 text-sm ${createSessionErrors?.course ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
-                      >
-                        <option value="">Select a course</option>
-                        {courses?.filter((c) => c.status === "published").map((c) => (
-                          <option key={c.id} value={c.id}>{c.title}{c.instructor?.username ? ` — ${c.instructor.username}` : ""}{c.instructor?.email ? ` (${c.instructor.email})` : ""}</option>
-                        ))}
-                      </FilterSelect>
+                      />
                       {createSessionErrors?.course && <p className="text-red-400 text-xs mt-1">{createSessionErrors.course}</p>}
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-slate-300 mb-2">Tutor</label>
-                      <input type="text" value={createSessionForm.instructor_username || ""} disabled placeholder="Auto-filled from course"
+                      <input type="text"
+                        value={createSessionForm.instructor_username ? `${createSessionForm.instructor_username}${createSessionForm.instructor_email ? ` (${createSessionForm.instructor_email})` : ""}` : ""}
+                        disabled placeholder="Auto-filled from course"
                         className="w-full px-3 py-2.5 bg-slate-700/50 border border-slate-600/50 rounded-xl text-slate-400 text-sm cursor-not-allowed placeholder-slate-600" />
                     </div>
                   </div>
@@ -660,31 +658,16 @@ const SessionsTab = ({
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-slate-300 mb-2">Course <span className="text-red-400">*</span></label>
-                      <FilterSelect
+                      <CourseSelect
+                        courses={courses || []}
                         value={createSessionForm.course}
-                        onChange={(e) => {
-                          const selectedCourse = courses?.find((c) => c.id === Number(e.target.value) && scheduledCourseReason(c) === null);
-                          setCreateSessionForm({ ...createSessionForm, course: e.target.value, instructor_id: selectedCourse?.instructor?.id || "", instructor_username: selectedCourse?.instructor?.username || "" });
+                        error={createSessionErrors?.course}
+                        getDisabledReason={scheduledCourseReason}
+                        onChange={(c) => {
+                          setCreateSessionForm({ ...createSessionForm, course: String(c.id), instructor_id: c.instructor?.id || "", instructor_username: c.instructor?.username || "", instructor_email: c.instructor?.email || "" });
                           clearCreateSessionFieldError("course");
                         }}
-                        className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white focus:outline-none focus:ring-2 text-sm ${createSessionErrors?.course ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
-                      >
-                        <option value="">Select a course</option>
-                        {(courses || []).filter(c => scheduledCourseReason(c) === null).length > 0 && (
-                          <optgroup label="─── Available ───">
-                            {(courses || []).filter(c => scheduledCourseReason(c) === null).map(c => (
-                              <option key={c.id} value={c.id}>{c.title}{c.instructor?.username ? ` — ${c.instructor.username}` : ""}{c.instructor?.email ? ` (${c.instructor.email})` : ""}</option>
-                            ))}
-                          </optgroup>
-                        )}
-                        {(courses || []).filter(c => scheduledCourseReason(c) !== null).length > 0 && (
-                          <optgroup label="─── Unavailable ───">
-                            {(courses || []).filter(c => scheduledCourseReason(c) !== null).map(c => (
-                              <option key={c.id} value={c.id} disabled>{`${c.title}${c.instructor?.username ? ` — ${c.instructor.username}` : ""}${c.instructor?.email ? ` (${c.instructor.email})` : ""} (${scheduledCourseReason(c)})`}</option>
-                            ))}
-                          </optgroup>
-                        )}
-                      </FilterSelect>
+                      />
                       {createSessionErrors?.course && <p className="text-red-400 text-xs mt-1">{createSessionErrors.course}</p>}
                       {(() => {
                         const sel = (courses || []).find(c => String(c.id) === String(createSessionForm.course));
@@ -701,7 +684,9 @@ const SessionsTab = ({
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-slate-300 mb-2">Tutor</label>
-                      <input type="text" value={createSessionForm.instructor_username || ""} disabled placeholder="Auto-filled from course"
+                      <input type="text"
+                        value={createSessionForm.instructor_username ? `${createSessionForm.instructor_username}${createSessionForm.instructor_email ? ` (${createSessionForm.instructor_email})` : ""}` : ""}
+                        disabled placeholder="Auto-filled from course"
                         className="w-full px-3 py-2.5 bg-slate-700/50 border border-slate-600/50 rounded-xl text-slate-400 text-sm cursor-not-allowed placeholder-slate-600" />
                     </div>
                   </div>
@@ -823,47 +808,28 @@ const SessionsTab = ({
                   </label>
                   {(() => {
                     const editCourseId = Number(editSessionForm.course_id);
-                    const availableOptions = courses.filter(c => c.status === "published");
                     const currentInList = editCourseId && courses.some(c => c.id === editCourseId);
+                    const editCourses = [
+                      ...(editCourseId && !currentInList ? [{ id: editCourseId, title: editSessionForm.course_title || `Course #${editCourseId}`, instructor: { username: editSessionForm.teacher_name || "", email: "" } }] : []),
+                      ...courses.filter(c => c.status === "published"),
+                    ];
                     return (
-                      <FilterSelect
+                      <CourseSelect
+                        courses={editCourses}
                         value={editSessionForm.course_id || ""}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          const selected = courses.find((c) => c.id === Number(val));
-                          if (selected) {
-                            setEditSessionForm({
-                              ...editSessionForm,
-                              course_id: val,
-                              course_title: selected.title || "",
-                              teacher_name: selected.instructor?.username || "",
-                              instructor_id: selected.instructor?.id || "",
-                            });
-                          } else {
-                            setEditSessionForm({ ...editSessionForm, course_id: val });
-                          }
+                        onChange={(c) => {
+                          setEditSessionForm({ ...editSessionForm, course_id: String(c.id), course_title: c.title || "", teacher_name: c.instructor?.username || "", instructor_id: c.instructor?.id || "", teacher_email: c.instructor?.email || "" });
                           clearEditSessionFieldError?.("course");
                         }}
-                        className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-                      >
-                        <option value="">Select a course</option>
-                        {editCourseId && !currentInList && (
-                          <option key={`current-${editCourseId}`} value={editCourseId}>
-                            {editSessionForm.course_title || `Course #${editCourseId}`}{editSessionForm.teacher_name ? ` — ${editSessionForm.teacher_name}` : ""}
-                          </option>
-                        )}
-                        {availableOptions.map((c) => (
-                          <option key={c.id} value={c.id}>
-                            {c.title}{c.instructor?.username ? ` — ${c.instructor.username}` : ""}{c.instructor?.email ? ` (${c.instructor.email})` : ""}
-                          </option>
-                        ))}
-                      </FilterSelect>
+                      />
                     );
                   })()}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">Tutor</label>
-                  <input type="text" value={editSessionForm.teacher_name || ""} disabled
+                  <input type="text"
+                    value={editSessionForm.teacher_name ? `${editSessionForm.teacher_name}${editSessionForm.teacher_email ? ` (${editSessionForm.teacher_email})` : ""}` : ""}
+                    disabled
                     className="w-full px-3 py-2.5 bg-slate-700/50 border border-slate-600/50 rounded-xl text-slate-400 text-sm cursor-not-allowed" />
                 </div>
               </div>

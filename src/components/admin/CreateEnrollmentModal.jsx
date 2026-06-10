@@ -7,7 +7,7 @@ import {
   fetchCoursesWithSessions,
 } from "../../store/slices/adminSlice";
 import { useFieldErrors } from "../../hooks";
-import { FilterSelect } from "../../components/ui";
+import CourseSelect from "../../components/common/CourseSelect";
 import { toastManager } from "../../utils/toastManager";
 import { showApiError } from "../../utils/apiErrorHandler";
 
@@ -207,17 +207,11 @@ const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
               <label className="block text-sm font-medium text-slate-300 mb-2">
                 Course <span className="text-red-400">*</span>
               </label>
-              <FilterSelect
-                name="course_id"
+              <CourseSelect
+                courses={publishedCourses}
                 value={formData.course_id}
-                onChange={(e) => setFormData((p) => ({ ...p, course_id: e.target.value }))}
-                className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-              >
-                <option value="">Select a course</option>
-                {publishedCourses.map((c) => (
-                  <option key={c.id} value={c.id}>{c.title}{c.instructor?.username ? ` — ${c.instructor.username}` : ""}{c.instructor?.email ? ` (${c.instructor.email})` : ""}</option>
-                ))}
-              </FilterSelect>
+                onChange={(c) => setFormData((p) => ({ ...p, course_id: String(c.id) }))}
+              />
             </div>
           </div>
 
