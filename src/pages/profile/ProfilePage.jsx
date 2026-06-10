@@ -10,6 +10,7 @@ import { validatePhone, normalizePhone, formatPhoneDisplay } from "../../utils/v
 import PhoneInput from "../../components/ui/PhoneInput";
 import FilterSelect from "../../components/ui/FilterSelect";
 import { getStorageUrl } from "../../utils/storageUrl";
+import DistinctionsEditor from "../../components/admin/DistinctionsEditor";
 
 // ── Tiny helpers ──────────────────────────────────────────────────────────────
 
@@ -139,6 +140,9 @@ const ProfilePage = () => {
       const val = rp[key] ?? "";
       initial[key] = type === "tel" && val ? normalizePhone(val) : val;
     });
+    if (role === "teacher") {
+      initial.distinctions = rp.distinctions ?? [];
+    }
     setForm(initial);
   };
 
@@ -185,6 +189,9 @@ const ProfilePage = () => {
             payload[key] = type === "number" ? Number(val) : val;
           }
         });
+        if (role === "teacher") {
+          payload.distinctions = form.distinctions ?? [];
+        }
         await authService.updateRoleProfile(role, payload);
       }
       toastManager.success("Profile updated successfully");
@@ -440,6 +447,20 @@ const ProfilePage = () => {
               </div>
             </Field>
           ))}
+
+          {/* Distinctions editor — teachers only, shown when editing */}
+          {role === "teacher" && editing && (
+            <div>
+              <label className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
+                <i className="fas fa-award text-slate-600" />
+                Achievements &amp; Distinctions
+              </label>
+              <DistinctionsEditor
+                distinctions={form.distinctions ?? []}
+                onChange={(d) => setForm((p) => ({ ...p, distinctions: d }))}
+              />
+            </div>
+          )}
 
           {/* Timezone — shown for all roles */}
           <Field label="Timezone" icon="globe">
