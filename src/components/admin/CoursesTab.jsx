@@ -500,7 +500,7 @@ const CoursesTab = ({
                   className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-indigo-400 hover:bg-indigo-500/10 hover:text-indigo-300 transition font-semibold"
                 >
                   <i className="fas fa-plus text-xs" />
-                  Add Category
+                  Add Level
                 </button>
               </div>
             )}
