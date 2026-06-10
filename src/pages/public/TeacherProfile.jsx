@@ -652,32 +652,45 @@ const TeacherProfile = () => {
             </div>
           </div>
 
-          {/* Distinctions */}
+          {/* Achievements & Distinctions */}
           <div className="bg-slate-900 border border-slate-800 rounded-3xl shadow-xl flex flex-col" style={{height: "280px"}}>
-            <h2 className="text-xl font-semibold px-6 pt-6 pb-4 flex-shrink-0 flex items-center gap-3">
-              <i className="fas fa-award text-indigo-400"></i>
-              Distinctions
-            </h2>
+            <div className="flex items-center justify-between px-6 pt-6 pb-4 flex-shrink-0">
+              <h2 className="text-xl font-semibold flex items-center gap-3">
+                <i className="fas fa-trophy text-amber-400"></i>
+                Achievements &amp; Distinctions
+              </h2>
+              {teacherDetails.distinctions?.length > 0 && (
+                <span className="text-xs uppercase tracking-[0.18em] text-slate-500 font-bold">
+                  {teacherDetails.distinctions.length} total
+                </span>
+              )}
+            </div>
             <div className="flex-1 overflow-y-auto px-6 pb-6 custom-scrollbar">
               {teacherDetails.distinctions?.length ? (
-              <ul className="space-y-5">
-                {teacherDetails.distinctions.map((cert, idx) => (
-                  <li key={`${cert.title}-${idx}`} className="flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center shrink-0">
-                      <i className="fas fa-award" />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-slate-200 text-sm">{cert.title}</p>
-                      <p className="text-xs text-slate-500 mt-0.5 uppercase tracking-wider">{cert.org}</p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <div className="h-full flex items-center justify-center">
-                <p className="text-slate-500 text-sm">No distinctions listed</p>
-              </div>
-            )}
+                <ul className="space-y-3">
+                  {teacherDetails.distinctions.map((cert, idx) => (
+                    <li key={`${cert.title}-${idx}`} className="flex items-start gap-3 rounded-2xl border border-slate-800 bg-slate-950/70 p-4">
+                      <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center shrink-0 font-black text-sm border border-amber-500/20">
+                        {idx + 1}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-semibold text-white leading-snug">{cert.title}</p>
+                        <span className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-bold uppercase tracking-wider">
+                          <i className="fas fa-building text-[8px]" />
+                          {cert.org}
+                        </span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="h-full flex flex-col items-center justify-center gap-2">
+                  <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center">
+                    <i className="fas fa-trophy text-slate-600" />
+                  </div>
+                  <p className="text-slate-500 text-sm">No distinctions listed</p>
+                </div>
+              )}
             </div>
           </div>
         </div>

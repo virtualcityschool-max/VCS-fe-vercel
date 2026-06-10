@@ -11,6 +11,7 @@ import HireTutorModal from "../../components/public/HireTutorModal";
 import PublicCourseCard from "../../components/courses/PublicCourseCard";
 import { toastManager } from "../../utils/toastManager";
 import { showApiError } from "../../utils/apiErrorHandler";
+import { getStorageUrl } from "../../utils/storageUrl";
 
 const PublicHome = () => {
   const auth = useSelector((state) => state.auth);
@@ -371,15 +372,19 @@ const PublicHome = () => {
               : teachers.slice(0, 4).map((t) => (
                   <div
                     key={t.id}
-                    className="group relative bg-gradient-to-b from-slate-900/80 to-slate-900 border border-slate-800 rounded-3xl p-5 transition-all duration-300 ease-out hover:border-indigo-500/40 hover:shadow-[0_10px_40px_-10px_rgba(99,102,241,0.35)] hover:-translate-y-[2px] flex flex-col"
+                    onClick={() => navigate(`/teachers/${t.id}`)}
+                    className="group relative bg-gradient-to-b from-slate-900/80 to-slate-900 border border-slate-800 rounded-3xl p-5 transition-all duration-300 ease-out hover:border-indigo-500/40 hover:shadow-[0_10px_40px_-10px_rgba(99,102,241,0.35)] hover:-translate-y-[2px] flex flex-col cursor-pointer"
                   >
                     {/* Hover glow overlay */}
                     <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition duration-300 pointer-events-none bg-indigo-500/4" />
 
                     {/* Top */}
                     <div className="flex items-center gap-3 mb-4 relative z-10">
-                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center text-white font-bold text-base shadow-md transition-transform duration-300 group-hover:scale-105 shrink-0">
-                        {t.teacher_name?.[0]?.toUpperCase() || "T"}
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center text-white font-bold text-base shadow-md transition-transform duration-300 group-hover:scale-105 shrink-0 overflow-hidden">
+                        {t.avatar
+                          ? <img src={getStorageUrl(t.avatar)} alt={t.teacher_name} className="w-full h-full object-cover" />
+                          : (t.teacher_name?.[0]?.toUpperCase() || "T")
+                        }
                       </div>
 
                       <div className="flex-1 min-w-0 text-left">
@@ -427,14 +432,15 @@ const PublicHome = () => {
                     <div className="flex flex-col gap-2 mt-auto relative z-10">
                       {auth.isLoggedIn && (
                         <button
-                          onClick={() => navigate(`/teachers/${t.id}`)}
+                          onClick={(e) => { e.stopPropagation(); navigate(`/teachers/${t.id}`); }}
                           className="w-full py-2.5 rounded-xl bg-slate-900 border border-indigo-600/30 text-indigo-400 hover:bg-indigo-600 hover:text-white font-black text-[11px] uppercase tracking-[0.18em] transition-all active:scale-95"
                         >
                           View Profile
                         </button>
                       )}
                       <button
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.stopPropagation();
                           if (!auth.isLoggedIn) {
                             dispatch(setAuthModal({ type: "login", intendedRole: "student" }));
                             return;

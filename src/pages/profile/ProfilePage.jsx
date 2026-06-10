@@ -525,6 +525,32 @@ const ProfilePage = () => {
           </div>
         )}
 
+        {/* Distinctions — teachers only */}
+        {role === "teacher" && (
+          <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6">
+            <h2 className="text-sm font-bold uppercase tracking-widest text-slate-500 mb-4">
+              Achievements &amp; Distinctions
+            </h2>
+            {(roleProfile?.distinctions?.length ?? 0) === 0 ? (
+              <p className="text-slate-600 text-sm italic">No distinctions listed.</p>
+            ) : (
+              <ul className="space-y-4">
+                {roleProfile.distinctions.map((d, idx) => (
+                  <li key={idx} className="flex items-start gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center flex-shrink-0">
+                      <i className="fas fa-award text-sm" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-white leading-snug">{d.title}</p>
+                      <p className="text-xs text-slate-500 uppercase tracking-wider mt-0.5">{d.org}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+
         {/* Account info */}
         <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6 space-y-3">
           <h2 className="text-sm font-bold uppercase tracking-widest text-slate-500 mb-4">
