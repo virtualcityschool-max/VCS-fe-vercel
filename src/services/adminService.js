@@ -280,15 +280,13 @@ export const adminService = {
 
   // Course Management
   updateCourse: async (courseId, courseData) => {
-    try {
+
       const response = await axiosInstance.patch(
         `/courses/${courseId}/`,
         courseData,
       );
       return response.data;
-    } catch (error) {
-      throw handleApiError(error, { context: "Update Course" });
-    }
+    
   },
 
   deleteCourse: async (courseId) => {

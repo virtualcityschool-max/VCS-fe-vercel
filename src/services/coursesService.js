@@ -93,20 +93,11 @@ export const coursesService = {
 
   // Update course
   updateCourse: async (courseId, courseData) => {
-    try {
       const response = await axiosInstance.patch(
         `/courses/${courseId}/`,
         courseData,
       );
       return response.data;
-    } catch (error) {
-      console.error("Update course error:", {
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message,
-      });
-      throw error;
-    }
   },
 
   // Unenroll from course

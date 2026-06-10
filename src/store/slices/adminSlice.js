@@ -242,11 +242,7 @@ export const updateCourse = createAsyncThunk(
       const response = await coursesService.updateCourse(courseId, courseData);
       return { courseId, ...response };
     } catch (error) {
-      const processedError = handleApiError(error, {
-        context: "Update Course",
-        logError: true,
-      });
-      return rejectWithValue(processedError);
+      return rejectWithValue(error);
     }
   },
 );
