@@ -8,7 +8,7 @@ import { getCourseImage } from "../../utils/courseImageUtils";
  *
  * mode: "enrolled" | "pending" | "rejected" | "teacher"
  */
-const CourseCard = ({ course, index = 0, mode, onClick, onNavigate }) => {
+const CourseCard = ({ course, index = 0, mode, onClick, onNavigate, ctaLabel }) => {
   const isPending  = mode === "pending";
   const isRejected = mode === "rejected";
   const isEnrolled = mode === "enrolled";
@@ -152,28 +152,25 @@ const CourseCard = ({ course, index = 0, mode, onClick, onNavigate }) => {
           </p>
         )}
 
-        {/* Price line for non-teacher */}
-        {!isTeacher && (
-          <p className={`text-sm font-black mt-auto pt-3 border-t border-white/5 ${courseData.is_paid ? "text-white" : "text-emerald-400"}`}>
-            {courseData.is_paid ? `$${(courseData.price || 0).toLocaleString("en-US")} USD` : "Free"}
-          </p>
-        )}
-
-        {/* CTA */}
-        <div className={`${isTeacher ? "mt-auto pt-3 border-t border-white/5" : "mt-2"}`}>
+        {/* Bottom — price + CTA */}
+        <div className="mt-auto pt-3 border-t border-white/5 space-y-2">
+          {!isTeacher && (
+            <p className={`text-sm font-black ${courseData.is_paid ? "text-white" : "text-emerald-400"}`}>
+              {courseData.is_paid ? `$${(courseData.price || 0).toLocaleString("en-US")} USD` : "Free"}
+            </p>
+          )}
           {isTeacher && (
             <button
               onClick={onClick}
-              className="w-full py-2.5 bg-indigo-600/20 hover:bg-indigo-600 border border-indigo-500/20 hover:border-transparent text-indigo-400 hover:text-white rounded-xl font-black text-[9px] uppercase tracking-widest transition-all active:scale-95 flex items-center justify-center gap-2"
+              className="w-full py-2.5 text-[10px] font-black uppercase tracking-[0.15em] rounded-xl transition-all active:scale-95 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-lg shadow-blue-900/40"
             >
-              <i className="fas fa-users text-[9px]" />
-              View Students
+              {ctaLabel || "View Students"}
             </button>
           )}
           {isEnrolled && (
             <button
               onClick={() => onNavigate(`/courses/${courseData.id}`)}
-              className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-black text-[9px] uppercase tracking-widest transition-all shadow-lg shadow-blue-900/40 active:scale-95"
+              className="w-full py-2.5 text-[10px] font-black uppercase tracking-[0.15em] rounded-xl transition-all active:scale-95 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-lg shadow-blue-900/40"
             >
               Continue Learning
             </button>
@@ -181,7 +178,7 @@ const CourseCard = ({ course, index = 0, mode, onClick, onNavigate }) => {
           {isPending && (
             <button
               disabled
-              className="w-full py-2.5 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded-xl font-black text-[9px] uppercase tracking-widest cursor-default"
+              className="w-full py-2.5 text-[10px] font-black uppercase tracking-[0.15em] rounded-xl bg-amber-600/10 border border-amber-500/20 text-amber-400 cursor-not-allowed"
             >
               Awaiting Approval
             </button>
@@ -189,7 +186,7 @@ const CourseCard = ({ course, index = 0, mode, onClick, onNavigate }) => {
           {isRejected && (
             <button
               disabled
-              className="w-full py-2.5 bg-slate-800 text-slate-500 border border-white/5 rounded-xl font-black text-[9px] uppercase tracking-widest cursor-not-allowed opacity-50"
+              className="w-full py-2.5 text-[10px] font-black uppercase tracking-[0.15em] rounded-xl bg-slate-800 border border-white/5 text-slate-500 cursor-not-allowed opacity-50"
             >
               Enrollment Declined
             </button>
