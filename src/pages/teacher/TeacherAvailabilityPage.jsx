@@ -28,6 +28,14 @@ const today = () => {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 };
 
+const todayInTz = (tz) =>
+  new Date().toLocaleDateString("sv-SE", { timeZone: tz || undefined });
+
+const isSlotInPast = (dateStr, timeStr, tz) => {
+  const nowStr = new Date().toLocaleString("sv-SE", { timeZone: tz || undefined });
+  return `${dateStr} ${timeStr.slice(0, 5)}:00` < nowStr;
+};
+
 const calcWindowSlots = (start, end) => {
   if (!start || !end || start >= end) return 0;
   const [sh, sm] = start.split(":").map(Number);
@@ -283,7 +291,7 @@ const getDatesInRange = (from, to) => {
 };
 
 const CreateAvailabilityModal = ({ onClose, onCreated }) => {
-  const { timezoneAbbr } = useDateFormatters();
+  const { timezoneAbbr, timezone } = useDateFormatters();
   const [entries, setEntries] = useState([]);
   const [rangeFrom, setRangeFrom] = useState("");
   const [rangeTo, setRangeTo] = useState("");
@@ -414,17 +422,17 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
 
   const validate = () => {
     if (entries.length === 0) return "Please click at least one day to configure before creating slots.";
+    const todayTz = todayInTz(timezone);
     for (const entry of entries) {
       if (!entry.date) return "Please select a date for all entries.";
-      const entryDate = new Date(entry.date + "T00:00:00");
-      const todayDate = new Date(new Date().toISOString().slice(0, 10) + "T00:00:00");
-      if (entryDate < todayDate)
+      if (entry.date < todayTz)
         return `Date ${entry.date} is in the past. Only today or future dates are allowed.`;
       for (const w of entry.time_windows) {
         if (!w.start || !w.end) return "All time ranges need a start and end time.";
         if (w.start >= w.end)
           return `Start time must be before end time (${entry.date}).`;
-        // Warn if window < 1 hour
+        if (entry.date === todayTz && isSlotInPast(entry.date, w.start, timezone))
+          return `Start time ${fmt12(w.start)} on today has already passed. Please choose a future time.`;
         const [sh, sm] = w.start.split(":").map(Number);
         const [eh, em] = w.end.split(":").map(Number);
         if ((eh * 60 + em) - (sh * 60 + sm) < 60)
@@ -552,7 +560,7 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
               <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 shrink-0">From</label>
               <input
                 type="date"
-                min={today()}
+                min={todayInTz(timezone)}
                 value={rangeFrom}
                 onChange={(e) => {
                   setRangeFrom(e.target.value);
@@ -565,7 +573,7 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
               <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 shrink-0">To</label>
               <input
                 type="date"
-                min={rangeFrom || today()}
+                min={rangeFrom || todayInTz(timezone)}
                 value={rangeTo}
                 onChange={(e) => setRangeTo(e.target.value)}
                 className="bg-slate-700/60 border border-slate-600/60 focus:border-indigo-500/60 rounded-xl px-3 py-1.5 text-white text-sm font-semibold outline-none transition cursor-pointer"
@@ -1002,6 +1010,7 @@ const StatusBadge = ({ status }) =>
 // ── Edit slot modal ───────────────────────────────────────────────────────────
 
 const EditSlotModal = ({ slot, onClose, onSaved }) => {
+  const { timezone } = useDateFormatters();
   const [date, setDate] = useState(slot.date);
   const [startTime, setStartTime] = useState(slot.start_time.slice(0, 5));
   const [endTime, setEndTime] = useState(slot.end_time.slice(0, 5));
@@ -1012,6 +1021,12 @@ const EditSlotModal = ({ slot, onClose, onSaved }) => {
     if (!date) { setError("Date is required."); return; }
     if (!startTime || !endTime) { setError("Both start and end times are required."); return; }
     if (startTime >= endTime) { setError("Start time must be before end time."); return; }
+    const todayTz = todayInTz(timezone);
+    if (date < todayTz) { setError("Cannot set a slot to a past date."); return; }
+    if (date === todayTz && isSlotInPast(date, startTime, timezone)) {
+      setError(`Start time ${fmt12(startTime)} has already passed. Please choose a future time.`);
+      return;
+    }
     setSaving(true);
     setError(null);
     try {
@@ -1065,7 +1080,7 @@ const EditSlotModal = ({ slot, onClose, onSaved }) => {
             </label>
             <input
               type="date"
-              min={today()}
+              min={todayInTz(timezone)}
               value={date}
               onChange={(e) => setDate(e.target.value)}
               className="w-full bg-slate-800 border border-slate-700 focus:border-indigo-500/60 rounded-xl px-3 py-2.5 text-white text-sm font-semibold outline-none transition"
