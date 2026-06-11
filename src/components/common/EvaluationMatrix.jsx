@@ -87,9 +87,9 @@ const EvaluationMatrix = ({ students = [], courseStatus, gradingScale: gradingSc
 
       {/* ── Grading scale strip ── */}
       {gradingScale.length > 0 && (
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2">
           <span className="text-[10px] uppercase tracking-widest text-slate-500 font-bold shrink-0">Grading Scale</span>
-          <div className="flex items-center gap-1.5 flex-wrap flex-1">
+          <div className="flex items-center gap-1.5 flex-wrap">
             {gradingScale.map((s) => (
               <div
                 key={s.grade}
@@ -348,7 +348,7 @@ const EvaluationMatrix = ({ students = [], courseStatus, gradingScale: gradingSc
                       className="sticky left-0 z-10 bg-slate-900 group-hover:bg-slate-800 px-3 py-3.5 border-r border-slate-800/50 transition-colors"
                       style={{ width: STUDENT_W, minWidth: STUDENT_W, maxWidth: STUDENT_W, ...leftShadow }}
                     >
-                      <div className="flex items-center justify-center gap-2">
+                      <div className="flex items-center justify-start gap-2">
                         <div className="w-6 h-6 rounded-full bg-indigo-600/20 flex items-center justify-center flex-shrink-0">
                           <span className="text-indigo-400 text-[10px] font-bold">
                             {s.student?.username?.charAt(0)?.toUpperCase()}
