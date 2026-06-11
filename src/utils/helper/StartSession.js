@@ -2,7 +2,7 @@
 const DAY_MAP = { SUN: 0, MON: 1, TUE: 2, WED: 3, THU: 4, FRI: 5, SAT: 6 };
 
   const SESSION_DURATION_MS = 60 * 60 * 1000;
-  const SESSION_BUFFER_MS  = 15 * 60 * 1000;
+  const SESSION_BUFFER_MS  = 30 * 60 * 1000;
   const SESSION_WINDOW_MS  = SESSION_DURATION_MS + SESSION_BUFFER_MS; // 75 min
 
   export const isWithinSessionWindow = (scheduleAt) => {
