@@ -138,18 +138,6 @@ const DistinctionsEditor = ({ distinctions, onChange }) => {
           </div>
         </div>
       )}
-
-      {/* Empty State */}
-      {!distinctions ||
-        (distinctions.length === 0 && !isAdding && (
-          <div className="text-center py-8 text-slate-500">
-            <i className="fas fa-award text-2xl mb-2"></i>
-            <p className="text-sm">No distinctions added yet</p>
-            <p className="text-xs mt-1">
-              Click "Add Distinction" to get started
-            </p>
-          </div>
-        ))}
     </div>
   );
 };

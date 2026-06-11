@@ -96,6 +96,7 @@ const UserDetailsPage = () => {
             // Add parent-specific fields
             address: profileResponse?.address || "",
             children: profileResponse?.children || [],
+            courses: profileResponse?.courses || []
           };
           setUserProfile(normalizedProfile);
         }
