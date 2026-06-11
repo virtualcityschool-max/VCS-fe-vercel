@@ -182,7 +182,7 @@ const CourseCategoriesModal = ({ onClose, onCategoriesChanged, initialEditId, in
         {/* Add new */}
         <div className="px-6 pt-3 pb-4 border-t border-slate-800">
           <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-2">
-            Add New Category
+            Add New Level
           </p>
           <div className="flex gap-2">
             <input

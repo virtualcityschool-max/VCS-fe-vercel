@@ -49,7 +49,7 @@ const AdminCategoriesPage = () => {
     );
     if (await sync(updated)) {
       setNewName("");
-      toastManager.success("Category added");
+      toastManager.success("Level added");
     }
   };
 
@@ -59,7 +59,7 @@ const AdminCategoriesPage = () => {
     const updated = categories.map((c) => (c.id === id ? { ...c, name } : c));
     if (await sync(updated)) {
       setEditingId(null);
-      toastManager.success("Category renamed");
+      toastManager.success("Level renamed");
     }
   };
 
@@ -68,7 +68,7 @@ const AdminCategoriesPage = () => {
     const updated = categories.filter((c) => c.id !== id);
     if (await sync(updated)) {
       setConfirmDeleteId(null);
-      toastManager.success("Category removed");
+      toastManager.success("Level removed");
     }
   };
 

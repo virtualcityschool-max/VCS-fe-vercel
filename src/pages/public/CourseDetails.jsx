@@ -744,7 +744,7 @@ const CourseDetails = () => {
                   <div className="flex justify-between items-center py-4 border-b border-slate-700/50">
                     <span className="text-slate-400 text-sm font-medium flex items-center gap-2">
                       <i className="fas fa-tag text-blue-400 text-xs"></i>
-                      Category
+                      Level
                     </span>
                     <span className="text-white font-medium">
                       {capitalize(normalizedCourse.category)}
