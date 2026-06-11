@@ -19,6 +19,7 @@ import { useDateFormatters } from "../../hooks";
 import { availabilityService } from "../../services/availabilityService";
 import TimezoneTag from "../../components/ui/TimezoneTag";
 import SessionCountdown from "../../components/common/SessionCountdown";
+import CourseCard from "../../components/courses/CourseCard";
 
 const fmt12 = (t) => {
   if (!t) return "";
@@ -622,45 +623,20 @@ const TeacherPortal = () => {
               Academic Portfolio
             </h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {loadingCourses ? (
                 Array(2).fill(0).map((_, i) => (
-                  <div key={i} className="h-28 bg-slate-800/50 rounded-[2rem] animate-pulse" />
+                  <div key={i} className="h-48 bg-slate-800/50 rounded-2xl animate-pulse" />
                 ))
               ) : myCourses?.length ? (
-                myCourses.map((course) => (
-                  <div
+                myCourses.map((course, i) => (
+                  <CourseCard
                     key={course.id}
+                    course={course}
+                    index={i}
+                    mode="teacher"
                     onClick={() => setStudentsModal({ id: course.id, title: course.title })}
-                    className="group relative bg-slate-900/40 backdrop-blur-md p-6 rounded-[2rem] border border-white/5 hover:border-indigo-500/40 transition-all duration-500 cursor-pointer overflow-hidden shadow-lg hover:shadow-indigo-500/10"
-                  >
-                    <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/5 rounded-full blur-2xl -mr-10 -mt-10 group-hover:bg-indigo-500/10 transition-colors"></div>
-                    
-                    <div className="relative z-10">
-                      <div className="flex justify-between items-start mb-3">
-                        <span className="px-3 py-1 bg-indigo-500/10 text-indigo-400 rounded-lg text-[9px] font-black uppercase tracking-widest border border-indigo-500/10">
-                          {typeof course.category === "object" ? course.category?.name : course.category}
-                        </span>
-                        <span className={`text-[9px] font-black uppercase tracking-widest ${course.status === 'published' ? 'text-emerald-400' : 'text-amber-400'}`}>
-                          {course.status}
-                        </span>
-                      </div>
-                      
-                      <h4 className="font-black text-lg text-white group-hover:text-indigo-400 transition-colors mb-4 leading-tight">
-                        {course.title}
-                      </h4>
-                      
-                      <div className="flex items-center justify-between pt-4 border-t border-white/5">
-                        <div className="flex items-center gap-2 text-slate-500">
-                          <i className="fas fa-user-graduate text-[10px]"></i>
-                          <span className="text-xs font-bold">{course.total_enrolled} Enrolled</span>
-                        </div>
-                        <div className="text-indigo-400/60 group-hover:translate-x-1 transition-transform">
-                          <i className="fas fa-chevron-right text-xs"></i>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  />
                 ))
               ) : (
                 <div className="md:col-span-2 bg-slate-900/30 p-10 rounded-[2rem] border border-white/5 text-center text-slate-500 font-bold">

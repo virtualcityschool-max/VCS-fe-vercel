@@ -6,127 +6,7 @@ import {
   selectPendingEnrollments,
   selectRejectedEnrollments,
 } from "../../store/slices/studentDashboardSlice";
-import { getStorageUrl } from "../../utils/storageUrl";
-
-const CourseCard = ({ course, enrollment, status, onNavigate }) => {
-  const getProgressColor = (percent) => {
-    if (percent >= 80) return "bg-green-500";
-    if (percent >= 60) return "bg-blue-500";
-    if (percent >= 40) return "bg-yellow-500";
-    return "bg-red-500";
-  };
-
-  const isEnrolled = status === "enrolled";
-  const isPending = status === "pending";
-  const isRejected = status === "rejected";
-
-  const courseData = isEnrolled ? course : enrollment.course;
-  const progress = isEnrolled ? (course.progress || 0) : 0;
-  
-  const dateLabel = isPending 
-    ? (enrollment.enrolled_at ? `Applied ${new Date(enrollment.enrolled_at).toLocaleDateString()}` : "Pending")
-    : isRejected 
-    ? (enrollment.updated_at || enrollment.enrolled_at ? `Declined ${new Date(enrollment.updated_at || enrollment.enrolled_at).toLocaleDateString()}` : "Rejected")
-    : null;
-
-  return (
-    <div className="bg-slate-900/40 backdrop-blur-xl rounded-[1.25rem] border border-white/5 overflow-hidden group shadow-2xl hover:border-blue-500/20 transition-all duration-500 flex flex-col h-full">
-      <div className="h-20 lg:h-24 bg-slate-800 relative overflow-hidden shrink-0">
-        {courseData.thumbnail ? (
-          <img
-            src={getStorageUrl(courseData.thumbnail)}
-            alt={courseData.title}
-            className={`w-full h-full object-cover transition duration-700 ${isEnrolled ? "opacity-60 group-hover:scale-110" : "opacity-40"}`}
-          />
-        ) : (
-          <div className="w-full h-full bg-slate-900/50 flex items-center justify-center">
-            <i className="fas fa-book-open text-slate-700 text-3xl"></i>
-          </div>
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent"></div>
-
-        {/* Paid/Free badge — top left */}
-        <div className="absolute top-2 left-2">
-          <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wide backdrop-blur-md ${
-            courseData.is_paid
-              ? "bg-amber-500/20 text-amber-400 border border-amber-500/30"
-              : "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-          }`}>
-            {courseData.is_paid ? "Paid" : "Free"}
-          </span>
-        </div>
-
-        {/* Status Badge — top right */}
-        <div className="absolute top-4 right-4">
-           {isPending && (
-             <span className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/10 backdrop-blur-md border border-amber-500/20 rounded-xl text-amber-400 text-[8px] font-black uppercase tracking-widest">
-               <span className="w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse" />
-               Pending
-             </span>
-           )}
-           {isRejected && (
-             <span className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-500/10 backdrop-blur-md border border-rose-500/20 rounded-xl text-rose-400 text-[8px] font-black uppercase tracking-widest">
-               <i className="fas fa-times-circle text-[10px]" />
-               Rejected
-             </span>
-           )}
-        </div>
-      </div>
-
-      <div className="p-4 flex flex-col flex-1 min-w-0">
-        <h4 className="text-sm font-black mb-1.5 text-white/90 line-clamp-1 tracking-tight">
-          {courseData.title}
-        </h4>
-        <p className="text-[10px] text-slate-500 mb-4 line-clamp-2 font-medium leading-relaxed">
-          {courseData.description}
-        </p>
-
-        <div className="mt-auto">
-          {isEnrolled ? (
-            <>
-              {/* <div className="flex justify-between items-center mb-1.5">
-                <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Progress</span>
-                <span className="text-[9px] font-black text-white">{progress}%</span>
-              </div>
-              <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden mb-4">
-                <div
-                  className={`h-full ${getProgressColor(progress)} transition-all duration-1000 shadow-[0_0_8px_rgba(59,130,246,0.3)]`}
-                  style={{ width: `${progress}%` }}
-                ></div>
-              </div> */}
-              <button
-                onClick={() => onNavigate(`/courses/${courseData.id}`)}
-                className="w-full bg-blue-600 hover:bg-blue-500 text-white py-2.5 rounded-xl font-black text-[9px] uppercase tracking-widest transition-all shadow-lg shadow-blue-900/40 active:scale-95"
-              >
-                Continue Learning
-              </button>
-            </>
-          ) : (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between text-[9px] font-black uppercase tracking-widest">
-                <span className="text-slate-500">Status</span>
-                <span className={isPending ? "text-amber-400" : "text-rose-400"}>
-                  {dateLabel}
-                </span>
-              </div>
-              <button
-                disabled={isRejected}
-                onClick={() => !isRejected && onNavigate("/courses")}
-                className={`w-full py-2.5 rounded-xl font-black text-[9px] uppercase tracking-widest transition-all ${
-                  isPending 
-                  ? "bg-amber-500/10 text-amber-500 border border-amber-500/20 cursor-default" 
-                  : "bg-slate-800 text-slate-500 border border-white/5 cursor-not-allowed opacity-50"
-                }`}
-              >
-                {isPending ? "Awaiting Approval" : "Enrollment Declined"}
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
+import CourseCard from "../courses/CourseCard";
 
 const CourseProgressGrid = () => {
   const navigate = useNavigate();
@@ -200,12 +80,13 @@ const CourseProgressGrid = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">
         {activeTab === "enrolled" && (
           <>
-            {enrolledCourses.map((course) => (
-              <CourseCard 
-                key={course.id} 
-                course={course} 
-                status="enrolled" 
-                onNavigate={navigate} 
+            {enrolledCourses.map((course, i) => (
+              <CourseCard
+                key={course.id}
+                course={course}
+                index={i}
+                mode="enrolled"
+                onNavigate={navigate}
               />
             ))}
             
@@ -230,12 +111,13 @@ const CourseProgressGrid = () => {
         {activeTab === "pending" && (
           <>
             {pendingEnrollments.length > 0 ? (
-              pendingEnrollments.map((enrollment) => (
-                <CourseCard 
-                  key={enrollment.id} 
-                  enrollment={enrollment} 
-                  status="pending" 
-                  onNavigate={navigate} 
+              pendingEnrollments.map((enrollment, i) => (
+                <CourseCard
+                  key={enrollment.id}
+                  course={enrollment}
+                  index={i}
+                  mode="pending"
+                  onNavigate={navigate}
                 />
               ))
             ) : (
@@ -253,12 +135,13 @@ const CourseProgressGrid = () => {
         {activeTab === "rejected" && (
           <>
             {rejectedEnrollments.length > 0 ? (
-              rejectedEnrollments.map((enrollment) => (
-                <CourseCard 
-                  key={enrollment.id} 
-                  enrollment={enrollment} 
-                  status="rejected" 
-                  onNavigate={navigate} 
+              rejectedEnrollments.map((enrollment, i) => (
+                <CourseCard
+                  key={enrollment.id}
+                  course={enrollment}
+                  index={i}
+                  mode="rejected"
+                  onNavigate={navigate}
                 />
               ))
             ) : (
