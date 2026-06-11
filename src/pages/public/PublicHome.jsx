@@ -125,74 +125,58 @@ const PublicHome = () => {
 
       {/* Hero Section */}
       <section className="relative z-10 max-w-7xl mx-auto px-6 pt-10 md:pt-20">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-          {/* Left Content */}
+        {/* Row 1: Heading + Image */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center mb-12">
+          {/* Left: Badge + Heading */}
           <div className="text-left animate-fadeIn">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-[10px] font-black uppercase tracking-[0.2em] text-cyan-400 mb-8">
               Gulf's Premier Online School
             </div>
-            
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-black font-poppins mb-6 leading-[1.1] tracking-tight text-white">
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-black font-poppins leading-[1.1] tracking-tight text-white">
               Your Borderless <br className="hidden md:block" />
               <span className="text-cyan-400">Digital Classroom</span> Starts Here
             </h1>
-            
-            <p className="text-slate-400 text-base md:text-lg max-w-lg leading-relaxed mb-10">
-              Learn Without Borders.<br /><br />
-              Virtual City School is a premium online learning platform for Cambridge students across the UAE, Saudi Arabia, Qatar, Kuwait, Bahrain, Oman, Canada, the UK, Australia, Malaysia, Singapore, Pakistan, and beyond — offering Grade 1 to A2 Level programmes with expert teachers and live classes.<br /><br />
-              Beyond academics, we build future-ready students through specialist courses in Artificial Intelligence, Emerging Technologies, Leadership, Interpersonal Skills, and Grooming.<br /><br />
-              Through our VCS Scholar Programme, deserving students get access to quality education — and you can sponsor a child's learning journey to make it possible.<br />
-              Unlimited discovery starts here.
-            </p>
-
-            <div className="flex flex-wrap gap-4">
-              <button
-                onClick={() => navigate("/courses")}
-                className="group px-8 py-4 bg-indigo-200 text-indigo-950 rounded-xl font-bold text-sm tracking-wide transition-all hover:scale-105 shadow-xl shadow-indigo-500/10 flex items-center gap-2"
-              >
-                Explore Courses
-                <i className="fas fa-arrow-right group-hover:translate-x-1 transition text-xs"></i>
-              </button>
-              <button
-                onClick={() => navigate("/teachers")}
-                className="group px-8 py-4 border border-cyan-500/40 hover:border-cyan-400 bg-cyan-500/5 hover:bg-cyan-500/10 text-white rounded-xl font-bold text-sm tracking-wide transition-all hover:scale-105 flex items-center gap-2"
-              >
-                Meet Our Tutors
-                <i className="fas fa-user-graduate group-hover:rotate-12 transition text-xs"></i>
-              </button>
-            </div>
           </div>
 
-          {/* Right Visual (Placeholder as requested) */}
-          <div className="relative group perspective-1000">
-            {/* Main Visual Container */}
+          {/* Right: Image */}
+          <div className="relative group perspective-1000 max-w-md ml-auto">
             <div className="relative z-10 rounded-[2.5rem] border border-cyan-500/30 overflow-hidden bg-slate-900/40 backdrop-blur-3xl aspect-[1.4/1] shadow-2xl shadow-cyan-500/10 group-hover:border-cyan-400/50 transition-all duration-500">
-              <img 
-                src="/assets/hero.png" 
-                alt="Digital Campus" 
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+              <img
+                src="/assets/hero.png"
+                alt="Digital Campus"
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
               />
-              {/* Inner subtle glow effect */}
               <div className="absolute inset-0 bg-linear-to-tr from-cyan-500/10 to-transparent pointer-events-none" />
             </div>
-
-            {/* Floating Stat Card */}
-            {/* <div className="absolute -bottom-6 -left-6 z-20 bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-5 shadow-2xl animate-float">
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-lg bg-cyan-500/20 flex items-center justify-center shrink-0">
-                  <i className="fas fa-bolt text-cyan-400 text-sm" />
-                </div>
-                <div>
-                  <p className="text-2xl font-black text-white leading-none mb-1">98%</p>
-                  <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold max-w-[120px] leading-tight">
-                    Completion rate in advanced AI tracks
-                  </p>
-                </div>
-              </div>
-            </div> */}
-
-            {/* Background Decorative Glow */}
             <div className="absolute -inset-4 bg-cyan-500/5 blur-[80px] rounded-full pointer-events-none -z-10" />
+          </div>
+        </div>
+
+        {/* Row 2: Description + Buttons — full width, centered */}
+        <div className="text-justify max-w-8xl mx-auto">
+          <p className="text-slate-400 text-base md:text-lg leading-relaxed mb-10">
+            Learn Without Borders.<br />
+            Virtual City School is a premium online learning platform for Cambridge students across the UAE, Saudi Arabia, Qatar, Kuwait, Bahrain, Oman, Canada, the UK, Australia, Malaysia, Singapore, Pakistan, and beyond — offering Grade 1 to A2 Level programmes with expert teachers and live classes.<br />
+            Beyond academics, we build future-ready students through specialist courses in Artificial Intelligence, Emerging Technologies, Leadership, Interpersonal Skills, and Grooming.<br />
+            Through our VCS Scholar Programme, deserving students get access to quality education — and you can sponsor a child's learning journey to make it possible.<br />
+            Unlimited discovery starts here.
+          </p>
+
+          <div className="flex flex-wrap justify-center gap-4">
+            <button
+              onClick={() => navigate("/courses")}
+              className="group px-8 py-4 bg-indigo-200 text-indigo-950 rounded-xl font-bold text-sm tracking-wide transition-all hover:scale-105 shadow-xl shadow-indigo-500/10 flex items-center gap-2"
+            >
+              Explore Courses
+              <i className="fas fa-arrow-right group-hover:translate-x-1 transition text-xs"></i>
+            </button>
+            <button
+              onClick={() => navigate("/teachers")}
+              className="group px-8 py-4 border border-cyan-500/40 hover:border-cyan-400 bg-cyan-500/5 hover:bg-cyan-500/10 text-white rounded-xl font-bold text-sm tracking-wide transition-all hover:scale-105 flex items-center gap-2"
+            >
+              Meet Our Tutors
+              <i className="fas fa-user-graduate group-hover:rotate-12 transition text-xs"></i>
+            </button>
           </div>
         </div>
       </section>

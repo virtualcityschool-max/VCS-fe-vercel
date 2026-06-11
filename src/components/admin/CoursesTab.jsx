@@ -1079,7 +1079,7 @@ const CoursesTab = ({
                     className="w-full px-3 py-2 bg-slate-800 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     required
                   >
-                    <option value="">Select an instructor</option>
+                    <option value="">Select an tutor</option>
                     {users?.map((user) => (
                       <option key={user.id} value={user.id}>
                         {user.username}
