@@ -1226,7 +1226,6 @@ const TeacherAvailabilityPage = () => {
   const [slots, setSlots] = useState([]);
   const [loadingSlots, setLoadingSlots] = useState(true);
   const [slotsError, setSlotsError] = useState(null);
-  const [statusFilter, setStatusFilter] = useState("all");
   const [deletingId, setDeletingId] = useState(null);
   const [editingSlot, setEditingSlot] = useState(null);
 
@@ -1263,10 +1262,6 @@ const TeacherAvailabilityPage = () => {
   const handleSlotUpdated = (updatedSlot) => {
     setSlots((prev) => prev.map((s) => (s.id === updatedSlot.id ? updatedSlot : s)));
   };
-
-  const filtered = slots.filter(
-    (s) => statusFilter === "all" || s.status === statusFilter
-  );
 
   const availableCount = slots.filter((s) => s.status === "available").length;
   const bookedCount = slots.filter((s) => s.status === "booked").length;
@@ -1337,30 +1332,6 @@ const TeacherAvailabilityPage = () => {
         {/* Slot calendar */}
         {(loadingSlots || slotsError || slots.length > 0) && (
           <div className="space-y-6">
-            {/* Filter bar */}
-            {!loadingSlots && !slotsError && slots.length > 0 && (
-              <div className="flex items-center justify-between gap-4 flex-wrap">
-                <p className="text-slate-500 text-sm">
-                  {slots.length} total slot{slots.length !== 1 ? "s" : ""}
-                </p>
-                <div className="flex items-center gap-1 bg-slate-900 border border-slate-800 rounded-xl p-1">
-                  {["all", "available", "booked"].map((f) => (
-                    <button
-                      key={f}
-                      onClick={() => setStatusFilter(f)}
-                      className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition ${
-                        statusFilter === f
-                          ? "bg-indigo-600 text-white"
-                          : "text-slate-500 hover:text-slate-300"
-                      }`}
-                    >
-                      {f}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
             {loadingSlots ? (
               <div className="flex flex-col items-center py-32">
                 <i className="fas fa-spinner fa-spin text-2xl text-slate-700 mb-3" />
@@ -1379,7 +1350,7 @@ const TeacherAvailabilityPage = () => {
               </div>
             ) : (
               <SlotCalendarView
-                slots={filtered}
+                slots={slots}
                 onDelete={handleDelete}
                 onEdit={setEditingSlot}
                 deletingId={deletingId}

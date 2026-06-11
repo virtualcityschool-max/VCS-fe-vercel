@@ -136,14 +136,107 @@ const SlotPopup = ({ slot, onClose }) => {
   );
 };
 
+// ── Slot list / table view ────────────────────────────────────────────────────
+
+const SlotListView = ({ slots, onDelete, onEdit, deletingId, allowDeleteBooked }) => {
+  const sorted = [...slots].sort((a, b) =>
+    a.date !== b.date ? a.date.localeCompare(b.date) : (a.start_time || "").localeCompare(b.start_time || "")
+  );
+
+  if (!sorted.length) return (
+    <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-12 text-center">
+      <div className="w-14 h-14 bg-slate-700/20 rounded-full flex items-center justify-center mx-auto mb-4">
+        <i className="fas fa-calendar text-slate-400 text-xl" />
+      </div>
+      <p className="text-white font-bold mb-1">No Slots</p>
+      <p className="text-slate-400 text-sm">No slots match the current filter.</p>
+    </div>
+  );
+
+  return (
+    <div className="bg-slate-900/50 border border-slate-800 rounded-2xl overflow-hidden">
+      <div className="divide-y divide-slate-800/40">
+        {sorted.map((slot) => {
+          const isBooked = slot.status === "booked";
+          const isDeleting = deletingId === slot.id;
+          const canEdit = !isBooked && !!onEdit;
+          const canDelete = (!isBooked || allowDeleteBooked) && !!onDelete;
+          return (
+            <div key={slot.id} className="flex items-center gap-3 px-4 py-3 hover:bg-slate-800/20 transition">
+              <div className={`w-0.5 h-10 rounded-full shrink-0 ${isBooked ? "bg-amber-400/70" : "bg-emerald-400/70"}`} />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-white tabular-nums">
+                  {fmt12(slot.start_time)} – {fmt12(slot.end_time)}
+                </p>
+                <p className="text-[10px] text-slate-500 mt-0.5">{fmtDate(slot.date)}</p>
+              </div>
+              {isBooked && slot.booked_by_name && (
+                <div className="hidden sm:block min-w-0">
+                  <p className="text-xs font-semibold text-slate-300 truncate max-w-[140px]">{slot.booked_by_name}</p>
+                  {slot.booked_by_email && (
+                    <p className="text-[10px] text-slate-500 truncate max-w-[140px]">{slot.booked_by_email}</p>
+                  )}
+                </div>
+              )}
+              <span className={`shrink-0 text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-full border ${
+                isBooked
+                  ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                  : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+              }`}>
+                {isBooked ? "Booked" : "Open"}
+              </span>
+              {(canEdit || canDelete) && (
+                <div className="flex items-center gap-1 shrink-0">
+                  {canEdit && (
+                    <button
+                      onClick={() => onEdit(slot)}
+                      title="Edit slot"
+                      className="w-7 h-7 rounded-lg flex items-center justify-center bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/15 text-indigo-400 transition"
+                    >
+                      <i className="fas fa-pencil-alt text-[10px]" />
+                    </button>
+                  )}
+                  {canDelete && (
+                    <button
+                      onClick={() => !isDeleting && onDelete(slot.id)}
+                      disabled={isDeleting}
+                      title="Delete slot"
+                      className="w-7 h-7 rounded-lg flex items-center justify-center bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/15 text-rose-400 transition disabled:opacity-50"
+                    >
+                      {isDeleting
+                        ? <i className="fas fa-spinner fa-spin text-[10px]" />
+                        : <i className="fas fa-trash-alt text-[10px]" />}
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+// ── Main calendar component ───────────────────────────────────────────────────
+
+const STATUS_FILTER_LABELS = { all: "All", available: "Available", booked: "Booked" };
+
 const SlotCalendarView = ({ slots = [], loading = false, onDelete, onEdit, deletingId, allowDeleteBooked = false }) => {
   const { formatTime, timezoneAbbr } = useDateFormatters();
   const [calendarMonth, setCalendarMonth] = useState(null);
   const [popupSlot, setPopupSlot] = useState(null);
+  const [view, setView] = useState("table");
+  const [statusFilter, setStatusFilter] = useState("all");
+
+  const filteredSlots = useMemo(
+    () => statusFilter === "all" ? slots : slots.filter((s) => s.status === statusFilter),
+    [slots, statusFilter]
+  );
 
   const { monthRange } = useMemo(() => {
-    if (!slots.length) return { monthRange: [] };
-    const dates = slots.map((s) => s.date).filter(Boolean).sort();
+    if (!filteredSlots.length) return { monthRange: [] };
+    const dates = filteredSlots.map((s) => s.date).filter(Boolean).sort();
     const start = new Date(dates[0] + "T00:00:00");
     const end   = new Date(dates[dates.length - 1] + "T00:00:00");
     const months = [];
@@ -154,7 +247,7 @@ const SlotCalendarView = ({ slots = [], loading = false, onDelete, onEdit, delet
       cur.setMonth(cur.getMonth() + 1);
     }
     return { monthRange: months };
-  }, [slots]);
+  }, [filteredSlots]);
 
   const activeMonthIdx = useMemo(() => {
     if (!monthRange.length) return 0;
@@ -175,7 +268,7 @@ const SlotCalendarView = ({ slots = [], loading = false, onDelete, onEdit, delet
 
   const slotsByDate = useMemo(() => {
     const map = {};
-    slots.forEach((s) => {
+    filteredSlots.forEach((s) => {
       if (!s.date) return;
       if (!map[s.date]) map[s.date] = [];
       map[s.date].push(s);
@@ -184,7 +277,7 @@ const SlotCalendarView = ({ slots = [], loading = false, onDelete, onEdit, delet
       arr.sort((a, b) => (a.start_time || "").localeCompare(b.start_time || ""))
     );
     return map;
-  }, [slots]);
+  }, [filteredSlots]);
 
   const calendarGrid = useMemo(() => {
     if (!activeMonthData) return [];
@@ -224,57 +317,116 @@ const SlotCalendarView = ({ slots = [], loading = false, onDelete, onEdit, delet
 
   return (
     <div className="space-y-4 animate-fadeIn">
-      {/* Month navigation */}
-      <div className="glass flex items-center justify-between p-1.5 rounded-xl border-slate-800 shadow-xl relative overflow-hidden group">
-        <div className="absolute inset-0 bg-linear-to-r from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
 
-        <button
-          onClick={() => setCalendarMonth(monthRange[Math.max(0, activeMonthIdx - 1)])}
-          disabled={activeMonthIdx === 0}
-          className="w-10 h-10 flex items-center justify-center rounded-lg bg-slate-800/50 hover:bg-indigo-500 hover:text-white text-slate-400 disabled:opacity-10 disabled:cursor-not-allowed transition-all duration-300 relative z-10"
-        >
-          <i className="fas fa-chevron-left text-xs" />
-        </button>
-
-        <div className="text-center relative z-10 py-2">
-          <h2 className="text-lg font-black text-white tracking-tight">
-            {MONTH_NAMES[activeMonthData.month]}&nbsp;&nbsp;
-            <span className="text-indigo-400">{activeMonthData.year}</span>
-          </h2>
-          <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500">
-            {activeMonthIdx + 1} of {monthRange.length} Month{monthRange.length !== 1 ? "s" : ""}
-          </span>
-        </div>
-
-        <button
-          onClick={() => setCalendarMonth(monthRange[Math.min(monthRange.length - 1, activeMonthIdx + 1)])}
-          disabled={activeMonthIdx === monthRange.length - 1}
-          className="w-10 h-10 flex items-center justify-center rounded-lg bg-slate-800/50 hover:bg-indigo-500 hover:text-white text-slate-400 disabled:opacity-10 disabled:cursor-not-allowed transition-all duration-300 relative z-10"
-        >
-          <i className="fas fa-chevron-right text-xs" />
-        </button>
-      </div>
-
-      {/* Month tab pills */}
-      {monthRange.length > 1 && (
-        <div className="flex gap-2 flex-wrap px-1">
-          {monthRange.map((m, idx) => (
+      {/* ── Mobile: filter pills + always table ── */}
+      <div className="sm:hidden space-y-3">
+        <div className="flex items-center gap-1 bg-slate-900 border border-slate-800 rounded-xl p-1 w-fit">
+          {Object.entries(STATUS_FILTER_LABELS).map(([f, label]) => (
             <button
-              key={`${m.year}-${m.month}`}
-              onClick={() => setCalendarMonth(m)}
-              className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${
-                idx === activeMonthIdx
-                  ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/20"
-                  : "bg-slate-800/40 text-slate-500 hover:bg-slate-800 hover:text-slate-300 border border-slate-800"
+              key={f}
+              onClick={() => setStatusFilter(f)}
+              className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition ${
+                statusFilter === f ? "bg-indigo-600 text-white" : "text-slate-500 hover:text-slate-300"
               }`}
             >
-              {MONTH_NAMES[m.month].slice(0, 3)} {m.year}
+              {label}
             </button>
           ))}
         </div>
+        <SlotListView slots={filteredSlots} onDelete={onDelete} onEdit={onEdit} deletingId={deletingId} allowDeleteBooked={allowDeleteBooked} />
+      </div>
+
+      {/* ── sm+: view toggle (left) + filter pills (right) ── */}
+      <div className="hidden sm:flex items-center justify-between gap-4 flex-wrap">
+        <div className="flex bg-slate-800 border border-slate-700 rounded-lg overflow-hidden shrink-0">
+          <button
+            onClick={() => setView("table")}
+            className={`px-3 py-2 text-sm font-medium transition flex items-center gap-1.5 ${view === "table" ? "bg-indigo-600 text-white" : "text-slate-400 hover:text-white"}`}
+          >
+            <i className="fas fa-list text-xs" /> Table
+          </button>
+          <button
+            onClick={() => setView("calendar")}
+            className={`px-3 py-2 text-sm font-medium transition flex items-center gap-1.5 ${view === "calendar" ? "bg-indigo-600 text-white" : "text-slate-400 hover:text-white"}`}
+          >
+            <i className="fas fa-calendar-alt text-xs" /> Calendar
+          </button>
+        </div>
+        <div className="flex items-center gap-1 bg-slate-900 border border-slate-800 rounded-xl p-1">
+          {Object.entries(STATUS_FILTER_LABELS).map(([f, label]) => (
+            <button
+              key={f}
+              onClick={() => setStatusFilter(f)}
+              className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition ${
+                statusFilter === f ? "bg-indigo-600 text-white" : "text-slate-500 hover:text-slate-300"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* ── sm+: calendar nav (below toggle, only when calendar view) ── */}
+      {view === "calendar" && (
+        <div className="hidden sm:block">
+          <div className="glass inline-flex items-center gap-3 p-2 rounded-xl border border-slate-800 shadow-xl">
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                onClick={() => setCalendarMonth(monthRange[Math.max(0, activeMonthIdx - 1)])}
+                disabled={activeMonthIdx === 0}
+                className="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800/50 hover:bg-indigo-500 hover:text-white text-slate-400 disabled:opacity-20 disabled:cursor-not-allowed transition-all duration-200"
+              >
+                <i className="fas fa-chevron-left text-xs" />
+              </button>
+              <div className="min-w-[110px] text-center">
+                <p className="text-sm font-black text-white leading-tight tracking-tight">
+                  {MONTH_NAMES[activeMonthData.month]}
+                  <span className="text-indigo-400 ml-1">{activeMonthData.year}</span>
+                </p>
+                <p className="text-[9px] font-bold uppercase tracking-widest text-slate-500 mt-0.5">
+                  {activeMonthIdx + 1} / {monthRange.length}
+                </p>
+              </div>
+              <button
+                onClick={() => setCalendarMonth(monthRange[Math.min(monthRange.length - 1, activeMonthIdx + 1)])}
+                disabled={activeMonthIdx === monthRange.length - 1}
+                className="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800/50 hover:bg-indigo-500 hover:text-white text-slate-400 disabled:opacity-20 disabled:cursor-not-allowed transition-all duration-200"
+              >
+                <i className="fas fa-chevron-right text-xs" />
+              </button>
+            </div>
+            {monthRange.length > 1 && <div className="w-px self-stretch bg-slate-800 shrink-0" />}
+            {monthRange.length > 1 && (
+              <div className="flex flex-wrap gap-1.5 overflow-y-auto max-h-20 custom-scrollbar pr-1">
+                {monthRange.map((m, idx) => (
+                  <button
+                    key={`${m.year}-${m.month}`}
+                    onClick={() => setCalendarMonth(m)}
+                    className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all duration-200 shrink-0 ${
+                      idx === activeMonthIdx
+                        ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/20"
+                        : "bg-slate-800/60 text-slate-500 hover:bg-slate-700 hover:text-slate-300 border border-slate-700/50"
+                    }`}
+                  >
+                    {MONTH_NAMES[m.month].slice(0, 3)} {String(m.year).slice(2)}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
       )}
 
-      {/* Calendar grid */}
+      {/* ── sm+: table view ── */}
+      {view === "table" && (
+        <div className="hidden sm:block">
+          <SlotListView slots={filteredSlots} onDelete={onDelete} onEdit={onEdit} deletingId={deletingId} allowDeleteBooked={allowDeleteBooked} />
+        </div>
+      )}
+
+      {/* ── sm+: calendar grid ── */}
+      {view === "calendar" && <div className="hidden sm:block">
       <div className="glass rounded-2xl sm:rounded-[2.5rem] border-slate-800 overflow-hidden shadow-2xl backdrop-blur-2xl">
         {/* Day-of-week header */}
         <div className="grid grid-cols-7 border-b border-slate-800/50 bg-slate-950/40">
@@ -354,31 +506,31 @@ const SlotCalendarView = ({ slots = [], loading = false, onDelete, onEdit, delet
                         {/* Left accent bar */}
                         <div className={`absolute left-0 top-0 bottom-0 w-0.5 ${isBooked ? "bg-amber-400/70" : "bg-indigo-400/70"}`} />
 
-                        {/* Student name — prominent, top */}
+                        {/* Student name / Open — top */}
                         {isBooked && slot.booked_by_name ? (
-                          <p className="text-[9px] sm:text-[10px] font-black text-white truncate leading-tight mb-0.5">
+                          <p className="text-[8px] font-black text-white truncate leading-tight mb-0.5">
                             {slot.booked_by_name}
                           </p>
                         ) : !isBooked && (
-                          <p className="text-[9px] sm:text-[10px] font-black text-indigo-300/80 truncate leading-tight mb-0.5">
+                          <p className="text-[8px] font-black text-indigo-300/80 truncate leading-tight mb-0.5">
                             Open
                           </p>
                         )}
 
                         {/* Time + badge row */}
-                        <div className="flex items-center justify-between gap-1">
-                          <div className={`flex items-center gap-0.5 ${isBooked ? "text-amber-400/70" : "text-indigo-400/70"}`}>
-                            <i className="far fa-clock text-[6px] sm:text-[7px]" />
-                            <span className="text-[7px] sm:text-[8px] font-semibold tabular-nums">
-                              {fmt12(slot.start_time)}{" "}<TimezoneTag />
+                        <div className="flex items-center gap-0.5 overflow-hidden">
+                          <div className={`flex items-center gap-0.5 truncate ${isBooked ? "text-amber-400/70" : "text-indigo-400/70"}`}>
+                            <i className="far fa-clock text-[6px] shrink-0" />
+                            <span className="text-[7px] font-semibold tabular-nums truncate">
+                              {fmt12(slot.start_time)}
                             </span>
                           </div>
-                          <span className={`shrink-0 text-[6px] sm:text-[7px] font-black uppercase tracking-widest px-1 py-0.5 rounded border ${
+                          <span className={`ml-auto shrink-0 hidden lg:inline text-[6px] font-black uppercase px-1 py-0.5 rounded border ${
                             isBooked
                               ? "bg-amber-500/15 text-amber-400 border-amber-500/20"
                               : "bg-emerald-500/10 text-emerald-400 border-emerald-500/15"
                           }`}>
-                            {isBooked ? "booked" : "open"}
+                            {isBooked ? "bkd" : "open"}
                           </span>
                         </div>
 
@@ -424,7 +576,8 @@ const SlotCalendarView = ({ slots = [], loading = false, onDelete, onEdit, delet
           })}
         </div>
       </div>
-      {/* Join popup for booked upcoming slots */}
+      </div>}  {/* end calendar grid conditional */}
+
       {popupSlot && <SlotPopup slot={popupSlot} onClose={() => setPopupSlot(null)} />}
     </div>
   );
