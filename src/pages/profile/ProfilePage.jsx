@@ -448,20 +448,6 @@ const ProfilePage = () => {
             </Field>
           ))}
 
-          {/* Distinctions editor — teachers only, shown when editing */}
-          {role === "teacher" && editing && (
-            <div>
-              <label className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
-                <i className="fas fa-award text-slate-600" />
-                Achievements &amp; Distinctions
-              </label>
-              <DistinctionsEditor
-                distinctions={form.distinctions ?? []}
-                onChange={(d) => setForm((p) => ({ ...p, distinctions: d }))}
-              />
-            </div>
-          )}
-
           {/* Timezone — shown for all roles */}
           <Field label="Timezone" icon="globe">
             <div>
@@ -490,24 +476,57 @@ const ProfilePage = () => {
             </div>
           </Field>
 
+          {/* Achievements & Distinctions — teachers only, inside profile card */}
+          {role === "teacher" && (
+            <div>
+              <label className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3">
+                <i className="fas fa-award text-slate-600" />
+                Achievements &amp; Distinctions
+              </label>
+              {editing ? (
+                <DistinctionsEditor
+                  distinctions={form.distinctions ?? []}
+                  onChange={(d) => setForm((p) => ({ ...p, distinctions: d }))}
+                />
+              ) : (roleProfile?.distinctions?.length ?? 0) === 0 ? (
+                <p className="text-slate-600 text-sm italic">No distinctions listed.</p>
+              ) : (
+                <ul className="space-y-3">
+                  {roleProfile.distinctions.map((d, idx) => (
+                    <li key={idx} className="flex items-start gap-3">
+                      <div className="w-8 h-8 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center flex-shrink-0">
+                        <i className="fas fa-award text-xs" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-white leading-snug">{d.title}</p>
+                        <p className="text-xs text-slate-500 uppercase tracking-wider mt-0.5">{d.org}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
+
           {/* Action buttons */}
           {editing && (
-            <div className="flex gap-3 pt-2">
+            <div className="flex justify-end gap-2 pt-2">
               <button
                 onClick={handleCancel}
-                className="flex-1 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-xl text-sm font-semibold transition"
+                className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white rounded-xl text-sm font-semibold transition active:scale-95"
               >
-                Cancel
+                <i className="fas fa-xmark text-xs" />
+                <span className="hidden sm:inline">Cancel</span>
               </button>
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="flex-1 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-semibold transition disabled:opacity-50 active:scale-95"
+                className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-semibold transition disabled:opacity-50 active:scale-95"
               >
                 {saving ? (
-                  <><i className="fas fa-spinner fa-spin mr-2" />Saving…</>
+                  <><i className="fas fa-spinner fa-spin text-xs" /><span className="hidden sm:inline">Saving…</span></>
                 ) : (
-                  <><i className="fas fa-check mr-2" />Save Changes</>
+                  <><i className="fas fa-check text-xs" /><span className="hidden sm:inline">Save Changes</span></>
                 )}
               </button>
             </div>
@@ -520,54 +539,46 @@ const ProfilePage = () => {
             <h2 className="text-sm font-bold uppercase tracking-widest text-slate-500 mb-4">
               Assigned Courses
             </h2>
-            {(roleProfile?.assigned_courses?.length ?? 0) === 0 ? (
+            {(profile?.assigned_courses?.filter((c) => c.status !== "draft").length ?? 0) === 0 ? (
               <p className="text-slate-600 text-sm italic">No courses assigned yet.</p>
             ) : (
               <div className="space-y-2">
-                {roleProfile.assigned_courses.map((course) => (
-                  <div key={course.id} className="flex items-center justify-between gap-3 py-2.5 border-b border-slate-800 last:border-0">
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold text-white truncate">{course.title}</p>
-                      <p className="text-xs text-slate-500 truncate mt-0.5">{course.category__name}</p>
+                {profile.assigned_courses.filter((c) => c.status !== "draft").map((course) => (
+                  <div key={course.id} className="flex items-start justify-between gap-3 py-2.5 border-b border-slate-800 last:border-0">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold text-white truncate">{course.course_name}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <p className="text-xs text-slate-500">
+                          {course.enrolled_students} student{course.enrolled_students === 1 ? "" : "s"}
+                        </p>
+                        <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border ${
+                          course.status === "published"
+                            ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                            : course.status === "completed"
+                            ? "bg-slate-500/10 text-slate-400 border-slate-600/20"
+                            : "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                        }`}>
+                          {course.status}
+                        </span>
+                      </div>
                     </div>
-                    <span className={`flex-shrink-0 text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full border ${
-                      course.status === "published"
-                        ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                        : course.status === "completed"
-                        ? "bg-slate-500/10 text-slate-400 border-slate-600/20"
-                        : "bg-amber-500/10 text-amber-400 border-amber-500/20"
-                    }`}>
-                      {course.status}
-                    </span>
+                    <div className="flex-shrink-0 flex flex-col items-end">
+                      <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border ${
+                        course.is_paid
+                          ? "bg-amber-500/10 text-amber-300 border-amber-500/20"
+                          : "bg-emerald-500/10 text-emerald-300 border-emerald-500/20"
+                      }`}>
+                        {course.is_paid ? "Paid" : "Free"}
+                      </span>
+                      {course.is_paid && (
+                        <span className="text-xs font-semibold text-slate-300 mt-0.5">
+                          ${parseFloat(course.price).toFixed(2)}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
-            )}
-          </div>
-        )}
-
-        {/* Distinctions — teachers only */}
-        {role === "teacher" && (
-          <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6">
-            <h2 className="text-sm font-bold uppercase tracking-widest text-slate-500 mb-4">
-              Achievements &amp; Distinctions
-            </h2>
-            {(roleProfile?.distinctions?.length ?? 0) === 0 ? (
-              <p className="text-slate-600 text-sm italic">No distinctions listed.</p>
-            ) : (
-              <ul className="space-y-4">
-                {roleProfile.distinctions.map((d, idx) => (
-                  <li key={idx} className="flex items-start gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center flex-shrink-0">
-                      <i className="fas fa-award text-sm" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold text-white leading-snug">{d.title}</p>
-                      <p className="text-xs text-slate-500 uppercase tracking-wider mt-0.5">{d.org}</p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
             )}
           </div>
         )}

@@ -620,20 +620,39 @@ const TeacherProfile = () => {
                 Courses
               </h2>
               <span className="text-xs uppercase tracking-[0.18em] text-slate-500 font-bold">
-                {teacherDetails.courses?.length || 0} total
+                {teacherDetails.courses?.filter((c) => c.status !== "draft").length || 0} total
               </span>
             </div>
             <div className="flex-1 overflow-y-auto px-6 pb-6 space-y-3 custom-scrollbar">
-              {teacherDetails.courses?.length ? (
-                teacherDetails.courses.map((course) => (
+              {teacherDetails.courses?.filter((c) => c.status !== "draft").length ? (
+                teacherDetails.courses.filter((c) => c.status !== "draft").map((course) => (
                   <Link
                     key={course.id}
                     to={`/courses/${course.id}`}
                     className="block rounded-2xl border border-slate-800 bg-slate-950/70 p-4 transition hover:bg-slate-800"
                   >
-                    <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-start justify-between gap-3">
                       <p className="text-sm font-semibold text-white truncate">{course.course_name}</p>
-                      <span className={`flex-shrink-0 inline-flex rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider border ${
+                      <div className="flex-shrink-0 flex flex-col items-end">
+                        <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider border ${
+                          course.is_paid
+                            ? "border-amber-500/20 bg-amber-500/10 text-amber-300"
+                            : "border-emerald-500/20 bg-emerald-500/10 text-emerald-300"
+                        }`}>
+                          {course.is_paid ? "Paid" : "Free"}
+                        </span>
+                        {course.is_paid && (
+                          <span className="text-xs font-semibold text-slate-300 mt-0.5">
+                            ${parseFloat(course.price).toFixed(2)}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 mt-1">
+                      <p className="text-xs text-slate-500">
+                        {course.enrolled_students} student{course.enrolled_students === 1 ? "" : "s"}
+                      </p>
+                      <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider border ${
                         course.status === "published"
                           ? "border-green-500/20 bg-green-500/10 text-green-300"
                           : "border-slate-700 bg-slate-800 text-slate-400"
@@ -641,9 +660,6 @@ const TeacherProfile = () => {
                         {course.status}
                       </span>
                     </div>
-                    <p className="text-xs text-slate-500 mt-1">
-                      {course.enrolled_students} student{course.enrolled_students === 1 ? "" : "s"}
-                    </p>
                   </Link>
                 ))
               ) : (
