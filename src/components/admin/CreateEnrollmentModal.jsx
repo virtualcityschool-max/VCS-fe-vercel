@@ -20,9 +20,9 @@ const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
   const dispatch = useDispatch();
 
   const { users, enrollmentCourses: courses } = useSelector((state) => state.admin);
-  const { loading: createLoading } = useSelector((state) => state.admin.enrollments);
 
   const [formData, setFormData] = useState(EMPTY_FORM);
+  const [submitting, setSubmitting] = useState(false);
   const [studentDropdownOpen, setStudentDropdownOpen] = useState(false);
   const [studentSearch, setStudentSearch] = useState("");
   const [studentDropPos, setStudentDropPos] = useState({ top: 0, left: 0, width: 0 });
@@ -98,6 +98,7 @@ const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
       student_id: parseInt(formData.student_id),
     };
 
+    setSubmitting(true);
     try {
       const result = await dispatch(createEnrollment(payload)).unwrap();
       toastManager.success(result.message || "Enrollment created successfully");
@@ -105,6 +106,8 @@ const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
       onClose();
     } catch (error) {
       showApiError(error);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -228,11 +231,11 @@ const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
             </button>
             <button
               type="submit"
-              disabled={createLoading}
+              disabled={submitting}
               className="px-6 py-2.5 rounded-xl text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition disabled:opacity-50 flex items-center gap-2"
             >
-              {createLoading
-                ? <><i className="fas fa-spinner fa-spin text-xs" /> Creating…</>
+              {submitting
+                ? <><i className="fas fa-spinner fa-spin text-xs" /> Enrolling…</>
                 : "Enroll Student"
               }
             </button>
