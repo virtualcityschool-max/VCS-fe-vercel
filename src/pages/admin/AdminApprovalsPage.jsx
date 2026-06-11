@@ -81,10 +81,11 @@ const AdminApprovalsPage = () => {
   const handleReject = async (userId, shouldDeleteUser) => {
     try {
       await dispatch(rejectUser(userId)).unwrap();
-      toastManager.success("User rejected successfully");
       if (shouldDeleteUser) {
         await adminService.purgeUser(userId);
-        toastManager.success("User permanently deleted");
+        toastManager.success("User rejected and permanently deleted");
+      } else {
+        toastManager.success("User rejected successfully");
       }
     } catch (error) {
       showApiError(error);
