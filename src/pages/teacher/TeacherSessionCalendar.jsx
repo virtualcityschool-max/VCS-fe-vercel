@@ -324,15 +324,15 @@ const TeacherSessionCalendar = () => {
   // ── helpers ──────────────────────────────────────────────
 
   const openEdit = (session) => {
-    const localDt = new Date(session.scheduled_at);
-    const pad = (n) => String(n).padStart(2, "0");
+    const localDT = toDatetimeInput(session.scheduled_at);
+    const [start_date, time] = localDT?.includes("T") ? localDT.split("T") : ["", ""];
     setEditForm({
       id:                  session.id,
       title:               session.title || "",
       course_id:           session.course?.id ?? session.course ?? "",
       course_title:        session.course?.title ?? session.course_title ?? "",
-      start_date:          `${localDt.getFullYear()}-${pad(localDt.getMonth()+1)}-${pad(localDt.getDate())}`,
-      time:                `${pad(localDt.getHours())}:${pad(localDt.getMinutes())}`,
+      start_date,
+      time,
       recurrence_end_date: session.recurrence_end_date ?? "",
       recurrence_days:     session.recurrence_days ?? [],
       is_recurring:        session.is_recurring ?? true,
