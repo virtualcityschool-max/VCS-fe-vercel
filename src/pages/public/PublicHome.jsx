@@ -9,6 +9,7 @@ import AuthRequiredModal from "../../components/common/AuthRequiredModal";
 import ConfirmDialog from "../../components/common/ConfirmDialog";
 import HireTutorModal from "../../components/public/HireTutorModal";
 import PublicCourseCard from "../../components/courses/PublicCourseCard";
+import TutorCard from "../../components/teachers/TutorCard";
 import { toastManager } from "../../utils/toastManager";
 import { showApiError } from "../../utils/apiErrorHandler";
 import { getStorageUrl } from "../../utils/storageUrl";
@@ -204,7 +205,7 @@ const PublicHome = () => {
                 </button>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                 {enrolledList.slice(0, 3).map((course, i) => (
                   <PublicCourseCard
                     key={course.id}
@@ -240,7 +241,7 @@ const PublicHome = () => {
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           {coursesLoading && courses.length === 0
             ? [...Array(4)].map((_, i) => (
                 <div key={i} className="bg-[#1a2235]/60 rounded-[2rem] overflow-hidden animate-pulse border border-white/5 aspect-[4/5]" />
@@ -348,99 +349,30 @@ const PublicHome = () => {
             </button>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {teachersLoading && teachers.length === 0
               ? [...Array(4)].map((_, i) => (
                   <div key={i} className="bg-[#1a2235]/60 rounded-[2.5rem] p-8 animate-pulse border border-white/5 h-[320px]" />
                 ))
-              : teachers.slice(0, 4).map((t) => (
-                  <div
+              : teachers.slice(0, 4).map((t, i) => (
+                  <TutorCard
                     key={t.id}
-                    onClick={() => navigate(`/teachers/${t.id}`)}
-                    className="group relative bg-gradient-to-b from-slate-900/80 to-slate-900 border border-slate-800 rounded-3xl p-5 transition-all duration-300 ease-out hover:border-indigo-500/40 hover:shadow-[0_10px_40px_-10px_rgba(99,102,241,0.35)] hover:-translate-y-[2px] flex flex-col cursor-pointer"
-                  >
-                    {/* Hover glow overlay */}
-                    <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition duration-300 pointer-events-none bg-indigo-500/4" />
-
-                    {/* Top */}
-                    <div className="flex items-center gap-3 mb-4 relative z-10">
-                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center text-white font-bold text-base shadow-md transition-transform duration-300 group-hover:scale-105 shrink-0 overflow-hidden">
-                        {t.avatar
-                          ? <img src={getStorageUrl(t.avatar)} alt={t.teacher_name} className="w-full h-full object-cover" />
-                          : (t.teacher_name?.[0]?.toUpperCase() || "T")
-                        }
-                      </div>
-
-                      <div className="flex-1 min-w-0 text-left">
-                        <h3 className="text-base font-semibold text-white truncate">
-                          {t.teacher_name || "Unnamed teacher"}
-                        </h3>
-                        <p className="text-xs text-slate-400 mt-0.5 truncate">
-                          {t.expertise || "No expertise specified"}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Experience */}
-                    <div className="mb-4 relative z-10 text-left">
-                      <span className="text-xs text-slate-400">
-                        <i className="fas fa-briefcase text-slate-600 mr-1.5" />
-                        {t.experience ?? 0} yrs experience
-                      </span>
-                    </div>
-
-                    {/* Courses */}
-                    <div className="mb-4 relative z-10 flex-1 text-left">
-                      <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-2 font-bold">
-                        Courses
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        {t.courses?.length ? (
-                          t.courses.slice(0, 3).map((course) => (
-                            <span
-                              key={course.id}
-                              className="text-xs px-3 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700 hover:border-indigo-500/40 transition"
-                            >
-                              {course.course_name}
-                            </span>
-                          ))
-                        ) : (
-                          <span className="text-xs text-slate-500">
-                            No courses available
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* CTA — pinned to bottom */}
-                    <div className="flex flex-col gap-2 mt-auto relative z-10">
-                      {auth.isLoggedIn && (
-                        <button
-                          onClick={(e) => { e.stopPropagation(); navigate(`/teachers/${t.id}`); }}
-                          className="w-full py-2.5 rounded-xl bg-slate-900 border border-indigo-600/30 text-indigo-400 hover:bg-indigo-600 hover:text-white font-black text-[11px] uppercase tracking-[0.18em] transition-all active:scale-95"
-                        >
-                          View Profile
-                        </button>
-                      )}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (!auth.isLoggedIn) {
-                            dispatch(setAuthModal({ type: "login", intendedRole: "student" }));
-                            return;
-                          }
-                          if (auth.role === "student") {
-                            navigate(`/teachers/${t.id}`);
-                            return;
-                          }
-                          setHireModal(t);
-                        }}
-                        className="w-full py-2.5 rounded-xl bg-slate-900 border border-blue-600/30 text-blue-500 hover:bg-blue-600 hover:text-white font-black text-[11px] uppercase tracking-[0.18em] transition-all active:scale-95"
-                      >
-                        Hire Tutor
-                      </button>
-                    </div>
-                  </div>
+                    teacher={t}
+                    index={i}
+                    isAuthenticated={auth.isLoggedIn}
+                    onViewProfile={(id) => navigate(`/teachers/${id}`)}
+                    onHire={(teacher) => {
+                      if (!auth.isLoggedIn) {
+                        dispatch(setAuthModal({ type: "login", intendedRole: "student" }));
+                        return;
+                      }
+                      if (auth.role === "student") {
+                        navigate(`/teachers/${teacher.id}`);
+                        return;
+                      }
+                      setHireModal(teacher);
+                    }}
+                  />
                 ))}
           </div>
         </div>
