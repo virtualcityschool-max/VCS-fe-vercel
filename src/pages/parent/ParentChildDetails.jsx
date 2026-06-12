@@ -92,8 +92,8 @@ const ParentChildDetails = () => {
   const sortedCourses = useMemo(() => {
     if (!courses) return [];
     return [...courses].sort((a, b) => {
-      const aDone = a.status === 'completed' || a.progress?.percent === 100;
-      const bDone = b.status === 'completed' || b.progress?.percent === 100;
+      const aDone = a.status === 'completed';
+      const bDone = b.status === 'completed';
       if (aDone && !bDone) return 1;
       if (!aDone && bDone) return -1;
       return 0;
@@ -151,7 +151,7 @@ const ParentChildDetails = () => {
     [evalResults, activeCourseId]
   );
 
-  const completedCount = sortedCourses.filter(c => c.status === 'completed' || c.progress?.percent === 100).length;
+  const completedCount = sortedCourses.filter(c => c.status === 'completed').length;
   const inProgressCount = sortedCourses.length - completedCount;
 
   if (loading) return (
@@ -249,7 +249,7 @@ const ParentChildDetails = () => {
           <div className="bg-slate-900/80 border-b border-white/5 px-4 sm:px-8 pt-4 sm:pt-6">
              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-6">
                {sortedCourses.map((course) => {
-                 const isCompleted = course.status === 'completed' || course.progress?.percent === 100;
+                 const isCompleted = course.status === 'completed';
                  return (
                    <button
                      key={course.id}
