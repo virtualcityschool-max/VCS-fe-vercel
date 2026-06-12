@@ -1,6 +1,41 @@
 import React, { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { TimezoneTag } from "../../components/ui";
 import { useDateFormatters } from "../../hooks";
+import SessionCalendarView from "../common/SessionCalendarView";
+
+const StatusHeaderTooltip = () => {
+  const [pos, setPos] = useState(null);
+  const ref = useRef(null);
+  const show = () => {
+    if (ref.current) {
+      const r = ref.current.getBoundingClientRect();
+      setPos({ top: r.top, left: r.left + r.width / 2 });
+    }
+  };
+  return (
+    <>
+       <i
+        ref={ref}
+        className="fas fa-info-circle text-slate-600 text-[10px] cursor-default"
+        onMouseEnter={show}
+        onMouseLeave={() => setPos(null)}
+      />
+      {pos && createPortal(
+         <div
+          className="fixed z-[9999] w-64 pointer-events-none"
+          style={{ top: pos.top, left: pos.left, transform: "translate(-50%, calc(-100% - 10px))" }}
+        >
+          <div className="bg-slate-800 border border-slate-700 rounded-xl shadow-2xl px-3 py-2.5 text-[11px] text-slate-300 leading-relaxed">
+            For recurring sessions, this is the first occurrence's status — not the overall series status.
+          </div>
+          <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-700 -mt-px" />
+        </div>,
+        document.body
+      )}
+    </>
+  );
+};
 
 const RECURRENCE_DAYS = [
   { key: "MON", label: "Mon" },
@@ -11,6 +46,8 @@ const RECURRENCE_DAYS = [
   { key: "SAT", label: "Sat" },
   { key: "SUN", label: "Sun" },
 ];
+const DAY_ORDER = RECURRENCE_DAYS.map((d) => d.key);
+const sortDays = (days) => [...days].sort((a, b) => DAY_ORDER.indexOf(a) - DAY_ORDER.indexOf(b));
 
 const getStatusBadge = (status) => {
   const cfg = {
@@ -205,32 +242,61 @@ const TeacherPlannerTab = ({
 
   const isModalOpen = activeModal !== null;
   const isEditMode = activeModal?.type === "edit";
+  const [view, setView] = useState("table");
 
   return (
     <div className="space-y-6">
-      {/* Header bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-slate-400 text-sm">
-          Manage recurring staff syncs and teacher meetings
-        </p>
+      {/* Header bar — view toggle left, create button right */}
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        {/* View toggle */}
+        <div className="flex bg-slate-800 border border-slate-700 rounded-lg overflow-hidden shrink-0">
+          <button
+            onClick={() => setView("table")}
+            className={`px-3 py-2 text-sm font-medium transition flex items-center gap-1.5 ${view === "table" ? "bg-indigo-600 text-white" : "text-slate-400 hover:text-white"}`}
+          >
+            <i className="fas fa-table text-xs" />
+            <span className="hidden sm:inline">Table</span>
+          </button>
+          <button
+            onClick={() => setView("calendar")}
+            className={`px-3 py-2 text-sm font-medium transition flex items-center gap-1.5 ${view === "calendar" ? "bg-indigo-600 text-white" : "text-slate-400 hover:text-white"}`}
+          >
+            <i className="fas fa-calendar-alt text-xs" />
+            <span className="hidden sm:inline">Calendar</span>
+          </button>
+        </div>
+
+        {/* Create button */}
         <button
           onClick={openCreate}
-          className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-lg active:scale-95 transition flex items-center gap-2 shrink-0"
+          className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-lg active:scale-95 transition flex items-center gap-2 shrink-0 ml-auto"
         >
-          <i className="fas fa-plus text-xs"></i>
+          <i className="fas fa-plus text-xs" />
           <span>Create Session</span>
         </button>
       </div>
 
+      {/* Calendar view */}
+      {view === "calendar" && (
+        <SessionCalendarView sessions={sessions} loading={loading} />
+      )}
+
       {/* Sessions table */}
-      <div className="bg-slate-900/50 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-sm">
+      {view === "table" && <div className="bg-slate-900/50 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-sm">
         {loading ? (
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead className="bg-slate-950/60 border-b border-slate-800">
                 <tr>
-                  {["Session", "Tutors", "Date & Time", "Recurrence", "End Date", "Status", "Meet", "Actions"].map((h) => (
-                    <th key={h} className="px-5 py-4 text-xs font-black uppercase text-slate-500">{h}</th>
+                  {["Session", "Tutors", "Date & Time", "Recurrence", "End Date", "Status", "Actions"].map((h) => (
+                    <th key={h} className="px-5 py-4 text-xs font-black uppercase text-slate-500">
+                      {h === "Status" ? (
+                        <div className="flex items-center gap-1">
+                          Status
+                          <StatusHeaderTooltip />
+                        </div>
+                      ) : h}
+                    </th>
                   ))}
                 </tr>
               </thead>
@@ -248,7 +314,7 @@ const TeacherPlannerTab = ({
         ) : sessions.length === 0 ? (
           <div className="p-16 text-center">
             <p className="text-white font-bold mb-1">No sessions yet</p>
-            <p className="text-slate-400 text-sm">Create your first teacher planner session to get started.</p>
+            <p className="text-slate-400 text-sm">Create your first tutor planner session to get started.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -259,11 +325,6 @@ const TeacherPlannerTab = ({
                   <div className="flex items-start justify-between gap-3 mb-3">
                     <div>
                       <p className="font-bold text-white text-sm">{session.title}</p>
-                      {session.is_recurring && (
-                        <span className="mt-0.5 inline-block px-1.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-indigo-500/20 text-indigo-300 border border-indigo-500/20">
-                          Recurring
-                        </span>
-                      )}
                     </div>
                     {getStatusBadge(session.status)}
                   </div>
@@ -273,19 +334,13 @@ const TeacherPlannerTab = ({
                       <span><i className="fas fa-clock mr-1 text-indigo-400"></i>{formatTime(session.scheduled_at)} <TimezoneTag /></span>
                     )}
                     {session.recurrence_days?.length > 0 && (
-                      <span><i className="fas fa-repeat mr-1 text-purple-400"></i>{session.recurrence_days.join(", ")}</span>
+                      <span><i className="fas fa-repeat mr-1 text-purple-400"></i>{sortDays(session.recurrence_days).join(", ")}</span>
                     )}
                     {session.invited_teachers?.length > 0 && (
                       <span><i className="fas fa-users mr-1 text-amber-400"></i>{session.invited_teachers.map((t) => t.username).join(", ")}</span>
                     )}
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    {session.meeting_link && (
-                      <a href={session.meeting_link} target="_blank" rel="noopener noreferrer"
-                        className="px-2 py-1 bg-emerald-600/20 text-emerald-400 rounded text-xs hover:bg-emerald-600/30 transition flex items-center gap-1">
-                        <i className="fas fa-video text-[10px]"></i> Join
-                      </a>
-                    )}
                     {!session.is_child && (
                       <button onClick={() => openEdit(session)}
                         className="w-7 h-7 flex items-center justify-center bg-slate-700/50 text-slate-300 rounded-lg hover:bg-slate-600/50 transition">
@@ -314,8 +369,14 @@ const TeacherPlannerTab = ({
                   <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Date & Time</th>
                   <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Recurrence</th>
                   <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">End Date</th>
-                  <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Status</th>
-                  <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Meet</th>
+                  <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">
+                    <div className="relative flex items-center gap-1 group/statushdr">
+                     <div className="flex items-center gap-1">
+                        Status
+                        <StatusHeaderTooltip />
+                      </div>
+                    </div>
+                  </th>
                   <th className="px-5 py-4 text-xs font-black uppercase text-slate-500 text-right">Actions</th>
                 </tr>
               </thead>
@@ -357,7 +418,7 @@ const TeacherPlannerTab = ({
                     <td className="px-5 py-4">
                       {session.recurrence_days?.length > 0 ? (
                         <div className="flex flex-wrap gap-1">
-                          {session.recurrence_days.map((d) => (
+                          {sortDays(session.recurrence_days).map((d) => (
                             <span key={d} className="px-1.5 py-0.5 bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 rounded text-xs font-medium">{d}</span>
                           ))}
                         </div>
@@ -369,16 +430,6 @@ const TeacherPlannerTab = ({
                       {session.recurrence_end_date ? formatDate(session.recurrence_end_date) : "—"}
                     </td>
                     <td className="px-5 py-4">{getStatusBadge(session.status)}</td>
-                    <td className="px-5 py-4">
-                      {session.meeting_link ? (
-                        <a href={session.meeting_link} target="_blank" rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-emerald-600/20 text-emerald-400 rounded-lg text-xs hover:bg-emerald-600/30 transition">
-                          <i className="fas fa-video text-[10px]"></i> Join
-                        </a>
-                      ) : (
-                        <span className="text-slate-500 text-xs">—</span>
-                      )}
-                    </td>
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-2 justify-end">
                         {!session.is_child && (
@@ -404,7 +455,7 @@ const TeacherPlannerTab = ({
             </table>
           </div>
         )}
-      </div>
+      </div>}
 
       {/* Create / Edit Modal */}
       {isModalOpen && (

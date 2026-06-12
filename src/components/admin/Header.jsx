@@ -50,7 +50,7 @@ const Header = ({ activeTab, children }) => {
         };
       case "teacher-planner":
         return {
-          title: "Teacher Planner",
+          title: "Tutor Planner",
           description: "Schedule and manage recurring sessions for teachers",
         };
       default:

@@ -1,9 +1,43 @@
 import React, { useMemo, useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Button, FilterSelect, Input, TimezoneTag } from "../../components/ui";
 import SessionCalendarView from "../common/SessionCalendarView";
 import { clampDate } from "../../utils/validation";
 import { useDateFormatters } from "../../hooks";
 import CourseSelect from "../common/CourseSelect";
+
+const StatusHeaderTooltip = () => {
+  const [pos, setPos] = useState(null);
+  const ref = useRef(null);
+  const show = () => {
+    if (ref.current) {
+      const r = ref.current.getBoundingClientRect();
+      setPos({ top: r.top, left: r.left + r.width / 2 });
+    }
+  };
+  return (
+    <>
+      <i
+        ref={ref}
+        className="fas fa-info-circle text-slate-600 text-[10px] cursor-default"
+        onMouseEnter={show}
+        onMouseLeave={() => setPos(null)}
+      />
+      {pos && createPortal(
+         <div
+          className="fixed z-[9999] w-64 pointer-events-none"
+          style={{ top: pos.top, left: pos.left, transform: "translate(-50%, calc(-100% - 10px))" }}
+        >
+          <div className="bg-slate-800 border border-slate-700 rounded-xl shadow-2xl px-3 py-2.5 text-[11px] text-slate-300 leading-relaxed">
+            For recurring sessions, this is the first occurrence's status — not the overall series status.
+          </div>
+          <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-700 -mt-px" />
+        </div>,
+        document.body
+      )}
+    </>
+  );
+};
 
 /** Why a course is ineligible for a NEW SCHEDULED (recurring) session, or null if eligible. */
 const scheduledCourseReason = (c) => {
@@ -41,6 +75,8 @@ const ScheduledCourseOptions = ({ courses = [] }) => {
 };
 
 const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const DAY_ORDER = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
+const sortDays = (days) => [...days].sort((a, b) => DAY_ORDER.indexOf(a) - DAY_ORDER.indexOf(b));
 const MONTH_NAMES = [
   "January","February","March","April","May","June",
   "July","August","September","October","November","December",
@@ -359,7 +395,14 @@ const SessionsTab = ({
                 <thead className="bg-slate-950/60 border-b border-slate-800">
                   <tr>
                     {["Session", "Course", "Tutor", "Start Date", "Recurrence", "End Date", "Status", "Actions"].map((h) => (
-                      <th key={h} className="px-5 py-4 text-xs font-black uppercase text-slate-500">{h}</th>
+                      <th key={h} className="px-5 py-4 text-xs font-black uppercase text-slate-500">
+                        {h === "Status" ? (
+                          <div className="flex items-center gap-1">
+                            Status
+                            <StatusHeaderTooltip />
+                          </div>
+                        ) : h}
+                      </th>
                     ))}
                   </tr>
                 </thead>
@@ -412,7 +455,7 @@ const SessionsTab = ({
                         <span><i className="fas fa-clock mr-1 text-indigo-400"></i>{formatTime(session.scheduled_at || session.start_time)}{" "}<TimezoneTag /></span>
                       )}
                       {session.recurrence_days?.length > 0 ? (
-                        <span><i className="fas fa-repeat mr-1 text-purple-400"></i>{session.recurrence_days.join(", ")}</span>
+                        <span><i className="fas fa-repeat mr-1 text-purple-400"></i>{sortDays(session.recurrence_days).join(", ")}</span>
                       ) : (() => {
                         const derived = getDayFromScheduledAt(session.scheduled_at || session.start_time);
                         return derived ? <span><i className="fas fa-repeat mr-1 text-slate-500"></i>{derived}</span> : null;
@@ -449,7 +492,12 @@ const SessionsTab = ({
                     <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Start Date & Time</th>
                     <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">End Date</th>
                     <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Recurrence</th>
-                    <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Status</th>
+                    <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">
+                      <div className="flex items-center gap-1">
+                        Status
+                        <StatusHeaderTooltip />
+                      </div>
+                    </th>
                     <th className="px-5 py-4 text-xs font-black uppercase text-slate-500 text-right">Actions</th>
                   </tr>
                 </thead>
@@ -476,7 +524,7 @@ const SessionsTab = ({
                       <td className="px-5 py-4">
                         {session.recurrence_days?.length > 0 ? (
                           <div className="flex flex-wrap gap-1">
-                            {session.recurrence_days.map((d) => (
+                            {sortDays(session.recurrence_days).map((d) => (
                               <span key={d} className="px-1.5 py-0.5 bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 rounded text-xs font-medium">{d}</span>
                             ))}
                           </div>

@@ -313,7 +313,23 @@ const SlotCalendarView = ({ slots = [], loading = false, onDelete, onEdit, delet
     );
   }
 
-  if (!activeMonthData) return null;
+  const EMPTY_STATE = {
+    available: {
+      icon: "fa-calendar-times",
+      title: "No available slots",
+      message: "All your slots are currently booked. Create new slots to open up availability.",
+    },
+    booked: {
+      icon: "fa-user-clock",
+      title: "No bookings yet",
+      message: "None of your slots have been booked yet.",
+    },
+    all: {
+      icon: "fa-calendar",
+      title: "No slots found",
+      message: "No availability slots match the current filter.",
+    },
+  };
 
   return (
     <div className="space-y-4 animate-fadeIn">
@@ -333,7 +349,17 @@ const SlotCalendarView = ({ slots = [], loading = false, onDelete, onEdit, delet
             </button>
           ))}
         </div>
-        <SlotListView slots={filteredSlots} onDelete={onDelete} onEdit={onEdit} deletingId={deletingId} allowDeleteBooked={allowDeleteBooked} />
+        {filteredSlots.length === 0 ? (
+          <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-10 text-center">
+            <div className="w-12 h-12 bg-slate-700/20 rounded-full flex items-center justify-center mx-auto mb-3">
+              <i className={`fas ${EMPTY_STATE[statusFilter].icon} text-slate-400 text-lg`} />
+            </div>
+            <p className="text-white font-bold mb-1">{EMPTY_STATE[statusFilter].title}</p>
+            <p className="text-slate-400 text-sm">{EMPTY_STATE[statusFilter].message}</p>
+          </div>
+        ) : (
+          <SlotListView slots={filteredSlots} onDelete={onDelete} onEdit={onEdit} deletingId={deletingId} allowDeleteBooked={allowDeleteBooked} />
+        )}
       </div>
 
       {/* ── sm+: view toggle (left) + filter pills (right) ── */}
@@ -367,8 +393,19 @@ const SlotCalendarView = ({ slots = [], loading = false, onDelete, onEdit, delet
         </div>
       </div>
 
-      {/* ── sm+: calendar nav (below toggle, only when calendar view) ── */}
-      {view === "calendar" && (
+      {/* ── sm+: empty state when filter produces no results ── */}
+      {filteredSlots.length === 0 && (
+        <div className="hidden sm:block bg-slate-900/50 border border-slate-800 rounded-2xl p-14 text-center">
+          <div className="w-14 h-14 bg-slate-700/20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i className={`fas ${EMPTY_STATE[statusFilter].icon} text-slate-400 text-xl`} />
+          </div>
+          <p className="text-white font-bold mb-1">{EMPTY_STATE[statusFilter].title}</p>
+          <p className="text-slate-400 text-sm max-w-xs mx-auto">{EMPTY_STATE[statusFilter].message}</p>
+        </div>
+      )}
+
+      {/* ── sm+: calendar nav (below toggle, only when calendar view and has data) ── */}
+      {filteredSlots.length > 0 && view === "calendar" && (
         <div className="hidden sm:block">
           <div className="glass inline-flex items-center gap-3 p-2 rounded-xl border border-slate-800 shadow-xl">
             <div className="flex items-center gap-2 shrink-0">
@@ -419,14 +456,14 @@ const SlotCalendarView = ({ slots = [], loading = false, onDelete, onEdit, delet
       )}
 
       {/* ── sm+: table view ── */}
-      {view === "table" && (
+      {filteredSlots.length > 0 && view === "table" && (
         <div className="hidden sm:block">
           <SlotListView slots={filteredSlots} onDelete={onDelete} onEdit={onEdit} deletingId={deletingId} allowDeleteBooked={allowDeleteBooked} />
         </div>
       )}
 
       {/* ── sm+: calendar grid ── */}
-      {view === "calendar" && <div className="hidden sm:block">
+      {filteredSlots.length > 0 && activeMonthData && view === "calendar" && <div className="hidden sm:block">
       <div className="glass rounded-2xl sm:rounded-[2.5rem] border-slate-800 overflow-hidden shadow-2xl backdrop-blur-2xl">
         {/* Day-of-week header */}
         <div className="grid grid-cols-7 border-b border-slate-800/50 bg-slate-950/40">

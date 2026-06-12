@@ -103,7 +103,7 @@ const NAV_CONFIG = {
     { id: "users",       label: "Users",        icon: "fas fa-users",         to: "/admin/users" },
     { id: "courses",     label: "Courses",      icon: "fas fa-book",          to: "/admin/courses" },
     { id: "sessions",        label: "Planner",          icon: "fas fa-chalkboard",      to: "/admin/sessions" },
-    { id: "teacher-planner", label: "Teacher Planner",  icon: "fas fa-user-clock",      to: "/admin/teacher-planner" },
+    { id: "teacher-planner", label: "Tutor Planner",  icon: "fas fa-user-clock",      to: "/admin/teacher-planner" },
     { id: "enrollments",     label: "Enrollments",      icon: "fas fa-user-graduate",   to: "/admin/enrollments" },
     { id: "attendance",  label: "Attendance",   icon: "fas fa-calendar-check", to: "/admin/attendance" },
     { id: "evaluations", label: "Evaluations",  icon: "fas fa-chart-bar",      to: "/admin/evaluations" },

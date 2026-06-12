@@ -27,7 +27,7 @@ const TeacherSessionCard = ({
 
   return (
     <div
-      className={`relative group bg-slate-900/40 backdrop-blur-md px-5 py-4 rounded-3xl border transition-all duration-300 ${
+      className={`relative group bg-slate-900/40 backdrop-blur-md px-5 py-8 rounded-3xl border transition-all duration-300 ${
         isLive
           ? "border-indigo-500/50 shadow-[0_0_30px_rgba(79,70,229,0.1)]"
           : "border-white/5 hover:border-white/10"
