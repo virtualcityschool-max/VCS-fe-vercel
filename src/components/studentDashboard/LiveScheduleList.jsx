@@ -146,9 +146,8 @@ const LiveScheduleList = () => {
   };
 
   const getStatusBadge = (session) => {
-    if (session.has_joined && !session.status.toLowerCase() =="live") {
+    if (session.has_joined && session.status.toLowerCase() !== "live") {
       // if teacher does does join and student joins
-      return
       return (
         <span className="bg-red-600/10 text-red-400 px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-[0.15em] border border-red-500/10 animate-pulse">
           Live Now
