@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { adminService } from "../../services/adminService";
 import { coursesService } from "../../services/coursesService";
 import { adminSessionService } from "../../services/adminSessionService";
+import { adminTeacherSessionService } from "../../services/adminTeacherSessionService";
 import { handleApiError } from "../../utils/errorHandler";
 import { axiosInstance } from "../../utils";
 
@@ -87,6 +88,13 @@ const initialState = {
 
   // Available Students for Parent linking
   availableStudents: {
+    data: [],
+    loading: false,
+    error: null,
+  },
+
+  // Teacher Planner Sessions
+  teacherPlannerSessions: {
     data: [],
     loading: false,
     error: null,
@@ -434,6 +442,56 @@ export const deleteSession = createAsyncThunk(
       return sessionId;
     } catch (error) {
       return rejectWithValue(error.message || "Failed to delete session");
+    }
+  },
+);
+
+// Teacher Planner Thunks
+export const fetchTeacherPlannerSessions = createAsyncThunk(
+  "admin/fetchTeacherPlannerSessions",
+  async (params = {}, { rejectWithValue }) => {
+    try {
+      const response = await adminTeacherSessionService.getSessions(params);
+      return response;
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  },
+);
+
+export const createTeacherPlannerSession = createAsyncThunk(
+  "admin/createTeacherPlannerSession",
+  async (sessionData, { rejectWithValue }) => {
+    try {
+      const response = await adminTeacherSessionService.createSession(sessionData);
+      return response;
+    } catch (error) {
+      debugger
+      return rejectWithValue(error);
+    }
+  },
+);
+
+export const updateTeacherPlannerSession = createAsyncThunk(
+  "admin/updateTeacherPlannerSession",
+  async ({ sessionId, sessionData }, { rejectWithValue }) => {
+    try {
+      const response = await adminTeacherSessionService.updateSession(sessionId, sessionData);
+      return { sessionId, ...response };
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  },
+);
+
+export const deleteTeacherPlannerSession = createAsyncThunk(
+  "admin/deleteTeacherPlannerSession",
+  async (sessionId, { rejectWithValue }) => {
+    try {
+      await adminTeacherSessionService.deleteSession(sessionId);
+      return sessionId;
+    } catch (error) {
+      return rejectWithValue(error);
     }
   },
 );
@@ -842,6 +900,43 @@ const adminSlice = createSlice({
         state.availableStudents.loading = false;
         state.availableStudents.error = action.payload;
       });
+
+    // Teacher Planner Sessions
+    builder
+      .addCase(fetchTeacherPlannerSessions.pending, (state) => {
+        state.teacherPlannerSessions.loading = true;
+        state.teacherPlannerSessions.error = null;
+      })
+      .addCase(fetchTeacherPlannerSessions.fulfilled, (state, action) => {
+        state.teacherPlannerSessions.loading = false;
+        const data = action.payload.results || action.payload || [];
+        state.teacherPlannerSessions.data = Array.isArray(data) ? data : [];
+      })
+      .addCase(fetchTeacherPlannerSessions.rejected, (state, action) => {
+        state.teacherPlannerSessions.loading = false;
+        state.teacherPlannerSessions.error = action.payload;
+      })
+      .addCase(createTeacherPlannerSession.fulfilled, (state, action) => {
+        if (action.payload) {
+          state.teacherPlannerSessions.data.unshift(action.payload);
+        }
+      })
+      .addCase(updateTeacherPlannerSession.fulfilled, (state, action) => {
+        const idx = state.teacherPlannerSessions.data.findIndex(
+          (s) => s.id === action.payload.sessionId,
+        );
+        if (idx !== -1) {
+          state.teacherPlannerSessions.data[idx] = {
+            ...state.teacherPlannerSessions.data[idx],
+            ...action.payload,
+          };
+        }
+      })
+      .addCase(deleteTeacherPlannerSession.fulfilled, (state, action) => {
+        state.teacherPlannerSessions.data = state.teacherPlannerSessions.data.filter(
+          (s) => s.id !== action.payload,
+        );
+      });
   },
 });
 
@@ -872,6 +967,7 @@ export const selectReports = (state) => state.admin.reports;
 export const selectEnrollments = (state) => state.admin.enrollments;
 export const selectSessions = (state) => state.admin.sessions;
 export const selectAvailableStudents = (state) => state.admin.availableStudents;
+export const selectTeacherPlannerSessions = (state) => state.admin.teacherPlannerSessions;
 
 // Convenience selectors
 export const selectUsersLoading = (state) => state.admin.users.loading;

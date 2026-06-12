@@ -50,6 +50,7 @@ export { default as AdminAttendancePage } from "./admin/AdminAttendance";
 export { default as AdminEvaluationPage } from "./admin/AdminEvaluationPage";
 export { default as AdminCategoriesPage } from "./admin/AdminCategoriesPage";
 export { default as UserDetailsPage } from "./admin/UserDetailsPage";
+export { default as AdminTeacherPlannerPage } from "./admin/AdminTeacherPlannerPage";
 
 // Profile
 export { default as ProfilePage } from "./profile/ProfilePage";

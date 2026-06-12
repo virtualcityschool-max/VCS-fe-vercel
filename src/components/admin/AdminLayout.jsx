@@ -12,6 +12,7 @@ import {
   fetchUsers,
   fetchEnrollments,
   fetchSessions,
+  fetchTeacherPlannerSessions,
 } from "../../store/slices/adminSlice";
 import Header from "./Header";
 
@@ -29,6 +30,7 @@ const AdminLayout = () => {
     if (path.includes("/admin/users")) return "users";
     if (path.includes("/admin/enrollments")) return "enrollments";
     if (path.includes("/admin/sessions")) return "sessions";
+    if (path.includes("/admin/teacher-planner")) return "teacher-planner";
     if (path.includes("/admin/evaluations")) return "evaluations";
     if (path.includes("/admin/attendance")) return "attendance";
     if (path.includes("/admin/course-levels")) return "levels";
@@ -67,6 +69,13 @@ const AdminLayout = () => {
 
   React.useEffect(() => {
     if (activeTab === "sessions") dispatch(fetchSessions({ view: "parent" }));
+  }, [dispatch, activeTab]);
+
+  React.useEffect(() => {
+    if (activeTab === "teacher-planner") {
+      dispatch(fetchTeacherPlannerSessions({ view: "parent" }));
+      dispatch(fetchUsers({ role: "teacher" }));
+    }
   }, [dispatch, activeTab]);
 
   return (

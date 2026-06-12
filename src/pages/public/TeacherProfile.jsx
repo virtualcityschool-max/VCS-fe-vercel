@@ -299,6 +299,7 @@ const TeacherProfile = () => {
 
   // Load slots automatically once the student is logged in
   useEffect(() => {
+    debugger
     if (isLoggedIn && role === "student" && id && !slotsLoaded) {
       loadSlots();
     }

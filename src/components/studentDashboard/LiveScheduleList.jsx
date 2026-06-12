@@ -17,6 +17,7 @@ import { availabilityService } from "../../services/availabilityService";
 import TimezoneTag from "../ui/TimezoneTag";
 import SessionCountdown from "../common/SessionCountdown";
 import GmailNotice from "../common/GmailNotice";
+import StudentSessionCard from "../sessions/StudentSessionCard";
 
 const fmt12 = (t) => {
   if (!t) return "";
@@ -132,7 +133,7 @@ const LiveScheduleList = () => {
     setEndConfirm({ open: false, session: null });
     const sessionId = session?.session_id ?? session?.id;
     setLoadingSessionId(sessionId);
-    setLoadingAction("end");
+    setLoadingAction("leave");
     try {
       await dispatch(endStudentSession(sessionId)).unwrap();
       toastManager.success("Session ended");
@@ -355,20 +356,17 @@ const LiveScheduleList = () => {
         {liveSchedule.map((session) => {
           const sessionId = session?.session_id ?? session?.id;
           const isThisLoading = loadingSessionId === sessionId;
-
           return (
-            <div
+            <StudentSessionCard
               key={sessionId}
-              className="bg-slate-900/40 backdrop-blur-xl p-5 rounded-[1.5rem] border border-white/5 flex flex-col md:flex-row items-center gap-6 hover:bg-white/5 transition-all duration-300 group shadow-2xl relative"
-            >
-              {/* Dynamic Glow Effect */}
-              {session.has_joined && (
-                <div className="absolute -left-10 -top-10 w-24 h-24 bg-red-500/5 rounded-full blur-[40px]"></div>
-              )}
-
-              {/* Instructor Avatar - Compact */}
-              <div className="flex-shrink-0 relative z-10">
-                {getStorageUrl(session.instructor_avatar) ? (
+              session={session}
+              isLoading={isThisLoading || isJoiningSession}
+              loadingAction={loadingAction}
+              onJoin={handleJoinSession}
+              onLeave={handleEndSession}
+              subtitle={`Tutor: ${session.instructor_name}`}
+              renderAvatar={() =>
+                getStorageUrl(session.instructor_avatar) ? (
                   <img
                     src={getStorageUrl(session.instructor_avatar)}
                     alt={session.instructor_name}
@@ -378,149 +376,9 @@ const LiveScheduleList = () => {
                   <div className="w-16 h-16 rounded-2xl border border-white/10 bg-white/5 flex items-center justify-center text-slate-500 font-black text-xl shadow-lg">
                     {session.instructor_name?.charAt(0).toUpperCase()}
                   </div>
-                )}
-              </div>
-
-              {/* Session Info - Compact */}
-              <div className="flex-1 min-w-0 relative z-10 text-center md:text-left">
-                <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 mb-1">
-                  <h4 className="text-lg font-black text-white group-hover:text-blue-400 transition-colors truncate tracking-tight">
-                    {session.course_title}
-                  </h4>
-                  {!session.is_recurring && (
-                    <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-violet-500/20 text-violet-300 border border-violet-500/20">Special Session</span>
-                  )}
-                  {getStatusBadge(session)}
-                </div>
-                <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mb-3 opacity-60">
-                  Tutor: {session.instructor_name}
-                </p>
-
-                {/* Schedule Info */}
-                <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-[11px] text-slate-400 font-bold uppercase tracking-wider mb-3">
-                  <div className="flex items-center gap-1.5">
-                    <i className="fas fa-calendar text-blue-400/60"></i>
-                    <span>
-                      {/* {new Date(session.scheduled_at).toLocaleDateString([], { weekday: "short" })},{" "} */}
-                      {formatDate(session.scheduled_at)}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <i className="fas fa-clock text-indigo-400/60"></i>
-                    <span>{formatTime(session.scheduled_at)}{" "}<TimezoneTag /></span>
-                  </div>
-                  {/* {session.recurring_schedule && (
-                    <div className="flex items-center gap-1">
-                      <i className="fas fa-repeat"></i>
-                      <span>{session.recurring_schedule}</span>
-                    </div>
-                  )} */}
-                </div>
-
-                {/* Countdown */}
-                {!session.has_joined && session.status !== "ended" && !session.left_at && (
-                  <div className="mb-3">
-                    <SessionCountdown scheduledAt={session.scheduled_at} status={session.status} />
-                  </div>
-                )}
-
-                {/* Attendance Rate - Slim
-                {session.attendance_rate !== null && (
-                  <div className="w-full max-w-[200px] mx-auto md:mx-0">
-                    <div className="flex justify-between text-[10px] font-black uppercase tracking-[0.15em] mb-1.5">
-                      <span className="text-slate-500 opacity-60">Attendance Rate</span>
-                      <span className={getAttendanceColor(session.attendance_rate)}>
-                        {session.attendance_rate}%
-                      </span>
-                    </div>
-                    <div className="h-1 bg-white/5 rounded-full overflow-hidden">
-                      <div
-                        className={`h-full transition-all duration-1000 ${session.attendance_rate >= 90
-                            ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.3)]"
-                            : session.attendance_rate >= 75
-                              ? "bg-amber-500"
-                              : session.attendance_rate >= 60
-                                ? "bg-orange-500"
-                                : "bg-red-500"
-                          }`}
-                        style={{ width: `${session.attendance_rate}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                )} */}
-              </div>
-
-              {/* Action Buttons - Compact */}
-              <div className="flex-shrink-0 flex flex-row md:flex-col gap-2 relative z-10">
-                {session?.status === "ended" || session.left_at ? (
-                  <span className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] px-4 py-2 border border-white/5 rounded-xl">
-                    {session.status}
-                  </span>
-                ) : session?.has_joined ? (
-                  <>
-                    <button
-                      onClick={() => handleJoinSession(session)}
-                      disabled={isThisLoading || isJoiningSession}
-                      className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-blue-900/40 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-w-[140px]"
-                    >
-                      {isThisLoading && loadingAction === "join" ? (
-                        <>
-                          <i className="fas fa-spinner fa-spin"></i>
-                          <span>Joining...</span>
-                        </>
-                      ) : (
-                        <>
-                          <i className="fas fa-video"></i>
-                          <span>Join Session</span>
-                        </>
-                      )}
-                    </button>
-                    <button
-                      onClick={() => handleEndSession(session)}
-                      disabled={isThisLoading || isJoiningSession}
-                      className="bg-red-600/10 hover:bg-red-600/20 text-red-400 px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest border border-red-500/10 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-w-[140px]"
-                    >
-                      {isThisLoading && loadingAction === "end" ? (
-                        <>
-                          <i className="fas fa-spinner fa-spin"></i>
-                          <span>Ending...</span>
-                        </>
-                      ) : (
-                        <>
-                          <i className="fas fa-stop-circle"></i>
-                          <span>Leave Session</span>
-                        </>
-                      )}
-                    </button>
-                  </>
-                ) : (
-                  <div className="relative group/tooltip">
-                    <button
-                      onClick={() => handleJoinSession(session)}
-                      disabled={isThisLoading || isJoiningSession}
-                      className="bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-blue-900/40 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-w-[150px]"
-                    >
-                      {isThisLoading ? (
-                        <>
-                          <i className="fas fa-spinner fa-spin"></i>
-                          <span>Joining...</span>
-                        </>
-                      ) : (
-                        <>
-                          <i className="fas fa-play text-[10px]"></i>
-                          <span>Join Session</span>
-                        </>
-                      )}
-                    </button>
-                    <div className="absolute bottom-full right-0 mb-2 px-4 py-2.5 bg-slate-900 border border-white/10 text-white text-[10px] rounded-xl whitespace-nowrap opacity-0 group-hover/tooltip:opacity-100 transition-all pointer-events-none z-[9999] shadow-2xl">
-                      <div className="absolute top-full right-4 border-[5px] border-transparent border-t-slate-900" />
-                      <p className="text-slate-400 font-bold uppercase tracking-widest mb-0.5">Join Window</p>
-                      <p className="font-black text-white">{getWindowLabel(session.scheduled_at, timezone, timezoneAbbr) || "Check schedule"}</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
+                )
+              }
+            />
           );
         })}
       </div>

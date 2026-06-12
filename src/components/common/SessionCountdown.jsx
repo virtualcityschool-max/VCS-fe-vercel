@@ -24,9 +24,9 @@ function Unit({ value, singular, plural, color }) {
 }
 
 const SessionCountdown = ({ scheduledAt, status }) => {
-  const { weeks, days, hours, minutes, seconds, total, isExpired } = useCountdown(scheduledAt);
+  const { weeks, days, hours, minutes, seconds, total, isExpired, hide_status } = useCountdown(scheduledAt);
 
-  if (status === "live") {
+  if (status === "live" && !hide_status) {
     return (
       <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-rose-500/10 border border-rose-500/20 rounded-xl">
         <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />

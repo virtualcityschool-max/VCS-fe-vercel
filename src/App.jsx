@@ -31,6 +31,7 @@ import {
   AdminUsersPage,
   AdminEnrollmentsPage,
   AdminSessionsPage,
+  AdminTeacherPlannerPage,
   AdminAttendancePage,
   AdminEvaluationPage,
   AdminCategoriesPage,
@@ -344,6 +345,7 @@ const AppInner = () => {
                 <Route path="users" element={<AdminUsersPage />} />
                 <Route path="enrollments" element={<AdminEnrollmentsPage />} />
                 <Route path="sessions" element={<AdminSessionsPage />} />
+                <Route path="teacher-planner" element={<AdminTeacherPlannerPage />} />
                 <Route path="attendance" element={<AdminAttendancePage />} />
                 <Route path="evaluations" element={<AdminEvaluationPage />} />
                 <Route path="course-levels" element={<AdminCategoriesPage />} />

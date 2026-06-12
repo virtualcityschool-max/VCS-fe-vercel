@@ -1373,6 +1373,7 @@ const TeacherAvailabilityPage = () => {
             )}
           </div>
         )}
+        
       </div>
 
       {/* Create modal — portalled to body to escape layout stacking context */}

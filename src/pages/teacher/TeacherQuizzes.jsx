@@ -210,7 +210,7 @@ const QuestionBuilder = ({ questions, onChange, marksPerQuestion = 1 }) => {
 const validateQuizForm = (form, questions, timezone, publishImmediately = false) => {
   if (!form.course)         return "Please select a course";
   if (!form.title.trim())   return "Title is required";
-  if (!form.total_marks)    return "Total marks is required";
+  if (!form.total_marks)    return "Total marks are required";
   if (!publishImmediately && !form.published_at) return "Publish date is required";
   if (!form.due_date)       return "Due date is required";
 

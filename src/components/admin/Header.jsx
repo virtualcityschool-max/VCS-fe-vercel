@@ -48,6 +48,11 @@ const Header = ({ activeTab, children }) => {
           title: "Course Levels",
           description: "Manage course levels for organizing your curriculum",
         };
+      case "teacher-planner":
+        return {
+          title: "Teacher Planner",
+          description: "Schedule and manage recurring sessions for teachers",
+        };
       default:
         return {
           title: activeTab,

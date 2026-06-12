@@ -14,6 +14,7 @@ import AttendanceEditModal from "../../components/common/AttendanceEditModal";
 import { FilterSelect } from "../../components/ui";
 import { toastManager } from "../../utils/toastManager";
 import { coursesService } from "../../services/coursesService";
+import { adminTeacherSessionService } from "../../services/adminTeacherSessionService";
 
 const AdminAttendance = () => {
   const dispatch = useDispatch();
@@ -32,6 +33,9 @@ const AdminAttendance = () => {
   const [dateFilter,        setDateFilter]        = useState("last7");
   const [editRecord,        setEditRecord]        = useState(null);
   const [courseEnrollments, setCourseEnrollments] = useState([]);
+
+  const [adminSessionAttendance, setAdminSessionAttendance] = useState([]);
+  const [adminAttendanceLoading, setAdminAttendanceLoading] = useState(false);
 
   const activeCourseId = courseId || (courses[0] ? String(courses[0].id) : "");
 
@@ -130,6 +134,15 @@ const AdminAttendance = () => {
     }));
   }, [activeCourseId, tab, dispatch]);
 
+  useEffect(() => {
+    if (tab !== "admin") return;
+    setAdminAttendanceLoading(true);
+    adminTeacherSessionService.getAllAttendance()
+      .then((data) => setAdminSessionAttendance(Array.isArray(data) ? data : []))
+      .catch(() => setAdminSessionAttendance([]))
+      .finally(() => setAdminAttendanceLoading(false));
+  }, [tab]);
+
   const refetchAttendance = () =>
     dispatch(fetchAllAttendance({
       course: activeCourseId,
@@ -188,8 +201,9 @@ const AdminAttendance = () => {
       {/* Tabs Row */}
       <div className="flex gap-1 border-b border-slate-800 overflow-x-auto no-scrollbar">
         {[
-          { id: "student", label: "Student Attendance", icon: "fa-user-graduate" },
-          { id: "teacher", label: "Tutor Attendance", icon: "fa-chalkboard-teacher" },
+          { id: "student", label: "Student Attendance",       icon: "fa-user-graduate" },
+          { id: "teacher", label: "Tutor Attendance",         icon: "fa-chalkboard-teacher" },
+          { id: "admin",   label: "Admin Session Attendance", icon: "fa-shield-alt" },
         ].map((t) => (
           <button
             key={t.id}
@@ -204,8 +218,8 @@ const AdminAttendance = () => {
         ))}
       </div>
 
-      {/* Stats */}
-      {!isLoading && (filteredAttendance || []).length > 0 && (
+      {/* Stats — course/teacher tabs only */}
+      {tab !== "admin" && !isLoading && (filteredAttendance || []).length > 0 && (
         <div className="grid grid-cols-3 gap-3">
           {[
             { label: "Total",   value: stats.total,   color: "text-white" },
@@ -220,19 +234,56 @@ const AdminAttendance = () => {
         </div>
       )}
 
-      {/* Matrix */}
-      {isLoading ? (
-        <div className="flex items-center justify-center py-20">
-          <i className="fas fa-spinner animate-spin text-indigo-400 text-2xl" />
-        </div>
-      ) : (
-        <AttendanceMatrix
-          sessions={filteredSessions}
-          attendanceRecords={filteredAttendance || []}
-          enrolledStudents={tab === "student" ? courseEnrollments : []}
-          participantRole={tab === "teacher" ? "teacher" : "student"}
-          onEditRecord={setEditRecord}
-        />
+      {/* Matrix — course/teacher tabs */}
+      {tab !== "admin" && (
+        isLoading ? (
+          <div className="flex items-center justify-center py-20">
+            <i className="fas fa-spinner animate-spin text-indigo-400 text-2xl" />
+          </div>
+        ) : (
+          <AttendanceMatrix
+            sessions={filteredSessions}
+            attendanceRecords={filteredAttendance || []}
+            enrolledStudents={tab === "student" ? courseEnrollments : []}
+            participantRole={tab === "teacher" ? "teacher" : "student"}
+            onEditRecord={setEditRecord}
+          />
+        )
+      )}
+
+      {/* Matrix — admin sessions tab */}
+      {tab === "admin" && (
+        adminAttendanceLoading ? (
+          <div className="flex items-center justify-center py-20">
+            <i className="fas fa-spinner animate-spin text-indigo-400 text-2xl" />
+          </div>
+        ) : (() => {
+          const adminMatrixSessions = adminSessionAttendance.map((item) => ({
+            id: item.session_id,
+            title: item.title,
+            scheduled_at: item.scheduled_at,
+          }));
+          const adminMatrixRecords = adminSessionAttendance.flatMap((item) =>
+            (Array.isArray(item.attendance) ? item.attendance : []).map((att) => ({
+              student: att.teacher_id,
+              session: item.session_id,
+              status: att.status,
+              joined_at: att.joined_at,
+              left_at: null,
+              teacher_name: att.username,
+              participant_role: "teacher",
+            }))
+          );
+          return (
+            <AttendanceMatrix
+              sessions={adminMatrixSessions}
+              attendanceRecords={adminMatrixRecords}
+              enrolledStudents={[]}
+              participantRole="teacher"
+              onEditRecord={setEditRecord}
+            />
+          );
+        })()
       )}
 
       <AttendanceEditModal

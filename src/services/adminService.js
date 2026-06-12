@@ -13,6 +13,7 @@ const ADMIN_ENDPOINTS = {
 
   // Admin Dashboard
   ADMIN_DASHBOARD: "/admin/dashboard/",
+  ADMIN_SESSIONS_DASHBOARD: "/classroom/admin-dashboard/",
   ALL_ENROLLMENTS: "/courses/all-enrollments/",
 
   // Child Link Requests
@@ -150,6 +151,15 @@ export const adminService = {
       throw handleApiError(error, {
         context: "Get Dashboard Analytics",
       });
+    }
+  },
+
+  getAdminSessionsDashboard: async () => {
+    try {
+      const response = await axiosInstance.get(ADMIN_ENDPOINTS.ADMIN_SESSIONS_DASHBOARD);
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error, { context: "Get Admin Sessions Dashboard" });
     }
   },
   

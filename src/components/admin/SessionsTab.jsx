@@ -398,7 +398,7 @@ const SessionsTab = ({
                     <div className="flex items-start justify-between gap-3 mb-3">
                       <div>
                         <p className="font-bold text-white text-sm">{session.title}</p>
-                        {!session.is_recurring && (
+                        {session.category == "special" && (
                           <span className="mt-0.5 inline-block px-1.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-violet-500/20 text-violet-300 border border-violet-500/20">Special Session</span>
                         )}
                         <p className="text-xs text-slate-400 mt-0.5">{session.course?.title || session.course_title || "—"}</p>
@@ -458,7 +458,7 @@ const SessionsTab = ({
                     <tr key={session.id} className="hover:bg-slate-800/30 transition">
                       <td className="px-5 py-4">
                         <p className="font-semibold text-white text-sm">{session.title}</p>
-                        {!session.is_recurring && (
+                        {session.category == "special" && (
                           <span className="mt-1 inline-block px-1.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-violet-500/20 text-violet-300 border border-violet-500/20">Special Session</span>
                         )}
                       </td>

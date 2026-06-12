@@ -554,7 +554,7 @@ const TeacherSessionCalendar = () => {
                       <div>
                         <div className="flex items-center gap-2 flex-wrap">
                           <p className="font-bold text-white text-sm">{s.title}</p>
-                          {!s.is_recurring && (
+                          {s.category == "special" && (
                             <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-violet-500/20 text-violet-300 border border-violet-500/20">Special Session</span>
                           )}
                         </div>
@@ -607,7 +607,7 @@ const TeacherSessionCalendar = () => {
                     <tr key={s.id} className="hover:bg-slate-800/30 transition">
                       <td className="px-5 py-4">
                         <p className="font-semibold text-white text-sm">{s.title}</p>
-                        {!s.is_recurring && (
+                        {s.category == "special" && (
                           <span className="mt-1 inline-block px-1.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-violet-500/20 text-violet-300 border border-violet-500/20">Special Session</span>
                         )}
                       </td>
