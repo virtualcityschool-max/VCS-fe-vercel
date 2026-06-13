@@ -72,7 +72,7 @@ const CourseCard = ({ course, index = 0, mode, onClick, onNavigate, ctaLabel }) 
         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/70 to-transparent pointer-events-none" />
 
         {/* Free / Paid badge — top left */}
-        {!isTeacher && (
+        {isTeacher && (
           <div className="absolute top-2 left-2 z-10">
             <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wide backdrop-blur-md border ${
               courseData.is_paid
@@ -85,13 +85,13 @@ const CourseCard = ({ course, index = 0, mode, onClick, onNavigate, ctaLabel }) 
         )}
 
         {/* Category badge — top left (teacher) */}
-        {isTeacher && categoryName && (
+        {/* {isTeacher && categoryName && (
           <div className="absolute top-2 left-2 z-10">
             <span className="px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-widest backdrop-blur-md bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
               {categoryName}
             </span>
           </div>
-        )}
+        )} */}
 
         {/* Status badge — top right */}
         <div className="absolute top-2 right-2 z-10">
@@ -156,7 +156,7 @@ const CourseCard = ({ course, index = 0, mode, onClick, onNavigate, ctaLabel }) 
         <div className="mt-auto pt-3 border-t border-white/5 space-y-2">
           {!isTeacher && (
             <p className={`text-sm font-black ${courseData.is_paid ? "text-white" : "text-emerald-400"}`}>
-              {courseData.is_paid ? `$${(courseData.price || 0).toLocaleString("en-US")} USD` : "Free"}
+              {courseData.is_paid ? `$${(courseData.price || 0).toLocaleString("en-US")} USD` : "Free "}
             </p>
           )}
           {isTeacher && (
