@@ -14,7 +14,7 @@ import { toastManager } from "../../utils/toastManager";
 import CourseStudentsModal from "../../components/courses/CourseStudentsModal";
 import { showApiError, extractApiErrorMessage } from "../../utils/apiErrorHandler";
 import ConfirmDialog from "../../components/common/ConfirmDialog";
-import { getWindowLabel, isWithinSessionWindow, isSessionExpired } from "../../utils/helper/StartSession";
+import { getWindowLabel, isWithinSessionWindow, isSessionExpired, handleJoinSession } from "../../utils/helper/StartSession";
 import { useDateFormatters } from "../../hooks";
 import { availabilityService } from "../../services/availabilityService";
 import { adminTeacherSessionService } from "../../services/adminTeacherSessionService";
