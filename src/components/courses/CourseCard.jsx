@@ -70,29 +70,6 @@ const CourseCard = ({ course, index = 0, mode, onClick, onNavigate, ctaLabel }) 
 
         {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/70 to-transparent pointer-events-none" />
-
-        {/* Free / Paid badge — top left */}
-        {isTeacher && (
-          <div className="absolute top-2 left-2 z-10">
-            <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wide backdrop-blur-md border ${
-              courseData.is_paid
-                ? "bg-amber-500/20 text-amber-400 border-amber-500/30"
-                : "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
-            }`}>
-              {courseData.is_paid ? "Paid" : "Free"}
-            </span>
-          </div>
-        )}
-
-        {/* Category badge — top left (teacher) */}
-        {/* {isTeacher && categoryName && (
-          <div className="absolute top-2 left-2 z-10">
-            <span className="px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-widest backdrop-blur-md bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
-              {categoryName}
-            </span>
-          </div>
-        )} */}
-
         {/* Status badge — top right */}
         <div className="absolute top-2 right-2 z-10">
           {isTeacher && (

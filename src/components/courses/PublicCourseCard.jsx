@@ -112,13 +112,6 @@ const PublicCourseCard = ({
         {course.status === "published" && (
           <div className={`absolute ${large ? "top-2 right-2 w-2 h-2" : "top-1.5 right-1.5 w-1.5 h-1.5"} z-10 bg-green-500 rounded-full shadow-[0_0_6px_rgba(34,197,94,0.8)] animate-pulse`} />
         )}
-        <div className={`absolute ${large ? "top-2 left-2 px-2 py-0.5 text-[9px]" : "top-1.5 left-1.5 px-1.5 py-0.5 text-[8px]"} rounded-full font-black uppercase tracking-wide z-10 ${
-          course.is_paid
-            ? "bg-amber-500/20 text-amber-400 border border-amber-500/30"
-            : "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-        }`}>
-          {course.is_paid ? "Paid" : "Free"}
-        </div>
       </div>
 
       {/* Content */}
