@@ -30,12 +30,19 @@ const TeacherSlotsCalendarSection = ({ teacherId }) => {
   const [confirmSlot, setConfirmSlot] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
 
+  const [timezone, setTimezone] = useState(null);
+
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const data = await adminService.getTeacherSlots(teacherId);
-      setSlots(Array.isArray(data) ? data : []);
+      if (Array.isArray(data)) {
+        setSlots(data);
+      } else {
+        setSlots(data.slots || []);
+        setTimezone(data.student_timezone || null);
+      }
     } catch {
       setError("Failed to load slots.");
     } finally {
@@ -86,8 +93,11 @@ const TeacherSlotsCalendarSection = ({ teacherId }) => {
           <div>
             <h3 className="text-base font-semibold text-white">Availability Slots</h3>
             {!loading && !error && (
-              <p className="text-[10px] text-slate-500 mt-0.5">
+              <p className="text-[10px] text-slate-500 mt-0.5 flex items-center gap-1.5">
                 {slots.length} total · {availableCount} open · {bookedCount} booked
+                {timezone && (
+                  <TimezoneTag tz={timezone} className="text-indigo-400/70 font-black" />
+                )}
               </p>
             )}
           </div>
@@ -138,6 +148,7 @@ const TeacherSlotsCalendarSection = ({ teacherId }) => {
           loading={loading}
           onDelete={handleDeleteRequest}
           deletingId={deletingId}
+          timezone={timezone}
         />
       )}
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { fetchUserProfile } from "../../store/slices/authSlice";
+import { fetchUserProfile, profileUpdated } from "../../store/slices/authSlice";
 import { fetchCategories } from "../../store/slices/coursesSlice";
 import { authService } from "../../services/authService";
 import { toastManager } from "../../utils/toastManager";
@@ -197,11 +197,11 @@ const ProfilePage = () => {
       toastManager.success("Profile updated successfully");
       setEditing(false);
       clearAllErrors();
-      // re-fetch to reflect saved state
+      // re-fetch to reflect saved state and sync Redux store immediately
       const fresh = await authService.getMe();
       setProfile(fresh);
       initForm(fresh);
-      dispatch(fetchUserProfile());
+      dispatch(profileUpdated(fresh));
     } catch (err) {
       if (err.originalError?.response?.data?.details) {
         setErrors(err.originalError.response.data.details);
@@ -229,7 +229,7 @@ const ProfilePage = () => {
       await authService.updateProfile(fd);
       const fresh = await authService.getMe();
       setProfile(fresh);
-      dispatch(fetchUserProfile());
+      dispatch(profileUpdated(fresh));
       toastManager.success("Profile photo updated");
     } catch (err) {
       showApiError(err);

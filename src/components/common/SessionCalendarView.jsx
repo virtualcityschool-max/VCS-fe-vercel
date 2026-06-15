@@ -257,6 +257,8 @@ const SessionCalendarView = ({ sessions = [], loading = false }) => {
             ))}
           </div>
         )}
+        <div className="w-px self-stretch bg-slate-800 shrink-0" />
+        <TimezoneTag className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1.5 bg-slate-900 border border-slate-800 rounded-xl text-slate-400" />
       </div>
 
       {/* Calendar grid container */}
@@ -315,6 +317,7 @@ const SessionCalendarView = ({ sessions = [], loading = false }) => {
                         <span className="text-[7px] font-semibold tabular-nums text-indigo-400/80 truncate">
                           {formatTime(session.scheduled_at)}
                         </span>
+                        <TimezoneTag className="text-[6px] shrink-0 ml-0.5 text-indigo-400/60" />
                         <span className={`ml-auto shrink-0 hidden lg:inline text-[6px] font-black uppercase px-1 py-0.5 rounded border ${
                           session.status === "live"
                             ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"

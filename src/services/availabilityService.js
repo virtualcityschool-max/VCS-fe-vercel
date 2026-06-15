@@ -26,8 +26,7 @@ const updateSlot = async (slotId, data) => {
 };
 
 const getTeacherAvailableSlots = async (teacherId) => {
-  const tz = store.getState().auth.profile?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
-  const response = await axiosInstance.get(`/availability/slots/teacher/${teacherId}/`, { params: { tz } });
+  const response = await axiosInstance.get(`/availability/slots/teacher/${teacherId}/`);
   return response.data;
 };
 

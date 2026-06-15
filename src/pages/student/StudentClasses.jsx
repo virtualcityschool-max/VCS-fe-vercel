@@ -7,6 +7,7 @@ import {
 import SessionCalendarView from "../../components/common/SessionCalendarView";
 import axiosInstance from "../../utils/axiosInstance";
 import { FilterSelect } from "../../components/ui";
+import TimezoneTag from "../../components/ui/TimezoneTag";
 import { useDateFormatters } from "../../hooks";
 
 const STATUS_COLORS = {
@@ -48,7 +49,7 @@ const SessionListView = ({ sessions, formatTime, formatDate }) => {
             </div>
             <div className="text-right shrink-0">
               <p className="text-xs font-semibold text-slate-300 tabular-nums">
-                {formatTime(session.scheduled_at)}
+                {formatTime(session.scheduled_at)} <TimezoneTag />
               </p>
               <p className="hidden sm:block text-[10px] text-slate-500 mt-0.5">
                 {formatDate(session.scheduled_at)}
@@ -137,6 +138,7 @@ const StudentClasses = () => {
       {/* Mobile: always table */}
       {/* View toggle — hidden on mobile (always table there) */}
       <div className="flex items-center gap-2 flex-wrap">
+          <TimezoneTag className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1.5 bg-slate-900 border border-slate-800 rounded-xl text-slate-400" />
           <div className="hidden sm:flex bg-slate-800 border border-slate-700 rounded-lg overflow-hidden">
             <button
               onClick={() => setView("table")}

@@ -45,6 +45,12 @@ axiosInstance.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
+    // Add X-Timezone header — profile timezone takes priority, browser timezone as fallback
+    const timezone =
+      authStorage.getAuthState()?.user?.timezone ||
+      Intl.DateTimeFormat().resolvedOptions().timeZone;
+    config.headers["X-Timezone"] = timezone;
+
     // Enhanced debugging for auth endpoints
     if (config.url?.includes("auth/me")) {
       console.log("🔍 AUTH DEBUG - Request to /auth/me:", {

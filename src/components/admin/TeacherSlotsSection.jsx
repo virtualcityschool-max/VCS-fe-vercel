@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { adminService } from "../../services/adminService";
 import { toastManager } from "../../utils/toastManager";
+import TimezoneTag from "../ui/TimezoneTag";
 
 const fmt12 = (t) => {
   if (!t) return "";
@@ -21,7 +22,7 @@ const fmtDate = (d) =>
 const isUpcoming = (date) => new Date(date + "T23:59:59") >= new Date();
 
 // ── Compact slot card ─────────────────────────────────────────────────────────
-const SlotCard = ({ slot, onDelete, deleting }) => {
+const SlotCard = ({ slot, onDelete, deleting, timezone }) => {
   const isBooked = slot.status === "booked";
   const isDel = deleting === slot.id;
 
@@ -50,6 +51,9 @@ const SlotCard = ({ slot, onDelete, deleting }) => {
               <span className="text-slate-500 font-normal mx-1">–</span>
               {fmt12(slot.end_time)}
             </p>
+            {timezone && (
+              <p className="text-[9px] text-indigo-400/70 mt-0.5 font-bold uppercase tracking-widest">{timezone}</p>
+            )}
             <p className="text-[9px] text-slate-600 mt-0.5 font-medium">1 hr</p>
           </div>
           <button
@@ -109,12 +113,19 @@ const TeacherSlotsSection = ({ teacherId }) => {
   const [deleting, setDeleting] = useState(null);
   const [filter, setFilter] = useState("all"); // all | available | booked
 
+  const [timezone, setTimezone] = useState(null);
+
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const data = await adminService.getTeacherSlots(teacherId);
-      setSlots(Array.isArray(data) ? data : []);
+      if (Array.isArray(data)) {
+        setSlots(data);
+      } else {
+        setSlots(data.slots || []);
+        setTimezone(data.student_timezone || null);
+      }
     } catch {
       setError("Failed to load slots.");
     } finally {
@@ -166,8 +177,11 @@ const TeacherSlotsSection = ({ teacherId }) => {
           <div>
             <h3 className="text-base font-semibold text-white">Availability Slots</h3>
             {!loading && !error && (
-              <p className="text-[10px] text-slate-500 mt-0.5">
+              <p className="text-[10px] text-slate-500 mt-0.5 flex items-center gap-1.5">
                 {slots.length} total · {availableCount} open · {bookedCount} booked
+                {timezone && (
+                  <TimezoneTag tz={timezone} className="text-indigo-400/70 font-black" />
+                )}
               </p>
             )}
           </div>
@@ -264,6 +278,7 @@ const TeacherSlotsSection = ({ teacherId }) => {
                         slot={slot}
                         onDelete={setConfirmSlot}
                         deleting={deleting}
+                        timezone={timezone}
                       />
                     ))}
                   </div>
@@ -292,7 +307,7 @@ const TeacherSlotsSection = ({ teacherId }) => {
                 <span className="font-semibold text-white">{fmtDate(confirmSlot.date)}</span>{" "}
                 from{" "}
                 <span className="font-semibold text-white tabular-nums">
-                  {fmt12(confirmSlot.start_time)} – {fmt12(confirmSlot.end_time)}
+                  {fmt12(confirmSlot.start_time)} – {fmt12(confirmSlot.end_time)}{" "}{timezone && <TimezoneTag tz={timezone} />}
                 </span>.
               </p>
               {confirmSlot.booked_by_name ? (

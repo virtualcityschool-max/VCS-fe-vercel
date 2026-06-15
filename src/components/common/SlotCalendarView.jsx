@@ -45,7 +45,7 @@ const openMeetLink = (link) => {
 };
 
 // Popup shown when clicking a booked slot on the calendar
-const SlotPopup = ({ slot, onClose }) => {
+const SlotPopup = ({ slot, onClose, timezone }) => {
   const { timezoneAbbr } = useDateFormatters();
   const joinable = isSlotJoinable(slot);
   const hasMeet = !!slot.meeting_link;
@@ -82,7 +82,7 @@ const SlotPopup = ({ slot, onClose }) => {
           <div className="bg-slate-800/60 rounded-2xl px-4 py-3 space-y-2 mb-5">
             <div className="flex items-center gap-2 text-sm">
               <i className="fas fa-clock text-indigo-400/70 w-4 text-center" />
-              <span className="font-bold text-white">{fmt12(slot.start_time)} – {fmt12(slot.end_time)}{" "}<TimezoneTag /></span>
+              <span className="font-bold text-white">{fmt12(slot.start_time)} – {fmt12(slot.end_time)}{" "}<TimezoneTag tz={timezone} /></span>
             </div>
             {slot.booked_by_name && (
               <div className="flex items-center gap-2 text-sm">
@@ -138,7 +138,7 @@ const SlotPopup = ({ slot, onClose }) => {
 
 // ── Slot list / table view ────────────────────────────────────────────────────
 
-const SlotListView = ({ slots, onDelete, onEdit, deletingId, allowDeleteBooked }) => {
+const SlotListView = ({ slots, onDelete, onEdit, deletingId, allowDeleteBooked, timezone }) => {
   const sorted = [...slots].sort((a, b) =>
     a.date !== b.date ? a.date.localeCompare(b.date) : (a.start_time || "").localeCompare(b.start_time || "")
   );
@@ -166,7 +166,7 @@ const SlotListView = ({ slots, onDelete, onEdit, deletingId, allowDeleteBooked }
               <div className={`w-0.5 h-10 rounded-full shrink-0 ${isBooked ? "bg-amber-400/70" : "bg-emerald-400/70"}`} />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-bold text-white tabular-nums">
-                  {fmt12(slot.start_time)} – {fmt12(slot.end_time)}
+                  {fmt12(slot.start_time)} – {fmt12(slot.end_time)}{" "}<TimezoneTag tz={timezone} />
                 </p>
                 <p className="text-[10px] text-slate-500 mt-0.5">{fmtDate(slot.date)}</p>
               </div>
@@ -222,7 +222,7 @@ const SlotListView = ({ slots, onDelete, onEdit, deletingId, allowDeleteBooked }
 
 const STATUS_FILTER_LABELS = { all: "All", available: "Available", booked: "Booked" };
 
-const SlotCalendarView = ({ slots = [], loading = false, onDelete, onEdit, deletingId, allowDeleteBooked = false }) => {
+const SlotCalendarView = ({ slots = [], loading = false, onDelete, onEdit, deletingId, allowDeleteBooked = false, timezone }) => {
   const { formatTime, timezoneAbbr } = useDateFormatters();
   const [calendarMonth, setCalendarMonth] = useState(null);
   const [popupSlot, setPopupSlot] = useState(null);
@@ -358,11 +358,11 @@ const SlotCalendarView = ({ slots = [], loading = false, onDelete, onEdit, delet
             <p className="text-slate-400 text-sm">{EMPTY_STATE[statusFilter].message}</p>
           </div>
         ) : (
-          <SlotListView slots={filteredSlots} onDelete={onDelete} onEdit={onEdit} deletingId={deletingId} allowDeleteBooked={allowDeleteBooked} />
+          <SlotListView slots={filteredSlots} onDelete={onDelete} onEdit={onEdit} deletingId={deletingId} allowDeleteBooked={allowDeleteBooked} timezone={timezone} />
         )}
       </div>
 
-      {/* ── sm+: view toggle (left) + filter pills (right) ── */}
+      {/* ── sm+: view toggle (left) + filter pills + timezone (right) ── */}
       <div className="hidden sm:flex items-center justify-between gap-4 flex-wrap">
         <div className="flex bg-slate-800 border border-slate-700 rounded-lg overflow-hidden shrink-0">
           <button
@@ -378,18 +378,21 @@ const SlotCalendarView = ({ slots = [], loading = false, onDelete, onEdit, delet
             <i className="fas fa-calendar-alt text-xs" /> Calendar
           </button>
         </div>
-        <div className="flex items-center gap-1 bg-slate-900 border border-slate-800 rounded-xl p-1">
-          {Object.entries(STATUS_FILTER_LABELS).map(([f, label]) => (
-            <button
-              key={f}
-              onClick={() => setStatusFilter(f)}
-              className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition ${
-                statusFilter === f ? "bg-indigo-600 text-white" : "text-slate-500 hover:text-slate-300"
-              }`}
-            >
-              {label}
-            </button>
-          ))}
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1 bg-slate-900 border border-slate-800 rounded-xl p-1">
+            {Object.entries(STATUS_FILTER_LABELS).map(([f, label]) => (
+              <button
+                key={f}
+                onClick={() => setStatusFilter(f)}
+                className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition ${
+                  statusFilter === f ? "bg-indigo-600 text-white" : "text-slate-500 hover:text-slate-300"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <TimezoneTag tz={timezone} className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1.5 bg-slate-900 border border-slate-800 rounded-xl text-slate-400" />
         </div>
       </div>
 
@@ -458,7 +461,7 @@ const SlotCalendarView = ({ slots = [], loading = false, onDelete, onEdit, delet
       {/* ── sm+: table view ── */}
       {filteredSlots.length > 0 && view === "table" && (
         <div className="hidden sm:block">
-          <SlotListView slots={filteredSlots} onDelete={onDelete} onEdit={onEdit} deletingId={deletingId} allowDeleteBooked={allowDeleteBooked} />
+          <SlotListView slots={filteredSlots} onDelete={onDelete} onEdit={onEdit} deletingId={deletingId} allowDeleteBooked={allowDeleteBooked} timezone={timezone} />
         </div>
       )}
 
@@ -562,6 +565,7 @@ const SlotCalendarView = ({ slots = [], loading = false, onDelete, onEdit, delet
                               {fmt12(slot.start_time)}
                             </span>
                           </div>
+                          <TimezoneTag tz={timezone} className={`text-[6px] shrink-0 ml-0.5 ${isBooked ? "text-amber-400/60" : "text-indigo-400/60"}`} />
                           <span className={`ml-auto shrink-0 hidden lg:inline text-[6px] font-black uppercase px-1 py-0.5 rounded border ${
                             isBooked
                               ? "bg-amber-500/15 text-amber-400 border-amber-500/20"
@@ -615,7 +619,7 @@ const SlotCalendarView = ({ slots = [], loading = false, onDelete, onEdit, delet
       </div>
       </div>}  {/* end calendar grid conditional */}
 
-      {popupSlot && <SlotPopup slot={popupSlot} onClose={() => setPopupSlot(null)} />}
+      {popupSlot && <SlotPopup slot={popupSlot} onClose={() => setPopupSlot(null)} timezone={timezone} />}
     </div>
   );
 };

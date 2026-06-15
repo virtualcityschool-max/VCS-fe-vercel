@@ -1,8 +1,9 @@
 import { useSelector } from "react-redux";
 import { getTimezoneAbbr } from "../../utils/validation";
 
-const TimezoneTag = ({ className = "" }) => {
-  const timezone = useSelector((s) => s.auth.profile?.timezone) || undefined;
+const TimezoneTag = ({ className = "", tz: tzOverride }) => {
+  const profileTimezone = useSelector((s) => s.auth.profile?.timezone) || undefined;
+  const timezone = tzOverride || profileTimezone;
   const abbr = getTimezoneAbbr(timezone);
   if (!abbr) return null;
   return (

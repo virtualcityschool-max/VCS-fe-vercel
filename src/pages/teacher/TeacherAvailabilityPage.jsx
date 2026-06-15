@@ -188,6 +188,7 @@ const DateEntryCard = ({ entry, onChange, onRemove, canRemove, index }) => {
             <p className="text-[9px] font-black uppercase tracking-widest text-slate-600 flex items-center gap-2">
               <i className="fas fa-clock" />
               Time Range
+              <TimezoneTag className="text-[9px] text-indigo-400 font-black normal-case tracking-normal" />
             </p>
             <div className="flex gap-2 flex-wrap items-center">
               {TIME_PRESETS.map((p) => {
@@ -1010,7 +1011,7 @@ const StatusBadge = ({ status }) =>
 // ── Edit slot modal ───────────────────────────────────────────────────────────
 
 const EditSlotModal = ({ slot, onClose, onSaved }) => {
-  const { timezone } = useDateFormatters();
+  const { timezone, timezoneAbbr } = useDateFormatters();
   const [date, setDate] = useState(slot.date);
   const [startTime, setStartTime] = useState(slot.start_time.slice(0, 5));
   const [endTime, setEndTime] = useState(slot.end_time.slice(0, 5));
@@ -1055,7 +1056,15 @@ const EditSlotModal = ({ slot, onClose, onSaved }) => {
             </div>
             <div>
               <h2 className="text-base font-semibold text-white">Edit Slot</h2>
-              <p className="text-slate-500 text-xs mt-0.5">{fmtDate(slot.date)}</p>
+              <p className="text-slate-500 text-xs mt-0.5">
+                {fmtDate(slot.date)}
+                {timezoneAbbr && (
+                  <span className="ml-2 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-bold">
+                    <i className="fas fa-globe text-[8px]" />
+                    {timezoneAbbr}
+                  </span>
+                )}
+              </p>
             </div>
           </div>
           <button
@@ -1091,8 +1100,9 @@ const EditSlotModal = ({ slot, onClose, onSaved }) => {
           {/* Time range */}
           <div className="flex items-end gap-3">
             <div className="flex-1">
-              <label className="text-[9px] font-black uppercase tracking-widest text-slate-600 block mb-1.5">
+              <label className="text-[9px] font-black uppercase tracking-widest text-slate-600 flex items-center gap-1.5 mb-1.5">
                 Start
+                <TimezoneTag className="text-[9px] text-indigo-400 font-black normal-case tracking-normal" />
               </label>
               <input
                 type="time"
@@ -1237,8 +1247,10 @@ const SlotCard = ({ slot, onDelete, onEdit, deletingId }) => {
 // ── Main page ─────────────────────────────────────────────────────────────────
 
 const TeacherAvailabilityPage = () => {
+  const { timezone } = useDateFormatters();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [slots, setSlots] = useState([]);
+  const [slotsTimezone, setSlotsTimezone] = useState(null);
   const [loadingSlots, setLoadingSlots] = useState(true);
   const [slotsError, setSlotsError] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
@@ -1249,7 +1261,12 @@ const TeacherAvailabilityPage = () => {
     setSlotsError(null);
     try {
       const data = await availabilityService.getMySlots();
-      setSlots(data);
+      if (Array.isArray(data)) {
+        setSlots(data);
+      } else {
+        setSlots(data.slots || []);
+        setSlotsTimezone(data.student_timezone || null);
+      }
     } catch {
       setSlotsError("Failed to load your slots. Please refresh.");
     } finally {
@@ -1369,6 +1386,7 @@ const TeacherAvailabilityPage = () => {
                 onDelete={handleDelete}
                 onEdit={setEditingSlot}
                 deletingId={deletingId}
+                timezone={slotsTimezone || timezone}
               />
             )}
           </div>

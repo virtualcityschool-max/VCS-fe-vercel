@@ -172,7 +172,7 @@ const OverviewTab = ({
               session={session}
               isLoading={actionLoadingIds.has(session.id)}
               onStart={(s) => onStartSession?.(session)}
-              onJoin={(s) => handleJoinSession(s.id, s.meeting_link, s.schedule_at)}
+              onJoin={(s) => handleJoinSession(s.id, s.meeting_link, s.scheduled_at || s.schedule_at)}
               onEnd={(s) => onEndSession?.(s.id)}
               subtitle={
                 session.invited_teachers?.length > 0 ? (

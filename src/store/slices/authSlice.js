@@ -281,6 +281,19 @@ const authSlice = createSlice({
     updateToken: (state, action) => {
       state.token = action.payload;
     },
+    profileUpdated: (state, action) => {
+      state.profile = action.payload;
+      state.role = action.payload.role;
+      state.username = action.payload.username;
+      state.user = {
+        username: action.payload.username,
+        email: action.payload.email,
+        role: action.payload.role,
+        avatar: action.payload.avatar || null,
+        timezone: action.payload.timezone || null,
+      };
+      authStorage.setStoredAuthUser(state.user);
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -407,5 +420,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout, clearAuthError, updateToken } = authSlice.actions;
+export const { logout, clearAuthError, updateToken, profileUpdated } = authSlice.actions;
 export default authSlice.reducer;

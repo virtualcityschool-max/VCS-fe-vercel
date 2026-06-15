@@ -57,11 +57,12 @@ const AdminOverviewPage = () => {
   }, []);
 
   const handleStartSession = async (session) => {
-    if (isSessionExpired(session?.schedule_at)) {
+    const scheduleAt = session?.scheduled_at || session?.schedule_at;
+    if (isSessionExpired(scheduleAt)) {
       setSessionExpiredOpen(true);
       return;
     }
-    if (!isWithinSessionWindow(session?.schedule_at)) {
+    if (!isWithinSessionWindow(scheduleAt)) {
       setTooEarlyOpen(true);
       return;
     }
