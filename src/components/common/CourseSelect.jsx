@@ -25,6 +25,7 @@ const CourseSelect = ({
   const [dropPos, setDropPos] = useState({ top: 0, left: 0, width: 0 });
   const triggerRef = useRef(null);
   const dropdownRef = useRef(null);
+  const isScrolling = useRef(false); // ✅ Added tracker for screen touch movements
 
   const openDropdown = () => {
     if (!triggerRef.current) return;
@@ -33,9 +34,11 @@ const CourseSelect = ({
     const spaceAbove = rect.top;
     const dropH = 256; // max-h-64
     const openBelow = spaceBelow >= dropH || spaceBelow >= spaceAbove;
+    
+    // ✅ CHANGED: Uses window scroll offsets to build an absolute anchor coordinates grid
     setDropPos({
-      top: openBelow ? rect.bottom + 4 : rect.top - dropH - 4,
-      left: rect.left,
+      top: openBelow ? rect.bottom + window.scrollY + 4 : rect.top + window.scrollY - dropH - 4,
+      left: rect.left + window.scrollX,
       width: rect.width,
     });
     setSearch("");
@@ -45,17 +48,23 @@ const CourseSelect = ({
   useEffect(() => {
     if (!open) return;
     const close = (e) => {
-      if (triggerRef.current && !triggerRef.current.contains(e.target)) setOpen(false);
+      if (triggerRef.current?.contains(e.target)) return;
+      if (dropdownRef.current?.contains(e.target)) return;
+      setOpen(false);
     };
+    
+    // ✅ CHANGED: Allow background scroll container movements if it targets the dropdown area itself
     const closeOnScroll = (e) => {
-      // ignore scrolling inside the dropdown list itself
       if (dropdownRef.current && dropdownRef.current.contains(e.target)) return;
       setOpen(false);
     };
-    document.addEventListener("mousedown", close);
-    window.addEventListener("scroll", closeOnScroll, true);
+
+    // ✅ CHANGED: Changed listener to standard 'click' to safely ignore mobile scroll triggers
+    document.addEventListener("click", close);
+    const t = setTimeout(() => window.addEventListener("scroll", closeOnScroll, true), 300);
     return () => {
-      document.removeEventListener("mousedown", close);
+      document.removeEventListener("click", close);
+      clearTimeout(t);
       window.removeEventListener("scroll", closeOnScroll, true);
     };
   }, [open]);
@@ -101,15 +110,14 @@ const CourseSelect = ({
           open && (
             <div
               style={{
-                position: "fixed",
+                position: "absolute", // ✅ CHANGED: Absolute elements resist mobile viewpoint bounces
                 top: dropPos.top,
                 left: dropPos.left,
                 width: dropPos.width,
                 zIndex: 9999,
               }}
               ref={dropdownRef}
-              onMouseDown={(e) => e.stopPropagation()}
-              onTouchStart={(e) => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()} // ✅ CHANGED: Uses click event bubbling controls
               className="bg-slate-900 border border-slate-700 rounded-xl shadow-2xl overflow-hidden"
             >
               {/* Search */}
@@ -128,7 +136,12 @@ const CourseSelect = ({
                 </div>
               </div>
 
-              <div className="max-h-52 overflow-y-auto custom-scrollbar">
+              <div 
+                className="max-h-52 overflow-y-auto custom-scrollbar" 
+                style={{ overscrollBehavior: "contain" }}
+                onTouchMove={() => { isScrolling.current = true; }}    // ✅ Added scroll capture hook
+                onTouchStart={() => { isScrolling.current = false; }}  // ✅ Added clean layout swipe reset
+              >
               {filtered.length === 0 && (
                 <div className="px-4 py-3 text-slate-500 text-sm">No courses found</div>
               )}
@@ -145,7 +158,8 @@ const CourseSelect = ({
                     }}
                     onTouchEnd={(e) => {
                       e.preventDefault();
-                      if (!disabled) { onChange(c); setOpen(false); }
+                      // ✅ CHANGED: Dropdown option picks only happen if the user didn't scroll the screen
+                      if (!disabled && !isScrolling.current) { onChange(c); setOpen(false); }
                     }}
                     className={`px-4 py-3 border-b border-slate-700/50 last:border-0 transition select-none
                       ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
