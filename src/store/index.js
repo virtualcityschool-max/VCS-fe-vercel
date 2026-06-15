@@ -44,6 +44,7 @@ const saveAuthState = (authState) => {
         username: authState.username,
         email: authState.user?.email,
         role: authState.role,
+        timezone: authState.user?.timezone || authState.profile?.timezone || null,
       };
 
       authStorage.setAuthState(authState.token, user);

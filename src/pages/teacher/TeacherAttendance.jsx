@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchAllAttendance,
@@ -36,6 +36,7 @@ const TeacherAttendance = () => {
   const [courseId, setCourseId] = useState("");
   const [editRecord, setEditRecord] = useState(null);
 
+  const [adminSessions,          setAdminSessions]          = useState([]);
   const [adminSessionAttendance, setAdminSessionAttendance] = useState([]);
   const [adminLoading,           setAdminLoading]           = useState(false);
 
@@ -74,15 +75,16 @@ const TeacherAttendance = () => {
   }, [activeCourseId]);
 
   useEffect(() => {
-    if (activeCourseId) dispatch(fetchTeacherSessions({ course: activeCourseId }));
-  }, [activeCourseId, dispatch]);
+    if (tab === "admin" || !activeCourseId) return;
+    dispatch(fetchTeacherSessions({ course: activeCourseId }));
+  }, [activeCourseId, tab, dispatch]);
 
   useEffect(() => {
     setMarkSessionId("");
   }, [activeCourseId]);
 
   useEffect(() => {
-    if (!activeCourseId) return;
+    if (tab === "admin" || !activeCourseId) return;
     dispatch(fetchAllAttendance({
       course: activeCourseId,
       participant_role: tab === "mine" ? "teacher" : "student",
@@ -93,14 +95,28 @@ const TeacherAttendance = () => {
     if (markModal && markSessionId) dispatch(fetchSessionAttendance(markSessionId));
   }, [dispatch, markModal, markSessionId]);
 
-  useEffect(() => {
-    if (tab !== "admin") return;
+  const fetchAdminData = useCallback(async () => {
     setAdminLoading(true);
-    adminTeacherSessionService.getAllAttendance()
-      .then((data) => setAdminSessionAttendance(Array.isArray(data) ? data : []))
-      .catch(() => setAdminSessionAttendance([]))
-      .finally(() => setAdminLoading(false));
-  }, [tab]);
+    try {
+      const [sessionsData, attendanceData] = await Promise.all([
+        adminTeacherSessionService.getSessions(),
+        adminTeacherSessionService.getAllAttendance(),
+      ]);
+      setAdminSessions(
+        Array.isArray(sessionsData) ? sessionsData : (sessionsData?.results || [])
+      );
+      setAdminSessionAttendance(Array.isArray(attendanceData) ? attendanceData : []);
+    } catch {
+      setAdminSessions([]);
+      setAdminSessionAttendance([]);
+    } finally {
+      setAdminLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (tab === "admin") fetchAdminData();
+  }, [tab, fetchAdminData]);
 
   // ── Mark modal helpers ────────────────────────────────────────────────────────
 
@@ -188,16 +204,18 @@ const TeacherAttendance = () => {
           <p className="text-slate-400 text-sm mt-1">Track your sessions and monitor student attendance.</p>
         </div>
 
-        <div className="w-full sm:w-64">
-          <label className="text-[10px] uppercase tracking-widest text-slate-500 font-bold px-0.5 mb-1.5 block">Course</label>
-          <FilterSelect
-            value={activeCourseId}
-            onChange={(e) => setCourseId(e.target.value)}
-            className="w-full"
-          >
-            {myCourses?.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
-          </FilterSelect>
-        </div>
+        {tab !== "admin" && (
+          <div className="w-full sm:w-64">
+            <label className="text-[10px] uppercase tracking-widest text-slate-500 font-bold px-0.5 mb-1.5 block">Course</label>
+            <FilterSelect
+              value={activeCourseId}
+              onChange={(e) => setCourseId(e.target.value)}
+              className="w-full"
+            >
+              {myCourses?.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
+            </FilterSelect>
+          </div>
+        )}
       </div>
 
       {/* Tabs */}
@@ -239,25 +257,23 @@ const TeacherAttendance = () => {
             <i className="fas fa-spinner animate-spin text-indigo-400 text-2xl" />
           </div>
         ) : (() => {
-          const adminMatrixSessions = adminSessionAttendance.map((item) => ({
-            id: item.session_id,
-            title: item.title,
-            scheduled_at: item.scheduled_at,
-          }));
-          const adminMatrixRecords = adminSessionAttendance
-            .filter((item) => item.attendance)
-            .map((item) => ({
-              student: item.attendance.teacher_id,
+          const adminMatrixRecords = adminSessionAttendance.flatMap((item) => {
+            const attList = Array.isArray(item.attendance)
+              ? item.attendance
+              : (item.attendance ? [item.attendance] : []);
+            return attList.map((att) => ({
+              student: att.teacher_id,
               session: item.session_id,
-              status: item.attendance.status,
-              joined_at: item.attendance.joined_at,
+              status: att.status,
+              joined_at: att.joined_at,
               left_at: null,
-              teacher_name: item.attendance.username,
+              teacher_name: att.username,
               participant_role: "teacher",
             }));
+          });
           return (
             <AttendanceMatrix
-              sessions={adminMatrixSessions}
+              sessions={adminSessions}
               attendanceRecords={adminMatrixRecords}
               enrolledStudents={profile?.id ? [{ id: profile.id, username: profile.username }] : []}
               participantRole="teacher"
