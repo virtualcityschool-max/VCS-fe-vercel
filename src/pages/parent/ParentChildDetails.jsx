@@ -289,24 +289,6 @@ const ParentChildDetails = () => {
                     </div>
                   </div>
                 </div>
-
-                <div className="bg-slate-800/40 rounded-2xl px-4 py-3 border border-white/5 flex items-center gap-6 sm:min-w-[260px]">
-                   <div className="space-y-0.5">
-                      <p className="text-[9px] font-black uppercase tracking-widest text-slate-500">Progress</p>
-                      <div className="text-xl font-black text-white">{activeCourse.progress.percent}%</div>
-                   </div>
-                   <div className="flex-1">
-                      <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-gradient-to-r from-indigo-500 to-blue-500 rounded-full"
-                          style={{ width: `${activeCourse.progress.percent}%` }}
-                        ></div>
-                      </div>
-                      <p className="text-[9px] text-slate-500 mt-1.5 font-bold uppercase tracking-widest">
-                        {activeCourse.progress.assignments_submitted} / {activeCourse.progress.assignments_total} Submissions
-                      </p>
-                   </div>
-                </div>
               </div>
 
               {/* Section Tabs */}
