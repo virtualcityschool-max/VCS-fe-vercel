@@ -466,7 +466,6 @@ export const createTeacherPlannerSession = createAsyncThunk(
       const response = await adminTeacherSessionService.createSession(sessionData);
       return response;
     } catch (error) {
-      debugger
       return rejectWithValue(error);
     }
   },

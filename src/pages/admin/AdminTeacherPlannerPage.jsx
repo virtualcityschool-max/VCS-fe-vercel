@@ -45,7 +45,6 @@ const AdminTeacherPlannerPage = () => {
       dispatch(fetchTeacherPlannerSessions({ view: "parent" }));
       onSuccess?.();
     } catch (error) {
-      debugger
       showApiError(error);
     } finally {
       setIsCreating(false);
