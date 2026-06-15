@@ -73,7 +73,8 @@ const TeacherPortal = () => {
   const [bookedSlotsLoading, setBookedSlotsLoading] = useState(false);
   const [tooEarlyOpen, setTooEarlyOpen] = useState(false);
   const [sessionExpiredOpen, setSessionExpiredOpen] = useState(false);
-  const [adminSessionLoadingIds, setAdminSessionLoadingIds] = useState(new Set());
+  const [adminLoadingSessionId, setAdminLoadingSessionId] = useState(null);
+  const [adminLoadingAction, setAdminLoadingAction] = useState(null);
 
   const {
     dashboard,
@@ -190,33 +191,54 @@ const TeacherPortal = () => {
     }
   };
 
-  const setAdminLoading = (id, on) => {
-    setAdminSessionLoadingIds((prev) => {
-      const next = new Set(prev);
-      on ? next.add(id) : next.delete(id);
-      return next;
-    });
-  };
-
   const handleJoinAdminSession = async (session) => {
-    if (!session.meeting_link) {
-      toastManager.error("No meeting link available");
+    if (isSessionExpired(session?.schedule_at)) {
+      setSessionExpiredOpen(true);
       return;
     }
-    setAdminLoading(session.id, true);
+    if (!isWithinSessionWindow(session?.schedule_at)) {
+      setTooEarlyOpen(true);
+      return;
+    }
+    const sessionId = session?.id ?? session?.session_id;
+    setAdminLoadingSessionId(sessionId);
+    setAdminLoadingAction("join");
+    const isMobile = /Mobi|Android|iPad|iPhone|iPod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    const meetWin = isMobile ? null : window.open("", "_blank");
     try {
-      await adminTeacherSessionService.joinSession(session.id);
-      window.open(session.meeting_link, "_blank", "noopener,noreferrer");
+      const result = await adminTeacherSessionService.joinSession(sessionId);
+      const meetingLink = result?.meeting_link || session?.meeting_link;
+      if (meetingLink && meetingLink.startsWith("http")) {
+        try {
+          new URL(meetingLink);
+          if (meetWin) meetWin.location.href = meetingLink;
+          else window.open(meetingLink, "_blank", "noopener,noreferrer");
+        } catch {
+          meetWin?.close();
+          toastManager.error("Invalid meeting link format");
+        }
+      } else {
+        meetWin?.close();
+        toastManager.error("No valid meeting link found");
+      }
       await dispatch(fetchTeacherDashboard()).unwrap();
     } catch (err) {
-      showApiError(err);
+      meetWin?.close();
+      const msg = extractApiErrorMessage(err);
+      if (msg === "You cannot join before the scheduled time." || msg === "You can join up to 30 minutes before the scheduled time.") {
+        setTooEarlyOpen(true);
+      } else {
+        showApiError(err);
+      }
     } finally {
-      setAdminLoading(session.id, false);
+      setAdminLoadingSessionId(null);
+      setAdminLoadingAction(null);
     }
   };
 
   const handleLeaveAdminSession = async (sessionId) => {
-    setAdminLoading(sessionId, true);
+    setAdminLoadingSessionId(sessionId);
+    setAdminLoadingAction("leave");
     try {
       await adminTeacherSessionService.leaveSession(sessionId);
       toastManager.success("Left session");
@@ -224,7 +246,8 @@ const TeacherPortal = () => {
     } catch (err) {
       showApiError(err);
     } finally {
-      setAdminLoading(sessionId, false);
+      setAdminLoadingSessionId(null);
+      setAdminLoadingAction(null);
     }
   };
 
@@ -429,7 +452,8 @@ const TeacherPortal = () => {
                     <StudentSessionCard
                       key={session.id}
                       session={session}
-                      isLoading={adminSessionLoadingIds.has(session.id)}
+                      isLoading={adminLoadingSessionId === session.id}
+                      loadingAction={adminLoadingAction}
                       onJoin={(s) => handleJoinAdminSession(s)}
                       onLeave={(s) => handleLeaveAdminSession(s.id)}
                       subtitle={<><i className="fas fa-shield-alt text-indigo-500/50" /> Admin Session</>}

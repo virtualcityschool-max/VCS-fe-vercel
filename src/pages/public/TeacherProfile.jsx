@@ -250,7 +250,7 @@ const TeacherProfile = () => {
   const abortControllerRef = useRef(null);
 
   const { teacherDetails, loading, error } = useSelector((state) => state.teachers);
-  const { isLoggedIn, role } = useSelector((state) => state.auth);
+  const { isLoggedIn, role, isInitialized } = useSelector((state) => state.auth);
 
   const [showBookModal, setShowBookModal] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -266,12 +266,7 @@ const TeacherProfile = () => {
     setLoadingSlots(true);
     try {
       const data = await availabilityService.getTeacherAvailableSlots(id);
-      const now = new Date();
-      const future = (data.slots || []).filter(s => {
-        const slotStart = new Date(s.date + "T" + s.start_time);
-        return slotStart > now;
-      });
-      setAvailableSlots(future);
+      setAvailableSlots((data.slots || []).filter(s => s.status === "available"));
     } catch {
       setAvailableSlots([]);
     } finally {
@@ -297,12 +292,12 @@ const TeacherProfile = () => {
     }
   };
 
-  // Load slots automatically once the student is logged in
+  // Load slots only after auth is initialized so the profile timezone is in the store
   useEffect(() => {
-    if (isLoggedIn && role === "student" && id && !slotsLoaded) {
+    if (isInitialized && isLoggedIn && role === "student" && id && !slotsLoaded) {
       loadSlots();
     }
-  }, [isLoggedIn, role, id, slotsLoaded, loadSlots]);
+  }, [isInitialized, isLoggedIn, role, id, slotsLoaded, loadSlots]);
 
   // Detect post-login hire intent stored before the login redirect
   useEffect(() => {

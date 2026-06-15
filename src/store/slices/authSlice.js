@@ -105,6 +105,7 @@ export const loginUser = createAsyncThunk(
           email: profile.email || user.email,
           role: profile.role || user.role,
           avatar: profile.avatar || null,
+          timezone: profile.timezone || null,
         };
 
         authStorage.setStoredAuthUser(normalizedUser);
@@ -334,7 +335,9 @@ const authSlice = createSlice({
           email: action.payload.email,
           role: action.payload.role,
           avatar: action.payload.avatar || null,
+          timezone: action.payload.timezone || null,
         };
+        authStorage.setStoredAuthUser(state.user);
       })
       .addCase(fetchUserProfile.rejected, (state, action) => {
         state.isLoading = false;
