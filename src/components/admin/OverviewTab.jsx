@@ -171,7 +171,7 @@ const OverviewTab = ({
               key={session.id}
               session={session}
               isLoading={actionLoadingIds.has(session.id)}
-              onStart={(s) => onStartSession?.(s.id)}
+              onStart={(s) => onStartSession?.(session)}
               onJoin={(s) => handleJoinSession(s.id, s.meeting_link, s.schedule_at)}
               onEnd={(s) => onEndSession?.(s.id)}
               subtitle={
