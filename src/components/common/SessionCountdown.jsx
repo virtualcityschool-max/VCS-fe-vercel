@@ -23,8 +23,8 @@ function Unit({ value, singular, plural, color }) {
   );
 }
 
-const SessionCountdown = ({ scheduledAt, status }) => {
-  const { weeks, days, hours, minutes, seconds, total, isExpired, hide_status } = useCountdown(scheduledAt);
+const SessionCountdown = ({ scheduledAt, status, hide_status }) => {
+  const { weeks, days, hours, minutes, seconds, total, isExpired } = useCountdown(scheduledAt);
 
   if (status === "live" && !hide_status) {
     return (
