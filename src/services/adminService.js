@@ -92,7 +92,7 @@ export const adminService = {
       );
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Update Avatar" });
+      throw error
     }
   },
 
@@ -103,7 +103,7 @@ export const adminService = {
       );
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Delete User" });
+      throw error
     }
   },
 
@@ -115,7 +115,7 @@ export const adminService = {
       );
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Purge User" });
+        throw error    
     }
   },
 
@@ -127,7 +127,7 @@ export const adminService = {
       );
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Get User Profile" });
+     throw error
     }
   },
 
@@ -139,7 +139,7 @@ export const adminService = {
       );
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Update User Profile" });
+      throw error
     }
   },
 
@@ -148,9 +148,7 @@ export const adminService = {
       const response = await axiosInstance.get(ADMIN_ENDPOINTS.ADMIN_DASHBOARD);
       return response.data;
     } catch (error) {
-      throw handleApiError(error, {
-        context: "Get Dashboard Analytics",
-      });
+      throw error
     }
   },
 
@@ -159,7 +157,7 @@ export const adminService = {
       const response = await axiosInstance.get(ADMIN_ENDPOINTS.ADMIN_SESSIONS_DASHBOARD);
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Get Admin Sessions Dashboard" });
+      throw error
     }
   },
   
@@ -304,7 +302,7 @@ export const adminService = {
       const response = await axiosInstance.delete(`/courses/${courseId}/`);
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Delete Course" });
+      throw error
     }
   },
 
@@ -346,7 +344,7 @@ export const adminService = {
       );
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Get Pending Child Links" });
+      throw error
     }
   },
 
@@ -358,7 +356,7 @@ export const adminService = {
       );
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Approve Child Link" });
+      throw error
     }
   },
 
@@ -370,7 +368,7 @@ export const adminService = {
       );
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Reject Child Link" });
+      throw error
     }
   },
 
@@ -385,7 +383,7 @@ export const adminService = {
       });
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Unlink Children Admin" });
+      throw error
     }
   },
 
@@ -394,7 +392,7 @@ export const adminService = {
       const response = await axiosInstance.get("/admin/students/available/");
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Get Available Students" });
+      throw error
     }
   },
 
@@ -407,7 +405,7 @@ export const adminService = {
       });
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Link Children Admin" });
+      throw error
     }
   },
 
@@ -416,7 +414,7 @@ export const adminService = {
       const response = await axiosInstance.get(ADMIN_ENDPOINTS.PENDING_ENROLLMENTS);
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Get Pending Enrollments" });
+      throw error
     }
   },
 
@@ -428,7 +426,7 @@ export const adminService = {
       );
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Enrollment Action" });
+      throw error
     }
   },
 
@@ -437,7 +435,7 @@ export const adminService = {
       const response = await axiosInstance.get(ADMIN_ENDPOINTS.ADMIN_TEACHER_SLOTS(teacherId));
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Get Tutor Slots" });
+      throw error
     }
   },
 
@@ -446,7 +444,7 @@ export const adminService = {
       const response = await axiosInstance.delete(ADMIN_ENDPOINTS.ADMIN_DELETE_SLOT(slotId));
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Admin Delete Slot" });
+      throw error
     }
   },
 };
