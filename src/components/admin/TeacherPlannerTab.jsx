@@ -385,11 +385,6 @@ const TeacherPlannerTab = ({
                   <tr key={session.id} className="hover:bg-slate-800/30 transition">
                     <td className="px-5 py-4">
                       <p className="font-semibold text-white text-sm">{session.title}</p>
-                      {session.is_recurring && !session.is_child && (
-                        <span className="mt-1 inline-block px-1.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-indigo-500/20 text-indigo-300 border border-indigo-500/20">
-                          Recurring
-                        </span>
-                      )}
                       {session.is_child && (
                         <span className="mt-1 inline-block px-1.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-slate-700/60 text-slate-400 border border-slate-600/30">
                           Child
