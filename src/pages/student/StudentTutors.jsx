@@ -22,12 +22,19 @@ const fmtDate = (d) =>
     year: "numeric",
   });
 
-const isUpcoming = (date) => new Date(date + "T23:59:59") >= new Date();
+// Both helpers receive the profile timezone string so comparisons use the
+// same "wall clock" the backend used when it computed the slot times.
+const nowInTz = (tz) =>
+  tz ? new Date(new Date().toLocaleString("en-US", { timeZone: tz })) : new Date();
 
-const isSlotJoinable = (slot) => {
-  const start = new Date(slot.date + "T" + slot.start_time);
-  const now = Date.now();
-  return now >= start.getTime() - 30 * 60 * 1000 && now <= start.getTime() + 60 * 60 * 1000;
+const isUpcoming = (date, tz) => new Date(date + "T23:59:59") >= nowInTz(tz);
+
+const isSlotJoinable = (slot, tz) => {
+  const now = nowInTz(tz);
+  const start = new Date(`${slot.date}T${slot.start_time}`);
+  const end   = new Date(`${slot.date}T${slot.end_time}`);
+  return now >= new Date(start.getTime() - 30 * 60 * 1000)
+      && now <= new Date(end.getTime()   + 30 * 60 * 1000);
 };
 
 const openMeetLink = (link) => {
@@ -36,7 +43,7 @@ const openMeetLink = (link) => {
 };
 
 const StudentTutors = () => {
-  const { formatDate, formatTime, timezoneAbbr } = useDateFormatters();
+  const { timezone, formatDate, formatTime, timezoneAbbr } = useDateFormatters();
   const [slots, setSlots] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -111,8 +118,8 @@ const StudentTutors = () => {
 
   // Group slots by teacher
   const filtered = slots.filter((s) => {
-    if (filter === "upcoming" && !isUpcoming(s.date)) return false;
-    if (filter === "past" && isUpcoming(s.date)) return false;
+    if (filter === "upcoming" && !isUpcoming(s.date, timezone)) return false;
+    if (filter === "past" && isUpcoming(s.date, timezone)) return false;
     if (dateFilter && s.date !== dateFilter) return false;
     if (searchQuery && !(s.teacher_name || "").toLowerCase().includes(searchQuery.toLowerCase())) return false;
     return true;
@@ -128,7 +135,7 @@ const StudentTutors = () => {
     return acc;
   }, {});
 
-  const upcomingCount = slots.filter((s) => isUpcoming(s.date)).length;
+  const upcomingCount = slots.filter((s) => isUpcoming(s.date, timezone)).length;
   const pastCount = slots.length - upcomingCount;
   const cancelledSlots = cancelRequests.filter(r => r.status === "approved");
 
@@ -366,8 +373,8 @@ const StudentTutors = () => {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {Object.entries(grouped).map(([teacherName, { teacherId, teacherAvatar, slots: teacherSlots }]) => {
-              const upcoming = teacherSlots.filter((s) => isUpcoming(s.date));
-              const past = teacherSlots.filter((s) => !isUpcoming(s.date));
+              const upcoming = teacherSlots.filter((s) => isUpcoming(s.date, timezone));
+              const past = teacherSlots.filter((s) => !isUpcoming(s.date, timezone));
               const initial = teacherName[0]?.toUpperCase() || "T";
               const avatarUrl = getStorageUrl(teacherAvatar);
 
@@ -418,8 +425,8 @@ const StudentTutors = () => {
                       .slice()
                       .sort((a, b) => a.date.localeCompare(b.date) || a.start_time.localeCompare(b.start_time))
                       .map((slot) => {
-                        const upcoming = isUpcoming(slot.date);
-                        const joinable = upcoming && isSlotJoinable(slot);
+                        const upcoming = isUpcoming(slot.date, timezone);
+                        const joinable = upcoming && isSlotJoinable(slot, timezone);
                         const hasMeet = !!slot.meeting_link;
                         return (
                           <div key={slot.id} className="flex items-center justify-between gap-3 px-6 py-4 flex-wrap">

@@ -39,11 +39,21 @@ const fmtDate = (d) => {
   });
 };
 
-const isSlotJoinable = (slot) => {
-  const slotStart = new Date(slot.date + "T" + slot.start_time);
-  const now = Date.now();
-  return now >= slotStart.getTime() - 30 * 60 * 1000 &&
-         now <= slotStart.getTime() + 60 * 60 * 1000;
+const nowInTz = (tz) =>
+  tz ? new Date(new Date().toLocaleString("en-US", { timeZone: tz })) : new Date();
+
+const isSlotJoinable = (slot, tz) => {
+  const now = nowInTz(tz);
+  const start = new Date(`${slot.date}T${slot.start_time}`);
+  const end   = new Date(`${slot.date}T${slot.end_time}`);
+  return now >= new Date(start.getTime() - 30 * 60 * 1000)
+      && now <= new Date(end.getTime()   + 30 * 60 * 1000);
+};
+
+const isSlotExpired = (slot, tz) => {
+  const now = nowInTz(tz);
+  const end = new Date(`${slot.date}T${slot.end_time}`);
+  return now > new Date(end.getTime() + 30 * 60 * 1000);
 };
 
 const openMeetLink = (link) => {
@@ -540,7 +550,10 @@ const TeacherPortal = () => {
                             <div className="relative group/tip">
                               <button
                                 onClick={() => {
-                                  if (!isSlotJoinable(slot)) { setTooEarlyOpen(true); return; }
+                                  if (!isSlotJoinable(slot, timezone)) {
+                                    isSlotExpired(slot, timezone) ? setSessionExpiredOpen(true) : setTooEarlyOpen(true);
+                                    return;
+                                  }
                                   openMeetLink(slot.meeting_link);
                                 }}
                                 className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black text-[10px] uppercase tracking-widest shadow-lg shadow-blue-900/40 transition-all active:scale-95"
