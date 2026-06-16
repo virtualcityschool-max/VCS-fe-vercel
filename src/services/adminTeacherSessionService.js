@@ -7,7 +7,7 @@ const adminTeacherSessionService = {
       const response = await axiosInstance.get("/classroom/admin-teacher-sessions/", { params });
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Get Teacher Planner Sessions" });
+      throw error;
     }
   },
 
@@ -21,7 +21,7 @@ const adminTeacherSessionService = {
       const response = await axiosInstance.patch(`/classroom/admin-teacher-sessions/${sessionId}/`, sessionData);
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Update Teacher Planner Session" });
+      throw error;
     }
   },
 
@@ -30,7 +30,7 @@ const adminTeacherSessionService = {
       await axiosInstance.delete(`/classroom/admin-teacher-sessions/${sessionId}/`);
       return sessionId;
     } catch (error) {
-      throw handleApiError(error, { context: "Delete Teacher Planner Session" });
+      throw error;
     }
   },
 
@@ -39,7 +39,7 @@ const adminTeacherSessionService = {
       const response = await axiosInstance.patch(`/classroom/admin-teacher-sessions/${sessionId}/cancel-future/`);
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Cancel Future Teacher Planner Sessions" });
+      throw error;
     }
   },
 
@@ -48,7 +48,7 @@ const adminTeacherSessionService = {
       const response = await axiosInstance.patch(`/classroom/admin-teacher-sessions/${sessionId}/start/`);
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Start Teacher Planner Session" });
+      throw error;
     }
   },
 
@@ -57,7 +57,7 @@ const adminTeacherSessionService = {
       const response = await axiosInstance.patch(`/classroom/admin-teacher-sessions/${sessionId}/end/`);
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "End Teacher Planner Session" });
+      throw error;
     }
   },
 
@@ -66,7 +66,7 @@ const adminTeacherSessionService = {
       const response = await axiosInstance.get("/classroom/admin-teacher-sessions/attendance/");
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Get Admin Sessions Attendance" });
+      throw error;
     }
   },
 
@@ -75,7 +75,7 @@ const adminTeacherSessionService = {
       const response = await axiosInstance.post(`/classroom/admin-teacher-sessions/${sessionId}/join/`);
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Join Admin Session" });
+      throw error;
     }
   },
 
