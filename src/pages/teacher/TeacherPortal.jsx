@@ -138,11 +138,12 @@ const TeacherPortal = () => {
   };
 
   const handleStartSession = async (session) => {
-    if (isSessionExpired(session?.scheduled_at)) {
+    debugger
+    if (isSessionExpired(session?.schedule_at)) {
       setSessionExpiredOpen(true);
       return;
     }
-    if (!isWithinSessionWindow(session?.scheduled_at)) {
+    if (!isWithinSessionWindow(session?.schedule_at)) {
       setTooEarlyOpen(true);
       return;
     }
@@ -600,8 +601,8 @@ const TeacherPortal = () => {
                     session={session}
                     isLoading={isJoiningSession}
                     onStart={(s) => handleStartSession(s)}
-                    onJoin={(s) => handleJoinSession(s.id, s.meeting_link, s.scheduled_at)}
-                    onEnd={(s) => handleEndSession(s.id, s.scheduled_at)}
+                    onJoin={(s) => handleJoinSession(s.id, s.meeting_link, s.schedule_at)}
+                    onEnd={(s) => handleEndSession(s.id, s.schedule_at)}
                     subtitle={
                       <>
                         <i className="fas fa-layer-group text-indigo-500/50" />
