@@ -376,8 +376,8 @@ const StudentTutors = () => {
                   {/* Top accent line */}
                   <div className="h-[3px] w-full bg-gradient-to-r from-amber-400/70 via-amber-400/30 to-transparent" />
                   {/* Teacher header */}
-                  <div className="flex items-center justify-between gap-4 px-6 py-5 border-b border-slate-800">
-                    <div className="flex items-center gap-4">
+                  <div className="flex items-center justify-between gap-4 px-6 py-5 border-b border-slate-800 flex-wrap">
+                    <div className="flex items-center gap-4 min-w-0">
                       <div className="w-12 h-12 rounded-2xl overflow-hidden shrink-0 shadow-lg">
                         {avatarUrl ? (
                           <img src={avatarUrl} alt={teacherName} className="w-full h-full object-cover" />
@@ -387,8 +387,8 @@ const StudentTutors = () => {
                           </div>
                         )}
                       </div>
-                      <div>
-                        <h2 className="font-bold text-white text-base">{teacherName}</h2>
+                      <div className="min-w-0">
+                        <h2 className="font-bold text-white text-base truncate">{teacherName}</h2>
                         <p className="text-xs text-slate-500 mt-0.5">
                           {teacherSlots.length} slot{teacherSlots.length !== 1 ? "s" : ""} booked
                           {upcoming.length > 0 && (
@@ -403,10 +403,11 @@ const StudentTutors = () => {
                       <Link
                         to={`/teachers/${teacherId}`}
                         state={{ openSlots: true }}
-                        className="shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white transition text-xs font-bold shadow shadow-indigo-500/20"
+                        className="shrink-0 flex items-center gap-2 px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white transition text-xs font-bold shadow shadow-indigo-500/20"
+                        title="Book More Sessions"
                       >
                         <i className="fas fa-calendar-plus text-[10px]" />
-                        Book More Sessions
+                        <span className="hidden sm:inline">Book More Sessions</span>
                       </Link>
                     )}
                   </div>
