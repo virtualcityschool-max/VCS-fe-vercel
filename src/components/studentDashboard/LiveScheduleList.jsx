@@ -306,7 +306,7 @@ const LiveScheduleList = () => {
                       </div>
                     </div>
                     <div className="mt-2 flex justify-center md:justify-start">
-                      <SessionCountdown scheduledAt={slot.date + "T" + slot.start_time} status="scheduled" />
+                      <SessionCountdown scheduledAt={new Date(tzToUTCMs(slot.date, slot.start_time, timezone)).toISOString()} status="scheduled" />
                     </div>
                   </div>
 

@@ -542,7 +542,7 @@ const TeacherPortal = () => {
                             </div>
                           </div>
                           <div className="mt-2">
-                            <SessionCountdown scheduledAt={slot.date + "T" + slot.start_time} status="scheduled" />
+                            <SessionCountdown scheduledAt={new Date(tzToUTCMs(slot.date, slot.start_time, timezone)).toISOString()} status="scheduled" />
                           </div>
                           {slot.note && (
                             <p className="mt-2 text-[11px] text-slate-500 italic truncate max-w-sm">

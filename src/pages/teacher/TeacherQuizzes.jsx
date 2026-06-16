@@ -598,7 +598,7 @@ const TeacherQuizzes = ({
           </div>
 
           {isEdit ? (
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">
                   Publish At <span className="text-rose-500">*</span>
