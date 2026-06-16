@@ -85,7 +85,7 @@ const TeacherSlotsCalendarSection = ({ teacherId }) => {
   return (
     <div>
       {/* Header */}
-      <div className="flex items-center justify-between gap-4 mb-6">
+      <div className="flex items-center justify-between gap-4 mb-6 flex-wrap">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-violet-500/20 border border-violet-500/20 flex items-center justify-center text-violet-400">
             <i className="fas fa-calendar-check text-sm" />

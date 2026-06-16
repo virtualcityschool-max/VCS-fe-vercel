@@ -335,7 +335,7 @@ const SlotCalendarView = ({ slots = [], loading = false, onDelete, onEdit, delet
     <div className="space-y-4 animate-fadeIn">
 
       {/* ── Mobile: filter pills + always table ── */}
-      <div className="sm:hidden space-y-3">
+      <div className="md:hidden space-y-3">
         <div className="flex items-center gap-1 bg-slate-900 border border-slate-800 rounded-xl p-1 w-fit">
           {Object.entries(STATUS_FILTER_LABELS).map(([f, label]) => (
             <button
@@ -362,8 +362,8 @@ const SlotCalendarView = ({ slots = [], loading = false, onDelete, onEdit, delet
         )}
       </div>
 
-      {/* ── sm+: view toggle (left) + filter pills + timezone (right) ── */}
-      <div className="hidden sm:flex items-center justify-between gap-4 flex-wrap">
+      {/* ── md+: view toggle (left) + filter pills + timezone (right) ── */}
+      <div className="hidden md:flex items-center justify-between gap-4 flex-wrap">
         <div className="flex bg-slate-800 border border-slate-700 rounded-lg overflow-hidden shrink-0">
           <button
             onClick={() => setView("table")}
@@ -396,9 +396,9 @@ const SlotCalendarView = ({ slots = [], loading = false, onDelete, onEdit, delet
         </div>
       </div>
 
-      {/* ── sm+: empty state when filter produces no results ── */}
+      {/* ── md+: empty state when filter produces no results ── */}
       {filteredSlots.length === 0 && (
-        <div className="hidden sm:block bg-slate-900/50 border border-slate-800 rounded-2xl p-14 text-center">
+        <div className="hidden md:block bg-slate-900/50 border border-slate-800 rounded-2xl p-14 text-center">
           <div className="w-14 h-14 bg-slate-700/20 rounded-full flex items-center justify-center mx-auto mb-4">
             <i className={`fas ${EMPTY_STATE[statusFilter].icon} text-slate-400 text-xl`} />
           </div>
@@ -407,10 +407,10 @@ const SlotCalendarView = ({ slots = [], loading = false, onDelete, onEdit, delet
         </div>
       )}
 
-      {/* ── sm+: calendar nav (below toggle, only when calendar view and has data) ── */}
+      {/* ── md+: calendar nav (below toggle, only when calendar view and has data) ── */}
       {filteredSlots.length > 0 && view === "calendar" && (
-        <div className="hidden sm:block">
-          <div className="glass inline-flex items-center gap-3 p-2 rounded-xl border border-slate-800 shadow-xl">
+        <div className="hidden md:block">
+          <div className="glass flex items-center gap-3 p-2 rounded-xl border border-slate-800 shadow-xl overflow-x-auto">
             <div className="flex items-center gap-2 shrink-0">
               <button
                 onClick={() => setCalendarMonth(monthRange[Math.max(0, activeMonthIdx - 1)])}
@@ -458,15 +458,15 @@ const SlotCalendarView = ({ slots = [], loading = false, onDelete, onEdit, delet
         </div>
       )}
 
-      {/* ── sm+: table view ── */}
+      {/* ── md+: table view ── */}
       {filteredSlots.length > 0 && view === "table" && (
-        <div className="hidden sm:block">
+        <div className="hidden md:block">
           <SlotListView slots={filteredSlots} onDelete={onDelete} onEdit={onEdit} deletingId={deletingId} allowDeleteBooked={allowDeleteBooked} timezone={timezone} />
         </div>
       )}
 
-      {/* ── sm+: calendar grid ── */}
-      {filteredSlots.length > 0 && activeMonthData && view === "calendar" && <div className="hidden sm:block">
+      {/* ── md+: calendar grid ── */}
+      {filteredSlots.length > 0 && activeMonthData && view === "calendar" && <div className="hidden md:block">
       <div className="glass rounded-2xl sm:rounded-[2.5rem] border-slate-800 overflow-hidden shadow-2xl backdrop-blur-2xl">
         {/* Day-of-week header */}
         <div className="grid grid-cols-7 border-b border-slate-800/50 bg-slate-950/40">
@@ -546,16 +546,19 @@ const SlotCalendarView = ({ slots = [], loading = false, onDelete, onEdit, delet
                         {/* Left accent bar */}
                         <div className={`absolute left-0 top-0 bottom-0 w-0.5 ${isBooked ? "bg-amber-400/70" : "bg-indigo-400/70"}`} />
 
-                        {/* Student name / Open — top */}
-                        {isBooked && slot.booked_by_name ? (
-                          <p className="text-[8px] font-black text-white truncate leading-tight mb-0.5">
-                            {slot.booked_by_name}
-                          </p>
-                        ) : !isBooked && (
-                          <p className="text-[8px] font-black text-indigo-300/80 truncate leading-tight mb-0.5">
-                            Open
-                          </p>
-                        )}
+                        {/* Name / Open  +  timezone — top row */}
+                        <div className="flex items-center justify-between gap-1 mb-0.5">
+                          {isBooked && slot.booked_by_name ? (
+                            <p className="text-[8px] font-black text-white truncate leading-tight min-w-0">
+                              {slot.booked_by_name}
+                            </p>
+                          ) : !isBooked ? (
+                            <p className="text-[8px] font-black text-indigo-300/80 leading-tight min-w-0">
+                              Open
+                            </p>
+                          ) : <span className="min-w-0" />}
+                          <TimezoneTag tz={timezone} className={`text-[8px] font-black shrink-0 ${isBooked ? "text-amber-400/90" : "text-indigo-400/90"}`} />
+                        </div>
 
                         {/* Time + badge row */}
                         <div className="flex items-center gap-0.5 overflow-hidden">
@@ -565,7 +568,6 @@ const SlotCalendarView = ({ slots = [], loading = false, onDelete, onEdit, delet
                               {fmt12(slot.start_time)}
                             </span>
                           </div>
-                          <TimezoneTag tz={timezone} className={`text-[6px] shrink-0 ml-0.5 ${isBooked ? "text-amber-400/60" : "text-indigo-400/60"}`} />
                           <span className={`ml-auto shrink-0 hidden lg:inline text-[6px] font-black uppercase px-1 py-0.5 rounded border ${
                             isBooked
                               ? "bg-amber-500/15 text-amber-400 border-amber-500/20"
@@ -577,7 +579,7 @@ const SlotCalendarView = ({ slots = [], loading = false, onDelete, onEdit, delet
 
                         {/* Clickable hint for upcoming booked slots (when not showing delete) */}
                         {isClickable && !allowDeleteBooked && (
-                          <div className="hidden sm:flex items-center gap-0.5 mt-0.5 opacity-0 group-hover/slot:opacity-100 transition-opacity duration-150">
+                          <div className="hidden md:flex items-center gap-0.5 mt-0.5 opacity-0 group-hover/slot:opacity-100 transition-opacity duration-150">
                             <i className="fas fa-video text-[7px] text-blue-400" />
                             <span className="text-[7px] text-blue-400 font-bold">Join</span>
                           </div>
@@ -585,7 +587,7 @@ const SlotCalendarView = ({ slots = [], loading = false, onDelete, onEdit, delet
 
                         {/* Edit / delete (hover, desktop) — unbooked always; booked when allowDeleteBooked */}
                         {(!isBooked || allowDeleteBooked) && (
-                          <div className="hidden sm:flex items-center gap-1 mt-1 opacity-0 group-hover/slot:opacity-100 transition-opacity duration-150">
+                          <div className="hidden md:flex items-center gap-1 mt-1 opacity-0 group-hover/slot:opacity-100 transition-opacity duration-150">
                             {!isBooked && onEdit && (
                               <button
                                 onClick={(e) => { e.stopPropagation(); onEdit(slot); }}

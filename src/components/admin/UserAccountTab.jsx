@@ -190,7 +190,7 @@ const UserAccountTab = ({ user, onUpdate, onCancel, onSaved, onAvatarUpdated, re
     <div className="space-y-4">
 
       {/* ── Avatar section ──────────────────────────────────────────────────── */}
-      <div className="flex items-center gap-5 p-4 bg-slate-800/40 border border-slate-700/50 rounded-2xl">
+      <div className="flex items-center gap-4 p-4 bg-slate-800/40 border border-slate-700/50 rounded-2xl flex-wrap sm:flex-nowrap">
         {/* Avatar circle */}
         <div className="relative group flex-shrink-0">
           <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-slate-600 bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
@@ -228,8 +228,8 @@ const UserAccountTab = ({ user, onUpdate, onCancel, onSaved, onAvatarUpdated, re
         </div>
 
         {/* Info */}
-        <div>
-          <p className="text-sm font-semibold text-white mb-0.5">{user?.username || "User"}</p>
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-semibold text-white mb-0.5 truncate">{user?.username || "User"}</p>
           <p className="text-xs text-slate-500 capitalize mb-2">{user?.role || "—"}</p>
           {!readOnly && (
             <button
@@ -242,7 +242,7 @@ const UserAccountTab = ({ user, onUpdate, onCancel, onSaved, onAvatarUpdated, re
               {avatarUploading ? "Uploading…" : "Upload Photo"}
             </button>
           )}
-          <p className="text-[9px] text-slate-600 mt-1.5">JPG or PNG · Max 2 MB · Displays as 200×200px</p>
+          <p className="text-[9px] text-slate-600 mt-1.5 leading-relaxed">JPG or PNG · Max 2 MB · 200×200px</p>
         </div>
       </div>
 

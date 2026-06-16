@@ -22,19 +22,28 @@ const fmtDate = (d) =>
     year: "numeric",
   });
 
-// Both helpers receive the profile timezone string so comparisons use the
-// same "wall clock" the backend used when it computed the slot times.
-const nowInTz = (tz) =>
-  tz ? new Date(new Date().toLocaleString("en-US", { timeZone: tz })) : new Date();
+// Convert a naive date+time string that lives in `tz` into UTC milliseconds.
+// Uses Intl.DateTimeFormat.formatToParts — reliable across all browsers.
+const tzToUTCMs = (dateStr, timeStr, tz) => {
+  if (!tz) return new Date(`${dateStr}T${timeStr}`).getTime();
+  const naiveUTC = new Date(`${dateStr}T${timeStr}Z`).getTime();
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false,
+  }).formatToParts(new Date(naiveUTC));
+  const g = (t) => parts.find((p) => p.type === t)?.value ?? "00";
+  const h = g("hour") === "24" ? "00" : g("hour");
+  const tzUTC = Date.parse(`${g("year")}-${g("month")}-${g("day")}T${h}:${g("minute")}:${g("second")}Z`);
+  return naiveUTC + (naiveUTC - tzUTC);
+};
 
-const isUpcoming = (date, tz) => new Date(date + "T23:59:59") >= nowInTz(tz);
+const isUpcoming = (date, tz) => Date.now() <= tzToUTCMs(date, "23:59:59", tz);
 
 const isSlotJoinable = (slot, tz) => {
-  const now = nowInTz(tz);
-  const start = new Date(`${slot.date}T${slot.start_time}`);
-  const end   = new Date(`${slot.date}T${slot.end_time}`);
-  return now >= new Date(start.getTime() - 30 * 60 * 1000)
-      && now <= new Date(end.getTime()   + 30 * 60 * 1000);
+  const now      = Date.now();
+  const startUTC = tzToUTCMs(slot.date, slot.start_time, tz);
+  const endUTC   = tzToUTCMs(slot.date, slot.end_time,   tz);
+  return now >= startUTC - 30 * 60 * 1000 && now <= endUTC + 30 * 60 * 1000;
 };
 
 const openMeetLink = (link) => {
@@ -67,7 +76,7 @@ const StudentTutors = () => {
         availabilityService.getMyBookings(),
         availabilityService.getMyCancellationRequests().catch(() => []),
       ]);
-      setSlots(Array.isArray(slotsData) ? slotsData : []);
+      setSlots((Array.isArray(slotsData) ? slotsData : []).filter((s) => s.can_join === true));
       setCancelRequests(Array.isArray(reqs) ? reqs : []);
     } catch {
       setError("Failed to load your booked slots. Please try again.");

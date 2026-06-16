@@ -19,6 +19,19 @@ import SessionCountdown from "../common/SessionCountdown";
 import GmailNotice from "../common/GmailNotice";
 import StudentSessionCard from "../sessions/StudentSessionCard";
 
+const tzToUTCMs = (dateStr, timeStr, tz) => {
+  if (!tz) return new Date(`${dateStr}T${timeStr}`).getTime();
+  const naiveUTC = new Date(`${dateStr}T${timeStr}Z`).getTime();
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false,
+  }).formatToParts(new Date(naiveUTC));
+  const g = (t) => parts.find((p) => p.type === t)?.value ?? "00";
+  const h = g("hour") === "24" ? "00" : g("hour");
+  const tzUTC = Date.parse(`${g("year")}-${g("month")}-${g("day")}T${h}:${g("minute")}:${g("second")}Z`);
+  return naiveUTC + (naiveUTC - tzUTC);
+};
+
 const fmt12 = (t) => {
   if (!t) return "";
   const [h, m] = t.split(":").map(Number);
@@ -55,7 +68,7 @@ const LiveScheduleList = () => {
     availabilityService.getMyBookings()
       .then((data) => {
         const upcoming = (Array.isArray(data) ? data : [])
-          .filter((s) => new Date(s.date + "T23:59:59") >= new Date())
+          .filter((s) => s.can_join === true)
           .sort((a, b) => a.date.localeCompare(b.date) || a.start_time.localeCompare(b.start_time));
         setTutorSlots(upcoming);
       })
@@ -79,12 +92,12 @@ const LiveScheduleList = () => {
     }
   };
 
-  // Returns true when now is within 30 min before start through 1 hr after start
+  // Returns true when now is within 30 min before start through 30 min after end (profile tz-aware).
   const isSlotJoinable = (slot) => {
-    const slotStart = new Date(slot.date + "T" + slot.start_time);
-    const now = Date.now();
-    return now >= slotStart.getTime() - 30 * 60 * 1000 &&
-           now <= slotStart.getTime() + 60 * 60 * 1000;
+    const now      = Date.now();
+    const startUTC = tzToUTCMs(slot.date, slot.start_time, timezone);
+    const endUTC   = tzToUTCMs(slot.date, slot.end_time,   timezone);
+    return now >= startUTC - 30 * 60 * 1000 && now <= endUTC + 30 * 60 * 1000;
   };
 
   const handleJoinSession = async (session) => {
@@ -305,8 +318,8 @@ const LiveScheduleList = () => {
                       <div className="relative group/tip">
                         <button
                           onClick={() => {
-                            const slotStart = new Date(slot.date + "T" + slot.start_time);
-                            if (Date.now() > slotStart.getTime() + 60 * 60 * 1000) { setSessionExpiredOpen(true); return; }
+                            const endUTC = tzToUTCMs(slot.date, slot.end_time, timezone);
+                            if (Date.now() > endUTC + 30 * 60 * 1000) { setSessionExpiredOpen(true); return; }
                             if (!isSlotJoinable(slot)) { setTooEarlyOpen(true); return; }
                             openMeetingLink(slot.meeting_link);
                           }}
