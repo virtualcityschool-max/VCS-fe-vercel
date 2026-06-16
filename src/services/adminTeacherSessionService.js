@@ -84,7 +84,7 @@ const adminTeacherSessionService = {
       const response = await axiosInstance.post(`/classroom/admin-teacher-sessions/${sessionId}/leave/`);
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Leave Admin Session" });
+      throw error;
     }
   },
 };

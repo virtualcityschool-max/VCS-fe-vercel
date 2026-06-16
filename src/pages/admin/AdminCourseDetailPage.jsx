@@ -238,7 +238,7 @@ const AdminCourseDetailPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen p-6 lg:p-8">
+      <div className="min-h-screen p-6 md:p-12 pt-16 lg:pt-12">
         <div className="animate-pulse space-y-6 max-w-7xl mx-auto">
           <div className="h-6 bg-slate-800 rounded w-56"></div>
           <div className="h-40 bg-slate-800 rounded-3xl"></div>
@@ -266,7 +266,7 @@ const AdminCourseDetailPage = () => {
   const hasAttachment = !!course.attachment;
 
   return (
-    <div className="min-h-screen text-white p-6 lg:p-8">
+    <div className="min-h-screen text-white p-6 md:p-12 pt-16 lg:pt-12">
       <div className="max-w-7xl mx-auto space-y-6">
 
         {/* Breadcrumb */}

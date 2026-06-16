@@ -93,6 +93,7 @@ const TeacherPortal = () => {
   const [sessionExpiredOpen, setSessionExpiredOpen] = useState(false);
   const [adminLoadingSessionId, setAdminLoadingSessionId] = useState(null);
   const [adminLoadingAction, setAdminLoadingAction] = useState(null);
+  const [leaveAdminConfirm, setLeaveAdminConfirm] = useState({ open: false, sessionId: null });
 
   const {
     dashboard,
@@ -215,7 +216,6 @@ const TeacherPortal = () => {
       return;
     }
     if (!isWithinSessionWindow(session?.scheduled_at)) {
-      debugger
       setTooEarlyOpen(true);
       return;
     }
@@ -255,7 +255,13 @@ const TeacherPortal = () => {
     }
   };
 
-  const handleLeaveAdminSession = async (sessionId) => {
+  const handleLeaveAdminSession = (session) => {
+    setLeaveAdminConfirm({ open: true, sessionId: session?.id ?? session?.session_id ?? session });
+  };
+
+  const confirmLeaveAdminSession = async () => {
+    const { sessionId } = leaveAdminConfirm;
+    setLeaveAdminConfirm({ open: false, sessionId: null });
     setAdminLoadingSessionId(sessionId);
     setAdminLoadingAction("leave");
     try {
@@ -473,7 +479,7 @@ const TeacherPortal = () => {
                       isLoading={adminLoadingSessionId === session.id}
                       loadingAction={adminLoadingAction}
                       onJoin={(s) => handleJoinAdminSession(s)}
-                      onLeave={(s) => handleLeaveAdminSession(s.id)}
+                      onLeave={(s) => handleLeaveAdminSession(s)}
                       subtitle={<><i className="fas fa-shield-alt text-indigo-500/50" /> Admin Session</>}
                     />
                   ))
@@ -813,6 +819,17 @@ const TeacherPortal = () => {
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        open={leaveAdminConfirm.open}
+        variant="warning"
+        title="Leave Session"
+        message="Are you sure you want to leave this session?"
+        confirmLabel="Confirm Leave"
+        cancelLabel="Cancel"
+        onConfirm={confirmLeaveAdminSession}
+        onCancel={() => setLeaveAdminConfirm({ open: false, sessionId: null })}
+      />
 
       <ConfirmDialog
         open={endSessionConfirm.open}

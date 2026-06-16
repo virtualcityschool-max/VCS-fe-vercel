@@ -686,15 +686,6 @@ const CoursesTab = ({
                         <i className="fas fa-dollar-sign text-amber-400"></i>
                         <span>{course.is_paid ? `$${(course.price || 0).toLocaleString("en-US")} USD` : "Free"}</span>
                       </div>
-                      <span
-                        className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wide ${
-                          course.is_paid
-                            ? "bg-amber-500/15 text-amber-400 border border-amber-500/20"
-                            : "bg-emerald-500/15 text-emerald-400 border border-emerald-500/20"
-                        }`}
-                      >
-                        {course.is_paid ? "Paid" : "Free"}
-                      </span>
                       <div className="flex items-center gap-2">
                         <i
                           className={`fas fa-circle text-xs ${
@@ -709,47 +700,26 @@ const CoursesTab = ({
 
                     {/* Action Buttons */}
                     <div
-                      className="flex flex-col gap-2"
+                      className="flex items-center gap-2"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <button
                         onClick={() => onCourseEdit(course.id)}
-                        className="bg-slate-700/50 text-slate-300 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-slate-600/50 transition flex items-center gap-2"
+                        className="w-8 h-8 flex items-center justify-center bg-slate-700/50 text-slate-300 rounded-lg hover:bg-slate-600/50 transition"
+                        title="Edit course"
                       >
-                        <i className="fas fa-edit"></i>
-                        <span>Edit Course</span>
+                        <i className="fas fa-edit text-xs"></i>
                       </button>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => {
-                            setEditCourseForm((prev) => ({
-                              ...prev,
-                              instructor_id:
-                                course.instructor?.id || course.instructor_id || "",
-                            }));
-                            setActiveModal({
-                              type: "assign-instructor",
-                              courseId: course.id,
-                            });
-                          }}
-                          className="bg-blue-600/10 text-blue-400 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-blue-600 hover:text-white transition flex items-center gap-2 flex-1"
-                        >
-                          <i className="fas fa-user-plus"></i>
-                          <span>Assign Tutor</span>
-                        </button>
-                        <button
-                          onClick={() => onCourseDelete(course.id)}
-                          disabled={loadingCourseIds.has(course.id)}
-                          className="bg-red-600/10 text-red-400 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-red-600/20 transition disabled:opacity-50 flex items-center gap-2 flex-1"
-                        >
-                          <i className="fas fa-trash"></i>
-                          <span>
-                            {loadingCourseIds.has(course.id)
-                              ? "Deleting..."
-                              : "Delete"}
-                          </span>
-                        </button>
-                      </div>
+                      <button
+                        onClick={() => onCourseDelete(course.id)}
+                        disabled={loadingCourseIds.has(course.id)}
+                        className="w-8 h-8 flex items-center justify-center bg-red-600/10 text-red-400 rounded-lg hover:bg-red-600/20 transition disabled:opacity-50"
+                        title="Delete course"
+                      >
+                        {loadingCourseIds.has(course.id)
+                          ? <i className="fas fa-spinner fa-spin text-xs"></i>
+                          : <i className="fas fa-trash text-xs"></i>}
+                      </button>
                     </div>
                   </div>
                 </div>
