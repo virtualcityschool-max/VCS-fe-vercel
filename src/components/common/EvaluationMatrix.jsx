@@ -151,7 +151,7 @@ const EvaluationMatrix = ({ students = [], courseStatus, gradingScale: gradingSc
                 <div className="flex-1 px-3 py-2.5 text-center">
                   <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-0.5">Obtained</p>
                   <p className="text-white font-bold text-sm tabular-nums">
-                    {obtained ?? "—"} <span className="text-slate-600 font-normal text-xs">/ {totalCourseMarks}</span>
+                    {obtained ?? "—"} <span className="text-slate-600 font-normal text-xs">/{totalCourseMarks}</span>
                   </p>
                 </div>
                 <div className="flex-1 px-3 py-2.5 text-center">
@@ -174,10 +174,10 @@ const EvaluationMatrix = ({ students = [], courseStatus, gradingScale: gradingSc
                       return (
                         <div key={a.id} className="flex items-center gap-2">
                           <span className="text-slate-400 text-xs truncate flex-1">{a.title}</span>
-                          <span className="text-slate-600 text-[10px] shrink-0">/ {a.max_score}</span>
                           <span className={`text-xs font-bold tabular-nums w-8 text-right shrink-0 ${sa?.is_graded ? "text-white" : "text-slate-600"}`}>
                             {sa?.is_graded ? sa.score : "—"}
                           </span>
+                          <span className="text-slate-600 text-[10px] shrink-0">/ {a.max_score}</span>
                         </div>
                       );
                     })}
@@ -197,10 +197,10 @@ const EvaluationMatrix = ({ students = [], courseStatus, gradingScale: gradingSc
                       return (
                         <div key={q.id} className="flex items-center gap-2">
                           <span className="text-slate-400 text-xs truncate flex-1">{q.title}</span>
-                          <span className="text-slate-600 text-[10px] shrink-0">/ {q.max_score}</span>
                           <span className={`text-xs font-bold tabular-nums w-8 text-right shrink-0 ${sq?.is_graded ? "text-white" : "text-slate-600"}`}>
                             {sq?.is_graded ? (sq.obtained_marks ?? sq.score) : "—"}
                           </span>
+                          <span className="text-slate-600 text-[10px] shrink-0">/ {q.max_score}</span>
                         </div>
                       );
                     })}
@@ -310,7 +310,7 @@ const EvaluationMatrix = ({ students = [], courseStatus, gradingScale: gradingSc
                   className="sticky z-20 bg-slate-900 px-4 py-4 text-center text-[10px] uppercase tracking-wider text-slate-500 font-semibold border-l border-slate-800"
                   style={{ right: GRADE_W, minWidth: OBTAINED_W }}
                 >
-                  Obtained <span className="text-slate-600 normal-case ml-0.5">/ {totalCourseMarks}</span>
+                  Obtained <span className="text-slate-600 normal-case ml-0.5">{totalCourseMarks}</span>
                 </th>
 
                 <th
@@ -408,7 +408,7 @@ const EvaluationMatrix = ({ students = [], courseStatus, gradingScale: gradingSc
                       style={{ right: GRADE_W, minWidth: OBTAINED_W }}
                     >
                       <span className="text-white font-bold tabular-nums">
-                        {s.combined_totals?.computed_obtained ?? s.assignment_totals?.computed_obtained ?? "—"}
+                        {s.combined_totals?.computed_obtained ?? s.assignment_totals?.computed_obtained ?? "—"}/{s.combined_totals?.computed_obtained}
                       </span>
                     </td>
 
