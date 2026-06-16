@@ -138,7 +138,6 @@ const StudentClasses = () => {
       {/* Mobile: always table */}
       {/* View toggle — hidden on mobile (always table there) */}
       <div className="flex items-center gap-2 flex-wrap">
-          <TimezoneTag className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1.5 bg-slate-900 border border-slate-800 rounded-xl text-slate-400" />
           <div className="hidden sm:flex bg-slate-800 border border-slate-700 rounded-lg overflow-hidden">
             <button
               onClick={() => setView("table")}
