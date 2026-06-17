@@ -193,7 +193,7 @@ const OverviewTab = ({
     return (
       <div className="space-y-4">
         {SessionsSection}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-6 gap-3">
           {[...Array(6)].map((_, i) => (
             <div
               key={i}
@@ -270,7 +270,7 @@ const OverviewTab = ({
   return (
     <div className="space-y-4 animate-fadeIn">
       {/* Row 1 — User stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-6 gap-3">
         <StatCardTip
           label="Total Users"
           value={analytics.users.total}

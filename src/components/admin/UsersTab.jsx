@@ -40,9 +40,9 @@ const SearchControls = ({
 
   return (
     <div className="mb-6 space-y-4">
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      <div className="flex flex-col xl:flex-row xl:items-start justify-between gap-4">
         {/* Role tab pills */}
-        <div className="bg-slate-900/60 border border-slate-800/80 rounded-xl p-1 flex items-center gap-1 w-full lg:w-fit overflow-x-auto no-scrollbar shrink-0">
+        <div className="bg-slate-900/60 border border-slate-800/80 rounded-xl p-1 flex items-center gap-1 w-fit max-w-full overflow-x-auto no-scrollbar shrink-0">
           {roleTabs.map((tab) => {
             const isActive = usersFilters.role === tab.value;
             return (
@@ -62,13 +62,13 @@ const SearchControls = ({
         </div>
 
         {/* Filter Controls Group */}
-        <div className="flex flex-col sm:flex-row sm:flex-wrap lg:flex-nowrap items-stretch sm:items-center gap-1.5 flex-1 sm:justify-end">
+        <div className="flex flex-col sm:flex-row sm:flex-wrap xl:flex-nowrap items-stretch sm:items-start gap-1.5 flex-1 sm:justify-end">
           <SearchInput
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             onClear={() => setSearchInput("")}
             placeholder="Search users..."
-            className="w-full sm:w-40 lg:w-40"
+            className="w-full sm:w-40"
           />
 
           <div className="grid grid-cols-2 sm:contents gap-1.5">
@@ -93,7 +93,7 @@ const SearchControls = ({
             </FilterSelect>
           </div>
 
-          <div className="flex flex-wrap items-center gap-1.5">
+          <div className="flex flex-wrap items-center justify-end gap-1.5">
             {hasActiveFilters && (
               <button
                 onClick={onClearFilters}
