@@ -22,11 +22,10 @@ import { useDateFormatters } from "../../hooks";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const defaultOption = () => ({ option_text: "", is_correct: false });
-// max_marks is filled by platform setting at component level — see makeDefaultQuestion()
-const defaultQuestion = (marksPerQuestion = 1) => ({
+const defaultQuestion = () => ({
   question_text: "",
   question_type: "SINGLE_CHOICE",
-  max_marks: String(marksPerQuestion),
+  max_marks: "",
   options: [defaultOption(), defaultOption(), defaultOption(), defaultOption()],
 });
 
@@ -88,7 +87,7 @@ const QuestionBuilder = ({ questions, onChange, marksPerQuestion = 1 }) => {
 
   const removeQuestion = (idx) => onChange(questions.filter((_, i) => i !== idx));
 
-  const addQuestion = () => onChange([...questions, { ...defaultQuestion(marksPerQuestion), max_marks: "" }]);
+  const addQuestion = () => onChange([...questions, defaultQuestion()]);
 
   return (
     <div className="space-y-5">
@@ -373,12 +372,12 @@ const TeacherQuizzes = ({
 
   const resetQuizState = () => {
     setForm(makeEmptyForm());
-    setQuestions([defaultQuestion(defaultMarks)]);
+    setQuestions([defaultQuestion()]);
     setPublishImmediately(!!ps.quiz_publish_immediately);
   };
 
   const [form, setForm]                     = useState(makeEmptyForm);
-  const [questions, setQuestions]           = useState(() => [defaultQuestion(defaultMarks)]);
+  const [questions, setQuestions]           = useState(() => [defaultQuestion()]);
   const [publishImmediately, setPublishImmediately] = useState(() => !!ps.quiz_publish_immediately);
 
   useEffect(() => {
