@@ -21,9 +21,8 @@ const AuthModals = () => {
   const [activeRoleTab, setActiveRoleTab] = useState("student");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [registrationStep, setRegistrationStep] = useState("form"); // form | sending | otp | success
+  const [registrationStep, setRegistrationStep] = useState("form"); // form | otp | success
   const [otp, setOtp] = useState("");
-  const [userId, setUserId] = useState(null);
 
   // Use useFieldErrors hook for consistent error management
   const {
@@ -102,7 +101,6 @@ const AuthModals = () => {
     // Reset OTP states
     setRegistrationStep("form");
     setOtp("");
-    setUserId(null);
 
     // Reset password visibility states
     setShowLoginPassword(false);
@@ -168,7 +166,6 @@ const AuthModals = () => {
       setGradeLevel("");
       setRegistrationStep("form");
       setOtp("");
-      setUserId(null);
       setShowLoginPassword(false);
       setShowRegisterPassword(false);
       setShowConfirmPassword(false);
@@ -322,37 +319,10 @@ const AuthModals = () => {
       if (role === "student" && gradeLevel) {
         registerPayload.grade_level = gradeLevel;
       }
-      const response = await dispatch(registerUser(registerPayload)).unwrap();
+      await dispatch(registerUser(registerPayload)).unwrap();
 
-      // Move to OTP step instead of showing success
+      // Move to OTP step — email is already in component state
       setRegistrationStep("otp");
-      console.log("Registration Response:", response);
-
-      // Extract userId with better debugging
-      const extractedUserId =
-        response.user_id || response.user?.id || response.id || response.userId;
-
-      console.log(
-        "Extracted userId:",
-        extractedUserId,
-        "from response:",
-        response,
-      );
-      console.log("Available response keys:", Object.keys(response));
-
-      if (!extractedUserId) {
-        console.error(
-          "No userId found in registration response. Response structure:",
-          response,
-        );
-        setOtpError(
-          "Registration succeeded but no user ID received. Please try registering again.",
-        );
-        setRegistrationStep("form");
-        return;
-      }
-
-      setUserId(extractedUserId);
     } catch (err) {
       // Use global error handler
       const normalizedError = handleRegistrationApiError(
@@ -395,22 +365,10 @@ const AuthModals = () => {
       return;
     }
 
-    // Validate userId exists before attempting OTP verification
-    if (!userId) {
-      setOtpError("User session expired. Please register again.");
-      console.error("OTP verification attempted without userId");
-      // Reset to registration form
-      setTimeout(() => {
-        setRegistrationStep("form");
-        setOtpError("");
-      }, 2000);
-      return;
-    }
-
     setOtpError("");
 
     try {
-      await dispatch(verifyOtp({ userId, otp })).unwrap();
+      await dispatch(verifyOtp({ email, otp })).unwrap();
 
       toastManager.success("Verification successful, you can login now");
 

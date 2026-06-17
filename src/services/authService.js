@@ -98,12 +98,10 @@ export const authService = {
 
       console.log("Registration Response:", response.data);
 
-      const userId = response.data.user_id || response.data.id;
-
       return {
         success: true,
-        user: response.data.user,
-        user_id: userId,
+        email: response.data.email,
+        role: response.data.role,
         message: response.data.message || "Registration successful",
       };
     } catch (error) {
@@ -118,42 +116,14 @@ export const authService = {
   },
 
   // OTP Verification
-  verifyOtp: async (userId, otp) => {
+  verifyOtp: async (email, otp) => {
     try {
-      console.log("Attempting OTP verification for user ID:", userId);
-      console.log("User ID type:", typeof userId);
-
-      const requestData = {
-        user_id: parseInt(userId, 10),
-        otp: otp,
-      };
-
-      console.log("OTP Request data:", {
-        user_id: requestData.user_id,
-        otp: "[OTP_HIDDEN]",
-      });
-
-      const response = await axiosInstance.post(
-        "/auth/verify-otp/",
-        requestData,
-      );
-
-      console.log("OTP Verification Response:", response.data);
-
+      const response = await axiosInstance.post("/auth/verify-otp/", { email, otp });
       return {
         success: true,
         message: response.data.message || "Email verified successfully",
       };
     } catch (error) {
-      console.error("OTP Verification Error:", {
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message,
-        userId: userId,
-        userIdType: typeof userId,
-      });
-
-      // Preserve full backend error response - DO NOT override messages
       throw error;
     }
   },

@@ -211,9 +211,9 @@ export const registerUser = createAsyncThunk(
 
 export const verifyOtp = createAsyncThunk(
   "auth/verifyOtp",
-  async ({ userId, otp }, { rejectWithValue }) => {
+  async ({ email, otp }, { rejectWithValue }) => {
     try {
-      const response = await authService.verifyOtp(userId, otp);
+      const response = await authService.verifyOtp(email, otp);
       return response;
     } catch (err) {
       // Preserve full error structure for proper normalization in UI
