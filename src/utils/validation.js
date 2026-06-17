@@ -200,6 +200,70 @@ export const validateRegistrationForm = (formData) => {
   };
 };
 
+/**
+ * Client-side validation for session create forms.
+ * Returns an errors object (empty = valid).
+ * @param {object} formData  — the create form state
+ * @param {string} mode      — "scheduled" | "now" | "delayed"
+ * @param {number} delayHours
+ * @param {number} delayMins
+ */
+export const validateSessionCreate = (formData, mode = "scheduled", delayHours = 0, delayMins = 30) => {
+  const errors = {};
+
+  if (!formData.course) errors.course = "Course is required";
+
+  if (!formData.title?.trim()) {
+    errors.title = "Session title is required";
+  } else if (formData.title.trim().length < 3) {
+    errors.title = "Title must be at least 3 characters";
+  }
+
+  if (mode === "scheduled") {
+    if (!formData.time) errors.time = "Session time is required";
+    if (!formData.scheduled_date) errors.scheduled_date = "Start date is required";
+    if (!formData.recurrence_days?.length) errors.recurrence_days = "Select at least one recurring day";
+    if (!formData.recurrence_end_date) {
+      errors.recurrence_end_date = "End date is required";
+    } else if (formData.scheduled_date && formData.recurrence_end_date < formData.scheduled_date) {
+      errors.recurrence_end_date = "End date must be on or after start date";
+    }
+  } else if (mode === "delayed") {
+    if (Number(delayHours) === 0 && Number(delayMins) === 0) {
+      errors.delay = "Set at least 1 minute delay";
+    }
+  }
+
+  return errors;
+};
+
+/**
+ * Client-side validation for session edit forms.
+ * Returns an errors object (empty = valid).
+ * @param {object} formData — the edit form state
+ */
+export const validateSessionEdit = (formData) => {
+  const errors = {};
+
+  if (!formData.title?.trim()) {
+    errors.title = "Session title is required";
+  } else if (formData.title.trim().length < 3) {
+    errors.title = "Title must be at least 3 characters";
+  }
+
+  if (!formData.time) errors.time = "Session time is required";
+
+  if (!formData.recurrence_days?.length) errors.recurrence_days = "Select at least one recurring day";
+
+  if (!formData.recurrence_end_date) {
+    errors.recurrence_end_date = "End date is required";
+  } else if (formData.start_date && formData.recurrence_end_date < formData.start_date) {
+    errors.recurrence_end_date = "End date cannot be before start date";
+  }
+
+  return errors;
+};
+
 export const clampDate = (value) => {
   if (!value) return value;
   const parts = value.split("-");

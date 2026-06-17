@@ -15,7 +15,7 @@ import CourseSelect from "../../components/common/CourseSelect";
 import TimezoneTag from "../../components/ui/TimezoneTag";
 import { useDateFormatters } from "../../hooks";
 import { toastManager } from "../../utils/toastManager";
-import { clampDate } from "../../utils/validation";
+import { clampDate, validateSessionCreate, validateSessionEdit } from "../../utils/validation";
 
 const DAYS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
 
@@ -348,6 +348,14 @@ const TeacherSessionCalendar = () => {
   const handleCreate = async (e) => {
     e.preventDefault();
     setCreateErrors({});
+
+    const validationErrors = validateSessionCreate(createForm, createMode, delayHours, delayMins);
+    if (Object.keys(validationErrors).length > 0) {
+      setCreateErrors(validationErrors);
+      toastManager.error("Please fix the highlighted fields before submitting");
+      return;
+    }
+
     try {
       let payload;
       if (createMode === "now") {
@@ -393,6 +401,14 @@ const TeacherSessionCalendar = () => {
   const handleUpdate = async (e) => {
     e.preventDefault();
     setEditErrors({});
+
+    const validationErrors = validateSessionEdit(editForm);
+    if (Object.keys(validationErrors).length > 0) {
+      setEditErrors(validationErrors);
+      toastManager.error("Please fix the highlighted fields before submitting");
+      return;
+    }
+
     try {
       await dispatch(updateTeacherSession({
         id:   editForm.id,
