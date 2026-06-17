@@ -76,7 +76,7 @@ const StudentTutors = () => {
         availabilityService.getMyBookings(),
         availabilityService.getMyCancellationRequests().catch(() => []),
       ]);
-      setSlots((Array.isArray(slotsData) ? slotsData : []).filter((s) => s.can_join === true));
+      setSlots(Array.isArray(slotsData) ? slotsData : []);
       setCancelRequests(Array.isArray(reqs) ? reqs : []);
     } catch {
       setError("Failed to load your booked slots. Please try again.");

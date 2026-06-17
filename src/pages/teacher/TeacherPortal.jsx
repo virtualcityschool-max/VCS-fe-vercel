@@ -283,7 +283,7 @@ const TeacherPortal = () => {
       .then((data) => {
         const all = Array.isArray(data) ? data : (data?.results || []);
         const upcoming = all
-          .filter((s) => s.status === "booked" && s.can_join === true)
+          .filter((s) => s.status === "booked" && Date.now() <= tzToUTCMs(s.date, "23:59:59", timezone))
           .sort((a, b) => a.date.localeCompare(b.date) || a.start_time.localeCompare(b.start_time));
         setBookedSlots(upcoming);
       })

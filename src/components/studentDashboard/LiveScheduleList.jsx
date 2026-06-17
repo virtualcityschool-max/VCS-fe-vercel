@@ -68,7 +68,7 @@ const LiveScheduleList = () => {
     availabilityService.getMyBookings()
       .then((data) => {
         const upcoming = (Array.isArray(data) ? data : [])
-          .filter((s) => s.can_join === true)
+          .filter((s) => Date.now() <= tzToUTCMs(s.date, "23:59:59", timezone))
           .sort((a, b) => a.date.localeCompare(b.date) || a.start_time.localeCompare(b.start_time));
         setTutorSlots(upcoming);
       })
