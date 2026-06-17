@@ -388,7 +388,7 @@ const TeacherGrading = ({
             </div>
             <h3 className="text-2xl font-bold text-white mb-2">No Assignments Created</h3>
             <p className="text-slate-400 max-w-sm mx-auto text-sm leading-relaxed">
-              Start by creating your first assignment or quiz for this course to begin tracking student progress.
+              Start by creating your first assignment for this course to begin tracking student progress.
             </p>
             <button
               onClick={() => setShowCreateModal(true)}

@@ -836,9 +836,21 @@ const TeacherQuizzes = ({
         ))}
       </div>
       ) : (
-        <div className="bg-slate-900 p-6 rounded-3xl border border-slate-800 text-slate-400 text-sm">
-          No quizzes found. Create your first quiz above.
-        </div>
+         <div className="col-span-full bg-slate-900/50 p-16 rounded-[2.5rem] border border-slate-800 border-dashed text-center">
+            <div className="w-20 h-20 bg-slate-800/30 rounded-3xl flex items-center justify-center text-slate-500 mx-auto mb-6">
+              <i className="fas fa-clipboard-list text-3xl" />
+            </div>
+            <h3 className="text-2xl font-bold text-white mb-2">No Quiz Created</h3>
+            <p className="text-slate-400 max-w-sm mx-auto text-sm leading-relaxed">
+              Start by creating your first quiz for this course to begin tracking student progress.
+            </p>
+            <button
+              onClick={() => { resetQuizState(); setShowCreate(true); }}
+              className="mt-8 px-8 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition-all shadow-lg shadow-indigo-600/20"
+            >
+              + Create Quiz
+            </button>
+          </div>
       )}
 
       {/* ── CREATE MODAL ── */}
