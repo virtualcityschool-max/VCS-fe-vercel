@@ -310,7 +310,8 @@ const EvaluationMatrix = ({ students = [], courseStatus, gradingScale: gradingSc
                   className="sticky z-20 bg-slate-900 px-4 py-4 text-center text-[10px] uppercase tracking-wider text-slate-500 font-semibold border-l border-slate-800"
                   style={{ right: GRADE_W, minWidth: OBTAINED_W }}
                 >
-                  Obtained <span className="text-slate-600 normal-case ml-0.5">{totalCourseMarks}</span>
+                  Obtained /
+                  <span className="text-slate-600 normal-case ml-0.5">{totalCourseMarks}</span>
                 </th>
 
                 <th
@@ -408,7 +409,7 @@ const EvaluationMatrix = ({ students = [], courseStatus, gradingScale: gradingSc
                       style={{ right: GRADE_W, minWidth: OBTAINED_W }}
                     >
                       <span className="text-white font-bold tabular-nums">
-                        {s.combined_totals?.computed_obtained ?? s.assignment_totals?.computed_obtained ?? "—"}/{s.combined_totals?.computed_obtained}
+                        {s.combined_totals?.computed_obtained ?? "—"}/{s.combined_totals?.computed_total}
                       </span>
                     </td>
 

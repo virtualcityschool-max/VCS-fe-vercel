@@ -218,13 +218,25 @@ const StudentAssignments = ({ hideHeader = false, filterCourse: externalFilterCo
                         <div className="mt-4 pt-4 border-t border-slate-800/50 flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <div className="w-8 h-8 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-500">
-                              <i className="far fa-calendar-check text-xs" />
+                              <i className={`fas ${assignment.my_score?.score != null ? "fa-star" : "fa-calendar-check"} text-xs`} />
                             </div>
                             <div className="flex flex-col">
-                              <span className="text-[8px] text-slate-600 uppercase font-black leading-none mb-0.5">Submitted</span>
-                              <span className="text-[11px] text-slate-400 font-bold italic">
-                                Ready for review
-                              </span>
+                              {assignment.my_score?.score != null ? (
+                                <>
+                                  <span className="text-[8px] text-slate-600 uppercase font-black leading-none mb-0.5">Score</span>
+                                  <span className="text-[11px] font-bold text-emerald-400">
+                                    {assignment.my_score.score}
+                                    {assignment.my_score.max_score != null && (
+                                      <span className="text-slate-500 font-normal"> / {assignment.my_score.max_score}</span>
+                                    )}
+                                  </span>
+                                </>
+                              ) : (
+                                <>
+                                  <span className="text-[8px] text-slate-600 uppercase font-black leading-none mb-0.5">Submitted</span>
+                                  <span className="text-[11px] text-slate-400 font-bold italic">Ready for review</span>
+                                </>
+                              )}
                             </div>
                           </div>
                           <div className="w-8 h-8 rounded-full bg-slate-800/50 flex items-center justify-center text-slate-500 group-hover:text-white group-hover:bg-indigo-600 transition-all duration-300">

@@ -33,7 +33,7 @@ const defaultQuestion = (marksPerQuestion = 1) => ({
 const QUESTION_TYPES = [
   { value: "SINGLE_CHOICE",   label: "Single Choice" },
   { value: "MULTIPLE_CHOICE", label: "Multiple Choice" },
-  { value: "TEXT_FORMAT",     label: "Text / Essay" },
+  { value: "TEXT_FORMAT",     label: "Short Question" },
 ];
 
 const statusColor = (status) => {
@@ -88,7 +88,7 @@ const QuestionBuilder = ({ questions, onChange, marksPerQuestion = 1 }) => {
 
   const removeQuestion = (idx) => onChange(questions.filter((_, i) => i !== idx));
 
-  const addQuestion = () => onChange([...questions, defaultQuestion(marksPerQuestion)]);
+  const addQuestion = () => onChange([...questions, { ...defaultQuestion(marksPerQuestion), max_marks: "" }]);
 
   return (
     <div className="space-y-5">
@@ -121,15 +121,15 @@ const QuestionBuilder = ({ questions, onChange, marksPerQuestion = 1 }) => {
 
           {/* Type + Marks row */}
           <div className="flex gap-2 mb-3">
-            <select
+            <FilterSelect
               value={q.question_type}
               onChange={(e) => changeType(qIdx, e.target.value)}
-              className="flex-1 p-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 appearance-none"
+              className="flex-1"
             >
               {QUESTION_TYPES.map((t) => (
                 <option key={t.value} value={t.value}>{t.label}</option>
               ))}
-            </select>
+            </FilterSelect>
             <input
               type="number"
               min={1}

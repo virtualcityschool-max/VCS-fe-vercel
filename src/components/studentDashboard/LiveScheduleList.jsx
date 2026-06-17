@@ -3,6 +3,8 @@ import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
   selectLiveSchedule,
+  selectUpcomingSlots,
+  selectDashboardLoading,
   startStudentSession,
   endStudentSession,
   fetchStudentDashboard,
@@ -13,7 +15,6 @@ import { getWindowLabel, isWithinSessionWindow, isSessionExpired } from "../../u
 import { extractApiErrorMessage, showApiError } from "../../utils/apiErrorHandler";
 import { getStorageUrl } from "../../utils/storageUrl";
 import ConfirmDialog from "../common/ConfirmDialog";
-import { availabilityService } from "../../services/availabilityService";
 import TimezoneTag from "../ui/TimezoneTag";
 import SessionCountdown from "../common/SessionCountdown";
 import GmailNotice from "../common/GmailNotice";
@@ -48,33 +49,24 @@ const LiveScheduleList = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const liveSchedule = useSelector(selectLiveSchedule);
+  const rawUpcomingSlots = useSelector(selectUpcomingSlots);
+  const dashboardLoading = useSelector(selectDashboardLoading);
   const { formatDate, formatTime, timezone, timezoneAbbr } = useDateFormatters();
   const isJoiningSession = useSelector(
     (state) => state.studentDashboard.isJoiningSession,
   );
 
+  const tutorSlots = (rawUpcomingSlots || [])
+    .filter((s) => Date.now() <= tzToUTCMs(s.date, "23:59:59", timezone))
+    .sort((a, b) => a.date.localeCompare(b.date) || a.start_time.localeCompare(b.start_time));
+
   const [activeTab, setActiveTab] = useState("classes");
-  const [tutorSlots, setTutorSlots] = useState([]);
-  const [slotsLoading, setSlotsLoading] = useState(false);
 
   const [loadingSessionId, setLoadingSessionId] = useState(null);
   const [loadingAction, setLoadingAction] = useState(null); // 'join' | 'end'
   const [endConfirm, setEndConfirm] = useState({ open: false, session: null });
   const [tooEarlyOpen, setTooEarlyOpen] = useState(false);
   const [sessionExpiredOpen, setSessionExpiredOpen] = useState(false);
-
-  useEffect(() => {
-    setSlotsLoading(true);
-    availabilityService.getMyBookings()
-      .then((data) => {
-        const upcoming = (Array.isArray(data) ? data : [])
-          .filter((s) => Date.now() <= tzToUTCMs(s.date, "23:59:59", timezone))
-          .sort((a, b) => a.date.localeCompare(b.date) || a.start_time.localeCompare(b.start_time));
-        setTutorSlots(upcoming);
-      })
-      .catch(() => setTutorSlots([]))
-      .finally(() => setSlotsLoading(false));
-  }, []);
 
   const openMeetingLink = (link, win) => {
     if (!link || !link.startsWith("http")) {
@@ -240,7 +232,7 @@ const LiveScheduleList = () => {
       {/* ── Tutors tab ── */}
       {activeTab === "tutors" && (
         <div>
-          {slotsLoading ? (
+          {dashboardLoading ? (
             <div className="flex items-center gap-3 text-slate-500 text-xs py-8 justify-center">
               <i className="fas fa-spinner fa-spin" />
               Loading tutoring slots…

@@ -360,6 +360,8 @@ const initialState = {
     course: "all",
   },
 
+  upcomingSlots: [],
+
   // My enrollments (active + pending from /courses/my-enrollments/)
   myEnrollments: [],
   myEnrollmentsLoading: false,
@@ -445,6 +447,7 @@ const studentDashboardSlice = createSlice({
         state.nextSession = action.payload.next_session;
         state.overdueAssignments = action.payload.overdue_assignments;
         state.liveSchedule = action.payload.live_schedule || [];
+        state.upcomingSlots = action.payload.upcoming_slots || [];
         state.enrolledCourses = action.payload.enrolled_courses || [];
         state.assignments = action.payload.assignments || [];
         state.quizzes = action.payload.quizzes || [];
@@ -804,6 +807,8 @@ export const selectOverdueAssignments = (state) =>
   state.studentDashboard.overdueAssignments;
 export const selectLiveSchedule = (state) =>
   state.studentDashboard.liveSchedule;
+export const selectUpcomingSlots = (state) =>
+  state.studentDashboard.upcomingSlots;
 export const selectEnrolledCourses = (state) =>
   state.studentDashboard.enrolledCourses;
 export const selectAssignments = (state) => state.studentDashboard.assignments;

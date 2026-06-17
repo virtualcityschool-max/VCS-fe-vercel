@@ -16,7 +16,6 @@ import { showApiError, extractApiErrorMessage } from "../../utils/apiErrorHandle
 import ConfirmDialog from "../../components/common/ConfirmDialog";
 import { getWindowLabel, isWithinSessionWindow, isSessionExpired, handleJoinSession } from "../../utils/helper/StartSession";
 import { useDateFormatters } from "../../hooks";
-import { availabilityService } from "../../services/availabilityService";
 import { adminTeacherSessionService } from "../../services/adminTeacherSessionService";
 import TimezoneTag from "../../components/ui/TimezoneTag";
 import SessionCountdown from "../../components/common/SessionCountdown";
@@ -87,8 +86,6 @@ const TeacherPortal = () => {
   const [studentsModal, setStudentsModal] = useState(null);
   const [endSessionConfirm, setEndSessionConfirm] = useState({ open: false, sessionId: null });
   const [activeSessionTab, setActiveSessionTab] = useState("classes");
-  const [bookedSlots, setBookedSlots] = useState([]);
-  const [bookedSlotsLoading, setBookedSlotsLoading] = useState(false);
   const [tooEarlyOpen, setTooEarlyOpen] = useState(false);
   const [sessionExpiredOpen, setSessionExpiredOpen] = useState(false);
   const [adminLoadingSessionId, setAdminLoadingSessionId] = useState(null);
@@ -105,6 +102,10 @@ const TeacherPortal = () => {
     errorDashboard,
     isJoiningSession,
   } = useSelector((state) => state.teachers);
+
+  const bookedSlots = (dashboard?.upcoming_slots || [])
+    .filter((s) => Date.now() <= tzToUTCMs(s.date, "23:59:59", timezone))
+    .sort((a, b) => a.date.localeCompare(b.date) || a.start_time.localeCompare(b.start_time));
 
   const handleCreateAnnouncement = async () => {
     if (!title.trim() || !body.trim()) {
@@ -276,20 +277,6 @@ const TeacherPortal = () => {
       setAdminLoadingAction(null);
     }
   };
-
-  useEffect(() => {
-    setBookedSlotsLoading(true);
-    availabilityService.getMySlots()
-      .then((data) => {
-        const all = Array.isArray(data) ? data : (data?.results || []);
-        const upcoming = all
-          .filter((s) => s.status === "booked" && Date.now() <= tzToUTCMs(s.date, "23:59:59", timezone))
-          .sort((a, b) => a.date.localeCompare(b.date) || a.start_time.localeCompare(b.start_time));
-        setBookedSlots(upcoming);
-      })
-      .catch(() => setBookedSlots([]))
-      .finally(() => setBookedSlotsLoading(false));
-  }, []);
 
   useEffect(() => {
     dispatch(fetchTeacherDashboard());
@@ -501,7 +488,7 @@ const TeacherPortal = () => {
             {/* ── Booked Students tab ── */}
             {activeSessionTab === "booked" && (
               <div>
-                {bookedSlotsLoading ? (
+                {loadingDashboard ? (
                   <div className="flex items-center gap-3 text-slate-500 text-xs py-8 justify-center">
                     <i className="fas fa-spinner fa-spin" />
                     Loading booked slots…
