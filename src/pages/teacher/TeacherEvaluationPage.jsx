@@ -155,7 +155,8 @@ const TeacherEvaluationPage = () => {
         </div>
 
         {/* Filters bar */}
-        <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-5 space-y-4">
+        {selectedCourse && (
+          <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-5 space-y-4">
           {/* <div className="flex flex-col sm:flex-row gap-4">
             <div>
               <label className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1.5 block">
@@ -218,7 +219,9 @@ const TeacherEvaluationPage = () => {
               )}
             </p>
           )}
-        </div>
+          </div>
+        )
+        }
 
         {/* ── PUBLIC TAB ── */}
         {tab === "public" && (
