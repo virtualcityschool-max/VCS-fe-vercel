@@ -156,7 +156,7 @@ const OverviewTab = ({
           <div className="w-10 h-10 bg-slate-800 rounded-full flex items-center justify-center mb-3">
             <i className="fas fa-calendar-times text-slate-500 text-base"></i>
           </div>
-          <p className="text-slate-400 text-sm">No upcoming teacher sessions</p>
+          <p className="text-slate-400 text-sm">No upcoming sessions</p>
           <button
             onClick={() => navigate("/admin/teacher-planner")}
             className="mt-3 text-xs text-indigo-400 hover:text-indigo-300 transition"
@@ -165,7 +165,7 @@ const OverviewTab = ({
           </button>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-3 max-h-80 overflow-y-auto pr-1 custom-scrollbar">
           {upcomingSessions.map((session) => (
             <TeacherSessionCard
               key={session.id}
