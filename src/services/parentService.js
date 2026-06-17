@@ -1,5 +1,4 @@
 import { axiosInstance } from "../utils";
-import { handleApiError } from "../utils/errorHandler";
 
 // Parent service endpoints
 const PARENT_ENDPOINTS = {
@@ -19,7 +18,7 @@ export const parentService = {
       const response = await axiosInstance.get(PARENT_ENDPOINTS.DASHBOARD);
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Get Parent Dashboard" });
+      throw error;
     }
   },
 
@@ -31,7 +30,7 @@ export const parentService = {
       });
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Get Child Detail" });
+      throw error;
     }
   },
 
@@ -43,7 +42,7 @@ export const parentService = {
       });
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Get Child Grades" });
+      throw error;
     }
   },
 
@@ -58,7 +57,7 @@ export const parentService = {
       );
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Get Child Attendance" });
+      throw error;
     }
   },
 
@@ -70,7 +69,7 @@ export const parentService = {
       });
       return response.data?.results ?? response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Get Child Courses" });
+      throw error;
     }
   },
 
@@ -84,7 +83,7 @@ export const parentService = {
       const response = await axiosInstance.get(PARENT_ENDPOINTS.ATTENDANCE, { params });
       return response.data?.results ?? response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Get Child Attendance Records" });
+      throw error;
     }
   },
 
@@ -101,7 +100,7 @@ export const parentService = {
       );
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Unlink Children" });
+      throw error;
     }
   },
 };

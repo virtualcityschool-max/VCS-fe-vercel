@@ -4,6 +4,7 @@ import { Button, Input, PhoneInput, FilterSelect } from "../ui";
 import { useFieldErrors } from "../../hooks";
 import { validatePhone, normalizePhone } from "../../utils/validation";
 import { fetchCategories } from "../../store/slices/coursesSlice";
+import { showApiError } from "../../utils/apiErrorHandler";
 
 const StatusBadge = ({ status }) => {
   if (status === "approved")
@@ -113,15 +114,7 @@ const StudentProfileTab = ({ profile, userId, rollNo, onUpdate, onCancel, onSave
         onSaved();
       }
     } catch (error) {
-      // Handle backend field errors using the error hook
-      const originalError = error.originalError || error;
-      if (originalError?.response?.data?.details) {
-        // Set field errors directly from backend response
-        setErrors(originalError.response.data.details);
-      } else {
-        // Use handleApiError for non-field errors
-        handleApiError(originalError);
-      }
+      showApiError(error)
     } finally {
       setIsSaving(false);
     }

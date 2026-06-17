@@ -110,15 +110,7 @@ const ParentProfileTab = ({ profile, onUpdate, onRefresh, onCancel, onSaved, rea
         onSaved();
       }
     } catch (error) {
-      // Handle backend field errors using the error hook
-      const originalError = error.originalError || error;
-      if (originalError?.response?.data?.details) {
-        // Set field errors directly from backend response
-        setErrors(originalError.response.data.details);
-      } else {
-        // Use handleApiError for non-field errors
-        handleApiError(originalError);
-      }
+      showApiError(error)
     } finally {
       setIsSaving(false);
     }

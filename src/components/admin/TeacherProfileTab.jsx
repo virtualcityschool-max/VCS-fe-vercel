@@ -4,6 +4,7 @@ import { Button, Input, PhoneInput } from "../ui";
 import { useFieldErrors } from "../../hooks";
 import { validatePhone, normalizePhone } from "../../utils/validation";
 import DistinctionsEditor from "./DistinctionsEditor";
+import { showApiError } from "../../utils/apiErrorHandler";
 
 const TeacherProfileTab = ({ profile, onUpdate, onCancel, onSaved, readOnly = false }) => {
   const [formData, setFormData] = useState({
@@ -77,9 +78,7 @@ const TeacherProfileTab = ({ profile, onUpdate, onCancel, onSaved, readOnly = fa
       clearAllErrors();
       if (onSaved) onSaved();
     } catch (error) {
-      const orig = error.originalError || error;
-      if (orig?.response?.data?.details) setErrors(orig.response.data.details);
-      else handleApiError(orig);
+      showApiError(error)
     } finally {
       setIsSaving(false);
     }

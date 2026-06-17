@@ -41,7 +41,7 @@ export const adminService = {
       });
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Get Users" });
+      throw error;
     }
   },
   getTeacherPrivateSlots: async (teacherId, params = {}) => {
@@ -52,7 +52,7 @@ export const adminService = {
       );
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Get Tutor Slots" });
+      throw error;
     }
   },
   getUserById: async (userId) => {
@@ -62,7 +62,7 @@ export const adminService = {
       );
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Get User" });
+      throw error;
     }
   },
 
@@ -280,9 +280,7 @@ export const adminService = {
 
       return result;
     } catch (error) {
-      throw handleApiError(error, {
-        context: "Get Enrollment Analytics",
-      });
+      throw error
     }
   },
 

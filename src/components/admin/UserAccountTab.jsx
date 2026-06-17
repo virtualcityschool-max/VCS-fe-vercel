@@ -5,6 +5,7 @@ import { useFieldErrors } from "../../hooks";
 import { getStorageUrl } from "../../utils/storageUrl";
 import { adminService } from "../../services/adminService";
 import { toastManager } from "../../utils/toastManager";
+import { showApiError } from "../../utils/apiErrorHandler";
 
 const MAX_AVATAR_MB = 2;
 const ACCEPTED_TYPES = ["image/jpeg", "image/png"];
@@ -146,15 +147,7 @@ const UserAccountTab = ({ user, onUpdate, onCancel, onSaved, onAvatarUpdated, re
         onSaved();
       }
     } catch (error) {
-      // Handle backend field errors using the error hook
-      const originalError = error.originalError || error;
-      if (originalError?.response?.data?.details) {
-        // Set field errors directly from backend response
-        setErrors(originalError.response.data.details);
-      } else {
-        // Use handleApiError for non-field errors
-        handleApiError(originalError);
-      }
+      showApiError(error)
     } finally {
       setIsSaving(false);
     }
