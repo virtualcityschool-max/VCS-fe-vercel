@@ -8,7 +8,7 @@ const TimezoneTag = ({ className = "", tz: tzOverride }) => {
   if (!abbr) return null;
   return (
     <span className={`relative inline-block ${timezone ? "group/tztag" : ""}`}>
-      <span className={`${timezone ? "cursor-help" : ""} ${className}`}>
+      <span className={`${timezone ? "cursor-pointer" : ""} ${className}`}>
         {abbr}
       </span>
       {timezone && (
