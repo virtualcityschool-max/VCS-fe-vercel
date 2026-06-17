@@ -638,14 +638,13 @@ const TeacherPortal = () => {
               </span>
               Academic Portfolio
             </h3>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {loadingCourses ? (
                 Array(2).fill(0).map((_, i) => (
                   <div key={i} className="h-48 bg-slate-800/50 rounded-2xl animate-pulse" />
                 ))
               ) : myCourses?.length ? (
-                myCourses.map((course, i) => (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {myCourses.map((course, i) => (
                   <CourseCard
                     key={course.id}
                     course={course}
@@ -653,13 +652,13 @@ const TeacherPortal = () => {
                     mode="teacher"
                     onClick={() => setStudentsModal({ id: course.id, title: course.title })}
                   />
-                ))
+                ))}
+            </div>
               ) : (
-                <div className="md:col-span-2 bg-slate-900/30 p-10 rounded-[2rem] border border-white/5 text-center text-slate-500 font-bold">
-                  No active courses found
+                <div className="bg-slate-900/30 backdrop-blur-md p-12 rounded-[2rem] border border-white/5 text-center flex flex-col items-center gap-4">
+                  <p className="text-slate-400 font-bold text-lg">No active courses found</p>
                 </div>
               )}
-            </div>
           </section>
         </div>
 
