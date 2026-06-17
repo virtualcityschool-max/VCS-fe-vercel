@@ -113,18 +113,16 @@ const AdminAttendance = () => {
   const adminMatrixRecords = useMemo(() => {
     const sessionIds = new Set(filteredAdminSessions.map((s) => s.id));
     return adminSessionAttendance
-      .filter((item) => sessionIds.has(item.session_id))
-      .flatMap((item) =>
-        (Array.isArray(item.attendance) ? item.attendance : []).map((att) => ({
-          student: att.teacher_id,
-          session: item.session_id,
-          status: att.status,
-          joined_at: att.joined_at,
-          left_at: null,
-          teacher_name: att.username,
-          participant_role: "teacher",
-        }))
-      );
+      .filter((r) => {
+        const sId = r.session?.id ?? r.session_id ?? r.session;
+        return sessionIds.has(sId);
+      })
+      .map((r) => ({
+        ...r,
+        // normalize participant fields so AttendanceMatrix can resolve name/id for both roles
+        student: r.student ?? r.teacher,
+        student_name: r.student_name || r.teacher_name,
+      }));
   }, [adminSessionAttendance, filteredAdminSessions]);
 
   // ── Data fetching ──────────────────────────────────────────────────────────
@@ -304,7 +302,7 @@ const AdminAttendance = () => {
             sessions={filteredAdminSessions}
             attendanceRecords={adminMatrixRecords}
             enrolledStudents={[]}
-            participantRole="teacher"
+            participantRole="student"
             onEditRecord={setEditRecord}
           />
         )
