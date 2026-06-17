@@ -58,7 +58,7 @@ const Marketplace = () => {
   const { enrollmentIntent } = useSelector((state) => state.ui);
 
   useEffect(() => {
-    if (courses?.length <= 0) dispatch(fetchAllCourses());
+    dispatch(fetchAllCourses());
     dispatch(fetchCategories());
     if (auth.isLoggedIn && auth.role === "student") dispatch(fetchStudentDashboard());
   }, [dispatch, auth.isLoggedIn, auth.role]);
