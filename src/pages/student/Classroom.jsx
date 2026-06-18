@@ -82,7 +82,7 @@ const Classroom = () => {
                       Dr. Samuel Okoro
                     </p>
                     <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-                      Instructor • Sharing Screen
+                      Tutor • Sharing Screen
                     </p>
                   </div>
                 </div>
@@ -181,7 +181,7 @@ const Classroom = () => {
                 type="text"
                 id="class-message"
                 name="class-message"
-                placeholder="Type a message to the class..."
+                placeholder="Type a message to the session..."
                 className="w-full bg-slate-900 border border-slate-800 rounded-2xl py-4 pl-5 pr-14 text-sm text-white focus:ring-2 focus:ring-indigo-500 outline-none shadow-inner"
               />
               <button className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center hover:bg-indigo-500 transition shadow-lg active:scale-95">

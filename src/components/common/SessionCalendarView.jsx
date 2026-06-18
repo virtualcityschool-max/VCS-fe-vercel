@@ -1,7 +1,9 @@
 import React, { useMemo, useState } from "react";
 import { useDateFormatters } from "../../hooks";
+import TimezoneTag from "../ui/TimezoneTag";
 
 const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const DAY_NAME_TO_NUM = { SUN: 0, MON: 1, TUE: 2, WED: 3, THU: 4, FRI: 5, SAT: 6 };
 const MONTH_NAMES = [
   "January","February","March","April","May","June",
   "July","August","September","October","November","December",
@@ -23,7 +25,7 @@ const getStatusCls = (status) => {
 };
 
 const SessionCalendarView = ({ sessions = [], loading = false }) => {
-  const { formatTime } = useDateFormatters();
+  const { formatTime, timezoneAbbr } = useDateFormatters();
   const [calendarMonth, setCalendarMonth] = useState(null);
 
   // Parent sessions (is_child === false) drive the date range when present
@@ -81,13 +83,46 @@ const SessionCalendarView = ({ sessions = [], loading = false }) => {
 
   const sessionsByDate = useMemo(() => {
     const map = {};
+
     sessions.forEach((s) => {
       if (!s.scheduled_at) return;
-      const d = new Date(s.scheduled_at);
-      const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-      if (!map[key]) map[key] = [];
-      map[key].push(s);
+
+      const start   = new Date(s.scheduled_at);
+      const days    = Array.isArray(s.recurrence_days) ? s.recurrence_days : [];
+      const endDate = s.recurrence_end_date
+        ? new Date(s.recurrence_end_date.includes("T") ? s.recurrence_end_date : `${s.recurrence_end_date}T23:59:59`)
+        : null;
+
+      if (days.length > 0 && endDate) {
+        const dayNums = new Set(
+          days.map((d) => DAY_NAME_TO_NUM[d.toUpperCase()]).filter((n) => n !== undefined)
+        );
+
+        // Walk day by day from start → end, placing a card on each matching weekday
+        const cur = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+        const end = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
+
+        while (cur <= end) {
+          if (dayNums.has(cur.getDay())) {
+            const key = `${cur.getFullYear()}-${cur.getMonth()}-${cur.getDate()}`;
+            if (!map[key]) map[key] = [];
+            // Avoid duplicate entries for the same session on the same day
+            if (!map[key].some((e) => e.id === s.id)) {
+              map[key].push(s);
+            }
+          }
+          cur.setDate(cur.getDate() + 1);
+        }
+      } else {
+        // Non-recurring: place on its single scheduled date
+        const key = `${start.getFullYear()}-${start.getMonth()}-${start.getDate()}`;
+        if (!map[key]) map[key] = [];
+        if (!map[key].some((e) => e.id === s.id)) {
+          map[key].push(s);
+        }
+      }
     });
+
     return map;
   }, [sessions]);
 
@@ -172,66 +207,68 @@ const SessionCalendarView = ({ sessions = [], loading = false }) => {
                   <span className="text-sm text-slate-300">{ref.teacher_name}</span>
                 </div>
     <div className="space-y-4 animate-fadeIn">
-      {/* Compact Month navigation bar */}
-      <div className="glass flex items-center justify-between p-1.5 rounded-xl border-slate-800 shadow-xl relative overflow-hidden group">
-        <div className="absolute inset-0 bg-linear-to-r from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-        
-        <button
-          onClick={() => setCalendarMonth(monthRange[Math.max(0, activeMonthIdx - 1)])}
-          disabled={activeMonthIdx === 0}
-          className="w-10 h-10 flex items-center justify-center rounded-lg bg-slate-800/50 hover:bg-indigo-500 hover:text-white text-slate-400 disabled:opacity-10 disabled:cursor-not-allowed transition-all duration-300 relative z-10"
-        >
-          <i className="fas fa-chevron-left text-xs"></i>
-        </button>
-
-        <div className="text-center relative z-10 py-2">
-          <h2 className="text-lg font-black text-white tracking-tight">
-            {MONTH_NAMES[activeMonthData.month]}&nbsp;&nbsp;
-            <span className="text-indigo-400">
-              {activeMonthData.year}
-            </span>          </h2>
-          <div className="flex items-center justify-center gap-2 mt-0.5">
-            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500">
-              {activeMonthIdx + 1} of {monthRange.length} Months
-            </span>
+      {/* Single-row header: nav left, month tabs right */}
+      <div className="glass inline-flex items-center gap-3 p-2 rounded-xl border border-slate-800 shadow-xl">
+        {/* Left — prev/next + current month label */}
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            onClick={() => setCalendarMonth(monthRange[Math.max(0, activeMonthIdx - 1)])}
+            disabled={activeMonthIdx === 0}
+            className="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800/50 hover:bg-indigo-500 hover:text-white text-slate-400 disabled:opacity-20 disabled:cursor-not-allowed transition-all duration-200"
+          >
+            <i className="fas fa-chevron-left text-xs" />
+          </button>
+          <div className="min-w-[110px] text-center">
+            <p className="text-sm font-black text-white leading-tight tracking-tight">
+              {MONTH_NAMES[activeMonthData.month]}
+              <span className="text-indigo-400 ml-1">{activeMonthData.year}</span>
+            </p>
+            <p className="text-[9px] font-bold uppercase tracking-widest text-slate-500 mt-0.5">
+              {activeMonthIdx + 1} / {monthRange.length}
+            </p>
           </div>
+          <button
+            onClick={() => setCalendarMonth(monthRange[Math.min(monthRange.length - 1, activeMonthIdx + 1)])}
+            disabled={activeMonthIdx === monthRange.length - 1}
+            className="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800/50 hover:bg-indigo-500 hover:text-white text-slate-400 disabled:opacity-20 disabled:cursor-not-allowed transition-all duration-200"
+          >
+            <i className="fas fa-chevron-right text-xs" />
+          </button>
         </div>
 
-        <button
-          onClick={() => setCalendarMonth(monthRange[Math.min(monthRange.length - 1, activeMonthIdx + 1)])}
-          disabled={activeMonthIdx === monthRange.length - 1}
-          className="w-10 h-10 flex items-center justify-center rounded-lg bg-slate-800/50 hover:bg-indigo-500 hover:text-white text-slate-400 disabled:opacity-10 disabled:cursor-not-allowed transition-all duration-300 relative z-10"
-        >
-          <i className="fas fa-chevron-right text-xs"></i>
-        </button>
+        {/* Divider */}
+        {monthRange.length > 1 && <div className="w-px self-stretch bg-slate-800 shrink-0" />}
+
+        {/* Right — month tabs, vertically scrollable if many */}
+        {monthRange.length > 1 && (
+          <div className="flex flex-wrap gap-1.5 overflow-y-auto max-h-20 custom-scrollbar pr-1">
+            {monthRange.map((m, idx) => (
+              <button
+                key={`${m.year}-${m.month}`}
+                onClick={() => setCalendarMonth(m)}
+                className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all duration-200 shrink-0 ${
+                  idx === activeMonthIdx
+                    ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/20"
+                    : "bg-slate-800/60 text-slate-500 hover:bg-slate-700 hover:text-slate-300 border border-slate-700/50"
+                }`}
+              >
+                {MONTH_NAMES[m.month].slice(0, 3)} {String(m.year).slice(2)}
+              </button>
+            ))}
+          </div>
+        )}
+        <div className="w-px self-stretch bg-slate-800 shrink-0" />
+        <TimezoneTag className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1.5 bg-slate-900 border border-slate-800 rounded-xl text-slate-400" />
       </div>
 
-      {/* Month tab pills (only if needed) */}
-      {monthRange.length > 1 && (
-        <div className="flex gap-2 flex-wrap px-1">
-          {monthRange.map((m, idx) => (
-            <button
-              key={`${m.year}-${m.month}`}
-              onClick={() => setCalendarMonth(m)}
-              className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${
-                idx === activeMonthIdx
-                  ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/20"
-                  : "bg-slate-800/40 text-slate-500 hover:bg-slate-800 hover:text-slate-300 border border-slate-800"
-              }`}
-            >
-              {MONTH_NAMES[m.month].slice(0, 3)} {m.year}
-            </button>
-          ))}
-        </div>
-      )}
-
       {/* Calendar grid container */}
-      <div className="glass rounded-[2.5rem] border-slate-800 overflow-hidden shadow-2xl backdrop-blur-2xl">
+      <div className="glass rounded-2xl sm:rounded-[2.5rem] border-slate-800 overflow-hidden shadow-2xl backdrop-blur-2xl">
         {/* Day-of-week header */}
         <div className="grid grid-cols-7 border-b border-slate-800/50 bg-slate-950/40">
           {DAY_LABELS.map((d) => (
-            <div key={d} className="px-4 py-5 text-center text-[10px] font-black uppercase tracking-[0.25em] text-slate-500">
-              {d}
+            <div key={d} className="px-0 py-2 sm:px-4 sm:py-5 text-center text-[8px] sm:text-[10px] font-black uppercase tracking-tight sm:tracking-[0.25em] text-slate-500">
+              <span className="hidden sm:inline">{d}</span>
+              <span className="sm:hidden">{d.slice(0, 2)}</span>
             </div>
           ))}
         </div>
@@ -240,7 +277,7 @@ const SessionCalendarView = ({ sessions = [], loading = false }) => {
         <div className="grid grid-cols-7">
           {calendarGrid.map((day, idx) => {
             if (!day) {
-              return <div key={`blank-${idx}`} className="min-h-[100px] border-b border-r border-slate-800/30 bg-slate-950/20" />;
+              return <div key={`blank-${idx}`} className="min-h-[60px] sm:min-h-[100px] border-b border-r border-slate-800/30 bg-slate-950/20" />;
             }
             const cellKey = `${activeMonthData.year}-${activeMonthData.month}-${day}`;
             const daySessions = sessionsByDate[cellKey] || [];
@@ -249,7 +286,7 @@ const SessionCalendarView = ({ sessions = [], loading = false }) => {
             return (
               <div
                 key={cellKey}
-                className={`min-h-[100px] border-b border-r border-slate-800/30 p-1.5 flex flex-col gap-1.5 transition-colors duration-300 ${
+                className={`min-h-[60px] max-h-[60px] sm:min-h-[100px] sm:max-h-[100px] overflow-y-auto custom-scrollbar border-b border-r border-slate-800/30 p-1 sm:p-1.5 flex flex-col gap-1 sm:gap-1.5 transition-colors duration-300 ${
                   isToday ? "bg-indigo-500/5" : "hover:bg-white/[0.01]"
                 }`}
               >
@@ -257,7 +294,7 @@ const SessionCalendarView = ({ sessions = [], loading = false }) => {
                   {isToday && (
                     <span className="text-[7px] font-black uppercase tracking-widest text-indigo-400">Today</span>
                   )}
-                  <span className={`text-[10px] font-black w-6 h-6 flex items-center justify-center rounded-lg ml-auto transition-all duration-300 ${
+                  <span className={`text-[9px] sm:text-[10px] font-black w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center rounded-lg ml-auto transition-all duration-300 ${
                     isToday 
                       ? "bg-indigo-500 text-white shadow-lg" 
                       : daySessions.length > 0 ? "text-white bg-slate-800/50" : "text-slate-600"
@@ -266,37 +303,39 @@ const SessionCalendarView = ({ sessions = [], loading = false }) => {
                   </span>
                 </div>
 
-                <div className="flex flex-col gap-1.5">
+                <div className="flex flex-col gap-0.5">
                   {daySessions.map((session) => (
-                    <div 
-                      key={session.id} 
-                      className="group/session relative overflow-hidden bg-slate-800/40 hover:bg-slate-800 border border-slate-700/50 hover:border-indigo-500/50 p-2 rounded-lg transition-all duration-300 cursor-pointer"
+                    <div
+                      key={session.id}
+                      className="group/session relative bg-slate-800/40 hover:bg-slate-800 border border-slate-700/50 hover:border-indigo-500/50 pl-2 pr-1 py-1 rounded-lg transition-all duration-200 cursor-pointer"
                     >
-                      <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-indigo-500 opacity-50 group-hover:opacity-100 transition-opacity" />
-                      
-                      <div className="flex items-center justify-between mb-0.5">
-                        <div className="flex items-center gap-1 text-indigo-400/80">
-                          <i className="far fa-clock text-[8px]"></i>
-                          <span className="text-[9px] font-bold">{formatTime(session.scheduled_at)}</span>
-                        </div>
-                      </div>
+                      <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-indigo-500 opacity-50 group-hover/session:opacity-100 transition-opacity rounded-l-lg" />
 
-                      <p className="text-[10px] font-bold text-slate-100 leading-tight line-clamp-1 group-hover:text-indigo-300 transition-colors">
-                        {session.title}
-                      </p>
-
-                      <div className="flex items-center justify-between gap-1 mt-1">
-                        <p className="text-[8px] text-slate-500 truncate font-medium max-w-[60%]">
-                          {session.course?.title || session.course_title || "General"}
-                        </p>
-                        <span className={`text-[7px] font-black uppercase tracking-widest px-1 rounded border border-white/5 ${
-                          session.status === 'live' 
-                            ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
-                            : 'bg-indigo-500/10 text-indigo-400'
+                      {/* Time + status row */}
+                      <div className="flex items-center gap-0.5 overflow-hidden">
+                        <i className="far fa-clock text-[6px] text-indigo-400/80 shrink-0" />
+                        <span className="text-[7px] font-semibold tabular-nums text-indigo-400/80 truncate">
+                          {formatTime(session.scheduled_at)}
+                        </span>
+                        <TimezoneTag className="text-[6px] shrink-0 ml-0.5 text-indigo-400/60" />
+                        <span className={`ml-auto shrink-0 hidden lg:inline text-[6px] font-black uppercase px-1 py-0.5 rounded border ${
+                          session.status === "live"
+                            ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                            : "bg-indigo-500/10 text-indigo-400 border-indigo-500/15"
                         }`}>
                           {session.status || "set"}
                         </span>
                       </div>
+
+                      {/* Title */}
+                      <p className="text-[8px] font-bold text-slate-100 leading-tight truncate group-hover/session:text-indigo-300 transition-colors mt-0.5">
+                        {session.title}
+                      </p>
+
+                      {/* Course — large desktop only */}
+                      <p className="hidden xl:block text-[7px] text-slate-500 truncate font-medium mt-0.5">
+                        {session.course?.title || session.course_title || "General"}
+                      </p>
                     </div>
                   ))}
                 </div>

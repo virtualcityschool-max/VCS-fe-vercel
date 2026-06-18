@@ -12,6 +12,7 @@ const TeacherEvaluationPage = () => {
   const [tab, setTab]                       = useState("public");
 
   const [publicStudents, setPublicStudents] = useState([]);
+  const [gradingScale, setGradingScale]     = useState(null);
   const [loadingPublic, setLoadingPublic]   = useState(false);
 
   const [privateList, setPrivateList]             = useState([]);
@@ -64,6 +65,7 @@ const TeacherEvaluationPage = () => {
         .flatMap((r) => r.students || [])
         .filter((s) => !s.is_private_enrollment);
       setPublicStudents(students);
+      setGradingScale(results[0]?.grading_scale || null);
     } catch {
       toastManager.error("Failed to load evaluations");
       setPublicStudents([]);
@@ -121,7 +123,7 @@ const TeacherEvaluationPage = () => {
   const isCompleted    = courseStatus === "completed";
 
   return (
-    <div className="min-h-screen text-white p-6 lg:p-8">
+    <div className="min-h-screen text-white px-6">
       <div className="mx-auto space-y-6">
 
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
@@ -153,7 +155,8 @@ const TeacherEvaluationPage = () => {
         </div>
 
         {/* Filters bar */}
-        <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-5 space-y-4">
+        {selectedCourse && (
+          <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-5 space-y-4">
           {/* <div className="flex flex-col sm:flex-row gap-4">
             <div>
               <label className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1.5 block">
@@ -216,7 +219,9 @@ const TeacherEvaluationPage = () => {
               )}
             </p>
           )}
-        </div>
+          </div>
+        )
+        }
 
         {/* ── PUBLIC TAB ── */}
         {tab === "public" && (
@@ -247,7 +252,7 @@ const TeacherEvaluationPage = () => {
                   )}
                 </div>
               )}
-              <EvaluationMatrix students={publicStudents} courseStatus={courseStatus} />
+              <EvaluationMatrix students={publicStudents} courseStatus={courseStatus} gradingScale={gradingScale} />
             </>
           )
         )}
@@ -268,7 +273,7 @@ const TeacherEvaluationPage = () => {
               ))}
             </div>
           ) : privateEval ? (
-            <EvaluationMatrix students={[privateEval]} courseStatus={courseStatus} />
+            <EvaluationMatrix students={[privateEval]} courseStatus={courseStatus} gradingScale={gradingScale} />
           ) : (
             <div className="bg-slate-900/50 border border-slate-800 border-dashed rounded-3xl p-12 text-center">
               <p className="text-slate-400 text-sm">No evaluation data found for this student</p>

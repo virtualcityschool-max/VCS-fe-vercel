@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import ConfirmDialog from "../common/ConfirmDialog";
 import { getStorageUrl } from "../../utils/storageUrl";
+import { useDateFormatters } from "../../hooks/useDateFormatters";
 
 const ApprovalsTab = ({
   pendingApprovals,
@@ -12,20 +13,25 @@ const ApprovalsTab = ({
   onRefresh,
 }) => {
   const [confirmDialog, setConfirmDialog] = useState({ open: false, type: null, userId: null, username: "" });
+  const [deleteUser, setDeleteUser] = useState(false);
+  const { timezone } = useDateFormatters();
 
   const handleApprove = (userId, username) => {
     setConfirmDialog({ open: true, type: "approve", userId, username });
   };
 
   const handleReject = (userId, username) => {
+    setDeleteUser(false);
     setConfirmDialog({ open: true, type: "reject", userId, username });
   };
 
   const handleConfirm = () => {
     const { type, userId } = confirmDialog;
+    const shouldDelete = deleteUser;
     setConfirmDialog({ open: false, type: null, userId: null, username: "" });
+    setDeleteUser(false);
     if (type === "approve") onApprove(userId);
-    else if (type === "reject") onReject(userId);
+    else if (type === "reject") onReject(userId, shouldDelete);
   };
 
   return (
@@ -156,23 +162,14 @@ const ApprovalsTab = ({
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                       <div className="flex items-center gap-2">
                         <span className="bg-slate-700/50 text-slate-300 px-2 sm:px-3 py-1 rounded-full text-[8px] sm:text-xs font-black uppercase border border-slate-600">
-                          {user.role || "user"}
+                          {{ teacher: "Tutor", parent: "Guardian" }[user.role] || user.role || "user"}
                         </span>
                       </div>
 
                       <div className="flex flex-col gap-2">
                         <span className="text-slate-400 text-xs">
                           {user.date_joined
-                            ? new Date(user.date_joined).toLocaleString(
-                                "en-US",
-                                {
-                                  year: "numeric",
-                                  month: "short",
-                                  day: "numeric",
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                },
-                              )
+                            ? new Date(user.date_joined).toLocaleString("en-US", { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", ...(timezone ? { timeZone: timezone } : {}) })
                             : "Unknown"}
                         </span>
 
@@ -277,22 +274,13 @@ const ApprovalsTab = ({
                       </td>
                       <td className="px-8 py-6">
                         <span className="bg-slate-700/50 text-slate-300 px-3 py-1 rounded-full text-[8px] font-black uppercase border border-slate-600">
-                          {user.role || "user"}
+                          {{ teacher: "Tutor", parent: "Guardian" }[user.role] || user.role || "user"}
                         </span>
                       </td>
                       <td className="px-8 py-6">
                         <span className="text-slate-400 text-sm">
                           {user.date_joined
-                            ? new Date(user.date_joined).toLocaleString(
-                                "en-US",
-                                {
-                                  year: "numeric",
-                                  month: "short",
-                                  day: "numeric",
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                },
-                              )
+                            ? new Date(user.date_joined).toLocaleString("en-US", { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", ...(timezone ? { timeZone: timezone } : {}) })
                             : "Unknown"}
                         </span>
                       </td>
@@ -354,7 +342,13 @@ const ApprovalsTab = ({
         confirmLabel={confirmDialog.type === "approve" ? "Approve" : "Reject"}
         cancelLabel="Cancel"
         onConfirm={handleConfirm}
-        onCancel={() => setConfirmDialog({ open: false, type: null, userId: null, username: "" })}
+        onCancel={() => {
+          setConfirmDialog({ open: false, type: null, userId: null, username: "" });
+          setDeleteUser(false);
+        }}
+        checkboxLabel={confirmDialog.type === "reject" ? "Permanently delete this user" : ""}
+        checkboxChecked={deleteUser}
+        onCheckboxChange={setDeleteUser}
       />
     </>
   );

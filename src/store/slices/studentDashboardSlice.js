@@ -145,6 +145,20 @@ export const enrollInCoursePrivate = createAsyncThunk(
   },
 );
 
+export const withdrawEnrollment = createAsyncThunk(
+  "studentDashboard/withdrawEnrollment",
+  async (courseId, { rejectWithValue }) => {
+    try {
+      const response = await studentService.withdrawEnrollment(courseId);
+      return { courseId, response };
+    } catch (error) {
+      return rejectWithValue(
+        typeof error === "string" ? error : error?.message || "An error occurred",
+      );
+    }
+  },
+);
+
 export const unenrollFromCourse = createAsyncThunk(
   "studentDashboard/unenrollFromCourse",
   async (courseId, { rejectWithValue }) => {
@@ -332,6 +346,7 @@ const initialState = {
   error: null,
   enrollingCourseIds: [],
   unenrollingCourseIds: [],
+  withdrawingCourseIds: [],
   sessions: [],
   attendance: {},
   isFetchingAttendance: false,
@@ -344,6 +359,8 @@ const initialState = {
     status: "all", // all, overdue, pending, submitted, graded
     course: "all",
   },
+
+  upcomingSlots: [],
 
   // My enrollments (active + pending from /courses/my-enrollments/)
   myEnrollments: [],
@@ -430,6 +447,7 @@ const studentDashboardSlice = createSlice({
         state.nextSession = action.payload.next_session;
         state.overdueAssignments = action.payload.overdue_assignments;
         state.liveSchedule = action.payload.live_schedule || [];
+        state.upcomingSlots = action.payload.upcoming_slots || [];
         state.enrolledCourses = action.payload.enrolled_courses || [];
         state.assignments = action.payload.assignments || [];
         state.quizzes = action.payload.quizzes || [];
@@ -586,6 +604,22 @@ const studentDashboardSlice = createSlice({
         state.unenrollingCourseIds = state.unenrollingCourseIds.filter(
           (id) => id !== courseId,
         );
+        state.error = action.payload;
+      })
+
+      // Withdraw enrollment request
+      .addCase(withdrawEnrollment.pending, (state, action) => {
+        state.withdrawingCourseIds.push(action.meta.arg);
+        state.error = null;
+      })
+      .addCase(withdrawEnrollment.fulfilled, (state, action) => {
+        const courseId = action.meta.arg;
+        state.withdrawingCourseIds = state.withdrawingCourseIds.filter((id) => id !== courseId);
+        state.enrolledCourses = state.enrolledCourses.filter((c) => c.id !== courseId);
+        state.error = null;
+      })
+      .addCase(withdrawEnrollment.rejected, (state, action) => {
+        state.withdrawingCourseIds = state.withdrawingCourseIds.filter((id) => id !== action.meta.arg);
         state.error = action.payload;
       })
 
@@ -773,6 +807,8 @@ export const selectOverdueAssignments = (state) =>
   state.studentDashboard.overdueAssignments;
 export const selectLiveSchedule = (state) =>
   state.studentDashboard.liveSchedule;
+export const selectUpcomingSlots = (state) =>
+  state.studentDashboard.upcomingSlots;
 export const selectEnrolledCourses = (state) =>
   state.studentDashboard.enrolledCourses;
 export const selectAssignments = (state) => state.studentDashboard.assignments;

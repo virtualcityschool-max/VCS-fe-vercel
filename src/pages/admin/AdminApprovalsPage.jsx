@@ -26,6 +26,7 @@ import ChildLinksTab from "../../components/admin/ChildLinksTab";
 import EnrollmentRequestsTab from "../../components/admin/EnrollmentRequestsTab";
 import HireRequestsTab from "../../components/admin/HireRequestsTab";
 import { showApiError } from "../../utils/apiErrorHandler";
+import { adminService } from "../../services/adminService";
 
 const AdminApprovalsPage = () => {
   const dispatch = useDispatch();
@@ -77,10 +78,15 @@ const AdminApprovalsPage = () => {
     }
   };
 
-  const handleReject = async (userId) => {
+  const handleReject = async (userId, shouldDeleteUser) => {
     try {
       await dispatch(rejectUser(userId)).unwrap();
-      toastManager.success("User rejected successfully");
+      if (shouldDeleteUser) {
+        await adminService.purgeUser(userId);
+        toastManager.success("User rejected and permanently deleted");
+      } else {
+        toastManager.success("User rejected successfully");
+      }
     } catch (error) {
       showApiError(error);
     }
@@ -123,12 +129,16 @@ const AdminApprovalsPage = () => {
     }
   };
 
-  const handleRejectEnrollment = async (enrollmentId) => {
+  const handleRejectEnrollment = async (enrollmentId, shouldDeleteUser, studentId) => {
     try {
       await dispatch(
         actionEnrollment({ enrollmentId, action: "reject" }),
       ).unwrap();
       toastManager.success("Enrollment rejected successfully");
+      if (shouldDeleteUser && studentId) {
+        await adminService.purgeUser(studentId);
+        toastManager.success("User permanently deleted");
+      }
     } catch (error) {
       showApiError(error);
     }
@@ -198,8 +208,8 @@ const AdminApprovalsPage = () => {
     <div className="space-y-6">
       {/* Tab Navigation */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-1 backdrop-blur-sm">
-          <div className="flex flex-wrap items-center gap-1">
+        <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-1 backdrop-blur-sm w-fit max-w-full overflow-x-auto no-scrollbar">
+          <div className="flex items-center gap-1 min-w-max">
             <button
               onClick={() => setActiveTab("users")}
               className={`inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
@@ -249,25 +259,9 @@ const AdminApprovalsPage = () => {
                 </span>
               )}
             </button>
-            <button
-              onClick={() => setActiveTab("hireRequests")}
-              className={`inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-                activeTab === "hireRequests"
-                  ? "bg-indigo-600 text-white shadow-lg"
-                  : "text-slate-400 hover:text-white hover:bg-slate-800/50"
-              }`}
-            >
-              <i className="fas fa-handshake"></i>
-              Teacher Hire Requests
-              {pendingHireCount > 0 && (
-                <span className="bg-indigo-500 text-white text-xs px-2 py-0.5 rounded-full">
-                  {pendingHireCount}
-                </span>
-              )}
-            </button>
           </div>
         </div>
-        <div className="flex items-center justify-end gap-3 flex-wrap">
+        <div className="flex items-center gap-3 flex-wrap">
           {activeTab === "users" ? (
             <div className="flex items-center gap-3 flex-wrap text-sm font-semibold">
               <span className="text-amber-300">

@@ -348,6 +348,40 @@ export const endLiveSession = createAsyncThunk(
   },
 );
 
+export const createTeacherSession = createAsyncThunk(
+  "teachers/createTeacherSession",
+  async (data, { rejectWithValue }) => {
+    try {
+      return await teacherService.createSession(data);
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  },
+);
+
+export const updateTeacherSession = createAsyncThunk(
+  "teachers/updateTeacherSession",
+  async ({ id, data }, { rejectWithValue }) => {
+    try {
+      return await teacherService.updateSession(id, data);
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  },
+);
+
+export const deleteTeacherSession = createAsyncThunk(
+  "teachers/deleteTeacherSession",
+  async ({ id, deletePast = false }, { rejectWithValue }) => {
+    try {
+      await teacherService.deleteSession(id, deletePast);
+      return id;
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  },
+);
+
 const initialState = {
   teachers: [],
   teacherDetails: null,
@@ -405,6 +439,11 @@ const initialState = {
   // session joining state
   isJoiningSession: false,
   joiningSessionError: null,
+
+  // session CRUD state (teacher)
+  isCreatingSession: false,
+  updatingSessionId: null,
+  deletingSessionIds: [],
 
   // quiz state
   quizzes: [],
@@ -802,6 +841,44 @@ const teacherSlice = createSlice({
             s.id === action.payload.id ? { ...s, status: action.payload.status, obtained_marks: action.payload.obtained_marks } : s
           );
         }
+      })
+
+      // CREATE SESSION (teacher)
+      .addCase(createTeacherSession.pending, (state) => {
+        state.isCreatingSession = true;
+      })
+      .addCase(createTeacherSession.fulfilled, (state, action) => {
+        state.isCreatingSession = false;
+        state.sessions.unshift(action.payload);
+      })
+      .addCase(createTeacherSession.rejected, (state) => {
+        state.isCreatingSession = false;
+      })
+
+      // UPDATE SESSION (teacher)
+      .addCase(updateTeacherSession.pending, (state, action) => {
+        state.updatingSessionId = action.meta.arg.id;
+      })
+      .addCase(updateTeacherSession.fulfilled, (state, action) => {
+        state.updatingSessionId = null;
+        state.sessions = state.sessions.map((s) =>
+          s.id === action.payload.id ? action.payload : s
+        );
+      })
+      .addCase(updateTeacherSession.rejected, (state) => {
+        state.updatingSessionId = null;
+      })
+
+      // DELETE SESSION (teacher)
+      .addCase(deleteTeacherSession.pending, (state, action) => {
+        state.deletingSessionIds = [...state.deletingSessionIds, action.meta.arg.id];
+      })
+      .addCase(deleteTeacherSession.fulfilled, (state, action) => {
+        state.deletingSessionIds = state.deletingSessionIds.filter((id) => id !== action.payload);
+        state.sessions = state.sessions.filter((s) => s.id !== action.payload);
+      })
+      .addCase(deleteTeacherSession.rejected, (state, action) => {
+        state.deletingSessionIds = state.deletingSessionIds.filter((id) => id !== action.meta.arg.id);
       });
   },
 });

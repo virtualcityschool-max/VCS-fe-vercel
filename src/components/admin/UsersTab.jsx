@@ -8,6 +8,9 @@ import {
   SearchInput,
 } from "../../components/ui";
 import ConfirmDialog from "../common/ConfirmDialog";
+import { getStorageUrl } from "../../utils/storageUrl";
+import { coursesService } from "../../services/coursesService";
+import { toastManager } from "../../utils/toastManager";
 
 // Search controls component
 const SearchControls = ({
@@ -22,9 +25,9 @@ const SearchControls = ({
   const roleTabs = [
     { value: "", label: "All" },
     { value: "admin", label: "Admin(s)" },
-    { value: "teacher", label: "Teacher(s)" },
+    { value: "teacher", label: "Tutor(s)" },
     { value: "student", label: "Student(s)" },
-    { value: "parent", label: "Parent(s)" },
+    { value: "parent", label: "Guardian(s)" },
   ];
 
   // Check if any filters are applied
@@ -37,9 +40,9 @@ const SearchControls = ({
 
   return (
     <div className="mb-6 space-y-4">
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      <div className="flex flex-col xl:flex-row xl:items-start justify-between gap-4">
         {/* Role tab pills */}
-        <div className="bg-slate-900/60 border border-slate-800/80 rounded-xl p-1 flex items-center gap-1 w-full lg:w-fit overflow-x-auto no-scrollbar shrink-0">
+        <div className="bg-slate-900/60 border border-slate-800/80 rounded-xl p-1 flex items-center gap-1 w-fit max-w-full overflow-x-auto no-scrollbar shrink-0">
           {roleTabs.map((tab) => {
             const isActive = usersFilters.role === tab.value;
             return (
@@ -59,21 +62,18 @@ const SearchControls = ({
         </div>
 
         {/* Filter Controls Group */}
-        <div className="flex flex-wrap lg:flex-nowrap items-center gap-1.5 flex-1 lg:justify-end">
-          <div className="min-w-[130px] flex-1 lg:flex-none lg:w-40">
-            <SearchInput
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              onClear={() => setSearchInput("")}
-              placeholder="Search users..."
-              className="w-full"
-            />
-          </div>
+        <div className="flex flex-col sm:flex-row sm:flex-wrap xl:flex-nowrap items-stretch sm:items-start gap-1.5 flex-1 sm:justify-end">
+          <SearchInput
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            onClear={() => setSearchInput("")}
+            placeholder="Search users..."
+            className="w-full sm:w-40"
+          />
 
-          <div className="flex items-center gap-1.5 flex-1 sm:flex-none">
+          <div className="grid grid-cols-2 sm:contents gap-1.5">
             <FilterSelect
-              style={{ minWidth: "100px" }}
-              className="flex-1 sm:flex-none"
+              className="w-full sm:w-auto"
               value={usersFilters.is_active}
               onChange={(e) => handleFilterChange("is_active", e.target.value)}
             >
@@ -83,8 +83,7 @@ const SearchControls = ({
             </FilterSelect>
 
             <FilterSelect
-              style={{ minWidth: "110px" }}
-              className="flex-1 sm:flex-none"
+              className="w-full sm:w-auto"
               value={usersFilters.ordering}
               onChange={(e) => handleFilterChange("ordering", e.target.value)}
             >
@@ -94,7 +93,7 @@ const SearchControls = ({
             </FilterSelect>
           </div>
 
-          <div className="flex items-center gap-1.5">
+          <div className="flex flex-wrap items-center justify-end gap-1.5">
             {hasActiveFilters && (
               <button
                 onClick={onClearFilters}
@@ -131,13 +130,13 @@ const SearchControls = ({
           Admin
         </span>
         <span className="px-2 py-1 rounded-full font-bold uppercase tracking-wider bg-blue-500/20 text-blue-400 border border-blue-500/20">
-          Teacher
+          Tutor
         </span>
         <span className="px-2 py-1 rounded-full font-bold uppercase tracking-wider bg-green-500/20 text-green-400 border border-green-500/20">
           Student
         </span>
         <span className="px-2 py-1 rounded-full font-bold uppercase tracking-wider bg-purple-500/20 text-purple-400 border border-purple-500/20">
-          Parent
+          Guardian
         </span>
         <span className="text-slate-500 mx-1">|</span>
         <span className="text-slate-400 font-medium mr-1">Status</span>
@@ -161,6 +160,7 @@ const UsersTab = ({
   onUserPurge,
   onFetchUsers,
   onUserEdit,
+  onUserView,
   onCreateUser,
 }) => {
   const navigate = useNavigate();
@@ -216,7 +216,24 @@ const UsersTab = ({
     },
     [setUsersFilters],
   );
-  const handleDeleteUser = (user) => {
+  const checkTeacherHasCourses = async (userId) => {
+    try {
+      const data = await coursesService.getAllCourses({ instructor: userId });
+      const list = Array.isArray(data) ? data : (data?.results || data?.data || []);
+      return list.length > 0;
+    } catch {
+      return false;
+    }
+  };
+
+  const handleDeleteUser = async (user) => {
+    // if (user.role === "teacher") {
+    //   const hasCourses = await checkTeacherHasCourses(user.id);
+    //   if (hasCourses) {
+    //     toastManager.error("This tutor has courses assigned. Remove or reassign their courses before deactivating.");
+    //     return;
+    //   }
+    // }
     setConfirmDialog({
       open: true,
       userId: user.id,
@@ -240,8 +257,15 @@ const UsersTab = ({
     }
   };
 
-  const handlePurgeUser = (userId) => {
-    setPurgeDialog({ open: true, userId });
+  const handlePurgeUser = async (user) => {
+    // if (user.role === "teacher") {
+    //   const hasCourses = await checkTeacherHasCourses(user.id);
+    //   if (hasCourses) {
+    //     toastManager.error("This tutor has courses assigned. Remove or reassign their courses before deleting.");
+    //     return;
+    //   }
+    // }
+    setPurgeDialog({ open: true, userId: user.id });
   };
 
   const confirmPurgeUser = async () => {
@@ -252,6 +276,11 @@ const UsersTab = ({
     } catch (error) {
       console.error("Failed to purge user:", error);
     }
+  };
+
+  const handleViewUser = (userId) => {
+    if (onUserView) onUserView(userId);
+    else navigate(`/admin/users/${userId}`, { state: { viewOnly: true } });
   };
 
   const handleEditUser = (userId) => {
@@ -266,6 +295,9 @@ const UsersTab = ({
       console.log("Create user functionality not implemented");
     }
   };
+
+  const ROLE_DISPLAY = { teacher: "Tutor", parent: "Guardian", student: "Student", admin: "Admin" };
+  const displayRole  = (r) => ROLE_DISPLAY[r] || r;
 
   const getRoleColor = (role) => {
     switch (role) {
@@ -363,11 +395,19 @@ const UsersTab = ({
                 >
                   <div className="flex items-start gap-3 sm:gap-4 mb-4">
                     <div className="relative">
-                      <div
-                        className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center ${getRoleColor(user.role)}`}
-                      >
-                        <i className={`fas ${user.is_superuser ? "fa-crown text-amber-400" : "fa-user text-white"}`}></i>
-                      </div>
+                      {getStorageUrl(user.avatar) ? (
+                        <img
+                          src={getStorageUrl(user.avatar)}
+                          alt={user.username}
+                          className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover flex-shrink-0"
+                        />
+                      ) : (
+                        <div
+                          className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center ${getRoleColor(user.role)}`}
+                        >
+                          <i className={`fas ${user.is_superuser ? "fa-crown text-amber-400" : "fa-user text-white"}`}></i>
+                        </div>
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap mb-1">
@@ -381,16 +421,21 @@ const UsersTab = ({
                           </span>
                         )}
                       </div>
-                      <p className="text-[9px] sm:text-xs text-slate-500 uppercase break-all">
+                      <p className="text-[9px] sm:text-xs text-slate-500 break-all">
                         {user.email}
                       </p>
+                      {user.role === "student" && user.roll_no != null && (
+                        <p className="text-[9px] sm:text-xs text-slate-500 break-all">
+                          Roll #{user.roll_no}
+                        </p>
+                      )}
                     </div>
                   </div>
 
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div className="flex items-center gap-2">
                       <span className={`px-2 py-1 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest ${getRoleColor(user.role)}`}>
-                        {user.role}
+                        {displayRole(user.role)}
                       </span>
                       <span className={`px-2 py-1 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest ${getStatusColor(user.is_active)}`}>
                         {user.is_active ? "Active" : "Inactive"}
@@ -405,32 +450,36 @@ const UsersTab = ({
                     ) : (
                       <div className="flex gap-2">
                         <button
-                          onClick={() => handleEditUser(user.id)}
-                          className="bg-slate-700/50 text-slate-300 px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium hover:bg-slate-600/50 transition flex items-center gap-1 flex-1 justify-center"
+                          onClick={() => handleViewUser(user.id)}
+                          className="w-8 h-8 flex items-center justify-center bg-slate-700/50 text-slate-400 rounded-lg hover:bg-slate-600/50 hover:text-slate-200 transition"
+                          title="View user"
                         >
-                          <i className="fas fa-edit"></i>
-                          <span className="hidden sm:inline">Edit</span>
+                          <i className="fas fa-eye text-xs"></i>
+                        </button>
+                        <button
+                          onClick={() => handleEditUser(user.id)}
+                          className="w-8 h-8 flex items-center justify-center bg-slate-700/50 text-slate-300 rounded-lg hover:bg-slate-600/50 transition"
+                          title="Edit user"
+                        >
+                          <i className="fas fa-edit text-xs"></i>
+                        </button>
+                        <button
+                          onClick={() => handlePurgeUser(user)}
+                          className="w-8 h-8 flex items-center justify-center bg-red-900/20 text-red-400 rounded-lg hover:bg-red-900/40 transition"
+                          title="Permanently delete"
+                        >
+                          <i className="fas fa-trash text-xs"></i>
                         </button>
                         <button
                           onClick={() => handleDeleteUser(user)}
-                          className={`px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition flex items-center gap-1 flex-1 justify-center ${
+                          className={`px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition flex items-center gap-1 justify-center ${
                             user.is_active
                               ? "bg-amber-600/10 text-amber-400 hover:bg-amber-600/20"
                               : "bg-emerald-600/10 text-emerald-400 hover:bg-emerald-600/20"
                           }`}
                         >
                           <i className={`fas ${user.is_active ? "fa-ban" : "fa-check-circle"}`}></i>
-                          <span className="hidden sm:inline">
-                            {user.is_active ? "Deactivate" : "Activate"}
-                          </span>
-                        </button>
-                        <button
-                          onClick={() => handlePurgeUser(user.id)}
-                          className="bg-red-900/20 text-red-400 px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium hover:bg-red-900/40 transition flex items-center gap-1 flex-1 justify-center"
-                          title="Permanently delete"
-                        >
-                          <i className="fas fa-trash"></i>
-                          <span className="hidden sm:inline">Delete</span>
+                          {user.is_active ? "Deactivate" : "Activate"}
                         </button>
                       </div>
                     )}
@@ -466,11 +515,19 @@ const UsersTab = ({
                     >
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div
-                            className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${getRoleColor(user.role)}`}
-                          >
-                            <i className={`fas ${user.is_superuser ? "fa-crown text-amber-400" : "fa-user text-white"}`}></i>
-                          </div>
+                          {getStorageUrl(user.avatar) ? (
+                            <img
+                              src={getStorageUrl(user.avatar)}
+                              alt={user.username}
+                              className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+                            />
+                          ) : (
+                            <div
+                              className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${getRoleColor(user.role)}`}
+                            >
+                              <i className={`fas ${user.is_superuser ? "fa-crown text-amber-400" : "fa-user text-white"}`}></i>
+                            </div>
+                          )}
                           <div>
                             <div className="flex items-center gap-2 flex-wrap">
                               <p className="font-medium text-white">
@@ -484,12 +541,17 @@ const UsersTab = ({
                               )}
                             </div>
                             <p className="text-sm text-slate-400">{user.email}</p>
+                            {user.role === "student" && user.roll_no != null && (
+                              <p className="text-sm text-slate-400">
+                                Roll #{user.roll_no}
+                              </p>
+                            )}
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4">
                         <span className={`px-2 py-1 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest ${getRoleColor(user.role)}`}>
-                          {user.role}
+                          {displayRole(user.role)}
                         </span>
                       </td>
                       <td className="px-6 py-4">
@@ -506,11 +568,25 @@ const UsersTab = ({
                         ) : (
                           <div className="flex items-center gap-2">
                             <button
-                              onClick={() => handleEditUser(user.id)}
-                              className="bg-slate-700/50 text-slate-300 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-slate-600/50 transition"
+                              onClick={() => handleViewUser(user.id)}
+                              className="w-8 h-8 flex items-center justify-center bg-slate-700/50 text-slate-400 rounded-lg hover:bg-slate-600/50 hover:text-slate-200 transition"
+                              title="View user"
                             >
-                              <i className="fas fa-edit mr-1"></i>
-                              Edit
+                              <i className="fas fa-eye text-xs"></i>
+                            </button>
+                            <button
+                              onClick={() => handleEditUser(user.id)}
+                              className="w-8 h-8 flex items-center justify-center bg-slate-700/50 text-slate-300 rounded-lg hover:bg-slate-600/50 transition"
+                              title="Edit user"
+                            >
+                              <i className="fas fa-edit text-xs"></i>
+                            </button>
+                            <button
+                              onClick={() => handlePurgeUser(user)}
+                              className="w-8 h-8 flex items-center justify-center bg-red-900/20 text-red-400 rounded-lg hover:bg-red-900/40 transition"
+                              title="Permanently delete"
+                            >
+                              <i className="fas fa-trash text-xs"></i>
                             </button>
                             <button
                               onClick={() => handleDeleteUser(user)}
@@ -523,14 +599,6 @@ const UsersTab = ({
                             >
                               <i className={`fas ${user.is_active ? "fa-ban" : "fa-check-circle"} mr-1`}></i>
                               {user.is_active ? "Deactivate" : "Activate"}
-                            </button>
-                            <button
-                              onClick={() => handlePurgeUser(user.id)}
-                              className="bg-red-900/20 text-red-400 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-red-900/40 transition"
-                              title="Permanently delete"
-                            >
-                              <i className="fas fa-trash mr-1"></i>
-                              Delete
                             </button>
                           </div>
                         )}

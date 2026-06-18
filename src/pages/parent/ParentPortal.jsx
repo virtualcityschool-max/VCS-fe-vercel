@@ -15,7 +15,7 @@ const ParentPortal = () => {
     error,
   } = useSelector((state) => state.parent.dashboard);
 
-  const userName = auth.user?.username || "Parent";
+  const userName = auth.user?.username || "Guardian";
 
   // Fetch dashboard data on component mount
   useEffect(() => {
@@ -31,7 +31,7 @@ const ParentPortal = () => {
     return (
       <section
         id="parent-view"
-        className="min-h-screen bg-[#0f172a] text-white font-inter"
+        className="min-h-screen bg-[#0f172a] text-white font-inter py-4"
       >
         <div className="max-w-7xl mx-auto px-6 py-8">
           <div className="bg-slate-800/40 rounded-[2.5rem] border border-slate-700/50 p-10 mb-12 animate-pulse">
@@ -103,7 +103,7 @@ const ParentPortal = () => {
     return (
       <section
         id="parent-view"
-        className="min-h-screen bg-[#0f172a] text-white font-inter relative overflow-hidden"
+        className="min-h-screen bg-[#0f172a] text-white font-inter relative overflow-hidden py-8"
       >
         {/* Decorative elements */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-600/10 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/3"></div>
@@ -189,7 +189,7 @@ const ParentPortal = () => {
   return (
     <section
       id="parent-view"
-      className="min-h-screen bg-[#0f172a] text-white font-inter"
+      className="min-h-screen bg-[#0f172a] text-white font-inter py-10"
     >
       <div className="max-w-7xl mx-auto px-6 py-8">
         <ParentDashboardHeader 

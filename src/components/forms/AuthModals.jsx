@@ -10,6 +10,7 @@ import {
   verifyOtp,
   resendOtp,
 } from "../../store/slices/authSlice";
+import { fetchCategories } from "../../store/slices/coursesSlice";
 import { authService } from "../../services/authService";
 import { normalizeApiError } from "../../utils/errorHandler";
 import { useFieldErrors } from "../../hooks";
@@ -20,9 +21,8 @@ const AuthModals = () => {
   const [activeRoleTab, setActiveRoleTab] = useState("student");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [registrationStep, setRegistrationStep] = useState("form"); // form | sending | otp | success
+  const [registrationStep, setRegistrationStep] = useState("form"); // form | otp | success
   const [otp, setOtp] = useState("");
-  const [userId, setUserId] = useState(null);
 
   // Use useFieldErrors hook for consistent error management
   const {
@@ -70,12 +70,15 @@ const AuthModals = () => {
 
   const dispatch = useDispatch();
   const { authModal, enrollmentIntent } = useSelector((state) => state.ui);
-  const { isLoading, resendOtpLoading } = useSelector((state) => state.auth);
+  const { isLoading, resendOtpLoading, isInitialized, isLoggedIn } = useSelector((state) => state.auth);
+  const { categories, categoriesLoading } = useSelector((state) => state.courses);
+  const [logoutCounter, setLogoutCounter] = useState(0);
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const isOpen = authModal.type;
   const intendedRole = authModal.intendedRole;
+  const adminMode = authModal.adminMode;
 
   // Comprehensive reset function
   const resetAllStates = () => {
@@ -98,7 +101,6 @@ const AuthModals = () => {
     // Reset OTP states
     setRegistrationStep("form");
     setOtp("");
-    setUserId(null);
 
     // Reset password visibility states
     setShowLoginPassword(false);
@@ -126,6 +128,34 @@ const AuthModals = () => {
     dispatch(setAuthModal(null));
   };
 
+  const resetLoginKey = () => {
+    setLogoutCounter(prev => prev + 1);
+  };
+
+  // Reset the login form key whenever the user logs out so autofill suggestions are cleared
+  const prevLoggedInRef = React.useRef(isLoggedIn);
+  const justLoggedOutRef = React.useRef(false);
+  React.useEffect(() => {
+    if (prevLoggedInRef.current && !isLoggedIn) {
+      resetLoginKey();
+      justLoggedOutRef.current = true;
+    }
+    prevLoggedInRef.current = isLoggedIn;
+  }, [isLoggedIn]);
+
+  // Auto-open admin login modal when URL has ?adminLogin=true (only when not already logged in)
+  // Skip if the user just logged out — ProtectedRoute transiently redirects to /?adminLogin=true
+  // before navigate("/") cleans the URL, which would otherwise reopen the admin modal.
+  React.useEffect(() => {
+    if (justLoggedOutRef.current) {
+      justLoggedOutRef.current = false;
+      return;
+    }
+    if (!isOpen && isInitialized && !isLoggedIn && searchParams.get("adminLogin") === "true") {
+      dispatch(setAuthModal({ type: "login", adminMode: true }));
+    }
+  }, [searchParams, isOpen, isInitialized, isLoggedIn, dispatch]);
+
   React.useEffect(() => {
     if (isOpen) {
       setEmail("");
@@ -136,7 +166,6 @@ const AuthModals = () => {
       setGradeLevel("");
       setRegistrationStep("form");
       setOtp("");
-      setUserId(null);
       setShowLoginPassword(false);
       setShowRegisterPassword(false);
       setShowConfirmPassword(false);
@@ -154,14 +183,21 @@ const AuthModals = () => {
       setFpError("");
 
       const urlRole = searchParams.get("role");
-      if (intendedRole) {
+      if (adminMode) {
+        setActiveRoleTab("admin");
+      } else if (intendedRole) {
         setActiveRoleTab(intendedRole);
-      } else if (urlRole && ["student", "teacher", "parent", "admin"].includes(urlRole)) {
+      } else if (urlRole && ["student", "teacher", "parent"].includes(urlRole)) {
         setActiveRoleTab(urlRole);
+      } else {
+        setActiveRoleTab("student");
       }
+
+      dispatch(fetchCategories());
     }
   }, [
     isOpen,
+    adminMode,
     intendedRole,
     searchParams,
     dispatch,
@@ -205,7 +241,7 @@ const AuthModals = () => {
       const userRole = user.role || activeRoleTab;
       switch (userRole) {
         case "admin":
-          navigate("/admin", { replace: true });
+          navigate("/admin/overview", { replace: true });
           break;
         case "student": {
           const hireIntentId = sessionStorage.getItem("vcs_hire_intent");
@@ -271,6 +307,8 @@ const AuthModals = () => {
 
     if (!role) newErrors.role = "Please select a role";
 
+    if (role === "student" && !gradeLevel) newErrors.gradeLevel = "Please select a course level";
+
     if (Object.keys(newErrors).length > 0) {
       setRegistrationErrors(newErrors);
       return;
@@ -278,40 +316,13 @@ const AuthModals = () => {
 
     try {
       const registerPayload = { email, username, password, confirmPassword, role };
-      if (role === "student" && gradeLevel.trim()) {
-        registerPayload.grade_level = gradeLevel.trim();
+      if (role === "student" && gradeLevel) {
+        registerPayload.grade_level = gradeLevel;
       }
-      const response = await dispatch(registerUser(registerPayload)).unwrap();
+      await dispatch(registerUser(registerPayload)).unwrap();
 
-      // Move to OTP step instead of showing success
+      // Move to OTP step — email is already in component state
       setRegistrationStep("otp");
-      console.log("Registration Response:", response);
-
-      // Extract userId with better debugging
-      const extractedUserId =
-        response.user_id || response.user?.id || response.id || response.userId;
-
-      console.log(
-        "Extracted userId:",
-        extractedUserId,
-        "from response:",
-        response,
-      );
-      console.log("Available response keys:", Object.keys(response));
-
-      if (!extractedUserId) {
-        console.error(
-          "No userId found in registration response. Response structure:",
-          response,
-        );
-        setOtpError(
-          "Registration succeeded but no user ID received. Please try registering again.",
-        );
-        setRegistrationStep("form");
-        return;
-      }
-
-      setUserId(extractedUserId);
     } catch (err) {
       // Use global error handler
       const normalizedError = handleRegistrationApiError(
@@ -354,22 +365,10 @@ const AuthModals = () => {
       return;
     }
 
-    // Validate userId exists before attempting OTP verification
-    if (!userId) {
-      setOtpError("User session expired. Please register again.");
-      console.error("OTP verification attempted without userId");
-      // Reset to registration form
-      setTimeout(() => {
-        setRegistrationStep("form");
-        setOtpError("");
-      }, 2000);
-      return;
-    }
-
     setOtpError("");
 
     try {
-      await dispatch(verifyOtp({ userId, otp })).unwrap();
+      await dispatch(verifyOtp({ email, otp })).unwrap();
 
       toastManager.success("Verification successful, you can login now");
 
@@ -468,7 +467,7 @@ const AuthModals = () => {
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-slate-950/80 backdrop-blur-md animate-fadeIn">
-      <div className={`bg-slate-900 border border-white/10 w-full ${isOpen === "register" && registrationStep === "form" ? "max-w-3xl" : "max-w-md"} rounded-[2.5rem] shadow-2xl overflow-hidden glass relative flex flex-col max-h-[90vh]`}>
+      <div className={`bg-slate-900 border border-white/10 w-full ${isOpen === "register" && registrationStep === "form" ? "max-w-3xl" : "max-w-md"} rounded-[2.5rem] shadow-2xl overflow-hidden glass relative flex flex-col max-h-[90vh]`} key={`login-session-${logoutCounter}`}>
         <button
           onClick={onClose}
           className="absolute top-6 right-6 z-20 text-slate-500 hover:text-white transition"
@@ -481,42 +480,46 @@ const AuthModals = () => {
             <div className="flex flex-col items-center mb-6">
               <img src="/assets/logo.png" alt="Virtual City School" className="h-12 sm:h-14 object-contain mb-4" />
               <h2 className="text-xl sm:text-2xl font-black font-poppins text-white text-center uppercase tracking-[0.15em]">
-                Secure Login
+                {adminMode ? "Admin Login" : "Secure Login"}
               </h2>
               <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-1.5">
-                Access your learning terminal
+                {adminMode ? "Admin portal access only" : "Access your learning terminal"}
               </p>
             </div>
 
-            <div className="flex bg-slate-950 p-1.5 rounded-2xl border border-white/5 mb-6">
-              {["student", "teacher", "parent", "admin"].map((roleOption) => (
-                <button
-                  key={roleOption}
-                  type="button"
-                  onClick={() => {
-                    // Reset form states but keep the selected role
-                    setEmail("");
-                    setPassword("");
-                    setShowLoginPassword(false);
-                    clearAllLoginErrors();
-                    dispatch(clearAuthError());
-                    // Set the new role
-                    setActiveRoleTab(roleOption);
-                    setSearchParams((prev) => {
-                      prev.set("role", roleOption);
-                      return prev;
-                    });
-                  }}
-                  className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
-                    activeRoleTab === roleOption
-                      ? "bg-indigo-600 text-white shadow-lg"
-                      : "text-slate-500 hover:text-slate-300"
-                  }`}
-                >
-                  {roleOption}
-                </button>
-              ))}
-            </div>
+            {!adminMode && (
+              <div className="flex bg-slate-950 p-1.5 rounded-2xl border border-white/5 mb-6">
+                {[
+                  { value: "student", label: "Student" },
+                  { value: "teacher", label: "Tutor"   },
+                  { value: "parent",  label: "Guardian" },
+                ].map(({ value: roleOption, label: roleLabel }) => (
+                  <button
+                    key={roleOption}
+                    type="button"
+                    onClick={() => {
+                      setEmail("");
+                      setPassword("");
+                      setShowLoginPassword(false);
+                      clearAllLoginErrors();
+                      dispatch(clearAuthError());
+                      setActiveRoleTab(roleOption);
+                      setSearchParams((prev) => {
+                        prev.set("role", roleOption);
+                        return prev;
+                      });
+                    }}
+                    className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                      activeRoleTab === roleOption
+                        ? "bg-indigo-600 text-white shadow-lg"
+                        : "text-slate-500 hover:text-slate-300"
+                    }`}
+                  >
+                    {roleLabel}
+                  </button>
+                ))}
+              </div>
+            )}
 
             <form onSubmit={handleLogin} className="space-y-4" autoComplete="off">
               <div>
@@ -683,9 +686,6 @@ const AuthModals = () => {
                   <form onSubmit={handleFpVerifyOtp} className="space-y-5 flex-1">
                     <div className="text-center mb-6 flex flex-col items-center">
                       <img src="/assets/logo.png" alt="Virtual City School" className="h-10 sm:h-12 object-contain mb-8" />
-                      <div className="w-16 h-16 bg-indigo-500/20 rounded-3xl flex items-center justify-center text-2xl mx-auto mb-4">
-                        <i className="fas fa-envelope-open-text text-indigo-400" />
-                      </div>
                       <h2 className="text-xl font-black font-poppins text-white mb-1">Check Your Email</h2>
                       <p className="text-slate-400 text-xs">Enter the 6-digit code sent to <strong className="text-slate-300">{fpEmail}</strong></p>
                     </div>
@@ -1052,9 +1052,9 @@ const AuthModals = () => {
                     placeholder="Select Role"
                     className="w-full !bg-slate-950 !border-white/5 !rounded-2xl !px-6 !py-4 focus:ring-2 focus:ring-indigo-500 text-white text-sm"
                   >
-                    <option value="teacher">Teacher</option>
+                    <option value="teacher">Tutor</option>
                     <option value="student">Student</option>
-                    <option value="parent">Parent</option>
+                    <option value="parent">Guardian</option>
                   </FilterSelect>
                   {registrationErrors.role && (
                     <p className="text-red-500 text-xs mt-2 animate-shake">
@@ -1067,23 +1067,27 @@ const AuthModals = () => {
 
                 {role === "student" && (
                   <div>
-                    <label
-                      htmlFor="register-grade"
-                      className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 flex items-center gap-2"
-                    >
-                      Grade Level
-                      <span className="text-slate-600 normal-case font-medium tracking-normal text-[9px]">(optional)</span>
+                    <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block">
+                      Grade Level <span className="text-red-500">*</span>
                     </label>
-                    <input
-                      id="register-grade"
-                      name="register-grade"
-                      type="text"
-                      autoComplete="off"
+                    <FilterSelect
                       value={gradeLevel}
                       onChange={(e) => setGradeLevel(e.target.value)}
-                      placeholder="e.g. Grade 8, A-Level"
-                      className="w-full bg-slate-950 border border-white/5 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
-                    />
+                      placeholder={categoriesLoading ? "Loading levels…" : "Select course level"}
+                      disabled={categoriesLoading}
+                      className="w-full !bg-slate-950 !border-white/5 !rounded-2xl !px-6 !py-4 focus:ring-2 focus:ring-indigo-500 text-white text-sm"
+                    >
+                      {categories.map((cat) => (
+                        <option key={cat.id} value={String(cat.id)}>{cat.name}</option>
+                      ))}
+                    </FilterSelect>
+                    {registrationErrors.gradeLevel && (
+                      <p className="text-red-500 text-xs mt-2 animate-shake">
+                        {Array.isArray(registrationErrors.gradeLevel)
+                          ? registrationErrors.gradeLevel[0]
+                          : registrationErrors.gradeLevel}
+                      </p>
+                    )}
                   </div>
                 )}
 
@@ -1135,9 +1139,6 @@ const AuthModals = () => {
               <form onSubmit={handleOtpVerification} className="space-y-5">
                 <div className="text-center mb-8 flex flex-col items-center">
                   <img src="/assets/logo.png" alt="Virtual City School" className="h-10 sm:h-12 object-contain mb-8" />
-                  <div className="w-16 h-16 bg-indigo-500/20 text-indigo-500 rounded-3xl flex items-center justify-center text-2xl mx-auto mb-6">
-                    <i className="fas fa-envelope-open-text"></i>
-                  </div>
                   <h2 className="text-xl font-black font-poppins text-white mb-2">
                     Check Your Email
                   </h2>

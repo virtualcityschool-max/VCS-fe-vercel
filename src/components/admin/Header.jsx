@@ -30,23 +30,28 @@ const Header = ({ activeTab, children }) => {
         };
       case "sessions":
         return {
-          title: "Class Management",
-          description: "Create, edit, and manage course classes",
+          title: "Session Management",
+          description: "Create, edit, and manage course sessions",
         };
       case "evaluations":
         return {
           title: "Evaluations",
-          description: "Review student performance across teachers and courses",
+          description: "Review student performance across tutors and courses",
         };
       case "attendance":
         return {
           title: "Attendance",
           description: "Session-wise attendance matrix for all courses.",
         };
-      case "categories":
+      case "levels":
         return {
-          title: "Course Categories",
-          description: "Manage course categories for organizing your curriculum",
+          title: "Course Levels",
+          description: "Manage course levels for organizing your curriculum",
+        };
+      case "teacher-planner":
+        return {
+          title: "Tutor Planner",
+          description: "Schedule and manage recurring sessions for teachers",
         };
       default:
         return {

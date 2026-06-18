@@ -1,20 +1,24 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { fetchUserProfile } from "../../store/slices/authSlice";
+import { fetchUserProfile, profileUpdated } from "../../store/slices/authSlice";
+import { fetchCategories } from "../../store/slices/coursesSlice";
 import { authService } from "../../services/authService";
 import { toastManager } from "../../utils/toastManager";
 import { showApiError } from "../../utils/apiErrorHandler";
 import { useFieldErrors } from "../../hooks";
 import { validatePhone, normalizePhone, formatPhoneDisplay } from "../../utils/validation";
 import PhoneInput from "../../components/ui/PhoneInput";
+import FilterSelect from "../../components/ui/FilterSelect";
+import { getStorageUrl } from "../../utils/storageUrl";
+import DistinctionsEditor from "../../components/admin/DistinctionsEditor";
 
 // ── Tiny helpers ──────────────────────────────────────────────────────────────
 
 const ROLE_LABEL = {
   admin: "Administrator",
-  teacher: "Instructor",
+  teacher: "Tutor",
   student: "Student",
-  parent: "Parent",
+  parent: "Guardian",
 };
 
 const ROLE_COLOR = {
@@ -41,11 +45,19 @@ const readCls  = "w-full px-4 py-3 bg-slate-800/30 border border-slate-700/40 ro
 // ── Timezone options ─────────────────────────────────────────────────────────
 
 const TIMEZONES = [
-  { label: "Browser (Local)", value: "" },
-  { label: "Dubai",           value: "Asia/Dubai" },
-  { label: "Pakistan",        value: "Asia/Karachi" },
+  { label: "Auto-Detected",              value: "" },
+  { label: "Saudi Arabia — AST", value: "Asia/Riyadh" },
+  { label: "UAE / Dubai — GST",  value: "Asia/Dubai" },
+  { label: "Pakistan — PKT",     value: "Asia/Karachi" },
   { label: "London",          value: "Europe/London" },
   { label: "New York",        value: "America/New_York" },
+  { label: "France",          value: "Europe/Paris" },
+  { label: "Russia",          value: "Europe/Moscow" },
+  { label: "Australia",       value: "Australia/Sydney" },
+  { label: "Antarctica",      value: "Antarctica/McMurdo" },
+  { label: "Canada",          value: "America/Toronto" },
+  { label: "Denmark",         value: "Europe/Copenhagen" },
+  { label: "New Zealand",     value: "Pacific/Auckland" },
 ];
 
 // ── Role field configs ────────────────────────────────────────────────────────
@@ -53,13 +65,14 @@ const TIMEZONES = [
 const FIELDS = {
   teacher: [
     { key: "bio",              label: "Bio",               icon: "align-left",    type: "textarea",  placeholder: "Tell students about yourself…" },
+    { key: "qualification",    label: "Qualification",     icon: "graduation-cap", type: "text",     placeholder: "e.g. MSc Computer Science, PhD Physics" },
     { key: "expertise",        label: "Expertise",         icon: "star",          type: "text",      placeholder: "e.g. Mathematics, Physics" },
     { key: "experience_years", label: "Years of Experience", icon: "briefcase",   type: "number",    placeholder: "0", required: true },
     { key: "linkedin",         label: "LinkedIn URL",      icon: "linkedin",      type: "url",       placeholder: "https://linkedin.com/in/…" },
     { key: "phone",            label: "Phone",             icon: "phone",         type: "tel",       placeholder: "+1-800-5551234" },
   ],
   student: [
-    { key: "grade_level",   label: "Grade Level",   icon: "graduation-cap", type: "text", placeholder: "e.g. Grade 8, A-Level" },
+    { key: "grade_level",   label: "Grade Level",   icon: "graduation-cap", type: "select" },
     { key: "phone",         label: "Phone",         icon: "phone",          type: "tel",  placeholder: "+1-800-5551234" },
     { key: "date_of_birth", label: "Date of Birth", icon: "calendar-alt",   type: "date", placeholder: "", required: true },
   ],
@@ -74,12 +87,16 @@ const FIELDS = {
 const ProfilePage = () => {
   const dispatch = useDispatch();
   const { role, profile: authProfile, username } = useSelector((s) => s.auth);
+  const { categories } = useSelector((s) => s.courses);
+
+  const avatarInputRef = useRef(null);
 
   const [profile, setProfile] = useState(null);
-  const [loading, setLoading]   = useState(true);
-  const [editing, setEditing]   = useState(false);
-  const [saving, setSaving]     = useState(false);
-  const [form, setForm]         = useState({});
+  const [loading, setLoading]       = useState(true);
+  const [editing, setEditing]       = useState(false);
+  const [saving, setSaving]         = useState(false);
+  const [form, setForm]             = useState({});
+  const [avatarUploading, setAvatarUploading] = useState(false);
 
   const {
     errors,
@@ -91,6 +108,7 @@ const ProfilePage = () => {
 
   // ── Fetch full profile ──────────────────────────────────────────────────────
   useEffect(() => {
+    dispatch(fetchCategories());
     const load = async () => {
       setLoading(true);
       try {
@@ -104,7 +122,7 @@ const ProfilePage = () => {
       }
     };
     load();
-  }, []);
+  }, [dispatch]);
 
   const getRoleProfile = (data) => {
     if (!data) return {};
@@ -122,6 +140,9 @@ const ProfilePage = () => {
       const val = rp[key] ?? "";
       initial[key] = type === "tel" && val ? normalizePhone(val) : val;
     });
+    if (role === "teacher") {
+      initial.distinctions = rp.distinctions ?? [];
+    }
     setForm(initial);
   };
 
@@ -168,16 +189,19 @@ const ProfilePage = () => {
             payload[key] = type === "number" ? Number(val) : val;
           }
         });
+        if (role === "teacher") {
+          payload.distinctions = form.distinctions ?? [];
+        }
         await authService.updateRoleProfile(role, payload);
       }
       toastManager.success("Profile updated successfully");
       setEditing(false);
       clearAllErrors();
-      // re-fetch to reflect saved state
+      // re-fetch to reflect saved state and sync Redux store immediately
       const fresh = await authService.getMe();
       setProfile(fresh);
       initForm(fresh);
-      dispatch(fetchUserProfile());
+      dispatch(profileUpdated(fresh));
     } catch (err) {
       if (err.originalError?.response?.data?.details) {
         setErrors(err.originalError.response.data.details);
@@ -195,6 +219,26 @@ const ProfilePage = () => {
     clearAllErrors();
   };
 
+  const handleAvatarUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const fd = new FormData();
+    fd.append("avatar", file);
+    setAvatarUploading(true);
+    try {
+      await authService.updateProfile(fd);
+      const fresh = await authService.getMe();
+      setProfile(fresh);
+      dispatch(profileUpdated(fresh));
+      toastManager.success("Profile photo updated");
+    } catch (err) {
+      showApiError(err);
+    } finally {
+      setAvatarUploading(false);
+      if (avatarInputRef.current) avatarInputRef.current.value = "";
+    }
+  };
+
   // ── Derived ────────────────────────────────────────────────────────────────
   const initials = username
     ? username.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2)
@@ -203,10 +247,24 @@ const ProfilePage = () => {
   const roleProfile = getRoleProfile(profile);
   const fields = FIELDS[role] || [];
 
+  // Resolve grade_level to a category ID (handles legacy name strings too)
+  const gradeLevelId = useMemo(() => {
+    const raw = String(form.grade_level ?? "");
+    if (!raw || !categories.length) return raw;
+    if (categories.some((c) => String(c.id) === raw)) return raw;
+    const byName = categories.find((c) => c.name === raw);
+    return byName ? String(byName.id) : raw;
+  }, [form.grade_level, categories]);
+
+  const gradeLevelName = useMemo(() => {
+    const match = categories.find((c) => String(c.id) === gradeLevelId);
+    return match ? match.name : (roleProfile?.grade_level ?? null);
+  }, [gradeLevelId, categories, roleProfile]);
+
   // ── Loading ────────────────────────────────────────────────────────────────
   if (loading) {
     return (
-      <div className="min-h-screen p-6 lg:p-10">
+      <div className="min-h-screen p-6 md:p-12 pt-16 lg:pt-12">
         <div className="max-w-2xl mx-auto animate-pulse space-y-6">
           <div className="h-40 bg-slate-800 rounded-3xl" />
           <div className="h-80 bg-slate-800 rounded-3xl" />
@@ -216,49 +274,91 @@ const ProfilePage = () => {
   }
 
   return (
-    <div className="min-h-screen text-white p-6 lg:p-10">
+    <div className="min-h-screen p-6 md:p-12 pt-16 lg:pt-12">
       <div className="max-w-2xl mx-auto space-y-6">
 
         {/* ── Header card ──────────────────────────────────────────────────── */}
         <div className="bg-gradient-to-br from-indigo-600/20 to-slate-900 border border-indigo-500/20 rounded-3xl p-6 lg:p-8">
-          <div className="flex items-center gap-5">
+          <div className="flex items-start gap-4 sm:gap-5">
             {/* Avatar */}
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center flex-shrink-0 shadow-xl shadow-indigo-500/20">
-              {profile?.avatar ? (
-                <img src={profile.avatar} alt="avatar" className="w-full h-full object-cover rounded-2xl" />
-              ) : (
-                <span className="text-white text-2xl font-black">{initials}</span>
-              )}
-            </div>
-
-            {/* Info */}
-            <div className="flex-1 min-w-0">
-              <div className="flex flex-wrap items-center gap-2 mb-1">
-                <h1 className="text-xl font-black font-poppins text-white truncate">
-                  {profile?.username || username}
-                </h1>
-                <span className={`text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full border ${ROLE_COLOR[role]}`}>
-                  {ROLE_LABEL[role]}
-                </span>
+            <div className="relative flex-shrink-0 group">
+              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-xl shadow-indigo-500/20 overflow-hidden">
+                {profile?.avatar ? (
+                  <img src={getStorageUrl(profile.avatar)} alt="avatar" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-white text-2xl font-black">{initials}</span>
+                )}
               </div>
-              <p className="text-slate-400 text-sm truncate">{profile?.email}</p>
-              {profile?.date_joined && (
-                <p className="text-slate-600 text-xs mt-1">
-                  Joined {new Date(profile.date_joined).toLocaleDateString("en-US", { month: "long", year: "numeric" })}
-                </p>
-              )}
+
+              <>
+                  {/* Upload overlay — spinner while uploading, camera on hover */}
+                  <button
+                    type="button"
+                    onClick={() => !avatarUploading && avatarInputRef.current?.click()}
+                    className={`absolute inset-0 rounded-2xl flex flex-col items-center justify-center gap-1 transition-opacity
+                      ${avatarUploading
+                        ? "bg-black/70 opacity-100 cursor-wait"
+                        : "bg-black/60 opacity-0 group-hover:opacity-100 cursor-pointer"}`}
+                  >
+                    {avatarUploading
+                      ? <i className="fas fa-spinner fa-spin text-white text-xl" />
+                      : <i className="fas fa-camera text-white text-lg" />}
+                    <span className="text-white text-[9px] font-black uppercase tracking-widest">
+                      {avatarUploading ? "Uploading…" : "Change"}
+                    </span>
+                  </button>
+
+                  {/* Small edit badge — visible when in editing mode */}
+                  {editing && !avatarUploading && (
+                    <button
+                      type="button"
+                      onClick={() => avatarInputRef.current?.click()}
+                      className="absolute -bottom-1.5 -right-1.5 w-6 h-6 rounded-full bg-indigo-600 hover:bg-indigo-500 border-2 border-slate-900 flex items-center justify-center transition-colors shadow-lg"
+                    >
+                      <i className="fas fa-pen text-white text-[8px]" />
+                    </button>
+                  )}
+
+                  <input
+                    ref={avatarInputRef}
+                    type="file"
+                    accept=".jpg,.jpeg,.png,.webp"
+                    className="hidden"
+                    onChange={handleAvatarUpload}
+                  />
+              </>
             </div>
 
-            {/* Edit / Save toggle */}
-            {!editing && (
-              <button
-                onClick={() => setEditing(true)}
-                className="flex-shrink-0 flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-semibold transition active:scale-95"
-              >
-                <i className="fas fa-pen text-xs" />
-                Edit
-              </button>
-            )}
+            {/* Info + Edit button */}
+            <div className="flex-1 min-w-0 flex flex-col gap-3 sm:flex-row sm:items-center">
+              <div className="flex-1 min-w-0">
+                <div className="flex flex-wrap items-center gap-2 mb-1">
+                  <h1 className="text-xl font-black font-poppins text-white truncate">
+                    {profile?.username || username}
+                  </h1>
+                  <span className={`text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full border ${ROLE_COLOR[role]}`}>
+                    {ROLE_LABEL[role]}
+                  </span>
+                </div>
+                <p className="text-slate-400 text-sm truncate">{profile?.email}</p>
+                {profile?.date_joined && (
+                  <p className="text-slate-600 text-xs mt-1">
+                    Joined {new Date(profile.date_joined).toLocaleDateString("en-US", { month: "long", year: "numeric" })}
+                  </p>
+                )}
+              </div>
+
+              {/* Edit toggle */}
+              {!editing && (
+                <button
+                  onClick={() => setEditing(true)}
+                  className="self-start flex-shrink-0 flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-semibold transition active:scale-95"
+                >
+                  <i className="fas fa-pen text-xs" />
+                  Edit
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Teacher rating pill */}
@@ -302,6 +402,20 @@ const ProfilePage = () => {
                     }}
                     error={errors[key]}
                   />
+                ) : type === "select" ? (
+                  <FilterSelect
+                    value={key === "grade_level" ? gradeLevelId : (form[key] || "")}
+                    onChange={(e) => {
+                      setForm((p) => ({ ...p, [key]: e.target.value }));
+                      clearFieldError(key);
+                    }}
+                    placeholder="Select level"
+                    className={errors[key] ? "border-red-500" : ""}
+                  >
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={String(cat.id)}>{cat.name}</option>
+                    ))}
+                  </FilterSelect>
                 ) : (
                   <input
                     type={type}
@@ -319,6 +433,8 @@ const ProfilePage = () => {
                 <div className={readCls}>
                   {type === "tel" && roleProfile[key]
                     ? formatPhoneDisplay(roleProfile[key])
+                    : type === "select" && key === "grade_level"
+                    ? (gradeLevelName ?? <span className="text-slate-600 italic">Not set</span>)
                     : (roleProfile[key] ?? <span className="text-slate-600 italic">Not set</span>)}
                 </div>
               )}
@@ -336,53 +452,136 @@ const ProfilePage = () => {
           <Field label="Timezone" icon="globe">
             <div>
               {editing ? (
-                <select
+                <FilterSelect
                   value={form.timezone || ""}
                   onChange={(e) => setForm((p) => ({ ...p, timezone: e.target.value }))}
-                  className={`${inputCls} appearance-none`}
+                  placeholder="Select timezone..."
                 >
                   {TIMEZONES.map((tz) => (
                     <option key={tz.value} value={tz.value}>
-                      {tz.value ? `${tz.label}: ${tz.value}` : tz.label}
+                      {tz.value ? `${tz.label}: ${tz.value}` : `${Intl.DateTimeFormat().resolvedOptions().timeZone} (Browser)`}
                     </option>
                   ))}
-                </select>
+                </FilterSelect>
               ) : (
                 <div className={readCls}>
                   {(() => {
                     const match = TIMEZONES.find((t) => t.value === (profile?.timezone ?? ""));
                     return match?.value
                       ? `${match.label}: ${match.value}`
-                      : match?.label ?? "Browser (Local)";
+                      : `${Intl.DateTimeFormat().resolvedOptions().timeZone} (Browser)`;
                   })()}
                 </div>
               )}
             </div>
           </Field>
 
+          {/* Achievements & Distinctions — teachers only, inside profile card */}
+          {role === "teacher" && (
+            <div>
+              <label className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3">
+                <i className="fas fa-award text-slate-600" />
+                Achievements &amp; Distinctions
+              </label>
+              {editing ? (
+                <DistinctionsEditor
+                  distinctions={form.distinctions ?? []}
+                  onChange={(d) => setForm((p) => ({ ...p, distinctions: d }))}
+                />
+              ) : (roleProfile?.distinctions?.length ?? 0) === 0 ? (
+                <p className="text-slate-600 text-sm italic">No distinctions listed.</p>
+              ) : (
+                <ul className="space-y-3">
+                  {roleProfile.distinctions.map((d, idx) => (
+                    <li key={idx} className="flex items-start gap-3">
+                      <div className="w-8 h-8 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center flex-shrink-0">
+                        <i className="fas fa-award text-xs" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-white leading-snug">{d.title}</p>
+                        <p className="text-xs text-slate-500 uppercase tracking-wider mt-0.5">{d.org}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
+
           {/* Action buttons */}
           {editing && (
-            <div className="flex gap-3 pt-2">
+            <div className="flex justify-end gap-2 pt-2">
               <button
                 onClick={handleCancel}
-                className="flex-1 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-xl text-sm font-semibold transition"
+                className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white rounded-xl text-sm font-semibold transition active:scale-95"
               >
-                Cancel
+                <i className="fas fa-xmark text-xs" />
+                <span className="hidden sm:inline">Cancel</span>
               </button>
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="flex-1 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-semibold transition disabled:opacity-50 active:scale-95"
+                className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-semibold transition disabled:opacity-50 active:scale-95"
               >
                 {saving ? (
-                  <><i className="fas fa-spinner fa-spin mr-2" />Saving…</>
+                  <><i className="fas fa-spinner fa-spin text-xs" /><span className="hidden sm:inline">Saving…</span></>
                 ) : (
-                  <><i className="fas fa-check mr-2" />Save Changes</>
+                  <><i className="fas fa-check text-xs" /><span className="hidden sm:inline">Save Changes</span></>
                 )}
               </button>
             </div>
           )}
         </div>
+
+        {/* Assigned courses — teachers only */}
+        {role === "teacher" && (
+          <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6">
+            <h2 className="text-sm font-bold uppercase tracking-widest text-slate-500 mb-4">
+              Assigned Courses
+            </h2>
+            {(profile?.assigned_courses?.filter((c) => c.status !== "draft").length ?? 0) === 0 ? (
+              <p className="text-slate-600 text-sm italic">No courses assigned yet.</p>
+            ) : (
+              <div className="space-y-2">
+                {profile.assigned_courses.filter((c) => c.status !== "draft").map((course) => (
+                  <div key={course.id} className="flex items-start justify-between gap-3 py-2.5 border-b border-slate-800 last:border-0">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold text-white truncate">{course.course_name}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <p className="text-xs text-slate-500">
+                          {course.enrolled_students} student{course.enrolled_students === 1 ? "" : "s"}
+                        </p>
+                        <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border ${
+                          course.status === "published"
+                            ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                            : course.status === "completed"
+                            ? "bg-slate-500/10 text-slate-400 border-slate-600/20"
+                            : "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                        }`}>
+                          {course.status}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex-shrink-0 flex flex-col items-end">
+                      <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border ${
+                        course.is_paid
+                          ? "bg-amber-500/10 text-amber-300 border-amber-500/20"
+                          : "bg-emerald-500/10 text-emerald-300 border-emerald-500/20"
+                      }`}>
+                        {course.is_paid ? "Paid" : "Free"}
+                      </span>
+                      {course.is_paid && (
+                        <span className="text-xs font-semibold text-slate-300 mt-0.5">
+                          ${parseFloat(course.price).toFixed(2)}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Account info */}
         <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6 space-y-3">

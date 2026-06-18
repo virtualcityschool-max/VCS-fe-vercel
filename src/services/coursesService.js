@@ -16,10 +16,10 @@ export const coursesService = {
     }
   },
 
-  // Get courses that have at least one session (for enrollment dropdown)
+  // Get all courses for enrollment dropdown
   getCoursesWithSessions: async () => {
     try {
-      const response = await axiosInstance.get(`/courses/`, { params: { has_session: true } });
+      const response = await axiosInstance.get(`/courses/`);
       return response.data;
     } catch (error) {
       throw error;
@@ -93,20 +93,11 @@ export const coursesService = {
 
   // Update course
   updateCourse: async (courseId, courseData) => {
-    try {
       const response = await axiosInstance.patch(
         `/courses/${courseId}/`,
         courseData,
       );
       return response.data;
-    } catch (error) {
-      console.error("Update course error:", {
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message,
-      });
-      throw error;
-    }
   },
 
   // Unenroll from course
@@ -190,6 +181,16 @@ export const coursesService = {
   getPrivateStudents: async (courseId) => {
     try {
       const response = await axiosInstance.get(`/courses/${courseId}/private-students/`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Get enrolled students for a specific course
+  getCourseEnrollments: async (courseId) => {
+    try {
+      const response = await axiosInstance.get(`/courses/${courseId}/enrollments/`);
       return response.data;
     } catch (error) {
       throw error;

@@ -285,6 +285,12 @@ export const studentService = {
     return response.data;
   },
 
+  // Initiate Gumroad checkout for a paid course
+  initiateCheckout: async (courseId) => {
+    const response = await axiosInstance.post(`/courses/${courseId}/initiate-checkout/`);
+    return response.data;
+  },
+
   // Private enrollment
   getTeacherAvailableSlots: async (teacherId) => {
     const response = await axiosInstance.get(`classroom/teachers/${teacherId}/available-slots/`);
@@ -293,7 +299,7 @@ export const studentService = {
 
   enrollInCoursePrivate: async ({ courseId, teacherId, preferred_slots }) => {
     if (!courseId) throw new Error("Course ID is required for private enrollment");
-    if (!teacherId) throw new Error("Teacher ID is required for private enrollment");
+    if (!teacherId) throw new Error("Tutor ID is required for private enrollment");
 
     const body = { course_id: courseId };
     if (preferred_slots) body.preferred_slots = preferred_slots;
@@ -303,6 +309,17 @@ export const studentService = {
       body,
     );
     return response.data;
+  },
+
+  // Withdraw pending enrollment request
+  withdrawEnrollment: async (courseId) => {
+    try {
+      const response = await axiosInstance.delete(`/courses/${courseId}/withdraw/`);
+      return response.data;
+    } catch (error) {
+      console.error("Error withdrawing enrollment request:", error);
+      throw new Error("Failed to withdraw enrollment request");
+    }
   },
 
   // Unenroll from course

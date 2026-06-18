@@ -45,7 +45,6 @@ const PreviewButton = ({ url, className = "" }) => {
 const TeacherGrading = ({
   externalFilters,
   onFiltersChange,
-  hideHeader = false,
   controlsContainerId,
 }) => {
   const { formatDate, formatTime, formatDateTime, toDatetimeInput, toPayloadISO } = useDateFormatters();
@@ -223,12 +222,10 @@ const TeacherGrading = ({
 
     if (!form.due_date) return "Due date is required";
 
-    const selectedDate = new Date(form.due_date);
-    const now = new Date();
+    const selectedDate = new Date(toPayloadISO(form.due_date));
+    if (selectedDate <= new Date()) return "Due date must be in the future";
 
-    if (selectedDate <= now) return "Due date must be in the future";
-
-    if (!form.max_score) return "Total marks is required";
+    if (!form.max_score) return "Total marks are required";
     if (Number(form.max_score) <= 0)
       return "Total marks must be greater than 0";
 
@@ -246,54 +243,6 @@ const TeacherGrading = ({
     <div className="text-white">
       {controlsContainer &&
         ReactDOM.createPortal(headerActions, controlsContainer)}
-
-      {!hideHeader && (
-        <>
-          <div className="mb-10 flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-black font-poppins mb-2">
-                My Assignments
-              </h1>
-              <p className="text-slate-400 text-sm">
-                Review assignments and move into grading workflows.
-              </p>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setShowCreateModal(true)}
-              className="bg-indigo-600 hover:bg-indigo-500 px-5 py-3 rounded-xl text-xs font-bold"
-            >
-              + Create Assignment
-            </button>
-          </div>
-
-          <div className="mb-6 flex flex-wrap gap-2 items-center">
-            <FilterSelect
-              value={filters.course}
-              onChange={(e) =>
-                setFilters((prev) => ({ ...prev, course: e.target.value }))
-              }
-            >
-              <option value="">All Courses</option>
-              {myCourses?.map((course) => (
-                <option key={course.id} value={course.id}>
-                  {course.title}
-                </option>
-              ))}
-            </FilterSelect>
-            <FilterSelect
-              value={filters.status}
-              onChange={(e) =>
-                setFilters((prev) => ({ ...prev, status: e.target.value }))
-              }
-            >
-              <option value="published">Published</option>
-              <option value="draft">Draft</option>
-            </FilterSelect>
-          </div>
-        </>
-      )}
 
       {/* ASSIGNMENTS LIST */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -388,7 +337,7 @@ const TeacherGrading = ({
                   <div className="mb-4">
                     <PreviewButton
                       url={getStorageUrl(assignment.file_url)}
-                      className="w-full !bg-indigo-600/10 !border-indigo-500/20 !text-indigo-400 hover:!bg-indigo-600 hover:!text-white shadow-sm !rounded-xl"
+                      className="!bg-indigo-600/10 !border-indigo-500/20 !text-indigo-400 hover:!bg-indigo-600 hover:!text-white shadow-sm !rounded-xl"
                     />
                   </div>
                 )}
@@ -439,7 +388,7 @@ const TeacherGrading = ({
             </div>
             <h3 className="text-2xl font-bold text-white mb-2">No Assignments Created</h3>
             <p className="text-slate-400 max-w-sm mx-auto text-sm leading-relaxed">
-              Start by creating your first assignment or quiz for this course to begin tracking student progress.
+              Start by creating your first assignment for this course to begin tracking student progress.
             </p>
             <button
               onClick={() => setShowCreateModal(true)}
@@ -526,12 +475,34 @@ const TeacherGrading = ({
                 </div>
 
                 {/* TEXT ANSWER */}
-                <div className="mb-6">
-                  <h3 className="text-xs uppercase text-slate-500 mb-2">
-                    Answer
-                  </h3>
-                  <div className="bg-slate-800 p-4 rounded-xl">
-                    {selectedSubmission.text_answer || "No text submitted"}
+                <div className="grid grid-cols-1 sm:grid-cols-[auto_1fr] gap-4 items-start">
+                  <div className="mb-6">
+                    <h3 className="text-xs uppercase text-slate-500 mb-2">
+                      Answer
+                    </h3>
+                    <div className="bg-slate-800 p-4 rounded-xl">
+                      {selectedSubmission.text_answer ? (
+                        <div
+                          className="submission-content text-sm leading-relaxed"
+                          dangerouslySetInnerHTML={{ __html: selectedSubmission.text_answer }}
+                        />
+                      ) : (
+                        <span className="text-slate-500 italic text-sm">No text submitted</span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="mb-6">
+                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2.5">
+                      Student Attachment
+                    </label>
+                    {selectedSubmission.file_url ? (
+                        <PreviewButton 
+                          url={getStorageUrl(selectedSubmission.file_url)} 
+                          className="!bg-indigo-600/10 !text-indigo-400 !border-indigo-500/20 hover:!bg-indigo-600 hover:!text-white"
+                        />
+                      ) : (
+                        <p className="text-slate-500 text-xs italic py-2">No file submitted</p>
+                      )}
                   </div>
                 </div>
 
@@ -772,7 +743,7 @@ const TeacherGrading = ({
 
               {/* Right Column: Configuration & Media */}
               <div className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">
                       Due Date <span className="text-rose-500">*</span>
@@ -1092,7 +1063,7 @@ const TeacherGrading = ({
                     ))}
                   </FilterSelect>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">
                       Due Date <span className="text-rose-500">*</span>

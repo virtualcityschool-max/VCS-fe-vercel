@@ -31,14 +31,14 @@ const Footer = ({ variant = "full" }) => {
           {/* Brand — left */}
           <div className="max-w-sm">
             <img
-              src="/assets/logo.png"
+              src="/assets/logo1.png"
               alt="Virtual City School"
-              className="w-28 h-28 object-contain cursor-pointer -ml-2 mb-1"
+              className="w-40 h-28 object-contain cursor-pointer -ml-2 mb-1"
               onClick={() => handleNavigation("/")}
             />
             <p className="text-slate-400 text-sm leading-relaxed">
               Next-generation learning platform connecting students with
-              world-class teachers for live classes and on-demand mastery modules.
+              world-class tutors for live classes and on-demand mastery modules.
             </p>
           </div>
 
@@ -53,7 +53,7 @@ const Footer = ({ variant = "full" }) => {
                     onClick={() => handleNavigation("/courses")}
                     className="text-slate-400 hover:text-white transition cursor-pointer text-sm"
                   >
-                    Browse Courses
+                    Explore Courses
                   </button>
                 </li>
                 <li>
@@ -61,7 +61,7 @@ const Footer = ({ variant = "full" }) => {
                     onClick={() => handleNavigation("/teachers")}
                     className="text-slate-400 hover:text-white cursor-pointer transition text-sm"
                   >
-                    Find Teachers
+                    Meet Our Tutors
                   </button>
                 </li>
                 {isLoggedIn && (
@@ -118,6 +118,12 @@ const Footer = ({ variant = "full" }) => {
               © {new Date().getFullYear()} Virtual City School. All rights reserved.
             </p>
             <div className="flex gap-6">
+              <button
+                onClick={() => handleNavigation("/about")}
+                className="text-slate-400 hover:text-white cursor-pointer transition text-sm"
+              >
+                About
+              </button>
               <button
                 onClick={() => handleNavigation("/privacy-policy")}
                 className="text-slate-400 hover:text-white cursor-pointer transition text-sm"

@@ -11,6 +11,8 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useSelector, useDispatch } from "react-redux";
 import { initializeAuth, logoutUser } from "./store/slices/authSlice";
+import { setAuthModal } from "./store/slices/uiSlice";
+import { fetchPlatformSettings } from "./store/slices/platformSettingsSlice";
 import { toastManager } from "./utils/toastManager";
 
 // Components
@@ -29,6 +31,7 @@ import {
   AdminUsersPage,
   AdminEnrollmentsPage,
   AdminSessionsPage,
+  AdminTeacherPlannerPage,
   AdminAttendancePage,
   AdminEvaluationPage,
   AdminCategoriesPage,
@@ -68,7 +71,10 @@ import {
   ParentChildDetails,
   PrivacyPolicy,
   TermsAndConditions,
+  AboutPage,
 } from "./pages";
+import AdminAboutPage from "./pages/admin/AdminAboutPage";
+import AdminPlatformSettingsPage from "./pages/admin/AdminPlatformSettingsPage";
 
 // Protected Route Component with Role-Based Access Control
 const ProtectedRoute = ({ allowedRoles = [] }) => {
@@ -89,15 +95,58 @@ const ProtectedRoute = ({ allowedRoles = [] }) => {
     );
   }
 
-  if (!isLoggedIn) return <Navigate to="/" replace />;
+  if (!isLoggedIn) {
+    if (allowedRoles.length === 1 && allowedRoles[0] === "admin") {
+      return <Navigate to="/?adminLogin=true" replace />;
+    }
+    return <Navigate to="/" replace />;
+  }
 
   if (allowedRoles.length > 0 && !allowedRoles.includes(role)) {
     const roleRedirects = {
       student: "/student",
       teacher: "/teacher",
       parent: "/parent",
-      admin: "/admin",
+      admin: "/admin/overview",
     };
+    return <Navigate to={roleRedirects[role] || "/"} replace />;
+  }
+
+  return <Outlet />;
+};
+
+// Gate for /admin routes: keeps URL at /admin, opens admin login modal once if not logged in
+const AdminAuthGate = () => {
+  const { isLoggedIn, isInitialized, role } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
+  const hasOpenedRef = React.useRef(false);
+
+  React.useEffect(() => {
+    if (isInitialized && !isLoggedIn && !hasOpenedRef.current) {
+      hasOpenedRef.current = true;
+      dispatch(setAuthModal({ type: "login", adminMode: true }));
+    }
+  }, [isInitialized, isLoggedIn, dispatch]);
+
+  if (!isInitialized) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-blue-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i className="fas fa-spinner text-blue-500 text-2xl animate-spin"></i>
+          </div>
+          <p className="text-white text-lg">Initializing...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isLoggedIn) {
+    return <PublicHome />;
+  }
+
+  if (role !== "admin") {
+    const roleRedirects = { student: "/student", teacher: "/teacher", parent: "/parent" };
     return <Navigate to={roleRedirects[role] || "/"} replace />;
   }
 
@@ -146,7 +195,7 @@ const AppInner = () => {
     if (p.includes("/admin/sessions")) return "sessions";
     if (p.includes("/admin/attendance")) return "attendance";
     if (p.includes("/admin/evaluations")) return "evaluations";
-    if (p.includes("/admin/categories")) return "categories";
+    if (p.includes("/admin/course-levels")) return "levels";
     return null;
   };
 
@@ -216,7 +265,7 @@ const AppInner = () => {
                         : role === "teacher"
                           ? "/teacher"
                           : role === "admin"
-                            ? "/admin"
+                            ? "/admin/overview"
                             : role === "parent"
                               ? "/parent"
                               : "/"
@@ -234,6 +283,7 @@ const AppInner = () => {
             <Route path="/teachers/:id" element={<TeacherProfile />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/terms" element={<TermsAndConditions />} />
+            <Route path="/about" element={<AboutPage />} />
 
             {/* Student-Only Routes */}
             <Route element={<ProtectedRoute allowedRoles={["student"]} />}>
@@ -283,7 +333,7 @@ const AppInner = () => {
             </Route>
 
             {/* Admin-Only Routes */}
-            <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
+            <Route element={<AdminAuthGate />}>
               <Route path="/admin" element={<AdminLayout />}>
                 <Route
                   index
@@ -295,9 +345,12 @@ const AppInner = () => {
                 <Route path="users" element={<AdminUsersPage />} />
                 <Route path="enrollments" element={<AdminEnrollmentsPage />} />
                 <Route path="sessions" element={<AdminSessionsPage />} />
+                <Route path="teacher-planner" element={<AdminTeacherPlannerPage />} />
                 <Route path="attendance" element={<AdminAttendancePage />} />
                 <Route path="evaluations" element={<AdminEvaluationPage />} />
-                <Route path="categories" element={<AdminCategoriesPage />} />
+                <Route path="course-levels" element={<AdminCategoriesPage />} />
+                <Route path="about" element={<AdminAboutPage />} />
+                <Route path="settings" element={<AdminPlatformSettingsPage />} />
               </Route>
               <Route path="/admin/users/:id" element={<UserDetailsPage />} />
               <Route path="/admin/courses/:courseId" element={<AdminCourseDetailPage />} />
@@ -312,6 +365,20 @@ const AppInner = () => {
           </Routes>
         </main>
         {showNavbar && <Footer />}
+
+        {/* Floating WhatsApp support button */}
+        <a
+          href="https://wa.me/923361062993"
+          target="_blank"
+          rel="noopener noreferrer"
+          title="24/7 Support on WhatsApp"
+          className="fixed bottom-6 right-6 z-[9998] group flex items-center gap-0 hover:gap-3 bg-emerald-500 hover:bg-emerald-400 text-white rounded-full shadow-[0_8px_30px_rgba(16,185,129,0.5)] hover:shadow-[0_8px_40px_rgba(16,185,129,0.7)] transition-all duration-300 overflow-hidden w-14 h-14 hover:w-44 hover:px-5"
+        >
+          <i className="fab fa-whatsapp text-2xl flex-shrink-0 mx-auto group-hover:mx-0 transition-all duration-300" />
+          <span className="text-sm font-black tracking-wide whitespace-nowrap max-w-0 group-hover:max-w-xs opacity-0 group-hover:opacity-100 transition-all duration-300 overflow-hidden">
+            24/7 Support
+          </span>
+        </a>
 
         {/* Global Overlays */}
         <section className="relative z-[9999]">
@@ -342,6 +409,9 @@ const App = () => {
   React.useEffect(() => {
     if (!isInitialized) dispatch(initializeAuth());
   }, [dispatch, isInitialized]);
+
+  // Fetch platform settings once on startup so form defaults are available
+  React.useEffect(() => { dispatch(fetchPlatformSettings()); }, [dispatch]);
 
   React.useEffect(() => {
     const handleTokenRefreshed = (event) => {

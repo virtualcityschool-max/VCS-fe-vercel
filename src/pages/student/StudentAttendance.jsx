@@ -15,6 +15,7 @@ const StudentAttendance = () => {
   const attendance = useSelector(selectMyAttendance);
   const isAttendanceLoading = useSelector(selectMyAttendanceLoading);
   const { sessions, loadingSessions } = useSelector((s) => s.teachers);
+  const profile    = useSelector((s) => s.auth.profile);
 
   const [courses, setCourses]             = useState([]);
   const [coursesLoading, setCoursesLoading] = useState(false);
@@ -77,6 +78,7 @@ const StudentAttendance = () => {
         <AttendanceMatrix
           sessions={sessions}
           attendanceRecords={attendance || []}
+          enrolledStudents={profile?.id ? [{ id: profile.id, username: profile.username }] : []}
           participantRole="student"
         />
       )}

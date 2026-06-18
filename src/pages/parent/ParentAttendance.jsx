@@ -79,6 +79,7 @@ const ParentAttendance = () => {
 
       {activeChild && (
         <div className="flex items-center gap-4 flex-wrap">
+          <span className="text-[10px] uppercase tracking-widest text-slate-500 font-bold shrink-0">Courses</span>
           {/* Course Tabs - Premium Segmented Control */}
           <div className="flex items-center p-1 bg-slate-900/80 rounded-2xl border border-white/5 shadow-2xl overflow-x-auto custom-scrollbar max-w-full pb-2">
             {courses.length > 0 ? (

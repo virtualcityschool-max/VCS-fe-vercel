@@ -3,21 +3,25 @@ import { Link } from "react-router-dom";
 import { getCourseImage } from "../../utils/courseImageUtils";
 import { getStorageUrl } from "../../utils/storageUrl";
 
-const PublicCourseCard = ({ 
-  course, 
-  index, 
-  enrolled, 
-  isEnrolling, 
-  isUnenrolling, 
-  onEnroll, 
-  onUnenroll 
+const PublicCourseCard = ({
+  course,
+  index,
+  enrolled,
+  isEnrolling,
+  isUnenrolling,
+  isWithdrawing,
+  onEnroll,
+  onUnenroll,
+  onWithdraw,
+  variant = "compact",
 }) => {
+  const large = variant === "large";
   const isPending = course.enrollment_status === "pending";
   const isRejected = course.enrollment_status === "rejected";
   const noSessions = !course.has_session;
 
   const renderCTA = () => {
-    let cls = "w-full py-3.5 font-black text-[10px] uppercase tracking-[0.2em] rounded-2xl transition-all active:scale-95 shadow-xl ";
+    let cls = `w-full ${large ? "py-2.5 text-[10px]" : "py-2 text-[9px]"} font-black uppercase tracking-[0.15em] rounded-xl transition-all active:scale-95 `;
     let label = "";
     let disabled = false;
     let tooltip = null;
@@ -34,14 +38,18 @@ const PublicCourseCard = ({
       cls += "bg-rose-600/10 border border-rose-500/20 text-rose-400 cursor-not-allowed";
       tooltip = "Your enrollment request was rejected. Please contact school administration.";
     } else if (isPending) {
-      label = "Approval Pending";
-      disabled = true;
-      cls += "bg-amber-600/10 border border-amber-500/20 text-amber-400 cursor-not-allowed";
-    } else if (noSessions) {
-      label = "Enroll Now";
-      disabled = true;
-      cls += "bg-gradient-to-r from-blue-600/40 to-indigo-600/40 text-white/40 cursor-not-allowed";
-      tooltip = "No sessions available for this course";
+      if (course.is_paid) {
+        label = "Approval Pending";
+        disabled = true;
+        cls += "bg-amber-600/10 border border-amber-500/20 text-amber-400 cursor-not-allowed";
+      } else if (isWithdrawing) {
+        label = "Cancelling...";
+        disabled = true;
+        cls += "bg-amber-600/10 border border-amber-500/20 text-amber-400 cursor-not-allowed";
+      } else {
+        label = "Cancel Request";
+        cls += "bg-amber-600/10 border border-amber-500/20 text-amber-400 hover:bg-amber-600 hover:text-white hover:border-transparent";
+      }
     } else if (isEnrolling) {
       label = "Enrolling...";
       disabled = true;
@@ -56,7 +64,8 @@ const PublicCourseCard = ({
         onClick={(e) => {
           e.stopPropagation();
           if (enrolled) onUnenroll(course.id, course.title);
-          else if (!isPending && !isRejected && !noSessions && !isEnrolling) onEnroll(course);
+          else if (isPending && !isWithdrawing && !course.is_paid) onWithdraw?.(course.id, course.title);
+          else if (!isPending && !isRejected && !isEnrolling) onEnroll(course);
         }}
         disabled={disabled}
         className={cls}
@@ -82,88 +91,55 @@ const PublicCourseCard = ({
 
   return (
     <div
-      style={{ animationDelay: `${index * 0.08}s` }}
-      className="bg-[#1a2235]/60 backdrop-blur-xl rounded-[1.5rem] overflow-hidden border border-white/5 shadow-2xl group flex flex-col animate-springyReveal opacity-0 glass-shine hover-lift"
+      style={{ animationDelay: `${index * 0.05}s` }}
+      className="bg-[#1a2235]/60 backdrop-blur-xl rounded-2xl overflow-hidden border border-white/5 shadow-lg group flex flex-col animate-springyReveal opacity-0 glass-shine hover-lift"
     >
-      {/* Image Container */}
-      <div className="relative aspect-[16/10] overflow-hidden bg-slate-900/50">
+      {/* Image */}
+      <div className={`relative ${large ? "h-36" : "h-20"} overflow-hidden bg-slate-900/50 shrink-0`}>
         <Link to={`/courses/${course.id}`} className="block h-full">
           {getCourseImage(course, index) ? (
             <img
               src={getCourseImage(course, index)}
-              className="w-full h-full object-cover group-hover:scale-110 transition duration-1000 opacity-70 group-hover:opacity-100"
+              className={`w-full h-full object-cover group-hover:scale-105 transition duration-700 ${large ? "opacity-75" : "opacity-70"} group-hover:opacity-100`}
               alt={course.title || "Course"}
             />
           ) : (
             <div className="w-full h-full bg-slate-800 flex items-center justify-center">
-              <i className="fas fa-book-open text-slate-700 text-3xl"></i>
+              <i className={`fas fa-book-open text-slate-700 ${large ? "text-3xl" : "text-xl"}`}></i>
             </div>
           )}
         </Link>
-        
-        {/* Category Badge */}
-        <div className="absolute top-4 left-4 z-10">
-          <span className="bg-slate-900/80 backdrop-blur-md text-[9px] font-black uppercase tracking-[0.15em] text-blue-400 px-3 py-1.5 rounded-lg border border-blue-500/20 shadow-xl">
-            {typeof course.category === "object" ? course.category?.name : course.category || "General"}
-          </span>
-        </div>
-
-        {/* Live Indicator */}
         {course.status === "published" && (
-          <div className="absolute top-4 right-4 z-10 w-2 h-2 bg-green-500 rounded-full shadow-[0_0_10px_rgba(34,197,94,0.8)] animate-pulse"></div>
+          <div className={`absolute ${large ? "top-2 right-2 w-2 h-2" : "top-1.5 right-1.5 w-1.5 h-1.5"} z-10 bg-green-500 rounded-full shadow-[0_0_6px_rgba(34,197,94,0.8)] animate-pulse`} />
         )}
       </div>
 
-      {/* Content Section */}
-      <div className="p-6 flex-1 flex flex-col">
-        <div className="mb-4">
-          <Link to={`/courses/${course.id}`}>
-            <h3 className="text-[17px] font-black font-poppins mb-2 leading-tight group-hover:text-blue-400 transition-colors cursor-pointer min-h-[42px] line-clamp-2 tracking-tight">
-              {course.title || "Untitled Course"}
-            </h3>
+      {/* Content */}
+      <div className={`${large ? "p-4 gap-2" : "p-2 gap-1.5"} flex-1 flex flex-col`}>
+        <Link to={`/courses/${course.id}`}>
+          <h3 className={`${large ? "text-sm" : "text-[10px]"} font-black leading-tight group-hover:text-blue-400 transition-colors line-clamp-2`}>
+            {course.title || "Untitled Course"}
+          </h3>
+        </Link>
+
+        {course.instructor?.id ? (
+          <Link
+            to={`/teachers/${course.instructor.id}`}
+            onClick={(e) => e.stopPropagation()}
+            className={`${large ? "text-xs" : "text-[9px]"} text-slate-500 hover:text-blue-400 transition-colors truncate block`}
+          >
+            {course.instructor.username || "Tutor"}
           </Link>
-          
-          <div className="flex items-center gap-2.5">
-            <div className="w-6 h-6 rounded-full overflow-hidden border border-white/10 shrink-0">
-              {course.instructor?.avatar ? (
-                <img
-                  src={getStorageUrl(course.instructor?.avatar)}
-                  className="w-full h-full object-cover"
-                  alt={course.instructor?.username}
-                />
-              ) : (
-                <div className="w-full h-full bg-slate-800 flex items-center justify-center">
-                  <i className="fas fa-user text-[10px] text-slate-500"></i>
-                </div>
-              )}
-            </div>
-            <span className="text-[11px] text-slate-400 font-bold tracking-tight">
-              {course.instructor?.username || "Instructor"}
-            </span>
-          </div>
-        </div>
+        ) : (
+          <span className={`${large ? "text-xs" : "text-[9px]"} text-slate-500 truncate`}>
+            {course.instructor?.username || "Tutor"}
+          </span>
+        )}
 
-        <div className="mt-auto space-y-4">
-          {/* Price and Rating Row */}
-          <div className="flex items-center justify-between py-3 border-y border-white/5">
-            <div className="flex flex-col">
-              <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Price</span>
-              <span className="text-sm font-black text-white">
-                PKR {course.price || "0.00"}
-              </span>
-            </div>
-            {/* <div className="flex flex-col items-end">
-              <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Rating</span>
-              <div className="flex items-center gap-1">
-                <i className="fas fa-star text-yellow-500 text-[10px]"></i>
-                <span className="text-xs font-black text-white">
-                  {course.rating || "5.0"}
-                </span>
-              </div>
-            </div> */}
-          </div>
-
-          {/* CTA Button */}
+        <div className={`mt-auto ${large ? "pt-3" : "pt-1.5"} border-t border-white/5 space-y-1`}>
+          <p className={`${large ? "text-sm" : "text-[9px]"} font-black ${course.is_paid ? "text-white" : "text-emerald-400"}`}>
+            {course.is_paid ? `$${(course.price || 0).toLocaleString("en-US")} USD` : "Free"}
+          </p>
           {renderCTA()}
         </div>
       </div>

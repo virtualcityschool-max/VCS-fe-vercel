@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import ConfirmDialog from "../common/ConfirmDialog";
+import { useDateFormatters } from "../../hooks/useDateFormatters";
 
 const EnrollmentRequestsTab = ({
   enrollments,
@@ -10,21 +11,25 @@ const EnrollmentRequestsTab = ({
   onReject,
   onRefresh,
 }) => {
-  const [confirmDialog, setConfirmDialog] = useState({ open: false, type: null, enrollmentId: null, label: "" });
-  const [paymentConfirmed, setPaymentConfirmed] = useState(false);
+  const [confirmDialog, setConfirmDialog] = useState({ open: false, type: null, enrollmentId: null, studentId: null, label: "" });
+  const [deleteUser, setDeleteUser] = useState(false);
+  const { timezone } = useDateFormatters();
 
   const handleApprove = (id, label) => {
-    setPaymentConfirmed(false);
-    setConfirmDialog({ open: true, type: "approve", enrollmentId: id, label });
+    setConfirmDialog({ open: true, type: "approve", enrollmentId: id, studentId: null, label });
   };
-  const handleReject  = (id, label) => setConfirmDialog({ open: true, type: "reject",  enrollmentId: id, label });
+  const handleReject = (id, studentId, label) => {
+    setDeleteUser(false);
+    setConfirmDialog({ open: true, type: "reject", enrollmentId: id, studentId, label });
+  };
 
   const handleConfirm = () => {
-    const { type, enrollmentId } = confirmDialog;
-    setConfirmDialog({ open: false, type: null, enrollmentId: null, label: "" });
-    setPaymentConfirmed(false);
+    const { type, enrollmentId, studentId } = confirmDialog;
+    const shouldDelete = deleteUser;
+    setConfirmDialog({ open: false, type: null, enrollmentId: null, studentId: null, label: "" });
+    setDeleteUser(false);
     if (type === "approve") onApprove(enrollmentId);
-    else if (type === "reject") onReject(enrollmentId);
+    else if (type === "reject") onReject(enrollmentId, shouldDelete, studentId);
   };
   if (loading && !enrollments?.length) {
     return (
@@ -108,15 +113,40 @@ const EnrollmentRequestsTab = ({
                     </span>
                   </div>
                   <p className="text-xs text-slate-400 truncate">{enrollment.student_email}</p>
+                  {enrollment.student_grade_level && (
+                    <p className="text-[10px] text-slate-500 mt-0.5 flex items-center gap-1">
+                      <i className="fas fa-layer-group text-slate-600 text-[9px]"></i>
+                      Grade: <span className="text-slate-400 font-semibold">{enrollment.student_grade_level}</span>
+                    </p>
+                  )}
                 </div>
               </div>
 
               {/* Course + teacher info */}
               <div className="flex-1 min-w-0 sm:border-l sm:border-slate-800 sm:pl-4">
-                <p className="text-sm font-medium text-white truncate">
-                  <i className="fas fa-book text-indigo-400 mr-1.5 text-xs"></i>
-                  {enrollment.course_title}
-                </p>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <p className="text-sm font-medium text-white truncate">
+                    <i className="fas fa-book text-indigo-400 mr-1.5 text-xs"></i>
+                    {enrollment.course_title}
+                  </p>
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide flex-shrink-0 ${
+                    enrollment.course_is_paid
+                      ? "bg-amber-500/20 text-amber-400 border border-amber-500/30"
+                      : "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                  }`}>
+                    {enrollment.course_is_paid ? "Paid" : "Free"}
+                  </span>
+                  {enrollment.course_is_paid && enrollment.course_price != null && (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/20 flex-shrink-0">
+                      ${Number(enrollment.course_price).toLocaleString("en-US")}
+                    </span>
+                  )}
+                  {enrollment.course_category && (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-700/60 text-slate-400 border border-slate-600/40 flex-shrink-0 capitalize">
+                      {enrollment.course_category}
+                    </span>
+                  )}
+                </div>
                 {enrollment.teacher_name && (
                   <p className="text-xs text-slate-400 mt-0.5">
                     <i className="fas fa-chalkboard-teacher mr-1.5 text-xs text-slate-500"></i>
@@ -124,7 +154,7 @@ const EnrollmentRequestsTab = ({
                   </p>
                 )}
                 <p className="text-[10px] text-slate-600 mt-1">
-                  {new Date(enrollment.enrolled_at).toLocaleString()}
+                  {new Date(enrollment.enrolled_at).toLocaleString("en-US", { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", ...(timezone ? { timeZone: timezone } : {}) })}
                 </p>
               </div>
 
@@ -143,7 +173,7 @@ const EnrollmentRequestsTab = ({
                   Approve
                 </button>
                 <button
-                  onClick={() => handleReject(enrollment.id, `${enrollment.student_name} — ${enrollment.course_title}`)}
+                  onClick={() => handleReject(enrollment.id, enrollment.student, `${enrollment.student_name} — ${enrollment.course_title}`)}
                   disabled={isProcessing}
                   className="flex items-center gap-1.5 px-4 py-2 bg-rose-600/20 hover:bg-rose-600/30 border border-rose-500/30 hover:border-rose-500/60 disabled:opacity-50 disabled:cursor-not-allowed text-rose-400 text-xs font-semibold rounded-xl transition"
                 >
@@ -172,12 +202,12 @@ const EnrollmentRequestsTab = ({
         cancelLabel="Cancel"
         onConfirm={handleConfirm}
         onCancel={() => {
-          setConfirmDialog({ open: false, type: null, enrollmentId: null, label: "" });
-          setPaymentConfirmed(false);
+          setConfirmDialog({ open: false, type: null, enrollmentId: null, studentId: null, label: "" });
+          setDeleteUser(false);
         }}
-        checkboxLabel={confirmDialog.type === "approve" ? "I have received the payment for this course" : ""}
-        checkboxChecked={paymentConfirmed}
-        onCheckboxChange={setPaymentConfirmed}
+        checkboxLabel={confirmDialog.type === "reject" ? "Permanently delete this user" : ""}
+        checkboxChecked={deleteUser}
+        onCheckboxChange={setDeleteUser}
       />
     </div>
   );

@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { selectPlatformSettings } from "../../store/slices/platformSettingsSlice";
 import {
   fetchSessions,
   createSession,
@@ -21,9 +22,13 @@ import { toastManager } from "../../utils/toastManager";
 import ConfirmDialog from "../../components/common/ConfirmDialog";
 import SessionsTab from "../../components/admin/SessionsTab";
 import { showApiError } from "../../utils/apiErrorHandler";
-import { formatLocalISO } from "../../utils/validation";
+import { useDateFormatters } from "../../hooks";
 const AdminSessionsPage = () => {
   const dispatch = useDispatch();
+  const { timezone, toPayloadISO, toDatetimeInput } = useDateFormatters();
+
+  // Read platform settings first — used as initial values for state below
+  const ps = useSelector(selectPlatformSettings);
 
   const [activeModal, setActiveModal] = useState(null);
   const [editingSession, setEditingSession] = useState(null);
@@ -31,6 +36,12 @@ const AdminSessionsPage = () => {
   const [updatingSessionId, setUpdatingSessionId] = useState(null);
   const [isCreatingSession, setIsCreatingSession] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState({ open: false, sessionId: null, sessionTitle: "" });
+  const [deletePast, setDeletePast] = useState(false);
+
+  // Scheduling mode for create form
+  const [createMode, setCreateMode] = useState(() => ps?.session_default_start_type || "scheduled");
+  const [delayHours, setDelayHours] = useState(0);
+  const [delayMins,  setDelayMins]  = useState(30);
 
   // Private students state for course-specific dropdown
   const [privateStudents, setPrivateStudents] = useState([]);
@@ -51,12 +62,13 @@ const AdminSessionsPage = () => {
   });
 
   const [editSessionForm, setEditSessionForm] = useState({});
+  const originalEditFormRef = useRef({});
   const [showSessionFilters, setShowSessionFilters] = useState(false);
   const [sessionFilters, setSessionFilters] = useState({
     search: "",
     teacher: "",
     course: "",
-    view: "",
+    view: "parent",
     status: "",
   });
 
@@ -103,6 +115,9 @@ const AdminSessionsPage = () => {
   // Reset create session form when modal opens/closes
   useEffect(() => {
     if (activeModal === "create-session") {
+      setCreateMode(ps?.session_default_start_type || "scheduled");
+      setDelayHours(0);
+      setDelayMins(30);
       setCreateSessionForm({
         course: "",
         title: "",
@@ -143,28 +158,19 @@ const AdminSessionsPage = () => {
       return;
     }
 
-    if ((session.enrollment_count ?? 0) >= 1) {
-      toastManager.error("Cannot edit: this session has active enrollments.");
-      return;
-    }
-
-    // Parse scheduled datetime into separate date + time for the form.
-    // Parse directly from the ISO string to preserve the original offset (e.g. +05:00)
-    // instead of letting JS convert it to local/UTC time.
     const rawDateTime = session.start_time || session.scheduled_at;
     let startDate = "";
     let startTime = "";
     if (rawDateTime) {
-      const match = rawDateTime.match(/^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})/);
-      if (match) {
-        startDate = match[1];
-        startTime = match[2];
+      const localDT = toDatetimeInput(rawDateTime); // converts to user's timezone (e.g. "2026-05-23T11:30")
+      if (localDT?.includes("T")) {
+        [startDate, startTime] = localDT.split("T");
       }
     }
 
     setEditingSession(session);
 
-    setEditSessionForm({
+    const formSnapshot = {
       course_id: session.course?.id || session.course_id || "",
       course_title: session.course?.title || session.course_title || "",
       teacher_name: session.teacher_name || "",
@@ -175,35 +181,37 @@ const AdminSessionsPage = () => {
       time: startTime,
       recurrence_days: session.recurrence_days || [],
       recurrence_end_date: session.recurrence_end_date || "",
-    });
+    };
+    originalEditFormRef.current = formSnapshot;
+    setEditSessionForm(formSnapshot);
     setActiveModal({ type: "edit-session", sessionId });
   };
 
   // Validation functions
-  const validateCreateSessionForm = (formData) => {
+  const validateCreateSessionForm = (formData, mode = "scheduled") => {
     const errors = {};
 
     if (!formData.course) errors.course = "Course is required";
 
     if (!formData.title?.trim()) {
-      errors.title = "Class title is required";
+      errors.title = "Session title is required";
     } else if (formData.title.trim().length < 3) {
       errors.title = "Title must be at least 3 characters";
     }
 
-    if (!formData.time) errors.time = "Class time is required";
-
-    if (!formData.scheduled_date) {
-      errors.scheduled_date = "Start date is required";
-    }
-
-    if (!formData.recurrence_days?.length) {
-      errors.recurrence_days = "Select at least one recurring day";
-    }
-    if (!formData.recurrence_end_date) {
-      errors.recurrence_end_date = "Recurrence end date is required";
-    } else if (formData.scheduled_date && formData.recurrence_end_date < formData.scheduled_date) {
-      errors.recurrence_end_date = "End date must be on or after start date";
+    if (mode === "scheduled") {
+      if (!formData.time) errors.time = "Session time is required";
+      if (!formData.scheduled_date) errors.scheduled_date = "Start date is required";
+      if (!formData.recurrence_days?.length) errors.recurrence_days = "Select at least one recurring day";
+      if (!formData.recurrence_end_date) {
+        errors.recurrence_end_date = "Recurrence end date is required";
+      } else if (formData.scheduled_date && formData.recurrence_end_date < formData.scheduled_date) {
+        errors.recurrence_end_date = "End date must be on or after start date";
+      }
+    } else if (mode === "delayed") {
+      if (Number(delayHours) === 0 && Number(delayMins) === 0) {
+        errors.delay = "Set at least 1 minute delay";
+      }
     }
 
     return errors;
@@ -215,24 +223,14 @@ const AdminSessionsPage = () => {
     if (!formData.title?.trim()) errors.title = "Session title is required";
     else if (formData.title.trim().length < 5) errors.title = "Title must be at least 5 characters";
 
-    if (!formData.start_date) {
-      errors.start_date = "Start date is required";
-    } else {
-      const d = new Date(formData.start_date);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      d.setHours(0, 0, 0, 0);
-      if (d < today) errors.start_date = "Start date must be today or in the future";
-    }
-
-    if (!formData.time) errors.time = "Class time is required";
+    if (!formData.time) errors.time = "Session time is required";
 
     if (!formData.recurrence_days?.length) errors.recurrence_days = "Select at least one recurring day";
 
     if (!formData.recurrence_end_date) {
       errors.recurrence_end_date = "Recurrence end date is required";
-    } else if (formData.start_date && formData.recurrence_end_date <= formData.start_date) {
-      errors.recurrence_end_date = "End date must be after start date";
+    } else if (formData.start_date && formData.recurrence_end_date < formData.start_date) {
+      errors.recurrence_end_date = "End date cannot be before start date";
     }
 
     return errors;
@@ -246,7 +244,7 @@ const AdminSessionsPage = () => {
       (c) => c.id === Number(sessionData.course),
     );
 
-    const validationErrors = validateCreateSessionForm(sessionData);
+    const validationErrors = validateCreateSessionForm(sessionData, createMode);
     if (Object.keys(validationErrors).length > 0) {
       setCreateSessionErrors(validationErrors);
       toastManager.error("Please fix highlighted fields");
@@ -255,24 +253,51 @@ const AdminSessionsPage = () => {
 
     const instructor_id = selectedCourse?.instructor?.id;
     if (!instructor_id) {
-      toastManager.error("Selected course has no instructor assigned");
+      toastManager.error("Selected course has no tutor assigned");
       return;
     }
-const localDate = new Date(`${sessionData.scheduled_date}T${sessionData.time}`);
-    const payload = {
-      course: Number(sessionData.course),
-      instructor_id,
-      title: sessionData.title,
-      scheduled_at: formatLocalISO(localDate),
-      // time: sessionData.time,
-      is_recurring: sessionData.is_recurring,
-      recurrence_days: sessionData.is_recurring ? (sessionData.recurrence_days || []) : [],
-      recurrence_end_date: sessionData.recurrence_end_date,
+
+    const pad = (n) => String(n).padStart(2, "0");
+    const localNow = (offsetMs = 0) => {
+      const d = new Date(Date.now() + offsetMs);
+      return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
     };
+
+    let payload;
+    if (createMode === "now") {
+      payload = {
+        course: Number(sessionData.course),
+        instructor_id,
+        title: sessionData.title,
+        scheduled_at: toPayloadISO(toDatetimeInput(new Date().toISOString())),
+        is_recurring: false,
+        recurrence_days: [],
+      };
+    } else if (createMode === "delayed") {
+      const offsetMs = (Number(delayHours) * 60 + Number(delayMins)) * 60 * 1000;
+      payload = {
+        course: Number(sessionData.course),
+        instructor_id,
+        title: sessionData.title,
+        scheduled_at: toPayloadISO(toDatetimeInput(new Date(Date.now() + offsetMs).toISOString())),
+        is_recurring: false,
+        recurrence_days: [],
+      };
+    } else {
+      payload = {
+        course: Number(sessionData.course),
+        instructor_id,
+        title: sessionData.title,
+        scheduled_at: toPayloadISO(`${sessionData.scheduled_date}T${sessionData.time}`),
+        is_recurring: sessionData.is_recurring,
+        recurrence_days: sessionData.is_recurring ? (sessionData.recurrence_days || []) : [],
+        recurrence_end_date: sessionData.recurrence_end_date,
+      };
+    }
     try {
       setIsCreatingSession(true);
       await dispatch(createSession(payload)).unwrap();
-      toastManager.success("Class created successfully");
+      toastManager.success("Session created successfully");
       setActiveModal(null);
       const params = {};
       if (sessionFilters.teacher) params.teacher = sessionFilters.teacher;
@@ -299,6 +324,15 @@ const localDate = new Date(`${sessionData.scheduled_date}T${sessionData.time}`);
     }
   };
 
+  const refreshSessions = () => {
+    const params = {};
+    if (sessionFilters.teacher) params.teacher = sessionFilters.teacher;
+    if (sessionFilters.course) params.course = sessionFilters.course;
+    if (sessionFilters.view) params.view = sessionFilters.view;
+    if (sessionFilters.status) params.status = sessionFilters.status;
+    dispatch(fetchSessions(params));
+  };
+
   // Handle session update
   const handleUpdateSession = async (sessionData) => {
     if (!editingSession) {
@@ -308,6 +342,43 @@ const localDate = new Date(`${sessionData.scheduled_date}T${sessionData.time}`);
 
     clearAllEditSessionErrors();
 
+    const orig = originalEditFormRef.current;
+    const scheduleFieldsChanged =
+      sessionData.start_date !== orig.start_date ||
+      sessionData.time !== orig.time ||
+      sessionData.recurrence_end_date !== orig.recurrence_end_date ||
+      String(sessionData.course_id) !== String(orig.course_id) ||
+      JSON.stringify([...(sessionData.recurrence_days || [])].sort()) !==
+        JSON.stringify([...(orig.recurrence_days || [])].sort());
+
+    if (!scheduleFieldsChanged) {
+      // Only title (or description) changed — validate title only, send minimal payload
+      const titleErrors = {};
+      if (!sessionData.title?.trim()) {
+        titleErrors.title = "Session title is required";
+      } else if (sessionData.title.trim().length < 5) {
+        titleErrors.title = "Title must be at least 5 characters";
+      }
+      if (Object.keys(titleErrors).length > 0) {
+        setEditSessionErrors(titleErrors);
+        toastManager.error("Please fix highlighted fields");
+        return;
+      }
+      setUpdatingSessionId(editingSession.id);
+      try {
+        await dispatch(updateSession({ sessionId: editingSession.id, sessionData: { title: sessionData.title } })).unwrap();
+        toastManager.success("Session updated successfully");
+        setActiveModal(null);
+        refreshSessions();
+      } catch (error) {
+        showApiError(error);
+      } finally {
+        setUpdatingSessionId(null);
+      }
+      return;
+    }
+
+    // Schedule fields changed — full validation
     const frontendErrors = validateEditSessionForm(sessionData);
     setEditSessionErrors(frontendErrors);
     if (Object.keys(frontendErrors).length > 0) {
@@ -317,10 +388,6 @@ const localDate = new Date(`${sessionData.scheduled_date}T${sessionData.time}`);
 
     setUpdatingSessionId(editingSession.id);
 
-    // Omit instructor_id — it is read-only in the edit form and re-sending it
-    // triggers the backend's instructor-overlap validator against itself.
-    // Course is editable and included when changed.
-    // The backend must exclude the current session from its overlap check.
     const payload = {
       title: sessionData.title,
       description: sessionData.description || "",
@@ -328,27 +395,17 @@ const localDate = new Date(`${sessionData.scheduled_date}T${sessionData.time}`);
       recurrence_days: sessionData.recurrence_days || [],
       recurrence_end_date: sessionData.recurrence_end_date,
     };
-    if (sessionData.course_id) {
-      payload.course = Number(sessionData.course_id);
-    }
-    if (sessionData.instructor_id) {
-      payload.instructor_id = Number(sessionData.instructor_id);
-    }
+    if (sessionData.course_id) payload.course = Number(sessionData.course_id);
+    if (sessionData.instructor_id) payload.instructor_id = Number(sessionData.instructor_id);
     if (sessionData.start_date && sessionData.time) {
-      const localDate = new Date(`${sessionData.start_date}T${sessionData.time}`);
-      payload.scheduled_at = formatLocalISO(localDate);
+      payload.scheduled_at = toPayloadISO(`${sessionData.start_date}T${sessionData.time}`);
     }
 
     try {
       await dispatch(updateSession({ sessionId: editingSession.id, sessionData: payload })).unwrap();
       toastManager.success("Session updated successfully");
       setActiveModal(null);
-      const params = {};
-      if (sessionFilters.teacher) params.teacher = sessionFilters.teacher;
-      if (sessionFilters.course) params.course = sessionFilters.course;
-      if (sessionFilters.view) params.view = sessionFilters.view;
-      if (sessionFilters.status) params.status = sessionFilters.status;
-      dispatch(fetchSessions(params));
+      refreshSessions();
     } catch (error) {
       showApiError(error);
     } finally {
@@ -361,28 +418,21 @@ const localDate = new Date(`${sessionData.scheduled_date}T${sessionData.time}`);
     const session = sessions?.data?.find((s) => s.id === sessionId);
     const sessionTitle = session?.title || "this session";
 
-    if ((session?.enrollment_count ?? 0) >= 1) {
-      toastManager.error("Cannot delete session as enrollment exists against this session.");
-      return;
-    }
-
     setConfirmDialog({ open: true, sessionId, sessionTitle });
   };
 
   const confirmDeleteSession = async () => {
     const { sessionId } = confirmDialog;
     setConfirmDialog({ open: false, sessionId: null, sessionTitle: "" });
+    const deletingPast = deletePast;
+    setDeletePast(false);
 
     setLoadingSessionIds((prev) => new Set(prev).add(sessionId));
     try {
-      await dispatch(deleteSession(sessionId)).unwrap();
-      toastManager.success("Session deleted successfully");
-      const params = {};
-      if (sessionFilters.teacher) params.teacher = sessionFilters.teacher;
-      if (sessionFilters.course) params.course = sessionFilters.course;
-      if (sessionFilters.view) params.view = sessionFilters.view;
-      if (sessionFilters.status) params.status = sessionFilters.status;
-      dispatch(fetchSessions(params));
+      await dispatch(deleteSession({ sessionId, deletePast: deletingPast })).unwrap();
+      toastManager.success(
+        deletingPast ? "Session and all history deleted" : "Future sessions deleted"
+      );
       dispatch(fetchCourses());
     } catch (error) {
       showApiError(error);
@@ -410,6 +460,7 @@ const localDate = new Date(`${sessionData.scheduled_date}T${sessionData.time}`);
       isCreatingSession={isCreatingSession}
       editSessionForm={editSessionForm}
       setEditSessionForm={setEditSessionForm}
+      originalEditForm={originalEditFormRef.current}
       createSessionForm={createSessionForm}
       setCreateSessionForm={setCreateSessionForm}
       createSessionErrors={createSessionErrors}
@@ -423,6 +474,12 @@ const localDate = new Date(`${sessionData.scheduled_date}T${sessionData.time}`);
       onSessionEdit={fetchSessionDetailsForEdit}
       activeModal={activeModal}
       setActiveModal={setActiveModal}
+      createMode={createMode}
+      setCreateMode={setCreateMode}
+      delayHours={delayHours}
+      setDelayHours={setDelayHours}
+      delayMins={delayMins}
+      setDelayMins={setDelayMins}
       showSessionFilters={showSessionFilters}
       setShowSessionFilters={setShowSessionFilters}
       sessionFilters={sessionFilters}
@@ -433,12 +490,15 @@ const localDate = new Date(`${sessionData.scheduled_date}T${sessionData.time}`);
     <ConfirmDialog
       open={confirmDialog.open}
       variant="danger"
-      title="Delete Class"
-      message={`Are you sure you want to delete "${confirmDialog.sessionTitle}"? This action cannot be undone.`}
+      title="Delete Session"
+      message={`Delete "${confirmDialog.sessionTitle}"? Future scheduled sessions will be removed. Past sessions and attendance are kept by default.`}
       confirmLabel="Delete"
       cancelLabel="Cancel"
+      checkboxLabel="Also delete past sessions & attendance"
+      checkboxChecked={deletePast}
+      onCheckboxChange={setDeletePast}
       onConfirm={confirmDeleteSession}
-      onCancel={() => setConfirmDialog({ open: false, sessionId: null, sessionTitle: "" })}
+      onCancel={() => { setConfirmDialog({ open: false, sessionId: null, sessionTitle: "" }); setDeletePast(false); }}
     />
     </>
   );

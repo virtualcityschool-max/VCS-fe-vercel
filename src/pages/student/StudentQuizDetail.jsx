@@ -196,7 +196,17 @@ const StudentQuizDetail = () => {
               </div>
             ) : (
               <div>
-                <p className="text-xs text-slate-400 mb-2">Your answer(s): option ID(s) {ans.selected_options?.join(", ") || "none"}</p>
+                <div className="flex flex-wrap gap-1.5 mb-2">
+                  {ans.selected_options?.length > 0 ? (
+                    ans.selected_options.map((optNum) => (
+                      <span key={optNum} className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/25">
+                        Option {optNum}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-xs text-slate-500 italic">No answer selected</span>
+                  )}
+                </div>
                 {(sub.status === "graded" || sub.status === "auto_graded") && (
                   <p className="text-xs">
                     Marks:{" "}

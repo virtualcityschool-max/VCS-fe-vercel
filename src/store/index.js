@@ -10,6 +10,7 @@ import announcementsReducer from "./slices/announcementsSlice";
 import parentReducer from "./slices/parentSlice";
 import childLinksReducer from "./slices/childLinksSlice";
 import hireReducer from "./slices/hireSlice";
+import platformSettingsReducer from "./slices/platformSettingsSlice";
 import { authStorage } from "../utils/authStorage";
 
 // Load auth state from localStorage using authStorage utilities
@@ -43,6 +44,7 @@ const saveAuthState = (authState) => {
         username: authState.username,
         email: authState.user?.email,
         role: authState.role,
+        timezone: authState.user?.timezone || authState.profile?.timezone || null,
       };
 
       authStorage.setAuthState(authState.token, user);
@@ -70,6 +72,7 @@ const appReducer = combineReducers({
   parent: parentReducer,
   childLinks: childLinksReducer,
   hire: hireReducer,
+  platformSettings: platformSettingsReducer,
 });
 
 // Reset all slices to their initial state when the user logs out

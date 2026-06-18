@@ -54,7 +54,7 @@ const ConfirmDialog = ({
   if (!open) return null;
 
   const v = VARIANTS[variant] || VARIANTS.danger;
-  const isConfirmDisabled = loading || (checkboxLabel && !checkboxChecked);
+  const isConfirmDisabled = loading;
 
   return createPortal(
     <div className="fixed inset-0 bg-slate-950/40 backdrop-blur-md z-[200] p-4 flex items-center justify-center animate-in fade-in duration-300">

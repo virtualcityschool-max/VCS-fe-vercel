@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchAllAttendance,
@@ -9,6 +9,7 @@ import {
   updateStudentAttendance,
 } from "../../store/slices/teacherSlice";
 import { coursesService } from "../../services/coursesService";
+import { adminTeacherSessionService } from "../../services/adminTeacherSessionService";
 import AttendanceMatrix from "../../components/common/AttendanceMatrix";
 import AttendanceEditModal from "../../components/common/AttendanceEditModal";
 import {
@@ -22,6 +23,7 @@ import { useDateFormatters } from "../../hooks";
 const TeacherAttendance = () => {
   const dispatch  = useDispatch();
   const { timezone, formatTime } = useDateFormatters();
+  const profile   = useSelector((s) => s.auth.profile);
 
   const {
     myCourses, allAttendance, loadingAllAttendance,
@@ -34,11 +36,16 @@ const TeacherAttendance = () => {
   const [courseId, setCourseId] = useState("");
   const [editRecord, setEditRecord] = useState(null);
 
+  const [adminSessions,          setAdminSessions]          = useState([]);
+  const [adminSessionAttendance, setAdminSessionAttendance] = useState([]);
+  const [adminLoading,           setAdminLoading]           = useState(false);
+
   const [markModal,          setMarkModal]          = useState(false);
   const [markSessionId,      setMarkSessionId]      = useState("");
   const [markStatuses,       setMarkStatuses]       = useState({});
   const [selectedStudentIds, setSelectedStudentIds] = useState(new Set());
   const [enrolledStudents,   setEnrolledStudents]   = useState([]);
+  const [courseEnrollments,  setCourseEnrollments]  = useState([]);
 
   const activeCourseId = courseId || (myCourses?.[0] ? String(myCourses[0].id) : "");
 
@@ -61,15 +68,23 @@ const TeacherAttendance = () => {
   }, [activeCourseId]);
 
   useEffect(() => {
-    if (activeCourseId) dispatch(fetchTeacherSessions({ course: activeCourseId }));
-  }, [activeCourseId, dispatch]);
+    if (!activeCourseId) { setCourseEnrollments([]); return; }
+    coursesService.getCourseEnrollments(activeCourseId)
+      .then((data) => setCourseEnrollments(Array.isArray(data) ? data : (data?.results || [])))
+      .catch(() => setCourseEnrollments([]));
+  }, [activeCourseId]);
+
+  useEffect(() => {
+    if (tab === "admin" || !activeCourseId) return;
+    dispatch(fetchTeacherSessions({ course: activeCourseId }));
+  }, [activeCourseId, tab, dispatch]);
 
   useEffect(() => {
     setMarkSessionId("");
   }, [activeCourseId]);
 
   useEffect(() => {
-    if (!activeCourseId) return;
+    if (tab === "admin" || !activeCourseId) return;
     dispatch(fetchAllAttendance({
       course: activeCourseId,
       participant_role: tab === "mine" ? "teacher" : "student",
@@ -79,6 +94,29 @@ const TeacherAttendance = () => {
   useEffect(() => {
     if (markModal && markSessionId) dispatch(fetchSessionAttendance(markSessionId));
   }, [dispatch, markModal, markSessionId]);
+
+  const fetchAdminData = useCallback(async () => {
+    setAdminLoading(true);
+    try {
+      const [sessionsData, attendanceData] = await Promise.all([
+        adminTeacherSessionService.getSessions(),
+        adminTeacherSessionService.getAllAttendance(),
+      ]);
+      setAdminSessions(
+        Array.isArray(sessionsData) ? sessionsData : (sessionsData?.results || [])
+      );
+      setAdminSessionAttendance(Array.isArray(attendanceData) ? attendanceData : []);
+    } catch {
+      setAdminSessions([]);
+      setAdminSessionAttendance([]);
+    } finally {
+      setAdminLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (tab === "admin") fetchAdminData();
+  }, [tab, fetchAdminData]);
 
   // ── Mark modal helpers ────────────────────────────────────────────────────────
 
@@ -159,23 +197,25 @@ const TeacherAttendance = () => {
   // ── Render ────────────────────────────────────────────────────────────────────
 
   return (
-    <div className="text-white px-4 sm:px-6 py-8 space-y-6">
+    <div className="text-white px-4 sm:px-6 space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-2">
         <div>
           <h1 className="text-2xl font-black font-poppins">Attendance</h1>
           <p className="text-slate-400 text-sm mt-1">Track your sessions and monitor student attendance.</p>
         </div>
 
-        <div className="w-full sm:w-64">
-          <label className="text-[10px] uppercase tracking-widest text-slate-500 font-bold px-0.5 mb-1.5 block">Course</label>
-          <FilterSelect
-            value={activeCourseId}
-            onChange={(e) => setCourseId(e.target.value)}
-            className="w-full"
-          >
-            {myCourses?.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
-          </FilterSelect>
-        </div>
+        {tab !== "admin" && (
+          <div className="w-full sm:w-64">
+            <label className="text-[10px] uppercase tracking-widest text-slate-500 font-bold px-0.5 mb-1.5 block">Course</label>
+            <FilterSelect
+              value={activeCourseId}
+              onChange={(e) => setCourseId(e.target.value)}
+              className="w-full"
+            >
+              {myCourses?.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
+            </FilterSelect>
+          </div>
+        )}
       </div>
 
       {/* Tabs */}
@@ -183,6 +223,7 @@ const TeacherAttendance = () => {
         {[
           { id: "mine",     label: "My Attendance",       icon: "fa-user-check" },
           { id: "students", label: "Students Attendance", icon: "fa-users" },
+          { id: "admin",    label: "Admin Sessions",      icon: "fa-shield-alt" },
         ].map((t) => (
           <button
             key={t.id}
@@ -197,7 +238,7 @@ const TeacherAttendance = () => {
         ))}
       </div>
 
-      {tab === "students" && activeCourseId && (
+      {tab === "students" && activeCourseId && tab !== "admin" && (
         <div className="flex justify-end">
           <button
             onClick={openMarkModal}
@@ -209,20 +250,59 @@ const TeacherAttendance = () => {
         </div>
       )}
 
-      {/* Matrix */}
-      {isLoading ? (
-        <div className="flex items-center justify-center py-20">
-          <i className="fas fa-spinner animate-spin text-indigo-400 text-2xl" />
-        </div>
-      ) : (
-        <AttendanceMatrix
-          sessions={allSessions}
-          attendanceRecords={(allAttendance || []).filter(
-            (r) => r.participant_role === (tab === "mine" ? "teacher" : "student")
-          )}
-          participantRole={tab === "mine" ? "teacher" : "student"}
-          onEditRecord={tab === "students" ? setEditRecord : undefined}
-        />
+      {/* Admin Sessions Attendance */}
+      {tab === "admin" && (
+        adminLoading ? (
+          <div className="flex items-center justify-center py-20">
+            <i className="fas fa-spinner animate-spin text-indigo-400 text-2xl" />
+          </div>
+        ) : (() => {
+          const adminMatrixRecords = adminSessionAttendance.flatMap((item) => {
+            const attList = Array.isArray(item.attendance)
+              ? item.attendance
+              : (item.attendance ? [item.attendance] : []);
+            return attList.map((att) => ({
+              student: att.teacher_id,
+              session: item.session_id,
+              status: att.status,
+              joined_at: att.joined_at,
+              left_at: null,
+              teacher_name: att.username,
+              participant_role: "teacher",
+            }));
+          });
+          return (
+            <AttendanceMatrix
+              sessions={adminSessions}
+              attendanceRecords={adminMatrixRecords}
+              enrolledStudents={profile?.id ? [{ id: profile.id, username: profile.username }] : []}
+              participantRole="teacher"
+            />
+          );
+        })()
+      )}
+
+      {/* Matrix — only for mine / students tabs */}
+      {tab !== "admin" && (
+        isLoading ? (
+          <div className="flex items-center justify-center py-20">
+            <i className="fas fa-spinner animate-spin text-indigo-400 text-2xl" />
+          </div>
+        ) : (
+          <AttendanceMatrix
+            sessions={allSessions}
+            attendanceRecords={(allAttendance || []).filter(
+              (r) => r.participant_role === (tab === "mine" ? "teacher" : "student")
+            )}
+            enrolledStudents={
+              tab === "students"
+                ? courseEnrollments
+                : profile?.id ? [{ id: profile.id, username: profile.username }] : []
+            }
+            participantRole={tab === "mine" ? "teacher" : "student"}
+            onEditRecord={tab === "students" ? setEditRecord : undefined}
+          />
+        )
       )}
 
       {/* Edit Modal */}

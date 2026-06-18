@@ -12,16 +12,72 @@ import {
 import { createAnnouncement } from "../../store/slices/announcementsSlice";
 import { toastManager } from "../../utils/toastManager";
 import CourseStudentsModal from "../../components/courses/CourseStudentsModal";
-import { showApiError } from "../../utils/apiErrorHandler";
+import { showApiError, extractApiErrorMessage } from "../../utils/apiErrorHandler";
 import ConfirmDialog from "../../components/common/ConfirmDialog";
-import { getWindowLabel, isWithinSessionWindow } from "../../components/common/StartSession";
+import { getWindowLabel, isWithinSessionWindow, isSessionExpired, handleJoinSession } from "../../utils/helper/StartSession";
 import { useDateFormatters } from "../../hooks";
+import { adminTeacherSessionService } from "../../services/adminTeacherSessionService";
+import TimezoneTag from "../../components/ui/TimezoneTag";
+import SessionCountdown from "../../components/common/SessionCountdown";
+import StudentSessionCard from "../../components/sessions/StudentSessionCard";
+import TeacherSessionCard from "../../components/sessions/TeacherSessionCard";
+import CourseCard from "../../components/courses/CourseCard";
+
+const fmt12 = (t) => {
+  if (!t) return "";
+  const [h, m] = t.split(":").map(Number);
+  const suffix = h >= 12 ? "PM" : "AM";
+  return `${h % 12 || 12}:${String(m).padStart(2, "0")} ${suffix}`;
+};
+
+const fmtDate = (d) => {
+  if (!d) return "";
+  const [y, mo, day] = d.split("-").map(Number);
+  return new Date(y, mo - 1, day).toLocaleDateString(undefined, {
+    weekday: "short", month: "short", day: "numeric", year: "numeric",
+  });
+};
+
+// Convert a naive date+time string that lives in `tz` into UTC milliseconds.
+// Uses Intl.DateTimeFormat.formatToParts — reliable across all browsers.
+const tzToUTCMs = (dateStr, timeStr, tz) => {
+  if (!tz) return new Date(`${dateStr}T${timeStr}`).getTime();
+  const naiveUTC = new Date(`${dateStr}T${timeStr}Z`).getTime();
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false,
+  }).formatToParts(new Date(naiveUTC));
+  const g = (t) => parts.find((p) => p.type === t)?.value ?? "00";
+  const h = g("hour") === "24" ? "00" : g("hour");
+  const tzUTC = Date.parse(`${g("year")}-${g("month")}-${g("day")}T${h}:${g("minute")}:${g("second")}Z`);
+  return naiveUTC + (naiveUTC - tzUTC);
+};
+
+const isSlotJoinable = (slot, tz) => {
+  const now      = Date.now();
+  const startUTC = tzToUTCMs(slot.date, slot.start_time, tz);
+  const endUTC   = tzToUTCMs(slot.date, slot.end_time,   tz);
+  return now >= startUTC - 30 * 60 * 1000 && now <= endUTC + 30 * 60 * 1000;
+};
+
+const isSlotExpired = (slot, tz) =>
+  Date.now() > tzToUTCMs(slot.date, slot.end_time, tz) + 30 * 60 * 1000;
+
+const openMeetLink = (link) => {
+  if (!link || !link.startsWith("http")) return;
+  try { new URL(link); window.open(link, "_blank", "noopener,noreferrer"); } catch {}
+};
+
+const fmtSlotDate = (d) =>
+  new Date(d + "T00:00:00").toLocaleDateString(undefined, {
+    weekday: "short", month: "short", day: "numeric",
+  });
 
 
 const TeacherPortal = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { timezone, formatDate, formatTime } = useDateFormatters();
+  const { timezone, formatDate, formatTime, timezoneAbbr } = useDateFormatters();
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [courseId, setCourseId] = useState("");
@@ -29,6 +85,12 @@ const TeacherPortal = () => {
   const [isAnnouncementModalOpen, setIsAnnouncementModalOpen] = useState(false);
   const [studentsModal, setStudentsModal] = useState(null);
   const [endSessionConfirm, setEndSessionConfirm] = useState({ open: false, sessionId: null });
+  const [activeSessionTab, setActiveSessionTab] = useState("classes");
+  const [tooEarlyOpen, setTooEarlyOpen] = useState(false);
+  const [sessionExpiredOpen, setSessionExpiredOpen] = useState(false);
+  const [adminLoadingSessionId, setAdminLoadingSessionId] = useState(null);
+  const [adminLoadingAction, setAdminLoadingAction] = useState(null);
+  const [leaveAdminConfirm, setLeaveAdminConfirm] = useState({ open: false, sessionId: null });
 
   const {
     dashboard,
@@ -40,6 +102,10 @@ const TeacherPortal = () => {
     errorDashboard,
     isJoiningSession,
   } = useSelector((state) => state.teachers);
+
+  const bookedSlots = (dashboard?.upcoming_slots || [])
+    .filter((s) => Date.now() <= tzToUTCMs(s.date, "23:59:59", timezone))
+    .sort((a, b) => a.date.localeCompare(b.date) || a.start_time.localeCompare(b.start_time));
 
   const handleCreateAnnouncement = async () => {
     if (!title.trim() || !body.trim()) {
@@ -73,8 +139,19 @@ const TeacherPortal = () => {
   };
 
   const handleStartSession = async (session) => {
+    debugger
+    if (isSessionExpired(session?.schedule_at)) {
+      setSessionExpiredOpen(true);
+      return;
+    }
+    if (!isWithinSessionWindow(session?.schedule_at)) {
+      setTooEarlyOpen(true);
+      return;
+    }
     const sessionId = session?.id ?? session?.session_id;
     const fallbackLink = session?.meeting_link;
+    const isMobile = /Mobi|Android|iPad|iPhone|iPod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    const meetWin = isMobile ? null : window.open("", "_blank");
     try {
       const result = await dispatch(startLiveSession(sessionId)).unwrap();
       const meetingLink = result?.meeting_link || fallbackLink;
@@ -82,42 +159,44 @@ const TeacherPortal = () => {
       if (meetingLink && meetingLink.startsWith("http")) {
         try {
           new URL(meetingLink);
-          window.open(meetingLink, "_blank", "noopener,noreferrer");
+          if (meetWin) meetWin.location.href = meetingLink;
+          else window.open(meetingLink, "_blank", "noopener,noreferrer");
         } catch {
+          meetWin?.close();
           toastManager.error("Invalid meeting link format");
         }
       } else {
+        meetWin?.close();
         toastManager.error("No valid meeting link found");
       }
 
       await dispatch(fetchTeacherDashboard()).unwrap();
     } catch (err) {
-      showApiError(err);
-    }
-  };
-
-  const handleJoinSession = async (sessionId) => {
-    try {
-      const result = await dispatch(joinLiveSession(sessionId)).unwrap();
-      const meetingLink = result?.meeting_link;
-
-      if (meetingLink && meetingLink.startsWith("http")) {
-        try {
-          new URL(meetingLink);
-          window.open(meetingLink, "_blank", "noopener,noreferrer");
-        } catch {
-          toastManager.error("Invalid meeting link format");
-        }
+      meetWin?.close();
+      const msg = extractApiErrorMessage(err);
+      if (msg === "You cannot join before the scheduled time." || msg === "You can join up to 30 minutes before the scheduled time.") {
+        setTooEarlyOpen(true);
       } else {
-        toastManager.error("No valid meeting link found");
+        showApiError(err);
       }
-      await dispatch(fetchTeacherDashboard()).unwrap();
-    } catch (err) {
-      showApiError(err);
     }
   };
 
-  const handleEndSession = (sessionId) => {
+  // const handleJoinSession = async (sessionId, meeting_link, scheduled_at) => {
+  //   if (isSessionExpired(scheduled_at)) {
+  //     setSessionExpiredOpen(true);
+  //     return;
+  //   }
+  //   if(meeting_link) {
+  //     const meetWin = window.open(meeting_link, "_blank");
+  //   }
+  // };
+
+  const handleEndSession = (sessionId, scheduled_at) => {
+    if (isSessionExpired(scheduled_at)) {
+      setSessionExpiredOpen(true);
+      return;
+    }
     setEndSessionConfirm({ open: true, sessionId });
   };
 
@@ -130,6 +209,72 @@ const TeacherPortal = () => {
       await dispatch(fetchTeacherDashboard()).unwrap();
     } catch (err) {
       showApiError(err);
+    }
+  };
+
+  const handleJoinAdminSession = async (session) => {
+    if (isSessionExpired(session?.scheduled_at)) {
+      setSessionExpiredOpen(true);
+      return;
+    }
+    if (!isWithinSessionWindow(session?.scheduled_at)) {
+      setTooEarlyOpen(true);
+      return;
+    }
+    const sessionId = session?.id ?? session?.session_id;
+    setAdminLoadingSessionId(sessionId);
+    setAdminLoadingAction("join");
+    const isMobile = /Mobi|Android|iPad|iPhone|iPod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    const meetWin = isMobile ? null : window.open("", "_blank");
+    try {
+      const result = await adminTeacherSessionService.joinSession(sessionId);
+      const meetingLink = result?.meeting_link || session?.meeting_link;
+      if (meetingLink && meetingLink.startsWith("http")) {
+        try {
+          new URL(meetingLink);
+          if (meetWin) meetWin.location.href = meetingLink;
+          else window.open(meetingLink, "_blank", "noopener,noreferrer");
+        } catch {
+          meetWin?.close();
+          toastManager.error("Invalid meeting link format");
+        }
+      } else {
+        meetWin?.close();
+        toastManager.error("No valid meeting link found");
+      }
+      await dispatch(fetchTeacherDashboard()).unwrap();
+    } catch (err) {
+      meetWin?.close();
+      const msg = extractApiErrorMessage(err);
+      if (msg === "You cannot join before the scheduled time." || msg === "You can join up to 30 minutes before the scheduled time.") {
+        setTooEarlyOpen(true);
+      } else {
+        showApiError(err);
+      }
+    } finally {
+      setAdminLoadingSessionId(null);
+      setAdminLoadingAction(null);
+    }
+  };
+
+  const handleLeaveAdminSession = (session) => {
+    setLeaveAdminConfirm({ open: true, sessionId: session?.id ?? session?.session_id ?? session });
+  };
+
+  const confirmLeaveAdminSession = async () => {
+    const { sessionId } = leaveAdminConfirm;
+    setLeaveAdminConfirm({ open: false, sessionId: null });
+    setAdminLoadingSessionId(sessionId);
+    setAdminLoadingAction("leave");
+    try {
+      await adminTeacherSessionService.leaveSession(sessionId);
+      toastManager.success("Left session");
+      await dispatch(fetchTeacherDashboard()).unwrap();
+    } catch (err) {
+      showApiError(err);
+    } finally {
+      setAdminLoadingSessionId(null);
+      setAdminLoadingAction(null);
     }
   };
 
@@ -217,7 +362,7 @@ const TeacherPortal = () => {
               </div>
               <div>
                 <h2 className="text-3xl sm:text-4xl font-black font-poppins tracking-tight text-white">
-                  Welcome, {dashboard?.teacher?.username || "Instructor"}!
+                  Welcome, {dashboard?.teacher?.username || "Tutor"}!
                 </h2>
               </div>
             </div>
@@ -243,7 +388,7 @@ const TeacherPortal = () => {
           
           {/* Sessions Section */}
           <section className="space-y-6">
-            <div className="flex items-end justify-between px-2">
+            <div className="flex flex-wrap items-end justify-between gap-3 px-2">
               <div>
                 <h3 className="text-2xl font-black font-poppins tracking-tight flex items-center gap-3">
                   <span className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center text-emerald-400 text-sm border border-emerald-500/20">
@@ -251,134 +396,211 @@ const TeacherPortal = () => {
                   </span>
                   Upcoming Sessions
                 </h3>
-                {(() => {
-                  const today = new Date();
-                  const end = new Date(today);
-                  end.setDate(end.getDate() + 6);
-                  const fmt = (d) => d.toLocaleDateString([], { month: "short", day: "numeric", ...(timezone ? { timeZone: timezone } : {}) });
-                  return <p className="text-sm text-slate-500 font-medium mt-1 ml-11">{fmt(today)} – {fmt(end)}</p>;
-                })()}
               </div>
-              <div className="px-4 py-1.5 bg-slate-800/50 rounded-full border border-white/5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                {dashboard?.todays_schedule?.length || 0} Total
+              <div className="flex items-center gap-3">
+                {/* Tabs */}
+                <div className="flex items-center gap-1 bg-slate-900/60 border border-white/5 rounded-xl p-1">
+                  <button
+                    onClick={() => setActiveSessionTab("admin")}
+                    className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 ${
+                      activeSessionTab === "admin"
+                        ? "bg-indigo-600 text-white shadow-lg shadow-indigo-900/30"
+                        : "text-slate-500 hover:text-slate-300"
+                    }`}
+                  >
+                    <i className="fas fa-user-shield" />
+                    Admin Session
+                    {(dashboard?.admin_sessions?.length || 0) > 0 && (
+                      <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-full ${
+                        activeSessionTab === "admin" ? "bg-white/20 text-white" : "bg-indigo-500/20 text-indigo-400"
+                      }`}>
+                        {dashboard.admin_sessions.length}
+                      </span>
+                    )}
+                  </button>
+                  <button
+                    onClick={() => setActiveSessionTab("classes")}
+                    className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 ${
+                      activeSessionTab === "classes"
+                        ? "bg-emerald-600 text-white shadow-lg shadow-emerald-900/30"
+                        : "text-slate-500 hover:text-slate-300"
+                    }`}
+                  >
+                    <i className="fas fa-chalkboard" />
+                    Classes
+                    <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-full ${
+                      activeSessionTab === "classes" ? "bg-white/20 text-white" : "bg-slate-700 text-slate-400"
+                    }`}>
+                      {dashboard?.todays_schedule?.length || 0}
+                    </span>
+                  </button>
+                  <button
+                    onClick={() => setActiveSessionTab("booked")}
+                    className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 ${
+                      activeSessionTab === "booked"
+                        ? "bg-indigo-600 text-white shadow-lg shadow-indigo-900/30"
+                        : "text-slate-500 hover:text-slate-300"
+                    }`}
+                  >
+                    <i className="fas fa-user-clock" />
+                    Reserved Slots
+                    {bookedSlots.length > 0 && (
+                      <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-full ${
+                        activeSessionTab === "booked" ? "bg-white/20 text-white" : "bg-indigo-500/20 text-indigo-400"
+                      }`}>
+                        {bookedSlots.length}
+                      </span>
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
 
-            <div className="space-y-4">
-              {dashboard?.todays_schedule?.length ? (
-                dashboard.todays_schedule.map((session) => {
-                  const schedDate = new Date(session.schedule_at);
-                  const dayLabel = schedDate.toLocaleDateString([], { weekday: "short", month: "short", day: "numeric", ...(timezone ? { timeZone: timezone } : {}) });
-                  const timeLabel = formatTime(session.schedule_at);
-                  const isLive = session.status === "live";
-
-                  return (
-                    <div
+            {/* ── Admin Sessions tab ── */}
+            {activeSessionTab === "admin" && (
+              <div className="max-h-[480px] overflow-y-auto custom-scrollbar pr-1 space-y-4">
+                {dashboard?.admin_sessions?.length ? (
+                  dashboard.admin_sessions.map((session) => (
+                    <StudentSessionCard
                       key={session.id}
-                      className={`relative group bg-slate-900/40 backdrop-blur-md p-5 rounded-3xl border transition-all duration-300 ${
-                        isLive ? "border-indigo-500/50 shadow-[0_0_40px_rgba(79,70,229,0.1)]" : "border-white/5 hover:border-white/10"
-                      }`}
-                    >
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-6">
-                        {/* Time Widget */}
-                        <div className={`flex flex-col items-center justify-center px-4 py-3 rounded-2xl border transition-colors ${
-                          isLive ? "bg-indigo-600 border-indigo-400/30" : "bg-slate-950 border-white/5"
-                        }`}>
-                          <span className={`text-[10px] font-black uppercase tracking-widest ${isLive ? "text-indigo-100" : "text-slate-500"}`}>
-                            {dayLabel}
-                          </span>
-                          <span className={`text-xl font-black ${isLive ? "text-white" : "text-indigo-400"}`}>
-                            {timeLabel}
-                          </span>
+                      session={session}
+                      isLoading={adminLoadingSessionId === session.id}
+                      loadingAction={adminLoadingAction}
+                      onJoin={(s) => handleJoinAdminSession(s)}
+                      onLeave={(s) => handleLeaveAdminSession(s)}
+                      subtitle={<><i className="fas fa-shield-alt text-indigo-500/50" /> Admin Session</>}
+                    />
+                  ))
+                ) : (
+                  <div className="bg-slate-900/30 backdrop-blur-md p-12 rounded-[2rem] border border-white/5 text-center flex flex-col items-center gap-4">
+                    <div className="w-16 h-16 rounded-full bg-slate-800 flex items-center justify-center text-slate-600 text-2xl">
+                      <i className="fas fa-user-shield"></i>
+                    </div>
+                    <div>
+                      <p className="text-slate-400 font-bold text-lg">No Admin Sessions</p>
+                      <p className="text-slate-500 text-sm">No admin-scheduled sessions assigned to you.</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ── Booked Students tab ── */}
+            {activeSessionTab === "booked" && (
+              <div>
+                {loadingDashboard ? (
+                  <div className="flex items-center gap-3 text-slate-500 text-xs py-8 justify-center">
+                    <i className="fas fa-spinner fa-spin" />
+                    Loading booked slots…
+                  </div>
+                ) : bookedSlots.length === 0 ? (
+                  <div className="bg-slate-900/30 backdrop-blur-md p-12 rounded-[2rem] border border-white/5 text-center flex flex-col items-center gap-4">
+                    <div className="w-16 h-16 rounded-full bg-slate-800 flex items-center justify-center text-slate-600 text-2xl">
+                      <i className="fas fa-user-clock"></i>
+                    </div>
+                    <div>
+                      <p className="text-slate-400 font-bold text-lg">No Booked Slots</p>
+                      <p className="text-slate-500 text-sm">Students haven't booked any upcoming tutoring slots.</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="max-h-[480px] overflow-y-auto custom-scrollbar pr-1 space-y-4">
+                    {bookedSlots.map((slot) => (
+                      <div
+                        key={slot.id}
+                        className="relative group bg-slate-900/40 backdrop-blur-md p-5 rounded-3xl border border-white/5 hover:border-indigo-500/30 transition-all duration-300 flex flex-col sm:flex-row sm:items-center gap-6 shadow-2xl overflow-hidden"
+                      >
+                        {/* Student avatar */}
+                        <div className="flex-shrink-0 w-14 h-14 rounded-2xl border border-indigo-500/20 bg-indigo-500/10 flex items-center justify-center text-indigo-400 font-black text-xl shadow-lg">
+                          {slot.booked_by_name?.[0]?.toUpperCase() || "S"}
                         </div>
 
                         {/* Info */}
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-3 mb-1">
-                            <h4 className="font-bold text-lg text-white group-hover:text-indigo-400 transition truncate">
-                              {session.title}
-                            </h4>
-                            {isLive && (
-                              <span className="flex items-center gap-1.5 px-2.5 py-1 bg-rose-500/20 text-rose-400 rounded-full text-[10px] font-black uppercase tracking-tighter border border-rose-500/20">
-                                <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>
-                                Live Now
-                              </span>
-                            )}
+                          <h4 className="text-lg font-black text-white group-hover:text-indigo-400 transition-colors tracking-tight mb-0.5">
+                            {slot.booked_by_name || "Student"}
+                          </h4>
+                          {slot.booked_by_email && (
+                            <p className="text-slate-500 text-xs font-bold tracking-widest mb-3 opacity-60">
+                              {slot.booked_by_email}
+                            </p>
+                          )}
+                          <div className="flex flex-wrap items-center gap-4 text-[11px] text-slate-400 font-bold uppercase tracking-wider">
+                            <div className="flex items-center gap-1.5">
+                              <i className="fas fa-calendar text-indigo-400/60" />
+                              <span>{fmtDate(slot.date)}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <i className="fas fa-clock text-indigo-400/60" />
+                              <span>{fmt12(slot.start_time)} – {fmt12(slot.end_time)}{" "}<TimezoneTag /></span>
+                            </div>
                           </div>
-                          <p className="text-xs text-slate-400 font-medium uppercase tracking-widest flex items-center gap-2">
-                            <i className="fas fa-layer-group text-indigo-500/50"></i>
-                            {session.course_title}
-                            <span className="text-slate-700">•</span>
-                            <i className="fas fa-users text-indigo-500/50"></i>
-                            {session.total_learners} Learners
-                          </p>
+                          <div className="mt-2">
+                            <SessionCountdown scheduledAt={new Date(tzToUTCMs(slot.date, slot.start_time, timezone)).toISOString()} status="scheduled" />
+                          </div>
+                          {slot.note && (
+                            <p className="mt-2 text-[11px] text-slate-500 italic truncate max-w-sm">
+                              "{slot.note}"
+                            </p>
+                          )}
                         </div>
 
-                        {/* Actions */}
-                        <div className="flex items-center gap-3">
-                          {session.status === "scheduled" && (() => {
-                            let canStart = true;
-                            const windowLabel = getWindowLabel(session.schedule_at);
-                            return (
-                              <div className="relative group/tooltip">
-                                <button
-                                  onClick={() => canStart && handleStartSession(session)}
-                                  disabled={isJoiningSession || !canStart}
-                                  className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-black uppercase tracking-widest transition-all ${
-                                    canStart
-                                      ? "bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-600/20 hover:scale-105"
-                                      : "bg-slate-800 text-slate-500 cursor-not-allowed opacity-40"
-                                  }`}
-                                >
-                                  <i className="fas fa-play text-[10px]"></i>
-                                  <span>Start</span>
-                                </button>
-                                {canStart && (
-                                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 px-4 py-2 bg-slate-800 border border-white/10 text-white text-[10px] rounded-xl whitespace-nowrap opacity-0 group-hover/tooltip:opacity-100 transition-all pointer-events-none z-20 shadow-2xl">
-                                    <p className="text-slate-400 font-bold uppercase mb-0.5">Start Window</p>
-                                    <p className="font-black text-white">{windowLabel || "Check schedule"}</p>
-                                  </div>
-                                )}
+                        {/* Badge + Join */}
+                        <div className="flex-shrink-0 flex flex-col items-center gap-3">
+                          {slot.meeting_link && (
+                            <div className="relative group/tip">
+                              <button
+                                onClick={() => {
+                                  if (!isSlotJoinable(slot, timezone)) {
+                                    isSlotExpired(slot, timezone) ? setSessionExpiredOpen(true) : setTooEarlyOpen(true);
+                                    return;
+                                  }
+                                  openMeetLink(slot.meeting_link);
+                                }}
+                                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black text-[10px] uppercase tracking-widest shadow-lg shadow-blue-900/40 transition-all active:scale-95"
+                              >
+                                <i className="fas fa-video text-[9px]" />
+                                Join Session
+                              </button>
+                              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-slate-800 border border-white/10 text-white text-[10px] rounded-xl whitespace-nowrap opacity-0 group-hover/tip:opacity-100 transition-all pointer-events-none z-20 shadow-xl">
+                                Available 30 min before the session
                               </div>
-                            );
-                          })()}
-
-                          {isLive && (
-                            <div className="flex items-center gap-2">
-                              <button
-                                onClick={() => handleJoinSession(session.id)}
-                                disabled={isJoiningSession}
-                                className="flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-black uppercase tracking-widest transition-all bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/20 hover:scale-105 active:scale-95"
-                              >
-                                <i className="fas fa-video text-[10px]"></i>
-                                <span>Join</span>
-                              </button>
-                              <button
-                                onClick={() => handleEndSession(session.id)}
-                                disabled={isJoiningSession}
-                                className="bg-slate-800 hover:bg-rose-600 hover:text-white text-rose-500 p-3 rounded-2xl transition-all border border-white/5 active:scale-95"
-                              >
-                                <i className="fas fa-power-off"></i>
-                              </button>
-                            </div>
-                          )}
-
-                          {session.status === "ended" && (
-                            <div className="px-4 py-2 rounded-xl bg-slate-950/50 border border-white/5 text-slate-600 text-[10px] font-black uppercase tracking-widest">
-                              Session Ended
-                            </div>
-                          )}
-
-                          {session.status === "cancelled" && (
-                            <div className="px-4 py-2 rounded-xl bg-rose-500/5 border border-rose-500/10 text-rose-500/50 text-[10px] font-black uppercase tracking-widest">
-                              Cancelled
                             </div>
                           )}
                         </div>
                       </div>
-                    </div>
-                  );
-                })
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ── Classes tab ── */}
+            {activeSessionTab === "classes" && (() => {
+              const adminIds = new Set((dashboard?.admin_sessions || []).map((s) => s.id));
+              const classSessions = (dashboard?.todays_schedule || []).filter((s) => !adminIds.has(s.id));
+              return (
+            <div className="max-h-[480px] overflow-y-auto custom-scrollbar pr-1 space-y-4">
+              {classSessions.length ? (
+                classSessions.map((session) => (
+                  <TeacherSessionCard
+                    key={session.id}
+                    session={session}
+                    isLoading={isJoiningSession}
+                    onStart={(s) => handleStartSession(s)}
+                    onJoin={(s) => handleJoinSession(s.id, s.meeting_link, s.schedule_at)}
+                    onEnd={(s) => handleEndSession(s.id, s.schedule_at)}
+                    subtitle={
+                      <>
+                        <i className="fas fa-layer-group text-indigo-500/50" />
+                        {session.course_title}
+                        <span className="text-slate-700">•</span>
+                        <i className="fas fa-users text-indigo-500/50" />
+                        {session.total_learners} Learners
+                      </>
+                    }
+                  />
+                ))
               ) : (
                 <div className="bg-slate-900/30 backdrop-blur-md p-12 rounded-[2rem] border border-white/5 text-center flex flex-col items-center gap-4">
                   <div className="w-16 h-16 rounded-full bg-slate-800 flex items-center justify-center text-slate-600 text-2xl">
@@ -386,11 +608,13 @@ const TeacherPortal = () => {
                   </div>
                   <div>
                     <p className="text-slate-400 font-bold text-lg">No sessions scheduled</p>
-                    <p className="text-slate-500 text-sm">Your schedule for the next 7 days is currently clear.</p>
+                    <p className="text-slate-500 text-sm">You have no upcoming sessions scheduled.</p>
                   </div>
                 </div>
               )}
             </div>
+              );
+            })()}
           </section>
 
           {/* My Courses Section */}
@@ -401,53 +625,27 @@ const TeacherPortal = () => {
               </span>
               Academic Portfolio
             </h3>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {loadingCourses ? (
                 Array(2).fill(0).map((_, i) => (
-                  <div key={i} className="h-28 bg-slate-800/50 rounded-[2rem] animate-pulse" />
+                  <div key={i} className="h-48 bg-slate-800/50 rounded-2xl animate-pulse" />
                 ))
               ) : myCourses?.length ? (
-                myCourses.map((course) => (
-                  <div
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {myCourses.map((course, i) => (
+                  <CourseCard
                     key={course.id}
+                    course={course}
+                    index={i}
+                    mode="teacher"
                     onClick={() => setStudentsModal({ id: course.id, title: course.title })}
-                    className="group relative bg-slate-900/40 backdrop-blur-md p-6 rounded-[2rem] border border-white/5 hover:border-indigo-500/40 transition-all duration-500 cursor-pointer overflow-hidden shadow-lg hover:shadow-indigo-500/10"
-                  >
-                    <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/5 rounded-full blur-2xl -mr-10 -mt-10 group-hover:bg-indigo-500/10 transition-colors"></div>
-                    
-                    <div className="relative z-10">
-                      <div className="flex justify-between items-start mb-3">
-                        <span className="px-3 py-1 bg-indigo-500/10 text-indigo-400 rounded-lg text-[9px] font-black uppercase tracking-widest border border-indigo-500/10">
-                          {typeof course.category === "object" ? course.category?.name : course.category}
-                        </span>
-                        <span className={`text-[9px] font-black uppercase tracking-widest ${course.status === 'published' ? 'text-emerald-400' : 'text-amber-400'}`}>
-                          {course.status}
-                        </span>
-                      </div>
-                      
-                      <h4 className="font-black text-lg text-white group-hover:text-indigo-400 transition-colors mb-4 leading-tight">
-                        {course.title}
-                      </h4>
-                      
-                      <div className="flex items-center justify-between pt-4 border-t border-white/5">
-                        <div className="flex items-center gap-2 text-slate-500">
-                          <i className="fas fa-user-graduate text-[10px]"></i>
-                          <span className="text-xs font-bold">{course.total_enrolled} Enrolled</span>
-                        </div>
-                        <div className="text-indigo-400/60 group-hover:translate-x-1 transition-transform">
-                          <i className="fas fa-chevron-right text-xs"></i>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))
+                  />
+                ))}
+            </div>
               ) : (
-                <div className="md:col-span-2 bg-slate-900/30 p-10 rounded-[2rem] border border-white/5 text-center text-slate-500 font-bold">
-                  No active courses found
+                <div className="bg-slate-900/30 backdrop-blur-md p-12 rounded-[2rem] border border-white/5 text-center flex flex-col items-center gap-4">
+                  <p className="text-slate-400 font-bold text-lg">No active courses found</p>
                 </div>
               )}
-            </div>
           </section>
         </div>
 
@@ -610,6 +808,17 @@ const TeacherPortal = () => {
       )}
 
       <ConfirmDialog
+        open={leaveAdminConfirm.open}
+        variant="warning"
+        title="Leave Session"
+        message="Are you sure you want to leave this session?"
+        confirmLabel="Confirm Leave"
+        cancelLabel="Cancel"
+        onConfirm={confirmLeaveAdminSession}
+        onCancel={() => setLeaveAdminConfirm({ open: false, sessionId: null })}
+      />
+
+      <ConfirmDialog
         open={endSessionConfirm.open}
         variant="warning"
         title="Terminate Live Session"
@@ -618,6 +827,28 @@ const TeacherPortal = () => {
         cancelLabel="Abort"
         onConfirm={confirmEndSession}
         onCancel={() => setEndSessionConfirm({ open: false, sessionId: null })}
+      />
+
+      <ConfirmDialog
+        open={tooEarlyOpen}
+        variant="primary"
+        title="Too Early to Join"
+        message="You can join 30 minutes earlier only."
+        confirmLabel="Got it"
+        cancelLabel={null}
+        onConfirm={() => setTooEarlyOpen(false)}
+        onCancel={() => setTooEarlyOpen(false)}
+      />
+
+      <ConfirmDialog
+        open={sessionExpiredOpen}
+        variant="warning"
+        title="Session Time Has Passed"
+        message="This session's time has already passed. The session window (1 hour from the scheduled time) has ended."
+        confirmLabel="Got it"
+        cancelLabel={null}
+        onConfirm={() => setSessionExpiredOpen(false)}
+        onCancel={() => setSessionExpiredOpen(false)}
       />
     </div>
   );

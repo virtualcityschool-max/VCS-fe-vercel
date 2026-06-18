@@ -1,5 +1,8 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import StatCard from "./StatCard";
+import { useDateFormatters } from "../../hooks";
+import TeacherSessionCard from "../sessions/TeacherSessionCard";
 import {
   BarChart,
   Bar,
@@ -9,11 +12,11 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { handleJoinSession } from "../../utils/helper/StartSession";
 
 // Truncate long course names for axis labels
 const truncate = (str, n = 12) =>
   str?.length > n ? str.slice(0, n) + "…" : str;
-
 const RevenueTooltip = ({ active, payload }) => {
   if (!active || !payload?.length) return null;
   const { fullName, Revenue } = payload[0].payload;
@@ -23,7 +26,7 @@ const RevenueTooltip = ({ active, payload }) => {
       <div className="flex items-center justify-between gap-4">
         <span className="text-[10px] uppercase tracking-wider text-slate-400">Revenue</span>
         <span className="text-xs font-semibold text-amber-400">
-          PKR {Revenue?.toLocaleString()}
+          ${(Revenue || 0).toLocaleString("en-US")} USD
         </span>
       </div>
     </div>
@@ -45,7 +48,7 @@ const EnrollmentTooltip = ({ active, payload }) => {
 };
 
 // ── Stat card with hover tooltip breakdown ───────────────────────────────────
-const StatCardTip = ({ label, value, icon, color, items }) => {
+const StatCardTip = ({ label, value, icon, color, items, onClick }) => {
   const colorClasses = {
     indigo:
       "from-indigo-500/20 to-indigo-600/20 border-indigo-500/20 text-indigo-400",
@@ -62,7 +65,8 @@ const StatCardTip = ({ label, value, icon, color, items }) => {
   return (
     <div className="relative group/tip">
       <div
-        className={`relative overflow-hidden bg-gradient-to-br ${colorClasses[color]} rounded-xl px-4 py-4 border backdrop-blur-sm transition-all duration-300 group-hover/tip:scale-[1.02] group-hover/tip:shadow-lg cursor-default`}
+        onClick={onClick}
+        className={`relative overflow-hidden bg-gradient-to-br ${colorClasses[color]} rounded-xl px-4 py-4 border backdrop-blur-sm transition-all duration-300 group-hover/tip:scale-[1.02] group-hover/tip:shadow-lg ${onClick ? "cursor-pointer" : "cursor-default"}`}
       >
         <div className="absolute top-0 right-0 w-14 h-14 bg-white/5 rounded-full -mr-6 -mt-6" />
         <div className="relative z-10 flex items-center gap-2.5 mb-2.5">
@@ -108,11 +112,88 @@ const StatCardTip = ({ label, value, icon, color, items }) => {
   );
 };
 
-const OverviewTab = ({ analytics, analyticsLoading, analyticsError }) => {
+const USER_FILTERS_BASE = { search: "", is_active: "", ordering: "-date_joined" };
+const toUsersTab = (navigate, role = "") =>
+  () => navigate("/admin/users", { state: { filters: { ...USER_FILTERS_BASE, role }, skipFetch: true } });
+
+
+const OverviewTab = ({
+  analytics,
+  analyticsLoading,
+  analyticsError,
+  upcomingSessions = [],
+  sessionsLoading = false,
+  actionLoadingIds = new Set(),
+  onStartSession,
+  onEndSession,
+}) => {
+  const navigate = useNavigate();
+  const { formatDate } = useDateFormatters();
+  const SessionsSection = (
+    <div>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-base font-bold text-white flex items-center gap-2.5">
+          <div className="w-7 h-7 bg-indigo-600/20 rounded-lg flex items-center justify-center">
+            <i className="fas fa-calendar-check text-indigo-400 text-xs"></i>
+          </div>
+          Upcoming Teacher Sessions
+        </h3>
+        <button
+          onClick={() => navigate("/admin/teacher-planner")}
+          className="text-xs text-indigo-400 hover:text-indigo-300 transition flex items-center gap-1"
+        >
+          View all <i className="fas fa-arrow-right text-[10px]"></i>
+        </button>
+      </div>
+      {sessionsLoading ? (
+        <div className="space-y-3">
+          {[...Array(2)].map((_, i) => (
+            <div key={i} className="h-24 bg-slate-900/40 border border-white/5 rounded-3xl animate-pulse" />
+          ))}
+        </div>
+      ) : upcomingSessions.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-8 bg-slate-900/40 border border-white/5 rounded-3xl">
+          <div className="w-10 h-10 bg-slate-800 rounded-full flex items-center justify-center mb-3">
+            <i className="fas fa-calendar-times text-slate-500 text-base"></i>
+          </div>
+          <p className="text-slate-400 text-sm">No upcoming sessions</p>
+          <button
+            onClick={() => navigate("/admin/teacher-planner")}
+            className="mt-3 text-xs text-indigo-400 hover:text-indigo-300 transition"
+          >
+            Schedule one →
+          </button>
+        </div>
+      ) : (
+        <div className="space-y-3 max-h-80 overflow-y-auto pr-1 custom-scrollbar">
+          {upcomingSessions.map((session) => (
+            <TeacherSessionCard
+              key={session.id}
+              session={session}
+              isLoading={actionLoadingIds.has(session.id)}
+              onStart={(s) => onStartSession?.(session)}
+              onJoin={(s) => handleJoinSession(s.id, s.meeting_link, s.scheduled_at || s.scheduled_at)}
+              onEnd={(s) => onEndSession?.(s.id)}
+              subtitle={
+                session.invited_teachers?.length > 0 ? (
+                  <>
+                    <i className="fas fa-users text-indigo-500/50" />
+                    {session.invited_teachers.map((t) => t.username).join(", ")}
+                  </>
+                ) : null
+              }
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
   if (analyticsLoading) {
     return (
-      <div className="space-y-3">
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div className="space-y-4">
+        {SessionsSection}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-6 gap-3">
           {[...Array(6)].map((_, i) => (
             <div
               key={i}
@@ -143,28 +224,31 @@ const OverviewTab = ({ analytics, analyticsLoading, analyticsError }) => {
 
   if (analyticsError) {
     return (
-      <div className="flex flex-col items-center justify-center p-16">
-        <div className="w-16 h-16 bg-rose-500/20 rounded-full flex items-center justify-center mb-6">
-          <i className="fas fa-exclamation-triangle text-rose-400 text-2xl"></i>
+      <div className="space-y-4">
+        {SessionsSection}
+        <div className="flex flex-col items-center justify-center p-16">
+          <div className="w-16 h-16 bg-rose-500/20 rounded-full flex items-center justify-center mb-6">
+            <i className="fas fa-exclamation-triangle text-rose-400 text-2xl"></i>
+          </div>
+          <h3 className="text-xl font-bold text-white mb-2">
+            Unable to Load Dashboard
+          </h3>
+          <p className="text-slate-400 text-center mb-6 max-w-md">
+            {analyticsError}
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-6 py-3 bg-rose-600 hover:bg-rose-500 text-white rounded-xl font-medium transition flex items-center gap-2"
+          >
+            <i className="fas fa-redo"></i>
+            Try Again
+          </button>
         </div>
-        <h3 className="text-xl font-bold text-white mb-2">
-          Unable to Load Dashboard
-        </h3>
-        <p className="text-slate-400 text-center mb-6 max-w-md">
-          {analyticsError}
-        </p>
-        <button
-          onClick={() => window.location.reload()}
-          className="px-6 py-3 bg-rose-600 hover:bg-rose-500 text-white rounded-xl font-medium transition flex items-center gap-2"
-        >
-          <i className="fas fa-redo"></i>
-          Try Again
-        </button>
       </div>
     );
   }
 
-  if (!analytics) return null;
+  if (!analytics) return <div className="space-y-4">{SessionsSection}</div>;
 
   const revenueData = (analytics.revenue?.by_course || []).map((item) => ({
     name: truncate(item.course),
@@ -186,12 +270,13 @@ const OverviewTab = ({ analytics, analyticsLoading, analyticsError }) => {
   return (
     <div className="space-y-4 animate-fadeIn">
       {/* Row 1 — User stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-6 gap-3">
         <StatCardTip
           label="Total Users"
           value={analytics.users.total}
           icon="fas fa-users"
           color="indigo"
+          onClick={toUsersTab(navigate)}
           items={[
             {
               label: "Active",
@@ -216,20 +301,23 @@ const OverviewTab = ({ analytics, analyticsLoading, analyticsError }) => {
           icon="fas fa-user-shield"
           color="rose"
           compact
+          onClick={toUsersTab(navigate, "admin")}
         />
         <StatCard
-          label="Teachers"
+          label="Tutors"
           value={analytics.users.teachers}
           icon="fas fa-chalkboard-teacher"
           color="pink"
           compact
+          onClick={toUsersTab(navigate, "teacher")}
         />
         <StatCard
-          label="Parents"
+          label="Guardians"
           value={analytics.users.parents}
           icon="fas fa-user-friends"
           color="amber"
           compact
+          onClick={toUsersTab(navigate, "parent")}
         />
         <StatCard
           label="Students"
@@ -237,12 +325,14 @@ const OverviewTab = ({ analytics, analyticsLoading, analyticsError }) => {
           icon="fas fa-graduation-cap"
           color="emerald"
           compact
+          onClick={toUsersTab(navigate, "student")}
         />
         <StatCardTip
           label="Total Courses"
           value={analytics.courses.total}
           icon="fas fa-book"
           color="purple"
+          onClick={() => navigate("/admin/courses")}
           items={[
             {
               label: "Total Enrollments",
@@ -277,6 +367,8 @@ const OverviewTab = ({ analytics, analyticsLoading, analyticsError }) => {
         />
       </div>
 
+      {SessionsSection}
+
       {/* Charts — side by side */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Revenue by Course */}
@@ -293,7 +385,7 @@ const OverviewTab = ({ analytics, analyticsLoading, analyticsError }) => {
                 Total Revenue
               </p>
               <p className="text-base font-bold text-amber-400">
-                PKR {totalRevenue.toLocaleString()}
+                ${totalRevenue.toLocaleString("en-US")} USD
               </p>
             </div>
           </div>

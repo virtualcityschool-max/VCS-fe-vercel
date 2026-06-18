@@ -106,7 +106,7 @@ const PrivacyPolicy = () => {
                 </div>
                 <div className="space-y-6 text-slate-400 leading-relaxed text-lg">
                   <p>
-                    VirtualCitySchool (&quot;we,&quot; &quot;our,&quot; or &quot;the Platform&quot;) is committed to protecting the privacy and security of 
+                    VirtualCitySchool is committed to protecting the privacy and security of 
                     our students, faculty, and institutional partners. This Privacy Policy outlines how we collect, process, and 
                     protect personal data within our next-generation digital campus environment.
                   </p>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchCourses,
@@ -13,6 +13,8 @@ import AttendanceMatrix from "../../components/common/AttendanceMatrix";
 import AttendanceEditModal from "../../components/common/AttendanceEditModal";
 import { FilterSelect } from "../../components/ui";
 import { toastManager } from "../../utils/toastManager";
+import { coursesService } from "../../services/coursesService";
+import { adminTeacherSessionService } from "../../services/adminTeacherSessionService";
 
 const AdminAttendance = () => {
   const dispatch = useDispatch();
@@ -26,14 +28,20 @@ const AdminAttendance = () => {
 
   const courses = coursesState?.data ?? [];
 
-  const [tab,        setTab]        = useState("student");
-  const [courseId,   setCourseId]   = useState("");
-  const [dateFilter, setDateFilter] = useState("last7");
-  const [editRecord, setEditRecord] = useState(null);
+  const [tab,               setTab]               = useState("student");
+  const [courseId,          setCourseId]          = useState("");
+  const [dateFilter,        setDateFilter]        = useState("last7");
+  const [editRecord,        setEditRecord]        = useState(null);
+  const [courseEnrollments, setCourseEnrollments] = useState([]);
+
+  // Admin tab state
+  const [adminSessions,           setAdminSessions]           = useState([]);
+  const [adminSessionAttendance,  setAdminSessionAttendance]  = useState([]);
+  const [adminLoading,            setAdminLoading]            = useState(false);
 
   const activeCourseId = courseId || (courses[0] ? String(courses[0].id) : "");
 
-  // Date Filter logic
+  // ── Date range ──────────────────────────────────────────────────────────────
   const dateRange = useMemo(() => {
     const now = new Date();
     const start = new Date();
@@ -56,43 +64,34 @@ const AdminAttendance = () => {
       end.setDate(0);
       end.setHours(23, 59, 59, 999);
     } else {
-      // all
       return null;
     }
-    
-    // For all filters except lastMonth, the end is 'now' (effectively)
-    if (dateFilter !== "lastMonth") {
-      end.setTime(now.getTime());
-    }
 
+    if (dateFilter !== "lastMonth") end.setTime(now.getTime());
     return { start, end };
   }, [dateFilter]);
 
-  // Filtered Sessions & Attendance
+  // ── Course-based filtering (student / teacher tabs) ────────────────────────
   const filteredSessions = useMemo(() => {
-    const list = sessions || [];
     const now = new Date();
-    return list.filter((s) => {
+    return (sessions || []).filter((s) => {
       const d = s.scheduled_at ? new Date(s.scheduled_at) : null;
-      if (!d) return false;
-      if (d > now) return false; // Don't show future
+      if (!d || d > now) return false;
       if (!dateRange) return true;
       return d >= dateRange.start && d <= dateRange.end;
     });
   }, [sessions, dateRange]);
 
   const filteredAttendance = useMemo(() => {
-    const list = allAttendance || [];
     const sessionIds = new Set(filteredSessions.map((s) => s.id));
-    return list.filter((r) => {
+    return (allAttendance || []).filter((r) => {
       const sId = r.session?.id ?? r.session_id ?? r.session;
       return sessionIds.has(sId);
     });
   }, [allAttendance, filteredSessions]);
 
-  // Overall stats from filtered list
   const stats = useMemo(() => {
-    const records = filteredAttendance || [];
+    const records = filteredAttendance;
     const present = records.filter((r) => r.status === "present").length;
     const absent  = records.filter((r) => r.status === "absent").length;
     const late    = records.filter((r) => r.status === "late").length;
@@ -100,27 +99,87 @@ const AdminAttendance = () => {
     return { total, present, absent, late, rate: total ? Math.round(((present + late) / total) * 100) : 0 };
   }, [filteredAttendance]);
 
-  // Load courses once
+  // ── Admin tab filtering ────────────────────────────────────────────────────
+  const filteredAdminSessions = useMemo(() => {
+    const now = new Date();
+    return adminSessions.filter((s) => {
+      const d = s.scheduled_at ? new Date(s.scheduled_at) : null;
+      if (!d || d > now) return false;
+      if (!dateRange) return true;
+      return d >= dateRange.start && d <= dateRange.end;
+    });
+  }, [adminSessions, dateRange]);
+
+  const adminMatrixRecords = useMemo(() => {
+    const sessionIds = new Set(filteredAdminSessions.map((s) => s.id));
+    return adminSessionAttendance
+      .filter((r) => {
+        const sId = r.session?.id ?? r.session_id ?? r.session;
+        return sessionIds.has(sId);
+      })
+      .map((r) => ({
+        ...r,
+        // normalize participant fields so AttendanceMatrix can resolve name/id for both roles
+        student: r.student ?? r.teacher,
+        student_name: r.student_name || r.teacher_name,
+      }));
+  }, [adminSessionAttendance, filteredAdminSessions]);
+
+  // ── Data fetching ──────────────────────────────────────────────────────────
+
+  // Courses (for student / teacher tabs)
   useEffect(() => {
-   dispatch(fetchCourses());
+    dispatch(fetchCourses());
   }, [dispatch]);
 
-  // Fetch sessions whenever course changes
+  // Sessions & attendance by course (student / teacher tabs only)
   useEffect(() => {
-    if (!activeCourseId) return;
+    if (tab === "admin" || !activeCourseId) return;
     dispatch(fetchTeacherSessions({ course: activeCourseId }));
-  }, [activeCourseId, dispatch]);
+  }, [activeCourseId, tab, dispatch]);
 
-  // Fetch attendance whenever course OR tab changes
   useEffect(() => {
     if (!activeCourseId) return;
+    coursesService.getCourseEnrollments(activeCourseId)
+      .then((data) => setCourseEnrollments(Array.isArray(data) ? data : (data?.results || [])))
+      .catch(() => setCourseEnrollments([]));
+  }, [activeCourseId]);
+
+  useEffect(() => {
+    if (tab === "admin" || !activeCourseId) return;
     dispatch(fetchAllAttendance({
       course: activeCourseId,
       participant_role: tab === "teacher" ? "teacher" : "student",
     }));
   }, [activeCourseId, tab, dispatch]);
 
-  const refetchAttendance = () =>
+  // Admin sessions + attendance (admin tab only, no course param)
+  const fetchAdminData = useCallback(async () => {
+    setAdminLoading(true);
+    try {
+      const [sessionsData, attendanceData] = await Promise.all([
+        adminTeacherSessionService.getSessions(),
+        adminTeacherSessionService.getAllAttendance(),
+      ]);
+      const sessionsList = Array.isArray(sessionsData)
+        ? sessionsData
+        : (sessionsData?.results || []);
+      setAdminSessions(sessionsList);
+      setAdminSessionAttendance(Array.isArray(attendanceData) ? attendanceData : []);
+    } catch {
+      setAdminSessions([]);
+      setAdminSessionAttendance([]);
+    } finally {
+      setAdminLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (tab === "admin") fetchAdminData();
+  }, [tab, fetchAdminData]);
+
+  // ── Edit handler ───────────────────────────────────────────────────────────
+  const refetchCourseAttendance = () =>
     dispatch(fetchAllAttendance({
       course: activeCourseId,
       participant_role: tab === "teacher" ? "teacher" : "student",
@@ -136,17 +195,19 @@ const AdminAttendance = () => {
       await dispatch(updateStudentAttendance({ sessionId, studentId: pId, data: { status: form.status, note: form.note } })).unwrap();
       toastManager.success("Attendance updated");
       setEditRecord(null);
-      refetchAttendance();
+      if (tab === "admin") fetchAdminData();
+      else refetchCourseAttendance();
     } catch {
       toastManager.error("Failed to update attendance");
     }
   };
 
   const isLoading = loadingSessions || loadingAllAttendance;
+
   return (
     <div className="text-white space-y-8">
-      {/* Header Actions (Course & Date Filters) - Positioned to align with the global header */}
-      <div className="flex flex-wrap lg:flex-nowrap justify-end gap-4 mb-4 -mt-20 lg:-mt-24 relative z-20">
+      {/* Header filters */}
+      <div className="flex flex-col sm:flex-row sm:flex-wrap lg:flex-nowrap sm:justify-end gap-3 mb-4 mt-2 sm:-mt-20 lg:-mt-24 relative z-20">
         <div className="w-full sm:w-48">
           <label className="text-[10px] uppercase tracking-widest text-slate-500 font-bold px-0.5 mb-1.5 block uppercase tracking-[0.2em]">Date Range</label>
           <FilterSelect
@@ -163,28 +224,31 @@ const AdminAttendance = () => {
           </FilterSelect>
         </div>
 
-        <div className="w-full sm:w-64">
-          <label className="text-[10px] uppercase tracking-widest text-slate-500 font-bold px-0.5 mb-1.5 block uppercase tracking-[0.2em]">Course</label>
-          <FilterSelect
-            value={activeCourseId}
-            onChange={(e) => setCourseId(e.target.value)}
-            className="w-full"
-          >
-            {courses.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
-          </FilterSelect>
-        </div>
+        {tab !== "admin" && (
+          <div className="w-full sm:w-64">
+            <label className="text-[10px] uppercase tracking-widest text-slate-500 font-bold px-0.5 mb-1.5 block uppercase tracking-[0.2em]">Course</label>
+            <FilterSelect
+              value={activeCourseId}
+              onChange={(e) => setCourseId(e.target.value)}
+              className="w-full"
+            >
+              {courses.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
+            </FilterSelect>
+          </div>
+        )}
       </div>
 
-      {/* Tabs Row */}
-      <div className="flex gap-1 border-b border-slate-800">
+      {/* Tabs */}
+      <div className="flex gap-1 border-b border-slate-800 overflow-x-auto no-scrollbar">
         {[
-          { id: "student", label: "Student Attendance", icon: "fa-user-graduate" },
-          { id: "teacher", label: "Teacher Attendance", icon: "fa-chalkboard-teacher" },
+          { id: "student", label: "Student Attendance",       icon: "fa-user-graduate" },
+          { id: "teacher", label: "Tutor Attendance",         icon: "fa-chalkboard-teacher" },
+          { id: "admin",   label: "Admin Session Attendance", icon: "fa-shield-alt" },
         ].map((t) => (
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
-            className={`flex items-center gap-2 px-5 py-3 text-sm font-bold border-b-2 -mb-px transition-all duration-200 ${
+            className={`flex items-center gap-2 px-5 py-3 text-sm font-bold border-b-2 -mb-px transition-all duration-200 whitespace-nowrap shrink-0 ${
               tab === t.id ? "border-indigo-500 text-white" : "border-transparent text-slate-500 hover:text-white"
             }`}
           >
@@ -194,14 +258,13 @@ const AdminAttendance = () => {
         ))}
       </div>
 
-      {/* Stats */}
-      {!isLoading && (filteredAttendance || []).length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      {/* Stats — student / teacher tabs */}
+      {tab !== "admin" && !isLoading && filteredAttendance.length > 0 && (
+        <div className="grid grid-cols-3 gap-3">
           {[
-            { label: "Total",   value: stats.total,      color: "text-white" },
-            { label: "Present", value: stats.present,    color: "text-emerald-400" },
-            { label: "Absent",  value: stats.absent,     color: "text-rose-400" },
-            { label: "Rate",    value: `${stats.rate}%`, color: stats.rate >= 75 ? "text-emerald-400" : "text-rose-400" },
+            { label: "Total",   value: stats.total,   color: "text-white" },
+            { label: "Present", value: stats.present, color: "text-emerald-400" },
+            { label: "Absent",  value: stats.absent,  color: "text-rose-400" },
           ].map((s) => (
             <div key={s.label} className="bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-center">
               <p className={`text-2xl font-black ${s.color}`}>{s.value}</p>
@@ -211,18 +274,38 @@ const AdminAttendance = () => {
         </div>
       )}
 
-      {/* Matrix */}
-      {isLoading ? (
-        <div className="flex items-center justify-center py-20">
-          <i className="fas fa-spinner animate-spin text-indigo-400 text-2xl" />
-        </div>
-      ) : (
-        <AttendanceMatrix
-          sessions={filteredSessions}
-          attendanceRecords={filteredAttendance || []}
-          participantRole={tab === "teacher" ? "teacher" : "student"}
-          onEditRecord={setEditRecord}
-        />
+      {/* Matrix — student / teacher tabs */}
+      {tab !== "admin" && (
+        isLoading ? (
+          <div className="flex items-center justify-center py-20">
+            <i className="fas fa-spinner animate-spin text-indigo-400 text-2xl" />
+          </div>
+        ) : (
+          <AttendanceMatrix
+            sessions={filteredSessions}
+            attendanceRecords={filteredAttendance}
+            enrolledStudents={tab === "student" ? courseEnrollments : []}
+            participantRole={tab === "teacher" ? "teacher" : "student"}
+            onEditRecord={setEditRecord}
+          />
+        )
+      )}
+
+      {/* Matrix — admin sessions tab */}
+      {tab === "admin" && (
+        adminLoading ? (
+          <div className="flex items-center justify-center py-20">
+            <i className="fas fa-spinner animate-spin text-indigo-400 text-2xl" />
+          </div>
+        ) : (
+          <AttendanceMatrix
+            sessions={filteredAdminSessions}
+            attendanceRecords={adminMatrixRecords}
+            enrolledStudents={[]}
+            participantRole="student"
+            onEditRecord={setEditRecord}
+          />
+        )
       )}
 
       <AttendanceEditModal

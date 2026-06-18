@@ -1,10 +1,82 @@
-import React, { useMemo, useState } from "react";
-import { Button, FilterSelect, Input } from "../../components/ui";
+import React, { useMemo, useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
+import { Button, FilterSelect, Input, TimezoneTag } from "../../components/ui";
 import SessionCalendarView from "../common/SessionCalendarView";
 import { clampDate } from "../../utils/validation";
 import { useDateFormatters } from "../../hooks";
+import CourseSelect from "../common/CourseSelect";
+
+const StatusHeaderTooltip = () => {
+  const [pos, setPos] = useState(null);
+  const ref = useRef(null);
+  const show = () => {
+    if (ref.current) {
+      const r = ref.current.getBoundingClientRect();
+      setPos({ top: r.top, left: r.left + r.width / 2 });
+    }
+  };
+  return (
+    <>
+      <i
+        ref={ref}
+        className="fas fa-info-circle text-slate-600 text-[10px] cursor-default"
+        onMouseEnter={show}
+        onMouseLeave={() => setPos(null)}
+      />
+      {pos && createPortal(
+         <div
+          className="fixed z-[9999] w-64 pointer-events-none"
+          style={{ top: pos.top, left: pos.left, transform: "translate(-50%, calc(-100% - 10px))" }}
+        >
+          <div className="bg-slate-800 border border-slate-700 rounded-xl shadow-2xl px-3 py-2.5 text-[11px] text-slate-300 leading-relaxed">
+            For recurring sessions, this is the first occurrence's status — not the overall series status.
+          </div>
+          <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-700 -mt-px" />
+        </div>,
+        document.body
+      )}
+    </>
+  );
+};
+
+/** Why a course is ineligible for a NEW SCHEDULED (recurring) session, or null if eligible. */
+const scheduledCourseReason = (c) => {
+  if (c.status === "draft")     return "Not published yet";
+  if (c.status === "completed") return "Course already completed";
+  if (c.status === "archived")  return "Course is archived";
+  if (c.status !== "published") return `Status: ${c.status}`;
+  if (c.has_session && c.upcoming_session !== false) return "Already has a recurring session";
+  return null;
+};
+
+/** Renders grouped <option> list: eligible on top, disabled ineligible below. */
+const ScheduledCourseOptions = ({ courses = [] }) => {
+  const eligible   = courses.filter(c => scheduledCourseReason(c) === null);
+  const ineligible = courses.filter(c => scheduledCourseReason(c) !== null);
+  return (
+    <>
+      <option value="">Select a course</option>
+      {eligible.length > 0 && (
+        <optgroup label="─── Available ───">
+          {eligible.map(c => (
+            <option key={c.id} value={c.id}>{c.title}</option>
+          ))}
+        </optgroup>
+      )}
+      {ineligible.length > 0 && (
+        <optgroup label="─── Unavailable ───">
+          {ineligible.map(c => (
+            <option key={c.id} value={c.id} disabled>{`${c.title} (${scheduledCourseReason(c)})`}</option>
+          ))}
+        </optgroup>
+      )}
+    </>
+  );
+};
 
 const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const DAY_ORDER = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
+const sortDays = (days) => [...days].sort((a, b) => DAY_ORDER.indexOf(a) - DAY_ORDER.indexOf(b));
 const MONTH_NAMES = [
   "January","February","March","April","May","June",
   "July","August","September","October","November","December",
@@ -20,6 +92,7 @@ const SessionsTab = ({
   isCreatingSession = false,
   editSessionForm,
   setEditSessionForm,
+  originalEditForm,
   createSessionForm,
   setCreateSessionForm,
   createSessionErrors,
@@ -36,8 +109,14 @@ const SessionsTab = ({
   setShowSessionFilters,
   sessionFilters,
   setSessionFilters,
+  createMode = "scheduled",
+  setCreateMode,
+  delayHours = 0,
+  setDelayHours,
+  delayMins = 30,
+  setDelayMins,
 }) => {
-  const { formatDate, formatTime } = useDateFormatters();
+  const { formatDate, formatTime, timezoneAbbr } = useDateFormatters();
   const [view, setView] = useState("table");
   const [calendarMonth, setCalendarMonth] = useState(null); // { year, month } — null = auto from data
 
@@ -141,6 +220,19 @@ const SessionsTab = ({
     [sessionFilters.search],
   );
 
+  // True when the user has only edited the title (no schedule fields changed)
+  const onlyTitleChanged = useMemo(() => {
+    if (!originalEditForm || Object.keys(originalEditForm).length === 0) return false;
+    return (
+      editSessionForm.start_date === originalEditForm.start_date &&
+      editSessionForm.time === originalEditForm.time &&
+      editSessionForm.recurrence_end_date === originalEditForm.recurrence_end_date &&
+      String(editSessionForm.course_id) === String(originalEditForm.course_id) &&
+      JSON.stringify([...(editSessionForm.recurrence_days || [])].sort()) ===
+        JSON.stringify([...(originalEditForm.recurrence_days || [])].sort())
+    );
+  }, [editSessionForm, originalEditForm]);
+
   const handleCreateSession = async (e) => {
     e.preventDefault();
     try {
@@ -194,8 +286,8 @@ const SessionsTab = ({
     <div className="space-y-6">
       {/* ── Header bar ── */}
       <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-        {/* View toggle */}
-        <div className="flex bg-slate-800 border border-slate-700 rounded-lg overflow-hidden shrink-0">
+        {/* View toggle — hidden on mobile (calendar-only on mobile) */}
+        <div className="hidden sm:flex bg-slate-800 border border-slate-700 rounded-lg overflow-hidden shrink-0">
           <button
             onClick={() => setView("table")}
             className={`px-3 py-2 text-sm font-medium transition flex items-center gap-1.5 ${view === "table" ? "bg-indigo-600 text-white" : "text-slate-400 hover:text-white"}`}
@@ -211,7 +303,7 @@ const SessionsTab = ({
             <span className="hidden sm:inline">Calendar</span>
           </button>
         </div>
-        <div className="flex gap-3 ml-auto">
+        <div className="w-full sm:w-auto grid grid-cols-2 sm:flex sm:flex-wrap sm:items-center gap-2 sm:ml-auto">
 
         {/* Month nav — inline, only in calendar view with data */}
         {/* {view === "calendar" && activeMonthData && (
@@ -238,7 +330,7 @@ const SessionsTab = ({
 
         {/* Date range — only in calendar view when range is known */}
         {view === "calendar" && calendarStart && calendarEnd && (
-          <div className="flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 shrink-0">
+          <div className="col-span-2 sm:col-auto flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 shrink-0">
             <i className="fas fa-calendar-alt text-indigo-400 text-xs"></i>
             <span className="text-xs font-semibold text-white">
               {calendarStart.toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" })}
@@ -250,63 +342,38 @@ const SessionsTab = ({
           </div>
         )}
 
-        {/* Status filter */}
-        <div className="flex items-center gap-2 shrink-0">
-          {/* <span className="text-xs font-semibold text-slate-500 hidden sm:inline">Status</span> */}
-          <FilterSelect
-            style={{ minWidth: "130px" }}
-            value={sessionFilters.status}
-            onChange={(e) => setSessionFilters({ ...sessionFilters, status: e.target.value })}
-          >
-            <option value="">All Status</option>
-            <option value="scheduled">Scheduled</option>
-            <option value="live">Live</option>
-            <option value="ended">Ended</option>
-          </FilterSelect>
-        </div>
+        <FilterSelect
+          className="w-full sm:w-auto"
+          value={sessionFilters.status}
+          onChange={(e) => setSessionFilters({ ...sessionFilters, status: e.target.value })}
+        >
+          <option value="">All Status</option>
+          <option value="scheduled">Scheduled</option>
+          <option value="live">Live</option>
+          <option value="ended">Ended</option>
+        </FilterSelect>
 
-        {/* View filter */}
-        <div className="flex items-center gap-2 shrink-0">
-          {/* <span className="text-xs font-semibold text-slate-500 hidden sm:inline">Session Type</span> */}
-          <FilterSelect
-            style={{ minWidth: "130px" }}
-            value={sessionFilters.view}
-            onChange={(e) => setSessionFilters({ ...sessionFilters, view: e.target.value })}
-          >
-            <option value="">All Sessions</option>
-            <option value="parent">Parent Session</option>
-          </FilterSelect>
-        </div>
+        <FilterSelect
+          className="w-full sm:w-auto"
+          value={sessionFilters.course}
+          onChange={(e) => setSessionFilters({ ...sessionFilters, course: e.target.value })}
+        >
+          <option value="">All Courses</option>
+          {courses?.map((c) => (
+            <option key={c.id} value={c.id}>{c.title}</option>
+          ))}
+        </FilterSelect>
 
-        {/* Course filter */}
-        <div className="flex items-center gap-2 shrink-0">
-          {/* <span className="text-xs font-semibold text-slate-500 hidden sm:inline">Course</span> */}
-          <FilterSelect
-            style={{ minWidth: "180px" }}
-            value={sessionFilters.course}
-            onChange={(e) => setSessionFilters({ ...sessionFilters, course: e.target.value })}
-          >
-            <option value="">All Courses</option>
-            {courses?.map((c) => (
-              <option key={c.id} value={c.id}>{c.title}</option>
-            ))}
-          </FilterSelect>
-        </div>
-
-        {/* Instructor filter */}
-        <div className="flex items-center gap-2 shrink-0">
-          {/* <span className="text-xs font-semibold text-slate-500 hidden sm:inline">Instructor</span> */}
-          <FilterSelect
-            style={{ minWidth: "160px" }}
-            value={sessionFilters.teacher}
-            onChange={(e) => setSessionFilters({ ...sessionFilters, teacher: e.target.value })}
-          >
-            <option value="">All Teachers</option>
-            {teachers.map((t) => (
-              <option key={t.id} value={t.id}>{t.username}</option>
-            ))}
-          </FilterSelect>
-        </div>
+        <FilterSelect
+          className="w-full sm:w-auto"
+          value={sessionFilters.teacher}
+          onChange={(e) => setSessionFilters({ ...sessionFilters, teacher: e.target.value })}
+        >
+          <option value="">All Tutors</option>
+          {teachers.map((t) => (
+            <option key={t.id} value={t.id}>{t.username}</option>
+          ))}
+        </FilterSelect>
       </div>
 
         {/* Create Class — pushed to the right */}
@@ -315,20 +382,27 @@ const SessionsTab = ({
           className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-lg active:scale-95 transition flex items-center gap-2 shrink-0"
         >
           <i className="fas fa-plus text-xs"></i>
-          <span>Create Class</span>
+          <span>Create Session</span>
         </button>
       </div>
 
-      {/* ── TABLE VIEW ── */}
-      {view === "table" && (
+      {/* ── TABLE VIEW ── (always on mobile, toggled on sm+) */}
+      <div className={view === "calendar" ? "sm:hidden" : ""}>
         <div className="bg-slate-900/50 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-sm">
           {loading ? (
             <div className="overflow-x-auto">
               <table className="w-full text-left">
                 <thead className="bg-slate-950/60 border-b border-slate-800">
                   <tr>
-                    {["Class", "Course", "Teacher", "Start Date", "Recurrence", "End Date", "Status", "Actions"].map((h) => (
-                      <th key={h} className="px-5 py-4 text-xs font-black uppercase text-slate-500">{h}</th>
+                    {["Session", "Course", "Tutor", "Start Date", "Recurrence", "End Date", "Status", "Actions"].map((h) => (
+                      <th key={h} className="px-5 py-4 text-xs font-black uppercase text-slate-500">
+                        {h === "Status" ? (
+                          <div className="flex items-center gap-1">
+                            Status
+                            <StatusHeaderTooltip />
+                          </div>
+                        ) : h}
+                      </th>
                     ))}
                   </tr>
                 </thead>
@@ -367,6 +441,9 @@ const SessionsTab = ({
                     <div className="flex items-start justify-between gap-3 mb-3">
                       <div>
                         <p className="font-bold text-white text-sm">{session.title}</p>
+                        {session.category == "special" && (
+                          <span className="mt-0.5 inline-block px-1.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-violet-500/20 text-violet-300 border border-violet-500/20">Special Session</span>
+                        )}
                         <p className="text-xs text-slate-400 mt-0.5">{session.course?.title || session.course_title || "—"}</p>
                         <p className="text-xs text-slate-500">{session.teacher_name || "—"}</p>
                       </div>
@@ -375,10 +452,10 @@ const SessionsTab = ({
                     <div className="flex flex-wrap gap-2 text-xs text-slate-400 mb-3">
                       <span><i className="fas fa-calendar mr-1 text-indigo-400"></i>{formatDate(session.scheduled_at || session.start_time)}</span>
                       {formatTime(session.scheduled_at || session.start_time) && (
-                        <span><i className="fas fa-clock mr-1 text-indigo-400"></i>{formatTime(session.scheduled_at || session.start_time)}</span>
+                        <span><i className="fas fa-clock mr-1 text-indigo-400"></i>{formatTime(session.scheduled_at || session.start_time)}{" "}<TimezoneTag /></span>
                       )}
                       {session.recurrence_days?.length > 0 ? (
-                        <span><i className="fas fa-repeat mr-1 text-purple-400"></i>{session.recurrence_days.join(", ")}</span>
+                        <span><i className="fas fa-repeat mr-1 text-purple-400"></i>{sortDays(session.recurrence_days).join(", ")}</span>
                       ) : (() => {
                         const derived = getDayFromScheduledAt(session.scheduled_at || session.start_time);
                         return derived ? <span><i className="fas fa-repeat mr-1 text-slate-500"></i>{derived}</span> : null;
@@ -388,22 +465,17 @@ const SessionsTab = ({
                       )}
                     </div>
                     <div className="flex gap-2">
-                      {!session.is_child && (() => {
-                        const hasEnrollments = (session.enrollment_count ?? 0) >= 1;
-                        return (
-                          <button
-                            onClick={() => !hasEnrollments && onSessionEdit(session.id)}
-                            disabled={hasEnrollments}
-                            title={hasEnrollments ? "Cannot edit: session has active enrollments" : "Edit session"}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-medium flex-1 flex items-center justify-center gap-1 transition ${hasEnrollments ? "bg-slate-800/30 text-slate-600 cursor-not-allowed" : "bg-slate-700/50 text-slate-300 hover:bg-slate-600/50"}`}
-                          >
-                            <i className="fas fa-edit"></i> Edit
-                          </button>
-                        );
-                      })()}
-                      <button onClick={() => onSessionDelete(session.id)} disabled={loadingSessionIds.has(session.id)} className="bg-red-600/10 text-red-400 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-red-600/20 transition disabled:opacity-50 flex-1 flex items-center justify-center gap-1">
-                        <i className="fas fa-trash"></i>
-                        {loadingSessionIds.has(session.id) ? "Deleting…" : "Delete"}
+                      {!session.is_child && session.is_recurring && (
+                        <button
+                          onClick={() => onSessionEdit(session.id)}
+                          title="Edit session"
+                          className="w-8 h-8 flex items-center justify-center bg-slate-700/50 text-slate-300 rounded-lg hover:bg-slate-600/50 transition"
+                        >
+                          <i className="fas fa-edit text-xs"></i>
+                        </button>
+                      )}
+                      <button onClick={() => onSessionDelete(session.id)} disabled={loadingSessionIds.has(session.id)} title="Delete session" className="w-8 h-8 flex items-center justify-center bg-red-600/10 text-red-400 rounded-lg hover:bg-red-600/20 transition disabled:opacity-50">
+                        {loadingSessionIds.has(session.id) ? <i className="fas fa-spinner fa-spin text-xs"></i> : <i className="fas fa-trash text-xs"></i>}
                       </button>
                     </div>
                   </div>
@@ -414,27 +486,37 @@ const SessionsTab = ({
               <table className="hidden lg:table w-full text-left">
                 <thead className="bg-slate-950/60 border-b border-slate-800">
                   <tr>
-                    <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Class</th>
+                    <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Session</th>
                     <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Course</th>
-                    <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Teacher</th>
+                    <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Tutor</th>
                     <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Start Date & Time</th>
                     <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">End Date</th>
                     <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Recurrence</th>
-                    <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Status</th>
+                    <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">
+                      <div className="flex items-center gap-1">
+                        Status
+                        <StatusHeaderTooltip />
+                      </div>
+                    </th>
                     <th className="px-5 py-4 text-xs font-black uppercase text-slate-500 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/50">
                   {filteredSessions.map((session) => (
                     <tr key={session.id} className="hover:bg-slate-800/30 transition">
-                      <td className="px-5 py-4 font-semibold text-white text-sm">{session.title}</td>
+                      <td className="px-5 py-4">
+                        <p className="font-semibold text-white text-sm">{session.title}</p>
+                        {session.category == "special" && (
+                          <span className="mt-1 inline-block px-1.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-violet-500/20 text-violet-300 border border-violet-500/20">Special Session</span>
+                        )}
+                      </td>
                       <td className="px-5 py-4 text-slate-300 text-sm">{session.course?.title || session.course_title || "—"}</td>
                       <td className="px-5 py-4 text-slate-300 text-sm">{session.teacher_name || "—"}</td>
                       <td className="px-5 py-4">
                         <div className="text-slate-300 text-sm">{formatDate(session.scheduled_at || session.start_time)}</div>
                         {formatTime(session.scheduled_at || session.start_time) && (
                           <div className="text-slate-500 text-xs mt-0.5">
-                            <i className="fas fa-clock mr-1"></i>{formatTime(session.scheduled_at || session.start_time)}
+                            <i className="fas fa-clock mr-1"></i>{formatTime(session.scheduled_at || session.start_time)}{" "}<TimezoneTag />
                           </div>
                         )}
                       </td>
@@ -442,7 +524,7 @@ const SessionsTab = ({
                       <td className="px-5 py-4">
                         {session.recurrence_days?.length > 0 ? (
                           <div className="flex flex-wrap gap-1">
-                            {session.recurrence_days.map((d) => (
+                            {sortDays(session.recurrence_days).map((d) => (
                               <span key={d} className="px-1.5 py-0.5 bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 rounded text-xs font-medium">{d}</span>
                             ))}
                           </div>
@@ -456,22 +538,17 @@ const SessionsTab = ({
                       <td className="px-5 py-4">{getStatusBadge(session.status)}</td>
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-2 justify-end">
-                          {!session.is_child && (() => {
-                            const hasEnrollments = (session.enrollment_count ?? 0) >= 1;
-                            return (
-                              <button
-                                onClick={() => !hasEnrollments && onSessionEdit(session.id)}
-                                disabled={hasEnrollments}
-                                title={hasEnrollments ? "Cannot edit: session has active enrollments" : "Edit session"}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${hasEnrollments ? "bg-slate-800/30 text-slate-600 cursor-not-allowed" : "bg-slate-700/50 text-slate-300 hover:bg-slate-600/50"}`}
-                              >
-                                <i className="fas fa-edit mr-1"></i>Edit
-                              </button>
-                            );
-                          })()}
-                          <button onClick={() => onSessionDelete(session.id)} disabled={loadingSessionIds.has(session.id)} className="bg-red-600/10 text-red-400 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-red-600/20 transition disabled:opacity-50">
-                            <i className="fas fa-trash mr-1"></i>
-                            {loadingSessionIds.has(session.id) ? "Deleting…" : "Delete"}
+                          {!session.is_child && session.is_recurring && (
+                            <button
+                              onClick={() => onSessionEdit(session.id)}
+                              title="Edit session"
+                              className="w-8 h-8 flex items-center justify-center bg-slate-700/50 text-slate-300 rounded-lg hover:bg-slate-600/50 transition"
+                            >
+                              <i className="fas fa-edit text-xs"></i>
+                            </button>
+                          )}
+                          <button onClick={() => onSessionDelete(session.id)} disabled={loadingSessionIds.has(session.id)} title="Delete session" className="w-8 h-8 flex items-center justify-center bg-red-600/10 text-red-400 rounded-lg hover:bg-red-600/20 transition disabled:opacity-50">
+                            {loadingSessionIds.has(session.id) ? <i className="fas fa-spinner fa-spin text-xs"></i> : <i className="fas fa-trash text-xs"></i>}
                           </button>
                         </div>
                       </td>
@@ -482,167 +559,270 @@ const SessionsTab = ({
             </div>
           )}
         </div>
-      )}
+      </div>
 
-      {/* ── CALENDAR VIEW ── */}
+      {/* ── CALENDAR VIEW ── (hidden on mobile) */}
       {view === "calendar" && (
-        <SessionCalendarView sessions={filteredSessions} loading={loading} />
+        <div className="hidden sm:block">
+          <SessionCalendarView sessions={filteredSessions} loading={loading} />
+        </div>
       )}
 
-      {/* ── CREATE CLASS MODAL ── */}
+      {/* ── CREATE SESSION MODAL ── */}
       {activeModal === "create-session" && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200] p-4">
           <div className="bg-slate-900 border border-slate-800 rounded-[1.5rem] p-4 sm:p-8 w-full max-w-2xl lg:max-w-4xl max-h-[92vh] overflow-y-auto shadow-2xl transition-all duration-300">
 
             {/* Header */}
-            <div className="flex justify-between items-start mb-8 pb-6 border-b border-white/5">
+            <div className="flex justify-between items-start mb-6 pb-5 border-b border-white/5">
               <div>
-                <h3 className="text-xl font-black text-white tracking-tight">Create New Class</h3>
-                <p className="text-slate-500 text-[12px] font-medium mt-1">Schedule a recurring class for a published course</p>
+                <h3 className="text-xl font-black text-white tracking-tight">Create New Session</h3>
+                <p className="text-slate-500 text-[12px] font-medium mt-1">
+                  {createMode === "now"     ? "Launches immediately — max 1 hour" :
+                   createMode === "delayed" ? "Starts after a set delay — max 1 hour" :
+                                             "Schedule a recurring session for a published course"}
+                </p>
               </div>
               <button onClick={() => setActiveModal(null)} className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-white hover:bg-white/5 transition-all">
                 <i className="fas fa-times text-lg"></i>
               </button>
             </div>
 
+            {/* Scheduling mode tabs */}
+            <div className="flex gap-1 bg-slate-800/60 border border-white/5 rounded-xl p-1 mb-6">
+              {[
+                { key: "now",       icon: "fa-bolt",           label: "Start Now"     },
+                { key: "delayed",   icon: "fa-hourglass-half", label: "Delayed Start" },
+                { key: "scheduled", icon: "fa-calendar-alt",   label: "Scheduled"     },
+              ].map(({ key, icon, label }) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setCreateMode?.(key)}
+                  className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition ${
+                    createMode === key
+                      ? "bg-indigo-600 text-white shadow-lg shadow-indigo-900/40"
+                      : "text-slate-400 hover:text-slate-300"
+                  }`}
+                >
+                  <i className={`fas ${icon} text-[9px]`}></i>
+                  {label}
+                </button>
+              ))}
+            </div>
+
             <form onSubmit={handleCreateSession} className="space-y-5">
-              {/* Row 1: Course | Instructor */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Course <span className="text-red-400">*</span>
-                  </label>
-                  <FilterSelect
-                    value={createSessionForm.course}
-                    onChange={(e) => {
-                      const selectedCourse = courses?.find((c) => c.id === Number(e.target.value) && c.status === "published" && !c.has_session);
-                      setCreateSessionForm({
-                        ...createSessionForm,
-                        course: e.target.value,
-                        instructor_id: selectedCourse?.instructor?.id || "",
-                        instructor_username: selectedCourse?.instructor?.username || "",
-                      });
-                      clearCreateSessionFieldError("course");
-                    }}
-                    className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white focus:outline-none focus:ring-2 text-sm ${createSessionErrors?.course ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
-                  >
-                    <option value="">Select a course</option>
-                    {courses?.filter((c) => c.status === "published" && !c.has_session).map((course) => (
-                      <option key={course.id} value={course.id}>{course.title}</option>
-                    ))}
-                  </FilterSelect>
-                  {createSessionErrors?.course && <p className="text-red-400 text-xs mt-1">{createSessionErrors.course}</p>}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">Instructor</label>
-                  <input
-                    type="text"
-                    value={createSessionForm.instructor_username || ""}
-                    disabled
-                    placeholder="Auto-filled from course"
-                    className="w-full px-3 py-2.5 bg-slate-700/50 border border-slate-600/50 rounded-xl text-slate-400 text-sm cursor-not-allowed placeholder-slate-600"
-                  />
-                </div>
-              </div>
 
-              {/* Row 2: Class Title */}
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
-                  Class Title <span className="text-red-400">*</span>
-                </label>
-                <Input
-                  type="text"
-                  placeholder="e.g. Python Basics - Batch 2"
-                  value={createSessionForm.title}
-                  onChange={(e) => { setCreateSessionForm({ ...createSessionForm, title: e.target.value }); clearCreateSessionFieldError("title"); }}
-                  className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 text-sm ${createSessionErrors?.title ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
-                  error={createSessionErrors?.title}
-                />
-              </div>
+              {/* ── Start Now / Delayed: Course + Tutor + Title only ── */}
+              {(createMode === "now" || createMode === "delayed") && (
+                <div className="space-y-5">
+                  {/* Course | Tutor */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-300 mb-2">Course <span className="text-red-400">*</span></label>
+                      <CourseSelect
+                        courses={courses?.filter(c => c.status === "published") || []}
+                        value={createSessionForm.course}
+                        error={createSessionErrors?.course}
+                        onChange={(c) => {
+                          setCreateSessionForm({ ...createSessionForm, course: String(c.id), instructor_id: c.instructor?.id || "", instructor_username: c.instructor?.username || "", instructor_email: c.instructor?.email || "" });
+                          clearCreateSessionFieldError("course");
+                        }}
+                      />
+                      {createSessionErrors?.course && <p className="text-red-400 text-xs mt-1">{createSessionErrors.course}</p>}
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-300 mb-2">Tutor</label>
+                      <input type="text"
+                        value={createSessionForm.instructor_username ? `${createSessionForm.instructor_username}${createSessionForm.instructor_email ? ` (${createSessionForm.instructor_email})` : ""}` : ""}
+                        disabled placeholder="Auto-filled from course"
+                        className="w-full px-3 py-2.5 bg-slate-700/50 border border-slate-600/50 rounded-xl text-slate-400 text-sm cursor-not-allowed placeholder-slate-600" />
+                    </div>
+                  </div>
 
-              {/* Row 3: Start Date | End Date */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Start Date <span className="text-red-400">*</span>
-                  </label>
-                  <Input
-                    type="date"
-                    value={createSessionForm.scheduled_date}
-                    min={new Date().toISOString().split("T")[0]}
-                    max="9999-12-31"
-                    onChange={(e) => { const v = clampDate(e.target.value); setCreateSessionForm({ ...createSessionForm, scheduled_date: v }); clearCreateSessionFieldError("scheduled_date"); }}
-                    className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white focus:outline-none focus:ring-2 text-sm ${createSessionErrors?.scheduled_date ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
-                    error={createSessionErrors?.scheduled_date}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
-                    End Date <span className="text-red-400">*</span>
-                  </label>
-                  <Input
-                    type="date"
-                    value={createSessionForm.recurrence_end_date}
-                    min={createSessionForm.scheduled_date || new Date().toISOString().split("T")[0]}
-                    max="9999-12-31"
-                    onChange={(e) => { const v = clampDate(e.target.value); setCreateSessionForm({ ...createSessionForm, recurrence_end_date: v }); clearCreateSessionFieldError("recurrence_end_date"); }}
-                    className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white focus:outline-none focus:ring-2 text-sm ${createSessionErrors?.recurrence_end_date ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
-                    error={createSessionErrors?.recurrence_end_date}
-                  />
-                  {createSessionForm.scheduled_date && createSessionForm.recurrence_end_date && (
-                    <p className="text-slate-500 text-xs mt-1">From {createSessionForm.scheduled_date} to {createSessionForm.recurrence_end_date}</p>
+                  {/* Title */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">Session Title <span className="text-red-400">*</span></label>
+                    <Input type="text" placeholder="e.g. Python Basics — Live Q&A"
+                      value={createSessionForm.title}
+                      onChange={(e) => { setCreateSessionForm({ ...createSessionForm, title: e.target.value }); clearCreateSessionFieldError("title"); }}
+                      className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 text-sm ${createSessionErrors?.title ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
+                      error={createSessionErrors?.title}
+                    />
+                  </div>
+
+                  {/* Delay picker */}
+                  {createMode === "delayed" && (
+                    <div>
+                      <label className="block text-sm font-medium text-slate-300 mb-2">Start After <span className="text-red-400">*</span></label>
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2 bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5">
+                          <input type="number" min={0} max={23} value={delayHours}
+                            onChange={(e) => setDelayHours?.(Math.min(23, Math.max(0, Number(e.target.value))))}
+                            className="w-12 bg-transparent text-white text-center text-sm font-black outline-none" />
+                          <span className="text-slate-500 text-xs font-bold uppercase tracking-widest">hrs</span>
+                        </div>
+                        <span className="text-slate-600 font-black">:</span>
+                        <div className="flex items-center gap-2 bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5">
+                          <input type="number" min={0} max={59} value={delayMins}
+                            onChange={(e) => setDelayMins?.(Math.min(59, Math.max(0, Number(e.target.value))))}
+                            className="w-12 bg-transparent text-white text-center text-sm font-black outline-none" />
+                          <span className="text-slate-500 text-xs font-bold uppercase tracking-widest">min</span>
+                        </div>
+                      </div>
+                      {createSessionErrors?.delay && <p className="text-red-400 text-xs mt-1">{createSessionErrors.delay}</p>}
+                      {(Number(delayHours) > 0 || Number(delayMins) > 0) && (
+                        <p className="text-slate-500 text-xs mt-2 flex items-center gap-1.5">
+                          <i className="fas fa-clock text-indigo-400/60"></i>
+                          Session starts in {Number(delayHours) > 0 && `${delayHours}h `}{Number(delayMins) > 0 && `${delayMins}m`} from now
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Start Now info banner */}
+                  {createMode === "now" && (
+                    <div className="flex items-center gap-3 px-4 py-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
+                      <i className="fas fa-bolt text-emerald-400"></i>
+                      <p className="text-emerald-300 text-xs font-semibold">
+                        This session will be created and ready to start immediately. Maximum duration is 1 hour.
+                      </p>
+                    </div>
                   )}
                 </div>
-              </div>
+              )}
 
-              {/* Row 4: Recurring Days | Class Time */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Recurring Days <span className="text-red-400">*</span>
-                  </label>
-                  <div className="flex flex-wrap gap-2">
-                    {["MON","TUE","WED","THU","FRI"].map((day) => {
-                      const active = (createSessionForm.recurrence_days || []).includes(day);
-                      return (
-                        <button
-                          key={day}
-                          type="button"
-                          onClick={() => {
-                            const days = createSessionForm.recurrence_days || [];
-                            const next = active ? days.filter((d) => d !== day) : [...days, day];
-                            setCreateSessionForm({ ...createSessionForm, recurrence_days: next });
-                            clearCreateSessionFieldError("recurrence_days");
-                          }}
-                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition ${active ? "bg-indigo-600/40 border-indigo-500/50 text-indigo-300" : "bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-600 hover:text-white"}`}
-                        >
-                          {day}
-                        </button>
-                      );
-                    })}
+              {/* ── Scheduled: full form ── */}
+              {createMode === "scheduled" && (
+                <div className="space-y-5">
+                  {/* Hourly chip */}
+                  <div className="flex items-center gap-2">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-indigo-500/10 border border-indigo-500/20 text-indigo-300">
+                      <i className="fas fa-clock text-[9px]" /> Hourly · Recurring
+                    </span>
                   </div>
-                  {createSessionErrors?.recurrence_days && <p className="text-red-400 text-xs mt-1">{createSessionErrors.recurrence_days}</p>}
+
+                  {/* Course | Tutor */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-300 mb-2">Course <span className="text-red-400">*</span></label>
+                      <CourseSelect
+                        courses={courses || []}
+                        value={createSessionForm.course}
+                        error={createSessionErrors?.course}
+                        getDisabledReason={scheduledCourseReason}
+                        onChange={(c) => {
+                          setCreateSessionForm({ ...createSessionForm, course: String(c.id), instructor_id: c.instructor?.id || "", instructor_username: c.instructor?.username || "", instructor_email: c.instructor?.email || "" });
+                          clearCreateSessionFieldError("course");
+                        }}
+                      />
+                      {createSessionErrors?.course && <p className="text-red-400 text-xs mt-1">{createSessionErrors.course}</p>}
+                      {(() => {
+                        const sel = (courses || []).find(c => String(c.id) === String(createSessionForm.course));
+                        if (sel?.has_session && sel?.upcoming_session === false) {
+                          return (
+                            <p className="text-[10px] text-blue-400 mt-1.5 flex items-center gap-1">
+                              <i className="fas fa-info-circle" />
+                              No upcoming session — you can create a new one.
+                            </p>
+                          );
+                        }
+                        return null;
+                      })()}
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-300 mb-2">Tutor</label>
+                      <input type="text"
+                        value={createSessionForm.instructor_username ? `${createSessionForm.instructor_username}${createSessionForm.instructor_email ? ` (${createSessionForm.instructor_email})` : ""}` : ""}
+                        disabled placeholder="Auto-filled from course"
+                        className="w-full px-3 py-2.5 bg-slate-700/50 border border-slate-600/50 rounded-xl text-slate-400 text-sm cursor-not-allowed placeholder-slate-600" />
+                    </div>
+                  </div>
+
+                  {/* Title */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">Session Title <span className="text-red-400">*</span></label>
+                    <Input type="text" placeholder="e.g. Python Basics - Batch 2"
+                      value={createSessionForm.title}
+                      onChange={(e) => { setCreateSessionForm({ ...createSessionForm, title: e.target.value }); clearCreateSessionFieldError("title"); }}
+                      className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 text-sm ${createSessionErrors?.title ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
+                      error={createSessionErrors?.title}
+                    />
+                  </div>
+
+                  {/* Start Date | End Date */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-300 mb-2">Start Date <span className="text-red-400">*</span></label>
+                      <Input type="date" value={createSessionForm.scheduled_date}
+                        min={new Date().toISOString().split("T")[0]} max="9999-12-31"
+                        onChange={(e) => { const v = clampDate(e.target.value); setCreateSessionForm({ ...createSessionForm, scheduled_date: v }); clearCreateSessionFieldError("scheduled_date"); }}
+                        className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white focus:outline-none focus:ring-2 text-sm ${createSessionErrors?.scheduled_date ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
+                        error={createSessionErrors?.scheduled_date}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-300 mb-2">End Date <span className="text-red-400">*</span></label>
+                      <Input type="date" value={createSessionForm.recurrence_end_date}
+                        min={createSessionForm.scheduled_date || new Date().toISOString().split("T")[0]} max="9999-12-31"
+                        onChange={(e) => { const v = clampDate(e.target.value); setCreateSessionForm({ ...createSessionForm, recurrence_end_date: v }); clearCreateSessionFieldError("recurrence_end_date"); }}
+                        className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white focus:outline-none focus:ring-2 text-sm ${createSessionErrors?.recurrence_end_date ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
+                        error={createSessionErrors?.recurrence_end_date}
+                      />
+                      {createSessionForm.scheduled_date && createSessionForm.recurrence_end_date && (
+                        <p className="text-slate-500 text-xs mt-1">From {createSessionForm.scheduled_date} to {createSessionForm.recurrence_end_date}</p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Recurring Days | Session Time */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-300 mb-2">Recurring Days <span className="text-red-400">*</span></label>
+                      <div className="flex flex-wrap gap-2">
+                        {["MON","TUE","WED","THU","FRI","SAT","SUN"].map((day) => {
+                          const active = (createSessionForm.recurrence_days || []).includes(day);
+                          return (
+                            <button key={day} type="button"
+                              onClick={() => {
+                                const days = createSessionForm.recurrence_days || [];
+                                const next = active ? days.filter((d) => d !== day) : [...days, day];
+                                setCreateSessionForm({ ...createSessionForm, recurrence_days: next });
+                                clearCreateSessionFieldError("recurrence_days");
+                              }}
+                              className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition ${active ? "bg-indigo-600/40 border-indigo-500/50 text-indigo-300" : "bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-600 hover:text-white"}`}
+                            >{day}</button>
+                          );
+                        })}
+                      </div>
+                      {createSessionErrors?.recurrence_days && <p className="text-red-400 text-xs mt-1">{createSessionErrors.recurrence_days}</p>}
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-300 mb-2">Session Time <span className="text-red-400">*</span></label>
+                      <input type="time" value={createSessionForm.time}
+                        onChange={(e) => { setCreateSessionForm({ ...createSessionForm, time: e.target.value }); clearCreateSessionFieldError("time"); }}
+                        className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white focus:outline-none focus:ring-2 text-sm [color-scheme:dark] ${createSessionErrors?.time ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
+                      />
+                      {createSessionErrors?.time && <p className="text-red-400 text-xs mt-1">{createSessionErrors.time}</p>}
+                      <p className="text-slate-500 text-xs mt-1.5 flex items-center gap-1">
+                        <i className="fas fa-globe text-[10px]"></i>
+                        Sessions will be scheduled in <TimezoneTag className="text-indigo-400 font-semibold" />
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Class Time <span className="text-red-400">*</span>
-                  </label>
-                  <input
-                    type="time"
-                    value={createSessionForm.time}
-                    onChange={(e) => { setCreateSessionForm({ ...createSessionForm, time: e.target.value }); clearCreateSessionFieldError("time"); }}
-                    className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white focus:outline-none focus:ring-2 text-sm [color-scheme:dark] ${createSessionErrors?.time ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
-                  />
-                  {createSessionErrors?.time && <p className="text-red-400 text-xs mt-1">{createSessionErrors.time}</p>}
-                </div>
-              </div>
+              )}
 
               {/* Footer */}
               <div className="flex justify-end gap-4 pt-8 mt-4 border-t border-white/5">
                 <button type="button" onClick={() => setActiveModal(null)} className="px-6 py-2.5 rounded-xl text-sm font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition">Cancel</button>
                 <button type="submit" disabled={isCreatingSession}
                   className="px-6 py-2.5 rounded-xl text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition disabled:opacity-50 flex items-center gap-2">
-                  {isCreatingSession ? <><i className="fas fa-spinner fa-spin text-xs"></i>Creating…</> : "Create Class"}
+                  {isCreatingSession
+                    ? <><i className="fas fa-spinner fa-spin text-xs"></i>Creating…</>
+                    : createMode === "now"     ? "Start Session"
+                    : createMode === "delayed" ? "Create Session"
+                    :                           "Create Session"}
                 </button>
               </div>
             </form>
@@ -676,47 +856,28 @@ const SessionsTab = ({
                   </label>
                   {(() => {
                     const editCourseId = Number(editSessionForm.course_id);
-                    const availableOptions = courses.filter(c => c.status === "published");
                     const currentInList = editCourseId && courses.some(c => c.id === editCourseId);
+                    const editCourses = [
+                      ...(editCourseId && !currentInList ? [{ id: editCourseId, title: editSessionForm.course_title || `Course #${editCourseId}`, instructor: { username: editSessionForm.teacher_name || "", email: "" } }] : []),
+                      ...courses.filter(c => c.status === "published"),
+                    ];
                     return (
-                      <FilterSelect
+                      <CourseSelect
+                        courses={editCourses}
                         value={editSessionForm.course_id || ""}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          const selected = courses.find((c) => c.id === Number(val));
-                          if (selected) {
-                            setEditSessionForm({
-                              ...editSessionForm,
-                              course_id: val,
-                              course_title: selected.title || "",
-                              teacher_name: selected.instructor?.username || "",
-                              instructor_id: selected.instructor?.id || "",
-                            });
-                          } else {
-                            setEditSessionForm({ ...editSessionForm, course_id: val });
-                          }
+                        onChange={(c) => {
+                          setEditSessionForm({ ...editSessionForm, course_id: String(c.id), course_title: c.title || "", teacher_name: c.instructor?.username || "", instructor_id: c.instructor?.id || "", teacher_email: c.instructor?.email || "" });
                           clearEditSessionFieldError?.("course");
                         }}
-                        className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-                      >
-                        <option value="">Select a course</option>
-                        {editCourseId && !currentInList && (
-                          <option key={`current-${editCourseId}`} value={editCourseId}>
-                            {editSessionForm.course_title || `Course #${editCourseId}`}{editSessionForm.teacher_name ? ` — ${editSessionForm.teacher_name}` : ""}
-                          </option>
-                        )}
-                        {availableOptions.map((c) => (
-                          <option key={c.id} value={c.id}>
-                            {c.title}{c.instructor?.username ? ` — ${c.instructor.username}` : ""}
-                          </option>
-                        ))}
-                      </FilterSelect>
+                      />
                     );
                   })()}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">Instructor</label>
-                  <input type="text" value={editSessionForm.teacher_name || ""} disabled
+                  <label className="block text-sm font-medium text-slate-300 mb-2">Tutor</label>
+                  <input type="text"
+                    value={editSessionForm.teacher_name ? `${editSessionForm.teacher_name}${editSessionForm.teacher_email ? ` (${editSessionForm.teacher_email})` : ""}` : ""}
+                    disabled
                     className="w-full px-3 py-2.5 bg-slate-700/50 border border-slate-600/50 rounded-xl text-slate-400 text-sm cursor-not-allowed" />
                 </div>
               </div>
@@ -752,17 +913,14 @@ const SessionsTab = ({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Start Date <span className="text-red-400">*</span>
+                    Start Date
                   </label>
                   <input
                     type="date"
                     value={editSessionForm.start_date || ""}
-                    min={new Date().toISOString().split("T")[0]}
-                    max="9999-12-31"
-                    onChange={(e) => { const v = clampDate(e.target.value); setEditSessionForm({ ...editSessionForm, start_date: v }); clearEditSessionFieldError("start_date"); }}
-                    className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white focus:outline-none focus:ring-2 text-sm [color-scheme:dark] ${editSessionErrors?.start_date ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
+                    disabled
+                    className="w-full px-3 py-2.5 bg-slate-800/50 border border-slate-700 rounded-xl text-slate-400 text-sm [color-scheme:dark] cursor-not-allowed opacity-60"
                   />
-                  {editSessionErrors?.start_date && <p className="text-red-400 text-xs mt-1">{editSessionErrors.start_date}</p>}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">
@@ -771,8 +929,7 @@ const SessionsTab = ({
                   <input
                     type="date"
                     value={editSessionForm.recurrence_end_date || ""}
-                    min={editSessionForm.start_date || new Date().toISOString().split("T")[0]}
-                    max="9999-12-31"
+                    {...(!onlyTitleChanged && { min: editSessionForm.start_date, max: "9999-12-31" })}
                     onChange={(e) => { const v = clampDate(e.target.value); setEditSessionForm({ ...editSessionForm, recurrence_end_date: v }); clearEditSessionFieldError("recurrence_end_date"); }}
                     className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white focus:outline-none focus:ring-2 text-sm [color-scheme:dark] ${editSessionErrors?.recurrence_end_date ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
                   />
@@ -787,7 +944,7 @@ const SessionsTab = ({
                     Recurring Days <span className="text-red-400">*</span>
                   </label>
                   <div className="flex flex-wrap gap-2">
-                    {["MON","TUE","WED","THU","FRI"].map((day) => {
+                    {["MON","TUE","WED","THU","FRI","SAT","SUN"].map((day) => {
                       const active = (editSessionForm.recurrence_days || []).includes(day);
                       return (
                         <button
@@ -819,6 +976,10 @@ const SessionsTab = ({
                     className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white focus:outline-none focus:ring-2 text-sm [color-scheme:dark] ${editSessionErrors?.time ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
                   />
                   {editSessionErrors?.time && <p className="text-red-400 text-xs mt-1">{editSessionErrors.time}</p>}
+                  <p className="text-slate-500 text-xs mt-1.5 flex items-center gap-1">
+                    <i className="fas fa-globe text-[10px]"></i>
+                    Sessions will be scheduled in <TimezoneTag className="text-indigo-400 font-semibold" />
+                  </p>
                 </div>
               </div>
 

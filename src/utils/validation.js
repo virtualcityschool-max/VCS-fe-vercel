@@ -200,6 +200,70 @@ export const validateRegistrationForm = (formData) => {
   };
 };
 
+/**
+ * Client-side validation for session create forms.
+ * Returns an errors object (empty = valid).
+ * @param {object} formData  — the create form state
+ * @param {string} mode      — "scheduled" | "now" | "delayed"
+ * @param {number} delayHours
+ * @param {number} delayMins
+ */
+export const validateSessionCreate = (formData, mode = "scheduled", delayHours = 0, delayMins = 30) => {
+  const errors = {};
+
+  if (!formData.course) errors.course = "Course is required";
+
+  if (!formData.title?.trim()) {
+    errors.title = "Session title is required";
+  } else if (formData.title.trim().length < 3) {
+    errors.title = "Title must be at least 3 characters";
+  }
+
+  if (mode === "scheduled") {
+    if (!formData.time) errors.time = "Session time is required";
+    if (!formData.scheduled_date) errors.scheduled_date = "Start date is required";
+    if (!formData.recurrence_days?.length) errors.recurrence_days = "Select at least one recurring day";
+    if (!formData.recurrence_end_date) {
+      errors.recurrence_end_date = "End date is required";
+    } else if (formData.scheduled_date && formData.recurrence_end_date < formData.scheduled_date) {
+      errors.recurrence_end_date = "End date must be on or after start date";
+    }
+  } else if (mode === "delayed") {
+    if (Number(delayHours) === 0 && Number(delayMins) === 0) {
+      errors.delay = "Set at least 1 minute delay";
+    }
+  }
+
+  return errors;
+};
+
+/**
+ * Client-side validation for session edit forms.
+ * Returns an errors object (empty = valid).
+ * @param {object} formData — the edit form state
+ */
+export const validateSessionEdit = (formData) => {
+  const errors = {};
+
+  if (!formData.title?.trim()) {
+    errors.title = "Session title is required";
+  } else if (formData.title.trim().length < 3) {
+    errors.title = "Title must be at least 3 characters";
+  }
+
+  if (!formData.time) errors.time = "Session time is required";
+
+  if (!formData.recurrence_days?.length) errors.recurrence_days = "Select at least one recurring day";
+
+  if (!formData.recurrence_end_date) {
+    errors.recurrence_end_date = "End date is required";
+  } else if (formData.start_date && formData.recurrence_end_date < formData.start_date) {
+    errors.recurrence_end_date = "End date cannot be before start date";
+  }
+
+  return errors;
+};
+
 export const clampDate = (value) => {
   if (!value) return value;
   const parts = value.split("-");
@@ -264,6 +328,138 @@ export const formatDate = (isoString, timeZone) => {
     return new Date(isoString).toLocaleDateString(undefined, opts);
   } catch {
     return "—";
+  }
+};
+
+// Lookup table: IANA → { std, dst? }. Used when Intl returns a generic "GMT+X" offset.
+const TZ_ABBR_MAP = {
+  "Asia/Dubai":           { std: "GST" },
+  "Asia/Karachi":         { std: "PKT" },
+  "Asia/Kolkata":         { std: "IST" },
+  "Asia/Colombo":         { std: "IST" },
+  "Asia/Dhaka":           { std: "BST" },
+  "Asia/Kathmandu":       { std: "NPT" },
+  "Asia/Rangoon":         { std: "MMT" },
+  "Asia/Yangon":          { std: "MMT" },
+  "Asia/Bangkok":         { std: "ICT" },
+  "Asia/Ho_Chi_Minh":     { std: "ICT" },
+  "Asia/Jakarta":         { std: "WIB" },
+  "Asia/Shanghai":        { std: "CST" },
+  "Asia/Hong_Kong":       { std: "HKT" },
+  "Asia/Singapore":       { std: "SGT" },
+  "Asia/Kuala_Lumpur":    { std: "MYT" },
+  "Asia/Manila":          { std: "PHT" },
+  "Asia/Tokyo":           { std: "JST" },
+  "Asia/Seoul":           { std: "KST" },
+  "Asia/Almaty":          { std: "ALMT" },
+  "Asia/Tashkent":        { std: "UZT" },
+  "Asia/Baku":            { std: "AZT" },
+  "Asia/Yerevan":         { std: "AMT" },
+  "Asia/Tbilisi":         { std: "GET" },
+  "Asia/Riyadh":          { std: "AST" },
+  "Asia/Kuwait":          { std: "AST" },
+  "Asia/Qatar":           { std: "AST" },
+  "Asia/Baghdad":         { std: "AST" },
+  "Asia/Tehran":          { std: "IRST" },
+  "Europe/Moscow":        { std: "MSK" },
+  "Europe/Minsk":         { std: "FET" },
+  "Europe/Istanbul":      { std: "TRT" },
+  "Europe/Kaliningrad":   { std: "EET" },
+  "Africa/Cairo":         { std: "EET" },
+  "Africa/Johannesburg":  { std: "SAST" },
+  "Africa/Nairobi":       { std: "EAT" },
+  "Africa/Lagos":         { std: "WAT" },
+  "Africa/Casablanca":    { std: "WET" },
+  "America/Caracas":      { std: "VET" },
+  "America/Bogota":       { std: "COT" },
+  "America/Lima":         { std: "PET" },
+  "America/Phoenix":      { std: "MST" },
+  "America/Argentina/Buenos_Aires": { std: "ART" },
+  "Pacific/Honolulu":     { std: "HST" },
+  "Pacific/Guam":         { std: "ChST" },
+  // DST zones
+  "Europe/London":        { std: "GMT",  dst: "BST"  },
+  "Europe/Dublin":        { std: "GMT",  dst: "IST"  },
+  "Europe/Paris":         { std: "CET",  dst: "CEST" },
+  "Europe/Berlin":        { std: "CET",  dst: "CEST" },
+  "Europe/Copenhagen":    { std: "CET",  dst: "CEST" },
+  "Europe/Stockholm":     { std: "CET",  dst: "CEST" },
+  "Europe/Amsterdam":     { std: "CET",  dst: "CEST" },
+  "Europe/Brussels":      { std: "CET",  dst: "CEST" },
+  "Europe/Rome":          { std: "CET",  dst: "CEST" },
+  "Europe/Madrid":        { std: "CET",  dst: "CEST" },
+  "Europe/Zurich":        { std: "CET",  dst: "CEST" },
+  "Europe/Vienna":        { std: "CET",  dst: "CEST" },
+  "Europe/Warsaw":        { std: "CET",  dst: "CEST" },
+  "Europe/Prague":        { std: "CET",  dst: "CEST" },
+  "Europe/Budapest":      { std: "CET",  dst: "CEST" },
+  "Europe/Bucharest":     { std: "EET",  dst: "EEST" },
+  "Europe/Helsinki":      { std: "EET",  dst: "EEST" },
+  "Europe/Athens":        { std: "EET",  dst: "EEST" },
+  "Europe/Kiev":          { std: "EET",  dst: "EEST" },
+  "Europe/Riga":          { std: "EET",  dst: "EEST" },
+  "Europe/Vilnius":       { std: "EET",  dst: "EEST" },
+  "Europe/Tallinn":       { std: "EET",  dst: "EEST" },
+  "America/New_York":     { std: "EST",  dst: "EDT"  },
+  "America/Toronto":      { std: "EST",  dst: "EDT"  },
+  "America/Detroit":      { std: "EST",  dst: "EDT"  },
+  "America/Chicago":      { std: "CST",  dst: "CDT"  },
+  "America/Denver":       { std: "MST",  dst: "MDT"  },
+  "America/Los_Angeles":  { std: "PST",  dst: "PDT"  },
+  "America/Vancouver":    { std: "PST",  dst: "PDT"  },
+  "America/Anchorage":    { std: "AKST", dst: "AKDT" },
+  "America/Halifax":      { std: "AST",  dst: "ADT"  },
+  "America/St_Johns":     { std: "NST",  dst: "NDT"  },
+  "America/Sao_Paulo":    { std: "BRT",  dst: "BRST" },
+  "America/Santiago":     { std: "CLT",  dst: "CLST" },
+  "Australia/Sydney":     { std: "AEST", dst: "AEDT" },
+  "Australia/Melbourne":  { std: "AEST", dst: "AEDT" },
+  "Australia/Brisbane":   { std: "AEST" },
+  "Australia/Adelaide":   { std: "ACST", dst: "ACDT" },
+  "Australia/Perth":      { std: "AWST" },
+  "Pacific/Auckland":     { std: "NZST", dst: "NZDT" },
+  "Antarctica/McMurdo":   { std: "NZST", dst: "NZDT" },
+  "Pacific/Fiji":         { std: "FJT",  dst: "FJST" },
+};
+
+const _tzOffset = (tz, date) => {
+  try {
+    const utc = new Date(date.toLocaleString("en-US", { timeZone: "UTC" }));
+    const loc = new Date(date.toLocaleString("en-US", { timeZone: tz }));
+    return Math.round((loc - utc) / 60000);
+  } catch { return 0; }
+};
+
+const _isDST = (tz) => {
+  try {
+    const y = new Date().getFullYear();
+    const jan = _tzOffset(tz, new Date(y, 0, 15));
+    const jul = _tzOffset(tz, new Date(y, 6, 15));
+    if (jan === jul) return false;
+    return _tzOffset(tz, new Date()) === Math.max(jan, jul);
+  } catch { return false; }
+};
+
+// Returns the correct summer or winter abbreviation (PKT, GST, BST, EDT, …)
+export const getTimezoneAbbr = (timeZone) => {
+  try {
+    const tz = timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+    // Try Intl first — modern browsers return proper abbreviations
+    const intlAbbr = new Intl.DateTimeFormat("en", { timeZoneName: "short", timeZone: tz })
+      .formatToParts(new Date())
+      .find((p) => p.type === "timeZoneName")?.value || "";
+
+    // If Intl returned a real abbreviation (not a generic "GMT+X" offset), use it
+    if (intlAbbr && !/^(GMT|UTC)[+-]/.test(intlAbbr)) return intlAbbr;
+
+    // Fall back to lookup table for environments that return "GMT+5" etc.
+    const entry = TZ_ABBR_MAP[tz];
+    if (!entry) return intlAbbr;
+    if (!entry.dst) return entry.std;
+    return _isDST(tz) ? entry.dst : entry.std;
+  } catch {
+    return "";
   }
 };
 

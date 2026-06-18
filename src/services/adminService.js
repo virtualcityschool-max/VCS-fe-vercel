@@ -13,6 +13,7 @@ const ADMIN_ENDPOINTS = {
 
   // Admin Dashboard
   ADMIN_DASHBOARD: "/admin/dashboard/",
+  ADMIN_SESSIONS_DASHBOARD: "/classroom/admin-dashboard/",
   ALL_ENROLLMENTS: "/courses/all-enrollments/",
 
   // Child Link Requests
@@ -25,6 +26,10 @@ const ADMIN_ENDPOINTS = {
   PENDING_ENROLLMENTS: "/courses/enrollments/pending/",
   ENROLLMENT_ACTION: (id) => `/courses/enrollments/${id}/approve/`,
 
+  // Teacher Slot Management (admin)
+  ADMIN_TEACHER_SLOTS: (teacherId) => `/availability/slots/admin/teacher/${teacherId}/`,
+  ADMIN_DELETE_SLOT: (slotId) => `/availability/slots/admin/${slotId}/`,
+
 };
 
 // User Management endpoints
@@ -36,7 +41,7 @@ export const adminService = {
       });
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Get Users" });
+      throw error;
     }
   },
   getTeacherPrivateSlots: async (teacherId, params = {}) => {
@@ -47,7 +52,7 @@ export const adminService = {
       );
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Get Teacher Slots" });
+      throw error;
     }
   },
   getUserById: async (userId) => {
@@ -57,7 +62,7 @@ export const adminService = {
       );
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Get User" });
+      throw error;
     }
   },
 
@@ -70,14 +75,24 @@ export const adminService = {
   },
 
   updateUser: async (userId, userData) => {
+    const response = await axiosInstance.patch(
+      ADMIN_ENDPOINTS.USER_UPDATE(userId),
+      userData,
+    );
+    return response.data;
+  },
+
+  updateUserAvatar: async (userId, file) => {
     try {
+      const fd = new FormData();
+      fd.append("avatar", file);
       const response = await axiosInstance.patch(
         ADMIN_ENDPOINTS.USER_UPDATE(userId),
-        userData,
+        fd,
       );
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Update User" });
+      throw error
     }
   },
 
@@ -88,7 +103,7 @@ export const adminService = {
       );
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Delete User" });
+      throw error
     }
   },
 
@@ -100,7 +115,7 @@ export const adminService = {
       );
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Purge User" });
+        throw error    
     }
   },
 
@@ -112,7 +127,7 @@ export const adminService = {
       );
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Get User Profile" });
+     throw error
     }
   },
 
@@ -124,7 +139,7 @@ export const adminService = {
       );
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Update User Profile" });
+      throw error
     }
   },
 
@@ -133,9 +148,16 @@ export const adminService = {
       const response = await axiosInstance.get(ADMIN_ENDPOINTS.ADMIN_DASHBOARD);
       return response.data;
     } catch (error) {
-      throw handleApiError(error, {
-        context: "Get Dashboard Analytics",
-      });
+      throw error
+    }
+  },
+
+  getAdminSessionsDashboard: async () => {
+    try {
+      const response = await axiosInstance.get(ADMIN_ENDPOINTS.ADMIN_SESSIONS_DASHBOARD);
+      return response.data;
+    } catch (error) {
+      throw error
     }
   },
   
@@ -258,23 +280,19 @@ export const adminService = {
 
       return result;
     } catch (error) {
-      throw handleApiError(error, {
-        context: "Get Enrollment Analytics",
-      });
+      throw error
     }
   },
 
   // Course Management
   updateCourse: async (courseId, courseData) => {
-    try {
+
       const response = await axiosInstance.patch(
         `/courses/${courseId}/`,
         courseData,
       );
       return response.data;
-    } catch (error) {
-      throw handleApiError(error, { context: "Update Course" });
-    }
+    
   },
 
   deleteCourse: async (courseId) => {
@@ -282,7 +300,7 @@ export const adminService = {
       const response = await axiosInstance.delete(`/courses/${courseId}/`);
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Delete Course" });
+      throw error
     }
   },
 
@@ -324,7 +342,7 @@ export const adminService = {
       );
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Get Pending Child Links" });
+      throw error
     }
   },
 
@@ -336,7 +354,7 @@ export const adminService = {
       );
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Approve Child Link" });
+      throw error
     }
   },
 
@@ -348,7 +366,7 @@ export const adminService = {
       );
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Reject Child Link" });
+      throw error
     }
   },
 
@@ -363,7 +381,7 @@ export const adminService = {
       });
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Unlink Children Admin" });
+      throw error
     }
   },
 
@@ -372,7 +390,7 @@ export const adminService = {
       const response = await axiosInstance.get("/admin/students/available/");
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Get Available Students" });
+      throw error
     }
   },
 
@@ -385,7 +403,7 @@ export const adminService = {
       });
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Link Children Admin" });
+      throw error
     }
   },
 
@@ -394,7 +412,7 @@ export const adminService = {
       const response = await axiosInstance.get(ADMIN_ENDPOINTS.PENDING_ENROLLMENTS);
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Get Pending Enrollments" });
+      throw error
     }
   },
 
@@ -406,7 +424,25 @@ export const adminService = {
       );
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Enrollment Action" });
+      throw error
+    }
+  },
+
+  getTeacherSlots: async (teacherId) => {
+    try {
+      const response = await axiosInstance.get(ADMIN_ENDPOINTS.ADMIN_TEACHER_SLOTS(teacherId));
+      return response.data;
+    } catch (error) {
+      throw error
+    }
+  },
+
+  adminDeleteSlot: async (slotId) => {
+    try {
+      const response = await axiosInstance.delete(ADMIN_ENDPOINTS.ADMIN_DELETE_SLOT(slotId));
+      return response.data;
+    } catch (error) {
+      throw error
     }
   },
 };

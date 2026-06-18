@@ -13,19 +13,40 @@ const FilterSelect = ({
   const [open, setOpen]   = useState(false);
   const [search, setSearch] = useState("");
   const [dropPos, setDropPos] = useState({ top: 0, left: 0, width: 0 });
-  const triggerRef = useRef(null);
-  const searchRef  = useRef(null);
+  const triggerRef  = useRef(null);
+  const searchRef   = useRef(null);
+  const dropdownRef = useRef(null);
+  const isScrolling = useRef(false); // Track mobile scroll states
 
-  // Parse <option> children → [{ value, label, disabled }]
+  // Parse <option> and <optgroup> children
   const options = useMemo(() => {
     const list = [];
     React.Children.forEach(children, (child) => {
-      if (!child || child.type !== "option") return;
-      list.push({
-        value:    String(child.props.value ?? ""),
-        label:    String(child.props.children ?? ""),
-        disabled: !!child.props.disabled,
-      });
+      if (!child) return;
+      if (child.type === "option") {
+        list.push({
+          value:   String(child.props.value ?? ""),
+          label:   String(child.props.children ?? ""),
+          disabled: !!child.props.disabled,
+          isGroup: false,
+        });
+      } else if (child.type === "optgroup") {
+        list.push({
+          value:   `__grp__${child.props.label}`,
+          label:   child.props.label,
+          disabled: true,
+          isGroup: true,
+        });
+        React.Children.forEach(child.props.children, (opt) => {
+          if (!opt || opt.type !== "option") return;
+          list.push({
+            value:   String(opt.props.value ?? ""),
+            label:   String(opt.props.children ?? ""),
+            disabled: !!opt.props.disabled,
+            isGroup: false,
+          });
+        });
+      }
     });
     return list;
   }, [children]);
@@ -35,7 +56,7 @@ const FilterSelect = ({
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return options;
-    return options.filter((o) => o.label.toLowerCase().includes(q));
+    return options.filter((o) => !o.isGroup && o.label.toLowerCase().includes(q));
   }, [options, search]);
 
   const computePos = () => {
@@ -46,32 +67,33 @@ const FilterSelect = ({
     const dropHeight = Math.min(240, options.length * 38 + 60);
     const openBelow = spaceBelow >= dropHeight || spaceBelow >= spaceAbove;
     setDropPos({
-      top: openBelow ? rect.bottom + 4 : rect.top - dropHeight - 4,
-      left: rect.left,
+      top: openBelow ? rect.bottom + window.scrollY + 4 : rect.top + window.scrollY - dropHeight - 4,
+      left: rect.left + window.scrollX,
       width: rect.width,
     });
   };
 
   const toggle = () => {
     if (disabled) return;
-    if (!open) computePos();
+    if (!open) {
+      // Small timeout ensures DOM layout has settled before reading positions
+      setTimeout(computePos, 10);
+    }
     setOpen((v) => !v);
   };
 
-  // Close on outside click/touch
+  // Fixed Close Handling: standard 'click' handles mobile safely without breaking during scroll
   useEffect(() => {
     if (!open) return;
     const close = (e) => {
-      if (triggerRef.current && !triggerRef.current.contains(e.target)) {
-        setOpen(false);
-        setSearch("");
-      }
+      if (triggerRef.current?.contains(e.target)) return;
+      if (dropdownRef.current?.contains(e.target)) return;
+      setOpen(false);
+      setSearch("");
     };
-    document.addEventListener("mousedown", close);
-    document.addEventListener("touchstart", close, { passive: true });
+    document.addEventListener("click", close);
     return () => {
-      document.removeEventListener("mousedown", close);
-      document.removeEventListener("touchstart", close);
+      document.removeEventListener("click", close);
     };
   }, [open]);
 
@@ -84,9 +106,15 @@ const FilterSelect = ({
 
   const dropdown = open && (
     <div
-      style={{ position: "fixed", top: dropPos.top, left: dropPos.left, width: dropPos.width, minWidth: 180, zIndex: 9999 }}
-      onMouseDown={(e) => e.stopPropagation()}
-      onTouchStart={(e) => e.stopPropagation()}
+      ref={dropdownRef}
+      style={{ 
+        position: "absolute", // Switched to absolute to move naturally with page bounces
+        top: dropPos.top, 
+        left: dropPos.left, 
+        width: dropPos.width, 
+        zIndex: 9999 
+      }}
+      onClick={(e) => e.stopPropagation()}
       className="bg-slate-900 border border-slate-700 rounded-xl shadow-2xl overflow-hidden"
     >
       {/* Search */}
@@ -108,25 +136,40 @@ const FilterSelect = ({
       </div>
 
       {/* Options */}
-      <ul className="max-h-52 overflow-y-auto py-1 custom-scrollbar">
+      <ul 
+        className="max-h-52 overflow-y-auto py-1 custom-scrollbar" 
+        style={{ overscrollBehavior: "contain" }}
+        onTouchMove={() => { isScrolling.current = true; }} // Detect movement
+        onTouchStart={() => { isScrolling.current = false; }} // Reset on fresh touch
+      >
         {filtered.length === 0 ? (
           <li className="px-3 py-2.5 text-xs text-slate-500 text-center">No results</li>
         ) : (
-          filtered.map((opt) => (
-            <li
-              key={opt.value}
-              onMouseDown={(e) => { e.preventDefault(); handleSelect(opt); }}
-              onTouchEnd={(e) => { e.preventDefault(); handleSelect(opt); }}
-              className={`px-3 py-2 text-sm transition-colors select-none
-                ${opt.disabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}
-                ${String(opt.value) === String(value ?? "")
-                  ? "bg-indigo-600/20 text-indigo-300 font-semibold"
-                  : "text-slate-300 hover:bg-slate-800 hover:text-white"
-                }`}
-            >
-              {opt.label}
-            </li>
-          ))
+          filtered.map((opt) =>
+            opt.isGroup ? (
+              <li key={opt.value}
+                className="px-3 py-1.5 text-[9px] font-black uppercase tracking-widest text-slate-500 bg-slate-950/60 select-none pointer-events-none">
+                {opt.label.replace(/─+\s*/g, "")}
+              </li>
+            ) : (
+              <li
+                key={opt.value}
+                onMouseDown={(e) => { e.preventDefault(); handleSelect(opt); }}
+                onTouchEnd={(e) => { 
+                  e.preventDefault(); 
+                  if (!isScrolling.current) handleSelect(opt); // Only select if they didn't scroll
+                }}
+                className={`px-3 py-2 text-sm transition-colors select-none
+                  ${opt.disabled ? "opacity-40 cursor-not-allowed text-slate-400 italic" : "cursor-pointer"}
+                  ${String(opt.value) === String(value ?? "")
+                    ? "bg-indigo-600/20 text-indigo-300 font-semibold"
+                    : opt.disabled ? "" : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                  }`}
+              >
+                {opt.label}
+              </li>
+            )
+          )
         )}
       </ul>
     </div>

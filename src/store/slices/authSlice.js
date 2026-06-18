@@ -104,6 +104,8 @@ export const loginUser = createAsyncThunk(
           username: profile.username || user.username,
           email: profile.email || user.email,
           role: profile.role || user.role,
+          avatar: profile.avatar || null,
+          timezone: profile.timezone || null,
         };
 
         authStorage.setStoredAuthUser(normalizedUser);
@@ -209,9 +211,9 @@ export const registerUser = createAsyncThunk(
 
 export const verifyOtp = createAsyncThunk(
   "auth/verifyOtp",
-  async ({ userId, otp }, { rejectWithValue }) => {
+  async ({ email, otp }, { rejectWithValue }) => {
     try {
-      const response = await authService.verifyOtp(userId, otp);
+      const response = await authService.verifyOtp(email, otp);
       return response;
     } catch (err) {
       // Preserve full error structure for proper normalization in UI
@@ -279,6 +281,19 @@ const authSlice = createSlice({
     updateToken: (state, action) => {
       state.token = action.payload;
     },
+    profileUpdated: (state, action) => {
+      state.profile = action.payload;
+      state.role = action.payload.role;
+      state.username = action.payload.username;
+      state.user = {
+        username: action.payload.username,
+        email: action.payload.email,
+        role: action.payload.role,
+        avatar: action.payload.avatar || null,
+        timezone: action.payload.timezone || null,
+      };
+      authStorage.setStoredAuthUser(state.user);
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -298,6 +313,7 @@ const authSlice = createSlice({
             username: action.payload.profile.username,
             email: action.payload.profile.email,
             role: action.payload.profile.role,
+            avatar: action.payload.profile.avatar || null,
           };
           state.token = authStorage.getAccessToken();
         } else {
@@ -331,7 +347,10 @@ const authSlice = createSlice({
           username: action.payload.username,
           email: action.payload.email,
           role: action.payload.role,
+          avatar: action.payload.avatar || null,
+          timezone: action.payload.timezone || null,
         };
+        authStorage.setStoredAuthUser(state.user);
       })
       .addCase(fetchUserProfile.rejected, (state, action) => {
         state.isLoading = false;
@@ -401,5 +420,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout, clearAuthError, updateToken } = authSlice.actions;
+export const { logout, clearAuthError, updateToken, profileUpdated } = authSlice.actions;
 export default authSlice.reducer;

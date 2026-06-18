@@ -14,6 +14,7 @@ import {
   StudentProfileTab,
   ParentProfileTab,
 } from "../../components/admin";
+import TeacherSlotsCalendarSection from "../../components/admin/TeacherSlotsCalendarSection";
 
 // Utility function to validate user ID
 const isValidUserId = (id) => {
@@ -42,6 +43,7 @@ const UserDetailsPage = () => {
   const location = useLocation();
   const dispatch = useDispatch();
 
+  const viewOnly = location.state?.viewOnly === true;
   const [activeTab, setActiveTab] = useState("account");
   const [userData, setUserData] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
@@ -81,17 +83,21 @@ const UserDetailsPage = () => {
           const normalizedProfile = {
             bio: profileResponse?.bio || "",
             expertise: profileResponse?.expertise || "",
+            qualification: profileResponse?.qualification || "",
             experience_years: profileResponse?.experience_years ?? "",
             rating: profileResponse?.rating ?? "",
             linkedin: profileResponse?.linkedin || "",
             phone: profileResponse?.phone || "",
             distinctions: profileResponse?.distinctions || [],
             // Add student-specific fields
+            roll_no: profileResponse?.roll_no ?? null,
             grade_level: profileResponse?.grade_level || "",
             date_of_birth: profileResponse?.date_of_birth || "",
+            parents: profileResponse?.parents || [],
             // Add parent-specific fields
             address: profileResponse?.address || "",
             children: profileResponse?.children || [],
+            courses: profileResponse?.courses || []
           };
           setUserProfile(normalizedProfile);
         }
@@ -169,6 +175,7 @@ const UserDetailsPage = () => {
       const normalizedProfile = {
         bio: profileResponse?.bio || "",
         expertise: profileResponse?.expertise || "",
+        qualification: profileResponse?.qualification || "",
         experience_years: profileResponse?.experience_years ?? "",
         rating: profileResponse?.rating ?? "",
         linkedin: profileResponse?.linkedin || "",
@@ -176,6 +183,7 @@ const UserDetailsPage = () => {
         distinctions: profileResponse?.distinctions || [],
         grade_level: profileResponse?.grade_level || "",
         date_of_birth: profileResponse?.date_of_birth || "",
+        parents: profileResponse?.parents || [],
         address: profileResponse?.address || "",
         children: profileResponse?.children || [],
       };
@@ -221,7 +229,7 @@ const UserDetailsPage = () => {
 
   return (
     <div className="min-h-screen bg-slate-950 text-white">
-      <div className="max-w-6xl mx-auto p-4 md:p-8">
+      <div className="max-w-6xl mx-auto px-4 md:px-8 pb-8 pt-16 lg:pt-12">
         {/* Header Section */}
         <UserDetailsHeader
           user={userData}
@@ -231,6 +239,21 @@ const UserDetailsPage = () => {
 
         {/* Tab Content */}
         <div className="bg-slate-900/60 border border-slate-800/50 rounded-2xl shadow-2xl backdrop-blur-sm mt-4">
+          {viewOnly && (
+            <div className="flex items-center justify-between gap-3 px-5 py-3 bg-indigo-500/10 border-b border-indigo-500/20">
+              <div className="flex items-center gap-2 text-indigo-300 text-xs font-bold">
+                <i className="fas fa-eye" />
+                <span>View Only — no changes can be made</span>
+              </div>
+              <button
+                onClick={() => navigate(`/admin/users/${id}`, { state: { filters: location.state?.filters } })}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-black uppercase tracking-widest transition"
+              >
+                <i className="fas fa-edit text-[9px]" />
+                Switch to Edit
+              </button>
+            </div>
+          )}
           <UserDetailsTabs
             activeTab={activeTab}
             onTabChange={setActiveTab}
@@ -244,6 +267,7 @@ const UserDetailsPage = () => {
                 onUpdate={handleUserUpdate}
                 onCancel={handleBackToUsers}
                 onSaved={handleBackToUsers}
+                readOnly={viewOnly}
               />
               )}
 
@@ -254,7 +278,14 @@ const UserDetailsPage = () => {
                     onUpdate={handleProfileUpdate}
                     onCancel={handleBackToUsers}
                     onSaved={handleBackToUsers}
+                    readOnly={viewOnly}
                   />
+                </div>
+              )}
+
+              {activeTab === "availability-slots" && userData?.role === "teacher" && (
+                <div className="pt-2 border-t border-slate-800">
+                  <TeacherSlotsCalendarSection teacherId={userData.id} />
                 </div>
               )}
 
@@ -263,9 +294,11 @@ const UserDetailsPage = () => {
                   <StudentProfileTab
                     profile={userProfile}
                     userId={userData?.id}
+                    rollNo={userProfile?.roll_no}
                     onUpdate={handleProfileUpdate}
                     onCancel={handleBackToUsers}
                     onSaved={handleBackToUsers}
+                    readOnly={viewOnly}
                   />
                 </div>
               )}
@@ -278,6 +311,7 @@ const UserDetailsPage = () => {
                     onRefresh={handleProfileRefresh}
                     onCancel={handleBackToUsers}
                     onSaved={handleBackToUsers}
+                    readOnly={viewOnly}
                   />
                 </div>
               )}

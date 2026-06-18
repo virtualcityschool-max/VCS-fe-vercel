@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useMemo } from "react";
+import GmailNotice from "../common/GmailNotice";
 import { useSelector, useDispatch } from "react-redux";
 import {
   selectNextSession,
@@ -8,6 +9,7 @@ import {
 import { toastManager } from "../../utils/toastManager";
 import { extractApiErrorMessage } from "../../utils/apiErrorHandler";
 import ConfirmDialog from "../common/ConfirmDialog";
+import SessionCountdown from "../common/SessionCountdown";
 
 const NextSessionCard = () => {
   const dispatch = useDispatch();
@@ -32,24 +34,28 @@ const NextSessionCard = () => {
       return;
     }
 
+    const isMobile = /Mobi|Android|iPad|iPhone|iPod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    const meetWin = isMobile ? null : window.open("", "_blank");
     try {
       const result = await dispatch(joinLiveSession(sessionId)).unwrap();
 
       const meetingLink = result?.meeting_link;
 
       if (meetingLink && meetingLink.startsWith("http")) {
-        // Validate URL format
         try {
           new URL(meetingLink);
-          window.open(meetingLink, "_blank", "noopener,noreferrer");
+          if (meetWin) meetWin.location.href = meetingLink;
+          else window.open(meetingLink, "_blank", "noopener,noreferrer");
         } catch (urlError) {
+          meetWin?.close();
           toastManager.error("Invalid meeting link format");
-          console.log("URL Error:", urlError);
         }
       } else {
+        meetWin?.close();
         toastManager.error("No valid meeting link found");
       }
     } catch (error) {
+      meetWin?.close();
       const msg = extractApiErrorMessage(error);
       if ((msg === "You cannot join before the scheduled time.") || (msg === "You can join up to 30 minutes before the scheduled time.")) {
         setTooEarlyOpen(true);
@@ -60,17 +66,14 @@ const NextSessionCard = () => {
     }
   };
 
-  const formatStartsIn = (minutes) => {
-    if (minutes < 60) {
-      return `Starts in ${minutes} min${minutes !== 1 ? "s" : ""}`;
-    }
-    const hours = Math.floor(minutes / 60);
-    const remainingMinutes = minutes % 60;
-    if (remainingMinutes === 0) {
-      return `Starts in ${hours} hour${hours !== 1 ? "s" : ""}`;
-    }
-    return `Starts in ${hours}h ${remainingMinutes}m`;
-  };
+  // Derive a stable target datetime from starts_in_mins so the countdown ticks correctly
+  const scheduledAt = useMemo(() => {
+    if (!nextSession) return null;
+    if (nextSession.starts_in_mins == null) return null;
+    return new Date(Date.now() + nextSession.starts_in_mins * 60 * 1000).toISOString();
+  // Recalculate only when session identity or minute count changes (i.e. after a fresh fetch)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nextSession?.id ?? nextSession?.session_id, nextSession?.starts_in_mins]);
 
   const canJoinNow =
     nextSession?.can_join === true || nextSession?.status === "live";
@@ -114,15 +117,12 @@ const NextSessionCard = () => {
         <h3 className="text-base font-black text-white mb-0.5 truncate tracking-tight">
           {nextSession.title}
         </h3>
-        <div className="flex items-center gap-2.5">
-          <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">
-            with {nextSession.teacher_name}
-          </p>
-          <div className="h-0.5 w-0.5 rounded-full bg-slate-700"></div>
-          <p className="text-[10px] font-black text-blue-400/90 tracking-wide">
-            {formatStartsIn(nextSession.starts_in_mins)}
-          </p>
-        </div>
+        <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">
+          with {nextSession.teacher_name}
+        </p>
+        {scheduledAt && (
+          <SessionCountdown scheduledAt={scheduledAt} status={nextSession.status} />
+        )}
       </div>
 
       <div className="shrink-0 relative z-10">
@@ -149,6 +149,9 @@ const NextSessionCard = () => {
             </>
           )}
         </button>
+        <div className="mt-2 px-1">
+          <GmailNotice compact />
+        </div>
       </div>
 
       <ConfirmDialog

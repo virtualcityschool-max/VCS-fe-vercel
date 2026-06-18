@@ -1,9 +1,39 @@
-import React, { useState, useEffect } from "react";
-import { Button, Input, PhoneInput } from "../ui";
+import React, { useState, useEffect, useMemo } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { Button, Input, PhoneInput, FilterSelect } from "../ui";
 import { useFieldErrors } from "../../hooks";
 import { validatePhone, normalizePhone } from "../../utils/validation";
+import { fetchCategories } from "../../store/slices/coursesSlice";
+import { showApiError } from "../../utils/apiErrorHandler";
 
-const StudentProfileTab = ({ profile, userId, onUpdate, onCancel, onSaved }) => {
+const StatusBadge = ({ status }) => {
+  if (status === "approved")
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[9px] font-black uppercase tracking-widest">
+        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+        Approved
+      </span>
+    );
+  if (status === "pending")
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[9px] font-black uppercase tracking-widest">
+        <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+        Pending
+      </span>
+    );
+  return (
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-700 border border-slate-600 text-slate-400 text-[9px] font-black uppercase tracking-widest">
+      {status}
+    </span>
+  );
+};
+
+const StudentProfileTab = ({ profile, userId, rollNo, onUpdate, onCancel, onSaved, readOnly = false }) => {
+  const dispatch = useDispatch();
+  const { categories } = useSelector((state) => state.courses);
+
+  useEffect(() => { dispatch(fetchCategories()); }, [dispatch]);
+
   const [formData, setFormData] = useState({
     grade_level: "",
     date_of_birth: "",
@@ -45,7 +75,7 @@ const StudentProfileTab = ({ profile, userId, onUpdate, onCancel, onSaved }) => 
     const newErrors = {};
 
     // Grade level validation
-    if (!formData.grade_level?.trim()) {
+    if (!formData.grade_level) {
       newErrors.grade_level = "Grade level is required";
     }
 
@@ -84,15 +114,7 @@ const StudentProfileTab = ({ profile, userId, onUpdate, onCancel, onSaved }) => 
         onSaved();
       }
     } catch (error) {
-      // Handle backend field errors using the error hook
-      const originalError = error.originalError || error;
-      if (originalError?.response?.data?.details) {
-        // Set field errors directly from backend response
-        setErrors(originalError.response.data.details);
-      } else {
-        // Use handleApiError for non-field errors
-        handleApiError(originalError);
-      }
+      showApiError(error)
     } finally {
       setIsSaving(false);
     }
@@ -111,16 +133,41 @@ const StudentProfileTab = ({ profile, userId, onUpdate, onCancel, onSaved }) => 
     }
   };
 
+  // Resolve stored grade_level to a category ID for the dropdown.
+  // Handles both new format (ID) and legacy format (category name string).
+  const gradeLevelId = useMemo(() => {
+    if (!formData.grade_level || !categories.length) return "";
+    const raw = String(formData.grade_level);
+    if (categories.some((c) => String(c.id) === raw)) return raw;
+    const byName = categories.find((c) => c.name === raw);
+    return byName ? String(byName.id) : "";
+  }, [formData.grade_level, categories]);
+
+  const parents = profile?.parents || [];
+
   return (
     <div className="space-y-4">
-      {/* Student ID — read-only */}
-      {userId != null && (
-        <div className="flex items-center gap-3 px-4 py-3 bg-slate-800/40 border border-slate-700/50 rounded-xl">
-          <i className="fas fa-id-badge text-indigo-400 text-sm flex-shrink-0" />
-          <div>
-            <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Student ID</p>
-            <p className="text-white font-semibold text-sm">#{userId}</p>
-          </div>
+      {/* Student ID / Roll No — read-only */}
+      {(userId != null || rollNo != null) && (
+        <div className="flex flex-wrap items-center gap-3 px-4 py-3 bg-slate-800/40 border border-slate-700/50 rounded-xl">
+          {userId != null && (
+            <div className="flex items-center gap-3 min-w-0">
+              <i className="fas fa-id-badge text-indigo-400 text-sm flex-shrink-0" />
+              <div className="min-w-0">
+                <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Student ID</p>
+                <p className="text-white font-semibold text-sm truncate">#{userId}</p>
+              </div>
+            </div>
+          )}
+          {rollNo != null && (
+            <div className="flex items-center gap-3 sm:border-l sm:border-slate-700/50 sm:pl-3 min-w-0">
+              <i className="fas fa-hashtag text-indigo-400 text-sm flex-shrink-0" />
+              <div className="min-w-0">
+                <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Roll No</p>
+                <p className="text-white font-semibold text-sm font-mono truncate">{rollNo}</p>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -130,13 +177,19 @@ const StudentProfileTab = ({ profile, userId, onUpdate, onCancel, onSaved }) => 
             <label className="block text-sm font-medium text-slate-300 mb-2">
               Grade Level
             </label>
-            <Input
-              value={formData.grade_level}
+            <FilterSelect
+              value={gradeLevelId}
               onChange={(e) => handleInputChange("grade_level", e.target.value)}
-              placeholder="e.g. Grade 8, A-Level"
-              error={getFieldError("grade_level")}
-              className="bg-slate-900/60 border-slate-700"
-            />
+              placeholder="Select grade level"
+              disabled={readOnly}
+            >
+              {categories.map((cat) => (
+                <option key={cat.id} value={String(cat.id)}>{cat.name}</option>
+              ))}
+            </FilterSelect>
+            {getFieldError("grade_level") && (
+              <p className="text-red-400 text-xs mt-1">{getFieldError("grade_level")}</p>
+            )}
           </div>
 
           <div>
@@ -150,6 +203,7 @@ const StudentProfileTab = ({ profile, userId, onUpdate, onCancel, onSaved }) => 
               max={new Date().toISOString().split("T")[0]}
               error={getFieldError("date_of_birth")}
               className="w-full bg-slate-900/60 text-white border-slate-700"
+              disabled={readOnly}
             />
           </div>
         </div>
@@ -162,37 +216,78 @@ const StudentProfileTab = ({ profile, userId, onUpdate, onCancel, onSaved }) => 
             value={formData.phone}
             onChange={(val) => handleInputChange("phone", val)}
             error={getFieldError("phone")}
+            disabled={readOnly}
           />
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-3 sm:justify-end">
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={handleCancel}
-            className="w-full sm:w-auto"
-          >
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            disabled={isSaving}
-            className="w-full sm:w-auto"
-          >
-            {isSaving ? (
-              <>
-                <i className="fas fa-spinner fa-spin mr-2"></i>
-                Saving...
-              </>
-            ) : (
-              <>
-                <i className="fas fa-save mr-2"></i>
-                Save Profile
-              </>
-            )}
-          </Button>
-        </div>
+        {!readOnly && (
+          <div className="flex flex-col sm:flex-row gap-3 sm:justify-end">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={handleCancel}
+              className="w-full sm:w-auto"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={isSaving}
+              className="w-full sm:w-auto"
+            >
+              {isSaving ? (
+                <>
+                  <i className="fas fa-spinner fa-spin mr-2"></i>
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <i className="fas fa-save mr-2"></i>
+                  Save Profile
+                </>
+              )}
+            </Button>
+          </div>
+        )}
       </form>
+
+      {/* Linked parents — outside main form */}
+      <div className="mt-6 pt-6 border-t border-slate-700/60">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-8 h-8 rounded-lg bg-indigo-500/20 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+            <i className="fas fa-user-friends text-sm" />
+          </div>
+          <div>
+            <h3 className="text-base font-semibold text-white">Linked Guardians</h3>
+            <p className="text-[10px] text-slate-500 mt-0.5">{parents.length} linked</p>
+          </div>
+        </div>
+        <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl overflow-hidden">
+          {parents.length === 0 ? (
+            <div className="flex items-center gap-2 px-4 py-4">
+              <i className="fas fa-unlink text-slate-700 text-xs" />
+              <span className="text-xs text-slate-600">No parents linked to this student.</span>
+            </div>
+          ) : (
+            <div className="divide-y divide-slate-700/30">
+              {parents.map((p) => (
+                <div key={p.id} className="flex items-center gap-3 px-4 py-2.5">
+                  <div className="w-7 h-7 rounded-lg bg-indigo-500/15 border border-indigo-500/20 flex items-center justify-center shrink-0">
+                    <span className="text-indigo-400 text-xs font-black">
+                      {p.username?.[0]?.toUpperCase() || "P"}
+                    </span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-white truncate">{p.username}</p>
+                    <p className="text-[11px] text-slate-500 truncate">{p.email}</p>
+                  </div>
+                  <StatusBadge status={p.status} />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

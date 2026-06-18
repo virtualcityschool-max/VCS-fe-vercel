@@ -30,6 +30,8 @@ import EnrollmentTypeModal from "../../components/courses/EnrollmentTypeModal";
 import ConfirmDialog from "../../components/common/ConfirmDialog";
 import { getStorageUrl } from "../../utils/storageUrl";
 import FileViewerModal from "../../components/common/FileViewerModal";
+import { studentService } from "../../services/studentService";
+import QuillViewer from "../../components/common/QuillViewer";
 
 const CourseDetails = () => {
   const { courseId } = useParams();
@@ -38,6 +40,7 @@ const CourseDetails = () => {
   const [enrollmentModalOpen, setEnrollmentModalOpen] = useState(false);
   const [paymentSubmitted, setPaymentSubmitted] = useState(false);
   const [viewerUrl, setViewerUrl] = useState(null);
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
   const submissionGuard = useSubmissionGuard();
   // Get auth state from Redux store
   const auth = useSelector((state) => state.auth);
@@ -101,6 +104,8 @@ const CourseDetails = () => {
       attachment: course.attachment || null,
       has_session: course.has_session ?? true,
       enrollment_status: course.enrollment_status,
+      is_paid: course.is_paid ?? false,
+      gumroad_product_permalink: course.gumroad_product_permalink || null,
     };
   }, [course, courseId]);
 
@@ -118,8 +123,9 @@ const CourseDetails = () => {
     return false;
   };
 
-  // Handle course enrollment
-  const handleEnrollCourse = () => {
+
+  // Handle course enrollment — always show confirmation modal first
+  const handleEnrollCourse = async () => {
     if (!auth.isLoggedIn) {
       dispatch(setAuthModal("login"));
       return;
@@ -130,8 +136,19 @@ const CourseDetails = () => {
       return;
     }
 
-    // Show enrollment modal
     setEnrollmentModalOpen(true);
+  };
+
+  // Called when student confirms on paid modal — redirect to Gumroad
+  const handleCheckout = async () => {
+    try {
+      setIsCheckingOut(true);
+      const data = await studentService.initiateCheckout(normalizedCourse.id);
+      window.location.href = data.checkout_url;
+    } catch (error) {
+      showApiError(error);
+      setIsCheckingOut(false);
+    }
   };
 
   // Handle post-login enrollment intent
@@ -493,17 +510,16 @@ const CourseDetails = () => {
                       </div>
                     )}
 
-                    {normalizedCourse.instructor_id && (
-                      <div className="flex items-center gap-3 bg-white/5 backdrop-blur-sm px-4 py-2 rounded-full border border-white/10">
-                        <img
-                          src={`https://i.pravatar.cc/150?u=instructor_${normalizedCourse.instructor_id}`}
-                          className="w-6 h-6 rounded-full border-2 border-white/20"
-                          alt="Instructor"
-                        />
-                        <span className="text-slate-300">
-                          Instructor #{normalizedCourse.instructor_id}
+                    {(normalizedCourse.instructor?.id || normalizedCourse.instructor_id) && (
+                      <Link
+                        to={`/teachers/${normalizedCourse.instructor?.id || normalizedCourse.instructor_id}`}
+                        className="flex items-center gap-2 bg-white/5 backdrop-blur-sm px-4 py-2 rounded-full border border-white/10 hover:border-indigo-500/40 hover:bg-indigo-500/10 transition-colors"
+                      >
+                        <i className="fas fa-chalkboard-teacher text-indigo-400 text-xs" />
+                        <span className="text-slate-300 font-medium">
+                          {normalizedCourse.instructor?.username || `Instructor #${normalizedCourse.instructor_id}`}
                         </span>
-                      </div>
+                      </Link>
                     )}
                   </div>
                 </div>
@@ -534,10 +550,7 @@ const CourseDetails = () => {
                       Course Outline
                     </h2>
                     <div className="bg-slate-800/30 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50">
-                      <div
-                        className="course-outline-content"
-                        dangerouslySetInnerHTML={{ __html: normalizedCourse.outline }}
-                      />
+                      <QuillViewer value={normalizedCourse.outline} />
                     </div>
                   </div>
                 )}
@@ -607,7 +620,7 @@ const CourseDetails = () => {
                     <div className="relative text-3xl lg:text-4xl font-black bg-linear-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent wrap-break-word max-w-full">
                       {formatCurrency(
                         parseFloat(normalizedCourse.price) || 0,
-                        "PKR",
+                        "USD",
                       )}
                     </div>
                   </div>
@@ -618,14 +631,14 @@ const CourseDetails = () => {
 
                 {/* CTA Button */}
                 {auth.isLoggedIn && auth.role === "student" ? (
-                  <div className={`relative mb-6 ${(noSessions && !enrolled) || isRejected ? "group/tooltip" : ""}`}>
+                  <div className={`relative mb-6 ${isRejected ? "group/tooltip" : ""}`}>
                     <button
                       onClick={() =>
                         enrolled
                           ? handleUnenrollCourse(normalizedCourse)
                           : !isPending && !isRejected && handleEnrollCourse()
                       }
-                      disabled={isEnrolling || isUnenrolling || isPending || isRejected || (noSessions && !enrolled)}
+                      disabled={isEnrolling || isUnenrolling || isPending || isRejected || isCheckingOut}
                       className={`w-full py-4 font-black text-xs uppercase tracking-[0.2em] rounded-2xl transition-all active:scale-95 ${
                         enrolled
                           ? isUnenrolling
@@ -635,11 +648,9 @@ const CourseDetails = () => {
                             ? "bg-rose-600/10 border border-rose-500/20 text-rose-400 cursor-not-allowed"
                             : isPending
                               ? "bg-amber-600/10 border border-amber-500/20 text-amber-400 cursor-not-allowed"
-                              : noSessions
-                                ? "bg-linear-to-r from-blue-600/40 to-cyan-600/40 text-white/40 cursor-not-allowed"
-                                : isEnrolling
-                                  ? "bg-slate-600 text-slate-400 cursor-not-allowed"
-                                  : "bg-linear-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 border-0 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-300 hover:scale-[1.02] text-white"
+                              : isEnrolling || isCheckingOut
+                                ? "bg-slate-600 text-slate-400 cursor-not-allowed"
+                                : "bg-linear-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 border-0 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-300 hover:scale-[1.02] text-white"
                       }`}
                     >
                       {enrolled
@@ -650,9 +661,13 @@ const CourseDetails = () => {
                           ? "Request Rejected"
                           : isPending
                             ? "Approval Pending"
-                            : isEnrolling
-                              ? "Enrolling..."
-                              : "Enroll Now"}
+                            : isCheckingOut
+                              ? <><i className="fas fa-spinner fa-spin mr-1" />Opening Checkout...</>
+                              : isEnrolling
+                                ? "Enrolling..."
+                                : normalizedCourse?.is_paid
+                                  ? <><i className="fas fa-lock-open mr-1.5" />Pay & Enroll</>
+                                  : "Enroll Now"}
                     </button>
                     {isRejected && (
                       <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 px-3 py-2 bg-slate-800 border border-rose-500/30 text-white text-[11px] font-medium rounded-lg text-center max-w-[220px] opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-150 shadow-xl z-10">
@@ -661,12 +676,12 @@ const CourseDetails = () => {
                         <div className="absolute top-full left-1/2 -translate-x-1/2 border-[5px] border-transparent border-t-slate-800"></div>
                       </div>
                     )}
-                    {noSessions && !enrolled && !isRejected && (
+                    {/* {noSessions && !enrolled && !isRejected && (
                       <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 px-3 py-1.5 bg-slate-800 border border-slate-700 text-white text-[11px] font-medium rounded-lg whitespace-nowrap opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-150 shadow-xl z-10">
                         No sessions available for this course
                         <div className="absolute top-full left-1/2 -translate-x-1/2 border-[5px] border-transparent border-t-slate-700"></div>
                       </div>
-                    )}
+                    )} */}
                   </div>
                 ) : auth.isLoggedIn ? (
                   <div className="text-center py-4 mb-6">
@@ -683,35 +698,28 @@ const CourseDetails = () => {
                     </Button>
                   </div>
                 ) : (
-                  <div className={`mb-6 relative ${noSessions ? "group/tooltip" : ""}`}>
+                  <div className="mb-6 relative">
                     <Button
                       variant="primary"
                       size="lg"
-                      disabled={noSessions}
-                      className={`w-full border-0 shadow-lg transition-all duration-300 group ${
-                        noSessions
-                          ? "bg-linear-to-r from-blue-600/40 to-cyan-600/40 text-white/40 cursor-not-allowed shadow-none"
-                          : "bg-linear-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 shadow-blue-500/25 hover:shadow-blue-500/40 hover:scale-[1.02]"
-                      }`}
+                      className="w-full border-0 shadow-lg transition-all duration-300 group bg-linear-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 shadow-blue-500/25 hover:shadow-blue-500/40 hover:scale-[1.02]"
                       onClick={() => {
-                        if (!noSessions) {
-                          dispatch(setEnrollmentIntent({ 
-                            courseId: normalizedCourse.id, 
-                            courseTitle: normalizedCourse.title 
-                          }));
-                          dispatch(setAuthModal("login"));
-                        }
+                        dispatch(setEnrollmentIntent({
+                          courseId: normalizedCourse.id,
+                          courseTitle: normalizedCourse.title
+                        }));
+                        dispatch(setAuthModal("login"));
                       }}
                     >
-                      <i className={`fas fa-sign-in-alt mr-2 ${!noSessions ? "group-hover:translate-x-1 transition-transform" : ""}`}></i>
+                      <i className="fas fa-sign-in-alt mr-2 group-hover:translate-x-1 transition-transform"></i>
                       Login to Enroll
                     </Button>
-                    {noSessions && (
+                    {/* {noSessions && (
                       <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 px-3 py-1.5 bg-slate-800 border border-slate-700 text-white text-[11px] font-medium rounded-lg whitespace-nowrap opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-150 shadow-xl z-10">
                         No sessions available for this course
                         <div className="absolute top-full left-1/2 -translate-x-1/2 border-[5px] border-transparent border-t-slate-700"></div>
                       </div>
-                    )}
+                    )} */}
                   </div>
                 )}
 
@@ -736,7 +744,7 @@ const CourseDetails = () => {
                   <div className="flex justify-between items-center py-4 border-b border-slate-700/50">
                     <span className="text-slate-400 text-sm font-medium flex items-center gap-2">
                       <i className="fas fa-tag text-blue-400 text-xs"></i>
-                      Category
+                      Level
                     </span>
                     <span className="text-white font-medium">
                       {capitalize(normalizedCourse.category)}
@@ -757,7 +765,7 @@ const CourseDetails = () => {
                     <div className="flex justify-between items-center py-4 border-b border-slate-700/50">
                       <span className="text-slate-400 text-sm font-medium flex items-center gap-2">
                         <i className="fas fa-user-tie text-purple-400 text-xs"></i>
-                        Instructor
+                        Tutor
                       </span>
                       <span className="text-white font-medium">
                         #{normalizedCourse.instructor_id}
@@ -804,19 +812,13 @@ const CourseDetails = () => {
       </div>
 
       {/* Enrollment Type Modal */}
-      <ConfirmDialog
-        open={enrollmentModalOpen}
-        variant="primary"
-        title="Confirm Enrollment"
-        message={`Are you sure you want to enroll in "${normalizedCourse?.title}"?`}
-        confirmLabel="Yes, Enroll Now"
-        cancelLabel="Cancel"
-        loading={isEnrolling}
-        checkboxLabel="I have submitted the payment for this course"
-        checkboxChecked={paymentSubmitted}
-        onCheckboxChange={setPaymentSubmitted}
-        onConfirm={() => handleEnrollmentTypeSelect("normal")}
-        onCancel={closeEnrollmentModal}
+      <EnrollmentTypeModal
+        isOpen={enrollmentModalOpen}
+        course={normalizedCourse}
+        isPaid={normalizedCourse?.is_paid || false}
+        isLoading={normalizedCourse?.is_paid ? isCheckingOut : isEnrolling}
+        onConfirm={normalizedCourse?.is_paid ? handleCheckout : () => handleEnrollmentTypeSelect("normal")}
+        onClose={closeEnrollmentModal}
       />
       {viewerUrl && (
         <FileViewerModal filePath={viewerUrl} handleClose={() => setViewerUrl(null)} />

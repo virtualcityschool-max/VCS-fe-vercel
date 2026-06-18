@@ -15,7 +15,7 @@ function dayPairKey(days) {
 }
 
 function dayPairLabel(days) {
-  const short = { MON: "Mon", TUE: "Tue", WED: "Wed", THU: "Thu", FRI: "Fri" };
+  const short = { MON: "Mon", TUE: "Tue", WED: "Wed", THU: "Thu", FRI: "Fri", SAT: "Sat", SUN: "Sun" };
   return days.map((d) => short[d] || d).join(" + ");
 }
 

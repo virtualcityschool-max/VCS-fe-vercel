@@ -90,7 +90,7 @@ const DistinctionsEditor = ({ distinctions, onChange }) => {
                   }))
                 }
                 className="w-full px-3 py-1.5 bg-slate-700 border border-slate-600 rounded text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                placeholder="e.g., Best Teacher"
+                placeholder="e.g., Best Tutor"
               />
             </div>
 
@@ -138,18 +138,6 @@ const DistinctionsEditor = ({ distinctions, onChange }) => {
           </div>
         </div>
       )}
-
-      {/* Empty State */}
-      {!distinctions ||
-        (distinctions.length === 0 && !isAdding && (
-          <div className="text-center py-8 text-slate-500">
-            <i className="fas fa-award text-2xl mb-2"></i>
-            <p className="text-sm">No distinctions added yet</p>
-            <p className="text-xs mt-1">
-              Click "Add Distinction" to get started
-            </p>
-          </div>
-        ))}
     </div>
   );
 };

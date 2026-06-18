@@ -3,44 +3,50 @@ import { useNavigate, NavLink } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchUnreadAnnouncementsCount, fetchMyAnnouncements } from "../../store/slices/announcementsSlice";
 import UserProfileDropdown from "./UserProfileDropdown";
+import { getTimezoneAbbr } from "../../utils/validation";
 
 const MOBILE_BREAKPOINT = 1024;
 
-const TZ_LABEL = {
-  "Asia/Dubai":       "Dubai",
-  "Asia/Karachi":     "Pakistan",
-  "Europe/London":    "London",
-  "America/New_York": "New York",
-};
-
 const TimezoneIndicator = ({ isCollapsed }) => {
-  const timezone = useSelector((s) => s.auth.profile?.timezone) || undefined;
+  const navigate  = useNavigate();
+  const timezone  = useSelector((s) => s.auth.profile?.timezone) || undefined;
   const [now, setNow] = useState(new Date());
 
   useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), 30000);
+    const id = setInterval(() => setNow(new Date()), 10000);
     return () => clearInterval(id);
   }, []);
 
-  const time = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", ...(timezone ? { timeZone: timezone } : {}) });
-  const label = timezone ? (TZ_LABEL[timezone] ?? timezone) : "Local";
+  const fmt        = (opts) => now.toLocaleString("en-US", { ...(timezone ? { timeZone: timezone } : {}), ...opts });
+  const time       = fmt({ hour: "2-digit", minute: "2-digit" });
+  const date       = fmt({ weekday: "short", month: "short", day: "numeric" });
+  const abbr       = getTimezoneAbbr(timezone);
+  // e.g. "Asia/Dubai" → "Dubai", "America/New_York" → "New York"
+  const city      = timezone ? timezone.split("/").pop().replace(/_/g, " ") : "Auto-Detected";
+  const displayTz = timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   if (isCollapsed) {
     return (
       <div className="flex justify-center pb-3 group/tz relative">
-        <div className="flex flex-col items-center gap-0.5 px-1 py-1.5 rounded-lg hover:bg-slate-800/60 transition-colors cursor-default">
-          <i className="fas fa-globe text-indigo-400 text-[11px]" />
-          <span className="text-white text-[9px] font-bold tabular-nums leading-none">{time}</span>
-          <span className="text-slate-500 text-[8px] font-semibold leading-none">{label}</span>
-        </div>
-        {/* Tooltip — slides in from the right */}
-        <div className="pointer-events-none absolute left-[calc(100%+12px)] top-1/2 -translate-y-1/2 z-[60]
-          opacity-0 group-hover/tz:opacity-100 translate-x-2 group-hover/tz:translate-x-0
-          transition-all duration-150 whitespace-nowrap">
-          <div className="relative bg-slate-800 border border-slate-700 rounded-lg shadow-xl px-3 py-2 w-48">
-            <span className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-slate-700" />
-            <p className="text-white text-xs font-semibold mb-1">All times in {label}</p>
-            <p className="text-slate-400 text-[10px] leading-snug whitespace-normal">To change, go to your Profile settings.</p>
+        <button
+          onClick={() => navigate("/profile")}
+          className="flex flex-col items-center gap-0.5 px-2 py-2 rounded-xl hover:bg-indigo-500/10 border border-transparent hover:border-indigo-500/20 transition-all cursor-pointer"
+        >
+          <i className="fas fa-globe text-indigo-400 text-xs" />
+          <span className="text-white text-[9px] font-bold tabular-nums leading-none mt-0.5">{time}</span>
+          <span className="text-indigo-400/70 text-[8px] font-bold leading-none">{city}</span>
+        </button>
+
+        {/* Tooltip — slides in from the right, clickable */}
+        <div
+          onClick={() => navigate("/profile")}
+          className="absolute left-[calc(100%+10px)] top-1/2 -translate-y-1/2 z-[60]
+            opacity-0 group-hover/tz:opacity-100 translate-x-2 group-hover/tz:translate-x-0
+            transition-all duration-150 cursor-pointer"
+        >
+          <div className="relative bg-slate-900 border border-slate-700 rounded-lg shadow-xl px-3 py-2 whitespace-nowrap">
+            <span className="absolute right-full top-1/2 -translate-y-1/2 border-[5px] border-transparent border-r-slate-700" />
+            <p className="text-indigo-400 text-xs font-semibold">Click here to change timezone</p>
           </div>
         </div>
       </div>
@@ -48,25 +54,42 @@ const TimezoneIndicator = ({ isCollapsed }) => {
   }
 
   return (
-    <div className="mx-4 mb-3 rounded-xl bg-slate-800/60 border border-slate-700/40 select-none px-3 py-2.5 group/tz relative cursor-default">
-      <p className="text-[9px] uppercase tracking-widest text-slate-500 font-semibold mb-1.5 flex items-center gap-1.5">
-        <i className="fas fa-globe text-indigo-400" />
-        All times shown in
-      </p>
-      <div className="flex items-center justify-between">
-        <span className="text-white text-xs font-bold">{label}</span>
-        <span className="text-indigo-300 text-xs font-bold tabular-nums">{time}</span>
-      </div>
-      {/* Tooltip — slides up from below the card */}
-      <div className="pointer-events-none absolute bottom-[calc(100%+8px)] left-0 right-0 z-[60]
-        opacity-0 group-hover/tz:opacity-100 translate-y-2 group-hover/tz:translate-y-0
-        transition-all duration-150">
-        <div className="relative bg-slate-800 border border-slate-700 rounded-lg shadow-xl px-3 py-2">
-          <span className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-700" />
-          <p className="text-slate-300 text-[10px] leading-snug flex items-start gap-1.5">
-            <i className="fas fa-circle-info text-indigo-400 mt-0.5 flex-shrink-0" />
-            To change the timezone, go to your <span className="text-white font-semibold">&nbsp;Profile settings.</span>
-          </p>
+    <div className="mx-3 mb-3 group/tz relative">
+      <button
+        onClick={() => navigate("/profile")}
+        className="w-full rounded-xl bg-slate-800/50 border border-slate-700/50 hover:border-indigo-500/40 hover:bg-slate-800/80 transition-all duration-200 px-3 py-2.5 text-left"
+      >
+        {/* Header row */}
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-1.5">
+            <i className="fas fa-globe text-indigo-400 text-[10px]" />
+            <span className="text-[9px] uppercase tracking-widest text-slate-500 font-bold">Timezone</span>
+          </div>
+          <span className="text-[9px] font-bold text-indigo-400/80 bg-indigo-500/10 border border-indigo-500/20 px-1.5 py-0.5 rounded-md">
+            {city}
+          </span>
+        </div>
+
+        {/* Timezone ID + offset + live clock */}
+        <div className="flex items-end justify-between">
+          <div>
+            <p className="text-white text-xs font-bold leading-none">{displayTz}</p>
+            <p className="text-slate-500 text-[10px] font-medium mt-0.5">{abbr}</p>
+          </div>
+          <span className="text-indigo-300 text-sm font-black tabular-nums leading-none">{time}</span>
+        </div>
+      </button>
+
+      {/* Tooltip — slides up, clickable */}
+      <div
+        onClick={() => navigate("/profile")}
+        className="absolute bottom-[calc(100%+8px)] left-0 right-0 z-[60]
+          opacity-0 group-hover/tz:opacity-100 translate-y-2 group-hover/tz:translate-y-0
+          transition-all duration-150 cursor-pointer"
+      >
+        <div className="relative bg-slate-900 border border-slate-700 rounded-lg shadow-xl px-3 py-2">
+          <span className="absolute top-full left-1/2 -translate-x-1/2 border-[5px] border-transparent border-t-slate-700" />
+          <p className="text-indigo-400 text-xs font-semibold text-center">Click here to change timezone</p>
         </div>
       </div>
     </div>
@@ -79,25 +102,28 @@ const NAV_CONFIG = {
     { id: "approvals",   label: "Approval(s) Pending",    icon: "fas fa-user-check",    to: "/admin/approvals" },
     { id: "users",       label: "Users",        icon: "fas fa-users",         to: "/admin/users" },
     { id: "courses",     label: "Courses",      icon: "fas fa-book",          to: "/admin/courses" },
-    { id: "sessions",    label: "Classes",      icon: "fas fa-chalkboard",    to: "/admin/sessions" },
-    { id: "enrollments", label: "Enrollments",  icon: "fas fa-user-graduate", to: "/admin/enrollments" },
+    { id: "sessions",        label: "Planner",          icon: "fas fa-chalkboard",      to: "/admin/sessions" },
+    { id: "teacher-planner", label: "Tutor Planner",  icon: "fas fa-user-clock",      to: "/admin/teacher-planner" },
+    { id: "enrollments",     label: "Enrollments",      icon: "fas fa-user-graduate",   to: "/admin/enrollments" },
     { id: "attendance",  label: "Attendance",   icon: "fas fa-calendar-check", to: "/admin/attendance" },
     { id: "evaluations", label: "Evaluations",  icon: "fas fa-chart-bar",      to: "/admin/evaluations" },
-    { id: "categories",  label: "Categories",   icon: "fas fa-tags",           to: "/admin/categories" },
+    { id: "levels",  label: "Levels",   icon: "fas fa-tags",           to: "/admin/course-levels" },
+    { id: "about",    label: "About Us",          icon: "fas fa-info-circle", to: "/admin/about" },
+    { id: "settings", label: "Platform Settings",  icon: "fas fa-sliders-h",   to: "/admin/settings" },
   ],
   teacher: [
     { label: "Dashboard",    to: "/teacher",                  icon: "fas fa-table-columns",   end: true },
     { label: "My Courses",   to: "/teacher/classes",          icon: "fas fa-book-open" },
     { label: "Attendance",   to: "/teacher/attendance",       icon: "fas fa-user-check" },
     { label: "Assessments",  to: "/teacher/assessments",      icon: "fas fa-clipboard-check" },
-    { label: "My Classes",   to: "/teacher/sessions",         icon: "fas fa-calendar-alt" },
-    { label: "Availability", to: "/teacher/availability",     icon: "fas fa-calendar-plus" },
+    { label: "Planner",  to: "/teacher/sessions",         icon: "fas fa-calendar-alt" },
+    { label: "Slots Management", to: "/teacher/availability",     icon: "fas fa-calendar-plus" },
     { label: "Evaluations",  to: "/teacher/evaluations",      icon: "fas fa-chart-bar" },
-    { label: "Hire Request", to: "/teacher/hire-leads",       icon: "fas fa-handshake" },
+    // { label: "Hire Request", to: "/teacher/hire-leads",       icon: "fas fa-handshake" },
   ],
   student: [
     { label: "Dashboard",   to: "/student",                 icon: "fas fa-table-columns",  end: true },
-    { label: "My Classes",  to: "/student/classes",         icon: "fas fa-calendar-alt" },
+    { label: "My Sessions", to: "/student/classes",         icon: "fas fa-calendar-alt" },
     { label: "My Tutors",   to: "/student/tutors",          icon: "fas fa-chalkboard-teacher" },
     { label: "Assessments", to: "/student/assessments",     icon: "fas fa-clipboard-list" },
     { label: "Attendance",  to: "/student/attendance",      icon: "fas fa-user-check" },
@@ -112,9 +138,9 @@ const NAV_CONFIG = {
 
 const PORTAL_LABEL = {
   admin:   "Admin Portal",
-  teacher: "Teacher Portal",
+  teacher: "Tutor Portal",
   student: "Student Portal",
-  parent:  "Parent Portal",
+  parent:  "Guardian Portal",
 };
 
 // ── Unified nav item — works for all roles ────────────────────────────────────

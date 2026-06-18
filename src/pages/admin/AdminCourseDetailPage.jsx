@@ -17,6 +17,7 @@ import ConfirmDialog from "../../components/common/ConfirmDialog";
 import CourseForm from "../../components/admin/CourseForm";
 import { showApiError } from "../../utils/apiErrorHandler";
 import { useFieldErrors } from "../../hooks";
+import QuillViewer from "../../components/common/QuillViewer";
 
 const Badge = ({ children, color = "slate" }) => {
   const colors = {
@@ -131,6 +132,7 @@ const AdminCourseDetailPage = () => {
       title: course.title || "",
       description: course.description || "",
       category: course.category?.id?.toString() || course.category || "",
+      is_paid: course.is_paid || false,
       price: course.price || "",
       status: course.status || "draft",
       instructor_id: course.instructor?.id || "",
@@ -142,6 +144,7 @@ const AdminCourseDetailPage = () => {
       attachment_url: course.attachment || null,
       thumbnail: null,
       thumbnail_url: course.thumbnail || null,
+      gumroad_product_permalink: course.gumroad_product_permalink || "",
     });
     setEditModalOpen(true);
   };
@@ -157,10 +160,13 @@ const AdminCourseDetailPage = () => {
     if (!formData.description?.trim()) errors.description = "Description is required";
     else if (formData.description.trim().length < 10) errors.description = "Description must be at least 10 characters";
     if (!formData.category) errors.category = "Category is required";
-    const price = Number(formData.price);
-    if (formData.price === "" || !Number.isInteger(price) || price < 0) errors.price = "Price must be a valid non-decimal positive number";
+    if (formData.is_paid) {
+      const price = Number(formData.price);
+      if (formData.price === "" || !Number.isInteger(price) || price <= 0) errors.price = "Price must be a positive whole number for paid courses";
+      if (!formData.gumroad_product_permalink?.trim()) errors.gumroad_product_permalink = "Gumroad permalink is required for paid courses";
+    }
     if (!formData.status) errors.status = "Status is required";
-    if (!formData.instructor_id) errors.instructor_id = "Instructor is required";
+    if (!formData.instructor_id) errors.instructor_id = "Tutor is required";
     return errors;
   };
 
@@ -169,13 +175,15 @@ const AdminCourseDetailPage = () => {
     fd.append("title", formData.title);
     fd.append("description", formData.description);
     if (formData.category) fd.append("category", Number(formData.category));
-    fd.append("price", Number(formData.price));
+    fd.append("is_paid", formData.is_paid ? "true" : "false");
+    fd.append("price", formData.is_paid ? Number(formData.price) : 0);
     fd.append("status", formData.status);
     fd.append("instructor_id", Number(formData.instructor_id));
     fd.append("schedule", JSON.stringify({ days: formData.days_of_recurring || [], time: formData.time || "" }));
     if (formData.outline) fd.append("outline", formData.outline);
     if (formData.attachment instanceof File) fd.append("attachment", formData.attachment);
     if (formData.thumbnail instanceof File) fd.append("thumbnail", formData.thumbnail);
+    fd.append("gumroad_product_permalink", formData.is_paid ? (formData.gumroad_product_permalink || "") : "");
     return fd;
   };
 
@@ -230,7 +238,7 @@ const AdminCourseDetailPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen p-6 lg:p-8">
+      <div className="min-h-screen p-6 md:p-12 pt-16 lg:pt-12">
         <div className="animate-pulse space-y-6 max-w-7xl mx-auto">
           <div className="h-6 bg-slate-800 rounded w-56"></div>
           <div className="h-40 bg-slate-800 rounded-3xl"></div>
@@ -258,7 +266,7 @@ const AdminCourseDetailPage = () => {
   const hasAttachment = !!course.attachment;
 
   return (
-    <div className="min-h-screen text-white p-6 lg:p-8">
+    <div className="min-h-screen text-white p-6 md:p-12 pt-16 lg:pt-12">
       <div className="max-w-7xl mx-auto space-y-6">
 
         {/* Breadcrumb */}
@@ -310,12 +318,12 @@ const AdminCourseDetailPage = () => {
                 {course.description}
               </p>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <MetaTile icon="user" label="Instructor" value={course.instructor?.username || "—"} />
+                <MetaTile icon="user" label="Tutor" value={course.instructor?.username || "—"} />
                 <MetaTile icon="tag" label="Category" value={formatCategoryLabel(course.category) || "—"} />
                 <MetaTile
                   icon="wallet"
                   label="Price"
-                  value={course.price ? `PKR ${Number(course.price).toLocaleString()}` : "Free"}
+                  value={course.price ? `$${Number(course.price).toLocaleString("en-US")} USD` : "Free"}
                   valueClass="text-emerald-400"
                 />
                 <MetaTile
@@ -357,7 +365,7 @@ const AdminCourseDetailPage = () => {
                   </div>
                   <h2 className="text-base font-bold text-white">Course Outline</h2>
                 </div>
-                <div className="course-outline-content" dangerouslySetInnerHTML={{ __html: course.outline }} />
+                <QuillViewer value={course.outline} />
               </div>
             )}
 

@@ -45,6 +45,12 @@ axiosInstance.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
+    // Add X-Timezone header — profile timezone takes priority, browser timezone as fallback
+    const timezone =
+      authStorage.getAuthState()?.user?.timezone ||
+      Intl.DateTimeFormat().resolvedOptions().timeZone;
+    config.headers["X-Timezone"] = timezone;
+
     // Enhanced debugging for auth endpoints
     if (config.url?.includes("auth/me")) {
       console.log("🔍 AUTH DEBUG - Request to /auth/me:", {
@@ -94,6 +100,7 @@ axiosInstance.interceptors.response.use(
     const isRefreshRequest = originalRequest?.url?.includes(
       "/auth/token/refresh/",
     );
+    const isLogoutRequest = originalRequest?.url?.includes("/auth/logout/");
 
     console.error("❌ Response Error:", {
       status: error.response?.status,
@@ -122,7 +129,7 @@ axiosInstance.interceptors.response.use(
     }
 
     // Handle 401 errors with token refresh
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (error.response?.status === 401 && !originalRequest._retry && !isLogoutRequest) {
       if (isRefreshing) {
         // If already refreshing, queue this request
         return new Promise((resolve, reject) => {

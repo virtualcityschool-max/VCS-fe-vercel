@@ -106,6 +106,29 @@ h3,
   background: rgba(99, 102, 241, 0.5);
 }
 
+.scrollbar-blue::-webkit-scrollbar {
+  height: 3px;
+}
+
+.scrollbar-blue::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.6);
+  border-radius: 10px;
+}
+
+.scrollbar-blue::-webkit-scrollbar-thumb {
+  background: #2563eb;
+  border-radius: 10px;
+}
+
+.scrollbar-blue::-webkit-scrollbar-thumb:hover {
+  background: #3b82f6;
+}
+
+.scrollbar-blue {
+  scrollbar-width: thin;
+  scrollbar-color: #2563eb rgba(15, 23, 42, 0.6);
+}
+
 @keyframes slideDown {
   from {
     transform: translateY(-20px);
@@ -260,8 +283,26 @@ h3,
 .course-outline-content strong { color: #e2e8f0; }
 .course-outline-content a { color: #818cf8; }
 .course-outline-content .ql-ui { display: none; }
+
+/* Submission answer rendered HTML */
+.submission-content h1,
+.submission-content h2,
+.submission-content h3 { color: #f1f5f9; font-family: var(--font-poppins); margin-bottom: 0.5rem; }
+.submission-content p { color: #cbd5e1; line-height: 1.7; margin-bottom: 0.5rem; }
+.submission-content ul { list-style-type: disc !important; padding-left: 1.5rem; margin-bottom: 1rem; color: #cbd5e1; }
+.submission-content ol { list-style-type: decimal !important; padding-left: 1.5rem; margin-bottom: 1rem; color: #cbd5e1; }
+.submission-content li { margin-bottom: 0.25rem; }
+.submission-content strong { color: #e2e8f0; }
+.submission-content a { color: #818cf8; }
+.submission-content .ql-ui { display: none; }
  
- @keyframes float {
+/* QuillViewer — read-only Quill instance, no border or background */
+.ql-viewer-root.ql-container.ql-snow {
+  background: transparent !important;
+  border-color: transparent !important;
+}
+
+@keyframes float {
    0%, 100% { transform: translateY(0); }
    50% { transform: translateY(-10px); }
  }

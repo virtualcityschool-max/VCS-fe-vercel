@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useSearchParams, useLocation } from "react-router-dom";
 import { setAuthModal } from "../../store/slices/uiSlice";
 import { useAuth, useNavigation } from "../../hooks";
 import Button from "../ui/Button";
@@ -9,8 +10,17 @@ const Navbar = ({ variant = "default" }) => {
   const dispatch = useDispatch();
   const { isLoggedIn } = useAuth();
   const { navigate, isActivePath } = useNavigation();
+  const [searchParams] = useSearchParams();
+  const location = useLocation();
+  const isAdminLoginMode =
+    searchParams.get("adminLogin") === "true" ||
+    location.pathname.startsWith("/admin");
 
   const handleSetAuthModal = (modal) => dispatch(setAuthModal(modal));
+  const handleLoginClick = () =>
+    handleSetAuthModal(
+      isAdminLoginMode ? { type: "login", adminMode: true } : "login",
+    );
 
   // Public variant (for PublicHome)
   if (variant === "public") {
@@ -22,23 +32,49 @@ const Navbar = ({ variant = "default" }) => {
               className="flex items-center gap-2 sm:gap-3 group cursor-pointer shrink-0"
               onClick={() => navigate("/")}
             >
-              <img src="/assets/logo.png" alt="Virtual City School" className="w-8 h-8 sm:w-10 sm:h-10 object-contain transition-all" style={{width: "180px",height: "70px"}}/>
+              <img
+                src="/assets/logo.png"
+                alt="Virtual City School"
+                className="w-8 h-8 sm:w-10 sm:h-10 object-contain transition-all"
+                style={{ width: "180px", height: "70px" }}
+              />
               {/* <span className="text-sm xs:text-lg sm:text-2xl font-black font-poppins tracking-tighter whitespace-nowrap">
                 VirtualCitySchool
               </span> */}
             </div>
             <div className="hidden lg:flex items-center gap-8">
               <button
-                onClick={() => navigate("/courses")}
-                className="text-sm font-bold text-slate-400 hover:text-white transition"
+                onClick={() => navigate("/")}
+                className={`text-slate-400 font-medium text-xs sm:text-sm hover:text-white transition cursor-pointer ${
+                  isActivePath("/") ? "text-white" : ""
+                }`}
               >
-                Browse Courses
+                Home
+              </button>
+
+              <button
+                onClick={() => navigate("/courses")}
+                className={`text-slate-400 font-medium text-xs sm:text-sm hover:text-white transition cursor-pointer ${
+                  isActivePath("/courses") ? "text-white" : ""
+                }`}
+              >
+                Explore Courses
               </button>
               <button
                 onClick={() => navigate("/teachers")}
-                className="text-sm font-bold text-slate-400 hover:text-white transition"
+                className={`text-slate-400 font-medium text-xs sm:text-sm hover:text-white transition cursor-pointer ${
+                  isActivePath("/teachers") ? "text-white" : ""
+                }`}
               >
-                Find Tutors
+                Meet Our Tutors
+              </button>
+              <button
+                onClick={() => navigate("/about")}
+                className={`text-slate-400 font-medium text-xs sm:text-sm hover:text-white transition cursor-pointer ${
+                  isActivePath("/about") ? "text-white" : ""
+                }`}
+              >
+                About Us
               </button>
             </div>
           </div>
@@ -46,11 +82,7 @@ const Navbar = ({ variant = "default" }) => {
           <div className="flex items-center gap-2 sm:gap-6 shrink-0">
             {!isLoggedIn ? (
               <div id="nav-guest" className="flex items-center gap-3 sm:gap-6">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleSetAuthModal("login")}
-                >
+                <Button variant="ghost" size="sm" onClick={handleLoginClick}>
                   Login
                 </Button>
                 <Button
@@ -134,7 +166,7 @@ const Navbar = ({ variant = "default" }) => {
                 isActivePath("/teachers") ? "text-white" : ""
               }`}
             >
-              Teachers
+              Tutors
             </button>
             <button
               onClick={() => navigate("/courses")}
@@ -144,6 +176,22 @@ const Navbar = ({ variant = "default" }) => {
             >
               Catalog
             </button> */}
+            <button
+              onClick={() => navigate("/")}
+              className={`text-slate-400 font-medium text-xs sm:text-sm hover:text-white transition cursor-pointer ${
+                isActivePath("/") ? "text-white" : ""
+              }`}
+            >
+              Home
+            </button>
+            <button
+              onClick={() => navigate("/about")}
+              className={`text-slate-400 font-medium text-xs sm:text-sm hover:text-white transition cursor-pointer ${
+                isActivePath("/about") ? "text-white" : ""
+              }`}
+            >
+              About Us
+            </button>
           </div>
         </div>
         <div className="flex items-center gap-2 sm:gap-4 shrink-0 ml-4">

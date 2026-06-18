@@ -1,4 +1,4 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { fetchTeacherById } from "../../store/slices/teacherSlice";
@@ -8,6 +8,8 @@ import BackButton from "../../components/ui/BackButton";
 import { availabilityService } from "../../services/availabilityService";
 import { toastManager } from "../../utils/toastManager";
 import AuthRequiredModal from "../../components/common/AuthRequiredModal";
+import { getStorageUrl } from "../../utils/storageUrl";
+import GmailNotice from "../../components/common/GmailNotice";
 
 const HIRE_INTENT_KEY = "vcs_hire_intent";
 
@@ -63,7 +65,7 @@ const BookingModal = ({ teacherName, slots, onClose, onBooked }) => {
 
   return (
     <div className="fixed inset-0 z-[9000] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-      <div className="w-full max-w-lg bg-slate-900 border border-slate-700/70 rounded-3xl shadow-2xl overflow-hidden">
+      <div className="w-full max-w-3xl bg-slate-900 border border-slate-700/70 rounded-3xl shadow-2xl overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-slate-800">
           <div className="flex items-center gap-3">
@@ -77,7 +79,7 @@ const BookingModal = ({ teacherName, slots, onClose, onBooked }) => {
             )}
             <div>
               <h2 className="text-base font-semibold text-white">
-                {step === 1 ? "Book a Tutoring Slot" : "Add a Message"}
+                {step === 1 ? "Book a Session" : "Add a Message"}
               </h2>
               <p className="text-slate-500 text-xs mt-0.5">
                 {step === 1
@@ -111,33 +113,35 @@ const BookingModal = ({ teacherName, slots, onClose, onBooked }) => {
                   No available slots at the moment. Check back later.
                 </div>
               ) : (
-                Object.entries(grouped)
-                  .sort(([a], [b]) => a.localeCompare(b))
-                  .map(([date, daySlots]) => (
-                    <div key={date}>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-3">
-                        {fmtDate(date)}
-                      </p>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                        {daySlots.map((slot) => (
-                          <button
-                            key={slot.id}
-                            onClick={() => setSelected(slot.id)}
-                            className={`rounded-xl border px-3 py-3 text-sm font-bold transition ${
-                              selected === slot.id
-                                ? "bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-500/20"
-                                : "bg-slate-800/60 border-slate-700/60 text-slate-300 hover:border-indigo-500/40 hover:text-white"
-                            }`}
-                          >
-                            {fmt12(slot.start_time)}
-                            <span className="text-[10px] font-normal opacity-70 block">
-                              – {fmt12(slot.end_time)}
-                            </span>
-                          </button>
-                        ))}
+                <div className="grid grid-cols-1 gap-6">
+                  {Object.entries(grouped)
+                    .sort(([a], [b]) => a.localeCompare(b))
+                    .map(([date, daySlots]) => (
+                      <div key={date}>
+                        <p className="text-sm font-black uppercase tracking-widest text-slate-300 mb-3 text-center">
+                          {fmtDate(date)}
+                        </p>
+                        <div className="grid grid-cols-4 gap-2">
+                          {daySlots.map((slot) => (
+                            <button
+                              key={slot.id}
+                              onClick={() => setSelected(slot.id)}
+                              className={`cursor-pointer rounded-xl border px-3 py-3 text-sm font-bold transition ${
+                                selected === slot.id
+                                  ? "bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-500/20"
+                                  : "bg-slate-800/60 border-slate-700/60 text-slate-300 hover:border-indigo-500/40 hover:text-white"
+                              }`}
+                            >
+                              {fmt12(slot.start_time)}
+                              <span className="text-[10px] font-normal opacity-70 block">
+                                – {fmt12(slot.end_time)}
+                              </span>
+                            </button>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  ))
+                    ))}
+                </div>
               )}
             </div>
 
@@ -183,10 +187,13 @@ const BookingModal = ({ teacherName, slots, onClose, onBooked }) => {
                 </div>
               )}
 
+              {/* Gmail notice */}
+              <GmailNotice />
+
               {/* Note textarea */}
               <div>
                 <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 block mb-2">
-                  Message to teacher{" "}
+                  Message to Tutor{" "}
                   <span className="text-slate-700 font-normal normal-case tracking-normal">
                     (optional)
                   </span>
@@ -194,7 +201,7 @@ const BookingModal = ({ teacherName, slots, onClose, onBooked }) => {
                 <textarea
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
-                  placeholder="Tell the teacher what you'd like to work on, your current level, or any questions…"
+                  placeholder="Tell the Tutor what you'd like to work on, your current level, or any questions…"
                   rows={4}
                   maxLength={500}
                   className="w-full bg-slate-800 border border-slate-700 focus:border-indigo-500/60 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 outline-none resize-none transition"
@@ -238,11 +245,12 @@ const BookingModal = ({ teacherName, slots, onClose, onBooked }) => {
 // ── Main component ─────────────────────────────────────────────────────────────
 const TeacherProfile = () => {
   const { id } = useParams();
+  const location = useLocation();
   const dispatch = useDispatch();
   const abortControllerRef = useRef(null);
 
   const { teacherDetails, loading, error } = useSelector((state) => state.teachers);
-  const { isLoggedIn, role } = useSelector((state) => state.auth);
+  const { isLoggedIn, role, isInitialized } = useSelector((state) => state.auth);
 
   const [showBookModal, setShowBookModal] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -258,7 +266,7 @@ const TeacherProfile = () => {
     setLoadingSlots(true);
     try {
       const data = await availabilityService.getTeacherAvailableSlots(id);
-      setAvailableSlots(data.slots || []);
+      setAvailableSlots((data.slots || []).filter(s => s.status === "available"));
     } catch {
       setAvailableSlots([]);
     } finally {
@@ -284,12 +292,12 @@ const TeacherProfile = () => {
     }
   };
 
-  // Load slots automatically once the student is logged in
+  // Load slots only after auth is initialized so the profile timezone is in the store
   useEffect(() => {
-    if (isLoggedIn && role === "student" && id && !slotsLoaded) {
+    if (isInitialized && isLoggedIn && role === "student" && id && !slotsLoaded) {
       loadSlots();
     }
-  }, [isLoggedIn, role, id, slotsLoaded, loadSlots]);
+  }, [isInitialized, isLoggedIn, role, id, slotsLoaded, loadSlots]);
 
   // Detect post-login hire intent stored before the login redirect
   useEffect(() => {
@@ -300,6 +308,13 @@ const TeacherProfile = () => {
     intentHandled.current = true;
     setOpenModalOnLoad(true);
   }, [isLoggedIn, role, id]);
+
+  // Auto-open booking modal when navigated from TeachersDirectory with openSlots flag
+  useEffect(() => {
+    if (!isLoggedIn || role !== "student" || !location.state?.openSlots || intentHandled.current) return;
+    intentHandled.current = true;
+    setOpenModalOnLoad(true);
+  }, [isLoggedIn, role, location.state?.openSlots]);
 
   // Open modal once slots are ready (used by the post-login intent path)
   useEffect(() => {
@@ -402,7 +417,7 @@ const TeacherProfile = () => {
           <p className="text-slate-400 text-sm mb-6">{error}</p>
           <BackButton
             to="/teachers"
-            label="Back to Teachers"
+            label="Back to Tutors"
             className="w-full"
           />
         </div>
@@ -417,13 +432,13 @@ const TeacherProfile = () => {
           <div className="w-14 h-14 rounded-2xl bg-slate-500/10 text-slate-400 flex items-center justify-center mx-auto mb-4 text-2xl">
             <i className="fas fa-user"></i>
           </div>
-          <h2 className="text-xl font-semibold mb-2">Teacher not found</h2>
+          <h2 className="text-xl font-semibold mb-2">Tutor not found</h2>
           <p className="text-slate-400 text-sm mb-6">
             The requested teacher profile could not be loaded.
           </p>
           <BackButton
             to="/teachers"
-            label="Back to Teachers"
+            label="Back to Tutors"
             className="w-full"
           />
         </div>
@@ -468,10 +483,10 @@ const TeacherProfile = () => {
         <BreadcrumbNavigation
           items={[
             { label: "Home", to: "/", icon: "fas fa-home" },
-            { label: "Teachers", to: "/teachers" },
+            { label: "Tutors", to: "/teachers" },
             {
               label: (
-                teacherDetails.teacher_name || "Unnamed Teacher"
+                teacherDetails.teacher_name || "Unnamed Tutor"
               ).substring(0, 25),
             },
           ]}
@@ -480,15 +495,21 @@ const TeacherProfile = () => {
 
       <div className="max-w-7xl mx-auto px-6 pb-6 space-y-8">
         {/* Header */}
-        <div className="relative overflow-hidden rounded-3xl border border-slate-800 bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 p-8 sm:p-10 shadow-2xl">
-          <div className="absolute inset-0 pointer-events-none bg-indigo-500/[0.03]" />
-          <div className="absolute -top-16 -right-16 w-64 h-64 bg-indigo-600/10 blur-3xl rounded-full pointer-events-none" />
+        <div className="rounded-3xl border border-slate-800 bg-slate-900 p-8 sm:p-10 shadow-xl">
+          <div className="flex flex-col lg:flex-row gap-8 lg:items-center">
 
-          <div className="relative z-10 flex flex-col lg:flex-row gap-8 lg:items-center">
             {/* Avatar */}
             <div className="shrink-0 mx-auto lg:mx-0">
-              <div className="w-28 h-28 sm:w-36 sm:h-36 rounded-3xl bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center text-white text-4xl sm:text-5xl font-bold shadow-xl border border-indigo-400/20">
-                {teacherDetails.teacher_name?.[0]?.toUpperCase() || "T"}
+              <div className="w-28 h-28 sm:w-36 sm:h-36 rounded-3xl bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center text-white text-4xl sm:text-5xl font-bold shadow-xl border border-indigo-400/20 overflow-hidden">
+                {teacherDetails.avatar ? (
+                  <img
+                    src={getStorageUrl(teacherDetails.avatar)}
+                    alt={teacherDetails.teacher_name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  teacherDetails.teacher_name?.[0]?.toUpperCase() || "T"
+                )}
               </div>
             </div>
 
@@ -496,46 +517,54 @@ const TeacherProfile = () => {
             <div className="flex-1 text-center lg:text-left">
               <div className="flex flex-col lg:flex-row lg:items-center gap-3 mb-3">
                 <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight">
-                  {teacherDetails.teacher_name || "Unnamed Teacher"}
+                  {teacherDetails.teacher_name || "Unnamed Tutor"}
                 </h1>
-
                 <span className="inline-flex items-center justify-center gap-2 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-4 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-indigo-300">
-                  <i className="fas fa-check-circle"></i>
-                  Verified Teacher
+                  <i className="fas fa-check-circle" />
+                  Verified Tutor
                 </span>
               </div>
 
-              <p className="text-slate-400 text-sm sm:text-base max-w-2xl mx-auto lg:mx-0 mb-5">
-                {teacherDetails.bio || "No teacher bio available."}
-              </p>
+              {teacherDetails.bio && (
+                <p className="text-slate-400 text-sm max-w-2xl mx-auto lg:mx-0 mb-6 leading-relaxed">
+                  {teacherDetails.bio}
+                </p>
+              )}
 
+              {/* Info pills */}
               <div className="flex flex-wrap justify-center lg:justify-start gap-3">
-                <span className="rounded-xl border border-slate-700 bg-slate-900/70 px-4 py-2 text-xs font-semibold text-slate-300">
-                  {teacherDetails.experience_years ?? 0} years experience
-                </span>
+                <div className="flex items-center gap-2 bg-slate-800/60 border border-slate-700/60 rounded-2xl px-4 py-2.5">
+                  <i className="fas fa-briefcase text-indigo-400 text-xs" />
+                  <div>
+                    <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold leading-none mb-0.5">Experience</p>
+                    <p className="text-sm font-semibold text-white leading-none">{teacherDetails.experience_years ?? 0} year{(teacherDetails.experience_years ?? 0) === 1 ? "" : "s"}</p>
+                  </div>
+                </div>
 
-                <span className="rounded-xl border border-slate-700 bg-slate-900/70 px-4 py-2 text-xs font-semibold text-slate-300">
-                  {activeCourses} active course{activeCourses === 1 ? "" : "s"}
-                </span>
+                {teacherDetails.qualification && (
+                  <div className="flex items-center gap-2 bg-slate-800/60 border border-slate-700/60 rounded-2xl px-4 py-2.5">
+                    <i className="fas fa-graduation-cap text-indigo-400 text-xs" />
+                    <div>
+                      <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold leading-none mb-0.5">Qualification</p>
+                      <p className="text-sm font-semibold text-white leading-none">{teacherDetails.qualification}</p>
+                    </div>
+                  </div>
+                )}
 
-                <span className="rounded-xl border border-slate-700 bg-slate-900/70 px-4 py-2 text-xs font-semibold text-slate-300">
-                  {totalStudents} student{totalStudents === 1 ? "" : "s"}
-                </span>
-
-                {expertiseList.slice(0, 2).map((tag) => (
-                  <span
-                    key={tag}
-                    className="rounded-xl border border-slate-700 bg-slate-900/70 px-4 py-2 text-xs font-semibold text-slate-300"
-                  >
-                    {tag}
-                  </span>
-                ))}
+                {expertiseList.length > 0 && (
+                  <div className="flex items-center gap-2 bg-slate-800/60 border border-slate-700/60 rounded-2xl px-4 py-2.5">
+                    <i className="fas fa-star text-indigo-400 text-xs" />
+                    <div>
+                      <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold leading-none mb-0.5">Expertise</p>
+                      <p className="text-sm font-semibold text-white leading-none">{expertiseList.join(", ")}</p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
             {/* CTA */}
             <div className="w-full lg:w-72 flex flex-col gap-3">
-              {/* Book a Slot */}
               <button
                 onClick={handleHireClick}
                 disabled={loadingSlots}
@@ -546,7 +575,7 @@ const TeacherProfile = () => {
                 ) : isLoggedIn && role === "student" ? (
                   <>
                     <i className="fas fa-calendar-check" />
-                    Book a Tutoring Slot
+                    Book a Session
                     {slotsLoaded && availableSlots.length > 0 && (
                       <span className="bg-white/20 text-white text-[10px] font-black px-2 py-0.5 rounded-full">
                         {availableSlots.length}
@@ -561,18 +590,6 @@ const TeacherProfile = () => {
                 )}
               </button>
 
-              {teacherDetails.linkedin && isValidLinkedInUrl(teacherDetails.linkedin) ? (
-                <a
-                  href={teacherDetails.linkedin}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full rounded-2xl border border-slate-800 bg-slate-950 px-6 py-4 text-center text-xs font-semibold uppercase tracking-[0.18em] text-slate-400 transition hover:border-slate-700 hover:text-white"
-                >
-                  View LinkedIn
-                </a>
-              ) : null}
-
-              {/* Slot availability summary for students */}
               {isLoggedIn && role === "student" && slotsLoaded && (
                 <div className={`rounded-xl border px-4 py-3 text-xs font-semibold text-center ${
                   availableSlots.length > 0
@@ -588,261 +605,105 @@ const TeacherProfile = () => {
           </div>
         </div>
 
-        {/* Top Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* About / Bio / Expertise */}
-          <div className="lg:col-span-2">
-            <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 sm:p-10 shadow-xl h-full">
-              <h2 className="text-2xl font-semibold mb-8 flex items-center gap-3">
-                <i className="fas fa-user-tie text-indigo-400"></i>
-                Teacher Profile
-              </h2>
-
-              <div className="space-y-8">
-                <div>
-                  <h3 className="text-sm font-semibold text-slate-200 mb-3">
-                    About
-                  </h3>
-                  <p className="text-slate-400 leading-relaxed">
-                    {teacherDetails.bio || "No bio available for this teacher."}
-                  </p>
-                </div>
-
-                <div>
-                  <h3 className="text-sm font-semibold text-slate-200 mb-3">
-                    Expertise
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {expertiseList.length ? (
-                      expertiseList.map((item) => (
-                        <span
-                          key={item}
-                          className="rounded-full border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs text-slate-300"
-                        >
-                          {item}
-                        </span>
-                      ))
-                    ) : (
-                      <p className="text-slate-500 text-sm">Not specified</p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="rounded-3xl border border-indigo-500/10 bg-indigo-500/[0.04] p-6">
-                  <p className="text-slate-300 leading-relaxed italic">
-                    “Dedicated to helping learners gain practical mastery
-                    through structured teaching, clarity, and real-world
-                    guidance.”
-                  </p>
-                  <p className="mt-4 text-[10px] font-bold uppercase tracking-[0.22em] text-indigo-300">
-                    Teaching Philosophy
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Stats + Distinctions */}
-          <div className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 text-center shadow-xl">
-                <p className="text-3xl font-semibold text-white mb-2">
-                  {totalStudents}
-                </p>
-                <p className="text-[10px] uppercase tracking-[0.22em] text-slate-500 font-bold">
-                  Learners
-                </p>
-              </div>
-
-              <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 text-center shadow-xl">
-                <p className="text-3xl font-semibold text-yellow-400 mb-2 flex items-center justify-center gap-2">
-                  {ratingValue.toFixed(1)}
-                  <i className="fas fa-star text-sm"></i>
-                </p>
-                <p className="text-[10px] uppercase tracking-[0.22em] text-slate-500 font-bold">
-                  Global Rating
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-xl">
-              <h3 className="text-xs font-bold uppercase tracking-[0.24em] text-slate-500 mb-6">
-                Distinctions
-              </h3>
-
-              {teacherDetails.distinctions?.length ? (
-                <ul className="space-y-5">
-                  {teacherDetails.distinctions.map((cert, idx) => (
-                    <li
-                      key={`${cert.title}-${idx}`}
-                      className="flex items-start gap-4"
-                    >
-                      <div className="w-11 h-11 rounded-2xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center shrink-0">
-                        <i className="fas fa-award"></i>
-                      </div>
-
-                      <div>
-                        <p className="font-semibold text-slate-200 text-sm">
-                          {cert.title}
-                        </p>
-                        <p className="text-xs text-slate-500 mt-1 uppercase tracking-[0.18em]">
-                          {cert.org}
-                        </p>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-slate-500 text-sm">No distinctions listed</p>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Courses + Rating Breakdown */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Courses + Distinctions */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
           {/* Courses */}
-          <div className="lg:col-span-2">
-            <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 sm:p-10 shadow-xl h-full">
-              <div className="flex items-center justify-between mb-8 gap-4 flex-wrap">
-                <h2 className="text-2xl font-semibold flex items-center gap-3">
-                  <i className="fas fa-book-open text-indigo-400"></i>
-                  Courses
-                </h2>
-
-                <span className="text-xs uppercase tracking-[0.18em] text-slate-500 font-bold">
-                  {teacherDetails.courses?.length || 0} total
-                </span>
-              </div>
-
-              {teacherDetails.courses?.length ? (
-                <div className="space-y-4">
-                  {teacherDetails.courses.map((course) => (
-                    <Link
-                      key={course.id}
-                      to={`/courses/${course.id}`}
-                      className="block rounded-2xl border border-slate-800 bg-slate-950/70 p-5 transition hover:bg-slate-800 cursor-pointer"
-                    >
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                        <div>
-                          <p className="text-sm font-semibold text-white">
-                            {course.course_name}
-                          </p>
-                          <p className="text-xs text-slate-500 mt-1">
-                            {course.enrolled_students} enrolled student
-                            {course.enrolled_students === 1 ? "" : "s"} • Rating{" "}
-                            {Number(course.rating || 0).toFixed(1)}
-                          </p>
-                        </div>
-
-                        <span
-                          className={`inline-flex rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] border ${
-                            course.status === "published"
-                              ? "border-green-500/20 bg-green-500/10 text-green-300"
-                              : "border-slate-700 bg-slate-800 text-slate-400"
-                          }`}
-                        >
-                          {course.status}
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl shadow-xl flex flex-col" style={{height: "280px"}}>
+            <div className="flex items-center justify-between px-6 pt-6 pb-4 flex-shrink-0">
+              <h2 className="text-xl font-semibold flex items-center gap-3">
+                <i className="fas fa-book-open text-indigo-400"></i>
+                Courses
+              </h2>
+              <span className="text-xs uppercase tracking-[0.18em] text-slate-500 font-bold">
+                {teacherDetails.courses?.filter((c) => c.status !== "draft").length || 0} total
+              </span>
+            </div>
+            <div className="flex-1 overflow-y-auto px-6 pb-6 space-y-3 custom-scrollbar">
+              {teacherDetails.courses?.filter((c) => c.status !== "draft").length ? (
+                teacherDetails.courses.filter((c) => c.status !== "draft").map((course) => (
+                  <Link
+                    key={course.id}
+                    to={`/courses/${course.id}`}
+                    className="block rounded-2xl border border-slate-800 bg-slate-950/70 p-4 transition hover:bg-slate-800"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <p className="text-sm font-semibold text-white truncate">{course.course_name}</p>
+                      <div className="flex-shrink-0 flex flex-col items-end">
+                        <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider border ${
+                          course.is_paid
+                            ? "border-amber-500/20 bg-amber-500/10 text-amber-300"
+                            : "border-emerald-500/20 bg-emerald-500/10 text-emerald-300"
+                        }`}>
+                          {course.is_paid ? "Paid" : "Free"}
                         </span>
+                        {course.is_paid && (
+                          <span className="text-xs font-semibold text-slate-300 mt-0.5">
+                            ${parseFloat(course.price).toFixed(2)}
+                          </span>
+                        )}
                       </div>
-                    </Link>
-                  ))}
-                </div>
+                    </div>
+                    <div className="flex items-center gap-2 mt-1">
+                      <p className="text-xs text-slate-500">
+                        {course.enrolled_students} student{course.enrolled_students === 1 ? "" : "s"}
+                      </p>
+                      <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider border ${
+                        course.status === "published"
+                          ? "border-green-500/20 bg-green-500/10 text-green-300"
+                          : "border-slate-700 bg-slate-800 text-slate-400"
+                      }`}>
+                        {course.status}
+                      </span>
+                    </div>
+                  </Link>
+                ))
               ) : (
                 <p className="text-slate-500 text-sm">No courses available</p>
               )}
             </div>
           </div>
 
-          {/* Rating breakdown */}
-          <div className="space-y-6">
-            <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-xl">
-              <h3 className="text-xs font-bold uppercase tracking-[0.24em] text-slate-500 mb-6">
-                Rating Breakdown
-              </h3>
-
-              <div className="mb-6">
-                <p className="text-4xl font-semibold text-white">
-                  {ratingValue.toFixed(1)}
-                </p>
-                <p className="text-sm text-slate-500 mt-1">
-                  Based on {totalReviews} review{totalReviews === 1 ? "" : "s"}
-                </p>
-              </div>
-
-              <div className="space-y-3">
-                {teacherDetails.rating_breakdown?.stars?.length ? (
-                  teacherDetails.rating_breakdown.stars.map((item) => (
-                    <div key={item.star} className="flex items-center gap-3">
-                      <span className="w-10 text-xs text-slate-400">
-                        {item.star}★
-                      </span>
-                      <div className="flex-1 h-2 rounded-full bg-slate-800 overflow-hidden">
-                        <div
-                          className="h-full bg-indigo-500 rounded-full"
-                          style={{ width: `${item.percentage}%` }}
-                        />
+          {/* Achievements & Distinctions */}
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl shadow-xl flex flex-col" style={{height: "280px"}}>
+            <div className="flex items-center justify-between px-6 pt-6 pb-4 flex-shrink-0">
+              <h2 className="text-xl font-semibold flex items-center gap-3">
+                <i className="fas fa-trophy text-amber-400"></i>
+                Achievements &amp; Distinctions
+              </h2>
+              {teacherDetails.distinctions?.length > 0 && (
+                <span className="text-xs uppercase tracking-[0.18em] text-slate-500 font-bold">
+                  {teacherDetails.distinctions.length} total
+                </span>
+              )}
+            </div>
+            <div className="flex-1 overflow-y-auto px-6 pb-6 custom-scrollbar">
+              {teacherDetails.distinctions?.length ? (
+                <ul className="space-y-3">
+                  {teacherDetails.distinctions.map((cert, idx) => (
+                    <li key={`${cert.title}-${idx}`} className="flex items-start gap-3 rounded-2xl border border-slate-800 bg-slate-950/70 p-4">
+                      <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center shrink-0 font-black text-sm border border-amber-500/20">
+                        {idx + 1}
                       </div>
-                      <span className="w-10 text-right text-xs text-slate-500">
-                        {item.count}
-                      </span>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-slate-500 text-sm">No ratings yet</p>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Reviews */}
-        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 sm:p-10 shadow-xl">
-          <div className="flex items-center justify-between mb-8 gap-4 flex-wrap">
-            <h2 className="text-2xl font-semibold flex items-center gap-3">
-              <i className="fas fa-comment-dots text-indigo-400"></i>
-              Recent Reviews
-            </h2>
-
-            <span className="text-xs uppercase tracking-[0.18em] text-slate-500 font-bold">
-              {teacherDetails.recent_reviews?.length || 0} shown
-            </span>
-          </div>
-
-          {teacherDetails.recent_reviews?.length ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {teacherDetails.recent_reviews.map((review, idx) => (
-                <div
-                  key={`${review.student_name}-${idx}`}
-                  className="rounded-2xl border border-slate-800 bg-slate-950/70 p-6"
-                >
-                  <div className="flex items-center justify-between gap-3 mb-3">
-                    <p className="text-sm font-semibold text-white">
-                      {review.student_name}
-                    </p>
-                    <span className="text-yellow-400 text-sm font-medium">
-                      ★ {review.rating}
-                    </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-semibold text-white leading-snug">{cert.title}</p>
+                        <span className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-bold uppercase tracking-wider">
+                          <i className="fas fa-building text-[8px]" />
+                          {cert.org}
+                        </span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="h-full flex flex-col items-center justify-center gap-2">
+                  <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center">
+                    <i className="fas fa-trophy text-slate-600" />
                   </div>
-
-                  <p className="text-slate-300 text-sm leading-relaxed mb-4">
-                    {review.comment}
-                  </p>
-
-                  <div className="text-xs text-slate-500 space-y-1">
-                    <p>{review.course_title}</p>
-                    <p>
-                      {review.created_at
-                        ? new Date(review.created_at).toLocaleDateString()
-                        : "Date not available"}
-                    </p>
-                  </div>
+                  <p className="text-slate-500 text-sm">No distinctions listed</p>
                 </div>
-              ))}
+              )}
             </div>
-          ) : (
-            <p className="text-slate-500 text-sm">No reviews available yet</p>
-          )}
+          </div>
         </div>
 
         {/* Available Slots Preview (students who are logged in) */}
@@ -905,7 +766,7 @@ const TeacherProfile = () => {
             </div>
             <h2 className="text-2xl font-semibold mb-3">Book a 1-on-1 Tutoring Session</h2>
             <p className="text-slate-400 text-sm max-w-md mx-auto mb-6">
-              {teacherDetails.teacher_name} offers private tutoring sessions. Log in as a student to view available time slots and book instantly.
+              {teacherDetails.teacher_name} offers private tutoring slots. Log in as a student to view available time slots and book instantly.
             </p>
             <button
               onClick={handleHireClick}
@@ -921,7 +782,7 @@ const TeacherProfile = () => {
       {/* Booking Modal */}
       {showBookModal && (
         <BookingModal
-          teacherName={teacherDetails.teacher_name || "Teacher"}
+          teacherName={teacherDetails.teacher_name || "Tutor"}
           slots={availableSlots}
           onClose={() => setShowBookModal(false)}
           onBooked={() => {
@@ -934,7 +795,7 @@ const TeacherProfile = () => {
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
         title="Login Required"
-        message="Please log in or create a student account to book a 1-on-1 tutoring session."
+        message="Please log in or create a student account to book a 1-on-1 tutoring slot."
       />
     </section>
   );

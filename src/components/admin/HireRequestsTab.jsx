@@ -150,7 +150,7 @@ const HireRequestsTab = ({
                       </div>
                       <div className="min-w-0">
                         <p className="text-sm font-bold text-slate-200 truncate">
-                          {req.teacher?.username || `Teacher #${req.teacher?.id}`}
+                          {req.teacher?.username || `Tutor #${req.teacher?.id}`}
                         </p>
                         {req.teacher?.email && (
                           <p className="text-[10px] text-slate-500 truncate">{req.teacher.email}</p>
@@ -268,9 +268,9 @@ const HireRequestsTab = ({
                 {/* Left — info details */}
                 <div className="px-6 py-5 space-y-0 divide-y divide-slate-800/60">
                   <DetailRow icon="phone"              label="Phone"             value={detailReq.phone} />
-                  <DetailRow icon="chalkboard-teacher" label="Teacher Requested" value={detailReq.teacher?.username || `Teacher #${detailReq.teacher?.id}`} />
+                  <DetailRow icon="chalkboard-teacher" label="Tutor Requested" value={detailReq.teacher?.username || `Tutor #${detailReq.teacher?.id}`} />
                   {detailReq.teacher?.email && (
-                    <DetailRow icon="envelope" label="Teacher Email" value={detailReq.teacher.email} />
+                    <DetailRow icon="envelope" label="Tutor Email" value={detailReq.teacher.email} />
                   )}
                   <DetailRow icon="calendar-alt"       label="Submitted"         value={detailReq.created_at ? new Date(detailReq.created_at).toLocaleString() : null} />
                   {detailReq.reviewed_at && (

@@ -119,6 +119,14 @@ const AdminUsersPage = () => {
   //   handleFetchUsers();
   // }, [handleFetchUsers]);
 
+  // On mount: if we arrived with filters from dashboard navigation, fetch immediately with those filters
+  useEffect(() => {
+    if (location.state?.filters) {
+      handleFetchUsers();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Re-fetch when any filter changes (not on mount — AdminLayout owns the initial fetch)
   useEffect(() => {
     const current = { role: usersFilters.role, is_active: usersFilters.is_active, ordering: usersFilters.ordering, search: usersFilters.search };
@@ -162,6 +170,10 @@ const AdminUsersPage = () => {
     } catch (error) {
       showApiError(error);
     }
+  };
+
+  const handleViewUser = (userId) => {
+    navigate(`/admin/users/${userId}`, { state: { viewOnly: true, filters: usersFilters } });
   };
 
   // Handle user editing - carry current filters so they can be restored on back
@@ -251,6 +263,7 @@ const AdminUsersPage = () => {
       role: userData.role,
       first_name: userData.first_name?.trim() || "",
       last_name: userData.last_name?.trim() || "",
+      is_active: true,
     };
 
     if (userData.role === "parent" && userData.selected_students?.length > 0) {
@@ -282,6 +295,7 @@ const AdminUsersPage = () => {
         onUserDelete={handleDeleteUser}
         onUserPurge={handlePurgeUser}
         onFetchUsers={handleFetchUsers}
+        onUserView={handleViewUser}
         onUserEdit={handleEditUser}
         onCreateUser={handleCreateUser}
       />
@@ -368,8 +382,8 @@ const AdminUsersPage = () => {
                     className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   >
                     <option value="student">Student</option>
-                    <option value="teacher">Teacher</option>
-                    <option value="parent">Parent</option>
+                    <option value="teacher">Tutor</option>
+                    <option value="parent">Guardian</option>
                     <option value="admin">Admin</option>
                   </FilterSelect>
                 </div>

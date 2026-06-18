@@ -44,10 +44,12 @@ const AdminCategoriesPage = () => {
   const handleAdd = async () => {
     const name = newName.trim();
     if (!name || saving) return;
-    const updated = [...categories, { name }].sort((a, b) => a.name.localeCompare(b.name));
+    const updated = [...categories, { name }].sort((a, b) =>
+      (a.sort_order ?? 99) - (b.sort_order ?? 99) || a.name.localeCompare(b.name)
+    );
     if (await sync(updated)) {
       setNewName("");
-      toastManager.success("Category added");
+      toastManager.success("Level added");
     }
   };
 
@@ -57,7 +59,7 @@ const AdminCategoriesPage = () => {
     const updated = categories.map((c) => (c.id === id ? { ...c, name } : c));
     if (await sync(updated)) {
       setEditingId(null);
-      toastManager.success("Category renamed");
+      toastManager.success("Level renamed");
     }
   };
 
@@ -66,7 +68,7 @@ const AdminCategoriesPage = () => {
     const updated = categories.filter((c) => c.id !== id);
     if (await sync(updated)) {
       setConfirmDeleteId(null);
-      toastManager.success("Category removed");
+      toastManager.success("Level removed");
     }
   };
 
@@ -91,7 +93,7 @@ const AdminCategoriesPage = () => {
                     onChange={(e) => setNewName(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleAdd()}
                     disabled={saving}
-                    placeholder="Enter category name..."
+                    placeholder="Enter level name..."
                     className="w-full bg-slate-950/50 border border-slate-800 rounded-2xl pl-5 pr-14 py-4 text-white placeholder:text-slate-700 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500/50 transition-all text-sm font-medium disabled:opacity-50"
                   />
                   <button
@@ -121,7 +123,7 @@ const AdminCategoriesPage = () => {
                       <i className="fas fa-layer-group text-xs" />
                    </div>
                    <h3 className="text-xs font-black text-white uppercase tracking-widest">
-                     Categories Repository
+                     Course Levels Repository
                    </h3>
                 </div>
                 <div className="px-4 py-1.5 bg-slate-950/50 rounded-full text-[10px] font-black text-slate-500 border border-slate-800 uppercase tracking-widest">
@@ -154,7 +156,7 @@ const AdminCategoriesPage = () => {
                     {categories.map((cat, index) => (
                       <div
                         key={cat.id || `temp-${index}`}
-                        className="group flex items-center gap-6 px-8 py-5 hover:bg-white/[0.01] transition-all duration-300"
+                        className="group flex items-center gap-4 px-6 py-2.5 hover:bg-white/[0.01] transition-all duration-300"
                       >
                         {/* Status Marker */}
                         <div className="w-1.5 h-1.5 rounded-full bg-slate-700 group-hover:bg-indigo-500 transition-all duration-500" />
@@ -189,12 +191,12 @@ const AdminCategoriesPage = () => {
                               </div>
                             </div>
                           ) : confirmDeleteId === cat.id ? (
-                            <div className="flex items-center justify-between bg-red-500/5 border border-red-500/20 px-5 py-3 rounded-2xl animate-in zoom-in-95 duration-200">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-red-500/5 border border-red-500/20 px-5 py-3 rounded-2xl animate-in zoom-in-95 duration-200">
                               <div className="flex items-center gap-3">
                                  <i className="fas fa-exclamation-triangle text-red-500 text-xs" />
-                                 <span className="text-xs text-red-400 font-black uppercase tracking-widest">Delete "{cat.name}"?</span>
+                                 <span className="text-xs text-red-400 font-black uppercase tracking-widest break-all">Delete "{cat.name}"?</span>
                               </div>
-                              <div className="flex items-center gap-3">
+                              <div className="flex items-center gap-3 shrink-0">
                                 <button
                                   onClick={() => handleDelete(cat.id)}
                                   disabled={saving}

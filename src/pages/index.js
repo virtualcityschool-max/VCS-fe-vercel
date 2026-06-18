@@ -6,6 +6,7 @@ export { default as TeachersDirectory } from "./public/TeachersDirectory";
 export { default as TeacherProfile } from "./public/TeacherProfile";
 export { default as PrivacyPolicy } from "./public/PrivacyPolicy";
 export { default as TermsAndConditions } from "./public/TermsAndConditions";
+export { default as AboutPage } from "./public/AboutPage";
 
 // Student Pages
 export { default as StudentLayout } from "./student/StudentLayout";
@@ -49,6 +50,7 @@ export { default as AdminAttendancePage } from "./admin/AdminAttendance";
 export { default as AdminEvaluationPage } from "./admin/AdminEvaluationPage";
 export { default as AdminCategoriesPage } from "./admin/AdminCategoriesPage";
 export { default as UserDetailsPage } from "./admin/UserDetailsPage";
+export { default as AdminTeacherPlannerPage } from "./admin/AdminTeacherPlannerPage";
 
 // Profile
 export { default as ProfilePage } from "./profile/ProfilePage";

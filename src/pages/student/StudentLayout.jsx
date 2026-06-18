@@ -1,10 +1,19 @@
 import React from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 
-const StudentLayout = () => (
-  <div className="min-h-screen bg-slate-950 text-white">
+const StudentLayout = () => {
+   const location = useLocation();
+
+  const isStudentHome = location.pathname === "/student";
+  return (
+    <div
+      className={`min-h-screen bg-slate-950 text-white ${
+        isStudentHome ? "pt-0" : "pt-12 md:pt-0"
+      }`}
+    >
     <Outlet />
   </div>
-);
+  );
+};
 
 export default StudentLayout;

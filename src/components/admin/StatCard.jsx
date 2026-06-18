@@ -1,6 +1,6 @@
 import React from "react";
 
-const StatCard = ({ label, value, icon, trend, color = "indigo", compact = false }) => {
+const StatCard = ({ label, value, icon, trend, color = "indigo", compact = false, onClick }) => {
   const colorClasses = {
     indigo: "from-indigo-500/20 to-indigo-600/20 border-indigo-500/20 text-indigo-400",
     emerald: "from-emerald-500/20 to-emerald-600/20 border-emerald-500/20 text-emerald-400",
@@ -13,7 +13,7 @@ const StatCard = ({ label, value, icon, trend, color = "indigo", compact = false
 
   if (compact) {
     return (
-      <div className={`relative overflow-hidden bg-gradient-to-br ${colorClasses[color]} rounded-xl px-4 py-4 border backdrop-blur-sm transition-all duration-300 hover:scale-[1.02] hover:shadow-lg`}>
+      <div onClick={onClick} className={`relative overflow-hidden bg-gradient-to-br ${colorClasses[color]} rounded-xl px-4 py-4 border backdrop-blur-sm transition-all duration-300 hover:scale-[1.02] hover:shadow-lg ${onClick ? "cursor-pointer" : ""}`}>
         <div className="absolute top-0 right-0 w-14 h-14 bg-white/5 rounded-full -mr-6 -mt-6"></div>
         <div className="relative z-10 flex items-center gap-2.5 mb-2.5">
           <div className="w-7 h-7 bg-white/10 rounded-md flex items-center justify-center flex-shrink-0">

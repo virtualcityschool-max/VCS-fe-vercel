@@ -14,7 +14,7 @@ export const hireService = {
       const response = await axiosInstance.post(HIRE_ENDPOINTS.SUBMIT, payload);
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Submit Hire Request" });
+      throw error;
     }
   },
 
@@ -24,7 +24,7 @@ export const hireService = {
       const response = await axiosInstance.get(HIRE_ENDPOINTS.ADMIN_LIST, { params });
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Get Hire Requests" });
+      throw error;
     }
   },
 
@@ -33,7 +33,7 @@ export const hireService = {
       const response = await axiosInstance.patch(HIRE_ENDPOINTS.ADMIN_ACTION(id), { action });
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Action Hire Request" });
+      throw error;
     }
   },
 
@@ -43,7 +43,7 @@ export const hireService = {
       const response = await axiosInstance.get(HIRE_ENDPOINTS.MY_LEADS, { params });
       return response.data;
     } catch (error) {
-      throw handleApiError(error, { context: "Get My Leads" });
+      throw error;
     }
   },
 };

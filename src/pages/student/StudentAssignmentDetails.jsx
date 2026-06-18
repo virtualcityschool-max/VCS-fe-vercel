@@ -7,6 +7,8 @@ import { toastManager } from "../../utils/toastManager";
 import { validateFile, ACCEPT_STRING } from "../../utils/fileValidation";
 import { getStorageUrl } from "../../utils/storageUrl";
 import FileViewerModal from "../../components/common/FileViewerModal";
+import QuillEditor from "../../components/common/QuillEditor";
+import { useDateFormatters } from "../../hooks/useDateFormatters";
 
 const PreviewButton = ({ url, className = "" }) => {
   const [open, setOpen] = React.useState(false);
@@ -34,6 +36,7 @@ const StudentAssignmentDetails = () => {
   const { isSubmittingAssignment } = useSelector(
     (state) => state.studentDashboard,
   );
+  const { formatDate, formatTime, formatDateTime } = useDateFormatters();
 
   const [assignment, setAssignment] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -229,9 +232,10 @@ const StudentAssignmentDetails = () => {
                   {/* Submission Card */}
                   <div className="glass p-8 rounded-[1.5rem] border-slate-800/50 space-y-6">
                     {assignment.my_submission?.text_answer ? (
-                      <div className="bg-slate-950/50 border border-slate-800/50 rounded-2xl p-6 text-slate-300 text-sm leading-relaxed whitespace-pre-wrap font-medium">
-                        {assignment.my_submission.text_answer}
-                      </div>
+                      <div
+                        className="submission-content bg-slate-950/50 border border-slate-800/50 rounded-2xl p-6 text-sm leading-relaxed"
+                        dangerouslySetInnerHTML={{ __html: assignment.my_submission.text_answer }}
+                      />
                     ) : (
                       <div className="flex flex-col items-center justify-center py-8 text-slate-500 border-2 border-dashed border-slate-800 rounded-2xl bg-slate-900/20">
                          <i className="fas fa-comment-slash text-2xl mb-3 opacity-20" />
@@ -256,13 +260,7 @@ const StudentAssignmentDetails = () => {
                           <div className="flex flex-col">
                             <span className="text-[9px] text-slate-500 uppercase font-black">Submitted On</span>
                             <span className="text-xs text-slate-300 font-bold">
-                              {new Date(assignment.my_submission.submitted_at).toLocaleDateString(undefined, { 
-                                day: 'numeric', 
-                                month: 'short', 
-                                year: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit'
-                              })}
+                              {formatDateTime(assignment.my_submission.submitted_at)}
                             </span>
                           </div>
                         </div>
@@ -317,13 +315,13 @@ const StudentAssignmentDetails = () => {
                 </div>
               ) : (
                 <div className="space-y-6">
-                  <textarea
-                    value={answer}
-                    onChange={(e) => setAnswer(e.target.value)}
-                    rows={8}
-                    className="w-full glass bg-slate-900/40 border border-slate-800 rounded-[1.5rem] p-6 text-white placeholder-slate-600 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/5 transition-all text-base"
-                    placeholder="Write your submission response here..."
-                  />
+                  <div className="rounded-xl overflow-hidden border border-slate-700/50">
+                    <QuillEditor
+                      value={answer}
+                      onChange={setAnswer}
+                      placeholder="Write your submission response here..."
+                    />
+                  </div>
                   
                   <div className="flex flex-col sm:flex-row items-stretch gap-2.5">
                     <div className="flex-1 relative group">
@@ -422,14 +420,10 @@ const StudentAssignmentDetails = () => {
                     Due Date
                   </p>
                   <p className="text-sm text-white font-bold leading-none">
-                    {new Date(assignment.due_date).toLocaleDateString(undefined, { 
-                      day: 'numeric', 
-                      month: 'long', 
-                      year: 'numeric' 
-                    })}
+                    {formatDate(assignment.due_date)}
                   </p>
                   <p className="text-[10px] text-slate-400 mt-1">
-                    {new Date(assignment.due_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    {formatTime(assignment.due_date)}
                   </p>
                 </div>
               </div>
@@ -473,7 +467,7 @@ const StudentAssignmentDetails = () => {
                   <p className="text-sm text-white font-bold leading-none">
                     {assignment.created_by_name}
                   </p>
-                  <p className="text-[10px] text-slate-400 mt-1">Subject Teacher</p>
+                  <p className="text-[10px] text-slate-400 mt-1">Subject Tutor</p>
                 </div>
               </div>
 

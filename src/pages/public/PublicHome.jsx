@@ -3,13 +3,16 @@ import { useNavigate, Link } from "react-router-dom";
 import { fetchAllCourses } from "../../store/slices/coursesSlice";
 import { useEffect, useState, useMemo } from "react";
 import { setAuthModal, setEnrollmentIntent } from "../../store/slices/uiSlice";
-import { fetchStudentDashboard, unenrollFromCourse } from "../../store/slices/studentDashboardSlice";
+import { fetchStudentDashboard, unenrollFromCourse, withdrawEnrollment } from "../../store/slices/studentDashboardSlice";
 import { fetchTeachers } from "../../store/slices/teacherSlice";
 import AuthRequiredModal from "../../components/common/AuthRequiredModal";
+import ConfirmDialog from "../../components/common/ConfirmDialog";
 import HireTutorModal from "../../components/public/HireTutorModal";
 import PublicCourseCard from "../../components/courses/PublicCourseCard";
+import TutorCard from "../../components/teachers/TutorCard";
 import { toastManager } from "../../utils/toastManager";
 import { showApiError } from "../../utils/apiErrorHandler";
+import { getStorageUrl } from "../../utils/storageUrl";
 
 const PublicHome = () => {
   const auth = useSelector((state) => state.auth);
@@ -18,9 +21,10 @@ const PublicHome = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [hireModal, setHireModal] = useState(null);
+  const [withdrawConfirm, setWithdrawConfirm] = useState({ open: false, courseId: null, courseTitle: "" });
 
   const { courses, isLoading: coursesLoading } = useSelector((state) => state.courses);
-  const { enrolledCourses, enrollingCourseIds } = useSelector((state) => state.studentDashboard);
+  const { enrolledCourses, enrollingCourseIds, withdrawingCourseIds } = useSelector((state) => state.studentDashboard);
   const { enrollmentIntent } = useSelector((state) => state.ui);
   const { teachers, loading: teachersLoading } = useSelector((state) => state.teachers);
 
@@ -72,6 +76,23 @@ const PublicHome = () => {
     }
   };
 
+  // Handle withdraw enrollment request
+  const handleWithdrawEnrollment = (courseId, courseTitle) => {
+    setWithdrawConfirm({ open: true, courseId, courseTitle });
+  };
+
+  const confirmWithdrawEnrollment = async () => {
+    const { courseId } = withdrawConfirm;
+    setWithdrawConfirm({ open: false, courseId: null, courseTitle: "" });
+    try {
+      await dispatch(withdrawEnrollment(courseId)).unwrap();
+      toastManager.success("Enrollment request cancelled");
+      dispatch(fetchAllCourses());
+    } catch (error) {
+      showApiError(error);
+    }
+  };
+
   // Filter courses based on search term
   const filteredCourses = useMemo(() => 
     courses?.filter(
@@ -104,71 +125,59 @@ const PublicHome = () => {
       </div>
 
       {/* Hero Section */}
-      <section className="relative z-10 max-w-7xl mx-auto px-6 pt-20 md:pt-32">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-          {/* Left Content */}
+      <section className="relative z-10 max-w-7xl mx-auto px-6 pt-10 md:pt-20">
+        {/* Row 1: Heading + Image */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center mb-12">
+          {/* Left: Badge + Heading */}
           <div className="text-left animate-fadeIn">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-[10px] font-black uppercase tracking-[0.2em] text-cyan-400 mb-8">
-              Prestige & Technology
+              Gulf's Premier Online School
             </div>
-            
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-black font-poppins mb-6 leading-[1.1] tracking-tight text-white">
-              Master the Future <br className="hidden md:block" />
-              at our <span className="text-cyan-400">Digital Campus</span>
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-black font-poppins leading-[1.1] tracking-tight text-white">
+              Your Borderless <br className="hidden md:block" />
+              <span className="text-cyan-400">Digital Classroom</span> Starts Here
             </h1>
-            
-            <p className="text-slate-400 text-base md:text-lg max-w-lg leading-relaxed mb-10">
-              Experience a high-performance intellectual environment where cutting-edge technology meets traditional academic excellence. Unlimited discovery starts here.
-            </p>
-
-            <div className="flex flex-wrap gap-4">
-              <button
-                onClick={() => navigate("/courses")}
-                className="group px-8 py-4 bg-indigo-200 text-indigo-950 rounded-xl font-bold text-sm tracking-wide transition-all hover:scale-105 shadow-xl shadow-indigo-500/10 flex items-center gap-2"
-              >
-                Explore Courses
-                <i className="fas fa-arrow-right group-hover:translate-x-1 transition text-xs"></i>
-              </button>
-              <button
-                onClick={() => navigate("/teachers")}
-                className="group px-8 py-4 border border-cyan-500/40 hover:border-cyan-400 bg-cyan-500/5 hover:bg-cyan-500/10 text-white rounded-xl font-bold text-sm tracking-wide transition-all hover:scale-105 flex items-center gap-2"
-              >
-                Meet Our Tutors
-                <i className="fas fa-user-graduate group-hover:rotate-12 transition text-xs"></i>
-              </button>
-            </div>
           </div>
 
-          {/* Right Visual (Placeholder as requested) */}
-          <div className="relative group perspective-1000">
-            {/* Main Visual Container */}
+          {/* Right: Image */}
+          <div className="relative group perspective-1000 max-w-md ml-auto">
             <div className="relative z-10 rounded-[2.5rem] border border-cyan-500/30 overflow-hidden bg-slate-900/40 backdrop-blur-3xl aspect-[1.4/1] shadow-2xl shadow-cyan-500/10 group-hover:border-cyan-400/50 transition-all duration-500">
-              <img 
-                src="/assets/hero.png" 
-                alt="Digital Campus" 
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+              <img
+                src="/assets/hero.png"
+                alt="Digital Campus"
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
               />
-              {/* Inner subtle glow effect */}
               <div className="absolute inset-0 bg-linear-to-tr from-cyan-500/10 to-transparent pointer-events-none" />
             </div>
-
-            {/* Floating Stat Card */}
-            <div className="absolute -bottom-6 -left-6 z-20 bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-5 shadow-2xl animate-float">
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-lg bg-cyan-500/20 flex items-center justify-center shrink-0">
-                  <i className="fas fa-bolt text-cyan-400 text-sm" />
-                </div>
-                <div>
-                  <p className="text-2xl font-black text-white leading-none mb-1">98%</p>
-                  <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold max-w-[120px] leading-tight">
-                    Completion rate in advanced AI tracks
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Background Decorative Glow */}
             <div className="absolute -inset-4 bg-cyan-500/5 blur-[80px] rounded-full pointer-events-none -z-10" />
+          </div>
+        </div>
+
+        {/* Row 2: Description + Buttons — full width, centered */}
+        <div className="text-justify max-w-8xl mx-auto">
+          <p className="text-slate-400 text-base md:text-lg leading-relaxed mb-10">
+            Learn Without Borders.<br />
+            Virtual City School is a premium online learning platform for Cambridge students across the UAE, Saudi Arabia, Qatar, Kuwait, Bahrain, Oman, Canada, the UK, Australia, Malaysia, Singapore, Pakistan, and beyond — offering Grade 1 to A2 Level programmes with expert teachers and live classes.<br />
+            Beyond academics, we build future-ready students through specialist courses in Artificial Intelligence, Emerging Technologies, Leadership, Interpersonal Skills, and Grooming.<br />
+            Through our VCS Scholar Programme, deserving students get access to quality education — and you can sponsor a child's learning journey to make it possible.<br />
+            Unlimited discovery starts here.
+          </p>
+
+          <div className="flex flex-wrap justify-center gap-4">
+            <button
+              onClick={() => navigate("/courses")}
+              className="group px-8 py-4 bg-indigo-200 text-indigo-950 rounded-xl font-bold text-sm tracking-wide transition-all hover:scale-105 shadow-xl shadow-indigo-500/10 flex items-center gap-2"
+            >
+              Explore Courses
+              <i className="fas fa-arrow-right group-hover:translate-x-1 transition text-xs"></i>
+            </button>
+            <button
+              onClick={() => navigate("/teachers")}
+              className="group px-8 py-4 border border-cyan-500/40 hover:border-cyan-400 bg-cyan-500/5 hover:bg-cyan-500/10 text-white rounded-xl font-bold text-sm tracking-wide transition-all hover:scale-105 flex items-center gap-2"
+            >
+              Meet Our Tutors
+              <i className="fas fa-user-graduate group-hover:rotate-12 transition text-xs"></i>
+            </button>
           </div>
         </div>
       </section>
@@ -196,7 +205,7 @@ const PublicHome = () => {
                 </button>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                 {enrolledList.slice(0, 3).map((course, i) => (
                   <PublicCourseCard
                     key={course.id}
@@ -205,6 +214,7 @@ const PublicHome = () => {
                     enrolled={true}
                     onEnroll={handleEnrollClick}
                     onUnenroll={handleUnenrollCourse}
+                    variant="large"
                   />
                 ))}
               </div>
@@ -231,7 +241,7 @@ const PublicHome = () => {
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           {coursesLoading && courses.length === 0
             ? [...Array(4)].map((_, i) => (
                 <div key={i} className="bg-[#1a2235]/60 rounded-[2rem] overflow-hidden animate-pulse border border-white/5 aspect-[4/5]" />
@@ -243,8 +253,11 @@ const PublicHome = () => {
                 index={i}
                 enrolled={false}
                 isEnrolling={enrollingCourseIds.includes(course.id)}
+                isWithdrawing={withdrawingCourseIds.includes(course.id)}
                 onEnroll={handleEnrollClick}
                 onUnenroll={handleUnenrollCourse}
+                onWithdraw={handleWithdrawEnrollment}
+                variant="large"
               />
           ))
           }
@@ -336,94 +349,30 @@ const PublicHome = () => {
             </button>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {teachersLoading && teachers.length === 0
               ? [...Array(4)].map((_, i) => (
                   <div key={i} className="bg-[#1a2235]/60 rounded-[2.5rem] p-8 animate-pulse border border-white/5 h-[320px]" />
                 ))
-              : teachers.slice(0, 4).map((t) => (
-                  <div
+              : teachers.slice(0, 4).map((t, i) => (
+                  <TutorCard
                     key={t.id}
-                    className="group relative bg-gradient-to-b from-slate-900/80 to-slate-900 border border-slate-800 rounded-3xl p-5 transition-all duration-300 ease-out hover:border-indigo-500/40 hover:shadow-[0_10px_40px_-10px_rgba(99,102,241,0.35)] hover:-translate-y-[2px] flex flex-col"
-                  >
-                    {/* Hover glow overlay */}
-                    <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition duration-300 pointer-events-none bg-indigo-500/4" />
-
-                    {/* Top */}
-                    <div className="flex items-center gap-3 mb-4 relative z-10">
-                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center text-white font-bold text-base shadow-md transition-transform duration-300 group-hover:scale-105 shrink-0">
-                        {t.teacher_name?.[0]?.toUpperCase() || "T"}
-                      </div>
-
-                      <div className="flex-1 min-w-0 text-left">
-                        <h3 className="text-base font-semibold text-white truncate">
-                          {t.teacher_name || "Unnamed teacher"}
-                        </h3>
-                        <p className="text-xs text-slate-400 mt-0.5 truncate">
-                          {t.expertise || "No expertise specified"}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Experience */}
-                    <div className="mb-4 relative z-10 text-left">
-                      <span className="text-xs text-slate-400">
-                        <i className="fas fa-briefcase text-slate-600 mr-1.5" />
-                        {t.experience ?? 0} yrs experience
-                      </span>
-                    </div>
-
-                    {/* Courses */}
-                    <div className="mb-4 relative z-10 flex-1 text-left">
-                      <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-2 font-bold">
-                        Courses
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        {t.courses?.length ? (
-                          t.courses.slice(0, 3).map((course) => (
-                            <span
-                              key={course.id}
-                              className="text-xs px-3 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700 hover:border-indigo-500/40 transition"
-                            >
-                              {course.course_name}
-                            </span>
-                          ))
-                        ) : (
-                          <span className="text-xs text-slate-500">
-                            No courses available
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* CTA — pinned to bottom */}
-                    <div className="flex flex-col gap-2 mt-auto relative z-10">
-                      {auth.isLoggedIn && (
-                        <button
-                          onClick={() => navigate(`/teachers/${t.id}`)}
-                          className="w-full py-2.5 rounded-xl bg-slate-900 border border-indigo-600/30 text-indigo-400 hover:bg-indigo-600 hover:text-white font-black text-[11px] uppercase tracking-[0.18em] transition-all active:scale-95"
-                        >
-                          View Profile
-                        </button>
-                      )}
-                      <button
-                        onClick={() => {
-                          if (!auth.isLoggedIn) {
-                            dispatch(setAuthModal({ type: "login", intendedRole: "student" }));
-                            return;
-                          }
-                          if (auth.role === "student") {
-                            navigate(`/teachers/${t.id}`);
-                            return;
-                          }
-                          setHireModal(t);
-                        }}
-                        className="w-full py-2.5 rounded-xl bg-slate-900 border border-blue-600/30 text-blue-500 hover:bg-blue-600 hover:text-white font-black text-[11px] uppercase tracking-[0.18em] transition-all active:scale-95"
-                      >
-                        Hire Tutor
-                      </button>
-                    </div>
-                  </div>
+                    teacher={t}
+                    index={i}
+                    isAuthenticated={auth.isLoggedIn}
+                    onViewProfile={(id) => navigate(`/teachers/${id}`)}
+                    onHire={(teacher) => {
+                      if (!auth.isLoggedIn) {
+                        dispatch(setAuthModal({ type: "login", intendedRole: "student" }));
+                        return;
+                      }
+                      if (auth.role === "student") {
+                        navigate(`/teachers/${teacher.id}`);
+                        return;
+                      }
+                      setHireModal(teacher);
+                    }}
+                  />
                 ))}
           </div>
         </div>
@@ -434,10 +383,22 @@ const PublicHome = () => {
       )}
 
 
-      <AuthRequiredModal 
-        isOpen={authModalOpen} 
-        onClose={() => setAuthModalOpen(false)} 
+      <AuthRequiredModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
         message="Create an account or log in to start your journey with this course and access all features."
+      />
+
+      <ConfirmDialog
+        open={withdrawConfirm.open}
+        variant="danger"
+        title="Cancel Enrollment Request"
+        message={`Are you sure you want to cancel your enrollment request for "${withdrawConfirm.courseTitle}"?`}
+        confirmLabel="Yes, Cancel Request"
+        cancelLabel="Keep Request"
+        loading={withdrawingCourseIds.includes(withdrawConfirm.courseId)}
+        onConfirm={confirmWithdrawEnrollment}
+        onCancel={() => setWithdrawConfirm({ open: false, courseId: null, courseTitle: "" })}
       />
     </main>
   );

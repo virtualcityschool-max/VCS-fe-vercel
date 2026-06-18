@@ -85,9 +85,9 @@ const CourseCategoriesModal = ({ onClose, onCategoriesChanged, initialEditId, in
           <div>
             <h3 className="text-base font-bold text-white flex items-center gap-2">
               <i className="fas fa-tags text-indigo-400 text-sm" />
-              Course Categories
+              Course Levels
             </h3>
-            <p className="text-xs text-slate-500 mt-0.5">Add, rename, or delete course categories</p>
+            <p className="text-xs text-slate-500 mt-0.5">Add, rename, or delete course levels</p>
           </div>
           <button
             onClick={onClose}
@@ -182,7 +182,7 @@ const CourseCategoriesModal = ({ onClose, onCategoriesChanged, initialEditId, in
         {/* Add new */}
         <div className="px-6 pt-3 pb-4 border-t border-slate-800">
           <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-2">
-            Add New Category
+            Add New Level
           </p>
           <div className="flex gap-2">
             <input
@@ -401,7 +401,7 @@ const CoursesTab = ({
         const upper = i + step;
         priceRanges.push({
           value: `${lower}-${upper}`,
-          label: `PKR ${lower.toFixed(0)} - ${upper.toFixed(0)}`,
+          label: `$${lower.toFixed(0)} – $${upper.toFixed(0)} USD`,
         });
       }
     }
@@ -416,7 +416,7 @@ const CoursesTab = ({
     <div className="space-y-6">
       {/* Course Management Header */}
       <div className="mb-6">
-        <div className="flex flex-wrap items-center gap-2 justify-end">
+        <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2 sm:justify-end">
           <SearchInput
             value={courseFilters.search}
             onChange={(e) => setCourseFilters({ ...courseFilters, search: e.target.value })}
@@ -424,32 +424,34 @@ const CoursesTab = ({
             placeholder="Search courses..."
             className="w-full sm:w-56"
           />
+          {/* 2-per-row on mobile for category + selects */}
+          <div className="grid grid-cols-2 sm:contents gap-2">
           {/* Category filter dropdown with inline add/edit/delete */}
           <div className="relative" ref={catDropdownRef}>
             <button
               onClick={() => setCatDropdownOpen((o) => !o)}
-              className="flex items-center gap-2 px-3 py-2 bg-slate-800/60 border border-slate-700/70 text-slate-300 hover:text-white rounded-xl text-sm font-medium transition-all w-full sm:w-auto sm:min-w-[160px] justify-between"
+              className="flex items-center gap-2 px-3 py-2 bg-slate-800/60 border border-slate-700/70 text-slate-300 hover:text-white rounded-xl text-sm font-medium transition-all w-full sm:w-[160px] justify-between"
             >
               <span className="flex items-center gap-1.5 truncate">
                 <i className="fas fa-tags text-xs text-indigo-400 shrink-0" />
                 <span className="truncate">
                   {courseFilters.category
                     ? (categories.find((c) => c.name.toLowerCase().replace(/\s+/g, "") === courseFilters.category)?.name ?? "Category")
-                    : "All Categories"}
+                    : "All levels"}
                 </span>
               </span>
               <i className={`fas fa-chevron-down text-xs text-slate-500 shrink-0 transition-transform duration-200 ${catDropdownOpen ? "rotate-180" : ""}`} />
             </button>
 
             {catDropdownOpen && (
-              <div className="absolute top-full right-0 sm:left-0 sm:right-auto mt-1.5 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-30 w-56 overflow-hidden">
+              <div className="absolute top-full right-0 sm:left-0 sm:right-auto mt-1.5 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-30 w-full overflow-hidden">
                 {/* All Categories — fixed, not scrolled */}
                 <button
                   onClick={() => { setCourseFilters({ ...courseFilters, category: "" }); setCatDropdownOpen(false); }}
                   className={`w-full text-left px-3 py-2.5 text-sm transition flex items-center gap-2 ${courseFilters.category === "" ? "text-indigo-400 bg-indigo-500/10" : "text-slate-300 hover:bg-slate-800 hover:text-white"}`}
                 >
                   <i className="fas fa-border-all text-xs opacity-60" />
-                  All Categories
+                  All Levels
                 </button>
 
                 {categories.length > 0 && <div className="border-t border-slate-800" />}
@@ -498,13 +500,14 @@ const CoursesTab = ({
                   className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-indigo-400 hover:bg-indigo-500/10 hover:text-indigo-300 transition font-semibold"
                 >
                   <i className="fas fa-plus text-xs" />
-                  Add Category
+                  Add Level
                 </button>
               </div>
             )}
           </div>
 
           <FilterSelect
+            className="w-full sm:w-[160px]"
             value={courseFilters.priceRange}
             onChange={(e) => setCourseFilters({ ...courseFilters, priceRange: e.target.value })}
           >
@@ -514,6 +517,7 @@ const CoursesTab = ({
                 ))}
           </FilterSelect>
           <FilterSelect
+            className="w-full sm:w-[160px]"
             value={courseFilters.status}
             onChange={(e) => setCourseFilters({ ...courseFilters, status: e.target.value })}
           >
@@ -523,34 +527,37 @@ const CoursesTab = ({
             <option value="completed">Completed</option>
           </FilterSelect>
           <FilterSelect
+            className="w-full sm:w-[160px]"
             value={courseFilters.instructor}
             onChange={(e) => setCourseFilters({ ...courseFilters, instructor: e.target.value })}
           >
-            <option value="">All Instructors</option>
+            <option value="">All Tutors</option>
             {users?.map((user) => (
               <option key={user.id} value={user.id}>{user.username}</option>
             ))}
           </FilterSelect>
-          
-          <GradingScaleButton />
-          <button
-            onClick={() => setActiveModal("create-course")}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold shadow-lg shadow-indigo-500/20 active:scale-95 transition-all duration-150"
-          >
-            <i className="fas fa-plus text-xs"></i>
-            <span className="hidden sm:inline">Create Course</span>
-            <span className="sm:hidden">+</span>
-          </button>
-          {hasActiveCourseFilters && (
+          </div>{/* end 2-col grid */}
+
+          <div className="flex items-center gap-2 flex-wrap">
+            <GradingScaleButton />
             <button
-              onClick={resetCourseFilters}
-              title="Clear all filters"
-              className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-slate-700/70 bg-slate-900 hover:bg-rose-500/10 hover:border-rose-500/40 text-slate-400 hover:text-rose-400 text-sm font-medium transition-all duration-150"
+              onClick={() => setActiveModal("create-course")}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold shadow-lg shadow-indigo-500/20 active:scale-95 transition-all duration-150"
             >
-              <i className="fas fa-times text-xs"></i>
-              <span className="hidden sm:inline">Clear</span>
+              <i className="fas fa-plus text-xs"></i>
+              <span>Create Course</span>
             </button>
-          )}
+            {hasActiveCourseFilters && (
+              <button
+                onClick={resetCourseFilters}
+                title="Clear all filters"
+                className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-slate-700/70 bg-slate-900 hover:bg-rose-500/10 hover:border-rose-500/40 text-slate-400 hover:text-rose-400 text-sm font-medium transition-all duration-150"
+              >
+                <i className="fas fa-times text-xs"></i>
+                <span className="hidden sm:inline">Clear</span>
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -572,13 +579,16 @@ const CoursesTab = ({
                     Course
                   </th>
                   <th className="px-6 py-4 text-xs font-black uppercase text-slate-500">
-                    Instructor
+                    Tutor
                   </th>
                   <th className="px-6 py-4 text-xs font-black uppercase text-slate-500">
-                    Category
+                    Level
                   </th>
                   <th className="px-6 py-4 text-xs font-black uppercase text-slate-500">
                     Price
+                  </th>
+                  <th className="px-6 py-4 text-xs font-black uppercase text-slate-500">
+                    Type
                   </th>
                   <th className="px-6 py-4 text-xs font-black uppercase text-slate-500">
                     Status
@@ -608,6 +618,9 @@ const CoursesTab = ({
                     </td>
                     <td className="px-6 py-4">
                       <div className="h-4 bg-slate-700 rounded w-16"></div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="h-6 bg-slate-700 rounded w-14"></div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="h-6 bg-slate-700 rounded w-16"></div>
@@ -671,7 +684,7 @@ const CoursesTab = ({
                       </div>
                       <div className="flex items-center gap-2">
                         <i className="fas fa-dollar-sign text-amber-400"></i>
-                        <span>PKR {course.price?.toLocaleString()}</span>
+                        <span>{course.is_paid ? `$${(course.price || 0).toLocaleString("en-US")} USD` : "Free"}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <i
@@ -687,47 +700,26 @@ const CoursesTab = ({
 
                     {/* Action Buttons */}
                     <div
-                      className="flex flex-col gap-2"
+                      className="flex items-center gap-2"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <button
                         onClick={() => onCourseEdit(course.id)}
-                        className="bg-slate-700/50 text-slate-300 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-slate-600/50 transition flex items-center gap-2"
+                        className="w-8 h-8 flex items-center justify-center bg-slate-700/50 text-slate-300 rounded-lg hover:bg-slate-600/50 transition"
+                        title="Edit course"
                       >
-                        <i className="fas fa-edit"></i>
-                        <span>Edit Course</span>
+                        <i className="fas fa-edit text-xs"></i>
                       </button>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => {
-                            setEditCourseForm((prev) => ({
-                              ...prev,
-                              instructor_id:
-                                course.instructor?.id || course.instructor_id || "",
-                            }));
-                            setActiveModal({
-                              type: "assign-instructor",
-                              courseId: course.id,
-                            });
-                          }}
-                          className="bg-blue-600/10 text-blue-400 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-blue-600 hover:text-white transition flex items-center gap-2 flex-1"
-                        >
-                          <i className="fas fa-user-plus"></i>
-                          <span>Assign Instructor</span>
-                        </button>
-                        <button
-                          onClick={() => onCourseDelete(course.id)}
-                          disabled={loadingCourseIds.has(course.id)}
-                          className="bg-red-600/10 text-red-400 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-red-600/20 transition disabled:opacity-50 flex items-center gap-2 flex-1"
-                        >
-                          <i className="fas fa-trash"></i>
-                          <span>
-                            {loadingCourseIds.has(course.id)
-                              ? "Deleting..."
-                              : "Delete"}
-                          </span>
-                        </button>
-                      </div>
+                      <button
+                        onClick={() => onCourseDelete(course.id)}
+                        disabled={loadingCourseIds.has(course.id)}
+                        className="w-8 h-8 flex items-center justify-center bg-red-600/10 text-red-400 rounded-lg hover:bg-red-600/20 transition disabled:opacity-50"
+                        title="Delete course"
+                      >
+                        {loadingCourseIds.has(course.id)
+                          ? <i className="fas fa-spinner fa-spin text-xs"></i>
+                          : <i className="fas fa-trash text-xs"></i>}
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -742,13 +734,16 @@ const CoursesTab = ({
                     Course
                   </th>
                   <th className="px-6 py-4 text-xs font-black uppercase text-slate-500">
-                    Instructor
+                    Tutor
                   </th>
                   <th className="px-6 py-4 text-xs font-black uppercase text-slate-500">
-                    Category
+                    Level
                   </th>
                   <th className="px-6 py-4 text-xs font-black uppercase text-slate-500">
                     Price
+                  </th>
+                  <th className="px-6 py-4 text-xs font-black uppercase text-slate-500">
+                    Type
                   </th>
                   <th className="px-6 py-4 text-xs font-black uppercase text-slate-500">
                     Status
@@ -797,13 +792,24 @@ const CoursesTab = ({
                       )}
                     </td>
                     <td className="px-6 py-4">
-                      <span className="bg-slate-700/50 text-slate-300 px-2 py-1 rounded-full text-xs font-medium border border-slate-600 md:text-nowrap">
+                      <span className="bg-slate-700/50 text-slate-300 px-2 py-1 rounded-full text-xs font-medium border border-slate-600 md:whitespace-nowrap">
                         {course.category?.name ?? course.category}
                       </span>
                     </td>
                     <td className="px-6 py-4">
                       <span className="text-white font-medium">
-                        PKR {course.price?.toLocaleString()}
+                        {course.is_paid ? `$${(course.price || 0).toLocaleString("en-US")} USD` : "—"}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-black uppercase tracking-wide ${
+                          course.is_paid
+                            ? "bg-amber-500/15 text-amber-400 border border-amber-500/20"
+                            : "bg-emerald-500/15 text-emerald-400 border border-emerald-500/20"
+                        }`}
+                      >
+                        {course.is_paid ? "Paid" : "Free"}
                       </span>
                     </td>
                     <td className="px-6 py-4">
@@ -829,20 +835,20 @@ const CoursesTab = ({
                       >
                         <button
                           onClick={() => onCourseEdit(course.id)}
-                          className="bg-slate-700/50 text-slate-300 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-slate-600/50 transition"
+                          className="w-8 h-8 flex items-center justify-center bg-slate-700/50 text-slate-300 rounded-lg hover:bg-slate-600/50 transition"
+                          title="Edit course"
                         >
-                          <i className="fas fa-edit mr-1"></i>
-                          Edit
+                          <i className="fas fa-edit text-xs"></i>
                         </button>
                         <button
                           onClick={() => onCourseDelete(course.id)}
                           disabled={loadingCourseIds.has(course.id)}
-                          className="bg-red-600/10 text-red-400 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-red-600/20 transition disabled:opacity-50"
+                          className="w-8 h-8 flex items-center justify-center bg-red-600/10 text-red-400 rounded-lg hover:bg-red-600/20 transition disabled:opacity-50"
+                          title="Delete course"
                         >
-                          <i className="fas fa-trash mr-1"></i>
                           {loadingCourseIds.has(course.id)
-                            ? "Deleting..."
-                            : "Delete"}
+                            ? <i className="fas fa-spinner fa-spin text-xs"></i>
+                            : <i className="fas fa-trash text-xs"></i>}
                         </button>
                       </div>
                     </td>
@@ -1003,7 +1009,7 @@ const CoursesTab = ({
             <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-xl font-bold text-white">
-                  Assign Instructor
+                  Assign Tutor
                 </h3>
                 <button
                   onClick={() => setActiveModal(null)}
@@ -1029,7 +1035,7 @@ const CoursesTab = ({
               >
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Select Instructor <span className="text-red-400">*</span>
+                    Select Tutor <span className="text-red-400">*</span>
                   </label>
                   <select
                     value={editCourseForm.instructor_id}
@@ -1043,7 +1049,7 @@ const CoursesTab = ({
                     className="w-full px-3 py-2 bg-slate-800 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     required
                   >
-                    <option value="">Select an instructor</option>
+                    <option value="">Select an tutor</option>
                     {users?.map((user) => (
                       <option key={user.id} value={user.id}>
                         {user.username}
@@ -1064,7 +1070,7 @@ const CoursesTab = ({
                     type="submit"
                     className="bg-indigo-600 hover:bg-indigo-500"
                   >
-                    Assign Instructor
+                    Assign Tutor
                   </Button>
                 </div>
               </form>

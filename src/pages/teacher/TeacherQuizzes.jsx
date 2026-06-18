@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import ReactDOM from "react-dom";
 import { useDispatch, useSelector } from "react-redux";
+import { selectPlatformSettings } from "../../store/slices/platformSettingsSlice";
 import {
   fetchQuizzes,
   createQuiz,
@@ -16,7 +17,7 @@ import { teacherService } from "../../services/teacherService";
 import { FilterSelect } from "../../components/ui";
 import { toastManager } from "../../utils/toastManager";
 import { showApiError } from "../../utils/apiErrorHandler";
-import { toLocalDatetimeInput, formatTimezoneISO } from "../../utils/validation";
+import { toLocalDatetimeInput, formatTimezoneISO, formatLocalISO } from "../../utils/validation";
 import { useDateFormatters } from "../../hooks";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -31,7 +32,7 @@ const defaultQuestion = () => ({
 const QUESTION_TYPES = [
   { value: "SINGLE_CHOICE",   label: "Single Choice" },
   { value: "MULTIPLE_CHOICE", label: "Multiple Choice" },
-  { value: "TEXT_FORMAT",     label: "Text / Essay" },
+  { value: "TEXT_FORMAT",     label: "Short Question" },
 ];
 
 const statusColor = (status) => {
@@ -49,7 +50,7 @@ const statusLabel = (status) => {
 };
 
 // ── Question Builder ──────────────────────────────────────────────────────────
-const QuestionBuilder = ({ questions, onChange }) => {
+const QuestionBuilder = ({ questions, onChange, marksPerQuestion = 1 }) => {
   const setQuestion = (idx, patch) =>
     onChange(questions.map((q, i) => (i === idx ? { ...q, ...patch } : q)));
 
@@ -119,15 +120,15 @@ const QuestionBuilder = ({ questions, onChange }) => {
 
           {/* Type + Marks row */}
           <div className="flex gap-2 mb-3">
-            <select
+            <FilterSelect
               value={q.question_type}
               onChange={(e) => changeType(qIdx, e.target.value)}
-              className="flex-1 p-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 appearance-none"
+              className="flex-1"
             >
               {QUESTION_TYPES.map((t) => (
                 <option key={t.value} value={t.value}>{t.label}</option>
               ))}
-            </select>
+            </FilterSelect>
             <input
               type="number"
               min={1}
@@ -205,19 +206,24 @@ const QuestionBuilder = ({ questions, onChange }) => {
 };
 
 // ── Quiz form validation ──────────────────────────────────────────────────────
-const validateQuizForm = (form, questions) => {
+const validateQuizForm = (form, questions, timezone, publishImmediately = false) => {
   if (!form.course)         return "Please select a course";
   if (!form.title.trim())   return "Title is required";
-  if (!form.total_marks)    return "Total marks is required";
-  if (!form.published_at)   return "Publish date is required";
+  if (!form.total_marks)    return "Total marks are required";
+  if (!publishImmediately && !form.published_at) return "Publish date is required";
   if (!form.due_date)       return "Due date is required";
 
-  const now = new Date();
-  const pub = new Date(form.published_at);
-  const due = new Date(form.due_date);
+  const toISO = (localStr) => formatTimezoneISO(localStr, timezone) || formatLocalISO(new Date(localStr));
+  const due = new Date(toISO(form.due_date));
 
-  if (pub < new Date(Date.now() - 60 * 1000)) return "Publish date cannot be in the past";
-  if (due <= pub)  return "Due date must be after publish date";
+  if (publishImmediately) {
+    const pubNowPlus2 = new Date(Date.now() + 2 * 60 * 1000);
+    if (due <= pubNowPlus2) return "Due date must be after publish date";
+  } else {
+    const pub = new Date(toISO(form.published_at));
+    if (pub < new Date(Date.now() - 60 * 1000)) return "Publish date cannot be in the past";
+    if (due <= pub) return "Due date must be after publish date";
+  }
 
   if (!questions.length) return "Add at least one question";
 
@@ -248,12 +254,14 @@ const validateQuizForm = (form, questions) => {
 };
 
 // ── Build payload from form state ─────────────────────────────────────────────
-const buildPayload = (form, questions, timezone) => ({
+const buildPayload = (form, questions, timezone, publishImmediately = false) => ({
   course: Number(form.course),
   title: form.title.trim(),
   description: form.description.trim(),
   total_marks: Number(form.total_marks),
-  published_at: form.published_at ? formatTimezoneISO(form.published_at, timezone) : "",
+  published_at: publishImmediately
+    ? new Date(Date.now() + 2 * 60 * 1000).toISOString()
+    : (form.published_at ? formatTimezoneISO(form.published_at, timezone) : ""),
   due_date: form.due_date ? formatTimezoneISO(form.due_date, timezone) : "",
   questions: questions.map((q) => {
     const base = {
@@ -316,6 +324,7 @@ const TeacherQuizzes = ({
     selectedQuizSubmission,
     loadingSelectedQuizSubmission,
   } = useSelector((s) => s.teachers);
+  const ps = useSelector(selectPlatformSettings); // platform settings
 
   const [internalFilters, setInternalFilters] = useState({
     course: "",
@@ -341,10 +350,35 @@ const TeacherQuizzes = ({
   const [gradeInputs, setGradeInputs] = useState({});
   const [saving, setSaving] = useState(false);
 
-  // Create / Edit form state
-  const emptyForm = { course: "", title: "", description: "", total_marks: "", published_at: "", due_date: "" };
-  const [form, setForm]           = useState(emptyForm);
-  const [questions, setQuestions] = useState([defaultQuestion()]);
+  // Build default form values from platform settings
+  const makeEmptyForm = () => {
+    const now = new Date();
+    const dueDate = new Date(now);
+    dueDate.setDate(dueDate.getDate() + (ps.quiz_submission_days || 2));
+    const pad = (n) => String(n).padStart(2, "0");
+    const fmtLocal = (d) =>
+      `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    return {
+      course: "",
+      title: "",
+      description: "",
+      total_marks: "",
+      published_at: "",
+      due_date:     fmtLocal(dueDate),
+    };
+  };
+
+  const defaultMarks = Number(ps.quiz_marks_per_question) || 1;
+
+  const resetQuizState = () => {
+    setForm(makeEmptyForm());
+    setQuestions([defaultQuestion()]);
+    setPublishImmediately(!!ps.quiz_publish_immediately);
+  };
+
+  const [form, setForm]                     = useState(makeEmptyForm);
+  const [questions, setQuestions]           = useState(() => [defaultQuestion()]);
+  const [publishImmediately, setPublishImmediately] = useState(() => !!ps.quiz_publish_immediately);
 
   useEffect(() => {
     if (!myCourses?.length) dispatch(fetchMyCourses());
@@ -365,7 +399,7 @@ const TeacherQuizzes = ({
       </FilterSelect>
       <button
         type="button"
-        onClick={() => { setShowCreate(true); setForm(emptyForm); setQuestions([defaultQuestion()]); }}
+        onClick={() => { resetQuizState(); setShowCreate(true); }}
         className="bg-indigo-600 hover:bg-indigo-500 px-5 py-3 rounded-xl text-xs font-bold transition whitespace-nowrap"
       >
         + Create Quiz
@@ -377,19 +411,16 @@ const TeacherQuizzes = ({
 
   // ── Create ────────────────────────────────────────────────────────────────
   const handleCreate = async () => {
-    const err = validateQuizForm(form, questions);
+    const err = validateQuizForm(form, questions, timezone, publishImmediately);
     if (err) { toastManager.error(err); return; }
     setSaving(true);
     try {
-      await dispatch(createQuiz(buildPayload(form, questions, timezone))).unwrap();
+      await dispatch(createQuiz(buildPayload(form, questions, timezone, publishImmediately))).unwrap();
       toastManager.success("Quiz created");
       setShowCreate(false);
-      setForm(emptyForm);
-      setQuestions([defaultQuestion()]);
+      resetQuizState();
     } catch (e) {
-      // const msg = typeof e === "string" ? e : (e?.detail || e?.title?.[0] || e?.questions || JSON.stringify(e));
-      // toastManager.error(msg || "Failed to create quiz");
-      showApiError(e)
+      showApiError(e);
     } finally {
       setSaving(false);
     }
@@ -397,6 +428,7 @@ const TeacherQuizzes = ({
 
   // ── Edit ──────────────────────────────────────────────────────────────────
   const openEdit = async (quiz) => {
+    setPublishImmediately(false);
     setEditTarget(quiz);
     setForm(quizToForm(quiz, timezone));
     setQuestions(quizToQuestions(quiz));
@@ -411,17 +443,15 @@ const TeacherQuizzes = ({
   };
 
   const handleEdit = async () => {
-    const err = validateQuizForm(form, questions);
+    const err = validateQuizForm(form, questions, timezone, false);
     if (err) { toastManager.error(err); return; }
     setSaving(true);
     try {
-      await dispatch(updateQuiz({ id: editTarget.id, data: buildPayload(form, questions, timezone) })).unwrap();
+      await dispatch(updateQuiz({ id: editTarget.id, data: buildPayload(form, questions, timezone, false) })).unwrap();
       toastManager.success("Quiz updated");
       setEditTarget(null);
     } catch (e) {
-      showApiError(e)
-      // const detail = e?.detail || (typeof e === "string" ? e : JSON.stringify(e));
-      // toastManager.error(detail || "Failed to update quiz");
+      showApiError(e);
     } finally {
       setSaving(false);
     }
@@ -566,30 +596,75 @@ const TeacherQuizzes = ({
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">
-                Publish At <span className="text-rose-500">*</span>
-              </label>
-              <input
-                type="datetime-local"
-                value={form.published_at}
-                onChange={(e) => setForm((p) => ({ ...p, published_at: e.target.value }))}
-                className="w-full p-3.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/50 transition-all"
-              />
+          {isEdit ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">
+                  Publish At <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="datetime-local"
+                  value={form.published_at}
+                  onChange={(e) => setForm((p) => ({ ...p, published_at: e.target.value }))}
+                  className="w-full p-3.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/50 transition-all"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">
+                  Due Date <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="datetime-local"
+                  value={form.due_date}
+                  onChange={(e) => setForm((p) => ({ ...p, due_date: e.target.value }))}
+                  className="w-full p-3.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/50 transition-all"
+                />
+              </div>
             </div>
-            <div>
-              <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">
-                Due Date <span className="text-rose-500">*</span>
+          ) : (
+            <div className="space-y-4">
+              <label className="flex items-center gap-3 cursor-pointer py-3 px-4 bg-white/5 rounded-xl border border-white/5 hover:bg-white/10 transition-all">
+                <div className="relative w-9 h-5 flex-shrink-0">
+                  <input
+                    type="checkbox"
+                    className="peer sr-only"
+                    checked={publishImmediately}
+                    onChange={(e) => setPublishImmediately(e.target.checked)}
+                  />
+                  <div className="w-9 h-5 bg-slate-700 peer-checked:bg-indigo-600 rounded-full transition-all" />
+                  <div className="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full transition-all peer-checked:translate-x-4 pointer-events-none" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-slate-300">Publish immediately</p>
+                  <p className="text-[10px] text-slate-500">Quiz goes live ~2 minutes after creation</p>
+                </div>
               </label>
-              <input
-                type="datetime-local"
-                value={form.due_date}
-                onChange={(e) => setForm((p) => ({ ...p, due_date: e.target.value }))}
-                className="w-full p-3.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/50 transition-all"
-              />
+              {!publishImmediately && (
+                <div>
+                  <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">
+                    Publish At <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={form.published_at}
+                    onChange={(e) => setForm((p) => ({ ...p, published_at: e.target.value }))}
+                    className="w-full p-3.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/50 transition-all"
+                  />
+                </div>
+              )}
+              <div>
+                <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">
+                  Due Date <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="datetime-local"
+                  value={form.due_date}
+                  onChange={(e) => setForm((p) => ({ ...p, due_date: e.target.value }))}
+                  className="w-full p-3.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/50 transition-all"
+                />
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
 
@@ -604,14 +679,14 @@ const TeacherQuizzes = ({
             <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Construct your quiz questions below</p>
           </div>
         </div>
-        <QuestionBuilder questions={questions} onChange={setQuestions} />
+        <QuestionBuilder questions={questions} onChange={setQuestions} marksPerQuestion={defaultMarks} />
       </div>
 
       {/* Footer Actions */}
       <div className="flex gap-4 justify-end pt-10 border-t border-white/5">
         <button
           type="button"
-          onClick={() => { setShowCreate(false); setEditTarget(null); setForm(emptyForm); setQuestions([defaultQuestion()]); }}
+          onClick={() => { setShowCreate(false); setEditTarget(null); resetQuizState(); }}
           className="px-8 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold uppercase tracking-widest transition-all active:scale-95"
         >
           Cancel
@@ -636,34 +711,6 @@ const TeacherQuizzes = ({
   return (
     <div>
       {controlsContainer && ReactDOM.createPortal(headerActions, controlsContainer)}
-
-      {!hideHeader && (
-        <div className="mb-10 flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-black font-poppins mb-2">My Quizzes</h1>
-            <p className="text-slate-400 text-sm">Review Quizzes and move into grading workflows.</p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2 shrink-0">
-            <FilterSelect
-              value={filterCourse}
-              onChange={(e) => setFilterCourse(e.target.value)}
-            >
-              <option value="">All Courses</option>
-              {myCourses?.map((c) => (
-                <option key={c.id} value={c.id}>{c.title}</option>
-              ))}
-            </FilterSelect>
-            <button
-              type="button"
-              onClick={() => { setShowCreate(true); setForm(emptyForm); setQuestions([defaultQuestion()]); }}
-              className="bg-indigo-600 hover:bg-indigo-500 px-5 py-3 rounded-xl text-xs font-bold transition whitespace-nowrap"
-            >
-              + Create Quiz
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* Quiz list */}
       {loadingQuizzes && !quizzes?.length ? (
         <div className="flex items-center justify-center py-16 text-white">
@@ -788,9 +835,21 @@ const TeacherQuizzes = ({
         ))}
       </div>
       ) : (
-        <div className="bg-slate-900 p-6 rounded-3xl border border-slate-800 text-slate-400 text-sm">
-          No quizzes found. Create your first quiz above.
-        </div>
+         <div className="col-span-full bg-slate-900/50 p-16 rounded-[2.5rem] border border-slate-800 border-dashed text-center">
+            <div className="w-20 h-20 bg-slate-800/30 rounded-3xl flex items-center justify-center text-slate-500 mx-auto mb-6">
+              <i className="fas fa-clipboard-list text-3xl" />
+            </div>
+            <h3 className="text-2xl font-bold text-white mb-2">No Quiz Created</h3>
+            <p className="text-slate-400 max-w-sm mx-auto text-sm leading-relaxed">
+              Start by creating your first quiz for this course to begin tracking student progress.
+            </p>
+            <button
+              onClick={() => { resetQuizState(); setShowCreate(true); }}
+              className="mt-8 px-8 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition-all shadow-lg shadow-indigo-600/20"
+            >
+              + Create Quiz
+            </button>
+          </div>
       )}
 
       {/* ── CREATE MODAL ── */}
@@ -802,7 +861,7 @@ const TeacherQuizzes = ({
               <div className="flex justify-between items-center">
                 <h3 className="text-2xl font-black text-white tracking-tight">Create New Quiz</h3>
                 <button
-                  onClick={() => { setShowCreate(false); setForm(emptyForm); setQuestions([defaultQuestion()]); }}
+                  onClick={() => { setShowCreate(false); resetQuizState(); }}
                   className="w-10 h-10 flex items-center justify-center rounded-xl text-slate-500 hover:text-white hover:bg-white/5 transition-all"
                 >
                   <i className="fas fa-times text-lg"></i>
@@ -829,7 +888,7 @@ const TeacherQuizzes = ({
                   <p className="text-indigo-400 text-xs font-bold uppercase tracking-widest mt-1">{editTarget.course_title}</p>
                 </div>
                 <button
-                  onClick={() => { setEditTarget(null); setForm(emptyForm); setQuestions([defaultQuestion()]); }}
+                  onClick={() => { setEditTarget(null); resetQuizState(); }}
                   className="w-10 h-10 flex items-center justify-center rounded-xl text-slate-500 hover:text-white hover:bg-white/5 transition-all"
                 >
                   <i className="fas fa-times text-lg"></i>

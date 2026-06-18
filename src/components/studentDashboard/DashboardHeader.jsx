@@ -47,6 +47,7 @@ const DashboardHeader = () => {
   const stats = useSelector(selectDashboardStats);
   const authProfile = useSelector((s) => s.auth.profile);
   const studentId = student?.id ?? authProfile?.id;
+  const rollNo = authProfile?.student_profile?.roll_no;
   const email = student?.email ?? authProfile?.email;
 
   const formatGreeting = () => {
@@ -75,6 +76,7 @@ const DashboardHeader = () => {
           </h1>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
             {studentId && <InfoChip label="Student ID" value={String(studentId)} icon="id-badge" isMono={true} />}
+            {rollNo && <InfoChip label="Roll No" value={String(rollNo)} icon="hashtag" isMono={true} />}
             {email && <InfoChip label="Email" value={email} icon="envelope" />}
           </div>
         </div>
