@@ -149,22 +149,22 @@ const StudentProfileTab = ({ profile, userId, rollNo, onUpdate, onCancel, onSave
     <div className="space-y-4">
       {/* Student ID / Roll No — read-only */}
       {(userId != null || rollNo != null) && (
-        <div className="flex items-center gap-4 px-4 py-3 bg-slate-800/40 border border-slate-700/50 rounded-xl">
+        <div className="flex flex-wrap items-center gap-3 px-4 py-3 bg-slate-800/40 border border-slate-700/50 rounded-xl">
           {userId != null && (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 min-w-0">
               <i className="fas fa-id-badge text-indigo-400 text-sm flex-shrink-0" />
-              <div>
+              <div className="min-w-0">
                 <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Student ID</p>
-                <p className="text-white font-semibold text-sm">#{userId}</p>
+                <p className="text-white font-semibold text-sm truncate">#{userId}</p>
               </div>
             </div>
           )}
           {rollNo != null && (
-            <div className="flex items-center gap-3 border-l border-slate-700/50 pl-4">
+            <div className="flex items-center gap-3 sm:border-l sm:border-slate-700/50 sm:pl-3 min-w-0">
               <i className="fas fa-hashtag text-indigo-400 text-sm flex-shrink-0" />
-              <div>
+              <div className="min-w-0">
                 <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Roll No</p>
-                <p className="text-white font-semibold text-sm font-mono">{rollNo}</p>
+                <p className="text-white font-semibold text-sm font-mono truncate">{rollNo}</p>
               </div>
             </div>
           )}

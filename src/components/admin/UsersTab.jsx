@@ -424,6 +424,11 @@ const UsersTab = ({
                       <p className="text-[9px] sm:text-xs text-slate-500 break-all">
                         {user.email}
                       </p>
+                      {user.role === "student" && user.roll_no != null && (
+                        <p className="text-[9px] sm:text-xs text-slate-500 break-all">
+                          Roll #{user.roll_no}
+                        </p>
+                      )}
                     </div>
                   </div>
 
@@ -536,6 +541,11 @@ const UsersTab = ({
                               )}
                             </div>
                             <p className="text-sm text-slate-400">{user.email}</p>
+                            {user.role === "student" && user.roll_no != null && (
+                              <p className="text-sm text-slate-400">
+                                Roll #{user.roll_no}
+                              </p>
+                            )}
                           </div>
                         </div>
                       </td>

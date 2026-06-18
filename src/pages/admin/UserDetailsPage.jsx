@@ -90,6 +90,7 @@ const UserDetailsPage = () => {
             phone: profileResponse?.phone || "",
             distinctions: profileResponse?.distinctions || [],
             // Add student-specific fields
+            roll_no: profileResponse?.roll_no ?? null,
             grade_level: profileResponse?.grade_level || "",
             date_of_birth: profileResponse?.date_of_birth || "",
             parents: profileResponse?.parents || [],
@@ -293,7 +294,7 @@ const UserDetailsPage = () => {
                   <StudentProfileTab
                     profile={userProfile}
                     userId={userData?.id}
-                    rollNo={userData?.roll_no}
+                    rollNo={userProfile?.roll_no}
                     onUpdate={handleProfileUpdate}
                     onCancel={handleBackToUsers}
                     onSaved={handleBackToUsers}
