@@ -22,9 +22,10 @@ const PublicHome = () => {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [hireModal, setHireModal] = useState(null);
   const [withdrawConfirm, setWithdrawConfirm] = useState({ open: false, courseId: null, courseTitle: "" });
+  const [unenrollConfirm, setUnenrollConfirm] = useState({ open: false, courseId: null, courseTitle: "" });
 
   const { courses, isLoading: coursesLoading } = useSelector((state) => state.courses);
-  const { enrolledCourses, enrollingCourseIds, withdrawingCourseIds } = useSelector((state) => state.studentDashboard);
+  const { enrolledCourses, enrollingCourseIds, withdrawingCourseIds, unenrollingCourseIds } = useSelector((state) => state.studentDashboard);
   const { enrollmentIntent } = useSelector((state) => state.ui);
   const { teachers, loading: teachersLoading } = useSelector((state) => state.teachers);
 
@@ -64,8 +65,13 @@ const PublicHome = () => {
   };
 
   // Handle unenrollment
-  const handleUnenrollCourse = async (courseId, courseTitle) => {
-    if (!window.confirm(`Are you sure you want to unenroll from "${courseTitle}"?`)) return;
+  const handleUnenrollCourse = (courseId, courseTitle) => {
+    setUnenrollConfirm({ open: true, courseId, courseTitle });
+  };
+
+  const confirmUnenrollCourse = async () => {
+    const { courseId, courseTitle } = unenrollConfirm;
+    setUnenrollConfirm({ open: false, courseId: null, courseTitle: "" });
     try {
       await dispatch(unenrollFromCourse(courseId)).unwrap();
       toastManager.success(`Unenrolled from ${courseTitle}`);
@@ -399,6 +405,18 @@ const PublicHome = () => {
         loading={withdrawingCourseIds.includes(withdrawConfirm.courseId)}
         onConfirm={confirmWithdrawEnrollment}
         onCancel={() => setWithdrawConfirm({ open: false, courseId: null, courseTitle: "" })}
+      />
+
+      <ConfirmDialog
+        open={unenrollConfirm.open}
+        variant="danger"
+        title="Unenroll from Course"
+        message={`Are you sure you want to unenroll from "${unenrollConfirm.courseTitle}"?`}
+        confirmLabel="Yes, Unenroll"
+        cancelLabel="Keep Enrolled"
+        loading={unenrollingCourseIds.includes(unenrollConfirm.courseId)}
+        onConfirm={confirmUnenrollCourse}
+        onCancel={() => setUnenrollConfirm({ open: false, courseId: null, courseTitle: "" })}
       />
     </main>
   );

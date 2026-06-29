@@ -41,6 +41,7 @@ const Marketplace = () => {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [withdrawConfirm, setWithdrawConfirm] = useState({ open: false, courseId: null, courseTitle: "" });
+  const [unenrollConfirm, setUnenrollConfirm] = useState({ open: false, courseId: null, courseTitle: "" });
   const [selectedCourse, setSelectedCourse] = useState(null);
   const submissionGuard = useSubmissionGuard();
   const [tooltip, setTooltip] = useState({ visible: false, text: "", x: 0, y: 0 });
@@ -302,7 +303,7 @@ const Marketplace = () => {
   };
 
   // Handle course unenrollment
-  const handleUnenrollCourse = async (courseId, courseTitle) => {
+  const handleUnenrollCourse = (courseId, courseTitle) => {
     if (!auth.isLoggedIn) {
       dispatch(setAuthModal("login"));
       return;
@@ -313,27 +314,20 @@ const Marketplace = () => {
       return;
     }
 
-    // Show confirmation dialog
-    const confirmed = window.confirm(
-      `Are you sure you want to unenroll from "${courseTitle}"?`,
-    );
+    setUnenrollConfirm({ open: true, courseId, courseTitle });
+  };
 
-    if (!confirmed) {
-      return;
-    }
+  const confirmUnenrollCourse = async () => {
+    const { courseId, courseTitle } = unenrollConfirm;
+    setUnenrollConfirm({ open: false, courseId: null, courseTitle: "" });
 
     await submissionGuard.guard(async () => {
       try {
         await dispatch(unenrollFromCourse(courseId)).unwrap();
-        toastManager.success(`Successfully unenrolledfrom course ${courseTitle}`);
+        toastManager.success(`Successfully unenrolled from course ${courseTitle}`);
 
-        // Refresh courses to update enrollment status
         dispatch(fetchAllCourses());
-
-        // Always refresh student dashboard to sync enrollment state
-        if (auth.role === "student") {
-          dispatch(fetchStudentDashboard());
-        }
+        dispatch(fetchStudentDashboard());
       } catch (error) {
         showApiError(error);
       }
@@ -602,6 +596,18 @@ const Marketplace = () => {
         loading={withdrawingCourseIds.includes(withdrawConfirm.courseId)}
         onConfirm={confirmWithdrawEnrollment}
         onCancel={() => setWithdrawConfirm({ open: false, courseId: null, courseTitle: "" })}
+      />
+
+      <ConfirmDialog
+        open={unenrollConfirm.open}
+        variant="danger"
+        title="Unenroll from Course"
+        message={`Are you sure you want to unenroll from "${unenrollConfirm.courseTitle}"?`}
+        confirmLabel="Yes, Unenroll"
+        cancelLabel="Keep Enrolled"
+        loading={unenrollingCourseIds.includes(unenrollConfirm.courseId)}
+        onConfirm={confirmUnenrollCourse}
+        onCancel={() => setUnenrollConfirm({ open: false, courseId: null, courseTitle: "" })}
       />
       {/* Fixed category tooltip — escapes overflow-x-auto boundary */}
       {tooltip.visible && (

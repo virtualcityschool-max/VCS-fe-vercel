@@ -41,6 +41,7 @@ const CourseDetails = () => {
   const [paymentSubmitted, setPaymentSubmitted] = useState(false);
   const [viewerUrl, setViewerUrl] = useState(null);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [unenrollConfirm, setUnenrollConfirm] = useState({ open: false });
   const submissionGuard = useSubmissionGuard();
   // Get auth state from Redux store
   const auth = useSelector((state) => state.auth);
@@ -265,7 +266,7 @@ const CourseDetails = () => {
   };
 
   // Handle course unenrollment
-  const handleUnenrollCourse = async (courseData) => {
+  const handleUnenrollCourse = (courseData) => {
     if (!auth.isLoggedIn) {
       dispatch(setAuthModal("login"));
       return;
@@ -276,29 +277,20 @@ const CourseDetails = () => {
       return;
     }
 
-    // Show confirmation dialog
-    const confirmed = window.confirm(
-      `Are you sure you want to unenroll from "${courseData.title}"?`,
-    );
+    setUnenrollConfirm({ open: true, courseData });
+  };
 
-    if (!confirmed) {
-      return;
-    }
+  const confirmUnenrollCourse = async () => {
+    const { courseData } = unenrollConfirm;
+    setUnenrollConfirm({ open: false });
 
     await submissionGuard.guard(async () => {
       try {
         await dispatch(unenrollFromCourse(courseData.id)).unwrap();
-        toastManager.success(
-          `Successfully unenrolled from ${courseData.title}`,
-        );
+        toastManager.success(`Successfully unenrolled from ${courseData.title}`);
 
-        // Refresh course data to update enrollment status
         dispatch(fetchCourseById(courseData.id));
-
-        // Refresh student dashboard to sync enrollment state
-        if (auth.role === "student") {
-          dispatch(fetchStudentDashboard());
-        }
+        dispatch(fetchStudentDashboard());
       } catch (error) {
         showApiError(error);
       }
@@ -823,6 +815,18 @@ const CourseDetails = () => {
       {viewerUrl && (
         <FileViewerModal filePath={viewerUrl} handleClose={() => setViewerUrl(null)} />
       )}
+
+      <ConfirmDialog
+        open={unenrollConfirm.open}
+        variant="danger"
+        title="Unenroll from Course"
+        message={`Are you sure you want to unenroll from "${unenrollConfirm.courseData?.title}"?`}
+        confirmLabel="Yes, Unenroll"
+        cancelLabel="Keep Enrolled"
+        loading={unenrollingCourseIds.includes(unenrollConfirm.courseData?.id)}
+        onConfirm={confirmUnenrollCourse}
+        onCancel={() => setUnenrollConfirm({ open: false })}
+      />
     </section>
   );
 };
