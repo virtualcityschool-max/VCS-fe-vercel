@@ -830,37 +830,6 @@ const AuthModals = () => {
                   </p>
                 </div>
                 
-                <div>
-                  <label
-                    htmlFor="register-email"
-                    className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block"
-                  >
-                    Email
-                  </label>
-                  <input
-                    id="register-email"
-                    name="register-email"
-                    type="email"
-                    autoComplete="off"
-                    value={email}
-                    onChange={(e) => {
-                      toastManager.dismiss();
-                      setEmail(e.target.value);
-                      clearRegistrationFieldError("email");
-                      dispatch(clearAuthError());
-                    }}
-                    placeholder="example@example.com"
-                    className="w-full bg-slate-950 border border-white/5 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
-                  />
-                  {registrationErrors.email && (
-                    <p className="text-red-500 text-xs mt-2 animate-shake">
-                      {Array.isArray(registrationErrors.email)
-                        ? registrationErrors.email[0]
-                        : registrationErrors.email}
-                    </p>
-                  )}
-                </div>
-
                 {/* Add all other form fields (first/last name, password, confirmPassword, role) */}
                 <div>
                   <label
@@ -920,6 +889,70 @@ const AuthModals = () => {
                       {Array.isArray(registrationErrors.last_name)
                         ? registrationErrors.last_name[0]
                         : registrationErrors.last_name}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="register-email"
+                    className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block"
+                  >
+                    Email
+                  </label>
+                  <input
+                    id="register-email"
+                    name="register-email"
+                    type="email"
+                    autoComplete="off"
+                    value={email}
+                    onChange={(e) => {
+                      toastManager.dismiss();
+                      setEmail(e.target.value);
+                      clearRegistrationFieldError("email");
+                      dispatch(clearAuthError());
+                    }}
+                    placeholder="example@example.com"
+                    className="w-full bg-slate-950 border border-white/5 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
+                  />
+                  {registrationErrors.email && (
+                    <p className="text-red-500 text-xs mt-2 animate-shake">
+                      {Array.isArray(registrationErrors.email)
+                        ? registrationErrors.email[0]
+                        : registrationErrors.email}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="register-role"
+                    className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block"
+                  >
+                    Role
+                  </label>
+                  <FilterSelect
+                    id="register-role"
+                    value={role}
+                    onChange={(e) => {
+                      toastManager.dismiss();
+                      setRole(e.target.value);
+                      setGradeLevel("");
+                      clearRegistrationFieldError("role");
+                      dispatch(clearAuthError());
+                    }}
+                    placeholder="Select Role"
+                    className="w-full !bg-slate-950 !border-white/5 !rounded-2xl !px-6 !py-4 focus:ring-2 focus:ring-indigo-500 text-white text-sm"
+                  >
+                    <option value="teacher">Tutor</option>
+                    <option value="student">Student</option>
+                    <option value="parent">Guardian</option>
+                  </FilterSelect>
+                  {registrationErrors.role && (
+                    <p className="text-red-500 text-xs mt-2 animate-shake">
+                      {Array.isArray(registrationErrors.role)
+                        ? registrationErrors.role[0]
+                        : registrationErrors.role}
                     </p>
                   )}
                 </div>
@@ -1065,39 +1098,6 @@ const AuthModals = () => {
                     </div>
                   </div>
                 )}
-
-                <div>
-                  <label
-                    htmlFor="register-role"
-                    className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block"
-                  >
-                    Role
-                  </label>
-                  <FilterSelect
-                    id="register-role"
-                    value={role}
-                    onChange={(e) => {
-                      toastManager.dismiss();
-                      setRole(e.target.value);
-                      setGradeLevel("");
-                      clearRegistrationFieldError("role");
-                      dispatch(clearAuthError());
-                    }}
-                    placeholder="Select Role"
-                    className="w-full !bg-slate-950 !border-white/5 !rounded-2xl !px-6 !py-4 focus:ring-2 focus:ring-indigo-500 text-white text-sm"
-                  >
-                    <option value="teacher">Tutor</option>
-                    <option value="student">Student</option>
-                    <option value="parent">Guardian</option>
-                  </FilterSelect>
-                  {registrationErrors.role && (
-                    <p className="text-red-500 text-xs mt-2 animate-shake">
-                      {Array.isArray(registrationErrors.role)
-                        ? registrationErrors.role[0]
-                        : registrationErrors.role}
-                    </p>
-                  )}
-                </div>
 
                 {role === "student" && (
                   <div>

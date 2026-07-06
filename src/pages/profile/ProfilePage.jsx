@@ -11,6 +11,7 @@ import PhoneInput from "../../components/ui/PhoneInput";
 import FilterSelect from "../../components/ui/FilterSelect";
 import { getStorageUrl } from "../../utils/storageUrl";
 import DistinctionsEditor from "../../components/admin/DistinctionsEditor";
+import { getDisplayName } from "../../utils/userDisplay";
 
 // ── Tiny helpers ──────────────────────────────────────────────────────────────
 
@@ -135,7 +136,11 @@ const ProfilePage = () => {
   const initForm = (data) => {
     const rp = getRoleProfile(data);
     const fields = FIELDS[role] || [];
-    const initial = { timezone: data?.timezone ?? "" };
+    const initial = {
+      timezone: data?.timezone ?? "",
+      first_name: data?.first_name ?? "",
+      last_name: data?.last_name ?? "",
+    };
     fields.forEach(({ key, type }) => {
       const val = rp[key] ?? "";
       initial[key] = type === "tel" && val ? normalizePhone(val) : val;
@@ -150,6 +155,10 @@ const ProfilePage = () => {
   const handleSave = async () => {
     // Validation
     const newErrors = {};
+    if (role !== "admin") {
+      if (!form.first_name?.trim()) newErrors.first_name = "First name is required";
+      if (!form.last_name?.trim()) newErrors.last_name = "Last name is required";
+    }
     if (role === "teacher" && (form.experience_years === "" || form.experience_years === null)) {
       newErrors.experience_years = "Experience years is required";
     }
@@ -174,8 +183,13 @@ const ProfilePage = () => {
 
     setSaving(true);
     try {
-      // Always save timezone at the user level
-      await authService.updateProfile({ timezone: form.timezone || "" });
+      // Always save account-level fields
+      const accountPayload = { timezone: form.timezone || "" };
+      if (role !== "admin") {
+        accountPayload.first_name = form.first_name.trim();
+        accountPayload.last_name = form.last_name.trim();
+      }
+      await authService.updateProfile(accountPayload);
 
       // Save role-specific fields (not applicable for admin)
       if (role !== "admin") {
@@ -240,8 +254,9 @@ const ProfilePage = () => {
   };
 
   // ── Derived ────────────────────────────────────────────────────────────────
-  const initials = username
-    ? username.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2)
+  const displayName = getDisplayName(authProfile) || username;
+  const initials = displayName
+    ? displayName.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2)
     : "U";
 
   const roleProfile = getRoleProfile(profile);
@@ -334,7 +349,7 @@ const ProfilePage = () => {
               <div className="flex-1 min-w-0">
                 <div className="flex flex-wrap items-center gap-2 mb-1">
                   <h1 className="text-xl font-black font-poppins text-white truncate">
-                    {profile?.username || username}
+                    {getDisplayName(profile) || displayName}
                   </h1>
                   <span className={`text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full border ${ROLE_COLOR[role]}`}>
                     {ROLE_LABEL[role]}
@@ -377,6 +392,64 @@ const ProfilePage = () => {
           <h2 className="text-sm font-bold uppercase tracking-widest text-slate-500">
             Profile Details
           </h2>
+
+          {role !== "admin" && (
+            <>
+              <Field label="First Name" icon="user">
+                <div required>
+                  {editing ? (
+                    <input
+                      type="text"
+                      placeholder="First Name"
+                      value={form.first_name || ""}
+                      onChange={(e) => {
+                        setForm((p) => ({ ...p, first_name: e.target.value }));
+                        clearFieldError("first_name");
+                      }}
+                      className={`${inputCls} ${errors.first_name ? "border-red-500 ring-1 ring-red-500/20" : ""}`}
+                    />
+                  ) : (
+                    <div className={readCls}>
+                      {profile?.first_name || <span className="text-slate-600 italic">Not set</span>}
+                    </div>
+                  )}
+                  {editing && errors.first_name && (
+                    <p className="mt-1.5 text-[11px] text-red-400 font-medium flex items-center gap-1.5">
+                      <i className="fas fa-exclamation-circle" />
+                      {getFieldError("first_name")}
+                    </p>
+                  )}
+                </div>
+              </Field>
+
+              <Field label="Last Name" icon="user">
+                <div required>
+                  {editing ? (
+                    <input
+                      type="text"
+                      placeholder="Last Name"
+                      value={form.last_name || ""}
+                      onChange={(e) => {
+                        setForm((p) => ({ ...p, last_name: e.target.value }));
+                        clearFieldError("last_name");
+                      }}
+                      className={`${inputCls} ${errors.last_name ? "border-red-500 ring-1 ring-red-500/20" : ""}`}
+                    />
+                  ) : (
+                    <div className={readCls}>
+                      {profile?.last_name || <span className="text-slate-600 italic">Not set</span>}
+                    </div>
+                  )}
+                  {editing && errors.last_name && (
+                    <p className="mt-1.5 text-[11px] text-red-400 font-medium flex items-center gap-1.5">
+                      <i className="fas fa-exclamation-circle" />
+                      {getFieldError("last_name")}
+                    </p>
+                  )}
+                </div>
+              </Field>
+            </>
+          )}
 
           {fields.map(({ key, label, icon, type, placeholder, required }) => (
             <Field key={key} label={label} icon={icon}>

@@ -286,6 +286,7 @@ const UserAccountTab = ({ user, onUpdate, onCancel, onSaved, onAvatarUpdated, re
                 placeholder="Email"
                 error={getFieldError("email")}
                 disabled={readOnly}
+                autoComplete="off"
               />
             </div>
 
@@ -353,6 +354,7 @@ const UserAccountTab = ({ user, onUpdate, onCancel, onSaved, onAvatarUpdated, re
                   error={getFieldError("password")}
                   showPassword={showPassword}
                   onTogglePassword={() => setShowPassword(!showPassword)}
+                  autoComplete="new-password"
                 />
                 {formData.password && (
                   <PasswordValidation password={formData.password} />
@@ -374,6 +376,7 @@ const UserAccountTab = ({ user, onUpdate, onCancel, onSaved, onAvatarUpdated, re
                   onTogglePassword={() =>
                     setShowConfirmPassword(!showConfirmPassword)
                   }
+                  autoComplete="new-password"
                 />
               </div>
           </div>
