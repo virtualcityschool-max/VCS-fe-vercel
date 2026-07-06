@@ -1,5 +1,6 @@
 // Utility Functions
 export { default as axiosInstance } from "./axiosInstance";
+export { getDisplayName } from "./userDisplay";
 export {
   handleApiError,
   getErrorMessage,

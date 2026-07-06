@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { adminService } from "../services/adminService";
 import { toastManager } from "../utils/toastManager";
+import { getDisplayName } from "../utils/userDisplay";
 
 function formatTime(t) {
   const [h] = t.split(":").map(Number);
@@ -97,11 +98,11 @@ const TeacherPrivateAvailableSlots = ({
       {teacher && (
         <div className="flex items-center gap-3 px-4 py-3 bg-indigo-500/10 border border-indigo-500/30 rounded-xl">
           <div className="w-9 h-9 rounded-full bg-indigo-600 flex items-center justify-center text-white font-semibold text-sm">
-            {teacher.username?.[0]?.toUpperCase() || "T"}
+            {getDisplayName(teacher)?.[0]?.toUpperCase() || "T"}
           </div>
           <div className="min-w-0">
             <p className="text-sm font-medium text-white truncate">
-              {teacher.username}
+              {getDisplayName(teacher)}
             </p>
             <p className="text-xs text-slate-400 truncate">{teacher.email}</p>
           </div>

@@ -9,6 +9,7 @@ import {
 } from "../../store/slices/teacherSlice";
 import AttendanceMatrix from "../../components/common/AttendanceMatrix";
 import { FilterSelect } from "../../components/ui";
+import { getDisplayName } from "../../utils/userDisplay";
 
 const ParentAttendance = () => {
   const dispatch = useDispatch();
@@ -70,7 +71,7 @@ const ParentAttendance = () => {
             >
               {children.map((c) => (
                 <option key={c.id} value={c.id}>
-                  {c.username || c.name}
+                  {getDisplayName(c) || c.name}
                 </option>
               ))}
             </FilterSelect>

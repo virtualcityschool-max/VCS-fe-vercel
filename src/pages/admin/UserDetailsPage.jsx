@@ -15,6 +15,7 @@ import {
   ParentProfileTab,
 } from "../../components/admin";
 import TeacherSlotsCalendarSection from "../../components/admin/TeacherSlotsCalendarSection";
+import { getDisplayName as getUserDisplayName } from "../../utils/userDisplay";
 
 // Utility function to validate user ID
 const isValidUserId = (id) => {
@@ -22,20 +23,7 @@ const isValidUserId = (id) => {
 };
 
 // Utility function to get display name safely
-const getDisplayName = (user) => {
-  if (!user) return "Unknown User";
-
-  const username = user.username?.trim();
-  const firstName = user.first_name?.trim();
-  const lastName = user.last_name?.trim();
-
-  if (username) return username;
-  if (firstName && lastName) return `${firstName} ${lastName}`;
-  if (firstName) return firstName;
-  if (lastName) return lastName;
-
-  return "Unknown User";
-};
+const getDisplayName = (user) => getUserDisplayName(user) || "Unknown User";
 
 const UserDetailsPage = () => {
   const { id } = useParams();

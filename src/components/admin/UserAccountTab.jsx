@@ -6,13 +6,15 @@ import { getStorageUrl } from "../../utils/storageUrl";
 import { adminService } from "../../services/adminService";
 import { toastManager } from "../../utils/toastManager";
 import { showApiError } from "../../utils/apiErrorHandler";
+import { getDisplayName } from "../../utils/userDisplay";
 
 const MAX_AVATAR_MB = 2;
 const ACCEPTED_TYPES = ["image/jpeg", "image/png"];
 
 const UserAccountTab = ({ user, onUpdate, onCancel, onSaved, onAvatarUpdated, readOnly = false }) => {
   const [formData, setFormData] = useState({
-    username: user?.username || "",
+    first_name: user?.first_name || "",
+    last_name: user?.last_name || "",
     email: user?.email || "",
     role: user?.role || "student",
     is_active: user?.is_active ?? true,
@@ -58,7 +60,8 @@ const UserAccountTab = ({ user, onUpdate, onCancel, onSaved, onAvatarUpdated, re
   };
 
   const currentAvatar = avatarPreview || getStorageUrl(user?.avatar);
-  const initials = (user?.username || "U").slice(0, 2).toUpperCase();
+  const displayName = getDisplayName(user);
+  const initials = (displayName || "U").slice(0, 2).toUpperCase();
 
   const {
     errors,
@@ -87,11 +90,11 @@ const UserAccountTab = ({ user, onUpdate, onCancel, onSaved, onAvatarUpdated, re
       newErrors.email = emailValidation.error;
     }
 
-    // Username validation
-    if (!formData.username.trim()) {
-      newErrors.username = "Username is required";
-    } else if (formData.username.length < 3) {
-      newErrors.username = "Username must be at least 3 characters";
+    // First/Last name: optional here (older accounts may not have one yet),
+    // but if either is provided both must be to avoid a half-set name.
+    if ((formData.first_name.trim() && !formData.last_name.trim())
+      || (!formData.first_name.trim() && formData.last_name.trim())) {
+      newErrors.last_name = "Enter both first and last name, or leave both blank";
     }
 
     // Password validation (only if password is provided)
@@ -121,7 +124,8 @@ const UserAccountTab = ({ user, onUpdate, onCancel, onSaved, onAvatarUpdated, re
     setIsSaving(true);
     try {
       const updateData = {
-        username: formData.username.trim(),
+        first_name: formData.first_name.trim(),
+        last_name: formData.last_name.trim(),
         email: formData.email.trim(),
         role: formData.role,
         is_active: formData.is_active,
@@ -156,7 +160,8 @@ const UserAccountTab = ({ user, onUpdate, onCancel, onSaved, onAvatarUpdated, re
   const handleCancel = () => {
     // Reset form to original user data
     setFormData({
-      username: user?.username || "",
+      first_name: user?.first_name || "",
+      last_name: user?.last_name || "",
       email: user?.email || "",
       role: user?.role || "student",
       is_active: user?.is_active ?? true,
@@ -222,7 +227,7 @@ const UserAccountTab = ({ user, onUpdate, onCancel, onSaved, onAvatarUpdated, re
 
         {/* Info */}
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold text-white mb-0.5 truncate">{user?.username || "User"}</p>
+          <p className="text-sm font-semibold text-white mb-0.5 truncate">{displayName || "User"}</p>
           <p className="text-xs text-slate-500 capitalize mb-2">{user?.role || "—"}</p>
           {!readOnly && (
             <button
@@ -243,14 +248,28 @@ const UserAccountTab = ({ user, onUpdate, onCancel, onSaved, onAvatarUpdated, re
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-2">
-                Username
+                First Name
               </label>
               <Input
-                value={formData.username}
-                onChange={(e) => handleInputChange("username", e.target.value)}
+                value={formData.first_name}
+                onChange={(e) => handleInputChange("first_name", e.target.value)}
                 className="w-full bg-slate-800 text-white"
-                placeholder="Username"
-                error={getFieldError("username")}
+                placeholder="First Name"
+                error={getFieldError("first_name")}
+                disabled={readOnly}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                Last Name
+              </label>
+              <Input
+                value={formData.last_name}
+                onChange={(e) => handleInputChange("last_name", e.target.value)}
+                className="w-full bg-slate-800 text-white"
+                placeholder="Last Name"
+                error={getFieldError("last_name")}
                 disabled={readOnly}
               />
             </div>

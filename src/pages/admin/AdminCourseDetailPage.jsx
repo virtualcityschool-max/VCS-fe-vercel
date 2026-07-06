@@ -18,6 +18,7 @@ import CourseForm from "../../components/admin/CourseForm";
 import { showApiError } from "../../utils/apiErrorHandler";
 import { useFieldErrors } from "../../hooks";
 import QuillViewer from "../../components/common/QuillViewer";
+import { getDisplayName } from "../../utils/userDisplay";
 
 const Badge = ({ children, color = "slate" }) => {
   const colors = {
@@ -318,7 +319,7 @@ const AdminCourseDetailPage = () => {
                 {course.description}
               </p>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <MetaTile icon="user" label="Tutor" value={course.instructor?.username || "—"} />
+                <MetaTile icon="user" label="Tutor" value={getDisplayName(course.instructor) || "—"} />
                 <MetaTile icon="tag" label="Category" value={formatCategoryLabel(course.category) || "—"} />
                 <MetaTile
                   icon="wallet"

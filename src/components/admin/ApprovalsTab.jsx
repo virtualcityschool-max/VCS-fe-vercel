@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import ConfirmDialog from "../common/ConfirmDialog";
 import { getStorageUrl } from "../../utils/storageUrl";
 import { useDateFormatters } from "../../hooks/useDateFormatters";
+import { getDisplayName } from "../../utils/userDisplay";
 
 const ApprovalsTab = ({
   pendingApprovals,
@@ -143,15 +144,13 @@ const ApprovalsTab = ({
                           getStorageUrl(user.profile_image)
                         }
                         className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl border border-slate-700 shadow-md shrink-0"
-                        alt={user.username || user.email}
+                        alt={getDisplayName(user) || user.email}
                       />:
                        <i className="fas fa-user text-white"></i>
                       }
                       <div className="flex-1 min-w-0">
                         <p className="font-bold text-white text-sm sm:text-base mb-1">
-                          {user.username ||
-                            user.first_name + " " + user.last_name ||
-                            "Unknown User"}
+                          {getDisplayName(user) || "Unknown User"}
                         </p>
                         <p className="text-[9px] sm:text-xs text-slate-500 break-all">
                           {user.email}
@@ -175,7 +174,7 @@ const ApprovalsTab = ({
 
                         <div className="flex gap-2">
                           <button
-                            onClick={() => handleApprove(user.id, user.username)}
+                            onClick={() => handleApprove(user.id, getDisplayName(user))}
                             disabled={isProcessing[user.id] === "approving"}
                             className="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-indigo-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 sm:gap-2 flex-1 justify-center"
                           >
@@ -196,7 +195,7 @@ const ApprovalsTab = ({
                             )}
                           </button>
                           <button
-                            onClick={() => handleReject(user.id, user.username)}
+                            onClick={() => handleReject(user.id, getDisplayName(user))}
                             disabled={isProcessing[user.id] === "rejecting"}
                             className="bg-red-600 text-white px-3 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-red-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 sm:gap-2 flex-1 justify-center"
                           >
@@ -255,16 +254,14 @@ const ApprovalsTab = ({
                               getStorageUrl(user.profile_image)
                             }
                             className="w-10 h-10 rounded-xl border border-slate-700 shadow-md"
-                            alt={user.username || user.email}
+                            alt={getDisplayName(user) || user.email}
                           />:
                            <i className="fas fa-user text-white"></i>
                           }
                           </div>
                           <div>
                             <p className="font-bold text-white group-hover:text-indigo-400 transition">
-                              {user.username ||
-                                user.first_name + " " + user.last_name ||
-                                "Unknown User"}
+                              {getDisplayName(user) || "Unknown User"}
                             </p>
                             <p className="text-[11px] text-slate-500">
                               {user.email}
@@ -287,7 +284,7 @@ const ApprovalsTab = ({
                       <td className="px-8 py-6 text-center">
                         <div className="flex items-center gap-2 justify-center">
                           <button
-                            onClick={() => handleApprove(user.id, user.username)}
+                            onClick={() => handleApprove(user.id, getDisplayName(user))}
                             disabled={isProcessing[user.id] === "approving"}
                             className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                           >
@@ -304,7 +301,7 @@ const ApprovalsTab = ({
                             )}
                           </button>
                           <button
-                            onClick={() => handleReject(user.id, user.username)}
+                            onClick={() => handleReject(user.id, getDisplayName(user))}
                             disabled={isProcessing[user.id] === "rejecting"}
                             className="bg-red-600 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                           >

@@ -10,6 +10,7 @@ import { useFieldErrors } from "../../hooks";
 import CourseSelect from "../../components/common/CourseSelect";
 import { toastManager } from "../../utils/toastManager";
 import { showApiError } from "../../utils/apiErrorHandler";
+import { getDisplayName } from "../../utils/userDisplay";
 
 const EMPTY_FORM = {
   student_id: "",
@@ -49,7 +50,7 @@ const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
     const q = studentSearch.trim().toLowerCase();
     if (!q) return students;
     return students.filter((s) =>
-      s.username?.toLowerCase().includes(q) ||
+      getDisplayName(s)?.toLowerCase().includes(q) ||
       s.email?.toLowerCase().includes(q) ||
       String(s.roll_no ?? "").includes(q)
     );
@@ -149,7 +150,7 @@ const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
                   }`}
               >
                 <span className={`truncate ${selectedStudent ? "text-white" : "text-slate-500"}`}>
-                  {selectedStudent ? selectedStudent.username : "Select a student"}
+                  {selectedStudent ? getDisplayName(selectedStudent) : "Select a student"}
                 </span>
                 <i className={`fas fa-chevron-down text-slate-500 text-[10px] flex-shrink-0 transition-transform duration-150 ${studentDropdownOpen ? "rotate-180" : ""}`} />
               </button>
@@ -191,7 +192,7 @@ const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
                                 : "text-slate-300 hover:bg-slate-800 hover:text-white"
                               }`}
                           >
-                            <p className="font-medium">{s.username}</p>
+                            <p className="font-medium">{getDisplayName(s)}</p>
                             <p className="text-slate-500 text-[11px] mt-0.5 font-normal">
                               {s.email}
                               {s.roll_no != null && <span className="ml-2 text-slate-600 font-mono">· Roll#: {s.roll_no}</span>}

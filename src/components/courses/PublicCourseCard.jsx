@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { getCourseImage } from "../../utils/courseImageUtils";
 import { getStorageUrl } from "../../utils/storageUrl";
+import { getDisplayName } from "../../utils/userDisplay";
 
 const PublicCourseCard = ({
   course,
@@ -128,11 +129,11 @@ const PublicCourseCard = ({
             onClick={(e) => e.stopPropagation()}
             className={`${large ? "text-xs" : "text-[9px]"} text-slate-500 hover:text-blue-400 transition-colors truncate block`}
           >
-            {course.instructor.username || "Tutor"}
+            {getDisplayName(course.instructor) || "Tutor"}
           </Link>
         ) : (
           <span className={`${large ? "text-xs" : "text-[9px]"} text-slate-500 truncate`}>
-            {course.instructor?.username || "Tutor"}
+            {getDisplayName(course.instructor) || "Tutor"}
           </span>
         )}
 

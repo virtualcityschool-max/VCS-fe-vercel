@@ -5,6 +5,7 @@ import { coursesService } from "../../services/coursesService";
 import { toastManager } from "../../utils/toastManager";
 import EvaluationMatrix from "../../components/common/EvaluationMatrix";
 import { FilterSelect } from "../../components/ui";
+import { getDisplayName } from "../../utils/userDisplay";
 
 const ParentEvaluationPage = () => {
   const dispatch = useDispatch();
@@ -78,7 +79,7 @@ const ParentEvaluationPage = () => {
               >
                 {children.map((c) => (
                   <option key={c.id} value={c.id}>
-                    {c.username || c.name}
+                    {getDisplayName(c) || c.name}
                   </option>
                 ))}
               </FilterSelect>

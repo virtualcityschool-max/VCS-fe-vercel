@@ -1,6 +1,7 @@
 import { useState } from "react";
 import ConfirmDialog from "../common/ConfirmDialog";
 import { formatPhoneDisplay } from "../../utils/validation";
+import { getDisplayName } from "../../utils/userDisplay";
 
 const STATUS_BADGE = {
   pending: "bg-amber-500/20 text-amber-400 border-amber-500/30",
@@ -150,7 +151,7 @@ const HireRequestsTab = ({
                       </div>
                       <div className="min-w-0">
                         <p className="text-sm font-bold text-slate-200 truncate">
-                          {req.teacher?.username || `Tutor #${req.teacher?.id}`}
+                          {getDisplayName(req.teacher) || `Tutor #${req.teacher?.id}`}
                         </p>
                         {req.teacher?.email && (
                           <p className="text-[10px] text-slate-500 truncate">{req.teacher.email}</p>
@@ -268,7 +269,7 @@ const HireRequestsTab = ({
                 {/* Left — info details */}
                 <div className="px-6 py-5 space-y-0 divide-y divide-slate-800/60">
                   <DetailRow icon="phone"              label="Phone"             value={detailReq.phone} />
-                  <DetailRow icon="chalkboard-teacher" label="Tutor Requested" value={detailReq.teacher?.username || `Tutor #${detailReq.teacher?.id}`} />
+                  <DetailRow icon="chalkboard-teacher" label="Tutor Requested" value={getDisplayName(detailReq.teacher) || `Tutor #${detailReq.teacher?.id}`} />
                   {detailReq.teacher?.email && (
                     <DetailRow icon="envelope" label="Tutor Email" value={detailReq.teacher.email} />
                   )}

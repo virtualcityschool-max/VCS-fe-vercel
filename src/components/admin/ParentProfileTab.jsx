@@ -20,6 +20,7 @@ import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import { showApiError } from "../../utils/apiErrorHandler";
 import SearchInput from "../ui/SearchInput";
+import { getDisplayName } from "../../utils/userDisplay";
 
 const ParentProfileTab = ({ profile, onUpdate, onRefresh, onCancel, onSaved, readOnly = false }) => {
   const { id } = useParams();
@@ -199,10 +200,7 @@ const ParentProfileTab = ({ profile, onUpdate, onRefresh, onCancel, onSaved, rea
 
   const filteredStudents = availableStudents.filter((student) => {
     const searchLower = searchTerm.toLowerCase();
-    const studentName = (
-      student.username ||
-      `${student.first_name || ""} ${student.last_name || ""}`
-    ).toLowerCase();
+    const studentName = getDisplayName(student).toLowerCase();
     return (
       studentName.includes(searchLower) ||
       student.email?.toLowerCase().includes(searchLower) ||
@@ -263,7 +261,7 @@ const ParentProfileTab = ({ profile, onUpdate, onRefresh, onCancel, onSaved, rea
                         <i className="fas fa-user-graduate text-green-500 text-base"></i>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-white truncate">{child.username}</p>
+                        <p className="font-semibold text-white truncate">{getDisplayName(child)}</p>
                         <div className="space-y-0.5 mt-1">
                           <p className="text-[11px] text-slate-400 flex items-center gap-1.5">
                             <i className="fas fa-id-badge text-[9px]"></i>
@@ -281,7 +279,7 @@ const ParentProfileTab = ({ profile, onUpdate, onRefresh, onCancel, onSaved, rea
                             variant="danger"
                             size="sm"
                             onClick={() =>
-                              handleUnlinkChild(child.id, child.username)
+                              handleUnlinkChild(child.id, getDisplayName(child))
                             }
                             disabled={unlinkingChildId === child.id}
                             className="mt-4 w-full sm:w-auto px-4 py-1.5 text-xs font-medium rounded-lg opacity-80 hover:opacity-100 transition-opacity"
@@ -380,7 +378,7 @@ const ParentProfileTab = ({ profile, onUpdate, onRefresh, onCancel, onSaved, rea
 
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-semibold text-white truncate">
-                              {student.username || `${student.first_name || ""} ${student.last_name || ""}`.trim() || student.email.split('@')[0]}
+                              {getDisplayName(student) || student.email.split('@')[0]}
                             </p>
                             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
                               <span className="flex items-center gap-1.5 text-[11px] text-slate-400">

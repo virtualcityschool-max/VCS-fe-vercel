@@ -11,6 +11,7 @@ import {
 import { showApiError } from "../../utils/apiErrorHandler";
 import { useDateFormatters } from "../../hooks/useDateFormatters";
 import TimezoneTag from "../ui/TimezoneTag";
+import { getDisplayName } from "../../utils/userDisplay";
 
 
 const fmt12 = (t) => {
@@ -95,17 +96,17 @@ const ChildCard = ({ child }) => {
           {child.avatar ? (
             <img
               src={child.avatar}
-              alt={child.username}
+              alt={getDisplayName(child)}
               className="w-16 h-16 rounded-2xl border-2 border-indigo-500/30 shadow-xl object-cover shrink-0"
             />
           ) : (
             <div className="w-16 h-16 bg-indigo-600/10 text-indigo-400 rounded-2xl border-2 border-indigo-500/30 shadow-xl flex items-center justify-center text-xl font-black shrink-0">
-              {getInitials(child.username)}
+              {getInitials(getDisplayName(child))}
             </div>
           )}
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 mb-1">
-              <h3 className="text-xl font-black text-white truncate leading-tight flex-1">{child.username}</h3>
+              <h3 className="text-xl font-black text-white truncate leading-tight flex-1">{getDisplayName(child)}</h3>
               {child.grade_level && (
                 <span className="text-[9px] text-indigo-400 font-black uppercase tracking-wider bg-indigo-500/10 border border-indigo-500/20 rounded-lg px-2 py-0.5 shrink-0">
                   Grade {child.grade_level}
@@ -332,7 +333,7 @@ const ChildCard = ({ child }) => {
         open={confirmUnlink}
         variant="danger"
         title="Unlink Child"
-        message={`Are you sure you want to unlink ${child.name || child.username || "this child"}? You will lose access to their dashboard.`}
+        message={`Are you sure you want to unlink ${child.name || getDisplayName(child) || "this child"}? You will lose access to their dashboard.`}
         confirmLabel="Unlink"
         cancelLabel="Cancel"
         loading={isUnlinking}

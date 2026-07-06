@@ -171,7 +171,6 @@ export const toggleUserActive = createAsyncThunk(
         is_active: !user.is_active,
         is_staff: user.is_staff ?? false,
         role: user.role,
-        username: user.username,
       });
       return result;
     } catch (error) {

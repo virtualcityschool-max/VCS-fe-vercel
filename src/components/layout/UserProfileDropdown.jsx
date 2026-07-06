@@ -5,6 +5,7 @@ import { logoutUser } from "../../store/slices/authSlice";
 import { ROLES, ROUTES } from "../../constants";
 import { toastManager } from "../../utils/toastManager";
 import { getStorageUrl } from "../../utils/storageUrl";
+import { getDisplayName } from "../../utils/userDisplay";
 
 const UserProfileDropdown = ({ dropUp = false, isCollapsed = false }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -28,9 +29,11 @@ const UserProfileDropdown = ({ dropUp = false, isCollapsed = false }) => {
     }
   };
 
+  const displayName = getDisplayName(auth.user) || auth.username;
+
   const getInitials = () => {
-    if (auth.username) {
-      return auth.username
+    if (displayName) {
+      return displayName
         .split(" ")
         .map((word) => word[0])
         .join("")
@@ -99,7 +102,7 @@ const UserProfileDropdown = ({ dropUp = false, isCollapsed = false }) => {
         {!isCollapsed && (
           <div className={`min-w-0 ${dropUp ? "text-left flex-1" : "text-right hidden sm:block"}`}>
             <p className="text-sm font-semibold text-white leading-none mb-1 truncate">
-              {auth.username || "User"}
+              {displayName || "User"}
             </p>
             <p className="text-xs text-indigo-400 font-medium uppercase tracking-wider leading-none truncate">
               {getRoleLabel()}
@@ -177,7 +180,7 @@ const UserProfileDropdown = ({ dropUp = false, isCollapsed = false }) => {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-white truncate">
-                  {auth.username || "User"}
+                  {displayName || "User"}
                 </p>
                 <p className="text-xs text-slate-400 truncate">{auth.user?.email}</p>
                 <p className="text-xs text-indigo-400 font-medium uppercase tracking-wider mt-1 truncate">

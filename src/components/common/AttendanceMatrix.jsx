@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
 import { useSelector } from "react-redux";
 import { formatTime } from "../../utils/validation";
+import { getDisplayName } from "../../utils/userDisplay";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const getId = (v) => (v && typeof v === "object") ? v.id : v;
@@ -71,9 +72,7 @@ const AttendanceMatrix = ({
       enrolledStudents.forEach((item) => {
         const s    = item.student || item;
         const id   = s.id;
-        const name = s.username
-          || [s.first_name, s.last_name].filter(Boolean).join(" ")
-          || `#${id}`;
+        const name = getDisplayName(s) || `#${id}`;
         if (id != null && !map.has(id)) {
           map.set(id, { id, name, rollNo: s.roll_no });
         }

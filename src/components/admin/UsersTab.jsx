@@ -11,6 +11,7 @@ import ConfirmDialog from "../common/ConfirmDialog";
 import { getStorageUrl } from "../../utils/storageUrl";
 import { coursesService } from "../../services/coursesService";
 import { toastManager } from "../../utils/toastManager";
+import { getDisplayName } from "../../utils/userDisplay";
 
 // Search controls component
 const SearchControls = ({
@@ -412,7 +413,7 @@ const UsersTab = ({
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap mb-1">
                         <p className="font-bold text-white text-sm sm:text-base">
-                          {user.username || user.first_name + " " + user.last_name || "Unknown User"}
+                          {getDisplayName(user) || "Unknown User"}
                         </p>
                         {user.is_superuser && (
                           <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-amber-500/15 border border-amber-500/30 text-amber-400 text-[9px] font-black uppercase tracking-wider">
@@ -531,7 +532,7 @@ const UsersTab = ({
                           <div>
                             <div className="flex items-center gap-2 flex-wrap">
                               <p className="font-medium text-white">
-                                {user.username || user.first_name + " " + user.last_name || "Unknown User"}
+                                {getDisplayName(user) || "Unknown User"}
                               </p>
                               {user.is_superuser && (
                                 <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-amber-500/15 border border-amber-500/30 text-amber-400 text-[9px] font-black uppercase tracking-wider">

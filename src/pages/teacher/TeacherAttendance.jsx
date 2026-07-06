@@ -275,7 +275,7 @@ const TeacherAttendance = () => {
             <AttendanceMatrix
               sessions={adminSessions}
               attendanceRecords={adminMatrixRecords}
-              enrolledStudents={profile?.id ? [{ id: profile.id, username: profile.username }] : []}
+              enrolledStudents={profile?.id ? [{ id: profile.id, username: profile.username, first_name: profile.first_name, last_name: profile.last_name }] : []}
               participantRole="teacher"
             />
           );
@@ -297,7 +297,7 @@ const TeacherAttendance = () => {
             enrolledStudents={
               tab === "students"
                 ? courseEnrollments
-                : profile?.id ? [{ id: profile.id, username: profile.username }] : []
+                : profile?.id ? [{ id: profile.id, username: profile.username, first_name: profile.first_name, last_name: profile.last_name }] : []
             }
             participantRole={tab === "mine" ? "teacher" : "student"}
             onEditRecord={tab === "students" ? setEditRecord : undefined}

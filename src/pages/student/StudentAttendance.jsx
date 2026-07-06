@@ -78,7 +78,7 @@ const StudentAttendance = () => {
         <AttendanceMatrix
           sessions={sessions}
           attendanceRecords={attendance || []}
-          enrolledStudents={profile?.id ? [{ id: profile.id, username: profile.username }] : []}
+          enrolledStudents={profile?.id ? [{ id: profile.id, username: profile.username, first_name: profile.first_name, last_name: profile.last_name }] : []}
           participantRole="student"
         />
       )}

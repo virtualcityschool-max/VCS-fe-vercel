@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
+import { getDisplayName } from "../../utils/userDisplay";
 
 /**
  * Rich course dropdown rendered via portal — floats freely above modals/overflow containers.
@@ -74,7 +75,7 @@ const CourseSelect = ({
   const filtered = search.trim()
     ? courses.filter((c) =>
         c.title?.toLowerCase().includes(search.toLowerCase()) ||
-        c.instructor?.username?.toLowerCase().includes(search.toLowerCase()) ||
+        getDisplayName(c.instructor)?.toLowerCase().includes(search.toLowerCase()) ||
         c.instructor?.email?.toLowerCase().includes(search.toLowerCase())
       )
     : courses;
@@ -168,9 +169,9 @@ const CourseSelect = ({
                     <p className={`text-sm font-semibold ${isSelected ? "text-indigo-300" : "text-white"}`}>
                       {c.title}
                     </p>
-                    {c.instructor?.username && (
+                    {getDisplayName(c.instructor) && (
                       <p className="text-xs text-slate-400 mt-0.5">
-                        Tutor: <span className="text-slate-300">{c.instructor.username}</span>
+                        Tutor: <span className="text-slate-300">{getDisplayName(c.instructor)}</span>
                         {c.instructor.email && (
                           <span className="text-slate-500"> · {c.instructor.email}</span>
                         )}

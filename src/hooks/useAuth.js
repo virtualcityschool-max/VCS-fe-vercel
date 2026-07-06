@@ -1,4 +1,5 @@
 import { useSelector } from 'react-redux';
+import { getDisplayName } from '../utils/userDisplay';
 
 // Custom hook for authentication state
 export const useAuth = () => {
@@ -22,7 +23,7 @@ export const useAuth = () => {
     isParent: auth.role === 'parent',
     
     // User display info
-    displayName: auth.user?.username || auth.user?.email || 'User',
+    displayName: getDisplayName(auth.user) || auth.user?.email || 'User',
     email: auth.user?.email,
     
     // Auth status checks

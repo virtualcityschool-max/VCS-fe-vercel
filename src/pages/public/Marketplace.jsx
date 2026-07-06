@@ -18,6 +18,7 @@ import { setAuthModal, setEnrollmentIntent } from "../../store/slices/uiSlice";
 import EnrollmentTypeModal from "../../components/courses/EnrollmentTypeModal";
 import ConfirmDialog from "../../components/common/ConfirmDialog";
 import { showApiError } from "../../utils/apiErrorHandler";
+import { getDisplayName } from "../../utils/userDisplay";
 import { getStorageUrl } from "../../utils/storageUrl";
 import AuthRequiredModal from "../../components/common/AuthRequiredModal";
 import PublicCourseCard from "../../components/courses/PublicCourseCard";
@@ -69,7 +70,7 @@ const Marketplace = () => {
   const filterOptions = useMemo(() => {
     const instructors = courses ? [
       ...new Set(
-        courses.map((course) => course.instructor?.username).filter(Boolean),
+        courses.map((course) => getDisplayName(course.instructor)).filter(Boolean),
       ),
     ] : [];
 
@@ -109,7 +110,7 @@ const Marketplace = () => {
       const matchesSearch =
         searchTerm === "" ||
         course.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        course.instructor?.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        getDisplayName(course.instructor)?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (getCategoryName(course) ?? "").toLowerCase().includes(searchTerm.toLowerCase()) ||
         course.description?.toLowerCase().includes(searchTerm.toLowerCase());
 
@@ -124,7 +125,7 @@ const Marketplace = () => {
 
       const matchesInstructor =
         filters.instructor === "" ||
-        course.instructor?.username === filters.instructor;
+        getDisplayName(course.instructor) === filters.instructor;
 
       return matchesSearch && matchesPrice && matchesInstructor;
     });

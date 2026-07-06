@@ -1,4 +1,5 @@
 import { useSelector } from "react-redux";
+import { getDisplayName } from "../../utils/userDisplay";
 
 const StudentFeed = () => {
   const auth = useSelector((state) => state.auth);
@@ -19,7 +20,7 @@ const StudentFeed = () => {
                 className="w-24 h-24 rounded-4xl border-4 border-[#0f172a] mx-auto mb-4 object-cover shadow-2xl"
               />
               <h3 className="text-xl font-bold font-poppins">
-                {auth.username || "Sarah"}
+                {getDisplayName(auth.user) || auth.username || "Sarah"}
               </h3>
               <p className="text-indigo-400 text-xs font-black uppercase tracking-widest mb-6">
                 Student • Grade 12

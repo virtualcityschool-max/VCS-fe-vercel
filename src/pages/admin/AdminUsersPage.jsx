@@ -23,7 +23,6 @@ import {
 import { useFieldErrors } from "../../hooks";
 import {
   validateEmail,
-  validateUsername,
   validatePassword,
   validateRole,
 } from "../../utils/validation";
@@ -45,7 +44,6 @@ const AdminUsersPage = () => {
 
   // Create user form state
   const [createUserForm, setCreateUserForm] = useState({
-    username: "",
     email: "",
     password: "",
     confirm_password: "",
@@ -184,7 +182,6 @@ const AdminUsersPage = () => {
   // Shared reset function for create user modal
   const resetCreateUserModal = useCallback(() => {
     setCreateUserForm({
-      username: "",
       email: "",
       password: "",
       confirm_password: "",
@@ -219,10 +216,12 @@ const AdminUsersPage = () => {
       errors.email = emailValidation.error;
     }
 
-    // Username validation
-    const usernameValidation = validateUsername(formData.username);
-    if (!usernameValidation.isValid) {
-      errors.username = usernameValidation.error;
+    // First/Last name validation
+    if (!formData.first_name?.trim()) {
+      errors.first_name = "First name is required";
+    }
+    if (!formData.last_name?.trim()) {
+      errors.last_name = "Last name is required";
     }
 
     // Password validation
@@ -257,7 +256,6 @@ const AdminUsersPage = () => {
 
     const payload = {
       email: userData.email.trim(),
-      username: userData.username.trim(),
       password: userData.password,
       confirm_password: userData.confirm_password,
       role: userData.role,
@@ -340,59 +338,12 @@ const AdminUsersPage = () => {
                 />
               </div>
 
-              {/* Username | Role */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1.5">
-                    Username <span className="text-red-500">*</span>
-                  </label>
-                  <Input
-                    value={createUserForm.username}
-                    onChange={(e) => {
-                      setCreateUserForm({
-                        ...createUserForm,
-                        username: e.target.value,
-                      });
-                      if (createUserErrors.username)
-                        setCreateUserErrors((prev) => ({
-                          ...prev,
-                          username: undefined,
-                        }));
-                    }}
-                    className="w-full"
-                    placeholder="Username"
-                    autoComplete="off"
-                    error={createUserErrors.username}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1.5">
-                    Role <span className="text-red-500">*</span>
-                  </label>
-                  <FilterSelect
-                    value={createUserForm.role}
-                    onChange={(e) => {
-                      setCreateUserForm({ ...createUserForm, role: e.target.value });
-                      if (createUserErrors.role)
-                        setCreateUserErrors((prev) => ({
-                          ...prev,
-                          role: undefined,
-                        }));
-                    }}
-                    className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  >
-                    <option value="student">Student</option>
-                    <option value="teacher">Tutor</option>
-                    <option value="parent">Guardian</option>
-                    <option value="admin">Admin</option>
-                  </FilterSelect>
-                </div>
-              </div>
-
               {/* First Name | Last Name */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1.5">First Name</label>
+                  <label className="block text-sm font-medium text-slate-300 mb-1.5">
+                    First Name <span className="text-red-500">*</span>
+                  </label>
                   <Input
                     value={createUserForm.first_name}
                     onChange={(e) => { setCreateUserForm({ ...createUserForm, first_name: e.target.value }); if (createUserErrors.first_name) setCreateUserErrors((prev) => ({ ...prev, first_name: undefined })); }}
@@ -403,7 +354,9 @@ const AdminUsersPage = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1.5">Last Name</label>
+                  <label className="block text-sm font-medium text-slate-300 mb-1.5">
+                    Last Name <span className="text-red-500">*</span>
+                  </label>
                   <Input
                     value={createUserForm.last_name}
                     onChange={(e) => { setCreateUserForm({ ...createUserForm, last_name: e.target.value }); if (createUserErrors.last_name) setCreateUserErrors((prev) => ({ ...prev, last_name: undefined })); }}
@@ -413,6 +366,30 @@ const AdminUsersPage = () => {
                     error={createUserErrors.last_name}
                   />
                 </div>
+              </div>
+
+              {/* Role */}
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1.5">
+                  Role <span className="text-red-500">*</span>
+                </label>
+                <FilterSelect
+                  value={createUserForm.role}
+                  onChange={(e) => {
+                    setCreateUserForm({ ...createUserForm, role: e.target.value });
+                    if (createUserErrors.role)
+                      setCreateUserErrors((prev) => ({
+                        ...prev,
+                        role: undefined,
+                      }));
+                  }}
+                  className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                >
+                  <option value="student">Student</option>
+                  <option value="teacher">Tutor</option>
+                  <option value="parent">Guardian</option>
+                  <option value="admin">Admin</option>
+                </FilterSelect>
               </div>
 
               {/* Password | Confirm Password */}

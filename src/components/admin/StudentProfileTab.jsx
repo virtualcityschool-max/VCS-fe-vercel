@@ -5,6 +5,7 @@ import { useFieldErrors } from "../../hooks";
 import { validatePhone, normalizePhone } from "../../utils/validation";
 import { fetchCategories } from "../../store/slices/coursesSlice";
 import { showApiError } from "../../utils/apiErrorHandler";
+import { getDisplayName } from "../../utils/userDisplay";
 
 const StatusBadge = ({ status }) => {
   if (status === "approved")
@@ -274,11 +275,11 @@ const StudentProfileTab = ({ profile, userId, rollNo, onUpdate, onCancel, onSave
                 <div key={p.id} className="flex items-center gap-3 px-4 py-2.5">
                   <div className="w-7 h-7 rounded-lg bg-indigo-500/15 border border-indigo-500/20 flex items-center justify-center shrink-0">
                     <span className="text-indigo-400 text-xs font-black">
-                      {p.username?.[0]?.toUpperCase() || "P"}
+                      {getDisplayName(p)?.[0]?.toUpperCase() || "P"}
                     </span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-white truncate">{p.username}</p>
+                    <p className="text-sm font-semibold text-white truncate">{getDisplayName(p)}</p>
                     <p className="text-[11px] text-slate-500 truncate">{p.email}</p>
                   </div>
                   <StatusBadge status={p.status} />

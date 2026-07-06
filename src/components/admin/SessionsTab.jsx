@@ -5,6 +5,7 @@ import SessionCalendarView from "../common/SessionCalendarView";
 import { clampDate } from "../../utils/validation";
 import { useDateFormatters } from "../../hooks";
 import CourseSelect from "../common/CourseSelect";
+import { getDisplayName } from "../../utils/userDisplay";
 
 const StatusHeaderTooltip = () => {
   const [pos, setPos] = useState(null);
@@ -371,7 +372,7 @@ const SessionsTab = ({
         >
           <option value="">All Tutors</option>
           {teachers.map((t) => (
-            <option key={t.id} value={t.id}>{t.username}</option>
+            <option key={t.id} value={t.id}>{getDisplayName(t)}</option>
           ))}
         </FilterSelect>
       </div>
@@ -625,7 +626,7 @@ const SessionsTab = ({
                         value={createSessionForm.course}
                         error={createSessionErrors?.course}
                         onChange={(c) => {
-                          setCreateSessionForm({ ...createSessionForm, course: String(c.id), instructor_id: c.instructor?.id || "", instructor_username: c.instructor?.username || "", instructor_email: c.instructor?.email || "" });
+                          setCreateSessionForm({ ...createSessionForm, course: String(c.id), instructor_id: c.instructor?.id || "", instructor_username: getDisplayName(c.instructor) || "", instructor_email: c.instructor?.email || "" });
                           clearCreateSessionFieldError("course");
                         }}
                       />
@@ -712,7 +713,7 @@ const SessionsTab = ({
                         error={createSessionErrors?.course}
                         getDisabledReason={scheduledCourseReason}
                         onChange={(c) => {
-                          setCreateSessionForm({ ...createSessionForm, course: String(c.id), instructor_id: c.instructor?.id || "", instructor_username: c.instructor?.username || "", instructor_email: c.instructor?.email || "" });
+                          setCreateSessionForm({ ...createSessionForm, course: String(c.id), instructor_id: c.instructor?.id || "", instructor_username: getDisplayName(c.instructor) || "", instructor_email: c.instructor?.email || "" });
                           clearCreateSessionFieldError("course");
                         }}
                       />
@@ -866,7 +867,7 @@ const SessionsTab = ({
                         courses={editCourses}
                         value={editSessionForm.course_id || ""}
                         onChange={(c) => {
-                          setEditSessionForm({ ...editSessionForm, course_id: String(c.id), course_title: c.title || "", teacher_name: c.instructor?.username || "", instructor_id: c.instructor?.id || "", teacher_email: c.instructor?.email || "" });
+                          setEditSessionForm({ ...editSessionForm, course_id: String(c.id), course_title: c.title || "", teacher_name: getDisplayName(c.instructor) || "", instructor_id: c.instructor?.id || "", teacher_email: c.instructor?.email || "" });
                           clearEditSessionFieldError?.("course");
                         }}
                       />

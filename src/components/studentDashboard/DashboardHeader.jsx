@@ -5,6 +5,7 @@ import {
   selectStudent,
   selectDashboardStats,
 } from "../../store/slices/studentDashboardSlice";
+import { getDisplayName } from "../../utils/userDisplay";
 
 const InfoChip = ({ label, value, icon, isMono = false }) => {
   const [state, setState] = useState("idle");
@@ -49,6 +50,7 @@ const DashboardHeader = () => {
   const studentId = student?.id ?? authProfile?.id;
   const rollNo = authProfile?.student_profile?.roll_no;
   const email = student?.email ?? authProfile?.email;
+  const displayName = getDisplayName(student) || getDisplayName(authProfile);
 
   const formatGreeting = () => {
     const hour = new Date().getHours();
@@ -65,13 +67,13 @@ const DashboardHeader = () => {
       <div className="flex items-center gap-5 relative z-10">
         <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center shrink-0">
           <span className="text-xl font-black text-indigo-400 font-poppins">
-            {student?.username?.charAt(0) || "S"}
+            {displayName?.charAt(0) || "S"}
           </span>
         </div>
 
         <div className="flex flex-col justify-center">
           <h1 className="text-xl font-bold font-poppins text-white flex items-center gap-2">
-            {formatGreeting()}, {student?.username || "Scholar"}
+            {formatGreeting()}, {displayName || "Scholar"}
             <span className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]" />
           </h1>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1">

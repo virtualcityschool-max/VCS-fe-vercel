@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { TimezoneTag } from "../../components/ui";
 import { useDateFormatters } from "../../hooks";
 import SessionCalendarView from "../common/SessionCalendarView";
+import { getDisplayName } from "../../utils/userDisplay";
 
 const StatusHeaderTooltip = () => {
   const [pos, setPos] = useState(null);
@@ -99,7 +100,7 @@ const TeacherMultiSelect = ({ teachers = [], selectedIds = [], onChange, error }
         <span className={selected.length === 0 ? "text-slate-500" : "text-white"}>
           {selected.length === 0
             ? "Select tutors..."
-            : selected.map((t) => t.username).join(", ")}
+            : selected.map((t) => getDisplayName(t)).join(", ")}
         </span>
         <i className={`fas fa-chevron-${open ? "up" : "down"} text-slate-500 text-xs`}></i>
       </button>
@@ -120,7 +121,7 @@ const TeacherMultiSelect = ({ teachers = [], selectedIds = [], onChange, error }
                   className="w-4 h-4 accent-indigo-500 rounded"
                 />
                 <div>
-                  <p className="text-white text-sm font-medium">{t.username}</p>
+                  <p className="text-white text-sm font-medium">{getDisplayName(t)}</p>
                   {t.email && <p className="text-slate-500 text-xs">{t.email}</p>}
                 </div>
               </label>
@@ -337,7 +338,7 @@ const TeacherPlannerTab = ({
                       <span><i className="fas fa-repeat mr-1 text-purple-400"></i>{sortDays(session.recurrence_days).join(", ")}</span>
                     )}
                     {session.invited_teachers?.length > 0 && (
-                      <span><i className="fas fa-users mr-1 text-amber-400"></i>{session.invited_teachers.map((t) => t.username).join(", ")}</span>
+                      <span><i className="fas fa-users mr-1 text-amber-400"></i>{session.invited_teachers.map((t) => getDisplayName(t)).join(", ")}</span>
                     )}
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -395,7 +396,7 @@ const TeacherPlannerTab = ({
                       {session.invited_teachers?.length > 0 ? (
                         <div className="flex flex-col gap-0.5">
                           {session.invited_teachers.map((t) => (
-                            <span key={t.id} className="text-slate-300 text-xs">{t.username}</span>
+                            <span key={t.id} className="text-slate-300 text-xs">{getDisplayName(t)}</span>
                           ))}
                         </div>
                       ) : (

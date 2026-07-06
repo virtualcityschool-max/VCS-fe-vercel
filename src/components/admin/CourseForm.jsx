@@ -3,6 +3,7 @@ import QuillEditor from "../common/QuillEditor";
 import { FilterSelect, Input } from "../ui";
 import { getStorageUrl } from "../../utils/storageUrl";
 import FileViewerModal from "../common/FileViewerModal";
+import { getDisplayName } from "../../utils/userDisplay";
 
 const fieldClass = (error) =>
   `w-full px-3 py-2 bg-slate-800 border rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 ${
@@ -201,8 +202,8 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
               <input
                 type="text"
                 value={
-                  users.find((u) => u.id === Number(formData.instructor_id || formData.instructor?.id))?.username ||
-                  formData.instructor?.username ||
+                  getDisplayName(users.find((u) => u.id === Number(formData.instructor_id || formData.instructor?.id))) ||
+                  getDisplayName(formData.instructor) ||
                   "—"
                 }
                 disabled
@@ -223,7 +224,7 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
               >
                 <option value="">Select an tutor</option>
                 {users.map((user) => (
-                  <option key={user.id} value={user.id}>{user.username}{user.email ? ` — ${user.email}` : ""}</option>
+                  <option key={user.id} value={user.id}>{getDisplayName(user)}{user.email ? ` — ${user.email}` : ""}</option>
                 ))}
               </FilterSelect>
               <FieldError error={errors.instructor_id} />

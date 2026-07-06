@@ -10,6 +10,7 @@ import { toastManager } from "../../utils/toastManager";
 import { coursesService } from "../../services/coursesService";
 import { useDateFormatters } from "../../hooks/useDateFormatters";
 import TimezoneTag from "../../components/ui/TimezoneTag";
+import { getDisplayName } from "../../utils/userDisplay";
 
 const fmt12 = (t) => {
   if (!t) return "";
@@ -76,7 +77,7 @@ const ParentChildDetails = () => {
   };
 
   // Filter cancel requests for this specific child
-  const childName = data?.student?.username;
+  const childName = getDisplayName(data?.student) || data?.student?.username;
   const myCancelRequests = cancelRequests.filter(r =>
     !childId || String(r.student_email || "").length >= 0
   );
@@ -138,7 +139,7 @@ const ParentChildDetails = () => {
       .filter(s => s.attendance_status)
       .map(s => ({
         student: child.id,
-        student_name: child.username,
+        student_name: getDisplayName(child),
         session: s.id,
         status: s.attendance_status,
         joined_at: s.joined_at,
@@ -192,17 +193,17 @@ const ParentChildDetails = () => {
                 <div className="absolute -inset-1 bg-gradient-to-tr from-indigo-500 to-blue-500 rounded-[2.5rem] blur opacity-25 group-hover:opacity-40 transition duration-1000"></div>
                 <div className="relative w-16 h-16 sm:w-24 sm:h-24 rounded-[1.5rem] sm:rounded-[2rem] bg-slate-800 border border-white/10 flex items-center justify-center overflow-hidden">
                   {child.avatar ? (
-                    <img src={child.avatar} alt={child.username} className="w-full h-full object-cover" />
+                    <img src={child.avatar} alt={getDisplayName(child)} className="w-full h-full object-cover" />
                   ) : (
                     <span className="text-2xl sm:text-3xl font-black text-indigo-400">
-                      {child.username?.charAt(0).toUpperCase()}
+                      {getDisplayName(child)?.charAt(0).toUpperCase()}
                     </span>
                   )}
                 </div>
               </div>
               <div className="space-y-1 min-w-0">
                 <h1 className="text-2xl sm:text-4xl font-black font-poppins tracking-tight bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent truncate">
-                  {child.username}
+                  {getDisplayName(child)}
                 </h1>
                 {child.grade_level && (
                 <div className="flex items-center gap-2 flex-wrap">

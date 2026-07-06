@@ -13,6 +13,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { handleJoinSession } from "../../utils/helper/StartSession";
+import { getDisplayName } from "../../utils/userDisplay";
 
 // Truncate long course names for axis labels
 const truncate = (str, n = 12) =>
@@ -178,7 +179,7 @@ const OverviewTab = ({
                 session.invited_teachers?.length > 0 ? (
                   <>
                     <i className="fas fa-users text-indigo-500/50" />
-                    {session.invited_teachers.map((t) => t.username).join(", ")}
+                    {session.invited_teachers.map((t) => getDisplayName(t)).join(", ")}
                   </>
                 ) : null
               }

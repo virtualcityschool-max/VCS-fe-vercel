@@ -87,6 +87,8 @@ export const loginUser = createAsyncThunk(
 
       const user = {
         username: response.user.username,
+        first_name: response.user.first_name,
+        last_name: response.user.last_name,
         email: response.user.email,
         role: response.user.role,
       };
@@ -102,6 +104,8 @@ export const loginUser = createAsyncThunk(
 
         const normalizedUser = {
           username: profile.username || user.username,
+          first_name: profile.first_name ?? user.first_name,
+          last_name: profile.last_name ?? user.last_name,
           email: profile.email || user.email,
           role: profile.role || user.role,
           avatar: profile.avatar || null,
@@ -287,6 +291,8 @@ const authSlice = createSlice({
       state.username = action.payload.username;
       state.user = {
         username: action.payload.username,
+        first_name: action.payload.first_name,
+        last_name: action.payload.last_name,
         email: action.payload.email,
         role: action.payload.role,
         avatar: action.payload.avatar || null,
@@ -311,6 +317,8 @@ const authSlice = createSlice({
           state.username = action.payload.profile.username;
           state.user = {
             username: action.payload.profile.username,
+            first_name: action.payload.profile.first_name,
+            last_name: action.payload.profile.last_name,
             email: action.payload.profile.email,
             role: action.payload.profile.role,
             avatar: action.payload.profile.avatar || null,
@@ -345,6 +353,8 @@ const authSlice = createSlice({
         state.username = action.payload.username;
         state.user = {
           username: action.payload.username,
+          first_name: action.payload.first_name,
+          last_name: action.payload.last_name,
           email: action.payload.email,
           role: action.payload.role,
           avatar: action.payload.avatar || null,

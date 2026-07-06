@@ -1,5 +1,6 @@
 import React from "react";
 import { Button } from "../ui";
+import { getDisplayName } from "../../utils/userDisplay";
 
 const UserDetailsHeader = ({ user, onBack, onDelete }) => {
   return (
@@ -16,9 +17,7 @@ const UserDetailsHeader = ({ user, onBack, onDelete }) => {
           </button>
           <span className="shrink-0">/</span>
           <span className="text-white truncate">
-            {user.first_name && user.last_name
-              ? `${user.first_name} ${user.last_name}`
-              : user.username || "Unknown User"}
+            {getDisplayName(user) || "Unknown User"}
           </span>
         </div>
         <Button variant="danger" onClick={onDelete} className="flex items-center gap-2">

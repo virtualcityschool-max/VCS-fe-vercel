@@ -32,6 +32,7 @@ import { getStorageUrl } from "../../utils/storageUrl";
 import FileViewerModal from "../../components/common/FileViewerModal";
 import { studentService } from "../../services/studentService";
 import QuillViewer from "../../components/common/QuillViewer";
+import { getDisplayName } from "../../utils/userDisplay";
 
 const CourseDetails = () => {
   const { courseId } = useParams();
@@ -509,7 +510,7 @@ const CourseDetails = () => {
                       >
                         <i className="fas fa-chalkboard-teacher text-indigo-400 text-xs" />
                         <span className="text-slate-300 font-medium">
-                          {normalizedCourse.instructor?.username || `Instructor #${normalizedCourse.instructor_id}`}
+                          {getDisplayName(normalizedCourse.instructor) || `Instructor #${normalizedCourse.instructor_id}`}
                         </span>
                       </Link>
                     )}

@@ -63,7 +63,8 @@ const AuthModals = () => {
   const [fpError, setFpError] = useState("");
 
   // Registration form state
-  const [username, setUsername] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [role, setRole] = useState("");
   const [gradeLevel, setGradeLevel] = useState("");
@@ -85,7 +86,8 @@ const AuthModals = () => {
     // Reset form inputs
     setEmail("");
     setPassword("");
-    setUsername("");
+    setFirstName("");
+    setLastName("");
     setConfirmPassword("");
     setRole("");
     setGradeLevel("");
@@ -160,7 +162,8 @@ const AuthModals = () => {
     if (isOpen) {
       setEmail("");
       setPassword("");
-      setUsername("");
+      setFirstName("");
+      setLastName("");
       setConfirmPassword("");
       setRole("");
       setGradeLevel("");
@@ -292,9 +295,13 @@ const AuthModals = () => {
     if (!email) newErrors.email = "Email is required";
     else if (!/\S+@\S+\.\S+/.test(email)) newErrors.email = "Email is invalid";
 
-    if (!username) newErrors.username = "Username is required";
-    else if (username.length < 3)
-      newErrors.username = "Username must be at least 3 characters";
+    if (!firstName) newErrors.first_name = "First name is required";
+    else if (firstName.length < 2)
+      newErrors.first_name = "First name must be at least 2 characters";
+
+    if (!lastName) newErrors.last_name = "Last name is required";
+    else if (lastName.length < 2)
+      newErrors.last_name = "Last name must be at least 2 characters";
 
     if (!password) newErrors.password = "Password is required";
     else if (password.length < 6)
@@ -315,7 +322,14 @@ const AuthModals = () => {
     }
 
     try {
-      const registerPayload = { email, username, password, confirmPassword, role };
+      const registerPayload = {
+        email,
+        first_name: firstName,
+        last_name: lastName,
+        password,
+        confirmPassword,
+        role,
+      };
       if (role === "student" && gradeLevel) {
         registerPayload.grade_level = gradeLevel;
       }
@@ -847,45 +861,65 @@ const AuthModals = () => {
                   )}
                 </div>
 
-                {/* Add all other form fields (username, password, confirmPassword, role) */}
+                {/* Add all other form fields (first/last name, password, confirmPassword, role) */}
                 <div>
                   <label
-                    htmlFor="register-username"
+                    htmlFor="register-first-name"
                     className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block"
                   >
-                    Username
+                    First Name
                   </label>
                   <input
-                    id="register-username"
-                    name="register-username"
+                    id="register-first-name"
+                    name="register-first-name"
                     type="text"
                     autoComplete="off"
-                    value={username}
-                    // maxLength={150}
+                    value={firstName}
                     onChange={(e) => {
                       toastManager.dismiss();
-                      setUsername(e.target.value);
-                      clearRegistrationFieldError("username");
+                      setFirstName(e.target.value);
+                      clearRegistrationFieldError("first_name");
                       dispatch(clearAuthError());
                     }}
-                    placeholder="JohnDoe"
+                    placeholder="John"
                     className="w-full bg-slate-950 border border-white/5 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
                   />
-                  {/* <div className="flex justify-between items-center mt-1">
-                    <span className="text-xs text-slate-500">
-                      3-150 characters
-                    </span>
-                    <span
-                      className={`text-xs ${username.length > 150 ? "text-red-400" : username.length >= 3 ? "text-green-400" : "text-slate-500"}`}
-                    >
-                      {username.length}/150
-                    </span>
-                  </div> */}
-                  {registrationErrors.username && (
+                  {registrationErrors.first_name && (
                     <p className="text-red-500 text-xs mt-2 animate-shake">
-                      {Array.isArray(registrationErrors.username)
-                        ? registrationErrors.username[0]
-                        : registrationErrors.username}
+                      {Array.isArray(registrationErrors.first_name)
+                        ? registrationErrors.first_name[0]
+                        : registrationErrors.first_name}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="register-last-name"
+                    className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block"
+                  >
+                    Last Name
+                  </label>
+                  <input
+                    id="register-last-name"
+                    name="register-last-name"
+                    type="text"
+                    autoComplete="off"
+                    value={lastName}
+                    onChange={(e) => {
+                      toastManager.dismiss();
+                      setLastName(e.target.value);
+                      clearRegistrationFieldError("last_name");
+                      dispatch(clearAuthError());
+                    }}
+                    placeholder="Doe"
+                    className="w-full bg-slate-950 border border-white/5 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
+                  />
+                  {registrationErrors.last_name && (
+                    <p className="text-red-500 text-xs mt-2 animate-shake">
+                      {Array.isArray(registrationErrors.last_name)
+                        ? registrationErrors.last_name[0]
+                        : registrationErrors.last_name}
                     </p>
                   )}
                 </div>

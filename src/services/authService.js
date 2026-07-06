@@ -69,7 +69,8 @@ export const authService = {
 
       console.log("Full user data being sent:", {
         email: userData.email,
-        username: userData.username,
+        first_name: userData.first_name,
+        last_name: userData.last_name,
         password: userData.password ? "[PASSWORD_HIDDEN]" : undefined,
         confirm_password: userData.confirmPassword
           ? "[PASSWORD_HIDDEN]"
@@ -79,7 +80,8 @@ export const authService = {
 
       const requestData = {
         email: userData.email,
-        username: userData.username,
+        first_name: userData.first_name,
+        last_name: userData.last_name,
         password: userData.password,
         confirm_password: userData.confirmPassword,
         role: userData.role,

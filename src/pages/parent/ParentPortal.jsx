@@ -4,6 +4,7 @@ import { fetchParentDashboard } from "../../store/slices/parentSlice";
 import { ChildCard, RecentActivity, OverviewStats, ParentDashboardHeader, PendingChildLinks } from "../../components";
 import { LoadingSpinner, ErrorMessage, Button } from "../../components/ui";
 import ChildLinkRequest from "../../components/parent/ChildLinkRequest";
+import { getDisplayName } from "../../utils/userDisplay";
 
 const ParentPortal = () => {
   const dispatch = useDispatch();
@@ -15,7 +16,7 @@ const ParentPortal = () => {
     error,
   } = useSelector((state) => state.parent.dashboard);
 
-  const userName = auth.user?.username || "Guardian";
+  const userName = getDisplayName(auth.user) || "Guardian";
 
   // Fetch dashboard data on component mount
   useEffect(() => {

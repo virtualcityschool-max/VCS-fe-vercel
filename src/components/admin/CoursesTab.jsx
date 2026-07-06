@@ -5,6 +5,7 @@ import CourseForm from "./CourseForm";
 import { coursesService } from "../../services/coursesService";
 import { toastManager } from "../../utils/toastManager";
 import { showApiError } from "../../utils/apiErrorHandler";
+import { getDisplayName } from "../../utils/userDisplay";
 
 import { GradingScaleButton } from "./GradingScaleModal";
 
@@ -287,7 +288,7 @@ const CoursesTab = ({
         course.title
           ?.toLowerCase()
           .includes(courseFilters.search.toLowerCase()) ||
-        course.instructor?.username
+        getDisplayName(course.instructor)
           ?.toLowerCase()
           .includes(courseFilters.search.toLowerCase()) ||
         (typeof course.category === "object" ? course.category?.name : course.category)
@@ -379,7 +380,7 @@ const CoursesTab = ({
  const filterOptions = useMemo(() => {
     const instructors = courses ? [
       ...new Set(
-        courses.map((course) => course.instructor?.username).filter(Boolean),
+        courses.map((course) => getDisplayName(course.instructor)).filter(Boolean),
       ),
     ] : [];
 
@@ -533,7 +534,7 @@ const CoursesTab = ({
           >
             <option value="">All Tutors</option>
             {users?.map((user) => (
-              <option key={user.id} value={user.id}>{user.username}</option>
+              <option key={user.id} value={user.id}>{getDisplayName(user)}</option>
             ))}
           </FilterSelect>
           </div>{/* end 2-col grid */}
@@ -670,7 +671,7 @@ const CoursesTab = ({
                       {course.instructor ? (
                         <div className="flex items-center gap-2">
                           <i className="fas fa-user text-indigo-400"></i>
-                          <span>{course.instructor.username}</span>
+                          <span>{getDisplayName(course.instructor)}</span>
                         </div>
                       ) : (
                         <div className="flex items-center gap-2">
@@ -782,7 +783,7 @@ const CoursesTab = ({
                             <i className="fas fa-user text-indigo-400 text-xs"></i>
                           </div>
                           <span className="text-slate-300 text-sm">
-                            {course.instructor.username}
+                            {getDisplayName(course.instructor)}
                           </span>
                         </div>
                       ) : (
@@ -1052,7 +1053,7 @@ const CoursesTab = ({
                     <option value="">Select an tutor</option>
                     {users?.map((user) => (
                       <option key={user.id} value={user.id}>
-                        {user.username}
+                        {getDisplayName(user)}
                       </option>
                     ))}
                   </select>
