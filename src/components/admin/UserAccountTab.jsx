@@ -245,7 +245,7 @@ const UserAccountTab = ({ user, onUpdate, onCancel, onSaved, onAvatarUpdated, re
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-2">
                 First Name
@@ -272,6 +272,21 @@ const UserAccountTab = ({ user, onUpdate, onCancel, onSaved, onAvatarUpdated, re
                 error={getFieldError("last_name")}
                 disabled={readOnly}
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                Username
+              </label>
+              <Input
+                value={user?.username || ""}
+                disabled
+                className="w-full bg-slate-800/50 border-slate-700 text-slate-400"
+                placeholder="Username"
+              />
+              <p className="text-[9px] text-slate-600 mt-1.5">
+                Auto-generated from first and last name.
+              </p>
             </div>
 
             <div>
