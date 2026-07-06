@@ -90,11 +90,12 @@ const UserAccountTab = ({ user, onUpdate, onCancel, onSaved, onAvatarUpdated, re
       newErrors.email = emailValidation.error;
     }
 
-    // First/Last name: optional here (older accounts may not have one yet),
-    // but if either is provided both must be to avoid a half-set name.
-    if ((formData.first_name.trim() && !formData.last_name.trim())
-      || (!formData.first_name.trim() && formData.last_name.trim())) {
-      newErrors.last_name = "Enter both first and last name, or leave both blank";
+    // First/Last name are required.
+    if (!formData.first_name.trim()) {
+      newErrors.first_name = "First name is required";
+    }
+    if (!formData.last_name.trim()) {
+      newErrors.last_name = "Last name is required";
     }
 
     // Password validation (only if password is provided)
@@ -248,7 +249,7 @@ const UserAccountTab = ({ user, onUpdate, onCancel, onSaved, onAvatarUpdated, re
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-2">
-                First Name
+                First Name <span className="text-red-400">*</span>
               </label>
               <Input
                 value={formData.first_name}
@@ -262,7 +263,7 @@ const UserAccountTab = ({ user, onUpdate, onCancel, onSaved, onAvatarUpdated, re
 
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-2">
-                Last Name
+                Last Name <span className="text-red-400">*</span>
               </label>
               <Input
                 value={formData.last_name}
