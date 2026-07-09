@@ -368,7 +368,7 @@ const AppInner = () => {
 
         {/* Floating WhatsApp support button */}
         <a
-          href="https://wa.me/923361062993"
+          href="https://wa.me/966556687417"
           target="_blank"
           rel="noopener noreferrer"
           title="24/7 Support on WhatsApp"
