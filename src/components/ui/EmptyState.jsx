@@ -23,9 +23,6 @@ const EmptyState = ({
 
   return (
     <div className={`${variants[variant]} ${className}`}>
-      <div className="inline-flex items-center justify-center w-16 h-16 bg-slate-100 rounded-full mb-4">
-        <i className={`${icon} ${iconColors[variant]} text-2xl`}></i>
-      </div>
 
       <h3 className="text-lg font-medium text-slate-900 mb-2">{title}</h3>
       <p className="text-slate-500 mb-6 max-w-sm mx-auto">{description}</p>
