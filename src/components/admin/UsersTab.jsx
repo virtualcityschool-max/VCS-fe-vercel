@@ -68,7 +68,11 @@ const SearchControls = ({
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             onClear={() => setSearchInput("")}
-            placeholder="Search users..."
+            placeholder={
+              usersFilters.role === "student"
+                ? "Search by name, email, or roll no..."
+                : "Search users..."
+            }
             className="w-full sm:w-40"
           />
 
