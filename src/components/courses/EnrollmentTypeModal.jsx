@@ -59,10 +59,7 @@ const WhatsAppRow = ({ label, value, chatHref }) => {
 
   return (
     <div className="flex items-center justify-between gap-2">
-      <p className="text-sm text-slate-400 truncate">
-        {label}: <span className="text-slate-100 font-semibold">{value}</span>
-      </p>
-      <div className="flex items-center gap-3 shrink-0">
+      <div class="flex items-center gap-2 min-w-0">
         <a
           href={chatHref}
           target="_blank"
@@ -72,6 +69,12 @@ const WhatsAppRow = ({ label, value, chatHref }) => {
         >
           <i className="fab fa-whatsapp text-base" />
         </a>
+        <p className="text-sm text-slate-400 truncate">
+          {label}: <span className="text-slate-100 font-semibold">{value}</span>
+        </p>
+      </div>
+      <div className="flex items-center gap-3 shrink-0">
+        
         <button
           type="button"
           onClick={handleCopy}

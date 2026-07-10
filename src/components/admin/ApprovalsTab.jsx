@@ -27,7 +27,17 @@ const ApprovalsTab = ({
       const name = (getDisplayName(user) || "").toLowerCase();
       const email = (user.email || "").toLowerCase();
       const role = (user.role || "").toLowerCase();
-      return name.includes(q) || email.includes(q) || role.includes(q);
+      // Match the on-screen label too — the UI shows "Tutor"/"Guardian",
+      // not the raw "teacher"/"parent" role values
+      const roleLabel = (
+        { teacher: "tutor", parent: "guardian" }[role] || role
+      );
+      return (
+        name.includes(q) ||
+        email.includes(q) ||
+        role.includes(q) ||
+        roleLabel.includes(q)
+      );
     });
   }, [pendingApprovals, search]);
 

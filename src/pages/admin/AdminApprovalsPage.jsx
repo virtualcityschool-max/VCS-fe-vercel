@@ -289,7 +289,7 @@ const AdminApprovalsPage = () => {
               onChange={(e) => setActiveSearch(e.target.value)}
               onClear={() => setActiveSearch("")}
               placeholder={activeSearchPlaceholder}
-              className="w-full sm:w-64"
+              className="w-full sm:w-72"
             />
           )}
           <button

@@ -6,6 +6,7 @@ import {
   Card,
   FilterSelect,
   SearchInput,
+  EmptyState,
 } from "../../components/ui";
 import ConfirmDialog from "../common/ConfirmDialog";
 import { getStorageUrl } from "../../utils/storageUrl";
@@ -73,7 +74,7 @@ const SearchControls = ({
                 ? "Search by name, email, or roll no..."
                 : "Search users..."
             }
-            className="w-full sm:w-40"
+            className="w-full sm:w-64"
           />
 
           <div className="grid grid-cols-2 sm:contents gap-1.5">
@@ -386,6 +387,35 @@ const UsersTab = ({
               ))}
             </tbody>
           </table>
+        </div>
+      ) : !users || users.length === 0 ? (
+        /* Empty state — no users match the current search/filters */
+        <div className="bg-slate-900/50 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
+          <EmptyState
+            icon="fas fa-search"
+            title={
+              usersFilters.search || usersFilters.role || usersFilters.is_active !== ""
+                ? "No users found"
+                : "No users yet"
+            }
+            description={
+              usersFilters.search
+                ? `No users match "${usersFilters.search}". Try a different search or clear the filters.`
+                : usersFilters.role || usersFilters.is_active !== ""
+                  ? "No users match the selected filters."
+                  : "There are no users to display at this time."
+            }
+            action={
+              usersFilters.search || usersFilters.role || usersFilters.is_active !== ""
+                ? {
+                    label: "Clear Filters",
+                    icon: "fas fa-redo",
+                    variant: "outline",
+                    onClick: handleClearFilters,
+                  }
+                : null
+            }
+          />
         </div>
       ) : (
         <>
