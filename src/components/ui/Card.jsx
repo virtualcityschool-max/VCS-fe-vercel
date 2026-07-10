@@ -10,7 +10,7 @@ const Card = ({
   const baseClasses = 'rounded-lg border transition-all duration-200';
   
   const variants = {
-    default: 'bg-white border-slate-200 shadow-sm',
+    default: 'bg-slate-900/60 border-white/5 shadow-lg backdrop-blur-md',
     glass: 'bg-white/10 backdrop-blur-md border-white/20 shadow-xl',
     dark: 'bg-slate-800 border-slate-700 shadow-xl',
     gradient: 'bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border-indigo-200/20 shadow-xl'

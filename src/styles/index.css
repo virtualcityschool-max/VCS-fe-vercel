@@ -59,15 +59,54 @@ body {
   overflow-x: hidden;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 :root {
   --font-sf-pro: "SF Pro Display", sans-serif;
   --bg-dark: #020617;
   --text-white: white;
 
+  /* Surface & accent tokens — single source of truth for the visual language */
+  --surface-1: rgba(15, 23, 42, 0.6);
+  --surface-2: rgba(30, 41, 59, 0.5);
+  --border-soft: rgba(255, 255, 255, 0.06);
+  --border-strong: rgba(255, 255, 255, 0.12);
+  --accent: #6366f1;
+  --accent-soft: rgba(99, 102, 241, 0.15);
+  --glow-indigo: 0 0 40px -12px rgba(99, 102, 241, 0.5);
+
   font-family: var(--font-sf-pro);
   background-color: var(--bg-dark);
   color: var(--text-white);
   margin: 0;
+}
+
+::selection {
+  background: rgba(99, 102, 241, 0.35);
+  color: #fff;
+}
+
+/* Accessible, on-brand keyboard focus — replaces browser default everywhere */
+/* :focus-visible {
+  outline: 2px solid rgba(129, 140, 248, 0.7);
+  outline-offset: 2px;
+  border-radius: 6px;
+} */
+
+/* Respect users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 #msdoc-renderer, 
 #msdoc-iframe, 
@@ -306,11 +345,286 @@ h3,
    0%, 100% { transform: translateY(0); }
    50% { transform: translateY(-10px); }
  }
- 
+
  .animate-float {
    animation: float 4s ease-in-out infinite;
  }
- 
+
  .perspective-1000 {
    perspective: 1000px;
  }
+
+/* ═══════════════════════════════════════════════════════════════════
+   Design-system layer — shared surfaces, motion & micro-interactions
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Entrance animations ── */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeInUp {
+  animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes fadeInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-fadeInLeft {
+  animation: fadeInLeft 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes fadeInRight {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-fadeInRight {
+  animation: fadeInRight 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Staggered children — apply to a parent; direct children cascade in */
+.stagger-children > * {
+  animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.stagger-children > *:nth-child(1)  { animation-delay: 0.03s; }
+.stagger-children > *:nth-child(2)  { animation-delay: 0.08s; }
+.stagger-children > *:nth-child(3)  { animation-delay: 0.13s; }
+.stagger-children > *:nth-child(4)  { animation-delay: 0.18s; }
+.stagger-children > *:nth-child(5)  { animation-delay: 0.23s; }
+.stagger-children > *:nth-child(6)  { animation-delay: 0.28s; }
+.stagger-children > *:nth-child(7)  { animation-delay: 0.33s; }
+.stagger-children > *:nth-child(8)  { animation-delay: 0.38s; }
+.stagger-children > *:nth-child(9)  { animation-delay: 0.43s; }
+.stagger-children > *:nth-child(10) { animation-delay: 0.48s; }
+.stagger-children > *:nth-child(n + 11) { animation-delay: 0.52s; }
+
+/* ── Scroll reveal (paired with useReveal hook / Reveal component) ── */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.reveal.reveal-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ── Skeleton shimmer — richer than a flat pulse ── */
+@keyframes shimmer {
+  from {
+    background-position: -200% 0;
+  }
+  to {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(
+    100deg,
+    rgba(30, 41, 59, 0.6) 40%,
+    rgba(51, 65, 85, 0.7) 50%,
+    rgba(30, 41, 59, 0.6) 60%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s linear infinite;
+}
+
+/* Sweep shimmer — used as an absolute overlay on loading placeholders */
+@keyframes shimmerSweep {
+  to {
+    transform: translateX(200%);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmerSweep 1.8s ease-in-out infinite;
+}
+
+/* Error shake — referenced by form validation messages */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-4px); }
+  40% { transform: translateX(4px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(3px); }
+}
+
+.animate-shake {
+  animation: shake 0.35s ease-in-out;
+}
+
+/* Hide scrollbar (alias used across forms) */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ── Shared surfaces ── */
+.card-surface {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 1rem;
+  backdrop-filter: blur(12px);
+  transition:
+    border-color 0.3s ease,
+    box-shadow 0.3s ease,
+    transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.card-surface-hover:hover {
+  border-color: rgba(129, 140, 248, 0.25);
+  box-shadow: 0 12px 40px -16px rgba(0, 0, 0, 0.6), var(--glow-indigo);
+  transform: translateY(-3px);
+}
+
+/* ── Signature gradient text ── */
+.text-gradient {
+  background: linear-gradient(92deg, #818cf8 0%, #22d3ee 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* ── Primary CTA — gradient, glow, press feedback ── */
+.btn-glow {
+  position: relative;
+  background: linear-gradient(92deg, #4f46e5 0%, #2563eb 100%);
+  box-shadow:
+    0 10px 30px -10px rgba(79, 70, 229, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  transition:
+    box-shadow 0.3s ease,
+    transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.3s ease;
+}
+
+.btn-glow:hover {
+  filter: brightness(1.12);
+  box-shadow:
+    0 14px 40px -10px rgba(79, 70, 229, 0.7),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.btn-glow:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* ── Icon chip — squared icon container used across dashboards ── */
+.icon-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.75rem;
+  background: rgba(99, 102, 241, 0.12);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  color: #818cf8;
+  flex-shrink: 0;
+}
+
+/* ── Subtle grid backdrop for hero/marketing sections ── */
+.bg-grid {
+  background-image:
+    linear-gradient(rgba(148, 163, 184, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.05) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 40%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 40%, transparent 100%);
+}
+
+/* ── Slow ambient drift for aurora blobs ── */
+@keyframes aurora-drift {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(3%, -4%) scale(1.06);
+  }
+  66% {
+    transform: translate(-3%, 3%) scale(0.97);
+  }
+}
+
+.animate-aurora {
+  animation: aurora-drift 18s ease-in-out infinite;
+}
+
+/* ── Animated underline for nav links ── */
+.nav-link {
+  position: relative;
+}
+
+.nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 100%;
+  bottom: -4px;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #818cf8, #22d3ee);
+  transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nav-link:hover::after,
+.nav-link.nav-link-active::after {
+  right: 0;
+}
+
+/* ── Count-up number feel (used with tabular-nums) ── */
+@keyframes popIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  70% {
+    transform: scale(1.04);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-popIn {
+  animation: popIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}

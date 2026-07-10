@@ -16,16 +16,19 @@ const EmptyState = ({
   };
 
   const iconColors = {
-    default: "text-slate-400",
-    compact: "text-slate-400",
+    default: "text-indigo-400",
+    compact: "text-indigo-400",
     inline: "text-slate-300",
   };
 
   return (
-    <div className={`${variants[variant]} ${className}`}>
+    <div className={`${variants[variant]} ${className} animate-scaleIn`}>
+      <div className="inline-flex items-center justify-center w-16 h-16 icon-chip rounded-2xl mb-4">
+        <i className={`${icon} ${iconColors[variant]} text-2xl`}></i>
+      </div>
 
-      <h3 className="text-lg font-medium text-slate-900 mb-2">{title}</h3>
-      <p className="text-slate-500 mb-6 max-w-sm mx-auto">{description}</p>
+      <h3 className="text-lg font-bold text-white mb-2">{title}</h3>
+      <p className="text-slate-400 mb-6 max-w-sm mx-auto text-sm">{description}</p>
 
       {action && (
         <div className="flex justify-center">

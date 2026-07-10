@@ -14,3 +14,4 @@ export { default as FilterDateInput } from "./FilterDateInput";
 export { default as SearchInput } from "./SearchInput";
 export { default as PhoneInput } from "./PhoneInput";
 export { default as TimezoneTag } from "./TimezoneTag";
+export { default as Reveal } from "./Reveal";

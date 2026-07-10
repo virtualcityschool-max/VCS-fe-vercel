@@ -80,9 +80,9 @@ const StudentPortal = () => {
       >
         <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
           {/* Loading indicator */}
-          <div className="text-center py-12">
-            <div className="w-16 h-16 bg-blue-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <i className="fas fa-spinner text-blue-500 text-2xl animate-spin"></i>
+          <div className="text-center py-12 animate-fadeIn">
+            <div className="w-16 h-16 bg-indigo-600/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <i className="fas fa-spinner text-indigo-400 text-2xl animate-spin"></i>
             </div>
             <h2 className="text-xl font-bold text-white mb-2">
               {!hasMounted
@@ -97,18 +97,15 @@ const StudentPortal = () => {
           </div>
 
           {/* Loading skeleton for header */}
-          <div className="bg-slate-800 p-10 rounded-[2.5rem] border border-slate-700 animate-pulse w-full"></div>
+          <div className="skeleton p-10 rounded-2xl border border-slate-800 w-full"></div>
 
           {/* Loading skeleton for action cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {[1, 2].map((i) => (
               <div
                 key={i}
-                className="bg-slate-800 p-8 rounded-[2.5rem] border border-slate-700 animate-pulse"
-              >
-                <div className="h-6 bg-slate-700 rounded mb-2 w-3/4"></div>
-                <div className="h-4 bg-slate-700 rounded w-1/2"></div>
-              </div>
+                className="skeleton p-8 rounded-2xl border border-slate-800 h-28"
+              />
             ))}
           </div>
 
@@ -119,19 +116,13 @@ const StudentPortal = () => {
                 {[1, 2].map((i) => (
                   <div
                     key={i}
-                    className="bg-slate-800 p-8 rounded-[2.5rem] border border-slate-700 animate-pulse"
-                  >
-                    <div className="h-4 bg-slate-700 rounded w-1/4 mb-4"></div>
-                    <div className="h-20 bg-slate-700 rounded"></div>
-                  </div>
+                    className="skeleton p-8 rounded-2xl border border-slate-800 h-36"
+                  />
                 ))}
               </div>
             </div>
             <div className="lg:col-span-3 space-y-8">
-              <div className="bg-slate-800 p-8 rounded-[2.5rem] border border-slate-700 animate-pulse">
-                <div className="h-4 bg-slate-700 rounded w-1/3 mb-4"></div>
-                <div className="h-32 bg-slate-700 rounded"></div>
-              </div>
+              <div className="skeleton p-8 rounded-2xl border border-slate-800 h-52" />
             </div>
           </div>
         </div>
@@ -146,7 +137,9 @@ const StudentPortal = () => {
     >
       <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
         {/* Dashboard Header */}
-        <DashboardHeader />
+        <div className="animate-fadeInUp">
+          <DashboardHeader />
+        </div>
 
         {isDashboardEmpty ? (
           <div className="relative group overflow-hidden rounded-[2.5rem] border border-white/5 bg-slate-900/40 backdrop-blur-xl p-12 lg:p-20 text-center shadow-2xl transition-all duration-500 hover:border-blue-500/10">
@@ -199,26 +192,23 @@ const StudentPortal = () => {
           </div>
         ) : (
           <div className="space-y-12 lg:space-y-16">
-                    {/* Curriculum Overview */}
-          
             {/* Main Dashboard Content */}
             <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 lg:gap-10 items-start">
               {/* Primary Column: Learning Activity */}
-              <div className="xl:col-span-8 space-y-10 lg:space-y-12">
+              <div className="xl:col-span-8 space-y-10 lg:space-y-12 animate-fadeInUp" style={{ animationDelay: "0.1s" }}>
                 <LiveScheduleList />
                 <MyAttendanceList />
               </div>
 
               {/* Sidebar: Alerts & Summaries */}
-              <div className="xl:col-span-4 space-y-8 lg:space-y-10">
+              <div className="xl:col-span-4 space-y-8 lg:space-y-10 animate-fadeInUp" style={{ animationDelay: "0.2s" }}>
                 <OverdueAssignmentsCard />
                 <AssignmentOverviewList />
               </div>
             </div>
-  <div className="pt-4 border-t border-white/5">
+            <div className="pt-4 border-t border-white/5 animate-fadeInUp" style={{ animationDelay: "0.3s" }}>
               <CourseProgressGrid />
             </div>
-    
           </div>
         )}
       </div>

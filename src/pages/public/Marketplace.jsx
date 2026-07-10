@@ -352,18 +352,19 @@ const Marketplace = () => {
     }
   };
 
-  // Loading state
+  // Loading state — skeleton grid mirrors the real layout
   if (isLoading) {
     return (
       <section className="min-h-screen bg-[#0f172a] text-white font-inter">
-        <div className="max-w-7xl mx-auto px-6 py-20">
-          <div className="flex items-center justify-center min-h-[60vh]">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-blue-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i className="fas fa-spinner text-blue-500 text-2xl animate-spin"></i>
-              </div>
-              <p className="text-white text-lg">Loading courses...</p>
-            </div>
+        <div className="max-w-7xl mx-auto px-6 py-10">
+          <div className="max-w-4xl mx-auto mb-10 space-y-3">
+            <div className="skeleton h-9 w-72 mx-auto rounded-xl" />
+            <div className="skeleton h-11 w-full rounded-xl" />
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
+            {[...Array(16)].map((_, i) => (
+              <div key={i} className="skeleton rounded-2xl aspect-[3/4] border border-white/5" style={{ animationDelay: `${i * 0.05}s` }} />
+            ))}
           </div>
         </div>
       </section>
@@ -376,11 +377,11 @@ const Marketplace = () => {
       <section className="min-h-screen bg-[#0f172a] text-white font-inter">
         <div className="max-w-7xl mx-auto px-6 py-20">
           <div className="flex items-center justify-center min-h-[60vh]">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-slate-700/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i className="fas fa-book text-slate-400 text-2xl"></i>
+            <div className="text-center animate-scaleIn">
+              <div className="w-20 h-20 icon-chip rounded-3xl mx-auto mb-6">
+                <i className="fas fa-book text-2xl"></i>
               </div>
-              <p className="text-white text-lg mb-4">No courses available</p>
+              <p className="text-white text-xl font-bold mb-2">No courses available</p>
               <p className="text-slate-400 text-sm">
                 Check back later for new courses
               </p>
@@ -398,10 +399,15 @@ const Marketplace = () => {
     >
       {/* Search + Filters Bar */}
       <div className="relative overflow-hidden border-b border-slate-800/50 animate-fadeIn">
-        <div className="max-w-7xl mx-auto px-6 py-5 relative z-10">
-          <div className="text-center mb-4">
-            <h1 className="text-2xl md:text-3xl font-black font-poppins leading-tight tracking-tight animate-scaleIn">
-              Expand your <span className="text-blue-500">potential</span>.
+        {/* Ambient glow behind the header */}
+        <div className="absolute top-[-60%] left-1/2 -translate-x-1/2 w-[70%] h-[160%] bg-indigo-600/8 blur-[100px] rounded-full pointer-events-none" />
+        <div className="max-w-7xl mx-auto px-6 py-6 relative z-10">
+          <div className="text-center mb-5">
+            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-indigo-400 mb-2 animate-fadeInUp">
+              Course Catalog
+            </p>
+            <h1 className="text-2xl md:text-4xl font-black font-poppins leading-tight tracking-tight animate-fadeInUp" style={{ animationDelay: "0.08s" }}>
+              Expand your <span className="text-gradient">potential</span>.
             </h1>
           </div>
           <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-8 gap-3 max-w-4xl mx-auto animate-springyReveal">
@@ -443,10 +449,10 @@ const Marketplace = () => {
           <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-blue py-2">
             <button
               onClick={() => setActiveCategory("all")}
-              className={`flex-shrink-0 px-3 py-0.5 rounded-full text-xs font-bold uppercase tracking-wide transition-all cursor-pointer ${
+              className={`flex-shrink-0 px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wide transition-all duration-200 cursor-pointer border ${
                 activeCategory === "all"
-                  ? "bg-blue-600 text-white"
-                  : "text-slate-400 hover:text-white hover:bg-slate-800"
+                  ? "bg-gradient-to-r from-indigo-600 to-blue-600 text-white border-transparent shadow-md shadow-indigo-900/30"
+                  : "text-slate-400 hover:text-white hover:bg-slate-800 border-transparent hover:border-slate-700"
               }`}
             >
               All
@@ -460,10 +466,10 @@ const Marketplace = () => {
                   setTooltip({ visible: true, text: cat.name, x: r.left + r.width / 2, y: r.top - 8 });
                 }}
                 onMouseLeave={() => setTooltip((t) => ({ ...t, visible: false }))}
-                className={`flex-shrink-0 max-w-[120px] truncate px-3 py-0.5 rounded-full text-xs font-bold uppercase tracking-wide transition-all cursor-pointer ${
+                className={`flex-shrink-0 max-w-[120px] truncate px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wide transition-all duration-200 cursor-pointer border ${
                   activeCategory === String(cat.id)
-                    ? "bg-blue-600 text-white"
-                    : "text-slate-400 hover:text-white hover:bg-slate-800"
+                    ? "bg-gradient-to-r from-indigo-600 to-blue-600 text-white border-transparent shadow-md shadow-indigo-900/30"
+                    : "text-slate-400 hover:text-white hover:bg-slate-800 border-transparent hover:border-slate-700"
                 }`}
               >
                 {formatCategoryLabel(cat.name)}
@@ -478,11 +484,12 @@ const Marketplace = () => {
 
           {/* No results */}
           {visibleCourses.length === 0 && (
-            <div className="text-center py-16">
-              <div className="w-16 h-16 bg-slate-700/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i className="fas fa-search text-slate-400 text-2xl"></i>
+            <div className="text-center py-16 animate-scaleIn">
+              <div className="w-20 h-20 icon-chip rounded-3xl mx-auto mb-6">
+                <i className="fas fa-search text-2xl"></i>
               </div>
-              <p className="text-slate-400 text-lg mb-4">No courses found</p>
+              <p className="text-white text-lg font-bold mb-1">No courses found</p>
+              <p className="text-slate-500 text-sm mb-4">Try adjusting your search or filters</p>
               {hasActiveFilters && (
                 <Button variant="outline" size="md" onClick={resetFilters} className="mt-2">
                   <i className="fas fa-redo mr-2"></i>Clear Filters
@@ -502,9 +509,12 @@ const Marketplace = () => {
                 return (
                   <section key={cat.id} className="mb-2">
                     <div className="flex items-center justify-between mb-5">
-                      <h2 className="text-lg font-black text-white tracking-tight">
+                      <h2 className="text-lg font-black text-white tracking-tight flex items-center gap-2.5">
+                        <span className="w-1 h-5 rounded-full bg-gradient-to-b from-indigo-500 to-blue-500 inline-block" />
                         {formatCategoryLabel(cat.name)}
-                        <span className="ml-2 text-slate-600 text-sm font-medium">({catCourses.length})</span>
+                        <span className="text-[11px] font-bold text-indigo-300 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-full">
+                          {catCourses.length}
+                        </span>
                       </h2>
                       {hasMore && (
                         <button
@@ -544,9 +554,12 @@ const Marketplace = () => {
             const cat = categories.find((c) => String(c.id) === activeCategory);
             return (
               <section>
-                <h2 className="text-lg font-black text-white tracking-tight mb-6">
+                <h2 className="text-lg font-black text-white tracking-tight mb-6 flex items-center gap-2.5">
+                  <span className="w-1 h-5 rounded-full bg-gradient-to-b from-indigo-500 to-blue-500 inline-block" />
                   {formatCategoryLabel(cat?.name || "")}
-                  <span className="ml-2 text-slate-600 text-sm font-medium">({visibleCourses.length})</span>
+                  <span className="text-[11px] font-bold text-indigo-300 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-full">
+                    {visibleCourses.length}
+                  </span>
                 </h2>
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
                   {visibleCourses.map((course, idx) => (

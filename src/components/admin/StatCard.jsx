@@ -13,7 +13,7 @@ const StatCard = ({ label, value, icon, trend, color = "indigo", compact = false
 
   if (compact) {
     return (
-      <div onClick={onClick} className={`relative overflow-hidden bg-gradient-to-br ${colorClasses[color]} rounded-xl px-4 py-4 border backdrop-blur-sm transition-all duration-300 hover:scale-[1.02] hover:shadow-lg ${onClick ? "cursor-pointer" : ""}`}>
+      <div onClick={onClick} className={`relative overflow-hidden bg-gradient-to-br ${colorClasses[color]} rounded-xl px-4 py-4 border backdrop-blur-sm transition-all duration-300 hover:scale-[1.03] hover:-translate-y-0.5 hover:shadow-xl hover:shadow-black/20 ${onClick ? "cursor-pointer" : ""}`}>
         <div className="absolute top-0 right-0 w-14 h-14 bg-white/5 rounded-full -mr-6 -mt-6"></div>
         <div className="relative z-10 flex items-center gap-2.5 mb-2.5">
           <div className="w-7 h-7 bg-white/10 rounded-md flex items-center justify-center flex-shrink-0">
@@ -22,7 +22,7 @@ const StatCard = ({ label, value, icon, trend, color = "indigo", compact = false
           <p className="text-[10px] uppercase tracking-wider opacity-80 leading-tight">{label}</p>
         </div>
         <div className="flex items-end justify-between">
-          <h3 className="text-2xl font-bold leading-none">{value}</h3>
+          <h3 className="text-2xl font-bold leading-none tabular-nums animate-popIn">{value}</h3>
           {trend && (
             <div className={`flex items-center gap-0.5 text-[10px] ${trend > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
               <i className={`fas fa-arrow-${trend > 0 ? 'up' : 'down'} text-[8px]`}></i>
@@ -54,7 +54,7 @@ const StatCard = ({ label, value, icon, trend, color = "indigo", compact = false
             </div>
           )}
         </div>
-        <h3 className="text-3xl font-bold">{value}</h3>
+        <h3 className="text-3xl font-bold tabular-nums animate-popIn">{value}</h3>
       </div>
     </div>
   );

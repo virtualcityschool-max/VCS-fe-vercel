@@ -64,8 +64,11 @@ const Header = ({ activeTab, children }) => {
   const { title, description } = getTabInfo();
 
   return (
-    <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
+    <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8 animate-fadeInUp">
       <div>
+        <p className="text-[10px] font-black uppercase tracking-[0.35em] text-indigo-400/80 mb-2">
+          Admin Portal
+        </p>
         <h2 className="text-3xl md:text-4xl font-black font-poppins text-white capitalize mb-2">
           {title}
         </h2>

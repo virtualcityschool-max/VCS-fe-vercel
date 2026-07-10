@@ -271,7 +271,7 @@ const OverviewTab = ({
   return (
     <div className="space-y-4 animate-fadeIn">
       {/* Row 1 — User stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-6 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-6 gap-3 stagger-children">
         <StatCardTip
           label="Total Users"
           value={analytics.users.total}
@@ -373,7 +373,7 @@ const OverviewTab = ({
       {/* Charts — side by side */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Revenue by Course */}
-        <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6 backdrop-blur-sm">
+        <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6 backdrop-blur-sm transition-all duration-300 hover:border-slate-700">
           <div className="flex items-center justify-between mb-1">
             <h3 className="text-lg font-bold text-white flex items-center gap-3">
               <div className="w-8 h-8 bg-amber-600/20 rounded-lg flex items-center justify-center">
@@ -419,7 +419,13 @@ const OverviewTab = ({
                 data={revenueData}
                 margin={{ top: 4, right: 8, left: 0, bottom: 0 }}
               >
-                <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                <defs>
+                  <linearGradient id="revenueBar" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#34d399" stopOpacity={0.95} />
+                    <stop offset="100%" stopColor="#059669" stopOpacity={0.7} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
                 <XAxis
                   interval={0}
                   hide={true}
@@ -428,18 +434,21 @@ const OverviewTab = ({
                   tick={{ fontSize: 11 }}
                 />
                 <YAxis
-                  stroke="#94a3b8"
+                  stroke="#64748b"
+                  axisLine={false}
+                  tickLine={false}
                   tick={{ fontSize: 10 }}
                   tickFormatter={(v) =>
                     v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v
                   }
                 />
-                <Tooltip content={<RevenueTooltip />} cursor={false} />
-                <Bar dataKey="Revenue" fill="#10b981" radius={[4, 4, 0, 0]} />
+                <Tooltip content={<RevenueTooltip />} cursor={{ fill: "rgba(148,163,184,0.06)" }} />
+                <Bar dataKey="Revenue" fill="url(#revenueBar)" radius={[6, 6, 0, 0]} maxBarSize={48} animationDuration={900} />
                 <Bar
                   dataKey="Lost Revenue"
                   fill="#f43f5e"
-                  radius={[4, 4, 0, 0]}
+                  radius={[6, 6, 0, 0]}
+                  maxBarSize={48}
                 />
               </BarChart>
             </ResponsiveContainer>
@@ -447,7 +456,7 @@ const OverviewTab = ({
         </div>
 
         {/* Enrollments by Course */}
-        <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6 backdrop-blur-sm">
+        <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6 backdrop-blur-sm transition-all duration-300 hover:border-slate-700">
           <div className="flex items-center justify-between mb-1">
             <h3 className="text-lg font-bold text-white flex items-center gap-3">
               <div className="w-8 h-8 bg-indigo-600/20 rounded-lg flex items-center justify-center">
@@ -479,7 +488,13 @@ const OverviewTab = ({
                 data={enrollmentData}
                 margin={{ top: 4, right: 8, left: 0, bottom: 0 }}
               >
-                <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                <defs>
+                  <linearGradient id="enrollmentBar" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#818cf8" stopOpacity={0.95} />
+                    <stop offset="100%" stopColor="#4f46e5" stopOpacity={0.7} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
                 <XAxis
                   interval={0}
                   hide={true}
@@ -488,12 +503,14 @@ const OverviewTab = ({
                   tick={{ fontSize: 11 }}
                 />
                 <YAxis
-                  stroke="#94a3b8"
+                  stroke="#64748b"
+                  axisLine={false}
+                  tickLine={false}
                   allowDecimals={false}
                   tick={{ fontSize: 10 }}
                 />
-                <Tooltip content={<EnrollmentTooltip />} cursor={false} />
-                <Bar dataKey="Students" fill="#6366f1" radius={[4, 4, 0, 0]} />
+                <Tooltip content={<EnrollmentTooltip />} cursor={{ fill: "rgba(148,163,184,0.06)" }} />
+                <Bar dataKey="Students" fill="url(#enrollmentBar)" radius={[6, 6, 0, 0]} maxBarSize={48} animationDuration={900} />
               </BarChart>
             </ResponsiveContainer>
           )}

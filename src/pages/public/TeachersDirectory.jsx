@@ -99,10 +99,14 @@ const TeachersDirectory = () => {
         <HireTutorModal teacher={hireModal} onClose={() => setHireModal(null)} />
       )}
       <div className="relative overflow-hidden border-b border-slate-800/50 animate-fadeIn">
-        <div className="max-w-7xl mx-auto px-6 py-5 relative z-10">
-          <div className="text-center mb-4">
-            <h1 className="text-2xl md:text-3xl font-black font-poppins leading-tight tracking-tight animate-scaleIn">
-              Find your <span className="text-indigo-500">Tutor</span>
+        <div className="absolute top-[-60%] left-1/2 -translate-x-1/2 w-[70%] h-[160%] bg-cyan-600/8 blur-[100px] rounded-full pointer-events-none" />
+        <div className="max-w-7xl mx-auto px-6 py-6 relative z-10">
+          <div className="text-center mb-5">
+            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-cyan-400 mb-2 animate-fadeInUp">
+              Mentorship
+            </p>
+            <h1 className="text-2xl md:text-4xl font-black font-poppins leading-tight tracking-tight animate-fadeInUp" style={{ animationDelay: "0.08s" }}>
+              Find your <span className="text-gradient">Tutor</span>
             </h1>
           </div>
           <div className="max-w-xl mx-auto animate-springyReveal" style={{ animationDelay: '0.1s' }}>
