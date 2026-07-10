@@ -1,4 +1,167 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { aboutService } from "../../services/aboutService";
+
+// TODO: replace with your real bank details before shipping to production.
+// WhatsApp number is pulled live from Admin → About Page settings (contact_whatsapp);
+// this is only the fallback shown before that loads / if it's unset.
+const MANUAL_BANK_DETAILS = {
+  bankName: "BANK_NAME",
+  accountTitle: "ACCOUNT_TITLE",
+  accountNumber: "ACCOUNT_NUMBER",
+};
+const FALLBACK_WHATSAPP = "WHATSAPP_NUMBER";
+
+// Compact "label: value" row with a copy button — used inside the manual-payment steps.
+const CompactCopyRow = ({ label, value }) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1200);
+    } catch {
+      // Clipboard access can fail (e.g. insecure context) — value is still visible to copy manually.
+    }
+  };
+
+  return (
+    <div className="flex items-center justify-between gap-2">
+      <p className="text-sm text-slate-400 truncate">
+        {label}: <span className="text-slate-100 font-semibold">{value}</span>
+      </p>
+      <button
+        type="button"
+        onClick={handleCopy}
+        className="shrink-0 text-slate-500 hover:text-white transition-colors"
+        title="Copy"
+      >
+        <i className={`fas ${copied ? "fa-check text-emerald-400" : "fa-copy"} text-xs`} />
+      </button>
+    </div>
+  );
+};
+
+// Same "label: value" row as CompactCopyRow, plus a WhatsApp icon that opens the prefilled chat.
+const WhatsAppRow = ({ label, value, chatHref }) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1200);
+    } catch {
+      // Clipboard access can fail (e.g. insecure context) — value is still visible to copy manually.
+    }
+  };
+
+  return (
+    <div className="flex items-center justify-between gap-2">
+      <p className="text-sm text-slate-400 truncate">
+        {label}: <span className="text-slate-100 font-semibold">{value}</span>
+      </p>
+      <div className="flex items-center gap-3 shrink-0">
+        <a
+          href={chatHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-emerald-400 hover:text-emerald-300 transition-colors"
+          title="Open WhatsApp chat"
+        >
+          <i className="fab fa-whatsapp text-base" />
+        </a>
+        <button
+          type="button"
+          onClick={handleCopy}
+          className="text-slate-500 hover:text-white transition-colors"
+          title="Copy"
+        >
+          <i className={`fas ${copied ? "fa-check text-emerald-400" : "fa-copy"} text-xs`} />
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// Checklist line ("✓ requirement: value") with an inline copy icon when a value is given.
+const ChecklistRow = ({ text, value }) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1200);
+    } catch {
+      // Clipboard access can fail (e.g. insecure context) — value is still visible to copy manually.
+    }
+  };
+
+  return (
+    <div className="flex items-center justify-between gap-2">
+      <div className="flex items-center gap-2 min-w-0">
+        <i className="fas fa-circle-check text-emerald-400 text-xs shrink-0" />
+        <p className="text-slate-300 text-sm truncate">
+          {text}
+          {value && <span className="text-white font-semibold">: {value}</span>}
+        </p>
+      </div>
+      {value && (
+        <button
+          type="button"
+          onClick={handleCopy}
+          className="shrink-0 text-slate-500 hover:text-white transition-colors"
+          title="Copy"
+        >
+          <i className={`fas ${copied ? "fa-check text-emerald-400" : "fa-copy"} text-xs`} />
+        </button>
+      )}
+    </div>
+  );
+};
+
+// A full-width, clickable payment-method option (replaces the old Cancel/Confirm button row).
+const PaymentMethodCard = ({
+  icon,
+  iconBg,
+  iconColor,
+  title,
+  badge,
+  badgeColor,
+  description,
+  onClick,
+  disabled,
+  loading,
+}) => (
+  <button
+    type="button"
+    onClick={onClick}
+    disabled={disabled}
+    className="w-full flex items-center gap-4 p-4 bg-slate-800/50 hover:bg-slate-800 border border-white/5 hover:border-white/10 rounded-2xl transition-all text-left disabled:opacity-50 disabled:cursor-not-allowed group"
+  >
+    <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${iconBg}`}>
+      {loading ? (
+        <i className="fas fa-spinner fa-spin text-white text-sm" />
+      ) : (
+        <i className={`fas ${icon} ${iconColor}`} />
+      )}
+    </div>
+    <div className="flex-1 min-w-0">
+      <div className="flex items-center gap-2 mb-0.5">
+        <p className="text-white text-sm font-bold">{title}</p>
+        <span className={`text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full ${badgeColor}`}>
+          {badge}
+        </span>
+      </div>
+      <p className="text-slate-400 text-xs">
+        {loading ? "Redirecting..." : description}
+      </p>
+    </div>
+    <i className="fas fa-chevron-right text-slate-600 group-hover:text-slate-400 text-xs transition-colors shrink-0" />
+  </button>
+);
 
 const EnrollmentTypeModal = ({
   isOpen,
@@ -8,12 +171,142 @@ const EnrollmentTypeModal = ({
   isPaid = false,
   isLoading = false,
 }) => {
+  const [view, setView] = useState("choose");
+  const [whatsappNumber, setWhatsappNumber] = useState(null);
+  const studentEmail = useSelector((state) => state.auth?.user?.email) || "";
+
+  // Always land back on the method-choice view when the modal is reopened.
+  useEffect(() => {
+    if (isOpen) setView("choose");
+  }, [isOpen]);
+
+  // Pull the WhatsApp number admins already configure in About Page settings.
+  useEffect(() => {
+    if (!isOpen || !isPaid) return;
+    let cancelled = false;
+    aboutService
+      .get()
+      .then((data) => {
+        if (!cancelled && data?.contact_whatsapp) setWhatsappNumber(data.contact_whatsapp);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen, isPaid]);
+
   if (!isOpen) return null;
 
   const price = course?.price ? `$${Number(course.price).toLocaleString("en-US")} USD` : null;
   const title = course?.title || "this course";
+  const effectiveWhatsapp = whatsappNumber || FALLBACK_WHATSAPP;
+  const whatsappMessage = `Hi! I've completed my bank transfer for "${title}"${price ? ` (${price})` : ""}.\nMy student email: ${studentEmail || "<your student email>"}\n(Attaching my payment screenshot)`;
+  const whatsappHref = `https://wa.me/${effectiveWhatsapp.replace(/\D/g, "")}?text=${encodeURIComponent(whatsappMessage)}`;
 
   if (isPaid) {
+    if (view === "manual") {
+      return (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fadeIn">
+          <div className="bg-slate-900 border border-white/10 w-full max-w-md rounded-[2rem] shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <button
+              onClick={onClose}
+              className="absolute top-5 right-5 text-slate-500 hover:text-white transition z-10"
+            >
+              <i className="fas fa-times text-lg" />
+            </button>
+
+            <div className="p-7 sm:p-9">
+              <button
+                onClick={() => setView("choose")}
+                className="flex items-center gap-1.5 text-slate-500 hover:text-white text-xs font-semibold mb-4 transition-colors"
+              >
+                <i className="fas fa-arrow-left text-[10px]" /> Back
+              </button>
+
+              <div className="text-center mb-5">
+                <div className="w-14 h-14 bg-amber-500/15 rounded-2xl flex items-center justify-center text-xl mx-auto mb-3 border border-amber-500/20">
+                  <i className="fas fa-building-columns text-amber-400" />
+                </div>
+                <h2 className="text-xl font-black font-poppins text-white mb-1">
+                  Bank Transfer — Manual Payment
+                </h2>
+                <p className="text-slate-400 text-sm">
+                  Enroll in <span className="text-white font-semibold">{title}</span>
+                  {price ? ` (${price})` : ""} by following these steps.
+                </p>
+              </div>
+
+              <div className="flex items-start gap-2 p-3.5 bg-amber-500/10 border border-amber-500/20 rounded-xl mb-4">
+                <i className="fas fa-circle-info text-amber-400 text-sm mt-0.5 shrink-0" />
+                <p className="text-amber-200/90 text-sm leading-relaxed">
+                  Your <span className="font-bold">payment screenshot</span> and{" "}
+                  <span className="font-bold">student email</span> are both required —
+                  our admin team uses them to verify your payment and enroll you.
+                </p>
+              </div>
+
+              <div className="bg-slate-800/50 border border-white/5 rounded-2xl divide-y divide-white/5 mb-5">
+                {/* Step 1 */}
+                <div className="p-4">
+                  <div className="flex items-center gap-2.5 mb-2.5">
+                    <span className="w-6 h-6 rounded-full bg-amber-500/20 text-amber-400 text-xs font-black flex items-center justify-center shrink-0">
+                      1
+                    </span>
+                    <p className="text-white text-sm font-bold">Transfer to our bank account</p>
+                  </div>
+                  <div className="pl-8 space-y-2">
+                    <CompactCopyRow label="Bank" value={MANUAL_BANK_DETAILS.bankName} />
+                    <CompactCopyRow label="Title" value={MANUAL_BANK_DETAILS.accountTitle} />
+                    <CompactCopyRow label="Account #" value={MANUAL_BANK_DETAILS.accountNumber} />
+                  </div>
+                </div>
+
+                {/* Step 2 */}
+                <div className="p-4 flex items-center gap-2.5">
+                  <span className="w-6 h-6 rounded-full bg-amber-500/20 text-amber-400 text-xs font-black flex items-center justify-center shrink-0">
+                    2
+                  </span>
+                  <p className="text-white text-sm font-bold">Screenshot the successful transfer</p>
+                </div>
+
+                {/* Step 3 */}
+                <div className="p-4">
+                  <div className="flex items-center gap-2.5 mb-2.5">
+                    <span className="w-6 h-6 rounded-full bg-amber-500/20 text-amber-400 text-xs font-black flex items-center justify-center shrink-0">
+                      3
+                    </span>
+                    <p className="text-white text-sm font-bold">Send us the following on WhatsApp</p>
+                  </div>
+                  <div className="pl-8 space-y-2 mb-3">
+                    <ChecklistRow text="Your payment screenshot" />
+                    <ChecklistRow text="Student email" value={studentEmail} />
+                  </div>
+                  <div className="pl-8">
+                    <WhatsAppRow label="WhatsApp Us" value={effectiveWhatsapp} chatHref={whatsappHref} />
+                  </div>
+                </div>
+
+                {/* Step 4 */}
+                <div className="p-4 flex items-center gap-2.5">
+                  <span className="w-6 h-6 rounded-full bg-amber-500/20 text-amber-400 text-xs font-black flex items-center justify-center shrink-0">
+                    4
+                  </span>
+                  <p className="text-white text-sm font-bold">We will verify your payment and enroll you within 24 hours</p>
+                </div>
+              </div>
+
+              <button
+                onClick={onClose}
+                className="w-full py-3 rounded-xl text-sm font-bold text-white bg-amber-600 hover:bg-amber-500 transition-all flex items-center justify-center gap-2"
+              >
+                <i className="fas fa-check text-xs" /> Got It
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fadeIn">
         <div className="bg-slate-900 border border-white/10 w-full max-w-md rounded-[2rem] shadow-2xl relative">
@@ -25,45 +318,43 @@ const EnrollmentTypeModal = ({
           </button>
 
           <div className="p-7 sm:p-9">
-            <div className="text-center mb-7">
+            <div className="text-center mb-6">
               <div className="w-16 h-16 bg-indigo-500/15 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-4 border border-indigo-500/20">
                 <i className="fas fa-credit-card text-indigo-400" />
               </div>
-              <h2 className="text-xl font-black font-poppins text-white mb-1">Proceed with Payment</h2>
-              <p className="text-slate-400 text-sm">
-                You'll be redirected to Gumroad to complete your payment.
-              </p>
+              <h2 className="text-xl font-black font-poppins text-white mb-1">Choose Payment Method</h2>
+              <p className="text-slate-400 text-sm">Select how you'd like to pay for this course.</p>
             </div>
 
             <div className="p-4 bg-indigo-600/10 border border-indigo-500/20 rounded-2xl mb-6 text-center">
-              {price && (
-                <p className="text-white font-black text-2xl mb-1">{price}</p>
-              )}
+              {price && <p className="text-white font-black text-2xl mb-1">{price}</p>}
               <p className="text-indigo-400 text-sm font-semibold truncate">{title}</p>
-              <p className="text-slate-500 text-xs mt-2">
-                After successful payment you'll be automatically enrolled.
-              </p>
             </div>
 
-            <div className="flex gap-3">
-              <button
-                onClick={onClose}
-                disabled={isLoading}
-                className="flex-1 py-3 rounded-xl text-sm font-bold text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 border border-white/5 transition-all disabled:opacity-50"
-              >
-                Cancel
-              </button>
-              <button
+            <div className="space-y-3">
+              <PaymentMethodCard
+                icon="fa-bolt"
+                iconBg="bg-indigo-500/20"
+                iconColor="text-indigo-400"
+                title="Gumroad"
+                badge="Live Payment"
+                badgeColor="bg-indigo-500/20 text-indigo-300"
+                description="Pay online now — you're enrolled automatically once payment completes."
                 onClick={onConfirm}
                 disabled={isLoading}
-                className="flex-1 py-3 rounded-xl text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-500 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isLoading ? (
-                  <><i className="fas fa-spinner fa-spin text-xs" /> Redirecting...</>
-                ) : (
-                  <>Proceed to Payment <i className="fas fa-arrow-right text-xs" /></>
-                )}
-              </button>
+                loading={isLoading}
+              />
+              <PaymentMethodCard
+                icon="fa-building-columns"
+                iconBg="bg-amber-500/20"
+                iconColor="text-amber-400"
+                title="Bank Transfer"
+                badge="Manual"
+                badgeColor="bg-amber-500/20 text-amber-300"
+                description="Pay via bank transfer — our team verifies and enrolls you manually."
+                onClick={() => setView("manual")}
+                disabled={isLoading}
+              />
             </div>
           </div>
         </div>
