@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import ConfirmDialog from "../common/ConfirmDialog";
 import { useDateFormatters } from "../../hooks/useDateFormatters";
 
@@ -10,10 +10,20 @@ const EnrollmentRequestsTab = ({
   onApprove,
   onReject,
   onRefresh,
+  search = "",
 }) => {
   const [confirmDialog, setConfirmDialog] = useState({ open: false, type: null, enrollmentId: null, studentId: null, label: "" });
   const [deleteUser, setDeleteUser] = useState(false);
   const { timezone } = useDateFormatters();
+
+  const filteredEnrollments = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return enrollments || [];
+    return (enrollments || []).filter((e) =>
+      [e.student_name, e.student_email, e.course_title, e.teacher_name, e.course_category]
+        .some((f) => (f || "").toLowerCase().includes(q)),
+    );
+  }, [enrollments, search]);
 
   const handleApprove = (id, label) => {
     setConfirmDialog({ open: true, type: "approve", enrollmentId: id, studentId: null, label });
@@ -84,7 +94,24 @@ const EnrollmentRequestsTab = ({
 
   return (
     <div className="space-y-3">
-      {enrollments.map((enrollment) => {
+      <div className="flex justify-end text-sm font-semibold">
+        <span className="text-amber-300">
+          Pending: <span className="text-white font-bold">{enrollments.length}</span>
+        </span>
+      </div>
+
+      {filteredEnrollments.length === 0 && (
+        <div className="flex flex-col items-center justify-center py-16">
+          <div className="w-14 h-14 bg-slate-800 rounded-full flex items-center justify-center mb-4">
+            <i className="fas fa-search text-slate-500 text-xl"></i>
+          </div>
+          <p className="text-slate-400 text-sm">
+            No enrollment requests match "{search}".
+          </p>
+        </div>
+      )}
+
+      {filteredEnrollments.map((enrollment) => {
         const isProcessing = !!processing[enrollment.id];
         const action = processing[enrollment.id];
 

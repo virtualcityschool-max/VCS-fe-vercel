@@ -6,7 +6,7 @@ import {
   fetchPendingEnrollments,
 } from "../../store/slices/approvalsSlice";
 import { fetchPendingChildLinks } from "../../store/slices/childLinksSlice";
-import { fetchAdminHireRequests } from "../../store/slices/hireSlice";
+// import { fetchAdminHireRequests } from "../../store/slices/hireSlice";
 import {
   fetchCourses,
   fetchUsers,
@@ -49,7 +49,7 @@ const AdminLayout = () => {
     dispatch(fetchPendingApprovals());
     dispatch(fetchPendingChildLinks());
     dispatch(fetchPendingEnrollments());
-    dispatch(fetchAdminHireRequests());
+    // dispatch(fetchAdminHireRequests());
   }, [dispatch]);
 
   React.useEffect(() => {

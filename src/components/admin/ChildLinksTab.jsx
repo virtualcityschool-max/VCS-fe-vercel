@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import ConfirmDialog from "../common/ConfirmDialog";
 import { useDateFormatters } from "../../hooks/useDateFormatters";
 
@@ -10,9 +10,19 @@ const ChildLinksTab = ({
   onApprove,
   onReject,
   onRefresh,
+  search = "",
 }) => {
   const [confirmDialog, setConfirmDialog] = useState({ open: false, type: null, linkId: null, label: "" });
   const { timezone } = useDateFormatters();
+
+  const filteredChildLinks = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return pendingChildLinks;
+    return pendingChildLinks.filter((link) =>
+      [link.parent, link.student, link.parent_email, link.student_email]
+        .some((f) => (f || "").toLowerCase().includes(q)),
+    );
+  }, [pendingChildLinks, search]);
 
   const handleApprove = (linkId, label) => {
     setConfirmDialog({ open: true, type: "approve", linkId, label });
@@ -46,6 +56,15 @@ const ChildLinksTab = ({
 
   return (
     <>
+      {/* Stats */}
+      {!childLinksLoading && !childLinksError && pendingChildLinks.length > 0 && (
+        <div className="flex justify-end mb-4 text-sm font-semibold">
+          <span className="text-amber-300">
+            Pending: <span className="text-white font-bold">{pendingChildLinks.length}</span>
+          </span>
+        </div>
+      )}
+
       <div className="bg-slate-900/50 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-sm animate-fadeIn">
 
         {/* Other Error State */}
@@ -121,14 +140,29 @@ const ChildLinksTab = ({
             </div>
           )}
 
+        {/* No Search Matches */}
+        {!childLinksLoading &&
+          !childLinksError &&
+          pendingChildLinks.length > 0 &&
+          filteredChildLinks.length === 0 && (
+            <div className="flex flex-col items-center justify-center p-16">
+              <div className="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mb-4">
+                <i className="fas fa-search text-slate-500 text-xl"></i>
+              </div>
+              <p className="text-slate-400 text-sm">
+                No child link requests match "{search}".
+              </p>
+            </div>
+          )}
+
         {/* Child Links List */}
         {!childLinksLoading &&
           !childLinksError &&
-          pendingChildLinks.length > 0 && (
+          filteredChildLinks.length > 0 && (
             <div className="overflow-x-auto">
               {/* Mobile Card View */}
               <div className="lg:hidden divide-y divide-slate-800/50">
-                {pendingChildLinks.map((link) => (
+                {filteredChildLinks.map((link) => (
                   <div
                     key={link.link_id}
                     className="p-4 sm:p-6 hover:bg-slate-800/30 transition"
@@ -227,7 +261,7 @@ const ChildLinksTab = ({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/50">
-                  {pendingChildLinks.map((link) => (
+                  {filteredChildLinks.map((link) => (
                     <tr
                       key={link.link_id}
                       className="hover:bg-slate-800/30 transition group"

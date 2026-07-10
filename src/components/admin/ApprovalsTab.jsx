@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import ConfirmDialog from "../common/ConfirmDialog";
 import { getStorageUrl } from "../../utils/storageUrl";
 import { useDateFormatters } from "../../hooks/useDateFormatters";
@@ -12,10 +12,24 @@ const ApprovalsTab = ({
   onApprove,
   onReject,
   onRefresh,
+  search = "",
+  approvedTodayCount = 0,
+  rejectedTodayCount = 0,
 }) => {
   const [confirmDialog, setConfirmDialog] = useState({ open: false, type: null, userId: null, username: "" });
   const [deleteUser, setDeleteUser] = useState(false);
   const { timezone } = useDateFormatters();
+
+  const filteredApprovals = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return pendingApprovals;
+    return pendingApprovals.filter((user) => {
+      const name = (getDisplayName(user) || "").toLowerCase();
+      const email = (user.email || "").toLowerCase();
+      const role = (user.role || "").toLowerCase();
+      return name.includes(q) || email.includes(q) || role.includes(q);
+    });
+  }, [pendingApprovals, search]);
 
   const handleApprove = (userId, username) => {
     setConfirmDialog({ open: true, type: "approve", userId, username });
@@ -37,6 +51,21 @@ const ApprovalsTab = ({
 
   return (
     <>
+      {/* Stats */}
+      {!approvalsLoading && !approvalsError && pendingApprovals.length > 0 && (
+        <div className="flex items-center gap-3 flex-wrap justify-end mb-4 text-sm font-semibold">
+          <span className="text-amber-300">
+            Pending: <span className="text-white font-bold">{pendingApprovals.length}</span>
+          </span>
+          <span className="text-emerald-300">
+            Approved Today: <span className="text-white font-bold">{approvedTodayCount}</span>
+          </span>
+          <span className="text-rose-300">
+            Rejected Today: <span className="text-white font-bold">{rejectedTodayCount}</span>
+          </span>
+        </div>
+      )}
+
       <div className="bg-slate-900/50 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-sm animate-fadeIn">
 
         {/* Other Error State */}
@@ -125,14 +154,29 @@ const ApprovalsTab = ({
             </div>
           )}
 
+        {/* No Search Matches */}
+        {!approvalsLoading &&
+          !approvalsError &&
+          pendingApprovals.length > 0 &&
+          filteredApprovals.length === 0 && (
+            <div className="flex flex-col items-center justify-center p-16">
+              <div className="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mb-4">
+                <i className="fas fa-search text-slate-500 text-xl"></i>
+              </div>
+              <p className="text-slate-400 text-sm">
+                No approvals match "{search}".
+              </p>
+            </div>
+          )}
+
         {/* Approvals List */}
         {!approvalsLoading &&
           !approvalsError &&
-          pendingApprovals.length > 0 && (
+          filteredApprovals.length > 0 && (
             <div className="overflow-x-auto">
               {/* Mobile Card View */}
               <div className="lg:hidden divide-y divide-slate-800/50">
-                {pendingApprovals.map((user) => (
+                {filteredApprovals.map((user) => (
                   <div
                     key={user.id}
                     className="p-4 sm:p-6 hover:bg-slate-800/30 transition"
@@ -239,7 +283,7 @@ const ApprovalsTab = ({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/50">
-                  {pendingApprovals.map((user) => (
+                  {filteredApprovals.map((user) => (
                     <tr
                       key={user.id}
                       className="hover:bg-slate-800/30 transition group"

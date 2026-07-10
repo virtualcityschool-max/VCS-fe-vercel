@@ -17,7 +17,7 @@ import {
   rejectChildLink,
 } from "../../store/slices/childLinksSlice";
 import {
-  fetchAdminHireRequests,
+  // fetchAdminHireRequests,
   actionHireRequest,
 } from "../../store/slices/hireSlice";
 import { toastManager } from "../../utils/toastManager";
@@ -27,10 +27,16 @@ import EnrollmentRequestsTab from "../../components/admin/EnrollmentRequestsTab"
 import HireRequestsTab from "../../components/admin/HireRequestsTab";
 import { showApiError } from "../../utils/apiErrorHandler";
 import { adminService } from "../../services/adminService";
+import { SearchInput } from "../../components/ui";
 
 const AdminApprovalsPage = () => {
   const dispatch = useDispatch();
   const [activeTab, setActiveTab] = useState("users");
+
+  // Search is independent per tab
+  const [usersSearch, setUsersSearch] = useState("");
+  const [enrollmentsSearch, setEnrollmentsSearch] = useState("");
+  const [childLinksSearch, setChildLinksSearch] = useState("");
 
   const {
     pendingApprovals,
@@ -66,7 +72,7 @@ const AdminApprovalsPage = () => {
     dispatch(fetchPendingApprovals());
     dispatch(fetchPendingChildLinks());
     dispatch(fetchPendingEnrollments());
-    dispatch(fetchAdminHireRequests(hireStatusFilter));
+    // dispatch(fetchAdminHireRequests(hireStatusFilter));
   }, [dispatch]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleApprove = async (userId) => {
@@ -167,11 +173,8 @@ const AdminApprovalsPage = () => {
   };
 
   const handleRefreshHireRequests = () => {
-    dispatch(fetchAdminHireRequests(hireStatusFilter));
+    // dispatch(fetchAdminHireRequests(hireStatusFilter));
   };
-
-  const pendingHireCount =
-    hireRequests?.filter((r) => r.status === "pending").length || 0;
 
   const isActiveTabLoading =
     activeTab === "users"
@@ -191,23 +194,41 @@ const AdminApprovalsPage = () => {
           ? handleRefreshEnrollments
           : handleRefreshHireRequests;
 
-  const activePendingCount =
-    activeTab === "users"
-      ? pendingApprovals?.length || 0
-      : activeTab === "childLinks"
-        ? pendingChildLinks?.length || 0
-        : activeTab === "enrollments"
-          ? pendingEnrollments?.length || 0
-          : pendingHireCount;
-
   // Placeholder counts until backend provides processed-today metrics.
   const approvedTodayCount = 0;
   const rejectedTodayCount = 0;
 
+  const activeSearch =
+    activeTab === "users"
+      ? usersSearch
+      : activeTab === "enrollments"
+        ? enrollmentsSearch
+        : activeTab === "childLinks"
+          ? childLinksSearch
+          : "";
+
+  const setActiveSearch =
+    activeTab === "users"
+      ? setUsersSearch
+      : activeTab === "enrollments"
+        ? setEnrollmentsSearch
+        : activeTab === "childLinks"
+          ? setChildLinksSearch
+          : () => {};
+
+  const activeSearchPlaceholder =
+    activeTab === "users"
+      ? "Search by name, email, or role..."
+      : activeTab === "enrollments"
+        ? "Search by student, course, or tutor..."
+        : activeTab === "childLinks"
+          ? "Search by guardian or student..."
+          : "Search...";
+
   return (
     <div className="space-y-6">
       {/* Tab Navigation */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-2">
         <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-1 backdrop-blur-sm w-fit max-w-full overflow-x-auto no-scrollbar">
           <div className="flex items-center gap-1 min-w-max">
             <button
@@ -262,32 +283,14 @@ const AdminApprovalsPage = () => {
           </div>
         </div>
         <div className="flex items-center gap-3 flex-wrap">
-          {activeTab === "users" ? (
-            <div className="flex items-center gap-3 flex-wrap text-sm font-semibold">
-              <span className="text-amber-300">
-                Pending:{" "}
-                <span className="text-white font-bold">
-                  {activePendingCount}
-                </span>
-              </span>
-              <span className="text-emerald-300">
-                Approved Today:{" "}
-                <span className="text-white font-bold">
-                  {approvedTodayCount}
-                </span>
-              </span>
-              <span className="text-rose-300">
-                Rejected Today:{" "}
-                <span className="text-white font-bold">
-                  {rejectedTodayCount}
-                </span>
-              </span>
-            </div>
-          ) : (
-            <span className="text-sm font-semibold text-amber-300">
-              Pending:{" "}
-              <span className="text-white font-bold">{activePendingCount}</span>
-            </span>
+          {activeTab !== "hireRequests" && (
+            <SearchInput
+              value={activeSearch}
+              onChange={(e) => setActiveSearch(e.target.value)}
+              onClear={() => setActiveSearch("")}
+              placeholder={activeSearchPlaceholder}
+              className="w-full sm:w-64"
+            />
           )}
           <button
             onClick={activeRefreshHandler}
@@ -312,6 +315,9 @@ const AdminApprovalsPage = () => {
           onApprove={handleApprove}
           onReject={handleReject}
           onRefresh={handleRefreshApprovals}
+          search={usersSearch}
+          approvedTodayCount={approvedTodayCount}
+          rejectedTodayCount={rejectedTodayCount}
         />
       )}
 
@@ -324,6 +330,7 @@ const AdminApprovalsPage = () => {
           onApprove={handleApproveChildLink}
           onReject={handleRejectChildLink}
           onRefresh={handleRefreshChildLinks}
+          search={childLinksSearch}
         />
       )}
 
@@ -336,6 +343,7 @@ const AdminApprovalsPage = () => {
           onApprove={handleApproveEnrollment}
           onReject={handleRejectEnrollment}
           onRefresh={handleRefreshEnrollments}
+          search={enrollmentsSearch}
         />
       )}
 
