@@ -22,10 +22,10 @@ import { useDateFormatters } from "../../hooks";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const defaultOption = () => ({ option_text: "", is_correct: false });
-const defaultQuestion = () => ({
+const defaultQuestion = (marks = "") => ({
   question_text: "",
   question_type: "SINGLE_CHOICE",
-  max_marks: "",
+  max_marks: marks,
   options: [defaultOption(), defaultOption(), defaultOption(), defaultOption()],
 });
 
@@ -87,7 +87,7 @@ const QuestionBuilder = ({ questions, onChange, marksPerQuestion = 1 }) => {
 
   const removeQuestion = (idx) => onChange(questions.filter((_, i) => i !== idx));
 
-  const addQuestion = () => onChange([...questions, defaultQuestion()]);
+  const addQuestion = () => onChange([...questions, defaultQuestion(marksPerQuestion)]);
 
   return (
     <div className="space-y-5">
@@ -372,12 +372,12 @@ const TeacherQuizzes = ({
 
   const resetQuizState = () => {
     setForm(makeEmptyForm());
-    setQuestions([defaultQuestion()]);
+    setQuestions([defaultQuestion(defaultMarks)]);
     setPublishImmediately(!!ps.quiz_publish_immediately);
   };
 
   const [form, setForm]                     = useState(makeEmptyForm);
-  const [questions, setQuestions]           = useState(() => [defaultQuestion()]);
+  const [questions, setQuestions]           = useState(() => [defaultQuestion(defaultMarks)]);
   const [publishImmediately, setPublishImmediately] = useState(() => !!ps.quiz_publish_immediately);
 
   useEffect(() => {
