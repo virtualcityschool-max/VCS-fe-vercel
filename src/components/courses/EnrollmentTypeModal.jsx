@@ -2,13 +2,12 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { aboutService } from "../../services/aboutService";
 
-// TODO: replace with your real bank details before shipping to production.
 // WhatsApp number is pulled live from Admin → About Page settings (contact_whatsapp);
 // this is only the fallback shown before that loads / if it's unset.
 const MANUAL_BANK_DETAILS = {
-  bankName: "BANK_NAME",
-  accountTitle: "ACCOUNT_TITLE",
-  accountNumber: "ACCOUNT_NUMBER",
+  bankName: "Easypaisa",
+  accountTitle: "Atika Rameen",
+  accountNumber: "03099093548",
 };
 const FALLBACK_WHATSAPP = "WHATSAPP_NUMBER";
 
@@ -203,7 +202,7 @@ const EnrollmentTypeModal = ({
   const price = course?.price ? `$${Number(course.price).toLocaleString("en-US")} USD` : null;
   const title = course?.title || "this course";
   const effectiveWhatsapp = whatsappNumber || FALLBACK_WHATSAPP;
-  const whatsappMessage = `Hi! I've completed my bank transfer for "${title}"${price ? ` (${price})` : ""}.\nMy student email: ${studentEmail || "<your student email>"}\n(Attaching my payment screenshot)`;
+  const whatsappMessage = `Hi! I've completed my Easypaisa transfer for "${title}"${price ? ` (${price})` : ""}.\nMy student email: ${studentEmail || "<your student email>"}\n(Attaching my payment screenshot)`;
   const whatsappHref = `https://wa.me/${effectiveWhatsapp.replace(/\D/g, "")}?text=${encodeURIComponent(whatsappMessage)}`;
 
   if (isPaid) {
@@ -228,10 +227,10 @@ const EnrollmentTypeModal = ({
 
               <div className="text-center mb-5">
                 <div className="w-14 h-14 bg-amber-500/15 rounded-2xl flex items-center justify-center text-xl mx-auto mb-3 border border-amber-500/20">
-                  <i className="fas fa-building-columns text-amber-400" />
+                  <i className="fas fa-wallet text-amber-400" />
                 </div>
                 <h2 className="text-xl font-black font-poppins text-white mb-1">
-                  Bank Transfer — Manual Payment
+                  Easypaisa — Manual Payment
                 </h2>
                 <p className="text-slate-400 text-sm">
                   Enroll in <span className="text-white font-semibold">{title}</span>
@@ -255,11 +254,11 @@ const EnrollmentTypeModal = ({
                     <span className="w-6 h-6 rounded-full bg-amber-500/20 text-amber-400 text-xs font-black flex items-center justify-center shrink-0">
                       1
                     </span>
-                    <p className="text-white text-sm font-bold">Transfer to our bank account</p>
+                    <p className="text-white text-sm font-bold">Transfer to our Easypaisa account</p>
                   </div>
                   <div className="pl-8 space-y-2">
-                    <CompactCopyRow label="Bank" value={MANUAL_BANK_DETAILS.bankName} />
-                    <CompactCopyRow label="Title" value={MANUAL_BANK_DETAILS.accountTitle} />
+                    <CompactCopyRow label="Service" value={MANUAL_BANK_DETAILS.bankName} />
+                    <CompactCopyRow label="Account Title" value={MANUAL_BANK_DETAILS.accountTitle} />
                     <CompactCopyRow label="Account #" value={MANUAL_BANK_DETAILS.accountNumber} />
                   </div>
                 </div>
@@ -348,13 +347,13 @@ const EnrollmentTypeModal = ({
                 loading={isLoading}
               />
               <PaymentMethodCard
-                icon="fa-building-columns"
+                icon="fa-wallet"
                 iconBg="bg-amber-500/20"
                 iconColor="text-amber-400"
-                title="Bank Transfer"
+                title="Easypaisa"
                 badge="Manual"
                 badgeColor="bg-amber-500/20 text-amber-300"
-                description="Pay via bank transfer — our team verifies and enrolls you manually."
+                description="Pay via Easypaisa transfer — our team verifies and enrolls you manually."
                 onClick={() => setView("manual")}
                 disabled={isLoading}
               />
