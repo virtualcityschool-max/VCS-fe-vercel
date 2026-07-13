@@ -8,6 +8,9 @@ const ApprovalsTab = ({
   pendingApprovals,
   approvalsLoading,
   approvalsError,
+  rejectedApprovals = [],
+  rejectedLoading = false,
+  rejectedError = null,
   isProcessing,
   onApprove,
   onReject,
@@ -16,14 +19,20 @@ const ApprovalsTab = ({
   approvedTodayCount = 0,
   rejectedTodayCount = 0,
 }) => {
+  const [subTab, setSubTab] = useState("pending");
   const [confirmDialog, setConfirmDialog] = useState({ open: false, type: null, userId: null, username: "" });
   const [deleteUser, setDeleteUser] = useState(false);
   const { timezone } = useDateFormatters();
 
+  const isRejectedTab = subTab === "rejected";
+  const activeList = isRejectedTab ? rejectedApprovals : pendingApprovals;
+  const activeLoading = isRejectedTab ? rejectedLoading : approvalsLoading;
+  const activeError = isRejectedTab ? rejectedError : approvalsError;
+
   const filteredApprovals = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return pendingApprovals;
-    return pendingApprovals.filter((user) => {
+    if (!q) return activeList;
+    return activeList.filter((user) => {
       const name = (getDisplayName(user) || "").toLowerCase();
       const email = (user.email || "").toLowerCase();
       const role = (user.role || "").toLowerCase();
@@ -39,7 +48,7 @@ const ApprovalsTab = ({
         roleLabel.includes(q)
       );
     });
-  }, [pendingApprovals, search]);
+  }, [activeList, search]);
 
   const handleApprove = (userId, username) => {
     setConfirmDialog({ open: true, type: "approve", userId, username });
@@ -50,6 +59,10 @@ const ApprovalsTab = ({
     setConfirmDialog({ open: true, type: "reject", userId, username });
   };
 
+  const handleDelete = (userId, username) => {
+    setConfirmDialog({ open: true, type: "delete", userId, username });
+  };
+
   const handleConfirm = () => {
     const { type, userId } = confirmDialog;
     const shouldDelete = deleteUser;
@@ -57,29 +70,83 @@ const ApprovalsTab = ({
     setDeleteUser(false);
     if (type === "approve") onApprove(userId);
     else if (type === "reject") onReject(userId, shouldDelete);
+    else if (type === "delete") onReject(userId, true, true);
   };
+
+  const dialogCopy = {
+    approve: {
+      title: "Approve User",
+      message: `Are you sure you want to approve "${confirmDialog.username}"? They will gain access to the platform.`,
+      confirmLabel: "Approve",
+    },
+    reject: {
+      title: "Reject User",
+      message: `Are you sure you want to reject "${confirmDialog.username}"? This will deny their registration. You can still approve them later from this list.`,
+      confirmLabel: "Reject",
+    },
+    delete: {
+      title: "Delete User",
+      message: `Permanently delete "${confirmDialog.username}"? This cannot be undone — they will be able to register again from scratch.`,
+      confirmLabel: "Delete",
+    },
+  }[confirmDialog.type] || { title: "", message: "", confirmLabel: "" };
 
   return (
     <>
-      {/* Stats */}
-      {!approvalsLoading && !approvalsError && pendingApprovals.length > 0 && (
-        <div className="flex items-center gap-3 flex-wrap justify-end mb-4 text-sm font-semibold">
-          <span className="text-amber-300">
-            Pending: <span className="text-white font-bold">{pendingApprovals.length}</span>
-          </span>
-          <span className="text-emerald-300">
-            Approved Today: <span className="text-white font-bold">{approvedTodayCount}</span>
-          </span>
-          <span className="text-rose-300">
-            Rejected Today: <span className="text-white font-bold">{rejectedTodayCount}</span>
-          </span>
+      {/* Sub-tabs + Stats */}
+      <div className="flex items-center justify-between gap-3 flex-wrap mb-4">
+        <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-1 backdrop-blur-sm w-fit">
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setSubTab("pending")}
+              className={`inline-flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all duration-200 ${
+                !isRejectedTab
+                  ? "bg-indigo-600 text-white shadow-lg"
+                  : "text-slate-400 hover:text-white hover:bg-slate-800/50"
+              }`}
+            >
+              <i className="fas fa-hourglass-half"></i>
+              Pending
+              {pendingApprovals.length > 0 && (
+                <span className="bg-amber-500/80 text-white text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 rounded-full">
+                  {pendingApprovals.length}
+                </span>
+              )}
+            </button>
+            <button
+              onClick={() => setSubTab("rejected")}
+              className={`inline-flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all duration-200 ${
+                isRejectedTab
+                  ? "bg-indigo-600 text-white shadow-lg"
+                  : "text-slate-400 hover:text-white hover:bg-slate-800/50"
+              }`}
+            >
+              <i className="fas fa-user-slash"></i>
+              Rejected
+              {rejectedApprovals.length > 0 && (
+                <span className="bg-rose-500/80 text-white text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 rounded-full">
+                  {rejectedApprovals.length}
+                </span>
+              )}
+            </button>
+          </div>
         </div>
-      )}
+        {!activeLoading && !activeError && (
+          <div className="flex items-center gap-2 sm:gap-3 flex-wrap text-xs sm:text-sm font-semibold">
+            <span className="text-emerald-300">
+              Approved Today: <span className="text-white font-bold">{approvedTodayCount}</span>
+            </span>
+            <span className="text-rose-300">
+              Rejected Today: <span className="text-white font-bold">{rejectedTodayCount}</span>
+            </span>
+          </div>
+        )}
+      </div>
 
       <div className="bg-slate-900/50 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-sm animate-fadeIn">
 
         {/* Other Error State */}
-        {approvalsError && !approvalsError.includes("404") && (
+        {activeError && !activeError.includes("404") && (
           <div className="p-8">
             <div className="bg-red-600/10 border border-red-500/20 rounded-2xl p-6 text-center">
               <div className="w-12 h-12 bg-red-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -88,23 +155,23 @@ const ApprovalsTab = ({
               <h4 className="text-red-400 font-bold mb-2">
                 Failed to load approvals
               </h4>
-              <p className="text-slate-400 text-sm mb-4">{approvalsError}</p>
+              <p className="text-slate-400 text-sm mb-4">{activeError}</p>
               <button
                 onClick={onRefresh}
-                disabled={approvalsLoading}
+                disabled={activeLoading}
                 className="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <i
-                  className={`fas ${approvalsLoading ? "fa-spinner fa-spin" : "fa-redo"}`}
+                  className={`fas ${activeLoading ? "fa-spinner fa-spin" : "fa-redo"}`}
                 ></i>
-                {approvalsLoading ? "Retrying..." : "Try Again"}
+                {activeLoading ? "Retrying..." : "Try Again"}
               </button>
             </div>
           </div>
         )}
 
         {/* Loading State */}
-        {approvalsLoading && !approvalsError && (
+        {activeLoading && !activeError && (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
@@ -147,27 +214,28 @@ const ApprovalsTab = ({
         )}
 
         {/* Empty State */}
-        {!approvalsLoading &&
-          !approvalsError &&
-          pendingApprovals.length === 0 && (
+        {!activeLoading &&
+          !activeError &&
+          activeList.length === 0 && (
             <div className="flex flex-col items-center justify-center p-16">
               <div className="w-20 h-20 bg-indigo-500/20 rounded-full flex items-center justify-center mb-6">
-                <i className="fas fa-check-circle text-indigo-400 text-3xl"></i>
+                <i className={`fas ${isRejectedTab ? "fa-user-slash" : "fa-check-circle"} text-indigo-400 text-3xl`}></i>
               </div>
               <h4 className="text-xl font-bold text-white mb-2">
-                All Caught Up!
+                {isRejectedTab ? "No Rejected Users" : "All Caught Up!"}
               </h4>
               <p className="text-slate-400 text-sm text-center max-w-md">
-                There are no pending account approvals at the moment. All
-                registration requests have been processed.
+                {isRejectedTab
+                  ? "There are no rejected registrations. Users you reject will appear here so you can approve them later or delete them permanently."
+                  : "There are no pending account approvals at the moment. All registration requests have been processed."}
               </p>
             </div>
           )}
 
         {/* No Search Matches */}
-        {!approvalsLoading &&
-          !approvalsError &&
-          pendingApprovals.length > 0 &&
+        {!activeLoading &&
+          !activeError &&
+          activeList.length > 0 &&
           filteredApprovals.length === 0 && (
             <div className="flex flex-col items-center justify-center p-16">
               <div className="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mb-4">
@@ -180,8 +248,8 @@ const ApprovalsTab = ({
           )}
 
         {/* Approvals List */}
-        {!approvalsLoading &&
-          !approvalsError &&
+        {!activeLoading &&
+          !activeError &&
           filteredApprovals.length > 0 && (
             <div className="overflow-x-auto">
               {/* Mobile Card View */}
@@ -230,42 +298,38 @@ const ApprovalsTab = ({
                           <button
                             onClick={() => handleApprove(user.id, getDisplayName(user))}
                             disabled={isProcessing[user.id] === "approving"}
-                            className="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-indigo-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 sm:gap-2 flex-1 justify-center"
+                            title="Approve"
+                            aria-label="Approve"
+                            className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-indigo-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center flex-1"
                           >
-                            {isProcessing[user.id] === "approving" ? (
-                              <React.Fragment key="approving">
-                                <i className="fas fa-spinner fa-spin"></i>
-                                <span className="hidden sm:inline">
-                                  Approving...
-                                </span>
-                              </React.Fragment>
-                            ) : (
-                              <React.Fragment key="approve">
-                                <i className="fas fa-check"></i>
-                                <span className="hidden sm:inline">
-                                  Approve
-                                </span>
-                              </React.Fragment>
-                            )}
+                            <i
+                              className={`fas ${
+                                isProcessing[user.id] === "approving"
+                                  ? "fa-spinner fa-spin"
+                                  : "fa-check"
+                              }`}
+                            ></i>
                           </button>
                           <button
-                            onClick={() => handleReject(user.id, getDisplayName(user))}
+                            onClick={() =>
+                              user.is_rejected
+                                ? handleDelete(user.id, getDisplayName(user))
+                                : handleReject(user.id, getDisplayName(user))
+                            }
                             disabled={isProcessing[user.id] === "rejecting"}
-                            className="bg-red-600 text-white px-3 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-red-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 sm:gap-2 flex-1 justify-center"
+                            title={user.is_rejected ? "Delete permanently" : "Reject"}
+                            aria-label={user.is_rejected ? "Delete permanently" : "Reject"}
+                            className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center flex-1"
                           >
-                            {isProcessing[user.id] === "rejecting" ? (
-                              <React.Fragment key="rejecting">
-                                <i className="fas fa-spinner fa-spin"></i>
-                                <span className="hidden sm:inline">
-                                  Rejecting...
-                                </span>
-                              </React.Fragment>
-                            ) : (
-                              <React.Fragment key="reject">
-                                <i className="fas fa-times"></i>
-                                <span className="hidden sm:inline">Reject</span>
-                              </React.Fragment>
-                            )}
+                            <i
+                              className={`fas ${
+                                isProcessing[user.id] === "rejecting"
+                                  ? "fa-spinner fa-spin"
+                                  : user.is_rejected
+                                    ? "fa-trash"
+                                    : "fa-times"
+                              }`}
+                            ></i>
                           </button>
                         </div>
                       </div>
@@ -355,19 +419,23 @@ const ApprovalsTab = ({
                             )}
                           </button>
                           <button
-                            onClick={() => handleReject(user.id, getDisplayName(user))}
+                            onClick={() =>
+                              user.is_rejected
+                                ? handleDelete(user.id, getDisplayName(user))
+                                : handleReject(user.id, getDisplayName(user))
+                            }
                             disabled={isProcessing[user.id] === "rejecting"}
                             className="bg-red-600 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                           >
                             {isProcessing[user.id] === "rejecting" ? (
                               <React.Fragment key="rejecting">
                                 <i className="fas fa-spinner fa-spin"></i>
-                                Rejecting...
+                                {user.is_rejected ? "Deleting..." : "Rejecting..."}
                               </React.Fragment>
                             ) : (
                               <React.Fragment key="reject">
-                                <i className="fas fa-times"></i>
-                                Reject
+                                <i className={`fas ${user.is_rejected ? "fa-trash" : "fa-times"}`}></i>
+                                {user.is_rejected ? "Delete" : "Reject"}
                               </React.Fragment>
                             )}
                           </button>
@@ -384,13 +452,9 @@ const ApprovalsTab = ({
       <ConfirmDialog
         open={confirmDialog.open}
         variant={confirmDialog.type === "approve" ? "primary" : "danger"}
-        title={confirmDialog.type === "approve" ? "Approve User" : "Reject User"}
-        message={
-          confirmDialog.type === "approve"
-            ? `Are you sure you want to approve "${confirmDialog.username}"? They will gain access to the platform.`
-            : `Are you sure you want to reject "${confirmDialog.username}"? This will deny their registration.`
-        }
-        confirmLabel={confirmDialog.type === "approve" ? "Approve" : "Reject"}
+        title={dialogCopy.title}
+        message={dialogCopy.message}
+        confirmLabel={dialogCopy.confirmLabel}
         cancelLabel="Cancel"
         onConfirm={handleConfirm}
         onCancel={() => {

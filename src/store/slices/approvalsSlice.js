@@ -18,13 +18,28 @@ export const fetchPendingApprovals = createAsyncThunk(
   },
 );
 
+export const fetchRejectedApprovals = createAsyncThunk(
+  "approvals/fetchRejectedApprovals",
+  async (_, { rejectWithValue }) => {
+    try {
+      return await authService.getRejectedApprovals();
+    } catch (error) {
+      console.error("Failed to fetch rejected users:", error);
+      return rejectWithValue(
+        error.error || error.message || "Failed to load rejected users",
+      );
+    }
+  },
+);
+
 export const approveUser = createAsyncThunk(
   "approvals/approveUser",
   async (userId, { rejectWithValue, dispatch }) => {
     try {
       const result = await authService.approveUser(userId);
-      // Refresh the approvals list after successful approval
+      // Refresh both lists — approving may remove the user from either tab
       dispatch(fetchPendingApprovals());
+      dispatch(fetchRejectedApprovals());
       return { userId, result };
     } catch (error) {
       console.error("Failed to approve user:", error);
@@ -40,8 +55,9 @@ export const rejectUser = createAsyncThunk(
   async (userId, { rejectWithValue, dispatch }) => {
     try {
       const result = await authService.rejectUser(userId);
-      // Refresh the approvals list after successful rejection
+      // Rejecting moves the user from the pending tab to the rejected tab
       dispatch(fetchPendingApprovals());
+      dispatch(fetchRejectedApprovals());
       return { userId, result };
     } catch (error) {
       console.error("Failed to reject user:", error);
@@ -81,6 +97,10 @@ const initialState = {
   isLoading: false,
   isProcessing: {},
   error: null,
+  // rejected registrations
+  rejectedApprovals: [],
+  rejectedLoading: false,
+  rejectedError: null,
   // enrollment requests
   pendingEnrollments: [],
   enrollmentsLoading: false,
@@ -120,6 +140,19 @@ const approvalsSlice = createSlice({
       .addCase(fetchPendingApprovals.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
+      })
+      // Fetch Rejected Approvals
+      .addCase(fetchRejectedApprovals.pending, (state) => {
+        state.rejectedLoading = true;
+        state.rejectedError = null;
+      })
+      .addCase(fetchRejectedApprovals.fulfilled, (state, action) => {
+        state.rejectedLoading = false;
+        state.rejectedApprovals = action.payload;
+      })
+      .addCase(fetchRejectedApprovals.rejected, (state, action) => {
+        state.rejectedLoading = false;
+        state.rejectedError = action.payload;
       })
       // Approve User
       .addCase(approveUser.pending, (state, action) => {
@@ -195,6 +228,12 @@ export const {
 // Selectors
 export const selectPendingApprovals = (state) =>
   state.approvals.pendingApprovals;
+export const selectRejectedApprovals = (state) =>
+  state.approvals.rejectedApprovals;
+export const selectRejectedApprovalsLoading = (state) =>
+  state.approvals.rejectedLoading;
+export const selectRejectedApprovalsError = (state) =>
+  state.approvals.rejectedError;
 export const selectApprovalsLoading = (state) => state.approvals.isLoading;
 export const selectApprovalsError = (state) => state.approvals.error;
 export const selectUserProcessingState = (state, userId) =>

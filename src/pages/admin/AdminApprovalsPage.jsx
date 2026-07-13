@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchPendingApprovals,
+  fetchRejectedApprovals,
   approveUser,
   rejectUser,
   fetchPendingEnrollments,
@@ -43,6 +44,9 @@ const AdminApprovalsPage = () => {
     isLoading: approvalsLoading,
     error: approvalsError,
     isProcessing,
+    rejectedApprovals,
+    rejectedLoading,
+    rejectedError,
   } = useSelector((state) => state.approvals);
 
   const {
@@ -70,6 +74,7 @@ const AdminApprovalsPage = () => {
   // would otherwise show stale data.
   useEffect(() => {
     dispatch(fetchPendingApprovals());
+    dispatch(fetchRejectedApprovals());
     dispatch(fetchPendingChildLinks());
     dispatch(fetchPendingEnrollments());
     // dispatch(fetchAdminHireRequests(hireStatusFilter));
@@ -84,12 +89,20 @@ const AdminApprovalsPage = () => {
     }
   };
 
-  const handleReject = async (userId, shouldDeleteUser) => {
+  const handleReject = async (userId, shouldDeleteUser, skipReject = false) => {
     try {
-      await dispatch(rejectUser(userId)).unwrap();
+      if (!skipReject) {
+        // Already-rejected users skip this so they don't get a second
+        // rejection email before deletion
+        await dispatch(rejectUser(userId)).unwrap();
+      }
       if (shouldDeleteUser) {
         await adminService.purgeUser(userId);
-        toastManager.success("User rejected and permanently deleted");
+        dispatch(fetchPendingApprovals());
+        dispatch(fetchRejectedApprovals());
+        toastManager.success(
+          skipReject ? "User permanently deleted" : "User rejected and permanently deleted"
+        );
       } else {
         toastManager.success("User rejected successfully");
       }
@@ -100,6 +113,7 @@ const AdminApprovalsPage = () => {
 
   const handleRefreshApprovals = () => {
     dispatch(fetchPendingApprovals());
+    dispatch(fetchRejectedApprovals());
   };
 
   const handleApproveChildLink = async (linkId) => {
@@ -228,7 +242,7 @@ const AdminApprovalsPage = () => {
   return (
     <div className="space-y-6">
       {/* Tab Navigation */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-2">
+      <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-3 mb-2">
         <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-1 backdrop-blur-sm w-fit max-w-full overflow-x-auto no-scrollbar">
           <div className="flex items-center gap-1 min-w-max">
             <button
@@ -311,6 +325,9 @@ const AdminApprovalsPage = () => {
           pendingApprovals={pendingApprovals}
           approvalsLoading={approvalsLoading}
           approvalsError={approvalsError}
+          rejectedApprovals={rejectedApprovals}
+          rejectedLoading={rejectedLoading}
+          rejectedError={rejectedError}
           isProcessing={isProcessing}
           onApprove={handleApprove}
           onReject={handleReject}

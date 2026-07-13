@@ -340,6 +340,36 @@ export const authService = {
     }
   },
 
+  // Get rejected approvals (admin only)
+  getRejectedApprovals: async () => {
+    try {
+      const response = await axiosInstance.get("/auth/rejected-approvals/");
+      return response.data;
+    } catch (error) {
+      console.error("Get rejected approvals error:", {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+      });
+
+      if (error.response?.status === 403) {
+        throw {
+          error: "You don't have permission to view rejected users.",
+          status: 403,
+        };
+      }
+
+      if (error.response?.status === 401) {
+        throw {
+          error: "Please log in to view rejected users.",
+          status: 401,
+        };
+      }
+
+      throw new Error(error.message || "Failed to fetch rejected users");
+    }
+  },
+
   // Approve user (admin only)
   approveUser: async (userId) => {
     try {
