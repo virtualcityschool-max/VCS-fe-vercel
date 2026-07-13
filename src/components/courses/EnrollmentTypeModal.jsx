@@ -125,6 +125,7 @@ const ChecklistRow = ({ text, value }) => {
 };
 
 // A full-width, clickable payment-method option (replaces the old Cancel/Confirm button row).
+// Pass `tooltip` (with disabled) to explain why the option can't be used — shown on hover.
 const PaymentMethodCard = ({
   icon,
   iconBg,
@@ -136,33 +137,43 @@ const PaymentMethodCard = ({
   onClick,
   disabled,
   loading,
+  tooltip,
 }) => (
-  <button
-    type="button"
-    onClick={onClick}
-    disabled={disabled}
-    className="w-full flex items-center gap-4 p-4 bg-slate-800/50 hover:bg-slate-800 border border-white/5 hover:border-white/10 rounded-2xl transition-all text-left disabled:opacity-50 disabled:cursor-not-allowed group"
-  >
-    <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${iconBg}`}>
-      {loading ? (
-        <i className="fas fa-spinner fa-spin text-white text-sm" />
-      ) : (
-        <i className={`fas ${icon} ${iconColor}`} />
-      )}
-    </div>
-    <div className="flex-1 min-w-0">
-      <div className="flex items-center gap-2 mb-0.5">
-        <p className="text-white text-sm font-bold">{title}</p>
-        <span className={`text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full ${badgeColor}`}>
-          {badge}
-        </span>
+  // Tooltip lives on this wrapper because :hover doesn't fire on a disabled <button>.
+  <div className="relative group/pm">
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className="w-full flex items-center gap-4 p-4 bg-slate-800/50 hover:bg-slate-800 border border-white/5 hover:border-white/10 rounded-2xl transition-all text-left disabled:opacity-50 disabled:cursor-not-allowed group"
+    >
+      <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${iconBg}`}>
+        {loading ? (
+          <i className="fas fa-spinner fa-spin text-white text-sm" />
+        ) : (
+          <i className={`fas ${icon} ${iconColor}`} />
+        )}
       </div>
-      <p className="text-slate-400 text-xs">
-        {loading ? "Redirecting..." : description}
-      </p>
-    </div>
-    <i className="fas fa-chevron-right text-slate-600 group-hover:text-slate-400 text-xs transition-colors shrink-0" />
-  </button>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 mb-0.5">
+          <p className="text-white text-sm font-bold">{title}</p>
+          <span className={`text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full ${badgeColor}`}>
+            {badge}
+          </span>
+        </div>
+        <p className="text-slate-400 text-xs">
+          {loading ? "Redirecting..." : description}
+        </p>
+      </div>
+      <i className="fas fa-chevron-right text-slate-600 group-hover:text-slate-400 text-xs transition-colors shrink-0" />
+    </button>
+    {tooltip && (
+      <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-slate-800 border border-white/10 rounded-lg text-[11px] font-semibold text-slate-200 whitespace-nowrap shadow-xl opacity-0 group-hover/pm:opacity-100 transition-opacity pointer-events-none z-10">
+        {tooltip}
+        <span className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-800" />
+      </div>
+    )}
+  </div>
 );
 
 const EnrollmentTypeModal = ({
@@ -201,6 +212,8 @@ const EnrollmentTypeModal = ({
 
   const price = course?.price ? `$${Number(course.price).toLocaleString("en-US")} USD` : null;
   const title = course?.title || "this course";
+  // Online (Gumroad) checkout only works when the course has a product link configured.
+  const gumroadAvailable = Boolean((course?.gumroad_product_permalink || "").trim());
   const effectiveWhatsapp = whatsappNumber || FALLBACK_WHATSAPP;
   const whatsappMessage = `Hi! I've completed my Easypaisa transfer for "${title}"${price ? ` (${price})` : ""}.\nMy student email: ${studentEmail || "<your student email>"}\n(Attaching my payment screenshot)`;
   const whatsappHref = `https://wa.me/${effectiveWhatsapp.replace(/\D/g, "")}?text=${encodeURIComponent(whatsappMessage)}`;
@@ -341,10 +354,15 @@ const EnrollmentTypeModal = ({
                 title="Gumroad"
                 badge="Live Payment"
                 badgeColor="bg-indigo-500/20 text-indigo-300"
-                description="Pay online now — you're enrolled automatically once payment completes."
-                onClick={onConfirm}
-                disabled={isLoading}
+                description={
+                  gumroadAvailable
+                    ? "Pay online now — you're enrolled automatically once payment completes."
+                    : "Online payment is not available for this course right now."
+                }
+                onClick={gumroadAvailable ? onConfirm : undefined}
+                disabled={isLoading || !gumroadAvailable}
                 loading={isLoading}
+                tooltip={!gumroadAvailable ? "Not available at this time" : undefined}
               />
               <PaymentMethodCard
                 icon="fa-wallet"

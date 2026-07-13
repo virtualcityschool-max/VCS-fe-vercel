@@ -178,7 +178,7 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
             </div>
             <div>
               <label className="block text-[11px] uppercase tracking-widest font-black text-slate-500 mb-2">
-                Gumroad Permalink <span className="text-red-400">*</span>
+                Gumroad Permalink <span className="text-slate-600 normal-case font-semibold">(optional)</span>
               </label>
               <Input
                 type="text"
@@ -188,6 +188,9 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
                 className={fieldClass(errors.gumroad_product_permalink)}
               />
               <FieldError error={errors.gumroad_product_permalink} />
+              <p className="text-[11px] text-slate-500 mt-1.5">
+                Leave empty to disable online payment — students will see it as unavailable.
+              </p>
             </div>
           </div>
         )}

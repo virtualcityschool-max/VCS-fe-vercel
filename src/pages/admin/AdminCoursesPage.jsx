@@ -183,9 +183,6 @@ const AdminCoursesPage = () => {
       if (formData.price === "" || !Number.isInteger(price) || price <= 0) {
         errors.price = "Price must be a positive whole number for paid courses";
       }
-      if (!formData.gumroad_product_permalink?.trim()) {
-        errors.gumroad_product_permalink = "Gumroad permalink is required for paid courses";
-      }
     }
 
     if (!formData.status) {
