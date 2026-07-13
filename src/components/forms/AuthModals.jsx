@@ -384,7 +384,9 @@ const AuthModals = () => {
     try {
       await dispatch(verifyOtp({ email, otp })).unwrap();
 
-      toastManager.success("Verification successful, you can login now");
+      toastManager.success(
+        "Verification successful. Your account is pending admin approval — you can login once approved."
+      );
 
       // Update URL with role for persistence
       setSearchParams((prev) => {
@@ -1258,7 +1260,7 @@ const AuthModals = () => {
                   Registration Successful!
                 </h2>
                 <p className="text-slate-400 text-sm leading-relaxed mb-8">
-                  {role=="student"?"Your account has been created and verified successfully.":"You Account has been verified Contact admin for approval"}
+                  Your account has been verified and is pending admin approval. You will be notified via email once approved.
                 </p>
                 {/* <button
                   onClick={() => {
