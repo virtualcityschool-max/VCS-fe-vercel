@@ -4,10 +4,21 @@ import { aboutService } from "../../services/aboutService";
 
 // WhatsApp number is pulled live from Admin → About Page settings (contact_whatsapp);
 // this is only the fallback shown before that loads / if it's unset.
-const MANUAL_BANK_DETAILS = {
-  bankName: "Easypaisa",
-  accountTitle: "Atika Rameen",
-  accountNumber: "03099093548",
+// Manual (transfer + WhatsApp verification) payment methods. Same account holder,
+// exposed through both Easypaisa and SadaPay so students can use whichever they have.
+const MANUAL_METHODS = {
+  easypaisa: {
+    id: "easypaisa",
+    service: "Easypaisa",
+    accountTitle: "Atika Rameen",
+    accountNumber: "03099093548",
+  },
+  sadapay: {
+    id: "sadapay",
+    service: "SadaPay",
+    accountTitle: "Atika Rameen",
+    accountNumber: "03099093548",
+  },
 };
 const FALLBACK_WHATSAPP = "WHATSAPP_NUMBER";
 
@@ -185,6 +196,7 @@ const EnrollmentTypeModal = ({
   isLoading = false,
 }) => {
   const [view, setView] = useState("choose");
+  const [manualMethod, setManualMethod] = useState(MANUAL_METHODS.easypaisa);
   const [whatsappNumber, setWhatsappNumber] = useState(null);
   const studentEmail = useSelector((state) => state.auth?.user?.email) || "";
 
@@ -215,7 +227,7 @@ const EnrollmentTypeModal = ({
   // Online (Gumroad) checkout only works when the course has a product link configured.
   const gumroadAvailable = Boolean((course?.gumroad_product_permalink || "").trim());
   const effectiveWhatsapp = whatsappNumber || FALLBACK_WHATSAPP;
-  const whatsappMessage = `Hi! I've completed my Easypaisa transfer for "${title}"${price ? ` (${price})` : ""}.\nMy student email: ${studentEmail || "<your student email>"}\n(Attaching my payment screenshot)`;
+  const whatsappMessage = `Hi! I've completed my ${manualMethod.service} transfer for "${title}"${price ? ` (${price})` : ""}.\nMy student email: ${studentEmail || "<your student email>"}\n(Attaching my payment screenshot)`;
   const whatsappHref = `https://wa.me/${effectiveWhatsapp.replace(/\D/g, "")}?text=${encodeURIComponent(whatsappMessage)}`;
 
   if (isPaid) {
@@ -243,7 +255,7 @@ const EnrollmentTypeModal = ({
                   <i className="fas fa-wallet text-amber-400" />
                 </div>
                 <h2 className="text-xl font-black font-poppins text-white mb-1">
-                  Easypaisa — Manual Payment
+                  {manualMethod.service} — Manual Payment
                 </h2>
                 <p className="text-slate-400 text-sm">
                   Enroll in <span className="text-white font-semibold">{title}</span>
@@ -267,12 +279,12 @@ const EnrollmentTypeModal = ({
                     <span className="w-6 h-6 rounded-full bg-amber-500/20 text-amber-400 text-xs font-black flex items-center justify-center shrink-0">
                       1
                     </span>
-                    <p className="text-white text-sm font-bold">Transfer to our Easypaisa account</p>
+                    <p className="text-white text-sm font-bold">Transfer to our {manualMethod.service} account</p>
                   </div>
                   <div className="pl-8 space-y-2">
-                    <CompactCopyRow label="Service" value={MANUAL_BANK_DETAILS.bankName} />
-                    <CompactCopyRow label="Account Title" value={MANUAL_BANK_DETAILS.accountTitle} />
-                    <CompactCopyRow label="Account #" value={MANUAL_BANK_DETAILS.accountNumber} />
+                    <CompactCopyRow label="Service" value={manualMethod.service} />
+                    <CompactCopyRow label="Account Title" value={manualMethod.accountTitle} />
+                    <CompactCopyRow label="Account #" value={manualMethod.accountNumber} />
                   </div>
                 </div>
 
@@ -372,7 +384,24 @@ const EnrollmentTypeModal = ({
                 badge="Manual"
                 badgeColor="bg-amber-500/20 text-amber-300"
                 description="Pay via Easypaisa transfer — our team verifies and enrolls you manually."
-                onClick={() => setView("manual")}
+                onClick={() => {
+                  setManualMethod(MANUAL_METHODS.easypaisa);
+                  setView("manual");
+                }}
+                disabled={isLoading}
+              />
+              <PaymentMethodCard
+                icon="fa-money-bill-wave"
+                iconBg="bg-emerald-500/20"
+                iconColor="text-emerald-400"
+                title="SadaPay"
+                badge="Manual"
+                badgeColor="bg-emerald-500/20 text-emerald-300"
+                description="Pay via SadaPay transfer — our team verifies and enrolls you manually."
+                onClick={() => {
+                  setManualMethod(MANUAL_METHODS.sadapay);
+                  setView("manual");
+                }}
                 disabled={isLoading}
               />
             </div>
