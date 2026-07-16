@@ -10,6 +10,7 @@ const PUBLIC_LINKS = [
   { label: "Home", path: "/" },
   { label: "Explore Courses", path: "/courses" },
   { label: "Meet Our Tutors", path: "/teachers" },
+  { label: "Blog", path: "/blogs" },
   { label: "About Us", path: "/about" },
 ];
 

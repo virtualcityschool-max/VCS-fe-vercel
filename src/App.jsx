@@ -50,6 +50,7 @@ const AppInner = () => {
     const p = location.pathname;
     if (p.includes("/admin/overview")) return "overview";
     if (p.includes("/admin/approvals")) return "approvals";
+    if (p.includes("/admin/blogs")) return "blogs";
     if (p.includes("/admin/courses")) return "courses";
     if (p.includes("/admin/users") && p.split("/").length <= 4) return "users";
     if (p.includes("/admin/enrollments")) return "enrollments";

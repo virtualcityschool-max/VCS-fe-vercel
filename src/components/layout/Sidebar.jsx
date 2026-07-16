@@ -102,6 +102,7 @@ const NAV_CONFIG = {
     { id: "approvals",   label: "Approval(s) Pending",    icon: "fas fa-user-check",    to: "/admin/approvals" },
     { id: "users",       label: "Users",        icon: "fas fa-users",         to: "/admin/users" },
     { id: "courses",     label: "Courses",      icon: "fas fa-book",          to: "/admin/courses" },
+    { id: "blogs",       label: "Blogs",        icon: "fas fa-newspaper",     to: "/admin/blogs" },
     { id: "sessions",        label: "Planner",          icon: "fas fa-chalkboard",      to: "/admin/sessions" },
     { id: "teacher-planner", label: "Tutor Planner",  icon: "fas fa-user-clock",      to: "/admin/teacher-planner" },
     { id: "enrollments",     label: "Enrollments",      icon: "fas fa-user-graduate",   to: "/admin/enrollments" },

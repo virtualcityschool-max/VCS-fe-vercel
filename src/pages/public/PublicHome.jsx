@@ -5,11 +5,13 @@ import { useEffect, useState, useMemo } from "react";
 import { setAuthModal, setEnrollmentIntent } from "../../store/slices/uiSlice";
 import { fetchStudentDashboard, unenrollFromCourse, withdrawEnrollment } from "../../store/slices/studentDashboardSlice";
 import { fetchTeachers } from "../../store/slices/teacherSlice";
+import { fetchBlogs } from "../../store/slices/blogsSlice";
 import AuthRequiredModal from "../../components/common/AuthRequiredModal";
 import ConfirmDialog from "../../components/common/ConfirmDialog";
 import HireTutorModal from "../../components/public/HireTutorModal";
 import PublicCourseCard from "../../components/courses/PublicCourseCard";
 import TutorCard from "../../components/teachers/TutorCard";
+import BlogCard from "../../components/blogs/BlogCard";
 import Reveal from "../../components/ui/Reveal";
 import { toastManager } from "../../utils/toastManager";
 import { showApiError } from "../../utils/apiErrorHandler";
@@ -29,6 +31,7 @@ const PublicHome = () => {
   const { enrolledCourses, enrollingCourseIds, withdrawingCourseIds, unenrollingCourseIds } = useSelector((state) => state.studentDashboard);
   const { enrollmentIntent } = useSelector((state) => state.ui);
   const { teachers, loading: teachersLoading } = useSelector((state) => state.teachers);
+  const { blogs, isLoading: blogsLoading } = useSelector((state) => state.blogs);
 
   useEffect(() => {
     if (courses.length <= 0) {
@@ -36,6 +39,9 @@ const PublicHome = () => {
     }
     if (teachers.length <= 0) {
       dispatch(fetchTeachers({}));
+    }
+    if (blogs.length <= 0) {
+      dispatch(fetchBlogs({ ordering: "-published_at" }));
     }
     if (auth.isLoggedIn && auth.role === "student") {
       dispatch(fetchStudentDashboard());
@@ -426,6 +432,47 @@ const PublicHome = () => {
                 ))}
           </div>
         </div>
+
+        {/* From the Blog Section */}
+        {(blogsLoading || blogs.length > 0) && (
+          <div className="mt-32 md:mt-48 pb-4">
+            <Reveal className="flex justify-between items-end mb-16">
+              <div className="text-left">
+                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-indigo-500 mb-2">
+                  The Journal
+                </p>
+                <h2 className="text-3xl md:text-5xl font-black font-poppins tracking-tight text-white">
+                  Latest from Our Blog
+                </h2>
+              </div>
+              <button
+                onClick={() => navigate("/blogs")}
+                className="hidden md:flex text-indigo-400 font-black text-[10px] uppercase tracking-widest hover:text-white transition items-center gap-3 border-b border-indigo-500/20 pb-1"
+              >
+                View All Articles <i className="fas fa-arrow-right text-[8px]"></i>
+              </button>
+            </Reveal>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {blogsLoading && blogs.length === 0
+                ? [...Array(3)].map((_, i) => (
+                    <div key={i} className="skeleton rounded-2xl border border-white/5 h-[360px]" />
+                  ))
+                : blogs.slice(0, 3).map((blog, i) => (
+                    <BlogCard key={blog.id} blog={blog} index={i} />
+                  ))}
+            </div>
+
+            <div className="mt-10 flex justify-center md:hidden">
+              <button
+                onClick={() => navigate("/blogs")}
+                className="btn-glow px-7 py-3.5 text-white rounded-xl font-bold text-sm flex items-center gap-2.5"
+              >
+                View All Articles <i className="fas fa-arrow-right text-xs"></i>
+              </button>
+            </div>
+          </div>
+        )}
       </section>
 
       {hireModal && (

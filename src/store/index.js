@@ -4,6 +4,7 @@ import authReducer, { logout } from "./slices/authSlice";
 import studentDashboardReducer from "./slices/studentDashboardSlice";
 import adminReducer from "./slices/adminSlice";
 import coursesReducer from "./slices/coursesSlice";
+import blogsReducer from "./slices/blogsSlice";
 import approvalsReducer from "./slices/approvalsSlice";
 import teachersReducer from "./slices/teacherSlice";
 import announcementsReducer from "./slices/announcementsSlice";
@@ -66,6 +67,7 @@ const appReducer = combineReducers({
   studentDashboard: studentDashboardReducer,
   admin: adminReducer,
   courses: coursesReducer,
+  blogs: blogsReducer,
   approvals: approvalsReducer,
   teachers: teachersReducer,
   announcements: announcementsReducer,

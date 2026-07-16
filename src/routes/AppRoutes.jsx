@@ -35,6 +35,10 @@ import {
   ParentPortal,
   Marketplace,
   CourseDetails,
+  Blogs,
+  BlogDetails,
+  AdminBlogsPage,
+  AdminBlogEditorPage,
   TeacherProfile,
   TeacherInternalStudentProfile,
   TeacherEvaluationPage,
@@ -169,6 +173,8 @@ const AppRoutes = () => {
       />
       <Route path="/courses" element={<Marketplace />} />
       <Route path="/courses/:courseId" element={<CourseDetails />} />
+      <Route path="/blogs" element={<Blogs />} />
+      <Route path="/blogs/:slug" element={<BlogDetails />} />
       <Route path="/teachers" element={<TeachersDirectory />} />
       <Route path="/teachers/:id" element={<TeacherProfile />} />
       <Route path="/privacy-policy" element={<PrivacyPolicy />} />
@@ -232,6 +238,7 @@ const AppRoutes = () => {
           <Route path="overview" element={<AdminOverviewPage />} />
           <Route path="approvals" element={<AdminApprovalsPage />} />
           <Route path="courses" element={<AdminCoursesPage />} />
+          <Route path="blogs" element={<AdminBlogsPage />} />
           <Route path="users" element={<AdminUsersPage />} />
           <Route path="enrollments" element={<AdminEnrollmentsPage />} />
           <Route path="sessions" element={<AdminSessionsPage />} />
@@ -244,6 +251,8 @@ const AppRoutes = () => {
         </Route>
         <Route path="/admin/users/:id" element={<UserDetailsPage />} />
         <Route path="/admin/courses/:courseId" element={<AdminCourseDetailPage />} />
+        <Route path="/admin/blogs/new" element={<AdminBlogEditorPage />} />
+        <Route path="/admin/blogs/:slug/edit" element={<AdminBlogEditorPage />} />
       </Route>
 
       {/* Profile — all authenticated roles */}

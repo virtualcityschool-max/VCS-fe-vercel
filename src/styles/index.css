@@ -341,6 +341,57 @@ h3,
   border-color: transparent !important;
 }
 
+/* ── Blog article body — long-form reading typography ── */
+.blog-content .ql-editor { padding: 0; font-size: 1.05rem; }
+.blog-content .ql-container.ql-snow { font-family: inherit; }
+.blog-content h1 { font-size: 2rem; }
+.blog-content h2 { font-size: 1.6rem; }
+.blog-content h3 { font-size: 1.3rem; }
+.blog-content h1,
+.blog-content h2,
+.blog-content h3 {
+  color: #f8fafc;
+  font-family: var(--font-poppins);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+  margin: 2rem 0 0.85rem;
+}
+.blog-content p { color: #cbd5e1; line-height: 1.85; margin-bottom: 1.15rem; font-size: 1.05rem; }
+.blog-content ul { list-style-type: disc !important; padding-left: 1.5rem; margin-bottom: 1.25rem; color: #cbd5e1; }
+.blog-content ol { list-style-type: decimal !important; padding-left: 1.5rem; margin-bottom: 1.25rem; color: #cbd5e1; }
+.blog-content li { margin-bottom: 0.5rem; line-height: 1.75; }
+.blog-content strong { color: #f1f5f9; font-weight: 700; }
+.blog-content em { color: #e2e8f0; }
+.blog-content a { color: #818cf8; text-decoration: underline; text-underline-offset: 2px; }
+.blog-content a:hover { color: #a5b4fc; }
+.blog-content blockquote {
+  border-left: 3px solid #6366f1;
+  padding: 0.25rem 0 0.25rem 1.25rem;
+  margin: 1.5rem 0;
+  color: #e2e8f0;
+  font-style: italic;
+  background: rgba(99, 102, 241, 0.06);
+  border-radius: 0 0.5rem 0.5rem 0;
+}
+.blog-content pre {
+  background: #0b1120;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+  overflow-x: auto;
+  color: #e2e8f0;
+  margin: 1.5rem 0;
+}
+.blog-content code { color: #a5b4fc; }
+.blog-content img { max-width: 100%; height: auto; border-radius: 0.85rem; margin: 1.5rem 0; }
+.blog-content .ql-ui { display: none; }
+
+/* ── Blog editor (admin) — roomy writing area ── */
+.blog-editor-shell .ql-toolbar.ql-snow { border: none; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.blog-editor-shell .ql-container.ql-snow { border: none; }
+.blog-editor-shell .ql-editor { min-height: 340px; font-size: 1rem; line-height: 1.7; }
+
 @keyframes float {
    0%, 100% { transform: translateY(0); }
    50% { transform: translateY(-10px); }

@@ -2,6 +2,8 @@
 export { default as PublicHome } from "./public/PublicHome";
 export { default as Marketplace } from "./public/Marketplace";
 export { default as CourseDetails } from "./public/CourseDetails";
+export { default as Blogs } from "./public/Blogs";
+export { default as BlogDetails } from "./public/BlogDetails";
 export { default as TeachersDirectory } from "./public/TeachersDirectory";
 export { default as TeacherProfile } from "./public/TeacherProfile";
 export { default as PrivacyPolicy } from "./public/PrivacyPolicy";
@@ -51,6 +53,8 @@ export { default as AdminEvaluationPage } from "./admin/AdminEvaluationPage";
 export { default as AdminCategoriesPage } from "./admin/AdminCategoriesPage";
 export { default as UserDetailsPage } from "./admin/UserDetailsPage";
 export { default as AdminTeacherPlannerPage } from "./admin/AdminTeacherPlannerPage";
+export { default as AdminBlogsPage } from "./admin/AdminBlogsPage";
+export { default as AdminBlogEditorPage } from "./admin/AdminBlogEditorPage";
 
 // Profile
 export { default as ProfilePage } from "./profile/ProfilePage";
