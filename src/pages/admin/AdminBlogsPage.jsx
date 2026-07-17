@@ -33,6 +33,11 @@ const AdminBlogsPage = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [togglingSlug, setTogglingSlug] = useState(null);
   const [confirm, setConfirm] = useState({ open: false, slug: null, title: "" });
+  // Publishing/unpublishing changes what the public site shows, so ask first.
+  const [publishConfirm, setPublishConfirm] = useState({
+    open: false,
+    blog: null,
+  });
 
   useEffect(() => {
     // Admin (authenticated) receives drafts + published from the same endpoint.
@@ -63,6 +68,7 @@ const AdminBlogsPage = () => {
 
   const toggleStatus = async (blog) => {
     const next = blog.status === "published" ? "draft" : "published";
+    setPublishConfirm({ open: false, blog: null });
     setTogglingSlug(blog.slug);
     try {
       await dispatch(
@@ -232,7 +238,7 @@ const AdminBlogsPage = () => {
                     </a>
                   )}
                   <button
-                    onClick={() => toggleStatus(blog)}
+                    onClick={() => setPublishConfirm({ open: true, blog })}
                     disabled={togglingSlug === blog.slug}
                     title={published ? "Unpublish" : "Publish"}
                     className={`w-9 h-9 rounded-lg flex items-center justify-center transition disabled:opacity-50 ${
@@ -273,6 +279,29 @@ const AdminBlogsPage = () => {
           })}
         </div>
       )}
+
+      <ConfirmDialog
+        open={publishConfirm.open}
+        variant={
+          publishConfirm.blog?.status === "published" ? "warning" : "success"
+        }
+        title={
+          publishConfirm.blog?.status === "published"
+            ? "Unpublish Blog"
+            : "Publish Blog"
+        }
+        message={
+          publishConfirm.blog?.status === "published"
+            ? `Move "${publishConfirm.blog?.title}" back to draft? It will no longer be visible on the public site.`
+            : `Publish "${publishConfirm.blog?.title}"? It will go live and be visible to everyone on the public site.`
+        }
+        confirmLabel={
+          publishConfirm.blog?.status === "published" ? "Unpublish" : "Publish"
+        }
+        cancelLabel="Cancel"
+        onConfirm={() => toggleStatus(publishConfirm.blog)}
+        onCancel={() => setPublishConfirm({ open: false, blog: null })}
+      />
 
       <ConfirmDialog
         open={confirm.open}

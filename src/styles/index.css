@@ -358,9 +358,37 @@ h3,
   margin: 2rem 0 0.85rem;
 }
 .blog-content p { color: #cbd5e1; line-height: 1.85; margin-bottom: 1.15rem; font-size: 1.05rem; }
-.blog-content ul { list-style-type: disc !important; padding-left: 1.5rem; margin-bottom: 1.25rem; color: #cbd5e1; }
-.blog-content ol { list-style-type: decimal !important; padding-left: 1.5rem; margin-bottom: 1.25rem; color: #cbd5e1; }
-.blog-content li { margin-bottom: 0.5rem; line-height: 1.75; }
+/* Lists: Quill 2 wraps every list in <ol> and records the type on
+   li[data-list="bullet|ordered"], rendering the marker through an internal
+   .ql-ui span. In the read-only viewer that span is hidden, so we draw our own
+   dark-theme markers via ::before. Legacy posts saved before data-list was
+   preserved fall back to numbered markers. */
+.blog-content ul,
+.blog-content ol { list-style: none; padding-left: 1.75rem; margin-bottom: 1.25rem; color: #cbd5e1; counter-reset: blog-list; }
+.blog-content ul > li,
+.blog-content ol > li { position: relative; padding-left: 0.35rem; margin-bottom: 0.5rem; line-height: 1.75; }
+.blog-content .ql-ui { display: none; }
+/* Bullet marker */
+.blog-content li[data-list="bullet"]::before,
+.blog-content ul > li:not([data-list])::before {
+  content: "\2022";
+  position: absolute;
+  left: -1.05rem;
+  color: #818cf8;
+  font-weight: 700;
+}
+/* Ordered marker (and legacy <ol><li> with no data-list) */
+.blog-content li[data-list="ordered"],
+.blog-content ol > li:not([data-list]) { counter-increment: blog-list; }
+.blog-content li[data-list="ordered"]::before,
+.blog-content ol > li:not([data-list])::before {
+  content: counter(blog-list) ".";
+  position: absolute;
+  left: -1.4rem;
+  color: #818cf8;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
 .blog-content strong { color: #f1f5f9; font-weight: 700; }
 .blog-content em { color: #e2e8f0; }
 .blog-content a { color: #818cf8; text-decoration: underline; text-underline-offset: 2px; }
@@ -385,7 +413,6 @@ h3,
 }
 .blog-content code { color: #a5b4fc; }
 .blog-content img { max-width: 100%; height: auto; border-radius: 0.85rem; margin: 1.5rem 0; }
-.blog-content .ql-ui { display: none; }
 
 /* ── Blog editor (admin) — roomy writing area ── */
 .blog-editor-shell .ql-toolbar.ql-snow { border: none; border-bottom: 1px solid rgba(255,255,255,0.08); }

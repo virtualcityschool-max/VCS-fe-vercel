@@ -22,7 +22,34 @@ const QuillEditor = ({ value = "", onChange, placeholder = "Write something..." 
     const quill = new Quill(containerRef.current, {
       theme: "snow",
       placeholder,
-      modules: { toolbar: TOOLBAR },
+      modules: {
+        toolbar: {
+          container: TOOLBAR,
+          handlers: {
+            // Quill's default "clean" (Tx) only clears formatting when text is
+            // selected, so it looks like a no-op on a collapsed cursor. Clear
+            // the current line's formatting in that case, and the whole doc
+            // when the editor isn't focused.
+            clean() {
+              const q = this.quill;
+              const range = q.getSelection();
+              if (!range) {
+                q.removeFormat(0, q.getLength(), Quill.sources.USER);
+                return;
+              }
+              if (range.length === 0) {
+                const [line] = q.getLine(range.index);
+                if (line) {
+                  const start = q.getIndex(line);
+                  q.removeFormat(start, line.length(), Quill.sources.USER);
+                }
+              } else {
+                q.removeFormat(range.index, range.length, Quill.sources.USER);
+              }
+            },
+          },
+        },
+      },
     });
 
     quill.root.innerHTML = value || "";

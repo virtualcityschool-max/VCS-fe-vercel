@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchBlogs } from "../../store/slices/blogsSlice";
 import { SearchInput } from "../../components/ui";
@@ -12,7 +12,16 @@ const Blogs = () => {
   const dispatch = useDispatch();
   const { blogs, isLoading } = useSelector((state) => state.blogs);
   const [search, setSearch] = useState("");
-  const [activeCategory, setActiveCategory] = useState("all");
+  // Keep the active category in the URL so it is preserved when a reader opens
+  // an article and navigates back (browser restores /blogs?category=…).
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeCategory = searchParams.get("category") || "all";
+  const setActiveCategory = (cat) => {
+    const next = new URLSearchParams(searchParams);
+    if (cat === "all") next.delete("category");
+    else next.set("category", cat);
+    setSearchParams(next, { replace: true });
+  };
 
   useSeo({
     title: "Blog — Insights, Guides & Updates",
