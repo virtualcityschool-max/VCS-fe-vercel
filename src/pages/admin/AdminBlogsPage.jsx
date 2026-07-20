@@ -5,7 +5,9 @@ import {
   fetchBlogs,
   deleteBlog,
   updateBlog,
+  createBlog,
 } from "../../store/slices/blogsSlice";
+import { blogsService } from "../../services/blogsService";
 import { LoadingSpinner } from "../../components/ui";
 import ConfirmDialog from "../../components/common/ConfirmDialog";
 import { toastManager } from "../../utils/toastManager";
@@ -32,6 +34,7 @@ const AdminBlogsPage = () => {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [togglingSlug, setTogglingSlug] = useState(null);
+  const [duplicatingSlug, setDuplicatingSlug] = useState(null);
   const [confirm, setConfirm] = useState({ open: false, slug: null, title: "" });
   // Publishing/unpublishing changes what the public site shows, so ask first.
   const [publishConfirm, setPublishConfirm] = useState({
@@ -81,6 +84,32 @@ const AdminBlogsPage = () => {
       showApiError(e);
     } finally {
       setTogglingSlug(null);
+    }
+  };
+
+  // Duplicate an existing blog into a fresh draft so admins can reuse its
+  // content instead of rewriting it. The list payload omits the full HTML body,
+  // so fetch the complete blog by slug first, then create a copy.
+  const duplicateBlog = async (blog) => {
+    setDuplicatingSlug(blog.slug);
+    try {
+      const full = await blogsService.getBlogBySlug(blog.slug);
+      const fd = new FormData();
+      fd.append("title", `${full.title || "Untitled"} (Copy)`);
+      fd.append("excerpt", full.excerpt || "");
+      fd.append("category", full.category || "");
+      fd.append("author_name", full.author_name || full.author || "");
+      fd.append("content", full.content || "");
+      fd.append("meta_title", full.meta_title || "");
+      fd.append("meta_description", full.meta_description || "");
+      fd.append("status", "draft"); // always start a copy as an unpublished draft
+      const created = await dispatch(createBlog(fd)).unwrap();
+      toastManager.success("Blog duplicated as a draft");
+      if (created?.slug) navigate(`/admin/blogs/${created.slug}/edit`);
+    } catch (e) {
+      showApiError(e);
+    } finally {
+      setDuplicatingSlug(null);
     }
   };
 
@@ -254,6 +283,18 @@ const AdminBlogsPage = () => {
                           : published
                             ? "fa-eye-slash"
                             : "fa-paper-plane"
+                      } text-xs`}
+                    />
+                  </button>
+                  <button
+                    onClick={() => duplicateBlog(blog)}
+                    disabled={duplicatingSlug === blog.slug}
+                    title="Duplicate this blog (creates an editable draft copy)"
+                    className="w-9 h-9 rounded-lg bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white flex items-center justify-center transition disabled:opacity-50"
+                  >
+                    <i
+                      className={`fas ${
+                        duplicatingSlug === blog.slug ? "fa-spinner fa-spin" : "fa-copy"
                       } text-xs`}
                     />
                   </button>

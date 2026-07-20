@@ -1,11 +1,7 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import {
-  createBlog,
-  updateBlog,
-  fetchBlogBySlug,
-} from "../../store/slices/blogsSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { createBlog, updateBlog } from "../../store/slices/blogsSlice";
 import { blogsService } from "../../services/blogsService";
 import QuillEditor from "../../components/common/QuillEditor";
 import { LoadingSpinner } from "../../components/ui";
@@ -26,7 +22,7 @@ const EMPTY_FORM = {
   status: "draft",
 };
 
-const labelCls = "block text-[11px] font-black uppercase tracking-[0.15em] text-slate-400 mb-2";
+const labelCls = "block text-[11px] font-black uppercase tracking-[0.15em] text-slate-400";
 const inputCls =
   "w-full bg-slate-900/70 border border-slate-700/70 rounded-xl px-4 py-2.5 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-indigo-500/60 focus:ring-2 focus:ring-indigo-500/15 transition";
 
@@ -37,6 +33,14 @@ const AdminBlogEditorPage = () => {
   const dispatch = useDispatch();
   const fileRef = useRef(null);
 
+  // Blogs are published by admins, so default the author to the signed-in admin.
+  const authUser = useSelector((s) => s.auth.user || s.auth.profile);
+  const adminName = useMemo(() => {
+    if (!authUser) return "";
+    const full = `${authUser.first_name || ""} ${authUser.last_name || ""}`.trim();
+    return full || authUser.username || "";
+  }, [authUser]);
+
   const [form, setForm] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState({});
   const [coverFile, setCoverFile] = useState(null);
@@ -45,6 +49,9 @@ const AdminBlogEditorPage = () => {
   const [saving, setSaving] = useState(false);
   const [leaveConfirm, setLeaveConfirm] = useState(false);
   const [dirty, setDirty] = useState(false);
+  // Author is locked by default (auto-filled) and only editable after the admin
+  // clicks the lock icon — prevents accidental edits to the published byline.
+  const [authorLocked, setAuthorLocked] = useState(true);
 
   // Load existing blog when editing.
   useEffect(() => {
@@ -76,6 +83,12 @@ const AdminBlogEditorPage = () => {
       alive = false;
     };
   }, [slug, isEdit, navigate]);
+
+  // Auto-fill the author with the admin's name on a new post (once we know it).
+  useEffect(() => {
+    if (isEdit || !adminName) return;
+    setForm((f) => (f.author_name ? f : { ...f, author_name: adminName }));
+  }, [isEdit, adminName]);
 
   const onChange = (key, value) => {
     setForm((f) => ({ ...f, [key]: value }));
@@ -167,8 +180,8 @@ const AdminBlogEditorPage = () => {
 
   return (
     <div className="min-h-screen bg-slate-950 text-white">
-      {/* Sticky action bar */}
-      <div className="sticky top-0 z-30 bg-slate-950/85 backdrop-blur-xl border-b border-slate-800">
+      {/* Sticky action bar — no divider so the page header stays clean */}
+      <div className="sticky top-0 z-30 bg-slate-950/85 backdrop-blur-xl">
         <div className="max-w-6xl mx-auto px-5 sm:px-8 h-16 flex items-center justify-between gap-4">
           <button
             onClick={handleBack}
@@ -321,13 +334,34 @@ const AdminBlogEditorPage = () => {
                 />
               </div>
               <div>
-                <label className={labelCls}>Author</label>
-                <input
-                  className={inputCls}
-                  placeholder="Defaults to your admin name"
-                  value={form.author_name}
-                  onChange={(e) => onChange("author_name", e.target.value)}
-                />
+                <div className="flex gap-1.5 mb-2">
+                  <label className={`${labelCls} mb-0`}>Author</label>
+                  {/* Info tooltip: explains that this value is the public byline. */}
+                  <span className="group relative inline-flex">
+                    <i className="fas fa-circle-info text-slate-500 hover:text-indigo-400 text-[11px] cursor-help" />
+                    <span className="pointer-events-none absolute left-1/2 bottom-full mb-2 -translate-x-1/2 w-52 rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-[11px] font-medium normal-case tracking-normal text-slate-200 leading-snug opacity-0 group-hover:opacity-100 transition z-20 shadow-xl">
+                      This name is shown publicly as the article's author. It
+                      defaults to your admin name.
+                    </span>
+                  </span>
+                </div>
+                <div className="relative">
+                  <input
+                    className={`${inputCls} pr-10 ${authorLocked ? "opacity-70 cursor-not-allowed" : ""}`}
+                    placeholder="Defaults to your admin name"
+                    value={form.author_name}
+                    readOnly={authorLocked}
+                    onChange={(e) => onChange("author_name", e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setAuthorLocked((v) => !v)}
+                    title={authorLocked ? "Unlock to edit the author" : "Lock the author"}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition"
+                  >
+                    <i className={`fas ${authorLocked ? "fa-lock" : "fa-lock-open"} text-[11px]`} />
+                  </button>
+                </div>
               </div>
             </div>
 

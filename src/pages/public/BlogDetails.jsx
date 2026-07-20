@@ -8,6 +8,7 @@ import Reveal from "../../components/ui/Reveal";
 import BlogCard from "../../components/blogs/BlogCard";
 import { getStorageUrl } from "../../utils/storageUrl";
 import { useSeo } from "../../hooks/useSeo";
+import { toastManager } from "../../utils/toastManager";
 
 const formatDate = (value) => {
   if (!value) return "";
@@ -113,20 +114,6 @@ const BlogDetails = () => {
               {blog.excerpt}
             </p>
           )}
-          <div className="flex items-center flex-wrap gap-x-5 gap-y-2 mt-6 text-[12px] text-slate-500">
-            <span className="flex items-center gap-2">
-              <span className="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-500 to-cyan-500 flex items-center justify-center text-[10px] font-black text-white">
-                {(blog.author || "A").charAt(0).toUpperCase()}
-              </span>
-              <span className="font-semibold text-slate-300">{blog.author || "Admin"}</span>
-            </span>
-            {(blog.published_at || blog.created_at) && (
-              <span>{formatDate(blog.published_at || blog.created_at)}</span>
-            )}
-            <span className="flex items-center gap-1.5">
-              <i className="fas fa-clock text-[9px]" /> {blog.read_time || 1} min read
-            </span>
-          </div>
         </header>
 
         {/* Cover */}
@@ -141,26 +128,63 @@ const BlogDetails = () => {
           <QuillViewer value={blog.content || ""} />
         </div>
 
+        {/* Article metadata — kept at the end so it never interrupts reading. */}
+        <div className="mt-12 pt-8 border-t border-white/5 flex items-center flex-wrap gap-x-5 gap-y-2 text-[12px] text-slate-500">
+          <span className="flex items-center gap-2">
+            <span className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-cyan-500 flex items-center justify-center text-[11px] font-black text-white">
+              {(blog.author || "A").charAt(0).toUpperCase()}
+            </span>
+            <span className="flex flex-col leading-tight">
+              <span className="text-[10px] uppercase tracking-widest text-slate-600">
+                Posted by
+              </span>
+              <span className="font-semibold text-slate-300">{blog.author || "Admin"}</span>
+            </span>
+          </span>
+          {(blog.published_at || blog.created_at) && (
+            <span className="flex items-center gap-1.5">
+              <i className="fas fa-calendar-day text-[9px]" />
+              {formatDate(blog.published_at || blog.created_at)}
+            </span>
+          )}
+          <span className="flex items-center gap-1.5">
+            <i className="fas fa-clock text-[9px]" /> {blog.read_time || 1} min read
+          </span>
+        </div>
+
         {/* Footer CTA */}
-        <div className="mt-14 pt-8 border-t border-white/5 flex items-center justify-between">
+        <div className="mt-6 pt-6 border-t border-white/5 flex items-center justify-between">
           <Link
             to="/blogs"
             className="inline-flex items-center gap-2 text-indigo-400 hover:text-white text-[11px] font-black uppercase tracking-widest transition"
           >
             <i className="fas fa-arrow-left text-[9px]" /> All Articles
           </Link>
-          <button
-            onClick={() => {
-              if (navigator.share) {
-                navigator.share({ title: blog.title, url: window.location.href }).catch(() => {});
-              } else {
-                navigator.clipboard?.writeText(window.location.href);
-              }
-            }}
-            className="inline-flex items-center gap-2 text-slate-400 hover:text-white text-[11px] font-black uppercase tracking-widest transition"
-          >
-            <i className="fas fa-share-nodes text-[10px]" /> Share
-          </button>
+          <div className="flex items-center gap-2">
+            {/* Info tooltip clarifying what the Share button does. */}
+            <span className="group relative inline-flex">
+              <i className="fas fa-circle-info text-slate-500 hover:text-indigo-400 text-xs cursor-help" />
+              <span className="pointer-events-none absolute right-0 bottom-full mb-2 w-56 rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-[11px] font-medium normal-case tracking-normal text-slate-200 leading-snug opacity-0 group-hover:opacity-100 transition z-20 shadow-xl">
+                Shares this article using your device's share menu, or copies the
+                link to your clipboard.
+              </span>
+            </span>
+            <button
+              onClick={() => {
+                if (navigator.share) {
+                  navigator
+                    .share({ title: blog.title, url: window.location.href })
+                    .catch(() => {});
+                } else {
+                  navigator.clipboard?.writeText(window.location.href);
+                  toastManager.success("Link copied to clipboard");
+                }
+              }}
+              className="inline-flex items-center gap-2 text-slate-400 hover:text-white text-[11px] font-black uppercase tracking-widest transition"
+            >
+              <i className="fas fa-share-nodes text-[10px]" /> Share
+            </button>
+          </div>
         </div>
       </article>
 

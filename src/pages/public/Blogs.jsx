@@ -51,7 +51,9 @@ const Blogs = () => {
         !q ||
         b.title?.toLowerCase().includes(q) ||
         b.excerpt?.toLowerCase().includes(q) ||
-        b.category?.toLowerCase().includes(q);
+        b.category?.toLowerCase().includes(q) ||
+        // Strip HTML tags so content matches on visible text, not markup.
+        b.content?.replace(/<[^>]*>/g, " ").toLowerCase().includes(q);
       return matchCat && matchSearch;
     });
   }, [blogs, search, activeCategory]);
@@ -83,28 +85,36 @@ const Blogs = () => {
         </div>
 
         {/* Controls */}
-        <div className="flex flex-col md:flex-row md:items-center gap-4 mb-10">
-          <div className="md:w-80">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-10">
+          {/* Clean segmented category tabs */}
+          {categories.length > 1 && (
+            <div className="order-2 md:order-1 -mx-6 px-6 md:mx-0 md:px-0 overflow-x-auto no-scrollbar">
+              <div className="inline-flex items-center gap-1 p-1 rounded-full bg-white/[0.04] border border-white/10 backdrop-blur-sm">
+                {categories.map((cat) => {
+                  const active = activeCategory === cat;
+                  return (
+                    <button
+                      key={cat}
+                      onClick={() => setActiveCategory(cat)}
+                      className={`relative px-4 py-1.5 rounded-full text-[11px] font-bold tracking-wide whitespace-nowrap transition-all ${
+                        active
+                          ? "bg-indigo-500 text-white shadow-md shadow-indigo-900/30"
+                          : "text-slate-400 hover:text-white"
+                      }`}
+                    >
+                      {cat === "all" ? "All" : cat}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+          <div className="order-1 md:order-2 md:w-72 shrink-0">
             <SearchInput
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search articles..."
+              placeholder="Search by title or content..."
             />
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
-                className={`px-4 py-2 rounded-full text-[11px] font-black uppercase tracking-wider transition-all ${
-                  activeCategory === cat
-                    ? "bg-indigo-500 text-white shadow-lg shadow-indigo-900/40"
-                    : "bg-white/5 text-slate-400 border border-white/5 hover:text-white hover:border-indigo-500/30"
-                }`}
-              >
-                {cat === "all" ? "All" : cat}
-              </button>
-            ))}
           </div>
         </div>
 
