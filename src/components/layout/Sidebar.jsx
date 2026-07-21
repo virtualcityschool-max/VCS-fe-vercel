@@ -120,6 +120,7 @@ const NAV_CONFIG = {
     { label: "Planner",  to: "/teacher/sessions",         icon: "fas fa-calendar-alt" },
     { label: "Slots Management", to: "/teacher/availability",     icon: "fas fa-calendar-plus" },
     { label: "Evaluations",  to: "/teacher/evaluations",      icon: "fas fa-chart-bar" },
+    { label: "Blogs",        to: "/blogs",                    icon: "fas fa-newspaper" },
     // { label: "Hire Request", to: "/teacher/hire-leads",       icon: "fas fa-handshake" },
   ],
   student: [
@@ -129,6 +130,8 @@ const NAV_CONFIG = {
     { label: "Assessments", to: "/student/assessments",     icon: "fas fa-clipboard-list" },
     { label: "Attendance",  to: "/student/attendance",      icon: "fas fa-user-check" },
     { label: "Evaluations", to: "/student/evaluations",     icon: "fas fa-chart-bar" },
+    { label: "Explore Courses", to: "/courses",             icon: "fas fa-compass" },
+    { label: "Blogs",       to: "/blogs",                   icon: "fas fa-newspaper" },
   ],
   parent: [
     { label: "Dashboard",        to: "/parent",              icon: "fas fa-table-columns", end: true },
