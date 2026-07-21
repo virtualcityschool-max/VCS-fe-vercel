@@ -362,6 +362,10 @@ const initialState = {
 
   upcomingSlots: [],
 
+  // Paid-course subscription states (from /classroom/student-dashboard/)
+  pendingCourses: { awaiting_approval: [], payment_pending: [] },
+  expiredCourses: [],
+
   // My enrollments (active + pending from /courses/my-enrollments/)
   myEnrollments: [],
   myEnrollmentsLoading: false,
@@ -451,6 +455,11 @@ const studentDashboardSlice = createSlice({
         state.enrolledCourses = action.payload.enrolled_courses || [];
         state.assignments = action.payload.assignments || [];
         state.quizzes = action.payload.quizzes || [];
+        state.pendingCourses = action.payload.pending_courses || {
+          awaiting_approval: [],
+          payment_pending: [],
+        };
+        state.expiredCourses = action.payload.expired_courses || [];
         state.lastFetched = new Date().toISOString();
       })
       .addCase(fetchStudentDashboard.rejected, (state, action) => {
@@ -809,6 +818,13 @@ export const selectLiveSchedule = (state) =>
   state.studentDashboard.liveSchedule;
 export const selectUpcomingSlots = (state) =>
   state.studentDashboard.upcomingSlots;
+export const selectPendingCourses = (state) =>
+  state.studentDashboard.pendingCourses || {
+    awaiting_approval: [],
+    payment_pending: [],
+  };
+export const selectExpiredCourses = (state) =>
+  state.studentDashboard.expiredCourses || [];
 export const selectEnrolledCourses = (state) =>
   state.studentDashboard.enrolledCourses;
 export const selectAssignments = (state) => state.studentDashboard.assignments;

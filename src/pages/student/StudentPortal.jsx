@@ -11,6 +11,8 @@ import {
   selectNextSession,
   selectAssignments,
   selectMyEnrollments,
+  selectPendingCourses,
+  selectExpiredCourses,
 } from "../../store/slices/studentDashboardSlice";
 import {
   DashboardHeader,
@@ -19,6 +21,7 @@ import {
   CourseProgressGrid,
   AssignmentOverviewList,
   MyAttendanceList,
+  SubscriptionAlerts,
 } from "../../components/studentDashboard";
 import { availabilityService } from "../../services/availabilityService";
 
@@ -31,9 +34,17 @@ const StudentPortal = () => {
   const nextSession = useSelector(selectNextSession);
   const assignments = useSelector(selectAssignments);
   const myEnrollments = useSelector(selectMyEnrollments);
+  const pendingCourses = useSelector(selectPendingCourses);
+  const expiredCourses = useSelector(selectExpiredCourses);
 
   const [hasMounted, setHasMounted] = useState(false);
   const [hasTutorSlots, setHasTutorSlots] = useState(false);
+
+  // Paid courses that need payment (pending payment / expired) — admin-approval
+  // is intentionally not surfaced on the dashboard.
+  const hasSubscriptionAlerts =
+    (pendingCourses?.payment_pending?.length || 0) > 0 ||
+    (expiredCourses?.length || 0) > 0;
 
   const hasCourseData =
     (enrolledCourses && enrolledCourses.length > 0) ||
@@ -41,7 +52,10 @@ const StudentPortal = () => {
     (assignments && assignments.length > 0) ||
     (myEnrollments && myEnrollments.length > 0);
 
-  const isDashboardEmpty = !hasCourseData && !hasTutorSlots;
+  // Don't show the "explore courses" empty state when the student has a pending
+  // payment / approval or an expired course — the alerts below are what matters.
+  const isDashboardEmpty =
+    !hasCourseData && !hasTutorSlots && !hasSubscriptionAlerts;
 
   // Ensure component has mounted on client
   useEffect(() => {
@@ -140,6 +154,10 @@ const StudentPortal = () => {
         <div className="animate-fadeInUp">
           <DashboardHeader />
         </div>
+
+        {/* Subscription alerts — pending payment / awaiting approval / expired.
+            Rendered above everything so the student sees them first. */}
+        <SubscriptionAlerts />
 
         {isDashboardEmpty ? (
           <div className="relative group overflow-hidden rounded-[2.5rem] border border-white/5 bg-slate-900/40 backdrop-blur-xl p-12 lg:p-20 text-center shadow-2xl transition-all duration-500 hover:border-blue-500/10">
