@@ -186,6 +186,21 @@ const PublicHome = () => {
                 <i className="fas fa-user-graduate group-hover:rotate-12 transition text-xs"></i>
               </button>
             </div>
+
+            {/* Subtle scholarship entry — visible without scrolling */}
+            <button
+              onClick={() => openFreeAccess()}
+              className="group mt-6 inline-flex items-center gap-2 text-sm text-slate-400 hover:text-white transition animate-fadeInUp"
+              style={{ animationDelay: "0.4s" }}
+            >
+              <i className="fas fa-hand-holding-heart text-indigo-400"></i>
+              <span>
+                Can't afford a course?{" "}
+                <span className="font-semibold text-indigo-300 group-hover:text-indigo-200 underline decoration-indigo-500/40 underline-offset-4">
+                  Apply for free access
+                </span>
+              </span>
+            </button>
           </div>
 
           {/* Right: Image */}
@@ -296,23 +311,12 @@ const PublicHome = () => {
                 : "Trending Skills"}
             </h2>
           </div>
-          <div className="flex items-center gap-4 sm:gap-6">
-            <button
-              onClick={() => openFreeAccess()}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/20 text-[10px] sm:text-xs font-black uppercase tracking-widest transition whitespace-nowrap"
-              title="Apply for free access if you can't afford a course"
-            >
-              <i className="fas fa-hand-holding-heart"></i>
-              <span className="hidden sm:inline">Apply for Free Access</span>
-              <span className="sm:hidden">Free Access</span>
-            </button>
-            <button
-              onClick={() => navigate("/courses")}
-              className="hidden md:flex text-indigo-400 font-black text-[10px] uppercase tracking-widest hover:text-white transition items-center gap-3 border-b border-indigo-500/20 pb-1"
-            >
-              View All Courses <i className="fas fa-arrow-right text-[8px]"></i>
-            </button>
-          </div>
+          <button
+            onClick={() => navigate("/courses")}
+            className="hidden md:flex text-indigo-400 font-black text-[10px] uppercase tracking-widest hover:text-white transition items-center gap-3 border-b border-indigo-500/20 pb-1"
+          >
+            View All Courses <i className="fas fa-arrow-right text-[8px]"></i>
+          </button>
         </Reveal>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
@@ -336,6 +340,40 @@ const PublicHome = () => {
           ))
           }
         </div>
+
+        {/* Free Access — scholarship entry point (compact, under the courses) */}
+        <Reveal className="mt-14">
+          <div className="group relative overflow-hidden rounded-2xl border border-indigo-500/15 bg-white/[0.03] backdrop-blur-xl px-6 py-5 sm:px-8 sm:py-6 transition-colors duration-300 hover:border-indigo-500/30">
+            {/* ambient glow */}
+            <div className="pointer-events-none absolute -right-12 -top-12 w-44 h-44 rounded-full bg-indigo-500/20 blur-3xl transition-opacity duration-500 group-hover:bg-indigo-500/30" />
+            <div className="relative z-10 flex flex-col sm:flex-row sm:items-center gap-5 sm:gap-8">
+              <div className="flex items-start gap-4 flex-1 min-w-0">
+                <span className="icon-chip shrink-0">
+                  <i className="fas fa-hand-holding-heart text-indigo-400"></i>
+                </span>
+                <div className="min-w-0">
+                  <p className="text-[10px] font-black uppercase tracking-[0.35em] text-indigo-400 mb-1.5">
+                    Financial Aid
+                  </p>
+                  <h3 className="text-lg sm:text-xl font-black font-poppins tracking-tight text-white">
+                    Can't afford it? Learn for free.
+                  </h3>
+                  <p className="text-slate-400 text-xs sm:text-sm mt-1 max-w-md leading-relaxed">
+                    Apply for free access — our team reviews your request and approved
+                    courses are added to your account at no cost.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => openFreeAccess()}
+                className="btn-glow shrink-0 inline-flex items-center justify-center gap-2.5 px-6 py-3 rounded-xl text-white font-bold text-sm whitespace-nowrap"
+              >
+                <i className="fas fa-hand-holding-heart"></i>
+                Apply for Free Access
+              </button>
+            </div>
+          </div>
+        </Reveal>
 
         {/* Your Journey to Mastery Section */}
         <div className="mt-32 md:mt-48">

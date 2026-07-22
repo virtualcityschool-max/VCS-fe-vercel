@@ -38,6 +38,8 @@ import { SearchInput } from "../../components/ui";
 const AdminApprovalsPage = () => {
   const dispatch = useDispatch();
   const [activeTab, setActiveTab] = useState("users");
+  // Enrollment tab has two request types: standard (paid/normal) and free-access.
+  const [enrollmentSubTab, setEnrollmentSubTab] = useState("standard");
 
   // Search is independent per tab
   const [usersSearch, setUsersSearch] = useState("");
@@ -81,6 +83,9 @@ const AdminApprovalsPage = () => {
     error: freeAccessError,
     processingId: freeAccessProcessing,
   } = useSelector((state) => state.freeAccess);
+  const freeAccessPendingCount = (freeAccessRequests || []).filter(
+    (r) => r.status === "pending",
+  ).length;
 
   // Re-fetch all 4 APIs every time this page is visited.
   // AdminLayout only fetches once on mount; navigating away and back
@@ -226,10 +231,13 @@ const AdminApprovalsPage = () => {
       : activeTab === "childLinks"
         ? childLinksLoading
         : activeTab === "enrollments"
-          ? enrollmentsLoading
-          : activeTab === "freeAccess"
-            ? freeAccessLoading
-            : hireLoading;
+          ? enrollmentsLoading || freeAccessLoading
+          : hireLoading;
+
+  const handleRefreshEnrollmentsTab = () => {
+    handleRefreshEnrollments();
+    handleRefreshFreeAccess();
+  };
 
   const activeRefreshHandler =
     activeTab === "users"
@@ -237,47 +245,46 @@ const AdminApprovalsPage = () => {
       : activeTab === "childLinks"
         ? handleRefreshChildLinks
         : activeTab === "enrollments"
-          ? handleRefreshEnrollments
-          : activeTab === "freeAccess"
-            ? handleRefreshFreeAccess
-            : handleRefreshHireRequests;
+          ? handleRefreshEnrollmentsTab
+          : handleRefreshHireRequests;
 
   // Placeholder counts until backend provides processed-today metrics.
   const approvedTodayCount = 0;
   const rejectedTodayCount = 0;
 
+  const enrollmentTabSearch =
+    enrollmentSubTab === "free" ? freeAccessSearch : enrollmentsSearch;
+  const setEnrollmentTabSearch =
+    enrollmentSubTab === "free" ? setFreeAccessSearch : setEnrollmentsSearch;
+
   const activeSearch =
     activeTab === "users"
       ? usersSearch
       : activeTab === "enrollments"
-        ? enrollmentsSearch
+        ? enrollmentTabSearch
         : activeTab === "childLinks"
           ? childLinksSearch
-          : activeTab === "freeAccess"
-            ? freeAccessSearch
-            : "";
+          : "";
 
   const setActiveSearch =
     activeTab === "users"
       ? setUsersSearch
       : activeTab === "enrollments"
-        ? setEnrollmentsSearch
+        ? setEnrollmentTabSearch
         : activeTab === "childLinks"
           ? setChildLinksSearch
-          : activeTab === "freeAccess"
-            ? setFreeAccessSearch
-            : () => {};
+          : () => {};
 
   const activeSearchPlaceholder =
     activeTab === "users"
       ? "Search by name, email, or role..."
       : activeTab === "enrollments"
-        ? "Search by student, course, or tutor..."
+        ? enrollmentSubTab === "free"
+          ? "Search by name, email, or country..."
+          : "Search by student, course, or tutor..."
         : activeTab === "childLinks"
           ? "Search by guardian or student..."
-          : activeTab === "freeAccess"
-            ? "Search by name, email, or country..."
-            : "Search...";
+          : "Search...";
 
   return (
     <div className="space-y-6">
@@ -312,9 +319,9 @@ const AdminApprovalsPage = () => {
             >
               <i className="fas fa-user-graduate"></i>
               Enrollment Requests
-              {pendingEnrollments?.length > 0 && (
+              {(pendingEnrollments?.length || 0) + freeAccessPendingCount > 0 && (
                 <span className="bg-indigo-500 text-white text-xs px-2 py-0.5 rounded-full">
-                  {pendingEnrollments.length}
+                  {(pendingEnrollments?.length || 0) + freeAccessPendingCount}
                 </span>
               )}
             </button>
@@ -331,22 +338,6 @@ const AdminApprovalsPage = () => {
               {pendingChildLinks?.length > 0 && (
                 <span className="bg-indigo-500 text-white text-xs px-2 py-0.5 rounded-full">
                   {pendingChildLinks.length}
-                </span>
-              )}
-            </button>
-            <button
-              onClick={() => setActiveTab("freeAccess")}
-              className={`inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-                activeTab === "freeAccess"
-                  ? "bg-indigo-600 text-white shadow-lg"
-                  : "text-slate-400 hover:text-white hover:bg-slate-800/50"
-              }`}
-            >
-              <i className="fas fa-hand-holding-heart"></i>
-              Free Access
-              {freeAccessRequests?.filter((r) => r.status === "pending").length > 0 && (
-                <span className="bg-indigo-500 text-white text-xs px-2 py-0.5 rounded-full">
-                  {freeAccessRequests.filter((r) => r.status === "pending").length}
                 </span>
               )}
             </button>
@@ -408,28 +399,66 @@ const AdminApprovalsPage = () => {
       )}
 
       {activeTab === "enrollments" && (
-        <EnrollmentRequestsTab
-          enrollments={pendingEnrollments}
-          loading={enrollmentsLoading}
-          error={enrollmentsError}
-          processing={enrollmentsProcessing}
-          onApprove={handleApproveEnrollment}
-          onReject={handleRejectEnrollment}
-          onRefresh={handleRefreshEnrollments}
-          search={enrollmentsSearch}
-        />
-      )}
+        <div className="space-y-5">
+          {/* Sub-tabs: Standard vs Free Access enrollment requests */}
+          <div className="inline-flex items-center gap-1 bg-slate-900/50 border border-slate-800 rounded-xl p-1">
+            <button
+              onClick={() => setEnrollmentSubTab("standard")}
+              className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition ${
+                enrollmentSubTab === "standard"
+                  ? "bg-indigo-600 text-white"
+                  : "text-slate-400 hover:text-white"
+              }`}
+            >
+              <i className="fas fa-user-graduate"></i>
+              Standard Enrollment
+              {pendingEnrollments?.length > 0 && (
+                <span className="bg-slate-700 text-white text-[10px] px-1.5 py-0.5 rounded-full">
+                  {pendingEnrollments.length}
+                </span>
+              )}
+            </button>
+            <button
+              onClick={() => setEnrollmentSubTab("free")}
+              className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition ${
+                enrollmentSubTab === "free"
+                  ? "bg-indigo-600 text-white"
+                  : "text-slate-400 hover:text-white"
+              }`}
+            >
+              <i className="fas fa-hand-holding-heart"></i>
+              Free Access
+              {freeAccessPendingCount > 0 && (
+                <span className="bg-slate-700 text-white text-[10px] px-1.5 py-0.5 rounded-full">
+                  {freeAccessPendingCount}
+                </span>
+              )}
+            </button>
+          </div>
 
-      {activeTab === "freeAccess" && (
-        <FreeAccessRequestsTab
-          requests={freeAccessRequests}
-          loading={freeAccessLoading}
-          error={freeAccessError}
-          processing={freeAccessProcessing}
-          onResolve={handleResolveFreeAccess}
-          onRefresh={handleRefreshFreeAccess}
-          search={freeAccessSearch}
-        />
+          {enrollmentSubTab === "standard" ? (
+            <EnrollmentRequestsTab
+              enrollments={pendingEnrollments}
+              loading={enrollmentsLoading}
+              error={enrollmentsError}
+              processing={enrollmentsProcessing}
+              onApprove={handleApproveEnrollment}
+              onReject={handleRejectEnrollment}
+              onRefresh={handleRefreshEnrollments}
+              search={enrollmentsSearch}
+            />
+          ) : (
+            <FreeAccessRequestsTab
+              requests={freeAccessRequests}
+              loading={freeAccessLoading}
+              error={freeAccessError}
+              processing={freeAccessProcessing}
+              onResolve={handleResolveFreeAccess}
+              onRefresh={handleRefreshFreeAccess}
+              search={freeAccessSearch}
+            />
+          )}
+        </div>
       )}
 
       {activeTab === "hireRequests" && (

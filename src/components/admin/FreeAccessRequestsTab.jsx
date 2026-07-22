@@ -33,6 +33,16 @@ const initials = (name) =>
     .join("")
     .toUpperCase();
 
+const DetailField = ({ icon, label, value, className = "" }) => (
+  <div className={`min-w-0 ${className}`}>
+    <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-0.5">
+      <i className={`fas ${icon} mr-1.5 text-slate-600`}></i>
+      {label}
+    </p>
+    <p className="text-sm text-white break-words">{value}</p>
+  </div>
+);
+
 /**
  * Full-request review dialog. Admin reviews the application and decides each
  * course (Approve = enroll free / Reject). A pending request must have every
@@ -81,7 +91,7 @@ const ReviewModal = ({ request, processing, onClose, onResolve }) => {
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4">
-      <div className="w-full max-w-xl bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl max-h-[92vh] overflow-y-auto custom-scrollbar">
+      <div className="w-full max-w-3xl bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl max-h-[92vh] overflow-y-auto custom-scrollbar">
         {/* Header */}
         <div className="flex items-start justify-between gap-3 p-5 sticky top-0 bg-slate-900 border-b border-slate-800 z-10">
           <div className="flex items-center gap-3">
@@ -93,10 +103,7 @@ const ReviewModal = ({ request, processing, onClose, onResolve }) => {
                 <h3 className="text-base font-bold text-white">{request.full_name}</h3>
                 <StatusBadge status={request.status} />
               </div>
-              <p className="text-xs text-slate-400 mt-0.5">
-                {request.email} · {request.country}
-                {request.occupation ? ` · ${request.occupation}` : ""}
-              </p>
+              <p className="text-xs text-slate-400 mt-0.5">{request.email}</p>
             </div>
           </div>
           <button onClick={onClose} className="text-slate-400 hover:text-white transition" aria-label="Close">
@@ -105,6 +112,25 @@ const ReviewModal = ({ request, processing, onClose, onResolve }) => {
         </div>
 
         <div className="p-5 space-y-4">
+          {/* Applicant details — full info for a thorough review */}
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2">
+              Applicant details
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-3 rounded-xl bg-slate-800/40 border border-slate-700/50 p-3.5">
+              <DetailField icon="fa-user" label="Full name" value={request.full_name} />
+              <DetailField icon="fa-envelope" label="Email" value={request.email} className="col-span-2 sm:col-span-1" />
+              <DetailField icon="fa-globe" label="Country" value={request.country} />
+              <DetailField icon="fa-briefcase" label="Occupation" value={request.occupation || "—"} />
+              <DetailField icon="fa-calendar" label="Applied" value={formatDate(request.created_at)} />
+              <DetailField
+                icon="fa-id-badge"
+                label="Account"
+                value={request.applicant ? "Existing student" : "New applicant"}
+              />
+            </div>
+          </div>
+
           {request.applicant && (
             <div className="text-[11px] text-slate-400 bg-slate-800/40 border border-slate-700/50 rounded-lg px-3 py-2">
               <i className="fas fa-circle-info mr-1.5 text-indigo-400"></i>
@@ -134,17 +160,22 @@ const ReviewModal = ({ request, processing, onClose, onResolve }) => {
 
           {/* Courses */}
           <div>
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
               <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">
                 Requested courses
               </p>
               {!isDecided && pendingCourses.length > 1 && (
-                <div className="flex gap-2 text-[11px] font-semibold">
-                  <button onClick={() => setAll("approve")} className="text-emerald-400 hover:text-emerald-300">
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => setAll("approve")}
+                    className="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20 border border-emerald-500/20 transition"
+                  >
                     Approve all
                   </button>
-                  <span className="text-slate-600">·</span>
-                  <button onClick={() => setAll("reject")} className="text-rose-400 hover:text-rose-300">
+                  <button
+                    onClick={() => setAll("reject")}
+                    className="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-rose-500/10 text-rose-300 hover:bg-rose-500/20 border border-rose-500/20 transition"
+                  >
                     Reject all
                   </button>
                 </div>
@@ -157,9 +188,9 @@ const ReviewModal = ({ request, processing, onClose, onResolve }) => {
                 return (
                   <div
                     key={c.id}
-                    className="flex items-center justify-between gap-2 rounded-lg bg-slate-800/40 border border-slate-700/40 px-3 py-2"
+                    className="flex items-center justify-between gap-3 rounded-lg bg-slate-800/40 border border-slate-700/40 px-3 py-2"
                   >
-                    <span className="text-sm text-white">
+                    <span className="text-sm text-white min-w-0 truncate">
                       {c.course.title}
                       {c.course.is_paid && (
                         <span className="text-[10px] text-slate-500 ml-1">(${c.course.price})</span>
@@ -168,10 +199,10 @@ const ReviewModal = ({ request, processing, onClose, onResolve }) => {
                     {decided ? (
                       <StatusBadge status={c.status} />
                     ) : (
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-1.5 shrink-0">
                         <button
                           onClick={() => setDecisions((p) => ({ ...p, [c.course.id]: "approve" }))}
-                          className={`px-3 py-1 rounded-md text-xs font-semibold transition ${
+                          className={`w-[76px] py-1 rounded-md text-xs font-semibold transition ${
                             pick === "approve" ? "bg-emerald-600 text-white" : "bg-slate-700/60 text-emerald-300 hover:bg-slate-700"
                           }`}
                         >
@@ -179,7 +210,7 @@ const ReviewModal = ({ request, processing, onClose, onResolve }) => {
                         </button>
                         <button
                           onClick={() => setDecisions((p) => ({ ...p, [c.course.id]: "reject" }))}
-                          className={`px-3 py-1 rounded-md text-xs font-semibold transition ${
+                          className={`w-[76px] py-1 rounded-md text-xs font-semibold transition ${
                             pick === "reject" ? "bg-rose-600 text-white" : "bg-slate-700/60 text-rose-300 hover:bg-slate-700"
                           }`}
                         >

@@ -194,6 +194,7 @@ const EnrollmentTypeModal = ({
   course,
   isPaid = false,
   isLoading = false,
+  onApplyFreeAccess,
 }) => {
   const [view, setView] = useState("choose");
   const [manualMethod, setManualMethod] = useState(MANUAL_METHODS.easypaisa);
@@ -405,6 +406,24 @@ const EnrollmentTypeModal = ({
                 disabled={isLoading}
               />
             </div>
+
+            {/* Can't afford it? — free-access alternative */}
+            {onApplyFreeAccess && (
+              <div className="mt-5 pt-5 border-t border-white/5">
+                <p className="text-center text-[11px] text-slate-500 mb-3">
+                  Can't afford this course?
+                </p>
+                <button
+                  type="button"
+                  onClick={onApplyFreeAccess}
+                  disabled={isLoading}
+                  className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 hover:text-indigo-200 border border-indigo-400/20 hover:border-indigo-400/40 text-sm font-bold transition disabled:opacity-50"
+                >
+                  <i className="fas fa-hand-holding-heart" />
+                  Apply for Free Access
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

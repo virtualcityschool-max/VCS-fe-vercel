@@ -21,6 +21,7 @@ import { showApiError } from "../../utils/apiErrorHandler";
 import { getDisplayName } from "../../utils/userDisplay";
 import { getStorageUrl } from "../../utils/storageUrl";
 import AuthRequiredModal from "../../components/common/AuthRequiredModal";
+import ApplyFreeAccessModal from "../../components/public/ApplyFreeAccessModal";
 import PublicCourseCard from "../../components/courses/PublicCourseCard";
 import { studentService } from "../../services/studentService";
 
@@ -40,6 +41,14 @@ const Marketplace = () => {
   const [enrollmentModalOpen, setEnrollmentModalOpen] = useState(false);
   const [paymentSubmitted, setPaymentSubmitted] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [freeAccessOpen, setFreeAccessOpen] = useState(false);
+  const [freeAccessPreselect, setFreeAccessPreselect] = useState([]);
+  const [pendingEnrollCourseId, setPendingEnrollCourseId] = useState(null);
+
+  const openFreeAccess = (courseIds = []) => {
+    setFreeAccessPreselect(courseIds);
+    setFreeAccessOpen(true);
+  };
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [withdrawConfirm, setWithdrawConfirm] = useState({ open: false, courseId: null, courseTitle: "" });
   const [unenrollConfirm, setUnenrollConfirm] = useState({ open: false, courseId: null, courseTitle: "" });
@@ -187,6 +196,7 @@ const Marketplace = () => {
         courseId: course.id,
         courseTitle: course.title
       }));
+      setPendingEnrollCourseId(course.id);
       setAuthModalOpen(true);
       return;
     }
@@ -410,7 +420,8 @@ const Marketplace = () => {
               Expand your <span className="text-gradient">potential</span>.
             </h1>
           </div>
-          <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-8 gap-3 max-w-4xl mx-auto animate-springyReveal">
+          <div className="flex flex-col lg:flex-row lg:items-stretch gap-3 max-w-5xl mx-auto animate-springyReveal">
+            <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-8 gap-3 flex-1">
             <div className="md:col-span-4">
               <SearchInput
                 id="course-search"
@@ -439,7 +450,18 @@ const Marketplace = () => {
                 ))}
               </FilterSelect>
             </div>
-          </form>
+            </form>
+            <button
+              type="button"
+              onClick={() => openFreeAccess()}
+              className="btn-glow flex items-center justify-center gap-2 h-11 px-5 rounded-xl text-white font-bold text-sm whitespace-nowrap shrink-0"
+              title="Can't afford a course? Apply for free access."
+            >
+              <i className="fas fa-hand-holding-heart"></i>
+              <span className="hidden sm:inline">Apply for Free Access</span>
+              <span className="sm:hidden">Free Access</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -592,13 +614,35 @@ const Marketplace = () => {
         isLoading={selectedCourse?.is_paid ? isCheckingOut : (selectedCourse ? enrollingCourseIds.includes(selectedCourse.id) : false)}
         onConfirm={selectedCourse?.is_paid ? handleCheckout : () => handleEnrollmentTypeSelect("normal")}
         onClose={closeEnrollmentModal}
+        onApplyFreeAccess={
+          selectedCourse
+            ? () => {
+                const cid = selectedCourse.id;
+                closeEnrollmentModal();
+                openFreeAccess([cid]);
+              }
+            : undefined
+        }
       />
 
       <AuthRequiredModal
         isOpen={authModalOpen}
         onClose={() => setAuthModalOpen(false)}
         message="Please sign in or create an account to enroll in courses and track your progress."
+        onApplyFreeAccess={() =>
+          openFreeAccess(pendingEnrollCourseId ? [pendingEnrollCourseId] : [])
+        }
       />
+
+      {freeAccessOpen && (
+        <ApplyFreeAccessModal
+          preselectedCourseIds={freeAccessPreselect}
+          onClose={() => {
+            setFreeAccessOpen(false);
+            setFreeAccessPreselect([]);
+          }}
+        />
+      )}
 
       <ConfirmDialog
         open={withdrawConfirm.open}

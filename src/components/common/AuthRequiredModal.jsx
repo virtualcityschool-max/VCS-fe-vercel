@@ -68,7 +68,7 @@ const AuthRequiredModal = ({ isOpen, onClose, title = "Authentication Required",
                     onClose();
                     onApplyFreeAccess();
                   }}
-                  className="w-full py-4 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/20 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                  className="w-full py-4 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 hover:text-indigo-200 border border-indigo-400/20 hover:border-indigo-400/40 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all active:scale-[0.98] flex items-center justify-center gap-2"
                 >
                   <i className="fas fa-hand-holding-heart"></i>
                   Apply for Free Access
