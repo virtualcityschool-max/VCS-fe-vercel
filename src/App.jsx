@@ -24,6 +24,9 @@ const AppInner = () => {
   const pendingHireCount = useSelector((state) =>
     (state.hire?.adminRequests || []).filter((r) => r.status === "pending").length
   );
+  const pendingFreeAccessCount = useSelector((state) =>
+    (state.freeAccess?.requests || []).filter((r) => r.status === "pending").length
+  );
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
@@ -65,7 +68,8 @@ const AppInner = () => {
     (pendingApprovals?.length || 0) +
     (pendingChildLinks?.length || 0) +
     (pendingEnrollments?.length || 0) +
-    pendingHireCount;
+    pendingHireCount +
+    pendingFreeAccessCount;
 
   const showNavbar = !isLoggedIn;
 

@@ -9,6 +9,7 @@ import { fetchBlogs } from "../../store/slices/blogsSlice";
 import AuthRequiredModal from "../../components/common/AuthRequiredModal";
 import ConfirmDialog from "../../components/common/ConfirmDialog";
 import HireTutorModal from "../../components/public/HireTutorModal";
+import ApplyFreeAccessModal from "../../components/public/ApplyFreeAccessModal";
 import PublicCourseCard from "../../components/courses/PublicCourseCard";
 import TutorCard from "../../components/teachers/TutorCard";
 import BlogCard from "../../components/blogs/BlogCard";
@@ -24,6 +25,14 @@ const PublicHome = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [hireModal, setHireModal] = useState(null);
+  const [freeAccessOpen, setFreeAccessOpen] = useState(false);
+  const [freeAccessPreselect, setFreeAccessPreselect] = useState([]);
+  const [pendingEnrollCourseId, setPendingEnrollCourseId] = useState(null);
+
+  const openFreeAccess = (courseIds = []) => {
+    setFreeAccessPreselect(courseIds);
+    setFreeAccessOpen(true);
+  };
   const [withdrawConfirm, setWithdrawConfirm] = useState({ open: false, courseId: null, courseTitle: "" });
   const [unenrollConfirm, setUnenrollConfirm] = useState({ open: false, courseId: null, courseTitle: "" });
 
@@ -60,10 +69,11 @@ const PublicHome = () => {
   // Handle enrollment button
   const handleEnrollClick = (course) => {
     if (!auth.isLoggedIn) {
-      dispatch(setEnrollmentIntent({ 
-        courseId: course.id, 
-        courseTitle: course.title 
+      dispatch(setEnrollmentIntent({
+        courseId: course.id,
+        courseTitle: course.title
       }));
+      setPendingEnrollCourseId(course.id);
       setAuthModalOpen(true);
       return;
     }
@@ -286,12 +296,23 @@ const PublicHome = () => {
                 : "Trending Skills"}
             </h2>
           </div>
-          <button
-            onClick={() => navigate("/courses")}
-            className="hidden md:flex text-indigo-400 font-black text-[10px] uppercase tracking-widest hover:text-white transition items-center gap-3 border-b border-indigo-500/20 pb-1"
-          >
-            View All Courses <i className="fas fa-arrow-right text-[8px]"></i>
-          </button>
+          <div className="flex items-center gap-4 sm:gap-6">
+            <button
+              onClick={() => openFreeAccess()}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/20 text-[10px] sm:text-xs font-black uppercase tracking-widest transition whitespace-nowrap"
+              title="Apply for free access if you can't afford a course"
+            >
+              <i className="fas fa-hand-holding-heart"></i>
+              <span className="hidden sm:inline">Apply for Free Access</span>
+              <span className="sm:hidden">Free Access</span>
+            </button>
+            <button
+              onClick={() => navigate("/courses")}
+              className="hidden md:flex text-indigo-400 font-black text-[10px] uppercase tracking-widest hover:text-white transition items-center gap-3 border-b border-indigo-500/20 pb-1"
+            >
+              View All Courses <i className="fas fa-arrow-right text-[8px]"></i>
+            </button>
+          </div>
         </Reveal>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
@@ -479,11 +500,24 @@ const PublicHome = () => {
         <HireTutorModal teacher={hireModal} onClose={() => setHireModal(null)} />
       )}
 
+      {freeAccessOpen && (
+        <ApplyFreeAccessModal
+          preselectedCourseIds={freeAccessPreselect}
+          onClose={() => {
+            setFreeAccessOpen(false);
+            setFreeAccessPreselect([]);
+          }}
+        />
+      )}
+
 
       <AuthRequiredModal
         isOpen={authModalOpen}
         onClose={() => setAuthModalOpen(false)}
         message="Create an account or log in to start your journey with this course and access all features."
+        onApplyFreeAccess={() =>
+          openFreeAccess(pendingEnrollCourseId ? [pendingEnrollCourseId] : [])
+        }
       />
 
       <ConfirmDialog

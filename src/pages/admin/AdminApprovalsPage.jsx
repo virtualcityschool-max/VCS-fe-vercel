@@ -21,10 +21,15 @@ import {
   // fetchAdminHireRequests,
   actionHireRequest,
 } from "../../store/slices/hireSlice";
+import {
+  fetchFreeAccessRequests,
+  resolveFreeAccessRequest,
+} from "../../store/slices/freeAccessSlice";
 import { toastManager } from "../../utils/toastManager";
 import ApprovalsTab from "../../components/admin/ApprovalsTab";
 import ChildLinksTab from "../../components/admin/ChildLinksTab";
 import EnrollmentRequestsTab from "../../components/admin/EnrollmentRequestsTab";
+import FreeAccessRequestsTab from "../../components/admin/FreeAccessRequestsTab";
 import HireRequestsTab from "../../components/admin/HireRequestsTab";
 import { showApiError } from "../../utils/apiErrorHandler";
 import { adminService } from "../../services/adminService";
@@ -38,6 +43,7 @@ const AdminApprovalsPage = () => {
   const [usersSearch, setUsersSearch] = useState("");
   const [enrollmentsSearch, setEnrollmentsSearch] = useState("");
   const [childLinksSearch, setChildLinksSearch] = useState("");
+  const [freeAccessSearch, setFreeAccessSearch] = useState("");
 
   const {
     pendingApprovals,
@@ -69,6 +75,13 @@ const AdminApprovalsPage = () => {
   } = useSelector((state) => state.hire);
   const [hireStatusFilter, setHireStatusFilter] = useState(undefined);
 
+  const {
+    requests: freeAccessRequests,
+    loading: freeAccessLoading,
+    error: freeAccessError,
+    processingId: freeAccessProcessing,
+  } = useSelector((state) => state.freeAccess);
+
   // Re-fetch all 4 APIs every time this page is visited.
   // AdminLayout only fetches once on mount; navigating away and back
   // would otherwise show stale data.
@@ -77,6 +90,7 @@ const AdminApprovalsPage = () => {
     dispatch(fetchRejectedApprovals());
     dispatch(fetchPendingChildLinks());
     dispatch(fetchPendingEnrollments());
+    dispatch(fetchFreeAccessRequests({ status: "pending" }));
     // dispatch(fetchAdminHireRequests(hireStatusFilter));
   }, [dispatch]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -190,6 +204,22 @@ const AdminApprovalsPage = () => {
     // dispatch(fetchAdminHireRequests(hireStatusFilter));
   };
 
+  const handleRefreshFreeAccess = () => {
+    dispatch(fetchFreeAccessRequests({ status: "pending" }));
+  };
+
+  // Returns true on success so the review modal can close itself.
+  const handleResolveFreeAccess = async (id, decisions, note) => {
+    try {
+      await dispatch(resolveFreeAccessRequest({ id, decisions, note })).unwrap();
+      toastManager.success("Decision applied and applicant notified.");
+      return true;
+    } catch (error) {
+      showApiError(error);
+      return false;
+    }
+  };
+
   const isActiveTabLoading =
     activeTab === "users"
       ? approvalsLoading
@@ -197,7 +227,9 @@ const AdminApprovalsPage = () => {
         ? childLinksLoading
         : activeTab === "enrollments"
           ? enrollmentsLoading
-          : hireLoading;
+          : activeTab === "freeAccess"
+            ? freeAccessLoading
+            : hireLoading;
 
   const activeRefreshHandler =
     activeTab === "users"
@@ -206,7 +238,9 @@ const AdminApprovalsPage = () => {
         ? handleRefreshChildLinks
         : activeTab === "enrollments"
           ? handleRefreshEnrollments
-          : handleRefreshHireRequests;
+          : activeTab === "freeAccess"
+            ? handleRefreshFreeAccess
+            : handleRefreshHireRequests;
 
   // Placeholder counts until backend provides processed-today metrics.
   const approvedTodayCount = 0;
@@ -219,7 +253,9 @@ const AdminApprovalsPage = () => {
         ? enrollmentsSearch
         : activeTab === "childLinks"
           ? childLinksSearch
-          : "";
+          : activeTab === "freeAccess"
+            ? freeAccessSearch
+            : "";
 
   const setActiveSearch =
     activeTab === "users"
@@ -228,7 +264,9 @@ const AdminApprovalsPage = () => {
         ? setEnrollmentsSearch
         : activeTab === "childLinks"
           ? setChildLinksSearch
-          : () => {};
+          : activeTab === "freeAccess"
+            ? setFreeAccessSearch
+            : () => {};
 
   const activeSearchPlaceholder =
     activeTab === "users"
@@ -237,7 +275,9 @@ const AdminApprovalsPage = () => {
         ? "Search by student, course, or tutor..."
         : activeTab === "childLinks"
           ? "Search by guardian or student..."
-          : "Search...";
+          : activeTab === "freeAccess"
+            ? "Search by name, email, or country..."
+            : "Search...";
 
   return (
     <div className="space-y-6">
@@ -291,6 +331,22 @@ const AdminApprovalsPage = () => {
               {pendingChildLinks?.length > 0 && (
                 <span className="bg-indigo-500 text-white text-xs px-2 py-0.5 rounded-full">
                   {pendingChildLinks.length}
+                </span>
+              )}
+            </button>
+            <button
+              onClick={() => setActiveTab("freeAccess")}
+              className={`inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
+                activeTab === "freeAccess"
+                  ? "bg-indigo-600 text-white shadow-lg"
+                  : "text-slate-400 hover:text-white hover:bg-slate-800/50"
+              }`}
+            >
+              <i className="fas fa-hand-holding-heart"></i>
+              Free Access
+              {freeAccessRequests?.filter((r) => r.status === "pending").length > 0 && (
+                <span className="bg-indigo-500 text-white text-xs px-2 py-0.5 rounded-full">
+                  {freeAccessRequests.filter((r) => r.status === "pending").length}
                 </span>
               )}
             </button>
@@ -361,6 +417,18 @@ const AdminApprovalsPage = () => {
           onReject={handleRejectEnrollment}
           onRefresh={handleRefreshEnrollments}
           search={enrollmentsSearch}
+        />
+      )}
+
+      {activeTab === "freeAccess" && (
+        <FreeAccessRequestsTab
+          requests={freeAccessRequests}
+          loading={freeAccessLoading}
+          error={freeAccessError}
+          processing={freeAccessProcessing}
+          onResolve={handleResolveFreeAccess}
+          onRefresh={handleRefreshFreeAccess}
+          search={freeAccessSearch}
         />
       )}
 

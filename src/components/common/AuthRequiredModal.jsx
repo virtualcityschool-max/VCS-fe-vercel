@@ -2,7 +2,7 @@ import React from "react";
 import { useDispatch } from "react-redux";
 import { setAuthModal } from "../../store/slices/uiSlice";
 
-const AuthRequiredModal = ({ isOpen, onClose, title = "Authentication Required", message = "Please sign in to your account to enroll in this course." }) => {
+const AuthRequiredModal = ({ isOpen, onClose, title = "Authentication Required", message = "Please sign in to your account to enroll in this course.", onApplyFreeAccess }) => {
   const dispatch = useDispatch();
 
   if (!isOpen) return null;
@@ -53,6 +53,29 @@ const AuthRequiredModal = ({ isOpen, onClose, title = "Authentication Required",
             >
               Create Account
             </button>
+
+            {onApplyFreeAccess && (
+              <>
+                <div className="flex items-center gap-3 my-1">
+                  <span className="h-px flex-1 bg-white/10" />
+                  <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">
+                    or
+                  </span>
+                  <span className="h-px flex-1 bg-white/10" />
+                </div>
+                <button
+                  onClick={() => {
+                    onClose();
+                    onApplyFreeAccess();
+                  }}
+                  className="w-full py-4 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/20 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                >
+                  <i className="fas fa-hand-holding-heart"></i>
+                  Apply for Free Access
+                </button>
+              </>
+            )}
+
             <button
               onClick={onClose}
               className="mt-2 text-slate-500 hover:text-white text-[10px] font-black uppercase tracking-widest transition"

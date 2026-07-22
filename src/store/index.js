@@ -12,6 +12,7 @@ import parentReducer from "./slices/parentSlice";
 import childLinksReducer from "./slices/childLinksSlice";
 import hireReducer from "./slices/hireSlice";
 import platformSettingsReducer from "./slices/platformSettingsSlice";
+import freeAccessReducer from "./slices/freeAccessSlice";
 import { authStorage } from "../utils/authStorage";
 
 // Load auth state from localStorage using authStorage utilities
@@ -75,6 +76,7 @@ const appReducer = combineReducers({
   childLinks: childLinksReducer,
   hire: hireReducer,
   platformSettings: platformSettingsReducer,
+  freeAccess: freeAccessReducer,
 });
 
 // Reset all slices to their initial state when the user logs out

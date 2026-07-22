@@ -6,6 +6,7 @@ import {
   fetchPendingEnrollments,
 } from "../../store/slices/approvalsSlice";
 import { fetchPendingChildLinks } from "../../store/slices/childLinksSlice";
+import { fetchFreeAccessRequests } from "../../store/slices/freeAccessSlice";
 // import { fetchAdminHireRequests } from "../../store/slices/hireSlice";
 import {
   fetchCourses,
@@ -50,6 +51,7 @@ const AdminLayout = () => {
     dispatch(fetchPendingApprovals());
     dispatch(fetchPendingChildLinks());
     dispatch(fetchPendingEnrollments());
+    dispatch(fetchFreeAccessRequests({ status: "pending" }));
     // dispatch(fetchAdminHireRequests());
   }, [dispatch]);
 

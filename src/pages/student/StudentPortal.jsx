@@ -21,6 +21,7 @@ import {
   MyAttendanceList,
 } from "../../components/studentDashboard";
 import { availabilityService } from "../../services/availabilityService";
+import ApplyFreeAccessModal from "../../components/public/ApplyFreeAccessModal";
 
 const StudentPortal = () => {
   const dispatch = useDispatch();
@@ -34,6 +35,7 @@ const StudentPortal = () => {
 
   const [hasMounted, setHasMounted] = useState(false);
   const [hasTutorSlots, setHasTutorSlots] = useState(false);
+  const [freeAccessOpen, setFreeAccessOpen] = useState(false);
 
   const hasCourseData =
     (enrolledCourses && enrolledCourses.length > 0) ||
@@ -141,6 +143,28 @@ const StudentPortal = () => {
           <DashboardHeader />
         </div>
 
+        {/* Apply for Free Access — quick entry point for students who need
+            financial assistance on additional courses. */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-indigo-500/20 bg-indigo-500/[0.07] px-5 py-4">
+          <div className="flex items-center gap-3">
+            <span className="icon-chip">
+              <i className="fas fa-hand-holding-heart text-indigo-400"></i>
+            </span>
+            <div>
+              <p className="text-sm font-semibold text-white">Need a course you can't afford?</p>
+              <p className="text-xs text-slate-400">
+                Apply for free access and our team will review your request.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => setFreeAccessOpen(true)}
+            className="shrink-0 inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold transition"
+          >
+            Apply for Free Access
+          </button>
+        </div>
+
         {isDashboardEmpty ? (
           <div className="relative group overflow-hidden rounded-[2.5rem] border border-white/5 bg-slate-900/40 backdrop-blur-xl p-12 lg:p-20 text-center shadow-2xl transition-all duration-500 hover:border-blue-500/10">
             <div className="absolute top-0 right-0 w-96 h-96 bg-blue-600/10 rounded-full blur-[120px] -mr-48 -mt-48 transition-all duration-1000 group-hover:bg-blue-600/20"></div>
@@ -212,6 +236,10 @@ const StudentPortal = () => {
           </div>
         )}
       </div>
+
+      {freeAccessOpen && (
+        <ApplyFreeAccessModal onClose={() => setFreeAccessOpen(false)} />
+      )}
     </section>
   );
 };
