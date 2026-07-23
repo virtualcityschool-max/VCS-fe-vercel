@@ -112,17 +112,29 @@ const AdminAttendance = () => {
 
   const adminMatrixRecords = useMemo(() => {
     const sessionIds = new Set(filteredAdminSessions.map((s) => s.id));
+    // The endpoint returns one object per session with the teacher attendance
+    // records nested under `attendance` — flatten them into per-participant rows
+    // (mirrors the teacher attendance page), otherwise the matrix gets records
+    // with no student/session id and renders nothing.
     return adminSessionAttendance
-      .filter((r) => {
-        const sId = r.session?.id ?? r.session_id ?? r.session;
-        return sessionIds.has(sId);
-      })
-      .map((r) => ({
-        ...r,
-        // normalize participant fields so AttendanceMatrix can resolve name/id for both roles
-        student: r.student ?? r.teacher,
-        student_name: r.student_name || r.teacher_name,
-      }));
+      .filter((item) => sessionIds.has(item.session_id ?? item.session))
+      .flatMap((item) => {
+        const attList = Array.isArray(item.attendance)
+          ? item.attendance
+          : item.attendance
+            ? [item.attendance]
+            : [];
+        return attList.map((att) => ({
+          student: att.teacher_id,
+          session: item.session_id ?? item.session,
+          status: att.status,
+          joined_at: att.joined_at,
+          left_at: att.left_at ?? null,
+          teacher_name: att.username,
+          student_name: att.username,
+          participant_role: "teacher",
+        }));
+      });
   }, [adminSessionAttendance, filteredAdminSessions]);
 
   // ── Data fetching ──────────────────────────────────────────────────────────
@@ -302,7 +314,7 @@ const AdminAttendance = () => {
             sessions={filteredAdminSessions}
             attendanceRecords={adminMatrixRecords}
             enrolledStudents={[]}
-            participantRole="student"
+            participantRole="teacher"
             onEditRecord={setEditRecord}
           />
         )

@@ -89,6 +89,9 @@ export const authService = {
       if (userData.grade_level) {
         requestData.grade_level = userData.grade_level;
       }
+      if (userData.referral_code) {
+        requestData.referral_code = userData.referral_code;
+      }
 
       console.log("Request data being sent to backend:", requestData);
       console.log(
@@ -490,12 +493,13 @@ export const authService = {
     return response.data;
   },
 
-  // Link child to parent (parent only)
-  linkChild: async ({ student_ids = [], student_emails = [] }) => {
+  // Link child to parent (parent only) — parents identify children by roll
+  // number or email (the backend rejects raw student_ids for parents).
+  linkChild: async ({ student_roll_nos = [], student_emails = [] }) => {
     try {
       const body = {};
-      if (student_ids.length)    body.student_ids    = student_ids;
-      if (student_emails.length) body.student_emails = student_emails;
+      if (student_roll_nos.length) body.student_roll_nos = student_roll_nos;
+      if (student_emails.length)   body.student_emails   = student_emails;
 
       const response = await axiosInstance.post("/auth/me/link-child/", body);
 

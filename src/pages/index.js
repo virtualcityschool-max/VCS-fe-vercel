@@ -51,6 +51,7 @@ export { default as AdminSessionsPage } from "./admin/AdminSessionsPage";
 export { default as AdminAttendancePage } from "./admin/AdminAttendance";
 export { default as AdminEvaluationPage } from "./admin/AdminEvaluationPage";
 export { default as AdminCategoriesPage } from "./admin/AdminCategoriesPage";
+export { default as AdminReferralsPage } from "./admin/AdminReferralsPage";
 export { default as UserDetailsPage } from "./admin/UserDetailsPage";
 export { default as AdminTeacherPlannerPage } from "./admin/AdminTeacherPlannerPage";
 export { default as AdminBlogsPage } from "./admin/AdminBlogsPage";

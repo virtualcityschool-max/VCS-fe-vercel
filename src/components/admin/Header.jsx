@@ -53,6 +53,11 @@ const Header = ({ activeTab, children }) => {
           title: "Tutor Planner",
           description: "Schedule and manage recurring sessions for teachers",
         };
+      case "referrals":
+        return {
+          title: "Referral Management",
+          description: "Track referral signups and enrollments across users",
+        };
       default:
         return {
           title: activeTab,

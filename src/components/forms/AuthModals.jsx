@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { toastManager } from "../../utils/toastManager";
 import { useSelector, useDispatch } from "react-redux";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { setAuthModal } from "../../store/slices/uiSlice";
 import {
   loginUser,
@@ -15,6 +15,11 @@ import { authService } from "../../services/authService";
 import { normalizeApiError } from "../../utils/errorHandler";
 import { useFieldErrors } from "../../hooks";
 import { showApiError } from "../../utils/apiErrorHandler";
+import {
+  captureReferralCode,
+  getStoredReferralCode,
+  clearStoredReferralCode,
+} from "../../utils/referral";
 import { FilterSelect } from "../ui";
 
 const AuthModals = () => {
@@ -76,6 +81,7 @@ const AuthModals = () => {
   const [logoutCounter, setLogoutCounter] = useState(0);
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
 
   const isOpen = authModal.type;
   const intendedRole = authModal.intendedRole;
@@ -157,6 +163,27 @@ const AuthModals = () => {
       dispatch(setAuthModal({ type: "login", adminMode: true }));
     }
   }, [searchParams, isOpen, isInitialized, isLoggedIn, dispatch]);
+
+  // Referral link entry point: capture ?ref=CODE into sessionStorage, and when
+  // someone lands on /signup (or /?ref=…) auto-open the register form so the
+  // referral flow starts immediately. No-op for already-logged-in users. Opens
+  // once per visit — closing the modal must not re-trigger it (the ref resets
+  // when the user navigates away from the signup entry point).
+  const signupPromptedRef = React.useRef(false);
+  React.useEffect(() => {
+    const hasRef = !!searchParams.get("ref");
+    if (hasRef) captureReferralCode(searchParams);
+
+    const wantsSignup = location.pathname === "/signup" || hasRef;
+    if (!wantsSignup) {
+      signupPromptedRef.current = false;
+      return;
+    }
+    if (!signupPromptedRef.current && !isOpen && isInitialized && !isLoggedIn) {
+      signupPromptedRef.current = true;
+      dispatch(setAuthModal({ type: "register" }));
+    }
+  }, [searchParams, location.pathname, isOpen, isInitialized, isLoggedIn, dispatch]);
 
   React.useEffect(() => {
     if (isOpen) {
@@ -333,6 +360,10 @@ const AuthModals = () => {
       if (role === "student" && gradeLevel) {
         registerPayload.grade_level = gradeLevel;
       }
+      const refCode = getStoredReferralCode();
+      if (refCode) {
+        registerPayload.referral_code = refCode;
+      }
       await dispatch(registerUser(registerPayload)).unwrap();
 
       // Move to OTP step — email is already in component state
@@ -383,6 +414,9 @@ const AuthModals = () => {
 
     try {
       await dispatch(verifyOtp({ email, otp })).unwrap();
+
+      // Referral (if any) is now linked server-side — drop the captured code.
+      clearStoredReferralCode();
 
       toastManager.success(
         "Verification successful. Your account is pending admin approval — you can login once approved."

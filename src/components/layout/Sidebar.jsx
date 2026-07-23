@@ -101,6 +101,7 @@ const NAV_CONFIG = {
     { id: "overview",    label: "Overview",     icon: "fas fa-chart-line",    to: "/admin/overview" },
     { id: "approvals",   label: "Approval(s) Pending",    icon: "fas fa-user-check",    to: "/admin/approvals" },
     { id: "users",       label: "Users",        icon: "fas fa-users",         to: "/admin/users" },
+    { id: "referrals",   label: "Referrals",    icon: "fas fa-share-nodes",    to: "/admin/referrals" },
     { id: "courses",     label: "Courses",      icon: "fas fa-book",          to: "/admin/courses" },
     { id: "blogs",       label: "Blogs",        icon: "fas fa-newspaper",     to: "/admin/blogs" },
     { id: "sessions",        label: "Planner",          icon: "fas fa-chalkboard",      to: "/admin/sessions" },

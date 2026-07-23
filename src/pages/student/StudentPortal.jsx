@@ -22,6 +22,7 @@ import {
 } from "../../components/studentDashboard";
 import { availabilityService } from "../../services/availabilityService";
 import ApplyFreeAccessModal from "../../components/public/ApplyFreeAccessModal";
+import ReferralLinkCard from "../../components/common/ReferralLinkCard";
 
 const StudentPortal = () => {
   const dispatch = useDispatch();
@@ -143,26 +144,32 @@ const StudentPortal = () => {
           <DashboardHeader />
         </div>
 
-        {/* Apply for Free Access — quick entry point for students who need
-            financial assistance on additional courses. */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-indigo-500/20 bg-indigo-500/[0.07] px-5 py-4">
-          <div className="flex items-center gap-3">
-            <span className="icon-chip">
-              <i className="fas fa-hand-holding-heart text-indigo-400"></i>
-            </span>
-            <div>
-              <p className="text-sm font-semibold text-white">Need a course?</p>
-              <p className="text-xs text-slate-400">
-                Apply for free access and our team will review your request.
-              </p>
+        {/* Free access + referral — two compact, matched cards side by side so
+            they stay low-profile and don't dominate the dashboard. */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="relative overflow-hidden rounded-2xl border border-indigo-500/15 bg-white/[0.03] backdrop-blur-xl px-5 py-4 flex items-center justify-between gap-3">
+            <div className="pointer-events-none absolute -left-8 -bottom-8 w-28 h-28 rounded-full bg-indigo-500/15 blur-3xl" />
+            <div className="relative z-10 flex items-center gap-2.5 min-w-0">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-500/15 text-indigo-400 text-xs">
+                <i className="fas fa-hand-holding-heart"></i>
+              </span>
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-white leading-tight">Need a course?</p>
+                <p className="text-[11px] text-slate-400 leading-tight truncate">
+                  Apply for free access — our team reviews it.
+                </p>
+              </div>
             </div>
+            <button
+              onClick={() => setFreeAccessOpen(true)}
+              className="relative z-10 shrink-0 inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition"
+            >
+              Apply
+            </button>
           </div>
-          <button
-            onClick={() => setFreeAccessOpen(true)}
-            className="shrink-0 inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold transition"
-          >
-            Apply for Free Access
-          </button>
+
+          {/* Referral link — invite others to the platform */}
+          <ReferralLinkCard />
         </div>
 
         {isDashboardEmpty ? (

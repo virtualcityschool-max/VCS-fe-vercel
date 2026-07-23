@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchAllCourses } from "../../store/slices/coursesSlice";
 import { freeAccessService } from "../../services/freeAccessService";
 import { useAuth } from "../../hooks/useAuth";
-import { MultiSelect } from "../ui";
+import { MultiSelect, FilterSelect } from "../ui";
 import { toastManager } from "../../utils/toastManager";
 import { showApiError } from "../../utils/apiErrorHandler";
 import { COUNTRIES } from "../../utils/countries";
@@ -197,23 +197,22 @@ const ApplyFreeAccessModal = ({ onClose, preselectedCourseIds = [] }) => {
                   <label className="block text-xs font-medium text-slate-300 mb-1">
                     Country <span className="text-rose-400">*</span>
                   </label>
-                  <select
-                    name="country"
+                  <FilterSelect
                     value={form.country}
-                    onChange={handleChange}
-                    className={`${inputBase} ${border("country")} ${
-                      form.country ? "" : "text-slate-500"
-                    }`}
+                    onChange={(e) => {
+                      setForm((prev) => ({ ...prev, country: e.target.value }));
+                      if (errors.country)
+                        setErrors((prev) => ({ ...prev, country: undefined }));
+                    }}
+                    placeholder="Select country"
+                    className={errors.country ? "!border-rose-500" : ""}
                   >
-                    <option value="" disabled>
-                      Select country
-                    </option>
                     {COUNTRIES.map((c) => (
-                      <option key={c} value={c} className="text-white bg-slate-800">
+                      <option key={c} value={c}>
                         {c}
                       </option>
                     ))}
-                  </select>
+                  </FilterSelect>
                   {errors.country && (
                     <p className="text-xs text-rose-400 mt-1">{errors.country}</p>
                   )}

@@ -80,7 +80,7 @@ const PendingChildLinks = ({ links, rejectedLinks }) => {
                   <div className="flex items-center gap-2 flex-wrap">
                     <p className="text-sm font-bold text-white truncate">{link.student_name}</p>
                     <span className="text-[8px] font-black uppercase tracking-widest text-slate-500 bg-slate-700/60 px-1.5 py-0.5 rounded">
-                      ID #{link.student_id}
+                      Roll #{link.student_roll_no}
                     </span>
                   </div>
                   {link.student_email && (
@@ -136,7 +136,7 @@ const PendingChildLinks = ({ links, rejectedLinks }) => {
                   <div className="flex items-center gap-2 flex-wrap">
                     <p className="text-sm font-bold text-white truncate">{link.student_name}</p>
                     <span className="text-[8px] font-black uppercase tracking-widest text-slate-500 bg-slate-700/60 px-1.5 py-0.5 rounded">
-                      ID #{link.student_id}
+                      Roll #{link.student_roll_no}
                     </span>
                   </div>
                   {link.student_email && (

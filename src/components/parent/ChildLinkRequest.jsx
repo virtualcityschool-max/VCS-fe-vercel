@@ -5,12 +5,12 @@ import { toastManager } from "../../utils/toastManager";
 import { showApiError } from "../../utils/apiErrorHandler";
 
 const isEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
-const isNumericId = (v) => /^\d+$/.test(v);
+const isRollNo = (v) => /^\d+$/.test(v);
 
 const ChildLinkRequest = ({ onSuccess }) => {
   const dispatch = useDispatch();
   const [input, setInput] = useState("");
-  const [entries, setEntries] = useState([]); // { type: "id"|"email", value: string }
+  const [entries, setEntries] = useState([]); // { type: "roll_no"|"email", value: string }
   const [showSuccess, setShowSuccess] = useState(false);
   const [successData, setSuccessData] = useState(null);
   const [tooltipVisible, setTooltipVisible] = useState(false);
@@ -20,14 +20,14 @@ const ChildLinkRequest = ({ onSuccess }) => {
 
   const handleAdd = () => {
     const val = input.trim();
-    if (!val) { toastManager.error("Please enter a student ID or email"); return; }
+    if (!val) { toastManager.error("Please enter a roll number or email"); return; }
 
-    if (isNumericId(val)) {
-      const id = String(parseInt(val));
-      if (entries.some((e) => e.type === "id" && e.value === id)) {
-        toastManager.error("This student ID is already added"); return;
+    if (isRollNo(val)) {
+      const rollNo = String(parseInt(val));
+      if (entries.some((e) => e.type === "roll_no" && e.value === rollNo)) {
+        toastManager.error("This roll number is already added"); return;
       }
-      setEntries((prev) => [...prev, { type: "id", value: id }]);
+      setEntries((prev) => [...prev, { type: "roll_no", value: rollNo }]);
     } else if (isEmail(val)) {
       const email = val.toLowerCase();
       if (entries.some((e) => e.type === "email" && e.value === email)) {
@@ -35,7 +35,7 @@ const ChildLinkRequest = ({ onSuccess }) => {
       }
       setEntries((prev) => [...prev, { type: "email", value: email }]);
     } else {
-      toastManager.error("Enter a valid numeric ID or email address");
+      toastManager.error("Enter a valid roll number or email address");
       return;
     }
     setInput("");
@@ -45,13 +45,13 @@ const ChildLinkRequest = ({ onSuccess }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!entries.length) { toastManager.error("Add at least one student ID or email"); return; }
+    if (!entries.length) { toastManager.error("Add at least one roll number or email"); return; }
 
-    const student_ids    = entries.filter((e) => e.type === "id").map((e) => parseInt(e.value));
-    const student_emails = entries.filter((e) => e.type === "email").map((e) => e.value);
+    const student_roll_nos = entries.filter((e) => e.type === "roll_no").map((e) => parseInt(e.value));
+    const student_emails   = entries.filter((e) => e.type === "email").map((e) => e.value);
 
     try {
-      const result = await dispatch(linkChildren({ student_ids, student_emails })).unwrap();
+      const result = await dispatch(linkChildren({ student_roll_nos, student_emails })).unwrap();
       setSuccessData(result.data);
       setShowSuccess(true);
       setEntries([]);
@@ -78,7 +78,7 @@ const ChildLinkRequest = ({ onSuccess }) => {
          Request Child Access
         </h2>
         <p className="text-slate-400">
-          Enter your child's student ID or email to link them to your account. The request will be sent to the school administration for approval.
+          Enter your child's roll number or email to link them to your account. The request will be sent to the school administration for approval.
         </p>
       </div>
 
@@ -114,7 +114,7 @@ const ChildLinkRequest = ({ onSuccess }) => {
         <div>
           <div className="flex items-center gap-2 mb-3">
             <label className="text-sm font-medium text-slate-300">
-              Student ID or Email
+              Roll Number or Email
             </label>
             {/* Tooltip */}
             <div className="relative" ref={tooltipRef}>
@@ -135,7 +135,7 @@ const ChildLinkRequest = ({ onSuccess }) => {
                       <i className="fas fa-lightbulb text-yellow-400 text-[10px]"></i>
                       How to find your child's info
                     </p>
-                    Ask your child to log into their student account and share their <span className="text-purple-300 font-medium">Student ID</span> or <span className="text-purple-300 font-medium">registered email address</span>. Both can be used to send a link request.
+                    Ask your child to log into their student account and share their <span className="text-purple-300 font-medium">Roll Number</span> or <span className="text-purple-300 font-medium">registered email address</span>. Both can be used to send a link request.
                     <span className="absolute left-1/2 -translate-x-1/2 top-full border-4 border-transparent border-t-slate-600"></span>
                   </div>
                 </div>
@@ -170,7 +170,7 @@ const ChildLinkRequest = ({ onSuccess }) => {
               <span className="w-4 h-4 rounded bg-purple-600/20 border border-purple-500/30 flex items-center justify-center">
                 <i className="fas fa-hashtag text-purple-400 text-[8px]"></i>
               </span>
-              Numeric → treated as ID
+              Numeric → treated as roll number
             </span>
             <span className="flex items-center gap-1.5 text-[11px] text-slate-500">
               <span className="w-4 h-4 rounded bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center">
@@ -196,20 +196,20 @@ const ChildLinkRequest = ({ onSuccess }) => {
                 >
                   <div className="flex items-center gap-3">
                     <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                      entry.type === "id"
+                      entry.type === "roll_no"
                         ? "bg-purple-600/20 border border-purple-500/30"
                         : "bg-indigo-600/20 border border-indigo-500/30"
                     }`}>
                       <i className={`fas text-xs ${
-                        entry.type === "id" ? "fa-hashtag text-purple-400" : "fa-at text-indigo-400"
+                        entry.type === "roll_no" ? "fa-hashtag text-purple-400" : "fa-at text-indigo-400"
                       }`}></i>
                     </div>
                     <div>
                       <p className="text-white text-sm font-medium">{entry.value}</p>
                       <p className={`text-[10px] uppercase tracking-widest font-bold ${
-                        entry.type === "id" ? "text-purple-500" : "text-indigo-500"
+                        entry.type === "roll_no" ? "text-purple-500" : "text-indigo-500"
                       }`}>
-                        {entry.type === "id" ? "Student ID" : "Email"}
+                        {entry.type === "roll_no" ? "Roll Number" : "Email"}
                       </p>
                     </div>
                   </div>

@@ -22,6 +22,7 @@ import SessionCountdown from "../../components/common/SessionCountdown";
 import StudentSessionCard from "../../components/sessions/StudentSessionCard";
 import TeacherSessionCard from "../../components/sessions/TeacherSessionCard";
 import CourseCard from "../../components/courses/CourseCard";
+import ReferralLinkCard from "../../components/common/ReferralLinkCard";
 
 const fmt12 = (t) => {
   if (!t) return "";
@@ -651,6 +652,9 @@ const TeacherPortal = () => {
 
         {/* --- Sidebar (Assignments) --- */}
         <div className="xl:col-span-4 space-y-10">
+          {/* Referral link — invite others to the platform */}
+          <ReferralLinkCard />
+
           <section className="space-y-6">
             <h3 className="text-2xl font-black font-poppins tracking-tight flex items-center gap-3 px-2">
               <span className="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center text-purple-400 text-sm border border-purple-500/20">

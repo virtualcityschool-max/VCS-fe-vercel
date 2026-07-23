@@ -19,6 +19,7 @@ import {
   AdminAttendancePage,
   AdminEvaluationPage,
   AdminCategoriesPage,
+  AdminReferralsPage,
   UserDetailsPage,
   StudentPortal,
   TeacherLayout,
@@ -171,6 +172,12 @@ const AppRoutes = () => {
           )
         }
       />
+      {/* Referral entry point — AuthModals auto-opens the register form here
+          and captures the ?ref=CODE query param. */}
+      <Route
+        path="/signup"
+        element={isLoggedIn ? <Navigate to="/" replace /> : <PublicHome />}
+      />
       <Route path="/courses" element={<Marketplace />} />
       <Route path="/courses/:courseId" element={<CourseDetails />} />
       <Route path="/blogs" element={<Blogs />} />
@@ -246,6 +253,7 @@ const AppRoutes = () => {
           <Route path="attendance" element={<AdminAttendancePage />} />
           <Route path="evaluations" element={<AdminEvaluationPage />} />
           <Route path="course-levels" element={<AdminCategoriesPage />} />
+          <Route path="referrals" element={<AdminReferralsPage />} />
           <Route path="about" element={<AdminAboutPage />} />
           <Route path="settings" element={<AdminPlatformSettingsPage />} />
         </Route>

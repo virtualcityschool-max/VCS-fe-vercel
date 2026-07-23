@@ -176,7 +176,7 @@ const ChildLinksTab = ({
                           {link.parent} → {link.student}
                         </p>
                         <p className="text-[9px] sm:text-xs text-slate-500 uppercase break-all">
-                          Guardian ID: {link.parent_id} • Student ID: {link.student_id}
+                          Guardian ID: {link.parent_id} • Roll #: {link.student_roll_no}
                         </p>
                         {link.parent_email && (
                           <p className="text-[9px] sm:text-xs text-slate-500 break-all mt-0.5 flex items-center gap-1">
@@ -276,7 +276,7 @@ const ChildLinksTab = ({
                               {link.parent} → {link.student}
                             </p>
                             <p className="text-[9px] text-slate-500 uppercase">
-                              Guardian ID: {link.parent_id} • Student ID: {link.student_id}
+                              Guardian ID: {link.parent_id} • Roll #: {link.student_roll_no}
                             </p>
                             {link.parent_email && (
                               <p className="text-[10px] text-slate-500 mt-0.5 flex items-center gap-1.5">

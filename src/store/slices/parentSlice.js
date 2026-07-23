@@ -71,9 +71,9 @@ export const fetchParentChildDetail = createAsyncThunk(
 
 export const linkChildren = createAsyncThunk(
   "parent/linkChildren",
-  async ({ student_ids, student_emails }, { rejectWithValue }) => {
+  async ({ student_roll_nos, student_emails }, { rejectWithValue }) => {
     try {
-      const response = await authService.linkChild({ student_ids, student_emails });
+      const response = await authService.linkChild({ student_roll_nos, student_emails });
       return response;
     } catch (error) {
       console.error("Failed to link children:", error);
