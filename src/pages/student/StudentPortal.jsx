@@ -151,7 +151,7 @@ const StudentPortal = () => {
               <i className="fas fa-hand-holding-heart text-indigo-400"></i>
             </span>
             <div>
-              <p className="text-sm font-semibold text-white">Need a course you can't afford?</p>
+              <p className="text-sm font-semibold text-white">Need a course?</p>
               <p className="text-xs text-slate-400">
                 Apply for free access and our team will review your request.
               </p>

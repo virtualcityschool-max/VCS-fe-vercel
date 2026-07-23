@@ -6,6 +6,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { MultiSelect } from "../ui";
 import { toastManager } from "../../utils/toastManager";
 import { showApiError } from "../../utils/apiErrorHandler";
+import { COUNTRIES } from "../../utils/countries";
 
 /**
  * Shared "Apply for Free Access" form. Used from the public landing page and
@@ -111,7 +112,7 @@ const ApplyFreeAccessModal = ({ onClose, preselectedCourseIds = [] }) => {
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4">
-      <div className="w-full max-w-lg bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl max-h-[92vh] overflow-y-auto custom-scrollbar">
+      <div className="w-full max-w-3xl bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl max-h-[92vh] overflow-y-auto custom-scrollbar">
         {done ? (
           <div className="p-8 text-center">
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/15">
@@ -149,24 +150,24 @@ const ApplyFreeAccessModal = ({ onClose, preselectedCourseIds = [] }) => {
             </div>
 
             <form onSubmit={handleSubmit} className="p-6 pt-4 space-y-3.5">
-              <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">
-                  Full Name <span className="text-rose-400">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="full_name"
-                  value={form.full_name}
-                  onChange={handleChange}
-                  placeholder="Jane Doe"
-                  className={`${inputBase} ${border("full_name")}`}
-                />
-                {errors.full_name && (
-                  <p className="text-xs text-rose-400 mt-1">{errors.full_name}</p>
-                )}
-              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                <div>
+                  <label className="block text-xs font-medium text-slate-300 mb-1">
+                    Full Name <span className="text-rose-400">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="full_name"
+                    value={form.full_name}
+                    onChange={handleChange}
+                    placeholder="Jane Doe"
+                    className={`${inputBase} ${border("full_name")}`}
+                  />
+                  {errors.full_name && (
+                    <p className="text-xs text-rose-400 mt-1">{errors.full_name}</p>
+                  )}
+                </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div>
                   <label className="block text-xs font-medium text-slate-300 mb-1">
                     Email <span className="text-rose-400">*</span>
@@ -196,89 +197,103 @@ const ApplyFreeAccessModal = ({ onClose, preselectedCourseIds = [] }) => {
                   <label className="block text-xs font-medium text-slate-300 mb-1">
                     Country <span className="text-rose-400">*</span>
                   </label>
-                  <input
-                    type="text"
+                  <select
                     name="country"
                     value={form.country}
                     onChange={handleChange}
-                    placeholder="Pakistan"
-                    className={`${inputBase} ${border("country")}`}
-                  />
+                    className={`${inputBase} ${border("country")} ${
+                      form.country ? "" : "text-slate-500"
+                    }`}
+                  >
+                    <option value="" disabled>
+                      Select country
+                    </option>
+                    {COUNTRIES.map((c) => (
+                      <option key={c} value={c} className="text-white bg-slate-800">
+                        {c}
+                      </option>
+                    ))}
+                  </select>
                   {errors.country && (
                     <p className="text-xs text-rose-400 mt-1">{errors.country}</p>
                   )}
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">
-                  Occupation <span className="text-slate-500 font-normal">(optional)</span>
-                </label>
-                <input
-                  type="text"
-                  name="occupation"
-                  value={form.occupation}
-                  onChange={handleChange}
-                  placeholder="Student, teacher, developer…"
-                  className={`${inputBase} border-slate-700`}
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div>
+                  <label className="block text-xs font-medium text-slate-300 mb-1">
+                    Occupation{" "}
+                    <span className="text-slate-500 font-normal">(optional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="occupation"
+                    value={form.occupation}
+                    onChange={handleChange}
+                    placeholder="Student, teacher, developer…"
+                    className={`${inputBase} border-slate-700`}
+                  />
+                </div>
+
+                <div>
+                  <MultiSelect
+                    label="Courses of Interest *"
+                    options={courseOptions}
+                    value={selectedCourses}
+                    onChange={(v) => {
+                      setSelectedCourses(v);
+                      if (errors.courses) setErrors((p) => ({ ...p, courses: undefined }));
+                    }}
+                    displayField="title"
+                    searchField="title"
+                    placeholder="Select one or more courses"
+                    searchPlaceholder="Search courses…"
+                    loading={coursesState?.loading}
+                    emptyMessage="No courses available"
+                    error={errors.courses}
+                  />
+                </div>
               </div>
 
-              <div>
-                <MultiSelect
-                  label="Courses of Interest *"
-                  options={courseOptions}
-                  value={selectedCourses}
-                  onChange={(v) => {
-                    setSelectedCourses(v);
-                    if (errors.courses) setErrors((p) => ({ ...p, courses: undefined }));
-                  }}
-                  displayField="title"
-                  searchField="title"
-                  placeholder="Select one or more courses"
-                  searchPlaceholder="Search courses…"
-                  loading={coursesState?.loading}
-                  emptyMessage="No courses available"
-                  error={errors.courses}
-                />
-              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div>
+                  <label className="block text-xs font-medium text-slate-300 mb-1">
+                    What makes you eligible for free access?{" "}
+                    <span className="text-rose-400">*</span>
+                  </label>
+                  <textarea
+                    name="eligibility_statement"
+                    value={form.eligibility_statement}
+                    onChange={handleChange}
+                    rows={3}
+                    placeholder="Share your circumstances and why you need financial assistance…"
+                    className={`${inputBase} ${border("eligibility_statement")} resize-none`}
+                  />
+                  {errors.eligibility_statement && (
+                    <p className="text-xs text-rose-400 mt-1">
+                      {errors.eligibility_statement}
+                    </p>
+                  )}
+                </div>
 
-              <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">
-                  What makes you eligible for free access?{" "}
-                  <span className="text-rose-400">*</span>
-                </label>
-                <textarea
-                  name="eligibility_statement"
-                  value={form.eligibility_statement}
-                  onChange={handleChange}
-                  rows={3}
-                  placeholder="Share your circumstances and why you need financial assistance…"
-                  className={`${inputBase} ${border("eligibility_statement")} resize-none`}
-                />
-                {errors.eligibility_statement && (
-                  <p className="text-xs text-rose-400 mt-1">
-                    {errors.eligibility_statement}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">
-                  How will this course help you achieve your goals?{" "}
-                  <span className="text-rose-400">*</span>
-                </label>
-                <textarea
-                  name="goals_statement"
-                  value={form.goals_statement}
-                  onChange={handleChange}
-                  rows={3}
-                  placeholder="Tell us about your goals and how these courses fit in…"
-                  className={`${inputBase} ${border("goals_statement")} resize-none`}
-                />
-                {errors.goals_statement && (
-                  <p className="text-xs text-rose-400 mt-1">{errors.goals_statement}</p>
-                )}
+                <div>
+                  <label className="block text-xs font-medium text-slate-300 mb-1">
+                    How will this course help you achieve your goals?{" "}
+                    <span className="text-rose-400">*</span>
+                  </label>
+                  <textarea
+                    name="goals_statement"
+                    value={form.goals_statement}
+                    onChange={handleChange}
+                    rows={3}
+                    placeholder="Tell us about your goals and how these courses fit in…"
+                    className={`${inputBase} ${border("goals_statement")} resize-none`}
+                  />
+                  {errors.goals_statement && (
+                    <p className="text-xs text-rose-400 mt-1">{errors.goals_statement}</p>
+                  )}
+                </div>
               </div>
 
               <div className="flex gap-2 pt-1">

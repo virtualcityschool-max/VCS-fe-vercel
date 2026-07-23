@@ -455,7 +455,7 @@ const Marketplace = () => {
               type="button"
               onClick={() => openFreeAccess()}
               className="btn-glow flex items-center justify-center gap-2 h-11 px-5 rounded-xl text-white font-bold text-sm whitespace-nowrap shrink-0"
-              title="Can't afford a course? Apply for free access."
+              title="Apply for free access."
             >
               <i className="fas fa-hand-holding-heart"></i>
               <span className="hidden sm:inline">Apply for Free Access</span>

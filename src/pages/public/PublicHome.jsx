@@ -195,7 +195,6 @@ const PublicHome = () => {
             >
               <i className="fas fa-hand-holding-heart text-indigo-400"></i>
               <span>
-                Can't afford a course?{" "}
                 <span className="font-semibold text-indigo-300 group-hover:text-indigo-200 underline decoration-indigo-500/40 underline-offset-4">
                   Apply for free access
                 </span>
@@ -356,10 +355,10 @@ const PublicHome = () => {
                     Financial Aid
                   </p>
                   <h3 className="text-lg sm:text-xl font-black font-poppins tracking-tight text-white">
-                    Can't afford it? Learn for free.
+                    Apply for Free Access to a course
                   </h3>
                   <p className="text-slate-400 text-xs sm:text-sm mt-1 max-w-md leading-relaxed">
-                    Apply for free access — our team reviews your request and approved
+                    Request free access — our team reviews your request and approved
                     courses are added to your account at no cost.
                   </p>
                 </div>

@@ -406,13 +406,8 @@ const EnrollmentTypeModal = ({
                 disabled={isLoading}
               />
             </div>
-
-            {/* Can't afford it? — free-access alternative */}
             {onApplyFreeAccess && (
               <div className="mt-5 pt-5 border-t border-white/5">
-                <p className="text-center text-[11px] text-slate-500 mb-3">
-                  Can't afford this course?
-                </p>
                 <button
                   type="button"
                   onClick={onApplyFreeAccess}
