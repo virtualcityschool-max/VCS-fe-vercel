@@ -584,6 +584,9 @@ const STATUS_MAP = {
 
 const AssessmentCard = ({ item }) => {
   const s = STATUS_MAP[item.status] ?? STATUS_MAP.pending;
+  // Quizzes report obtained_marks/total_marks; assignments report score/max_score.
+  const obtained = item.obtained_marks ?? item.score;
+  const total = item.total_marks ?? item.max_score;
   return (
     <div className={`flex items-center gap-3 px-4 py-3 rounded-xl border transition-all ${s.cardBg}`}>
       <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${s.bg}`}>
@@ -597,9 +600,9 @@ const AssessmentCard = ({ item }) => {
       </div>
       <div className="text-right shrink-0">
         <div className={`text-[10px] font-black ${s.textCls}`}>{s.label}</div>
-        {item.obtained_marks != null && (
+        {obtained != null && (
           <div className="text-[10px] font-bold text-slate-400 tabular-nums">
-            {item.obtained_marks}/{item.total_marks}
+            {obtained}/{total ?? "-"}
           </div>
         )}
       </div>
