@@ -208,7 +208,7 @@ const parentSlice = createSlice({
         state.childGrades.loading[childId] = false;
         state.childGrades.error[childId] = error;
       })
-      // Child Attendance (summary — used by ChildCard)
+      // Child Attendance (summary - used by ChildCard)
       .addCase(fetchChildAttendance.pending, (state, action) => {
         const childId = action.meta.arg;
         state.childAttendance.loading[childId] = true;
@@ -240,7 +240,7 @@ const parentSlice = createSlice({
         state.childCourses.loading[childId] = false;
         state.childCourses.error[childId] = error;
       })
-      // Child Attendance Records (filtered — used by ParentAttendance page)
+      // Child Attendance Records (filtered - used by ParentAttendance page)
       .addCase(fetchChildAttendanceRecords.pending, (state, action) => {
         const { childId } = action.meta.arg;
         state.childAttendanceRecords.loading[childId] = true;

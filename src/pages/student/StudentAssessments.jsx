@@ -102,7 +102,7 @@ const StudentAssessments = () => {
         ))}
       </div>
 
-      {/* Tab content — suppress the sub-page header on StudentAssignments */}
+      {/* Tab content - suppress the sub-page header on StudentAssignments */}
       {activeTab === "assignments" && <StudentAssignments hideHeader filterCourse={courseId} />}
       {activeTab === "quizzes"     && <StudentQuizList hideHeader filterCourse={courseId} />}
     </div>

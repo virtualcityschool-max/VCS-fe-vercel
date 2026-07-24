@@ -13,8 +13,9 @@ import Sidebar from "./components/layout/Sidebar";
 
 // Routes
 import AppRoutes from "./routes/AppRoutes";
+import { useOutsideCloseModals } from "./hooks/useOutsideCloseModals";
 
-// Inner app — inside BrowserRouter so useLocation works
+// Inner app - inside BrowserRouter so useLocation works
 const AppInner = () => {
   const { isLoggedIn, role, isInitialized } = useSelector(
     (state) => state.auth,
@@ -28,6 +29,8 @@ const AppInner = () => {
     (state.freeAccess?.requests || []).filter((r) => r.status === "pending").length
   );
   const location = useLocation();
+  // One global handler so clicking the dim backdrop closes any modal.
+  useOutsideCloseModals();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
     try { return localStorage.getItem("sidebarCollapsed") === "true"; } catch { return false; }
@@ -96,7 +99,7 @@ const AppInner = () => {
         />
       )}
 
-      {/* Content area — offset by sidebar width on desktop */}
+      {/* Content area - offset by sidebar width on desktop */}
       <div className={hasSidebar ? (isSidebarCollapsed ? "lg:ml-20" : "lg:ml-72") : ""} style={{ transition: "margin-left 0.3s ease" }}>
         {/* Navbar (hidden on /admin and /teacher routes) */}
         {showNavbar && (

@@ -136,7 +136,7 @@ const StudentClasses = () => {
       </div>
 
       {/* Mobile: always table */}
-      {/* View toggle — hidden on mobile (always table there) */}
+      {/* View toggle - hidden on mobile (always table there) */}
       <div className="flex items-center gap-2 flex-wrap">
           <div className="hidden sm:flex bg-slate-800 border border-slate-700 rounded-lg overflow-hidden">
             <button

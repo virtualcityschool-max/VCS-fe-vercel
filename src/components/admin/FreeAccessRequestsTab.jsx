@@ -22,7 +22,7 @@ const StatusBadge = ({ status }) => (
 const formatDate = (d) =>
   d
     ? new Date(d).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })
-    : "—";
+    : "-";
 
 const initials = (name) =>
   (name || "?")
@@ -64,7 +64,7 @@ const ReviewModal = ({ request, processing, onClose, onResolve }) => {
       .filter((c) => decisions[c.course.id])
       .map((c) => ({ course_id: c.course.id, action: decisions[c.course.id] }));
 
-  // Step 1 — validate then ask the admin to confirm.
+  // Step 1 - validate then ask the admin to confirm.
   const apply = () => {
     if (buildList().length !== pendingCourses.length) {
       toastManager.error("Choose Approve or Reject for every course first.");
@@ -73,7 +73,7 @@ const ReviewModal = ({ request, processing, onClose, onResolve }) => {
     setConfirmOpen(true);
   };
 
-  // Step 2 — on confirm, call the API. Parent closes the modal on success.
+  // Step 2 - on confirm, call the API. Parent closes the modal on success.
   const doConfirm = async () => {
     const ok = await onResolve(request.id, buildList(), note.trim());
     if (!ok) setConfirmOpen(false);
@@ -112,7 +112,7 @@ const ReviewModal = ({ request, processing, onClose, onResolve }) => {
         </div>
 
         <div className="p-5 space-y-4">
-          {/* Applicant details — full info for a thorough review */}
+          {/* Applicant details - full info for a thorough review */}
           <div>
             <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2">
               Applicant details
@@ -121,7 +121,7 @@ const ReviewModal = ({ request, processing, onClose, onResolve }) => {
               <DetailField icon="fa-user" label="Full name" value={request.full_name} />
               <DetailField icon="fa-envelope" label="Email" value={request.email} className="col-span-2 sm:col-span-1" />
               <DetailField icon="fa-globe" label="Country" value={request.country} />
-              <DetailField icon="fa-briefcase" label="Occupation" value={request.occupation || "—"} />
+              <DetailField icon="fa-briefcase" label="Occupation" value={request.occupation || "-"} />
               <DetailField icon="fa-calendar" label="Applied" value={formatDate(request.created_at)} />
               <DetailField
                 icon="fa-id-badge"
@@ -134,7 +134,7 @@ const ReviewModal = ({ request, processing, onClose, onResolve }) => {
           {request.applicant && (
             <div className="text-[11px] text-slate-400 bg-slate-800/40 border border-slate-700/50 rounded-lg px-3 py-2">
               <i className="fas fa-circle-info mr-1.5 text-indigo-400"></i>
-              Existing student account — approved courses are added straight to their enrolled courses.
+              Existing student account - approved courses are added straight to their enrolled courses.
             </div>
           )}
 
@@ -295,7 +295,7 @@ const ReviewModal = ({ request, processing, onClose, onResolve }) => {
 const FreeAccessRequestsTab = ({ requests = [], loading, error, processing, onResolve, onRefresh, search = "" }) => {
   const [reviewing, setReviewing] = useState(null);
 
-  // This is a review queue — only PENDING requests are shown here. Once a
+  // This is a review queue - only PENDING requests are shown here. Once a
   // request is approved/rejected it leaves the queue (the resolve response
   // patches its status, so it drops out immediately).
   const pendingRequests = useMemo(

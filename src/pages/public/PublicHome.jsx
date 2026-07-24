@@ -165,7 +165,7 @@ const PublicHome = () => {
               <span className="text-gradient">Digital Classroom</span> Starts Here
             </h1>
             <p className="text-slate-400 text-base md:text-lg leading-relaxed mt-6 max-w-xl animate-fadeInUp" style={{ animationDelay: "0.2s" }}>
-              A premium online learning platform for Cambridge students — Grade 1
+              A premium online learning platform for Cambridge students. Grade 1
               to A2 Level programmes with expert teachers and live classes, across
               the Gulf and beyond.
             </p>
@@ -187,7 +187,7 @@ const PublicHome = () => {
               </button>
             </div>
 
-            {/* Subtle scholarship entry — visible without scrolling */}
+            {/* Subtle scholarship entry - visible without scrolling */}
             <button
               onClick={() => openFreeAccess()}
               className="group mt-6 inline-flex items-center gap-2 text-sm text-slate-400 hover:text-white transition animate-fadeInUp"
@@ -216,7 +216,7 @@ const PublicHome = () => {
           </div>
         </div>
 
-        {/* Row 2: What makes VCS different — restructured from the original description */}
+        {/* Row 2: What makes VCS different - restructured from the original description */}
         <Reveal className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
           <div className="card-surface card-surface-hover p-6 flex items-start gap-4">
             <div className="icon-chip w-11 h-11">
@@ -239,7 +239,7 @@ const PublicHome = () => {
               <h3 className="text-white font-bold text-sm mb-1.5">Future-Ready Skills</h3>
               <p className="text-slate-400 text-xs leading-relaxed">
                 Specialist courses in Artificial Intelligence, Emerging
-                Technologies, Leadership, Interpersonal Skills, and Grooming —
+                Technologies, Leadership, Interpersonal Skills, and Grooming -
                 beyond academics.
               </p>
             </div>
@@ -251,7 +251,7 @@ const PublicHome = () => {
             <div>
               <h3 className="text-white font-bold text-sm mb-1.5">VCS Scholar Programme</h3>
               <p className="text-slate-400 text-xs leading-relaxed">
-                Deserving students get access to quality education — and you can
+                Deserving students get access to quality education - and you can
                 sponsor a child's learning journey to make it possible.
               </p>
             </div>
@@ -340,7 +340,7 @@ const PublicHome = () => {
           }
         </div>
 
-        {/* Free Access — scholarship entry point (compact, under the courses) */}
+        {/* Free Access - scholarship entry point (compact, under the courses) */}
         <Reveal className="mt-14">
           <div className="group relative overflow-hidden rounded-2xl border border-indigo-500/15 bg-white/[0.03] backdrop-blur-xl px-6 py-5 sm:px-8 sm:py-6 transition-colors duration-300 hover:border-indigo-500/30">
             {/* ambient glow */}
@@ -358,7 +358,7 @@ const PublicHome = () => {
                     Apply for Free Access to a course
                   </h3>
                   <p className="text-slate-400 text-xs sm:text-sm mt-1 max-w-md leading-relaxed">
-                    Request free access — our team reviews your request and approved
+                    Request free access, our team reviews your request and approved
                     courses are added to your account at no cost.
                   </p>
                 </div>

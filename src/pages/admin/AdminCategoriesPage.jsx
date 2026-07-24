@@ -222,7 +222,7 @@ const AdminCategoriesPage = () => {
                           )}
                         </div>
 
-                        {/* Actions — ALWAYS VISIBLE */}
+                        {/* Actions - ALWAYS VISIBLE */}
                         {editingId !== cat.id && confirmDeleteId !== cat.id && (
                           <div className="flex items-center gap-2 transition-all duration-300">
                             <button

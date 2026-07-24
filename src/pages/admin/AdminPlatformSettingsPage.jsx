@@ -44,7 +44,7 @@ const AdminPlatformSettingsPage = () => {
     const sd = Number(form.quiz_submission_days);
     if (!sd || sd < 1 || sd > 10)
       e.quiz_submission_days = "Must be between 1 and 10 days.";
-    // session_duration_mins is fixed at 60 — no validation needed
+    // session_duration_mins is fixed at 60 - no validation needed
     return e;
   };
 
@@ -99,7 +99,7 @@ const AdminPlatformSettingsPage = () => {
             <div className="flex items-center gap-3">
               <Toggle value={form.quiz_publish_immediately} onChange={v => set("quiz_publish_immediately", v)} />
               <span className={`text-sm font-semibold ${form.quiz_publish_immediately ? "text-indigo-400" : "text-slate-500"}`}>
-                {form.quiz_publish_immediately ? "Yes — publish now" : "No — set manually"}
+                {form.quiz_publish_immediately ? "Yes - publish now" : "No - set manually"}
               </span>
             </div>
           </Row>
@@ -129,7 +129,7 @@ const AdminPlatformSettingsPage = () => {
           </div>
         </div>
         <div className="px-6">
-          <Row label="Session duration" hint="Fixed at 60 minutes — cannot be changed at this time.">
+          <Row label="Session duration" hint="Fixed at 60 minutes - cannot be changed at this time.">
             <div className="flex items-center gap-3 px-4 py-2.5 bg-slate-800/50 border border-slate-700 rounded-xl w-fit">
               <i className="fas fa-clock text-indigo-400 text-sm" />
               <span className="text-sm font-semibold text-white">60 minutes</span>
@@ -138,9 +138,9 @@ const AdminPlatformSettingsPage = () => {
           </Row>
           <Row label="Default scheduling mode" hint="Which mode is active when the create form opens.">
             <select value={form.session_default_start_type} onChange={e => set("session_default_start_type", e.target.value)} className={sel}>
-              <option value="scheduled">Scheduled — pick a date & time</option>
-              <option value="now">Start Now — launches immediately</option>
-              <option value="delayed">Delayed Start — after X hrs : Y min</option>
+              <option value="scheduled">Scheduled - pick a date & time</option>
+              <option value="now">Start Now - launches immediately</option>
+              <option value="delayed">Delayed Start - after X hrs : Y min</option>
             </select>
           </Row>
           <Row label="Meeting platform" hint="Google Meet is the only integrated platform at this time.">

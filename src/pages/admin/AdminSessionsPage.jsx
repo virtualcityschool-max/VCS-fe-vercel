@@ -27,7 +27,7 @@ const AdminSessionsPage = () => {
   const dispatch = useDispatch();
   const { timezone, toPayloadISO, toDatetimeInput } = useDateFormatters();
 
-  // Read platform settings first — used as initial values for state below
+  // Read platform settings first - used as initial values for state below
   const ps = useSelector(selectPlatformSettings);
 
   const [activeModal, setActiveModal] = useState(null);
@@ -352,7 +352,7 @@ const AdminSessionsPage = () => {
         JSON.stringify([...(orig.recurrence_days || [])].sort());
 
     if (!scheduleFieldsChanged) {
-      // Only title (or description) changed — validate title only, send minimal payload
+      // Only title (or description) changed - validate title only, send minimal payload
       const titleErrors = {};
       if (!sessionData.title?.trim()) {
         titleErrors.title = "Session title is required";
@@ -378,7 +378,7 @@ const AdminSessionsPage = () => {
       return;
     }
 
-    // Schedule fields changed — full validation
+    // Schedule fields changed - full validation
     const frontendErrors = validateEditSessionForm(sessionData);
     setEditSessionErrors(frontendErrors);
     if (Object.keys(frontendErrors).length > 0) {

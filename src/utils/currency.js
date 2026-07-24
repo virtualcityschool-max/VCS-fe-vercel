@@ -1,6 +1,6 @@
 // ── System-wide currency configuration ───────────────────────────────────────
 // All prices are stored in USD as the base currency.
-// Display conversion (if ever needed) must be applied here — never at the DB layer.
+// Display conversion (if ever needed) must be applied here - never at the DB layer.
 
 export const CURRENCY = {
   code:   "USD",   // ISO 4217

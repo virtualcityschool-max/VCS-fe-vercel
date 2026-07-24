@@ -14,7 +14,7 @@ const GradingForm = ({ selectedSubmission, onSubmit, onCancel, assignmentMaxScor
     e.preventDefault();
 
     if (score === "" || score === null || score === undefined) {
-      setScoreError("Score is required — enter 0 or higher");
+      setScoreError("Score is required - enter 0 or higher");
       return;
     }
     const numeric = parseFloat(score);
@@ -42,7 +42,7 @@ const GradingForm = ({ selectedSubmission, onSubmit, onCancel, assignmentMaxScor
           <div className="flex items-center gap-2.5">
             <input
               type="number"
-              placeholder="—"
+              placeholder="-"
               value={score}
               onChange={(e) => {
                 const val = e.target.value;

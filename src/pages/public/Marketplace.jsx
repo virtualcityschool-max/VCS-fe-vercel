@@ -211,7 +211,7 @@ const Marketplace = () => {
     setEnrollmentModalOpen(true);
   };
 
-  // Called when student confirms on paid modal — redirect to Gumroad
+  // Called when student confirms on paid modal - redirect to Gumroad
   const handleCheckout = async () => {
     if (!selectedCourse) return;
     try {
@@ -236,7 +236,7 @@ const Marketplace = () => {
     }
   }, [auth.isLoggedIn, auth.role, enrollmentIntent, courses, dispatch]);
 
-  // Handle normal enrollment type selection only — private is handled by callPrivateEnrollmentCall
+  // Handle normal enrollment type selection only - private is handled by callPrivateEnrollmentCall
   const handleEnrollmentTypeSelect = async (type) => {
     if (type !== "normal" || !selectedCourse) return;
 
@@ -362,7 +362,7 @@ const Marketplace = () => {
     }
   };
 
-  // Loading state — skeleton grid mirrors the real layout
+  // Loading state - skeleton grid mirrors the real layout
   if (isLoading) {
     return (
       <section className="min-h-screen bg-[#0f172a] text-white font-inter">
@@ -667,7 +667,7 @@ const Marketplace = () => {
         onConfirm={confirmUnenrollCourse}
         onCancel={() => setUnenrollConfirm({ open: false, courseId: null, courseTitle: "" })}
       />
-      {/* Fixed category tooltip — escapes overflow-x-auto boundary */}
+      {/* Fixed category tooltip - escapes overflow-x-auto boundary */}
       {tooltip.visible && (
         <div
           className="fixed z-[9999] pointer-events-none px-2.5 py-1.5 bg-slate-800 border border-slate-700 text-white text-[11px] font-medium rounded-lg whitespace-nowrap shadow-xl -translate-x-1/2 -translate-y-full"

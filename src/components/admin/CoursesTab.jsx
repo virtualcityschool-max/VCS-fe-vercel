@@ -297,7 +297,7 @@ const CoursesTab = ({
         course.description
           ?.toLowerCase()
           .includes(courseFilters.search.toLowerCase());
-      // Category filter — compare by normalized name
+      // Category filter - compare by normalized name
       const matchesCategory =
         courseFilters.category === "" ||
         (() => {
@@ -446,7 +446,7 @@ const CoursesTab = ({
 
             {catDropdownOpen && (
               <div className="absolute top-full right-0 sm:left-0 sm:right-auto mt-1.5 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-30 w-full overflow-hidden">
-                {/* All Categories — fixed, not scrolled */}
+                {/* All Categories - fixed, not scrolled */}
                 <button
                   onClick={() => { setCourseFilters({ ...courseFilters, category: "" }); setCatDropdownOpen(false); }}
                   className={`w-full text-left px-3 py-2.5 text-sm transition flex items-center gap-2 ${courseFilters.category === "" ? "text-indigo-400 bg-indigo-500/10" : "text-slate-300 hover:bg-slate-800 hover:text-white"}`}
@@ -495,7 +495,7 @@ const CoursesTab = ({
 
                 <div className="border-t border-slate-800" />
 
-                {/* Add Category — fixed at bottom */}
+                {/* Add Category - fixed at bottom */}
                 <button
                   onClick={() => { setCatDropdownOpen(false); setCategoriesOpenWith({}); }}
                   className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-indigo-400 hover:bg-indigo-500/10 hover:text-indigo-300 transition font-semibold"
@@ -799,7 +799,7 @@ const CoursesTab = ({
                     </td>
                     <td className="px-6 py-4">
                       <span className="text-white font-medium">
-                        {course.is_paid ? `$${(course.price || 0).toLocaleString("en-US")} USD` : "—"}
+                        {course.is_paid ? `$${(course.price || 0).toLocaleString("en-US")} USD` : "-"}
                       </span>
                     </td>
                     <td className="px-6 py-4">

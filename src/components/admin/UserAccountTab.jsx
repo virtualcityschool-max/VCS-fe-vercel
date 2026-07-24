@@ -205,7 +205,7 @@ const UserAccountTab = ({ user, onUpdate, onCancel, onSaved, onAvatarUpdated, re
             )}
           </div>
 
-          {/* Upload overlay — only shown when not readOnly */}
+          {/* Upload overlay - only shown when not readOnly */}
           {!readOnly && !avatarUploading && (
             <button
               type="button"
@@ -229,7 +229,7 @@ const UserAccountTab = ({ user, onUpdate, onCancel, onSaved, onAvatarUpdated, re
         {/* Info */}
         <div className="min-w-0 flex-1">
           <p className="text-sm font-semibold text-white mb-0.5 truncate">{displayName || "User"}</p>
-          <p className="text-xs text-slate-500 capitalize mb-2">{user?.role || "—"}</p>
+          <p className="text-xs text-slate-500 capitalize mb-2">{user?.role || "-"}</p>
           {!readOnly && (
             <button
               type="button"

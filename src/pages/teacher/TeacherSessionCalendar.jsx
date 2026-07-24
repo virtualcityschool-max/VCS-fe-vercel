@@ -73,7 +73,7 @@ function SessionForm({ form, setForm, errors, clearError, isCreate, courses }) {
               return (
                 <p className="text-[10px] text-blue-400 mt-1.5 flex items-center gap-1">
                   <i className="fas fa-info-circle" />
-                  No upcoming session — you can create a new one.
+                  No upcoming session - you can create a new one.
                 </p>
               );
             }
@@ -107,7 +107,7 @@ function SessionForm({ form, setForm, errors, clearError, isCreate, courses }) {
         </label>
         <Input
           type="text"
-          placeholder="e.g. Python Basics — Batch 3"
+          placeholder="e.g. Python Basics - Batch 3"
           value={form.title}
           onChange={(e) => { setForm({ ...form, title: e.target.value }); clearError("title"); }}
           className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 text-sm ${
@@ -574,7 +574,7 @@ const TeacherSessionCalendar = () => {
                             <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-violet-500/20 text-violet-300 border border-violet-500/20">Special Session</span>
                           )}
                         </div>
-                        <p className="text-xs text-slate-400 mt-0.5">{s.course?.title ?? s.course_title ?? "—"}</p>
+                        <p className="text-xs text-slate-400 mt-0.5">{s.course?.title ?? s.course_title ?? "-"}</p>
                       </div>
                       <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${STATUS_BADGE[s.status] ?? STATUS_BADGE.scheduled}`}>
                         {s.status}
@@ -627,7 +627,7 @@ const TeacherSessionCalendar = () => {
                           <span className="mt-1 inline-block px-1.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-violet-500/20 text-violet-300 border border-violet-500/20">Special Session</span>
                         )}
                       </td>
-                      <td className="px-5 py-4 text-slate-300 text-sm">{s.course?.title ?? s.course_title ?? "—"}</td>
+                      <td className="px-5 py-4 text-slate-300 text-sm">{s.course?.title ?? s.course_title ?? "-"}</td>
                       <td className="px-5 py-4">
                         <div className="text-slate-300 text-sm">{formatDate(s.scheduled_at)}</div>
                         <div className="text-slate-500 text-xs mt-0.5">
@@ -641,9 +641,9 @@ const TeacherSessionCalendar = () => {
                               <span key={d} className="px-1.5 py-0.5 bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 rounded text-xs font-medium">{d}</span>
                             ))}
                           </div>
-                        ) : <span className="text-slate-500 text-xs">—</span>}
+                        ) : <span className="text-slate-500 text-xs">-</span>}
                       </td>
-                      <td className="px-5 py-4 text-slate-300 text-sm">{s.recurrence_end_date ? formatDate(s.recurrence_end_date) : "—"}</td>
+                      <td className="px-5 py-4 text-slate-300 text-sm">{s.recurrence_end_date ? formatDate(s.recurrence_end_date) : "-"}</td>
                       <td className="px-5 py-4">
                         <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${STATUS_BADGE[s.status] ?? STATUS_BADGE.scheduled}`}>
                           {s.status}
@@ -695,8 +695,8 @@ const TeacherSessionCalendar = () => {
               <div>
                 <h3 className="text-xl font-black text-white tracking-tight">Create New Session</h3>
                 <p className="text-slate-500 text-xs mt-1">
-                  {createMode === "now"     ? "Launches immediately — max 1 hour" :
-                   createMode === "delayed" ? "Starts after a set delay — max 1 hour" :
+                  {createMode === "now"     ? "Launches immediately - max 1 hour" :
+                   createMode === "delayed" ? "Starts after a set delay - max 1 hour" :
                                              "Schedule a recurring class for one of your courses"}
                 </p>
               </div>
@@ -758,7 +758,7 @@ const TeacherSessionCalendar = () => {
                     </label>
                     <Input
                       type="text"
-                      placeholder="e.g. Python Basics — Live Q&A"
+                      placeholder="e.g. Python Basics - Live Q&A"
                       value={createForm.title}
                       onChange={(e) => { setCreateForm({ ...createForm, title: e.target.value }); setCreateErrors((p) => { const n={...p}; delete n.title; return n; }); }}
                       className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 text-sm ${createErrors.title ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}

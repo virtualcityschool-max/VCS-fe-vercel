@@ -27,7 +27,7 @@ export const setStoredReferralCode = (code) => {
   try {
     sessionStorage.setItem(REF_KEY, clean);
   } catch {
-    /* storage unavailable (private mode) — ignore, signup still works */
+    /* storage unavailable (private mode) - ignore, signup still works */
   }
 };
 

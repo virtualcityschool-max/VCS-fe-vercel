@@ -240,7 +240,7 @@ const extractApiError = (err) => {
   const d = err.response.data;
   if (!d) return `Server error (${err.response.status}). Please try again.`;
   if (typeof d === "string") return d;
-  // DRF field errors — date_ranges is our main field
+  // DRF field errors - date_ranges is our main field
   if (d.date_ranges) {
     const v = d.date_ranges;
     return Array.isArray(v) ? v[0] : String(v);
@@ -475,7 +475,7 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
         return;
       }
 
-      // created === 0 — explain exactly why with inline feedback
+      // created === 0 - explain exactly why with inline feedback
       const dups = data.skipped_duplicate ?? 0;
       const conflicts = data.session_conflicts_count ?? 0;
 
@@ -492,7 +492,7 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
       } else if (dups > 0 || conflicts > 0) {
         setInlineError({
           type: "mixed",
-          message: `No new slots created — ${dups > 0 ? `${dups} already exist` : ""}${dups > 0 && conflicts > 0 ? " and " : ""}${conflicts > 0 ? `${conflicts} conflict with your sessions` : ""}. Adjust dates or times and try again.`,
+          message: `No new slots created - ${dups > 0 ? `${dups} already exist` : ""}${dups > 0 && conflicts > 0 ? " and " : ""}${conflicts > 0 ? `${conflicts} conflict with your sessions` : ""}. Adjust dates or times and try again.`,
         });
       } else {
         setInlineError({
@@ -519,7 +519,7 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
             <div>
               <h2 className="text-base font-semibold text-white">Create Availability</h2>
               <p className="text-slate-500 text-xs mt-0.5">
-                Set dates &amp; time ranges — hourly slots are generated automatically
+                Set dates &amp; time ranges - hourly slots are generated automatically
                 {timezoneAbbr && (
                   <span className="ml-2 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-bold">
                     <i className="fas fa-globe text-[8px]" />
@@ -556,7 +556,7 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
                 </div>
               )}
             </div>
-            {/* Pickers row — centered */}
+            {/* Pickers row - centered */}
             <div className="flex items-center justify-center gap-3 flex-wrap">
               <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 shrink-0">From</label>
               <input
@@ -647,7 +647,7 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
                 </button>
               </div>
 
-              {/* Per-conflict rows — only for conflict/mixed types */}
+              {/* Per-conflict rows - only for conflict/mixed types */}
               {(inlineError.type === "conflict" || inlineError.type === "mixed") &&
                 result?.session_conflicts?.length > 0 && (
                   <div className="border-t border-amber-500/20 divide-y divide-amber-500/10">
@@ -1190,7 +1190,7 @@ const SlotCard = ({ slot, onDelete, onEdit, deletingId }) => {
           </div>
 
           <div className="flex items-center gap-1.5 shrink-0">
-            {/* Edit button — only for unbooked slots */}
+            {/* Edit button - only for unbooked slots */}
             <button
               onClick={() => !isBooked && onEdit(slot)}
               disabled={isBooked}
@@ -1300,7 +1300,7 @@ const TeacherAvailabilityPage = () => {
 
   return (
     <div className="text-white space-y-10 pb-12 animate-fadeIn">
-      {/* Page header — matches TeacherClasses style */}
+      {/* Page header - matches TeacherClasses style */}
       <div className="relative px-2 flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-4xl font-black font-poppins tracking-tight mb-2">Slots Management</h1>
@@ -1339,7 +1339,7 @@ const TeacherAvailabilityPage = () => {
       {/* Page body */}
       <div>
 
-        {/* Empty hero — first time */}
+        {/* Empty hero - first time */}
         {!loadingSlots && !slotsError && slots.length === 0 && (
           <div className="flex flex-col items-center justify-center py-32 text-center space-y-5">
             <div className="w-20 h-20 rounded-3xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mx-auto">
@@ -1394,7 +1394,7 @@ const TeacherAvailabilityPage = () => {
         
       </div>
 
-      {/* Create modal — portalled to body to escape layout stacking context */}
+      {/* Create modal - portalled to body to escape layout stacking context */}
       {showCreateModal && createPortal(
         <CreateAvailabilityModal
           onClose={() => setShowCreateModal(false)}
@@ -1403,7 +1403,7 @@ const TeacherAvailabilityPage = () => {
         document.body
       )}
 
-      {/* Edit slot modal — portalled to body */}
+      {/* Edit slot modal - portalled to body */}
       {editingSlot && createPortal(
         <EditSlotModal
           slot={editingSlot}

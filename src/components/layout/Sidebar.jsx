@@ -37,7 +37,7 @@ const TimezoneIndicator = ({ isCollapsed }) => {
           <span className="text-indigo-400/70 text-[8px] font-bold leading-none">{city}</span>
         </button>
 
-        {/* Tooltip — slides in from the right, clickable */}
+        {/* Tooltip - slides in from the right, clickable */}
         <div
           onClick={() => navigate("/profile")}
           className="absolute left-[calc(100%+10px)] top-1/2 -translate-y-1/2 z-[60]
@@ -80,7 +80,7 @@ const TimezoneIndicator = ({ isCollapsed }) => {
         </div>
       </button>
 
-      {/* Tooltip — slides up, clickable */}
+      {/* Tooltip - slides up, clickable */}
       <div
         onClick={() => navigate("/profile")}
         className="absolute bottom-[calc(100%+8px)] left-0 right-0 z-[60]
@@ -148,7 +148,7 @@ const PORTAL_LABEL = {
   parent:  "Guardian Portal",
 };
 
-// ── Unified nav item — works for all roles ────────────────────────────────────
+// ── Unified nav item - works for all roles ────────────────────────────────────
 // Pass `to` for NavLink-based (teacher/student), omit for button-based (admin).
 function NavItem({ label, icon, isCollapsed, badge, isActive, onClick, to, end }) {
   const itemClass = (active) =>
@@ -192,7 +192,7 @@ function NavItem({ label, icon, isCollapsed, badge, isActive, onClick, to, end }
         </button>
       )}
 
-      {/* Tooltip — only when collapsed */}
+      {/* Tooltip - only when collapsed */}
       {isCollapsed && (
         <div className="pointer-events-none absolute left-[calc(100%+12px)] top-1/2 -translate-y-1/2 z-[60]
           opacity-0 group-hover/item:opacity-100 translate-x-1 group-hover/item:translate-x-0

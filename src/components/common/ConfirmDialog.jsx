@@ -102,6 +102,7 @@ const ConfirmDialog = ({
             {cancelLabel && (
               <button
                 onClick={onCancel}
+                data-modal-close
                 disabled={loading}
                 className="flex-1 px-6 py-3.5 bg-white/5 hover:bg-white/10 border border-white/5 text-slate-400 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all active:scale-95 disabled:opacity-50"
               >

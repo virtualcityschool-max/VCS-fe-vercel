@@ -1,5 +1,22 @@
 @import "tailwindcss";
 
+/* Clickable elements should always show the pointer cursor. Tailwind v4's
+   preflight leaves buttons as the default arrow, so restore it globally. */
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  a[href],
+  label[for],
+  summary,
+  select:not(:disabled) {
+    cursor: pointer;
+  }
+  button:disabled,
+  [aria-disabled="true"] {
+    cursor: not-allowed;
+  }
+}
+
 @font-face {
   font-family: "SF Pro Display";
   src: url("/fonts/SF-Pro-Display-Regular.otf") format("opentype");

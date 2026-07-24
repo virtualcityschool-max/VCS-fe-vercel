@@ -50,7 +50,7 @@ const AttendanceCalendar = ({
   onNextMonth,
   selectedDay,
   onDaySelect,
-  onDayClick,   // optional: (records[]) => void — called when a day with records is clicked
+  onDayClick,   // optional: (records[]) => void - called when a day with records is clicked
 }) => {
   const today = todayStr();
 

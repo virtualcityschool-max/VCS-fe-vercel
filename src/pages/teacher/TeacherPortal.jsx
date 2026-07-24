@@ -40,7 +40,7 @@ const fmtDate = (d) => {
 };
 
 // Convert a naive date+time string that lives in `tz` into UTC milliseconds.
-// Uses Intl.DateTimeFormat.formatToParts — reliable across all browsers.
+// Uses Intl.DateTimeFormat.formatToParts - reliable across all browsers.
 const tzToUTCMs = (dateStr, timeStr, tz) => {
   if (!tz) return new Date(`${dateStr}T${timeStr}`).getTime();
   const naiveUTC = new Date(`${dateStr}T${timeStr}Z`).getTime();
@@ -652,7 +652,7 @@ const TeacherPortal = () => {
 
         {/* --- Sidebar (Assignments) --- */}
         <div className="xl:col-span-4 space-y-10">
-          {/* Referral link — invite others to the platform */}
+          {/* Referral link - invite others to the platform */}
           <ReferralLinkCard />
 
           <section className="space-y-6">

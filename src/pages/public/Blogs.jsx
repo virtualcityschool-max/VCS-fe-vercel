@@ -11,40 +11,52 @@ import { getStorageUrl } from "../../utils/storageUrl";
 const Blogs = () => {
   const dispatch = useDispatch();
   const { blogs, isLoading } = useSelector((state) => state.blogs);
-  // Persist search to sessionStorage so it's restored when a reader opens an
-  // article and returns (via the browser back button OR the in-page link).
-  const [search, setSearch] = useState(() => {
-    try { return sessionStorage.getItem("blogs_search") || ""; } catch { return ""; }
-  });
-  useEffect(() => {
-    try {
-      if (search) sessionStorage.setItem("blogs_search", search);
-      else sessionStorage.removeItem("blogs_search");
-    } catch { /* storage unavailable */ }
-  }, [search]);
-
-  // Active category lives in the URL (shareable) and falls back to sessionStorage
-  // so it survives a plain "/blogs" navigation back from an article too.
+  const [search, setSearch] = useState("");
   const [searchParams, setSearchParams] = useSearchParams();
-  const activeCategory =
-    searchParams.get("category") ||
-    (() => { try { return sessionStorage.getItem("blogs_category"); } catch { return null; } })() ||
-    "all";
+  const activeCategory = searchParams.get("category") || "all";
   const setActiveCategory = (cat) => {
     const next = new URLSearchParams(searchParams);
     if (cat === "all") next.delete("category");
     else next.set("category", cat);
     setSearchParams(next, { replace: true });
+  };
+
+  // Filters are retained ONLY across the "open an article and come back" trip —
+  // not when arriving at /blogs from elsewhere. We save the current filter the
+  // moment a blog card is opened (below), then restore-and-consume it once here.
+  useEffect(() => {
+    let saved;
+    try { saved = JSON.parse(sessionStorage.getItem("blogs_return_filter") || "null"); } catch { saved = null; }
+    if (!saved) return;
+    try { sessionStorage.removeItem("blogs_return_filter"); } catch { /* ignore */ }
+    if (saved.search) setSearch(saved.search);
+    if (saved.category && saved.category !== "all") {
+      const next = new URLSearchParams(searchParams);
+      next.set("category", saved.category);
+      setSearchParams(next, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Called when a blog card is clicked — stash the filter so the return trip can
+  // restore it. Ignores clicks that aren't on an article link.
+  const rememberFilterOnBlogOpen = (e) => {
+    const link = e.target.closest?.("a[href]");
+    if (!link) return;
+    const href = link.getAttribute("href") || "";
+    if (!/^\/blogs\/[^/]+/.test(href)) return; // only real article links
     try {
-      if (cat === "all") sessionStorage.removeItem("blogs_category");
-      else sessionStorage.setItem("blogs_category", cat);
+      sessionStorage.setItem(
+        "blogs_return_filter",
+        JSON.stringify({ category: activeCategory, search }),
+      );
     } catch { /* storage unavailable */ }
   };
 
   useSeo({
-    title: "Blog — Insights, Guides & Updates",
+    title: "Blog - Insights, Guides & Updates",
     description:
-      "Read the latest articles, learning guides and announcements from Virtual City School — expert insight for Cambridge students, parents and educators.",
+      "Read the latest articles, learning guides and announcements from Virtual City School - expert insight for Cambridge students, parents and educators.",
     url: typeof window !== "undefined" ? window.location.href : undefined,
   });
 
@@ -97,7 +109,7 @@ const Blogs = () => {
             Insights & <span className="text-gradient">Stories</span>
           </h1>
           <p className="text-slate-400 text-base md:text-lg leading-relaxed mt-5 animate-fadeInUp" style={{ animationDelay: "0.2s" }}>
-            Guides, ideas and updates from our educators — crafted to help
+            Guides, ideas and updates from our educators - crafted to help
             learners and families get the most out of their journey.
           </p>
         </div>
@@ -152,11 +164,11 @@ const Blogs = () => {
             <p className="text-slate-500 text-sm">
               {search || activeCategory !== "all"
                 ? "Try a different search or category."
-                : "Check back soon — fresh stories are on the way."}
+                : "Check back soon - fresh stories are on the way."}
             </p>
           </div>
         ) : (
-          <>
+          <div onClickCapture={rememberFilterOnBlogOpen}>
             {/* Featured (first published) */}
             {featured && activeCategory === "all" && !search && (
               <Reveal className="mb-14">
@@ -171,7 +183,7 @@ const Blogs = () => {
                 ),
               )}
             </div>
-          </>
+          </div>
         )}
       </section>
     </main>

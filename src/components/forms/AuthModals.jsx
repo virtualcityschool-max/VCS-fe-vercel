@@ -152,7 +152,7 @@ const AuthModals = () => {
   }, [isLoggedIn]);
 
   // Auto-open admin login modal when URL has ?adminLogin=true (only when not already logged in)
-  // Skip if the user just logged out — ProtectedRoute transiently redirects to /?adminLogin=true
+  // Skip if the user just logged out - ProtectedRoute transiently redirects to /?adminLogin=true
   // before navigate("/") cleans the URL, which would otherwise reopen the admin modal.
   React.useEffect(() => {
     if (justLoggedOutRef.current) {
@@ -167,7 +167,7 @@ const AuthModals = () => {
   // Referral link entry point: capture ?ref=CODE into sessionStorage, and when
   // someone lands on /signup (or /?ref=…) auto-open the register form so the
   // referral flow starts immediately. No-op for already-logged-in users. Opens
-  // once per visit — closing the modal must not re-trigger it (the ref resets
+  // once per visit - closing the modal must not re-trigger it (the ref resets
   // when the user navigates away from the signup entry point).
   const signupPromptedRef = React.useRef(false);
   React.useEffect(() => {
@@ -276,7 +276,7 @@ const AuthModals = () => {
         case "student": {
           const hireIntentId = sessionStorage.getItem("vcs_hire_intent");
           if (hireIntentId) {
-            // DO NOT clear sessionStorage here — TeacherProfile.jsx reads and clears it
+            // DO NOT clear sessionStorage here - TeacherProfile.jsx reads and clears it
             navigate(`/teachers/${hireIntentId}`, { replace: true });
           } else if (enrollmentIntent) {
             navigate(`/courses/${enrollmentIntent.courseId}`, { replace: true });
@@ -366,7 +366,7 @@ const AuthModals = () => {
       }
       await dispatch(registerUser(registerPayload)).unwrap();
 
-      // Move to OTP step — email is already in component state
+      // Move to OTP step - email is already in component state
       setRegistrationStep("otp");
     } catch (err) {
       // Use global error handler
@@ -415,11 +415,11 @@ const AuthModals = () => {
     try {
       await dispatch(verifyOtp({ email, otp })).unwrap();
 
-      // Referral (if any) is now linked server-side — drop the captured code.
+      // Referral (if any) is now linked server-side - drop the captured code.
       clearStoredReferralCode();
 
       toastManager.success(
-        "Verification successful. Your account is pending admin approval — you can login once approved."
+        "Verification successful. Your account is pending admin approval - you can login once approved."
       );
 
       // Update URL with role for persistence

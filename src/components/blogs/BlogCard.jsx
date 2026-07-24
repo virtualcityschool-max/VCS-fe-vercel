@@ -16,7 +16,7 @@ const formatDate = (value) => {
 };
 
 /**
- * BlogCard — public/admin blog preview card in the VCS glass style.
+ * BlogCard - public/admin blog preview card in the VCS glass style.
  * Links to the SEO-friendly slug URL. Shows a "Draft" badge when the blog
  * is unpublished (admins are the only ones who ever receive drafts).
  */
@@ -29,7 +29,7 @@ const BlogCard = ({ blog, index = 0 }) => {
       style={{ animationDelay: `${index * 0.05}s` }}
       className="group flex flex-col bg-[#1a2235]/60 backdrop-blur-xl rounded-2xl overflow-hidden border border-white/5 shadow-lg animate-springyReveal opacity-0 glass-shine hover-lift"
     >
-      {/* Cover — fixed, shorter height keeps every card balanced and uniform */}
+      {/* Cover - fixed, shorter height keeps every card balanced and uniform */}
       <Link to={`/blogs/${blog.slug}`} className="block relative h-36 overflow-hidden bg-slate-900/50 shrink-0">
         {cover ? (
           <img

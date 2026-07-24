@@ -270,7 +270,7 @@ const OverviewTab = ({
 
   return (
     <div className="space-y-4 animate-fadeIn">
-      {/* Row 1 — User stats */}
+      {/* Row 1 - User stats */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-6 gap-3 stagger-children">
         <StatCardTip
           label="Total Users"
@@ -370,7 +370,7 @@ const OverviewTab = ({
 
       {SessionsSection}
 
-      {/* Charts — side by side */}
+      {/* Charts - side by side */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Revenue by Course */}
         <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6 backdrop-blur-sm transition-all duration-300 hover:border-slate-700">

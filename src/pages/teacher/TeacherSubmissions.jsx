@@ -105,20 +105,22 @@ const TeacherSubmissions = () => {
         </span>
       );
     }
-    const score = sub.grade?.score ?? sub.grade;
-    const max = sub.assignment_max_score || sub.max_score || 100;
-    const pct = score != null ? Math.round((score / max) * 100) : null;
+    const score = sub.score ?? sub.grade?.score ?? sub.grade;
+    const max = sub.assignment_max_score || sub.max_score;
+    const pct = score != null && max ? Math.round((score / max) * 100) : null;
     const color =
       pct == null
-        ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/20"
+        ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30"
         : pct >= 80
-          ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/20"
+          ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30"
           : pct >= 50
-            ? "bg-blue-500/20 text-blue-400 border-blue-500/20"
-            : "bg-red-500/20 text-red-400 border-red-500/20";
+            ? "bg-blue-500/20 text-blue-300 border-blue-500/30"
+            : "bg-red-500/20 text-red-300 border-red-500/30";
     return (
-      <span className={`px-2 py-1 rounded-full text-xs font-medium border ${color}`}>
-        {score != null ? `${score}/${max}` : "Graded"}
+      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-sm font-black border ${color}`}>
+        <i className="fas fa-award text-[10px] opacity-80" />
+        {score != null ? (max ? `${score}/${max}` : `${score}`) : "Graded"}
+        {pct != null && <span className="text-[10px] font-bold opacity-70">({pct}%)</span>}
       </span>
     );
   };
@@ -236,10 +238,10 @@ const TeacherSubmissions = () => {
                         )}
                       </div>
                       <p className="text-xs text-slate-400 mt-0.5">
-                        {sub.assignment_title || sub.assignment?.title || "—"}
+                        {sub.assignment_title || sub.assignment?.title || "-"}
                       </p>
                       <p className="text-xs text-indigo-400 mt-0.5">
-                        {sub.course_title || sub.assignment?.course_title || "—"}
+                        {sub.course_title || sub.assignment?.course_title || "-"}
                       </p>
                     </div>
                     {getGradeBadge(sub)}
@@ -295,10 +297,10 @@ const TeacherSubmissions = () => {
                         </div>
                       </td>
                       <td className="px-5 py-4 text-slate-300 text-sm">
-                        {sub.assignment_title || sub.assignment?.title || "—"}
+                        {sub.assignment_title || sub.assignment?.title || "-"}
                       </td>
                       <td className="px-5 py-4 text-indigo-400 text-sm">
-                        {sub.course_title || sub.assignment?.course_title || "—"}
+                        {sub.course_title || sub.assignment?.course_title || "-"}
                       </td>
                       <td className="px-5 py-4 text-slate-400 text-sm">
                         {formatDateTime(sub.submitted_at || sub.created_at)}
@@ -328,8 +330,14 @@ const TeacherSubmissions = () => {
 
       {/* Grade modal */}
       {gradingId && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[200] p-4">
-          <div className="bg-slate-900 border border-slate-800/80 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl shadow-black/50">
+        <div
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[200] p-4"
+          onClick={closeGradeModal}
+        >
+          <div
+            className="bg-slate-900 border border-slate-800/80 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl shadow-black/50"
+            onClick={(e) => e.stopPropagation()}
+          >
             {loadingSelectedSubmission || !selectedSubmission ? (
               <div className="p-16 flex flex-col items-center justify-center gap-4">
                 <div className="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
@@ -373,7 +381,15 @@ const TeacherSubmissions = () => {
                       {selectedSubmission.is_graded ? (
                         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-bold rounded-full">
                           <i className="fas fa-check-circle text-[9px]" />
-                          Graded
+                          {(() => {
+                            const score = selectedSubmission.grade?.score ?? selectedSubmission.grade;
+                            const max = selectedSubmission.assignment_max_score || selectedSubmission.max_score;
+                            return score != null && max
+                              ? `${score}/${max} · Graded`
+                              : score != null
+                                ? `${score} · Graded`
+                                : "Graded";
+                          })()}
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 text-[11px] font-bold rounded-full">
@@ -383,7 +399,8 @@ const TeacherSubmissions = () => {
                       )}
                       <button
                         onClick={closeGradeModal}
-                        className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-white hover:bg-slate-700/60 transition-all"
+                        aria-label="Close"
+                        className="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800 border border-slate-700 text-slate-300 hover:text-white hover:bg-slate-700 hover:border-slate-600 transition-all"
                       >
                         <i className="fas fa-times text-sm"></i>
                       </button>
@@ -444,6 +461,41 @@ const TeacherSubmissions = () => {
                       <i className="fas fa-graduation-cap text-indigo-400/70" />
                       {selectedSubmission.grade ? "Update Grade" : "Grade This Submission"}
                     </p>
+
+                    {/* Marks obtained — shown prominently for a graded submission */}
+                    {selectedSubmission.is_graded &&
+                      (() => {
+                        const score =
+                          selectedSubmission.grade?.score ?? selectedSubmission.grade;
+                        const max =
+                          selectedSubmission.assignment_max_score ||
+                          selectedSubmission.max_score;
+                        const pct =
+                          score != null && max ? Math.round((score / max) * 100) : null;
+                        return (
+                          <div className="mb-4 flex items-center justify-between gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/5 px-4 py-3">
+                            <span className="inline-flex items-center gap-2 text-emerald-300 text-sm font-semibold">
+                              <i className="fas fa-award" />
+                              Marks obtained
+                            </span>
+                            <span className="text-right whitespace-nowrap">
+                              <span className="text-xl font-black text-white">
+                                {score != null ? score : "-"}
+                              </span>
+                              <span className="text-sm text-slate-400">
+                                {" "}
+                                / {max != null ? max : "-"}
+                              </span>
+                              {pct != null && (
+                                <span className="ml-2 text-xs font-bold text-emerald-400">
+                                  ({pct}%)
+                                </span>
+                              )}
+                            </span>
+                          </div>
+                        );
+                      })()}
+
                     <GradingForm
                       selectedSubmission={selectedSubmission}
                       onCancel={closeGradeModal}

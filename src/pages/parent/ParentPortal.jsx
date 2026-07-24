@@ -95,7 +95,7 @@ const ParentPortal = () => {
     );
   }
 
-  // Empty state — no children linked yet AND no pending/rejected links to show
+  // Empty state - no children linked yet AND no pending/rejected links to show
   const hasChildren = dashboardData?.children?.length > 0;
   const hasPending = dashboardData?.pending_child_links?.length > 0;
   const hasRejected = dashboardData?.rejected_child_links?.length > 0;

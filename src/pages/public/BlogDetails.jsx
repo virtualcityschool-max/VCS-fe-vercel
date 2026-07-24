@@ -128,7 +128,7 @@ const BlogDetails = () => {
           <QuillViewer value={blog.content || ""} />
         </div>
 
-        {/* Article metadata — kept at the end so it never interrupts reading. */}
+        {/* Article metadata - kept at the end so it never interrupts reading. */}
         <div className="mt-12 pt-8 border-t border-white/5 flex items-center flex-wrap gap-x-5 gap-y-2 text-[12px] text-slate-500">
           <span className="flex items-center gap-2">
             <span className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-cyan-500 flex items-center justify-center text-[11px] font-black text-white">
@@ -157,11 +157,10 @@ const BlogDetails = () => {
           <Link
             to="/blogs"
             onClick={() => {
-              // "All Articles" is a fresh start — drop any retained category/search
-              // so the list opens on the "All" tab with no filter.
+              // "All Articles" is a fresh start - drop the retained filter so the
+              // list opens on the "All" tab with no filter.
               try {
-                sessionStorage.removeItem("blogs_category");
-                sessionStorage.removeItem("blogs_search");
+                sessionStorage.removeItem("blogs_return_filter");
               } catch { /* storage unavailable */ }
             }}
             className="inline-flex items-center gap-2 text-indigo-400 hover:text-white text-[11px] font-black uppercase tracking-widest transition"

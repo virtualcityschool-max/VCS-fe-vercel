@@ -41,7 +41,7 @@ const triggerDownload = async (url, filename) => {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    // Delay revocation — revoking synchronously races the browser's download start
+    // Delay revocation - revoking synchronously races the browser's download start
     setTimeout(() => URL.revokeObjectURL(objectUrl), 3000);
   } catch {
     const link = document.createElement('a');
@@ -175,7 +175,7 @@ const FileViewerModal = ({ filePath, handleClose }) => {
           </div>
         </div>
 
-        {/* Body — relative so sub-viewers can use absolute inset-0 */}
+        {/* Body - relative so sub-viewers can use absolute inset-0 */}
         <div className="flex-1 min-h-0 relative overflow-hidden rounded-b-3xl bg-slate-950/50">
           {renderBody()}
         </div>

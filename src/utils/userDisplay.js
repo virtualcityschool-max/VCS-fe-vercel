@@ -1,5 +1,5 @@
 // Returns "First Last" when both names are present, else falls back to
-// username — needed for accounts created before first/last name existed.
+// username - needed for accounts created before first/last name existed.
 export const getDisplayName = (user) => {
   if (!user) return "";
   const first = user.first_name || user.firstName;

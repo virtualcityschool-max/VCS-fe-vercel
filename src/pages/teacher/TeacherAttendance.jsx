@@ -282,7 +282,7 @@ const TeacherAttendance = () => {
         })()
       )}
 
-      {/* Matrix — only for mine / students tabs */}
+      {/* Matrix - only for mine / students tabs */}
       {tab !== "admin" && (
         isLoading ? (
           <div className="flex items-center justify-center py-20">
@@ -356,10 +356,10 @@ const TeacherAttendance = () => {
                       onChange={(e) => setMarkSessionId(e.target.value)}
                       className="w-full px-4 py-2.5 bg-slate-800/60 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 appearance-none"
                     >
-                      <option value="">— Select a session —</option>
+                      <option value="">- Select a session -</option>
                       {allSessions.map((s) => (
                         <option key={s.id} value={s.id}>
-                          {s.title}{s.scheduled_at ? ` — ${new Date(s.scheduled_at).toLocaleDateString([], { month: "short", day: "numeric", ...(timezone ? { timeZone: timezone } : {}) })}` : ""}
+                          {s.title}{s.scheduled_at ? ` - ${new Date(s.scheduled_at).toLocaleDateString([], { month: "short", day: "numeric", ...(timezone ? { timeZone: timezone } : {}) })}` : ""}
                         </option>
                       ))}
                     </select>

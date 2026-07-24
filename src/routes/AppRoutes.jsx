@@ -172,7 +172,7 @@ const AppRoutes = () => {
           )
         }
       />
-      {/* Referral entry point — AuthModals auto-opens the register form here
+      {/* Referral entry point - AuthModals auto-opens the register form here
           and captures the ?ref=CODE query param. */}
       <Route
         path="/signup"
@@ -263,7 +263,7 @@ const AppRoutes = () => {
         <Route path="/admin/blogs/:slug/edit" element={<AdminBlogEditorPage />} />
       </Route>
 
-      {/* Profile — all authenticated roles */}
+      {/* Profile - all authenticated roles */}
       <Route element={<ProtectedRoute allowedRoles={["student", "teacher", "admin", "parent"]} />}>
         <Route path="/profile" element={<ProfilePage />} />
       </Route>

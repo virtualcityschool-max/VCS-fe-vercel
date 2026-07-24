@@ -15,7 +15,7 @@ import { showApiError } from "../../utils/apiErrorHandler";
 import { getStorageUrl } from "../../utils/storageUrl";
 
 const formatDate = (v) => {
-  if (!v) return "—";
+  if (!v) return "-";
   try {
     return new Date(v).toLocaleDateString("en-US", {
       month: "short",
@@ -23,7 +23,7 @@ const formatDate = (v) => {
       year: "numeric",
     });
   } catch {
-    return "—";
+    return "-";
   }
 };
 

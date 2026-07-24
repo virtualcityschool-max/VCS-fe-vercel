@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import { getDisplayName } from "../../utils/userDisplay";
 
 /**
- * Rich course dropdown rendered via portal — floats freely above modals/overflow containers.
+ * Rich course dropdown rendered via portal - floats freely above modals/overflow containers.
  *
  * Props:
  *   courses          - array of course objects
@@ -11,7 +11,7 @@ import { getDisplayName } from "../../utils/userDisplay";
  *   onChange(course) - called with the full course object on selection
  *   error            - truthy → red border
  *   placeholder      - trigger placeholder text (default "Select a course")
- *   getDisabledReason(course) → string|null — return a string to disable + annotate an item
+ *   getDisabledReason(course) → string|null - return a string to disable + annotate an item
  */
 const CourseSelect = ({
   courses = [],

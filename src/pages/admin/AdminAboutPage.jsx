@@ -78,7 +78,7 @@ const AdminAboutPage = () => {
 
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-black font-poppins tracking-tight">About Us — CMS</h1>
+        <h1 className="text-3xl font-black font-poppins tracking-tight">About Us - CMS</h1>
         <p className="text-slate-500 text-sm mt-1">All fields here populate the public /about page. Changes are live immediately after saving.</p>
       </div>
 
@@ -106,7 +106,7 @@ const AdminAboutPage = () => {
           <Field label="Mission Statement" name="mission" value={form.mission} onChange={handleChange} multiline />
         </div>
 
-        {/* About — full width */}
+        {/* About - full width */}
         <div className="lg:col-span-2 bg-slate-900/50 border border-slate-800 rounded-2xl p-6 space-y-4">
           <div className="flex items-center gap-2 mb-1">
             <div className="w-7 h-7 bg-emerald-500/10 rounded-lg flex items-center justify-center text-emerald-400 text-xs">

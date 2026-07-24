@@ -36,7 +36,7 @@ const ApprovalsTab = ({
       const name = (getDisplayName(user) || "").toLowerCase();
       const email = (user.email || "").toLowerCase();
       const role = (user.role || "").toLowerCase();
-      // Match the on-screen label too — the UI shows "Tutor"/"Guardian",
+      // Match the on-screen label too - the UI shows "Tutor"/"Guardian",
       // not the raw "teacher"/"parent" role values
       const roleLabel = (
         { teacher: "tutor", parent: "guardian" }[role] || role
@@ -86,7 +86,7 @@ const ApprovalsTab = ({
     },
     delete: {
       title: "Delete User",
-      message: `Permanently delete "${confirmDialog.username}"? This cannot be undone — they will be able to register again from scratch.`,
+      message: `Permanently delete "${confirmDialog.username}"? This cannot be undone - they will be able to register again from scratch.`,
       confirmLabel: "Delete",
     },
   }[confirmDialog.type] || { title: "", message: "", confirmLabel: "" };

@@ -114,7 +114,7 @@ export const GradingScaleModal = ({ onClose, onUpdated }) => {
   };
 
   // Portal to <body> so the overlay escapes the page header's `relative z-20`
-  // stacking context — otherwise the matrix's sticky z-30 "Category"/"Final
+  // stacking context - otherwise the matrix's sticky z-30 "Category"/"Final
   // Results" columns paint above the blur.
   return createPortal(
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4">
@@ -173,9 +173,9 @@ export const GradingScaleModal = ({ onClose, onUpdated }) => {
                   F
                 </span>
                 <div className="flex-1">
-                  <label className="text-[10px] uppercase tracking-widest text-slate-500 font-bold block mb-1">F — Below D minimum</label>
+                  <label className="text-[10px] uppercase tracking-widest text-slate-500 font-bold block mb-1">F - Below D minimum</label>
                   <div className="px-3 py-2 bg-slate-800/40 border border-slate-700/40 rounded-xl text-slate-500 text-sm italic">
-                    Below {form.d_min ?? "—"}%
+                    Below {form.d_min ?? "-"}%
                   </div>
                 </div>
               </div>

@@ -84,7 +84,7 @@ const BookingModal = ({ teacherName, slots, onClose, onBooked }) => {
               <p className="text-slate-500 text-xs mt-0.5">
                 {step === 1
                   ? `with ${teacherName}`
-                  : "Optional — sent to the teacher with your booking"}
+                  : "Optional - sent to the teacher with your booking"}
               </p>
             </div>
           </div>
@@ -104,7 +104,7 @@ const BookingModal = ({ teacherName, slots, onClose, onBooked }) => {
           </div>
         </div>
 
-        {/* Step 1 — slot selection */}
+        {/* Step 1 - slot selection */}
         {step === 1 && (
           <>
             <div className="max-h-[55vh] overflow-y-auto px-6 py-5 space-y-5">
@@ -163,7 +163,7 @@ const BookingModal = ({ teacherName, slots, onClose, onBooked }) => {
           </>
         )}
 
-        {/* Step 2 — message */}
+        {/* Step 2 - message */}
         {step === 2 && (
           <>
             <div className="px-6 py-5 space-y-5">

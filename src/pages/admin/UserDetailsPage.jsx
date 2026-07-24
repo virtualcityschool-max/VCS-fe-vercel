@@ -231,7 +231,7 @@ const UserDetailsPage = () => {
             <div className="flex items-center justify-between gap-3 px-5 py-3 bg-indigo-500/10 border-b border-indigo-500/20">
               <div className="flex items-center gap-2 text-indigo-300 text-xs font-bold">
                 <i className="fas fa-eye" />
-                <span>View Only — no changes can be made</span>
+                <span>View Only - no changes can be made</span>
               </div>
               <button
                 onClick={() => navigate(`/admin/users/${id}`, { state: { filters: location.state?.filters } })}

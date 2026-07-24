@@ -389,7 +389,7 @@ const UsersTab = ({
           </table>
         </div>
       ) : !users || users.length === 0 ? (
-        /* Empty state — no users match the current search/filters */
+        /* Empty state - no users match the current search/filters */
         <div className="bg-slate-900/50 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
           <EmptyState
             icon="fas fa-search"

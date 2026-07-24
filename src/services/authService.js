@@ -471,19 +471,19 @@ export const authService = {
     }
   },
 
-  // Forgot Password — Step 1: request OTP
+  // Forgot Password - Step 1: request OTP
   forgotPasswordRequestOtp: async (email) => {
     const response = await axiosInstance.post("/auth/forgot-password/request-otp/", { email });
     return response.data;
   },
 
-  // Forgot Password — Step 2: verify OTP
+  // Forgot Password - Step 2: verify OTP
   forgotPasswordVerifyOtp: async (email, otp) => {
     const response = await axiosInstance.post("/auth/forgot-password/verify-otp/", { email, otp });
     return response.data;
   },
 
-  // Forgot Password — Step 3: reset password
+  // Forgot Password - Step 3: reset password
   forgotPasswordReset: async (email, newPassword, confirmPassword) => {
     const response = await axiosInstance.post("/auth/forgot-password/reset/", {
       email,
@@ -493,7 +493,7 @@ export const authService = {
     return response.data;
   },
 
-  // Link child to parent (parent only) — parents identify children by roll
+  // Link child to parent (parent only) - parents identify children by roll
   // number or email (the backend rejects raw student_ids for parents).
   linkChild: async ({ student_roll_nos = [], student_emails = [] }) => {
     try {

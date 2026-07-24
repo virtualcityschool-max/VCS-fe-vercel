@@ -39,7 +39,7 @@ const AttendanceMatrix = ({
     sortedSessions.forEach((s) => {
       const d = s.scheduled_at ? new Date(s.scheduled_at) : null;
       const key   = d ? `${d.getFullYear()}-${d.getMonth()}` : "?";
-      const label = d ? d.toLocaleDateString([], { month: "long", year: "numeric" }) : "—";
+      const label = d ? d.toLocaleDateString([], { month: "long", year: "numeric" }) : "-";
       if (!groups.length || groups[groups.length - 1].key !== key) {
         groups.push({ key, label, count: 0 });
       }
@@ -127,7 +127,7 @@ const AttendanceMatrix = ({
           </span>
         ))}
         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-bold bg-slate-800 text-slate-500 border-slate-700">
-          <span>—</span>
+          <span>-</span>
           <span className="font-normal opacity-70">Not Recorded</span>
         </span>
       </div>
@@ -165,7 +165,7 @@ const AttendanceMatrix = ({
                 </div>
                 <div className="text-right">
                   <p className={`text-sm font-bold tabular-nums ${pctColor}`}>
-                    {pct != null ? `${pct}%` : "—"}
+                    {pct != null ? `${pct}%` : "-"}
                   </p>
                   <p className="text-[11px] text-slate-500">{attended}/{total} sessions</p>
                 </div>
@@ -193,7 +193,7 @@ const AttendanceMatrix = ({
                           return (
                             <div
                               key={s.id}
-                              title={s.title + (d ? ` — ${d.toLocaleDateString()}` : "")}
+                              title={s.title + (d ? ` - ${d.toLocaleDateString()}` : "")}
                               onClick={() => editable && onEditRecord(record)}
                               className={`flex flex-col items-center justify-center w-10 h-10 rounded-xl border select-none
                                 ${cfg ? cfg.cls : "bg-slate-800/60 text-slate-600 border-slate-700/50"}
@@ -209,10 +209,10 @@ const AttendanceMatrix = ({
                                     </span>
                                   </>
                                 ) : (
-                                  <span className="text-[10px]">—</span>
+                                  <span className="text-[10px]">-</span>
                                 )
                               ) : isNoRecord ? (
-                                <span className="text-[12px] text-slate-600 select-none">—</span>
+                                <span className="text-[12px] text-slate-600 select-none">-</span>
                               ) : null}
                             </div>
                           );
@@ -285,7 +285,7 @@ const AttendanceMatrix = ({
                     <th
                       key={s.id}
                       className="px-1 py-3 text-center min-w-[52px] border-r border-slate-800/30 last:border-r-0"
-                      title={s.title + (d ? ` — ${d.toLocaleDateString()}` : "")}
+                      title={s.title + (d ? ` - ${d.toLocaleDateString()}` : "")}
                     >
                       {d ? (
                         <>
@@ -295,7 +295,7 @@ const AttendanceMatrix = ({
                           </div>
                         </>
                       ) : (
-                        <span className="text-slate-700 text-[10px]">—</span>
+                        <span className="text-slate-700 text-[10px]">-</span>
                       )}
                     </th>
                   );
@@ -364,10 +364,10 @@ const AttendanceMatrix = ({
                                 <div className="bg-slate-800 border border-slate-700 rounded-xl shadow-2xl px-3 py-2 text-center text-[11px] space-y-1 min-w-[200px]">
                                   <p className="font-bold capitalize text-white">{record?.status}</p>
                                   <p className="text-slate-400 flex items-center gap-1.5">
-                                    Joined At: {joinedStr ?? "—"}
+                                    Joined At: {joinedStr ?? "-"}
                                   </p>
                                   <p className="text-slate-400 flex items-center gap-1.5">
-                                    Left At: {leftStr ?? "—"}
+                                    Left At: {leftStr ?? "-"}
                                   </p>
                                   {record?.note && (
                                     <p className="text-slate-500 italic border-t border-slate-700 pt-1 max-w-[180px] whitespace-normal leading-relaxed">
@@ -379,7 +379,7 @@ const AttendanceMatrix = ({
                               </div>
                             </div>
                           ) : isNoRecord ? (
-                            <span className="text-slate-600 text-xs select-none">—</span>
+                            <span className="text-slate-600 text-xs select-none">-</span>
                           ) : null}
                         </td>
                       );
@@ -393,7 +393,7 @@ const AttendanceMatrix = ({
                         {attended}<span className="text-slate-500 font-normal">/{total}</span>
                       </div>
                       <div className={`text-[10px] font-semibold tabular-nums mt-1 ${pctColor}`}>
-                        {pct != null ? `${pct}%` : "—"}
+                        {pct != null ? `${pct}%` : "-"}
                       </div>
                     </td>
                   </tr>

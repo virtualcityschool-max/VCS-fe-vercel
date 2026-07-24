@@ -113,7 +113,7 @@ const AdminAttendance = () => {
   const adminMatrixRecords = useMemo(() => {
     const sessionIds = new Set(filteredAdminSessions.map((s) => s.id));
     // The endpoint returns one object per session with the teacher attendance
-    // records nested under `attendance` — flatten them into per-participant rows
+    // records nested under `attendance` - flatten them into per-participant rows
     // (mirrors the teacher attendance page), otherwise the matrix gets records
     // with no student/session id and renders nothing.
     return adminSessionAttendance
@@ -270,7 +270,7 @@ const AdminAttendance = () => {
         ))}
       </div>
 
-      {/* Stats — student / teacher tabs */}
+      {/* Stats - student / teacher tabs */}
       {tab !== "admin" && !isLoading && filteredAttendance.length > 0 && (
         <div className="grid grid-cols-3 gap-3">
           {[
@@ -286,7 +286,7 @@ const AdminAttendance = () => {
         </div>
       )}
 
-      {/* Matrix — student / teacher tabs */}
+      {/* Matrix - student / teacher tabs */}
       {tab !== "admin" && (
         isLoading ? (
           <div className="flex items-center justify-center py-20">
@@ -303,7 +303,7 @@ const AdminAttendance = () => {
         )
       )}
 
-      {/* Matrix — admin sessions tab */}
+      {/* Matrix - admin sessions tab */}
       {tab === "admin" && (
         adminLoading ? (
           <div className="flex items-center justify-center py-20">

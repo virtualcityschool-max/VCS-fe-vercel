@@ -85,10 +85,10 @@ const CourseStudentsModal = ({ courseId, courseTitle, onClose, canUnenroll }) =>
             </button>
           </div>
 
-          {/* Body — two columns */}
+          {/* Body - two columns */}
           <div className="flex-1 overflow-hidden flex flex-col lg:flex-row min-h-0">
 
-            {/* LEFT — Course details */}
+            {/* LEFT - Course details */}
             <div className="lg:w-2/5 border-b lg:border-b-0 lg:border-r border-slate-800 overflow-y-auto p-6 flex-shrink-0">
               {loading ? (
                 <div className="space-y-4 animate-pulse">
@@ -134,13 +134,13 @@ const CourseStudentsModal = ({ courseId, courseTitle, onClose, canUnenroll }) =>
                     <div className="bg-slate-800/50 rounded-xl p-3 border border-slate-700/40">
                       <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Tutor</p>
                       <p className="text-white text-sm font-medium truncate">
-                        {getDisplayName(course.instructor) || "—"}
+                        {getDisplayName(course.instructor) || "-"}
                       </p>
                     </div>
                     <div className="bg-slate-800/50 rounded-xl p-3 border border-slate-700/40">
                       <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Level</p>
                       <p className="text-white text-sm font-medium truncate capitalize">
-                        {(typeof course.category === "object" ? course.category?.name : course.category)?.replace(/_/g, " ") || "—"}
+                        {(typeof course.category === "object" ? course.category?.name : course.category)?.replace(/_/g, " ") || "-"}
                       </p>
                     </div>
                     <div className="bg-slate-800/50 rounded-xl p-3 border border-slate-700/40">
@@ -161,7 +161,7 @@ const CourseStudentsModal = ({ courseId, courseTitle, onClose, canUnenroll }) =>
               ) : null}
             </div>
 
-            {/* RIGHT — Students list */}
+            {/* RIGHT - Students list */}
             <div className="flex-1 overflow-y-auto p-6 min-h-0">
               {loading ? (
                 <div className="space-y-3">

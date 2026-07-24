@@ -35,7 +35,7 @@ const Footer = ({ variant = "full" }) => {
       <div className="relative max-w-7xl mx-auto px-6 sm:px-8 py-8">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-12">
 
-          {/* Brand — left */}
+          {/* Brand - left */}
           <div className="max-w-sm">
             <img
               src="/assets/logo1.png"
@@ -49,7 +49,7 @@ const Footer = ({ variant = "full" }) => {
             </p>
           </div>
 
-          {/* Quick Links + Support — grouped on the right, side by side */}
+          {/* Quick Links + Support - grouped on the right, side by side */}
           <div className="flex gap-16 shrink-0 items-start md:items-end">
             {/* Quick Links */}
             <div>

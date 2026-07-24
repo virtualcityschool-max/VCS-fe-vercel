@@ -148,7 +148,7 @@ const StudentProfileTab = ({ profile, userId, rollNo, onUpdate, onCancel, onSave
 
   return (
     <div className="space-y-4">
-      {/* Student ID / Roll No — read-only */}
+      {/* Student ID / Roll No - read-only */}
       {(userId != null || rollNo != null) && (
         <div className="flex flex-wrap items-center gap-3 px-4 py-3 bg-slate-800/40 border border-slate-700/50 rounded-xl">
           {userId != null && (
@@ -252,7 +252,7 @@ const StudentProfileTab = ({ profile, userId, rollNo, onUpdate, onCancel, onSave
         )}
       </form>
 
-      {/* Linked parents — outside main form */}
+      {/* Linked parents - outside main form */}
       <div className="mt-6 pt-6 border-t border-slate-700/60">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-8 h-8 rounded-lg bg-indigo-500/20 border border-indigo-500/20 flex items-center justify-center text-indigo-400">

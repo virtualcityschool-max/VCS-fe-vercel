@@ -188,7 +188,7 @@ const EnrollmentRequestsTab = ({
               {/* Actions */}
               <div className="flex items-center gap-2 flex-shrink-0">
                 <button
-                  onClick={() => handleApprove(enrollment.id, `${enrollment.student_name} — ${enrollment.course_title}`)}
+                  onClick={() => handleApprove(enrollment.id, `${enrollment.student_name} - ${enrollment.course_title}`)}
                   disabled={isProcessing}
                   className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-semibold rounded-xl transition"
                 >
@@ -200,7 +200,7 @@ const EnrollmentRequestsTab = ({
                   Approve
                 </button>
                 <button
-                  onClick={() => handleReject(enrollment.id, enrollment.student, `${enrollment.student_name} — ${enrollment.course_title}`)}
+                  onClick={() => handleReject(enrollment.id, enrollment.student, `${enrollment.student_name} - ${enrollment.course_title}`)}
                   disabled={isProcessing}
                   className="flex items-center gap-1.5 px-4 py-2 bg-rose-600/20 hover:bg-rose-600/30 border border-rose-500/30 hover:border-rose-500/60 disabled:opacity-50 disabled:cursor-not-allowed text-rose-400 text-xs font-semibold rounded-xl transition"
                 >

@@ -154,12 +154,12 @@ const StudentQuizDetail = () => {
               <p className="text-white font-bold text-lg">
                 {(sub.status === "graded" || sub.status === "auto_graded") && sub.obtained_marks != null
                   ? `${sub.obtained_marks} / ${sub.total_marks_snapshot ?? currentQuiz.total_marks}`
-                  : `— / ${sub.total_marks_snapshot ?? currentQuiz.total_marks}`}
+                  : `- / ${sub.total_marks_snapshot ?? currentQuiz.total_marks}`}
               </p>
             </div>
             <div className="bg-slate-800/60 rounded-2xl p-3 text-center">
               <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Submitted</p>
-              <p className="text-white text-xs">{sub.submitted_at ? formatDate(sub.submitted_at) : "—"}</p>
+              <p className="text-white text-xs">{sub.submitted_at ? formatDate(sub.submitted_at) : "-"}</p>
             </div>
           </div>
           {(sub.status === "submitted") && (

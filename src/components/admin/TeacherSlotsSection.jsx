@@ -288,7 +288,7 @@ const TeacherSlotsSection = ({ teacherId }) => {
         </div>
       )}
 
-      {/* Confirm delete dialog — portalled to body */}
+      {/* Confirm delete dialog - portalled to body */}
       {confirmSlot && createPortal(
         <div className="fixed inset-0 z-[950] flex items-center justify-center bg-black/70 backdrop-blur-sm px-4">
           <div className="w-full max-w-sm bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden">

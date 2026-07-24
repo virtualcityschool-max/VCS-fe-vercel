@@ -98,7 +98,7 @@ const UserProfileDropdown = ({ dropUp = false, isCollapsed = false }) => {
         aria-label="User menu"
         aria-expanded={isDropdownOpen}
       >
-        {/* User Info — hidden when collapsed */}
+        {/* User Info - hidden when collapsed */}
         {!isCollapsed && (
           <div className={`min-w-0 ${dropUp ? "text-left flex-1" : "text-right hidden sm:block"}`}>
             <p className="text-sm font-semibold text-white leading-none mb-1 truncate">
@@ -131,7 +131,7 @@ const UserProfileDropdown = ({ dropUp = false, isCollapsed = false }) => {
           <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-slate-900"></div>
         </div>
 
-        {/* Dropdown Arrow — hidden when collapsed */}
+        {/* Dropdown Arrow - hidden when collapsed */}
         {!isCollapsed && (
           <svg
             className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${

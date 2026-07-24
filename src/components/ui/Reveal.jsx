@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 
 /**
- * Reveal — animates children into view when they enter the viewport.
+ * Reveal - animates children into view when they enter the viewport.
  * Pure presentation: renders a single wrapper element (default <div>)
  * with the `.reveal` CSS transition classes from index.css.
  *

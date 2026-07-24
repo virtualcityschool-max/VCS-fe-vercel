@@ -128,7 +128,7 @@ const CourseDetails = () => {
   };
 
 
-  // Handle course enrollment — always show confirmation modal first
+  // Handle course enrollment - always show confirmation modal first
   const handleEnrollCourse = async () => {
     if (!auth.isLoggedIn) {
       dispatch(setAuthModal("login"));
@@ -143,7 +143,7 @@ const CourseDetails = () => {
     setEnrollmentModalOpen(true);
   };
 
-  // Called when student confirms on paid modal — redirect to Gumroad
+  // Called when student confirms on paid modal - redirect to Gumroad
   const handleCheckout = async () => {
     try {
       setIsCheckingOut(true);

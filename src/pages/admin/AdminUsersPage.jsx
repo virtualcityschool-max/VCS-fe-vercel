@@ -125,7 +125,7 @@ const AdminUsersPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Re-fetch when any filter changes (not on mount — AdminLayout owns the initial fetch)
+  // Re-fetch when any filter changes (not on mount - AdminLayout owns the initial fetch)
   useEffect(() => {
     const current = { role: usersFilters.role, is_active: usersFilters.is_active, ordering: usersFilters.ordering, search: usersFilters.search };
     const prev = prevFilterRef.current;
@@ -160,7 +160,7 @@ const AdminUsersPage = () => {
     }
   };
 
-  // Handle user purge (hard-delete — permanent removal)
+  // Handle user purge (hard-delete - permanent removal)
   const handlePurgeUser = async (userId) => {
     try {
       await dispatch(purgeUser(userId)).unwrap();

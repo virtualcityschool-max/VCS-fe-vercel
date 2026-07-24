@@ -4,15 +4,15 @@ import SessionCountdown from "../common/SessionCountdown";
 import { getStatusBadge } from "../common/SessionBadge";
 import { getWindowLabel } from "../../utils/helper/StartSession";
 
-// View 2 — teacher-style card (time widget | info | start/join/end actions)
+// View 2 - teacher-style card (time widget | info | start/join/end actions)
 // Used by: teacher "Classes" tab, admin overview sessions section
 const TeacherSessionCard = ({
   session,
   isLoading = false,
-  onStart,  // (session) => void — show Start button when scheduled
-  onJoin,   // (session) => void — show Join button when live
-  onEnd,    // (session) => void — show End/power button when live
-  subtitle, // string or ReactNode — secondary info line (course, learners, teachers…)
+  onStart,  // (session) => void - show Start button when scheduled
+  onJoin,   // (session) => void - show Join button when live
+  onEnd,    // (session) => void - show End/power button when live
+  subtitle, // string or ReactNode - secondary info line (course, learners, teachers…)
 }) => {
   const { formatTime, timezone, timezoneAbbr } = useDateFormatters();
   const scheduledAt = session.scheduled_at || session.schedule_at;

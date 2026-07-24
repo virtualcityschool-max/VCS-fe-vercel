@@ -94,7 +94,7 @@ const TeacherPrivateAvailableSlots = ({
 
   return (
     <>
-      {/* Teacher card — only shown when teacher object is available */}
+      {/* Teacher card - only shown when teacher object is available */}
       {teacher && (
         <div className="flex items-center gap-3 px-4 py-3 bg-indigo-500/10 border border-indigo-500/30 rounded-xl">
           <div className="w-9 h-9 rounded-full bg-indigo-600 flex items-center justify-center text-white font-semibold text-sm">

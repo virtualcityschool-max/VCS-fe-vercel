@@ -234,7 +234,7 @@ const HireRequestsTab = ({
         onCancel={() => setConfirm({ open: false, type: null, id: null, label: "" })}
       />
 
-      {/* Detail modal — wide horizontal layout */}
+      {/* Detail modal - wide horizontal layout */}
       {detailReq && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setDetailReq(null)} />
@@ -266,7 +266,7 @@ const HireRequestsTab = ({
             <div className="flex-1 overflow-y-auto custom-scrollbar">
               <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-slate-800 min-h-0">
 
-                {/* Left — info details */}
+                {/* Left - info details */}
                 <div className="px-6 py-5 space-y-0 divide-y divide-slate-800/60">
                   <DetailRow icon="phone"              label="Phone"             value={detailReq.phone} />
                   <DetailRow icon="chalkboard-teacher" label="Tutor Requested" value={getDisplayName(detailReq.teacher) || `Tutor #${detailReq.teacher?.id}`} />
@@ -282,7 +282,7 @@ const HireRequestsTab = ({
                   )}
                 </div>
 
-                {/* Right — message */}
+                {/* Right - message */}
                 <div className="px-6 py-5 flex flex-col gap-2">
                   <div className="flex items-center gap-2 mb-1">
                     <div className="w-7 h-7 rounded-lg bg-slate-800 flex items-center justify-center shrink-0">

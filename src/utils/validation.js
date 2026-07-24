@@ -47,7 +47,7 @@ export const validateEmail = (email) => {
   return { isValid: true, error: null };
 };
 
-// Phone validation — accepts any international number (7–15 digits, optional + prefix and separators)
+// Phone validation - accepts any international number (7–15 digits, optional + prefix and separators)
 export const validatePhone = (phone) => {
   if (!phone) return { isValid: true, error: null }; // optional field
   const trimmed = phone.trim();
@@ -203,8 +203,8 @@ export const validateRegistrationForm = (formData) => {
 /**
  * Client-side validation for session create forms.
  * Returns an errors object (empty = valid).
- * @param {object} formData  — the create form state
- * @param {string} mode      — "scheduled" | "now" | "delayed"
+ * @param {object} formData  - the create form state
+ * @param {string} mode      - "scheduled" | "now" | "delayed"
  * @param {number} delayHours
  * @param {number} delayMins
  */
@@ -240,7 +240,7 @@ export const validateSessionCreate = (formData, mode = "scheduled", delayHours =
 /**
  * Client-side validation for session edit forms.
  * Returns an errors object (empty = valid).
- * @param {object} formData — the edit form state
+ * @param {object} formData - the edit form state
  */
 export const validateSessionEdit = (formData) => {
   const errors = {};
@@ -280,7 +280,7 @@ export const clampDate = (value) => {
 };
 
 // Returns "+05:00" / "-04:00" style offset for the given timezone at the given moment.
-// Classic trick: parse the same instant formatted in UTC vs the target tz — local offset cancels.
+// Classic trick: parse the same instant formatted in UTC vs the target tz - local offset cancels.
 const getOffsetStr = (timeZone, forDate = new Date()) => {
   const utcDate = new Date(forDate.toLocaleString("en-US", { timeZone: "UTC" }));
   const tzDate  = new Date(forDate.toLocaleString("en-US", { timeZone }));
@@ -319,15 +319,15 @@ export const formatTimezoneISO = (localString, timeZone) => {
   return `${datePart}T${timePart.slice(0, 5)}:00${offsetStr}`;
 };
 
-// "May 15, 2026"  — pass timeZone (e.g. "Asia/Karachi") to override browser locale
+// "May 15, 2026"  - pass timeZone (e.g. "Asia/Karachi") to override browser locale
 export const formatDate = (isoString, timeZone) => {
-  if (!isoString) return "—";
+  if (!isoString) return "-";
   try {
     const opts = { year: "numeric", month: "short", day: "numeric" };
     if (timeZone) opts.timeZone = timeZone;
     return new Date(isoString).toLocaleDateString(undefined, opts);
   } catch {
-    return "—";
+    return "-";
   }
 };
 
@@ -445,7 +445,7 @@ export const getTimezoneAbbr = (timeZone) => {
   try {
     const tz = timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-    // Try Intl first — modern browsers return proper abbreviations
+    // Try Intl first - modern browsers return proper abbreviations
     const intlAbbr = new Intl.DateTimeFormat("en", { timeZoneName: "short", timeZone: tz })
       .formatToParts(new Date())
       .find((p) => p.type === "timeZoneName")?.value || "";
@@ -477,13 +477,13 @@ export const formatTime = (isoString, timeZone) => {
 
 // "May 15, 2026, 12:28 PM"
 export const formatDateTime = (isoString, timeZone) => {
-  if (!isoString) return "—";
+  if (!isoString) return "-";
   try {
     const opts = { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" };
     if (timeZone) opts.timeZone = timeZone;
     return new Date(isoString).toLocaleString(undefined, opts);
   } catch {
-    return "—";
+    return "-";
   }
 };
 

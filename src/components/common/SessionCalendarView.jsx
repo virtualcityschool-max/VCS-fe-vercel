@@ -209,7 +209,7 @@ const SessionCalendarView = ({ sessions = [], loading = false }) => {
     <div className="space-y-4 animate-fadeIn">
       {/* Single-row header: nav left, month tabs right */}
       <div className="glass inline-flex items-center gap-3 p-2 rounded-xl border border-slate-800 shadow-xl">
-        {/* Left — prev/next + current month label */}
+        {/* Left - prev/next + current month label */}
         <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={() => setCalendarMonth(monthRange[Math.max(0, activeMonthIdx - 1)])}
@@ -239,7 +239,7 @@ const SessionCalendarView = ({ sessions = [], loading = false }) => {
         {/* Divider */}
         {monthRange.length > 1 && <div className="w-px self-stretch bg-slate-800 shrink-0" />}
 
-        {/* Right — month tabs, vertically scrollable if many */}
+        {/* Right - month tabs, vertically scrollable if many */}
         {monthRange.length > 1 && (
           <div className="flex flex-wrap gap-1.5 overflow-y-auto max-h-20 custom-scrollbar pr-1">
             {monthRange.map((m, idx) => (
@@ -332,7 +332,7 @@ const SessionCalendarView = ({ sessions = [], loading = false }) => {
                         {session.title}
                       </p>
 
-                      {/* Course — large desktop only */}
+                      {/* Course - large desktop only */}
                       <p className="hidden xl:block text-[7px] text-slate-500 truncate font-medium mt-0.5">
                         {session.course?.title || session.course_title || "General"}
                       </p>

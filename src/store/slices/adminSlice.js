@@ -792,7 +792,7 @@ const adminSlice = createSlice({
         state.enrollments.error = action.payload;
       })
       .addCase(createEnrollment.pending, (state) => {
-        // intentionally left blank — modal handles its own loading state
+        // intentionally left blank - modal handles its own loading state
       })
       .addCase(createEnrollment.fulfilled, (state, action) => {
         if (action.payload && state.enrollments.data) {
@@ -808,7 +808,7 @@ const adminSlice = createSlice({
         }
       })
       .addCase(createEnrollment.rejected, () => {
-        // error is surfaced via .unwrap() in the modal — do not touch enrollments.error
+        // error is surfaced via .unwrap() in the modal - do not touch enrollments.error
       })
       .addCase(unenrollStudent.fulfilled, (state, action) => {
         const { courseId, studentId } = action.meta.arg;

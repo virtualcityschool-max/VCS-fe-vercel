@@ -1,17 +1,17 @@
 import { useEffect } from "react";
 
 /**
- * useSeo — lightweight, dependency-free document head manager.
+ * useSeo - lightweight, dependency-free document head manager.
  *
  * Sets the page <title> plus common SEO / social meta tags (description,
  * canonical, Open Graph, Twitter) while a component is mounted, and restores
- * the previous values on unmount. Suitable for a client-rendered SPA — good
+ * the previous values on unmount. Suitable for a client-rendered SPA - good
  * enough for search engines that execute JS and for social link previews,
  * without pulling in a head-management dependency.
  *
  * Usage:
  *   useSeo({
- *     title: "My Post — VCS Blog",
+ *     title: "My Post - VCS Blog",
  *     description: "...",
  *     image: "https://.../cover.jpg",
  *     url: window.location.href,

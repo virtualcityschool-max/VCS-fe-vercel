@@ -23,7 +23,7 @@ const fmtDate = (d) =>
   });
 
 // Convert a naive date+time string that lives in `tz` into UTC milliseconds.
-// Uses Intl.DateTimeFormat.formatToParts — reliable across all browsers.
+// Uses Intl.DateTimeFormat.formatToParts - reliable across all browsers.
 const tzToUTCMs = (dateStr, timeStr, tz) => {
   if (!tz) return new Date(`${dateStr}T${timeStr}`).getTime();
   const naiveUTC = new Date(`${dateStr}T${timeStr}Z`).getTime();
@@ -150,7 +150,7 @@ const StudentTutors = () => {
 
   return (
     <div className="text-white px-6 py-4 pb-24 space-y-8 animate-fadeIn">
-      {/* Page header — matches StudentClasses/StudentAssignments style */}
+      {/* Page header - matches StudentClasses/StudentAssignments style */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-3xl font-black font-poppins mb-2">My Tutors</h1>
@@ -491,7 +491,7 @@ const StudentTutors = () => {
                                 </div>
                               )}
 
-                              {/* Cancellation controls — only for upcoming slots */}
+                              {/* Cancellation controls - only for upcoming slots */}
                               {upcoming && (() => {
                                 const req = cancelBySlot[slot.id];
                                 if (req?.status === "pending") {

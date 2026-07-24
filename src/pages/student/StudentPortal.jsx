@@ -144,7 +144,7 @@ const StudentPortal = () => {
           <DashboardHeader />
         </div>
 
-        {/* Free access + referral — two compact, matched cards side by side so
+        {/* Free access + referral - two compact, matched cards side by side so
             they stay low-profile and don't dominate the dashboard. */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div className="relative overflow-hidden rounded-2xl border border-indigo-500/15 bg-white/[0.03] backdrop-blur-xl px-5 py-4 flex items-center justify-between gap-3">
@@ -156,7 +156,7 @@ const StudentPortal = () => {
               <div className="min-w-0">
                 <p className="text-sm font-bold text-white leading-tight">Need a course?</p>
                 <p className="text-[11px] text-slate-400 leading-tight truncate">
-                  Apply for free access — our team reviews it.
+                  Apply for free access - our team reviews it.
                 </p>
               </div>
             </div>
@@ -168,7 +168,7 @@ const StudentPortal = () => {
             </button>
           </div>
 
-          {/* Referral link — invite others to the platform */}
+          {/* Referral link - invite others to the platform */}
           <ReferralLinkCard />
         </div>
 
@@ -196,7 +196,7 @@ const StudentPortal = () => {
             </div>
           </div>
         ) : !hasCourseData && hasTutorSlots ? (
-          /* Student has tutoring slots but no enrolled courses — show sessions + CTA */
+          /* Student has tutoring slots but no enrolled courses - show sessions + CTA */
           <div className="space-y-8">
             <LiveScheduleList />
             <div className="relative group overflow-hidden rounded-[2.5rem] border border-white/5 bg-slate-900/40 backdrop-blur-xl p-10 text-center shadow-2xl transition-all duration-500 hover:border-blue-500/10">
@@ -209,7 +209,7 @@ const StudentPortal = () => {
                   Ready to <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">Level Up</span>?
                 </h3>
                 <p className="text-slate-400 text-sm font-medium mb-8 leading-relaxed">
-                  You have tutoring slots lined up. Enrol in a course to unlock the full dashboard — attendance, assignments, and more.
+                  You have tutoring slots lined up. Enrol in a course to unlock the full dashboard - attendance, assignments, and more.
                 </p>
                 <button
                   onClick={() => navigate('/courses')}

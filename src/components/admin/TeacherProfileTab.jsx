@@ -103,7 +103,7 @@ const TeacherProfileTab = ({ profile, onUpdate, onCancel, onSaved, readOnly = fa
     <div className="space-y-4">
       <form onSubmit={handleSubmit} className="space-y-4">
 
-        {/* Bio — full width */}
+        {/* Bio - full width */}
         <div>
           <label className="block text-sm font-medium text-slate-300 mb-2">Bio</label>
           <textarea
@@ -121,7 +121,7 @@ const TeacherProfileTab = ({ profile, onUpdate, onCancel, onSaved, readOnly = fa
           {errors.bio && <p className="mt-1 text-xs text-rose-400">{getFieldError("bio")}</p>}
         </div>
 
-        {/* Expertise · Experience · Qualification — 3 col */}
+        {/* Expertise · Experience · Qualification - 3 col */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-2">Expertise</label>
@@ -175,7 +175,7 @@ const TeacherProfileTab = ({ profile, onUpdate, onCancel, onSaved, readOnly = fa
           </div> */}
         </div>
 
-        {/* Phone · LinkedIn — 2 col */}
+        {/* Phone · LinkedIn - 2 col */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-2">Phone Number</label>

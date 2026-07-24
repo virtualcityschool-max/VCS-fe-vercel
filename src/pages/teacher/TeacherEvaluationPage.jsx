@@ -190,7 +190,7 @@ const TeacherEvaluationPage = () => {
                   className="w-full px-4 py-2.5 bg-slate-800/60 border border-amber-700/40 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/50 appearance-none"
                 >
                   <option value="">
-                    {privateList.length === 0 ? "No private students found" : "— Select a student —"}
+                    {privateList.length === 0 ? "No private students found" : "- Select a student -"}
                   </option>
                   {privateList.map((s) => (
                     <option key={s.enrollment_id} value={s.student_id}>

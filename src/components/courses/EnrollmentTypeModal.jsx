@@ -22,7 +22,7 @@ const MANUAL_METHODS = {
 };
 const FALLBACK_WHATSAPP = "WHATSAPP_NUMBER";
 
-// Compact "label: value" row with a copy button — used inside the manual-payment steps.
+// Compact "label: value" row with a copy button - used inside the manual-payment steps.
 const CompactCopyRow = ({ label, value }) => {
   const [copied, setCopied] = useState(false);
 
@@ -32,7 +32,7 @@ const CompactCopyRow = ({ label, value }) => {
       setCopied(true);
       setTimeout(() => setCopied(false), 1200);
     } catch {
-      // Clipboard access can fail (e.g. insecure context) — value is still visible to copy manually.
+      // Clipboard access can fail (e.g. insecure context) - value is still visible to copy manually.
     }
   };
 
@@ -63,7 +63,7 @@ const WhatsAppRow = ({ label, value, chatHref }) => {
       setCopied(true);
       setTimeout(() => setCopied(false), 1200);
     } catch {
-      // Clipboard access can fail (e.g. insecure context) — value is still visible to copy manually.
+      // Clipboard access can fail (e.g. insecure context) - value is still visible to copy manually.
     }
   };
 
@@ -108,7 +108,7 @@ const ChecklistRow = ({ text, value }) => {
       setCopied(true);
       setTimeout(() => setCopied(false), 1200);
     } catch {
-      // Clipboard access can fail (e.g. insecure context) — value is still visible to copy manually.
+      // Clipboard access can fail (e.g. insecure context) - value is still visible to copy manually.
     }
   };
 
@@ -136,7 +136,7 @@ const ChecklistRow = ({ text, value }) => {
 };
 
 // A full-width, clickable payment-method option (replaces the old Cancel/Confirm button row).
-// Pass `tooltip` (with disabled) to explain why the option can't be used — shown on hover.
+// Pass `tooltip` (with disabled) to explain why the option can't be used - shown on hover.
 const PaymentMethodCard = ({
   icon,
   iconBg,
@@ -256,7 +256,7 @@ const EnrollmentTypeModal = ({
                   <i className="fas fa-wallet text-amber-400" />
                 </div>
                 <h2 className="text-xl font-black font-poppins text-white mb-1">
-                  {manualMethod.service} — Manual Payment
+                  {manualMethod.service} - Manual Payment
                 </h2>
                 <p className="text-slate-400 text-sm">
                   Enroll in <span className="text-white font-semibold">{title}</span>
@@ -268,7 +268,7 @@ const EnrollmentTypeModal = ({
                 <i className="fas fa-circle-info text-amber-400 text-sm mt-0.5 shrink-0" />
                 <p className="text-amber-200/90 text-sm leading-relaxed">
                   Your <span className="font-bold">payment screenshot</span> and{" "}
-                  <span className="font-bold">student email</span> are both required —
+                  <span className="font-bold">student email</span> are both required -
                   our admin team uses them to verify your payment and enroll you.
                 </p>
               </div>
@@ -369,7 +369,7 @@ const EnrollmentTypeModal = ({
                 badgeColor="bg-indigo-500/20 text-indigo-300"
                 description={
                   gumroadAvailable
-                    ? "Pay online now — you're enrolled automatically once payment completes."
+                    ? "Pay online now - you're enrolled automatically once payment completes."
                     : "Online payment is not available for this course right now."
                 }
                 onClick={gumroadAvailable ? onConfirm : undefined}
@@ -384,7 +384,7 @@ const EnrollmentTypeModal = ({
                 title="Easypaisa"
                 badge="Manual"
                 badgeColor="bg-amber-500/20 text-amber-300"
-                description="Pay via Easypaisa transfer — our team verifies and enrolls you manually."
+                description="Pay via Easypaisa transfer - our team verifies and enrolls you manually."
                 onClick={() => {
                   setManualMethod(MANUAL_METHODS.easypaisa);
                   setView("manual");
@@ -398,7 +398,7 @@ const EnrollmentTypeModal = ({
                 title="SadaPay"
                 badge="Manual"
                 badgeColor="bg-emerald-500/20 text-emerald-300"
-                description="Pay via SadaPay transfer — our team verifies and enrolls you manually."
+                description="Pay via SadaPay transfer - our team verifies and enrolls you manually."
                 onClick={() => {
                   setManualMethod(MANUAL_METHODS.sadapay);
                   setView("manual");

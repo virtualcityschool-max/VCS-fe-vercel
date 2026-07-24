@@ -36,7 +36,7 @@ export const StatusPill = ({ value, active, onClick, disabled }) => {
 };
 
 export const fmtTime = (iso) => {
-  if (!iso) return <span className="text-slate-600 italic text-xs">—</span>;
+  if (!iso) return <span className="text-slate-600 italic text-xs">-</span>;
   return (
     <span className="text-slate-300 text-xs tabular-nums">
       {new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}

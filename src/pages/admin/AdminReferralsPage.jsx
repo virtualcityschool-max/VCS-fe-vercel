@@ -26,7 +26,7 @@ const roleBadge = (role) => {
 };
 
 const fmtDate = (v) =>
-  v ? new Date(v).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" }) : "—";
+  v ? new Date(v).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" }) : "-";
 
 // Prominent signup count with a clear Student / Teacher breakdown.
 // Big white number = total; blue graduation icon = students; purple teacher
@@ -66,10 +66,10 @@ const CourseChips = ({ courses }) =>
       ))}
     </div>
   ) : (
-    <span className="text-slate-600 text-xs">—</span>
+    <span className="text-slate-600 text-xs">-</span>
   );
 
-// Referred-user list for one role tab — table on desktop, cards on mobile.
+// Referred-user list for one role tab - table on desktop, cards on mobile.
 // Both students and teachers share the same shape: name, signup date, and the
 // courses they're "enrolled" on (enrolled courses / courses taught).
 const ReferredList = ({ list, nameLabel, emptyText }) => {
@@ -230,7 +230,6 @@ const AdminReferralsPage = () => {
           className="w-full sm:max-w-sm"
         />
         <div className="sm:ml-auto flex items-center gap-2">
-          <span className="text-xs text-slate-500">Sort</span>
           <FilterSelect value={ordering} onChange={(e) => setOrdering(e.target.value)} className="min-w-[160px]">
             {ORDERINGS.map((o) => (
               <option key={o.value} value={o.value}>
@@ -347,7 +346,7 @@ const AdminReferralsPage = () => {
               </div>
 
               <div className="mt-3 space-y-2">
-                {/* Signups — prominent, with Student / Teacher breakdown */}
+                {/* Signups - prominent, with Student / Teacher breakdown */}
                 <div className="rounded-xl bg-slate-800/50 px-3 py-2.5 flex items-center justify-between gap-2">
                   <span className="text-[10px] text-slate-500">Signups</span>
                   <SignupCount total={r.total_signups} students={r.student_signups} size="text-lg" />
@@ -376,7 +375,7 @@ const AdminReferralsPage = () => {
         )}
       </div>
 
-      {/* Detail modal — users who signed up through this referrer */}
+      {/* Detail modal - users who signed up through this referrer */}
       {detailUser && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="w-full max-w-2xl bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl max-h-[85vh] overflow-hidden flex flex-col">

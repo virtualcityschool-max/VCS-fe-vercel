@@ -50,7 +50,7 @@ const AdminBlogEditorPage = () => {
   const [leaveConfirm, setLeaveConfirm] = useState(false);
   const [dirty, setDirty] = useState(false);
   // Author is locked by default (auto-filled) and only editable after the admin
-  // clicks the lock icon — prevents accidental edits to the published byline.
+  // clicks the lock icon - prevents accidental edits to the published byline.
   const [authorLocked, setAuthorLocked] = useState(true);
 
   // Load existing blog when editing.
@@ -180,7 +180,7 @@ const AdminBlogEditorPage = () => {
 
   return (
     <div className="min-h-screen bg-slate-950 text-white">
-      {/* Sticky action bar — no divider so the page header stays clean */}
+      {/* Sticky action bar - no divider so the page header stays clean */}
       <div className="sticky top-0 z-30 bg-slate-950/85 backdrop-blur-xl">
         <div className="max-w-6xl mx-auto px-5 sm:px-8 h-16 flex items-center justify-between gap-4">
           <button
@@ -241,7 +241,7 @@ const AdminBlogEditorPage = () => {
                 className={`${inputCls} resize-none`}
                 rows={2}
                 maxLength={300}
-                placeholder="A short summary shown on cards and used for SEO (optional — auto-generated if left blank)."
+                placeholder="A short summary shown on cards and used for SEO (optional - auto-generated if left blank)."
                 value={form.excerpt}
                 onChange={(e) => onChange("excerpt", e.target.value)}
               />
@@ -256,19 +256,19 @@ const AdminBlogEditorPage = () => {
                 <QuillEditor
                   value={form.content}
                   onChange={(val) => onChange("content", val)}
-                  placeholder="Write your article — use the H1/H2/H3 buttons for headings…"
+                  placeholder="Write your article - use the H1/H2/H3 buttons for headings…"
                 />
               </div>
               <p className="text-[10px] text-slate-600 mt-2">
                 <i className="fas fa-shield-halved mr-1" /> Content is sanitized on
-                save — unsafe HTML/scripts are automatically removed.
+                save - unsafe HTML/scripts are automatically removed.
               </p>
             </div>
           </div>
 
           {/* Sidebar */}
           <aside className="space-y-6">
-            {/* Current status (read-only indicator — actions live in the top bar) */}
+            {/* Current status (read-only indicator - actions live in the top bar) */}
             {isEdit && (
               <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-5 flex items-center gap-3">
                 <span

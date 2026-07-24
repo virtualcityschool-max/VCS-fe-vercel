@@ -32,7 +32,7 @@ const AdminOverviewPage = () => {
       const data = await adminService.getAdminSessionsDashboard();
       setUpcomingSessions(data?.upcoming_admin_sessions || []);
     } catch {
-      // non-critical — silently ignore
+      // non-critical - silently ignore
     } finally {
       setSessionsLoading(false);
     }

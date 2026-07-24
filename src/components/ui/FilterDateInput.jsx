@@ -1,7 +1,7 @@
 import React from "react";
 
 /**
- * Styled date <input> for filter bars — matches FilterSelect visually.
+ * Styled date <input> for filter bars - matches FilterSelect visually.
  * Props: label, value, min, max, onChange, className
  */
 const FilterDateInput = ({ label, className = "", ...props }) => (

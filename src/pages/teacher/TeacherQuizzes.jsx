@@ -46,7 +46,7 @@ const statusLabel = (status) => {
   if (status === "graded")      return "Graded";
   if (status === "auto_graded") return "Auto Graded";
   if (status === "submitted")   return "Pending Grade";
-  return status ?? "—";
+  return status ?? "-";
 };
 
 // ── Question Builder ──────────────────────────────────────────────────────────
@@ -142,7 +142,7 @@ const QuestionBuilder = ({ questions, onChange, marksPerQuestion = 1 }) => {
           {/* Options */}
           {q.question_type === "SINGLE_CHOICE" && (
             <div className="space-y-2">
-              <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Options — select 1 correct</p>
+              <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Options - select 1 correct</p>
               {q.options.map((opt, oIdx) => (
                 <div key={oIdx} className="flex items-center gap-2">
                   <input
@@ -166,7 +166,7 @@ const QuestionBuilder = ({ questions, onChange, marksPerQuestion = 1 }) => {
 
           {q.question_type === "MULTIPLE_CHOICE" && (
             <div className="space-y-2">
-              <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Options — check all correct</p>
+              <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Options - check all correct</p>
               {q.options.map((opt, oIdx) => (
                 <div key={oIdx} className="flex items-center gap-2">
                   <input
@@ -1052,25 +1052,33 @@ const TeacherQuizzes = ({
                             </span>
                           )}
                         </div>
-                        <p className="text-xs text-slate-400 mt-0.5">
-                          {sub.obtained_marks != null ? `${sub.obtained_marks} / ${sub.total_marks_snapshot}` : "Not graded"}
-                          {sub.percentage != null ? ` (${sub.percentage}%)` : ""}
-                        </p>
-                        <p className="text-xs text-slate-500 mt-0.5">{formatDateTime(sub.submitted_at)}</p>
+                        {sub.obtained_marks != null ? (
+                          <p className="mt-1 text-base font-black leading-none">
+                            <span className="text-emerald-400">{sub.obtained_marks}</span>
+                            <span className="text-slate-400"> / {sub.total_marks_snapshot}</span>
+                            {sub.percentage != null && (
+                              <span className="ml-1.5 text-xs font-bold text-emerald-400">({sub.percentage}%)</span>
+                            )}
+                          </p>
+                        ) : (
+                          <p className="mt-1 text-xs text-slate-500 italic">Not graded</p>
+                        )}
+                        <p className="text-xs text-slate-500 mt-1">{formatDateTime(sub.submitted_at)}</p>
                       </div>
-                      <div className="flex flex-col items-end gap-2">
+                      <div className="flex flex-col items-end gap-2 shrink-0">
                         <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${statusColor(sub.status)}`}>
                           {statusLabel(sub.status)}
                         </span>
                         <button
                           type="button"
                           onClick={() => openGrading(sub.id)}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition ${
+                          className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-black text-white transition ${
                             sub.status === "submitted"
                               ? "bg-indigo-600 hover:bg-indigo-500"
                               : "bg-slate-700 hover:bg-slate-600"
                           }`}
                         >
+                          <i className={`fas ${sub.status === "submitted" ? "fa-pen" : "fa-eye"} text-[10px]`} />
                           {sub.status === "submitted" ? "Grade" : "View"}
                         </button>
                       </div>
@@ -1091,7 +1099,7 @@ const TeacherQuizzes = ({
           <div className="bg-slate-900 rounded-3xl border border-slate-800 w-full max-w-xl max-h-[90vh] flex flex-col">
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 flex-shrink-0">
               <h2 className="font-bold text-white text-sm">
-                {selectedQuizSubmission ? `Submission — ${selectedQuizSubmission.student_name}` : "Loading…"}
+                {selectedQuizSubmission ? `Submission - ${selectedQuizSubmission.student_name}` : "Loading…"}
               </h2>
               <button
                 onClick={() => { setGradingSubId(null); dispatch(clearSelectedQuizSubmission()); }}
@@ -1113,12 +1121,12 @@ const TeacherQuizzes = ({
                     <div className="bg-slate-800/60 rounded-2xl p-3">
                       <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Score</p>
                       <p className="text-white font-bold">
-                        {selectedQuizSubmission.obtained_marks != null ? selectedQuizSubmission.obtained_marks : "—"} / {selectedQuizSubmission.total_marks_snapshot}
+                        {selectedQuizSubmission.obtained_marks != null ? selectedQuizSubmission.obtained_marks : "-"} / {selectedQuizSubmission.total_marks_snapshot}
                       </p>
                     </div>
                     <div className="bg-slate-800/60 rounded-2xl p-3">
                       <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">%</p>
-                      <p className="text-white font-bold">{selectedQuizSubmission.percentage != null ? `${selectedQuizSubmission.percentage}%` : "—"}</p>
+                      <p className="text-white font-bold">{selectedQuizSubmission.percentage != null ? `${selectedQuizSubmission.percentage}%` : "-"}</p>
                     </div>
                     <div className="bg-slate-800/60 rounded-2xl p-3">
                       <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Status</p>
@@ -1171,7 +1179,7 @@ const TeacherQuizzes = ({
                             </div>
                           ) : (
                             <p className="text-xs text-slate-400">
-                              Marks: <span className="text-white font-semibold">{ans.obtained_marks ?? "—"}</span>
+                              Marks: <span className="text-white font-semibold">{ans.obtained_marks ?? "-"}</span>
                             </p>
                           )}
                         </div>
@@ -1180,7 +1188,7 @@ const TeacherQuizzes = ({
                           <p className="text-xs text-slate-500 mb-1">Selected options: {ans.selected_options?.join(", ") || "none"}</p>
                           <p className="text-xs text-slate-400">
                             Marks: <span className={`font-semibold ${ans.obtained_marks > 0 ? "text-emerald-400" : "text-rose-400"}`}>
-                              {ans.obtained_marks ?? "—"} / {ans.max_marks}
+                              {ans.obtained_marks ?? "-"} / {ans.max_marks}
                             </span>
                           </p>
                         </div>

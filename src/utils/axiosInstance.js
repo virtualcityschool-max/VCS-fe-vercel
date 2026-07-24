@@ -45,7 +45,7 @@ axiosInstance.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
-    // Add X-Timezone header — profile timezone takes priority, browser timezone as fallback
+    // Add X-Timezone header - profile timezone takes priority, browser timezone as fallback
     const timezone =
       authStorage.getAuthState()?.user?.timezone ||
       Intl.DateTimeFormat().resolvedOptions().timeZone;

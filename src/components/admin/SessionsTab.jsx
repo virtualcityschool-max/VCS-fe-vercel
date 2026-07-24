@@ -30,7 +30,7 @@ const StatusHeaderTooltip = () => {
           style={{ top: pos.top, left: pos.left, transform: "translate(-50%, calc(-100% - 10px))" }}
         >
           <div className="bg-slate-800 border border-slate-700 rounded-xl shadow-2xl px-3 py-2.5 text-[11px] text-slate-300 leading-relaxed">
-            For recurring sessions, this is the first occurrence's status — not the overall series status.
+            For recurring sessions, this is the first occurrence's status - not the overall series status.
           </div>
           <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-700 -mt-px" />
         </div>,
@@ -119,7 +119,7 @@ const SessionsTab = ({
 }) => {
   const { formatDate, formatTime, timezoneAbbr } = useDateFormatters();
   const [view, setView] = useState("table");
-  const [calendarMonth, setCalendarMonth] = useState(null); // { year, month } — null = auto from data
+  const [calendarMonth, setCalendarMonth] = useState(null); // { year, month } - null = auto from data
 
   // ── filtered sessions (search only; teacher filtering is done server-side) ──
   const filteredSessions = useMemo(() => {
@@ -287,7 +287,7 @@ const SessionsTab = ({
     <div className="space-y-6">
       {/* ── Header bar ── */}
       <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-        {/* View toggle — hidden on mobile (calendar-only on mobile) */}
+        {/* View toggle - hidden on mobile (calendar-only on mobile) */}
         <div className="hidden sm:flex bg-slate-800 border border-slate-700 rounded-lg overflow-hidden shrink-0">
           <button
             onClick={() => setView("table")}
@@ -306,7 +306,7 @@ const SessionsTab = ({
         </div>
         <div className="w-full sm:w-auto grid grid-cols-2 sm:flex sm:flex-wrap sm:items-center gap-2 sm:ml-auto">
 
-        {/* Month nav — inline, only in calendar view with data */}
+        {/* Month nav - inline, only in calendar view with data */}
         {/* {view === "calendar" && activeMonthData && (
           <div className="flex items-center gap-1 bg-slate-800 border border-slate-700 rounded-lg px-1 py-1 shrink-0">
             <button
@@ -329,7 +329,7 @@ const SessionsTab = ({
           </div>
         )} */}
 
-        {/* Date range — only in calendar view when range is known */}
+        {/* Date range - only in calendar view when range is known */}
         {view === "calendar" && calendarStart && calendarEnd && (
           <div className="col-span-2 sm:col-auto flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 shrink-0">
             <i className="fas fa-calendar-alt text-indigo-400 text-xs"></i>
@@ -377,7 +377,7 @@ const SessionsTab = ({
         </FilterSelect>
       </div>
 
-        {/* Create Class — pushed to the right */}
+        {/* Create Class - pushed to the right */}
         <button
           onClick={() => setActiveModal("create-session")}
           className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-lg active:scale-95 transition flex items-center gap-2 shrink-0"
@@ -445,8 +445,8 @@ const SessionsTab = ({
                         {session.category == "special" && (
                           <span className="mt-0.5 inline-block px-1.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-violet-500/20 text-violet-300 border border-violet-500/20">Special Session</span>
                         )}
-                        <p className="text-xs text-slate-400 mt-0.5">{session.course?.title || session.course_title || "—"}</p>
-                        <p className="text-xs text-slate-500">{session.teacher_name || "—"}</p>
+                        <p className="text-xs text-slate-400 mt-0.5">{session.course?.title || session.course_title || "-"}</p>
+                        <p className="text-xs text-slate-500">{session.teacher_name || "-"}</p>
                       </div>
                       {getStatusBadge(session.status)}
                     </div>
@@ -511,8 +511,8 @@ const SessionsTab = ({
                           <span className="mt-1 inline-block px-1.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-violet-500/20 text-violet-300 border border-violet-500/20">Special Session</span>
                         )}
                       </td>
-                      <td className="px-5 py-4 text-slate-300 text-sm">{session.course?.title || session.course_title || "—"}</td>
-                      <td className="px-5 py-4 text-slate-300 text-sm">{session.teacher_name || "—"}</td>
+                      <td className="px-5 py-4 text-slate-300 text-sm">{session.course?.title || session.course_title || "-"}</td>
+                      <td className="px-5 py-4 text-slate-300 text-sm">{session.teacher_name || "-"}</td>
                       <td className="px-5 py-4">
                         <div className="text-slate-300 text-sm">{formatDate(session.scheduled_at || session.start_time)}</div>
                         {formatTime(session.scheduled_at || session.start_time) && (
@@ -521,7 +521,7 @@ const SessionsTab = ({
                           </div>
                         )}
                       </td>
-                      <td className="px-5 py-4 text-slate-300 text-sm">{formatDate(session.recurrence_end_date) || "—"}</td>
+                      <td className="px-5 py-4 text-slate-300 text-sm">{formatDate(session.recurrence_end_date) || "-"}</td>
                       <td className="px-5 py-4">
                         {session.recurrence_days?.length > 0 ? (
                           <div className="flex flex-wrap gap-1">
@@ -533,7 +533,7 @@ const SessionsTab = ({
                           const derived = getDayFromScheduledAt(session.scheduled_at || session.start_time);
                           return derived
                             ? <span className="px-1.5 py-0.5 bg-slate-700/50 text-slate-400 border border-slate-600/40 rounded text-xs font-medium">{derived}</span>
-                            : <span className="text-slate-500 text-xs">—</span>;
+                            : <span className="text-slate-500 text-xs">-</span>;
                         })()}
                       </td>
                       <td className="px-5 py-4">{getStatusBadge(session.status)}</td>
@@ -579,8 +579,8 @@ const SessionsTab = ({
               <div>
                 <h3 className="text-xl font-black text-white tracking-tight">Create New Session</h3>
                 <p className="text-slate-500 text-[12px] font-medium mt-1">
-                  {createMode === "now"     ? "Launches immediately — max 1 hour" :
-                   createMode === "delayed" ? "Starts after a set delay — max 1 hour" :
+                  {createMode === "now"     ? "Launches immediately - max 1 hour" :
+                   createMode === "delayed" ? "Starts after a set delay - max 1 hour" :
                                              "Schedule a recurring session for a published course"}
                 </p>
               </div>
@@ -644,7 +644,7 @@ const SessionsTab = ({
                   {/* Title */}
                   <div>
                     <label className="block text-sm font-medium text-slate-300 mb-2">Session Title <span className="text-red-400">*</span></label>
-                    <Input type="text" placeholder="e.g. Python Basics — Live Q&A"
+                    <Input type="text" placeholder="e.g. Python Basics - Live Q&A"
                       value={createSessionForm.title}
                       onChange={(e) => { setCreateSessionForm({ ...createSessionForm, title: e.target.value }); clearCreateSessionFieldError("title"); }}
                       className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 text-sm ${createSessionErrors?.title ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
@@ -724,7 +724,7 @@ const SessionsTab = ({
                           return (
                             <p className="text-[10px] text-blue-400 mt-1.5 flex items-center gap-1">
                               <i className="fas fa-info-circle" />
-                              No upcoming session — you can create a new one.
+                              No upcoming session - you can create a new one.
                             </p>
                           );
                         }

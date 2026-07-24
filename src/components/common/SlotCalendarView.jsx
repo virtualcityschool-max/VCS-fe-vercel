@@ -546,7 +546,7 @@ const SlotCalendarView = ({ slots = [], loading = false, onDelete, onEdit, delet
                         {/* Left accent bar */}
                         <div className={`absolute left-0 top-0 bottom-0 w-0.5 ${isBooked ? "bg-amber-400/70" : "bg-indigo-400/70"}`} />
 
-                        {/* Name / Open  +  timezone — top row */}
+                        {/* Name / Open  +  timezone - top row */}
                         <div className="flex items-center justify-between gap-1 mb-0.5">
                           {isBooked && slot.booked_by_name ? (
                             <p className="text-[8px] font-black text-white truncate leading-tight min-w-0">
@@ -585,7 +585,7 @@ const SlotCalendarView = ({ slots = [], loading = false, onDelete, onEdit, delet
                           </div>
                         )}
 
-                        {/* Edit / delete (hover, desktop) — unbooked always; booked when allowDeleteBooked */}
+                        {/* Edit / delete (hover, desktop) - unbooked always; booked when allowDeleteBooked */}
                         {(!isBooked || allowDeleteBooked) && (
                           <div className="hidden md:flex items-center gap-1 mt-1 opacity-0 group-hover/slot:opacity-100 transition-opacity duration-150">
                             {!isBooked && onEdit && (

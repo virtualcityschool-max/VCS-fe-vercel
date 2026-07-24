@@ -5,7 +5,7 @@ import TimezoneTag from "../ui/TimezoneTag";
 import SessionCountdown from "../common/SessionCountdown";
 import { getStatusBadge } from "../common/SessionBadge";
 
-// View 1 — student-style flat card (avatar | info | join/leave actions)
+// View 1 - student-style flat card (avatar | info | join/leave actions)
 // Used by: student classes tab, teacher "Admin Sessions" tab
 const StudentSessionCard = ({
   session,

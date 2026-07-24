@@ -37,7 +37,7 @@ export const approveUser = createAsyncThunk(
   async (userId, { rejectWithValue, dispatch }) => {
     try {
       const result = await authService.approveUser(userId);
-      // Refresh both lists — approving may remove the user from either tab
+      // Refresh both lists - approving may remove the user from either tab
       dispatch(fetchPendingApprovals());
       dispatch(fetchRejectedApprovals());
       return { userId, result };

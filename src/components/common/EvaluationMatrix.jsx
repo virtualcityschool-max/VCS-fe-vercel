@@ -21,7 +21,7 @@ const GradeBadge = ({ grade }) => {
   const style = GRADE_STYLE[grade] ?? "bg-slate-700/50 text-slate-400 border-slate-600/30";
   return (
     <span className={`inline-flex items-center justify-center px-3 py-1 rounded-lg text-sm font-black border whitespace-nowrap min-w-[40px] ${style}`}>
-      {grade ?? "—"}
+      {grade ?? "-"}
     </span>
   );
 };
@@ -151,13 +151,13 @@ const EvaluationMatrix = ({ students = [], courseStatus, gradingScale: gradingSc
                 <div className="flex-1 px-3 py-2.5 text-center">
                   <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-0.5">Obtained</p>
                   <p className="text-white font-bold text-sm tabular-nums">
-                    {obtained ?? "—"} <span className="text-slate-600 font-normal text-xs">/{totalCourseMarks}</span>
+                    {obtained ?? "-"} <span className="text-slate-600 font-normal text-xs">/{totalCourseMarks}</span>
                   </p>
                 </div>
                 <div className="flex-1 px-3 py-2.5 text-center">
                   <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-0.5">Percentage</p>
                   <p className={`font-bold text-sm tabular-nums ${pct != null ? (pct >= 75 ? "text-emerald-400" : "text-rose-400") : "text-slate-600"}`}>
-                    {pct != null ? `${pct}%` : "—"}
+                    {pct != null ? `${pct}%` : "-"}
                   </p>
                 </div>
               </div>
@@ -175,7 +175,7 @@ const EvaluationMatrix = ({ students = [], courseStatus, gradingScale: gradingSc
                         <div key={a.id} className="flex items-center gap-2">
                           <span className="text-slate-400 text-xs truncate flex-1">{a.title}</span>
                           <span className={`text-xs font-bold tabular-nums w-8 text-right shrink-0 ${sa?.is_graded ? "text-white" : "text-slate-600"}`}>
-                            {sa?.is_graded ? sa.score : "—"}
+                            {sa?.is_graded ? sa.score : "-"}
                           </span>
                           <span className="text-slate-600 text-[10px] shrink-0">/ {a.max_score}</span>
                         </div>
@@ -198,7 +198,7 @@ const EvaluationMatrix = ({ students = [], courseStatus, gradingScale: gradingSc
                         <div key={q.id} className="flex items-center gap-2">
                           <span className="text-slate-400 text-xs truncate flex-1">{q.title}</span>
                           <span className={`text-xs font-bold tabular-nums w-8 text-right shrink-0 ${sq?.is_graded ? "text-white" : "text-slate-600"}`}>
-                            {sq?.is_graded ? (sq.obtained_marks ?? sq.score) : "—"}
+                            {sq?.is_graded ? (sq.obtained_marks ?? sq.score) : "-"}
                           </span>
                           <span className="text-slate-600 text-[10px] shrink-0">/ {q.max_score}</span>
                         </div>
@@ -373,7 +373,7 @@ const EvaluationMatrix = ({ students = [], courseStatus, gradingScale: gradingSc
                         <td key={`a-${a.id}`} className="px-4 py-3.5 text-center group-hover:bg-slate-800/30 transition-colors">
                           {sa?.is_graded
                             ? <span className="text-white font-bold tabular-nums">{sa.score}</span>
-                            : <span className="text-slate-600 text-xs">—</span>
+                            : <span className="text-slate-600 text-xs">-</span>
                           }
                         </td>
                       );
@@ -385,7 +385,7 @@ const EvaluationMatrix = ({ students = [], courseStatus, gradingScale: gradingSc
                         <td key={`q-${q.id}`} className="px-4 py-3.5 text-center group-hover:bg-slate-800/30 transition-colors">
                           {sq?.is_graded
                             ? <span className="text-white font-bold tabular-nums">{sq.obtained_marks ?? sq.score}</span>
-                            : <span className="text-slate-600 text-xs">—</span>
+                            : <span className="text-slate-600 text-xs">-</span>
                           }
                         </td>
                       );
@@ -400,7 +400,7 @@ const EvaluationMatrix = ({ students = [], courseStatus, gradingScale: gradingSc
                           {pct}%
                         </span>
                       ) : (
-                        <span className="text-slate-600 text-xs">—</span>
+                        <span className="text-slate-600 text-xs">-</span>
                       )}
                     </td>
 
@@ -409,7 +409,7 @@ const EvaluationMatrix = ({ students = [], courseStatus, gradingScale: gradingSc
                       style={{ right: GRADE_W, minWidth: OBTAINED_W }}
                     >
                       <span className="text-white font-bold tabular-nums">
-                        {s.combined_totals?.computed_obtained ?? "—"}/{s.combined_totals?.computed_total}
+                        {s.combined_totals?.computed_obtained ?? "-"}/{s.combined_totals?.computed_total}
                       </span>
                     </td>
 

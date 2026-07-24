@@ -318,8 +318,8 @@ const AdminCourseDetailPage = () => {
                 {course.description}
               </p>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <MetaTile icon="user" label="Tutor" value={getDisplayName(course.instructor) || "—"} />
-                <MetaTile icon="tag" label="Category" value={formatCategoryLabel(course.category) || "—"} />
+                <MetaTile icon="user" label="Tutor" value={getDisplayName(course.instructor) || "-"} />
+                <MetaTile icon="tag" label="Category" value={formatCategoryLabel(course.category) || "-"} />
                 <MetaTile
                   icon="wallet"
                   label="Price"

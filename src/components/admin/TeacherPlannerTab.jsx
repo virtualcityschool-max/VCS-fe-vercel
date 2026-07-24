@@ -28,7 +28,7 @@ const StatusHeaderTooltip = () => {
           style={{ top: pos.top, left: pos.left, transform: "translate(-50%, calc(-100% - 10px))" }}
         >
           <div className="bg-slate-800 border border-slate-700 rounded-xl shadow-2xl px-3 py-2.5 text-[11px] text-slate-300 leading-relaxed">
-            For recurring sessions, this is the first occurrence's status — not the overall series status.
+            For recurring sessions, this is the first occurrence's status - not the overall series status.
           </div>
           <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-700 -mt-px" />
         </div>,
@@ -247,7 +247,7 @@ const TeacherPlannerTab = ({
 
   return (
     <div className="space-y-6">
-      {/* Header bar — view toggle left, create button right */}
+      {/* Header bar - view toggle left, create button right */}
       <div className="flex items-center justify-between gap-3 flex-wrap">
         {/* View toggle */}
         <div className="flex bg-slate-800 border border-slate-700 rounded-lg overflow-hidden shrink-0">
@@ -400,7 +400,7 @@ const TeacherPlannerTab = ({
                           ))}
                         </div>
                       ) : (
-                        <span className="text-slate-500 text-sm">—</span>
+                        <span className="text-slate-500 text-sm">-</span>
                       )}
                     </td>
                     <td className="px-5 py-4">
@@ -419,11 +419,11 @@ const TeacherPlannerTab = ({
                           ))}
                         </div>
                       ) : (
-                        <span className="text-slate-500 text-xs">—</span>
+                        <span className="text-slate-500 text-xs">-</span>
                       )}
                     </td>
                     <td className="px-5 py-4 text-slate-300 text-sm">
-                      {session.recurrence_end_date ? formatDate(session.recurrence_end_date) : "—"}
+                      {session.recurrence_end_date ? formatDate(session.recurrence_end_date) : "-"}
                     </td>
                     <td className="px-5 py-4">{getStatusBadge(session.status)}</td>
                     <td className="px-5 py-4">

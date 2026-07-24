@@ -42,6 +42,19 @@ const PreviewButton = ({ url, className = "" }) => {
   );
 };
 
+// Match the quiz-submissions status styling so both views read the same.
+const subStatusColor = (status) => {
+  if (status === "graded") return "text-emerald-400 bg-emerald-500/10";
+  if (status === "late") return "text-orange-400 bg-orange-500/10";
+  return "text-amber-400 bg-amber-500/10"; // submitted
+};
+const subStatusLabel = (status) => {
+  if (status === "graded") return "Graded";
+  if (status === "late") return "Late";
+  if (status === "submitted") return "Pending Grade";
+  return status ?? "-";
+};
+
 const TeacherGrading = ({
   externalFilters,
   onFiltersChange,
@@ -409,35 +422,63 @@ const TeacherGrading = ({
 
             <div className="space-y-4 max-h-[400px] overflow-y-auto">
               {submissions?.length ? (
-                submissions.map((sub) => (
-                  <div
-                    key={sub.id}
-                    className="bg-slate-800 p-4 rounded-xl flex justify-between items-center"
-                  >
-                    <div>
-                      <p className="text-sm font-bold">{sub.student_name}</p>
-                      <p className="text-xs text-slate-400">
-                        Submitted at:{" "}
-                        {formatDateTime(sub.submitted_at)}
-                      </p>
-                    </div>
-
-                    <button
-                      className={`px-3 py-1 rounded text-xs ${
-                        sub.status === "graded"
-                          ? "bg-green-600"
-                          : "bg-indigo-600"
-                      }`}
-                      onClick={() => {
-                        dispatch(clearSelectedSubmission());
-                        dispatch(fetchSubmissionById(sub.id));
-                        setSelectedAssignment(sub.id);
-                      }}
+                submissions.map((sub) => {
+                  const max = selectedAssignmentForSubmissions?.max_score;
+                  const pct =
+                    sub.score != null && max
+                      ? Math.round((sub.score / max) * 100)
+                      : null;
+                  return (
+                    <div
+                      key={sub.id}
+                      className="bg-slate-800 p-4 rounded-2xl flex items-center justify-between gap-3"
                     >
-                      {sub.status === "graded" ? "Graded" : "Grade"}
-                    </button>
-                  </div>
-                ))
+                      {/* Left: student + marks + date */}
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold text-white">{sub.student_name}</p>
+                        {sub.score != null ? (
+                          <p className="mt-1 text-base font-black leading-none">
+                            <span className="text-emerald-400">{sub.score}</span>
+                            <span className="text-slate-400"> / {max ?? "-"}</span>
+                            {pct != null && (
+                              <span className="ml-1.5 text-xs font-bold text-emerald-400">({pct}%)</span>
+                            )}
+                          </p>
+                        ) : (
+                          <p className="mt-1 text-xs text-slate-500 italic">Not graded</p>
+                        )}
+                        <p className="text-xs text-slate-500 mt-1">
+                          {formatDateTime(sub.submitted_at)}
+                        </p>
+                      </div>
+
+                      {/* Right: status + action */}
+                      <div className="flex flex-col items-end gap-2 shrink-0">
+                        <span
+                          className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${subStatusColor(sub.status)}`}
+                        >
+                          {subStatusLabel(sub.status)}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            dispatch(clearSelectedSubmission());
+                            dispatch(fetchSubmissionById(sub.id));
+                            setSelectedAssignment(sub.id);
+                          }}
+                          className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-black transition ${
+                            sub.status === "graded"
+                              ? "bg-slate-700 hover:bg-slate-600 text-white"
+                              : "bg-indigo-600 hover:bg-indigo-500 text-white"
+                          }`}
+                        >
+                          <i className={`fas ${sub.status === "graded" ? "fa-eye" : "fa-pen"} text-[10px]`} />
+                          {sub.status === "graded" ? "View" : "Grade"}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })
               ) : (
                 <p className="text-slate-400 text-sm">No submissions yet</p>
               )}
@@ -616,7 +657,7 @@ const TeacherGrading = ({
                   Description
                 </p>
                 <p className="text-slate-300 text-sm whitespace-pre-wrap">
-                  {viewAssignment.description || "—"}
+                  {viewAssignment.description || "-"}
                 </p>
               </div>
 
@@ -658,7 +699,7 @@ const TeacherGrading = ({
                 <p className="text-slate-300 text-sm">
                   {viewAssignment.due_date
                     ? formatDateTime(viewAssignment.due_date)
-                    : "—"}
+                    : "-"}
                 </p>
               </div>
 
@@ -804,7 +845,7 @@ const TeacherGrading = ({
                   <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">
                     Attachment{" "}
                     <span className="ml-1 text-[10px] normal-case tracking-normal font-medium text-slate-600">
-                      (Replace existing — Optional)
+                      (Replace existing - Optional)
                     </span>
                   </label>
 
@@ -1162,7 +1203,7 @@ const TeacherGrading = ({
                           {privateStudents.map((s) => (
                             <option key={s.enrollment_id} value={s.student_id}>
                               {s.username}
-                              {s.email ? ` — ${s.email}` : ""}
+                              {s.email ? ` - ${s.email}` : ""}
                             </option>
                           ))}
                         </select>
@@ -1194,7 +1235,7 @@ const TeacherGrading = ({
                   <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">
                     Attachment{" "}
                     <span className="ml-1 text-[10px] normal-case tracking-normal font-medium text-slate-600">
-                      (PDF, DOC, ZIP — Optional)
+                      (PDF, DOC, ZIP - Optional)
                     </span>
                   </label>
                   <label className="flex items-center gap-4 w-full p-3.5 rounded-xl bg-slate-800/40 border border-dashed border-slate-700 cursor-pointer hover:border-indigo-500/50 hover:bg-slate-800/60 transition-all group">

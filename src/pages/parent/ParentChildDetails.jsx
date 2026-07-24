@@ -372,7 +372,7 @@ const ParentChildDetails = () => {
         </div>
       </section>
 
-      {/* Booked Tutoring Slots — standalone, not course-specific */}
+      {/* Booked Tutoring Slots - standalone, not course-specific */}
       <section className="mx-4 sm:mx-6 lg:mx-10 mt-6">
         <div className="bg-slate-900/50 backdrop-blur-2xl border border-white/5 rounded-2xl shadow-xl p-4 sm:p-6">
           <div className="flex items-center gap-3 mb-5">

@@ -11,7 +11,7 @@ import {
  *
  * Shows the user's permanent shareable link with a copy button. The full URL is
  * composed from the current origin + the user's code. Per spec, no referral
- * analytics are shown to the user — just the link. Kept intentionally low-profile
+ * analytics are shown to the user - just the link. Kept intentionally low-profile
  * so it doesn't dominate the dashboard.
  */
 const ReferralLinkCard = ({ className = "" }) => {
@@ -34,7 +34,7 @@ const ReferralLinkCard = ({ className = "" }) => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      /* clipboard blocked — user can still select the text manually */
+      /* clipboard blocked - user can still select the text manually */
     }
   };
 
@@ -51,7 +51,7 @@ const ReferralLinkCard = ({ className = "" }) => {
           <div className="min-w-0">
             <h3 className="text-sm font-bold text-white leading-tight">Invite &amp; refer</h3>
             <p className="text-[11px] text-slate-400 leading-tight truncate">
-              Share your link — signups are tracked to you.
+              Share your link, anyone who joins through it is credited to you.
             </p>
           </div>
         </div>

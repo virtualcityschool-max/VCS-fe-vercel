@@ -186,7 +186,7 @@ const AdminEvaluationPage = () => {
                 className="w-full"
               >
                 <option value="">
-                  {privateList.length === 0 ? "No private students" : "— Select a student —"}
+                  {privateList.length === 0 ? "No private students" : "- Select a student -"}
                 </option>
                 {privateList.map((s) => (
                   <option key={s.enrollment_id} value={s.student_id}>

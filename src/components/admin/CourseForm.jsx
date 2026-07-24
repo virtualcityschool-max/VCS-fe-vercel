@@ -159,7 +159,7 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
           </div>
         </div>
 
-        {/* Price + Gumroad — only shown for paid courses */}
+        {/* Price + Gumroad - only shown for paid courses */}
         {formData.is_paid && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
@@ -189,7 +189,7 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
               />
               <FieldError error={errors.gumroad_product_permalink} />
               <p className="text-[11px] text-slate-500 mt-1.5">
-                Leave empty to disable online payment — students will see it as unavailable.
+                Leave empty to disable online payment - students will see it as unavailable.
               </p>
             </div>
           </div>
@@ -207,7 +207,7 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
                 value={
                   getDisplayName(users.find((u) => u.id === Number(formData.instructor_id || formData.instructor?.id))) ||
                   getDisplayName(formData.instructor) ||
-                  "—"
+                  "-"
                 }
                 disabled
                 className="w-full px-3 py-2 bg-slate-700/40 border border-slate-700/40 rounded-lg text-slate-400 cursor-not-allowed text-sm"
@@ -242,7 +242,7 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
 
       {/* Right Column: Content & Media */}
       <div className="space-y-6">
-        {/* Media Section — Pinned to top for stability */}
+        {/* Media Section - Pinned to top for stability */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Thumbnail */}
           <div>

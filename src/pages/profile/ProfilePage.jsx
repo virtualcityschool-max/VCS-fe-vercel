@@ -47,9 +47,9 @@ const readCls  = "w-full px-4 py-3 bg-slate-800/30 border border-slate-700/40 ro
 
 const TIMEZONES = [
   { label: "Auto-Detected",              value: "" },
-  { label: "Saudi Arabia — AST", value: "Asia/Riyadh" },
-  { label: "UAE / Dubai — GST",  value: "Asia/Dubai" },
-  { label: "Pakistan — PKT",     value: "Asia/Karachi" },
+  { label: "Saudi Arabia - AST", value: "Asia/Riyadh" },
+  { label: "UAE / Dubai - GST",  value: "Asia/Dubai" },
+  { label: "Pakistan - PKT",     value: "Asia/Karachi" },
   { label: "London",          value: "Europe/London" },
   { label: "New York",        value: "America/New_York" },
   { label: "France",          value: "Europe/Paris" },
@@ -306,7 +306,7 @@ const ProfilePage = () => {
               </div>
 
               <>
-                  {/* Upload overlay — spinner while uploading, camera on hover */}
+                  {/* Upload overlay - spinner while uploading, camera on hover */}
                   <button
                     type="button"
                     onClick={() => !avatarUploading && avatarInputRef.current?.click()}
@@ -323,7 +323,7 @@ const ProfilePage = () => {
                     </span>
                   </button>
 
-                  {/* Small edit badge — visible when in editing mode */}
+                  {/* Small edit badge - visible when in editing mode */}
                   {editing && !avatarUploading && (
                     <button
                       type="button"
@@ -521,7 +521,7 @@ const ProfilePage = () => {
             </Field>
           ))}
 
-          {/* Timezone — shown for all roles */}
+          {/* Timezone - shown for all roles */}
           <Field label="Timezone" icon="globe">
             <div>
               {editing ? (
@@ -549,7 +549,7 @@ const ProfilePage = () => {
             </div>
           </Field>
 
-          {/* Achievements & Distinctions — teachers only, inside profile card */}
+          {/* Achievements & Distinctions - teachers only, inside profile card */}
           {role === "teacher" && (
             <div>
               <label className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3">
@@ -606,7 +606,7 @@ const ProfilePage = () => {
           )}
         </div>
 
-        {/* Assigned courses — teachers only */}
+        {/* Assigned courses - teachers only */}
         {role === "teacher" && (
           <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6">
             <h2 className="text-sm font-bold uppercase tracking-widest text-slate-500 mb-4">
@@ -673,7 +673,7 @@ const ProfilePage = () => {
                 <i className={`fas fa-${icon} text-slate-600 text-xs w-4 text-center`} />
                 {label}
               </span>
-              <span className={`text-sm font-medium ${valueClass || "text-white"}`}>{value || "—"}</span>
+              <span className={`text-sm font-medium ${valueClass || "text-white"}`}>{value || "-"}</span>
             </div>
           ))}
         </div>

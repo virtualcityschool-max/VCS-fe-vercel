@@ -70,7 +70,7 @@ const CourseCard = ({ course, index = 0, mode, onClick, onNavigate, ctaLabel }) 
 
         {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/70 to-transparent pointer-events-none" />
-        {/* Status badge — top right */}
+        {/* Status badge - top right */}
         <div className="absolute top-2 right-2 z-10">
           {isTeacher && (
             <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border ${
@@ -129,7 +129,7 @@ const CourseCard = ({ course, index = 0, mode, onClick, onNavigate, ctaLabel }) 
           </p>
         )}
 
-        {/* Bottom — price + CTA */}
+        {/* Bottom - price + CTA */}
         <div className="mt-auto pt-3 border-t border-white/5 space-y-2">
           {!isTeacher && (
             <p className={`text-sm font-black ${courseData.is_paid ? "text-white" : "text-emerald-400"}`}>

@@ -36,7 +36,7 @@ const AdminLayout = () => {
     if (path.includes("/admin/attendance")) return "attendance";
     if (path.includes("/admin/course-levels")) return "levels";
     if (path.includes("/admin/referrals")) return "referrals";
-    // These pages manage their own heading — skip the shared Header
+    // These pages manage their own heading - skip the shared Header
     if (path.includes("/admin/blogs"))    return null;
     if (path.includes("/admin/about"))    return null;
     if (path.includes("/admin/settings")) return null;
@@ -47,7 +47,7 @@ const AdminLayout = () => {
   const activeTab = getActiveTabFromPath();
 
   // Fetch all approval counts once on mount so the sidebar badge is always accurate.
-  // AdminApprovalsPage reads from this Redux state directly — no duplicate fetches.
+  // AdminApprovalsPage reads from this Redux state directly - no duplicate fetches.
   React.useEffect(() => {
     dispatch(fetchPendingApprovals());
     dispatch(fetchPendingChildLinks());

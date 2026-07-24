@@ -1,5 +1,5 @@
 // A plain list of world country names, used to populate country dropdowns.
-// Kept dependency-free — just an alphabetically ordered array of strings.
+// Kept dependency-free - just an alphabetically ordered array of strings.
 export const COUNTRIES = [
   "Afghanistan", "Albania", "Algeria", "Andorra", "Angola",
   "Antigua and Barbuda", "Argentina", "Armenia", "Australia", "Austria",
