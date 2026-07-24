@@ -521,7 +521,7 @@ const TeacherQuizzes = ({
     setSaving(true);
     try {
       await dispatch(gradeQuizTextAnswers({ submissionId: selectedQuizSubmission.id, grades })).unwrap();
-      toastManager.success("Submission graded");
+      toastManager.success("Marks saved successfully");
       
       setGradingSubId(null);
     } catch (e) {

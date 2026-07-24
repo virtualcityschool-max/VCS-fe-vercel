@@ -85,7 +85,7 @@ const TeacherSubmissions = () => {
             data: { score: Number(score), feedback },
           }),
         ).unwrap();
-        toastManager.success("Submission graded");
+        toastManager.success("Marks saved successfully");
       }
       closeGradeModal();
       // Refresh list so is_graded reflects the change

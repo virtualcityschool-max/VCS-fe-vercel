@@ -414,13 +414,22 @@ const TeacherGrading = ({
       </div>
 
       {selectedAssignmentForSubmissions && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[200]">
-          <div className="bg-slate-900 p-8 rounded-3xl border border-slate-800 w-full max-w-2xl">
-            <h2 className="text-lg font-bold mb-4">
-              Submissions: {selectedAssignmentForSubmissions.title}
-            </h2>
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[200] p-4">
+          <div className="bg-slate-900 rounded-3xl border border-slate-800 w-full max-w-2xl max-h-[85vh] flex flex-col">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 flex-shrink-0">
+              <h2 className="font-bold text-white text-sm">
+                Submissions: {selectedAssignmentForSubmissions.title}
+              </h2>
+              <button
+                onClick={() => setSelectedAssignmentForSubmissions(null)}
+                aria-label="Close"
+                className="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-white transition"
+              >
+                <i className="fas fa-times text-xs" />
+              </button>
+            </div>
 
-            <div className="space-y-4 max-h-[400px] overflow-y-auto">
+            <div className="flex-1 overflow-y-auto p-6 space-y-4">
               {submissions?.length ? (
                 submissions.map((sub) => {
                   const max = selectedAssignmentForSubmissions?.max_score;
@@ -483,13 +492,6 @@ const TeacherGrading = ({
                 <p className="text-slate-400 text-sm">No submissions yet</p>
               )}
             </div>
-
-            <button
-              className="mt-4 text-sm text-slate-400"
-              onClick={() => setSelectedAssignmentForSubmissions(null)}
-            >
-              Close
-            </button>
           </div>
         </div>
       )}
@@ -581,7 +583,7 @@ const TeacherGrading = ({
                           }),
                         ).unwrap();
 
-                        toastManager.success("Submission graded");
+                        toastManager.success("Marks saved successfully");
                       }
 
                       if (selectedAssignmentForSubmissions?.id) {
