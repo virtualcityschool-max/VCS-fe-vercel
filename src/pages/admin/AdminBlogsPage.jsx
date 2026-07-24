@@ -164,7 +164,7 @@ const AdminBlogsPage = () => {
       </div>
 
       {/* Controls */}
-      <div className="flex flex-col md:flex-row md:jus gap-3 mb-6">
+      <div className="flex flex-col md:flex-row md:jus gap-3 mb-6 justift-end">
         <div className="relative md:w-72">
           <i className="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-600 text-xs" />
           <input
