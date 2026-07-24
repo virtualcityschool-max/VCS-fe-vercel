@@ -225,9 +225,13 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
                 onChange={(e) => onChange("instructor_id", e.target.value)}
                 className={fieldClass(errors.instructor_id)}
               >
-                <option value="">Select an tutor</option>
+                <option value="">Select a tutor</option>
                 {users.map((user) => (
-                  <option key={user.id} value={user.id}>{getDisplayName(user)}{user.email ? ` — ${user.email}` : ""}</option>
+                  <option key={user.id} value={user.id}>
+                    {user.email
+                      ? `${getDisplayName(user)} (${user.email})`
+                      : getDisplayName(user)}
+                  </option>
                 ))}
               </FilterSelect>
               <FieldError error={errors.instructor_id} />

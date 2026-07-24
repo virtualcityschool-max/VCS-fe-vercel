@@ -9,9 +9,9 @@
 
 const REF_KEY = "vcs_ref_code";
 
-// Normalize to the same shape the backend stores/compares (uppercase, trimmed).
-const normalize = (code) =>
-  (code || "").toString().trim().toUpperCase().slice(0, 16);
+// Trim to a sane length; matching is case-insensitive on the backend, so we
+// preserve whatever casing the link used.
+const normalize = (code) => (code || "").toString().trim().slice(0, 16);
 
 export const getStoredReferralCode = () => {
   try {

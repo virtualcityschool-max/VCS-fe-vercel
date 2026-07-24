@@ -28,6 +28,102 @@ const roleBadge = (role) => {
 const fmtDate = (v) =>
   v ? new Date(v).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" }) : "—";
 
+// Prominent signup count with a clear Student / Teacher breakdown.
+// Big white number = total; blue graduation icon = students; purple teacher
+// icon = teachers. Colors mirror the role badges used elsewhere, and each part
+// carries a hover label so it reads at a glance in every row.
+const SignupCount = ({ total, students, size = "text-lg" }) => {
+  const teachers = Math.max(0, (total || 0) - (students || 0));
+  return (
+    <div className="inline-flex items-center gap-2.5">
+      <span className={`${size} font-black text-white leading-none`} title="Total signups">
+        {total || 0}
+      </span>
+      <span className="h-5 w-px bg-slate-700" />
+      <span className="inline-flex items-center gap-1 text-blue-300" title="Students">
+        <i className="fas fa-user-graduate text-[11px]" />
+        <span className="text-xs font-bold">{students || 0}</span>
+      </span>
+      <span className="inline-flex items-center gap-1 text-purple-300" title="Teachers">
+        <i className="fas fa-chalkboard-teacher text-[11px]" />
+        <span className="text-xs font-bold">{teachers}</span>
+      </span>
+    </div>
+  );
+};
+
+// Course-title chips (students → enrolled courses; teachers → courses taught).
+const CourseChips = ({ courses }) =>
+  courses && courses.length ? (
+    <div className="flex flex-wrap gap-1">
+      {courses.map((c) => (
+        <span
+          key={c.id}
+          className="px-2 py-0.5 rounded-md bg-slate-800 border border-slate-700 text-[11px] text-slate-300"
+        >
+          {c.title}
+        </span>
+      ))}
+    </div>
+  ) : (
+    <span className="text-slate-600 text-xs">—</span>
+  );
+
+// Referred-user list for one role tab — table on desktop, cards on mobile.
+// Both students and teachers share the same shape: name, signup date, and the
+// courses they're "enrolled" on (enrolled courses / courses taught).
+const ReferredList = ({ list, nameLabel, emptyText }) => {
+  if (!list.length) {
+    return <p className="text-center text-slate-500 py-8">{emptyText}</p>;
+  }
+  return (
+    <>
+      {/* Desktop: table */}
+      <table className="hidden sm:table w-full text-sm">
+        <thead>
+          <tr className="text-left text-[11px] uppercase tracking-wider text-slate-400 border-b border-white/5">
+            <th className="py-2 pr-3 font-semibold">{nameLabel}</th>
+            <th className="py-2 px-3 font-semibold">Signed up</th>
+            <th className="py-2 pl-3 font-semibold">Enrolled Courses</th>
+          </tr>
+        </thead>
+        <tbody>
+          {list.map((u) => (
+            <tr key={u.id} className="border-b border-white/5 align-top">
+              <td className="py-2.5 pr-3">
+                <div className="font-medium text-white">{u.referred_user_name}</div>
+                <div className="text-xs text-slate-500">{u.referred_user_email}</div>
+              </td>
+              <td className="py-2.5 px-3 text-slate-400 whitespace-nowrap">{fmtDate(u.signed_up_at)}</td>
+              <td className="py-2.5 pl-3">
+                <CourseChips courses={u.enrolled_courses} />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      {/* Mobile: cards */}
+      <div className="sm:hidden space-y-3">
+        {list.map((u) => (
+          <div key={u.id} className="rounded-xl border border-white/5 bg-slate-800/40 p-4">
+            <div className="font-semibold text-white truncate">{u.referred_user_name}</div>
+            <div className="text-xs text-slate-500 truncate">{u.referred_user_email}</div>
+            <div className="mt-2 flex items-center gap-1.5 text-[11px] text-slate-400">
+              <i className="fas fa-calendar-day text-slate-500" />
+              Signed up {fmtDate(u.signed_up_at)}
+            </div>
+            <div className="mt-2">
+              <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Enrolled Courses</p>
+              <CourseChips courses={u.enrolled_courses} />
+            </div>
+          </div>
+        ))}
+      </div>
+    </>
+  );
+};
+
 const AdminReferralsPage = () => {
   const dispatch = useDispatch();
   const rows = useSelector(selectReferralStats);
@@ -65,8 +161,9 @@ const AdminReferralsPage = () => {
 
   const totals = useMemo(() => {
     const signups = rows.reduce((s, r) => s + (r.total_signups || 0), 0);
+    const studentSignups = rows.reduce((s, r) => s + (r.student_signups || 0), 0);
     const enrolled = rows.reduce((s, r) => s + (r.total_enrolled || 0), 0);
-    return { signups, enrolled };
+    return { signups, studentSignups, teacherSignups: signups - studentSignups, enrolled };
   }, [rows]);
 
   // Split the referred users into the two tabs.
@@ -85,8 +182,14 @@ const AdminReferralsPage = () => {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
           { label: "Referring users", value: rows.length, icon: "fa-users", chip: "bg-indigo-500/15 text-indigo-400" },
-          { label: "Total signups", value: totals.signups, icon: "fa-user-plus", chip: "bg-blue-500/15 text-blue-400" },
-          { label: "Enrolled", value: totals.enrolled, icon: "fa-graduation-cap", chip: "bg-emerald-500/15 text-emerald-400" },
+          {
+            label: "Total signups",
+            value: totals.signups,
+            icon: "fa-user-plus",
+            chip: "bg-blue-500/15 text-blue-400",
+            breakdown: true,
+          },
+          { label: "Enrolled / teaching", value: totals.enrolled, icon: "fa-graduation-cap", chip: "bg-emerald-500/15 text-emerald-400" },
         ].map((t) => (
           <div
             key={t.label}
@@ -95,8 +198,22 @@ const AdminReferralsPage = () => {
             <span className={`flex h-11 w-11 items-center justify-center rounded-xl ${t.chip}`}>
               <i className={`fas ${t.icon}`} />
             </span>
-            <div>
-              <p className="text-2xl font-black text-white leading-none">{t.value}</p>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <p className="text-2xl font-black text-white leading-none">{t.value}</p>
+                {t.breakdown && (
+                  <span className="flex items-center gap-2">
+                    <span className="inline-flex items-center gap-1 text-blue-300" title="Students">
+                      <i className="fas fa-user-graduate text-[11px]" />
+                      <span className="text-xs font-bold">{totals.studentSignups}</span>
+                    </span>
+                    <span className="inline-flex items-center gap-1 text-purple-300" title="Teachers">
+                      <i className="fas fa-chalkboard-teacher text-[11px]" />
+                      <span className="text-xs font-bold">{totals.teacherSignups}</span>
+                    </span>
+                  </span>
+                )}
+              </div>
               <p className="text-xs text-slate-400 mt-1">{t.label}</p>
             </div>
           </div>
@@ -172,9 +289,11 @@ const AdminReferralsPage = () => {
                         </span>
                       </span>
                     </td>
-                    <td className="px-5 py-3 text-center font-bold text-white">{r.total_signups}</td>
-                    <td className="px-5 py-3 text-center font-bold text-emerald-400">{r.total_enrolled}</td>
-                    <td className="px-5 py-3 text-center text-slate-300">{r.conversion_rate}%</td>
+                    <td className="px-5 py-3 text-center">
+                      <SignupCount total={r.total_signups} students={r.student_signups} size="text-base" />
+                    </td>
+                    <td className="px-5 py-3 text-center font-bold text-white text-base">{r.total_enrolled}</td>
+                    <td className="px-5 py-3 text-center font-bold text-white text-base">{r.conversion_rate}%</td>
                     <td className="px-5 py-3 text-slate-400">{fmtDate(r.created_at)}</td>
                     <td className="px-5 py-3 text-right">
                       <button
@@ -227,18 +346,21 @@ const AdminReferralsPage = () => {
                 <span className="text-[11px] text-slate-500">· {fmtDate(r.created_at)}</span>
               </div>
 
-              <div className="mt-3 grid grid-cols-3 gap-2 text-center">
-                <div className="rounded-xl bg-slate-800/50 py-2">
-                  <p className="text-base font-black text-white leading-none">{r.total_signups}</p>
-                  <p className="text-[10px] text-slate-500 mt-1">Signups</p>
+              <div className="mt-3 space-y-2">
+                {/* Signups — prominent, with Student / Teacher breakdown */}
+                <div className="rounded-xl bg-slate-800/50 px-3 py-2.5 flex items-center justify-between gap-2">
+                  <span className="text-[10px] text-slate-500">Signups</span>
+                  <SignupCount total={r.total_signups} students={r.student_signups} size="text-lg" />
                 </div>
-                <div className="rounded-xl bg-slate-800/50 py-2">
-                  <p className="text-base font-black text-emerald-400 leading-none">{r.total_enrolled}</p>
-                  <p className="text-[10px] text-slate-500 mt-1">Enrolled</p>
-                </div>
-                <div className="rounded-xl bg-slate-800/50 py-2">
-                  <p className="text-base font-black text-white leading-none">{r.conversion_rate}%</p>
-                  <p className="text-[10px] text-slate-500 mt-1">Conversion</p>
+                <div className="grid grid-cols-2 gap-2 text-center">
+                  <div className="rounded-xl bg-slate-800/50 py-2">
+                    <p className="text-base font-black text-white leading-none">{r.total_enrolled}</p>
+                    <p className="text-[10px] text-slate-500 mt-1">Enrolled</p>
+                  </div>
+                  <div className="rounded-xl bg-slate-800/50 py-2">
+                    <p className="text-base font-black text-white leading-none">{r.conversion_rate}%</p>
+                    <p className="text-[10px] text-slate-500 mt-1">Conversion</p>
+                  </div>
                 </div>
               </div>
 
@@ -303,172 +425,9 @@ const AdminReferralsPage = () => {
                   ))}
                 </div>
               ) : detailTab === "student" ? (
-                students.length === 0 ? (
-                  <p className="text-center text-slate-500 py-8">No student signups yet.</p>
-                ) : (
-                  <>
-                    {/* Desktop: table */}
-                    <table className="hidden sm:table w-full text-sm">
-                      <thead>
-                        <tr className="text-left text-[11px] uppercase tracking-wider text-slate-400 border-b border-white/5">
-                          <th className="py-2 pr-3 font-semibold">Student</th>
-                          <th className="py-2 px-3 font-semibold">Signed up</th>
-                          <th className="py-2 px-3 font-semibold text-center">Enrolled</th>
-                          <th className="py-2 pl-3 font-semibold">Courses</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {students.map((u) => (
-                          <tr key={u.id} className="border-b border-white/5 align-top">
-                            <td className="py-2.5 pr-3">
-                              <div className="font-medium text-white">{u.referred_user_name}</div>
-                              <div className="text-xs text-slate-500">{u.referred_user_email}</div>
-                            </td>
-                            <td className="py-2.5 px-3 text-slate-400 whitespace-nowrap">
-                              {fmtDate(u.signed_up_at)}
-                            </td>
-                            <td className="py-2.5 px-3 text-center">
-                              <span
-                                className={`inline-flex items-center justify-center min-w-[1.5rem] px-2 py-0.5 rounded-full text-xs font-bold border ${
-                                  u.enrolled_course_count > 0
-                                    ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30"
-                                    : "bg-slate-600/20 text-slate-400 border-slate-500/30"
-                                }`}
-                              >
-                                {u.enrolled_course_count}
-                              </span>
-                            </td>
-                            <td className="py-2.5 pl-3">
-                              {u.enrolled_course_count > 0 ? (
-                                <div className="flex flex-wrap gap-1">
-                                  {u.enrolled_courses.map((c) => (
-                                    <span
-                                      key={c.id}
-                                      className="px-2 py-0.5 rounded-md bg-slate-800 border border-slate-700 text-[11px] text-slate-300"
-                                    >
-                                      {c.title}
-                                    </span>
-                                  ))}
-                                </div>
-                              ) : (
-                                <span className="text-slate-600 text-xs">—</span>
-                              )}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-
-                    {/* Mobile: cards */}
-                    <div className="sm:hidden space-y-3">
-                      {students.map((u) => (
-                        <div
-                          key={u.id}
-                          className="rounded-xl border border-white/5 bg-slate-800/40 p-4"
-                        >
-                          <div className="flex items-start justify-between gap-3">
-                            <div className="min-w-0">
-                              <div className="font-semibold text-white truncate">
-                                {u.referred_user_name}
-                              </div>
-                              <div className="text-xs text-slate-500 truncate">
-                                {u.referred_user_email}
-                              </div>
-                            </div>
-                            <span
-                              className={`shrink-0 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-bold border ${
-                                u.enrolled_course_count > 0
-                                  ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30"
-                                  : "bg-slate-600/20 text-slate-400 border-slate-500/30"
-                              }`}
-                            >
-                              <i className="fas fa-book text-[10px]" />
-                              {u.enrolled_course_count}
-                            </span>
-                          </div>
-                          <div className="mt-2 flex items-center gap-1.5 text-[11px] text-slate-400">
-                            <i className="fas fa-calendar-day text-slate-500" />
-                            Signed up {fmtDate(u.signed_up_at)}
-                          </div>
-                          {u.enrolled_course_count > 0 && (
-                            <div className="mt-2 flex flex-wrap gap-1">
-                              {u.enrolled_courses.map((c) => (
-                                <span
-                                  key={c.id}
-                                  className="px-2 py-0.5 rounded-md bg-slate-800 border border-slate-700 text-[11px] text-slate-300"
-                                >
-                                  {c.title}
-                                </span>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </>
-                )
-              ) : teachers.length === 0 ? (
-                <p className="text-center text-slate-500 py-8">No teacher signups yet.</p>
+                <ReferredList list={students} nameLabel="Student" emptyText="No student signups yet." />
               ) : (
-                <>
-                  {/* Desktop: table */}
-                  <table className="hidden sm:table w-full text-sm">
-                    <thead>
-                      <tr className="text-left text-[11px] uppercase tracking-wider text-slate-400 border-b border-white/5">
-                        <th className="py-2 pr-3 font-semibold">Teacher</th>
-                        <th className="py-2 px-3 font-semibold">Signed up</th>
-                        <th className="py-2 pl-3 font-semibold">Referral code used</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {teachers.map((u) => (
-                        <tr key={u.id} className="border-b border-white/5">
-                          <td className="py-2.5 pr-3">
-                            <div className="font-medium text-white">{u.referred_user_name}</div>
-                            <div className="text-xs text-slate-500">{u.referred_user_email}</div>
-                          </td>
-                          <td className="py-2.5 px-3 text-slate-400 whitespace-nowrap">
-                            {fmtDate(u.signed_up_at)}
-                          </td>
-                          <td className="py-2.5 pl-3">
-                            <code className="px-2 py-1 rounded-md bg-slate-800 border border-slate-700 text-indigo-300 text-xs font-mono">
-                              {u.code_used}
-                            </code>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-
-                  {/* Mobile: cards */}
-                  <div className="sm:hidden space-y-3">
-                    {teachers.map((u) => (
-                      <div
-                        key={u.id}
-                        className="rounded-xl border border-white/5 bg-slate-800/40 p-4"
-                      >
-                        <div className="font-semibold text-white truncate">
-                          {u.referred_user_name}
-                        </div>
-                        <div className="text-xs text-slate-500 truncate">
-                          {u.referred_user_email}
-                        </div>
-                        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[11px] text-slate-400">
-                          <span className="inline-flex items-center gap-1.5">
-                            <i className="fas fa-calendar-day text-slate-500" />
-                            Signed up {fmtDate(u.signed_up_at)}
-                          </span>
-                          <span className="inline-flex items-center gap-1.5">
-                            Code
-                            <code className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-indigo-300 font-mono">
-                              {u.code_used}
-                            </code>
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </>
+                <ReferredList list={teachers} nameLabel="Teacher" emptyText="No teacher signups yet." />
               )}
             </div>
           </div>
