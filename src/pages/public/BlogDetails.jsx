@@ -156,6 +156,14 @@ const BlogDetails = () => {
         <div className="mt-6 pt-6 border-t border-white/5 flex items-center justify-between">
           <Link
             to="/blogs"
+            onClick={() => {
+              // "All Articles" is a fresh start — drop any retained category/search
+              // so the list opens on the "All" tab with no filter.
+              try {
+                sessionStorage.removeItem("blogs_category");
+                sessionStorage.removeItem("blogs_search");
+              } catch { /* storage unavailable */ }
+            }}
             className="inline-flex items-center gap-2 text-indigo-400 hover:text-white text-[11px] font-black uppercase tracking-widest transition"
           >
             <i className="fas fa-arrow-left text-[9px]" /> All Articles
@@ -163,7 +171,7 @@ const BlogDetails = () => {
           <div className="flex items-center gap-2">
             {/* Info tooltip clarifying what the Share button does. */}
             <span className="group relative inline-flex">
-              <i className="fas fa-circle-info text-slate-500 hover:text-indigo-400 text-xs cursor-help" />
+              <i className="fas fa-circle-info text-slate-500 hover:text-indigo-400 text-xs cursor-pointer" />
               <span className="pointer-events-none absolute right-0 bottom-full mb-2 w-56 rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-[11px] font-medium normal-case tracking-normal text-slate-200 leading-snug opacity-0 group-hover:opacity-100 transition z-20 shadow-xl">
                 Shares this article using your device's share menu, or copies the
                 link to your clipboard.

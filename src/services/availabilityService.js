@@ -56,8 +56,10 @@ const getMyCancellationRequests = async () => {
   return response.data;
 };
 
-const getGuardianCancellationRequests = async () => {
-  const response = await axiosInstance.get("/availability/cancel-requests/");
+const getGuardianCancellationRequests = async (childId) => {
+  const response = await axiosInstance.get("/availability/cancel-requests/", {
+    params: childId ? { child_id: childId } : {},
+  });
   return response.data;
 };
 

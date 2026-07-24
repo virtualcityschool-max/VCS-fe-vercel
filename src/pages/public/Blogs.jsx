@@ -11,16 +11,34 @@ import { getStorageUrl } from "../../utils/storageUrl";
 const Blogs = () => {
   const dispatch = useDispatch();
   const { blogs, isLoading } = useSelector((state) => state.blogs);
-  const [search, setSearch] = useState("");
-  // Keep the active category in the URL so it is preserved when a reader opens
-  // an article and navigates back (browser restores /blogs?category=…).
+  // Persist search to sessionStorage so it's restored when a reader opens an
+  // article and returns (via the browser back button OR the in-page link).
+  const [search, setSearch] = useState(() => {
+    try { return sessionStorage.getItem("blogs_search") || ""; } catch { return ""; }
+  });
+  useEffect(() => {
+    try {
+      if (search) sessionStorage.setItem("blogs_search", search);
+      else sessionStorage.removeItem("blogs_search");
+    } catch { /* storage unavailable */ }
+  }, [search]);
+
+  // Active category lives in the URL (shareable) and falls back to sessionStorage
+  // so it survives a plain "/blogs" navigation back from an article too.
   const [searchParams, setSearchParams] = useSearchParams();
-  const activeCategory = searchParams.get("category") || "all";
+  const activeCategory =
+    searchParams.get("category") ||
+    (() => { try { return sessionStorage.getItem("blogs_category"); } catch { return null; } })() ||
+    "all";
   const setActiveCategory = (cat) => {
     const next = new URLSearchParams(searchParams);
     if (cat === "all") next.delete("category");
     else next.set("category", cat);
     setSearchParams(next, { replace: true });
+    try {
+      if (cat === "all") sessionStorage.removeItem("blogs_category");
+      else sessionStorage.setItem("blogs_category", cat);
+    } catch { /* storage unavailable */ }
   };
 
   useSeo({
@@ -109,7 +127,7 @@ const Blogs = () => {
               </div>
             </div>
           )}
-          <div className="order-1 md:order-2 md:w-72 shrink-0">
+          <div className="order-1 md:order-2 md:w-72 shrink-0 text-end">
             <SearchInput
               value={search}
               onChange={(e) => setSearch(e.target.value)}

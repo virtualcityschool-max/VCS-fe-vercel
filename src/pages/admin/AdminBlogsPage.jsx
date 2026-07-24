@@ -31,8 +31,22 @@ const AdminBlogsPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { blogs, isLoading } = useSelector((state) => state.blogs);
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
+  // Persist the filters so they're kept when editing a blog and coming back.
+  const [search, setSearch] = useState(() => {
+    try { return sessionStorage.getItem("admin_blogs_search") || ""; } catch { return ""; }
+  });
+  const [statusFilter, setStatusFilter] = useState(() => {
+    try { return sessionStorage.getItem("admin_blogs_status") || "all"; } catch { return "all"; }
+  });
+  useEffect(() => {
+    try {
+      if (search) sessionStorage.setItem("admin_blogs_search", search);
+      else sessionStorage.removeItem("admin_blogs_search");
+    } catch { /* storage unavailable */ }
+  }, [search]);
+  useEffect(() => {
+    try { sessionStorage.setItem("admin_blogs_status", statusFilter); } catch { /* ignore */ }
+  }, [statusFilter]);
   const [togglingSlug, setTogglingSlug] = useState(null);
   const [duplicatingSlug, setDuplicatingSlug] = useState(null);
   const [confirm, setConfirm] = useState({ open: false, slug: null, title: "" });
@@ -103,6 +117,8 @@ const AdminBlogsPage = () => {
       fd.append("meta_title", full.meta_title || "");
       fd.append("meta_description", full.meta_description || "");
       fd.append("status", "draft"); // always start a copy as an unpublished draft
+      // Copy the original's cover image server-side (no re-upload needed).
+      if (full.cover_image) fd.append("copy_cover_from", blog.slug);
       const created = await dispatch(createBlog(fd)).unwrap();
       toastManager.success("Blog duplicated as a draft");
       if (created?.slug) navigate(`/admin/blogs/${created.slug}/edit`);
@@ -148,7 +164,7 @@ const AdminBlogsPage = () => {
       </div>
 
       {/* Controls */}
-      <div className="flex flex-col md:flex-row gap-3 mb-6">
+      <div className="flex flex-col md:flex-row md:jus gap-3 mb-6">
         <div className="relative md:w-72">
           <i className="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-600 text-xs" />
           <input

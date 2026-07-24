@@ -165,7 +165,7 @@ const ReviewModal = ({ request, processing, onClose, onResolve }) => {
                 Requested courses
               </p>
               {!isDecided && pendingCourses.length > 1 && (
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1.5 px-3">
                   <button
                     onClick={() => setAll("approve")}
                     className="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20 border border-emerald-500/20 transition"

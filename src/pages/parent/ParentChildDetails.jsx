@@ -43,8 +43,10 @@ const ParentChildDetails = () => {
   const [resolving, setResolving]                     = useState(false);
 
   const loadCancelRequests = () => {
-    availabilityService.getGuardianCancellationRequests()
-      .then(d => setCancelRequests(Array.isArray(d) ? d.filter(r => String(r.student_name || "").length >= 0) : []))
+    if (!childId) return;
+    // Scoped to this child on the backend via ?child_id=.
+    availabilityService.getGuardianCancellationRequests(childId)
+      .then(d => setCancelRequests(Array.isArray(d) ? d : []))
       .catch(() => {});
   };
 
@@ -76,11 +78,9 @@ const ParentChildDetails = () => {
     }
   };
 
-  // Filter cancel requests for this specific child
+  // Cancel requests are already scoped to this child by the backend.
   const childName = getDisplayName(data?.student) || data?.student?.username;
-  const myCancelRequests = cancelRequests.filter(r =>
-    !childId || String(r.student_email || "").length >= 0
-  );
+  const myCancelRequests = cancelRequests;
 
   useEffect(() => {
     if (!childId) return;

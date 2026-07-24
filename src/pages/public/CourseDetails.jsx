@@ -27,6 +27,7 @@ import {
 import { getCourseImage } from "../../utils/courseImageUtils";
 import { setAuthModal, setEnrollmentIntent } from "../../store/slices/uiSlice";
 import EnrollmentTypeModal from "../../components/courses/EnrollmentTypeModal";
+import ApplyFreeAccessModal from "../../components/public/ApplyFreeAccessModal";
 import ConfirmDialog from "../../components/common/ConfirmDialog";
 import { getStorageUrl } from "../../utils/storageUrl";
 import FileViewerModal from "../../components/common/FileViewerModal";
@@ -39,6 +40,7 @@ const CourseDetails = () => {
   const dispatch = useDispatch();
   const [imageError, setImageError] = useState(false);
   const [enrollmentModalOpen, setEnrollmentModalOpen] = useState(false);
+  const [freeAccessOpen, setFreeAccessOpen] = useState(false);
   const [paymentSubmitted, setPaymentSubmitted] = useState(false);
   const [viewerUrl, setViewerUrl] = useState(null);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
@@ -812,7 +814,26 @@ const CourseDetails = () => {
         isLoading={normalizedCourse?.is_paid ? isCheckingOut : isEnrolling}
         onConfirm={normalizedCourse?.is_paid ? handleCheckout : () => handleEnrollmentTypeSelect("normal")}
         onClose={closeEnrollmentModal}
+        onApplyFreeAccess={
+          normalizedCourse
+            ? () => {
+                closeEnrollmentModal();
+                setFreeAccessOpen(true);
+              }
+            : undefined
+        }
       />
+
+      {freeAccessOpen && (
+        <ApplyFreeAccessModal
+          preselectedCourseIds={normalizedCourse ? [normalizedCourse.id] : []}
+          onClose={() => {
+            setFreeAccessOpen(false);
+            // Refetch so the enroll button reflects the new "Approval Pending" state.
+            if (courseId) dispatch(fetchCourseById(courseId));
+          }}
+        />
+      )}
       {viewerUrl && (
         <FileViewerModal filePath={viewerUrl} handleClose={() => setViewerUrl(null)} />
       )}

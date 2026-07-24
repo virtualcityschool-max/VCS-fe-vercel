@@ -152,7 +152,7 @@ const PendingChildLinks = ({ links, rejectedLinks }) => {
                 </div>
 
                 <Tooltip text="Only an admin can create this link now. Please contact school administration.">
-                  <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-rose-500/10 rounded-xl border border-rose-500/20 shrink-0 cursor-help">
+                  <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-rose-500/10 rounded-xl border border-rose-500/20 shrink-0 cursor-pointer">
                     <i className="fas fa-lock text-rose-400 text-[9px]" />
                     <span className="text-[8px] font-black uppercase tracking-widest text-rose-400">Rejected</span>
                   </div>
