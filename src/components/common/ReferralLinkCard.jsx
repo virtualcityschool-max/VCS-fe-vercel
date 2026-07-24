@@ -49,7 +49,7 @@ const ReferralLinkCard = ({ className = "" }) => {
             <i className="fas fa-share-nodes" />
           </span>
           <div className="min-w-0">
-            <h3 className="text-sm font-bold text-white leading-tight">Invite &amp; refer</h3>
+            <h3 className="text-sm font-bold text-white leading-tight">Invite &amp; Refer</h3>
             <p className="text-[11px] text-slate-400 leading-tight truncate">
               Share your link, anyone who joins through it is credited to you.
             </p>
