@@ -842,6 +842,22 @@ export const selectPendingEnrollments = (state) =>
   (state.studentDashboard.myEnrollments || []).filter((e) => e.status === "pending");
 export const selectRejectedEnrollments = (state) =>
   (state.studentDashboard.myEnrollments || []).filter((e) => e.status === "rejected");
+// Still enrolled, but the monthly access window has run out. These drop out of
+// the dashboard's enrolled list (the backend filters them), so without this the
+// course would just vanish with no way to renew.
+export const selectExpiredEnrollments = (state) =>
+  (state.studentDashboard.myEnrollments || []).filter(
+    (e) => e.status === "active" && e.has_access === false
+  );
+// Active access that is close to running out, for the countdown banner.
+export const selectExpiringEnrollments = (state) =>
+  (state.studentDashboard.myEnrollments || []).filter(
+    (e) =>
+      e.status === "active" &&
+      e.has_access === true &&
+      typeof e.days_remaining === "number" &&
+      e.days_remaining <= 7
+  );
 
 // Filtered selectors
 export const selectFilteredAssignments = createSelector(

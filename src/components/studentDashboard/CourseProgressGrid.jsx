@@ -5,7 +5,9 @@ import {
   selectEnrolledCourses,
   selectPendingEnrollments,
   selectRejectedEnrollments,
+  selectExpiredEnrollments,
 } from "../../store/slices/studentDashboardSlice";
+import { studentService } from "../../services/studentService";
 import CourseCard from "../courses/CourseCard";
 
 const CourseProgressGrid = () => {
@@ -13,9 +15,34 @@ const CourseProgressGrid = () => {
   const enrolledCourses = useSelector(selectEnrolledCourses);
   const pendingEnrollments = useSelector(selectPendingEnrollments);
   const rejectedEnrollments = useSelector(selectRejectedEnrollments);
-  
+  const expiredEnrollments = useSelector(selectExpiredEnrollments);
+
   const [activeTab, setActiveTab] = useState("enrolled");
   const [hasDefaulted, setHasDefaulted] = useState(false);
+  const [renewingId, setRenewingId] = useState(null);
+  const [renewError, setRenewError] = useState("");
+
+  // Send the student back to Gumroad to restart their monthly membership. The
+  // webhook restores access when the charge lands, so there is nothing to do here
+  // beyond the redirect.
+  const handleRenew = async (courseId) => {
+    setRenewError("");
+    setRenewingId(courseId);
+    try {
+      const { checkout_url } = await studentService.initiateCheckout(courseId);
+      if (checkout_url) {
+        window.location.href = checkout_url;
+        return;
+      }
+      setRenewError("Could not start checkout. Please try again.");
+    } catch (err) {
+      setRenewError(
+        err?.response?.data?.error || "Could not start checkout. Please try again."
+      );
+    } finally {
+      setRenewingId(null);
+    }
+  };
 
   // Automatically select the most relevant tab on initial load
   React.useEffect(() => {
@@ -24,6 +51,9 @@ const CourseProgressGrid = () => {
     if (enrolledCourses.length > 0) {
       setActiveTab("enrolled");
       setHasDefaulted(true);
+    } else if (expiredEnrollments.length > 0) {
+      setActiveTab("expired");
+      setHasDefaulted(true);
     } else if (pendingEnrollments.length > 0) {
       setActiveTab("pending");
       setHasDefaulted(true);
@@ -31,10 +61,11 @@ const CourseProgressGrid = () => {
       setActiveTab("rejected");
       setHasDefaulted(true);
     }
-  }, [enrolledCourses.length, pendingEnrollments.length, rejectedEnrollments.length, hasDefaulted]);
+  }, [enrolledCourses.length, expiredEnrollments.length, pendingEnrollments.length, rejectedEnrollments.length, hasDefaulted]);
 
   const tabs = [
     { id: "enrolled", label: "Enrolled", count: enrolledCourses.length },
+    { id: "expired", label: "Access Ended", count: expiredEnrollments.length },
     { id: "pending", label: "Pending Approvals", count: pendingEnrollments.length },
     { id: "rejected", label: "Rejected", count: rejectedEnrollments.length },
   ];
@@ -76,6 +107,12 @@ const CourseProgressGrid = () => {
         </div>
       </div>
 
+      {renewError && (
+        <div className="mb-6 px-4 py-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-sm">
+          {renewError}
+        </div>
+      )}
+
       {/* Grid Content */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {activeTab === "enrolled" && (
@@ -105,6 +142,32 @@ const CourseProgressGrid = () => {
                 Discover new learning paths
               </p>
             </div>
+          </>
+        )}
+
+        {activeTab === "expired" && (
+          <>
+            {expiredEnrollments.length > 0 ? (
+              expiredEnrollments.map((enrollment, i) => (
+                <CourseCard
+                  key={enrollment.id}
+                  course={enrollment}
+                  index={i}
+                  mode="expired"
+                  onNavigate={navigate}
+                  onRenew={handleRenew}
+                  ctaLabel={renewingId === enrollment.course?.id ? "Redirecting..." : undefined}
+                />
+              ))
+            ) : (
+              <div className="col-span-full flex flex-col items-center justify-center py-20 bg-slate-900/20 rounded-[2.5rem] border border-white/5 border-dashed">
+                <div className="w-20 h-20 rounded-[2rem] bg-slate-800 flex items-center justify-center mb-6 text-slate-600">
+                  <i className="fas fa-lock-open text-3xl"></i>
+                </div>
+                <h3 className="text-xl font-bold text-slate-400">All Access Active</h3>
+                <p className="text-slate-500 text-sm mt-2">Courses whose monthly access has ended will appear here.</p>
+              </div>
+            )}
           </>
         )}
 

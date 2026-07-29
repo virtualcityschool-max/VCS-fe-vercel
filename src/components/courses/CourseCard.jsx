@@ -6,16 +6,21 @@ import { getCourseImage } from "../../utils/courseImageUtils";
  * Shared course card used across student dashboard (enrolled/pending/rejected)
  * and teacher portal (academic portfolio).
  *
- * mode: "enrolled" | "pending" | "rejected" | "teacher"
+ * mode: "enrolled" | "pending" | "rejected" | "expired" | "teacher"
+ *
+ * "expired" is a still-enrolled student whose monthly access has run out. The
+ * enrollment is intact and nothing has been lost, so the card stays visible and
+ * offers a renewal rather than disappearing.
  */
-const CourseCard = ({ course, index = 0, mode, onClick, onNavigate, ctaLabel }) => {
+const CourseCard = ({ course, index = 0, mode, onClick, onNavigate, ctaLabel, onRenew }) => {
   const isPending  = mode === "pending";
   const isRejected = mode === "rejected";
   const isEnrolled = mode === "enrolled";
+  const isExpired  = mode === "expired";
   const isTeacher  = mode === "teacher";
 
-  // For pending/rejected the API gives an enrollment object with .course nested
-  const courseData = (isPending || isRejected) ? course.course : course;
+  // For pending/rejected/expired the API gives an enrollment object with .course nested
+  const courseData = (isPending || isRejected || isExpired) ? course.course : course;
 
   const thumbnail = getCourseImage(courseData, index);
 
@@ -38,7 +43,7 @@ const CourseCard = ({ course, index = 0, mode, onClick, onNavigate, ctaLabel }) 
     >
       {/* Thumbnail */}
       <div className="relative h-32 overflow-hidden bg-slate-900/50 shrink-0">
-        {isTeacher || isEnrolled ? (
+        {isTeacher || isEnrolled || isExpired ? (
           <div className="block h-full">
             {thumbnail ? (
               <img
@@ -99,12 +104,18 @@ const CourseCard = ({ course, index = 0, mode, onClick, onNavigate, ctaLabel }) 
               Rejected
             </span>
           )}
+          {isExpired && (
+            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest bg-amber-500/10 text-amber-400 border border-amber-500/20 backdrop-blur-md">
+              <i className="fas fa-lock text-[9px]" />
+              Access Ended
+            </span>
+          )}
         </div>
       </div>
 
       {/* Content */}
       <div className="p-4 flex flex-col flex-1 min-w-0">
-        {isTeacher || isEnrolled ? (
+        {isTeacher || isEnrolled || isExpired ? (
           <h4 className="text-sm font-black leading-tight text-white group-hover:text-blue-400 transition-colors line-clamp-2 mb-2">
             {courseData.title || "Untitled Course"}
           </h4>
@@ -121,6 +132,14 @@ const CourseCard = ({ course, index = 0, mode, onClick, onNavigate, ctaLabel }) 
             <i className="fas fa-user-graduate text-[10px]" />
             <span className="font-bold">{courseData.total_enrolled ?? 0} Enrolled</span>
           </div>
+        )}
+
+        {isExpired && (
+          <p className="text-[9px] font-black uppercase tracking-widest mb-2 text-amber-400/70">
+            {course.access_expires_at
+              ? `Access ended ${new Date(course.access_expires_at).toLocaleDateString()}`
+              : "Access ended"}
+          </p>
         )}
 
         {(isPending || isRejected) && dateLabel && (
@@ -158,6 +177,14 @@ const CourseCard = ({ course, index = 0, mode, onClick, onNavigate, ctaLabel }) 
               className="w-full py-2.5 text-[10px] font-black uppercase tracking-[0.15em] rounded-xl bg-amber-600/10 border border-amber-500/20 text-amber-400 cursor-not-allowed"
             >
               Awaiting Approval
+            </button>
+          )}
+          {isExpired && (
+            <button
+              onClick={() => onRenew?.(courseData.id)}
+              className="w-full py-2.5 text-[10px] font-black uppercase tracking-[0.15em] rounded-xl transition-all active:scale-95 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white shadow-lg shadow-amber-900/40"
+            >
+              Renew Access
             </button>
           )}
           {isRejected && (

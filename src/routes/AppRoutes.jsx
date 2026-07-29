@@ -64,6 +64,7 @@ import {
 } from "../pages";
 import AdminAboutPage from "../pages/admin/AdminAboutPage";
 import AdminPlatformSettingsPage from "../pages/admin/AdminPlatformSettingsPage";
+import AdminSubscriptionsPage from "../pages/admin/AdminSubscriptionsPage";
 
 // Protected Route Component with Role-Based Access Control
 const ProtectedRoute = ({ allowedRoles = [] }) => {
@@ -248,6 +249,7 @@ const AppRoutes = () => {
           <Route path="blogs" element={<AdminBlogsPage />} />
           <Route path="users" element={<AdminUsersPage />} />
           <Route path="enrollments" element={<AdminEnrollmentsPage />} />
+          <Route path="subscriptions" element={<AdminSubscriptionsPage />} />
           <Route path="sessions" element={<AdminSessionsPage />} />
           <Route path="teacher-planner" element={<AdminTeacherPlannerPage />} />
           <Route path="attendance" element={<AdminAttendancePage />} />

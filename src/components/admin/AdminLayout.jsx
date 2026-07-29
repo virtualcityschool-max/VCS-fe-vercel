@@ -29,6 +29,7 @@ const AdminLayout = () => {
     if (path.includes("/admin/approvals")) return "approvals";
     if (path.includes("/admin/courses")) return "courses";
     if (path.includes("/admin/users")) return "users";
+    if (path.includes("/admin/subscriptions")) return "subscriptions";
     if (path.includes("/admin/enrollments")) return "enrollments";
     if (path.includes("/admin/sessions")) return "sessions";
     if (path.includes("/admin/teacher-planner")) return "teacher-planner";

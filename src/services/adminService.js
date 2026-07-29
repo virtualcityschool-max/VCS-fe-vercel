@@ -26,6 +26,12 @@ const ADMIN_ENDPOINTS = {
   PENDING_ENROLLMENTS: "/courses/enrollments/pending/",
   ENROLLMENT_ACTION: (id) => `/courses/enrollments/${id}/approve/`,
 
+  // Subscriptions (monthly paid-course access)
+  SUBSCRIPTIONS: "/courses/subscriptions/",
+  EXTEND_SUBSCRIPTION: (id) => `/courses/enrollments/${id}/extend/`,
+  REVOKE_SUBSCRIPTION: (id) => `/courses/enrollments/${id}/revoke/`,
+  MARK_GUMROAD_CANCELLED: (id) => `/courses/enrollments/${id}/gumroad-cancelled/`,
+
   // Teacher Slot Management (admin)
   ADMIN_TEACHER_SLOTS: (teacherId) => `/availability/slots/admin/teacher/${teacherId}/`,
   ADMIN_DELETE_SLOT: (slotId) => `/availability/slots/admin/${slotId}/`,
@@ -444,5 +450,37 @@ export const adminService = {
     } catch (error) {
       throw error
     }
+  },
+
+  // ── Subscriptions ────────────────────────────────────────────────────────
+  getSubscriptions: async () => {
+    const response = await axiosInstance.get(ADMIN_ENDPOINTS.SUBSCRIPTIONS);
+    return response.data;
+  },
+
+  // Records another month of manual payment for an admin-enrolled student.
+  extendSubscription: async (enrollmentId) => {
+    const response = await axiosInstance.post(
+      ADMIN_ENDPOINTS.EXTEND_SUBSCRIPTION(enrollmentId)
+    );
+    return response.data;
+  },
+
+  // Ends a student's paid access immediately without un-enrolling them. Does not
+  // cancel anything on Gumroad; the response says so when billing is still live.
+  revokeSubscription: async (enrollmentId) => {
+    const response = await axiosInstance.post(
+      ADMIN_ENDPOINTS.REVOKE_SUBSCRIPTION(enrollmentId)
+    );
+    return response.data;
+  },
+
+  // Acknowledges that a membership was cancelled on Gumroad. Gumroad has no
+  // cancel API, so this is the admin confirming a manual action, not a check.
+  markGumroadCancelled: async (enrollmentId) => {
+    const response = await axiosInstance.post(
+      ADMIN_ENDPOINTS.MARK_GUMROAD_CANCELLED(enrollmentId)
+    );
+    return response.data;
   },
 };

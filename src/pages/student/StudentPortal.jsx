@@ -23,6 +23,7 @@ import {
 import { availabilityService } from "../../services/availabilityService";
 import ApplyFreeAccessModal from "../../components/public/ApplyFreeAccessModal";
 import ReferralLinkCard from "../../components/common/ReferralLinkCard";
+import SubscriptionBanner from "../../components/studentDashboard/SubscriptionBanner";
 
 const StudentPortal = () => {
   const dispatch = useDispatch();
@@ -171,6 +172,9 @@ const StudentPortal = () => {
           {/* Referral link - invite others to the platform */}
           <ReferralLinkCard />
         </div>
+
+        {/* Monthly access notices for paid courses */}
+        <SubscriptionBanner />
 
         {isDashboardEmpty ? (
           <div className="relative group overflow-hidden rounded-[2.5rem] border border-white/5 bg-slate-900/40 backdrop-blur-xl p-12 lg:p-20 text-center shadow-2xl transition-all duration-500 hover:border-blue-500/10">
