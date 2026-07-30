@@ -75,6 +75,35 @@ export const toastManager = {
     return toastId;
   },
 
+  // For outcomes that succeeded but leave the admin something to act on, the
+  // classic being "access is off but Gumroad is still billing them".
+  warning: (message, options = {}) => {
+    const key = generateToastKey("warning", message);
+
+    if (toastDeduplicationMap.has(key)) {
+      return;
+    }
+
+    const toastId = toast.warning(message, {
+      autoClose: options.duration || 8000,
+      position: options.position || "top-right",
+      ...options,
+    });
+
+    toastDeduplicationMap.set(key, {
+      id: toastId,
+      timestamp: Date.now(),
+    });
+
+    const cleanupTimeout = setTimeout(() => {
+      toastDeduplicationMap.delete(key);
+    }, 9000);
+
+    toastDeduplicationMap.get(key).cleanupTimeout = cleanupTimeout;
+
+    return toastId;
+  },
+
   loading: (message, options = {}) => {
     return toast.loading(message, {
       position: options.position || "top-right",

@@ -29,8 +29,8 @@ const SubscriptionBanner = () => {
           <div className="min-w-0">
             <p className="text-sm font-bold text-amber-300">
               {expired.length === 1
-                ? `Access to ${expired[0].course?.title || "a course"} has ended`
-                : `Access to ${expired.length} courses has ended`}
+                ? `Access to ${expired[0].course?.title || "a course"} is pending renewal`
+                : `Access to ${expired.length} courses is pending renewal`}
             </p>
             <p className="text-xs text-amber-200/70 mt-1">
               You are still enrolled and nothing has been lost. Sessions, quizzes
