@@ -92,6 +92,14 @@ export const authService = {
       if (userData.referral_code) {
         requestData.referral_code = userData.referral_code;
       }
+      // Guardian signup: the children the guardian is asking to be linked to.
+      // The backend verifies each one exists before the request reaches admin.
+      if (userData.student_roll_nos?.length) {
+        requestData.student_roll_nos = userData.student_roll_nos;
+      }
+      if (userData.student_emails?.length) {
+        requestData.student_emails = userData.student_emails;
+      }
 
       console.log("Request data being sent to backend:", requestData);
       console.log(
@@ -374,12 +382,15 @@ export const authService = {
   },
 
   // Approve user (admin only)
-  approveUser: async (userId) => {
+  // approveChildLinks only applies to guardians: when true (the default) the
+  // students they named at signup are linked along with the account.
+  approveUser: async (userId, approveChildLinks = true) => {
     try {
       console.log("Approving user:", userId);
 
       const response = await axiosInstance.patch(`/auth/approve/${userId}/`, {
         action: "approve",
+        approve_child_links: approveChildLinks,
       });
       console.log("Approve User Response:", response.data);
 
@@ -388,6 +399,7 @@ export const authService = {
         message: response.data.message || "User approved successfully",
         user_id: response.data.user_id,
         is_active: response.data.is_active,
+        linked_children: response.data.linked_children || 0,
       };
     } catch (error) {
       console.error("Approve user error:", {

@@ -1,8 +1,142 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import ConfirmDialog from "../common/ConfirmDialog";
 import { getStorageUrl } from "../../utils/storageUrl";
 import { useDateFormatters } from "../../hooks/useDateFormatters";
 import { getDisplayName } from "../../utils/userDisplay";
+
+const CHILD_STATUS_STYLE = {
+  pending:  "bg-amber-500/10 text-amber-400 border-amber-500/20",
+  approved: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+  rejected: "bg-rose-500/10 text-rose-400 border-rose-500/20",
+};
+
+/**
+ * Compact hint that a guardian named children on the signup form. The names
+ * themselves live in the preview popup so the row stays scannable.
+ */
+const RequestedChildrenBadge = ({ user, onPreview }) => {
+  const children = user?.requested_children || [];
+  if (user?.role !== "parent" || children.length === 0) return null;
+
+  return (
+    <button
+      type="button"
+      onClick={() => onPreview(user)}
+      title="View the students this guardian requested"
+      className="mt-2 inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 hover:bg-indigo-500/20 hover:text-indigo-200 transition text-[10px] font-black uppercase tracking-wider"
+    >
+      <i className="fas fa-child text-[10px]"></i>
+      Requesting access to {children.length} student{children.length > 1 ? "s" : ""}
+      <i className="fas fa-eye text-[10px] opacity-80"></i>
+    </button>
+  );
+};
+
+/** Small read-only popup listing the students a guardian asked to be linked to. */
+const RequestedChildrenModal = ({ user, onClose }) => {
+  // Match the app's other modals: freeze the page behind the popup
+  useEffect(() => {
+    if (!user) return undefined;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [user]);
+
+  if (!user) return null;
+  const children = user.requested_children || [];
+
+  return createPortal(
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4 animate-fadeIn">
+      <div className="w-full max-w-md bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden animate-scaleIn">
+        {/* Header */}
+        <div className="flex items-start justify-between gap-3 p-5 border-b border-slate-800">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center shrink-0">
+              <i className="fas fa-link text-indigo-400 text-sm"></i>
+            </div>
+            <div className="min-w-0">
+              <h3 className="text-sm font-bold text-white truncate">
+                {getDisplayName(user) || "Guardian"}
+              </h3>
+              <p className="text-[11px] text-slate-500 truncate">{user.email}</p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="text-slate-500 hover:text-white transition shrink-0"
+            aria-label="Close"
+          >
+            <i className="fas fa-times"></i>
+          </button>
+        </div>
+
+        {/* Children */}
+        <div className="p-5">
+          <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-3">
+            Requested students
+            <span className="ml-2 text-slate-600 normal-case tracking-normal font-bold">
+              {children.length} total
+            </span>
+          </p>
+
+          <div className="space-y-2 max-h-[45vh] overflow-y-auto scrollbar-hide">
+            {children.map((child) => (
+              <div
+                key={child.link_id}
+                className="flex items-center gap-3 rounded-xl bg-slate-800/40 border border-slate-700/50 px-3 py-2.5"
+              >
+                <div className="w-9 h-9 rounded-lg bg-slate-900 border border-slate-700 flex items-center justify-center shrink-0">
+                  <i className="fas fa-user-graduate text-slate-400 text-xs"></i>
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-white truncate">
+                    {child.student_name || child.student}
+                  </p>
+                  <p className="text-[11px] text-slate-500 truncate">
+                    {child.student_email}
+                  </p>
+                </div>
+                <div className="flex flex-col items-end gap-1 shrink-0">
+                  {child.student_roll_no != null && (
+                    <span className="text-[10px] font-black text-indigo-400">
+                      Roll #{child.student_roll_no}
+                    </span>
+                  )}
+                  <span
+                    className={`px-1.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider border ${
+                      CHILD_STATUS_STYLE[child.status] || CHILD_STATUS_STYLE.pending
+                    }`}
+                  >
+                    {child.status}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <p className="text-[11px] text-slate-500 mt-4 leading-relaxed">
+            <i className="fas fa-circle-info mr-1.5 text-indigo-400"></i>
+            Approving this guardian links these students by default. Untick the
+            option in the approve dialog to decide them separately.
+          </p>
+        </div>
+
+        {/* Footer */}
+        <div className="px-5 pb-5">
+          <button
+            onClick={onClose}
+            className="w-full py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-black uppercase tracking-[0.2em] transition"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>,
+    document.body,
+  );
+};
 
 const ApprovalsTab = ({
   pendingApprovals,
@@ -20,8 +154,13 @@ const ApprovalsTab = ({
   rejectedTodayCount = 0,
 }) => {
   const [subTab, setSubTab] = useState("pending");
-  const [confirmDialog, setConfirmDialog] = useState({ open: false, type: null, userId: null, username: "" });
+  const [confirmDialog, setConfirmDialog] = useState({ open: false, type: null, userId: null, username: "", children: [] });
   const [deleteUser, setDeleteUser] = useState(false);
+  // Guardians name their children at signup — approving the account grants
+  // that access unless the admin unticks it
+  const [approveChildLinks, setApproveChildLinks] = useState(true);
+  // Guardian whose requested students are being previewed
+  const [childrenPreview, setChildrenPreview] = useState(null);
   const { timezone } = useDateFormatters();
 
   const isRejectedTab = subTab === "rejected";
@@ -41,47 +180,91 @@ const ApprovalsTab = ({
       const roleLabel = (
         { teacher: "tutor", parent: "guardian" }[role] || role
       );
+      // Guardians are also findable by the children they asked to be linked to
+      const childMatch = (user.requested_children || []).some((c) =>
+        [c.student_name, c.student, c.student_email, String(c.student_roll_no ?? "")]
+          .some((f) => (f || "").toLowerCase().includes(q)),
+      );
       return (
         name.includes(q) ||
         email.includes(q) ||
         role.includes(q) ||
-        roleLabel.includes(q)
+        roleLabel.includes(q) ||
+        childMatch
       );
     });
   }, [activeList, search]);
 
-  const handleApprove = (userId, username) => {
-    setConfirmDialog({ open: true, type: "approve", userId, username });
-  };
+  // Children a guardian asked to be linked to at registration — pending ones
+  // are the decision the admin is making alongside the account itself
+  const pendingChildren = (user) =>
+    (user?.requested_children || []).filter((c) => c.status === "pending");
 
-  const handleReject = (userId, username) => {
+  const closeDialog = () => {
+    setConfirmDialog({ open: false, type: null, userId: null, username: "", children: [] });
     setDeleteUser(false);
-    setConfirmDialog({ open: true, type: "reject", userId, username });
+    setApproveChildLinks(true);
   };
 
-  const handleDelete = (userId, username) => {
-    setConfirmDialog({ open: true, type: "delete", userId, username });
+  const handleApprove = (user) => {
+    setApproveChildLinks(true);
+    setConfirmDialog({
+      open: true,
+      type: "approve",
+      userId: user.id,
+      username: getDisplayName(user),
+      children: pendingChildren(user),
+    });
+  };
+
+  const handleReject = (user) => {
+    setDeleteUser(false);
+    setConfirmDialog({
+      open: true,
+      type: "reject",
+      userId: user.id,
+      username: getDisplayName(user),
+      children: pendingChildren(user),
+    });
+  };
+
+  const handleDelete = (user) => {
+    setConfirmDialog({
+      open: true,
+      type: "delete",
+      userId: user.id,
+      username: getDisplayName(user),
+      children: [],
+    });
   };
 
   const handleConfirm = () => {
     const { type, userId } = confirmDialog;
     const shouldDelete = deleteUser;
-    setConfirmDialog({ open: false, type: null, userId: null, username: "" });
-    setDeleteUser(false);
-    if (type === "approve") onApprove(userId);
+    const withChildLinks = approveChildLinks;
+    closeDialog();
+    if (type === "approve") onApprove(userId, withChildLinks);
     else if (type === "reject") onReject(userId, shouldDelete);
     else if (type === "delete") onReject(userId, true, true);
   };
 
+  const childSummary = confirmDialog.children
+    .map((c) => `${c.student_name}${c.student_roll_no != null ? ` (Roll #${c.student_roll_no})` : ""}`)
+    .join(", ");
+
   const dialogCopy = {
     approve: {
       title: "Approve User",
-      message: `Are you sure you want to approve "${confirmDialog.username}"? They will gain access to the platform.`,
+      message: confirmDialog.children.length
+        ? `Approve "${confirmDialog.username}"? They requested access to: ${childSummary}.`
+        : `Are you sure you want to approve "${confirmDialog.username}"? They will gain access to the platform.`,
       confirmLabel: "Approve",
     },
     reject: {
       title: "Reject User",
-      message: `Are you sure you want to reject "${confirmDialog.username}"? This will deny their registration. You can still approve them later from this list.`,
+      message: confirmDialog.children.length
+        ? `Reject "${confirmDialog.username}"? Their request to access ${childSummary} will be denied too. You can still approve them later from this list.`
+        : `Are you sure you want to reject "${confirmDialog.username}"? This will deny their registration. You can still approve them later from this list.`,
       confirmLabel: "Reject",
     },
     delete: {
@@ -99,7 +282,7 @@ const ApprovalsTab = ({
           <div className="flex items-center gap-1">
             <button
               onClick={() => setSubTab("pending")}
-              className={`inline-flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all duration-200 ${
+              className={`inline-flex items-center gap-1.5 capitalize sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-[10px] sm:text-xs font-bold tracking-wider transition-all duration-200 ${
                 !isRejectedTab
                   ? "bg-indigo-600 text-white shadow-lg"
                   : "text-slate-400 hover:text-white hover:bg-slate-800/50"
@@ -115,7 +298,7 @@ const ApprovalsTab = ({
             </button>
             <button
               onClick={() => setSubTab("rejected")}
-              className={`inline-flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all duration-200 ${
+              className={`inline-flex items-center gap-1.5 capitalize sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-[10px] sm:text-xs font-bold tracking-wider transition-all duration-200 ${
                 isRejectedTab
                   ? "bg-indigo-600 text-white shadow-lg"
                   : "text-slate-400 hover:text-white hover:bg-slate-800/50"
@@ -280,6 +463,8 @@ const ApprovalsTab = ({
                       </div>
                     </div>
 
+                    <RequestedChildrenBadge user={user} onPreview={setChildrenPreview} />
+
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                       <div className="flex items-center gap-2">
                         <span className="bg-slate-700/50 text-slate-300 px-2 sm:px-3 py-1 rounded-full text-[8px] sm:text-xs font-black uppercase border border-slate-600">
@@ -296,7 +481,7 @@ const ApprovalsTab = ({
 
                         <div className="flex gap-2">
                           <button
-                            onClick={() => handleApprove(user.id, getDisplayName(user))}
+                            onClick={() => handleApprove(user)}
                             disabled={isProcessing[user.id] === "approving"}
                             title="Approve"
                             aria-label="Approve"
@@ -313,8 +498,8 @@ const ApprovalsTab = ({
                           <button
                             onClick={() =>
                               user.is_rejected
-                                ? handleDelete(user.id, getDisplayName(user))
-                                : handleReject(user.id, getDisplayName(user))
+                                ? handleDelete(user)
+                                : handleReject(user)
                             }
                             disabled={isProcessing[user.id] === "rejecting"}
                             title={user.is_rejected ? "Delete permanently" : "Reject"}
@@ -384,6 +569,7 @@ const ApprovalsTab = ({
                             <p className="text-[11px] text-slate-500">
                               {user.email}
                             </p>
+                            <RequestedChildrenBadge user={user} onPreview={setChildrenPreview} />
                           </div>
                         </div>
                       </td>
@@ -402,7 +588,7 @@ const ApprovalsTab = ({
                       <td className="px-8 py-6 text-center">
                         <div className="flex items-center gap-2 justify-center">
                           <button
-                            onClick={() => handleApprove(user.id, getDisplayName(user))}
+                            onClick={() => handleApprove(user)}
                             disabled={isProcessing[user.id] === "approving"}
                             className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                           >
@@ -421,8 +607,8 @@ const ApprovalsTab = ({
                           <button
                             onClick={() =>
                               user.is_rejected
-                                ? handleDelete(user.id, getDisplayName(user))
-                                : handleReject(user.id, getDisplayName(user))
+                                ? handleDelete(user)
+                                : handleReject(user)
                             }
                             disabled={isProcessing[user.id] === "rejecting"}
                             className="bg-red-600 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
@@ -457,13 +643,25 @@ const ApprovalsTab = ({
         confirmLabel={dialogCopy.confirmLabel}
         cancelLabel="Cancel"
         onConfirm={handleConfirm}
-        onCancel={() => {
-          setConfirmDialog({ open: false, type: null, userId: null, username: "" });
-          setDeleteUser(false);
-        }}
-        checkboxLabel={confirmDialog.type === "reject" ? "Permanently delete this user" : ""}
-        checkboxChecked={deleteUser}
-        onCheckboxChange={setDeleteUser}
+        onCancel={closeDialog}
+        checkboxLabel={
+          confirmDialog.type === "reject"
+            ? "Permanently delete this user"
+            : confirmDialog.type === "approve" && confirmDialog.children.length
+              ? `Also link the ${confirmDialog.children.length} student(s) they requested`
+              : ""
+        }
+        checkboxChecked={
+          confirmDialog.type === "approve" ? approveChildLinks : deleteUser
+        }
+        onCheckboxChange={
+          confirmDialog.type === "approve" ? setApproveChildLinks : setDeleteUser
+        }
+      />
+
+      <RequestedChildrenModal
+        user={childrenPreview}
+        onClose={() => setChildrenPreview(null)}
       />
     </>
   );

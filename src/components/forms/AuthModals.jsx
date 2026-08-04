@@ -22,6 +22,11 @@ import {
 } from "../../utils/referral";
 import { FilterSelect } from "../ui";
 
+// Guardians identify a child by roll number (digits) or by the email the child
+// registered with — same two forms the parent portal accepts after signup.
+const isChildEmail  = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+const isChildRollNo = (v) => /^\d+$/.test(v);
+
 const AuthModals = () => {
   const [activeRoleTab, setActiveRoleTab] = useState("student");
   const [email, setEmail] = useState("");
@@ -73,6 +78,10 @@ const AuthModals = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [role, setRole] = useState("");
   const [gradeLevel, setGradeLevel] = useState("");
+  // Guardian-only: the children this guardian is asking to follow.
+  // { type: "roll_no" | "email", value: string }
+  const [childInput, setChildInput] = useState("");
+  const [childEntries, setChildEntries] = useState([]);
 
   const dispatch = useDispatch();
   const { authModal, enrollmentIntent } = useSelector((state) => state.ui);
@@ -97,6 +106,8 @@ const AuthModals = () => {
     setConfirmPassword("");
     setRole("");
     setGradeLevel("");
+    setChildInput("");
+    setChildEntries([]);
 
     // Reset role tab to default
     setActiveRoleTab("student");
@@ -194,6 +205,8 @@ const AuthModals = () => {
       setConfirmPassword("");
       setRole("");
       setGradeLevel("");
+      setChildInput("");
+      setChildEntries([]);
       setRegistrationStep("form");
       setOtp("");
       setShowLoginPassword(false);
@@ -310,6 +323,46 @@ const AuthModals = () => {
     }
   };
 
+  // Adds whatever is typed in the child field to the list. Returns the new
+  // list so submit can accept a value the guardian never clicked "Add" on.
+  const addChildEntry = (raw = childInput, { silent = false } = {}) => {
+    const val = (raw || "").trim();
+    if (!val) {
+      if (!silent) toastManager.error("Enter your child's roll number or email");
+      return childEntries;
+    }
+
+    let entry;
+    if (isChildRollNo(val)) {
+      entry = { type: "roll_no", value: String(parseInt(val, 10)) };
+    } else if (isChildEmail(val)) {
+      entry = { type: "email", value: val.toLowerCase() };
+    } else {
+      toastManager.error("Enter a valid roll number or email address");
+      return childEntries;
+    }
+
+    if (childEntries.some((c) => c.type === entry.type && c.value === entry.value)) {
+      toastManager.error(
+        entry.type === "roll_no"
+          ? "This roll number is already added"
+          : "This email is already added",
+      );
+      return childEntries;
+    }
+
+    const next = [...childEntries, entry];
+    setChildEntries(next);
+    setChildInput("");
+    clearRegistrationFieldError("student_roll_nos");
+    clearRegistrationFieldError("student_emails");
+    clearRegistrationFieldError("children");
+    return next;
+  };
+
+  const removeChildEntry = (idx) =>
+    setChildEntries((prev) => prev.filter((_, i) => i !== idx));
+
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
     dispatch(clearAuthError());
@@ -343,6 +396,19 @@ const AuthModals = () => {
 
     if (role === "student" && !gradeLevel) newErrors.gradeLevel = "Please select a course level";
 
+    // Guardians must name at least one child so the admin can review who the
+    // request is for. A value left in the input counts - no need to press Add.
+    let children = childEntries;
+    if (role === "parent") {
+      if (childInput.trim()) {
+        children = addChildEntry(childInput);
+      }
+      if (children.length === 0) {
+        newErrors.children =
+          "Add at least one child by roll number or email";
+      }
+    }
+
     if (Object.keys(newErrors).length > 0) {
       setRegistrationErrors(newErrors);
       return;
@@ -359,6 +425,14 @@ const AuthModals = () => {
       };
       if (role === "student" && gradeLevel) {
         registerPayload.grade_level = gradeLevel;
+      }
+      if (role === "parent") {
+        registerPayload.student_roll_nos = children
+          .filter((c) => c.type === "roll_no")
+          .map((c) => parseInt(c.value, 10));
+        registerPayload.student_emails = children
+          .filter((c) => c.type === "email")
+          .map((c) => c.value);
       }
       const refCode = getStoredReferralCode();
       if (refCode) {
@@ -974,7 +1048,13 @@ const AuthModals = () => {
                       toastManager.dismiss();
                       setRole(e.target.value);
                       setGradeLevel("");
+                      // Child links only apply to guardians
+                      if (e.target.value !== "parent") {
+                        setChildInput("");
+                        setChildEntries([]);
+                      }
                       clearRegistrationFieldError("role");
+                      clearRegistrationFieldError("children");
                       dispatch(clearAuthError());
                     }}
                     placeholder="Select Role"
@@ -1158,6 +1238,139 @@ const AuthModals = () => {
                           : registrationErrors.gradeLevel}
                       </p>
                     )}
+                  </div>
+                )}
+
+                {role === "parent" && (
+                  <div className="md:col-span-2 bg-slate-950/60 border border-white/5 rounded-2xl p-5">
+                    <label
+                      htmlFor="register-child"
+                      className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block"
+                    >
+                      Your Child's Roll Number or Email <span className="text-red-500">*</span>
+                    </label>
+                    <p className="text-slate-500 text-[11px] mb-3 leading-relaxed">
+                      Add each child you want access to. Ask your child for the
+                      roll number or the email they registered with. The
+                      administrator reviews these before approving your account.
+                    </p>
+
+                    <div className="flex gap-2">
+                      <input
+                        id="register-child"
+                        name="register-child"
+                        type="text"
+                        autoComplete="off"
+                        value={childInput}
+                        onChange={(e) => {
+                          toastManager.dismiss();
+                          setChildInput(e.target.value);
+                          clearRegistrationFieldError("children");
+                          clearRegistrationFieldError("student_roll_nos");
+                          clearRegistrationFieldError("student_emails");
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            addChildEntry();
+                          }
+                        }}
+                        placeholder="e.g. 42  or  student@email.com"
+                        className="flex-1 bg-slate-950 border border-white/5 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => addChildEntry()}
+                        className="px-5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-black uppercase tracking-widest transition flex items-center gap-2 shrink-0"
+                      >
+                        <i className="fas fa-plus text-[10px]"></i>
+                        Add
+                      </button>
+                    </div>
+
+                    <div className="flex items-center gap-4 mt-2.5 flex-wrap">
+                      <span className="flex items-center gap-1.5 text-[10px] text-slate-500">
+                        <span className="w-4 h-4 rounded bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center">
+                          <i className="fas fa-hashtag text-indigo-400 text-[8px]"></i>
+                        </span>
+                        Numbers are read as a roll number
+                      </span>
+                      <span className="flex items-center gap-1.5 text-[10px] text-slate-500">
+                        <span className="w-4 h-4 rounded bg-emerald-600/20 border border-emerald-500/30 flex items-center justify-center">
+                          <i className="fas fa-at text-emerald-400 text-[8px]"></i>
+                        </span>
+                        Anything with @ is read as an email
+                      </span>
+                    </div>
+
+                    {childEntries.length > 0 && (
+                      <div className="mt-4 space-y-2">
+                        <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest">
+                          Children to link
+                          <span className="ml-2 text-slate-600 font-bold normal-case tracking-normal">
+                            {childEntries.length} added
+                          </span>
+                        </p>
+                        {childEntries.map((entry, idx) => (
+                          <div
+                            key={`${entry.type}-${entry.value}`}
+                            className="flex items-center justify-between bg-slate-900/70 border border-white/5 rounded-xl px-4 py-2.5"
+                          >
+                            <div className="flex items-center gap-3 min-w-0">
+                              <div
+                                className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
+                                  entry.type === "roll_no"
+                                    ? "bg-indigo-600/20 border border-indigo-500/30"
+                                    : "bg-emerald-600/20 border border-emerald-500/30"
+                                }`}
+                              >
+                                <i
+                                  className={`fas text-[10px] ${
+                                    entry.type === "roll_no"
+                                      ? "fa-hashtag text-indigo-400"
+                                      : "fa-at text-emerald-400"
+                                  }`}
+                                ></i>
+                              </div>
+                              <div className="min-w-0">
+                                <p className="text-white text-sm font-medium truncate">
+                                  {entry.value}
+                                </p>
+                                <p
+                                  className={`text-[9px] uppercase tracking-widest font-black ${
+                                    entry.type === "roll_no"
+                                      ? "text-indigo-500"
+                                      : "text-emerald-500"
+                                  }`}
+                                >
+                                  {entry.type === "roll_no" ? "Roll Number" : "Email"}
+                                </p>
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => removeChildEntry(idx)}
+                              className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition shrink-0"
+                              title="Remove"
+                            >
+                              <i className="fas fa-times text-xs"></i>
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {[
+                      registrationErrors.children,
+                      registrationErrors.student_roll_nos,
+                      registrationErrors.student_emails,
+                    ]
+                      .filter(Boolean)
+                      .map((err, i) => (
+                        <p key={i} className="text-red-500 text-xs mt-2 animate-shake">
+                          {Array.isArray(err) ? err[0] : err}
+                        </p>
+                      ))}
                   </div>
                 )}
 

@@ -177,6 +177,9 @@ const UsersTab = ({
     user: null,
   });
   const [purgeDialog, setPurgeDialog] = useState({ open: false, userId: null });
+  // { [userId]: "purging" | "toggling" } — keeps the confirm dialog and the
+  // row's buttons in a visible busy state until the request comes back
+  const [processing, setProcessing] = useState({});
   // Debounced search handler - use controlled pattern
   const [localSearchInput, setLocalSearchInput] = useState(
     usersFilters.search || "",
@@ -209,8 +212,10 @@ const UsersTab = ({
     return () => clearTimeout(timer);
   }, [searchInput, usersFilters.search, setUsersFilters]);
 
-  // Cleanup on unmount
+  // Cleanup on unmount. The flag must be re-armed on mount — StrictMode runs
+  // mount/cleanup/mount in dev, which would otherwise leave it stuck at false.
   useEffect(() => {
+    isMountedRef.current = true;
     return () => {
       isMountedRef.current = false;
     };
@@ -248,18 +253,31 @@ const UsersTab = ({
     });
   };
 
+  const startProcessing = (userId, kind) =>
+    setProcessing((prev) => ({ ...prev, [userId]: kind }));
+
+  const stopProcessing = (userId) =>
+    setProcessing((prev) => {
+      const next = { ...prev };
+      delete next[userId];
+      return next;
+    });
+
   const confirmDeleteUser = async () => {
     const { userId, user } = confirmDialog;
-    setConfirmDialog({
-      open: false,
-      userId: null,
-      isActive: false,
-      user: null,
-    });
+    startProcessing(userId, "toggling");
     try {
       await onUserDelete(userId, user);
     } catch (error) {
       console.error("Failed to toggle user status:", error);
+    } finally {
+      stopProcessing(userId);
+      setConfirmDialog({
+        open: false,
+        userId: null,
+        isActive: false,
+        user: null,
+      });
     }
   };
 
@@ -276,11 +294,14 @@ const UsersTab = ({
 
   const confirmPurgeUser = async () => {
     const { userId } = purgeDialog;
-    setPurgeDialog({ open: false, userId: null });
+    startProcessing(userId, "purging");
     try {
       await onUserPurge(userId);
     } catch (error) {
       console.error("Failed to purge user:", error);
+    } finally {
+      stopProcessing(userId);
+      setPurgeDialog({ open: false, userId: null });
     }
   };
 
@@ -500,21 +521,32 @@ const UsersTab = ({
                         </button>
                         <button
                           onClick={() => handlePurgeUser(user)}
-                          className="w-8 h-8 flex items-center justify-center bg-red-900/20 text-red-400 rounded-lg hover:bg-red-900/40 transition"
-                          title="Permanently delete"
+                          disabled={!!processing[user.id]}
+                          className="w-8 h-8 flex items-center justify-center bg-red-900/20 text-red-400 rounded-lg hover:bg-red-900/40 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                          title={processing[user.id] === "purging" ? "Deleting..." : "Permanently delete"}
                         >
-                          <i className="fas fa-trash text-xs"></i>
+                          <i className={`fas ${processing[user.id] === "purging" ? "fa-spinner fa-spin" : "fa-trash"} text-xs`}></i>
                         </button>
                         <button
                           onClick={() => handleDeleteUser(user)}
-                          className={`px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition flex items-center gap-1 justify-center ${
+                          disabled={!!processing[user.id]}
+                          className={`px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition flex items-center gap-1 justify-center disabled:opacity-50 disabled:cursor-not-allowed ${
                             user.is_active
                               ? "bg-amber-600/10 text-amber-400 hover:bg-amber-600/20"
                               : "bg-emerald-600/10 text-emerald-400 hover:bg-emerald-600/20"
                           }`}
                         >
-                          <i className={`fas ${user.is_active ? "fa-ban" : "fa-check-circle"}`}></i>
-                          {user.is_active ? "Deactivate" : "Activate"}
+                          {processing[user.id] === "toggling" ? (
+                            <>
+                              <i className="fas fa-spinner fa-spin"></i>
+                              {user.is_active ? "Deactivating..." : "Activating..."}
+                            </>
+                          ) : (
+                            <>
+                              <i className={`fas ${user.is_active ? "fa-ban" : "fa-check-circle"}`}></i>
+                              {user.is_active ? "Deactivate" : "Activate"}
+                            </>
+                          )}
                         </button>
                       </div>
                     )}
@@ -618,22 +650,33 @@ const UsersTab = ({
                             </button>
                             <button
                               onClick={() => handlePurgeUser(user)}
-                              className="w-8 h-8 flex items-center justify-center bg-red-900/20 text-red-400 rounded-lg hover:bg-red-900/40 transition"
-                              title="Permanently delete"
+                              disabled={!!processing[user.id]}
+                              className="w-8 h-8 flex items-center justify-center bg-red-900/20 text-red-400 rounded-lg hover:bg-red-900/40 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                              title={processing[user.id] === "purging" ? "Deleting..." : "Permanently delete"}
                             >
-                              <i className="fas fa-trash text-xs"></i>
+                              <i className={`fas ${processing[user.id] === "purging" ? "fa-spinner fa-spin" : "fa-trash"} text-xs`}></i>
                             </button>
                             <button
                               onClick={() => handleDeleteUser(user)}
+                              disabled={!!processing[user.id]}
                               style={{ minWidth: "100px" }}
-                              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition text-center ${
+                              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition text-center disabled:opacity-50 disabled:cursor-not-allowed ${
                                 user.is_active
                                   ? "bg-amber-600/10 text-amber-400 hover:bg-amber-600/20"
                                   : "bg-emerald-600/10 text-emerald-400 hover:bg-emerald-600/20"
                               }`}
                             >
-                              <i className={`fas ${user.is_active ? "fa-ban" : "fa-check-circle"} mr-1`}></i>
-                              {user.is_active ? "Deactivate" : "Activate"}
+                              {processing[user.id] === "toggling" ? (
+                                <>
+                                  <i className="fas fa-spinner fa-spin mr-1"></i>
+                                  {user.is_active ? "Deactivating..." : "Activating..."}
+                                </>
+                              ) : (
+                                <>
+                                  <i className={`fas ${user.is_active ? "fa-ban" : "fa-check-circle"} mr-1`}></i>
+                                  {user.is_active ? "Deactivate" : "Activate"}
+                                </>
+                              )}
                             </button>
                           </div>
                         )}
@@ -656,7 +699,16 @@ const UsersTab = ({
             ? "Are you sure you want to deactivate this user? They will lose access to the platform."
             : "Are you sure you want to activate this user? They will regain access to the platform."
         }
-        confirmLabel={confirmDialog.isActive ? "Deactivate" : "Activate"}
+        loading={processing[confirmDialog.userId] === "toggling"}
+        confirmLabel={
+          processing[confirmDialog.userId] === "toggling"
+            ? confirmDialog.isActive
+              ? "Deactivating..."
+              : "Activating..."
+            : confirmDialog.isActive
+              ? "Deactivate"
+              : "Activate"
+        }
         cancelLabel="Cancel"
         onConfirm={confirmDeleteUser}
         onCancel={() =>
@@ -674,7 +726,10 @@ const UsersTab = ({
         variant="danger"
         title="Delete User Permanently"
         message="This will permanently remove the user record and cannot be undone. This action is irreversible."
-        confirmLabel="Delete"
+        loading={processing[purgeDialog.userId] === "purging"}
+        confirmLabel={
+          processing[purgeDialog.userId] === "purging" ? "Deleting..." : "Delete"
+        }
         cancelLabel="Cancel"
         onConfirm={confirmPurgeUser}
         onCancel={() => setPurgeDialog({ open: false, userId: null })}

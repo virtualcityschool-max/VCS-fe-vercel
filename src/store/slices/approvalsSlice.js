@@ -32,11 +32,18 @@ export const fetchRejectedApprovals = createAsyncThunk(
   },
 );
 
+// Accepts a plain userId, or { userId, approveChildLinks } for guardians whose
+// registration named children.
 export const approveUser = createAsyncThunk(
   "approvals/approveUser",
-  async (userId, { rejectWithValue, dispatch }) => {
+  async (arg, { rejectWithValue, dispatch }) => {
+    const userId = typeof arg === "object" && arg !== null ? arg.userId : arg;
+    const approveChildLinks =
+      typeof arg === "object" && arg !== null
+        ? arg.approveChildLinks !== false
+        : true;
     try {
-      const result = await authService.approveUser(userId);
+      const result = await authService.approveUser(userId, approveChildLinks);
       // Refresh both lists - approving may remove the user from either tab
       dispatch(fetchPendingApprovals());
       dispatch(fetchRejectedApprovals());
@@ -91,6 +98,12 @@ export const actionEnrollment = createAsyncThunk(
     }
   },
 );
+
+// approveUser accepts either a userId or { userId, approveChildLinks }
+const argUserId = (action) => {
+  const arg = action.meta.arg;
+  return typeof arg === "object" && arg !== null ? arg.userId : arg;
+};
 
 const initialState = {
   pendingApprovals: [],
@@ -156,18 +169,15 @@ const approvalsSlice = createSlice({
       })
       // Approve User
       .addCase(approveUser.pending, (state, action) => {
-        const userId = action.meta.arg;
-        state.isProcessing[userId] = "approving";
+        state.isProcessing[argUserId(action)] = "approving";
         state.error = null;
       })
       .addCase(approveUser.fulfilled, (state, action) => {
-        const userId = action.meta.arg;
-        delete state.isProcessing[userId];
+        delete state.isProcessing[argUserId(action)];
         state.error = null;
       })
       .addCase(approveUser.rejected, (state, action) => {
-        const userId = action.meta.arg;
-        delete state.isProcessing[userId];
+        delete state.isProcessing[argUserId(action)];
         state.error = action.payload;
       })
       // Reject User

@@ -99,10 +99,15 @@ const AdminApprovalsPage = () => {
     // dispatch(fetchAdminHireRequests(hireStatusFilter));
   }, [dispatch]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleApprove = async (userId) => {
+  const handleApprove = async (userId, approveChildLinks = true) => {
     try {
-      await dispatch(approveUser(userId)).unwrap();
-      toastManager.success("User approved successfully");
+      const { result } = await dispatch(
+        approveUser({ userId, approveChildLinks }),
+      ).unwrap();
+      // Approving a guardian can resolve the child links they requested at
+      // signup, so that tab's list needs a refresh too
+      dispatch(fetchPendingChildLinks());
+      toastManager.success(result?.message || "User approved successfully");
     } catch (error) {
       showApiError(error);
     }
@@ -125,6 +130,8 @@ const AdminApprovalsPage = () => {
       } else {
         toastManager.success("User rejected successfully");
       }
+      // A rejected guardian's link requests are no longer actionable
+      dispatch(fetchPendingChildLinks());
     } catch (error) {
       showApiError(error);
     }
