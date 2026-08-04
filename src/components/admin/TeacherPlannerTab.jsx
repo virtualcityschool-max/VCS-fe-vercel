@@ -65,20 +65,41 @@ const getStatusBadge = (status) => {
   );
 };
 
-// Multi-select teacher dropdown
+// Searchable multi-select tutor dropdown. Selected tutors show as removable
+// chips; the dropdown filters by name or email as you type.
 const TeacherMultiSelect = ({ teachers = [], selectedIds = [], onChange, error }) => {
   const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
   const ref = useRef(null);
+  const searchRef = useRef(null);
+
+  const close = () => {
+    setOpen(false);
+    setQuery("");
+  };
 
   useEffect(() => {
     const handler = (e) => {
-      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+      if (ref.current && !ref.current.contains(e.target)) close();
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
+  // Focus the search box the moment the list opens so admins can just type.
+  useEffect(() => {
+    if (open) searchRef.current?.focus();
+  }, [open]);
+
   const selected = teachers.filter((t) => selectedIds.includes(t.id));
+
+  const q = query.trim().toLowerCase();
+  const filtered = q
+    ? teachers.filter((t) =>
+        [getDisplayName(t), t.email, t.username]
+          .some((field) => (field || "").toLowerCase().includes(q)),
+      )
+    : teachers;
 
   const toggle = (id) => {
     if (selectedIds.includes(id)) {
@@ -90,43 +111,143 @@ const TeacherMultiSelect = ({ teachers = [], selectedIds = [], onChange, error }
 
   return (
     <div ref={ref} className="relative">
-      <button
-        type="button"
-        onClick={() => setOpen((o) => !o)}
-        className={`w-full flex items-center justify-between px-3 py-2.5 bg-slate-800/60 border ${
+      {/* Control - chips of the chosen tutors */}
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={() => (open ? close() : setOpen(true))}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            open ? close() : setOpen(true);
+          }
+          if (e.key === "Escape") close();
+        }}
+        className={`w-full flex items-center gap-2 px-3 py-2 pr-9 min-h-[42px] bg-slate-800/60 border ${
           error ? "border-red-500/60" : "border-slate-700/60"
-        } rounded-xl text-sm text-left transition hover:border-slate-600`}
+        } rounded-xl text-sm text-left transition hover:border-slate-600 cursor-pointer relative`}
       >
-        <span className={selected.length === 0 ? "text-slate-500" : "text-white"}>
-          {selected.length === 0
-            ? "Select tutors..."
-            : selected.map((t) => getDisplayName(t)).join(", ")}
-        </span>
-        <i className={`fas fa-chevron-${open ? "up" : "down"} text-slate-500 text-xs`}></i>
-      </button>
-      {open && (
-        <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl overflow-hidden max-h-52 overflow-y-auto">
-          {teachers.length === 0 ? (
-            <p className="text-slate-500 text-sm px-3 py-3">No tutors available</p>
-          ) : (
-            teachers.map((t) => (
-              <label
+        {selected.length === 0 ? (
+          <span className="text-slate-500 py-0.5">Search and select tutors...</span>
+        ) : (
+          <div className="flex flex-wrap gap-1.5">
+            {selected.map((t) => (
+              <span
                 key={t.id}
-                className="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-800 cursor-pointer transition"
+                className="inline-flex items-center gap-1.5 bg-indigo-600/90 text-white text-xs pl-2.5 pr-1.5 py-1 rounded-lg"
               >
-                <input
-                  type="checkbox"
-                  checked={selectedIds.includes(t.id)}
-                  onChange={() => toggle(t.id)}
-                  className="w-4 h-4 accent-indigo-500 rounded"
-                />
-                <div>
-                  <p className="text-white text-sm font-medium">{getDisplayName(t)}</p>
-                  {t.email && <p className="text-slate-500 text-xs">{t.email}</p>}
-                </div>
-              </label>
-            ))
+                {getDisplayName(t)}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggle(t.id);
+                  }}
+                  title={`Remove ${getDisplayName(t)}`}
+                  className="hover:text-red-300 transition"
+                >
+                  <i className="fas fa-times text-[10px]"></i>
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
+        <i
+          className={`fas fa-chevron-down text-slate-500 text-xs absolute right-3 top-1/2 -translate-y-1/2 transition-transform ${
+            open ? "rotate-180" : ""
+          }`}
+        ></i>
+      </div>
+
+      {open && (
+        <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl overflow-hidden">
+          {/* Search */}
+          <div className="p-2 border-b border-slate-700/70">
+            <div className="relative">
+              <input
+                ref={searchRef}
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={(e) => e.key === "Escape" && close()}
+                placeholder="Search tutors by name or email..."
+                className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg pl-9 pr-8 py-2 text-sm placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition"
+              />
+              <i className="fas fa-search text-slate-500 text-xs absolute left-3 top-1/2 -translate-y-1/2"></i>
+              {query && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setQuery("");
+                    searchRef.current?.focus();
+                  }}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition"
+                  title="Clear search"
+                >
+                  <i className="fas fa-times text-xs"></i>
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Selection summary */}
+          {selected.length > 0 && (
+            <div className="flex items-center justify-between px-3 py-1.5 bg-slate-950/40 border-b border-slate-800">
+              <span className="text-[10px] font-black uppercase tracking-wider text-slate-500">
+                {selected.length} selected
+              </span>
+              <button
+                type="button"
+                onClick={() => onChange([])}
+                className="text-[10px] font-black uppercase tracking-wider text-slate-400 hover:text-red-400 transition"
+              >
+                Clear all
+              </button>
+            </div>
           )}
+
+          {/* Options */}
+          <div className="max-h-52 overflow-y-auto">
+            {teachers.length === 0 ? (
+              <p className="text-slate-500 text-sm px-3 py-4 text-center">
+                No tutors available
+              </p>
+            ) : filtered.length === 0 ? (
+              <p className="text-slate-500 text-sm px-3 py-4 text-center">
+                No tutors match "{query}"
+              </p>
+            ) : (
+              filtered.map((t) => {
+                const isSelected = selectedIds.includes(t.id);
+                return (
+                  <label
+                    key={t.id}
+                    className={`flex items-center gap-3 px-3 py-2.5 cursor-pointer transition ${
+                      isSelected ? "bg-indigo-600/15" : "hover:bg-slate-800"
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => toggle(t.id)}
+                      className="w-4 h-4 accent-indigo-500 rounded shrink-0"
+                    />
+                    <div className="min-w-0">
+                      <p className="text-white text-sm font-medium truncate">
+                        {getDisplayName(t)}
+                      </p>
+                      {t.email && (
+                        <p className="text-slate-500 text-xs truncate">{t.email}</p>
+                      )}
+                    </div>
+                    {isSelected && (
+                      <i className="fas fa-check text-indigo-400 text-xs ml-auto shrink-0"></i>
+                    )}
+                  </label>
+                );
+              })
+            )}
+          </div>
         </div>
       )}
     </div>
