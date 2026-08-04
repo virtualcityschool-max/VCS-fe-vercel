@@ -13,6 +13,7 @@ import ConfirmDialog from "../../components/common/ConfirmDialog";
 import { toastManager } from "../../utils/toastManager";
 import { showApiError } from "../../utils/apiErrorHandler";
 import { getStorageUrl } from "../../utils/storageUrl";
+import { blogVideoId, youTubeThumbnail } from "../../utils/youtube";
 
 const formatDate = (v) => {
   if (!v) return "-";
@@ -47,6 +48,12 @@ const AdminBlogsPage = () => {
   useEffect(() => {
     try { sessionStorage.setItem("admin_blogs_status", statusFilter); } catch { /* ignore */ }
   }, [statusFilter]);
+  const [typeFilter, setTypeFilter] = useState(() => {
+    try { return sessionStorage.getItem("admin_blogs_type") || "all"; } catch { return "all"; }
+  });
+  useEffect(() => {
+    try { sessionStorage.setItem("admin_blogs_type", typeFilter); } catch { /* ignore */ }
+  }, [typeFilter]);
   const [togglingSlug, setTogglingSlug] = useState(null);
   const [duplicatingSlug, setDuplicatingSlug] = useState(null);
   const [confirm, setConfirm] = useState({ open: false, slug: null, title: "" });
@@ -66,19 +73,23 @@ const AdminBlogsPage = () => {
     return blogs.filter((b) => {
       const matchStatus =
         statusFilter === "all" || b.status === statusFilter;
+      const matchType =
+        typeFilter === "all" || (b.post_type || "article") === typeFilter;
       const matchSearch =
         !q ||
         b.title?.toLowerCase().includes(q) ||
         b.category?.toLowerCase().includes(q);
-      return matchStatus && matchSearch;
+      return matchStatus && matchType && matchSearch;
     });
-  }, [blogs, search, statusFilter]);
+  }, [blogs, search, statusFilter, typeFilter]);
 
   const counts = useMemo(
     () => ({
       all: blogs.length,
       published: blogs.filter((b) => b.status === "published").length,
       draft: blogs.filter((b) => b.status !== "published").length,
+      video: blogs.filter((b) => b.post_type === "video").length,
+      article: blogs.filter((b) => (b.post_type || "article") === "article").length,
     }),
     [blogs],
   );
@@ -117,6 +128,9 @@ const AdminBlogsPage = () => {
       fd.append("meta_title", full.meta_title || "");
       fd.append("meta_description", full.meta_description || "");
       fd.append("status", "draft"); // always start a copy as an unpublished draft
+      // Carry the format across so a duplicated video blog stays a video blog
+      fd.append("post_type", full.post_type || "article");
+      fd.append("video_url", full.video_url || "");
       // Copy the original's cover image server-side (no re-upload needed).
       if (full.cover_image) fd.append("copy_cover_from", blog.slug);
       const created = await dispatch(createBlog(fd)).unwrap();
@@ -174,7 +188,7 @@ const AdminBlogsPage = () => {
             className="w-full bg-slate-900/70 border border-slate-700/70 rounded-xl pl-9 pr-4 py-2.5 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-indigo-500/60 focus:ring-2 focus:ring-indigo-500/15 transition"
           />
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           {[
             { id: "all", label: `All (${counts.all})` },
             { id: "published", label: `Published (${counts.published})` },
@@ -192,6 +206,33 @@ const AdminBlogsPage = () => {
               {t.label}
             </button>
           ))}
+
+          {/* Format filter - only useful once a video blog exists */}
+          {counts.video > 0 && (
+            <div className="flex gap-2 sm:ml-2 sm:pl-2 sm:border-l sm:border-white/10">
+              {[
+                { id: "article", label: `Articles (${counts.article})`, icon: "fa-newspaper" },
+                { id: "video", label: `Videos (${counts.video})`, icon: "fa-circle-play" },
+              ].map((t) => {
+                const active = typeFilter === t.id;
+                return (
+                  <button
+                    key={t.id}
+                    // Clicking the active format clears it back to everything
+                    onClick={() => setTypeFilter(active ? "all" : t.id)}
+                    className={`px-4 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-wider transition inline-flex items-center gap-2 ${
+                      active
+                        ? "bg-white text-slate-900"
+                        : "bg-white/5 border border-white/10 text-slate-400 hover:text-white"
+                    }`}
+                  >
+                    <i className={`fas ${t.icon} text-[10px]`} />
+                    {t.label}
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 
@@ -223,7 +264,13 @@ const AdminBlogsPage = () => {
       ) : (
         <div className="space-y-3">
           {filtered.map((blog) => {
-            const cover = getStorageUrl(blog.cover_image);
+            const isVideo = blog.post_type === "video";
+            // Video posts fall back to the YouTube poster when no cover was set
+            const cover =
+              getStorageUrl(blog.cover_image) ||
+              (isVideo
+                ? blog.video_thumbnail || youTubeThumbnail(blogVideoId(blog))
+                : "");
             const published = blog.status === "published";
             return (
               <div
@@ -231,11 +278,18 @@ const AdminBlogsPage = () => {
                 className="group flex items-center gap-4 bg-slate-900/50 border border-slate-800 hover:border-slate-700 rounded-2xl p-3.5 transition"
               >
                 {/* Thumb */}
-                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-slate-800 shrink-0 flex items-center justify-center">
+                <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-slate-800 shrink-0 flex items-center justify-center">
                   {cover ? (
                     <img src={cover} alt="" className="w-full h-full object-cover" />
                   ) : (
-                    <i className="fas fa-newspaper text-slate-600" />
+                    <i className={`fas ${isVideo ? "fa-circle-play" : "fa-newspaper"} text-slate-600`} />
+                  )}
+                  {isVideo && cover && (
+                    <span className="absolute inset-0 flex items-center justify-center bg-slate-950/40">
+                      <span className="w-7 h-7 rounded-full bg-red-600/90 flex items-center justify-center">
+                        <i className="fas fa-play text-white text-[9px] ml-0.5" />
+                      </span>
+                    </span>
                   )}
                 </div>
 
@@ -251,6 +305,11 @@ const AdminBlogsPage = () => {
                     >
                       {published ? "Published" : "Draft"}
                     </span>
+                    {isVideo && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-red-500/15 text-red-300 border border-red-400/30">
+                        <i className="fas fa-play text-[7px]" /> Video
+                      </span>
+                    )}
                     {blog.category && (
                       <span className="text-[10px] text-slate-500 font-semibold uppercase tracking-wide truncate">
                         {blog.category}
@@ -265,7 +324,7 @@ const AdminBlogsPage = () => {
                     {published
                       ? formatDate(blog.published_at || blog.created_at)
                       : `updated ${formatDate(blog.created_at)}`}{" "}
-                    · {blog.read_time || 1} min
+                    · {isVideo ? "Video" : `${blog.read_time || 1} min`}
                   </p>
                 </div>
 

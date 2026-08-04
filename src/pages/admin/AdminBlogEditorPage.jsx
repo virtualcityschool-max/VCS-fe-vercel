@@ -9,6 +9,8 @@ import ConfirmDialog from "../../components/common/ConfirmDialog";
 import { toastManager } from "../../utils/toastManager";
 import { showApiError } from "../../utils/apiErrorHandler";
 import { getStorageUrl } from "../../utils/storageUrl";
+import { parseYouTubeId, youTubeThumbnail } from "../../utils/youtube";
+import VideoEmbed from "../../components/blogs/VideoEmbed";
 
 const MAX_IMAGE_MB = 5;
 const EMPTY_FORM = {
@@ -20,6 +22,8 @@ const EMPTY_FORM = {
   meta_title: "",
   meta_description: "",
   status: "draft",
+  post_type: "article",
+  video_url: "",
 };
 
 const labelCls = "block text-[11px] font-black uppercase tracking-[0.15em] text-slate-400";
@@ -71,6 +75,8 @@ const AdminBlogEditorPage = () => {
           meta_title: b.meta_title || "",
           meta_description: b.meta_description || "",
           status: b.status || "draft",
+          post_type: b.post_type || "article",
+          video_url: b.video_url || "",
         });
         setCoverPreview(getStorageUrl(b.cover_image));
       })
@@ -112,12 +118,27 @@ const AdminBlogEditorPage = () => {
     setDirty(true);
   };
 
+  const isVideoPost = form.post_type === "video";
+  // Live-parsed id drives the preview while the admin is still typing.
+  const previewVideoId = useMemo(
+    () => parseYouTubeId(form.video_url),
+    [form.video_url],
+  );
+  const videoUrlTouched = Boolean(form.video_url.trim());
+  const videoUrlInvalid = videoUrlTouched && !previewVideoId;
+
   const validate = () => {
     const e = {};
     if (!form.title.trim()) e.title = "Title is required";
     else if (form.title.trim().length < 4) e.title = "Title is too short";
     if (form.meta_description && form.meta_description.length > 320)
       e.meta_description = "Keep the meta description under 320 characters";
+    if (isVideoPost) {
+      if (!form.video_url.trim())
+        e.video_url = "A YouTube video link is required for a video blog";
+      else if (!previewVideoId)
+        e.video_url = "That doesn't look like a YouTube link";
+    }
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -132,6 +153,9 @@ const AdminBlogEditorPage = () => {
     fd.append("meta_title", form.meta_title.trim());
     fd.append("meta_description", form.meta_description.trim());
     fd.append("status", status);
+    fd.append("post_type", form.post_type);
+    // Always sent so switching a video post back to an article clears the link.
+    fd.append("video_url", isVideoPost ? form.video_url.trim() : "");
     if (coverFile instanceof File) fd.append("cover_image", coverFile);
     return fd;
   };
@@ -212,16 +236,145 @@ const AdminBlogEditorPage = () => {
       <div className="max-w-6xl mx-auto px-5 sm:px-8 py-8">
         <div className="mb-8">
           <p className="text-[10px] font-black uppercase tracking-[0.4em] text-indigo-500 mb-1.5">
-            {isEdit ? "Edit Article" : "New Article"}
+            {isEdit ? "Edit" : "New"} {isVideoPost ? "Video Blog" : "Article"}
           </p>
           <h1 className="text-2xl md:text-3xl font-black font-poppins tracking-tight">
             {isEdit ? "Edit Blog Post" : "Create a Blog Post"}
           </h1>
         </div>
 
+        {/* Post type - decides whether this post leads with a cover or a player */}
+        <div className="mb-8">
+          <label className={`${labelCls} mb-2`}>Post Type</label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl">
+            {[
+              {
+                id: "article",
+                icon: "fa-newspaper",
+                title: "Article",
+                blurb: "A written post with a cover image.",
+              },
+              {
+                id: "video",
+                icon: "fa-circle-play",
+                title: "Video Blog",
+                blurb: "A YouTube video that plays on the blog page.",
+              },
+            ].map((t) => {
+              const active = form.post_type === t.id;
+              return (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => onChange("post_type", t.id)}
+                  className={`text-left rounded-2xl border p-4 transition ${
+                    active
+                      ? "border-indigo-500/60 bg-indigo-500/10 ring-2 ring-indigo-500/20"
+                      : "border-slate-800 bg-slate-900/50 hover:border-slate-700"
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5 mb-1">
+                    <i
+                      className={`fas ${t.icon} text-sm ${
+                        active ? "text-indigo-400" : "text-slate-500"
+                      }`}
+                    />
+                    <span className="text-sm font-black text-white">{t.title}</span>
+                    {active && (
+                      <i className="fas fa-check-circle text-indigo-400 text-xs ml-auto" />
+                    )}
+                  </div>
+                  <p className="text-[11px] text-slate-500 leading-relaxed">
+                    {t.blurb}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8">
           {/* Main column */}
           <div className="space-y-6">
+            {isVideoPost && (
+              <div className="rounded-2xl border border-slate-800 bg-slate-900/50 p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <i className="fab fa-youtube text-red-500" />
+                  <label className={`${labelCls} mb-0`}>YouTube Video Link</label>
+                  <span className="text-red-400 text-xs">*</span>
+                </div>
+
+                <div className="relative">
+                  <input
+                    className={`${inputCls} pr-11 ${
+                      errors.video_url || videoUrlInvalid ? "border-red-500/70" : ""
+                    } ${previewVideoId ? "border-emerald-500/50" : ""}`}
+                    placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+                    value={form.video_url}
+                    onChange={(e) => onChange("video_url", e.target.value)}
+                  />
+                  {videoUrlTouched && (
+                    <i
+                      className={`fas ${
+                        previewVideoId
+                          ? "fa-circle-check text-emerald-400"
+                          : "fa-circle-exclamation text-red-400"
+                      } absolute right-4 top-1/2 -translate-y-1/2 text-sm`}
+                    />
+                  )}
+                </div>
+
+                {errors.video_url ? (
+                  <p className="text-red-400 text-xs mt-1.5">{errors.video_url}</p>
+                ) : videoUrlInvalid ? (
+                  <p className="text-red-400 text-xs mt-1.5">
+                    That doesn't look like a YouTube link. Paste a watch, youtu.be,
+                    shorts or embed URL.
+                  </p>
+                ) : (
+                  <p className="text-[10px] text-slate-600 mt-1.5">
+                    Works with watch, youtu.be, shorts, live and embed links -
+                    extra parameters are fine.
+                  </p>
+                )}
+
+                {/* Live preview - appears the moment a valid link is pasted */}
+                {previewVideoId ? (
+                  <div className="mt-5">
+                    <div className="flex items-center justify-between gap-3 mb-2.5 flex-wrap">
+                      <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.15em] text-emerald-400">
+                        <i className="fas fa-eye text-[10px]" /> Live preview
+                      </span>
+                      <span className="text-[10px] text-slate-600 font-mono">
+                        ID: {previewVideoId}
+                      </span>
+                    </div>
+                    <div className="rounded-xl overflow-hidden border border-slate-700/70 max-w-xl">
+                      <VideoEmbed
+                        videoId={previewVideoId}
+                        title={form.title || "Video preview"}
+                        rounded="rounded-none"
+                      />
+                    </div>
+                    <p className="text-[10px] text-slate-600 mt-2">
+                      This is exactly how the video appears to visitors - press
+                      play to check you pasted the right one.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="mt-5 rounded-xl border border-dashed border-slate-700 bg-slate-950/40 max-w-xl aspect-video flex flex-col items-center justify-center text-center px-6">
+                    <i className="fab fa-youtube text-slate-700 text-3xl mb-3" />
+                    <p className="text-slate-500 text-xs font-semibold">
+                      Paste a YouTube link to see the preview
+                    </p>
+                    <p className="text-slate-600 text-[10px] mt-1">
+                      The player will appear here instantly
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
             <div>
               <label className={labelCls}>Title</label>
               <input
@@ -251,12 +404,18 @@ const AdminBlogEditorPage = () => {
             </div>
 
             <div>
-              <label className={labelCls}>Content</label>
+              <label className={labelCls}>
+                {isVideoPost ? "Description (optional)" : "Content"}
+              </label>
               <div className="bg-slate-900/60 border border-slate-700/70 rounded-xl overflow-hidden blog-editor-shell">
                 <QuillEditor
                   value={form.content}
                   onChange={(val) => onChange("content", val)}
-                  placeholder="Write your article - use the H1/H2/H3 buttons for headings…"
+                  placeholder={
+                    isVideoPost
+                      ? "Add notes, chapters or a summary shown under the video…"
+                      : "Write your article - use the H1/H2/H3 buttons for headings…"
+                  }
                 />
               </div>
               <p className="text-[10px] text-slate-600 mt-2">
@@ -291,7 +450,9 @@ const AdminBlogEditorPage = () => {
 
             {/* Cover image */}
             <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-5">
-              <label className={labelCls}>Cover Image</label>
+              <label className={labelCls}>
+                {isVideoPost ? "Cover Image (optional)" : "Cover Image"}
+              </label>
               <div
                 onClick={() => fileRef.current?.click()}
                 className="relative h-40 rounded-xl border-2 border-dashed border-slate-700 hover:border-indigo-500/50 bg-slate-900/60 cursor-pointer overflow-hidden flex items-center justify-center transition group"
@@ -305,6 +466,23 @@ const AdminBlogEditorPage = () => {
                       </span>
                     </div>
                   </>
+                ) : isVideoPost && previewVideoId ? (
+                  /* No upload yet - show the YouTube thumbnail that will be used */
+                  <>
+                    <img
+                      src={youTubeThumbnail(previewVideoId)}
+                      alt="video thumbnail"
+                      className="w-full h-full object-cover opacity-70"
+                    />
+                    <div className="absolute inset-0 bg-slate-950/60 flex flex-col items-center justify-center text-center px-4">
+                      <p className="text-[10px] font-black uppercase tracking-wider text-slate-300">
+                        Using video thumbnail
+                      </p>
+                      <p className="text-[10px] text-slate-500 mt-1">
+                        Click to upload your own
+                      </p>
+                    </div>
+                  </>
                 ) : (
                   <div className="text-center text-slate-500">
                     <i className="fas fa-image text-2xl mb-2" />
@@ -313,6 +491,11 @@ const AdminBlogEditorPage = () => {
                   </div>
                 )}
               </div>
+              {isVideoPost && (
+                <p className="text-[10px] text-slate-600 mt-2 leading-relaxed">
+                  Leave empty to use the video's own thumbnail as the poster.
+                </p>
+              )}
               <input
                 ref={fileRef}
                 type="file"

@@ -514,7 +514,7 @@ const PublicHome = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {blogsLoading && blogs.length === 0
                 ? [...Array(3)].map((_, i) => (
-                    <div key={i} className="skeleton rounded-2xl border border-white/5 h-[360px]" />
+                    <div key={i} className="skeleton rounded-2xl border border-white/5 h-[380px]" />
                   ))
                 : blogs.slice(0, 3).map((blog, i) => (
                     <BlogCard key={blog.id} blog={blog} index={i} />

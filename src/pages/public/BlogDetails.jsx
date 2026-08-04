@@ -6,6 +6,13 @@ import { LoadingSpinner } from "../../components/ui";
 import QuillViewer from "../../components/common/QuillViewer";
 import Reveal from "../../components/ui/Reveal";
 import BlogCard from "../../components/blogs/BlogCard";
+import VideoEmbed from "../../components/blogs/VideoEmbed";
+import {
+  blogVideoId,
+  isVideoBlog,
+  youTubeThumbnail,
+  youTubeWatchUrl,
+} from "../../utils/youtube";
 import { getStorageUrl } from "../../utils/storageUrl";
 import { useSeo } from "../../hooks/useSeo";
 import { toastManager } from "../../utils/toastManager";
@@ -42,9 +49,15 @@ const BlogDetails = () => {
   useSeo({
     title: found ? blog.meta_title || blog.title : "Blog",
     description: found ? blog.meta_description || blog.excerpt : undefined,
-    image: found ? getStorageUrl(blog.cover_image) : undefined,
+    // Video posts often have no cover image — share the video thumbnail so the
+    // link preview still shows something.
+    image: found
+      ? getStorageUrl(blog.cover_image) ||
+        blog.video_thumbnail ||
+        youTubeThumbnail(blogVideoId(blog))
+      : undefined,
     url: typeof window !== "undefined" ? window.location.href : undefined,
-    type: "article",
+    type: found && isVideoBlog(blog) ? "video.other" : "article",
   });
 
   if (isLoading && !found) {
@@ -81,6 +94,9 @@ const BlogDetails = () => {
 
   const cover = getStorageUrl(blog.cover_image);
   const related = blogs.filter((b) => b.slug !== blog.slug).slice(0, 3);
+  const isVideo = isVideoBlog(blog);
+  const videoId = blogVideoId(blog);
+  const watchUrl = blog.video_watch_url || youTubeWatchUrl(videoId);
 
   return (
     <main className="min-h-screen bg-[#020617] text-white selection:bg-indigo-500/30 overflow-x-hidden">
@@ -101,11 +117,18 @@ const BlogDetails = () => {
 
         {/* Header */}
         <header className="mb-8">
-          {blog.category && (
-            <span className="inline-block px-3 py-1 mb-5 rounded-full bg-indigo-500/15 border border-indigo-400/30 text-indigo-300 text-[10px] font-black uppercase tracking-[0.2em]">
-              {blog.category}
-            </span>
-          )}
+          <div className="flex items-center gap-2.5 mb-5 flex-wrap">
+            {isVideo && (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-600/90 text-white text-[10px] font-black uppercase tracking-[0.2em]">
+                <i className="fas fa-play text-[8px]" /> Video
+              </span>
+            )}
+            {blog.category && (
+              <span className="inline-block px-3 py-1 rounded-full bg-indigo-500/15 border border-indigo-400/30 text-indigo-300 text-[10px] font-black uppercase tracking-[0.2em]">
+                {blog.category}
+              </span>
+            )}
+          </div>
           <h1 className="text-3xl md:text-5xl font-black font-poppins tracking-tight leading-[1.1] text-white">
             {blog.title}
           </h1>
@@ -116,17 +139,42 @@ const BlogDetails = () => {
           )}
         </header>
 
-        {/* Cover */}
-        {cover && (
-          <div className="rounded-[1.5rem] overflow-hidden border border-white/10 mb-10 shadow-2xl">
-            <img src={cover} alt={blog.title} className="w-full object-cover" />
+        {/* Video posts lead with the player; articles lead with the cover. */}
+        {isVideo && videoId ? (
+          <div className="mb-10">
+            <div className="rounded-[1.5rem] overflow-hidden border border-white/10 shadow-2xl">
+              <VideoEmbed
+                videoId={videoId}
+                poster={cover}
+                title={blog.title}
+                rounded="rounded-none"
+              />
+            </div>
+            {watchUrl && (
+              <a
+                href={watchUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-3 inline-flex items-center gap-2 text-slate-400 hover:text-white text-[11px] font-black uppercase tracking-widest transition"
+              >
+                <i className="fab fa-youtube text-red-500 text-sm" /> Watch on YouTube
+              </a>
+            )}
           </div>
+        ) : (
+          cover && (
+            <div className="rounded-[1.5rem] overflow-hidden border border-white/10 mb-10 shadow-2xl">
+              <img src={cover} alt={blog.title} className="w-full object-cover" />
+            </div>
+          )
         )}
 
         {/* Body */}
-        <div className="blog-content">
-          <QuillViewer value={blog.content || ""} />
-        </div>
+        {blog.content ? (
+          <div className="blog-content">
+            <QuillViewer value={blog.content || ""} />
+          </div>
+        ) : null}
 
         {/* Article metadata - kept at the end so it never interrupts reading. */}
         <div className="mt-12 pt-8 border-t border-white/5 flex items-center flex-wrap gap-x-5 gap-y-2 text-[12px] text-slate-500">
@@ -147,9 +195,15 @@ const BlogDetails = () => {
               {formatDate(blog.published_at || blog.created_at)}
             </span>
           )}
-          <span className="flex items-center gap-1.5">
-            <i className="fas fa-clock text-[9px]" /> {blog.read_time || 1} min read
-          </span>
+          {isVideo ? (
+            <span className="flex items-center gap-1.5 text-red-400 font-semibold">
+              <i className="fas fa-circle-play text-[10px]" /> Video
+            </span>
+          ) : (
+            <span className="flex items-center gap-1.5">
+              <i className="fas fa-clock text-[9px]" /> {blog.read_time || 1} min read
+            </span>
+          )}
         </div>
 
         {/* Footer CTA */}
