@@ -30,7 +30,7 @@ import { toastManager } from "../../utils/toastManager";
 import UsersTab from "../../components/admin/UsersTab";
 import { showApiError } from "../../utils/apiErrorHandler";
 
-const DEFAULT_FILTERS = { search: "", role: "", is_active: "", ordering: "-date_joined" };
+const DEFAULT_FILTERS = { search: "", role: "", is_active: "", tags: "", ordering: "-date_joined" };
 
 const AdminUsersPage = () => {
   const dispatch = useDispatch();
@@ -95,6 +95,9 @@ const AdminUsersPage = () => {
     if (usersFilters.is_active !== "") {
       params.is_active = usersFilters.is_active;
     }
+    if (usersFilters.tags) {
+      params.tags = usersFilters.tags;
+    }
     if (usersFilters.ordering) {
       params.ordering = usersFilters.ordering;
     }
@@ -127,7 +130,7 @@ const AdminUsersPage = () => {
 
   // Re-fetch when any filter changes (not on mount - AdminLayout owns the initial fetch)
   useEffect(() => {
-    const current = { role: usersFilters.role, is_active: usersFilters.is_active, ordering: usersFilters.ordering, search: usersFilters.search };
+    const current = { role: usersFilters.role, is_active: usersFilters.is_active, tags: usersFilters.tags, ordering: usersFilters.ordering, search: usersFilters.search };
     const prev = prevFilterRef.current;
     prevFilterRef.current = current;
 
@@ -136,12 +139,13 @@ const AdminUsersPage = () => {
     if (
       prev.role !== current.role ||
       prev.is_active !== current.is_active ||
+      prev.tags !== current.tags ||
       prev.ordering !== current.ordering ||
       prev.search !== current.search
     ) {
       handleFetchUsers();
     }
-  }, [usersFilters.role, usersFilters.is_active, usersFilters.ordering, usersFilters.search, handleFetchUsers]);
+  }, [usersFilters.role, usersFilters.is_active, usersFilters.tags, usersFilters.ordering, usersFilters.search, handleFetchUsers]);
 
   // Fetch available students when create user modal opens
   useEffect(() => {

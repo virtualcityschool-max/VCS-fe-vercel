@@ -13,6 +13,8 @@ import { getStorageUrl } from "../../utils/storageUrl";
 import { coursesService } from "../../services/coursesService";
 import { toastManager } from "../../utils/toastManager";
 import { getDisplayName } from "../../utils/userDisplay";
+import { TagChip, StudentTagsModal, LabelFilterDropdown } from "./StudentTags";
+import { useStudentTags } from "../../hooks/useStudentTags";
 
 // Search controls component
 const SearchControls = ({
@@ -23,6 +25,8 @@ const SearchControls = ({
   onFetchUsers,
   handleCreateUser,
   onClearFilters,
+  tags,
+  onManageLabels,
 }) => {
   const roleTabs = [
     { value: "", label: "All" },
@@ -37,6 +41,7 @@ const SearchControls = ({
     usersFilters.search ||
     usersFilters.role ||
     usersFilters.is_active ||
+    usersFilters.tags ||
     usersFilters.ordering !== "-date_joined"
   );
 
@@ -63,8 +68,10 @@ const SearchControls = ({
           })}
         </div>
 
-        {/* Filter Controls Group */}
-        <div className="flex flex-col sm:flex-row sm:flex-wrap xl:flex-nowrap items-stretch sm:items-start gap-1.5 flex-1 sm:justify-end">
+        {/* Filter Controls Group. Must stay wrappable at every width: forcing
+            one line here pushed Create User and Refresh off-screen between
+            about 1280px and 1450px, where the role pills share the row. */}
+        <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-start gap-1.5 flex-1 sm:justify-end">
           <SearchInput
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
@@ -78,6 +85,21 @@ const SearchControls = ({
           />
 
           <div className="grid grid-cols-2 sm:contents gap-1.5">
+            {/* Labels only apply to students, so the filter appears with them.
+                Same shape as the course-level dropdown: filter, rename, delete
+                or add without leaving the menu. */}
+            {(usersFilters.role === "" || usersFilters.role === "student") && (
+              <LabelFilterDropdown
+                className="w-full sm:w-auto"
+                tags={tags}
+                value={usersFilters.tags}
+                onChange={(v) => handleFilterChange("tags", v)}
+                onAdd={() => onManageLabels({})}
+                onEdit={(tag) => onManageLabels({ edit: tag })}
+                onDelete={(tag) => onManageLabels({ delete: tag })}
+              />
+            )}
+
             <FilterSelect
               className="w-full sm:w-auto"
               value={usersFilters.is_active}
@@ -104,7 +126,7 @@ const SearchControls = ({
               <button
                 onClick={onClearFilters}
                 title="Clear all filters"
-                className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-slate-700/70 bg-slate-900 hover:bg-rose-500/10 hover:border-rose-500/40 text-slate-400 hover:text-rose-400 text-sm font-medium transition-all duration-150"
+                className="flex items-center gap-1.5 h-[42px] px-3.5 rounded-xl border border-slate-700/70 bg-slate-900 hover:bg-rose-500/10 hover:border-rose-500/40 text-slate-400 hover:text-rose-400 text-sm font-medium transition-all duration-150 shrink-0"
               >
                 <i className="fas fa-times text-xs"></i>
                 <span className="hidden sm:inline">Clear</span>
@@ -113,14 +135,14 @@ const SearchControls = ({
 
             <button
               onClick={handleCreateUser}
-              className="h-[40px] px-5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-indigo-600/20 active:scale-95 transition-all flex items-center justify-center gap-2 whitespace-nowrap shrink-0"
+              className="h-[42px] px-5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-indigo-600/20 active:scale-95 transition-all flex items-center justify-center gap-2 whitespace-nowrap shrink-0"
             >
               <i className="fas fa-user-plus text-[10px]" />
               <span>Create User</span>
             </button>
             <button
               onClick={() => onFetchUsers()}
-              className="text-white px-5 py-3 rounded-xl text-sm font-medium shadow-lg active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500"
+              className="text-white h-[42px] px-5 rounded-xl text-sm font-medium shadow-lg active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 shrink-0"
               title="Refresh"
             >
               <i className="fas fa-sync text-xs"></i>
@@ -177,6 +199,16 @@ const UsersTab = ({
     user: null,
   });
   const [purgeDialog, setPurgeDialog] = useState({ open: false, userId: null });
+  // Student labels: the full list for the filter/picker, plus whichever student
+  // currently has the picker open.
+  const { tags, loaded: tagsLoaded, refresh: refreshTags } = useStudentTags();
+  const [tagModalUser, setTagModalUser] = useState(null);
+  // The same dialog opened without a student: manage the labels themselves.
+  // null = closed; {} = plain; {edit|delete: tag} = opened straight into that action.
+  const [labelLibrary, setLabelLibrary] = useState(null);
+  // Tags saved since the last fetch, so rows update without a full reload
+  const [tagOverrides, setTagOverrides] = useState({});
+  const tagsFor = (user) => tagOverrides[user.id] ?? user.tags ?? [];
   // { [userId]: "purging" | "toggling" } — keeps the confirm dialog and the
   // row's buttons in a visible busy state until the request comes back
   const [processing, setProcessing] = useState({});
@@ -196,6 +228,7 @@ const UsersTab = ({
       search: "",
       role: "",
       is_active: "",
+      tags: "",
       ordering: "-date_joined",
     });
     setLocalSearchInput("");
@@ -227,6 +260,22 @@ const UsersTab = ({
     },
     [setUsersFilters],
   );
+
+  // Renaming or deleting a label leaves the chips already drawn on the rows
+  // showing stale text, so re-read the list from the server.
+  const handleStudentsStale = useCallback(() => {
+    setTagOverrides({});
+    onFetchUsers();
+  }, [onFetchUsers]);
+
+  // Deleting the label that's currently filtering the list would otherwise
+  // leave an invisible filter matching nothing, so drop it.
+  useEffect(() => {
+    if (!tagsLoaded || !usersFilters.tags) return;
+    if (!tags.some((t) => String(t.id) === String(usersFilters.tags))) {
+      handleFilterChange("tags", "");
+    }
+  }, [tags, tagsLoaded, usersFilters.tags, handleFilterChange]);
   const checkTeacherHasCourses = async (userId) => {
     try {
       const data = await coursesService.getAllCourses({ instructor: userId });
@@ -356,6 +405,8 @@ const UsersTab = ({
         onFetchUsers={onFetchUsers}
         handleCreateUser={handleCreateUser}
         onClearFilters={handleClearFilters}
+        tags={tags}
+        onManageLabels={setLabelLibrary}
       />
       {/* Loading State */}
       {loading ? (
@@ -415,19 +466,19 @@ const UsersTab = ({
           <EmptyState
             icon="fas fa-search"
             title={
-              usersFilters.search || usersFilters.role || usersFilters.is_active !== ""
+              usersFilters.search || usersFilters.role || usersFilters.tags || usersFilters.is_active !== ""
                 ? "No users found"
                 : "No users yet"
             }
             description={
               usersFilters.search
                 ? `No users match "${usersFilters.search}". Try a different search or clear the filters.`
-                : usersFilters.role || usersFilters.is_active !== ""
+                : usersFilters.role || usersFilters.tags || usersFilters.is_active !== ""
                   ? "No users match the selected filters."
                   : "There are no users to display at this time."
             }
             action={
-              usersFilters.search || usersFilters.role || usersFilters.is_active !== ""
+              usersFilters.search || usersFilters.role || usersFilters.tags || usersFilters.is_active !== ""
                 ? {
                     label: "Clear Filters",
                     icon: "fas fa-redo",
@@ -485,6 +536,17 @@ const UsersTab = ({
                           Roll #{user.roll_no}
                         </p>
                       )}
+                      {user.role === "student" && tagsFor(user).length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-1.5">
+                          {tagsFor(user).map((tag) => (
+                            <TagChip
+                              key={tag.id}
+                              tag={tag}
+                              onClick={() => handleFilterChange("tags", String(tag.id))}
+                            />
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -505,6 +567,15 @@ const UsersTab = ({
                       </div>
                     ) : (
                       <div className="flex gap-2">
+                        {user.role === "student" && (
+                          <button
+                            onClick={() => setTagModalUser(user)}
+                            className="w-8 h-8 flex items-center justify-center bg-slate-700/50 text-slate-400 rounded-lg hover:bg-slate-600/50 hover:text-indigo-300 transition"
+                            title="Manage labels"
+                          >
+                            <i className="fas fa-tags text-xs"></i>
+                          </button>
+                        )}
                         <button
                           onClick={() => handleViewUser(user.id)}
                           className="w-8 h-8 flex items-center justify-center bg-slate-700/50 text-slate-400 rounded-lg hover:bg-slate-600/50 hover:text-slate-200 transition"
@@ -613,6 +684,19 @@ const UsersTab = ({
                                 Roll #{user.roll_no}
                               </p>
                             )}
+                            {user.role === "student" && tagsFor(user).length > 0 && (
+                              <div className="flex flex-wrap gap-1 mt-1.5 max-w-xs">
+                                {tagsFor(user).map((tag) => (
+                                  <TagChip
+                                    key={tag.id}
+                                    tag={tag}
+                                    onClick={() =>
+                                      handleFilterChange("tags", String(tag.id))
+                                    }
+                                  />
+                                ))}
+                              </div>
+                            )}
                           </div>
                         </div>
                       </td>
@@ -634,6 +718,15 @@ const UsersTab = ({
                           </div>
                         ) : (
                           <div className="flex items-center gap-2">
+                            {user.role === "student" && (
+                              <button
+                                onClick={() => setTagModalUser(user)}
+                                className="w-8 h-8 flex items-center justify-center bg-slate-700/50 text-slate-400 rounded-lg hover:bg-slate-600/50 hover:text-indigo-300 transition"
+                                title="Manage labels"
+                              >
+                                <i className="fas fa-tags text-xs"></i>
+                              </button>
+                            )}
                             <button
                               onClick={() => handleViewUser(user.id)}
                               className="w-8 h-8 flex items-center justify-center bg-slate-700/50 text-slate-400 rounded-lg hover:bg-slate-600/50 hover:text-slate-200 transition"
@@ -688,6 +781,38 @@ const UsersTab = ({
             </div>
           </div>
         </>
+      )}
+
+      {labelLibrary && (
+        <StudentTagsModal
+          student={null}
+          tags={tags}
+          initialEdit={labelLibrary.edit || null}
+          initialDelete={labelLibrary.delete || null}
+          onClose={() => setLabelLibrary(null)}
+          onTagsChanged={refreshTags}
+          onStudentsStale={handleStudentsStale}
+          onSaved={() => {}}
+        />
+      )}
+
+      {tagModalUser && (
+        <StudentTagsModal
+          student={{
+            id: tagModalUser.id,
+            name: getDisplayName(tagModalUser) || tagModalUser.email,
+            roll_no: tagModalUser.roll_no,
+            tags: tagsFor(tagModalUser),
+          }}
+          tags={tags}
+          onClose={() => setTagModalUser(null)}
+          onTagsChanged={refreshTags}
+          onStudentsStale={handleStudentsStale}
+          onSaved={(userId, saved) => {
+            setTagOverrides((prev) => ({ ...prev, [userId]: saved }));
+            refreshTags(); // keep the filter dropdown counts honest
+          }}
+        />
       )}
 
       <ConfirmDialog

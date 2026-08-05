@@ -36,6 +36,10 @@ const ADMIN_ENDPOINTS = {
   ADMIN_TEACHER_SLOTS: (teacherId) => `/availability/slots/admin/teacher/${teacherId}/`,
   ADMIN_DELETE_SLOT: (slotId) => `/availability/slots/admin/${slotId}/`,
 
+  // Student Tags (admin labels)
+  STUDENT_TAGS: "/student-tags/",
+  STUDENT_TAG_DETAIL: (id) => `/student-tags/${id}/`,
+  USER_TAGS: (id) => `/users/${id}/tags/`,
 };
 
 // User Management endpoints
@@ -100,6 +104,43 @@ export const adminService = {
     } catch (error) {
       throw error
     }
+  },
+
+  // ── Student tags (admin labels used to group and find students) ──
+  getStudentTags: async () => {
+    const response = await axiosInstance.get(ADMIN_ENDPOINTS.STUDENT_TAGS);
+    return response.data;
+  },
+
+  createStudentTag: async (payload) => {
+    const response = await axiosInstance.post(
+      ADMIN_ENDPOINTS.STUDENT_TAGS,
+      payload,
+    );
+    return response.data;
+  },
+
+  updateStudentTag: async (tagId, payload) => {
+    const response = await axiosInstance.patch(
+      ADMIN_ENDPOINTS.STUDENT_TAG_DETAIL(tagId),
+      payload,
+    );
+    return response.data;
+  },
+
+  deleteStudentTag: async (tagId) => {
+    const response = await axiosInstance.delete(
+      ADMIN_ENDPOINTS.STUDENT_TAG_DETAIL(tagId),
+    );
+    return response.data;
+  },
+
+  // Replaces a student's whole tag list in one call
+  setUserTags: async (userId, tagIds) => {
+    const response = await axiosInstance.put(ADMIN_ENDPOINTS.USER_TAGS(userId), {
+      tag_ids: tagIds,
+    });
+    return response.data;
   },
 
   deleteUser: async (userId) => {
