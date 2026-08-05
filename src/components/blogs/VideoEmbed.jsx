@@ -12,6 +12,9 @@ import { youTubeEmbedUrl, youTubeThumbnail } from "../../utils/youtube";
  *   poster    – optional image URL; defaults to the YouTube thumbnail
  *   title     – accessible label for the player
  *   autoPlay  – mount the iframe immediately (detail page hero)
+ *   play      – external trigger: flips to true (e.g. a "Watch now" link
+ *               elsewhere in the card) to start playback as if the play
+ *               button had been pressed
  *   rounded   – tailwind radius class for the frame
  *   className – extra classes on the 16:9 wrapper
  */
@@ -20,12 +23,15 @@ const VideoEmbed = ({
   poster,
   title = "Video",
   autoPlay = false,
+  play = false,
   rounded = "rounded-2xl",
   className = "",
   onPlay,
 }) => {
-  const [playing, setPlaying] = useState(autoPlay);
+  const [clicked, setClicked] = useState(autoPlay);
   const [posterFailed, setPosterFailed] = useState(false);
+  // Either the poster's play button was pressed or the parent asked us to play
+  const playing = clicked || play;
 
   if (!videoId) return null;
 
@@ -35,7 +41,7 @@ const VideoEmbed = ({
     // Cards wrap this in a <Link> — never navigate when play is pressed.
     e.preventDefault();
     e.stopPropagation();
-    setPlaying(true);
+    setClicked(true);
     onPlay?.();
   };
 

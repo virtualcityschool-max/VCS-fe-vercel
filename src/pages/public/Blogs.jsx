@@ -260,6 +260,8 @@ const FeaturedBlog = ({ blog }) => {
   const cover = getStorageUrl(blog.cover_image);
   const isVideo = isVideoBlog(blog);
   const videoId = blogVideoId(blog);
+  // "Watch now" below starts the embedded player instead of being a dead label
+  const [watchNow, setWatchNow] = useState(false);
 
   const media =
     isVideo && videoId ? (
@@ -269,6 +271,7 @@ const FeaturedBlog = ({ blog }) => {
           poster={cover}
           title={blog.title}
           rounded="rounded-none"
+          play={watchNow}
         />
       </div>
     ) : (
@@ -322,9 +325,13 @@ const FeaturedBlog = ({ blog }) => {
         <div className="mt-6 flex items-center gap-4 text-[11px] text-slate-500">
           <span className="font-semibold text-slate-400">{blog.author || "Admin"}</span>
           {isVideo ? (
-            <span className="flex items-center gap-1 text-red-400 font-bold">
+            <button
+              type="button"
+              onClick={() => setWatchNow(true)}
+              className="flex items-center gap-1 text-red-400 hover:text-red-300 font-bold transition"
+            >
               <i className="fas fa-circle-play text-[9px]" /> Watch now
-            </span>
+            </button>
           ) : (
             <span className="flex items-center gap-1">
               <i className="fas fa-clock text-[8px]" /> {blog.read_time || 1} min read

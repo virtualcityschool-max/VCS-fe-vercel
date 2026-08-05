@@ -27,6 +27,8 @@ const BlogCard = ({ blog, index = 0 }) => {
   const isDraft = blog.status && blog.status !== "published";
   const isVideo = isVideoBlog(blog);
   const videoId = blogVideoId(blog);
+  // "Watch" in the footer starts the embedded player above it
+  const [watchNow, setWatchNow] = React.useState(false);
 
   // Badges sit above the media for both variants, so the video player keeps
   // its own click target while the article cover stays a link to the post.
@@ -64,6 +66,7 @@ const BlogCard = ({ blog, index = 0 }) => {
             poster={cover}
             title={blog.title}
             rounded="rounded-none"
+            play={watchNow}
           />
           {badges}
         </div>
@@ -110,9 +113,13 @@ const BlogCard = ({ blog, index = 0 }) => {
               <span>{formatDate(blog.published_at || blog.created_at)}</span>
             ) : null}
             {isVideo ? (
-              <span className="flex items-center gap-1 text-red-400 font-bold">
+              <button
+                type="button"
+                onClick={() => setWatchNow(true)}
+                className="flex items-center gap-1 text-red-400 hover:text-red-300 font-bold transition"
+              >
                 <i className="fas fa-circle-play text-[9px]" /> Watch
-              </span>
+              </button>
             ) : (
               <span className="flex items-center gap-1">
                 <i className="fas fa-clock text-[8px]" /> {blog.read_time || 1} min
