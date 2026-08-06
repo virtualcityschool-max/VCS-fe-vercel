@@ -99,7 +99,7 @@ const SearchControls = ({
                 value={usersFilters.tags}
                 onChange={(v) => handleFilterChange("tags", v)}
                 onAdd={() => onManageLabels({})}
-                onEdit={(tag) => onManageLabels({ edit: tag })}
+                onEdit={(tag) => onManageLabels({ highlight: tag })}
               />
             )}
 
@@ -795,8 +795,7 @@ const UsersTab = ({
         <StudentTagsModal
           student={null}
           tags={tags}
-          initialEdit={labelLibrary.edit || null}
-          initialDelete={labelLibrary.delete || null}
+          initialHighlight={labelLibrary.highlight || null}
           onClose={() => setLabelLibrary(null)}
           onTagsChanged={refreshTags}
           onStudentsStale={handleStudentsStale}

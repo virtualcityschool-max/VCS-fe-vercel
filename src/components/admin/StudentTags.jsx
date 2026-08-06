@@ -142,7 +142,7 @@ export const LabelFilterDropdown = ({
                       setOpen(false);
                       onEdit(tag);
                     }}
-                    title="Rename or delete"
+                    title="Manage this label"
                     className="w-6 h-6 flex items-center justify-center rounded-md text-slate-500 hover:text-white hover:bg-slate-700 transition text-xs shrink-0"
                   >
                     <i className="fas fa-pencil-alt" />
@@ -183,8 +183,7 @@ export const StudentTagsModal = ({
   onSaved,
   onTagsChanged,
   onStudentsStale,
-  initialEdit = null,
-  initialDelete = null,
+  initialHighlight = null,
 }) => {
   // Without a student the dialog is just the label library: create and delete,
   // but nothing to attach them to.
@@ -194,14 +193,20 @@ export const StudentTagsModal = ({
   const [newColor, setNewColor] = useState("indigo");
   const [saving, setSaving] = useState(false);
   const [creating, setCreating] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState(initialDelete);
+  const [deleteTarget, setDeleteTarget] = useState(null);
   // { id, name, color } while a label is being renamed in place
-  const [editing, setEditing] = useState(
-    initialEdit
-      ? { id: initialEdit.id, name: initialEdit.name, color: initialEdit.color }
-      : null,
-  );
+  const [editing, setEditing] = useState(null);
   const [savingEdit, setSavingEdit] = useState(false);
+  // Opened from a specific label's pencil: point that row out, but leave it
+  // read-only. Renaming and deleting stay explicit actions taken here.
+  const highlightId = initialHighlight?.id ?? null;
+  const highlightRef = useRef(null);
+
+  useEffect(() => {
+    if (highlightId && highlightRef.current) {
+      highlightRef.current.scrollIntoView({ block: "nearest" });
+    }
+  }, [highlightId]);
 
   const trimmed = query.trim();
 
@@ -428,13 +433,17 @@ export const StudentTagsModal = ({
                   );
                 }
 
+                const highlighted = tag.id === highlightId;
                 return (
                   <div
                     key={tag.id}
+                    ref={highlighted ? highlightRef : null}
                     className={`flex items-center gap-3 px-3 py-2 rounded-xl border transition ${
-                      checked
-                        ? "bg-indigo-500/10 border-indigo-500/30"
-                        : "bg-slate-800/40 border-transparent hover:bg-slate-800/70"
+                      highlighted
+                        ? "bg-indigo-500/10 border-indigo-500/50 ring-1 ring-indigo-500/40"
+                        : checked
+                          ? "bg-indigo-500/10 border-indigo-500/30"
+                          : "bg-slate-800/40 border-transparent hover:bg-slate-800/70"
                     }`}
                   >
                     {manageOnly ? (
