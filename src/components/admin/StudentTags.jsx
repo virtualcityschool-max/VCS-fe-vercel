@@ -36,7 +36,6 @@ export const LabelFilterDropdown = ({
   onChange,
   onAdd,
   onEdit,
-  onDelete,
   className = "",
 }) => {
   const [open, setOpen] = useState(false);
@@ -64,6 +63,7 @@ export const LabelFilterDropdown = ({
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
+        title={activeTag ? activeTag.name : "All Labels"}
         className={`w-full flex items-center justify-between gap-2
           bg-slate-900 border rounded-xl pl-3.5 pr-3 py-2.5
           text-sm font-medium transition-all duration-150 cursor-pointer
@@ -73,7 +73,7 @@ export const LabelFilterDropdown = ({
               : "border-slate-700/70 hover:border-slate-600 hover:bg-slate-800/70"
           }`}
       >
-        <span className="flex items-center gap-1.5 truncate text-white">
+        <span className="flex items-center gap-1.5 min-w-0 truncate text-white">
           <i className="fas fa-tags text-xs text-indigo-400 shrink-0" />
           <span className="truncate">{activeTag ? activeTag.name : "All Labels"}</span>
         </span>
@@ -84,10 +84,10 @@ export const LabelFilterDropdown = ({
         />
       </button>
 
-      {/* min-w keeps the menu readable when the trigger is sized to a short
-          label name */}
+      {/* Menu matches the trigger width exactly - long label names truncate
+          inside it rather than widening the control */}
       {open && (
-        <div className="absolute top-full right-0 sm:left-0 sm:right-auto mt-1.5 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-30 w-full min-w-[190px] overflow-hidden">
+        <div className="absolute top-full left-0 right-0 mt-1.5 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-30 w-full overflow-hidden">
           {/* All Labels - fixed, not scrolled */}
           <button
             onClick={() => {
@@ -110,14 +110,15 @@ export const LabelFilterDropdown = ({
             {tags.map((tag) => (
               <div
                 key={tag.id}
-                className="flex items-center gap-1 px-2 py-1.5 hover:bg-slate-800/70 group"
+                className="relative flex items-center px-2 py-1.5 hover:bg-slate-800 group"
               >
                 <button
                   onClick={() => {
                     onChange(String(tag.id));
                     setOpen(false);
                   }}
-                  className={`flex-1 text-left text-sm px-1.5 py-1 rounded-lg transition truncate ${
+                  title={tag.name}
+                  className={`flex-1 min-w-0 text-left text-sm px-1.5 py-1 rounded-lg transition truncate ${
                     String(tag.id) === String(value)
                       ? "text-indigo-400 font-semibold"
                       : "text-slate-300 group-hover:text-white"
@@ -125,27 +126,28 @@ export const LabelFilterDropdown = ({
                 >
                   {tag.name}
                 </button>
-                {/* Always visible on mobile, hover-only on desktop */}
-                <button
-                  onClick={() => {
-                    setOpen(false);
-                    onEdit(tag);
-                  }}
-                  title="Rename"
-                  className="w-6 h-6 flex items-center justify-center rounded-md text-slate-500 hover:text-white hover:bg-slate-700 transition text-xs opacity-100 sm:opacity-0 sm:group-hover:opacity-100 shrink-0"
+                {/* Only rename lives here - it floats over the end of the row
+                    so the name keeps the full width for filtering. Deleting a
+                    label is done from the manage dialog the pencil opens.
+                    Always visible on mobile, hover-only on desktop; the fade
+                    keeps the icon legible over whatever text sits under. */}
+                <div
+                  className="absolute inset-y-0 right-1 flex items-center pl-6
+                    bg-gradient-to-r from-transparent via-slate-900 to-slate-900
+                    group-hover:via-slate-800 group-hover:to-slate-800
+                    opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
                 >
-                  <i className="fas fa-pencil-alt" />
-                </button>
-                <button
-                  onClick={() => {
-                    setOpen(false);
-                    onDelete(tag);
-                  }}
-                  title="Delete"
-                  className="w-6 h-6 flex items-center justify-center rounded-md text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition text-xs opacity-100 sm:opacity-0 sm:group-hover:opacity-100 shrink-0"
-                >
-                  <i className="fas fa-trash-alt" />
-                </button>
+                  <button
+                    onClick={() => {
+                      setOpen(false);
+                      onEdit(tag);
+                    }}
+                    title="Rename or delete"
+                    className="w-6 h-6 flex items-center justify-center rounded-md text-slate-500 hover:text-white hover:bg-slate-700 transition text-xs shrink-0"
+                  >
+                    <i className="fas fa-pencil-alt" />
+                  </button>
+                </div>
               </div>
             ))}
           </div>

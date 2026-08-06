@@ -70,7 +70,10 @@ const SearchControls = ({
 
         {/* Filter Controls Group. Must stay wrappable at every width: forcing
             one line here pushed Create User and Refresh off-screen between
-            about 1280px and 1450px, where the role pills share the row. */}
+            about 1280px and 1450px, where the role pills share the row.
+            At xl the group shares the row with the pills and stays packed
+            right; below xl it drops to its own row, where mr-auto anchors the
+            search left instead of leaving it right-aligned. */}
         <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-start gap-1.5 flex-1 sm:justify-end">
           <SearchInput
             value={searchInput}
@@ -81,22 +84,22 @@ const SearchControls = ({
                 ? "Search by name, email, or roll no..."
                 : "Search users..."
             }
-            className="w-full sm:w-64"
+            className="w-full sm:w-64 sm:mr-auto xl:mr-0"
           />
 
           <div className="grid grid-cols-2 sm:contents gap-1.5">
             {/* Labels only apply to students, so the filter appears with them.
                 Same shape as the course-level dropdown: filter, rename, delete
-                or add without leaving the menu. */}
+                or add without leaving the menu. Fixed width so a long label
+                name truncates in the trigger instead of stretching the row. */}
             {(usersFilters.role === "" || usersFilters.role === "student") && (
               <LabelFilterDropdown
-                className="w-full sm:w-auto"
+                className="w-full sm:w-34"
                 tags={tags}
                 value={usersFilters.tags}
                 onChange={(v) => handleFilterChange("tags", v)}
                 onAdd={() => onManageLabels({})}
                 onEdit={(tag) => onManageLabels({ edit: tag })}
-                onDelete={(tag) => onManageLabels({ delete: tag })}
               />
             )}
 
@@ -122,16 +125,21 @@ const SearchControls = ({
           </div>
 
           <div className="flex flex-wrap items-center justify-end gap-1.5">
-            {hasActiveFilters && (
-              <button
-                onClick={onClearFilters}
-                title="Clear all filters"
-                className="flex items-center gap-1.5 h-[42px] px-3.5 rounded-xl border border-slate-700/70 bg-slate-900 hover:bg-rose-500/10 hover:border-rose-500/40 text-slate-400 hover:text-rose-400 text-sm font-medium transition-all duration-150 shrink-0"
-              >
-                <i className="fas fa-times text-xs"></i>
-                <span className="hidden sm:inline">Clear</span>
-              </button>
-            )}
+            {/* Always rendered, disabled when there is nothing to clear, so the
+                row never reflows as filters come and go. */}
+            <button
+              onClick={onClearFilters}
+              disabled={!hasActiveFilters}
+              title={hasActiveFilters ? "Clear all filters" : "No filters applied"}
+              className={`flex items-center gap-1.5 h-[42px] px-3.5 rounded-xl border bg-slate-900 text-sm font-medium transition-all duration-150 shrink-0 ${
+                hasActiveFilters
+                  ? "border-slate-700/70 text-slate-400 hover:bg-rose-500/10 hover:border-rose-500/40 hover:text-rose-400"
+                  : "border-slate-800/60 text-slate-600 cursor-not-allowed"
+              }`}
+            >
+              <i className="fas fa-times text-xs"></i>
+              <span className="hidden sm:inline">Clear</span>
+            </button>
 
             <button
               onClick={handleCreateUser}
