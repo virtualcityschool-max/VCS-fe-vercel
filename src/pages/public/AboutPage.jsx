@@ -40,7 +40,7 @@ const AboutPage = () => {
 
   useSeo({
       title: "About Us",
-      description: "Learn about Virtual City School's vision, mission and story - the online Cambridge school for Grade 1 to A2 Level students across the UAE, Saudi Arabia, Qatar and Pakistan.",
+      description: "Learn about Virtual City School's vision, mission and story - the online Cambridge school offering O Level, AS Level and A2 Level programmes alongside Grade 5-12 curricula, for students across the UAE, Saudi Arabia, Qatar and Pakistan.",
       url: typeof window !== "undefined" ? window.location.href : undefined,
   });
   
