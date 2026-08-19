@@ -24,6 +24,7 @@ import AuthRequiredModal from "../../components/common/AuthRequiredModal";
 import ApplyFreeAccessModal from "../../components/public/ApplyFreeAccessModal";
 import PublicCourseCard from "../../components/courses/PublicCourseCard";
 import { studentService } from "../../services/studentService";
+import { useSeo } from "../../hooks/useSeo";
 
 const PREVIEW_LIMIT = 8;
 
@@ -362,6 +363,12 @@ const Marketplace = () => {
     }
   };
 
+  useSeo({
+      title: "Cambridge Courses - O Level, A Level & IGCSE Online",
+      description: "Browse live online Cambridge courses from Grade 1 to A2 Level, including O Level, A Level and IGCSE, for students across the UAE, Saudi Arabia, Qatar and Pakistan.",
+      url: typeof window !== "undefined" ? window.location.href : undefined,
+  });
+  
   // Loading state - skeleton grid mirrors the real layout
   if (isLoading) {
     return (
