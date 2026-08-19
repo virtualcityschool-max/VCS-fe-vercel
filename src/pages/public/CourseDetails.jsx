@@ -34,6 +34,7 @@ import FileViewerModal from "../../components/common/FileViewerModal";
 import { studentService } from "../../services/studentService";
 import QuillViewer from "../../components/common/QuillViewer";
 import { getDisplayName } from "../../utils/userDisplay";
+import { useSeo } from "../../hooks/useSeo";
 
 const CourseDetails = () => {
   const { courseId } = useParams();
@@ -113,6 +114,14 @@ const CourseDetails = () => {
     };
   }, [course, courseId]);
 
+  useSeo({
+      title: normalizedCourse ? `${normalizedCourse.title} | Virtual City School` : undefined,
+      description: normalizedCourse
+            ? `Enroll in ${normalizedCourse.title} - a live online Cambridge course at Virtual City School for students across the UAE, Saudi Arabia, Qatar and Pakistan.`
+            : undefined,
+      url: typeof window !== "undefined" ? window.location.href : undefined,
+  });
+  
   // Check if course is enrolled
   const isCourseEnrolled = (courseData) => {
     if (!courseData || !auth.isLoggedIn || auth.role !== "student") {
