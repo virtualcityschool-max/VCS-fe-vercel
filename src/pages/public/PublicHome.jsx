@@ -138,7 +138,7 @@ const PublicHome = () => {
 
   useSeo({
       title: "Online Cambridge School for Gulf & Pakistani Students",
-      description: "Live Cambridge classes, Grade 1 to A2 Level, for students across the UAE, Saudi Arabia, Qatar, Kuwait, Bahrain, Oman and Pakistan. Expert tutors, flexible schedules.",
+      description: "Live Cambridge O Level, AS Level and A2 Level classes, alongside Grade 5-12 curricula, for students across the UAE, Saudi Arabia, Qatar, Kuwait, Bahrain, Oman and Pakistan. Expert tutors, flexible schedules.",
       url: typeof window !== "undefined" ? window.location.href : undefined,
   });
   
@@ -172,9 +172,7 @@ const PublicHome = () => {
               <span className="text-gradient">Digital Classroom</span> Starts Here
             </h1>
             <p className="text-slate-400 text-base md:text-lg leading-relaxed mt-6 max-w-xl animate-fadeInUp" style={{ animationDelay: "0.2s" }}>
-              A premium online learning platform for Cambridge students. Grade 1
-              to A2 Level programmes with expert teachers and live classes, across
-              the Gulf and beyond.
+              A premium online learning platform for Cambridge students. Cambridge O Level, AS Level, and A2 Level programmes alongside Grade 5-12 curricula, with expert teachers and live classes, across the Gulf and beyond.
             </p>
 
             <div className="flex flex-wrap gap-4 mt-9 animate-fadeInUp" style={{ animationDelay: "0.3s" }}>
