@@ -365,7 +365,7 @@ const Marketplace = () => {
 
   useSeo({
       title: "Cambridge Courses - O Level, A Level & IGCSE Online",
-      description: "Browse live online Cambridge courses from Grade 1 to A2 Level, including O Level, A Level and IGCSE, for students across the UAE, Saudi Arabia, Qatar and Pakistan.",
+      description: "Browse live online Cambridge O Level, AS Level and A2 Level courses, alongside Grade 5-12 curricula, for students across the UAE, Saudi Arabia, Qatar and Pakistan.",
       url: typeof window !== "undefined" ? window.location.href : undefined,
   });
   
