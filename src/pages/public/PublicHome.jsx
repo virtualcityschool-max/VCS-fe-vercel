@@ -17,6 +17,7 @@ import Reveal from "../../components/ui/Reveal";
 import { toastManager } from "../../utils/toastManager";
 import { showApiError } from "../../utils/apiErrorHandler";
 import { getStorageUrl } from "../../utils/storageUrl";
+import { useSeo } from "../../hooks/useSeo";
 
 const PublicHome = () => {
   const auth = useSelector((state) => state.auth);
@@ -135,11 +136,17 @@ const PublicHome = () => {
       ? filteredCourses.filter((course) => !isCourseEnrolled(course))
       : filteredCourses, [filteredCourses, auth.role]);
 
+  useSeo({
+      title: "Online Cambridge School for Gulf & Pakistani Students",
+      description: "Live Cambridge classes, Grade 1 to A2 Level, for students across the UAE, Saudi Arabia, Qatar, Kuwait, Bahrain, Oman and Pakistan. Expert tutors, flexible schedules.",
+      url: typeof window !== "undefined" ? window.location.href : undefined,
+  });
+  
   return (
     <main
       id="public-home"
       className="min-h-screen bg-[#020617] text-white selection:bg-indigo-500/30 overflow-x-hidden"
-    >
+>
       {/* Aurora Background Tints */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
         <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-indigo-600/10 blur-[120px] rounded-full animate-aurora"></div>
