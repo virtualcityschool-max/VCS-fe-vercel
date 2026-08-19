@@ -8,6 +8,7 @@ import { useAuth } from "../../hooks/useAuth";
 import HireTutorModal from "../../components/public/HireTutorModal";
 import AuthRequiredModal from "../../components/common/AuthRequiredModal";
 import TutorCard from "../../components/teachers/TutorCard";
+import { useSeo } from "../../hooks/useSeo";
 
 const HIRE_INTENT_KEY = "vcs_hire_intent";
 
@@ -93,6 +94,12 @@ const TeachersDirectory = () => {
     };
   }, [dispatch, searchQuery]);
 
+  useSeo({
+      title: "Meet Our Tutors - Cambridge Teachers Online",
+      description: "Meet Virtual City School's expert Cambridge tutors - qualified teachers for O Level, A Level, IGCSE and more, teaching live online across the UAE, Saudi Arabia, Qatar and Pakistan.",
+      url: typeof window !== "undefined" ? window.location.href : undefined,
+  });
+  
   return (
     <section id="teachers-view" className="bg-slate-950 text-white font-inter animate-fadeIn">
       {hireModal && (
