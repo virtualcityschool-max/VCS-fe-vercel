@@ -10,6 +10,7 @@ import { toastManager } from "../../utils/toastManager";
 import AuthRequiredModal from "../../components/common/AuthRequiredModal";
 import { getStorageUrl } from "../../utils/storageUrl";
 import GmailNotice from "../../components/common/GmailNotice";
+import { useSeo } from "../../hooks/useSeo";
 
 const HIRE_INTENT_KEY = "vcs_hire_intent";
 
@@ -332,6 +333,14 @@ const TeacherProfile = () => {
     return () => { if (abortControllerRef.current) abortControllerRef.current.abort(); };
   }, [id, dispatch]);
 
+  useSeo({
+      title: teacherDetails ? `${teacherDetails.teacher_name || "Tutor"} - Cambridge Tutor | Virtual City School` : undefined,
+      description: teacherDetails
+            ? `Book live online tutoring with ${teacherDetails.teacher_name || "this tutor"} at Virtual City School - a Cambridge-qualified teacher for students across the UAE, Saudi Arabia, Qatar and Pakistan.`
+            : undefined,
+      url: typeof window !== "undefined" ? window.location.href : undefined,
+  });
+  
   if (loading && !teacherDetails) {
     return (
       <section className="min-h-screen bg-slate-950 text-white">
