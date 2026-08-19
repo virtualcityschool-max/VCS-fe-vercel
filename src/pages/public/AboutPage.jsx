@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { aboutService } from "../../services/aboutService";
+import { useSeo } from "../../hooks/useSeo";
 
 const SOCIAL = [
   { key: "social_facebook",  icon: "fab fa-facebook-f",  label: "Facebook",  color: "hover:text-blue-500"   },
@@ -37,6 +38,12 @@ const AboutPage = () => {
       .finally(() => setLoading(false));
   }, []);
 
+  useSeo({
+      title: "About Us",
+      description: "Learn about Virtual City School's vision, mission and story - the online Cambridge school for Grade 1 to A2 Level students across the UAE, Saudi Arabia, Qatar and Pakistan.",
+      url: typeof window !== "undefined" ? window.location.href : undefined,
+  });
+  
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center">
