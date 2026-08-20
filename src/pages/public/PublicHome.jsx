@@ -172,7 +172,7 @@ const PublicHome = () => {
               <span className="text-gradient">Digital Classroom</span> Starts Here
             </h1>
             <p className="text-slate-400 text-base md:text-lg leading-relaxed mt-6 max-w-xl animate-fadeInUp" style={{ animationDelay: "0.2s" }}>
-              A premium online learning platform for Cambridge students. Cambridge O Level, AS Level, and A2 Level programmes alongside Grade 5-12 curricula, with expert teachers and live classes, across the Gulf and beyond.
+              A premium online learning platform for Cambridge students. Cambridge O Level, AS Level, and A2 Level programmes alongside Grade 5-12 curricula, with expert teachers and live classes, across the UAE, Saudi Arabia, Qatar, Kuwait, Bahrain, Oman and Pakistan.
             </p>
 
             <div className="flex flex-wrap gap-4 mt-9 animate-fadeInUp" style={{ animationDelay: "0.3s" }}>
