@@ -19,6 +19,33 @@ import { showApiError } from "../../utils/apiErrorHandler";
 import { getStorageUrl } from "../../utils/storageUrl";
 import { useSeo } from "../../hooks/useSeo";
 
+const TESTIMONIALS = [
+  {
+    quote:
+      "Ngl, live classes here actually hit different. Teachers explain it properly and still reply after class ends. Went from hating Physics to lowkey enjoying it.",
+    name: "Zainab R.",
+    role: "O Level Student, Dubai",
+  },
+  {
+    quote:
+      "Study from anywhere, still stay on track. Teachers know the exam stuff inside out, no cap. Flexibility is everything tbh.",
+    name: "Hamza A.",
+    role: "AS Level Student, Riyadh",
+  },
+  {
+    quote:
+      "Distance isn't an issue here. Classes are interactive, students actually show up motivated. Teaching across the Gulf and Pakistan? Love it.",
+    name: "Ms. Sana Malik",
+    role: "Cambridge O Level Faculty",
+  },
+  {
+    quote:
+      "Good communication, schedule that works for us, real progress in my daughter's grades. That's all I need as a parent.",
+    name: "Imran H.",
+    role: "Parent, Doha",
+  },
+];
+
 const PublicHome = () => {
   const auth = useSelector((state) => state.auth);
   const navigate = useNavigate();
@@ -536,6 +563,36 @@ const PublicHome = () => {
             </div>
           </div>
         )}
+        {/* Testimonials Section */}
+        <div className="mt-32 md:mt-48 pb-20">
+          <Reveal className="text-center mb-16 max-w-2xl mx-auto">
+            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-blue-400 mb-2">
+              Real Voices
+            </p>
+            <h2 className="text-3xl md:text-5xl font-black font-poppins tracking-tight text-white">
+              What Our Community Says
+            </h2>
+          </Reveal>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            {TESTIMONIALS.map((t) => (
+              <div
+                key={t.name}
+                className="bg-[#1a2235]/60 backdrop-blur-xl rounded-2xl border border-white/5 p-7 h-full flex flex-col glass-shine hover-lift"
+              >
+                <i className="fas fa-quote-left text-blue-500/30 text-2xl mb-4"></i>
+                <p className="text-slate-300 text-sm leading-relaxed flex-1">
+                  &ldquo;{t.quote}&rdquo;
+                </p>
+                <div className="mt-6 pt-5 border-t border-white/5">
+                  <p className="text-white font-bold text-sm">{t.name}</p>
+                  <p className="text-slate-500 text-xs mt-0.5">{t.role}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
       </section>
 
       {hireModal && (
