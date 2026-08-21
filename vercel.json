@@ -1,0 +1,7 @@
+{
+  "buildCommand": "node scripts/generate-sitemap.js && npm run build",
+  "outputDirectory": "dist",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
