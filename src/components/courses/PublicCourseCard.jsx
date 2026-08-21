@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { getCourseImage } from "../../utils/courseImageUtils";
 import { getStorageUrl } from "../../utils/storageUrl";
@@ -20,6 +20,7 @@ const PublicCourseCard = ({
   const isPending = course.enrollment_status === "pending";
   const isRejected = course.enrollment_status === "rejected";
   const noSessions = !course.has_session;
+  const [imgFailed, setImgFailed] = useState(false);
 
   const renderCTA = () => {
     let cls = `w-full ${large ? "py-2.5 text-[10px]" : "py-2 text-[9px]"} font-black uppercase tracking-[0.15em] rounded-xl transition-all active:scale-95 inline-flex items-center justify-center gap-1.5 `;
@@ -107,11 +108,12 @@ const PublicCourseCard = ({
       {/* Image */}
       <div className={`relative ${large ? "h-36" : "h-20"} overflow-hidden bg-slate-900/50 shrink-0`}>
         <Link to={`/courses/${course.id}`} className="block h-full">
-          {getCourseImage(course, index) ? (
+          {getCourseImage(course, index) && !imgFailed ? (
             <img
               src={getCourseImage(course, index)}
               className={`w-full h-full object-contain group-hover:scale-105 transition duration-700 ${large ? "opacity-75" : "opacity-70"} group-hover:opacity-100`}
               alt={course.title || "Course"}
+              onError={() => setImgFailed(true)}
             />
           ) : (
             <div className="w-full h-full bg-slate-800 flex items-center justify-center">
