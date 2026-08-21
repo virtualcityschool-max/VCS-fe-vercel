@@ -22,42 +22,50 @@ const PublicCourseCard = ({
   const noSessions = !course.has_session;
 
   const renderCTA = () => {
-    let cls = `w-full ${large ? "py-2.5 text-[10px]" : "py-2 text-[9px]"} font-black uppercase tracking-[0.15em] rounded-xl transition-all active:scale-95 `;
+    let cls = `w-full ${large ? "py-2.5 text-[10px]" : "py-2 text-[9px]"} font-black uppercase tracking-[0.15em] rounded-xl transition-all active:scale-95 inline-flex items-center justify-center gap-1.5 `;
     let label = "";
+    let icon = "";
     let disabled = false;
     let tooltip = null;
 
     if (enrolled) {
       label = isUnenrolling ? "Unenrolling..." : "Unenroll";
+      icon = isUnenrolling ? "fas fa-spinner fa-spin" : "fas fa-user-minus";
       disabled = isUnenrolling;
       cls += isUnenrolling
         ? "bg-red-600/50 text-red-400 cursor-not-allowed"
         : "bg-red-600/10 border border-red-600/20 text-red-400 hover:bg-red-600 hover:text-white";
     } else if (isRejected) {
       label = "Request Rejected";
+      icon = "fas fa-circle-exclamation";
       disabled = true;
       cls += "bg-rose-600/10 border border-rose-500/20 text-rose-400 cursor-not-allowed";
       tooltip = "Your enrollment request was rejected. Please contact school administration.";
     } else if (isPending) {
       if (course.is_paid) {
         label = "Approval Pending";
+        icon = "fas fa-clock";
         disabled = true;
         cls += "bg-amber-600/10 border border-amber-500/20 text-amber-400 cursor-not-allowed";
       } else if (isWithdrawing) {
         label = "Cancelling...";
+        icon = "fas fa-spinner fa-spin";
         disabled = true;
         cls += "bg-amber-600/10 border border-amber-500/20 text-amber-400 cursor-not-allowed";
       } else {
         label = "Cancel Request";
+        icon = "fas fa-ban";
         cls += "bg-amber-600/10 border border-amber-500/20 text-amber-400 hover:bg-amber-600 hover:text-white hover:border-transparent";
       }
     } else if (isEnrolling) {
       label = "Enrolling...";
+      icon = "fas fa-spinner fa-spin";
       disabled = true;
       cls += "bg-slate-700 text-slate-400 cursor-not-allowed";
     } else {
       label = "Enroll Now";
-      cls += "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-500 hover:to-indigo-500 shadow-blue-900/40";
+      icon = "fas fa-graduation-cap";
+      cls += "bg-indigo-600/10 border border-indigo-500/20 text-indigo-300 hover:bg-indigo-600 hover:text-white hover:border-transparent";
     }
 
     const btn = (
@@ -71,6 +79,7 @@ const PublicCourseCard = ({
         disabled={disabled}
         className={cls}
       >
+        {icon && <i className={icon}></i>}
         {label}
       </button>
     );
@@ -101,7 +110,7 @@ const PublicCourseCard = ({
           {getCourseImage(course, index) ? (
             <img
               src={getCourseImage(course, index)}
-              className={`w-full h-full object-cover group-hover:scale-105 transition duration-700 ${large ? "opacity-75" : "opacity-70"} group-hover:opacity-100`}
+              className={`w-full h-full object-contain group-hover:scale-105 transition duration-700 ${large ? "opacity-75" : "opacity-70"} group-hover:opacity-100`}
               alt={course.title || "Course"}
             />
           ) : (
@@ -127,12 +136,12 @@ const PublicCourseCard = ({
           <Link
             to={`/teachers/${course.instructor.id}`}
             onClick={(e) => e.stopPropagation()}
-            className={`${large ? "text-xs" : "text-[9px]"} text-slate-500 hover:text-blue-400 transition-colors truncate block`}
+            className={`${large ? "text-sm" : "text-[11px]"} font-semibold text-[#d4b483] hover:text-blue-400 transition-colors truncate block`}
           >
             {getDisplayName(course.instructor) || "Tutor"}
           </Link>
         ) : (
-          <span className={`${large ? "text-xs" : "text-[9px]"} text-slate-500 truncate`}>
+          <span className={`${large ? "text-sm" : "text-[11px]"} font-semibold text-[#d4b483] truncate`}>
             {getDisplayName(course.instructor) || "Tutor"}
           </span>
         )}
