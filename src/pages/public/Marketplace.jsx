@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { fetchAllCourses, fetchCategories } from "../../store/slices/coursesSlice";
@@ -26,10 +26,70 @@ import PublicCourseCard from "../../components/courses/PublicCourseCard";
 import { studentService } from "../../services/studentService";
 import { useSeo } from "../../hooks/useSeo";
 
-const PREVIEW_LIMIT = 8;
-
 const getCategoryName = (course) =>
   typeof course.category === "object" ? course.category?.name : course.category;
+
+// Netflix-style horizontal row: hover-reveal paging arrows, no "show all" link needed
+// since every course in the category stays reachable by scrolling the row itself.
+const CourseRow = ({ courses, renderCard }) => {
+  const rowRef = useRef(null);
+  const [atStart, setAtStart] = useState(true);
+  const [atEnd, setAtEnd] = useState(true);
+
+  const updateEdges = () => {
+    const el = rowRef.current;
+    if (!el) return;
+    setAtStart(el.scrollLeft <= 4);
+    setAtEnd(el.scrollLeft + el.clientWidth >= el.scrollWidth - 4);
+  };
+
+  useEffect(() => {
+    updateEdges();
+  }, [courses]);
+
+  const page = (dir) => {
+    const el = rowRef.current;
+    if (!el) return;
+    el.scrollBy({ left: el.clientWidth * 0.85 * dir, behavior: "smooth" });
+  };
+
+  return (
+    <div className="relative group/row">
+      {!atStart && (
+        <button
+          type="button"
+          onClick={() => page(-1)}
+          aria-label="Scroll left"
+          className="hidden md:flex absolute left-0 top-0 bottom-3 w-14 items-center justify-start bg-gradient-to-r from-[#0f172a] to-transparent opacity-0 group-hover/row:opacity-100 transition-opacity duration-200 z-20"
+        >
+          <span className="ml-1.5 w-9 h-9 rounded-full bg-slate-950/85 border border-white/10 flex items-center justify-center text-white">
+            <i className="fas fa-chevron-left text-xs" />
+          </span>
+        </button>
+      )}
+      <div
+        ref={rowRef}
+        onScroll={updateEdges}
+        className="flex gap-3 overflow-x-auto pb-3 scroll-smooth [&::-webkit-scrollbar]:hidden"
+        style={{ scrollbarWidth: "none" }}
+      >
+        {courses.map(renderCard)}
+      </div>
+      {!atEnd && (
+        <button
+          type="button"
+          onClick={() => page(1)}
+          aria-label="Scroll right"
+          className="hidden md:flex absolute right-0 top-0 bottom-3 w-14 items-center justify-end bg-gradient-to-l from-[#0f172a] to-transparent opacity-0 group-hover/row:opacity-100 transition-opacity duration-200 z-20"
+        >
+          <span className="mr-1.5 w-9 h-9 rounded-full bg-slate-950/85 border border-white/10 flex items-center justify-center text-white">
+            <i className="fas fa-chevron-right text-xs" />
+          </span>
+        </button>
+      )}
+    </div>
+  );
+};
 
 const Marketplace = () => {
   const dispatch = useDispatch();
@@ -75,8 +135,6 @@ const Marketplace = () => {
     if (auth.isLoggedIn && auth.role === "student") dispatch(fetchStudentDashboard());
   }, [dispatch, auth.isLoggedIn, auth.role]);
 
-
-
   const filterOptions = useMemo(() => {
     const instructors = courses ? [
       ...new Set(
@@ -87,7 +145,7 @@ const Marketplace = () => {
     // Dynamic price ranges based on course prices
     const prices = (courses || []).map((c) => parseFloat(c.price) || 0);
     const maxPrice = Math.max(...prices, 0);
-    
+
     let priceRanges = [];
     if (maxPrice === 0) {
       priceRanges = [{ value: "0-0", label: "Free" }];
@@ -96,7 +154,7 @@ const Marketplace = () => {
       // We aim for approximately 5 ranges
       let step = Math.ceil(maxPrice / 5 / 10) * 10;
       if (step === 0) step = 10;
-      
+
       for (let i = 0; i < maxPrice; i += step) {
         const lower = i;
         const upper = i + step;
@@ -157,7 +215,7 @@ const Marketplace = () => {
 
   const hasActiveFilters = useMemo(() =>
     searchTerm !== "" || Object.values(filters).some((v) => v !== ""),
-  [searchTerm, filters]);
+    [searchTerm, filters]);
 
   const resetFilters = () => {
     setSearchTerm("");
@@ -187,8 +245,7 @@ const Marketplace = () => {
   // Handle search
   const handleSearch = (e) => {
     e.preventDefault();
-    // Search is handled by the filteredCourses computed above
-  };
+    // Search is handled by the filteredCourses computed above  };
 
   // Handle course enrollment
   const handleEnrollCourse = async (course) => {
@@ -364,11 +421,11 @@ const Marketplace = () => {
   };
 
   useSeo({
-      title: "Cambridge Courses - O Level, A Level & IGCSE Online",
-      description: "Browse live online Cambridge O Level, AS Level and A2 Level courses, alongside Grade 5-12 curricula, for students across the UAE, Saudi Arabia, Qatar and Pakistan.",
-      url: typeof window !== "undefined" ? window.location.href : undefined,
+    title: "Cambridge Courses - O Level, A Level & IGCSE Online",
+    description: "Browse live online Cambridge O Level, AS Level and A2 Level courses, alongside Grade 5-12 curricula, for students across the UAE, Saudi Arabia, Qatar and Pakistan.",
+    url: typeof window !== "undefined" ? window.location.href : undefined,
   });
-  
+
   // Loading state - skeleton grid mirrors the real layout
   if (isLoading) {
     return (
@@ -429,34 +486,33 @@ const Marketplace = () => {
           </div>
           <div className="flex flex-col lg:flex-row lg:items-stretch gap-3 max-w-5xl mx-auto animate-springyReveal">
             <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-8 gap-3 flex-1">
-            <div className="md:col-span-4">
-              <SearchInput
-                id="course-search"
-                name="course-search"
-                placeholder="Search courses..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                onClear={() => setSearchTerm("")}
-                className="w-full"
-                inputClassName="h-11"
-              />
-            </div>
-            <div className="md:col-span-2">
-              <FilterSelect value={filters.priceRange} onChange={(e) => handleFilterChange("priceRange", e.target.value)} className="w-full h-11">
-                <option value="">All Prices</option>
-                {filterOptions.priceRanges.map((range) => (
-                  <option key={range.value} value={range.value}>{range.label}</option>
-                ))}
-              </FilterSelect>
-            </div>
-            <div className="md:col-span-2">
-              <FilterSelect value={filters.instructor} onChange={(e) => handleFilterChange("instructor", e.target.value)} className="w-full h-11">
-                <option value="">All Tutors</option>
-                {filterOptions.instructors.map((instructor) => (
-                  <option key={instructor} value={instructor}>{instructor}</option>
-                ))}
-              </FilterSelect>
-            </div>
+              <div className="md:col-span-4">
+                <SearchInput
+                  id="course-search"
+                  name="course-search"
+                  placeholder="Search courses..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}                  onClear={() => setSearchTerm("")}
+                  className="w-full"
+                  inputClassName="h-11"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <FilterSelect value={filters.priceRange} onChange={(e) => handleFilterChange("priceRange", e.target.value)} className="w-full h-11">
+                  <option value="">All Prices</option>
+                  {filterOptions.priceRanges.map((range) => (
+                    <option key={range.value} value={range.value}>{range.label}</option>
+                  ))}
+                </FilterSelect>
+              </div>
+              <div className="md:col-span-2">
+                <FilterSelect value={filters.instructor} onChange={(e) => handleFilterChange("instructor", e.target.value)} className="w-full h-11">
+                  <option value="">All Tutors</option>
+                  {filterOptions.instructors.map((instructor) => (
+                    <option key={instructor} value={instructor}>{instructor}</option>
+                  ))}
+                </FilterSelect>
+              </div>
             </form>
             <button
               type="button"
@@ -527,50 +583,41 @@ const Marketplace = () => {
             </div>
           )}
 
-          {/* ── All tab: grouped by category ── */}
+          {/* ── All tab: grouped by category, Netflix-style scrolling rows ── */}
           {activeCategory === "all" && visibleCourses.length > 0 && (
-            <div className="space-y-6">
+            <div className="space-y-10">
               {activeCats.map((cat) => {
                 const catCourses = filteredCourses.filter((c) => getCategoryName(c) === cat.name);
                 if (!catCourses.length) return null;
-                const preview = catCourses.slice(0, PREVIEW_LIMIT);
-                const hasMore = catCourses.length > PREVIEW_LIMIT;
                 return (
                   <section key={cat.id} className="mb-2">
-                    <div className="flex items-center justify-between mb-5">
-                      <h2 className="text-lg font-black text-white tracking-tight flex items-center gap-2.5">
-                        <span className="w-1 h-5 rounded-full bg-gradient-to-b from-indigo-500 to-blue-500 inline-block" />
+                    <div className="flex items-center gap-2.5 mb-4">
+                      <span className="w-1 h-5 rounded-full bg-gradient-to-b from-indigo-500 to-blue-500 inline-block" />
+                      <h2 className="text-lg font-black text-white tracking-tight">
                         {formatCategoryLabel(cat.name)}
-                        <span className="text-[11px] font-bold text-indigo-300 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-full">
-                          {catCourses.length}
-                        </span>
                       </h2>
-                      {hasMore && (
-                        <button
-                          onClick={() => { setActiveCategory(String(cat.id)); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-                          className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 text-sm font-semibold transition-colors flex-shrink-0"
-                        >
-                          Show all {catCourses.length}
-                          <i className="fas fa-arrow-right text-xs" />
-                        </button>
+                      <span className="text-[11px] font-bold text-indigo-300 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-full">
+                        {catCourses.length}
+                      </span>
+                    </div>
+                    <CourseRow
+                      courses={catCourses}
+                      renderCard={(course, idx) => (
+                        <div key={course.id || idx} className="w-[150px] sm:w-[170px] md:w-[190px] flex-shrink-0">
+                          <PublicCourseCard
+                            course={course}
+                            index={idx}
+                            enrolled={isCourseEnrolled(course)}
+                            isEnrolling={enrollingCourseIds.includes(course.id)}
+                            isUnenrolling={unenrollingCourseIds.includes(course.id)}
+                            isWithdrawing={withdrawingCourseIds.includes(course.id)}
+                            onEnroll={handleEnrollCourse}
+                            onUnenroll={handleUnenrollCourse}
+                            onWithdraw={handleWithdrawEnrollment}
+                          />
+                        </div>
                       )}
-                    </div>
-                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
-                      {preview.map((course, idx) => (
-                        <PublicCourseCard
-                          key={course.id || idx}
-                          course={course}
-                          index={idx}
-                          enrolled={isCourseEnrolled(course)}
-                          isEnrolling={enrollingCourseIds.includes(course.id)}
-                          isUnenrolling={unenrollingCourseIds.includes(course.id)}
-                          isWithdrawing={withdrawingCourseIds.includes(course.id)}
-                          onEnroll={handleEnrollCourse}
-                          onUnenroll={handleUnenrollCourse}
-                          onWithdraw={handleWithdrawEnrollment}
-                        />
-                      ))}
-                    </div>
+                    />
                     <hr className="mt-4 border-slate-800/60" />
                   </section>
                 );
