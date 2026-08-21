@@ -17,6 +17,11 @@ jobs:
 
       - run: npm ci
 
+      - name: Debug env vars
+        run: echo "VITE_STORAGE_BASE_URL is [$VITE_STORAGE_BASE_URL] length ${#VITE_STORAGE_BASE_URL}"
+        env:
+          VITE_STORAGE_BASE_URL: ${{ vars.VITE_STORAGE_BASE_URL }}
+
       - name: Generate sitemap
         run: node scripts/generate-sitemap.js
         env:
