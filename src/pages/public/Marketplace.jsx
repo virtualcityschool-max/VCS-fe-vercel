@@ -245,7 +245,8 @@ const Marketplace = () => {
   // Handle search
   const handleSearch = (e) => {
     e.preventDefault();
-    // Search is handled by the filteredCourses computed above  };
+    // Search is handled by the filteredCourses computed above
+  };
 
   // Handle course enrollment
   const handleEnrollCourse = async (course) => {
@@ -492,7 +493,8 @@ const Marketplace = () => {
                   name="course-search"
                   placeholder="Search courses..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}                  onClear={() => setSearchTerm("")}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onClear={() => setSearchTerm("")}
                   className="w-full"
                   inputClassName="h-11"
                 />
