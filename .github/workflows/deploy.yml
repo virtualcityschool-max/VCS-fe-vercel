@@ -17,11 +17,6 @@ jobs:
 
       - run: npm ci
 
-      - name: Debug env vars
-        run: echo "VITE_STORAGE_BASE_URL is [$VITE_STORAGE_BASE_URL] length ${#VITE_STORAGE_BASE_URL}"
-        env:
-          VITE_STORAGE_BASE_URL: ${{ vars.VITE_STORAGE_BASE_URL }}
-
       - name: Generate sitemap
         run: node scripts/generate-sitemap.js
         env:
@@ -31,6 +26,12 @@ jobs:
         env:
           VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
           VITE_STORAGE_BASE_URL: ${{ vars.VITE_STORAGE_BASE_URL }}
+
+      - name: Verify build output
+        run: |
+          ls -la dist/assets/
+          echo "---searching built JS for storage host string---"
+          grep -l -r -i "s3\.us-east-2" dist/assets/*.js || echo "MARKER_NOT_FOUND_IN_BUILD"
 
       - name: Deploy to Netlify
         run: npx netlify-cli deploy --dir=dist --prod --site="$NETLIFY_SITE_ID" --auth="$NETLIFY_AUTH_TOKEN"
