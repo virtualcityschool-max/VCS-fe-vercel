@@ -23,7 +23,7 @@ const PublicCourseCard = ({
   const [imgFailed, setImgFailed] = useState(false);
 
   const renderCTA = () => {
-    let cls = `w-full ${large ? "py-2.5 text-[10px]" : "py-2 text-[9px]"} font-black uppercase tracking-[0.15em] rounded-xl transition-all active:scale-95 inline-flex items-center justify-center gap-1.5 `;
+    let cls = `w-full ${large ? "py-2.5 text-[12px]" : "py-2 text-[11px]"} font-black uppercase tracking-[0.1em] rounded-xl transition-all active:scale-95 inline-flex items-center justify-center gap-1.5 `;
     let label = "";
     let icon = "";
     let disabled = false;
@@ -106,7 +106,7 @@ const PublicCourseCard = ({
       className="bg-[#1a2235]/60 backdrop-blur-xl rounded-2xl overflow-hidden border border-white/5 shadow-lg group flex flex-col animate-springyReveal opacity-0 glass-shine hover-lift"
     >
       {/* Image */}
-      <div className={`relative ${large ? "h-36" : "h-20"} overflow-hidden bg-slate-900/50 shrink-0`}>
+      <div className={`relative ${large ? "h-36" : "h-24"} overflow-hidden bg-slate-900/50 shrink-0`}>
         <Link to={`/courses/${course.id}`} className="block h-full">
           {getCourseImage(course, index) && !imgFailed ? (
             <img
@@ -127,9 +127,9 @@ const PublicCourseCard = ({
       </div>
 
       {/* Content */}
-      <div className={`${large ? "p-4 gap-2" : "p-2 gap-1.5"} flex-1 flex flex-col`}>
+      <div className={`${large ? "p-4 gap-2" : "p-3 gap-2"} flex-1 flex flex-col`}>
         <Link to={`/courses/${course.id}`}>
-          <h3 className={`${large ? "text-sm" : "text-[10px]"} font-black leading-tight group-hover:text-blue-400 transition-colors line-clamp-2`}>
+          <h3 className={`${large ? "text-sm" : "text-[13px]"} font-black leading-tight text-white group-hover:text-blue-400 transition-colors line-clamp-2`}>
             {course.title || "Untitled Course"}
           </h3>
         </Link>
@@ -138,18 +138,18 @@ const PublicCourseCard = ({
           <Link
             to={`/teachers/${course.instructor.id}`}
             onClick={(e) => e.stopPropagation()}
-            className={`${large ? "text-sm" : "text-[11px]"} font-semibold text-[#d4b483] hover:text-blue-400 transition-colors truncate block`}
+            className={`${large ? "text-sm" : "text-[13px]"} font-bold text-[#e8c48f] hover:text-blue-400 transition-colors truncate block`}
           >
             {getDisplayName(course.instructor) || "Tutor"}
           </Link>
         ) : (
-          <span className={`${large ? "text-sm" : "text-[11px]"} font-semibold text-[#d4b483] truncate`}>
+          <span className={`${large ? "text-sm" : "text-[13px]"} font-bold text-[#e8c48f] truncate`}>
             {getDisplayName(course.instructor) || "Tutor"}
           </span>
         )}
 
-        <div className={`mt-auto ${large ? "pt-3" : "pt-1.5"} border-t border-white/5 space-y-1`}>
-          <p className={`${large ? "text-sm" : "text-[9px]"} font-black ${course.is_paid ? "text-white" : "text-emerald-400"}`}>
+        <div className={`mt-auto ${large ? "pt-3" : "pt-2"} border-t border-white/5 space-y-1.5`}>
+          <p className={`${large ? "text-sm" : "text-[13px]"} font-black ${course.is_paid ? "text-white" : "text-emerald-400"}`}>
             {course.is_paid ? `$${(course.price || 0).toLocaleString("en-US")} USD` : "Free"}
           </p>
           {renderCTA()}
