@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchBlogs,
@@ -31,6 +31,11 @@ const formatDate = (v) => {
 const AdminBlogsPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
+  // "/admin/vlogs" and "/admin/blogs" are the same page pre-filtered by the
+  // sidebar link that led here (each route remounts this page - see the
+  // `key` on the two <Route> entries - so this only runs once per landing).
+  const isVlogsRoute = location.pathname.startsWith("/admin/vlogs");
   const { blogs, isLoading } = useSelector((state) => state.blogs);
   // Persist the filters so they're kept when editing a blog and coming back.
   const [search, setSearch] = useState(() => {
@@ -48,12 +53,7 @@ const AdminBlogsPage = () => {
   useEffect(() => {
     try { sessionStorage.setItem("admin_blogs_status", statusFilter); } catch { /* ignore */ }
   }, [statusFilter]);
-  const [typeFilter, setTypeFilter] = useState(() => {
-    try { return sessionStorage.getItem("admin_blogs_type") || "all"; } catch { return "all"; }
-  });
-  useEffect(() => {
-    try { sessionStorage.setItem("admin_blogs_type", typeFilter); } catch { /* ignore */ }
-  }, [typeFilter]);
+  const [typeFilter, setTypeFilter] = useState(() => isVlogsRoute ? "video" : "article");
   const [togglingSlug, setTogglingSlug] = useState(null);
   const [duplicatingSlug, setDuplicatingSlug] = useState(null);
   const [confirm, setConfirm] = useState({ open: false, slug: null, title: "" });

@@ -246,7 +246,8 @@ const AppRoutes = () => {
           <Route path="overview" element={<AdminOverviewPage />} />
           <Route path="approvals" element={<AdminApprovalsPage />} />
           <Route path="courses" element={<AdminCoursesPage />} />
-          <Route path="blogs" element={<AdminBlogsPage />} />
+          <Route path="blogs" element={<AdminBlogsPage key="blogs" />} />
+          <Route path="vlogs" element={<AdminBlogsPage key="vlogs" />} />
           <Route path="users" element={<AdminUsersPage />} />
           <Route path="enrollments" element={<AdminEnrollmentsPage />} />
           <Route path="subscriptions" element={<AdminSubscriptionsPage />} />

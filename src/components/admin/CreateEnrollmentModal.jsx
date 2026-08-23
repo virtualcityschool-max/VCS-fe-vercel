@@ -121,7 +121,7 @@ const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
         {/* Header */}
         <div className="flex justify-between items-start mb-8 pb-6 border-b border-white/5">
           <div>
-            <h2 className="text-xl font-black text-white tracking-tight">Create Enrollment</h2>
+            <h2 className="text-xl font-black text-white tracking-tight">New Class Enrollment</h2>
             <p className="text-slate-500 text-[12px] font-medium mt-1">Enroll a student into a published course</p>
           </div>
           <button

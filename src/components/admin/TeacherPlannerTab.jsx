@@ -394,7 +394,7 @@ const TeacherPlannerTab = ({
           className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-lg active:scale-95 transition flex items-center gap-2 shrink-0 ml-auto"
         >
           <i className="fas fa-plus text-xs" />
-          <span>Create Session</span>
+          <span>Plan Tutor Meeting</span>
         </button>
       </div>
 
@@ -737,7 +737,7 @@ const TeacherPlannerTab = ({
                   ) : isEditMode ? (
                     "Save Changes"
                   ) : (
-                    "Create Session"
+                    "Plan Tutor Meeting"
                   )}
                 </button>
               </div>

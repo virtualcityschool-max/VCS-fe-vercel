@@ -183,20 +183,22 @@ const AdminUsersPage = () => {
     navigate(`/admin/users/${userId}`, { state: { filters: usersFilters } });
   };
 
-  // Shared reset function for create user modal
+  // Shared reset function for create user modal.
+  // Defaults the role to whichever tab is active (e.g. opening it from
+  // "Tutor(s)" pre-selects role "teacher"); falls back to "student" on "All".
   const resetCreateUserModal = useCallback(() => {
     setCreateUserForm({
       email: "",
       password: "",
       confirm_password: "",
-      role: "student",
+      role: usersFilters.role || "student",
       first_name: "",
       last_name: "",
       selected_students: [],
     });
     setCreateUserErrors({});
     clearAllCreateUserErrors();
-  }, [setCreateUserErrors, clearAllCreateUserErrors]);
+  }, [usersFilters.role, setCreateUserErrors, clearAllCreateUserErrors]);
 
   // Handle create user
   const handleCreateUser = () => {

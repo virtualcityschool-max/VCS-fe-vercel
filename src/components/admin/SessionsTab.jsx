@@ -383,7 +383,7 @@ const SessionsTab = ({
           className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-lg active:scale-95 transition flex items-center gap-2 shrink-0"
         >
           <i className="fas fa-plus text-xs"></i>
-          <span>Create Session</span>
+          <span>Plan Class</span>
         </button>
       </div>
 
@@ -820,10 +820,10 @@ const SessionsTab = ({
                 <button type="submit" disabled={isCreatingSession}
                   className="px-6 py-2.5 rounded-xl text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition disabled:opacity-50 flex items-center gap-2">
                   {isCreatingSession
-                    ? <><i className="fas fa-spinner fa-spin text-xs"></i>Creating…</>
+                    ? <><i className="fas fa-spinner fa-spin text-xs"></i>Planning…</>
                     : createMode === "now"     ? "Start Session"
-                    : createMode === "delayed" ? "Create Session"
-                    :                           "Create Session"}
+                    : createMode === "delayed" ? "Plan Class"
+                    :                           "Plan Class"}
                 </button>
               </div>
             </form>

@@ -36,6 +36,16 @@ const SearchControls = ({
     { value: "parent", label: "Guardian(s)" },
   ];
 
+  // "Create User" is ambiguous about what role it creates - name it after
+  // whichever role tab is active, so it matches the form it's about to open.
+  const CREATE_LABEL_BY_ROLE = {
+    admin: "New Admin",
+    teacher: "New Tutor",
+    student: "New Student",
+    parent: "New Guardian",
+  };
+  const createUserLabel = CREATE_LABEL_BY_ROLE[usersFilters.role] || "Create User";
+
   // Check if any filters are applied
   const hasActiveFilters = !!(
     usersFilters.search ||
@@ -146,7 +156,7 @@ const SearchControls = ({
               className="h-[42px] px-5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-indigo-600/20 active:scale-95 transition-all flex items-center justify-center gap-2 whitespace-nowrap shrink-0"
             >
               <i className="fas fa-user-plus text-[10px]" />
-              <span>Create User</span>
+              <span>{createUserLabel}</span>
             </button>
             <button
               onClick={() => onFetchUsers()}

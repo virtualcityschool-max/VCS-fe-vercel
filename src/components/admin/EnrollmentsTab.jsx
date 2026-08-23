@@ -317,7 +317,7 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold shadow-lg shadow-indigo-500/20 active:scale-95 transition-all duration-150"
             >
               <i className="fas fa-plus text-xs"></i>
-              <span>Create Enrollment</span>
+              <span>New Class Enrollment</span>
             </button>
             <button
               onClick={onRefresh}
