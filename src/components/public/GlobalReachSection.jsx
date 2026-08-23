@@ -35,18 +35,17 @@ const GlobalReachSection = () => (
     </Reveal>
 
     <Reveal delay={80}>
-      <div className="grid grid-cols-7 lg:grid-cols-[repeat(13,minmax(0,1fr))] gap-x-2 gap-y-3 lg:gap-2 max-w-4xl mx-auto">
+      <div className="grid grid-cols-7 lg:grid-cols-[repeat(13,minmax(0,1fr))] gap-x-2.5 gap-y-4 lg:gap-2.5 max-w-2xl mx-auto">
         {COUNTRIES.map((country) => (
           <div key={country.code} className="group flex flex-col items-center text-center">
             <div className="w-full aspect-[3/2] rounded-md overflow-hidden border border-white/10 bg-slate-800 shadow-[0_4px_12px_-4px_rgba(0,0,0,0.6)] transition-transform duration-200 group-hover:-translate-y-1 group-hover:scale-105">
               <img
                 src={`/assets/flags/${country.code}.svg`}
                 alt={`${country.name} flag`}
-                loading="lazy"
                 className="w-full h-full object-cover block"
               />
             </div>
-            <p className="mt-1.5 text-[9.5px] lg:text-[10.5px] font-bold font-poppins text-slate-400 leading-tight">
+            <p className="mt-1.5 text-[9px] lg:text-[9.5px] font-bold font-poppins text-slate-400 leading-tight">
               {country.name}
             </p>
           </div>
