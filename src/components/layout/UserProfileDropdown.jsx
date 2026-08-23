@@ -89,52 +89,49 @@ const UserProfileDropdown = ({ dropUp = false, isCollapsed = false }) => {
 
   return (
     <div className="relative" ref={dropdownRef}>
-      {/* Profile Button */}
+      {/* Profile Button - single compact row */}
       <button
         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-        className={`flex items-center gap-3 p-2 rounded-xl hover:bg-slate-800/50 transition-all duration-200 group ${
+        className={`flex items-center gap-2 p-1.5 rounded-lg hover:bg-slate-800/50 transition-all duration-200 group ${
           dropUp && !isCollapsed ? "w-full" : isCollapsed ? "justify-center w-full px-0" : ""
         }`}
         aria-label="User menu"
         aria-expanded={isDropdownOpen}
       >
-        {/* User Info - hidden when collapsed */}
+        {/* Circular Avatar */}
+        <div className="relative flex-shrink-0">
+          <div className="w-7 h-7 rounded-full border border-slate-700 group-hover:border-indigo-500/60 transition-all duration-200 bg-slate-900 flex items-center justify-center overflow-hidden">
+            {auth.user?.avatar ? (
+              <img
+                src={getStorageUrl(auth.user.avatar)}
+                alt="User Avatar"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span className="text-white font-bold text-[10px]">
+                {getInitials()}
+              </span>
+            )}
+          </div>
+          {/* Status Indicator */}
+          <div className="absolute bottom-0 right-0 w-2 h-2 bg-green-500 rounded-full border border-slate-900"></div>
+        </div>
+
+        {/* User Info - hidden when collapsed, single line */}
         {!isCollapsed && (
-          <div className={`min-w-0 ${dropUp ? "text-left flex-1" : "text-right hidden sm:block"}`}>
-            <p className="text-sm font-semibold text-white leading-none mb-1 truncate">
-              {displayName || "User"}
-            </p>
-            <p className="text-xs text-indigo-400 font-medium uppercase tracking-wider leading-none truncate">
-              {getRoleLabel()}
+          <div className={`min-w-0 ${dropUp ? "text-left flex-1" : "hidden sm:block"}`}>
+            <p className="text-xs leading-none truncate">
+              <span className="font-semibold text-white">{displayName || "User"}</span>
+              <span className="text-slate-500"> &middot; </span>
+              <span className="text-indigo-400 font-medium">{getRoleLabel()}</span>
             </p>
           </div>
         )}
 
-        {/* Circular Avatar */}
-        <div className="relative flex-shrink-0">
-          <div className="w-10 h-10 rounded-full bg-linear-to-br from-indigo-500 to-purple-600 p-0.5 group-hover:from-indigo-400 group-hover:to-purple-500 transition-all duration-200 shadow-lg group-hover:shadow-indigo-500/25">
-            <div className="w-full h-full rounded-full bg-slate-900 flex items-center justify-center overflow-hidden">
-              {auth.user?.avatar ? (
-                <img
-                  src={getStorageUrl(auth.user.avatar)}
-                  alt="User Avatar"
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <span className="text-white font-bold text-sm">
-                  {getInitials()}
-                </span>
-              )}
-            </div>
-          </div>
-          {/* Status Indicator */}
-          <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-slate-900"></div>
-        </div>
-
         {/* Dropdown Arrow - hidden when collapsed */}
         {!isCollapsed && (
           <svg
-            className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
+            className={`w-3.5 h-3.5 text-slate-500 flex-shrink-0 transition-transform duration-200 ${
               isDropdownOpen ? "rotate-180" : ""
             }`}
             fill="none"
