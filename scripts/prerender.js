@@ -25,7 +25,20 @@ import { createServer } from "node:http";
 import { existsSync, copyFileSync, mkdirSync, writeFileSync, readFileSync, statSync } from "node:fs";
 import { dirname, join, extname } from "node:path";
 import { fileURLToPath } from "node:url";
-import puppeteer from "puppeteer";
+
+// Vercel's build environment blocks npm postinstall scripts by default
+// (supply-chain protection), so plain `puppeteer` never gets to download its
+// bundled Chromium there and puppeteer.launch() fails. `puppeteer-core` +
+// `@sparticuz/chromium` need no postinstall download at all - a prebuilt
+// binary made for exactly this kind of CI/serverless Linux environment - so
+// that combination is what actually runs during the real Vercel build.
+// Locally (no VERCEL env var) we just use the full `puppeteer` package and
+// its already-downloaded local Chromium, which is faster to iterate with.
+const ON_VERCEL = !!process.env.VERCEL;
+const { default: puppeteer } = ON_VERCEL
+  ? await import("puppeteer-core")
+  : await import("puppeteer");
+const chromium = ON_VERCEL ? (await import("@sparticuz/chromium")).default : null;
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "..");
@@ -160,7 +173,13 @@ async function main() {
   console.log(`Prerendering ${routes.length} routes...`);
 
   const server = await startServer(shellHtml);
-  const browser = await puppeteer.launch({ headless: true, args: ["--no-sandbox", "--disable-setuid-sandbox"] });
+  const browser = ON_VERCEL
+    ? await puppeteer.launch({
+        headless: true,
+        args: chromium.args,
+        executablePath: await chromium.executablePath(),
+      })
+    : await puppeteer.launch({ headless: true, args: ["--no-sandbox", "--disable-setuid-sandbox"] });
 
   const results = await runPool(routes, (route) => prerenderRoute(browser, route), CONCURRENCY);
 
