@@ -57,7 +57,7 @@ const Navbar = ({ variant = "default", hideLogo = false }) => {
             : "border-white/5 bg-slate-950/50 backdrop-blur-xl"
         }`}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex justify-between items-center">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 h-20 flex justify-between items-center">
           <div className="flex items-center gap-4 sm:gap-12">
             {!hideLogo && (
               <div
@@ -148,7 +148,7 @@ const Navbar = ({ variant = "default", hideLogo = false }) => {
   // Default variant (for authenticated views)
   return (
     <nav className="w-full bg-[#0f172a]/90 backdrop-blur-xl border-b border-slate-800 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex justify-between items-center">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 h-16 flex justify-between items-center">
         <div className="flex items-center gap-4 sm:gap-10 overflow-hidden">
           <div
             className="flex items-center gap-2 sm:gap-3 group cursor-pointer shrink-0"

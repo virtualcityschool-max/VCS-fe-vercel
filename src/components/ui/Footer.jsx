@@ -14,7 +14,7 @@ const Footer = ({ variant = "full" }) => {
   if (variant === "minimal") {
     return (
       <footer className="bg-slate-900 border-t border-slate-800 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 text-center">
           <p className="text-slate-400 text-sm">
             © {new Date().getFullYear()} Virtual City School. All rights reserved.
           </p>
@@ -32,7 +32,7 @@ const Footer = ({ variant = "full" }) => {
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-indigo-500/50 to-transparent" />
       <div className="absolute bottom-[-40%] left-[10%] w-[40%] h-[80%] bg-indigo-600/5 blur-[100px] rounded-full pointer-events-none" />
 
-      <div className="relative max-w-7xl mx-auto px-6 sm:px-8 py-8">
+      <div className="relative max-w-[1440px] mx-auto px-6 sm:px-8 py-8">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-12">
 
           {/* Brand - left */}

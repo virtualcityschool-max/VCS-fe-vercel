@@ -13,6 +13,7 @@ import ApplyFreeAccessModal from "../../components/public/ApplyFreeAccessModal";
 import PublicCourseCard from "../../components/courses/PublicCourseCard";
 import TutorCard from "../../components/teachers/TutorCard";
 import BlogCard from "../../components/blogs/BlogCard";
+import FivePillarsSection from "../../components/public/FivePillarsSection";
 import Reveal from "../../components/ui/Reveal";
 import { toastManager } from "../../utils/toastManager";
 import { showApiError } from "../../utils/apiErrorHandler";
@@ -69,6 +70,14 @@ const PublicHome = () => {
   const { enrollmentIntent } = useSelector((state) => state.ui);
   const { teachers, loading: teachersLoading } = useSelector((state) => state.teachers);
   const { blogs, isLoading: blogsLoading } = useSelector((state) => state.blogs);
+  const articleBlogs = useMemo(
+    () => blogs.filter((b) => (b.post_type || "article") === "article"),
+    [blogs],
+  );
+  const videoBlogs = useMemo(
+    () => blogs.filter((b) => b.post_type === "video"),
+    [blogs],
+  );
 
   useEffect(() => {
     if (courses.length <= 0) {
@@ -185,7 +194,7 @@ const PublicHome = () => {
       <div className="absolute inset-x-0 top-0 h-[720px] bg-grid pointer-events-none z-0" />
 
       {/* Hero Section */}
-      <section className="relative z-10 max-w-7xl mx-auto px-6 pt-10 md:pt-20">
+      <section className="relative z-10 max-w-[1440px] mx-auto px-6 pt-10 md:pt-20">
         {/* Row 1: Heading + Image */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center mb-14">
           {/* Left: Badge + Heading */}
@@ -247,51 +256,10 @@ const PublicHome = () => {
             <div className="absolute -inset-4 bg-cyan-500/5 blur-[80px] rounded-full pointer-events-none -z-10" />
           </div>
         </div>
-
-        {/* Row 2: What makes VCS different - restructured from the original description */}
-        <Reveal className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
-          <div className="card-surface card-surface-hover p-6 flex items-start gap-4">
-            <div className="icon-chip w-11 h-11">
-              <i className="fas fa-globe text-base" />
-            </div>
-            <div>
-              <h3 className="text-white font-bold text-sm mb-1.5">Learn Without Borders</h3>
-              <p className="text-slate-400 text-xs leading-relaxed">
-                Serving Cambridge students across the UAE, Saudi Arabia, Qatar,
-                Kuwait, Bahrain, Oman, Canada, the UK, Australia, Malaysia,
-                Singapore, Pakistan, and beyond.
-              </p>
-            </div>
-          </div>
-          <div className="card-surface card-surface-hover p-6 flex items-start gap-4">
-            <div className="icon-chip w-11 h-11" style={{ background: "rgba(34,211,238,0.1)", borderColor: "rgba(34,211,238,0.2)", color: "#22d3ee" }}>
-              <i className="fas fa-microchip text-base" />
-            </div>
-            <div>
-              <h3 className="text-white font-bold text-sm mb-1.5">Future-Ready Skills</h3>
-              <p className="text-slate-400 text-xs leading-relaxed">
-                Specialist courses in Artificial Intelligence, Emerging
-                Technologies, Leadership, Interpersonal Skills, and Grooming -
-                beyond academics.
-              </p>
-            </div>
-          </div>
-          <div className="card-surface card-surface-hover p-6 flex items-start gap-4 sm:col-span-2 lg:col-span-1">
-            <div className="icon-chip w-11 h-11" style={{ background: "rgba(52,211,153,0.1)", borderColor: "rgba(52,211,153,0.2)", color: "#34d399" }}>
-              <i className="fas fa-hand-holding-heart text-base" />
-            </div>
-            <div>
-              <h3 className="text-white font-bold text-sm mb-1.5">VCS Scholar Programme</h3>
-              <p className="text-slate-400 text-xs leading-relaxed">
-                Deserving students get access to quality education - and you can
-                sponsor a child's learning journey to make it possible.
-              </p>
-            </div>
-          </div>
-        </Reveal>
       </section>
 
-      <section className="relative z-10 max-w-7xl mx-auto px-6 py-20 md:py-32">
+      <section className="relative z-10 max-w-[1440px] mx-auto px-6 py-20 md:py-32">
+        <FivePillarsSection />
         {/* Enrolled Courses Section - Only for logged-in students */}
         {auth.isLoggedIn &&
           auth.role === "student" &&
@@ -523,8 +491,9 @@ const PublicHome = () => {
           </div>
         </div>
 
-        {/* From the Blog Section */}
-        {(blogsLoading || blogs.length > 0) && (
+        {/* From the Blog Section - articles and vlogs kept separate so a "Latest
+            from Our Blog" reader isn't surprised by a video, and vice versa */}
+        {(blogsLoading || articleBlogs.length > 0) && (
           <div className="mt-32 md:mt-48 pb-4">
             <Reveal className="flex justify-between items-end mb-16">
               <div className="text-left">
@@ -536,7 +505,7 @@ const PublicHome = () => {
                 </h2>
               </div>
               <button
-                onClick={() => navigate("/blogs")}
+                onClick={() => navigate("/blogs?type=article")}
                 className="hidden md:flex text-indigo-400 font-black text-[10px] uppercase tracking-widest hover:text-white transition items-center gap-3 border-b border-indigo-500/20 pb-1"
               >
                 View All Articles <i className="fas fa-arrow-right text-[8px]"></i>
@@ -544,21 +513,62 @@ const PublicHome = () => {
             </Reveal>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {blogsLoading && blogs.length === 0
+              {blogsLoading && articleBlogs.length === 0
                 ? [...Array(3)].map((_, i) => (
                     <div key={i} className="skeleton rounded-2xl border border-white/5 h-[380px]" />
                   ))
-                : blogs.slice(0, 3).map((blog, i) => (
+                : articleBlogs.slice(0, 3).map((blog, i) => (
                     <BlogCard key={blog.id} blog={blog} index={i} />
                   ))}
             </div>
 
             <div className="mt-10 flex justify-center md:hidden">
               <button
-                onClick={() => navigate("/blogs")}
+                onClick={() => navigate("/blogs?type=article")}
                 className="btn-glow px-7 py-3.5 text-white rounded-xl font-bold text-sm flex items-center gap-2.5"
               >
                 View All Articles <i className="fas fa-arrow-right text-xs"></i>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Latest Vlogs - only appears once a video post actually exists */}
+        {(blogsLoading || videoBlogs.length > 0) && (
+          <div className="mt-32 md:mt-48 pb-4">
+            <Reveal className="flex justify-between items-end mb-16">
+              <div className="text-left">
+                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-rose-400 mb-2">
+                  Watch &amp; Learn
+                </p>
+                <h2 className="text-3xl md:text-5xl font-black font-poppins tracking-tight text-white">
+                  Latest Vlogs
+                </h2>
+              </div>
+              <button
+                onClick={() => navigate("/blogs?type=video")}
+                className="hidden md:flex text-rose-400 font-black text-[10px] uppercase tracking-widest hover:text-white transition items-center gap-3 border-b border-rose-400/20 pb-1"
+              >
+                View All Vlogs <i className="fas fa-arrow-right text-[8px]"></i>
+              </button>
+            </Reveal>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {blogsLoading && videoBlogs.length === 0
+                ? [...Array(3)].map((_, i) => (
+                    <div key={i} className="skeleton rounded-2xl border border-white/5 h-[380px]" />
+                  ))
+                : videoBlogs.slice(0, 3).map((blog, i) => (
+                    <BlogCard key={blog.id} blog={blog} index={i} />
+                  ))}
+            </div>
+
+            <div className="mt-10 flex justify-center md:hidden">
+              <button
+                onClick={() => navigate("/blogs?type=video")}
+                className="btn-glow px-7 py-3.5 text-white rounded-xl font-bold text-sm flex items-center gap-2.5"
+              >
+                View All Vlogs <i className="fas fa-arrow-right text-xs"></i>
               </button>
             </div>
           </div>
