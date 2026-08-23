@@ -54,30 +54,18 @@ const TimezoneIndicator = ({ isCollapsed }) => {
   }
 
   return (
-    <div className="mx-3 mb-3 group/tz relative">
+    <div className="mx-3 mb-2 group/tz relative">
       <button
         onClick={() => navigate("/profile")}
-        className="w-full rounded-xl bg-slate-800/50 border border-slate-700/50 hover:border-indigo-500/40 hover:bg-slate-800/80 transition-all duration-200 px-3 py-2.5 text-left"
+        className="w-full flex items-center justify-between gap-2 rounded-xl bg-slate-800/50 border border-slate-700/50 hover:border-indigo-500/40 hover:bg-slate-800/80 transition-all duration-200 px-3 py-2 text-left"
       >
-        {/* Header row */}
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-1.5">
-            <i className="fas fa-globe text-indigo-400 text-[10px]" />
-            <span className="text-[9px] uppercase tracking-widest text-slate-500 font-bold">Timezone</span>
-          </div>
-          <span className="text-[9px] font-bold text-indigo-400/80 bg-indigo-500/10 border border-indigo-500/20 px-1.5 py-0.5 rounded-md">
-            {city}
-          </span>
+        <div className="flex items-center gap-2 min-w-0">
+          <i className="fas fa-globe text-indigo-400 text-[10px] flex-shrink-0" />
+          <p className="text-white text-xs font-bold truncate">
+            {displayTz} <span className="text-slate-500 font-medium">{abbr}</span>
+          </p>
         </div>
-
-        {/* Timezone ID + offset + live clock */}
-        <div className="flex items-end justify-between">
-          <div>
-            <p className="text-white text-xs font-bold leading-none">{displayTz}</p>
-            <p className="text-slate-500 text-[10px] font-medium mt-0.5">{abbr}</p>
-          </div>
-          <span className="text-indigo-300 text-sm font-black tabular-nums leading-none">{time}</span>
-        </div>
+        <span className="text-indigo-300 text-xs font-black tabular-nums flex-shrink-0">{time}</span>
       </button>
 
       {/* Tooltip - slides up, clickable */}
@@ -459,7 +447,7 @@ const Sidebar = ({
       <TimezoneIndicator isCollapsed={isCollapsed} />
 
       {/* ── Footer: UserProfileDropdown ── */}
-      <div className="border-t border-slate-800/80 flex-shrink-0 p-4 overflow-visible relative">
+      <div className="border-t border-slate-800/80 flex-shrink-0 p-3 overflow-visible relative">
         <UserProfileDropdown dropUp isCollapsed={isCollapsed} />
       </div>
     </aside>
