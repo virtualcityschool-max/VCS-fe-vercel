@@ -161,17 +161,19 @@ const AdminBlogsPage = () => {
             Content
           </p>
           <h1 className="text-2xl md:text-3xl font-black font-poppins tracking-tight text-white">
-            Blog Manager
+            {isVlogsRoute ? "Vlog Manager" : "Blog Manager"}
           </h1>
           <p className="text-slate-500 text-sm mt-1.5">
-            Create, publish and manage articles shown on the public site.
+            {isVlogsRoute
+              ? "Create, publish and manage videos shown on the public site."
+              : "Create, publish and manage articles shown on the public site."}
           </p>
         </div>
         <button
-          onClick={() => navigate("/admin/blogs/new")}
+          onClick={() => navigate("/admin/blogs/new", { state: { post_type: isVlogsRoute ? "video" : "article" } })}
           className="btn-glow px-5 py-3 rounded-xl text-white text-[12px] font-black uppercase tracking-wider flex items-center gap-2 self-start"
         >
-          <i className="fas fa-plus text-[10px]" /> New Blog
+          <i className="fas fa-plus text-[10px]" /> {isVlogsRoute ? "New Vlog" : "New Blog"}
         </button>
       </div>
 
@@ -257,15 +259,17 @@ const AdminBlogsPage = () => {
           <h3 className="text-white font-black mb-1">No blogs found</h3>
           <p className="text-slate-500 text-sm mb-5">
             {blogs.length === 0
-              ? "Start by writing your first article."
+              ? isVlogsRoute
+                ? "Start by uploading your first video."
+                : "Start by writing your first article."
               : "Try a different search or filter."}
           </p>
           {blogs.length === 0 && (
             <button
-              onClick={() => navigate("/admin/blogs/new")}
+              onClick={() => navigate("/admin/blogs/new", { state: { post_type: isVlogsRoute ? "video" : "article" } })}
               className="btn-glow px-5 py-2.5 rounded-xl text-white text-[11px] font-black uppercase tracking-wider inline-flex items-center gap-2"
             >
-              <i className="fas fa-plus text-[10px]" /> New Blog
+              <i className="fas fa-plus text-[10px]" /> {isVlogsRoute ? "New Vlog" : "New Blog"}
             </button>
           )}
         </div>

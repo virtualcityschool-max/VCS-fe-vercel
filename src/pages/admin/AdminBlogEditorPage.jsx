@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { createBlog, updateBlog } from "../../store/slices/blogsSlice";
 import { blogsService } from "../../services/blogsService";
@@ -34,6 +34,7 @@ const AdminBlogEditorPage = () => {
   const { slug } = useParams();
   const isEdit = Boolean(slug);
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch();
   const fileRef = useRef(null);
 
@@ -45,7 +46,11 @@ const AdminBlogEditorPage = () => {
     return full || authUser.username || "";
   }, [authUser]);
 
-  const [form, setForm] = useState(EMPTY_FORM);
+  // Pre-select the post type based on which manager (Blogs/Vlogs) linked here,
+  // same as the New Blog/New Vlog button that navigated to this page.
+  const [form, setForm] = useState(() =>
+    isEdit ? EMPTY_FORM : { ...EMPTY_FORM, post_type: location.state?.post_type || "article" },
+  );
   const [errors, setErrors] = useState({});
   const [coverFile, setCoverFile] = useState(null);
   const [coverPreview, setCoverPreview] = useState(null); // existing url
@@ -239,7 +244,9 @@ const AdminBlogEditorPage = () => {
             {isEdit ? "Edit" : "New"} {isVideoPost ? "Video Blog" : "Article"}
           </p>
           <h1 className="text-2xl md:text-3xl font-black font-poppins tracking-tight">
-            {isEdit ? "Edit Blog Post" : "Create a Blog Post"}
+            {isEdit
+              ? isVideoPost ? "Edit Vlog Post" : "Edit Blog Post"
+              : isVideoPost ? "Create a Vlog Post" : "Create a Blog Post"}
           </h1>
         </div>
 
