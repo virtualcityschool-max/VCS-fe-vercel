@@ -19,6 +19,11 @@ const StatusBadge = ({ status }) => (
   </span>
 );
 
+// Default note included in the rejection email, pointing declined applicants
+// to a manual review path instead of a dead end.
+const DEFAULT_REJECTION_NOTE =
+  "If you still believe you qualify for free access, please send your case for review to virtualcityschool@gmail.com.";
+
 const formatDate = (d) =>
   d
     ? new Date(d).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })
@@ -56,8 +61,12 @@ const ReviewModal = ({ request, processing, onClose, onResolve }) => {
 
   const pendingCourses = request.courses.filter((c) => c.status === "pending");
 
-  const setAll = (action) =>
+  const setAll = (action) => {
     setDecisions(Object.fromEntries(pendingCourses.map((c) => [c.course.id, action])));
+    // Suggest the default decline note, without clobbering anything the
+    // admin already typed.
+    if (action === "reject" && !note.trim()) setNote(DEFAULT_REJECTION_NOTE);
+  };
 
   const buildList = () =>
     pendingCourses
@@ -244,14 +253,21 @@ const ReviewModal = ({ request, processing, onClose, onResolve }) => {
                 <button
                   onClick={apply}
                   disabled={processing}
-                  className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-sm font-semibold transition flex items-center gap-2"
+                  className={`px-5 py-2 rounded-xl disabled:opacity-50 text-white text-sm font-semibold transition flex items-center gap-2 ${
+                    approveCount ? "bg-indigo-600 hover:bg-indigo-500" : "bg-rose-600 hover:bg-rose-500"
+                  }`}
                 >
                   {processing ? (
                     <>
-                      <i className="fas fa-spinner fa-spin text-xs"></i> Granting…
+                      <i className="fas fa-spinner fa-spin text-xs"></i>{" "}
+                      {approveCount ? "Granting…" : "Rejecting…"}
                     </>
-                  ) : (
+                  ) : approveCount && rejectCount ? (
+                    <>Apply Decisions</>
+                  ) : approveCount ? (
                     <>Grant Access</>
+                  ) : (
+                    <>Reject All</>
                   )}
                 </button>
               </div>
@@ -294,6 +310,12 @@ const ReviewModal = ({ request, processing, onClose, onResolve }) => {
 
 const FreeAccessRequestsTab = ({ requests = [], loading, error, processing, onResolve, onRefresh, search = "" }) => {
   const [reviewing, setReviewing] = useState(null);
+  // Request queued up for the one-click "reject everything" decline action.
+  // This rejects every course (same as a manual per-course reject, applicant
+  // gets the usual rejection email) - the request record itself is kept on
+  // the backend, not deleted, so a resubmission from the same account is
+  // still visible to admins/backend logic.
+  const [declining, setDeclining] = useState(null);
 
   // This is a review queue - only PENDING requests are shown here. Once a
   // request is approved/rejected it leaves the queue (the resolve response
@@ -321,6 +343,17 @@ const FreeAccessRequestsTab = ({ requests = [], loading, error, processing, onRe
     const ok = await onResolve(id, decisions, note);
     if (ok) setReviewing(null);
     return ok;
+  };
+
+  // Declines a bogus/unwanted application in one click by rejecting every
+  // course on it, instead of forcing the admin through the full review modal.
+  const confirmDecline = async () => {
+    if (!declining) return;
+    const decisions = declining.courses
+      .filter((c) => c.status === "pending")
+      .map((c) => ({ course_id: c.course.id, action: "reject" }));
+    const ok = await onResolve(declining.id, decisions, DEFAULT_REJECTION_NOTE);
+    if (ok) setDeclining(null);
   };
 
   if (loading && requests.length === 0) {
@@ -424,6 +457,16 @@ const FreeAccessRequestsTab = ({ requests = [], loading, error, processing, onRe
                     <i className={`fas ${req.status === "pending" ? "fa-clipboard-check" : "fa-eye"}`}></i>
                     {req.status === "pending" ? `Review${pendingCourses ? "" : ""}` : "View"}
                   </button>
+                  {req.status === "pending" && (
+                    <button
+                      onClick={() => setDeclining(req)}
+                      title="Reject this application"
+                      aria-label="Reject this application"
+                      className="px-3 py-2 rounded-lg text-sm font-semibold transition bg-rose-600/10 text-rose-400 border border-rose-600/20 hover:bg-rose-600/20 hover:text-rose-300"
+                    >
+                      <i className="fas fa-ban"></i>
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -439,6 +482,22 @@ const FreeAccessRequestsTab = ({ requests = [], loading, error, processing, onRe
           onResolve={handleResolve}
         />
       )}
+
+      <ConfirmDialog
+        open={!!declining}
+        variant="danger"
+        title="Reject application?"
+        message={
+          declining
+            ? `Reject every course ${declining.full_name} applied for? They'll be emailed with a note pointing them to virtualcityschool@gmail.com if they want to appeal. The application record is kept, not deleted.`
+            : ""
+        }
+        confirmLabel="Yes, Reject"
+        cancelLabel="Cancel"
+        loading={declining ? processing === declining.id : false}
+        onConfirm={confirmDecline}
+        onCancel={() => setDeclining(null)}
+      />
     </div>
   );
 };
