@@ -14,6 +14,7 @@ import PublicCourseCard from "../../components/courses/PublicCourseCard";
 import TutorCard from "../../components/teachers/TutorCard";
 import BlogCard from "../../components/blogs/BlogCard";
 import FivePillarsSection from "../../components/public/FivePillarsSection";
+import GlobalReachSection from "../../components/public/GlobalReachSection";
 import Reveal from "../../components/ui/Reveal";
 import { toastManager } from "../../utils/toastManager";
 import { showApiError } from "../../utils/apiErrorHandler";
@@ -602,6 +603,8 @@ const PublicHome = () => {
             ))}
           </div>
         </div>
+
+        <GlobalReachSection />
 
       </section>
 
