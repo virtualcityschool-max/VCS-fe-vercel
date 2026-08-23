@@ -270,7 +270,7 @@ const Sidebar = ({
       {/* ── Header ── */}
       <div className={`
         border-b border-slate-800/80 flex-shrink-0 flex items-center transition-all duration-300 overflow-hidden
-        ${isCollapsed ? "px-3 h-16" : "px-4 h-[110px]"}
+        ${isCollapsed ? "px-3 h-16" : "px-4 h-20"}
       `}>
         <div className="relative flex-1 h-full flex items-center min-w-0">
           {/* Full Logo */}
