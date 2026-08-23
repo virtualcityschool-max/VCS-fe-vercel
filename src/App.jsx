@@ -74,7 +74,9 @@ const AppInner = () => {
     pendingHireCount +
     pendingFreeAccessCount;
 
-  const showNavbar = !isLoggedIn;
+  // Admins keep the public navbar too, so they can reach Courses/Tutors/Blog/
+  // About without logging out (other logged-in roles keep their own layout).
+  const showNavbar = !isLoggedIn || role === "admin";
 
   return (
     <div className="min-h-screen bg-slate-950 selection:bg-indigo-500/30 overflow-x-hidden">
@@ -101,10 +103,11 @@ const AppInner = () => {
 
       {/* Content area - offset by sidebar width on desktop */}
       <div className={hasSidebar ? (isSidebarCollapsed ? "lg:ml-20" : "lg:ml-64") : ""} style={{ transition: "margin-left 0.3s ease" }}>
-        {/* Navbar (hidden on /admin and /teacher routes) */}
+        {/* Navbar - public variant for everyone (it already swaps
+            Login/Register for the profile dropdown once logged in) */}
         {showNavbar && (
           <header className="relative z-50">
-            <Navbar variant={isLoggedIn ? "default" : "public"} />
+            <Navbar variant="public" />
           </header>
         )}
 

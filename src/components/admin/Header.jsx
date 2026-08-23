@@ -25,12 +25,12 @@ const Header = ({ activeTab, children }) => {
         };
       case "enrollments":
         return {
-          title: "Enrollment Management",
+          title: "Class Enrollments",
           description: "View and manage course enrollments",
         };
       case "sessions":
         return {
-          title: "Session Management",
+          title: "Class Timetable",
           description: "Create, edit, and manage course sessions",
         };
       case "evaluations":
@@ -50,8 +50,8 @@ const Header = ({ activeTab, children }) => {
         };
       case "teacher-planner":
         return {
-          title: "Tutor Planner",
-          description: "Schedule and manage recurring sessions for teachers",
+          title: "Tutor Meetings",
+          description: "Schedule and manage recurring meetings for tutors",
         };
       case "referrals":
         return {
