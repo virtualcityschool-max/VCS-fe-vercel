@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchTeachers } from "../../store/slices/teacherSlice";
 import { setAuthModal } from "../../store/slices/uiSlice";
@@ -9,12 +9,14 @@ import HireTutorModal from "../../components/public/HireTutorModal";
 import AuthRequiredModal from "../../components/common/AuthRequiredModal";
 import TutorCard from "../../components/teachers/TutorCard";
 import { useSeo } from "../../hooks/useSeo";
+import { SUBJECT_THEMES, SUBJECT_CATEGORY_LIST, getTeacherCategory } from "../../utils/subjectTheme";
 
 const HIRE_INTENT_KEY = "vcs_hire_intent";
 
 const TeachersDirectory = () => {
   const [hasFetched, setHasFetched] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [activeCategory, setActiveCategory] = useState("all");
   const [hireModal, setHireModal] = useState(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const navigate = useNavigate();
@@ -23,6 +25,37 @@ const TeachersDirectory = () => {
 
   const dispatch = useDispatch();
   const { teachers, loading, error } = useSelector((state) => state.teachers);
+
+  const teachersWithCategory = useMemo(
+    () => teachers.map((t) => ({ teacher: t, category: getTeacherCategory(t) })),
+    [teachers],
+  );
+
+  const visibleTeachers = useMemo(
+    () =>
+      activeCategory === "all"
+        ? teachers
+        : teachersWithCategory.filter((t) => t.category === activeCategory).map((t) => t.teacher),
+    [teachers, teachersWithCategory, activeCategory],
+  );
+
+  const stats = useMemo(() => {
+    const subjectSet = new Set();
+    let expCount = 0;
+    let expSum = 0;
+    teachers.forEach((t) => {
+      (t.courses || []).forEach((c) => c.course_name && subjectSet.add(c.course_name));
+      if (Number.isFinite(t.experience)) {
+        expCount += 1;
+        expSum += t.experience;
+      }
+    });
+    return {
+      tutorCount: teachers.length,
+      subjectCount: subjectSet.size,
+      avgExperience: expCount ? Math.round((expSum / expCount) * 10) / 10 : 0,
+    };
+  }, [teachers]);
 
   const handleHireClick = (teacher) => {
     if (!isAuthenticated) {
@@ -116,6 +149,24 @@ const TeachersDirectory = () => {
               Find your <span className="text-gradient">Tutor</span>
             </h1>
           </div>
+
+          {!loading && !error && stats.tutorCount > 0 && (
+            <div className="flex justify-center gap-8 sm:gap-14 mb-5 animate-fadeInUp" style={{ animationDelay: "0.09s" }}>
+              <div className="text-center">
+                <p className="text-xl sm:text-2xl font-black font-poppins text-indigo-300 tabular-nums">{stats.tutorCount}</p>
+                <p className="text-[10px] uppercase tracking-widest text-slate-500 font-semibold mt-0.5">Tutors</p>
+              </div>
+              <div className="text-center">
+                <p className="text-xl sm:text-2xl font-black font-poppins text-purple-300 tabular-nums">{stats.subjectCount}</p>
+                <p className="text-[10px] uppercase tracking-widest text-slate-500 font-semibold mt-0.5">Subjects</p>
+              </div>
+              <div className="text-center">
+                <p className="text-xl sm:text-2xl font-black font-poppins text-amber-300 tabular-nums">{stats.avgExperience}</p>
+                <p className="text-[10px] uppercase tracking-widest text-slate-500 font-semibold mt-0.5">Avg. yrs experience</p>
+              </div>
+            </div>
+          )}
+
           <div className="max-w-xl mx-auto animate-springyReveal" style={{ animationDelay: '0.1s' }}>
             <SearchInput
               value={searchQuery}
@@ -126,6 +177,37 @@ const TeachersDirectory = () => {
               inputClassName="h-10 text-xs sm:text-sm"
             />
           </div>
+
+          {!loading && !error && teachers.length > 0 && (
+            <div className="flex flex-wrap justify-center gap-2 mt-5 animate-fadeInUp" style={{ animationDelay: "0.12s" }}>
+              <button
+                onClick={() => setActiveCategory("all")}
+                className={`text-xs font-bold px-4 py-2 rounded-full border transition-all ${
+                  activeCategory === "all"
+                    ? "bg-gradient-to-r from-indigo-500 to-cyan-500 border-transparent text-white"
+                    : "border-slate-700 text-white hover:border-slate-500"
+                }`}
+              >
+                All Tutors
+              </button>
+              {SUBJECT_CATEGORY_LIST.map((key) => {
+                const theme = SUBJECT_THEMES[key];
+                const active = activeCategory === key;
+                return (
+                  <button
+                    key={key}
+                    onClick={() => setActiveCategory(active ? "all" : key)}
+                    className={`inline-flex items-center gap-1.5 text-xs font-bold px-4 py-2 rounded-full border transition-all ${
+                      active ? theme.chipActive : "border-slate-700 text-slate-400 hover:border-slate-500 hover:text-slate-200"
+                    }`}
+                  >
+                    <span className={`w-1.5 h-1.5 rounded-full ${theme.chipSwatch}`} />
+                    {theme.label}
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 
@@ -157,9 +239,15 @@ const TeachersDirectory = () => {
                 No teachers found matching your search.
               </p>
             </div>
+          ) : visibleTeachers.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-slate-400 text-lg">
+                No tutors in this subject yet — try another category.
+              </p>
+            </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-              {teachers.map((teacher, index) => (
+              {visibleTeachers.map((teacher, index) => (
                 <TutorCard
                   key={teacher.id}
                   teacher={teacher}
