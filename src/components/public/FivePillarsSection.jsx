@@ -86,8 +86,8 @@ const PillarColumn = ({ pillar, delay = 0 }) => (
       </span>
     </div>
     <div className="w-[74%] h-2 rounded-t-sm bg-gradient-to-r from-indigo-400/50 to-cyan-400/40 shadow-[0_1px_0_rgba(255,255,255,0.15)_inset]" />
-    <div className="w-[46%] min-h-24 relative bg-gradient-to-b from-white/5 via-indigo-400/5 to-white/4 border-x border-white/8" />
-    <div className="w-[84%] h-2.5 rounded-b-sm bg-white/8 shadow-[0_-1px_0_rgba(255,255,255,0.1)_inset] mb-5" />
+    <div className="w-[46%] h-4 relative bg-gradient-to-b from-white/5 via-indigo-400/5 to-white/4 border-x border-white/8" />
+    <div className="w-[84%] h-2.5 rounded-b-sm bg-white/8 shadow-[0_-1px_0_rgba(255,255,255,0.1)_inset] mb-4" />
     <div className="text-center px-2">
       <p className="text-[9.5px] font-black tracking-[0.22em] uppercase text-cyan-400 mb-1.5">{pillar.label}</p>
       <h4 className="font-poppins text-[15px] font-black text-white mb-1.5 leading-snug">{pillar.headline}</h4>
@@ -105,8 +105,10 @@ const FivePillarsSection = () => {
   const [p1, p2, p3, p4, p5] = PILLARS;
 
   return (
-    <div className="mt-32 md:mt-48">
-      <div className="max-w-4xl mx-auto">
+    <div className="mb-20 md:mb-28">
+      {/* No extra top margin here - the parent <section> in PublicHome
+          already provides py-20 md:py-32, so this sits right after that. */}
+      <div className="max-w-6xl mx-auto">
         <Reveal className="text-center rounded-t-2xl rounded-b-sm px-8 py-8 sm:py-9 bg-gradient-to-b from-indigo-400/15 to-indigo-400/5 border border-indigo-400/25 border-b-[3px] border-b-indigo-400/40">
           <p className="text-[10px] font-black tracking-[0.32em] uppercase text-cyan-400 mb-2.5">
             Our Promise
@@ -119,13 +121,15 @@ const FivePillarsSection = () => {
           </p>
         </Reveal>
 
-        <div className="pt-1 grid grid-cols-1 sm:grid-cols-3 gap-x-2 gap-y-10 sm:gap-y-0">
+        <div className="pt-6 grid grid-cols-2 sm:grid-cols-5 gap-x-2 gap-y-10 sm:gap-y-0">
           <PillarColumn pillar={p1} delay={0} />
           <PillarColumn pillar={p2} delay={80} />
           <PillarColumn pillar={p3} delay={160} />
-          <div className="sm:col-span-3 grid grid-cols-1 sm:grid-cols-2 gap-x-2 gap-y-10 sm:max-w-[68%] sm:mx-auto sm:mt-10">
-            <PillarColumn pillar={p4} delay={240} />
-            <PillarColumn pillar={p5} delay={320} />
+          <PillarColumn pillar={p4} delay={240} />
+          <div className="col-span-2 sm:col-span-1 flex justify-center">
+            <div className="w-1/2 sm:w-full">
+              <PillarColumn pillar={p5} delay={320} />
+            </div>
           </div>
         </div>
 
