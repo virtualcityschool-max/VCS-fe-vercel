@@ -1,51 +1,17 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import StatCard from "./StatCard";
-import { useDateFormatters } from "../../hooks";
+import { useDateFormatters, useDateFormat } from "../../hooks";
 import TeacherSessionCard from "../sessions/TeacherSessionCard";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
 import { handleJoinSession } from "../../utils/helper/StartSession";
 import { getDisplayName } from "../../utils/userDisplay";
 
-// Truncate long course names for axis labels
-const truncate = (str, n = 12) =>
-  str?.length > n ? str.slice(0, n) + "…" : str;
-const RevenueTooltip = ({ active, payload }) => {
-  if (!active || !payload?.length) return null;
-  const { fullName, Revenue } = payload[0].payload;
-  return (
-    <div className="bg-slate-900 border border-slate-700 rounded-xl shadow-2xl px-4 py-3 min-w-[160px]">
-      <p className="font-bold text-white text-sm leading-snug mb-2">{fullName}</p>
-      <div className="flex items-center justify-between gap-4">
-        <span className="text-[10px] uppercase tracking-wider text-slate-400">Revenue</span>
-        <span className="text-xs font-semibold text-amber-400">
-          ${(Revenue || 0).toLocaleString("en-US")} USD
-        </span>
-      </div>
-    </div>
-  );
-};
-
-const EnrollmentTooltip = ({ active, payload }) => {
-  if (!active || !payload?.length) return null;
-  const { fullName, Students } = payload[0].payload;
-  return (
-    <div className="bg-slate-900 border border-slate-700 rounded-xl shadow-2xl px-4 py-3 min-w-[160px]">
-      <p className="font-bold text-white text-sm leading-snug mb-2">{fullName}</p>
-      <div className="flex items-center justify-between gap-4">
-        <span className="text-[10px] uppercase tracking-wider text-slate-400">Students</span>
-        <span className="text-xs font-semibold text-indigo-400">{Students}</span>
-      </div>
-    </div>
-  );
+// Icon/color per Recent Activity item kind
+const ACTIVITY_STYLE = {
+  approval: { icon: "fa-user-clock", bg: "bg-amber-500/15", text: "text-amber-400" },
+  enrollment: { icon: "fa-user-graduate", bg: "bg-indigo-500/15", text: "text-indigo-400" },
+  "free-access": { icon: "fa-hand-holding-heart", bg: "bg-purple-500/15", text: "text-purple-400" },
+  "child-link": { icon: "fa-link", bg: "bg-emerald-500/15", text: "text-emerald-400" },
 };
 
 // ── Stat card with hover tooltip breakdown ───────────────────────────────────
@@ -127,17 +93,19 @@ const OverviewTab = ({
   actionLoadingIds = new Set(),
   onStartSession,
   onEndSession,
+  recentActivity = [],
 }) => {
   const navigate = useNavigate();
   const { formatDate } = useDateFormatters();
+  const { formatRelativeTime } = useDateFormat();
   const SessionsSection = (
     <div>
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-base font-bold text-white flex items-center gap-2.5">
           <div className="w-7 h-7 bg-indigo-600/20 rounded-lg flex items-center justify-center">
-            <i className="fas fa-calendar-check text-indigo-400 text-xs"></i>
+            <i className="fas fa-user-clock text-indigo-400 text-xs"></i>
           </div>
-          Upcoming Teacher Sessions
+          Upcoming Tutor Meetings
         </h3>
         <button
           onClick={() => navigate("/admin/teacher-planner")}
@@ -157,7 +125,7 @@ const OverviewTab = ({
           <div className="w-10 h-10 bg-slate-800 rounded-full flex items-center justify-center mb-3">
             <i className="fas fa-calendar-times text-slate-500 text-base"></i>
           </div>
-          <p className="text-slate-400 text-sm">No upcoming sessions</p>
+          <p className="text-slate-400 text-sm">No meetings planned</p>
           <button
             onClick={() => navigate("/admin/teacher-planner")}
             className="mt-3 text-xs text-indigo-400 hover:text-indigo-300 transition"
@@ -251,22 +219,27 @@ const OverviewTab = ({
 
   if (!analytics) return <div className="space-y-4">{SessionsSection}</div>;
 
-  const revenueData = (analytics.revenue?.by_course || []).map((item) => ({
-    name: truncate(item.course),
-    fullName: item.course,
-    Revenue: item.revenue,
-    // "Lost Revenue": item.lost_revenue,
-  }));
-
-  const enrollmentData = (analytics.enrollments?.by_course || []).map(
-    (item) => ({
-      name: truncate(item.course),
-      fullName: item.course,
-      Students: item.students,
-    }),
-  );
-
   const totalRevenue = analytics.revenue?.total || 0;
+
+  // Merge revenue-by-course and enrollments-by-course (same source as the
+  // old two separate charts) into one ranked list, top 6 by revenue.
+  const courseMap = new Map();
+  (analytics.revenue?.by_course || []).forEach((item) => {
+    courseMap.set(item.course, { name: item.course, revenue: item.revenue || 0, students: 0 });
+  });
+  (analytics.enrollments?.by_course || []).forEach((item) => {
+    const existing = courseMap.get(item.course);
+    if (existing) existing.students = item.students || 0;
+    else courseMap.set(item.course, { name: item.course, revenue: 0, students: item.students || 0 });
+  });
+  const topCourses = Array.from(courseMap.values())
+    .sort((a, b) => b.revenue - a.revenue || b.students - a.students)
+    .slice(0, 6);
+  const totalRankedRevenue = topCourses.reduce((sum, c) => sum + c.revenue, 0);
+  const rankMetricMax = Math.max(
+    ...topCourses.map((c) => (totalRankedRevenue > 0 ? c.revenue : c.students)),
+    1,
+  );
 
   return (
     <div className="space-y-4 animate-fadeIn">
@@ -370,16 +343,58 @@ const OverviewTab = ({
 
       {SessionsSection}
 
-      {/* Charts - side by side */}
+      {/* Recent Activity + Top Courses - side by side */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Revenue by Course */}
+        {/* Recent Activity */}
+        <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6 backdrop-blur-sm transition-all duration-300 hover:border-slate-700">
+          <h3 className="text-lg font-bold text-white flex items-center gap-3 mb-1">
+            <div className="w-8 h-8 bg-indigo-600/20 rounded-lg flex items-center justify-center">
+              <i className="fas fa-bolt text-indigo-400 text-sm"></i>
+            </div>
+            Recent Activity
+          </h3>
+          <p className="text-xs text-slate-500 mb-4 ml-11">
+            What's newly waiting on you, newest first
+          </p>
+
+          {recentActivity.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12">
+              <div className="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center mb-3">
+                <i className="fas fa-check text-slate-500 text-lg"></i>
+              </div>
+              <p className="text-slate-400 text-sm">All caught up - nothing new to review</p>
+            </div>
+          ) : (
+            <div>
+              {recentActivity.map((item) => {
+                const style = ACTIVITY_STYLE[item.kind] || ACTIVITY_STYLE.approval;
+                return (
+                  <div
+                    key={item.id}
+                    className="flex items-start gap-3 py-2.5 border-b border-slate-800/50 last:border-0"
+                  >
+                    <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${style.bg}`}>
+                      <i className={`fas ${style.icon} ${style.text} text-[10px]`}></i>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs text-slate-300 leading-snug">{item.text}</p>
+                      <p className="text-[10px] text-slate-600 mt-0.5">{formatRelativeTime(item.timestamp)}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Top Courses */}
         <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6 backdrop-blur-sm transition-all duration-300 hover:border-slate-700">
           <div className="flex items-center justify-between mb-1">
             <h3 className="text-lg font-bold text-white flex items-center gap-3">
               <div className="w-8 h-8 bg-amber-600/20 rounded-lg flex items-center justify-center">
-                <i className="fas fa-coins text-amber-400 text-sm"></i>
+                <i className="fas fa-ranking-star text-amber-400 text-sm"></i>
               </div>
-              Revenue by Course
+              Top Courses
             </h3>
             <div className="text-right">
               <p className="text-[10px] uppercase tracking-wider text-slate-500">
@@ -391,128 +406,50 @@ const OverviewTab = ({
             </div>
           </div>
           <p className="text-xs text-slate-500 mb-4 ml-11">
-            Total earnings generated per course
-          </p>
-          {/* <div className="flex items-center gap-4 text-xs text-slate-400 ml-11 mb-4">
-            <span className="flex items-center gap-1.5">
-              <span className="w-3 h-3 rounded-sm bg-emerald-500 inline-block"></span>
-              Earned
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="w-3 h-3 rounded-sm bg-rose-500 inline-block"></span>
-              Lost
-            </span>
-          </div> */}
-
-          {revenueData.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12">
-              <div className="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center mb-3">
-                <i className="fas fa-coins text-slate-500 text-lg"></i>
-              </div>
-              <p className="text-slate-400 text-sm">
-                No revenue data available
-              </p>
-            </div>
-          ) : (
-            <ResponsiveContainer width="100%" height={260}>
-              <BarChart
-                data={revenueData}
-                margin={{ top: 4, right: 8, left: 0, bottom: 0 }}
-              >
-                <defs>
-                  <linearGradient id="revenueBar" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#34d399" stopOpacity={0.95} />
-                    <stop offset="100%" stopColor="#059669" stopOpacity={0.7} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
-                <XAxis
-                  interval={0}
-                  hide={true}
-                  dataKey="name"
-                  stroke="#94a3b8"
-                  tick={{ fontSize: 11 }}
-                />
-                <YAxis
-                  stroke="#64748b"
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fontSize: 10 }}
-                  tickFormatter={(v) =>
-                    v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v
-                  }
-                />
-                <Tooltip content={<RevenueTooltip />} cursor={{ fill: "rgba(148,163,184,0.06)" }} />
-                <Bar dataKey="Revenue" fill="url(#revenueBar)" radius={[6, 6, 0, 0]} maxBarSize={48} animationDuration={900} />
-                <Bar
-                  dataKey="Lost Revenue"
-                  fill="#f43f5e"
-                  radius={[6, 6, 0, 0]}
-                  maxBarSize={48}
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          )}
-        </div>
-
-        {/* Enrollments by Course */}
-        <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6 backdrop-blur-sm transition-all duration-300 hover:border-slate-700">
-          <div className="flex items-center justify-between mb-1">
-            <h3 className="text-lg font-bold text-white flex items-center gap-3">
-              <div className="w-8 h-8 bg-indigo-600/20 rounded-lg flex items-center justify-center">
-                <i className="fas fa-user-graduate text-indigo-400 text-sm"></i>
-              </div>
-              Enrollments by Course
-            </h3>
-            <span className="text-xs text-slate-400">
-              {analytics.enrollments.active} active /{" "}
-              {analytics.enrollments.cancelled} cancelled
-            </span>
-          </div>
-          <p className="text-xs text-slate-500 mb-4 ml-11">
-            Active students enrolled per course
+            Revenue and enrollment together, ranked
           </p>
 
-          {enrollmentData.length === 0 ? (
+          {topCourses.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12">
               <div className="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center mb-3">
-                <i className="fas fa-user-graduate text-slate-500 text-lg"></i>
+                <i className="fas fa-book text-slate-500 text-lg"></i>
               </div>
-              <p className="text-slate-400 text-sm">
-                No enrollment data available
-              </p>
+              <p className="text-slate-400 text-sm">No course data available</p>
             </div>
           ) : (
-            <ResponsiveContainer width="100%" height={260}>
-              <BarChart
-                data={enrollmentData}
-                margin={{ top: 4, right: 8, left: 0, bottom: 0 }}
-              >
-                <defs>
-                  <linearGradient id="enrollmentBar" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#818cf8" stopOpacity={0.95} />
-                    <stop offset="100%" stopColor="#4f46e5" stopOpacity={0.7} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
-                <XAxis
-                  interval={0}
-                  hide={true}
-                  dataKey="name"
-                  stroke="#94a3b8"
-                  tick={{ fontSize: 11 }}
-                />
-                <YAxis
-                  stroke="#64748b"
-                  axisLine={false}
-                  tickLine={false}
-                  allowDecimals={false}
-                  tick={{ fontSize: 10 }}
-                />
-                <Tooltip content={<EnrollmentTooltip />} cursor={{ fill: "rgba(148,163,184,0.06)" }} />
-                <Bar dataKey="Students" fill="url(#enrollmentBar)" radius={[6, 6, 0, 0]} maxBarSize={48} animationDuration={900} />
-              </BarChart>
-            </ResponsiveContainer>
+            <div>
+              {topCourses.map((course, i) => {
+                const metric = totalRankedRevenue > 0 ? course.revenue : course.students;
+                const pct = Math.max(Math.round((metric / rankMetricMax) * 100), 4);
+                return (
+                  <div
+                    key={course.name}
+                    className="flex items-center gap-3 py-2.5 border-b border-slate-800/50 last:border-0"
+                  >
+                    <div className="w-6 h-6 rounded-md bg-slate-800 flex items-center justify-center text-[10px] font-bold text-slate-400 flex-shrink-0">
+                      {i + 1}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs text-white font-medium truncate">{course.name}</p>
+                      <div className="h-1 bg-slate-800 rounded-full mt-1.5 overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-indigo-400 to-indigo-600 rounded-full"
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <p className="text-xs font-bold text-amber-400">
+                        ${course.revenue.toLocaleString("en-US")}
+                      </p>
+                      <p className="text-[10px] text-slate-500">
+                        {course.students} student{course.students === 1 ? "" : "s"}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           )}
         </div>
       </div>

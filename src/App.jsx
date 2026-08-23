@@ -100,7 +100,7 @@ const AppInner = () => {
       )}
 
       {/* Content area - offset by sidebar width on desktop */}
-      <div className={hasSidebar ? (isSidebarCollapsed ? "lg:ml-20" : "lg:ml-72") : ""} style={{ transition: "margin-left 0.3s ease" }}>
+      <div className={hasSidebar ? (isSidebarCollapsed ? "lg:ml-20" : "lg:ml-64") : ""} style={{ transition: "margin-left 0.3s ease" }}>
         {/* Navbar (hidden on /admin and /teacher routes) */}
         {showNavbar && (
           <header className="relative z-50">

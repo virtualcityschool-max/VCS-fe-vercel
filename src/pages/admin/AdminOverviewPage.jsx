@@ -1,13 +1,68 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
+import { useSelector } from "react-redux";
 import { adminService } from "../../services/adminService";
 import { adminTeacherSessionService } from "../../services/adminTeacherSessionService";
 import OverviewTab from "../../components/admin/OverviewTab";
 import { toastManager } from "../../utils/toastManager";
 import { showApiError, extractApiErrorMessage } from "../../utils/apiErrorHandler";
 import { isSessionExpired, isWithinSessionWindow } from "../../utils/helper/StartSession";
+import { getDisplayName } from "../../utils/userDisplay";
 import ConfirmDialog from "../../components/common/ConfirmDialog";
 
+const ROLE_LABEL = { teacher: "tutor", parent: "guardian", student: "student", admin: "admin" };
+
+// Builds the "Recent Activity" feed from data already fetched app-wide by
+// AdminLayout on mount (pending approvals/enrollments/free-access/child
+// links) - no new API calls. Only pending/unresolved items are available
+// with reliable timestamps, so this shows what's newly waiting on you,
+// newest first, rather than a full history of past decisions.
+const useRecentActivity = (limit = 6) => {
+  // Each slice's initialState already defaults these to [], so no `|| []`
+  // fallback is needed here (that would create a fresh array every render).
+  const pendingApprovals = useSelector((s) => s.approvals.pendingApprovals);
+  const pendingEnrollments = useSelector((s) => s.approvals.pendingEnrollments);
+  const freeAccessRequests = useSelector((s) => s.freeAccess.requests);
+  const pendingChildLinks = useSelector((s) => s.childLinks.pendingChildLinks);
+
+  return useMemo(() => {
+    const items = [
+      ...pendingApprovals.map((u) => ({
+        id: `approval-${u.id}`,
+        kind: "approval",
+        timestamp: u.date_joined,
+        text: `${getDisplayName(u) || "Someone"} registered as a ${ROLE_LABEL[u.role] || u.role} and is awaiting approval`,
+      })),
+      ...pendingEnrollments.map((e) => ({
+        id: `enrollment-${e.id}`,
+        kind: "enrollment",
+        timestamp: e.enrolled_at,
+        text: `${e.student_name || "A student"} requested enrollment in ${e.course_title || "a course"}`,
+      })),
+      ...freeAccessRequests
+        .filter((r) => r.status === "pending")
+        .map((r) => ({
+          id: `free-access-${r.id}`,
+          kind: "free-access",
+          timestamp: r.created_at,
+          text: `${r.full_name || "Someone"} applied for free access to ${r.courses?.length || 0} course${r.courses?.length === 1 ? "" : "s"}`,
+        })),
+      ...pendingChildLinks.map((l) => ({
+        id: `child-link-${l.link_id}`,
+        kind: "child-link",
+        timestamp: l.requested_at,
+        text: `${l.parent || "A guardian"} requested to link with ${l.student || "a student"}`,
+      })),
+    ];
+
+    return items
+      .filter((item) => item.timestamp)
+      .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+      .slice(0, limit);
+  }, [pendingApprovals, pendingEnrollments, freeAccessRequests, pendingChildLinks, limit]);
+};
+
 const AdminOverviewPage = () => {
+  const recentActivity = useRecentActivity();
   const [analytics, setAnalytics] = useState(null);
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
   const [analyticsError, setAnalyticsError] = useState(null);
@@ -126,6 +181,7 @@ const AdminOverviewPage = () => {
         actionLoadingIds={actionLoadingIds}
         onStartSession={handleStartSession}
         onEndSession={handleEndSession}
+        recentActivity={recentActivity}
       />
 
       <ConfirmDialog

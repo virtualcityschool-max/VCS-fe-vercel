@@ -99,21 +99,25 @@ const TimezoneIndicator = ({ isCollapsed }) => {
 const NAV_CONFIG = {
   admin: [
     { id: "overview",    label: "Overview",     icon: "fas fa-chart-line",    to: "/admin/overview" },
-    { id: "approvals",   label: "Approval(s) Pending",    icon: "fas fa-user-check",    to: "/admin/approvals" },
-    { id: "users",       label: "Users",        icon: "fas fa-users",         to: "/admin/users" },
-    { id: "referrals",   label: "Referrals",    icon: "fas fa-share-nodes",    to: "/admin/referrals" },
-    { id: "courses",     label: "Courses",      icon: "fas fa-book",          to: "/admin/courses" },
-    { id: "enrollments",     label: "Class Enrollments", icon: "fas fa-user-graduate",   to: "/admin/enrollments" },
-    { id: "sessions",        label: "Class Timetable",   icon: "fas fa-chalkboard",      to: "/admin/sessions" },
-    { id: "teacher-planner", label: "Tutor Meetings",    icon: "fas fa-user-clock",      to: "/admin/teacher-planner" },
-    { id: "subscriptions",   label: "Subscriptions",    icon: "fas fa-rotate",          to: "/admin/subscriptions" },
-    { id: "attendance",  label: "Attendance",   icon: "fas fa-calendar-check", to: "/admin/attendance" },
-    { id: "evaluations", label: "Evaluations",  icon: "fas fa-chart-bar",      to: "/admin/evaluations" },
-    { id: "blogs",       label: "Blogs",        icon: "fas fa-newspaper",     to: "/admin/blogs" },
-    { id: "vlogs",       label: "Vlogs",        icon: "fas fa-circle-play",   to: "/admin/vlogs" },
-    { id: "levels",  label: "Levels",   icon: "fas fa-tags",           to: "/admin/course-levels" },
-    { id: "about",    label: "About Us",          icon: "fas fa-info-circle", to: "/admin/about" },
-    { id: "settings", label: "Platform Settings",  icon: "fas fa-sliders-h",   to: "/admin/settings" },
+
+    { id: "approvals",   label: "Approval(s) Pending",    icon: "fas fa-user-check",    to: "/admin/approvals",  section: "People & Approvals" },
+    { id: "users",       label: "Users",        icon: "fas fa-users",         to: "/admin/users",      section: "People & Approvals" },
+    { id: "referrals",   label: "Referrals",    icon: "fas fa-share-nodes",    to: "/admin/referrals", section: "People & Approvals" },
+
+    { id: "courses",     label: "Courses",      icon: "fas fa-book",          to: "/admin/courses",    section: "Academics" },
+    { id: "enrollments",     label: "Class Enrollments", icon: "fas fa-user-graduate",   to: "/admin/enrollments",       section: "Academics" },
+    { id: "sessions",        label: "Class Timetable",   icon: "fas fa-chalkboard",      to: "/admin/sessions",         section: "Academics" },
+    { id: "teacher-planner", label: "Tutor Meetings",    icon: "fas fa-user-clock",      to: "/admin/teacher-planner",  section: "Academics" },
+    { id: "subscriptions",   label: "Subscriptions",    icon: "fas fa-rotate",          to: "/admin/subscriptions",     section: "Academics" },
+    { id: "attendance",  label: "Attendance",   icon: "fas fa-calendar-check", to: "/admin/attendance",   section: "Academics" },
+    { id: "evaluations", label: "Evaluations",  icon: "fas fa-chart-bar",      to: "/admin/evaluations",  section: "Academics" },
+
+    { id: "blogs",       label: "Blogs",        icon: "fas fa-newspaper",     to: "/admin/blogs", section: "Content" },
+    { id: "vlogs",       label: "Vlogs",        icon: "fas fa-circle-play",   to: "/admin/vlogs", section: "Content" },
+
+    { id: "levels",  label: "Levels",   icon: "fas fa-tags",           to: "/admin/course-levels", section: "Settings" },
+    { id: "about",    label: "About Us",          icon: "fas fa-info-circle", to: "/admin/about",  section: "Settings" },
+    { id: "settings", label: "Platform Settings",  icon: "fas fa-sliders-h",   to: "/admin/settings", section: "Settings" },
   ],
   teacher: [
     { label: "Dashboard",    to: "/teacher",                  icon: "fas fa-table-columns",   end: true },
@@ -155,7 +159,7 @@ const PORTAL_LABEL = {
 function NavItem({ label, icon, isCollapsed, badge, isActive, onClick, to, end }) {
   const itemClass = (active) =>
     `w-full flex items-center rounded-xl font-medium text-sm transition-all duration-200 relative
-    ${isCollapsed ? "justify-center px-0 py-3" : "px-3 py-3 gap-3"}
+    ${isCollapsed ? "justify-center px-0 py-2.5" : "px-3 py-2.5 gap-2.5"}
     ${active
       ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20"
       : "text-slate-400 hover:text-white hover:bg-slate-800/60"
@@ -260,7 +264,7 @@ const Sidebar = ({
       transition-all duration-300 ease-in-out
       lg:translate-x-0
       ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
-      ${isCollapsed ? "w-20" : "w-72"}
+      ${isCollapsed ? "w-20" : "w-64"}
     `}>
 
       {/* ── Header ── */}
@@ -324,27 +328,41 @@ const Sidebar = ({
       </div>
 
       {/* ── Nav ── */}
-      <div className={`flex-1 py-4 overflow-y-auto overflow-x-hidden ${isCollapsed ? "px-3" : "px-4"}`}>
+      <div className={`flex-1 py-3 overflow-y-auto overflow-x-hidden ${isCollapsed ? "px-3" : "px-4"}`}>
         {!isCollapsed && (
-          <p className="text-[10px] font-black uppercase tracking-widest text-slate-600 px-3 mb-3">
+          <p className="text-[10px] font-black uppercase tracking-widest text-slate-600 px-3 mb-2">
             Navigation
           </p>
         )}
-        {isCollapsed && <div className="mb-3" />}
+        {isCollapsed && <div className="mb-2" />}
 
         <nav className="space-y-1">
           {role === "admin"
-            ? NAV_CONFIG.admin.map((tab) => (
-                <NavItem
-                  key={tab.id}
-                  label={tab.label}
-                  icon={tab.icon}
-                  isCollapsed={isCollapsed}
-                  isActive={activeTab === tab.id}
-                  badge={tab.id === "approvals" ? pendingApprovalsCount : 0}
-                  to={tab.to}
-                />
-              ))
+            ? NAV_CONFIG.admin.map((tab, i) => {
+                const prevSection = NAV_CONFIG.admin[i - 1]?.section;
+                const startsNewSection = tab.section && tab.section !== prevSection;
+                return (
+                  <React.Fragment key={tab.id}>
+                    {startsNewSection && (
+                      <div className={`pt-3 mt-2 border-t border-slate-800/70 ${isCollapsed ? "px-0" : ""}`}>
+                        {!isCollapsed && (
+                          <p className="text-[9px] font-black uppercase tracking-widest text-slate-600 px-3 mb-1.5">
+                            {tab.section}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                    <NavItem
+                      label={tab.label}
+                      icon={tab.icon}
+                      isCollapsed={isCollapsed}
+                      isActive={activeTab === tab.id}
+                      badge={tab.id === "approvals" ? pendingApprovalsCount : 0}
+                      to={tab.to}
+                    />
+                  </React.Fragment>
+                );
+              })
             : NAV_CONFIG[role]?.map((item) => (
                 <NavItem
                   key={item.label}
