@@ -106,10 +106,12 @@ const AppInner = () => {
       {/* Content area - offset by sidebar width on desktop */}
       <div className={hasSidebar ? (isSidebarCollapsed ? "lg:ml-20" : "lg:ml-64") : ""} style={{ transition: "margin-left 0.3s ease" }}>
         {/* Navbar - public variant for everyone (it already swaps
-            Login/Register for the profile dropdown once logged in) */}
+            Login/Register for the profile dropdown once logged in).
+            Logo is hidden when a sidebar is present - the sidebar already
+            shows the logo, so this avoids showing it twice. */}
         {showNavbar && (
           <header className="relative z-50">
-            <Navbar variant="public" />
+            <Navbar variant="public" hideLogo={hasSidebar} />
           </header>
         )}
 

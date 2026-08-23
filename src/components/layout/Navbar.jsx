@@ -14,7 +14,7 @@ const PUBLIC_LINKS = [
   { label: "About Us", path: "/about" },
 ];
 
-const Navbar = ({ variant = "default" }) => {
+const Navbar = ({ variant = "default", hideLogo = false }) => {
   const dispatch = useDispatch();
   const { isLoggedIn } = useAuth();
   const { navigate, isActivePath } = useNavigation();
@@ -59,16 +59,18 @@ const Navbar = ({ variant = "default" }) => {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex justify-between items-center">
           <div className="flex items-center gap-4 sm:gap-12">
-            <div
-              className="flex items-center gap-2 sm:gap-3 group cursor-pointer shrink-0"
-              onClick={() => goTo("/")}
-            >
-              <img
-                src="/assets/logo.png"
-                alt="Virtual City School"
-                className="h-12 w-[110px] sm:h-[70px] sm:w-[180px] object-contain transition-transform duration-300 group-hover:scale-[1.03]"
-              />
-            </div>
+            {!hideLogo && (
+              <div
+                className="flex items-center gap-2 sm:gap-3 group cursor-pointer shrink-0"
+                onClick={() => goTo("/")}
+              >
+                <img
+                  src="/assets/logo.png"
+                  alt="Virtual City School"
+                  className="h-12 w-[110px] sm:h-[70px] sm:w-[180px] object-contain transition-transform duration-300 group-hover:scale-[1.03]"
+                />
+              </div>
+            )}
             <div className="hidden lg:flex items-center gap-8">
               {PUBLIC_LINKS.map((link) => (
                 <button
