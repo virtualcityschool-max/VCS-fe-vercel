@@ -74,9 +74,11 @@ const AppInner = () => {
     pendingHireCount +
     pendingFreeAccessCount;
 
-  // Admins keep the public navbar too, so they can reach Courses/Tutors/Blog/
-  // About without logging out (other logged-in roles keep their own layout).
-  const showNavbar = !isLoggedIn || role === "admin";
+  // Every role keeps the public navbar too, so they can reach Courses/Tutors/
+  // Blog/About without logging out. Its UserProfileDropdown already shows a
+  // role label (Administrator/Tutor/Student/Guardian) next to the name, so
+  // it's clear at a glance which dashboard is open.
+  const showNavbar = true;
 
   return (
     <div className="min-h-screen bg-slate-950 selection:bg-indigo-500/30 overflow-x-hidden">
