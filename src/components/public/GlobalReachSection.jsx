@@ -30,7 +30,7 @@ const GlobalReachSection = () => (
         <span className="text-gradient">we&rsquo;re already there</span>
       </h2>
       <p className="mt-4 text-slate-400 text-sm md:text-base leading-relaxed">
-        Serving Pakistani, Indian, and expatriate families across 13 countries — with dedicated pages for each community coming soon.
+        Serving Pakistani and expatriate families across 13 countries — with dedicated pages for each community coming soon.
       </p>
     </Reveal>
 
