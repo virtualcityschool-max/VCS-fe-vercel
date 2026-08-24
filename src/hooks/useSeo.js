@@ -49,12 +49,28 @@ const setLink = (rel, href) => {
   return { el, created, prev };
 };
 
+const setJsonLd = (data) => {
+    if (typeof document === "undefined") return null;
+    let el = document.head.querySelector('script[data-seo-jsonld="true"]');
+    const created = !el;
+    if (!el) {
+          el = document.createElement("script");
+          el.type = "application/ld+json";
+          el.setAttribute("data-seo-jsonld", "true");
+          document.head.appendChild(el);
+    }
+    const prev = el.textContent;
+    el.textContent = JSON.stringify(data);
+    return { el, created, prev };
+};
+
 export const useSeo = ({
   title,
   description,
   image,
   url,
   type = "website",
+    jsonLd,
 } = {}) => {
   useEffect(() => {
     if (typeof document === "undefined") return;
@@ -88,6 +104,9 @@ export const useSeo = ({
       track(setMeta("property", "og:url", url));
       track(setLink("canonical", url));
     }
+  if (jsonLd) {
+        track(setJsonLd(jsonLd));
+  }
 
     // Restore prior head state when the page unmounts / deps change.
     return () => {
@@ -97,11 +116,15 @@ export const useSeo = ({
         if (h.created) {
           h.el.remove();
         } else if (h.prev != null) {
-          h.el.setAttribute(h.el.tagName === "LINK" ? "href" : "content", h.prev);
+          if (h.el.tagName === "SCRIPT") {
+                        h.el.textContent = h.prev;
+          } else {
+                        h.el.setAttribute(h.el.tagName === "LINK" ? "href" : "content", h.prev);
+          }
         }
       });
     };
-  }, [title, description, image, url, type]);
+  }, [title, description, image, url, type, jsonLd]);
 };
 
 export default useSeo;
