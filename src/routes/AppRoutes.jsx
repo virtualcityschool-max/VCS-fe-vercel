@@ -1,70 +1,74 @@
-import React from "react";
+import React, { Suspense } from "react";
 import { Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { setAuthModal } from "../store/slices/uiSlice";
+import { LoadingSpinner } from "../components/ui";
 
-// Pages
-import {
-  PublicHome,
-  AdminLayout,
-  AdminOverviewPage,
-  AdminApprovalsPage,
-  AdminCoursesPage,
-  AdminCourseDetailPage,
-  ProfilePage,
-  AdminUsersPage,
-  AdminEnrollmentsPage,
-  AdminSessionsPage,
-  AdminTeacherPlannerPage,
-  AdminAttendancePage,
-  AdminEvaluationPage,
-  AdminCategoriesPage,
-  AdminReferralsPage,
-  UserDetailsPage,
-  StudentPortal,
-  TeacherLayout,
-  TeacherPortal,
-  TeacherClasses,
-  TeacherCourseDetailPage,
-  TeacherAttendance,
-  TeacherGrading,
-  TeacherAssessments,
-  TeacherSubmissions,
-  TeacherSessionCalendar,
-  StudentLayout,
-  StudentClasses,
-  ParentPortal,
-  Marketplace,
-  CourseDetails,
-  Blogs,
-  BlogDetails,
-  AdminBlogsPage,
-  AdminBlogEditorPage,
-  TeacherProfile,
-  TeacherInternalStudentProfile,
-  TeacherEvaluationPage,
-  TeacherHireLeads,
-  TeacherAvailabilityPage,
-  TeachersDirectory,
-  StudentAssignments,
-  StudentAssignmentDetails,
-  StudentAssessments,
-  StudentQuizDetail,
-  StudentAttendance,
-  // StudentExamDetail,
-  StudentEvaluationPage,
-  StudentTutors,
-  ParentLayout,
-  ParentAttendance,
-  ParentEvaluationPage,
-  ParentChildDetails,
-  PrivacyPolicy,
-  TermsAndConditions,
-  AboutPage,
-} from "../pages";
-import AdminAboutPage from "../pages/admin/AdminAboutPage";
-import AdminPlatformSettingsPage from "../pages/admin/AdminPlatformSettingsPage";
-import AdminSubscriptionsPage from "../pages/admin/AdminSubscriptionsPage";
+// Public pages load eagerly - anonymous visitors and prerendering hit these directly.
+import PublicHome from "../pages/public/PublicHome";
+import Marketplace from "../pages/public/Marketplace";
+import CourseDetails from "../pages/public/CourseDetails";
+import Blogs from "../pages/public/Blogs";
+import BlogDetails from "../pages/public/BlogDetails";
+import TeachersDirectory from "../pages/public/TeachersDirectory";
+import TeacherProfile from "../pages/public/TeacherProfile";
+import PrivacyPolicy from "../pages/public/PrivacyPolicy";
+import TermsAndConditions from "../pages/public/TermsAndConditions";
+import AboutPage from "../pages/public/AboutPage";
+
+// Authenticated dashboards are code-split so public visitors never download them.
+const StudentLayout = React.lazy(() => import("../pages/student/StudentLayout"));
+const StudentPortal = React.lazy(() => import("../pages/student/StudentPortal"));
+const StudentClasses = React.lazy(() => import("../pages/student/StudentClasses"));
+const StudentAssignments = React.lazy(() => import("../pages/student/StudentAssignments"));
+const StudentAssignmentDetails = React.lazy(() => import("../pages/student/StudentAssignmentDetails"));
+const StudentAssessments = React.lazy(() => import("../pages/student/StudentAssessments"));
+const StudentQuizDetail = React.lazy(() => import("../pages/student/StudentQuizDetail"));
+const StudentAttendance = React.lazy(() => import("../pages/student/StudentAttendance"));
+const StudentEvaluationPage = React.lazy(() => import("../pages/student/StudentEvaluationPage"));
+const StudentTutors = React.lazy(() => import("../pages/student/StudentTutors"));
+
+const TeacherLayout = React.lazy(() => import("../pages/teacher/TeacherLayout"));
+const TeacherPortal = React.lazy(() => import("../pages/teacher/TeacherPortal"));
+const TeacherClasses = React.lazy(() => import("../pages/teacher/TeacherClasses"));
+const TeacherCourseDetailPage = React.lazy(() => import("../pages/teacher/TeacherCourseDetailPage"));
+const TeacherAttendance = React.lazy(() => import("../pages/teacher/TeacherAttendance"));
+const TeacherGrading = React.lazy(() => import("../pages/teacher/TeacherGrading"));
+const TeacherAssessments = React.lazy(() => import("../pages/teacher/TeacherAssessments"));
+const TeacherSubmissions = React.lazy(() => import("../pages/teacher/TeacherSubmissions"));
+const TeacherSessionCalendar = React.lazy(() => import("../pages/teacher/TeacherSessionCalendar"));
+const TeacherInternalStudentProfile = React.lazy(() => import("../pages/teacher/TeacherInternalStudentProfile"));
+const TeacherEvaluationPage = React.lazy(() => import("../pages/teacher/TeacherEvaluationPage"));
+const TeacherHireLeads = React.lazy(() => import("../pages/teacher/TeacherHireLeads"));
+const TeacherAvailabilityPage = React.lazy(() => import("../pages/teacher/TeacherAvailabilityPage"));
+
+const AdminLayout = React.lazy(() => import("../components/admin/AdminLayout"));
+const AdminOverviewPage = React.lazy(() => import("../pages/admin/AdminOverviewPage"));
+const AdminApprovalsPage = React.lazy(() => import("../pages/admin/AdminApprovalsPage"));
+const AdminCoursesPage = React.lazy(() => import("../pages/admin/AdminCoursesPage"));
+const AdminCourseDetailPage = React.lazy(() => import("../pages/admin/AdminCourseDetailPage"));
+const AdminUsersPage = React.lazy(() => import("../pages/admin/AdminUsersPage"));
+const AdminEnrollmentsPage = React.lazy(() => import("../pages/admin/AdminEnrollmentsPage"));
+const AdminSessionsPage = React.lazy(() => import("../pages/admin/AdminSessionsPage"));
+const AdminAttendancePage = React.lazy(() => import("../pages/admin/AdminAttendance"));
+const AdminEvaluationPage = React.lazy(() => import("../pages/admin/AdminEvaluationPage"));
+const AdminCategoriesPage = React.lazy(() => import("../pages/admin/AdminCategoriesPage"));
+const AdminReferralsPage = React.lazy(() => import("../pages/admin/AdminReferralsPage"));
+const UserDetailsPage = React.lazy(() => import("../pages/admin/UserDetailsPage"));
+const AdminTeacherPlannerPage = React.lazy(() => import("../pages/admin/AdminTeacherPlannerPage"));
+const AdminBlogsPage = React.lazy(() => import("../pages/admin/AdminBlogsPage"));
+const AdminBlogEditorPage = React.lazy(() => import("../pages/admin/AdminBlogEditorPage"));
+const AdminAboutPage = React.lazy(() => import("../pages/admin/AdminAboutPage"));
+const AdminPlatformSettingsPage = React.lazy(() => import("../pages/admin/AdminPlatformSettingsPage"));
+const AdminSubscriptionsPage = React.lazy(() => import("../pages/admin/AdminSubscriptionsPage"));
+
+const ProfilePage = React.lazy(() => import("../pages/profile/ProfilePage"));
+
+const ParentLayout = React.lazy(() => import("../pages/parent/ParentLayout"));
+const ParentPortal = React.lazy(() => import("../pages/parent/ParentPortal"));
+const ParentAttendance = React.lazy(() => import("../pages/parent/ParentAttendance"));
+const ParentEvaluationPage = React.lazy(() => import("../pages/parent/ParentEvaluationPage"));
+const ParentChildDetails = React.lazy(() => import("../pages/parent/ParentChildDetails"));
 
 // Protected Route Component with Role-Based Access Control
 const ProtectedRoute = ({ allowedRoles = [] }) => {
@@ -148,6 +152,7 @@ const AppRoutes = () => {
   const { isLoggedIn, role } = useSelector((state) => state.auth);
 
   return (
+        <Suspense fallback={<LoadingSpinner />}>
     <Routes>
       {/* Public Routes */}
       <Route
@@ -273,6 +278,7 @@ const AppRoutes = () => {
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+        </Suspense>
   );
 };
 
