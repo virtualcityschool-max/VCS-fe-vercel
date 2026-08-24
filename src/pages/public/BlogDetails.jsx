@@ -46,19 +46,23 @@ const BlogDetails = () => {
 
   const found = blog && blog.slug === slug;
 
-  useSeo({
-    title: found ? blog.meta_title || blog.title : "Blog",
-    description: found ? blog.meta_description || blog.excerpt : undefined,
-    // Video posts often have no cover image — share the video thumbnail so the
-    // link preview still shows something.
-    image: found
+const seoImage = found
       ? getStorageUrl(blog.cover_image) ||
         blog.video_thumbnail ||
         youTubeThumbnail(blogVideoId(blog))
-      : undefined,
-    url: typeof window !== "undefined" ? window.location.href : undefined,
-    type: found && isVideoBlog(blog) ? "video.other" : "article",
-  });
+      : undefined;
+    const seoUrl = typeof window !== "undefined" ? window.location.href : undefined;
+
+    useSeo({
+          title: found ? blog.meta_title || blog.title : "Blog",
+          description: found ? blog.meta_description || blog.excerpt : undefined,
+          // Video posts often have no cover image — share the video thumbnail so the
+          // link preview still shows something.
+          image: seoImage,
+          url: seoUrl,
+          type: found && isVideoBlog(blog) ? "video.other" : "article",
+      jsonLd: found ? { "@context": "https://schema.org", "@type": "BlogPosting", headline: blog.title, description: blog.excerpt || blog.meta_description || undefined, image: seoImage ? [seoImage] : undefined, datePublished: blog.published_at || blog.created_at || undefined, dateModified: blog.updated_at || blog.published_at || blog.created_at || undefined, author: { "@type": "Person", name: blog.author || "Admin" }, publisher: { "@type": "Organization", name: "Virtual City School", logo: { "@type": "ImageObject", url: "https://virtualcityschool.com/assets/logo02.png" } }, mainEntityOfPage: seoUrl ? { "@type": "WebPage", "@id": seoUrl } : undefined } : undefined,
+    });
 
   if (isLoading && !found) {
     return (
