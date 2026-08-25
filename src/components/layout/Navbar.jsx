@@ -5,6 +5,7 @@ import { setAuthModal } from "../../store/slices/uiSlice";
 import { useAuth, useNavigation } from "../../hooks";
 import Button from "../ui/Button";
 import UserProfileDropdown from "./UserProfileDropdown";
+import TopBar from "./TopBar";
 
 const PUBLIC_LINKS = [
   { label: "Home", path: "/" },
@@ -50,6 +51,8 @@ const Navbar = ({ variant = "default", hideLogo = false }) => {
   // Public variant (for PublicHome)
   if (variant === "public") {
     return (
+<>
+      <TopBar />
       <nav
         className={`sticky top-0 z-50 w-full border-b transition-all duration-300 ${
           scrolled
@@ -142,6 +145,7 @@ const Navbar = ({ variant = "default", hideLogo = false }) => {
           </div>
         )}
       </nav>
+</>
     );
   }
 
