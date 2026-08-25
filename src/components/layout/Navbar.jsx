@@ -94,16 +94,16 @@ const Navbar = ({ variant = "default", hideLogo = false }) => {
           <div className="flex items-center gap-1.5 sm:gap-4 shrink-0">
             {!isLoggedIn ? (
               <div id="nav-guest" className="flex items-center gap-1.5 sm:gap-5">
-                <Button variant="ghost" size="sm" onClick={handleLoginClick}>
-                  Login
+                <Button variant="outline" size="sm" onClick={handleLoginClick}>
+                  Log in
                 </Button>
                 <Button
                   variant="primary"
                   size="sm"
                   onClick={() => handleSetAuthModal("register")}
-                  className="btn-glow text-white px-3 sm:px-7 py-2 sm:py-3 rounded-xl font-bold text-[11px] sm:text-sm whitespace-nowrap border-0"
+                  className="bg-cyan-400 hover:bg-cyan-300 text-slate-950 shadow-none px-3 sm:px-7 py-2 sm:py-3 rounded-xl font-bold text-[11px] sm:text-sm whitespace-nowrap border-0"
                 >
-                  Register<span className="hidden sm:inline">&nbsp;Now</span>
+Get started
                 </Button>
               </div>
             ) : (
