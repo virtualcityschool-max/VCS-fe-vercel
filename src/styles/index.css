@@ -723,3 +723,25 @@ h3,
 .animate-popIn {
   animation: popIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
+
+
+/* ── Top bar announcement ticker — seamless left-to-right loop ── */
+@keyframes ticker-ltr {
+     from {
+            transform: translateX(-50%);
+     }
+     to {
+            transform: translateX(0%);
+     }
+}
+
+.ticker-track {
+     width: max-content;
+     animation: ticker-ltr 22s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+     .ticker-track {
+            animation: none;
+     }
+}
