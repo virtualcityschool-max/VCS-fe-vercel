@@ -47,6 +47,35 @@ const Footer = ({ variant = "full" }) => {
               Next-generation learning platform connecting students with
               world-class tutors for live classes and on-demand mastery modules.
             </p>
+            <div className="flex items-center gap-3 mt-4">
+              <a
+                href="https://www.facebook.com/virtualcityschool"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-slate-400 hover:text-white transition"
+                aria-label="Virtual City School on Facebook"
+              >
+                <i className="fab fa-facebook-f text-sm"></i>
+              </a>
+              <a
+                href="https://www.instagram.com/virtualcityschool/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-slate-400 hover:text-white transition"
+                aria-label="Virtual City School on Instagram"
+              >
+                <i className="fab fa-instagram text-sm"></i>
+              </a>
+              <a
+                href="https://www.youtube.com/@VirtualCitySchool"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-slate-400 hover:text-white transition"
+                aria-label="Virtual City School on YouTube"
+              >
+                <i className="fab fa-youtube text-sm"></i>
+              </a>
+            </div>
           </div>
 
           {/* Quick Links + Support - grouped on the right, side by side */}
