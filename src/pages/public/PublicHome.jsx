@@ -14,7 +14,7 @@ import PublicCourseCard from "../../components/courses/PublicCourseCard";
 import TutorCard from "../../components/teachers/TutorCard";
 import BlogCard from "../../components/blogs/BlogCard";
 import FivePillarsSection from "../../components/public/FivePillarsSection";
-import GlobalReachSection from "../../components/public/GlobalReachSection";
+import GlobalReachSection from "../../components/public/GlobalReachSection"; import FaqSection, { FAQ_ITEMS } from "../../components/public/FaqSection"; import FaqSection, { FAQ_ITEMS } from "../../components/public/FaqSection";
 import Reveal from "../../components/ui/Reveal";
 import { toastManager } from "../../utils/toastManager";
 import { showApiError } from "../../utils/apiErrorHandler";
@@ -174,9 +174,18 @@ const PublicHome = () => {
       : filteredCourses, [filteredCourses, auth.role]);
 
   useSeo({
-      title: "Online Cambridge School for Gulf & Pakistani Students",
-      description: "Live Cambridge O Level, AS Level and A2 Level classes, alongside Grade 5-12 curricula, for students across the UAE, Saudi Arabia, Qatar, Kuwait, Bahrain, Oman, Pakistan and beyond. Expert tutors, flexible schedules.",
+      title: "Online Cambridge O & A Level School",
+      description: "Online Cambridge O Level and A Level classes based in Saudi Arabia, serving students across the UAE, Qatar, Kuwait, Bahrain, Oman, Pakistan and beyond.",
       url: typeof window !== "undefined" ? window.location.href : undefined,
+      jsonLd: {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: FAQ_ITEMS.map((item) => ({
+                    "@type": "Question",
+                    name: item.q,
+                    acceptedAnswer: { "@type": "Answer", text: item.a },
+            })),
+      },
   });
   
   return (
@@ -610,7 +619,7 @@ const PublicHome = () => {
           </div>
         </div>
 
-        <GlobalReachSection />
+        <GlobalReachSection /> <FaqSection />
 
       </section>
 
