@@ -79,6 +79,7 @@ const PillarColumn = ({ pillar, delay = 0 }) => (
       <img
         src={pillar.photo}
         alt={pillar.label}
+        loading="lazy"
         className="w-[76px] h-[76px] rounded-full object-cover border-[3px] border-indigo-400/55 shadow-[0_0_0_4px_rgba(2,6,23,0.95),0_10px_26px_-6px_rgba(0,0,0,0.55)]"
       />
       <span className="absolute -bottom-0.5 -right-0.5 w-[26px] h-[26px] rounded-full bg-[#0b1220] border border-cyan-400/55 flex items-center justify-center text-cyan-400">
