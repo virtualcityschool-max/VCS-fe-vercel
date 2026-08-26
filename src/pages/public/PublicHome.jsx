@@ -254,7 +254,7 @@ const PublicHome = () => {
               </span>
             </button>
             <p className="mt-6 text-sm text-slate-400 animate-fadeInUp" style={{ animationDelay: "0.45s" }}>
-              125 students &middot; 13 countries served &middot; Launched July 2026
+              <span className="text-cyan-400 font-extrabold text-base">125</span> students &middot; <span className="text-cyan-400 font-extrabold text-base">13</span> countries served &middot; <span className="text-cyan-400 font-extrabold text-base">Launched</span> July 2026</span>
             </p>
           </div>
 
