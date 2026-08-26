@@ -249,7 +249,7 @@ const PublicHome = () => {
             <div className="relative z-10 rounded-[2.5rem] border border-cyan-500/30 overflow-hidden bg-slate-900/40 backdrop-blur-3xl aspect-[1.4/1] shadow-2xl shadow-cyan-500/10 group-hover:border-cyan-400/50 transition-all duration-500">
               <img
                 src="/assets/digital-learning.jpg"
-                alt="Digital Campus"
+                alt="Student attending a live online Cambridge class with Virtual City School"
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
               />
               <div className="absolute inset-0 bg-linear-to-tr from-cyan-500/10 to-transparent pointer-events-none" />
@@ -383,7 +383,8 @@ const PublicHome = () => {
               <div className="relative z-10 rounded-[2.5rem] overflow-hidden border border-white/5 shadow-2xl">
                 <img
                   src="/assets/journey.jpg"
-                  alt="Learning Journey"
+                  alt="Cambridge-qualified teacher leading a small-group online class with Virtual City School"
+                  loading="lazy"
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
               </div>
