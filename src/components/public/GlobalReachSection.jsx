@@ -26,11 +26,11 @@ const GlobalReachSection = () => (
         Global Community
       </p>
       <h2 className="text-3xl md:text-5xl font-black font-poppins tracking-tight text-white text-balance">
-        Wherever the diaspora calls home,{" "}
-        <span className="text-gradient">we&rsquo;re already there</span>
+        Based in Saudi Arabia.{" "}
+        <span className="text-gradient">Trusted by families across 13 countries.</span>
       </h2>
       <p className="mt-4 text-slate-400 text-sm md:text-base leading-relaxed">
-        Serving Pakistani and expatriate families across 13 countries — with dedicated pages for each community coming soon.
+        A Saudi Arabia-based school with teachers from Pakistan and beyond — serving expatriate and local families across 13 countries, with dedicated pages for each community coming soon.
       </p>
     </Reveal>
 
