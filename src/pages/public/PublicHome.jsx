@@ -205,9 +205,11 @@ const PublicHome = () => {
               Gulf's Premier Online School
             </div>
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black font-poppins leading-[1.08] tracking-tight text-white animate-fadeInUp" style={{ animationDelay: "0.1s" }}>
-              Your Borderless <br className="hidden md:block" />
-              <span className="text-gradient">Digital Classroom</span> Starts Here
+              Online <span className="text-gradient">Cambridge O Level and A Level</span> School for the UAE, Saudi Arabia, Qatar and beyond
             </h1>
+            <p className="italic text-slate-400 text-sm md:text-base mt-3 animate-fadeInUp" style={{ animationDelay: "0.15s" }}>
+              "Your borderless digital classroom starts here."
+            </p>
             <p className="text-slate-400 text-base md:text-lg leading-relaxed mt-6 max-w-xl animate-fadeInUp" style={{ animationDelay: "0.2s" }}>
               A premium online learning platform for Cambridge students. Cambridge O Level, AS Level, and A2 Level programmes alongside Grade 5-12 curricula, with expert teachers and live classes, across the UAE, Saudi Arabia, Qatar, Kuwait, Bahrain, Oman, Pakistan and beyond — open to students of all nationalities worldwide.
             </p>
@@ -242,6 +244,9 @@ const PublicHome = () => {
                 </span>
               </span>
             </button>
+            <p className="mt-6 text-sm text-slate-400 animate-fadeInUp" style={{ animationDelay: "0.45s" }}>
+              125 students &middot; 13 countries served &middot; Launched July 2026
+            </p>
           </div>
 
           {/* Right: Image */}
