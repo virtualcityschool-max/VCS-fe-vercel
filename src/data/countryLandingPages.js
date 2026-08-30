@@ -23,27 +23,18 @@ export const APPROX_FX = {
 
 // Photos sourced via the Pexels API (free tier, no attribution required by
 // license) and screened against the content rules before use: no religious
-// or political imagery, no flags, no identifiable person framed as "our
-// student," no physical-classroom shots that would misrepresent VCS as
-// running a campus. Converted to WebP, capped at 1000px wide, stored per
-// country under public/assets/countries/<slug>/. The two "study" photos are
-// deliberately anonymous (back of frame, no face) and reused across all four
-// pages since they illustrate a generic concept, not a specific place -
-// only the skyline photo is genuinely unique to each country.
-const STUDY_DESK_IMAGE = {
-  src: "student-studying-home-desk.webp",
-  width: 1000,
-  height: 1500,
-  alt: "A student studying at a home desk with a laptop, notebook and a shelf of books nearby",
-  caption: "Live classes fit around a normal home study routine, not a commute to campus.",
-};
-const STUDY_LAPTOP_IMAGE = {
-  src: "student-online-class-laptop.webp",
-  width: 1000,
-  height: 564,
-  alt: "A student following a live online class on a laptop at a home desk",
-  caption: "One live teacher, one small class, joined from home.",
-};
+// or political imagery, no identifiable person framed as "our student," no
+// physical-classroom shots that would misrepresent VCS as running a campus.
+// Converted to WebP, capped at 1000px wide, stored per country under
+// public/assets/countries/<slug>/.
+//
+// Every image below is unique to its own country - no file is reused across
+// pages (an earlier version shared two generic "student at a desk" photos
+// across all four, which read as duplication). Each country now gets its
+// own skyline, its own culturally-specific landmark, and its own distinct
+// student/online-class photo, chosen for genuine landmark recognizability
+// (the kind of shot that already ranks for "[city] skyline" / "[landmark
+// name]" on Google Images) rather than generic stock.
 
 export const COUNTRY_PAGES = [
   {
@@ -117,8 +108,20 @@ export const COUNTRY_PAGES = [
         alt: "The Kingdom Centre tower illuminated at night among office buildings and palm trees in Riyadh, Saudi Arabia",
         caption: "Riyadh, Saudi Arabia.",
       },
-      study1: STUDY_DESK_IMAGE,
-      study2: STUDY_LAPTOP_IMAGE,
+      study1: {
+        src: "al-balad-jeddah-heritage.webp",
+        width: 1000,
+        height: 1500,
+        alt: "Traditional Hejazi coral-stone architecture with green wooden balconies in the historic Al-Balad district of Jeddah, Saudi Arabia",
+        caption: "Al-Balad, the historic heart of Jeddah.",
+      },
+      study2: {
+        src: "student-online-class-saudi.webp",
+        width: 1000,
+        height: 667,
+        alt: "A young boy attending a live online class at a home desk, with a lamp and study books nearby",
+        caption: "One live teacher, one small class, joined from home.",
+      },
     },
     siblingSlugs: ["uae", "qatar"],
   },
@@ -194,8 +197,20 @@ export const COUNTRY_PAGES = [
         alt: "Skyscrapers of the Dubai Marina district lit by evening sunset light",
         caption: "Dubai Marina, UAE.",
       },
-      study1: STUDY_LAPTOP_IMAGE,
-      study2: STUDY_DESK_IMAGE,
+      study1: {
+        src: "burj-al-arab-dubai.webp",
+        width: 1000,
+        height: 667,
+        alt: "The sail-shaped Burj Al Arab hotel on the Dubai coastline, seen from the sea",
+        caption: "The Burj Al Arab, Dubai.",
+      },
+      study2: {
+        src: "student-video-call-uae.webp",
+        width: 1000,
+        height: 667,
+        alt: "A student on a video call with a teacher, taking notes at a home desk",
+        caption: "Live classes fit around a normal home study routine, not a commute to campus.",
+      },
     },
     siblingSlugs: ["qatar", "kuwait"],
   },
@@ -272,8 +287,20 @@ export const COUNTRY_PAGES = [
         alt: "Doha's skyline viewed across the water from the Corniche promenade",
         caption: "Doha, Qatar, seen from the Corniche.",
       },
-      study1: STUDY_DESK_IMAGE,
-      study2: STUDY_LAPTOP_IMAGE,
+      study1: {
+        src: "souq-waqif-doha-textiles.webp",
+        width: 1000,
+        height: 667,
+        alt: "Colourful woven textiles and cushions on display in the stalls of Souq Waqif, Doha",
+        caption: "Souq Waqif, Doha's traditional market.",
+      },
+      study2: {
+        src: "student-online-class-qatar.webp",
+        width: 1000,
+        height: 667,
+        alt: "A student following an online class on a laptop, seen from above at a home desk",
+        caption: "One live teacher, one small class, joined from home.",
+      },
     },
     siblingSlugs: ["kuwait", "saudi-arabia"],
   },
@@ -349,8 +376,20 @@ export const COUNTRY_PAGES = [
         alt: "Kuwait City's skyline reflected in calm water at sunset",
         caption: "Kuwait City, Kuwait.",
       },
-      study1: STUDY_LAPTOP_IMAGE,
-      study2: STUDY_DESK_IMAGE,
+      study1: {
+        src: "al-hamra-tower-kuwait.webp",
+        width: 1000,
+        height: 1334,
+        alt: "Al Hamra Tower's distinctive twisting facade rising above Kuwait City",
+        caption: "Al Hamra Tower, Kuwait City.",
+      },
+      study2: {
+        src: "student-studying-kuwait.webp",
+        width: 1000,
+        height: 667,
+        alt: "A teenage student sitting on the floor of a bright living room, studying with a laptop and notes",
+        caption: "Live classes fit around a normal home study routine, not a commute to campus.",
+      },
     },
     siblingSlugs: ["saudi-arabia", "uae"],
   },
