@@ -9,7 +9,7 @@ import {
 } from "../../data/countryLandingPages";
 import Reveal from "../../components/ui/Reveal";
 import CountryFaqSection from "../../components/public/CountryFaqSection";
-import CountryImagePlaceholder from "../../components/public/CountryImagePlaceholder";
+import CountryInlineImage from "../../components/public/CountryInlineImage";
 
 // Two representative evening batch times, expressed as fixed-offset Pakistan
 // Standard Time (+05:00, no DST) instants, then converted per-country via
@@ -118,29 +118,14 @@ const CountryLandingPage = () => {
           </div>
         </header>
 
-        {/*
-          IMAGE SLOT - hero photograph for this country page.
-          Suggested asset: a real (non-stock-cliche) photo representing
-          Pakistani families/students in this country - e.g. a home study
-          setup, a skyline recognizable as this country's, or a portrait-style
-          shot of a student on a video call. Avoid generic Gulf skyline stock
-          photography if possible; specificity to the Pakistani-expat framing
-          is preferred. Target file: /public/assets/countries/{slug}-hero.jpg
-          Recommended dimensions: 1600x900 (16:9), optimized/compressed.
-        */}
-        <Reveal className="mb-12">
-          <CountryImagePlaceholder
-            src={`/assets/countries/${country.slug}-hero.jpg`}
-            alt={`A Pakistani expatriate family in ${country.countryName} attending a live online Cambridge class with Virtual City School`}
-            note={`1600x900 photo representing Pakistani families/students in ${country.countryName}`}
-          />
-        </Reveal>
-
-        {/* Local schooling landscape */}
+        {/* Local schooling landscape - skyline photo floats beside the text
+            it illustrates, Wikipedia-style, rather than sitting in a hero
+            block above the fold. */}
         <Reveal className="mb-12">
           <h2 className="text-2xl md:text-3xl font-black font-poppins tracking-tight mb-5">
             {country.schoolingLandscape.heading}
           </h2>
+          <CountryInlineImage image={country.images.skyline} countrySlug={country.slug} side="right" />
           <div className="space-y-4">
             {country.schoolingLandscape.paragraphs.map((p, i) => (
               <p key={i} className="text-slate-400 leading-relaxed">{p}</p>
@@ -150,6 +135,7 @@ const CountryLandingPage = () => {
               it's an internal fact-check flag for the VCS team, not visitor
               copy. See SEO-AUDIT-FE.md / the country-pages report for the
               compiled list of claims to verify before publish. */}
+          <div className="clear-both" />
         </Reveal>
 
         {/* Why O/A Level */}
@@ -157,11 +143,13 @@ const CountryLandingPage = () => {
           <h2 className="text-2xl md:text-3xl font-black font-poppins tracking-tight mb-5">
             {country.whyOALevel.heading}
           </h2>
+          <CountryInlineImage image={country.images.study1} countrySlug={country.slug} side="left" />
           <div className="space-y-4">
             {country.whyOALevel.paragraphs.map((p, i) => (
               <p key={i} className="text-slate-400 leading-relaxed">{p}</p>
             ))}
           </div>
+          <div className="clear-both" />
         </Reveal>
 
         {/* Class timing */}
@@ -222,7 +210,9 @@ const CountryLandingPage = () => {
           <h2 className="text-2xl md:text-3xl font-black font-poppins tracking-tight mb-5">
             The Pakistani community in {country.countryName}
           </h2>
+          <CountryInlineImage image={country.images.study2} countrySlug={country.slug} side="right" />
           <p className="text-slate-400 leading-relaxed">{country.diaspora}</p>
+          <div className="clear-both" />
         </Reveal>
 
         {/* FAQ */}

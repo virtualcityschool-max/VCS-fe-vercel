@@ -21,6 +21,30 @@ export const APPROX_FX = {
   KWD: { rate: 0.31, label: "Kuwaiti Dinar" },
 };
 
+// Photos sourced via the Pexels API (free tier, no attribution required by
+// license) and screened against the content rules before use: no religious
+// or political imagery, no flags, no identifiable person framed as "our
+// student," no physical-classroom shots that would misrepresent VCS as
+// running a campus. Converted to WebP, capped at 1000px wide, stored per
+// country under public/assets/countries/<slug>/. The two "study" photos are
+// deliberately anonymous (back of frame, no face) and reused across all four
+// pages since they illustrate a generic concept, not a specific place -
+// only the skyline photo is genuinely unique to each country.
+const STUDY_DESK_IMAGE = {
+  src: "student-studying-home-desk.webp",
+  width: 1000,
+  height: 1500,
+  alt: "A student studying at a home desk with a laptop, notebook and a shelf of books nearby",
+  caption: "Live classes fit around a normal home study routine, not a commute to campus.",
+};
+const STUDY_LAPTOP_IMAGE = {
+  src: "student-online-class-laptop.webp",
+  width: 1000,
+  height: 564,
+  alt: "A student following a live online class on a laptop at a home desk",
+  caption: "One live teacher, one small class, joined from home.",
+};
+
 export const COUNTRY_PAGES = [
   {
     slug: "saudi-arabia",
@@ -85,6 +109,17 @@ export const COUNTRY_PAGES = [
         a: "Pakistan International Schools in Saudi Arabia generally teach the Pakistani Federal Board curriculum (Matric/FSc). Virtual City School teaches Cambridge O Level and A Level - a different, internationally-portable qualification track, not a replacement for or continuation of the Federal Board syllabus.",
       },
     ],
+    images: {
+      skyline: {
+        src: "riyadh-skyline.webp",
+        width: 1000,
+        height: 667,
+        alt: "The Kingdom Centre tower illuminated at night among office buildings and palm trees in Riyadh, Saudi Arabia",
+        caption: "Riyadh, Saudi Arabia.",
+      },
+      study1: STUDY_DESK_IMAGE,
+      study2: STUDY_LAPTOP_IMAGE,
+    },
     siblingSlugs: ["uae", "qatar"],
   },
 
@@ -151,6 +186,17 @@ export const COUNTRY_PAGES = [
         verify: true,
       },
     ],
+    images: {
+      skyline: {
+        src: "dubai-marina-skyline.webp",
+        width: 1000,
+        height: 667,
+        alt: "Skyscrapers of the Dubai Marina district lit by evening sunset light",
+        caption: "Dubai Marina, UAE.",
+      },
+      study1: STUDY_LAPTOP_IMAGE,
+      study2: STUDY_DESK_IMAGE,
+    },
     siblingSlugs: ["qatar", "kuwait"],
   },
 
@@ -218,6 +264,17 @@ export const COUNTRY_PAGES = [
         verify: true,
       },
     ],
+    images: {
+      skyline: {
+        src: "doha-corniche-skyline.webp",
+        width: 1000,
+        height: 667,
+        alt: "Doha's skyline viewed across the water from the Corniche promenade",
+        caption: "Doha, Qatar, seen from the Corniche.",
+      },
+      study1: STUDY_DESK_IMAGE,
+      study2: STUDY_LAPTOP_IMAGE,
+    },
     siblingSlugs: ["kuwait", "saudi-arabia"],
   },
 
@@ -284,6 +341,17 @@ export const COUNTRY_PAGES = [
         a: "Since classes are attended online, a change of address - within Kuwait or to another country - doesn't interrupt your child's enrollment the way changing a physical school would.",
       },
     ],
+    images: {
+      skyline: {
+        src: "kuwait-city-skyline.webp",
+        width: 1000,
+        height: 607,
+        alt: "Kuwait City's skyline reflected in calm water at sunset",
+        caption: "Kuwait City, Kuwait.",
+      },
+      study1: STUDY_LAPTOP_IMAGE,
+      study2: STUDY_DESK_IMAGE,
+    },
     siblingSlugs: ["saudi-arabia", "uae"],
   },
 ];
