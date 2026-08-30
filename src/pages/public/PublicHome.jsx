@@ -21,6 +21,20 @@ import { showApiError } from "../../utils/apiErrorHandler";
 import { getStorageUrl } from "../../utils/storageUrl";
 import { useSeo } from "../../hooks/useSeo";
 
+// O Level / IGCSE / AS Level / A2 Level are VCS's core Cambridge programmes -
+// the homepage previews should lead with these ahead of the Grade 5-12 /
+// Federal Board catalogue, since that's what most visitors are here for.
+const OA_LEVEL_PATTERN = /\bo[\s-]?levels?\b|\bigcse\b|\bas[\s-]?level\b|\ba2[\s-]?level\b/i;
+
+const isOALevelCourse = (course) => {
+  const categoryName =
+    typeof course.category === "string" ? course.category : course.category?.name ?? "";
+  return OA_LEVEL_PATTERN.test(categoryName) || OA_LEVEL_PATTERN.test(course.title || "");
+};
+
+const isOALevelTutor = (teacher) =>
+  (teacher.courses || []).some((c) => OA_LEVEL_PATTERN.test(c.course_name || ""));
+
 const TESTIMONIALS = [
   {
     quote:
@@ -73,11 +87,14 @@ const PublicHome = () => {
   // Same reasoning as featuredCourses below: this homepage grid is only ever
   // a 4-tutor preview (full directory is one click away via "View All
   // Tutors"), so it's safe to only feature tutors who have a real uploaded
-  // photo - a tutor without one still shows up normally on /teachers.
-  const featuredTeachers = useMemo(
-    () => teachers.filter((t) => t.avatar).slice(0, 4),
-    [teachers],
-  );
+  // photo - a tutor without one still shows up normally on /teachers. O/A
+  // Level tutors are shown first since that's VCS's core offering.
+  const featuredTeachers = useMemo(() => {
+    const withAvatar = teachers.filter((t) => t.avatar);
+    const oaLevel = withAvatar.filter(isOALevelTutor);
+    const rest = withAvatar.filter((t) => !isOALevelTutor(t));
+    return [...oaLevel, ...rest].slice(0, 4);
+  }, [teachers]);
   const { blogs, isLoading: blogsLoading } = useSelector((state) => state.blogs);
   const articleBlogs = useMemo(
     () => blogs.filter((b) => (b.post_type || "article") === "article"),
@@ -185,10 +202,13 @@ const PublicHome = () => {
   // click away via "View All Courses"), so it's safe to only feature courses
   // that actually have a thumbnail - a course missing one still shows up
   // normally on /courses, it just doesn't get featured here looking broken.
-  const featuredCourses = useMemo(
-    () => availableCourses.filter((course) => course.thumbnail).slice(0, 4),
-    [availableCourses],
-  );
+  // O/A Level courses are shown first since they're VCS's core programmes.
+  const featuredCourses = useMemo(() => {
+    const withThumbnail = availableCourses.filter((course) => course.thumbnail);
+    const oaLevel = withThumbnail.filter(isOALevelCourse);
+    const rest = withThumbnail.filter((course) => !isOALevelCourse(course));
+    return [...oaLevel, ...rest].slice(0, 4);
+  }, [availableCourses]);
 
   useSeo({
       title: "Online Cambridge O & A Level School",
