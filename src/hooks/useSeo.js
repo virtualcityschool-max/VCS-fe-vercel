@@ -49,6 +49,10 @@ const setLink = (rel, href) => {
   return { el, created, prev };
 };
 
+// Accepts either a single schema.org object (used as-is, unchanged behavior)
+// or an array of objects (e.g. [FAQPage, BreadcrumbList]), which are combined
+// into one document via @graph so a route can carry more than one schema
+// type without stacking multiple <script> tags.
 const setJsonLd = (data) => {
     if (typeof document === "undefined") return null;
     let el = document.head.querySelector('script[data-seo-jsonld="true"]');
@@ -60,8 +64,30 @@ const setJsonLd = (data) => {
           document.head.appendChild(el);
     }
     const prev = el.textContent;
-    el.textContent = JSON.stringify(data);
+    const payload = Array.isArray(data)
+      ? { "@context": "https://schema.org", "@graph": data }
+      : data;
+    el.textContent = JSON.stringify(payload);
     return { el, created, prev };
+};
+
+// Manages a set of <link rel="alternate" hreflang="..."> tags for
+// language/region variants (e.g. en-sa, en-ae, x-default). These are
+// additive elements with no single prior value to restore, so unlike
+// setMeta/setLink this just creates its own tags on mount and removes
+// exactly those tags on cleanup.
+const setHreflangAlternates = (alternates) => {
+  if (typeof document === "undefined" || !alternates?.length) return null;
+  const els = alternates.map(({ hreflang, href }) => {
+    const el = document.createElement("link");
+    el.setAttribute("rel", "alternate");
+    el.setAttribute("hreflang", hreflang);
+    el.setAttribute("href", href);
+    el.setAttribute("data-seo-hreflang", "true");
+    document.head.appendChild(el);
+    return el;
+  });
+  return { els };
 };
 
 export const useSeo = ({
@@ -71,6 +97,7 @@ export const useSeo = ({
   url,
   type = "website",
     jsonLd,
+    hreflangAlternates,
 } = {}) => {
   useEffect(() => {
     if (typeof document === "undefined") return;
@@ -108,6 +135,8 @@ export const useSeo = ({
         track(setJsonLd(jsonLd));
   }
 
+  const hreflangHandle = setHreflangAlternates(hreflangAlternates);
+
     // Restore prior head state when the page unmounts / deps change.
     return () => {
       document.title = prevTitle;
@@ -123,8 +152,9 @@ export const useSeo = ({
           }
         }
       });
+      hreflangHandle?.els.forEach((el) => el.remove());
     };
-  }, [title, description, image, url, type, jsonLd]);
+  }, [title, description, image, url, type, jsonLd, hreflangAlternates]);
 };
 
 export default useSeo;

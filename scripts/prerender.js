@@ -58,8 +58,17 @@ async function fetchJson(url) {
   return Array.isArray(data) ? data : data.results || [];
 }
 
+// Country landing pages are static content committed to the repo, not
+// CMS-driven data - unlike courses/teachers/blogs below, they don't need
+// the API to exist and are never stale between deploys.
+const COUNTRY_LANDING_SLUGS = ["saudi-arabia", "uae", "qatar", "kuwait"];
+
 async function buildRouteList() {
-  const routes = ["/", "/courses", "/teachers", "/blogs", "/about", "/privacy-policy", "/terms"];
+  const routes = [
+    "/", "/courses", "/teachers", "/blogs", "/about", "/privacy-policy", "/terms",
+    "/online-school",
+    ...COUNTRY_LANDING_SLUGS.map((slug) => `/online-school/${slug}`),
+  ];
 
   try {
     const courses = await fetchJson(`${API_BASE_URL}/courses/`);

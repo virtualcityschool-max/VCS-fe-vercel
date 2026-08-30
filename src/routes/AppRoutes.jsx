@@ -15,6 +15,8 @@ import TeacherProfile from "../pages/public/TeacherProfile";
 import PrivacyPolicy from "../pages/public/PrivacyPolicy";
 import TermsAndConditions from "../pages/public/TermsAndConditions";
 import AboutPage from "../pages/public/AboutPage";
+import OnlineSchoolHub from "../pages/public/OnlineSchoolHub";
+import CountryLandingPage from "../pages/public/CountryLandingPage";
 
 // Authenticated dashboards are code-split so public visitors never download them.
 const StudentLayout = React.lazy(() => import("../pages/student/StudentLayout"));
@@ -193,6 +195,8 @@ const AppRoutes = () => {
       <Route path="/privacy-policy" element={<PrivacyPolicy />} />
       <Route path="/terms" element={<TermsAndConditions />} />
       <Route path="/about" element={<AboutPage />} />
+      <Route path="/online-school" element={<OnlineSchoolHub />} />
+      <Route path="/online-school/:countrySlug" element={<CountryLandingPage />} />
 
       {/* Student-Only Routes */}
       <Route element={<ProtectedRoute allowedRoles={["student"]} />}>

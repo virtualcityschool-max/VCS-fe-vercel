@@ -7,6 +7,11 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const SITE_URL = "https://virtualcityschool.com";
 const API_BASE_URL = process.env.VITE_API_BASE_URL || "https://virtualschool.grayphite.com/api/v1";
 
+// Bump this when the country landing page content is meaningfully edited -
+// it's the lastmod value Google uses to gauge freshness for these pages,
+// since (unlike blogs/courses) they have no API-side updated_at to read.
+const COUNTRY_PAGES_LAST_UPDATED = "2026-08-30";
+
 const STATIC_PAGES = [
   { loc: "/", changefreq: "weekly", priority: "1.0" },
   { loc: "/about", changefreq: "monthly" },
@@ -15,10 +20,16 @@ const STATIC_PAGES = [
   { loc: "/blogs", changefreq: "daily" },
   { loc: "/privacy-policy", changefreq: "yearly" },
   { loc: "/terms", changefreq: "yearly" },
+  { loc: "/online-school", changefreq: "monthly", lastmod: COUNTRY_PAGES_LAST_UPDATED },
+  { loc: "/online-school/saudi-arabia", changefreq: "monthly", lastmod: COUNTRY_PAGES_LAST_UPDATED },
+  { loc: "/online-school/uae", changefreq: "monthly", lastmod: COUNTRY_PAGES_LAST_UPDATED },
+  { loc: "/online-school/qatar", changefreq: "monthly", lastmod: COUNTRY_PAGES_LAST_UPDATED },
+  { loc: "/online-school/kuwait", changefreq: "monthly", lastmod: COUNTRY_PAGES_LAST_UPDATED },
 ];
 
-function urlEntry({ loc, changefreq, priority }) {
+function urlEntry({ loc, changefreq, priority, lastmod }) {
   let entry = `<url><loc>${SITE_URL}${loc}</loc>`;
+  if (lastmod) entry += `<lastmod>${lastmod}</lastmod>`;
   if (changefreq) entry += `<changefreq>${changefreq}</changefreq>`;
   if (priority) entry += `<priority>${priority}</priority>`;
   entry += `</url>`;
