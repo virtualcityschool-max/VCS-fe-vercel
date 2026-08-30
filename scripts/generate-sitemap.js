@@ -12,12 +12,23 @@ const API_BASE_URL = process.env.VITE_API_BASE_URL || "https://virtualschool.gra
 // since (unlike blogs/courses) they have no API-side updated_at to read.
 const COUNTRY_PAGES_LAST_UPDATED = "2026-08-30";
 
+// Today's build date, in UTC. Used only for pages whose content is a live
+// aggregate of everything else (the homepage's course list, /courses,
+// /teachers, /blogs) - it's honest to say those changed "today" because the
+// build did just regenerate them from current data. NOT used for /about,
+// /privacy-policy, /terms below: those have no genuine tracked edit date,
+// and stamping every deploy's date on a page that didn't actually change
+// is exactly the kind of inaccurate lastmod that makes Google start
+// ignoring a sitemap's lastmod signal site-wide - better to omit it than
+// fake it.
+const BUILD_DATE = new Date().toISOString().slice(0, 10);
+
 const STATIC_PAGES = [
-  { loc: "/", changefreq: "weekly", priority: "1.0" },
+  { loc: "/", changefreq: "weekly", priority: "1.0", lastmod: BUILD_DATE },
   { loc: "/about", changefreq: "monthly" },
-  { loc: "/courses", changefreq: "weekly" },
-  { loc: "/teachers", changefreq: "weekly" },
-  { loc: "/blogs", changefreq: "daily" },
+  { loc: "/courses", changefreq: "weekly", lastmod: BUILD_DATE },
+  { loc: "/teachers", changefreq: "weekly", lastmod: BUILD_DATE },
+  { loc: "/blogs", changefreq: "daily", lastmod: BUILD_DATE },
   { loc: "/privacy-policy", changefreq: "yearly" },
   { loc: "/terms", changefreq: "yearly" },
   { loc: "/online-school", changefreq: "monthly", lastmod: COUNTRY_PAGES_LAST_UPDATED },
@@ -57,7 +68,13 @@ async function main() {
     `${API_BASE_URL}/blogs/?ordering=-published_at`,
     {
       filter: (b) => b.status === "published" && b.slug,
-      toEntry: (b) => ({ loc: `/blogs/${b.slug}`, changefreq: "monthly" }),
+      // updated_at is the real "last modified" signal when present; fall
+      // back to published_at for posts that have never been edited since.
+      toEntry: (b) => ({
+        loc: `/blogs/${b.slug}`,
+        changefreq: "monthly",
+        lastmod: (b.updated_at || b.published_at || "").slice(0, 10) || undefined,
+      }),
     },
   );
 
@@ -66,7 +83,15 @@ async function main() {
     `${API_BASE_URL}/courses/`,
     {
       filter: (c) => c.id != null,
-      toEntry: (c) => ({ loc: `/courses/${c.id}`, changefreq: "weekly" }),
+      // The courses API only exposes created_at, not updated_at, so this is
+      // "when the course was added," not "when it last changed" - the best
+      // real signal available today. Worth asking the backend to add
+      // updated_at if course details get edited after creation.
+      toEntry: (c) => ({
+        loc: `/courses/${c.id}`,
+        changefreq: "weekly",
+        lastmod: (c.created_at || "").slice(0, 10) || undefined,
+      }),
     },
   );
 
@@ -75,6 +100,10 @@ async function main() {
     `${API_BASE_URL}/courses/teachers/`,
     {
       filter: (t) => t.id != null,
+      // No date field at all comes back from this endpoint (checked live:
+      // id, teacher_name, avatar, experience, expertise, courses, rating -
+      // nothing else), so there's no honest lastmod to set here. Flagging
+      // for the backend team rather than fabricating one.
       toEntry: (t) => ({ loc: `/teachers/${t.id}`, changefreq: "monthly" }),
     },
   );
