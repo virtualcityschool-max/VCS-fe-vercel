@@ -70,6 +70,14 @@ const PublicHome = () => {
   const { enrolledCourses, enrollingCourseIds, withdrawingCourseIds, unenrollingCourseIds } = useSelector((state) => state.studentDashboard);
   const { enrollmentIntent } = useSelector((state) => state.ui);
   const { teachers, loading: teachersLoading } = useSelector((state) => state.teachers);
+  // Same reasoning as featuredCourses below: this homepage grid is only ever
+  // a 4-tutor preview (full directory is one click away via "View All
+  // Tutors"), so it's safe to only feature tutors who have a real uploaded
+  // photo - a tutor without one still shows up normally on /teachers.
+  const featuredTeachers = useMemo(
+    () => teachers.filter((t) => t.avatar).slice(0, 4),
+    [teachers],
+  );
   const { blogs, isLoading: blogsLoading } = useSelector((state) => state.blogs);
   const articleBlogs = useMemo(
     () => blogs.filter((b) => (b.post_type || "article") === "article"),
@@ -493,7 +501,7 @@ const PublicHome = () => {
               ? [...Array(4)].map((_, i) => (
                   <div key={i} className="skeleton rounded-[2.5rem] p-8 border border-white/5 h-[320px]" />
                 ))
-              : teachers.slice(0, 4).map((t, i) => (
+              : featuredTeachers.map((t, i) => (
                   <TutorCard
                     key={t.id}
                     teacher={t}
