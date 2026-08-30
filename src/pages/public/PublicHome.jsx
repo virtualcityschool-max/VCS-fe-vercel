@@ -322,7 +322,7 @@ const PublicHome = () => {
             <h2 className="text-3xl md:text-5xl font-black font-poppins tracking-tight">
               {auth.isLoggedIn && auth.role === "student"
                 ? "Available Courses"
-                : "Trending Skills"}
+                : "Trending Courses"}
             </h2>
           </div>
           <button
