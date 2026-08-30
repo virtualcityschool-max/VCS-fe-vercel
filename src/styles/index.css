@@ -374,7 +374,7 @@ h3,
   line-height: 1.25;
   margin: 2rem 0 0.85rem;
 }
-.blog-content p { color: #cbd5e1; line-height: 1.85; margin-bottom: 1.15rem; font-size: 1.05rem; }
+.blog-content p { color: #cbd5e1; line-height: 1.7; margin-bottom: 1.15rem; font-size: 1.05rem; }
 /* Lists: Quill 2 wraps every list in <ol> and records the type on
    li[data-list="bullet|ordered"], rendering the marker through an internal
    .ql-ui span. In the read-only viewer that span is hidden, so we draw our own
