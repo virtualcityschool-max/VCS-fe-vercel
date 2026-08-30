@@ -30,7 +30,7 @@ const ExamZoneCallout = () => (
           className="inline-flex items-center gap-2 text-amber-400 hover:text-white text-xs font-black uppercase tracking-widest transition"
         >
           Find your zone on cambridgeinternational.org
-          <i className="fas fa-arrow-up-right-from-square text-[10px]" aria-hidden="true" />
+          <i className="fas fa-arrow-up-right-from-square text-xs" aria-hidden="true" />
         </a>
       </div>
     </div>

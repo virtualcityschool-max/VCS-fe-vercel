@@ -56,18 +56,18 @@ const ExamDatesPage = () => {
       </div>
 
       <article className="relative z-10 max-w-4xl mx-auto px-6 pt-12 md:pt-16 pb-24">
-        <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-slate-500 mb-8">
+        <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-500 mb-8">
           <Link to="/" className="hover:text-white transition">Home</Link>
           <span>/</span>
           <span className="text-slate-300">Exam Dates & Deadlines</span>
         </nav>
 
         <header className="mb-8">
-          <span className="inline-flex items-center px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-[10px] font-black uppercase tracking-[0.2em] mb-5">
+          <span className="inline-flex items-center px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-black uppercase tracking-[0.2em] mb-5">
             Cambridge Key Dates
           </span>
           <h1 className="text-3xl md:text-5xl font-black font-poppins tracking-tight leading-[1.1] text-white mb-6">
-            Cambridge O Level & A Level Exam Dates and Deadlines
+            Cambridge O Level & A Level <span className="text-gradient">Exam Dates and Deadlines</span>
           </h1>
           <p className="text-slate-400 text-base md:text-lg leading-relaxed max-w-2xl">
             Registration deadlines, exam windows and results release dates for Cambridge IGCSE, O Level and International AS & A Level - sourced directly from Cambridge International, for Pakistani families across Saudi Arabia, the UAE, Qatar and Kuwait.

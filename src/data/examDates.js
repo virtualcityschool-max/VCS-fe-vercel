@@ -50,25 +50,59 @@ export const SERIES_TYPE_LABELS = {
   "oct-nov": "Oct/Nov series",
 };
 
-// One Tailwind colour per series type, reused from the palette already used
-// elsewhere on the site (cyan + indigo appear together on the homepage hero
-// badge and country pages) - no new colours introduced.
-export const SERIES_TYPE_COLORS = {
+// One accent colour per SERIES (column identity) - cyan/indigo, the same
+// pairing used on the homepage hero badge and country pages (matches the
+// site's .text-gradient too). Bars themselves are coloured by PHASE, not by
+// series - see PHASE_COLORS below - so series identity here is carried by
+// column position, this header colour, and the underline border, not hue.
+export const SERIES_ACCENT_COLORS = {
   "may-june": {
     text: "text-cyan-300",
     accentText: "text-cyan-400",
-    bg: "bg-cyan-500/20",
-    border: "border-cyan-400/40",
-    bar: "fill-cyan-500/70",
-    barPast: "fill-cyan-500/25",
+    border: "border-cyan-400/50",
   },
   "oct-nov": {
     text: "text-indigo-300",
     accentText: "text-indigo-400",
-    bg: "bg-indigo-500/20",
-    border: "border-indigo-400/40",
-    bar: "fill-indigo-500/70",
-    barPast: "fill-indigo-500/25",
+    border: "border-indigo-400/50",
+  },
+};
+
+// One colour per PHASE, reused consistently across both series' columns in
+// the timeline and every row in the table, so colour actually encodes
+// meaning (which phase) instead of decorating. All three are already used
+// elsewhere on the site (amber on the zone callout/FAQ kicker, rose in
+// testimonials/badges, emerald on the WhatsApp button) - no new hues.
+export const PHASE_COLORS = {
+  registration: {
+    text: "text-amber-300",
+    accentText: "text-amber-400",
+    bar: "fill-amber-500/85",
+    barMuted: "fill-amber-500/30",
+    dot: "bg-amber-400",
+    badgeBg: "bg-amber-500/15",
+    badgeBorder: "border-amber-400/40",
+    badgeText: "text-amber-300",
+  },
+  exam: {
+    text: "text-rose-300",
+    accentText: "text-rose-400",
+    bar: "fill-rose-500/85",
+    barMuted: "fill-rose-500/30",
+    dot: "bg-rose-400",
+    badgeBg: "bg-rose-500/15",
+    badgeBorder: "border-rose-400/40",
+    badgeText: "text-rose-300",
+  },
+  results: {
+    text: "text-emerald-300",
+    accentText: "text-emerald-400",
+    bar: "fill-emerald-500/85",
+    barMuted: "fill-emerald-500/30",
+    dot: "bg-emerald-400",
+    badgeBg: "bg-emerald-500/15",
+    badgeBorder: "border-emerald-400/40",
+    badgeText: "text-emerald-300",
   },
 };
 
@@ -104,6 +138,13 @@ export const PHASE_LABELS = {
 //                  family could misread (e.g. a centre-vs-Cambridge deadline)
 //   highlight    - true if this point should be eligible to appear in the
 //                  page's live "next milestone" status line
+//   primary      - true on the one point per registration phase that should
+//                  be used as the short "Entries close" headline date in the
+//                  timeline graphic (Cambridge's real final-entries cutoff,
+//                  not a late/retake extension)
+//   shortDisplay - only needed on an `exact: false` point - a compact form
+//                  of displayDate for the timeline graphic's narrow bars,
+//                  e.g. displayDate "Late September 2026" -> "late Sep"
 
 export const EXAM_SERIES = [
   {
@@ -119,6 +160,7 @@ export const EXAM_SERIES = [
           date: "2026-02-21",
           exact: true,
           anchorDate: "2026-02-21",
+          primary: true,
           sourceUrl: SOURCES.JUNE_2026_KEY_DATES,
           sourceLabel: "Cambridge: Key dates for June 2026 series (PDF)",
           familyNote:
@@ -203,6 +245,7 @@ export const EXAM_SERIES = [
           date: "2026-08-16",
           exact: true,
           anchorDate: "2026-08-16",
+          primary: true,
           sourceUrl: SOURCES.NOV_2026_KEY_DATES,
           sourceLabel: "Cambridge: Key dates for November 2026 series (PDF)",
           familyNote:
@@ -239,6 +282,7 @@ export const EXAM_SERIES = [
           date: null,
           exact: false,
           displayDate: "Late September 2026",
+          shortDisplay: "late Sep",
           anchorDate: "2026-09-26",
           sourceUrl: SOURCES.NOV_2026_KEY_DATES,
           sourceLabel: "Cambridge: Key dates for November 2026 series (PDF)",
@@ -249,6 +293,7 @@ export const EXAM_SERIES = [
           date: null,
           exact: false,
           displayDate: "Mid-November 2026",
+          shortDisplay: "mid Nov",
           anchorDate: "2026-11-15",
           sourceUrl: SOURCES.NOV_2026_KEY_DATES,
           sourceLabel: "Cambridge: Key dates for November 2026 series (PDF)",

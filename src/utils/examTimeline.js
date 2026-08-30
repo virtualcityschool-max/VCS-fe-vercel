@@ -22,12 +22,6 @@ export function monthAxisPosition(isoDate, anchorYear) {
   return row + frac;
 }
 
-export const AXIS_ROW_LABELS = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
-  "January",
-];
-
 const pointDate = (point) => point.date || point.anchorDate;
 
 // The date/time text that should actually be rendered for a point - never a
@@ -44,6 +38,40 @@ export function formatIsoDate(isoDate) {
     year: "numeric",
     timeZone: "UTC",
   });
+}
+
+// Compact "16 Aug" form for the timeline graphic's narrow bars - never used
+// for the table, which always shows the full formatIsoDate.
+export function formatShortDate(isoDate) {
+  if (!isoDate) return "";
+  return toUtcDate(isoDate).toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    timeZone: "UTC",
+  });
+}
+
+export function shortMonthName(isoDate) {
+  if (!isoDate) return "";
+  return toUtcDate(isoDate).toLocaleDateString("en-GB", { month: "long", timeZone: "UTC" });
+}
+
+// The compact date text for a point, for the timeline graphic specifically -
+// `shortDisplay` for an approximate point, otherwise a short formatted date.
+export function pointShortLabel(point) {
+  return point.exact === false ? point.shortDisplay : formatShortDate(point.date);
+}
+
+export const AXIS_MONTH_NAMES = [
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan",
+];
+
+// "Jan '26" / "Jan '27" - a compact, unambiguous year on every axis row.
+// `referenceYear` is the calendar year row 0 (January) represents; row 12
+// (the trailing January) is always referenceYear + 1.
+export function axisRowLabel(rowIndex, referenceYear) {
+  const year = referenceYear + (rowIndex === 12 ? 1 : 0);
+  return `${AXIS_MONTH_NAMES[rowIndex]} '${String(year).slice(-2)}`;
 }
 
 // Start/end position (in axis rows) + earliest/latest point for a phase
@@ -79,18 +107,38 @@ export function isSeriesFinished(series, today) {
 }
 
 // Picks the one series per type ("may-june" | "oct-nov") the timeline
-// graphic should show: the soonest one that isn't finished yet, so a fully-
-// past series (e.g. June 2026, once August's results are out) automatically
-// drops out in favour of the next occurrence - even an unpublished/TBC one -
-// rather than leading the page with something that already happened.
+// graphic should show, as { series, mode, nextUnpublished }:
+//   mode "current"   - a published series that hasn't finished yet - the
+//                      normal case, shown at full colour.
+//   mode "completed" - no published series is currently active (e.g. the
+//                      next occurrence's dates aren't out yet), so the most
+//                      recently completed one is shown instead, muted. An
+//                      empty column is never acceptable - a finished series
+//                      still shows families the annual rhythm.
+//   mode "none"      - there is genuinely no data at all for this type yet
+//                      (only possible before any series has ever been added).
+// `nextUnpublished` carries the not-yet-published series (if one exists in
+// the data) so the UI can caption e.g. "2027 dates not yet published".
 export function pickCurrentSeriesByType(allSeries, today) {
   const result = {};
-  for (const type of Object.keys({ "may-june": 0, "oct-nov": 0 })) {
+  for (const type of ["may-june", "oct-nov"]) {
     const candidates = allSeries
       .filter((s) => s.type === type)
       .sort((a, b) => a.examYear - b.examYear);
-    const notFinished = candidates.find((s) => !isSeriesFinished(s, today));
-    result[type] = notFinished || candidates[candidates.length - 1] || null;
+
+    const current = candidates.find((s) => s.published !== false && !isSeriesFinished(s, today));
+    if (current) {
+      result[type] = { series: current, mode: "current", nextUnpublished: null };
+      continue;
+    }
+
+    const nextUnpublished = candidates.find((s) => s.published === false) || null;
+    const completed = candidates.filter((s) => s.published !== false && isSeriesFinished(s, today));
+    const mostRecentCompleted = completed[completed.length - 1] || null;
+
+    result[type] = mostRecentCompleted
+      ? { series: mostRecentCompleted, mode: "completed", nextUnpublished }
+      : { series: null, mode: "none", nextUnpublished };
   }
   return result;
 }
