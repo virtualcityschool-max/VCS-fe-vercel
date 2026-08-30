@@ -168,10 +168,19 @@ const PublicHome = () => {
       ? filteredCourses.filter((course) => isCourseEnrolled(course))
       : [], [filteredCourses, auth.role]);
 
-  const availableCourses = useMemo(() => 
+  const availableCourses = useMemo(() =>
     auth.role === "student"
       ? filteredCourses.filter((course) => !isCourseEnrolled(course))
       : filteredCourses, [filteredCourses, auth.role]);
+
+  // This homepage grid is only ever a 4-course preview (full catalog is one
+  // click away via "View All Courses"), so it's safe to only feature courses
+  // that actually have a thumbnail - a course missing one still shows up
+  // normally on /courses, it just doesn't get featured here looking broken.
+  const featuredCourses = useMemo(
+    () => availableCourses.filter((course) => course.thumbnail).slice(0, 4),
+    [availableCourses],
+  );
 
   useSeo({
       title: "Online Cambridge O & A Level School",
@@ -338,7 +347,7 @@ const PublicHome = () => {
             ? [...Array(4)].map((_, i) => (
                 <div key={i} className="skeleton rounded-2xl overflow-hidden border border-white/5 aspect-[4/5]" />
               ))
-            : availableCourses.slice(0, 4).map((course, i) => (
+            : featuredCourses.map((course, i) => (
               <PublicCourseCard
                 key={course.id}
                 course={course}
