@@ -68,6 +68,7 @@ async function buildRouteList() {
     "/", "/courses", "/teachers", "/blogs", "/about", "/privacy-policy", "/terms",
     "/online-school",
     ...COUNTRY_LANDING_SLUGS.map((slug) => `/online-school/${slug}`),
+    "/exam-dates",
   ];
 
   try {

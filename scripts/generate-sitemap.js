@@ -1,6 +1,7 @@
 import { writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
+import { LAST_VERIFIED as EXAM_DATES_LAST_VERIFIED } from "../src/data/examDates.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -32,6 +33,7 @@ const STATIC_PAGES = [
   { loc: "/privacy-policy", changefreq: "yearly" },
   { loc: "/terms", changefreq: "yearly" },
   { loc: "/online-school", changefreq: "monthly", lastmod: COUNTRY_PAGES_LAST_UPDATED },
+  { loc: "/exam-dates", changefreq: "weekly", lastmod: EXAM_DATES_LAST_VERIFIED },
   { loc: "/online-school/saudi-arabia", changefreq: "monthly", lastmod: COUNTRY_PAGES_LAST_UPDATED },
   { loc: "/online-school/uae", changefreq: "monthly", lastmod: COUNTRY_PAGES_LAST_UPDATED },
   { loc: "/online-school/qatar", changefreq: "monthly", lastmod: COUNTRY_PAGES_LAST_UPDATED },
