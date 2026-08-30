@@ -239,6 +239,12 @@ const CountryLandingPage = () => {
               </Link>
             ))}
             <Link
+              to="/exam-dates"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 hover:border-indigo-400/40 hover:bg-indigo-500/10 transition text-sm font-semibold text-slate-300"
+            >
+              <i className="fas fa-calendar-days text-[11px]" aria-hidden="true" /> Exam Dates & Deadlines
+            </Link>
+            <Link
               to="/online-school"
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 hover:border-indigo-400/40 hover:bg-indigo-500/10 transition text-sm font-semibold text-slate-300"
             >

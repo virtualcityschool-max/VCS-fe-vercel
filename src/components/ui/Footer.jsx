@@ -102,6 +102,14 @@ const Footer = ({ variant = "full" }) => {
                     Meet Our Tutors
                   </button>
                 </li>
+                <li>
+                  <button
+                    onClick={() => handleNavigation("/exam-dates")}
+                    className={footerLink}
+                  >
+                    Exam Dates & Deadlines
+                  </button>
+                </li>
                 {isLoggedIn && (
                   <>
                     <li>
