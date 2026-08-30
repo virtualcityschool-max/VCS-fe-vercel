@@ -110,7 +110,7 @@ const seoImage = found
         <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-purple-600/10 blur-[150px] rounded-full animate-aurora" style={{ animationDelay: "-6s" }} />
       </div>
 
-      <article className="relative z-10 max-w-3xl mx-auto px-6 pt-12 md:pt-16 pb-24">
+      <article className="relative z-10 max-w-4xl mx-auto px-6 pt-12 md:pt-16 pb-24">
         {/* Breadcrumb / back */}
         <Link
           to="/blogs"
