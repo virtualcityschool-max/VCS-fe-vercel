@@ -114,12 +114,56 @@ const CourseDetails = () => {
     };
   }, [course, courseId]);
 
+  const courseUrl = typeof window !== "undefined" ? window.location.href : undefined;
+
   useSeo({
       title: normalizedCourse ? `${normalizedCourse.title} | Virtual City School` : undefined,
       description: normalizedCourse
             ? `Enroll in ${normalizedCourse.title} - a live online Cambridge course at Virtual City School for students across the UAE, Saudi Arabia, Qatar and Pakistan.`
             : undefined,
-      url: typeof window !== "undefined" ? window.location.href : undefined,
+      url: courseUrl,
+      jsonLd: normalizedCourse
+        ? [
+            {
+              "@type": "Course",
+              name: normalizedCourse.title,
+              description: normalizedCourse.description,
+              url: courseUrl,
+              provider: {
+                "@type": "EducationalOrganization",
+                name: "Virtual City School",
+                sameAs: "https://virtualcityschool.com",
+              },
+              // Real data only - the instructor is whoever's actually assigned,
+              // and this is a live-taught, paid-per-course offering, not a
+              // free/self-paced one, so hasCourseInstance/offers reflect what's
+              // actually true rather than filling in placeholder values.
+              ...(getDisplayName(normalizedCourse.instructor)
+                ? { instructor: { "@type": "Person", name: getDisplayName(normalizedCourse.instructor) } }
+                : {}),
+              hasCourseInstance: {
+                "@type": "CourseInstance",
+                courseMode: "online",
+                courseWorkload: "Live, instructor-led",
+              },
+              offers: {
+                "@type": "Offer",
+                price: normalizedCourse.price,
+                priceCurrency: "USD",
+                availability: "https://schema.org/InStock",
+                url: courseUrl,
+              },
+            },
+            {
+              "@type": "BreadcrumbList",
+              itemListElement: [
+                { "@type": "ListItem", position: 1, name: "Home", item: "https://virtualcityschool.com" },
+                { "@type": "ListItem", position: 2, name: "Courses", item: "https://virtualcityschool.com/courses" },
+                { "@type": "ListItem", position: 3, name: normalizedCourse.title, item: courseUrl },
+              ],
+            },
+          ]
+        : undefined,
   });
   
   // Check if course is enrolled
