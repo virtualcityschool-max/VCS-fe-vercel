@@ -9,6 +9,14 @@ function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
 gtag('config', 'AW-18418489308');
 </script>
+<script>
+  document.addEventListener('click', function (e) {
+    var link = e.target.closest('a[href*="wa.me"]');
+    if (link) {
+      gtag('event', 'conversion', {'send_to': 'AW-18418489308/wBBaCKWxvO8cENyvz85E'});
+    }
+  });
+</script>
 <meta charset="UTF-8" />
 <link rel="icon" type="image/svg+xml" href="/assets/logo02.png" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
