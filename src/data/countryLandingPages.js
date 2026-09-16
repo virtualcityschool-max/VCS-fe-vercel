@@ -21,6 +21,13 @@ export const APPROX_FX = {
   KWD: { rate: 0.31, label: "Kuwaiti Dinar" },
   BHD: { rate: 0.376, label: "Bahraini Dinar" },
   OMR: { rate: 0.385, label: "Omani Rial" },
+  // Unlike the Gulf currencies above, these float rather than peg to the
+  // dollar - approximate and illustrative only (the UI already labels this
+  // "not a live feed" everywhere it's shown), not a claim of precision.
+  GBP: { rate: 0.79, label: "British Pound" },
+  CAD: { rate: 1.38, label: "Canadian Dollar" },
+  AUD: { rate: 1.53, label: "Australian Dollar" },
+  PKR: { rate: 278, label: "Pakistani Rupee" },
 };
 
 // Photos sourced via the Pexels API (free tier, no attribution required by
@@ -574,6 +581,356 @@ export const COUNTRY_PAGES = [
       },
     },
     siblingSlugs: ["uae", "qatar"],
+  },
+
+  // The six pages above are all Gulf countries, where the pitch is "no
+  // Cambridge school exists near you." The five below are structurally
+  // different markets - the UK, US, Canada and Australia all run their own
+  // native secondary curricula (GCSE/A-Level in the UK; state/provincial
+  // diplomas in the US, Canada and Australia), so "no Cambridge option
+  // locally" isn't the honest pitch there. Pakistan is different again - not
+  // a diaspora market at all, but families already inside Pakistan choosing
+  // between VCS and the country's own established (and expensive, and
+  // city-concentrated) private Cambridge school networks. Photography has
+  // not been sourced for these five yet - images is intentionally {} and
+  // CountryInlineImage renders nothing when a slot is empty, so the page
+  // still works, just without the floated photos the Gulf pages have.
+  {
+    slug: "uk",
+    countryName: "United Kingdom",
+    flagCode: "gb",
+    timeZone: "Europe/London",
+    currency: "GBP",
+    heroKicker: "Cambridge Online School - United Kingdom",
+    h1: "Online Cambridge O Level & A Level School for Pakistani Families in the UK",
+    metaTitle: "Online Cambridge School for Pakistani Families in the UK | Virtual City School",
+    metaDescription:
+      "Live online O Level and A Level classes with Urdu, Islamiyat and Pakistan Studies alongside Cambridge - for Pakistani families in Bradford, Birmingham, London, Manchester and beyond.",
+    intro: [
+      "The UK is the one market on this list where the obvious objection comes first: British schools already teach GCSEs and A-Levels, so why would a Pakistani family in Bradford or Birmingham need an online Cambridge school at all?",
+      "The honest answer is that VCS isn't pitched at every British-Pakistani family - it's for the specific situations where the local system doesn't quite fit: a child being home-educated who still needs a structured, examined curriculum; a family wanting Urdu, Islamiyat and Pakistan Studies taught properly alongside the Cambridge core, which no mainstream UK school offers; or a family moving between the UK, Pakistan and the Gulf who needs a curriculum that travels with them instead of restarting each time.",
+    ],
+    schoolingLandscape: {
+      heading: "Where VCS actually fits alongside UK schooling",
+      paragraphs: [
+        "Most British-Pakistani families are already inside the UK state or private school system, sitting GCSEs and A-Levels through UK exam boards (AQA, Edexcel, OCR) rather than Cambridge International - and for the large majority of families, that's the right, free, default path. VCS isn't trying to replace that.",
+        "Where it does come up: places in oversubscribed schools in Pakistani-dense areas - parts of Bradford, East London, and Birmingham have real, documented pressure on school-place admissions, particularly mid-year - families who choose to home-educate for religious, cultural or personal reasons and want a recognised, examined curriculum rather than an unstructured one, and families who move between the UK and Pakistan or the Gulf and need a qualification that's recognised the same way wherever they land next.",
+        "Cambridge O Level/IGCSE and A Level are set by Cambridge International, a different exam board to the UK's domestic GCSE boards but built to the same level and broadly treated as equivalent for progression purposes - families should confirm equivalence directly with a specific sixth form, college or employer if it matters for a particular decision.",
+      ],
+      verifyNote:
+        "GCSE-vs-Cambridge-IGCSE equivalence treatment varies by receiving institution and is not a single fixed rule - do not state a blanket guarantee of equivalence without a citable UK-government or awarding-body source before publish.",
+    },
+    whyOALevel: {
+      heading: "Why Cambridge specifically, for a family already in the UK",
+      paragraphs: [
+        "Cambridge O Level and A Level are recognised across Pakistan, the Gulf and the UK itself - which matters specifically for a family that might not stay in the UK permanently, or that wants their child to have a genuinely global set of university options rather than a UK-only one.",
+        "For return to Pakistan: results convert to a Pakistani-board equivalent through the Inter Board Committee of Chairmen (IBCC) for university admission, the same process that applies from any Cambridge-taught background - confirm current documentation requirements with IBCC directly.",
+        "For families choosing to home-educate: Cambridge O/A Level gives a nationally and internationally recognised exam at the end of it, rather than a home-education pathway with no external, comparable qualification attached.",
+      ],
+    },
+    diaspora:
+      "The UK has the largest Pakistani-origin population outside Pakistan itself - over 1.6 million people recorded in the 2021 Census - concentrated in Bradford, Birmingham, East London, Manchester, Luton and Slough. That scale means most families already have real, local schooling options; VCS is built for the specific minority of situations inside that community where those options don't quite fit, not as a general alternative to British schooling.",
+    faq: [
+      {
+        q: "My child already attends a UK school and sits GCSEs - why would we need this?",
+        a: "For most families, you wouldn't - a UK state or private school GCSE/A-Level path is usually the right default. VCS tends to make sense for home-educating families, families wanting Urdu/Islamiyat/Pakistan Studies alongside the core subjects, or families expecting to relocate to Pakistan or the Gulf.",
+      },
+      {
+        q: "Is a Cambridge O Level the same as a GCSE for UK college or sixth-form admission?",
+        a: "They're set to a broadly comparable level by a different exam board, and are generally treated as equivalent, but individual sixth forms, colleges and employers set their own admission rules. Confirm directly with the specific institution before relying on this for a UK progression decision.",
+        verify: true,
+      },
+      {
+        q: "We're struggling to get a secondary school place in our area - can VCS be our child's main school, not just a supplement?",
+        a: "Yes - VCS is a full live-taught school, not a supplementary tutoring service. A child can be enrolled as their primary schooling, not just extra lessons alongside another school.",
+      },
+      {
+        q: "If we move back to Pakistan or to the Gulf, will these results actually count?",
+        a: "Cambridge O Level and A Level results convert to a Pakistani-board equivalent through the Inter Board Committee of Chairmen (IBCC) for university admission, and are separately recognised across the Gulf. Confirm current IBCC documentation requirements directly, as processes can be updated.",
+        verify: true,
+      },
+      {
+        q: "What time do live classes run for us in the UK?",
+        a: "Saudi Arabia is 2-3 hours ahead of the UK depending on the time of year (UK clocks change for daylight saving, Saudi Arabia's don't). Message us on WhatsApp with your child's grade and subjects to confirm exact timings before enrolling.",
+      },
+      {
+        q: "Do you offer home-education-friendly reporting or portfolios for local authority purposes?",
+        a: "We can provide attendance and academic progress records on request. Home-education reporting requirements are set by your local authority, not by us - check your specific council's current elective home education guidance.",
+        verify: true,
+      },
+    ],
+    images: {},
+    siblingSlugs: ["us", "canada"],
+  },
+
+  {
+    slug: "us",
+    countryName: "United States",
+    flagCode: "us",
+    timeZone: "America/New_York",
+    currency: "USD",
+    heroKicker: "Cambridge Online School - United States",
+    h1: "Online Cambridge O Level & A Level School for Pakistani Families in the US",
+    metaTitle: "Online Cambridge School for Pakistani Families in the US | Virtual City School",
+    metaDescription:
+      "Live online O Level and A Level classes with Urdu, Islamiyat and Pakistan Studies alongside Cambridge - for Pakistani-American families choosing a globally portable qualification.",
+    intro: [
+      "American public and private high schools don't run GCSE-style O Levels or A Levels at all - they run grade-based diplomas, often alongside Advanced Placement (AP) courses, which is a genuinely different structure from what most Pakistani families abroad are used to comparing against.",
+      "So the question for a Pakistani-American family isn't \"why choose Cambridge over a local Cambridge school\" the way it might be in the Gulf - it's whether a globally portable, internationally recognised qualification alongside (or instead of) the US diploma track is worth having, particularly for families who may return to Pakistan, move to the Gulf, or simply want their child's university options to include Pakistan, the UK and the Gulf as well as the US.",
+    ],
+    schoolingLandscape: {
+      heading: "Where Cambridge fits into an American education",
+      paragraphs: [
+        "The default path for most Pakistani-American families is the local US public or private high school system, leading to a US high school diploma - a well-understood, free (for public schools) and locally-accepted qualification that VCS is not trying to replace for most families.",
+        "Cambridge O/A Level tends to matter for three specific groups: families who home-school (a large and established choice within many Muslim-American communities) and want a recognised external curriculum rather than an unaccredited one; families expecting to relocate - back to Pakistan, to the Gulf, or elsewhere - who want a qualification that transfers cleanly rather than restarting under a new system; and families who want Urdu, Islamiyat and Pakistan Studies taught properly, which isn't offered inside the US public system.",
+        "Cambridge International A Levels are accepted for admission, and in some cases credit, by a number of US universities, though policies vary significantly by institution - a family relying on this for a specific university's admissions decision should confirm directly with that university's admissions office.",
+      ],
+      verifyNote:
+        "US university acceptance of Cambridge A Levels varies by institution and by year - do not state that a specific named US university accepts Cambridge credentials without a current, citable source from that university's own admissions policy.",
+    },
+    whyOALevel: {
+      heading: "Why Cambridge specifically, for a family based in the US",
+      paragraphs: [
+        "Cambridge O Level and A Level are recognised for university admission across Pakistan, the UK and the Gulf, and by a number of US universities as well - giving a Pakistani-American family a genuinely wider set of options than a US-only diploma path, without giving anything up if the family stays in the US long-term.",
+        "For return to Pakistan specifically: O Level and A Level results are converted to a Pakistani-board equivalent by the Inter Board Committee of Chairmen (IBCC) for university admission - confirm current documentation requirements with IBCC directly.",
+        "For home-schooling families: Cambridge O/A Level gives a structured syllabus and an externally examined, internationally recognised result, rather than an unaccredited home-school curriculum with no comparable outside benchmark.",
+      ],
+    },
+    diaspora:
+      "The Pakistani-American population was recorded at roughly 684,000 people in the US Census Bureau's 2023 American Community Survey, with significant communities in the New York/New Jersey area (including the Coney Island, Brooklyn area sometimes called \"Little Pakistan\"), Houston, Chicago, Northern Virginia/DC, and California. It's a geographically spread-out community compared to the UK's, which is part of why a live online school - rather than a physical one - fits the way many Pakistani-American families are already distributed.",
+    faq: [
+      {
+        q: "The time difference between the US and Saudi Arabia is huge - how do live classes actually work for us?",
+        a: "It's a real gap - Saudi Arabia is roughly 8 hours ahead of the US East Coast and up to 11 hours ahead of the West Coast. Message us on WhatsApp with your time zone and your child's grade before enrolling so we can confirm which batch slots are realistically workable for your family.",
+      },
+      {
+        q: "Will a Cambridge A Level actually help with US university admissions?",
+        a: "Cambridge International A Levels are accepted for admission, and sometimes credit, by a number of US universities, but policies differ by institution. If a specific university's admission decision matters to you, confirm directly with that university's admissions office rather than relying on a general answer.",
+        verify: true,
+      },
+      {
+        q: "We already home-school under our state's regulations - how does VCS fit with that?",
+        a: "VCS can serve as your child's examined curriculum within a home-school program, but home-school reporting and legal requirements are set at the state level and vary significantly. Check your specific state's current home-education requirements - we don't file paperwork on your behalf.",
+        verify: true,
+      },
+      {
+        q: "If we move back to Pakistan or to the Gulf, will these results actually count?",
+        a: "Cambridge O Level and A Level results convert to a Pakistani-board equivalent through the Inter Board Committee of Chairmen (IBCC) for university admission, and are separately recognised across the Gulf. Confirm current IBCC documentation requirements directly, as processes can be updated.",
+        verify: true,
+      },
+      {
+        q: "Do you teach Urdu, Islamiyat and Pakistan Studies, or only the Cambridge core subjects?",
+        a: "Both - alongside Cambridge O Level, AS Level and A2 Level subjects, we teach Urdu, Islamiyat and Pakistan Studies, which aren't offered inside the US public school system.",
+      },
+      {
+        q: "Is this a full-time school or a supplement to our child's existing US schooling?",
+        a: "It works either way - as your child's full-time school, or as a structured supplement (for example, alongside home-schooling, or to keep Urdu and Pakistan Studies going while your child is otherwise in a US school).",
+      },
+    ],
+    images: {},
+    siblingSlugs: ["canada", "uk"],
+  },
+
+  {
+    slug: "canada",
+    countryName: "Canada",
+    flagCode: "ca",
+    timeZone: "America/Toronto",
+    currency: "CAD",
+    heroKicker: "Cambridge Online School - Canada",
+    h1: "Online Cambridge O Level & A Level School for Pakistani Families in Canada",
+    metaTitle: "Online Cambridge School for Pakistani Families in Canada | Virtual City School",
+    metaDescription:
+      "Live online O Level and A Level classes with Urdu, Islamiyat and Pakistan Studies alongside Cambridge - for Pakistani-Canadian families in Toronto, Mississauga, Brampton and beyond.",
+    intro: [
+      "Canada, like the US, doesn't run GCSE-style O Levels or A Levels - each province sets its own secondary diploma (the Ontario Secondary School Diploma, for example), which is a different structure from what a family might be used to from Pakistan or the Gulf.",
+      "For a Pakistani-Canadian family, VCS isn't a replacement for the provincial diploma most children will still need - it's for the specific situations where a globally portable Cambridge qualification, taught alongside Urdu, Islamiyat and Pakistan Studies, adds something the local system doesn't: home-schooling families, families planning an eventual move to Pakistan or the Gulf, or families who simply want their child's academic options to extend beyond Canada.",
+    ],
+    schoolingLandscape: {
+      heading: "Where Cambridge fits alongside Canadian schooling",
+      paragraphs: [
+        "Most Pakistani-Canadian families are inside their provincial public or Catholic school system, working toward a provincial diploma - a well-established, free, locally-recognised path that VCS is not positioned to replace for most children.",
+        "Where VCS tends to come up: families who home-school under their province's regulations and want a recognised, externally examined curriculum rather than an unaccredited one; families who expect to relocate - back to Pakistan, to the Gulf, or elsewhere - and want continuity rather than switching systems entirely; and families who want Urdu, Islamiyat and Pakistan Studies taught properly, which Canadian public schools generally don't offer.",
+        "Toronto's Peel Region (Mississauga and Brampton in particular) has one of the largest concentrations of Pakistani-Canadian families in the country, alongside communities in other parts of the Greater Toronto Area, Calgary and Vancouver.",
+      ],
+      verifyNote:
+        "Provincial home-schooling regulations and diploma-equivalence rules vary by province and change over time - do not state a specific province's requirements as fact without a current, citable source from that province's Ministry of Education.",
+    },
+    whyOALevel: {
+      heading: "Why Cambridge specifically, for a family based in Canada",
+      paragraphs: [
+        "Cambridge O Level and A Level are recognised for university admission across Pakistan, the UK and the Gulf, giving a Pakistani-Canadian family university options beyond Canada if their plans change - without needing to give up a Canadian path if they stay.",
+        "For return to Pakistan specifically: O Level and A Level results are converted to a Pakistani-board equivalent by the Inter Board Committee of Chairmen (IBCC) for university admission - confirm current documentation requirements with IBCC directly.",
+        "For home-schooling families: Cambridge O/A Level provides a structured, internationally examined syllabus, giving a home-schooled child a comparable, recognised result rather than an informal record with no external benchmark.",
+      ],
+    },
+    diaspora:
+      "Canada's Pakistani-origin population was recorded at just over 300,000 in the 2021 census, concentrated heavily in Ontario - especially Mississauga and Brampton in the Greater Toronto Area - with further communities in Calgary and Vancouver. It's a younger, faster-growing community than some other Pakistani diaspora populations, which is part of why school-age demand for options like VCS keeps growing alongside it.",
+    faq: [
+      {
+        q: "The time difference between Canada and Saudi Arabia is significant - how do live classes actually work for us?",
+        a: "It's real, and varies by which part of Canada you're in - roughly 8 hours behind Saudi Arabia in Toronto, up to 11 hours in Vancouver. Message us on WhatsApp with your time zone and your child's grade before enrolling so we can confirm workable batch slots.",
+      },
+      {
+        q: "We already home-school under our province's regulations - how does VCS fit with that?",
+        a: "VCS can serve as your child's examined curriculum within a home-school program, but reporting and legal requirements are set provincially and vary. Check your specific province's current home-education requirements directly - we don't file paperwork on your behalf.",
+        verify: true,
+      },
+      {
+        q: "Will Canadian universities recognise a Cambridge A Level for admission?",
+        a: "Many Canadian universities do accept Cambridge International qualifications for admission, though policies and specific subject/grade requirements vary by institution. Confirm directly with the specific university if this matters for a particular admissions decision.",
+        verify: true,
+      },
+      {
+        q: "If we move back to Pakistan or to the Gulf, will these results actually count?",
+        a: "Cambridge O Level and A Level results convert to a Pakistani-board equivalent through the Inter Board Committee of Chairmen (IBCC) for university admission, and are separately recognised across the Gulf. Confirm current IBCC documentation requirements directly, as processes can be updated.",
+        verify: true,
+      },
+      {
+        q: "Do you teach Urdu, Islamiyat and Pakistan Studies, or only the Cambridge core subjects?",
+        a: "Both - alongside Cambridge O Level, AS Level and A2 Level subjects, we teach Urdu, Islamiyat and Pakistan Studies, which aren't offered inside Canadian public schools.",
+      },
+      {
+        q: "Is this a full-time school or a supplement to our child's existing schooling?",
+        a: "Either - it works as your child's full-time school, or as a structured supplement alongside home-schooling or an existing Canadian school, particularly to keep Urdu and Pakistan Studies going.",
+      },
+    ],
+    images: {},
+    siblingSlugs: ["us", "uk"],
+  },
+
+  {
+    slug: "australia",
+    countryName: "Australia",
+    flagCode: "au",
+    timeZone: "Australia/Sydney",
+    currency: "AUD",
+    heroKicker: "Cambridge Online School - Australia",
+    h1: "Online Cambridge O Level & A Level School for Pakistani Families in Australia",
+    metaTitle: "Online Cambridge School for Pakistani Families in Australia | Virtual City School",
+    metaDescription:
+      "Live online O Level and A Level classes with Urdu, Islamiyat and Pakistan Studies alongside Cambridge - for Pakistani-Australian families in Sydney, Melbourne, Perth and beyond.",
+    intro: [
+      "Australia runs its own state-based senior secondary certificates (the HSC in New South Wales, the VCE in Victoria, and equivalents elsewhere) rather than Cambridge O Levels or A Levels as the default - though unlike the US or Canada, Cambridge IGCSE already has some real presence in Australia through a number of private and international schools, so it's not an unfamiliar system here.",
+      "For a Pakistani-Australian family, that existing familiarity is part of the appeal: Cambridge is a known, respected option locally, but a full seat at one of the private schools that offer it can be expensive or limited. VCS is built for families who want that same internationally portable qualification - plus Urdu, Islamiyat and Pakistan Studies - without needing a place at one of those schools.",
+    ],
+    schoolingLandscape: {
+      heading: "Where Cambridge fits alongside Australian schooling",
+      paragraphs: [
+        "Most Pakistani-Australian families are inside their state's public or Catholic school system, working toward a state certificate (HSC, VCE, or equivalent) - a well-established, largely free, locally-recognised path that VCS is not positioned to replace for most children.",
+        "A smaller number of Australian private and international schools already teach Cambridge IGCSE and A Level as an alternative to the state curriculum, generally at private-school fee levels. VCS offers the same Cambridge pathway without requiring enrolment in one of those schools, plus Urdu, Islamiyat and Pakistan Studies, which even Australia's Cambridge-offering private schools generally don't teach.",
+        "Pakistani-Australian families are concentrated mainly in Sydney and Melbourne, with smaller communities in Perth, Brisbane and Adelaide.",
+      ],
+      verifyNote:
+        "Which specific Australian universities give credit or preferential admission treatment for Cambridge A Levels varies by institution and year - do not name a specific university's policy without a current, citable source.",
+    },
+    whyOALevel: {
+      heading: "Why Cambridge specifically, for a family based in Australia",
+      paragraphs: [
+        "Cambridge O Level and A Level are recognised for university admission across Pakistan, the UK and the Gulf, and are accepted by a number of Australian universities as well, giving a Pakistani-Australian family options beyond a state-certificate-only path.",
+        "For return to Pakistan specifically: O Level and A Level results are converted to a Pakistani-board equivalent by the Inter Board Committee of Chairmen (IBCC) for university admission - confirm current documentation requirements with IBCC directly.",
+        "For families who want Urdu, Islamiyat and Pakistan Studies taught properly alongside a recognised international curriculum, rather than as an after-hours community class disconnected from the main academic program.",
+      ],
+    },
+    diaspora:
+      "Australia's Pakistani-origin population was recorded at roughly 90,000 in the 2021 census and has been growing quickly since, concentrated mainly in Sydney and Melbourne. It's a smaller and newer community than the UK's or Canada's, which is part of why dedicated schooling infrastructure - Cambridge-teaching private schools included - is still limited outside the largest cities.",
+    faq: [
+      {
+        q: "We already have Cambridge-teaching schools here - why would we choose an online option?",
+        a: "A handful of Australian private and international schools do offer Cambridge IGCSE and A Level, generally at private-school fee levels and mostly concentrated in Sydney and Melbourne. VCS offers the same Cambridge pathway - plus Urdu, Islamiyat and Pakistan Studies - without requiring a place at one of those specific schools or living near one.",
+      },
+      {
+        q: "What time do live classes run for us in Australia?",
+        a: "Saudi Arabia is well behind Australian time zones - roughly 7-8 hours behind Sydney, depending on daylight saving in each country (Australia and Saudi Arabia observe daylight saving differently). Message us on WhatsApp with your child's grade and subjects to confirm exact timings before enrolling.",
+      },
+      {
+        q: "Will Australian universities recognise a Cambridge A Level for admission?",
+        a: "A number of Australian universities do accept Cambridge International qualifications for admission, with policies varying by institution and course. Confirm directly with the specific university if this matters for a particular admissions decision.",
+        verify: true,
+      },
+      {
+        q: "If we move back to Pakistan or to the Gulf, will these results actually count?",
+        a: "Cambridge O Level and A Level results convert to a Pakistani-board equivalent through the Inter Board Committee of Chairmen (IBCC) for university admission, and are separately recognised across the Gulf. Confirm current IBCC documentation requirements directly, as processes can be updated.",
+        verify: true,
+      },
+      {
+        q: "Do you teach Urdu, Islamiyat and Pakistan Studies, or only the Cambridge core subjects?",
+        a: "Both - alongside Cambridge O Level, AS Level and A2 Level subjects, we teach Urdu, Islamiyat and Pakistan Studies.",
+      },
+      {
+        q: "Is this a full-time school or a supplement to our child's existing schooling?",
+        a: "Either - it works as your child's full-time school, or as a structured supplement alongside an existing Australian school, particularly to keep Urdu and Pakistan Studies going.",
+      },
+    ],
+    images: {},
+    siblingSlugs: ["uk", "us"],
+  },
+
+  {
+    slug: "pakistan",
+    countryName: "Pakistan",
+    flagCode: "pk",
+    timeZone: "Asia/Karachi",
+    currency: "PKR",
+    heroKicker: "Cambridge Online School - Pakistan",
+    h1: "Online Cambridge O Level & A Level School for Families in Pakistan",
+    metaTitle: "Online Cambridge School in Pakistan | Virtual City School",
+    metaDescription:
+      "Live online O Level and A Level classes for families in Pakistan - an affordable alternative to city-concentrated private Cambridge schools, live-taught by qualified teachers.",
+    intro: [
+      "This page is different from the others: it's not about a family living abroad with no Cambridge school nearby. It's for families already inside Pakistan, choosing between VCS and the country's established private Cambridge school networks - Beaconhouse, Lahore Grammar School, Roots, The City School and others - which are real, respected options, but concentrated in Karachi, Lahore and Islamabad, and priced well above what most families can pay.",
+      "VCS exists for two specific groups inside Pakistan: families in smaller cities - Faisalabad, Multan, Gujranwala, Peshawar, Sialkot, Hyderabad, Quetta and others - where no Cambridge-affiliated school exists at all, leaving Matric/FSc as the only local option; and families in the major cities who want a genuine Cambridge education but can't justify elite private-school fees for it.",
+    ],
+    schoolingLandscape: {
+      heading: "What Cambridge schooling actually looks like inside Pakistan",
+      paragraphs: [
+        "In Karachi, Lahore and Islamabad, an established network of private schools already teaches Cambridge O Level and A Level - generally at annual fees well beyond what most middle-income Pakistani families can sustain across multiple children, and with competitive, sometimes limited admissions even for families who can afford them.",
+        "Outside those three cities, Cambridge-affiliated schools are far sparser. A family in Faisalabad, Multan, Gujranwala, Sialkot, Hyderabad, Peshawar or a smaller town often has no local Cambridge option at all - the choice narrows to the Federal Board (Matric/FSc) track, or relocating, or boarding, none of which every family wants or can do.",
+        "The Federal Board (Matric/FSc) track itself is a perfectly legitimate, widely-recognised path within Pakistan - VCS isn't positioned as inherently superior to it, only as the Cambridge alternative for families who specifically want that qualification and don't have affordable local access to it.",
+      ],
+      verifyNote:
+        "Specific current tuition figures for named private Cambridge schools in Karachi/Lahore/Islamabad are not stated here and should be confirmed (or removed) before publishing any comparison number publicly - fee levels change and vary significantly by school and grade.",
+    },
+    whyOALevel: {
+      heading: "Why Cambridge specifically, for a family already in Pakistan",
+      paragraphs: [
+        "Cambridge O Level and A Level are recognised for university admission internationally - in the UK, across the Gulf, and via IBCC equivalence for Pakistani university admission as well - which matters for families who want their child's options to extend beyond Pakistan's own university system, without giving up a Pakistani university pathway.",
+        "For Pakistani university admission specifically: O Level and A Level results are converted to a Pakistani-board equivalent by the Inter Board Committee of Chairmen (IBCC), the same process that applies to Cambridge results from anywhere in the world - confirm current documentation requirements with IBCC directly, as processes can be updated.",
+        "For a family weighing Cambridge against the Federal Board track: the practical difference is less about quality and more about where the qualification is recognised without conversion - Cambridge travels more easily if a child might study or work abroad; Federal Board is the direct, unconverted path into Pakistan's own university system.",
+      ],
+    },
+    diaspora:
+      "This isn't a diaspora page - VCS is based in Saudi Arabia, but Pakistan is only two hours behind Saudi Arabia (PKT vs. AST), which makes live class scheduling straightforward in a way it isn't for the Gulf's more distant Western counterparts. A meaningful share of VCS's own teaching staff are based in Pakistan, teaching students there and across the Gulf from the same live classroom.",
+    faq: [
+      {
+        q: "There are already Cambridge schools in our city - why choose an online one?",
+        a: "If your city already has an affordable, accessible Cambridge school your family is happy with, that's a legitimate first choice - VCS isn't trying to compete with a good local fit. VCS exists for families where the local Cambridge options are unaffordable, oversubscribed, or don't exist at all.",
+      },
+      {
+        q: "Is Cambridge actually better than Matric/FSc for my child?",
+        a: "Not inherently \"better\" - they're different, both legitimate paths. Federal Board (Matric/FSc) is the direct route into Pakistan's own university system with no conversion needed. Cambridge O Level/A Level is the route built for portability - useful specifically if university abroad, or in the Gulf, is a real possibility for your family.",
+      },
+      {
+        q: "My city doesn't have any Cambridge-affiliated school - can my child access Cambridge at all otherwise?",
+        a: "Yes - this is exactly the situation VCS is built for. Your child attends live classes from home; there's no dependency on a Cambridge school existing in your city.",
+      },
+      {
+        q: "If my child later wants to study or work abroad, will these results actually count?",
+        a: "Cambridge O Level and A Level are recognised for university admission in the UK and across the Gulf directly, and convert to a Pakistani-board equivalent through IBCC for Pakistani university admission. Confirm current requirements with the receiving institution or with IBCC directly.",
+        verify: true,
+      },
+      {
+        q: "Do you teach in the same time zone, or will classes clash with local school hours?",
+        a: "Pakistan is only about two hours behind Saudi Arabia, so live batch timings are generally workable around a normal school-day schedule. Message us on WhatsApp with your child's grade to confirm exact timings.",
+      },
+      {
+        q: "How does the cost compare to a private Cambridge school in Karachi, Lahore or Islamabad?",
+        a: "Per-course pricing is on our Courses page and is generally well below flagship private Cambridge school fees in the major cities - but confirm current pricing directly rather than assuming a fixed comparison, since school fees vary widely by institution and grade.",
+        verify: true,
+      },
+    ],
+    images: {},
+    siblingSlugs: ["saudi-arabia", "uae"],
   },
 ];
 

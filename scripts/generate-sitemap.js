@@ -45,6 +45,11 @@ const STATIC_PAGES = [
   { loc: "/online-school/kuwait", changefreq: "monthly", lastmod: COUNTRY_PAGES_LAST_UPDATED },
   { loc: "/online-school/bahrain", changefreq: "monthly", lastmod: NEW_COUNTRY_PAGES_ADDED },
   { loc: "/online-school/oman", changefreq: "monthly", lastmod: NEW_COUNTRY_PAGES_ADDED },
+  { loc: "/online-school/uk", changefreq: "monthly", lastmod: NEW_COUNTRY_PAGES_ADDED },
+  { loc: "/online-school/us", changefreq: "monthly", lastmod: NEW_COUNTRY_PAGES_ADDED },
+  { loc: "/online-school/canada", changefreq: "monthly", lastmod: NEW_COUNTRY_PAGES_ADDED },
+  { loc: "/online-school/australia", changefreq: "monthly", lastmod: NEW_COUNTRY_PAGES_ADDED },
+  { loc: "/online-school/pakistan", changefreq: "monthly", lastmod: NEW_COUNTRY_PAGES_ADDED },
 ];
 
 function urlEntry({ loc, changefreq, priority, lastmod }) {

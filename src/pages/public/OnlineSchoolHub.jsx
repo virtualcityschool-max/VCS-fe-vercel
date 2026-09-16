@@ -11,13 +11,18 @@ const HOOK_LINES = {
   kuwait: "A schooling option that isn't tied to one licensed private-school seat.",
   bahrain: "A Cambridge track that doesn't depend on a seat at one of Bahrain's few British-curriculum schools.",
   oman: "For families outside Muscat, or without a seat in Pakistan School Muscat's Cambridge stream.",
+  uk: "For home-educating families, and families wanting Urdu, Islamiyat and Pakistan Studies alongside GCSE-level schooling.",
+  us: "A globally portable Cambridge qualification alongside the US diploma track - plus Urdu, Islamiyat and Pakistan Studies.",
+  canada: "For home-educating families, and families wanting a curriculum that travels if you relocate.",
+  australia: "The same Cambridge pathway Australia's private schools charge for, without needing a seat at one of them.",
+  pakistan: "An affordable Cambridge option for families without access to Karachi, Lahore or Islamabad's private school network.",
 };
 
 const OnlineSchoolHub = () => {
   useSeo({
     title: "Online Cambridge School by Country",
     description:
-      "Country-specific guides for Pakistani families choosing an online Cambridge O Level or A Level school in Saudi Arabia, the UAE, Qatar, Kuwait, Bahrain and Oman.",
+      "Country-specific guides for Pakistani families choosing an online Cambridge O Level or A Level school - across the Gulf, the UK, the US, Canada, Australia and inside Pakistan itself.",
     url: `${SITE_URL}/online-school`,
     jsonLd: {
       "@type": "BreadcrumbList",
@@ -50,7 +55,7 @@ const OnlineSchoolHub = () => {
             Online Cambridge O Level & A Level School, by Country
           </h1>
           <p className="text-slate-400 text-base md:text-lg leading-relaxed max-w-2xl">
-            Every Gulf country has a different Pakistani-family schooling situation - different school options, different waiting lists, different costs, different local university pathways. Pick your country below for the specifics, not a generic pitch.
+            Every country on this list has a different Pakistani-family schooling situation - different local options, different waiting lists or costs, different reasons Cambridge fits. Pick your country below for the specifics, not a generic pitch.
           </p>
         </header>
 

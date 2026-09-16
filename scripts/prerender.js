@@ -65,7 +65,10 @@ async function fetchJson(url) {
 // Country landing pages are static content committed to the repo, not
 // CMS-driven data - unlike courses/teachers/blogs below, they don't need
 // the API to exist and are never stale between deploys.
-const COUNTRY_LANDING_SLUGS = ["saudi-arabia", "uae", "qatar", "kuwait", "bahrain", "oman"];
+const COUNTRY_LANDING_SLUGS = [
+  "saudi-arabia", "uae", "qatar", "kuwait", "bahrain", "oman",
+  "uk", "us", "canada", "australia", "pakistan",
+];
 
 async function buildRouteList() {
   const routes = [

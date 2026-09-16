@@ -1,23 +1,24 @@
 import { Link } from "react-router-dom";
 import Reveal from "../ui/Reveal";
 
-// Alphabetical by display name. Country pages exist for 6 markets (`to` set
-// below); the rest don't have a dedicated page yet, so those tiles stay
-// plain, unlinked divs exactly as before.
+// Alphabetical by display name. Country pages exist for 11 of these 13
+// markets (`to` set below) - China and Malaysia don't have one yet (weaker,
+// less-documented fit for VCS's Pakistani-diaspora-Cambridge pitch than the
+// other 11), so those two tiles stay plain, unlinked divs.
 const COUNTRIES = [
-  { code: "au", name: "Australia" },
+  { code: "au", name: "Australia", to: "/online-school/australia" },
   { code: "bh", name: "Bahrain", to: "/online-school/bahrain" },
-  { code: "ca", name: "Canada" },
+  { code: "ca", name: "Canada", to: "/online-school/canada" },
   { code: "cn", name: "China" },
   { code: "kw", name: "Kuwait", to: "/online-school/kuwait" },
   { code: "my", name: "Malaysia" },
   { code: "om", name: "Oman", to: "/online-school/oman" },
-  { code: "pk", name: "Pakistan" },
+  { code: "pk", name: "Pakistan", to: "/online-school/pakistan" },
   { code: "qa", name: "Qatar", to: "/online-school/qatar" },
   { code: "sa", name: "Saudi Arabia", to: "/online-school/saudi-arabia" },
   { code: "ae", name: "UAE", to: "/online-school/uae" },
-  { code: "gb", name: "United Kingdom" },
-  { code: "us", name: "United States" },
+  { code: "gb", name: "United Kingdom", to: "/online-school/uk" },
+  { code: "us", name: "United States", to: "/online-school/us" },
 ];
 
 const GlobalReachSection = () => (
@@ -31,7 +32,7 @@ const GlobalReachSection = () => (
         <span className="text-gradient">Trusted by families across 13 countries.</span>
       </h2>
       <p className="mt-4 text-slate-400 text-sm md:text-base leading-relaxed">
-        A Saudi Arabia-based school with teachers from Pakistan and beyond — serving expatriate and local families across 13 countries, with dedicated pages for each community coming soon.
+        A Saudi Arabia-based school with teachers from Pakistan and beyond — serving expatriate and local families across 13 countries.
       </p>
     </Reveal>
 

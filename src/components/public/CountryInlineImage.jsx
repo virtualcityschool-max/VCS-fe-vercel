@@ -6,6 +6,9 @@
  * ratio to avoid layout shift while CSS controls the actual rendered size.
  */
 const CountryInlineImage = ({ image, countrySlug, side = "right" }) => {
+  // Not every country page has screened photography sourced yet - render
+  // nothing (text flows full-width) rather than a broken image tag.
+  if (!image) return null;
   const floatClass = side === "right" ? "sm:float-right sm:ml-6" : "sm:float-left sm:mr-6";
   return (
     <figure className={`w-full sm:w-[42%] ${floatClass} mb-4`}>

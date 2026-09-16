@@ -184,14 +184,16 @@ const CountryLandingPage = () => {
           </p>
         </Reveal>
 
-        {/* Pricing context */}
+        {/* Pricing context - skipped for a country whose own currency is
+            USD, where "fees in USD vs. USD" would be meaningless */}
+        {fx && (
         <Reveal className="mb-12">
           <h2 className="text-2xl md:text-3xl font-black font-poppins tracking-tight mb-5">
             Fees in {fx.label} vs. USD
           </h2>
           <p className="text-slate-400 leading-relaxed mb-3">
             Course fees are billed in USD through Gumroad - the same price every family pays regardless of country. As a rough sense of scale in local currency, 1 USD is approximately{" "}
-            <span className="text-white font-bold">{fx.rate} {country.currency}</span> at long-standing Gulf exchange-rate levels.
+            <span className="text-white font-bold">{fx.rate} {country.currency}</span>.
           </p>
           <p className="text-amber-400/80 text-xs bg-amber-500/5 border border-amber-500/20 rounded-lg px-4 py-3 leading-relaxed mb-3">
             <i className="fas fa-triangle-exclamation mr-2" aria-hidden="true" />
@@ -204,6 +206,7 @@ const CountryLandingPage = () => {
             See current course fees <i className="fas fa-arrow-right text-[10px]" aria-hidden="true" />
           </Link>
         </Reveal>
+        )}
 
         {/* Diaspora framing */}
         <Reveal className="mb-12">
