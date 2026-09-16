@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { getCourseImage } from "../../utils/courseImageUtils";
 import { getStorageUrl } from "../../utils/storageUrl";
 import { getDisplayName } from "../../utils/userDisplay";
+import { useWhatsappNumber } from "../../hooks/useWhatsappNumber";
 
 const PublicCourseCard = ({
   course,
@@ -21,9 +22,13 @@ const PublicCourseCard = ({
   const isRejected = course.enrollment_status === "rejected";
   const noSessions = !course.has_session;
   const [imgFailed, setImgFailed] = useState(false);
+  const whatsappNumber = useWhatsappNumber();
+  const whatsappHref = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
+    `Hi! I'd like to ask about "${course.title || "this course"}" at Virtual City School.`,
+  )}`;
 
   const renderCTA = () => {
-    let cls = `w-full ${large ? "py-2.5 text-[12px]" : "py-2 text-[11px]"} font-black uppercase tracking-[0.1em] rounded-xl transition-all active:scale-95 inline-flex items-center justify-center gap-1.5 `;
+    let cls = `flex-1 ${large ? "py-2.5 text-[12px]" : "py-2 text-[11px]"} font-black uppercase tracking-[0.1em] rounded-xl transition-all active:scale-95 inline-flex items-center justify-center gap-1.5 `;
     let label = "";
     let icon = "";
     let disabled = false;
@@ -87,7 +92,7 @@ const PublicCourseCard = ({
 
     if (tooltip) {
       return (
-        <div className="relative group/tooltip">
+        <div className="relative group/tooltip flex-1">
           {btn}
           <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 px-3 py-2 bg-slate-800 border border-slate-700 text-white text-[11px] font-medium rounded-lg text-center max-w-[200px] opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-150 shadow-xl z-10">
             {tooltip}
@@ -152,7 +157,20 @@ const PublicCourseCard = ({
           <p className={`${large ? "text-sm" : "text-[13px]"} font-black ${course.is_paid ? "text-white" : "text-emerald-400"}`}>
             {course.is_paid ? `$${(course.price || 0).toLocaleString("en-US")} USD` : "Free"}
           </p>
-          {renderCTA()}
+          <div className="flex items-center gap-1.5">
+            {renderCTA()}
+            <a
+              href={whatsappHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              title="Ask about this course on WhatsApp"
+              aria-label="Ask about this course on WhatsApp"
+              className={`shrink-0 inline-flex items-center justify-center ${large ? "w-9 h-9" : "w-8 h-8"} rounded-xl bg-emerald-600/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-600 hover:text-white hover:border-transparent transition-all active:scale-95`}
+            >
+              <i className="fab fa-whatsapp text-base" aria-hidden="true"></i>
+            </a>
+          </div>
         </div>
       </div>
     </div>

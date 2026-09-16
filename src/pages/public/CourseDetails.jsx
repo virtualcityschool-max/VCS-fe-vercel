@@ -35,6 +35,7 @@ import { studentService } from "../../services/studentService";
 import QuillViewer from "../../components/common/QuillViewer";
 import { getDisplayName } from "../../utils/userDisplay";
 import { useSeo } from "../../hooks/useSeo";
+import { useWhatsappNumber } from "../../hooks/useWhatsappNumber";
 
 const CourseDetails = () => {
   const { courseId } = useParams();
@@ -67,6 +68,7 @@ const CourseDetails = () => {
   const { formatDate } = useDateFormat();
   const { formatCurrency } = useNumberFormat();
   const { capitalize, truncate } = useTextFormat();
+  const whatsappNumber = useWhatsappNumber();
 
   // Fetch course details on component mount
   useEffect(() => {
@@ -811,6 +813,22 @@ const CourseDetails = () => {
                     )} */}
                   </div>
                 )}
+
+                {/* WhatsApp CTA - a lower-friction way to reach out than the
+                    login/account wall above, for a visitor who just wants
+                    to ask about the course first. Never replaces or gates
+                    the enroll flow itself. */}
+                <a
+                  href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
+                    `Hi! I'd like to ask about "${normalizedCourse.title}" at Virtual City School.`,
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mb-8 w-full inline-flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-emerald-600/10 border border-emerald-500/20 text-emerald-400 font-black text-xs uppercase tracking-[0.15em] hover:bg-emerald-600 hover:text-white hover:border-transparent transition-all active:scale-95"
+                >
+                  <i className="fab fa-whatsapp text-base"></i>
+                  Ask about this course on WhatsApp
+                </a>
 
                 {/* Trust indicators */}
                 <div className="flex items-center justify-center gap-6 mb-8 text-xs text-slate-400">
