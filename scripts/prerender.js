@@ -7,9 +7,13 @@
 //   2. We copy that shell to dist/shell.html BEFORE touching anything, so
 //      there's a permanent, never-rendered fallback for routes we don't
 //      prerender (the authenticated app: /admin, /teacher, /student, /parent,
-//      /profile, and anything not in ROUTES below).
-//   3. vercel.json's catch-all rewrite is pointed at /shell.html instead of
-//      /index.html, so those routes keep working exactly as before.
+//      /profile).
+//   3. vercel.json rewrites those known route prefixes (plus dynamic
+//      /courses/:id, /blogs/:slug etc. for records too new to be in this
+//      run's ROUTES list) to /shell.html instead of /index.html. Anything
+//      NOT matching one of those prefixes has no rewrite and no static
+//      file, so Vercel serves public/404.html with a real 404 status -
+//      unmatched paths no longer silently 200 as the homepage.
 //   4. We serve dist/ locally, visit each public route in headless Chrome,
 //      wait for the real app to fetch its data and render, and overwrite
 //      that route's directory with the resulting HTML (dist/index.html for

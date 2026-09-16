@@ -2,6 +2,19 @@
   "buildCommand": "node scripts/generate-sitemap.js && npm run build && node scripts/prerender.js",
   "outputDirectory": "dist",
   "rewrites": [
-    { "source": "/(.*)", "destination": "/shell.html" }
+    { "source": "/signup", "destination": "/shell.html" },
+    { "source": "/courses/:path*", "destination": "/shell.html" },
+    { "source": "/blogs/:path*", "destination": "/shell.html" },
+    { "source": "/teachers/:path*", "destination": "/shell.html" },
+    { "source": "/online-school/:path*", "destination": "/shell.html" },
+    { "source": "/student", "destination": "/shell.html" },
+    { "source": "/student/:path*", "destination": "/shell.html" },
+    { "source": "/teacher", "destination": "/shell.html" },
+    { "source": "/teacher/:path*", "destination": "/shell.html" },
+    { "source": "/parent", "destination": "/shell.html" },
+    { "source": "/parent/:path*", "destination": "/shell.html" },
+    { "source": "/admin", "destination": "/shell.html" },
+    { "source": "/admin/:path*", "destination": "/shell.html" },
+    { "source": "/profile", "destination": "/shell.html" }
   ]
 }
