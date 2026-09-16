@@ -1,0 +1,31 @@
+# Virtual City School
+
+> Virtual City School (VCS) is a live online school teaching the Cambridge O Level and A Level curriculum (alongside Grade 5-12 curricula), based in Saudi Arabia and serving expatriate Pakistani families across the Gulf and beyond.
+
+Classes are live and taught in real time by qualified subject teachers - not pre-recorded video. VCS exists for families whose local Pakistani-curriculum schools don't offer a Cambridge track, and for families facing long waiting lists, high tuition, or no nearby seat at all in their country's British-curriculum schools. Class times are set in Arabian Standard Time (AST, UTC+3) / Gulf Standard Time (GST, UTC+4 for the UAE and Oman) and scheduled to work across the served countries.
+
+## Country guides
+
+Country-specific pages on local schooling options, waiting lists, and why O Level/A Level fits each market, written for Pakistani expatriate families:
+
+- [Saudi Arabia](https://virtualcityschool.com/online-school/saudi-arabia): Virtual City School's home country; families in Riyadh, Jeddah, Dammam, Khobar and smaller industrial cities with no Cambridge school nearby.
+- [UAE](https://virtualcityschool.com/online-school/uae): For families on a KHDA/ADEK school waiting list, or commuting between emirates for a seat.
+- [Qatar](https://virtualcityschool.com/online-school/qatar): Doha's smaller, more competitive private-school market.
+- [Kuwait](https://virtualcityschool.com/online-school/kuwait): Kuwait's long-settled Pakistani community and its private-school licensing environment.
+- [Bahrain](https://virtualcityschool.com/online-school/bahrain): Manama and Isa Town families choosing between the Pakistani Federal Board track and Bahrain's oversubscribed British-curriculum schools.
+- [Oman](https://virtualcityschool.com/online-school/oman): Families across Muscat, Sohar, Nizwa, Salalah, Buraimi and Sawiq, outside Oman's Muscat-concentrated British-curriculum schools.
+- [Online School by Country (hub)](https://virtualcityschool.com/online-school): Index of all country guides above.
+
+## Courses and people
+
+- [Courses](https://virtualcityschool.com/courses): Cambridge O Level, AS Level and A2 Level courses, plus Grade 5-12 curricula, with live class schedules and per-course pricing.
+- [Teachers](https://virtualcityschool.com/teachers): Qualified subject teachers, each currently or previously teaching at recognised institutions.
+- [Exam Dates & Deadlines](https://virtualcityschool.com/exam-dates): Cambridge O Level and A Level exam registration deadlines and results dates, sourced from Cambridge International.
+- [About](https://virtualcityschool.com/about): Virtual City School's mission and story.
+- [Blog](https://virtualcityschool.com/blogs): Articles on online learning, Cambridge curricula, and education topics relevant to expatriate families.
+
+## Optional
+
+- [Sitemap](https://virtualcityschool.com/sitemap.xml)
+- [Privacy Policy](https://virtualcityschool.com/privacy-policy)
+- [Terms](https://virtualcityschool.com/terms)
