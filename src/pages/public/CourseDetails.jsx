@@ -92,7 +92,19 @@ const CourseDetails = () => {
   const normalizedCourse = React.useMemo(() => {
     if (!course) return null;
 
-    const title = course.title || "Untitled Course";
+    // CMS titles occasionally carry runs of stray whitespace (e.g. tabs
+    // pasted in from a spreadsheet) that otherwise land verbatim in the
+    // <title> tag, meta description and JSON-LD - collapse them before the
+    // title is used anywhere visitor- or crawler-facing.
+    const title = (course.title || "Untitled Course").replace(/\s+/g, " ").trim();
+
+    // Cambridge syllabus codes are the trailing 4 digits of a course title,
+    // either bare ("Chemistry O Levels 5070") or parenthesized ("Biology
+    // IGCSE I (0610)"). Federal Board and non-Cambridge courses don't carry
+    // one, so this is best-effort and null when absent - never invented.
+    const syllabusMatch = title.match(/\(?(\d{4})\)?$/);
+    const syllabusCode = syllabusMatch ? syllabusMatch[1] : null;
+
     // Some course records have no real description on file and just echo
     // the title back (e.g. description: "Biology 0620" for a course named
     // "Biology 0620") - that's indistinguishable from "not written yet," so
@@ -104,6 +116,7 @@ const CourseDetails = () => {
     return {
       id: course.id || courseId,
       title,
+      syllabusCode,
       description: hasRealDescription
         ? course.description
         : "Full course description coming soon - message us on WhatsApp for the syllabus and schedule.",
@@ -127,11 +140,28 @@ const CourseDetails = () => {
 
   const courseUrl = typeof window !== "undefined" ? window.location.href : undefined;
 
+  // Per-course meta description built from real fields only - previously
+  // identical boilerplate for every course ("Enroll in X - a live online
+  // Cambridge course..."), which reads as duplicate/thin content across
+  // 100+ course pages. Deliberately has no exam-session date: the course
+  // API carries no such field (Cambridge exam sessions live only on the
+  // general /exam-dates page), and inventing one here would be exactly the
+  // kind of unverified claim flagged elsewhere on this site.
+  const metaDescription = normalizedCourse
+    ? [
+        `${normalizedCourse.title} — a live, teacher-led ${normalizedCourse.category} course at Virtual City School.`,
+        normalizedCourse.syllabusCode ? `Cambridge syllabus ${normalizedCourse.syllabusCode}.` : null,
+        Number(normalizedCourse.price) > 0
+          ? `${formatCurrency(Number(normalizedCourse.price))} per course.`
+          : null,
+      ]
+        .filter(Boolean)
+        .join(" ")
+    : undefined;
+
   useSeo({
       title: normalizedCourse ? `${normalizedCourse.title} | Virtual City School` : undefined,
-      description: normalizedCourse
-            ? `Enroll in ${normalizedCourse.title} - a live online Cambridge course at Virtual City School for students across the UAE, Saudi Arabia, Qatar and Pakistan.`
-            : undefined,
+      description: metaDescription,
       url: courseUrl,
       jsonLd: normalizedCourse
         ? [
