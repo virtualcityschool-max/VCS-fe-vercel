@@ -4,6 +4,15 @@
 
 Classes are live and taught in real time by qualified subject teachers - not pre-recorded video. VCS exists for families whose local Pakistani-curriculum schools don't offer a Cambridge track, and for families facing long waiting lists, high tuition, or no nearby seat at all in their country's British-curriculum schools. Class times are set in Arabian Standard Time (AST, UTC+3) / Gulf Standard Time (GST, UTC+4 for the UAE and Oman) and scheduled to work across the served countries.
 
+## Subjects and levels
+
+- **Cambridge O Level / IGCSE**: Mathematics, Additional Mathematics, Biology, Chemistry, Physics, Computer Science, English Language, Urdu, Islamiyat, Pakistan Studies.
+- **Cambridge AS Level & A2 Level**: Mathematics, Biology, Chemistry, Physics, Computer Science, English Language, Urdu.
+- **Pakistani Federal Board (Matric/SSC, Grade 9-10 and FSc/ICS/FA, Grade 11-12)**: for families who need the Federal Board track rather than Cambridge.
+- **Grade 5-12 general curriculum**: primary- and middle-school subjects on the Cambridge Curriculum for students not yet at O Level.
+
+Live class schedules and current per-course pricing are on the [Courses](https://virtualcityschool.com/courses) page - the catalog changes as courses open and close, so treat that page as the source of truth rather than this file.
+
 ## Country guides
 
 Country-specific pages on local schooling options, waiting lists, and why O Level/A Level fits each market, written for Pakistani expatriate families:
@@ -23,6 +32,11 @@ Country-specific pages on local schooling options, waiting lists, and why O Leve
 - [Exam Dates & Deadlines](https://virtualcityschool.com/exam-dates): Cambridge O Level and A Level exam registration deadlines and results dates, sourced from Cambridge International.
 - [About](https://virtualcityschool.com/about): Virtual City School's mission and story.
 - [Blog](https://virtualcityschool.com/blogs): Articles on online learning, Cambridge curricula, and education topics relevant to expatriate families.
+
+## Enquire
+
+- WhatsApp: [+966 55 668 7417](https://wa.me/966556687417) - fastest way to ask about a subject, class schedule, or price before enrolling.
+- Email: admin@virtualcityschool.com
 
 ## Optional
 
