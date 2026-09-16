@@ -426,7 +426,50 @@ const PublicHome = () => {
           </div>
         </Reveal>
 
-        {/* Your Journey to Mastery Section */}
+        {/* Refer & Earn - every current student/teacher has a permanent
+            referral link on their dashboard (see ReferralLinkCard); this
+            banner is what tells anyone the link exists and what it's worth,
+            since the dashboard card itself is deliberately low-profile. */}
+        <Reveal className="mt-5">
+          <div className="group relative overflow-hidden rounded-2xl border border-emerald-500/15 bg-white/[0.03] backdrop-blur-xl px-6 py-5 sm:px-8 sm:py-6 transition-colors duration-300 hover:border-emerald-500/30">
+            <div className="pointer-events-none absolute -right-12 -top-12 w-44 h-44 rounded-full bg-emerald-500/20 blur-3xl transition-opacity duration-500 group-hover:bg-emerald-500/30" />
+            <div className="relative z-10 flex flex-col sm:flex-row sm:items-center gap-5 sm:gap-8">
+              <div className="flex items-start gap-4 flex-1 min-w-0">
+                <span className="icon-chip shrink-0">
+                  <i className="fas fa-share-nodes text-emerald-400"></i>
+                </span>
+                <div className="min-w-0">
+                  <p className="text-[10px] font-black uppercase tracking-[0.35em] text-emerald-400 mb-1.5">
+                    Refer &amp; Earn
+                  </p>
+                  <h3 className="text-lg sm:text-xl font-black font-poppins tracking-tight text-white">
+                    Refer a family, earn for as long as they stay
+                  </h3>
+                  <p className="text-slate-400 text-xs sm:text-sm mt-1 max-w-md leading-relaxed">
+                    Every VCS student and teacher has a personal referral link. When a
+                    family enrolls through yours, you earn 10% of what they pay - for
+                    as long as they remain enrolled, not just once.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  if (auth.isLoggedIn && (auth.role === "student" || auth.role === "teacher")) {
+                    navigate(auth.role === "teacher" ? "/teacher" : "/student");
+                  } else {
+                    dispatch(setAuthModal({ type: "login" }));
+                  }
+                }}
+                className="btn-glow shrink-0 inline-flex items-center justify-center gap-2.5 px-6 py-3 rounded-xl text-white font-bold text-sm whitespace-nowrap bg-emerald-600 hover:bg-emerald-500"
+              >
+                <i className="fas fa-share-nodes"></i>
+                Get My Referral Link
+              </button>
+            </div>
+          </div>
+        </Reveal>
+
+        {/* How Virtual City School Works Section */}
         <div className="mt-32 md:mt-48">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center">
             {/* Left: Journey Image */}
@@ -447,7 +490,7 @@ const PublicHome = () => {
             {/* Right: Steps */}
             <div className="space-y-12">
               <Reveal as="h2" className="text-4xl md:text-5xl font-black font-poppins tracking-tight text-white mb-4">
-                Your Journey to Mastery
+                How Virtual City School Works
               </Reveal>
 
               <div className="space-y-10 relative">
@@ -460,9 +503,9 @@ const PublicHome = () => {
                     1
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-white mb-2">Identify Your Node</h3>
+                    <h3 className="text-xl font-bold text-white mb-2">Choose Your Subjects</h3>
                     <p className="text-slate-400 leading-relaxed text-sm">
-                      Choose from hundreds of specialized knowledge paths or take our aptitude assessment to build a custom roadmap.
+                      Pick from live-taught Cambridge O Level, AS Level and A2 Level courses - Mathematics, Sciences, English, Computer Science, Urdu, Islamiyat, Pakistan Studies and more - matched to your child's grade. Can't cover the fee? Apply for free access above.
                     </p>
                   </div>
                 </Reveal>
@@ -473,9 +516,9 @@ const PublicHome = () => {
                     2
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-white mb-2">Immersive Engagement</h3>
+                    <h3 className="text-xl font-bold text-white mb-2">Attend Live Classes</h3>
                     <p className="text-slate-400 leading-relaxed text-sm">
-                      Access the 'Lecture Glass' for interactive video content, collaborative projects, and live coding sessions.
+                      Real-time, teacher-led classes over video - not pre-recorded lectures - with attendance tracked and assignments set by your child's actual subject teacher.
                     </p>
                   </div>
                 </Reveal>
@@ -486,9 +529,9 @@ const PublicHome = () => {
                     3
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-white mb-2">Validation & Certification</h3>
+                    <h3 className="text-xl font-bold text-white mb-2">Track Progress, Sit the Real Exam</h3>
                     <p className="text-slate-400 leading-relaxed text-sm">
-                      Complete rigorous peer-reviewed assessments and secure blockchain-verified credentials for your portfolio.
+                      Follow your child's progress through assessments and evaluations along the way, then register for the official Cambridge O Level or A Level exam - a qualification recognised for university admission across Pakistan, the UK and the Gulf.
                     </p>
                   </div>
                 </Reveal>
