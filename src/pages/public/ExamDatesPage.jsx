@@ -21,6 +21,8 @@ const COUNTRY_DESCRIPTORS = {
   uae: "Cambridge deadlines explained for families juggling UAE school waitlists.",
   qatar: "A Cambridge pathway and clear deadlines for Pakistani families in Doha.",
   kuwait: "Cambridge O & A Level support for Kuwait's long-settled Pakistani community.",
+  bahrain: "Cambridge O & A Level deadlines for Pakistani families in Manama and Isa Town.",
+  oman: "Cambridge deadlines for Pakistani families across Muscat and beyond.",
 };
 
 const PAGE_URL = `${SITE_URL}/exam-dates`;
@@ -34,7 +36,7 @@ const ExamDatesPage = () => {
   useSeo({
     title: "Cambridge O Level & A Level Exam Dates and Deadlines",
     description:
-      "O Level results dates, A Level exam registration deadlines and IGCSE results release dates for Cambridge students in Saudi Arabia, the UAE, Qatar and Kuwait - sourced directly from Cambridge International.",
+      "O Level results dates, A Level exam registration deadlines and IGCSE results release dates for Cambridge students in Saudi Arabia, the UAE, Qatar, Kuwait, Bahrain and Oman - sourced directly from Cambridge International.",
     url: PAGE_URL,
     jsonLd: [
       ...events,
@@ -70,7 +72,7 @@ const ExamDatesPage = () => {
             Cambridge O Level & A Level <span className="text-gradient">Exam Dates and Deadlines</span>
           </h1>
           <p className="text-slate-400 text-base md:text-lg leading-relaxed max-w-2xl">
-            Registration deadlines, exam windows and results release dates for Cambridge IGCSE, O Level and International AS & A Level - sourced directly from Cambridge International, for Pakistani families across Saudi Arabia, the UAE, Qatar and Kuwait.
+            Registration deadlines, exam windows and results release dates for Cambridge IGCSE, O Level and International AS & A Level - sourced directly from Cambridge International, for Pakistani families across Saudi Arabia, the UAE, Qatar, Kuwait, Bahrain and Oman.
           </p>
         </header>
 

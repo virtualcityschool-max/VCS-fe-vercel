@@ -9,13 +9,15 @@ const HOOK_LINES = {
   uae: "For families on a KHDA waitlist, or commuting from Sharjah/Ajman for a Dubai school seat.",
   qatar: "A Cambridge option for Doha's smaller, competitive private-school market.",
   kuwait: "A schooling option that isn't tied to one licensed private-school seat.",
+  bahrain: "A Cambridge track that doesn't depend on a seat at one of Bahrain's few British-curriculum schools.",
+  oman: "For families outside Muscat, or without a seat in Pakistan School Muscat's Cambridge stream.",
 };
 
 const OnlineSchoolHub = () => {
   useSeo({
     title: "Online Cambridge School by Country",
     description:
-      "Country-specific guides for Pakistani families choosing an online Cambridge O Level or A Level school in Saudi Arabia, the UAE, Qatar and Kuwait.",
+      "Country-specific guides for Pakistani families choosing an online Cambridge O Level or A Level school in Saudi Arabia, the UAE, Qatar, Kuwait, Bahrain and Oman.",
     url: `${SITE_URL}/online-school`,
     jsonLd: {
       "@type": "BreadcrumbList",

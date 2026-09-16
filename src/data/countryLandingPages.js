@@ -19,6 +19,8 @@ export const APPROX_FX = {
   AED: { rate: 3.67, label: "UAE Dirham" },
   QAR: { rate: 3.64, label: "Qatari Riyal" },
   KWD: { rate: 0.31, label: "Kuwaiti Dinar" },
+  BHD: { rate: 0.376, label: "Bahraini Dinar" },
+  OMR: { rate: 0.385, label: "Omani Rial" },
 };
 
 // Photos sourced via the Pexels API (free tier, no attribution required by
@@ -392,6 +394,186 @@ export const COUNTRY_PAGES = [
       },
     },
     siblingSlugs: ["saudi-arabia", "uae"],
+  },
+
+  {
+    slug: "bahrain",
+    countryName: "Bahrain",
+    flagCode: "bh",
+    timeZone: "Asia/Bahrain",
+    currency: "BHD",
+    heroKicker: "Cambridge Online School - Bahrain",
+    h1: "Online Cambridge O Level & A Level School for Pakistani Families in Bahrain",
+    metaTitle: "Online Cambridge School in Bahrain | Virtual City School",
+    metaDescription:
+      "Live online O Level and A Level classes for Pakistani families in Manama, Isa Town and across Bahrain - built for multi-year waiting lists at Bahrain's British-curriculum schools.",
+    intro: [
+      "Bahrain's Pakistani community is one of the oldest and most established in the Gulf - Pakistan School, Bahrain has been running since 1968, now split across a primary wing in Manama and a main campus in Isa Town. It teaches the Pakistani Federal Board curriculum (Matriculation and HSSC/FSc), not Cambridge O Level or A Level.",
+      "For a Cambridge track, Bahraini families turn to the country's British-curriculum schools - St Christopher's School, the British School of Bahrain, Capital School Bahrain and a handful of others. These are well-regarded, but seats at the most in-demand ones are genuinely scarce: popular year groups commonly carry waiting lists, and several run hard application-window cutoffs months before the academic year starts. Virtual City School gives a Bahrain-based Pakistani family a live Cambridge O Level/A Level option that isn't contingent on being early enough, or lucky enough, to get one of those seats.",
+    ],
+    schoolingLandscape: {
+      heading: "What schooling actually looks like for Pakistani families in Bahrain",
+      paragraphs: [
+        "Pakistani families in Bahrain generally choose between the Pakistani Federal Board track at Pakistan School, Bahrain, and a British-curriculum international school offering IGCSE, O Level and A Level. The two are not close substitutes: one leads to a Matric/FSc certificate recognised primarily within Pakistan's own system, the other to an internationally portable Cambridge qualification.",
+        "Bahrain's most established British-curriculum schools - among them St Christopher's School (running since 1961) and the selective British School of Bahrain - are routinely described as having genuine waiting lists for popular year groups, with some in-demand schools' intake windows closing months ahead of the academic year. A family that starts looking mid-year, or after a mid-year relocation to Bahrain, can find the realistic in-person choice set for Cambridge O Level/A Level narrower than the total number of schools in the country would suggest.",
+        "For families who specifically want the Cambridge track rather than the Federal Board syllabus, that leaves a fairly small number of schools actually competing for the same seats - a very different situation from a market the size of the UAE's.",
+      ],
+      verifyNote:
+        "Specific current tuition figures, exact waiting-list durations, and this year's application-window dates for Bahrain's British-curriculum schools are not stated here and should be confirmed against each school's own admissions page before publishing any number publicly.",
+    },
+    whyOALevel: {
+      heading: "Why O Level and A Level specifically, for a family in Bahrain",
+      paragraphs: [
+        "Bahrain's public higher-education system, like most of the Gulf, is not the default pathway for expatriate students. That means Pakistani families in Bahrain are, in the overwhelming majority of cases, already planning for their child to study elsewhere after school - Pakistan, the UK, another Gulf country, or a private university with an international admissions track.",
+        "Cambridge O Level and A Level is built for exactly that uncertainty: a single qualification recognised for university admission across Pakistan, the UK, and the wider Gulf, without requiring a family to commit in advance to one specific destination.",
+        "On return to Pakistan specifically, O Level and A Level results are converted to a Pakistani-board equivalent by the Inter Board Committee of Chairmen (IBCC) for university admission - a standard, well-established process, though families should confirm current IBCC documentation requirements directly, since these are periodically updated.",
+      ],
+    },
+    diaspora:
+      "Bahrain's Pakistani community is long-settled and multi-generational in a way few other Gulf markets can match - Pakistan School, Bahrain has been serving it since 1968. That history hasn't translated into abundant Cambridge-track school seats, though: the community's schooling need has outgrown what the country's smaller number of British-curriculum schools can seat every year, which is exactly the constraint an online school removes.",
+    faq: [
+      {
+        q: "Is there a Pakistani-curriculum school in Bahrain, and how is this different?",
+        a: "Pakistan School, Bahrain teaches the Pakistani Federal Board curriculum (Matriculation and HSSC/FSc) across its Manama and Isa Town campuses. Virtual City School teaches Cambridge O Level and A Level instead - a different, internationally-portable qualification track, not a continuation of or replacement for the Federal Board syllabus.",
+      },
+      {
+        q: "We're on a waiting list for a British-curriculum school in Bahrain - can our child start online now and switch later?",
+        a: "Yes. Families commonly use an online Cambridge track as a bridge while waiting for a place to open up at a preferred school, then decide whether to switch once a seat is actually offered.",
+      },
+      {
+        q: "How does the class schedule work with Bahrain's Friday-Saturday weekend?",
+        a: "Class timings are planned around the standard Gulf week, and times are shown in Arabian Standard Time (AST) so there's no manual conversion needed.",
+      },
+      {
+        q: "Do we need a specific visa or residency status to enroll?",
+        a: "Enrollment isn't tied to a specific visa category - it's designed for expatriate families living in Bahrain generally. If your situation is unusual, message us on WhatsApp before enrolling to confirm.",
+        verify: true,
+      },
+      {
+        q: "If we eventually move back to Pakistan, will these results actually count?",
+        a: "Cambridge O Level and A Level results are converted to a Pakistani-board equivalent through the Inter Board Committee of Chairmen (IBCC) for university admission. Confirm current documentation requirements with IBCC directly, as processes can be updated.",
+        verify: true,
+      },
+      {
+        q: "Is Virtual City School recognised for a company education allowance in Bahrain?",
+        a: "This depends on your employer's specific policy for online schooling. We can provide enrollment confirmation and invoicing documentation - check with your HR/education-allowance administrator on their requirements before enrolling.",
+        verify: true,
+      },
+    ],
+    images: {
+      skyline: {
+        src: "manama-skyline.webp",
+        width: 1000,
+        height: 667,
+        alt: "Manama's skyline at dusk, including the twin sail-shaped towers of the Bahrain World Trade Center",
+        caption: "Manama, Bahrain.",
+      },
+      study1: {
+        src: "qalat-al-bahrain-fort.webp",
+        width: 1000,
+        height: 667,
+        alt: "The coral-stone walls of Qal'at al-Bahrain (Bahrain Fort), a UNESCO World Heritage site on the Gulf coast",
+        caption: "Qal'at al-Bahrain, a UNESCO World Heritage Site.",
+      },
+      study2: {
+        src: "student-online-class-bahrain.webp",
+        width: 1000,
+        height: 667,
+        alt: "A student attending a live online class on a laptop at a home desk",
+        caption: "One live teacher, one small class, joined from home.",
+      },
+    },
+    siblingSlugs: ["qatar", "kuwait"],
+  },
+
+  {
+    slug: "oman",
+    countryName: "Oman",
+    flagCode: "om",
+    timeZone: "Asia/Muscat",
+    currency: "OMR",
+    heroKicker: "Cambridge Online School - Oman",
+    h1: "Online Cambridge O Level & A Level School for Pakistani Families in Oman",
+    metaTitle: "Online Cambridge School in Oman | Virtual City School",
+    metaDescription:
+      "Live online O Level and A Level classes for Pakistani families across Muscat, Sohar, Nizwa, Salalah and beyond - a Cambridge track that doesn't depend on where in Oman you live.",
+    intro: [
+      "Oman's Pakistani community is spread far wider than in most other Gulf markets - the Pakistan Schools Oman network runs seven campuses across Muscat, Seeb, Buraimi, Nizwa, Sohar, Salalah and Sawiq, serving a community estimated at around 400,000. The flagship, Pakistan School Muscat, is unusual in the region: alongside the Pakistani Federal Board curriculum, it also runs a Cambridge IGCSE/AS/A Level stream on the same very large, oversubscribed campus.",
+      "Oman's dedicated British-curriculum schools - led by the long-established British School Muscat and premium options like Cheltenham Muscat - concentrate almost entirely in the capital, and the best-known among them keep genuine, multi-year waiting lists. For a family outside Muscat, or one that can't secure a Cambridge-stream seat within Pakistan School Muscat itself, Virtual City School offers a live Cambridge O Level/A Level option that doesn't depend on where in Oman you live.",
+    ],
+    schoolingLandscape: {
+      heading: "What schooling actually looks like for Pakistani families in Oman",
+      paragraphs: [
+        "Pakistan School Muscat, the historic flagship of the seven-school Pakistan Schools Oman network, is one of the largest community schools in the Gulf - over 3,000 students from roughly 20 nationalities, spanning Kindergarten through Grade 12/A Level. Notably, it already offers a Cambridge IGCSE/AS/A Level pathway internally, alongside the Federal Board (FBISE) track - genuinely more than the equivalent Pakistani community schools in Saudi Arabia, Qatar, Kuwait or Bahrain provide. But that Cambridge stream sits inside one very large, long-running campus in Muscat, and the other six schools in the network - in Seeb, Buraimi, Nizwa, Sohar, Salalah and Sawiq - exist primarily to extend the Federal Board track geographically, not the Cambridge one.",
+        "For a dedicated British-curriculum option, Muscat has a small set of well-regarded schools - British School Muscat (Oman's oldest, operating for over 50 years), Cheltenham Muscat, and mid-tier options like Muscat International School. The most established of these are consistently described as heavily oversubscribed, with families advised to apply many months, sometimes upward of a year, ahead of the intended start date, particularly for the most sought-after year groups.",
+        "Outside Muscat - in Sohar, Nizwa, Salalah, Buraimi and Sawiq, where much of the Pakistan Schools Oman network itself is concentrated - the realistic in-person choice for a Cambridge O Level/A Level track narrows further still, simply because Oman's British-curriculum schools are almost entirely a Muscat phenomenon.",
+      ],
+      verifyNote:
+        "Current admission status, fees, and waiting-list length for Pakistan School Muscat's Cambridge stream and for Muscat's British-curriculum schools should be confirmed directly with each school before publishing any specific figure or availability claim.",
+    },
+    whyOALevel: {
+      heading: "Why O Level and A Level specifically, for a family in Oman",
+      paragraphs: [
+        "Oman's public universities are structured primarily around Omani nationals, so - as in most of the Gulf - the default undergraduate pathway isn't open to most expatriate students. Pakistani families in Oman are typically planning from early on for their child to study elsewhere: Pakistan, the UK, another Gulf country, or a private university with an international admissions track.",
+        "Cambridge O Level and A Level is built for that uncertainty specifically - an internationally recognised qualification for admission across Pakistan, the UK, and the wider Gulf that doesn't require a family to have already decided where their child will study next.",
+        "On return to Pakistan, O Level and A Level results are converted to a Pakistani-board equivalent through the Inter Board Committee of Chairmen (IBCC) for university admission - a standard process, though families should confirm current IBCC documentation requirements directly, as these are periodically updated.",
+      ],
+    },
+    diaspora:
+      "Oman's Pakistani community, estimated at around 400,000, is more geographically spread out than almost anywhere else in the Gulf - the seven-school Pakistan Schools Oman network exists specifically because that community isn't concentrated in one or two cities the way it is in the UAE or Qatar. For a family in Sohar, Nizwa, Salalah or Buraimi in particular, distance from Muscat's small cluster of British-curriculum schools is a bigger day-to-day constraint on a Cambridge education than cost or a waiting list.",
+    faq: [
+      {
+        q: "Pakistan School Muscat already offers a Cambridge stream - how is Virtual City School different?",
+        a: "Pakistan School Muscat's Cambridge IGCSE/AS/A Level stream sits inside one very large, long-established campus in Muscat, alongside its much bigger Federal Board programme. Virtual City School is a dedicated live online O Level/A Level track that isn't tied to competing for a seat within that specific stream, or to living near Muscat at all.",
+        verify: true,
+      },
+      {
+        q: "My family lives in Sohar, Nizwa, Salalah or Buraimi, far from Muscat's British-curriculum schools - can my child still do O Level or A Level?",
+        a: "Yes - this is precisely the situation an online Cambridge school is designed for. Your child attends live classes from home, with no dependency on a physical school existing in your city.",
+      },
+      {
+        q: "We're on a waiting list for a British-curriculum school in Muscat - can we start online now and switch later if a seat opens?",
+        a: "Yes. Families commonly use an online Cambridge track as a bridge while waiting for a preferred school place, then decide whether to switch once a seat is actually offered.",
+      },
+      {
+        q: "How does the class schedule work with Oman's Friday-Saturday weekend?",
+        a: "Class timings are planned around the standard Gulf week, and times are shown in Gulf Standard Time (GST) - the same time zone as the UAE - so there's no manual conversion needed.",
+      },
+      {
+        q: "Do we need a specific visa or residency status to enroll?",
+        a: "Enrollment isn't tied to a specific visa category - it's designed for expatriate families living in Oman generally. If your situation is unusual, message us on WhatsApp before enrolling to confirm.",
+        verify: true,
+      },
+      {
+        q: "If we eventually move back to Pakistan, will these results actually count?",
+        a: "Cambridge O Level and A Level results are converted to a Pakistani-board equivalent through the Inter Board Committee of Chairmen (IBCC) for university admission. Confirm current documentation requirements with IBCC directly, as processes can be updated.",
+        verify: true,
+      },
+    ],
+    images: {
+      skyline: {
+        src: "muttrah-corniche-muscat.webp",
+        width: 1000,
+        height: 667,
+        alt: "Muttrah Corniche in Muscat, Oman, with traditional dhows moored along the waterfront and mountains behind",
+        caption: "Muttrah Corniche, Muscat.",
+      },
+      study1: {
+        src: "nizwa-fort-oman.webp",
+        width: 1000,
+        height: 1334,
+        alt: "The round tower of Nizwa Fort rising against a clear sky in Oman's interior",
+        caption: "Nizwa Fort, one of Oman's best-known landmarks outside the capital.",
+      },
+      study2: {
+        src: "student-online-class-oman.webp",
+        width: 1000,
+        height: 667,
+        alt: "A student attending a live online class on a laptop at a home desk",
+        caption: "Live classes fit around a normal home study routine, not a commute to campus.",
+      },
+    },
+    siblingSlugs: ["uae", "qatar"],
   },
 ];
 

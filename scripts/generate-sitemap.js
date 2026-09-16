@@ -13,6 +13,11 @@ const API_BASE_URL = process.env.VITE_API_BASE_URL || "https://virtualschool.gra
 // since (unlike blogs/courses) they have no API-side updated_at to read.
 const COUNTRY_PAGES_LAST_UPDATED = "2026-08-30";
 
+// Bahrain and Oman pages were added separately from the original four -
+// tracked with their own lastmod so adding them doesn't imply the
+// unchanged Saudi/UAE/Qatar/Kuwait pages were also edited on this date.
+const NEW_COUNTRY_PAGES_ADDED = "2026-09-16";
+
 // Today's build date, in UTC. Used only for pages whose content is a live
 // aggregate of everything else (the homepage's course list, /courses,
 // /teachers, /blogs) - it's honest to say those changed "today" because the
@@ -38,6 +43,8 @@ const STATIC_PAGES = [
   { loc: "/online-school/uae", changefreq: "monthly", lastmod: COUNTRY_PAGES_LAST_UPDATED },
   { loc: "/online-school/qatar", changefreq: "monthly", lastmod: COUNTRY_PAGES_LAST_UPDATED },
   { loc: "/online-school/kuwait", changefreq: "monthly", lastmod: COUNTRY_PAGES_LAST_UPDATED },
+  { loc: "/online-school/bahrain", changefreq: "monthly", lastmod: NEW_COUNTRY_PAGES_ADDED },
+  { loc: "/online-school/oman", changefreq: "monthly", lastmod: NEW_COUNTRY_PAGES_ADDED },
 ];
 
 function urlEntry({ loc, changefreq, priority, lastmod }) {

@@ -1,17 +1,17 @@
 import { Link } from "react-router-dom";
 import Reveal from "../ui/Reveal";
 
-// Alphabetical by display name. Country pages exist for the first 4 markets
-// (`to` set below); the rest don't have a dedicated page yet, so those tiles
-// stay plain, unlinked divs exactly as before.
+// Alphabetical by display name. Country pages exist for 6 markets (`to` set
+// below); the rest don't have a dedicated page yet, so those tiles stay
+// plain, unlinked divs exactly as before.
 const COUNTRIES = [
   { code: "au", name: "Australia" },
-  { code: "bh", name: "Bahrain" },
+  { code: "bh", name: "Bahrain", to: "/online-school/bahrain" },
   { code: "ca", name: "Canada" },
   { code: "cn", name: "China" },
   { code: "kw", name: "Kuwait", to: "/online-school/kuwait" },
   { code: "my", name: "Malaysia" },
-  { code: "om", name: "Oman" },
+  { code: "om", name: "Oman", to: "/online-school/oman" },
   { code: "pk", name: "Pakistan" },
   { code: "qa", name: "Qatar", to: "/online-school/qatar" },
   { code: "sa", name: "Saudi Arabia", to: "/online-school/saudi-arabia" },
