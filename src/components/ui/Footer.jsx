@@ -44,8 +44,8 @@ const Footer = ({ variant = "full" }) => {
               onClick={() => handleNavigation("/")}
             />
             <p className="text-slate-400 text-sm leading-relaxed">
-              Next-generation learning platform connecting students with
-              world-class tutors for live classes and on-demand mastery modules.
+              Live, teacher-led Cambridge O Level and A Level classes for
+              Pakistani families across the Gulf and beyond.
             </p>
             <div className="flex items-center gap-3 mt-4">
               <a
