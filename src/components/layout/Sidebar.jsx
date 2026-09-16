@@ -102,6 +102,7 @@ const NAV_CONFIG = {
 
     { id: "blogs",       label: "Blogs",        icon: "fas fa-newspaper",     to: "/admin/blogs", section: "Content" },
     { id: "vlogs",       label: "Vlogs",        icon: "fas fa-circle-play",   to: "/admin/vlogs", section: "Content" },
+    { id: "testimonials", label: "Testimonials", icon: "fas fa-quote-left",   to: "/admin/testimonials", section: "Content" },
 
     { id: "levels",  label: "Levels",   icon: "fas fa-tags",           to: "/admin/course-levels", section: "Settings" },
     { id: "about",    label: "About Us",          icon: "fas fa-info-circle", to: "/admin/about",  section: "Settings" },

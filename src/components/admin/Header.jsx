@@ -58,6 +58,11 @@ const Header = ({ activeTab, children }) => {
           title: "Referral Management",
           description: "Track referral signups and enrollments across users",
         };
+      case "testimonials":
+        return {
+          title: "Testimonials",
+          description: "Add and publish real student, parent and teacher quotes for the homepage",
+        };
       default:
         return {
           title: activeTab,

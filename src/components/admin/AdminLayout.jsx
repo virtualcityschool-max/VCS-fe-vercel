@@ -37,6 +37,7 @@ const AdminLayout = () => {
     if (path.includes("/admin/attendance")) return "attendance";
     if (path.includes("/admin/course-levels")) return "levels";
     if (path.includes("/admin/referrals")) return "referrals";
+    if (path.includes("/admin/testimonials")) return "testimonials";
     // These pages manage their own heading - skip the shared Header
     if (path.includes("/admin/blogs"))    return null;
     if (path.includes("/admin/about"))    return null;

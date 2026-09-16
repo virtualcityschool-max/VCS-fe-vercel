@@ -57,6 +57,7 @@ const AdminAttendancePage = React.lazy(() => import("../pages/admin/AdminAttenda
 const AdminEvaluationPage = React.lazy(() => import("../pages/admin/AdminEvaluationPage"));
 const AdminCategoriesPage = React.lazy(() => import("../pages/admin/AdminCategoriesPage"));
 const AdminReferralsPage = React.lazy(() => import("../pages/admin/AdminReferralsPage"));
+const AdminTestimonialsPage = React.lazy(() => import("../pages/admin/AdminTestimonialsPage"));
 const UserDetailsPage = React.lazy(() => import("../pages/admin/UserDetailsPage"));
 const AdminTeacherPlannerPage = React.lazy(() => import("../pages/admin/AdminTeacherPlannerPage"));
 const AdminBlogsPage = React.lazy(() => import("../pages/admin/AdminBlogsPage"));
@@ -268,6 +269,7 @@ const AppRoutes = () => {
           <Route path="evaluations" element={<AdminEvaluationPage />} />
           <Route path="course-levels" element={<AdminCategoriesPage />} />
           <Route path="referrals" element={<AdminReferralsPage />} />
+          <Route path="testimonials" element={<AdminTestimonialsPage />} />
           <Route path="about" element={<AdminAboutPage />} />
           <Route path="settings" element={<AdminPlatformSettingsPage />} />
         </Route>

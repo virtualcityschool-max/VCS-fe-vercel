@@ -14,6 +14,7 @@ import hireReducer from "./slices/hireSlice";
 import platformSettingsReducer from "./slices/platformSettingsSlice";
 import freeAccessReducer from "./slices/freeAccessSlice";
 import referralReducer from "./slices/referralSlice";
+import testimonialsReducer from "./slices/testimonialsSlice";
 import { authStorage } from "../utils/authStorage";
 
 // Load auth state from localStorage using authStorage utilities
@@ -79,6 +80,7 @@ const appReducer = combineReducers({
   platformSettings: platformSettingsReducer,
   freeAccess: freeAccessReducer,
   referrals: referralReducer,
+  testimonials: testimonialsReducer,
 });
 
 // Reset all slices to their initial state when the user logs out
