@@ -92,10 +92,21 @@ const CourseDetails = () => {
   const normalizedCourse = React.useMemo(() => {
     if (!course) return null;
 
+    const title = course.title || "Untitled Course";
+    // Some course records have no real description on file and just echo
+    // the title back (e.g. description: "Biology 0620" for a course named
+    // "Biology 0620") - that's indistinguishable from "not written yet," so
+    // treat it the same as missing rather than showing a duplicate of the
+    // title as if it were content, both on the page and in Course schema.
+    const hasRealDescription =
+      course.description && course.description.trim().toLowerCase() !== title.trim().toLowerCase();
+
     return {
       id: course.id || courseId,
-      title: course.title || "Untitled Course",
-      description: course.description || "No description available.",
+      title,
+      description: hasRealDescription
+        ? course.description
+        : "Full course description coming soon - message us on WhatsApp for the syllabus and schedule.",
       thumbnail: course.thumbnail,
       category: (typeof course.category === "object" && course.category !== null ? course.category.name : course.category) || "general",
       price: course.price || "0.00",
