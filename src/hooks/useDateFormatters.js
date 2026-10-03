@@ -5,7 +5,8 @@ import {
 } from "../utils/validation";
 
 export const useDateFormatters = () => {
-  const timezone = useSelector((s) => s.auth.profile?.timezone) || undefined;
+  const storeTimezone = useSelector((s) => s.auth.profile?.timezone);
+  const timezone = storeTimezone || (typeof window !== "undefined" ? localStorage.getItem("vcs_user_timezone") : null) || undefined;
   const timezoneAbbr = getTimezoneAbbr(timezone);
   return {
     timezone,

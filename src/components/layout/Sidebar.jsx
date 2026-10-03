@@ -9,7 +9,8 @@ import TimezoneModal from "../common/TimezoneModal";
 const MOBILE_BREAKPOINT = 1024;
 
 const TimezoneIndicator = ({ isCollapsed, onOpenTimezoneModal }) => {
-  const timezone  = useSelector((s) => s.auth.profile?.timezone) || undefined;
+  const storeTimezone = useSelector((s) => s.auth.profile?.timezone);
+  const timezone = storeTimezone || (typeof window !== "undefined" ? localStorage.getItem("vcs_user_timezone") : null) || undefined;
   const [now, setNow] = useState(new Date());
 
   useEffect(() => {
@@ -120,15 +121,15 @@ const NAV_CONFIG = {
     // { label: "Hire Request", to: "/teacher/hire-leads",       icon: "fas fa-handshake" },
   ],
   student: [
-    { label: "Overview",             to: "/student?tab=overview",    icon: "fas fa-th-large" },
-    { label: "Calendar",             to: "/student?tab=calendar",    icon: "fas fa-calendar-alt" },
-    { label: "Schedule & Attendance",to: "/student?tab=schedule",    icon: "fas fa-clock" },
-    { label: "Resources",            to: "/student?tab=resources",   icon: "fas fa-folder-open" },
-    { label: "My Tutors",            to: "/student?tab=tutors",      icon: "fas fa-chalkboard-teacher" },
-    { label: "Assessments",          to: "/student?tab=assessments", icon: "fas fa-clipboard-list" },
-    { label: "Evaluations",          to: "/student?tab=evaluations", icon: "fas fa-chart-bar" },
-    { label: "Explore Courses",      to: "/courses",                 icon: "fas fa-compass" },
-    { label: "Blogs",                to: "/blogs",                   icon: "fas fa-newspaper" },
+    { label: "Overview",        to: "/student?tab=overview",   icon: "fas fa-th-large" },
+    { label: "Live Schedule",   to: "/student?tab=schedule",   icon: "fas fa-video" },
+    { label: "Weekly Planner",  to: "/student?tab=planner",    icon: "fas fa-calendar-alt" },
+    { label: "Calendar",        to: "/student?tab=calendar",   icon: "fas fa-calendar-days" },
+    { label: "Attendance",      to: "/student?tab=attendance", icon: "fas fa-user-check" },
+    { label: "Resources",       to: "/student?tab=resources",  icon: "fas fa-folder-open" },
+    { label: "Evaluations",     to: "/student?tab=evaluations",icon: "fas fa-chart-bar" },
+    { label: "Explore Courses", to: "/courses",                icon: "fas fa-compass" },
+    { label: "Blogs",           to: "/blogs",                  icon: "fas fa-newspaper" },
   ],
   parent: [
     { label: "Dashboard",        to: "/parent",              icon: "fas fa-table-columns", end: true },

@@ -18,30 +18,27 @@ import {
 import {
   StudentWorkspaceHeader,
   StudentWorkspaceNav,
-  FinancialStatusSidebar,
   OverviewTab,
+  LiveScheduleTab,
+  WeeklyPlannerTab,
   CalendarTab,
-  ScheduleAttendanceTab,
+  AttendanceTab,
   ResourcesTab,
   RequestTranscriptModal,
   RequestLeaveModal,
   AssignmentSubmitModal,
 } from "../../components/studentDashboard/workspace";
-import StudentTutors from "./StudentTutors";
-import StudentAssessments from "./StudentAssessments";
 import StudentEvaluationPage from "./StudentEvaluationPage";
 import TimezoneModal from "../../components/common/TimezoneModal";
 import ApplyFreeAccessModal from "../../components/public/ApplyFreeAccessModal";
-import ReferralLinkCard from "../../components/common/ReferralLinkCard";
-import SubscriptionBanner from "../../components/studentDashboard/SubscriptionBanner";
 
 const VALID_TABS = [
   "overview",
-  "calendar",
   "schedule",
+  "planner",
+  "calendar",
+  "attendance",
   "resources",
-  "tutors",
-  "assessments",
   "evaluations",
 ];
 
@@ -158,18 +155,8 @@ const StudentPortal = () => {
           </div>
 
           {/* Loading skeleton for main content */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <div className="lg:col-span-8 space-y-6">
-              {[1, 2].map((i) => (
-                <div
-                  key={i}
-                  className="skeleton p-8 rounded-2xl border border-slate-800 h-56"
-                />
-              ))}
-            </div>
-            <div className="lg:col-span-4 space-y-6">
-              <div className="skeleton p-6 rounded-2xl border border-slate-800 h-72" />
-            </div>
+          <div className="w-full space-y-6">
+            <div className="skeleton p-8 rounded-2xl border border-slate-800 h-72" />
           </div>
         </div>
       </section>
@@ -191,10 +178,7 @@ const StudentPortal = () => {
           />
         </div>
 
-        {/* Monthly Subscription Banner (if any enrollments pending renewal or expiring) */}
-        <SubscriptionBanner />
-
-        {/* 2. Navigation Tabs (Overview, Calendar, Schedule & Attendance, Resources, My Tutors, Assessments, Evaluations) */}
+        {/* 2. Navigation Tabs (Overview, Live Schedule, Weekly Planner, Calendar, Attendance, Resources, Evaluations) */}
         <StudentWorkspaceNav
           activeTab={activeTab}
           onSelectTab={handleSelectTab}
@@ -203,72 +187,49 @@ const StudentPortal = () => {
           }}
         />
 
-        {/* 3. Main 2-Column Responsive Workspace Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          {/* Primary Main Column (8 Cols): Dynamic Tab Views */}
-          <div className="lg:col-span-8 space-y-6 animate-fadeInUp">
-            {activeTab === "overview" && (
-              <OverviewTab
-                onOpenSubmitModal={(asg) => setSubmittingAssignment(asg)}
-              />
-            )}
-
-            {activeTab === "calendar" && (
-              <CalendarTab
-                onOpenSubmitModal={(asg) => setSubmittingAssignment(asg)}
-              />
-            )}
-
-            {activeTab === "schedule" && (
-              <ScheduleAttendanceTab
-                onRequestLeave={() => setIsLeaveModalOpen(true)}
-              />
-            )}
-
-            {activeTab === "resources" && (
-              <ResourcesTab
-                onRequestTranscript={() => setIsTranscriptModalOpen(true)}
-              />
-            )}
-
-            {activeTab === "tutors" && (
-              <div className="rounded-2xl bg-slate-900/80 border border-white/10 overflow-hidden shadow-xl p-2 sm:p-4">
-                <StudentTutors />
-              </div>
-            )}
-
-            {activeTab === "assessments" && (
-              <div className="rounded-2xl bg-slate-900/80 border border-white/10 overflow-hidden shadow-xl p-2 sm:p-4">
-                <StudentAssessments />
-              </div>
-            )}
-
-            {activeTab === "evaluations" && (
-              <div className="rounded-2xl bg-slate-900/80 border border-white/10 overflow-hidden shadow-xl p-2 sm:p-4">
-                <StudentEvaluationPage />
-              </div>
-            )}
-          </div>
-
-          {/* Right Rail (4 Cols): Persistent Financial Status (Always Paid), Student Photo Card & Quick Actions */}
-          <div
-            className="lg:col-span-4 space-y-6 animate-fadeInUp"
-            style={{ animationDelay: "0.15s" }}
-          >
-            <FinancialStatusSidebar
-              onRequestTranscript={() => setIsTranscriptModalOpen(true)}
-              onApplyFreeAccess={() => setFreeAccessOpen(true)}
-              onOpenTimezone={() => setIsTimezoneModalOpen(true)}
-              onOpenReferral={() => {
-                const el = document.getElementById("referral-card");
-                if (el) el.scrollIntoView({ behavior: "smooth" });
-              }}
+        {/* 3. Main Full-Width Content Area - Clean, Uncluttered, Focused */}
+        <div className="w-full space-y-6 animate-fadeInUp">
+          {activeTab === "overview" && (
+            <OverviewTab
+              onOpenSubmitModal={(asg) => setSubmittingAssignment(asg)}
             />
+          )}
 
-            <div id="referral-card">
-              <ReferralLinkCard />
+          {activeTab === "schedule" && (
+            <LiveScheduleTab
+              onOpenWeeklyPlanner={() => handleSelectTab("planner")}
+            />
+          )}
+
+          {activeTab === "planner" && (
+            <WeeklyPlannerTab
+              onOpenLiveSchedule={() => handleSelectTab("schedule")}
+            />
+          )}
+
+          {activeTab === "calendar" && (
+            <CalendarTab
+              onOpenSubmitModal={(asg) => setSubmittingAssignment(asg)}
+            />
+          )}
+
+          {activeTab === "attendance" && (
+            <AttendanceTab
+              onRequestLeave={() => setIsLeaveModalOpen(true)}
+            />
+          )}
+
+          {activeTab === "resources" && (
+            <ResourcesTab
+              onRequestTranscript={() => setIsTranscriptModalOpen(true)}
+            />
+          )}
+
+          {activeTab === "evaluations" && (
+            <div className="rounded-2xl bg-slate-900/80 border border-white/10 overflow-hidden shadow-xl p-2 sm:p-4">
+              <StudentEvaluationPage />
             </div>
-          </div>
+          )}
         </div>
       </div>
 

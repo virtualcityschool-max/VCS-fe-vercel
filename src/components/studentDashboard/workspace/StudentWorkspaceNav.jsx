@@ -2,11 +2,11 @@ import React from "react";
 
 const TABS = [
   { id: "overview", label: "Overview", icon: "fas fa-th-large" },
-  { id: "calendar", label: "Calendar", icon: "fas fa-calendar-alt" },
-  { id: "schedule", label: "Schedule & Attendance", icon: "fas fa-clock" },
+  { id: "schedule", label: "Live Schedule", icon: "fas fa-video" },
+  { id: "planner", label: "Weekly Planner", icon: "fas fa-calendar-alt" },
+  { id: "calendar", label: "Calendar", icon: "fas fa-calendar-days" },
+  { id: "attendance", label: "Attendance", icon: "fas fa-user-check" },
   { id: "resources", label: "Resources", icon: "fas fa-folder-open" },
-  { id: "tutors", label: "My Tutors", icon: "fas fa-chalkboard-teacher" },
-  { id: "assessments", label: "Assessments", icon: "fas fa-clipboard-list" },
   { id: "evaluations", label: "Evaluations", icon: "fas fa-chart-bar" },
 ];
 

@@ -9,10 +9,17 @@ import { getTimezoneAbbr } from "../../utils/validation";
 const TimezoneModal = ({ isOpen, onClose }) => {
   const dispatch = useDispatch();
   const authProfile = useSelector((s) => s.auth.profile);
-  const currentTimezone = authProfile?.timezone || "";
+  const currentTimezone = authProfile?.timezone || localStorage.getItem("vcs_user_timezone") || "";
 
   const [selectedTz, setSelectedTz] = useState(currentTimezone);
   const [isSaving, setIsSaving] = useState(false);
+
+  // Sync selected timezone whenever modal opens or profile changes
+  React.useEffect(() => {
+    if (isOpen) {
+      setSelectedTz(authProfile?.timezone || localStorage.getItem("vcs_user_timezone") || "");
+    }
+  }, [isOpen, authProfile?.timezone]);
 
   if (!isOpen) return null;
 
@@ -20,10 +27,25 @@ const TimezoneModal = ({ isOpen, onClose }) => {
     e?.preventDefault();
     setIsSaving(true);
     try {
-      await authService.updateProfile({ timezone: selectedTz });
-      const fresh = await authService.getMe();
-      dispatch(profileUpdated(fresh));
-      const label = TIMEZONES.find((t) => t.value === selectedTz)?.label || selectedTz || "Auto-Detected";
+      // 1. Immediately persist to localStorage for instant client-side reactivity
+      if (selectedTz) {
+        localStorage.setItem("vcs_user_timezone", selectedTz);
+      } else {
+        localStorage.removeItem("vcs_user_timezone");
+      }
+
+      // 2. Immediately update Redux store so all hooks and components re-render instantly
+      const updatedProfile = { ...(authProfile || {}), timezone: selectedTz };
+      dispatch(profileUpdated(updatedProfile));
+
+      // 3. Attempt backend update (non-blocking if backend ignores or fails)
+      try {
+        await authService.updateProfile({ timezone: selectedTz });
+      } catch (backendErr) {
+        console.warn("Backend updateProfile timezone warning:", backendErr);
+      }
+
+      const label = TIMEZONES.find((t) => t.value === selectedTz)?.label || selectedTz || "Auto-Detected (System Local)";
       toastManager.success(`Timezone updated to ${label}`);
       onClose();
     } catch (err) {
