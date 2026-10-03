@@ -24,6 +24,7 @@ import {
   CalendarTab,
   AttendanceTab,
   ResourcesTab,
+  TodayAgendaSidebar,
   RequestTranscriptModal,
   RequestLeaveModal,
   AssignmentSubmitModal,
@@ -154,9 +155,14 @@ const StudentPortal = () => {
             ))}
           </div>
 
-          {/* Loading skeleton for main content */}
-          <div className="w-full space-y-6">
-            <div className="skeleton p-8 rounded-2xl border border-slate-800 h-72" />
+          {/* Loading skeleton for main content (2-column layout) */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            <div className="lg:col-span-8 space-y-6">
+              <div className="skeleton p-8 rounded-2xl border border-slate-800 h-72" />
+            </div>
+            <div className="lg:col-span-4 space-y-6">
+              <div className="skeleton p-6 rounded-2xl border border-slate-800 h-64" />
+            </div>
           </div>
         </div>
       </section>
@@ -187,49 +193,64 @@ const StudentPortal = () => {
           }}
         />
 
-        {/* 3. Main Full-Width Content Area - Clean, Uncluttered, Focused */}
-        <div className="w-full space-y-6 animate-fadeInUp">
-          {activeTab === "overview" && (
-            <OverviewTab
+        {/* 3. Option 1: 2-Column Balanced Workspace Grid (68% Main Canvas / 32% Today's Agenda Rail) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          {/* Main Learning Canvas (68% - 8 Columns) */}
+          <div className="lg:col-span-8 space-y-6 animate-fadeInUp">
+            {activeTab === "overview" && (
+              <OverviewTab
+                onOpenSubmitModal={(asg) => setSubmittingAssignment(asg)}
+              />
+            )}
+
+            {activeTab === "schedule" && (
+              <LiveScheduleTab
+                onOpenWeeklyPlanner={() => handleSelectTab("planner")}
+              />
+            )}
+
+            {activeTab === "planner" && (
+              <WeeklyPlannerTab
+                onOpenLiveSchedule={() => handleSelectTab("schedule")}
+              />
+            )}
+
+            {activeTab === "calendar" && (
+              <CalendarTab
+                onOpenSubmitModal={(asg) => setSubmittingAssignment(asg)}
+              />
+            )}
+
+            {activeTab === "attendance" && (
+              <AttendanceTab
+                onRequestLeave={() => setIsLeaveModalOpen(true)}
+              />
+            )}
+
+            {activeTab === "resources" && (
+              <ResourcesTab
+                onRequestTranscript={() => setIsTranscriptModalOpen(true)}
+              />
+            )}
+
+            {activeTab === "evaluations" && (
+              <div className="rounded-2xl bg-slate-900/80 border border-white/10 overflow-hidden shadow-xl p-2 sm:p-4">
+                <StudentEvaluationPage />
+              </div>
+            )}
+          </div>
+
+          {/* Right Rail: Today's Agenda, Live Classes & Upcoming Deadlines (32% - 4 Columns) */}
+          <div className="lg:col-span-4 space-y-6 animate-fadeInUp" style={{ animationDelay: "0.1s" }}>
+            <TodayAgendaSidebar
               onOpenSubmitModal={(asg) => setSubmittingAssignment(asg)}
-            />
-          )}
-
-          {activeTab === "schedule" && (
-            <LiveScheduleTab
-              onOpenWeeklyPlanner={() => handleSelectTab("planner")}
-            />
-          )}
-
-          {activeTab === "planner" && (
-            <WeeklyPlannerTab
-              onOpenLiveSchedule={() => handleSelectTab("schedule")}
-            />
-          )}
-
-          {activeTab === "calendar" && (
-            <CalendarTab
-              onOpenSubmitModal={(asg) => setSubmittingAssignment(asg)}
-            />
-          )}
-
-          {activeTab === "attendance" && (
-            <AttendanceTab
-              onRequestLeave={() => setIsLeaveModalOpen(true)}
-            />
-          )}
-
-          {activeTab === "resources" && (
-            <ResourcesTab
               onRequestTranscript={() => setIsTranscriptModalOpen(true)}
+              onRequestLeave={() => setIsLeaveModalOpen(true)}
+              onOpenTimezone={() => setIsTimezoneModalOpen(true)}
+              onViewAllSchedule={() => handleSelectTab("schedule")}
+              onViewAllPlanner={() => handleSelectTab("planner")}
             />
-          )}
-
-          {activeTab === "evaluations" && (
-            <div className="rounded-2xl bg-slate-900/80 border border-white/10 overflow-hidden shadow-xl p-2 sm:p-4">
-              <StudentEvaluationPage />
-            </div>
-          )}
+          </div>
         </div>
       </div>
 

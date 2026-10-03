@@ -8,6 +8,7 @@ export { default as CalendarTab } from "./CalendarTab";
 export { default as AttendanceTab } from "./AttendanceTab";
 export { default as ScheduleAttendanceTab } from "./ScheduleAttendanceTab";
 export { default as ResourcesTab } from "./ResourcesTab";
+export { default as TodayAgendaSidebar } from "./TodayAgendaSidebar";
 export { default as RequestTranscriptModal } from "./RequestTranscriptModal";
 export { default as RequestLeaveModal } from "./RequestLeaveModal";
 export { default as AssignmentSubmitModal } from "./AssignmentSubmitModal";
