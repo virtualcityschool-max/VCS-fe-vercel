@@ -27,9 +27,23 @@ import {
   RequestLeaveModal,
   AssignmentSubmitModal,
 } from "../../components/studentDashboard/workspace";
+import StudentTutors from "./StudentTutors";
+import StudentAssessments from "./StudentAssessments";
+import StudentEvaluationPage from "./StudentEvaluationPage";
+import TimezoneModal from "../../components/common/TimezoneModal";
 import ApplyFreeAccessModal from "../../components/public/ApplyFreeAccessModal";
 import ReferralLinkCard from "../../components/common/ReferralLinkCard";
 import SubscriptionBanner from "../../components/studentDashboard/SubscriptionBanner";
+
+const VALID_TABS = [
+  "overview",
+  "calendar",
+  "schedule",
+  "resources",
+  "tutors",
+  "assessments",
+  "evaluations",
+];
 
 const StudentPortal = () => {
   const dispatch = useDispatch();
@@ -52,11 +66,12 @@ const StudentPortal = () => {
   const [submittingAssignment, setSubmittingAssignment] = useState(null);
   const [isTranscriptModalOpen, setIsTranscriptModalOpen] = useState(false);
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
+  const [isTimezoneModalOpen, setIsTimezoneModalOpen] = useState(false);
 
   // Sync tab with URL search parameter
   useEffect(() => {
     const tabParam = searchParams.get("tab");
-    if (tabParam && ["overview", "calendar", "schedule", "resources"].includes(tabParam)) {
+    if (tabParam && VALID_TABS.includes(tabParam)) {
       setActiveTab(tabParam);
     }
   }, [searchParams]);
@@ -167,18 +182,19 @@ const StudentPortal = () => {
       className="min-h-screen bg-[#0f172a] text-white font-inter py-8"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-6">
-        {/* 1. Header: 3-Card Workspace Strip (Welcome, Next Class with Live Countdown & Google Meet launch, Action Required past due alert) */}
+        {/* 1. Header: 3-Card Workspace Strip (Student Photo Space, Timezone Selector, Next Class Countdown, Action Required) */}
         <div className="animate-fadeInUp">
           <StudentWorkspaceHeader
             onResolveOverdue={handleResolveOverdue}
             onJoinNextClass={handleJoinNextClass}
+            onOpenTimezone={() => setIsTimezoneModalOpen(true)}
           />
         </div>
 
         {/* Monthly Subscription Banner (if any enrollments pending renewal or expiring) */}
         <SubscriptionBanner />
 
-        {/* 2. Navigation Tabs (Overview, Calendar, Schedule & Attendance, Resources) */}
+        {/* 2. Navigation Tabs (Overview, Calendar, Schedule & Attendance, Resources, My Tutors, Assessments, Evaluations) */}
         <StudentWorkspaceNav
           activeTab={activeTab}
           onSelectTab={handleSelectTab}
@@ -214,9 +230,27 @@ const StudentPortal = () => {
                 onRequestTranscript={() => setIsTranscriptModalOpen(true)}
               />
             )}
+
+            {activeTab === "tutors" && (
+              <div className="rounded-2xl bg-slate-900/80 border border-white/10 overflow-hidden shadow-xl p-2 sm:p-4">
+                <StudentTutors />
+              </div>
+            )}
+
+            {activeTab === "assessments" && (
+              <div className="rounded-2xl bg-slate-900/80 border border-white/10 overflow-hidden shadow-xl p-2 sm:p-4">
+                <StudentAssessments />
+              </div>
+            )}
+
+            {activeTab === "evaluations" && (
+              <div className="rounded-2xl bg-slate-900/80 border border-white/10 overflow-hidden shadow-xl p-2 sm:p-4">
+                <StudentEvaluationPage />
+              </div>
+            )}
           </div>
 
-          {/* Right Rail (4 Cols): Persistent Financial Status, Quick Actions & Referral */}
+          {/* Right Rail (4 Cols): Persistent Financial Status (Always Paid), Student Photo Card & Quick Actions */}
           <div
             className="lg:col-span-4 space-y-6 animate-fadeInUp"
             style={{ animationDelay: "0.15s" }}
@@ -224,6 +258,7 @@ const StudentPortal = () => {
             <FinancialStatusSidebar
               onRequestTranscript={() => setIsTranscriptModalOpen(true)}
               onApplyFreeAccess={() => setFreeAccessOpen(true)}
+              onOpenTimezone={() => setIsTimezoneModalOpen(true)}
               onOpenReferral={() => {
                 const el = document.getElementById("referral-card");
                 if (el) el.scrollIntoView({ behavior: "smooth" });
@@ -256,6 +291,13 @@ const StudentPortal = () => {
         <RequestLeaveModal
           enrolledCourses={enrolledCourses}
           onClose={() => setIsLeaveModalOpen(false)}
+        />
+      )}
+
+      {isTimezoneModalOpen && (
+        <TimezoneModal
+          isOpen={isTimezoneModalOpen}
+          onClose={() => setIsTimezoneModalOpen(false)}
         />
       )}
 

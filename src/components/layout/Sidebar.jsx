@@ -1,14 +1,14 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useNavigate, NavLink } from "react-router-dom";
+import { useNavigate, NavLink, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchUnreadAnnouncementsCount, fetchMyAnnouncements } from "../../store/slices/announcementsSlice";
 import UserProfileDropdown from "./UserProfileDropdown";
 import { getTimezoneAbbr } from "../../utils/validation";
+import TimezoneModal from "../common/TimezoneModal";
 
 const MOBILE_BREAKPOINT = 1024;
 
-const TimezoneIndicator = ({ isCollapsed }) => {
-  const navigate  = useNavigate();
+const TimezoneIndicator = ({ isCollapsed, onOpenTimezoneModal }) => {
   const timezone  = useSelector((s) => s.auth.profile?.timezone) || undefined;
   const [now, setNow] = useState(new Date());
 
@@ -29,7 +29,7 @@ const TimezoneIndicator = ({ isCollapsed }) => {
     return (
       <div className="flex justify-center pb-3 group/tz relative">
         <button
-          onClick={() => navigate("/profile")}
+          onClick={onOpenTimezoneModal}
           className="flex flex-col items-center gap-0.5 px-2 py-2 rounded-xl hover:bg-indigo-500/10 border border-transparent hover:border-indigo-500/20 transition-all cursor-pointer"
         >
           <i className="fas fa-globe text-indigo-400 text-xs" />
@@ -39,14 +39,14 @@ const TimezoneIndicator = ({ isCollapsed }) => {
 
         {/* Tooltip - slides in from the right, clickable */}
         <div
-          onClick={() => navigate("/profile")}
+          onClick={onOpenTimezoneModal}
           className="absolute left-[calc(100%+10px)] top-1/2 -translate-y-1/2 z-[60]
             opacity-0 group-hover/tz:opacity-100 translate-x-2 group-hover/tz:translate-x-0
             transition-all duration-150 cursor-pointer"
         >
           <div className="relative bg-slate-900 border border-slate-700 rounded-lg shadow-xl px-3 py-2 whitespace-nowrap">
             <span className="absolute right-full top-1/2 -translate-y-1/2 border-[5px] border-transparent border-r-slate-700" />
-            <p className="text-indigo-400 text-xs font-semibold">Click here to change timezone</p>
+            <p className="text-indigo-400 text-xs font-semibold">Click to select timezone</p>
           </div>
         </div>
       </div>
@@ -56,8 +56,8 @@ const TimezoneIndicator = ({ isCollapsed }) => {
   return (
     <div className="mx-3 mb-2 group/tz relative">
       <button
-        onClick={() => navigate("/profile")}
-        className="w-full flex items-center justify-between gap-2 rounded-xl bg-slate-800/50 border border-slate-700/50 hover:border-indigo-500/40 hover:bg-slate-800/80 transition-all duration-200 px-3 py-2 text-left"
+        onClick={onOpenTimezoneModal}
+        className="w-full flex items-center justify-between gap-2 rounded-xl bg-slate-800/50 border border-slate-700/50 hover:border-indigo-500/40 hover:bg-slate-800/80 transition-all duration-200 px-3 py-2 text-left cursor-pointer"
       >
         <div className="flex items-center gap-2 min-w-0">
           <i className="fas fa-globe text-indigo-400 text-[10px] flex-shrink-0" />
@@ -70,14 +70,14 @@ const TimezoneIndicator = ({ isCollapsed }) => {
 
       {/* Tooltip - slides up, clickable */}
       <div
-        onClick={() => navigate("/profile")}
+        onClick={onOpenTimezoneModal}
         className="absolute bottom-[calc(100%+8px)] left-0 right-0 z-[60]
           opacity-0 group-hover/tz:opacity-100 translate-y-2 group-hover/tz:translate-y-0
           transition-all duration-150 cursor-pointer"
       >
         <div className="relative bg-slate-900 border border-slate-700 rounded-lg shadow-xl px-3 py-2">
           <span className="absolute top-full left-1/2 -translate-x-1/2 border-[5px] border-transparent border-t-slate-700" />
-          <p className="text-indigo-400 text-xs font-semibold text-center">Click here to change timezone</p>
+          <p className="text-indigo-400 text-xs font-semibold text-center">Click to select timezone</p>
         </div>
       </div>
     </div>
@@ -120,14 +120,15 @@ const NAV_CONFIG = {
     // { label: "Hire Request", to: "/teacher/hire-leads",       icon: "fas fa-handshake" },
   ],
   student: [
-    { label: "Dashboard",   to: "/student",                 icon: "fas fa-table-columns",  end: true },
-    { label: "My Sessions", to: "/student/classes",         icon: "fas fa-calendar-alt" },
-    { label: "My Tutors",   to: "/student/tutors",          icon: "fas fa-chalkboard-teacher" },
-    { label: "Assessments", to: "/student/assessments",     icon: "fas fa-clipboard-list" },
-    { label: "Attendance",  to: "/student/attendance",      icon: "fas fa-user-check" },
-    { label: "Evaluations", to: "/student/evaluations",     icon: "fas fa-chart-bar" },
-    { label: "Explore Courses", to: "/courses",             icon: "fas fa-compass" },
-    { label: "Blogs",       to: "/blogs",                   icon: "fas fa-newspaper" },
+    { label: "Overview",             to: "/student?tab=overview",    icon: "fas fa-th-large" },
+    { label: "Calendar",             to: "/student?tab=calendar",    icon: "fas fa-calendar-alt" },
+    { label: "Schedule & Attendance",to: "/student?tab=schedule",    icon: "fas fa-clock" },
+    { label: "Resources",            to: "/student?tab=resources",   icon: "fas fa-folder-open" },
+    { label: "My Tutors",            to: "/student?tab=tutors",      icon: "fas fa-chalkboard-teacher" },
+    { label: "Assessments",          to: "/student?tab=assessments", icon: "fas fa-clipboard-list" },
+    { label: "Evaluations",          to: "/student?tab=evaluations", icon: "fas fa-chart-bar" },
+    { label: "Explore Courses",      to: "/courses",                 icon: "fas fa-compass" },
+    { label: "Blogs",                to: "/blogs",                   icon: "fas fa-newspaper" },
   ],
   parent: [
     { label: "Dashboard",        to: "/parent",              icon: "fas fa-table-columns", end: true },
@@ -146,6 +147,24 @@ const PORTAL_LABEL = {
 // ── Unified nav item - works for all roles ────────────────────────────────────
 // Pass `to` for NavLink-based (teacher/student), omit for button-based (admin).
 function NavItem({ label, icon, isCollapsed, badge, isActive, onClick, to, end }) {
+  const location = useLocation();
+
+  // If `to` includes query parameter like `?tab=schedule`, compute active matching
+  const tabActive = (() => {
+    if (!to) return null;
+    if (to.includes("?")) {
+      const [toPath, toQuery] = to.split("?");
+      const toTab = new URLSearchParams(toQuery).get("tab");
+      const currTab = new URLSearchParams(location.search).get("tab") || "overview";
+      return location.pathname === toPath && toTab === currTab;
+    }
+    if (to === "/student") {
+      const currTab = new URLSearchParams(location.search).get("tab");
+      return location.pathname === "/student" && (!currTab || currTab === "overview");
+    }
+    return null;
+  })();
+
   const itemClass = (active) =>
     `w-full flex items-center rounded-xl font-medium text-sm transition-all duration-200 relative
     ${isCollapsed ? "justify-center px-0 py-2.5" : "px-3 py-2.5 gap-2.5"}
@@ -178,12 +197,17 @@ function NavItem({ label, icon, isCollapsed, badge, isActive, onClick, to, end }
   return (
     <div className="relative group/item">
       {to ? (
-        <NavLink to={to} end={end} className={({ isActive: a }) => itemClass(a)}>
-          {({ isActive: a }) => inner(a)}
+        <NavLink
+          to={to}
+          end={end}
+          className={({ isActive: a }) => itemClass(tabActive !== null ? tabActive : a)}
+          onClick={onClick}
+        >
+          {({ isActive: a }) => inner(tabActive !== null ? tabActive : a)}
         </NavLink>
       ) : (
-        <button onClick={onClick} className={itemClass(isActive)}>
-          {inner(isActive)}
+        <button onClick={onClick} className={itemClass(typeof isActive === "boolean" ? isActive : false)}>
+          {inner(typeof isActive === "boolean" ? isActive : false)}
         </button>
       )}
 
@@ -219,6 +243,8 @@ const Sidebar = ({
 }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
+  const [isTimezoneModalOpen, setIsTimezoneModalOpen] = useState(false);
 
   // Student announcements
   const { unreadCount, items: announcements, loadingItems } = useSelector(
@@ -445,12 +471,21 @@ const Sidebar = ({
       )}
 
       {/* ── Timezone Indicator ── */}
-      <TimezoneIndicator isCollapsed={isCollapsed} />
+      <TimezoneIndicator
+        isCollapsed={isCollapsed}
+        onOpenTimezoneModal={() => setIsTimezoneModalOpen(true)}
+      />
 
       {/* ── Footer: UserProfileDropdown ── */}
       <div className="border-t border-slate-800/80 flex-shrink-0 p-3 overflow-visible relative">
         <UserProfileDropdown dropUp isCollapsed={isCollapsed} />
       </div>
+
+      {/* ── Quick Timezone Selector Modal ── */}
+      <TimezoneModal
+        isOpen={isTimezoneModalOpen}
+        onClose={() => setIsTimezoneModalOpen(false)}
+      />
     </aside>
   );
 };
