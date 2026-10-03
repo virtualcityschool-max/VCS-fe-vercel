@@ -127,7 +127,7 @@ const NAV_CONFIG = {
     { label: "Calendar",        to: "/student?tab=calendar",   icon: "fas fa-calendar-days" },
     { label: "Attendance",      to: "/student?tab=attendance", icon: "fas fa-user-check" },
     { label: "Resources",       to: "/student?tab=resources",  icon: "fas fa-folder-open" },
-    { label: "Evaluations",     to: "/student?tab=evaluations",icon: "fas fa-chart-bar" },
+    { label: "Assignments & Quizzes", to: "/student?tab=assessments", icon: "fas fa-clipboard-check" },
     { label: "Explore Courses", to: "/courses",                icon: "fas fa-compass" },
     { label: "Blogs",           to: "/blogs",                  icon: "fas fa-newspaper" },
   ],

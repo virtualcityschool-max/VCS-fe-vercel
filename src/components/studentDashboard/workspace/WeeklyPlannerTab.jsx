@@ -4,57 +4,58 @@ import { useDateFormatters } from "../../../hooks/useDateFormatters";
 const WeeklyPlannerTab = ({ onOpenLiveSchedule }) => {
   const { timezoneAbbr } = useDateFormatters();
 
-  // Determine current day of week (1 = Monday, 5 = Friday)
-  const currentDayIndex = new Date().getDay(); // 0 is Sunday, 1 is Monday...
-  const initialDay =
-    currentDayIndex === 1
-      ? "Monday"
-      : currentDayIndex === 2
-      ? "Tuesday"
-      : currentDayIndex === 3
-      ? "Wednesday"
-      : currentDayIndex === 4
-      ? "Thursday"
-      : currentDayIndex === 5
-      ? "Friday"
-      : "Monday";
+  // Determine current day of week (0 = Sunday, 1 = Monday ... 6 = Saturday)
+  const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  const currentDayIndex = new Date().getDay();
+  const initialDay = DAY_NAMES[currentDayIndex] || "Sunday";
 
   const [selectedDay, setSelectedDay] = useState(initialDay);
 
-  // Weekly timetable rows (Monday to Friday)
+  // Full 7-Day Curriculum Timetable (Sunday through Saturday for Gulf & Global Frameworks)
   const weeklyTimetable = [
+    // SUNDAY (GCC / Gulf School Week Starter)
+    { day: "Sunday", time: "08:00 – 09:30", subject: "Mathematics", code: "IGCSE 0580", tutor: "Faculty Mathematics", room: "Room 204", topic: "Differential Calculus & Rate of Change Core" },
+    { day: "Sunday", time: "09:45 – 11:15", subject: "Chemistry", code: "IGCSE 0620", tutor: "Faculty Chemistry", room: "Lab 2", topic: "Chemical Bonding, Covalent & Ionic Structures" },
+    { day: "Sunday", time: "11:30 – 13:00", subject: "English", code: "Literature 0475", tutor: "Faculty English", room: "Hall A", topic: "Prose Analysis & Critical Commentary" },
+    { day: "Sunday", time: "13:30 – 15:00", subject: "Physics", code: "IGCSE 0625", tutor: "Faculty Physics", room: "Lab 1", topic: "Kinematics & Newton's Laws of Motion" },
+
     // MONDAY
-    { day: "Monday", time: "08:00 – 09:30", subject: "Mathematics", code: "IGCSE 0580", tutor: "Dr. A. Vance", room: "Room 204", topic: "Differential Calculus & Rate of Change" },
-    { day: "Monday", time: "09:45 – 11:15", subject: "Physics", code: "IGCSE 0625", tutor: "Prof. Einstein", room: "Lab 1", topic: "Electromagnetism & Induced Currents" },
-    { day: "Monday", time: "11:30 – 13:00", subject: "English", code: "Literature 0475", tutor: "Ms. Shakespeare", room: "Hall A", topic: "Macbeth: Analysis of Act III Scene II" },
-    { day: "Monday", time: "13:30 – 15:00", subject: "Urdu", code: "First Lang 3247", tutor: "Mr. Iqbal", room: "Room 105", topic: "Poetry Analysis: Ghalib & Allama Iqbal" },
+    { day: "Monday", time: "08:00 – 09:30", subject: "Mathematics", code: "IGCSE 0580", tutor: "Faculty Mathematics", room: "Room 204", topic: "Functions, Quad Equations & Graphs" },
+    { day: "Monday", time: "09:45 – 11:15", subject: "Physics", code: "IGCSE 0625", tutor: "Faculty Physics", room: "Lab 1", topic: "Electromagnetism & Induced Currents" },
+    { day: "Monday", time: "11:30 – 13:00", subject: "English", code: "Literature 0475", tutor: "Faculty English", room: "Hall A", topic: "Macbeth: Analysis of Act III Scene II" },
+    { day: "Monday", time: "13:30 – 15:00", subject: "Urdu", code: "First Lang 3247", tutor: "Faculty Urdu", room: "Room 105", topic: "Poetry Analysis: Ghalib & Allama Iqbal" },
 
     // TUESDAY
-    { day: "Tuesday", time: "08:00 – 09:30", subject: "Chemistry", code: "IGCSE 0620", tutor: "Dr. Curie", room: "Lab 2", topic: "Organic Chemistry: Functional Groups" },
-    { day: "Tuesday", time: "09:45 – 11:15", subject: "History", code: "Cambridge 0470", tutor: "Dr. Brown", room: "Room 302", topic: "World War I & Modern Treaties (1919-1923)" },
-    { day: "Tuesday", time: "11:30 – 13:00", subject: "Islamic Study", code: "Islamiyat 2058", tutor: "Prof. Ghazali", room: "Hall B", topic: "The Major Themes of the Quran" },
-    { day: "Tuesday", time: "13:30 – 15:00", subject: "Pakistan Study", code: "Pak Studies 2059", tutor: "Ms. Jinnah", room: "Room 108", topic: "Decline of Mughal Empire & 1857 War" },
+    { day: "Tuesday", time: "08:00 – 09:30", subject: "Chemistry", code: "IGCSE 0620", tutor: "Faculty Chemistry", room: "Lab 2", topic: "Organic Chemistry: Functional Groups" },
+    { day: "Tuesday", time: "09:45 – 11:15", subject: "History", code: "Cambridge 0470", tutor: "Faculty History", room: "Room 302", topic: "World War I & Modern Treaties (1919-1923)" },
+    { day: "Tuesday", time: "11:30 – 13:00", subject: "Islamic Study", code: "Islamiyat 2058", tutor: "Faculty Islamiyat", room: "Hall B", topic: "The Major Themes of the Holy Quran" },
+    { day: "Tuesday", time: "13:30 – 15:00", subject: "Pakistan Study", code: "Pak Studies 2059", tutor: "Faculty Pak Studies", room: "Room 108", topic: "Decline of Mughal Empire & 1857 Movement" },
 
     // WEDNESDAY
-    { day: "Wednesday", time: "08:00 – 09:30", subject: "Mathematics", code: "IGCSE 0580", tutor: "Dr. A. Vance", room: "Room 204", topic: "Trigonometric Identities & Sine/Cosine Rules" },
-    { day: "Wednesday", time: "09:45 – 11:15", subject: "Physics", code: "IGCSE 0625", tutor: "Prof. Einstein", room: "Lab 1", topic: "Thermal Physics & Gas Laws Demonstration" },
-    { day: "Wednesday", time: "11:30 – 13:00", subject: "Chemistry", code: "IGCSE 0620", tutor: "Dr. Curie", room: "Lab 2", topic: "Stoichiometry & Mole Calculations" },
-    { day: "Wednesday", time: "13:30 – 15:00", subject: "English", code: "Literature 0475", tutor: "Ms. Shakespeare", room: "Hall A", topic: "Discursive Essay Writing & Argumentation" },
+    { day: "Wednesday", time: "08:00 – 09:30", subject: "Mathematics", code: "IGCSE 0580", tutor: "Faculty Mathematics", room: "Room 204", topic: "Trigonometric Identities & Sine/Cosine Rules" },
+    { day: "Wednesday", time: "09:45 – 11:15", subject: "Physics", code: "IGCSE 0625", tutor: "Faculty Physics", room: "Lab 1", topic: "Thermal Physics & Gas Laws Demonstration" },
+    { day: "Wednesday", time: "11:30 – 13:00", subject: "Chemistry", code: "IGCSE 0620", tutor: "Faculty Chemistry", room: "Lab 2", topic: "Stoichiometry & Mole Calculations" },
+    { day: "Wednesday", time: "13:30 – 15:00", subject: "English", code: "Literature 0475", tutor: "Faculty English", room: "Hall A", topic: "Discursive Essay Writing & Argumentation" },
 
     // THURSDAY
-    { day: "Thursday", time: "08:00 – 09:30", subject: "Urdu", code: "First Lang 3247", tutor: "Mr. Iqbal", room: "Room 105", topic: "Formal Letter Writing & Grammar Drill" },
-    { day: "Thursday", time: "09:45 – 11:15", subject: "History", code: "Cambridge 0470", tutor: "Dr. Brown", room: "Room 302", topic: "The League of Nations & Collective Security" },
-    { day: "Thursday", time: "11:30 – 13:00", subject: "Pakistan Study", code: "Pak Studies 2059", tutor: "Ms. Jinnah", room: "Room 108", topic: "Sir Syed Ahmad Khan & Aligarh Movement" },
-    { day: "Thursday", time: "13:30 – 15:00", subject: "Islamic Study", code: "Islamiyat 2058", tutor: "Prof. Ghazali", room: "Hall B", topic: "Life in Makkah: Opposition & Migration" },
+    { day: "Thursday", time: "08:00 – 09:30", subject: "Urdu", code: "First Lang 3247", tutor: "Faculty Urdu", room: "Room 105", topic: "Formal Letter Writing & Grammar Drill" },
+    { day: "Thursday", time: "09:45 – 11:15", subject: "History", code: "Cambridge 0470", tutor: "Faculty History", room: "Room 302", topic: "The League of Nations & Collective Security" },
+    { day: "Thursday", time: "11:30 – 13:00", subject: "Pakistan Study", code: "Pak Studies 2059", tutor: "Faculty Pak Studies", room: "Room 108", topic: "Sir Syed Ahmad Khan & Educational Reforms" },
+    { day: "Thursday", time: "13:30 – 15:00", subject: "Islamic Study", code: "Islamiyat 2058", tutor: "Faculty Islamiyat", room: "Hall B", topic: "Life in Makkah: Opposition & Migration" },
 
-    // FRIDAY
-    { day: "Friday", time: "08:00 – 09:30", subject: "Mathematics", code: "IGCSE 0580", tutor: "Dr. A. Vance", room: "Room 204", topic: "Vectors and Transformation Geometry" },
-    { day: "Friday", time: "09:45 – 11:15", subject: "Physics", code: "IGCSE 0625", tutor: "Prof. Einstein", room: "Lab 1", topic: "Radioactivity & Half-life Problem Solving" },
-    { day: "Friday", time: "11:30 – 13:00", subject: "Chemistry", code: "IGCSE 0620", tutor: "Dr. Curie", room: "Lab 2", topic: "Acids, Bases and Salts Laboratory Practical" },
-    { day: "Friday", time: "14:00 – 15:30", subject: "English", code: "Literature 0475", tutor: "Ms. Shakespeare", room: "Hall A", topic: "Unseen Poetry Comprehension & Analysis" },
+    // FRIDAY (GCC Prayer Day & Cambridge Masterclasses)
+    { day: "Friday", time: "08:30 – 10:00", subject: "Mathematics Past Paper Drill", code: "IGCSE 0580", tutor: "Faculty Mathematics", room: "Room 204", topic: "Cambridge Paper 2 & 4 Past Paper Solutions" },
+    { day: "Friday", time: "10:15 – 11:45", subject: "Islamic Study", code: "Islamiyat 2058", tutor: "Faculty Islamiyat", room: "Hall B", topic: "Prophetic Traditions & Ethical Jurisprudence" },
+    { day: "Friday", time: "12:00 – 14:00", subject: "Jumu'ah Prayer & Midday Recess", code: "Recess", tutor: "All Faculty", room: "Campus / Online", topic: "Spiritual Prayer Break & Midday Fellowship" },
+    { day: "Friday", time: "14:30 – 16:00", subject: "Guided Science Mentorship", code: "Tutorial", tutor: "Faculty Science", room: "Lab 1", topic: "Weekly Academic Q&A and Faculty Office Hours" },
+
+    // SATURDAY (Weekend Practical Defenses & Exam Prep)
+    { day: "Saturday", time: "09:00 – 10:30", subject: "Physics Practical Laboratory", code: "IGCSE 0625", tutor: "Faculty Physics", room: "Lab 1", topic: "Alternative to Practical (Paper 6) Mechanics" },
+    { day: "Saturday", time: "10:45 – 12:15", subject: "Chemistry Laboratory Practical", code: "IGCSE 0620", tutor: "Faculty Chemistry", room: "Lab 2", topic: "Salt Analysis & Titration Experimental Technique" },
+    { day: "Saturday", time: "13:00 – 14:30", subject: "Exam Defense Masterclass", code: "Workshop", tutor: "Lead Examiners", room: "Hall A", topic: "Cambridge Exam Rubric & High-Grade Strategies" },
   ];
 
-  const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "All Days"];
+  const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "All Days"];
 
   const filteredSchedule =
     selectedDay === "All Days"
@@ -93,11 +94,11 @@ const WeeklyPlannerTab = ({ onOpenLiveSchedule }) => {
               Weekly Curriculum Planner &amp; Timetable
             </h3>
             <span className="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-slate-300 text-[10px] font-bold">
-              Term 2025–26
+              Gulf &amp; Global 7-Day Timetable
             </span>
           </div>
           <p className="text-xs text-slate-400 mt-1">
-            Shows your recurring curriculum framework across Monday to Friday. Times shown in your local timezone ({timezoneAbbr}).
+            Recurring academic curriculum across Sunday to Saturday (Gulf Sunday start &amp; Friday prayer breaks included). Times shown in your local timezone ({timezoneAbbr}).
           </p>
         </div>
 
@@ -116,12 +117,7 @@ const WeeklyPlannerTab = ({ onOpenLiveSchedule }) => {
       <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar pb-1">
         {days.map((day) => {
           const isSelected = selectedDay === day;
-          const isToday =
-            (day === "Monday" && currentDayIndex === 1) ||
-            (day === "Tuesday" && currentDayIndex === 2) ||
-            (day === "Wednesday" && currentDayIndex === 3) ||
-            (day === "Thursday" && currentDayIndex === 4) ||
-            (day === "Friday" && currentDayIndex === 5);
+          const isToday = day === DAY_NAMES[currentDayIndex];
 
           return (
             <button

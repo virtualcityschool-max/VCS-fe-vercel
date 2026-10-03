@@ -67,28 +67,20 @@ const StudentWorkspaceHeader = ({ onResolveOverdue, onJoinNextClass, onOpenTimez
   const timezoneAbbr = getTimezoneAbbr(timezone) || "LOCAL";
   const displayTz = timezone ? timezone.split("/").pop().replace(/_/g, " ") : "Auto-Detected";
 
-  // Fallback next session if empty or not scheduled today
-  const fallbackNext = {
-    id: "live-next-math",
-    title: "Derivatives & Rate of Change - Live Class",
-    course_title: "Cambridge IGCSE Mathematics",
-    instructor_name: "Dr. A. Vance",
-    scheduled_at: new Date(Date.now() + 20 * 60000).toISOString(),
-    meeting_link: "https://meet.google.com/abc-vcs-math",
-    status: "scheduled",
-  };
-
-  // Calculate live next session
+  // Real live next session from Redux (no dummy fallbacks)
   const activeNextSession =
     nextSession ||
     (liveSchedule || []).find((s) => s.can_join || s.status === "scheduled") ||
-    fallbackNext;
+    null;
 
   // Countdown timer calculation
-  const [minsRemaining, setMinsRemaining] = useState(20);
+  const [minsRemaining, setMinsRemaining] = useState(null);
 
   useEffect(() => {
-    if (!activeNextSession?.scheduled_at) return;
+    if (!activeNextSession?.scheduled_at) {
+      setMinsRemaining(null);
+      return;
+    }
     const calculateDiff = () => {
       const diff = Math.max(
         0,
@@ -101,7 +93,7 @@ const StudentWorkspaceHeader = ({ onResolveOverdue, onJoinNextClass, onOpenTimez
     return () => clearInterval(interval);
   }, [activeNextSession]);
 
-  const isJoinWindowOpen = minsRemaining <= 30;
+  const isJoinWindowOpen = minsRemaining !== null && minsRemaining <= 30;
   const unlockDate = activeNextSession?.scheduled_at
     ? new Date(new Date(activeNextSession.scheduled_at).getTime() - 30 * 60000)
     : null;
@@ -214,72 +206,100 @@ const StudentWorkspaceHeader = ({ onResolveOverdue, onJoinNextClass, onOpenTimez
 
       {/* 2. WHAT IS MY NEXT CLASS? - Spotlight with 30-Minute Google Meet Join Window */}
       <div className="relative overflow-hidden rounded-2xl bg-slate-900/80 border border-white/10 p-5 shadow-xl flex flex-col justify-between group hover:border-indigo-500/30 transition-all">
-        <div className="flex items-start gap-3.5">
-          <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
-            isJoinWindowOpen
-              ? "bg-emerald-500/20 border border-emerald-500/30 text-emerald-400"
-              : "bg-blue-500/15 border border-blue-500/20 text-blue-400"
-          }`}>
-            <i className={isJoinWindowOpen ? "fas fa-video animate-pulse" : "fas fa-clock text-base"} />
-          </div>
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2">
-              <span className={`text-[10px] font-black uppercase tracking-widest ${
-                isJoinWindowOpen ? "text-emerald-400" : "text-slate-400"
+        {activeNextSession ? (
+          <>
+            <div className="flex items-start gap-3.5">
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                isJoinWindowOpen
+                  ? "bg-emerald-500/20 border border-emerald-500/30 text-emerald-400"
+                  : "bg-blue-500/15 border border-blue-500/20 text-blue-400"
               }`}>
-                WHAT IS MY NEXT CLASS?
-              </span>
-              {isJoinWindowOpen && (
-                <span className="px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 text-[9px] font-black tracking-wider animate-pulse">
-                  JOIN NOW
+                <i className={isJoinWindowOpen ? "fas fa-video animate-pulse" : "fas fa-clock text-base"} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <span className={`text-[10px] font-black uppercase tracking-widest ${
+                    isJoinWindowOpen ? "text-emerald-400" : "text-slate-400"
+                  }`}>
+                    WHAT IS MY NEXT CLASS?
+                  </span>
+                  {isJoinWindowOpen && (
+                    <span className="px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 text-[9px] font-black tracking-wider animate-pulse">
+                      JOIN NOW
+                    </span>
+                  )}
+                </div>
+
+                <h3 className="text-base font-black text-white truncate mt-1">
+                  {activeNextSession.course_title || "Cambridge Course"}
+                </h3>
+                <p className="text-xs text-indigo-200/90 truncate font-medium">
+                  {activeNextSession.title || "Live Session"}
+                </p>
+                <p className="text-xs text-slate-400 truncate mt-0.5">
+                  Tutor: <strong className="text-slate-200">{activeNextSession.instructor_name || activeNextSession.teacher_name || "Assigned Faculty"}</strong>
+                </p>
+
+                {activeNextSession.scheduled_at && (
+                  <p className="text-[11px] text-slate-300 mt-1 font-mono flex items-center gap-1.5">
+                    <i className="far fa-calendar text-indigo-400" />
+                    Starts at {formatTime(activeNextSession.scheduled_at, timezone)} ({timezoneAbbr})
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* 30-Minute Join Window Logic */}
+            {isJoinWindowOpen ? (
+              <div className="mt-3 space-y-1">
+                <a
+                  href={activeNextSession.meeting_link || "https://meet.google.com"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition shadow-lg shadow-emerald-900/40 cursor-pointer"
+                >
+                  <i className="fas fa-video text-xs" />
+                  <span>Join Google Meet (Starts in {minsRemaining}m)</span>
+                </a>
+                <p className="text-[10px] text-emerald-400 text-center font-medium">
+                  Classroom open! (Join window active 30 mins before start)
+                </p>
+              </div>
+            ) : (
+              <div className="mt-3 p-2 rounded-xl bg-white/5 border border-white/10 text-[11px] text-slate-400 flex items-center justify-between">
+                <div className="flex items-center gap-1.5">
+                  <i className="fas fa-lock text-indigo-400 text-xs" />
+                  <span>Google Meet opens 30 min before class</span>
+                </div>
+                <span className="font-mono text-indigo-300 text-[10px] font-bold">
+                  Opens {unlockTime}
                 </span>
-              )}
-            </div>
-
-            <h3 className="text-base font-black text-white truncate mt-1">
-              {activeNextSession?.course_title || "Cambridge IGCSE Course"}
-            </h3>
-            <p className="text-xs text-indigo-200/90 truncate font-medium">
-              {activeNextSession?.title || "Regular Lecture & Discussion"}
-            </p>
-            <p className="text-xs text-slate-400 truncate mt-0.5">
-              Tutor: <strong className="text-slate-200">{activeNextSession?.instructor_name || activeNextSession?.teacher_name || "Assigned Faculty"}</strong>
-            </p>
-
-            {activeNextSession?.scheduled_at && (
-              <p className="text-[11px] text-slate-300 mt-1 font-mono flex items-center gap-1.5">
-                <i className="far fa-calendar text-indigo-400" />
-                Starts at {formatTime(activeNextSession.scheduled_at, timezone)} ({timezoneAbbr})
-              </p>
+              </div>
             )}
-          </div>
-        </div>
-
-        {/* 30-Minute Join Window Logic */}
-        {isJoinWindowOpen ? (
-          <div className="mt-3 space-y-1">
-            <a
-              href={activeNextSession.meeting_link || "https://meet.google.com"}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition shadow-lg shadow-emerald-900/40 cursor-pointer"
-            >
-              <i className="fas fa-video text-xs" />
-              <span>Join Google Meet (Starts in {minsRemaining}m)</span>
-            </a>
-            <p className="text-[10px] text-emerald-400 text-center font-medium">
-              Classroom open! (Join window active 30 mins before start)
-            </p>
-          </div>
+          </>
         ) : (
-          <div className="mt-3 p-2 rounded-xl bg-white/5 border border-white/10 text-[11px] text-slate-400 flex items-center justify-between">
-            <div className="flex items-center gap-1.5">
-              <i className="fas fa-lock text-indigo-400 text-xs" />
-              <span>Google Meet opens 30 min before class</span>
+          <div className="h-full flex flex-col justify-between space-y-3">
+            <div className="flex items-start gap-3.5">
+              <div className="w-10 h-10 rounded-xl bg-indigo-500/15 border border-indigo-500/20 text-indigo-400 flex items-center justify-center shrink-0">
+                <i className="fas fa-calendar-check text-base" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                  WHAT IS MY NEXT CLASS?
+                </div>
+                <h3 className="text-base font-black text-white mt-1">
+                  No Live Classes Today
+                </h3>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  You have no scheduled Google Meet lectures for today.
+                </p>
+              </div>
             </div>
-            <span className="font-mono text-indigo-300 text-[10px] font-bold">
-              Opens {unlockTime}
-            </span>
+
+            <div className="p-2 rounded-xl bg-white/5 border border-white/10 text-[11px] text-slate-400 flex items-center gap-2">
+              <i className="fas fa-info-circle text-indigo-400 text-xs shrink-0" />
+              <span>Google Meet links unlock 30 min before scheduled start time</span>
+            </div>
           </div>
         )}
       </div>

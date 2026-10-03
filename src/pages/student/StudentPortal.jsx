@@ -29,7 +29,7 @@ import {
   RequestLeaveModal,
   AssignmentSubmitModal,
 } from "../../components/studentDashboard/workspace";
-import StudentEvaluationPage from "./StudentEvaluationPage";
+import StudentAssessments from "./StudentAssessments";
 import TimezoneModal from "../../components/common/TimezoneModal";
 import ApplyFreeAccessModal from "../../components/public/ApplyFreeAccessModal";
 
@@ -40,7 +40,10 @@ const VALID_TABS = [
   "calendar",
   "attendance",
   "resources",
+  "assessments",
   "evaluations",
+  "assignments",
+  "quizzes",
 ];
 
 const StudentPortal = () => {
@@ -233,9 +236,12 @@ const StudentPortal = () => {
               />
             )}
 
-            {activeTab === "evaluations" && (
-              <div className="rounded-2xl bg-slate-900/80 border border-white/10 overflow-hidden shadow-xl p-2 sm:p-4">
-                <StudentEvaluationPage />
+            {(activeTab === "assessments" ||
+              activeTab === "evaluations" ||
+              activeTab === "assignments" ||
+              activeTab === "quizzes") && (
+              <div className="rounded-2xl bg-slate-900/80 border border-white/10 overflow-hidden shadow-xl p-4 sm:p-6">
+                <StudentAssessments isEmbedded={true} />
               </div>
             )}
           </div>
@@ -247,6 +253,7 @@ const StudentPortal = () => {
               onRequestTranscript={() => setIsTranscriptModalOpen(true)}
               onRequestLeave={() => setIsLeaveModalOpen(true)}
               onOpenTimezone={() => setIsTimezoneModalOpen(true)}
+              onApplyFreeAccess={() => setFreeAccessOpen(true)}
               onViewAllSchedule={() => handleSelectTab("schedule")}
               onViewAllPlanner={() => handleSelectTab("planner")}
             />

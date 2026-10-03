@@ -7,7 +7,7 @@ const TABS = [
   { id: "calendar", label: "Calendar", icon: "fas fa-calendar-days" },
   { id: "attendance", label: "Attendance", icon: "fas fa-user-check" },
   { id: "resources", label: "Resources", icon: "fas fa-folder-open" },
-  { id: "evaluations", label: "Evaluations", icon: "fas fa-chart-bar" },
+  { id: "assessments", label: "Assignments & Quizzes", icon: "fas fa-clipboard-check" },
 ];
 
 const StudentWorkspaceNav = ({ activeTab, onSelectTab, counts = {} }) => {

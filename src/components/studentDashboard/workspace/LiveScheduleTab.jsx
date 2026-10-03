@@ -16,61 +16,14 @@ const LiveScheduleTab = ({ onOpenWeeklyPlanner }) => {
 
   const [activeFilter, setActiveFilter] = useState("all");
 
-  // Fallback scheduled classes with Google Meet links initiated by VCS Admin & Faculty
-  const fallbackLiveClasses = [
-    {
-      id: "live-math-01",
-      title: "Derivatives & Rate of Change - Live Class",
-      course_title: "Cambridge IGCSE Mathematics",
-      teacher_name: "Dr. A. Vance",
-      scheduled_at: new Date(Date.now() + 20 * 60000).toISOString(), // 20 mins from now -> JOINABLE NOW!
-      meeting_link: "https://meet.google.com/abc-vcs-math",
-      status: "scheduled",
-      room: "Google Meet Room Alpha",
-      syllabus_ref: "Syllabus 0580 • Calculus Core",
-    },
-    {
-      id: "live-phys-02",
-      title: "Electromagnetism & Induced Currents",
-      course_title: "IGCSE Physics (0625)",
-      teacher_name: "Prof. Einstein",
-      scheduled_at: new Date(Date.now() + 140 * 60000).toISOString(), // 2h 20m from now -> opens 30m before
-      meeting_link: "https://meet.google.com/xyz-vcs-phys",
-      status: "scheduled",
-      room: "Google Meet Room Beta",
-      syllabus_ref: "Syllabus 0625 • Electromagnetism",
-    },
-    {
-      id: "live-chem-03",
-      title: "Organic Chemistry: Hydrocarbons & Esters",
-      course_title: "Cambridge Chemistry (0620)",
-      teacher_name: "Dr. Curie",
-      scheduled_at: new Date(Date.now() + 26 * 3600000).toISOString(), // Tomorrow
-      meeting_link: "https://meet.google.com/chem-vcs-gamma",
-      status: "scheduled",
-      room: "Google Meet Chemistry Lab",
-      syllabus_ref: "Syllabus 0620 • Section 14",
-    },
-    {
-      id: "live-eng-04",
-      title: "Literary Analysis: Shakespeare's Macbeth Act III",
-      course_title: "English Language & Literature",
-      teacher_name: "Ms. Shakespeare",
-      scheduled_at: new Date(Date.now() + 30 * 3600000).toISOString(), // Tomorrow afternoon
-      meeting_link: "https://meet.google.com/eng-vcs-delta",
-      status: "scheduled",
-      room: "Google Meet Humanities Hall",
-      syllabus_ref: "Cambridge Literature 0475",
-    },
-  ];
-
-  const sessions = liveSchedule.length > 0 ? liveSchedule : fallbackLiveClasses;
+  // Real live schedule from Redux (no dummy fallbacks)
+  const sessions = liveSchedule || [];
 
   // The immediate next class spotlight
-  const nextClass = nextSession || sessions[0];
+  const nextClass = nextSession || (sessions.length > 0 ? sessions[0] : null);
 
   // Real-time minutes remaining calculation for the spotlight class
-  const [minsToNext, setMinsToNext] = useState(20);
+  const [minsToNext, setMinsToNext] = useState(null);
 
   useEffect(() => {
     if (!nextClass?.scheduled_at) return;
@@ -140,7 +93,7 @@ const LiveScheduleTab = ({ onOpenWeeklyPlanner }) => {
       </div>
 
       {/* 2. "WHAT IS MY NEXT CLASS?" Spotlight Hero Card */}
-      {nextClass && (
+      {nextClass ? (
         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-indigo-950/40 to-slate-900 border border-indigo-500/30 p-6 shadow-2xl">
           <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
 
@@ -202,11 +155,41 @@ const LiveScheduleTab = ({ onOpenWeeklyPlanner }) => {
                     <span>Google Meet opens 30 min before class</span>
                   </div>
                   <p className="text-[11px] text-indigo-300 font-mono">
-                    Starts in Math.floor(minsToNext / 60)h {minsToNext % 60}m (at {formatTime(nextClass.scheduled_at, timezone)})
+                    Starts at {formatTime(nextClass.scheduled_at, timezone)} ({timezoneAbbr})
                   </p>
                 </div>
               )}
             </div>
+          </div>
+        </div>
+      ) : (
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-indigo-950/20 to-slate-900 border border-white/10 p-6 shadow-xl">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3.5">
+              <div className="w-12 h-12 rounded-xl bg-indigo-500/15 border border-indigo-500/20 text-indigo-400 flex items-center justify-center shrink-0">
+                <i className="fas fa-calendar-check text-xl" />
+              </div>
+              <div>
+                <span className="text-xs font-black uppercase tracking-widest text-slate-400">
+                  WHAT IS MY NEXT CLASS?
+                </span>
+                <h3 className="text-lg font-black text-white mt-0.5">
+                  No Live Classes Scheduled Right Now
+                </h3>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Live classes initiated by administration or faculty will appear here. Links unlock 30 minutes before start.
+                </p>
+              </div>
+            </div>
+            {onOpenWeeklyPlanner && (
+              <button
+                onClick={onOpenWeeklyPlanner}
+                className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition flex items-center gap-2 cursor-pointer shadow-lg shadow-indigo-600/30 shrink-0 self-start sm:self-auto"
+              >
+                <span>View Weekly Timetable</span>
+                <i className="fas fa-arrow-right text-[10px]" />
+              </button>
+            )}
           </div>
         </div>
       )}
@@ -242,89 +225,110 @@ const LiveScheduleTab = ({ onOpenWeeklyPlanner }) => {
           </div>
         </div>
 
-        <div className="space-y-3">
-          {filteredSessions.map((session) => {
-            const diffMins = Math.floor(
-              (new Date(session.scheduled_at).getTime() - Date.now()) / 60000
-            );
-            const canJoin = diffMins <= 30 && diffMins >= -60;
-            const unlockDate = new Date(
-              new Date(session.scheduled_at).getTime() - 30 * 60000
-            );
-            const unlockTimeStr = formatTime(unlockDate.toISOString(), timezone);
+        {filteredSessions.length > 0 ? (
+          <div className="space-y-3">
+            {filteredSessions.map((session) => {
+              const diffMins = Math.floor(
+                (new Date(session.scheduled_at).getTime() - Date.now()) / 60000
+              );
+              const canJoin = diffMins <= 30 && diffMins >= -60;
+              const unlockDate = new Date(
+                new Date(session.scheduled_at).getTime() - 30 * 60000
+              );
+              const unlockTimeStr = formatTime(unlockDate.toISOString(), timezone);
 
-            return (
-              <div
-                key={session.id}
-                className={`p-4 rounded-xl border transition flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
-                  canJoin
-                    ? "bg-emerald-950/20 border-emerald-500/40 shadow-lg shadow-emerald-950/30"
-                    : "bg-white/[0.02] border-white/5 hover:border-white/10"
-                }`}
-              >
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                    <span
-                      className={`w-2 h-2 rounded-full ${
-                        canJoin ? "bg-emerald-400 animate-pulse" : "bg-blue-400"
-                      }`}
-                    />
-                    <span className="text-[10px] font-black uppercase tracking-wider text-indigo-400">
-                      {session.course_title}
-                    </span>
-                    <span
-                      className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${
-                        canJoin
-                          ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
-                          : "bg-blue-500/15 text-blue-300 border border-blue-500/25"
-                      }`}
-                    >
-                      {canJoin
-                        ? diffMins <= 0
-                          ? "LIVE NOW"
-                          : `JOINABLE (IN ${diffMins}M)`
-                        : `OPENS 30M PRIOR (${unlockTimeStr})`}
-                    </span>
+              return (
+                <div
+                  key={session.id}
+                  className={`p-4 rounded-xl border transition flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
+                    canJoin
+                      ? "bg-emerald-950/20 border-emerald-500/40 shadow-lg shadow-emerald-950/30"
+                      : "bg-white/[0.02] border-white/5 hover:border-white/10"
+                  }`}
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                      <span
+                        className={`w-2 h-2 rounded-full ${
+                          canJoin ? "bg-emerald-400 animate-pulse" : "bg-blue-400"
+                        }`}
+                      />
+                      <span className="text-[10px] font-black uppercase tracking-wider text-indigo-400">
+                        {session.course_title}
+                      </span>
+                      <span
+                        className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${
+                          canJoin
+                            ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                            : "bg-blue-500/15 text-blue-300 border border-blue-500/25"
+                        }`}
+                      >
+                        {canJoin
+                          ? diffMins <= 0
+                            ? "LIVE NOW"
+                            : `JOINABLE (IN ${diffMins}M)`
+                          : `OPENS 30M PRIOR (${unlockTimeStr})`}
+                      </span>
+                    </div>
+
+                    <h4 className="text-sm font-bold text-white truncate">
+                      {session.title}
+                    </h4>
+
+                    <p className="text-xs text-slate-400 mt-0.5">
+                      Faculty: <span className="text-slate-200 font-semibold">{session.teacher_name}</span> • {session.room || "Google Meet"}
+                    </p>
+
+                    <p className="text-[11px] text-slate-400 font-mono mt-1 flex items-center gap-1.5">
+                      <i className="far fa-clock text-slate-500" />
+                      <span>{formatTime(session.scheduled_at, timezone)} <TimezoneTag /></span>
+                      <span>•</span>
+                      <span>{formatDate(session.scheduled_at, timezone)}</span>
+                    </p>
                   </div>
 
-                  <h4 className="text-sm font-bold text-white truncate">
-                    {session.title}
-                  </h4>
-
-                  <p className="text-xs text-slate-400 mt-0.5">
-                    Faculty: <span className="text-slate-200 font-semibold">{session.teacher_name}</span> • {session.room || "Google Meet"}
-                  </p>
-
-                  <p className="text-[11px] text-slate-400 font-mono mt-1 flex items-center gap-1.5">
-                    <i className="far fa-clock text-slate-500" />
-                    <span>{formatTime(session.scheduled_at, timezone)} <TimezoneTag /></span>
-                    <span>•</span>
-                    <span>{formatDate(session.scheduled_at, timezone)}</span>
-                  </p>
+                  <div className="shrink-0 flex items-center gap-2">
+                    {canJoin ? (
+                      <a
+                        href={session.meeting_link || "https://meet.google.com"}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-2 transition shadow-lg shadow-emerald-900/30 cursor-pointer"
+                      >
+                        <i className="fas fa-video text-xs" />
+                        <span>Join Class (Google Meet)</span>
+                      </a>
+                    ) : (
+                      <div className="px-3.5 py-2 rounded-xl bg-white/5 border border-white/10 text-slate-400 text-xs font-medium flex items-center gap-2">
+                        <i className="fas fa-lock text-indigo-400 text-xs" />
+                        <span>Opens at {unlockTimeStr}</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
-
-                <div className="shrink-0 flex items-center gap-2">
-                  {canJoin ? (
-                    <a
-                      href={session.meeting_link || "https://meet.google.com"}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-2 transition shadow-lg shadow-emerald-900/30 cursor-pointer"
-                    >
-                      <i className="fas fa-video text-xs" />
-                      <span>Join Class (Google Meet)</span>
-                    </a>
-                  ) : (
-                    <div className="px-3.5 py-2 rounded-xl bg-white/5 border border-white/10 text-slate-400 text-xs font-medium flex items-center gap-2">
-                      <i className="fas fa-lock text-indigo-400 text-xs" />
-                      <span>Opens at {unlockTimeStr}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="p-8 rounded-xl bg-white/[0.02] border border-white/5 text-center space-y-2">
+            <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center mx-auto">
+              <i className="fas fa-video-slash text-base" />
+            </div>
+            <p className="text-sm font-bold text-white">No Live Sessions Scheduled</p>
+            <p className="text-xs text-slate-400 max-w-md mx-auto">
+              There are no live Google Meet classes scheduled under this filter. Check your weekly timetable for recurring curriculum periods.
+            </p>
+            {onOpenWeeklyPlanner && (
+              <button
+                onClick={onOpenWeeklyPlanner}
+                className="mt-2 text-xs text-indigo-400 hover:text-indigo-300 font-semibold inline-flex items-center gap-1 cursor-pointer"
+              >
+                <span>View Weekly Curriculum Planner</span>
+                <i className="fas fa-arrow-right text-[10px]" />
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
