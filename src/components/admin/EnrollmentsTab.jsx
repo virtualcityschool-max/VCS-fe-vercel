@@ -19,7 +19,7 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
   const [typeFilter, setTypeFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [dateSort, setDateSort] = useState("newest");
-  const [viewMode, setViewMode] = useState("by_student"); // "by_student" | "table"
+  const [viewMode, setViewMode] = useState("table"); // "table" by default, toggleable to "by_student"
 
   // Check if any filters are applied
   const hasActiveFilters = useMemo(() => {

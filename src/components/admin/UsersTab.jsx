@@ -324,40 +324,26 @@ const StudentCard = ({
       }`}
     >
       <div className="p-5 space-y-4">
-        {/* Card Header: Avatar, Name, Status Badge */}
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="relative shrink-0">
-              {getStorageUrl(user.avatar) ? (
-                <img
-                  src={getStorageUrl(user.avatar)}
-                  alt={user.username}
-                  className="w-12 h-12 rounded-xl object-cover ring-2 ring-slate-800"
-                />
-              ) : (
-                <div
-                  className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg ${
-                    isEnrolled
-                      ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                      : "bg-rose-500/20 text-rose-400 border border-rose-500/30"
-                  }`}
-                >
-                  {(getDisplayName(user) || user.username || "S")[0].toUpperCase()}
-                </div>
-              )}
-            </div>
-            <div className="min-w-0">
-              <h4 className="font-bold text-white text-base truncate">
-                {getDisplayName(user) || "Student"}
-              </h4>
-              <p className="text-xs text-slate-400 truncate">{user.email}</p>
-              {user.phone && (
-                <p className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5">
-                  <i className="fas fa-phone text-[9px]" />
-                  <span>{user.phone}</span>
-                </p>
-              )}
-            </div>
+        {/* Card Header: Avatar & Status Badge on Top Bar */}
+        <div className="flex items-center justify-between gap-3">
+          <div className="relative shrink-0">
+            {getStorageUrl(user.avatar) ? (
+              <img
+                src={getStorageUrl(user.avatar)}
+                alt={user.username}
+                className="w-12 h-12 rounded-xl object-cover ring-2 ring-slate-800"
+              />
+            ) : (
+              <div
+                className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg ${
+                  isEnrolled
+                    ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                    : "bg-rose-500/20 text-rose-400 border border-rose-500/30"
+                }`}
+              >
+                {(getDisplayName(user) || user.username || "S")[0].toUpperCase()}
+              </div>
+            )}
           </div>
 
           {/* Active / Inactive Status Badge */}
@@ -374,6 +360,22 @@ const StudentCard = ({
               </span>
             )}
           </div>
+        </div>
+
+        {/* User Identity: Full Name & Full Email (Zero Truncation) */}
+        <div className="space-y-1">
+          <h4 className="font-bold text-white text-base leading-snug break-words">
+            {getDisplayName(user) || "Student"}
+          </h4>
+          <p className="text-xs text-slate-400 font-mono break-all select-all">
+            {user.email}
+          </p>
+          {user.phone && (
+            <p className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5">
+              <i className="fas fa-phone text-[9px]" />
+              <span>{user.phone}</span>
+            </p>
+          )}
         </div>
 
         {/* Academic Tier & Roll Number Info */}
@@ -539,40 +541,26 @@ const TutorCard = ({
       }`}
     >
       <div className="p-5 space-y-4">
-        {/* Header: Avatar, Name, Status Badge */}
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="relative shrink-0">
-              {getStorageUrl(user.avatar) ? (
-                <img
-                  src={getStorageUrl(user.avatar)}
-                  alt={user.username}
-                  className="w-12 h-12 rounded-xl object-cover ring-2 ring-slate-800"
-                />
-              ) : (
-                <div
-                  className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg ${
-                    engaged
-                      ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                      : "bg-amber-500/20 text-amber-400 border border-amber-500/30"
-                  }`}
-                >
-                  {(getDisplayName(user) || user.username || "T")[0].toUpperCase()}
-                </div>
-              )}
-            </div>
-            <div className="min-w-0">
-              <h4 className="font-bold text-white text-base truncate">
-                {getDisplayName(user) || "Tutor"}
-              </h4>
-              <p className="text-xs text-slate-400 truncate">{user.email}</p>
-              {user.phone && (
-                <p className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5">
-                  <i className="fas fa-phone text-[9px]" />
-                  <span>{user.phone}</span>
-                </p>
-              )}
-            </div>
+        {/* Card Header: Avatar & Status Badge on Top Bar */}
+        <div className="flex items-center justify-between gap-3">
+          <div className="relative shrink-0">
+            {getStorageUrl(user.avatar) ? (
+              <img
+                src={getStorageUrl(user.avatar)}
+                alt={user.username}
+                className="w-12 h-12 rounded-xl object-cover ring-2 ring-slate-800"
+              />
+            ) : (
+              <div
+                className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg ${
+                  engaged
+                    ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                    : "bg-amber-500/20 text-amber-400 border border-amber-500/30"
+                }`}
+              >
+                {(getDisplayName(user) || user.username || "T")[0].toUpperCase()}
+              </div>
+            )}
           </div>
 
           {/* Engaged vs Standby badge */}
@@ -589,6 +577,22 @@ const TutorCard = ({
               </span>
             )}
           </div>
+        </div>
+
+        {/* User Identity: Full Name & Full Email (Zero Truncation) */}
+        <div className="space-y-1">
+          <h4 className="font-bold text-white text-base leading-snug break-words">
+            {getDisplayName(user) || "Tutor"}
+          </h4>
+          <p className="text-xs text-slate-400 font-mono break-all select-all">
+            {user.email}
+          </p>
+          {user.phone && (
+            <p className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5">
+              <i className="fas fa-phone text-[9px]" />
+              <span>{user.phone}</span>
+            </p>
+          )}
         </div>
 
         {/* Professional Details: Experience & Qualification */}
@@ -706,28 +710,14 @@ const GuardianCard = ({
   return (
     <div className="rounded-2xl border border-purple-500/30 bg-gradient-to-b from-slate-900 via-slate-900 to-purple-950/20 flex flex-col justify-between overflow-hidden shadow-xl hover:border-purple-500/60 transition-all duration-200">
       <div className="p-5 space-y-4">
-        {/* Header */}
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-12 h-12 rounded-xl bg-purple-500/20 text-purple-400 border border-purple-500/30 flex items-center justify-center font-black text-lg shrink-0">
-              <i className="fas fa-user-friends text-base" />
-            </div>
-            <div className="min-w-0">
-              <h4 className="font-bold text-white text-base truncate">
-                {getDisplayName(user) || "Guardian"}
-              </h4>
-              <p className="text-xs text-slate-400 truncate">{user.email}</p>
-              {user.phone && (
-                <p className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5">
-                  <i className="fas fa-phone text-[9px]" />
-                  <span>{user.phone}</span>
-                </p>
-              )}
-            </div>
+        {/* Header: Avatar & Status Badge on Top Bar */}
+        <div className="flex items-center justify-between gap-3">
+          <div className="w-12 h-12 rounded-xl bg-purple-500/20 text-purple-400 border border-purple-500/30 flex items-center justify-center font-black text-lg shrink-0">
+            <i className="fas fa-user-friends text-base" />
           </div>
 
           <span
-            className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${
+            className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border shrink-0 ${
               user.is_active
                 ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
                 : "bg-slate-500/15 text-slate-400 border-slate-500/30"
@@ -735,6 +725,22 @@ const GuardianCard = ({
           >
             {user.is_active ? "Active" : "Inactive"}
           </span>
+        </div>
+
+        {/* User Identity: Full Name & Full Email (Zero Truncation) */}
+        <div className="space-y-1">
+          <h4 className="font-bold text-white text-base leading-snug break-words">
+            {getDisplayName(user) || "Guardian"}
+          </h4>
+          <p className="text-xs text-slate-400 font-mono break-all select-all">
+            {user.email}
+          </p>
+          {user.phone && (
+            <p className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5">
+              <i className="fas fa-phone text-[9px]" />
+              <span>{user.phone}</span>
+            </p>
+          )}
         </div>
 
         {/* Linked Children Section */}
@@ -859,36 +865,20 @@ const AdminCard = ({
       }`}
     >
       <div className="p-5 space-y-4">
-        {/* Header */}
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex items-center gap-3 min-w-0">
-            <div
-              className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg ${
-                user.is_superuser
-                  ? "bg-amber-500/20 text-amber-400 border border-amber-500/30"
-                  : "bg-red-500/20 text-red-400 border border-red-500/30"
-              }`}
-            >
-              <i className={`fas ${user.is_superuser ? "fa-crown text-amber-400" : "fa-shield-alt text-red-400"}`} />
-            </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <h4 className="font-bold text-white text-base truncate">
-                  {getDisplayName(user) || "Admin"}
-                </h4>
-                {user.is_superuser && (
-                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-amber-500/15 border border-amber-500/30 text-amber-400 text-[9px] font-black uppercase tracking-wider">
-                    <i className="fas fa-crown text-[8px]" />
-                    Super Admin
-                  </span>
-                )}
-              </div>
-              <p className="text-xs text-slate-400 truncate">{user.email}</p>
-            </div>
+        {/* Header: Avatar & Status Badge on Top Bar */}
+        <div className="flex items-center justify-between gap-3">
+          <div
+            className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg shrink-0 ${
+              user.is_superuser
+                ? "bg-amber-500/20 text-amber-400 border border-amber-500/30"
+                : "bg-red-500/20 text-red-400 border border-red-500/30"
+            }`}
+          >
+            <i className={`fas ${user.is_superuser ? "fa-crown text-amber-400" : "fa-shield-alt text-red-400"}`} />
           </div>
 
           <span
-            className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${
+            className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border shrink-0 ${
               user.is_active
                 ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
                 : "bg-slate-500/15 text-slate-400 border-slate-500/30"
@@ -896,6 +886,24 @@ const AdminCard = ({
           >
             {user.is_active ? "Active" : "Inactive"}
           </span>
+        </div>
+
+        {/* User Identity: Full Name & Full Email (Zero Truncation) */}
+        <div className="space-y-1">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h4 className="font-bold text-white text-base leading-snug break-words">
+              {getDisplayName(user) || "Admin"}
+            </h4>
+            {user.is_superuser && (
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-amber-500/15 border border-amber-500/30 text-amber-400 text-[9px] font-black uppercase tracking-wider">
+                <i className="fas fa-crown text-[8px]" />
+                Super Admin
+              </span>
+            )}
+          </div>
+          <p className="text-xs text-slate-400 font-mono break-all select-all">
+            {user.email}
+          </p>
         </div>
 
         {/* System Protection or Role scope */}
@@ -987,7 +995,7 @@ const UsersTab = ({
   onCreateUser,
 }) => {
   const navigate = useNavigate();
-  const [viewMode, setViewMode] = useState("cards"); // 'cards' (default) vs 'table'
+  const [viewMode, setViewMode] = useState("table"); // 'table' (default) vs 'cards'
   const [selectedDepartment, setSelectedDepartment] = useState("all");
   const [selectedTutorStatus, setSelectedTutorStatus] = useState("all"); // 'all' | 'engaged' | 'standby'
   const [coursesByTeacher, setCoursesByTeacher] = useState({});
