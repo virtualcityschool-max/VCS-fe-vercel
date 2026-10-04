@@ -694,9 +694,9 @@ const CoursesTab = ({
       {/* ─────────────────────────────────────────────
          QUICK-CLICK DEPARTMENT & STATUS FILTER BAR
          ───────────────────────────────────────────── */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 p-3 bg-slate-900/60 border border-slate-800/80 rounded-2xl shadow-lg">
+      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3 p-3 bg-slate-900/60 border border-slate-800/80 rounded-2xl shadow-lg">
         {/* Department Pills */}
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+        <div className="flex flex-wrap items-center gap-1.5 py-0.5">
           {COURSE_DEPARTMENTS.map((dept) => {
             const active = selectedDepartment === dept.id;
             const count = departmentCounts[dept.id] || 0;
@@ -838,7 +838,7 @@ const CoursesTab = ({
             </table>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div>
             {/* Mobile Card View */}
             <div className="lg:hidden divide-y divide-slate-800/50 space-y-4">
               {filteredCourses?.map((course) => (
@@ -859,9 +859,6 @@ const CoursesTab = ({
                         <p className="font-bold text-white text-sm sm:text-base mb-1">
                           {course.title}
                         </p>
-                        {/* <p className="text-xs text-slate-500 mt-1 line-clamp-2">
-                          {course.description}
-                        </p> */}
                       </div>
                     </div>
 
@@ -927,20 +924,19 @@ const CoursesTab = ({
             </div>
 
             {/* Desktop Table View */}
-            <div className="overflow-x-auto">
-              <table className="hidden lg:table w-full text-left border-collapse">
+            <div className="hidden lg:block overflow-x-auto table-scrollbar pb-1">
+              <table className="w-full text-left border-collapse">
                 <thead className="bg-slate-950/80 border-b border-slate-800 text-[11px] font-bold text-slate-400 uppercase tracking-wider sticky top-0 z-10 backdrop-blur-md">
                   <tr>
-                    <th className="px-3 py-3 w-10 text-center">#</th>
-                    <th className="px-4 py-3">Course</th>
-                    <th className="px-3 py-3">Department</th>
-                    <th className="px-3 py-3">Level</th>
-                    <th className="px-3 py-3">Tutor</th>
-                    <th className="px-3 py-3">Price</th>
-                    <th className="px-3 py-3">Type</th>
-                    <th className="px-3 py-3">Status</th>
-                    <th className="px-3 py-3 text-center">Students</th>
-                    <th className="px-4 py-3 text-right">Actions</th>
+                    <th className="px-2.5 py-3 w-8 text-center">#</th>
+                    <th className="px-3.5 py-3">Course</th>
+                    <th className="px-2.5 py-3">Department</th>
+                    <th className="px-2.5 py-3">Level</th>
+                    <th className="px-2.5 py-3">Tutor</th>
+                    <th className="px-2.5 py-3">Price</th>
+                    <th className="px-2.5 py-3">Status</th>
+                    <th className="px-2 py-3 text-center">Students</th>
+                    <th className="px-3 py-3 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/40 text-xs">
@@ -957,60 +953,64 @@ const CoursesTab = ({
                         onClick={() => navigate(`/admin/courses/${course.id}`)}
                       >
                         {/* Index */}
-                        <td className="px-3 py-2.5 text-center font-mono text-slate-500">
+                        <td className="px-2.5 py-2.5 text-center font-mono text-slate-500">
                           {index + 1}
                         </td>
 
                         {/* Course (Clean single-line with title, code, department icon, and description in tooltip) */}
-                        <td className="px-4 py-2.5 whitespace-nowrap">
+                        <td className="px-3.5 py-2.5">
                           <div
-                            className="flex items-center gap-2.5 max-w-md"
-                            title={course.description || course.title}
+                            className="flex items-center gap-2 max-w-[220px] xl:max-w-[300px]"
+                            title={course.description ? `${course.title}\n\n${course.description}` : course.title}
                           >
-                            <div className={`w-7 h-7 rounded-lg ${dept.bg} ${dept.color} flex items-center justify-center shrink-0 shadow-sm`}>
-                              <i className={`fas ${dept.icon} text-xs`} />
+                            <div className={`w-6 h-6 rounded-md ${dept.bg} ${dept.color} flex items-center justify-center shrink-0 shadow-sm`}>
+                              <i className={`fas ${dept.icon} text-[10px]`} />
                             </div>
-                            <div className="min-w-0">
-                              <div className="flex items-center gap-1.5">
-                                <p className="font-semibold text-white text-xs leading-none group-hover:text-indigo-300 transition truncate">
-                                  {course.title}
-                                </p>
-                                {courseCode && (
-                                  <span className="px-1.5 py-0.2 rounded font-mono text-[10px] bg-slate-800 text-indigo-300 border border-slate-700/80 font-semibold shrink-0">
-                                    {courseCode}
-                                  </span>
-                                )}
-                              </div>
+                            <div className="min-w-0 flex items-center gap-1.5 flex-1">
+                              <p className="font-semibold text-white text-xs leading-none group-hover:text-indigo-300 transition truncate">
+                                {course.title}
+                              </p>
+                              {courseCode && (
+                                <span className="px-1.5 py-0.2 rounded font-mono text-[9px] bg-slate-800 text-indigo-300 border border-slate-700/80 font-semibold shrink-0">
+                                  {courseCode}
+                                </span>
+                              )}
                             </div>
                           </div>
                         </td>
 
                         {/* Department */}
-                        <td className="px-3 py-2.5 whitespace-nowrap">
-                          <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-semibold border ${dept.bg} ${dept.color}`}>
-                            <i className={`fas ${dept.icon} text-[10px]`} />
-                            <span>{dept.name}</span>
+                        <td className="px-2.5 py-2.5 whitespace-nowrap">
+                          <span
+                            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold border ${dept.bg} ${dept.color} max-w-[115px] truncate`}
+                            title={dept.name}
+                          >
+                            <i className={`fas ${dept.icon} text-[9px] shrink-0`} />
+                            <span className="truncate">{dept.name}</span>
                           </span>
                         </td>
 
                         {/* Level */}
-                        <td className="px-3 py-2.5 whitespace-nowrap">
-                          <span className="bg-slate-800/80 text-slate-300 px-2 py-0.5 rounded text-[11px] font-medium border border-slate-700/80">
+                        <td className="px-2.5 py-2.5 whitespace-nowrap">
+                          <span
+                            className="bg-slate-800/80 text-slate-300 px-2 py-0.5 rounded text-[10px] font-medium border border-slate-700/80 max-w-[125px] truncate inline-block align-middle"
+                            title={levelName}
+                          >
                             {levelName}
                           </span>
                         </td>
 
                         {/* Tutor */}
-                        <td className="px-3 py-2.5 whitespace-nowrap">
+                        <td className="px-2.5 py-2.5 whitespace-nowrap">
                           {course.instructor ? (
-                            <div className="flex items-center gap-2">
-                              <div className="w-6 h-6 rounded-md bg-indigo-500/20 text-indigo-300 flex items-center justify-center font-bold text-[11px] shrink-0">
+                            <div
+                              className="flex items-center gap-1.5 max-w-[125px]"
+                              title={getDisplayName(course.instructor)}
+                            >
+                              <div className="w-5 h-5 rounded-md bg-indigo-500/20 text-indigo-300 flex items-center justify-center font-bold text-[10px] shrink-0">
                                 {(getDisplayName(course.instructor) || "T")[0].toUpperCase()}
                               </div>
-                              <span
-                                className="text-slate-300 text-xs font-medium truncate max-w-[140px]"
-                                title={getDisplayName(course.instructor)}
-                              >
+                              <span className="text-slate-300 text-xs font-medium truncate">
                                 {getDisplayName(course.instructor)}
                               </span>
                             </div>
@@ -1019,30 +1019,23 @@ const CoursesTab = ({
                           )}
                         </td>
 
-                        {/* Price */}
-                        <td className="px-3 py-2.5 whitespace-nowrap font-mono text-xs">
-                          <span className={course.is_paid ? "text-emerald-400 font-semibold" : "text-slate-400"}>
-                            {course.is_paid ? `$${(course.price || 0).toLocaleString("en-US")} USD` : "Free"}
-                          </span>
-                        </td>
-
-                        {/* Type */}
-                        <td className="px-3 py-2.5 whitespace-nowrap">
-                          <span
-                            className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${
-                              course.is_paid
-                                ? "bg-amber-500/15 text-amber-300 border-amber-500/30"
-                                : "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
-                            }`}
-                          >
-                            {course.is_paid ? "Paid" : "Free"}
-                          </span>
+                        {/* Price (Smart badge combining amount & free/paid status) */}
+                        <td className="px-2.5 py-2.5 whitespace-nowrap font-mono text-xs">
+                          {course.is_paid ? (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                              ${(course.price || 0).toLocaleString("en-US")} USD
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium bg-slate-800 text-slate-400 border border-slate-700">
+                              Free
+                            </span>
+                          )}
                         </td>
 
                         {/* Status */}
-                        <td className="px-3 py-2.5 whitespace-nowrap">
+                        <td className="px-2.5 py-2.5 whitespace-nowrap">
                           <span
-                            className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${
+                            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${
                               course.status === "published"
                                 ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
                                 : "bg-amber-500/15 text-amber-300 border-amber-500/30"
@@ -1058,15 +1051,18 @@ const CoursesTab = ({
                         </td>
 
                         {/* Enrolled Students */}
-                        <td className="px-3 py-2.5 whitespace-nowrap text-center">
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-slate-800 text-slate-300 border border-slate-700 font-mono text-xs font-semibold">
-                            <i className="fas fa-user-graduate text-[10px] text-indigo-400" />
+                        <td className="px-2 py-2.5 whitespace-nowrap text-center">
+                          <span
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 border border-slate-700 font-mono text-xs font-semibold"
+                            title={`${course.enrolled_students_count || 0} enrolled students`}
+                          >
+                            <i className="fas fa-user-graduate text-[9px] text-indigo-400" />
                             {course.enrolled_students_count || 0}
                           </span>
                         </td>
 
                         {/* Actions */}
-                        <td className="px-4 py-2.5 whitespace-nowrap text-right">
+                        <td className="px-3 py-2.5 whitespace-nowrap text-right">
                           <div
                             className="flex items-center justify-end gap-1"
                             onClick={(e) => e.stopPropagation()}

@@ -1,6 +1,6 @@
 import React from "react";
 import { Outlet, useLocation } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import {
   fetchPendingApprovals,
   fetchPendingEnrollments,
@@ -85,7 +85,7 @@ const AdminLayout = () => {
   }, [dispatch, activeTab]);
 
   return (
-    <section className="min-h-screen bg-slate-950 text-white font-inter p-6 md:p-12 pt-16 lg:pt-12">
+    <section className="min-h-screen bg-slate-950 text-white font-inter px-4 sm:px-6 lg:px-8 py-6 pt-16 lg:pt-8">
       {activeTab !== null && <Header activeTab={activeTab} />}
       <Outlet />
     </section>

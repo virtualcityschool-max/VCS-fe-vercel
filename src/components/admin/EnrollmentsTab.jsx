@@ -556,9 +556,9 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
         {/* ─────────────────────────────────────────────
            QUICK-CLICK FILTER BARS (Department & Multi-Course)
            ───────────────────────────────────────────── */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 p-3 bg-slate-900/60 border border-slate-800/80 rounded-2xl shadow-lg">
+        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3 p-3 bg-slate-900/60 border border-slate-800/80 rounded-2xl shadow-lg">
           {/* Department Pills */}
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+          <div className="flex flex-wrap items-center gap-1.5 py-0.5">
             {ENROLLMENT_DEPARTMENTS.map((dept) => {
               const active = selectedDepartment === dept.id;
               const count = departmentCounts[dept.id] || 0;
@@ -655,7 +655,7 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
              DEFAULT MODE: DEDUPLICATED STUDENT TABLE
              (One student, one entry only, dedicated columns)
              ═════════════════════════════════════════════ */
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto table-scrollbar pb-1">
             <table className="w-full text-left border-collapse">
               <thead className="bg-slate-950/80 border-b border-slate-800 text-[11px] font-bold text-slate-400 uppercase tracking-wider sticky top-0 z-10 backdrop-blur-md">
                 <tr>
@@ -931,7 +931,7 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
              DETAILED TABLE MODE: ALL JUNCTION RECORDS
              (De-stacked, compact high-density layout)
              ═════════════════════════════════════════════ */
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto table-scrollbar pb-1">
             <table className="w-full text-left border-collapse">
               <thead className="bg-slate-950/80 border-b border-slate-800 text-[11px] font-bold text-slate-400 uppercase tracking-wider sticky top-0 z-10 backdrop-blur-md">
                 <tr>

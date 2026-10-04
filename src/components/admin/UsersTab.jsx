@@ -1416,9 +1416,9 @@ const UsersTab = ({
         <div className="space-y-6">
           {/* Quick Click Filter Bar for Tutors (Visible in both Table & Cards view) */}
           {usersFilters.role === "teacher" && (
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 p-3 bg-slate-900/60 border border-slate-800/80 rounded-2xl shadow-lg">
+            <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3 p-3 bg-slate-900/60 border border-slate-800/80 rounded-2xl shadow-lg">
               {/* Department Filter Pills */}
-              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+              <div className="flex flex-wrap items-center gap-1.5 py-0.5">
                 <button
                   onClick={() => setSelectedDepartment("all")}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
@@ -1498,7 +1498,7 @@ const UsersTab = ({
           {/* Quick Click Filter Bar for Students (Visible in both Table & Cards view) */}
           {usersFilters.role === "student" && (
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 bg-slate-900/60 border border-slate-800/80 rounded-2xl shadow-lg">
-              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+              <div className="flex flex-wrap items-center gap-1.5 py-0.5">
                 <button
                   onClick={() => setSelectedStudentStatus("all")}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
@@ -1987,7 +1987,7 @@ const UsersTab = ({
           </div>
 
           {/* Desktop Table View */}
-          <div className="overflow-x-auto hidden lg:block">
+          <div className="overflow-x-auto hidden lg:block table-scrollbar pb-1">
             <table className="w-full text-left border-collapse">
               <thead className="bg-slate-950/80 border-b border-slate-800 text-[11px] font-bold text-slate-400 uppercase tracking-wider sticky top-0 z-10 backdrop-blur-md">
                 {usersFilters.role === "student" ? (
