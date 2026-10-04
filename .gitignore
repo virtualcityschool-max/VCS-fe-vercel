@@ -36,3 +36,4 @@ skills-lock.json
 .netlify
 .vercel
 .env*
+.qa/

@@ -54,9 +54,6 @@ const OverviewTab = ({ onOpenSubmitModal }) => {
   const submittedAssignments = assignments.filter(
     (a) => a.status === "submitted" || a.status === "graded"
   );
-  const pendingAssignments = assignments.filter(
-    (a) => a.status === "pending" || a.status === "overdue"
-  );
 
   const filteredAssignments = assignments.filter((a) => {
     if (assignmentFilter === "all") return true;

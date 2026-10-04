@@ -21,8 +21,16 @@ const TodayAgendaSidebar = ({
   const assignments = useSelector(selectAssignments) || [];
   const { timezone, timezoneAbbr, formatTime } = useDateFormatters();
 
+  const [currentTime, setCurrentTime] = React.useState(() => Date.now());
+
+  React.useEffect(() => {
+    const id = setInterval(() => setCurrentTime(Date.now()), 30000);
+    return () => clearInterval(id);
+  }, []);
+
+  const todayStr = new Date(currentTime).toDateString();
+
   // Filter actual today's live sessions from Redux (no mock dummy fallbacks)
-  const todayStr = new Date().toDateString();
   const sessions = liveSchedule.filter((s) => {
     if (!s.scheduled_at) return false;
     return new Date(s.scheduled_at).toDateString() === todayStr;
@@ -63,7 +71,7 @@ const TodayAgendaSidebar = ({
           <div className="space-y-3">
             {sessions.slice(0, 3).map((session) => {
               const diffMins = Math.floor(
-                (new Date(session.scheduled_at).getTime() - Date.now()) / 60000
+                (new Date(session.scheduled_at).getTime() - currentTime) / 60000
               );
               const isJoinable = diffMins <= 30 && diffMins >= -60;
               const unlockDate = new Date(

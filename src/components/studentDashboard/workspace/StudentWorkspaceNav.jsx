@@ -28,7 +28,7 @@ const StudentWorkspaceNav = ({ activeTab, onSelectTab, counts = {} }) => {
               aria-label={tab.label}
               className={`group relative flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-xl transition-all duration-200 cursor-pointer ${
                 isActive
-                  ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30 scale-105"
+                  ? "bg-emerald-600 text-white shadow-lg shadow-emerald-600/30 scale-105"
                   : "text-slate-400 hover:text-white hover:bg-white/5"
               }`}
             >
@@ -57,7 +57,7 @@ const StudentWorkspaceNav = ({ activeTab, onSelectTab, counts = {} }) => {
 
       {/* Active Tab View Label Indicator */}
       <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/[0.03] border border-white/10">
-        <i className={`${currentTabObj.icon} text-xs text-indigo-400`} />
+        <i className={`${currentTabObj.icon} text-xs text-emerald-400`} />
         <span className="text-xs font-bold text-white tracking-wide">
           {currentTabObj.label}
         </span>

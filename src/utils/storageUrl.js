@@ -6,47 +6,71 @@ export const getStorageUrl = (path) => {
   return BASE + "/" + path.replace(/^\//, "");
 };
 
-export const handleFileDownload = async (url) => {
+export const handleFileDownload = async (url, customFileName) => {
+  if (!url) return;
   try {
-    let url_ = getStorageUrl(url)
-    const response = await fetch("https://virtual-city-school.s3.us-east-2.amazonaws.com/course_attachments/2026/05/Virtual_City_School__Product_Scope__PRD_ZtoTtiY.pdf");
+    const fullUrl = getStorageUrl(url);
+    const fileName = customFileName || getFileNameFromUrl(url);
 
-    if (!response.ok) {
-      throw new Error(`Failed to fetch: ${response.statusText}`);
+    // If it's a data URL or blob URL, download directly
+    if (fullUrl.startsWith("data:") || fullUrl.startsWith("blob:")) {
+      const link = document.createElement("a");
+      link.href = fullUrl;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      return;
     }
 
-    const blob = await response.blob();
-    const blobUrl = window.URL.createObjectURL(blob);
+    // Attempt blob fetch to force download prompt
+    try {
+      const response = await fetch(fullUrl, { mode: "cors" });
+      if (response.ok) {
+        const blob = await response.blob();
+        const blobUrl = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = blobUrl;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(blobUrl);
+        return;
+      }
+    } catch {
+      // CORS or network failure fallback
+    }
 
-    const link = document.createElement('a');
-    link.href = blobUrl;
-    link.download = getFileNameFromUrl("https://virtual-city-school.s3.us-east-2.amazonaws.com/course_attachments/2026/05/Virtual_City_School__Product_Scope__PRD_ZtoTtiY.pdf");
-
+    // Direct browser navigation/download fallback
+    const link = document.createElement("a");
+    link.href = fullUrl;
+    link.download = fileName;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-
-    window.URL.revokeObjectURL(blobUrl);
   } catch (error) {
-    console.error('Download failed:', error);
-    throw error;
+    console.error("Download failed:", error);
+    window.open(getStorageUrl(url), "_blank");
   }
 };
 
-const getFileNameFromUrl = (url) => {
+export const getFileNameFromUrl = (url) => {
+  if (!url) return "resource-file";
   try {
-    let url_ = getStorageUrl(url)
-    const urlObj = new URL("https://virtual-city-school.s3.us-east-2.amazonaws.com/course_attachments/2026/05/Virtual_City_School__Product_Scope__PRD_ZtoTtiY.pdf");
-
-    // Strip query params & hash, get just the pathname segment
+    const fullUrl = getStorageUrl(url);
+    if (fullUrl.startsWith("data:")) {
+      return "downloaded-file";
+    }
+    const urlObj = new URL(fullUrl, window.location.origin);
     const pathname = urlObj.pathname;
-    const rawName = pathname.split('/').pop();
+    const rawName = pathname.split("/").pop();
     const fileName = decodeURIComponent(rawName);
-
-    return fileName || 'download';
+    return fileName || "downloaded-file";
   } catch {
-    // Fallback: split on '/' and take the last part
-    const parts = "https://virtual-city-school.s3.us-east-2.amazonaws.com/course_attachments/2026/05/Virtual_City_School__Product_Scope__PRD_ZtoTtiY.pdf".split('?')[0].split('/');
-    return decodeURIComponent(parts.pop()) || 'download';
+    const parts = String(url).split("?")[0].split("/");
+    return decodeURIComponent(parts.pop()) || "downloaded-file";
   }
 };

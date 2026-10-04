@@ -20,7 +20,6 @@ const TimezoneIndicator = ({ isCollapsed, onOpenTimezoneModal }) => {
 
   const fmt        = (opts) => now.toLocaleString("en-US", { ...(timezone ? { timeZone: timezone } : {}), ...opts });
   const time       = fmt({ hour: "2-digit", minute: "2-digit" });
-  const date       = fmt({ weekday: "short", month: "short", day: "numeric" });
   const abbr       = getTimezoneAbbr(timezone);
   // e.g. "Asia/Dubai" → "Dubai", "America/New_York" → "New York"
   const city      = timezone ? timezone.split("/").pop().replace(/_/g, " ") : "Auto-Detected";
@@ -150,7 +149,7 @@ const PORTAL_LABEL = {
 
 // ── Unified nav item - works for all roles ────────────────────────────────────
 // Pass `to` for NavLink-based (teacher/student), omit for button-based (admin).
-function NavItem({ label, icon, isCollapsed, badge, isActive, onClick, to, end }) {
+function NavItem({ label, icon, isCollapsed, badge, isActive, onClick, to, end, role }) {
   const location = useLocation();
 
   // If `to` includes query parameter like `?tab=schedule`, compute active matching
@@ -160,6 +159,29 @@ function NavItem({ label, icon, isCollapsed, badge, isActive, onClick, to, end }
       const [toPath, toQuery] = to.split("?");
       const toTab = new URLSearchParams(toQuery).get("tab");
       const currTab = new URLSearchParams(location.search).get("tab") || "overview";
+
+      if (toTab === "assessments") {
+        const isAssessmentsTab = ["assessments", "assignments", "quizzes", "evaluations"].includes(currTab);
+        const isAssessmentsPath =
+          location.pathname.startsWith("/student/assessments") ||
+          location.pathname.startsWith("/student/assignments") ||
+          location.pathname.startsWith("/student/quizzes") ||
+          location.pathname.startsWith("/student/evaluations");
+        return (location.pathname === toPath && isAssessmentsTab) || isAssessmentsPath;
+      }
+
+      if (toTab === "schedule") {
+        return (location.pathname === toPath && currTab === "schedule") || location.pathname.startsWith("/student/classes");
+      }
+
+      if (toTab === "attendance") {
+        return (location.pathname === toPath && currTab === "attendance") || location.pathname.startsWith("/student/attendance");
+      }
+
+      if (toTab === "resources") {
+        return (location.pathname === toPath && currTab === "resources") || location.pathname.startsWith("/student/resources");
+      }
+
       return location.pathname === toPath && toTab === currTab;
     }
     if (to === "/student") {
@@ -169,18 +191,23 @@ function NavItem({ label, icon, isCollapsed, badge, isActive, onClick, to, end }
     return null;
   })();
 
+  const isStudent = role === "student";
   const itemClass = (active) =>
     `w-full flex items-center rounded-xl font-medium text-sm transition-all duration-200 relative
     ${isCollapsed ? "justify-center px-0 py-2.5" : "px-3 py-2.5 gap-2.5"}
     ${active
-      ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20"
+      ? (isStudent
+          ? "bg-emerald-600 text-white shadow-lg shadow-emerald-500/25"
+          : "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20")
       : "text-slate-400 hover:text-white hover:bg-slate-800/60"
     }`;
 
   const inner = (active) => (
     <>
       {active && !isCollapsed && (
-        <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-white/40 rounded-r-full" />
+        <span className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full ${
+          isStudent ? "bg-emerald-300" : "bg-white/40"
+        }`} />
       )}
       <i className={`${icon} text-base w-5 text-center flex-shrink-0 ${active ? "text-white" : "text-slate-500 group-hover/item:text-slate-300"}`} />
       <span className={`whitespace-nowrap overflow-hidden transition-all duration-300 ${isCollapsed ? "w-0 opacity-0" : "flex-1 opacity-100"}`}>
@@ -378,6 +405,7 @@ const Sidebar = ({
                       isActive={activeTab === tab.id}
                       badge={tab.id === "approvals" ? pendingApprovalsCount : 0}
                       to={tab.to}
+                      role={role}
                     />
                   </React.Fragment>
                 );
@@ -391,6 +419,7 @@ const Sidebar = ({
                   to={item.to}
                   end={item.end}
                   onClick={onMobileClose}
+                  role={role}
                 />
               ))
           }
