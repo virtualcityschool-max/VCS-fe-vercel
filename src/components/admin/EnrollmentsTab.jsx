@@ -93,9 +93,63 @@ const getCourseDepartment = (course) => {
   return ENROLLMENT_DEPARTMENTS[ENROLLMENT_DEPARTMENTS.length - 1]; // general_sciences
 };
 
+// Distinct student color themes to differentiate users and eliminate visual blending
+const STUDENT_THEMES = [
+  {
+    border: "border-l-indigo-500",
+    avatarBg: "bg-indigo-500/20 text-indigo-300 border-indigo-500/40",
+    badgeBg: "bg-indigo-500/10 text-indigo-300 border-indigo-500/20",
+    rowBg: "bg-slate-900/90",
+    rowHover: "hover:bg-indigo-950/25",
+  },
+  {
+    border: "border-l-emerald-500",
+    avatarBg: "bg-emerald-500/20 text-emerald-300 border-emerald-500/40",
+    badgeBg: "bg-emerald-500/10 text-emerald-300 border-emerald-500/20",
+    rowBg: "bg-slate-900/50",
+    rowHover: "hover:bg-emerald-950/25",
+  },
+  {
+    border: "border-l-purple-500",
+    avatarBg: "bg-purple-500/20 text-purple-300 border-purple-500/40",
+    badgeBg: "bg-purple-500/10 text-purple-300 border-purple-500/20",
+    rowBg: "bg-slate-900/90",
+    rowHover: "hover:bg-purple-950/25",
+  },
+  {
+    border: "border-l-amber-500",
+    avatarBg: "bg-amber-500/20 text-amber-300 border-amber-500/40",
+    badgeBg: "bg-amber-500/10 text-amber-300 border-amber-500/20",
+    rowBg: "bg-slate-900/50",
+    rowHover: "hover:bg-amber-950/25",
+  },
+  {
+    border: "border-l-cyan-500",
+    avatarBg: "bg-cyan-500/20 text-cyan-300 border-cyan-500/40",
+    badgeBg: "bg-cyan-500/10 text-cyan-300 border-cyan-500/20",
+    rowBg: "bg-slate-900/90",
+    rowHover: "hover:bg-cyan-950/25",
+  },
+  {
+    border: "border-l-rose-500",
+    avatarBg: "bg-rose-500/20 text-rose-300 border-rose-500/40",
+    badgeBg: "bg-rose-500/10 text-rose-300 border-rose-500/20",
+    rowBg: "bg-slate-900/50",
+    rowHover: "hover:bg-rose-950/25",
+  },
+  {
+    border: "border-l-blue-500",
+    avatarBg: "bg-blue-500/20 text-blue-300 border-blue-500/40",
+    badgeBg: "bg-blue-500/10 text-blue-300 border-blue-500/20",
+    rowBg: "bg-slate-900/90",
+    rowHover: "hover:bg-blue-950/25",
+  },
+];
+
 const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
   const dispatch = useDispatch();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [selectedStudentForEnrollment, setSelectedStudentForEnrollment] = useState(null);
 
   // Filter states
   const [studentFilter, setStudentFilter] = useState("");
@@ -297,13 +351,15 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
     });
   };
 
-  const handleOpenCreateModal = () => {
+  const handleOpenCreateModal = (studentId = null) => {
+    setSelectedStudentForEnrollment(studentId);
     setIsCreateModalOpen(true);
     dispatch(clearEnrollmentsError());
   };
 
   const handleCloseCreateModal = () => {
     setIsCreateModalOpen(false);
+    setSelectedStudentForEnrollment(null);
     dispatch(clearEnrollmentsError());
   };
 
@@ -619,25 +675,26 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
                   const studentName = group.student?.username || "Unknown Student";
                   const initial = studentName.charAt(0).toUpperCase() || "S";
                   const count = group.enrollments.length;
+                  const theme = STUDENT_THEMES[index % STUDENT_THEMES.length];
 
                   return (
                     <tr
                       key={group.studentId || index}
-                      className="hover:bg-slate-800/30 transition-colors group"
+                      className={`border-l-4 ${theme.border} ${theme.rowBg} ${theme.rowHover} border-b-2 border-slate-800 transition-colors group`}
                     >
                       {/* Index */}
-                      <td className="px-3 py-2.5 text-center font-mono text-slate-500">
+                      <td className="px-3 py-3.5 text-center font-mono text-slate-500 align-top">
                         {index + 1}
                       </td>
 
                       {/* Student */}
-                      <td className="px-4 py-2.5 whitespace-nowrap">
+                      <td className="px-4 py-3.5 whitespace-nowrap align-top">
                         <div className="flex items-center gap-2.5">
-                          <div className="w-7 h-7 rounded-lg bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 flex items-center justify-center font-black text-xs shrink-0 shadow-sm">
+                          <div className={`w-8 h-8 rounded-lg ${theme.avatarBg} border flex items-center justify-center font-black text-xs shrink-0 shadow-sm`}>
                             {initial}
                           </div>
                           <div>
-                            <p className="font-semibold text-white text-xs leading-none">
+                            <p className="font-bold text-white text-xs leading-tight">
                               {studentName}
                             </p>
                           </div>
@@ -645,9 +702,9 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
                       </td>
 
                       {/* Roll # */}
-                      <td className="px-3 py-2.5 whitespace-nowrap">
+                      <td className="px-3 py-3.5 whitespace-nowrap align-top">
                         {group.student_roll_no ? (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 font-mono text-xs">
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded font-mono text-xs ${theme.badgeBg} border`}>
                             #{group.student_roll_no}
                           </span>
                         ) : (
@@ -656,7 +713,7 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
                       </td>
 
                       {/* Email */}
-                      <td className="px-3 py-2.5 whitespace-nowrap">
+                      <td className="px-3 py-3.5 whitespace-nowrap align-top">
                         <span
                           className="font-mono text-xs text-slate-300 select-all hover:text-indigo-300 transition"
                           title={group.student?.email}
@@ -665,8 +722,8 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
                         </span>
                       </td>
 
-                      {/* Enrolled Subjects (Chips) */}
-                      <td className="px-4 py-2.5">
+                      {/* Enrolled Subjects (Chips with prominent red cross button + inline Add Subject button) */}
+                      <td className="px-4 py-3.5 align-top">
                         <div className="flex items-center gap-1.5 flex-wrap">
                           {group.enrollments.map((enr) => {
                             const dept = getCourseDepartment(enr.course);
@@ -677,35 +734,49 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
                             return (
                               <span
                                 key={enr.id}
-                                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-800/80 border border-slate-700/80 hover:border-slate-600 text-xs transition"
+                                className="inline-flex items-center gap-1.5 pl-2.5 pr-1 py-1 rounded-lg bg-slate-800 border border-slate-700 hover:border-slate-600 text-xs transition shadow-sm"
                               >
                                 <i className={`fas ${dept.icon} text-[10px] ${dept.color}`} />
-                                <span className="font-medium text-slate-200">
+                                <span className="font-semibold text-slate-200">
                                   {enr.course?.title || "Course"}
                                 </span>
                                 {catName && (
-                                  <span className="text-[10px] text-slate-400 bg-slate-900/60 px-1.5 py-0.2 rounded border border-slate-700/50">
+                                  <span className="text-[10px] text-slate-400 bg-slate-900/80 px-1.5 py-0.2 rounded border border-slate-700/60">
                                     {catName}
                                   </span>
                                 )}
-                                <span className="text-[10px] font-mono font-semibold text-emerald-400">
+                                <span className="text-[10px] font-mono font-bold text-emerald-400">
                                   ${enr.course?.price || 0}
                                 </span>
+                                {/* High-contrast prominent red cross button */}
                                 <button
-                                  onClick={() => handleUnenroll(enr)}
-                                  className="ml-0.5 text-slate-500 hover:text-rose-400 transition"
-                                  title={`Unenroll from ${enr.course?.title}`}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleUnenroll(enr);
+                                  }}
+                                  className="w-5 h-5 rounded-md bg-rose-500/15 hover:bg-rose-600 text-rose-400 hover:text-white flex items-center justify-center transition shrink-0 ml-1 shadow-sm active:scale-90"
+                                  title={`Remove / Unenroll ${studentName} from ${enr.course?.title}`}
                                 >
-                                  <i className="fas fa-times text-[10px]" />
+                                  <i className="fas fa-times text-[11px] font-black" />
                                 </button>
                               </span>
                             );
                           })}
+
+                          {/* Plus sign inline to enroll another subject for this student */}
+                          <button
+                            onClick={() => handleOpenCreateModal(group.student?.id)}
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border-2 border-dashed border-indigo-500/50 hover:border-indigo-400 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 hover:text-white text-xs font-bold transition active:scale-95 shadow-sm"
+                            title={`Add another subject for ${studentName}`}
+                          >
+                            <i className="fas fa-plus text-[10px]" />
+                            <span>Add Subject</span>
+                          </button>
                         </div>
                       </td>
 
                       {/* Total Subjects */}
-                      <td className="px-3 py-2.5 whitespace-nowrap text-center">
+                      <td className="px-3 py-3.5 whitespace-nowrap text-center align-top">
                         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 font-mono">
                           <i className="fas fa-book text-[9px]" />
                           {count} {count === 1 ? "Subject" : "Subjects"}
@@ -713,12 +784,12 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
                       </td>
 
                       {/* Latest Enrollment */}
-                      <td className="px-3 py-2.5 whitespace-nowrap text-slate-400 font-mono text-xs">
+                      <td className="px-3 py-3.5 whitespace-nowrap text-slate-400 font-mono text-xs align-top">
                         {formatDate(group.latest_enrolled_at)}
                       </td>
 
                       {/* Status */}
-                      <td className="px-3 py-2.5 whitespace-nowrap">
+                      <td className="px-3 py-3.5 whitespace-nowrap align-top">
                         <span
                           className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${
                             group.has_active
@@ -736,15 +807,15 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
                       </td>
 
                       {/* Actions */}
-                      <td className="px-4 py-2.5 whitespace-nowrap text-right">
+                      <td className="px-4 py-3.5 whitespace-nowrap text-right align-top">
                         <div className="flex items-center justify-end gap-1.5">
                           <button
-                            onClick={handleOpenCreateModal}
-                            className="px-2.5 py-1 bg-indigo-600/15 hover:bg-indigo-600/30 text-indigo-300 rounded-lg text-xs font-semibold border border-indigo-500/30 transition flex items-center gap-1"
-                            title="Enroll in additional subject"
+                            onClick={() => handleOpenCreateModal(group.student?.id)}
+                            className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-500/20 transition active:scale-95 flex items-center gap-1.5 shrink-0"
+                            title={`Enroll ${studentName} in a new subject`}
                           >
-                            <i className="fas fa-plus text-[10px]" />
-                            <span>Enroll</span>
+                            <i className="fas fa-plus text-xs" />
+                            <span>Enroll Subject</span>
                           </button>
                         </div>
                       </td>
@@ -967,6 +1038,7 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
         isOpen={isCreateModalOpen}
         onClose={handleCloseCreateModal}
         onSuccess={handleEnrollmentSuccess}
+        initialStudentId={selectedStudentForEnrollment}
       />
 
       {unenrollConfirm && (

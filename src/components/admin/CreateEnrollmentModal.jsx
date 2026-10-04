@@ -17,7 +17,7 @@ const EMPTY_FORM = {
   course_id: "",
 };
 
-const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
+const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess, initialStudentId = null }) => {
   const dispatch = useDispatch();
 
   const { users, enrollmentCourses: courses } = useSelector((state) => state.admin);
@@ -35,13 +35,16 @@ const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess }) => {
     if (isOpen) {
       dispatch(fetchUsers());
       dispatch(fetchCoursesWithSessions());
+      if (initialStudentId) {
+        setFormData({ student_id: String(initialStudentId), course_id: "" });
+      }
     } else {
       setFormData(EMPTY_FORM);
       setStudentDropdownOpen(false);
       setStudentSearch("");
       clearAllErrors();
     }
-  }, [isOpen]);
+  }, [isOpen, initialStudentId]);
 
   const publishedCourses = courses.data?.filter((c) => c.status === "published") || [];
   const students = users.data?.filter((u) => u.role === "student" && u.is_active) || [];
