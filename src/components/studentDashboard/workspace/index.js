@@ -1,4 +1,5 @@
 export { default as StudentWorkspaceHeader } from "./StudentWorkspaceHeader";
+export { default as StudentWorkspaceCard } from "./StudentWorkspaceCard";
 export { default as StudentWorkspaceNav } from "./StudentWorkspaceNav";
 export { default as FinancialStatusSidebar } from "./FinancialStatusSidebar";
 export { default as OverviewTab } from "./OverviewTab";

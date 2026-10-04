@@ -48,104 +48,110 @@ const Navbar = ({ variant = "default", hideLogo = false }) => {
     navigate(path);
   };
 
-  // Public variant (for PublicHome)
+  // Public variant (for PublicHome and site header)
   if (variant === "public") {
     return (
-<>
-      <TopBar />
-      <nav
-        className={`sticky top-0 z-50 w-full border-b transition-all duration-300 ${
-          scrolled
-            ? "border-white/10 bg-slate-950/80 backdrop-blur-2xl shadow-lg shadow-black/20"
-            : "border-white/5 bg-slate-950/50 backdrop-blur-xl"
-        }`}
-      >
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 h-20 flex justify-between items-center">
-          <div className="flex items-center gap-4 sm:gap-12">
-            {!hideLogo && (
-              <div
-                className="flex items-center gap-2 sm:gap-3 group cursor-pointer shrink-0"
-                onClick={() => goTo("/")}
-              >
-                <img
-                  src="/assets/logo.png"
-                  alt="Virtual City School"
-                  className="h-12 w-[110px] sm:h-[70px] sm:w-[180px] object-contain transition-transform duration-300 group-hover:scale-[1.03]"
-                />
-              </div>
-            )}
-            <div className="hidden lg:flex items-center gap-8">
-              {PUBLIC_LINKS.map((link) => (
-                <button
-                  key={link.path}
-                  onClick={() => goTo(link.path)}
-                  className={`nav-link font-medium text-xs sm:text-sm transition cursor-pointer ${
-                    isActivePath(link.path)
-                      ? "text-white nav-link-active"
-                      : "text-slate-400 hover:text-white"
-                  }`}
+      <>
+        {!hideLogo && <TopBar />}
+        <nav
+          className={`sticky top-0 z-50 w-full border-b transition-all duration-300 ${
+            scrolled
+              ? "border-white/10 bg-slate-950/80 backdrop-blur-2xl shadow-lg shadow-black/20"
+              : "border-white/5 bg-slate-950/50 backdrop-blur-xl"
+          }`}
+        >
+          <div className={`max-w-[1440px] mx-auto px-4 sm:px-6 flex justify-between items-center ${
+            hideLogo ? "h-14 sm:h-16" : "h-20"
+          }`}>
+            <div className="flex items-center gap-4 sm:gap-12">
+              {!hideLogo && (
+                <div
+                  className="flex items-center gap-2 sm:gap-3 group cursor-pointer shrink-0"
+                  onClick={() => goTo("/")}
                 >
-                  {link.label}
+                  <img
+                    src="/assets/logo.png"
+                    alt="Virtual City School"
+                    className="h-12 w-[110px] sm:h-[70px] sm:w-[180px] object-contain transition-transform duration-300 group-hover:scale-[1.03]"
+                  />
+                </div>
+              )}
+              {!hideLogo && (
+                <div className="hidden lg:flex items-center gap-8">
+                  {PUBLIC_LINKS.map((link) => (
+                    <button
+                      key={link.path}
+                      onClick={() => goTo(link.path)}
+                      className={`nav-link font-medium text-xs sm:text-sm transition cursor-pointer ${
+                        isActivePath(link.path)
+                          ? "text-white nav-link-active"
+                          : "text-slate-400 hover:text-white"
+                      }`}
+                    >
+                      {link.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center gap-1.5 sm:gap-4 shrink-0 ml-auto">
+              {!isLoggedIn ? (
+                <div id="nav-guest" className="flex items-center gap-1.5 sm:gap-5">
+                  <Button variant="outline" size="sm" onClick={handleLoginClick}>
+                    Log in
+                  </Button>
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={() => handleSetAuthModal("register")}
+                    className="bg-cyan-400 hover:bg-cyan-300 text-slate-950 shadow-none px-3 sm:px-7 py-2 sm:py-3 rounded-xl font-bold text-[11px] sm:text-sm whitespace-nowrap border-0"
+                  >
+                    Get started
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-4 animate-fadeIn">
+                  <UserProfileDropdown />
+                </div>
+              )}
+
+              {/* Mobile menu toggle for public navigation */}
+              {!hideLogo && (
+                <button
+                  onClick={() => setMobileOpen((v) => !v)}
+                  className="lg:hidden flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 shrink-0 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 border border-white/5 transition-all"
+                  aria-label="Toggle navigation menu"
+                  aria-expanded={mobileOpen}
+                >
+                  <i className={`fas ${mobileOpen ? "fa-times" : "fa-bars"} text-base transition-transform duration-200`} />
                 </button>
-              ))}
+              )}
             </div>
           </div>
 
-          <div className="flex items-center gap-1.5 sm:gap-4 shrink-0">
-            {!isLoggedIn ? (
-              <div id="nav-guest" className="flex items-center gap-1.5 sm:gap-5">
-                <Button variant="outline" size="sm" onClick={handleLoginClick}>
-                  Log in
-                </Button>
-                <Button
-                  variant="primary"
-                  size="sm"
-                  onClick={() => handleSetAuthModal("register")}
-                  className="bg-cyan-400 hover:bg-cyan-300 text-slate-950 shadow-none px-3 sm:px-7 py-2 sm:py-3 rounded-xl font-bold text-[11px] sm:text-sm whitespace-nowrap border-0"
-                >
-Get started
-                </Button>
+          {/* Mobile menu panel for public navigation */}
+          {!hideLogo && mobileOpen && (
+            <div className="lg:hidden border-t border-white/5 bg-slate-950/95 backdrop-blur-2xl animate-slideDown">
+              <div className="px-4 py-4 space-y-1">
+                {PUBLIC_LINKS.map((link) => (
+                  <button
+                    key={link.path}
+                    onClick={() => goTo(link.path)}
+                    className={`w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition-all ${
+                      isActivePath(link.path)
+                        ? "bg-indigo-500/15 text-indigo-300 border border-indigo-500/20"
+                        : "text-slate-300 hover:text-white hover:bg-white/5 border border-transparent"
+                    }`}
+                  >
+                    {link.label}
+                  </button>
+                ))}
               </div>
-            ) : (
-              <div className="flex items-center gap-4 animate-fadeIn">
-                <UserProfileDropdown />
-              </div>
-            )}
-
-            {/* Mobile menu toggle */}
-            <button
-              onClick={() => setMobileOpen((v) => !v)}
-              className="lg:hidden flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 shrink-0 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 border border-white/5 transition-all"
-              aria-label="Toggle navigation menu"
-              aria-expanded={mobileOpen}
-            >
-              <i className={`fas ${mobileOpen ? "fa-times" : "fa-bars"} text-base transition-transform duration-200`} />
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile menu panel */}
-        {mobileOpen && (
-          <div className="lg:hidden border-t border-white/5 bg-slate-950/95 backdrop-blur-2xl animate-slideDown">
-            <div className="px-4 py-4 space-y-1">
-              {PUBLIC_LINKS.map((link) => (
-                <button
-                  key={link.path}
-                  onClick={() => goTo(link.path)}
-                  className={`w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition-all ${
-                    isActivePath(link.path)
-                      ? "bg-indigo-500/15 text-indigo-300 border border-indigo-500/20"
-                      : "text-slate-300 hover:text-white hover:bg-white/5 border border-transparent"
-                  }`}
-                >
-                  {link.label}
-                </button>
-              ))}
             </div>
-          </div>
-        )}
-      </nav>
-</>
+          )}
+        </nav>
+      </>
     );
   }
 

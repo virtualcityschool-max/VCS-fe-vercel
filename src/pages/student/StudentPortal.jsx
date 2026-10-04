@@ -16,7 +16,6 @@ import {
   joinLiveSession,
 } from "../../store/slices/studentDashboardSlice";
 import {
-  StudentWorkspaceHeader,
   StudentWorkspaceNav,
   OverviewTab,
   LiveScheduleTab,
@@ -99,26 +98,6 @@ const StudentPortal = () => {
     dispatch(fetchStudentQuizzes());
   }, [dispatch]);
 
-  const handleResolveOverdue = () => {
-    handleSelectTab("overview");
-    const overdue =
-      assignments.find((a) => a.status === "overdue") ||
-      assignments.find((a) => a.status === "pending");
-    if (overdue) {
-      setSubmittingAssignment(overdue);
-    }
-  };
-
-  const handleJoinNextClass = () => {
-    if (nextSession?.meeting_link) {
-      window.open(nextSession.meeting_link, "_blank");
-    } else if (nextSession?.id) {
-      dispatch(joinLiveSession(nextSession.id));
-    } else {
-      window.open("https://meet.google.com", "_blank");
-    }
-  };
-
   // Show loading state while mounting or loading
   if (!hasMounted || isLoading) {
     return (
@@ -173,29 +152,33 @@ const StudentPortal = () => {
       id="student-view"
       className="min-h-screen bg-[#0f172a] text-white font-inter py-8"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-6">
-        {/* 1. Header: 3-Card Workspace Strip (Student Photo Space, Timezone Selector, Next Class Countdown, Action Required) */}
-        <div className="animate-fadeInUp">
-          <StudentWorkspaceHeader
-            onResolveOverdue={handleResolveOverdue}
-            onJoinNextClass={handleJoinNextClass}
-            onOpenTimezone={() => setIsTimezoneModalOpen(true)}
-          />
-        </div>
-
-        {/* 2. Navigation Tabs (Overview, Live Schedule, Weekly Planner, Calendar, Attendance, Resources, Evaluations) */}
-        <StudentWorkspaceNav
-          activeTab={activeTab}
-          onSelectTab={handleSelectTab}
-          counts={{
-            overview: pendingAssignmentsCount,
-          }}
-        />
-
-        {/* 3. Option 1: 2-Column Balanced Workspace Grid (68% Main Canvas / 32% Today's Agenda Rail) */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        {/* 2-Column Balanced Workspace Grid: Left Rail (Student Workspace Card & Agenda Stack) / Right Main Learning Canvas */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          {/* Main Learning Canvas (68% - 8 Columns) */}
-          <div className="lg:col-span-8 space-y-6 animate-fadeInUp">
+          {/* Left Column (4 Columns): Student Workspace Card + Today's Live Classes + Upcoming Deadlines + Financial Status + Quick Actions + Invite & Refer */}
+          <div className="lg:col-span-4 space-y-6 animate-fadeInUp">
+            <TodayAgendaSidebar
+              onOpenSubmitModal={(asg) => setSubmittingAssignment(asg)}
+              onRequestLeave={() => setIsLeaveModalOpen(true)}
+              onOpenTimezone={() => setIsTimezoneModalOpen(true)}
+              onViewAllSchedule={() => handleSelectTab("schedule")}
+              onViewAllPlanner={() => handleSelectTab("planner")}
+            />
+          </div>
+
+          {/* Right Column (8 Columns): Navigation Tabs + Main Learning Canvas */}
+          <div className="lg:col-span-8 space-y-6 animate-fadeInUp" style={{ animationDelay: "0.05s" }}>
+            {/* Horizontal Workspace Navigation Tabs */}
+            <StudentWorkspaceNav
+              activeTab={activeTab}
+              onSelectTab={handleSelectTab}
+              counts={{
+                assessments: pendingAssignmentsCount,
+                schedule: nextSession ? 1 : 0,
+              }}
+            />
+
+            {/* Active Tab Learning Content */}
             {activeTab === "overview" && (
               <OverviewTab
                 onOpenSubmitModal={(asg) => setSubmittingAssignment(asg)}
@@ -236,17 +219,6 @@ const StudentPortal = () => {
                 <StudentAssessments isEmbedded={true} />
               </div>
             )}
-          </div>
-
-          {/* Right Rail: Today's Agenda, Live Classes & Upcoming Deadlines (32% - 4 Columns) */}
-          <div className="lg:col-span-4 space-y-6 animate-fadeInUp" style={{ animationDelay: "0.1s" }}>
-            <TodayAgendaSidebar
-              onOpenSubmitModal={(asg) => setSubmittingAssignment(asg)}
-              onRequestLeave={() => setIsLeaveModalOpen(true)}
-              onOpenTimezone={() => setIsTimezoneModalOpen(true)}
-              onViewAllSchedule={() => handleSelectTab("schedule")}
-              onViewAllPlanner={() => handleSelectTab("planner")}
-            />
           </div>
         </div>
       </div>

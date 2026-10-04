@@ -8,7 +8,6 @@ import {
 } from "../../../store/slices/studentDashboardSlice";
 import { getCourseImage } from "../../../utils/courseImageUtils";
 import { useDateFormatters } from "../../../hooks/useDateFormatters";
-import ReferralLinkCard from "../../common/ReferralLinkCard";
 
 const OverviewTab = ({ onOpenSubmitModal }) => {
   const navigate = useNavigate();
@@ -481,11 +480,6 @@ const OverviewTab = ({ onOpenSubmitModal }) => {
             </button>
           </div>
         )}
-      </div>
-
-      {/* Invite & Refer Banner on Overview Canvas */}
-      <div className="rounded-2xl border border-indigo-500/20 bg-indigo-950/10 p-1">
-        <ReferralLinkCard />
       </div>
     </div>
   );

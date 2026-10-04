@@ -7,6 +7,7 @@ import {
 } from "../../../store/slices/studentDashboardSlice";
 import { useDateFormatters } from "../../../hooks/useDateFormatters";
 import ReferralLinkCard from "../../common/ReferralLinkCard";
+import StudentWorkspaceCard from "./StudentWorkspaceCard";
 
 const TodayAgendaSidebar = ({
   onOpenSubmitModal,
@@ -34,6 +35,9 @@ const TodayAgendaSidebar = ({
 
   return (
     <div className="space-y-5 animate-fadeIn">
+      {/* 0. Student Workspace Profile Card */}
+      <StudentWorkspaceCard onOpenTimezone={onOpenTimezone} />
+
       {/* 1. Today's Live Classes Card (Real Data & Clean Empty State) */}
       <div className="rounded-2xl bg-slate-900/80 border border-white/10 p-5 shadow-xl space-y-4">
         <div className="flex items-center justify-between pb-3 border-b border-white/10">
