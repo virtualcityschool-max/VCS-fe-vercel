@@ -18,6 +18,31 @@ export const authService = {
     }
   },
 
+  // Google Authentication (Login / Token Verification)
+  googleAuth: async (credential) => {
+    try {
+      const response = await axiosInstance.post("/auth/google/", {
+        id_token: credential,
+        credential: credential,
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Google Auth error:", error);
+      throw error;
+    }
+  },
+
+  // Google Registration (Step 2 - Completion)
+  googleRegister: async (registerData) => {
+    try {
+      const response = await axiosInstance.post("/auth/google/register/", registerData);
+      return response.data;
+    } catch (error) {
+      console.error("Google Register error:", error);
+      throw error;
+    }
+  },
+
   // Login
   login: async (credentials) => {
     try {
@@ -130,15 +155,11 @@ export const authService = {
 
   // OTP Verification
   verifyOtp: async (email, otp) => {
-    try {
-      const response = await axiosInstance.post("/auth/verify-otp/", { email, otp });
-      return {
-        success: true,
-        message: response.data.message || "Email verified successfully",
-      };
-    } catch (error) {
-      throw error;
-    }
+    const response = await axiosInstance.post("/auth/verify-otp/", { email, otp });
+    return {
+      success: true,
+      message: response.data.message || "Email verified successfully",
+    };
   },
 
   // Token refresh
@@ -231,12 +252,8 @@ export const authService = {
 
   // Update role-specific profile (student / teacher / parent)
   updateRoleProfile: async (role, profileData) => {
-    try {
-      const response = await axiosInstance.patch(`/auth/me/profile/${role}/`, profileData);
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
+    const response = await axiosInstance.patch(`/auth/me/profile/${role}/`, profileData);
+    return response.data;
   },
 
   // Update Profile

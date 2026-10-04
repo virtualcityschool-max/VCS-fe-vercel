@@ -154,6 +154,93 @@ export const loginUser = createAsyncThunk(
   },
 );
 
+export const loginWithGoogle = createAsyncThunk(
+  "auth/loginWithGoogle",
+  async (credential, { dispatch, rejectWithValue }) => {
+    try {
+      const response = await authService.googleAuth(credential);
+
+      // New user -> return data so UI can transition to Step 2 profile completion
+      if (response.is_new_user) {
+        return { is_new_user: true, googleData: response, credential };
+      }
+
+      // Pending admin approval
+      if (response.status === "pending_approval") {
+        return {
+          is_new_user: false,
+          is_pending: true,
+          message: response.message,
+          role: response.role,
+          email: response.email,
+        };
+      }
+
+      // Existing approved user -> store session
+      const accessToken = response.access;
+      const refreshToken = response.refresh;
+
+      authStorage.setAccessToken(accessToken);
+      if (refreshToken) {
+        localStorage.setItem("vcs_refresh_token", refreshToken);
+      }
+
+      const baseUser = {
+        id: response.user?.id,
+        username: response.user?.username,
+        first_name: response.user?.first_name,
+        last_name: response.user?.last_name,
+        email: response.user?.email,
+        role: response.user?.role,
+        avatar: response.user?.avatar,
+      };
+
+      authStorage.setStoredAuthUser(baseUser);
+
+      try {
+        const profile = await dispatch(fetchUserProfile()).unwrap();
+        const normalizedUser = {
+          ...baseUser,
+          ...profile,
+          role: profile.role || baseUser.role,
+        };
+        authStorage.setStoredAuthUser(normalizedUser);
+        return {
+          is_new_user: false,
+          is_pending: false,
+          token: accessToken,
+          role: normalizedUser.role,
+          username: normalizedUser.username,
+          user: normalizedUser,
+          profile,
+        };
+      } catch {
+        return {
+          is_new_user: false,
+          is_pending: false,
+          token: accessToken,
+          role: baseUser.role,
+          username: baseUser.username,
+          user: baseUser,
+          profile: null,
+        };
+      }
+    } catch (error) {
+      console.error("❌ Google login error:", error);
+      const serializableError = {
+        message: error.message,
+        response: error.response
+          ? {
+              status: error.response.status,
+              data: error.response.data,
+            }
+          : null,
+      };
+      return rejectWithValue(serializableError);
+    }
+  },
+);
+
 export const logoutUser = createAsyncThunk(
   "auth/logoutUser",
   async (_, { dispatch }) => {
@@ -382,6 +469,27 @@ const authSlice = createSlice({
         state.error = null;
       })
       .addCase(loginUser.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+      .addCase(loginWithGoogle.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(loginWithGoogle.fulfilled, (state, action) => {
+        state.isLoading = false;
+        if (!action.payload?.is_new_user && !action.payload?.is_pending && action.payload?.token) {
+          state.isLoggedIn = true;
+          state.isInitialized = true;
+          state.role = action.payload.role;
+          state.username = action.payload.username;
+          state.token = action.payload.token;
+          state.user = action.payload.user;
+          state.profile = action.payload.profile;
+        }
+        state.error = null;
+      })
+      .addCase(loginWithGoogle.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
       })

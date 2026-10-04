@@ -5,11 +5,13 @@ import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { setAuthModal } from "../../store/slices/uiSlice";
 import {
   loginUser,
+  loginWithGoogle,
   registerUser,
   clearAuthError,
   verifyOtp,
   resendOtp,
 } from "../../store/slices/authSlice";
+import GoogleSignInButton from "../common/GoogleSignInButton";
 import { fetchCategories } from "../../store/slices/coursesSlice";
 import { authService } from "../../services/authService";
 import { normalizeApiError } from "../../utils/errorHandler";
@@ -31,7 +33,7 @@ const AuthModals = () => {
   const [activeRoleTab, setActiveRoleTab] = useState("student");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [registrationStep, setRegistrationStep] = useState("form"); // form | otp | success
+  const [registrationStep, setRegistrationStep] = useState("google_prompt"); // google_prompt | google_onboarding | submitted | form | otp | success
   const [otp, setOtp] = useState("");
 
   // Use useFieldErrors hook for consistent error management
@@ -83,6 +85,20 @@ const AuthModals = () => {
   const [childInput, setChildInput] = useState("");
   const [childEntries, setChildEntries] = useState([]);
 
+  // Google Auth & 2-Step Onboarding states
+  const [googleCredential, setGoogleCredential] = useState("");
+  const [googleProfile, setGoogleProfile] = useState(null);
+  const [phone, setPhone] = useState("");
+  const [guardianName, setGuardianName] = useState("");
+  const [guardianPhone, setGuardianPhone] = useState("");
+  const [guardianRelationship, setGuardianRelationship] = useState("parent");
+  const [schoolName, setSchoolName] = useState("");
+  const [teacherSubjects, setTeacherSubjects] = useState("");
+  const [teacherExperience, setTeacherExperience] = useState("");
+  const [teacherQualification, setTeacherQualification] = useState("");
+  const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
+  const [submittedMessage, setSubmittedMessage] = useState("");
+
   const dispatch = useDispatch();
   const { authModal, enrollmentIntent } = useSelector((state) => state.ui);
   const { isLoading, resendOtpLoading, isInitialized, isLoggedIn } = useSelector((state) => state.auth);
@@ -108,6 +124,18 @@ const AuthModals = () => {
     setGradeLevel("");
     setChildInput("");
     setChildEntries([]);
+    setGoogleCredential("");
+    setGoogleProfile(null);
+    setPhone("");
+    setGuardianName("");
+    setGuardianPhone("");
+    setGuardianRelationship("parent");
+    setSchoolName("");
+    setTeacherSubjects("");
+    setTeacherExperience("");
+    setTeacherQualification("");
+    setIsGoogleSubmitting(false);
+    setSubmittedMessage("");
 
     // Reset role tab to default
     setActiveRoleTab("student");
@@ -118,7 +146,7 @@ const AuthModals = () => {
     setOtpError("");
 
     // Reset OTP states
-    setRegistrationStep("form");
+    setRegistrationStep("google_prompt");
     setOtp("");
 
     // Reset password visibility states
@@ -207,7 +235,19 @@ const AuthModals = () => {
       setGradeLevel("");
       setChildInput("");
       setChildEntries([]);
-      setRegistrationStep("form");
+      setRegistrationStep(isOpen === "register" ? "google_prompt" : "form");
+      setGoogleCredential("");
+      setGoogleProfile(null);
+      setPhone("");
+      setGuardianName("");
+      setGuardianPhone("");
+      setGuardianRelationship("parent");
+      setSchoolName("");
+      setTeacherSubjects("");
+      setTeacherExperience("");
+      setTeacherQualification("");
+      setIsGoogleSubmitting(false);
+      setSubmittedMessage("");
       setOtp("");
       setShowLoginPassword(false);
       setShowRegisterPassword(false);
@@ -250,6 +290,180 @@ const AuthModals = () => {
 
   if (!isOpen) return null;
 
+  const redirectToRolePortal = (userRole) => {
+    switch (userRole) {
+      case "admin":
+        navigate("/admin/overview", { replace: true });
+        break;
+      case "student": {
+        const hireIntentId = sessionStorage.getItem("vcs_hire_intent");
+        if (hireIntentId) {
+          navigate(`/teachers/${hireIntentId}`, { replace: true });
+        } else if (enrollmentIntent) {
+          navigate(`/courses/${enrollmentIntent.courseId}`, { replace: true });
+        } else {
+          navigate("/student", { replace: true });
+        }
+        break;
+      }
+      case "teacher":
+        navigate("/teacher", { replace: true });
+        break;
+      case "parent":
+        navigate("/parent", { replace: true });
+        break;
+      default:
+        navigate("/", { replace: true });
+    }
+  };
+
+  const handleGoogleLoginSuccess = async (credential) => {
+    try {
+      toastManager.dismiss();
+      const result = await dispatch(loginWithGoogle(credential)).unwrap();
+
+      if (result.is_new_user) {
+        setGoogleCredential(credential);
+        setGoogleProfile(result.googleData);
+        setFirstName(result.googleData.first_name || "");
+        setLastName(result.googleData.last_name || "");
+        setEmail(result.googleData.email || "");
+        const chosenRole = activeRoleTab && activeRoleTab !== "admin" ? activeRoleTab : "student";
+        setRole(chosenRole);
+        dispatch(setAuthModal({ type: "register" }));
+        setRegistrationStep("google_onboarding");
+        return;
+      }
+
+      if (result.is_pending) {
+        toastManager.info(result.message || "Your account is pending administrator review.");
+        return;
+      }
+
+      redirectToRolePortal(result.role || result.user?.role || activeRoleTab);
+      setTimeout(() => {
+        onClose();
+      }, 50);
+    } catch (err) {
+      const msg = typeof err === "string" ? err : err?.message || "Google sign-in failed. Please try again.";
+      toastManager.error(msg);
+    }
+  };
+
+  const handleGoogleLoginError = (err) => {
+    console.error("Google sign-in error:", err);
+    toastManager.error("Google sign-in was interrupted. Please try again.");
+  };
+
+  const handleGoogleSignupSuccess = async (credential) => {
+    try {
+      toastManager.dismiss();
+      const result = await dispatch(loginWithGoogle(credential)).unwrap();
+
+      if (result.is_new_user) {
+        setGoogleCredential(credential);
+        setGoogleProfile(result.googleData);
+        setFirstName(result.googleData.first_name || "");
+        setLastName(result.googleData.last_name || "");
+        setEmail(result.googleData.email || "");
+        const chosenRole = role || activeRoleTab || "student";
+        setRole(chosenRole !== "admin" ? chosenRole : "student");
+        setRegistrationStep("google_onboarding");
+        return;
+      }
+
+      if (result.is_pending) {
+        toastManager.info(result.message || "Your account is already registered and pending administrator review.");
+        return;
+      }
+
+      toastManager.success("Welcome back! You already have an active account.");
+      redirectToRolePortal(result.role || result.user?.role || activeRoleTab);
+      setTimeout(() => {
+        onClose();
+      }, 50);
+    } catch (err) {
+      const msg = typeof err === "string" ? err : err?.message || "Google sign-up failed. Please try again.";
+      toastManager.error(msg);
+    }
+  };
+
+  const handleGoogleRegisterSubmit = async (e) => {
+    e.preventDefault();
+    clearAllRegistrationErrors();
+
+    const newErrors = {};
+    const selectedRole = role || activeRoleTab || "student";
+    if (selectedRole === "student" && !gradeLevel) {
+      newErrors.gradeLevel = "Please select your course level";
+    }
+    if (selectedRole === "student" && !phone.trim()) {
+      newErrors.phone = "Phone or WhatsApp number is required";
+    }
+
+    let children = childEntries;
+    if (selectedRole === "parent") {
+      if (childInput.trim()) {
+        children = addChildEntry(childInput);
+      }
+      if (children.length === 0) {
+        newErrors.children = "Add at least one child by roll number or email";
+      }
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setRegistrationErrors(newErrors);
+      return;
+    }
+
+    try {
+      setIsGoogleSubmitting(true);
+      const payload = {
+        id_token: googleCredential,
+        role: selectedRole,
+        first_name: firstName,
+        last_name: lastName,
+        phone,
+      };
+
+      if (selectedRole === "student") {
+        payload.grade_level = gradeLevel;
+        payload.guardian_name = guardianName;
+        payload.guardian_phone = guardianPhone;
+        payload.guardian_relationship = guardianRelationship || "parent";
+        payload.school_name = schoolName;
+      } else if (selectedRole === "parent") {
+        payload.student_roll_nos = children
+          .filter((c) => c.type === "roll_no")
+          .map((c) => parseInt(c.value, 10));
+        payload.student_emails = children
+          .filter((c) => c.type === "email")
+          .map((c) => c.value);
+      } else if (selectedRole === "teacher") {
+        payload.subjects = teacherSubjects ? teacherSubjects.split(",").map((s) => s.trim()) : [];
+        payload.experience_years = teacherExperience ? parseInt(teacherExperience, 10) : 0;
+        payload.qualification = teacherQualification;
+      }
+
+      const refCode = getStoredReferralCode();
+      if (refCode) {
+        payload.referral_code = refCode;
+      }
+
+      const res = await authService.googleRegister(payload);
+      clearStoredReferralCode();
+      setRegistrationStep("submitted");
+      setSubmittedMessage(res.message || "Registration submitted for admin review.");
+    } catch (err) {
+      const normalizedError = handleRegistrationApiError(err, toastManager.error);
+      if (normalizedError.type === "general") {
+        toastManager.error(normalizedError.message);
+      }
+    } finally {
+      setIsGoogleSubmitting(false);
+    }
+  };
+
   const handleLogin = async (e) => {
     e.preventDefault();
     dispatch(clearAuthError());
@@ -282,31 +496,7 @@ const AuthModals = () => {
 
       // Navigate to role dashboard after successful login
       const userRole = user.role || activeRoleTab;
-      switch (userRole) {
-        case "admin":
-          navigate("/admin/overview", { replace: true });
-          break;
-        case "student": {
-          const hireIntentId = sessionStorage.getItem("vcs_hire_intent");
-          if (hireIntentId) {
-            // DO NOT clear sessionStorage here - TeacherProfile.jsx reads and clears it
-            navigate(`/teachers/${hireIntentId}`, { replace: true });
-          } else if (enrollmentIntent) {
-            navigate(`/courses/${enrollmentIntent.courseId}`, { replace: true });
-          } else {
-            navigate("/student", { replace: true });
-          }
-          break;
-        }
-        case "teacher":
-          navigate("/teacher", { replace: true });
-          break;
-        case "parent":
-          navigate("/parent", { replace: true });
-          break;
-        default:
-          navigate("/", { replace: true });
-      }
+      redirectToRolePortal(userRole);
 
       // Close modal after a small delay to allow navigation to start
       setTimeout(() => {
@@ -591,7 +781,7 @@ const AuthModals = () => {
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-slate-950/80 backdrop-blur-md animate-fadeIn">
-      <div className={`bg-slate-900 border border-white/10 w-full ${isOpen === "register" && registrationStep === "form" ? "max-w-3xl" : "max-w-md"} rounded-[2.5rem] shadow-2xl overflow-hidden glass relative flex flex-col max-h-[90vh] animate-scaleIn`} key={`login-session-${logoutCounter}`}>
+      <div className={`bg-slate-900 border border-white/10 w-full ${isOpen === "register" && (registrationStep === "form" || registrationStep === "google_onboarding") ? "max-w-2xl" : "max-w-md"} rounded-[2.5rem] shadow-2xl overflow-hidden glass relative flex flex-col max-h-[90vh] animate-scaleIn`} key={`login-session-${logoutCounter}`}>
         <button
           onClick={onClose}
           className="absolute top-6 right-6 z-20 text-slate-500 hover:text-white transition"
@@ -642,6 +832,28 @@ const AuthModals = () => {
                     {roleLabel}
                   </button>
                 ))}
+              </div>
+            )}
+
+            {!adminMode && (
+              <div className="flex flex-col items-center mb-5">
+                <GoogleSignInButton
+                  text="signin_with"
+                  onSuccess={handleGoogleLoginSuccess}
+                  onError={handleGoogleLoginError}
+                  width={340}
+                />
+                <p className="text-[11px] text-slate-400 text-center mt-2 max-w-xs">
+                  Instant sign-in with your Gmail account. Connects directly to Google Meet classes.
+                </p>
+
+                <div className="w-full flex items-center my-4">
+                  <div className="flex-1 border-t border-white/10" />
+                  <span className="px-3 text-[10px] uppercase font-bold text-slate-500 tracking-widest">
+                    or sign in with password
+                  </span>
+                  <div className="flex-1 border-t border-white/10" />
+                </div>
               </div>
             )}
 
@@ -928,6 +1140,468 @@ const AuthModals = () => {
           </div>
         ) : (
           <div className="p-6 sm:p-10 overflow-y-auto flex-1">
+            {/* ── STEP 1: GOOGLE SIGNUP PROMPT ───────────────────────────── */}
+            {registrationStep === "google_prompt" && (
+              <div className="flex flex-col items-center max-w-sm mx-auto animate-fadeIn">
+                <img src="/assets/logo.png" alt="Virtual City School" className="h-12 sm:h-14 object-contain mb-4" />
+                <h2 className="text-xl sm:text-2xl font-black font-poppins text-white text-center uppercase tracking-[0.15em]">
+                  Create Account
+                </h2>
+                <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-1 mb-6 text-center">
+                  Select your role to get started
+                </p>
+
+                {/* Role Selection Tabs */}
+                <div className="w-full flex bg-slate-950 p-1.5 rounded-2xl border border-white/5 mb-5">
+                  {[
+                    { value: "student", label: "Student" },
+                    { value: "teacher", label: "Tutor"   },
+                    { value: "parent",  label: "Guardian" },
+                  ].map(({ value: roleOption, label: roleLabel }) => (
+                    <button
+                      key={roleOption}
+                      type="button"
+                      onClick={() => {
+                        setActiveRoleTab(roleOption);
+                        setRole(roleOption);
+                      }}
+                      className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                        (role || activeRoleTab) === roleOption
+                          ? "bg-indigo-600 text-white shadow-lg"
+                          : "text-slate-500 hover:text-slate-300"
+                      }`}
+                    >
+                      {roleLabel}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Google Meet Notice */}
+                <div className="w-full bg-indigo-500/10 border border-indigo-500/20 rounded-2xl p-4 mb-6 flex items-start gap-3 text-left">
+                  <div className="w-7 h-7 rounded-xl bg-indigo-500/20 flex items-center justify-center shrink-0 mt-0.5">
+                    <i className="fas fa-video text-indigo-400 text-xs" />
+                  </div>
+                  <div className="text-xs text-indigo-200/90 leading-relaxed">
+                    <strong className="text-white block font-semibold mb-0.5">Google Meet Compatibility</strong>
+                    Classes, exams, and timetables are managed through Google Meet. A Google account is required so you join sessions automatically without entry delays.
+                  </div>
+                </div>
+
+                {/* Google Sign-Up Button */}
+                <div className="w-full flex flex-col items-center">
+                  <GoogleSignInButton
+                    text="signup_with"
+                    onSuccess={handleGoogleSignupSuccess}
+                    onError={handleGoogleLoginError}
+                    width={320}
+                  />
+                </div>
+
+                <div className="text-center mt-6 space-y-2">
+                  <p className="text-slate-500 text-xs">
+                    Already have an account?{" "}
+                    <button
+                      type="button"
+                      onClick={() => dispatch(setAuthModal({ type: "login" }))}
+                      className="text-indigo-400 hover:text-indigo-300 font-bold transition cursor-pointer"
+                    >
+                      Sign In
+                    </button>
+                  </p>
+                  <p className="text-[11px] text-slate-500">
+                    Need to register with password instead?{" "}
+                    <button
+                      type="button"
+                      onClick={() => setRegistrationStep("form")}
+                      className="text-slate-400 hover:text-slate-300 underline transition cursor-pointer"
+                    >
+                      Click here
+                    </button>
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* ── STEP 2: GOOGLE PROFILE ONBOARDING ───────────────────────── */}
+            {registrationStep === "google_onboarding" && (
+              <div className="max-w-xl mx-auto animate-fadeIn">
+                <div className="flex flex-col items-center mb-6">
+                  <img src="/assets/logo.png" alt="Virtual City School" className="h-10 sm:h-12 object-contain mb-3" />
+                  <h2 className="text-xl sm:text-2xl font-black font-poppins text-white text-center uppercase tracking-[0.15em]">
+                    Complete Your Profile
+                  </h2>
+                  <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-1">
+                    Step 2 of 2 • Pre-filled from Google
+                  </p>
+                </div>
+
+                {/* Verified Google Account Banner */}
+                <div className="bg-slate-950 border border-emerald-500/20 rounded-2xl p-4 mb-6 flex items-center justify-between gap-3 shadow-sm">
+                  <div className="flex items-center gap-3 min-w-0">
+                    {googleProfile?.picture ? (
+                      <img src={googleProfile.picture} alt="" className="w-10 h-10 rounded-full border border-white/10 shrink-0" />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-indigo-600/30 border border-indigo-500/30 flex items-center justify-center text-white font-bold shrink-0">
+                        {firstName?.[0] || "U"}
+                      </div>
+                    )}
+                    <div className="min-w-0">
+                      <p className="text-white text-sm font-bold truncate">
+                        {firstName} {lastName}
+                      </p>
+                      <p className="text-slate-400 text-xs truncate">{email}</p>
+                    </div>
+                  </div>
+                  <span className="shrink-0 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center gap-1.5">
+                    <i className="fas fa-check-circle text-emerald-400 text-xs" />
+                    Verified Google
+                  </span>
+                </div>
+
+                {/* Role Switcher */}
+                <div className="flex bg-slate-950 p-1.5 rounded-2xl border border-white/5 mb-6">
+                  {[
+                    { value: "student", label: "Student" },
+                    { value: "teacher", label: "Tutor"   },
+                    { value: "parent",  label: "Guardian" },
+                  ].map(({ value: roleOption, label: roleLabel }) => (
+                    <button
+                      key={roleOption}
+                      type="button"
+                      onClick={() => {
+                        setRole(roleOption);
+                        clearRegistrationFieldError("role");
+                      }}
+                      className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                        (role || activeRoleTab) === roleOption
+                          ? "bg-indigo-600 text-white shadow-lg"
+                          : "text-slate-500 hover:text-slate-300"
+                      }`}
+                    >
+                      {roleLabel}
+                    </button>
+                  ))}
+                </div>
+
+                <form onSubmit={handleGoogleRegisterSubmit} className="space-y-4">
+                  {/* Name Fields (pre-filled from Google) */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-1.5 block">
+                        First Name
+                      </label>
+                      <input
+                        type="text"
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                        className="w-full bg-slate-950 border border-white/5 rounded-2xl px-5 py-3.5 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-1.5 block">
+                        Last Name
+                      </label>
+                      <input
+                        type="text"
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                        className="w-full bg-slate-950 border border-white/5 rounded-2xl px-5 py-3.5 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Student Specific Fields */}
+                  {(role || activeRoleTab) === "student" && (
+                    <>
+                      <div>
+                        <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-1.5 block">
+                          Course Level / Grade <span className="text-red-400">*</span>
+                        </label>
+                        <FilterSelect
+                          value={gradeLevel}
+                          onChange={(e) => {
+                            setGradeLevel(e.target.value);
+                            clearRegistrationFieldError("gradeLevel");
+                          }}
+                          placeholder="Select Your Course Level"
+                          className="w-full !bg-slate-950 !border-white/5 !rounded-2xl !px-5 !py-3.5 focus:ring-2 focus:ring-indigo-500 text-white text-sm"
+                        >
+                          {categoriesLoading ? (
+                            <option value="">Loading course levels...</option>
+                          ) : (
+                            categories.map((cat) => (
+                              <option key={cat.id} value={cat.name}>
+                                {cat.name}
+                              </option>
+                            ))
+                          )}
+                        </FilterSelect>
+                        {registrationErrors.gradeLevel && (
+                          <p className="text-red-500 text-xs mt-1.5 animate-shake">
+                            {registrationErrors.gradeLevel}
+                          </p>
+                        )}
+                      </div>
+
+                      <div>
+                        <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-1.5 block">
+                          Student WhatsApp / Phone Number <span className="text-red-400">*</span>
+                        </label>
+                        <input
+                          type="tel"
+                          value={phone}
+                          onChange={(e) => {
+                            setPhone(e.target.value);
+                            clearRegistrationFieldError("phone");
+                          }}
+                          placeholder="e.g. +966 50 123 4567 or +92 300 1234567"
+                          className="w-full bg-slate-950 border border-white/5 rounded-2xl px-5 py-3.5 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
+                          required
+                        />
+                        {registrationErrors.phone && (
+                          <p className="text-red-500 text-xs mt-1.5 animate-shake">
+                            {registrationErrors.phone}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-1.5 block">
+                            Guardian Name
+                          </label>
+                          <input
+                            type="text"
+                            value={guardianName}
+                            onChange={(e) => setGuardianName(e.target.value)}
+                            placeholder="Parent / Guardian Name"
+                            className="w-full bg-slate-950 border border-white/5 rounded-2xl px-5 py-3.5 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-1.5 block">
+                            Guardian WhatsApp / Phone
+                          </label>
+                          <input
+                            type="tel"
+                            value={guardianPhone}
+                            onChange={(e) => setGuardianPhone(e.target.value)}
+                            placeholder="e.g. +966 50 000 0000"
+                            className="w-full bg-slate-950 border border-white/5 rounded-2xl px-5 py-3.5 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-1.5 block">
+                          Current School / College (Optional)
+                        </label>
+                        <input
+                          type="text"
+                          value={schoolName}
+                          onChange={(e) => setSchoolName(e.target.value)}
+                          placeholder="e.g. International School Jeddah"
+                          className="w-full bg-slate-950 border border-white/5 rounded-2xl px-5 py-3.5 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  {/* Guardian Specific Fields */}
+                  {(role || activeRoleTab) === "parent" && (
+                    <>
+                      <div>
+                        <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-1.5 block">
+                          Guardian WhatsApp / Phone Number <span className="text-red-400">*</span>
+                        </label>
+                        <input
+                          type="tel"
+                          value={phone}
+                          onChange={(e) => setPhone(e.target.value)}
+                          placeholder="e.g. +966 50 123 4567"
+                          className="w-full bg-slate-950 border border-white/5 rounded-2xl px-5 py-3.5 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-1.5 block">
+                          Child's Roll Number or Registered Email <span className="text-red-400">*</span>
+                        </label>
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            value={childInput}
+                            onChange={(e) => setChildInput(e.target.value)}
+                            placeholder="Roll # or student@gmail.com"
+                            className="flex-1 bg-slate-950 border border-white/5 rounded-2xl px-5 py-3.5 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => addChildEntry()}
+                            className="px-4 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl text-xs font-bold transition cursor-pointer"
+                          >
+                            Add
+                          </button>
+                        </div>
+
+                        {childEntries.length > 0 && (
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            {childEntries.map((child, idx) => (
+                              <span
+                                key={idx}
+                                className="inline-flex items-center gap-2 bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 px-3 py-1 rounded-xl text-xs"
+                              >
+                                {child.value}
+                                <button
+                                  type="button"
+                                  onClick={() => removeChildEntry(idx)}
+                                  className="text-slate-400 hover:text-white cursor-pointer"
+                                >
+                                  ×
+                                </button>
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                        {registrationErrors.children && (
+                          <p className="text-red-500 text-xs mt-1.5 animate-shake">
+                            {registrationErrors.children}
+                          </p>
+                        )}
+                      </div>
+                    </>
+                  )}
+
+                  {/* Tutor Specific Fields */}
+                  {(role || activeRoleTab) === "teacher" && (
+                    <>
+                      <div>
+                        <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-1.5 block">
+                          WhatsApp / Phone Number <span className="text-red-400">*</span>
+                        </label>
+                        <input
+                          type="tel"
+                          value={phone}
+                          onChange={(e) => setPhone(e.target.value)}
+                          placeholder="e.g. +92 300 1234567"
+                          className="w-full bg-slate-950 border border-white/5 rounded-2xl px-5 py-3.5 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
+                          required
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-1.5 block">
+                            Subjects Taught (comma separated)
+                          </label>
+                          <input
+                            type="text"
+                            value={teacherSubjects}
+                            onChange={(e) => setTeacherSubjects(e.target.value)}
+                            placeholder="e.g. Physics, Chemistry, Math"
+                            className="w-full bg-slate-950 border border-white/5 rounded-2xl px-5 py-3.5 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-1.5 block">
+                            Years of Experience
+                          </label>
+                          <input
+                            type="number"
+                            min="0"
+                            value={teacherExperience}
+                            onChange={(e) => setTeacherExperience(e.target.value)}
+                            placeholder="e.g. 5"
+                            className="w-full bg-slate-950 border border-white/5 rounded-2xl px-5 py-3.5 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-1.5 block">
+                          Highest Qualification
+                        </label>
+                        <input
+                          type="text"
+                          value={teacherQualification}
+                          onChange={(e) => setTeacherQualification(e.target.value)}
+                          placeholder="e.g. Master of Science (Physics)"
+                          className="w-full bg-slate-950 border border-white/5 rounded-2xl px-5 py-3.5 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  {registrationFormError && (
+                    <p className="text-red-500 text-xs font-bold animate-shake text-center">
+                      {registrationFormError}
+                    </p>
+                  )}
+
+                  <div className="pt-2">
+                    <button
+                      type="submit"
+                      disabled={isGoogleSubmitting}
+                      className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-400 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all shadow-xl active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      {isGoogleSubmitting ? (
+                        <>
+                          <i className="fas fa-circle-notch fa-spin" />
+                          <span>Submitting Registration...</span>
+                        </>
+                      ) : (
+                        <span>Complete Registration</span>
+                      )}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            )}
+
+            {/* ── STEP 3: SUBMITTED FOR REVIEW ───────────────────────────── */}
+            {registrationStep === "submitted" && (
+              <div className="p-4 sm:p-8 flex flex-col items-center justify-center text-center animate-fadeIn max-w-lg mx-auto">
+                <div className="w-20 h-20 bg-emerald-500/20 rounded-3xl flex items-center justify-center text-3xl text-emerald-400 mb-6 border border-emerald-500/30 shadow-xl shadow-emerald-500/10">
+                  <i className="fas fa-shield-check text-emerald-400" />
+                </div>
+                <h2 className="text-2xl font-black font-poppins text-white mb-2">
+                  Registration Submitted!
+                </h2>
+                <p className="text-slate-300 text-sm leading-relaxed mb-6">
+                  {submittedMessage || (
+                    <>
+                      Your registration for <strong className="text-white">{email}</strong> has been received and forwarded for administrator review.
+                    </>
+                  )}
+                </p>
+
+                <div className="bg-slate-950 border border-white/5 rounded-2xl p-4 text-xs text-slate-400 text-left mb-6 space-y-2.5 w-full">
+                  <div className="flex items-start gap-2.5">
+                    <i className="fas fa-check-circle text-emerald-400 text-sm mt-0.5 shrink-0" />
+                    <span>Your Gmail address is verified and ready for live Google Meet classroom sessions.</span>
+                  </div>
+                  <div className="flex items-start gap-2.5">
+                    <i className="fas fa-envelope text-indigo-400 text-sm mt-0.5 shrink-0" />
+                    <span>You will receive an email confirmation once your account is activated by an administrator.</span>
+                  </div>
+                  <div className="flex items-start gap-2.5">
+                    <i className="fas fa-arrow-right-to-bracket text-indigo-400 text-sm mt-0.5 shrink-0" />
+                    <span>Once approved, you can log in instantly with 1-click using your Google account.</span>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition shadow-xl cursor-pointer"
+                >
+                  Return to Portal
+                </button>
+              </div>
+            )}
+
             {registrationStep === "form" && (
               <form onSubmit={handleRegisterSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="md:col-span-2 flex flex-col items-center mb-8">
@@ -938,6 +1612,14 @@ const AuthModals = () => {
                   <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-2">
                     Join the Virtual City School terminal
                   </p>
+                  <button
+                    type="button"
+                    onClick={() => setRegistrationStep("google_prompt")}
+                    className="flex items-center gap-2 text-indigo-400 hover:text-indigo-300 text-xs font-bold transition mt-3 cursor-pointer bg-indigo-500/10 hover:bg-indigo-500/20 px-3 py-1.5 rounded-xl border border-indigo-500/20"
+                  >
+                    <i className="fab fa-google text-xs" />
+                    Sign up with Google (Recommended)
+                  </button>
                 </div>
                 
                 {/* Add all other form fields (first/last name, password, confirmPassword, role) */}

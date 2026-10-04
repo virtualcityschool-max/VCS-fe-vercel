@@ -19,6 +19,7 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
   const [typeFilter, setTypeFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [dateSort, setDateSort] = useState("newest");
+  const [viewMode, setViewMode] = useState("by_student"); // "by_student" | "table"
 
   // Check if any filters are applied
   const hasActiveFilters = useMemo(() => {
@@ -97,6 +98,24 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
     dateSort,
   ]);
 
+  // Group enrollments by student so each student appears ONLY ONCE
+  const studentGroups = useMemo(() => {
+    const map = new Map();
+    filteredEnrollments.forEach((e) => {
+      const studentId = e.student?.id || e.student?.email || "unknown";
+      if (!map.has(studentId)) {
+        map.set(studentId, {
+          studentId,
+          student: e.student,
+          student_roll_no: e.student_roll_no,
+          enrollments: [],
+        });
+      }
+      map.get(studentId).enrollments.push(e);
+    });
+    return Array.from(map.values());
+  }, [filteredEnrollments]);
+
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
       case "active":
@@ -112,7 +131,7 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
     }
   };
 
-  const getTypeColor = (isPrivate) => {
+  const _getTypeColor = (isPrivate) => {
     return isPrivate
       ? "bg-purple-500/20 text-purple-400 border-purple-500/20"
       : "bg-blue-500/20 text-blue-400 border-blue-500/20";
@@ -312,6 +331,36 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
           </div>
 
           <div className="flex flex-wrap items-center gap-2 sm:contents">
+            {/* View Mode Switcher: By Student vs Detailed Table */}
+            <div className="bg-slate-900 border border-slate-800 rounded-xl p-1 flex items-center gap-1 shrink-0">
+              <button
+                type="button"
+                onClick={() => setViewMode("by_student")}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  viewMode === "by_student"
+                    ? "bg-indigo-600 text-white shadow-md shadow-indigo-500/20"
+                    : "text-slate-400 hover:text-white"
+                }`}
+                title="Group each student once with all their enrolled courses"
+              >
+                <i className="fas fa-user-graduate text-xs" />
+                <span>By Student (Deduplicated)</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode("table")}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  viewMode === "table"
+                    ? "bg-indigo-600 text-white shadow-md shadow-indigo-500/20"
+                    : "text-slate-400 hover:text-white"
+                }`}
+                title="Row by row enrollment junction records"
+              >
+                <i className="fas fa-table text-xs" />
+                <span>Detailed Table</span>
+              </button>
+            </div>
+
             <button
               onClick={handleOpenCreateModal}
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold shadow-lg shadow-indigo-500/20 active:scale-95 transition-all duration-150"
@@ -339,9 +388,108 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
         </div>
       </div>
 
-      {/* Enrollments Table */}
+      {/* Enrollments Container */}
       <div className="bg-slate-900/50 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
-        {/* Mobile Card View */}
+        {viewMode === "by_student" ? (
+          /* By Student (Deduplicated Cards) View */
+          <div className="p-4 sm:p-6 space-y-4">
+            {studentGroups.map((group, gIdx) => {
+              const studentName = group.student?.username || "Unknown Student";
+              const studentEmail = group.student?.email || "No email";
+              const initial = studentName.charAt(0).toUpperCase() || "S";
+              const count = group.enrollments.length;
+
+              return (
+                <div
+                  key={group.studentId || gIdx}
+                  className="bg-slate-800/40 border border-slate-700/80 hover:border-indigo-500/40 rounded-2xl p-5 transition-all duration-200 shadow-lg"
+                >
+                  {/* Student Header */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-700/60">
+                    <div className="flex items-center gap-3">
+                      <div className="w-11 h-11 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-black text-base shadow-md">
+                        {initial}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h4 className="text-base font-bold text-white">
+                            {studentName}
+                          </h4>
+                          {group.student_roll_no && (
+                            <span className="px-2 py-0.5 rounded-md bg-indigo-500/15 border border-indigo-500/30 text-indigo-400 text-xs font-mono font-semibold">
+                              Roll #{group.student_roll_no}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-slate-400">{studentEmail}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <span className="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                        {count} Subject{count === 1 ? "" : "s"} Enrolled
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Course Cards / Chips Grid */}
+                  <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {group.enrollments.map((enrollment) => {
+                      const courseTitle = enrollment.course?.title || "Unknown Course";
+                      const category =
+                        typeof enrollment.course?.category === "object"
+                          ? enrollment.course?.category?.name
+                          : enrollment.course?.category || "General";
+                      const price = enrollment.course?.price || 0;
+
+                      return (
+                        <div
+                          key={enrollment.id}
+                          className="bg-slate-900/70 border border-slate-800 rounded-xl p-3.5 hover:border-slate-700 transition flex flex-col justify-between"
+                        >
+                          <div>
+                            <div className="flex items-start justify-between gap-2 mb-1.5">
+                              <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20">
+                                {category}
+                              </span>
+                              <span
+                                className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${getStatusColor(
+                                  enrollment.status
+                                )}`}
+                              >
+                                {enrollment.status || "Active"}
+                              </span>
+                            </div>
+                            <h5 className="font-semibold text-white text-sm line-clamp-1">
+                              {courseTitle}
+                            </h5>
+                            <p className="text-xs text-slate-400 mt-1">
+                              ${price} USD • Enrolled {formatDate(enrollment.enrolled_at)}
+                            </p>
+                          </div>
+
+                          <div className="mt-3 pt-2.5 border-t border-slate-800/80 flex items-center justify-end">
+                            <button
+                              onClick={() => handleUnenroll(enrollment)}
+                              className="text-xs text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 px-2.5 py-1 rounded-lg transition flex items-center gap-1.5"
+                              title="Unenroll from this course"
+                            >
+                              <i className="fas fa-user-minus text-[10px]" />
+                              <span>Unenroll</span>
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <>
+            {/* Mobile Card View */}
         <div className="lg:hidden space-y-4 p-4">
           {filteredEnrollments.map((enrollment, index) => (
             <div
@@ -567,6 +715,8 @@ const EnrollmentsTab = ({ enrollments, loading, error, onRefresh }) => {
               </button>
             )}
           </div>
+        )}
+          </>
         )}
       </div>
 

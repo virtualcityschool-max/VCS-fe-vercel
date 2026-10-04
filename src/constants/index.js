@@ -7,6 +7,11 @@ export const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ||
   "https://virtualschool.grayphite.com/api/v1";
 
+export const GOOGLE_CLIENT_ID =
+  import.meta.env.VITE_GOOGLE_CLIENT_ID ||
+  "953842157843-0mifojo7s7nbsq8fhl9e4bo594g9p55h.apps.googleusercontent.com";
+
+
 // Role Constants
 export const ROLES = {
   STUDENT: "student",
