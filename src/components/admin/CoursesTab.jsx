@@ -226,6 +226,90 @@ const CourseCategoriesModal = ({ onClose, onCategoriesChanged, initialEditId, in
   );
 };
 
+// Subject department definitions matching VCS standard
+const COURSE_DEPARTMENTS = [
+  {
+    id: "all",
+    name: "All Courses",
+    icon: "fa-layer-group",
+    color: "text-indigo-400",
+    bg: "bg-indigo-500/10 border-indigo-500/20",
+    keywords: [],
+  },
+  {
+    id: "mathematics",
+    name: "Mathematics",
+    icon: "fa-calculator",
+    color: "text-blue-400",
+    bg: "bg-blue-500/10 border-blue-500/20",
+    keywords: ["math", "mathematics", "calculus", "algebra", "geometry", "0580", "4024", "9709"],
+  },
+  {
+    id: "physics",
+    name: "Physics",
+    icon: "fa-atom",
+    color: "text-indigo-400",
+    bg: "bg-indigo-500/10 border-indigo-500/20",
+    keywords: ["physics", "mechanics", "astrophysics", "quantum", "0625", "5054", "9702"],
+  },
+  {
+    id: "chemistry",
+    name: "Chemistry",
+    icon: "fa-flask",
+    color: "text-purple-400",
+    bg: "bg-purple-500/10 border-purple-500/20",
+    keywords: ["chemistry", "organic", "inorganic", "biochemistry", "0620", "5070", "9701"],
+  },
+  {
+    id: "biology",
+    name: "Biology",
+    icon: "fa-dna",
+    color: "text-emerald-400",
+    bg: "bg-emerald-500/10 border-emerald-500/20",
+    keywords: ["biology", "bio", "zoology", "botany", "life science", "genetics", "0610", "5090", "9700"],
+  },
+  {
+    id: "english_urdu",
+    name: "English & Urdu",
+    icon: "fa-book-open",
+    color: "text-amber-400",
+    bg: "bg-amber-500/10 border-amber-500/20",
+    keywords: ["english", "urdu", "literature", "language", "grammar", "ielts", "toefl", "0500", "1123", "3248"],
+  },
+  {
+    id: "computer_science",
+    name: "Computer Science",
+    icon: "fa-laptop-code",
+    color: "text-cyan-400",
+    bg: "bg-cyan-500/10 border-cyan-500/20",
+    keywords: ["computer", "programming", "coding", "software", "python", "cs", "0478", "2210", "9618"],
+  },
+  {
+    id: "general_sciences",
+    name: "General & Other Subjects",
+    icon: "fa-graduation-cap",
+    color: "text-slate-400",
+    bg: "bg-slate-500/10 border-slate-500/20",
+    keywords: [],
+  },
+];
+
+const getCourseDepartment = (course) => {
+  if (!course) return COURSE_DEPARTMENTS[COURSE_DEPARTMENTS.length - 1];
+  const catName = typeof course.category === "object" ? course.category?.name : course.category || "";
+  const title = course.title || "";
+  const text = `${title} ${catName}`.toLowerCase();
+
+  for (const dept of COURSE_DEPARTMENTS) {
+    if (dept.id !== "all" && dept.keywords.length > 0) {
+      if (dept.keywords.some((kw) => text.includes(kw))) {
+        return dept;
+      }
+    }
+  }
+  return COURSE_DEPARTMENTS[COURSE_DEPARTMENTS.length - 1];
+};
+
 const CoursesTab = ({
   courses,
   users,
@@ -250,13 +334,12 @@ const CoursesTab = ({
   onAssignInstructor,
   activeModal,
   setActiveModal,
-  showCourseFilters,
-  setShowCourseFilters,
   courseFilters,
   setCourseFilters,
 }) => {
   const navigate = useNavigate();
 
+  const [selectedDepartment, setSelectedDepartment] = useState("all");
   const [catDropdownOpen, setCatDropdownOpen]       = useState(false);
   const [categoriesOpenWith, setCategoriesOpenWith] = useState(null); // null | { editId?, deleteId? }
   const catDropdownRef = useRef(null);
@@ -277,7 +360,7 @@ const CoursesTab = ({
     };
   }, [catDropdownOpen]);
 
-  // Filter courses based on search term and filters
+  // Filter courses based on search term, filters, and department
   const filteredCourses = useMemo(() => {
     if (!courses || courses.length === 0) return [];
 
@@ -297,7 +380,8 @@ const CoursesTab = ({
         course.description
           ?.toLowerCase()
           .includes(courseFilters.search.toLowerCase());
-      // Category filter - compare by normalized name
+
+      // Category / Level filter - compare by normalized name
       const matchesCategory =
         courseFilters.category === "" ||
         (() => {
@@ -305,6 +389,14 @@ const CoursesTab = ({
           if (!cat) return false;
           const catName = typeof cat === "object" ? cat.name : String(cat);
           return (catName || "").toLowerCase().replace(/\s+/g, "") === courseFilters.category;
+        })();
+
+      // Department quick filter
+      const matchesDept =
+        selectedDepartment === "all" ||
+        (() => {
+          const dept = getCourseDepartment(course);
+          return dept.id === selectedDepartment;
         })();
 
       // Price range filter
@@ -334,7 +426,6 @@ const CoursesTab = ({
         (() => {
           const inst = course.instructor;
           if (!inst) return false;
-          // Check if instructor is an object with id or just an ID
           const instId = typeof inst === "object" ? inst.id : inst;
           return String(instId) === courseFilters.instructor;
         })();
@@ -342,6 +433,7 @@ const CoursesTab = ({
       return (
         matchesSearch &&
         matchesCategory &&
+        matchesDept &&
         matchesPrice &&
         matchesStatus &&
         matchesInstructor
@@ -349,12 +441,12 @@ const CoursesTab = ({
     });
 
     return filtered;
-  }, [courses, courseFilters]);
+  }, [courses, courseFilters, selectedDepartment]);
 
   // Check if any course filters are active
   const hasActiveCourseFilters = useMemo(() => {
-    return Object.values(courseFilters).some((value) => value !== "");
-  }, [courseFilters]);
+    return Object.values(courseFilters).some((value) => value !== "") || selectedDepartment !== "all";
+  }, [courseFilters, selectedDepartment]);
 
   // Reset all course filters
   const resetCourseFilters = () => {
@@ -365,7 +457,44 @@ const CoursesTab = ({
       status: "",
       instructor: "",
     });
+    setSelectedDepartment("all");
   };
+
+  // Department counts for quick filter pills
+  const departmentCounts = useMemo(() => {
+    const counts = { all: courses?.length || 0 };
+    COURSE_DEPARTMENTS.forEach((dept) => {
+      if (dept.id !== "all") counts[dept.id] = 0;
+    });
+    (courses || []).forEach((c) => {
+      const dept = getCourseDepartment(c);
+      if (counts[dept.id] !== undefined) {
+        counts[dept.id]++;
+      }
+    });
+    return counts;
+  }, [courses]);
+
+  // Course metrics
+  const courseMetrics = useMemo(() => {
+    let published = 0;
+    let draft = 0;
+    let paid = 0;
+    let free = 0;
+    (courses || []).forEach((c) => {
+      if (c.status === "published") published++;
+      else draft++;
+      if (c.is_paid) paid++;
+      else free++;
+    });
+    return {
+      total: courses?.length || 0,
+      published,
+      draft,
+      paid,
+      free,
+    };
+  }, [courses]);
 
   const handleCreateCourse = async (e) => {
     e.preventDefault();
@@ -562,6 +691,76 @@ const CoursesTab = ({
         </div>
       </div>
 
+      {/* ─────────────────────────────────────────────
+         QUICK-CLICK DEPARTMENT & STATUS FILTER BAR
+         ───────────────────────────────────────────── */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 p-3 bg-slate-900/60 border border-slate-800/80 rounded-2xl shadow-lg">
+        {/* Department Pills */}
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+          {COURSE_DEPARTMENTS.map((dept) => {
+            const active = selectedDepartment === dept.id;
+            const count = departmentCounts[dept.id] || 0;
+            return (
+              <button
+                key={dept.id}
+                onClick={() => setSelectedDepartment(dept.id)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition border ${
+                  active
+                    ? "bg-indigo-600 text-white border-indigo-500 shadow-md shadow-indigo-500/20 ring-1 ring-indigo-400"
+                    : "bg-slate-800/40 text-slate-400 hover:text-white hover:bg-slate-800 border-slate-800"
+                }`}
+              >
+                <i className={`fas ${dept.icon} text-[11px] ${active ? "text-white" : dept.color}`} />
+                <span>{dept.name}</span>
+                <span
+                  className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
+                    active ? "bg-indigo-700/80 text-white" : "bg-slate-800 text-slate-400"
+                  }`}
+                >
+                  {count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Status / Publication Quick Toggles */}
+        <div className="flex items-center gap-1.5 shrink-0 border-t lg:border-t-0 border-slate-800 pt-2 lg:pt-0">
+          <button
+            onClick={() => setCourseFilters((prev) => ({ ...prev, status: "" }))}
+            className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition ${
+              courseFilters.status === ""
+                ? "bg-slate-700 text-white"
+                : "text-slate-400 hover:text-white"
+            }`}
+          >
+            All ({courseMetrics.total})
+          </button>
+          <button
+            onClick={() => setCourseFilters((prev) => ({ ...prev, status: "published" }))}
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition border ${
+              courseFilters.status === "published"
+                ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
+                : "border-slate-800 text-slate-400 hover:text-emerald-300"
+            }`}
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span>Published ({courseMetrics.published})</span>
+          </button>
+          <button
+            onClick={() => setCourseFilters((prev) => ({ ...prev, status: "draft" }))}
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition border ${
+              courseFilters.status === "draft"
+                ? "bg-amber-500/20 text-amber-300 border-amber-500/40"
+                : "border-slate-800 text-slate-400 hover:text-amber-300"
+            }`}
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+            <span>Draft ({courseMetrics.draft})</span>
+          </button>
+        </div>
+      </div>
+
       {/* Filter Results Info */}
       {hasActiveCourseFilters && (
         <div className="mb-4 text-sm text-slate-400">
@@ -728,135 +927,184 @@ const CoursesTab = ({
             </div>
 
             {/* Desktop Table View */}
-            <table className="hidden lg:table w-full text-left">
-              <thead className="bg-slate-950/60 border-b border-slate-800">
-                <tr>
-                  <th className="px-6 py-4 text-xs font-black uppercase text-slate-500">
-                    Course
-                  </th>
-                  <th className="px-6 py-4 text-xs font-black uppercase text-slate-500">
-                    Tutor
-                  </th>
-                  <th className="px-6 py-4 text-xs font-black uppercase text-slate-500">
-                    Level
-                  </th>
-                  <th className="px-6 py-4 text-xs font-black uppercase text-slate-500">
-                    Price
-                  </th>
-                  <th className="px-6 py-4 text-xs font-black uppercase text-slate-500">
-                    Type
-                  </th>
-                  <th className="px-6 py-4 text-xs font-black uppercase text-slate-500">
-                    Status
-                  </th>
-                  <th className="px-6 py-4 text-xs font-black uppercase text-slate-500">
-                    Enrolled Students
-                  </th>
-                  <th className="px-6 py-4 text-xs font-black uppercase text-slate-500 text-right">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800/50">
-                {filteredCourses?.map((course) => (
-                  <tr
-                    key={course.id}
-                    className="hover:bg-slate-800/30 transition cursor-pointer"
-                    onClick={() =>
-                      navigate(`/admin/courses/${course.id}`)
-                    }
-                  >
-                    <td className="px-6 py-4">
-                      <div>
-                        <p className="font-bold text-white group-hover:text-indigo-400 transition">
-                          {course.title}
-                        </p>
-                        <p className="text-xs text-slate-500 mt-1 line-clamp-2">
-                          {course.description}
-                        </p>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      {course.instructor ? (
-                        <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 bg-indigo-500/20 rounded-full flex items-center justify-center">
-                            <i className="fas fa-user text-indigo-400 text-xs"></i>
-                          </div>
-                          <span className="text-slate-300 text-sm">
-                            {getDisplayName(course.instructor)}
-                          </span>
-                        </div>
-                      ) : (
-                        <span className="text-slate-500 text-sm">
-                          Not assigned
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="bg-slate-700/50 text-slate-300 px-2 py-1 rounded-full text-xs font-medium border border-slate-600 md:whitespace-nowrap">
-                        {course.category?.name ?? course.category}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="text-white font-medium">
-                        {course.is_paid ? `$${(course.price || 0).toLocaleString("en-US")} USD` : "-"}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs font-black uppercase tracking-wide ${
-                          course.is_paid
-                            ? "bg-amber-500/15 text-amber-400 border border-amber-500/20"
-                            : "bg-emerald-500/15 text-emerald-400 border border-emerald-500/20"
-                        }`}
-                      >
-                        {course.is_paid ? "Paid" : "Free"}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          course.status === "published"
-                            ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/20"
-                            : "bg-slate-700/50 text-slate-300 border border-slate-600"
-                        }`}
-                      >
-                        {course.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="text-white font-medium">
-                        {course.enrolled_students_count}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div
-                        className="flex items-center gap-2 justify-end"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <button
-                          onClick={() => onCourseEdit(course.id)}
-                          className="w-8 h-8 flex items-center justify-center bg-slate-700/50 text-slate-300 rounded-lg hover:bg-slate-600/50 transition"
-                          title="Edit course"
-                        >
-                          <i className="fas fa-edit text-xs"></i>
-                        </button>
-                        <button
-                          onClick={() => onCourseDelete(course.id)}
-                          disabled={loadingCourseIds.has(course.id)}
-                          className="w-8 h-8 flex items-center justify-center bg-red-600/10 text-red-400 rounded-lg hover:bg-red-600/20 transition disabled:opacity-50"
-                          title="Delete course"
-                        >
-                          {loadingCourseIds.has(course.id)
-                            ? <i className="fas fa-spinner fa-spin text-xs"></i>
-                            : <i className="fas fa-trash text-xs"></i>}
-                        </button>
-                      </div>
-                    </td>
+            <div className="overflow-x-auto">
+              <table className="hidden lg:table w-full text-left border-collapse">
+                <thead className="bg-slate-950/80 border-b border-slate-800 text-[11px] font-bold text-slate-400 uppercase tracking-wider sticky top-0 z-10 backdrop-blur-md">
+                  <tr>
+                    <th className="px-3 py-3 w-10 text-center">#</th>
+                    <th className="px-4 py-3">Course</th>
+                    <th className="px-3 py-3">Department</th>
+                    <th className="px-3 py-3">Level</th>
+                    <th className="px-3 py-3">Tutor</th>
+                    <th className="px-3 py-3">Price</th>
+                    <th className="px-3 py-3">Type</th>
+                    <th className="px-3 py-3">Status</th>
+                    <th className="px-3 py-3 text-center">Students</th>
+                    <th className="px-4 py-3 text-right">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-slate-800/40 text-xs">
+                  {filteredCourses?.map((course, index) => {
+                    const dept = getCourseDepartment(course);
+                    const levelName = course.category?.name ?? course.category ?? "General";
+                    const codeMatch = course.title?.match(/\(([0-9]{4})\)/);
+                    const courseCode = codeMatch ? codeMatch[1] : null;
+
+                    return (
+                      <tr
+                        key={course.id}
+                        className="hover:bg-slate-800/30 transition-colors group cursor-pointer"
+                        onClick={() => navigate(`/admin/courses/${course.id}`)}
+                      >
+                        {/* Index */}
+                        <td className="px-3 py-2.5 text-center font-mono text-slate-500">
+                          {index + 1}
+                        </td>
+
+                        {/* Course (Clean single-line with title, code, department icon, and description in tooltip) */}
+                        <td className="px-4 py-2.5 whitespace-nowrap">
+                          <div
+                            className="flex items-center gap-2.5 max-w-md"
+                            title={course.description || course.title}
+                          >
+                            <div className={`w-7 h-7 rounded-lg ${dept.bg} ${dept.color} flex items-center justify-center shrink-0 shadow-sm`}>
+                              <i className={`fas ${dept.icon} text-xs`} />
+                            </div>
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-1.5">
+                                <p className="font-semibold text-white text-xs leading-none group-hover:text-indigo-300 transition truncate">
+                                  {course.title}
+                                </p>
+                                {courseCode && (
+                                  <span className="px-1.5 py-0.2 rounded font-mono text-[10px] bg-slate-800 text-indigo-300 border border-slate-700/80 font-semibold shrink-0">
+                                    {courseCode}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+
+                        {/* Department */}
+                        <td className="px-3 py-2.5 whitespace-nowrap">
+                          <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-semibold border ${dept.bg} ${dept.color}`}>
+                            <i className={`fas ${dept.icon} text-[10px]`} />
+                            <span>{dept.name}</span>
+                          </span>
+                        </td>
+
+                        {/* Level */}
+                        <td className="px-3 py-2.5 whitespace-nowrap">
+                          <span className="bg-slate-800/80 text-slate-300 px-2 py-0.5 rounded text-[11px] font-medium border border-slate-700/80">
+                            {levelName}
+                          </span>
+                        </td>
+
+                        {/* Tutor */}
+                        <td className="px-3 py-2.5 whitespace-nowrap">
+                          {course.instructor ? (
+                            <div className="flex items-center gap-2">
+                              <div className="w-6 h-6 rounded-md bg-indigo-500/20 text-indigo-300 flex items-center justify-center font-bold text-[11px] shrink-0">
+                                {(getDisplayName(course.instructor) || "T")[0].toUpperCase()}
+                              </div>
+                              <span
+                                className="text-slate-300 text-xs font-medium truncate max-w-[140px]"
+                                title={getDisplayName(course.instructor)}
+                              >
+                                {getDisplayName(course.instructor)}
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="text-slate-500 text-xs italic">Not assigned</span>
+                          )}
+                        </td>
+
+                        {/* Price */}
+                        <td className="px-3 py-2.5 whitespace-nowrap font-mono text-xs">
+                          <span className={course.is_paid ? "text-emerald-400 font-semibold" : "text-slate-400"}>
+                            {course.is_paid ? `$${(course.price || 0).toLocaleString("en-US")} USD` : "Free"}
+                          </span>
+                        </td>
+
+                        {/* Type */}
+                        <td className="px-3 py-2.5 whitespace-nowrap">
+                          <span
+                            className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${
+                              course.is_paid
+                                ? "bg-amber-500/15 text-amber-300 border-amber-500/30"
+                                : "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
+                            }`}
+                          >
+                            {course.is_paid ? "Paid" : "Free"}
+                          </span>
+                        </td>
+
+                        {/* Status */}
+                        <td className="px-3 py-2.5 whitespace-nowrap">
+                          <span
+                            className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${
+                              course.status === "published"
+                                ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
+                                : "bg-amber-500/15 text-amber-300 border-amber-500/30"
+                            }`}
+                          >
+                            <span
+                              className={`w-1.5 h-1.5 rounded-full ${
+                                course.status === "published" ? "bg-emerald-400 animate-pulse" : "bg-amber-400"
+                              }`}
+                            />
+                            {course.status}
+                          </span>
+                        </td>
+
+                        {/* Enrolled Students */}
+                        <td className="px-3 py-2.5 whitespace-nowrap text-center">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-slate-800 text-slate-300 border border-slate-700 font-mono text-xs font-semibold">
+                            <i className="fas fa-user-graduate text-[10px] text-indigo-400" />
+                            {course.enrolled_students_count || 0}
+                          </span>
+                        </td>
+
+                        {/* Actions */}
+                        <td className="px-4 py-2.5 whitespace-nowrap text-right">
+                          <div
+                            className="flex items-center justify-end gap-1"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <button
+                              onClick={() => navigate(`/admin/courses/${course.id}`)}
+                              className="w-7 h-7 flex items-center justify-center bg-slate-800 text-slate-400 rounded-lg hover:bg-slate-700 hover:text-white transition"
+                              title="View course details"
+                            >
+                              <i className="fas fa-eye text-[11px]" />
+                            </button>
+                            <button
+                              onClick={() => onCourseEdit(course.id)}
+                              className="w-7 h-7 flex items-center justify-center bg-slate-800 text-slate-400 rounded-lg hover:bg-slate-700 hover:text-white transition"
+                              title="Edit course"
+                            >
+                              <i className="fas fa-edit text-[11px]" />
+                            </button>
+                            <button
+                              onClick={() => onCourseDelete(course.id)}
+                              disabled={loadingCourseIds.has(course.id)}
+                              className="w-7 h-7 flex items-center justify-center bg-red-900/20 text-red-400 rounded-lg hover:bg-red-900/40 transition disabled:opacity-50"
+                              title="Delete course"
+                            >
+                              {loadingCourseIds.has(course.id) ? (
+                                <i className="fas fa-spinner fa-spin text-[11px]" />
+                              ) : (
+                                <i className="fas fa-trash text-[11px]" />
+                              )}
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
 
