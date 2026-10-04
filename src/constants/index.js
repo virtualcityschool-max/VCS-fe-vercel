@@ -5,7 +5,7 @@ export const APP_VERSION = "1.0.0";
 // API Constants
 export const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ||
-  "https://virtualschool.grayphite.com/api/v1";
+  "https://vcs-be-supabase.vercel.app/api/v1";
 
 export const GOOGLE_CLIENT_ID =
   import.meta.env.VITE_GOOGLE_CLIENT_ID ||

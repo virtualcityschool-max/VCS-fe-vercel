@@ -7,12 +7,13 @@ import {
 } from "../../components/ui";
 import ConfirmDialog from "../common/ConfirmDialog";
 import { getStorageUrl } from "../../utils/storageUrl";
+import { coursesService } from "../../services/coursesService";
 import { toastManager } from "../../utils/toastManager";
 import { getDisplayName } from "../../utils/userDisplay";
 import { TagChip, StudentTagsModal, LabelFilterDropdown } from "./StudentTags";
 import { useStudentTags } from "../../hooks/useStudentTags";
 
-// Subject department definitions for Tutor Swimlanes
+// Subject department definitions for Tutor classification
 const TUTOR_DEPARTMENTS = [
   {
     id: "mathematics",
@@ -515,24 +516,26 @@ const StudentCard = ({
   );
 };
 
-// Tutor Card inside Subject Swimlane: Green if engaged, Amber if standby
+// Tutor Card in Responsive Grid: Green if engaged, Amber if standby (Identical grid card layout like others)
 const TutorCard = ({
   user,
+  assignedCourses,
+  isEngaged,
   handleViewUser,
   handleEditUser,
   handlePurgeUser,
   handleDeleteUser,
   processing,
 }) => {
-  const assignedList = user.assigned_courses || [];
-  const isEngaged = user.is_engaged || assignedList.length > 0;
+  const courses = assignedCourses || user.assigned_courses || [];
+  const engaged = isEngaged != null ? isEngaged : (user.is_engaged || courses.length > 0);
 
   return (
     <div
-      className={`min-w-[310px] max-w-[330px] rounded-2xl border flex flex-col justify-between overflow-hidden shadow-xl shrink-0 transition-all duration-200 ${
-        isEngaged
-          ? "border-emerald-500/30 bg-gradient-to-b from-slate-900 via-slate-900 to-emerald-950/20 hover:border-emerald-500/60"
-          : "border-amber-500/30 bg-gradient-to-b from-slate-900 via-slate-900 to-amber-950/20 hover:border-amber-500/60"
+      className={`rounded-2xl border transition-all duration-200 flex flex-col justify-between overflow-hidden shadow-xl ${
+        engaged
+          ? "border-emerald-500/30 bg-gradient-to-b from-slate-900 via-slate-900 to-emerald-950/20 hover:border-emerald-500/60 hover:shadow-emerald-500/5"
+          : "border-amber-500/30 bg-gradient-to-b from-slate-900 via-slate-900 to-amber-950/20 hover:border-amber-500/60 hover:shadow-amber-500/5"
       }`}
     >
       <div className="p-5 space-y-4">
@@ -549,7 +552,7 @@ const TutorCard = ({
               ) : (
                 <div
                   className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg ${
-                    isEngaged
+                    engaged
                       ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
                       : "bg-amber-500/20 text-amber-400 border border-amber-500/30"
                   }`}
@@ -574,10 +577,10 @@ const TutorCard = ({
 
           {/* Engaged vs Standby badge */}
           <div className="shrink-0">
-            {isEngaged ? (
+            {engaged ? (
               <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                Engaged • {assignedList.length} Active
+                Engaged • {courses.length} Active
               </span>
             ) : (
               <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/15 text-amber-300 border border-amber-500/30">
@@ -607,12 +610,12 @@ const TutorCard = ({
         {/* Assigned Classes vs Standby Notification */}
         <div className="space-y-1.5 pt-2 border-t border-slate-800/80">
           <div className="text-[11px] text-slate-400 font-semibold uppercase tracking-wider flex items-center justify-between">
-            <span>{isEngaged ? `Assigned Courses (${assignedList.length})` : "Current Status"}</span>
+            <span>{engaged ? `Assigned Courses (${courses.length})` : "Current Status"}</span>
           </div>
 
-          {isEngaged ? (
+          {engaged ? (
             <div className="space-y-1 max-h-28 overflow-y-auto no-scrollbar">
-              {assignedList.map((course, idx) => (
+              {courses.map((course, idx) => (
                 <div
                   key={course.id || idx}
                   className="p-2 rounded-lg bg-slate-800/80 border border-slate-700/60 text-xs text-white flex items-center justify-between gap-2"
@@ -985,6 +988,10 @@ const UsersTab = ({
 }) => {
   const navigate = useNavigate();
   const [viewMode, setViewMode] = useState("cards"); // 'cards' (default) vs 'table'
+  const [selectedDepartment, setSelectedDepartment] = useState("all");
+  const [selectedTutorStatus, setSelectedTutorStatus] = useState("all"); // 'all' | 'engaged' | 'standby'
+  const [coursesByTeacher, setCoursesByTeacher] = useState({});
+
   const [confirmDialog, setConfirmDialog] = useState({
     open: false,
     userId: null,
@@ -1003,6 +1010,36 @@ const UsersTab = ({
 
   const searchInput = localSearchInput;
   const setSearchInput = setLocalSearchInput;
+
+  // Fetch all courses in background to establish instructor assignment mapping
+  useEffect(() => {
+    let isMounted = true;
+    coursesService
+      .getAllCourses()
+      .then((data) => {
+        if (!isMounted) return;
+        const list = Array.isArray(data) ? data : (data?.results || data?.data || []);
+        const map = {};
+        list.forEach((c) => {
+          const instructorId =
+            c.instructor?.id || (typeof c.instructor === "number" ? c.instructor : null);
+          if (instructorId) {
+            if (!map[instructorId]) map[instructorId] = [];
+            map[instructorId].push({
+              id: c.id,
+              title: c.title,
+              category: typeof c.category === "object" ? c.category?.name : c.category,
+            });
+          }
+        });
+        setCoursesByTeacher(map);
+      })
+      .catch((err) => console.warn("Could not load courses for teacher map:", err));
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const handleClearFilters = useCallback(() => {
     setUsersFilters({
@@ -1142,63 +1179,99 @@ const UsersTab = ({
       : "bg-slate-500/20 text-slate-400 border-slate-500/20";
   };
 
-  // Group tutors into subject swimlanes
-  const tutorDepartmentGroups = useMemo(() => {
-    const teachers = (users || []).filter((u) => u.role === "teacher");
-    const departmentMap = {};
+  // Helper: Retrieve assigned courses for teacher with fallback to coursesByTeacher map
+  const getTeacherCourses = useCallback(
+    (teacher) => {
+      if (teacher.assigned_courses && teacher.assigned_courses.length > 0) {
+        return teacher.assigned_courses;
+      }
+      return coursesByTeacher[teacher.id] || [];
+    },
+    [coursesByTeacher],
+  );
 
+  // Helper: Check if teacher is engaged in active courses
+  const getTeacherIsEngaged = useCallback(
+    (teacher) => {
+      if (teacher.is_engaged != null) {
+        return Boolean(teacher.is_engaged);
+      }
+      const courses = getTeacherCourses(teacher);
+      return courses.length > 0;
+    },
+    [getTeacherCourses],
+  );
+
+  // Helper: Extract search tokens for subject department classification
+  const getTeacherSubjectTokens = useCallback(
+    (teacher) => {
+      const courses = getTeacherCourses(teacher);
+      const courseTokens = courses.map((c) => `${c.title} ${c.category || ""}`).join(" ");
+      const profileSubjects = (teacher.subjects || []).join(" ");
+      const expertise = teacher.expertise || "";
+      return `${courseTokens} ${profileSubjects} ${expertise}`.toLowerCase();
+    },
+    [getTeacherCourses],
+  );
+
+  // Map teachers to department buckets
+  const departmentTutorMap = useMemo(() => {
+    const teachers = (users || []).filter((u) => u.role === "teacher");
+    const map = {};
     TUTOR_DEPARTMENTS.forEach((dept) => {
-      departmentMap[dept.id] = [];
+      map[dept.id] = [];
     });
 
     teachers.forEach((teacher) => {
-      // Gather all subjects and course text for this teacher
-      const subjectTokens = [
-        ...(teacher.subjects || []),
-        teacher.expertise || "",
-        ...(teacher.assigned_courses || []).map((c) => `${c.title} ${c.category || ""}`),
-      ]
-        .join(" ")
-        .toLowerCase();
-
+      const tokens = getTeacherSubjectTokens(teacher);
       let matched = false;
       TUTOR_DEPARTMENTS.forEach((dept) => {
         if (dept.keywords.length > 0) {
-          const hasKeyword = dept.keywords.some((kw) => subjectTokens.includes(kw));
+          const hasKeyword = dept.keywords.some((kw) => tokens.includes(kw));
           if (hasKeyword) {
-            departmentMap[dept.id].push(teacher);
+            map[dept.id].push(teacher);
             matched = true;
           }
         }
       });
-
-      // If tutor doesn't match any specific department keyword, place in general
       if (!matched) {
-        departmentMap["general_sciences"].push(teacher);
+        map["general_sciences"].push(teacher);
       }
     });
 
-    return TUTOR_DEPARTMENTS.map((dept) => ({
-      ...dept,
-      tutors: departmentMap[dept.id] || [],
-      engagedCount: (departmentMap[dept.id] || []).filter(
-        (t) => t.is_engaged || (t.assigned_courses && t.assigned_courses.length > 0)
-      ).length,
-      standbyCount: (departmentMap[dept.id] || []).filter(
-        (t) => !t.is_engaged && (!t.assigned_courses || t.assigned_courses.length === 0)
-      ).length,
-    })).filter((dept) => dept.tutors.length > 0);
-  }, [users]);
+    return map;
+  }, [users, getTeacherSubjectTokens]);
 
   // Overall metric counts for tutors
   const tutorMetrics = useMemo(() => {
     const teachers = (users || []).filter((u) => u.role === "teacher");
-    const engaged = teachers.filter(
-      (t) => t.is_engaged || (t.assigned_courses && t.assigned_courses.length > 0)
-    ).length;
+    let engaged = 0;
+    teachers.forEach((t) => {
+      if (getTeacherIsEngaged(t)) engaged++;
+    });
     const standby = teachers.length - engaged;
     return { total: teachers.length, engaged, standby };
-  }, [users]);
+  }, [users, getTeacherIsEngaged]);
+
+  // Filtered tutors list for 3-column responsive grid view
+  const filteredTutors = useMemo(() => {
+    const teachers = (users || []).filter((u) => u.role === "teacher");
+
+    return teachers.filter((teacher) => {
+      // Department filter
+      if (selectedDepartment !== "all") {
+        const inDept = (departmentTutorMap[selectedDepartment] || []).some((t) => t.id === teacher.id);
+        if (!inDept) return false;
+      }
+
+      // Status filter
+      const isEngaged = getTeacherIsEngaged(teacher);
+      if (selectedTutorStatus === "engaged" && !isEngaged) return false;
+      if (selectedTutorStatus === "standby" && isEngaged) return false;
+
+      return true;
+    });
+  }, [users, selectedDepartment, selectedTutorStatus, departmentTutorMap, getTeacherIsEngaged]);
 
   // Overall metric counts for students
   const studentMetrics = useMemo(() => {
@@ -1284,7 +1357,7 @@ const UsersTab = ({
            CARDS VIEW MODE
            ───────────────────────────────────────────── */
         <div className="space-y-8">
-          {/* 1. STUDENT VIEW */}
+          {/* 1. STUDENT VIEW (Grid of Cards) */}
           {usersFilters.role === "student" && (
             <div className="space-y-6">
               {/* Student Metrics Header */}
@@ -1341,9 +1414,9 @@ const UsersTab = ({
             </div>
           )}
 
-          {/* 2. TUTOR VIEW (Subject-wise Horizontal Swimlanes) */}
+          {/* 2. TUTOR VIEW (Responsive 3-Column Grid like Others with Subject Department Filter) */}
           {usersFilters.role === "teacher" && (
-            <div className="space-y-8">
+            <div className="space-y-6">
               {/* Tutor Metrics Header */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 flex items-center justify-between">
@@ -1377,66 +1450,112 @@ const UsersTab = ({
                 </div>
               </div>
 
-              {/* Subject-Wise Horizontal Swimlanes */}
-              <div className="space-y-8">
-                {tutorDepartmentGroups.map((dept) => (
-                  <div
-                    key={dept.id}
-                    className="p-5 rounded-2xl bg-slate-900/40 border border-slate-800/80 space-y-4"
+              {/* Subject Department & Status Filter Bar */}
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 p-3 bg-slate-900/60 border border-slate-800/80 rounded-2xl">
+                {/* Department Filter Pills */}
+                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
+                  <button
+                    onClick={() => setSelectedDepartment("all")}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
+                      selectedDepartment === "all"
+                        ? "bg-indigo-600 text-white shadow-md shadow-indigo-500/20"
+                        : "text-slate-400 hover:text-white hover:bg-slate-800"
+                    }`}
                   >
-                    {/* Swimlane Department Header */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800/80">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg ${dept.bg}`}>
-                          <i className={`fas ${dept.icon} ${dept.color}`} />
-                        </div>
-                        <div>
-                          <h3 className="text-lg font-black text-white tracking-tight flex items-center gap-2">
-                            <span>{dept.name}</span>
-                            <span className="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 font-mono">
-                              {dept.tutors.length}
-                            </span>
-                          </h3>
-                          <p className="text-xs text-slate-400">
-                            Subject Faculty & Class Allocation Lane
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Engaged vs Standby Pills */}
-                      <div className="flex items-center gap-2 shrink-0">
-                        <span className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                          <span>{dept.engagedCount} Engaged</span>
+                    All Departments ({tutorMetrics.total})
+                  </button>
+                  {TUTOR_DEPARTMENTS.map((dept) => {
+                    const count = (departmentTutorMap[dept.id] || []).length;
+                    if (count === 0) return null;
+                    const isActive = selectedDepartment === dept.id;
+                    return (
+                      <button
+                        key={dept.id}
+                        onClick={() => setSelectedDepartment(dept.id)}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
+                          isActive
+                            ? "bg-indigo-600 text-white shadow-md shadow-indigo-500/20"
+                            : "text-slate-400 hover:text-white hover:bg-slate-800"
+                        }`}
+                      >
+                        <i className={`fas ${dept.icon} text-[11px] ${isActive ? "text-white" : dept.color}`} />
+                        <span>{dept.name}</span>
+                        <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-800 text-slate-300 font-mono">
+                          {count}
                         </span>
-                        <span className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-amber-500/15 text-amber-400 border border-amber-500/30 flex items-center gap-1.5">
-                          <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                          <span>{dept.standbyCount} Standby</span>
-                        </span>
-                      </div>
-                    </div>
+                      </button>
+                    );
+                  })}
+                </div>
 
-                    {/* Horizontal Scrollable Row */}
-                    <div className="flex gap-4 overflow-x-auto pb-4 pt-1 no-scrollbar scroll-smooth">
-                      {dept.tutors.map((tutor) => (
-                        <TutorCard
-                          key={`${dept.id}-${tutor.id}`}
-                          user={tutor}
-                          handleViewUser={handleViewUser}
-                          handleEditUser={handleEditUser}
-                          handlePurgeUser={handlePurgeUser}
-                          handleDeleteUser={handleDeleteUser}
-                          processing={processing}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                ))}
+                {/* Status Toggle (All / Engaged / Standby) */}
+                <div className="flex items-center gap-1 shrink-0 bg-slate-950/60 p-1 rounded-xl border border-slate-800/60">
+                  <button
+                    onClick={() => setSelectedTutorStatus("all")}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-medium transition ${
+                      selectedTutorStatus === "all"
+                        ? "bg-slate-800 text-white font-semibold"
+                        : "text-slate-400 hover:text-white"
+                    }`}
+                  >
+                    All
+                  </button>
+                  <button
+                    onClick={() => setSelectedTutorStatus("engaged")}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-medium transition flex items-center gap-1.5 ${
+                      selectedTutorStatus === "engaged"
+                        ? "bg-emerald-500/20 text-emerald-300 font-semibold border border-emerald-500/30"
+                        : "text-slate-400 hover:text-emerald-400"
+                    }`}
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                    <span>Engaged ({tutorMetrics.engaged})</span>
+                  </button>
+                  <button
+                    onClick={() => setSelectedTutorStatus("standby")}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-medium transition flex items-center gap-1.5 ${
+                      selectedTutorStatus === "standby"
+                        ? "bg-amber-500/20 text-amber-300 font-semibold border border-amber-500/30"
+                        : "text-slate-400 hover:text-amber-400"
+                    }`}
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                    <span>Standby ({tutorMetrics.standby})</span>
+                  </button>
+                </div>
               </div>
+
+              {/* Responsive 3-Column Tutor Grid: Cards wrap cleanly like others! */}
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                {filteredTutors.map((tutor) => {
+                  const assigned = getTeacherCourses(tutor);
+                  const isEngaged = getTeacherIsEngaged(tutor);
+                  return (
+                    <TutorCard
+                      key={tutor.id}
+                      user={tutor}
+                      assignedCourses={assigned}
+                      isEngaged={isEngaged}
+                      handleViewUser={handleViewUser}
+                      handleEditUser={handleEditUser}
+                      handlePurgeUser={handlePurgeUser}
+                      handleDeleteUser={handleDeleteUser}
+                      processing={processing}
+                    />
+                  );
+                })}
+              </div>
+
+              {filteredTutors.length === 0 && (
+                <div className="p-12 text-center rounded-2xl bg-slate-900/40 border border-slate-800 text-slate-400">
+                  <i className="fas fa-filter text-2xl mb-2 text-slate-500" />
+                  <p className="text-sm">No tutors match the selected department or status filters.</p>
+                </div>
+              )}
             </div>
           )}
 
-          {/* 3. GUARDIAN VIEW */}
+          {/* 3. GUARDIAN VIEW (Grid of Cards) */}
           {usersFilters.role === "parent" && (
             <div className="space-y-6">
               <div className="p-4 rounded-2xl bg-purple-950/20 border border-purple-500/30 flex items-center justify-between">
@@ -1447,7 +1566,7 @@ const UsersTab = ({
                   </p>
                 </div>
                 <div className="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-300 flex items-center justify-center">
-                  <i className="fas fa-user-shield" />
+                  <i className="fas fa-user-friends text-base" />
                 </div>
               </div>
 
@@ -1467,7 +1586,7 @@ const UsersTab = ({
             </div>
           )}
 
-          {/* 4. ADMIN VIEW (eStudyGate Role Permissions Model) */}
+          {/* 4. ADMIN VIEW (eStudyGate Role Permissions Model + Grid of Cards) */}
           {usersFilters.role === "admin" && (
             <div className="space-y-8">
               {/* 4 Role Governance Cards */}
@@ -1527,7 +1646,7 @@ const UsersTab = ({
             </div>
           )}
 
-          {/* 5. ALL ROLES VIEW (Rich unified cards) */}
+          {/* 5. ALL ROLES VIEW (Rich unified cards in 3-column grid) */}
           {usersFilters.role === "" && (
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -1550,10 +1669,14 @@ const UsersTab = ({
                     );
                   }
                   if (user.role === "teacher") {
+                    const assigned = getTeacherCourses(user);
+                    const isEngaged = getTeacherIsEngaged(user);
                     return (
                       <TutorCard
                         key={user.id}
                         user={user}
+                        assignedCourses={assigned}
+                        isEngaged={isEngaged}
                         handleViewUser={handleViewUser}
                         handleEditUser={handleEditUser}
                         handlePurgeUser={handlePurgeUser}
@@ -1765,168 +1888,171 @@ const UsersTab = ({
                 </tr>
               </thead>
               <tbody>
-                {users?.map((user) => (
-                  <tr
-                    key={user.id}
-                    className={`border-b border-slate-800 ${
-                      user.is_superuser ? "bg-amber-500/[0.04]" : "hover:bg-slate-800/20 transition"
-                    }`}
-                  >
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        {getStorageUrl(user.avatar) ? (
-                          <img
-                            src={getStorageUrl(user.avatar)}
-                            alt={user.username}
-                            className="w-10 h-10 rounded-full object-cover flex-shrink-0"
-                          />
-                        ) : (
-                          <div
-                            className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${getRoleColor(
+                {users?.map((user) => {
+                  const assigned = user.role === "teacher" ? getTeacherCourses(user) : [];
+                  return (
+                    <tr
+                      key={user.id}
+                      className={`border-b border-slate-800 ${
+                        user.is_superuser ? "bg-amber-500/[0.04]" : "hover:bg-slate-800/20 transition"
+                      }`}
+                    >
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          {getStorageUrl(user.avatar) ? (
+                            <img
+                              src={getStorageUrl(user.avatar)}
+                              alt={user.username}
+                              className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+                            />
+                          ) : (
+                            <div
+                              className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${getRoleColor(
+                                user.role,
+                              )}`}
+                            >
+                              <i
+                                className={`fas ${
+                                  user.is_superuser ? "fa-crown text-amber-400" : "fa-user text-white"
+                                }`}
+                              />
+                            </div>
+                          )}
+                          <div>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <p className="font-medium text-white">
+                                {getDisplayName(user) || "Unknown User"}
+                              </p>
+                              {user.is_superuser && (
+                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-amber-500/15 border border-amber-500/30 text-amber-400 text-[9px] font-black uppercase tracking-wider">
+                                  <i className="fas fa-crown text-[8px]" />
+                                  Super Admin
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-sm text-slate-400">{user.email}</p>
+                            {user.role === "student" && user.roll_no != null && (
+                              <p className="text-sm text-slate-400">Roll #{user.roll_no}</p>
+                            )}
+                            {user.role === "student" && tagsFor(user).length > 0 && (
+                              <div className="flex flex-wrap gap-1 mt-1.5 max-w-xs">
+                                {tagsFor(user).map((tag) => (
+                                  <TagChip
+                                    key={tag.id}
+                                    tag={tag}
+                                    onClick={() => handleFilterChange("tags", String(tag.id))}
+                                  />
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="space-y-1">
+                          <span
+                            className={`px-2 py-1 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest ${getRoleColor(
                               user.role,
                             )}`}
                           >
-                            <i
-                              className={`fas ${
-                                user.is_superuser ? "fa-crown text-amber-400" : "fa-user text-white"
-                              }`}
-                            />
-                          </div>
-                        )}
-                        <div>
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <p className="font-medium text-white">
-                              {getDisplayName(user) || "Unknown User"}
+                            {displayRole(user.role)}
+                          </span>
+                          {user.role === "student" && user.enrolled_courses?.length > 0 && (
+                            <p className="text-xs text-slate-400">
+                              {user.enrolled_courses.length} enrolled: {user.enrolled_courses.map((c) => c.title).slice(0, 2).join(", ")}
+                              {user.enrolled_courses.length > 2 ? "..." : ""}
                             </p>
-                            {user.is_superuser && (
-                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-amber-500/15 border border-amber-500/30 text-amber-400 text-[9px] font-black uppercase tracking-wider">
-                                <i className="fas fa-crown text-[8px]" />
-                                Super Admin
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-sm text-slate-400">{user.email}</p>
-                          {user.role === "student" && user.roll_no != null && (
-                            <p className="text-sm text-slate-400">Roll #{user.roll_no}</p>
                           )}
-                          {user.role === "student" && tagsFor(user).length > 0 && (
-                            <div className="flex flex-wrap gap-1 mt-1.5 max-w-xs">
-                              {tagsFor(user).map((tag) => (
-                                <TagChip
-                                  key={tag.id}
-                                  tag={tag}
-                                  onClick={() => handleFilterChange("tags", String(tag.id))}
-                                />
-                              ))}
-                            </div>
+                          {user.role === "teacher" && (
+                            <p className="text-xs text-slate-400">
+                              {assigned.length > 0
+                                ? `${assigned.length} assigned class(es)`
+                                : "Standby (0 assigned)"}
+                            </p>
+                          )}
+                          {user.role === "parent" && user.linked_children?.length > 0 && (
+                            <p className="text-xs text-slate-400">
+                              {user.linked_children.length} linked child(ren)
+                            </p>
                           )}
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="space-y-1">
+                      </td>
+                      <td className="px-6 py-4">
                         <span
-                          className={`px-2 py-1 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest ${getRoleColor(
-                            user.role,
+                          className={`px-2 py-1 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest ${getStatusColor(
+                            user.is_active,
                           )}`}
                         >
-                          {displayRole(user.role)}
+                          {user.is_active ? "Active" : "Inactive"}
                         </span>
-                        {user.role === "student" && user.enrolled_courses?.length > 0 && (
-                          <p className="text-xs text-slate-400">
-                            {user.enrolled_courses.length} enrolled: {user.enrolled_courses.map((c) => c.title).slice(0, 2).join(", ")}
-                            {user.enrolled_courses.length > 2 ? "..." : ""}
-                          </p>
-                        )}
-                        {user.role === "teacher" && (
-                          <p className="text-xs text-slate-400">
-                            {user.assigned_courses?.length > 0
-                              ? `${user.assigned_courses.length} assigned class(es)`
-                              : "Standby (0 assigned)"}
-                          </p>
-                        )}
-                        {user.role === "parent" && user.linked_children?.length > 0 && (
-                          <p className="text-xs text-slate-400">
-                            {user.linked_children.length} linked child(ren)
-                          </p>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span
-                        className={`px-2 py-1 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest ${getStatusColor(
-                          user.is_active,
-                        )}`}
-                      >
-                        {user.is_active ? "Active" : "Inactive"}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      {user.is_superuser ? (
-                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 w-fit">
-                          <i className="fas fa-lock text-amber-500/70 text-xs" />
-                          <span className="text-amber-600/90 text-xs font-semibold">System Protected</span>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-2">
-                          {user.role === "student" && (
-                            <button
-                              onClick={() => setTagModalUser(user)}
-                              className="w-8 h-8 flex items-center justify-center bg-slate-700/50 text-slate-400 rounded-lg hover:bg-slate-600/50 hover:text-indigo-300 transition"
-                              title="Manage labels"
-                            >
-                              <i className="fas fa-tags text-xs" />
-                            </button>
-                          )}
-                          <button
-                            onClick={() => handleViewUser(user.id)}
-                            className="w-8 h-8 flex items-center justify-center bg-slate-700/50 text-slate-400 rounded-lg hover:bg-slate-600/50 hover:text-slate-200 transition"
-                            title="View user"
-                          >
-                            <i className="fas fa-eye text-xs" />
-                          </button>
-                          <button
-                            onClick={() => handleEditUser(user.id)}
-                            className="w-8 h-8 flex items-center justify-center bg-slate-700/50 text-slate-300 rounded-lg hover:bg-slate-600/50 transition"
-                            title="Edit user"
-                          >
-                            <i className="fas fa-edit text-xs" />
-                          </button>
-                          <button
-                            onClick={() => handlePurgeUser(user)}
-                            disabled={!!processing[user.id]}
-                            className="w-8 h-8 flex items-center justify-center bg-red-900/20 text-red-400 rounded-lg hover:bg-red-900/40 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                            title={processing[user.id] === "purging" ? "Deleting..." : "Permanently delete"}
-                          >
-                            <i className={`fas ${processing[user.id] === "purging" ? "fa-spinner fa-spin" : "fa-trash"} text-xs`} />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteUser(user)}
-                            disabled={!!processing[user.id]}
-                            style={{ minWidth: "100px" }}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition text-center disabled:opacity-50 disabled:cursor-not-allowed ${
-                              user.is_active
-                                ? "bg-amber-600/10 text-amber-400 hover:bg-amber-600/20"
-                                : "bg-emerald-600/10 text-emerald-400 hover:bg-emerald-600/20"
-                            }`}
-                          >
-                            {processing[user.id] === "toggling" ? (
-                              <>
-                                <i className="fas fa-spinner fa-spin mr-1" />
-                                {user.is_active ? "Deactivating..." : "Activating..."}
-                              </>
-                            ) : (
-                              <>
-                                <i className={`fas ${user.is_active ? "fa-ban" : "fa-check-circle"} mr-1`} />
-                                {user.is_active ? "Deactivate" : "Activate"}
-                              </>
+                      </td>
+                      <td className="px-6 py-4">
+                        {user.is_superuser ? (
+                          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 w-fit">
+                            <i className="fas fa-lock text-amber-500/70 text-xs" />
+                            <span className="text-amber-600/90 text-xs font-semibold">System Protected</span>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            {user.role === "student" && (
+                              <button
+                                onClick={() => setTagModalUser(user)}
+                                className="w-8 h-8 flex items-center justify-center bg-slate-700/50 text-slate-400 rounded-lg hover:bg-slate-600/50 hover:text-indigo-300 transition"
+                                title="Manage labels"
+                              >
+                                <i className="fas fa-tags text-xs" />
+                              </button>
                             )}
-                          </button>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                ))}
+                            <button
+                              onClick={() => handleViewUser(user.id)}
+                              className="w-8 h-8 flex items-center justify-center bg-slate-700/50 text-slate-400 rounded-lg hover:bg-slate-600/50 hover:text-slate-200 transition"
+                              title="View user"
+                            >
+                              <i className="fas fa-eye text-xs" />
+                            </button>
+                            <button
+                              onClick={() => handleEditUser(user.id)}
+                              className="w-8 h-8 flex items-center justify-center bg-slate-700/50 text-slate-300 rounded-lg hover:bg-slate-600/50 transition"
+                              title="Edit user"
+                            >
+                              <i className="fas fa-edit text-xs" />
+                            </button>
+                            <button
+                              onClick={() => handlePurgeUser(user)}
+                              disabled={!!processing[user.id]}
+                              className="w-8 h-8 flex items-center justify-center bg-red-900/20 text-red-400 rounded-lg hover:bg-red-900/40 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                              title={processing[user.id] === "purging" ? "Deleting..." : "Permanently delete"}
+                            >
+                              <i className={`fas ${processing[user.id] === "purging" ? "fa-spinner fa-spin" : "fa-trash"} text-xs`} />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteUser(user)}
+                              disabled={!!processing[user.id]}
+                              style={{ minWidth: "100px" }}
+                              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition text-center disabled:opacity-50 disabled:cursor-not-allowed ${
+                                user.is_active
+                                  ? "bg-amber-600/10 text-amber-400 hover:bg-amber-600/20"
+                                  : "bg-emerald-600/10 text-emerald-400 hover:bg-emerald-600/20"
+                              }`}
+                            >
+                              {processing[user.id] === "toggling" ? (
+                                <>
+                                  <i className="fas fa-spinner fa-spin mr-1" />
+                                  {user.is_active ? "Deactivating..." : "Activating..."}
+                                </>
+                              ) : (
+                                <>
+                                  <i className={`fas ${user.is_active ? "fa-ban" : "fa-check-circle"} mr-1`} />
+                                  {user.is_active ? "Deactivate" : "Activate"}
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
