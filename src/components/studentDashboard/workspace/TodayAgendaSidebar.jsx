@@ -10,10 +10,8 @@ import ReferralLinkCard from "../../common/ReferralLinkCard";
 
 const TodayAgendaSidebar = ({
   onOpenSubmitModal,
-  onRequestTranscript,
   onRequestLeave,
   onOpenTimezone,
-  onApplyFreeAccess,
   onViewAllSchedule,
   onViewAllPlanner,
 }) => {
@@ -270,26 +268,13 @@ const TodayAgendaSidebar = ({
         </div>
       </div>
 
-      {/* 4. Quick Actions Card (Full Action Suite) */}
+      {/* 4. Quick Actions Card */}
       <div className="rounded-2xl bg-slate-900/80 border border-white/10 p-5 shadow-xl space-y-3">
         <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 pb-2 border-b border-white/10">
           Quick Academic Actions
         </h4>
 
         <div className="space-y-1.5 text-xs">
-          {onRequestTranscript && (
-            <button
-              onClick={onRequestTranscript}
-              className="w-full p-2.5 rounded-xl hover:bg-white/5 text-slate-300 hover:text-white transition flex items-center justify-between cursor-pointer text-left"
-            >
-              <span className="flex items-center gap-2.5">
-                <i className="fas fa-file-alt text-indigo-400 text-xs w-4 text-center" />
-                <span>Request Official Transcript</span>
-              </span>
-              <i className="fas fa-chevron-right text-[10px] text-slate-500" />
-            </button>
-          )}
-
           {onRequestLeave && (
             <button
               onClick={onRequestLeave}
@@ -327,18 +312,16 @@ const TodayAgendaSidebar = ({
             <i className="fas fa-chevron-right text-[10px] text-slate-500" />
           </button>
 
-          {onApplyFreeAccess && (
-            <button
-              onClick={onApplyFreeAccess}
-              className="w-full p-2.5 rounded-xl hover:bg-white/5 text-slate-300 hover:text-white transition flex items-center justify-between cursor-pointer text-left"
-            >
-              <span className="flex items-center gap-2.5">
-                <i className="fas fa-hand-holding-heart text-pink-400 text-xs w-4 text-center" />
-                <span>Apply for Free Access</span>
-              </span>
-              <i className="fas fa-chevron-right text-[10px] text-slate-500" />
-            </button>
-          )}
+          <button
+            onClick={() => navigate("/courses")}
+            className="w-full p-2.5 rounded-xl hover:bg-white/5 text-slate-300 hover:text-white transition flex items-center justify-between cursor-pointer text-left"
+          >
+            <span className="flex items-center gap-2.5">
+              <i className="fas fa-compass text-indigo-400 text-xs w-4 text-center" />
+              <span>Browse Course Catalog</span>
+            </span>
+            <i className="fas fa-chevron-right text-[10px] text-slate-500" />
+          </button>
         </div>
       </div>
 

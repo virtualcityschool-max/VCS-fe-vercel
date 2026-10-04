@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { selectEnrolledCourses } from "../../../store/slices/studentDashboardSlice";
 import { toastManager } from "../../../utils/toastManager";
 
-const ResourcesTab = ({ onRequestTranscript }) => {
+const ResourcesTab = () => {
+  const navigate = useNavigate();
   const enrolledCourses = useSelector(selectEnrolledCourses) || [];
   const [activeDocSubject, setActiveDocSubject] = useState("all");
   const [activeVideoModal, setActiveVideoModal] = useState(null);
@@ -234,17 +236,18 @@ const ResourcesTab = ({ onRequestTranscript }) => {
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-950/60 via-slate-900 to-slate-900 border border-indigo-500/20 p-6 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h4 className="text-base font-bold text-white">
-            Looking for older academic records?
+            Need additional learning resources or past papers?
           </h4>
           <p className="text-xs text-slate-400 mt-0.5">
-            Access your complete academic history, past session archives, and transcripts from previous terms.
+            Access Cambridge syllabus specifications, solved past papers, and revision notes across our curriculum catalog.
           </p>
         </div>
         <button
-          onClick={onRequestTranscript}
-          className="shrink-0 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs uppercase tracking-wider transition shadow-lg shadow-indigo-600/30 cursor-pointer"
+          onClick={() => navigate("/courses")}
+          className="shrink-0 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs uppercase tracking-wider transition shadow-lg shadow-indigo-600/30 cursor-pointer flex items-center gap-2"
         >
-          View Archive & Transcripts
+          <i className="fas fa-book-open text-xs" />
+          <span>Browse Course Library</span>
         </button>
       </div>
 

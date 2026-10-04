@@ -25,13 +25,11 @@ import {
   AttendanceTab,
   ResourcesTab,
   TodayAgendaSidebar,
-  RequestTranscriptModal,
   RequestLeaveModal,
   AssignmentSubmitModal,
 } from "../../components/studentDashboard/workspace";
 import StudentAssessments from "./StudentAssessments";
 import TimezoneModal from "../../components/common/TimezoneModal";
-import ApplyFreeAccessModal from "../../components/public/ApplyFreeAccessModal";
 
 const VALID_TABS = [
   "overview",
@@ -60,12 +58,10 @@ const StudentPortal = () => {
   const pendingAssignmentsCount = useSelector(selectPendingAssignmentsCount) || 0;
 
   const [hasMounted, setHasMounted] = useState(false);
-  const [freeAccessOpen, setFreeAccessOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(
     () => searchParams.get("tab") || "overview"
   );
   const [submittingAssignment, setSubmittingAssignment] = useState(null);
-  const [isTranscriptModalOpen, setIsTranscriptModalOpen] = useState(false);
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
   const [isTimezoneModalOpen, setIsTimezoneModalOpen] = useState(false);
 
@@ -230,11 +226,7 @@ const StudentPortal = () => {
               />
             )}
 
-            {activeTab === "resources" && (
-              <ResourcesTab
-                onRequestTranscript={() => setIsTranscriptModalOpen(true)}
-              />
-            )}
+            {activeTab === "resources" && <ResourcesTab />}
 
             {(activeTab === "assessments" ||
               activeTab === "evaluations" ||
@@ -250,10 +242,8 @@ const StudentPortal = () => {
           <div className="lg:col-span-4 space-y-6 animate-fadeInUp" style={{ animationDelay: "0.1s" }}>
             <TodayAgendaSidebar
               onOpenSubmitModal={(asg) => setSubmittingAssignment(asg)}
-              onRequestTranscript={() => setIsTranscriptModalOpen(true)}
               onRequestLeave={() => setIsLeaveModalOpen(true)}
               onOpenTimezone={() => setIsTimezoneModalOpen(true)}
-              onApplyFreeAccess={() => setFreeAccessOpen(true)}
               onViewAllSchedule={() => handleSelectTab("schedule")}
               onViewAllPlanner={() => handleSelectTab("planner")}
             />
@@ -270,12 +260,6 @@ const StudentPortal = () => {
         />
       )}
 
-      {isTranscriptModalOpen && (
-        <RequestTranscriptModal
-          onClose={() => setIsTranscriptModalOpen(false)}
-        />
-      )}
-
       {isLeaveModalOpen && (
         <RequestLeaveModal
           enrolledCourses={enrolledCourses}
@@ -288,10 +272,6 @@ const StudentPortal = () => {
           isOpen={isTimezoneModalOpen}
           onClose={() => setIsTimezoneModalOpen(false)}
         />
-      )}
-
-      {freeAccessOpen && (
-        <ApplyFreeAccessModal onClose={() => setFreeAccessOpen(false)} />
       )}
     </section>
   );
