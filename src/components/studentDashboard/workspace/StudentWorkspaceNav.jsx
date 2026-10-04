@@ -11,9 +11,11 @@ const TABS = [
 ];
 
 const StudentWorkspaceNav = ({ activeTab, onSelectTab, counts = {} }) => {
+  const currentTabObj = TABS.find((t) => t.id === activeTab) || TABS[0];
+
   return (
-    <div className="border-b border-white/10 pb-1">
-      <div className="flex items-center gap-1 sm:gap-2.5 overflow-x-auto no-scrollbar py-1">
+    <div className="border-b border-white/10 pb-3 flex items-center justify-between gap-3 flex-wrap">
+      <div className="flex items-center gap-1.5 sm:gap-2.5">
         {TABS.map((tab) => {
           const isActive = activeTab === tab.id;
           const count = counts[tab.id];
@@ -22,26 +24,43 @@ const StudentWorkspaceNav = ({ activeTab, onSelectTab, counts = {} }) => {
             <button
               key={tab.id}
               onClick={() => onSelectTab(tab.id)}
-              className={`relative flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold tracking-tight transition-all duration-200 whitespace-nowrap cursor-pointer ${
+              title={tab.label}
+              aria-label={tab.label}
+              className={`group relative flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-xl transition-all duration-200 cursor-pointer ${
                 isActive
-                  ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30"
+                  ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30 scale-105"
                   : "text-slate-400 hover:text-white hover:bg-white/5"
               }`}
             >
-              <i className={`${tab.icon} text-xs ${isActive ? "text-white" : "text-slate-400"}`} />
-              <span>{tab.label}</span>
+              <i
+                className={`${tab.icon} ${
+                  isActive
+                    ? "text-white text-base"
+                    : "text-slate-400 group-hover:text-slate-200 text-sm"
+                }`}
+              />
+
               {typeof count === "number" && count > 0 && (
-                <span
-                  className={`ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-extrabold ${
-                    isActive ? "bg-white/20 text-white" : "bg-indigo-500/20 text-indigo-300"
-                  }`}
-                >
+                <span className="absolute -top-1 -right-1 px-1.5 py-0.2 rounded-full text-[9px] font-black bg-rose-500 text-white shadow">
                   {count}
                 </span>
               )}
+
+              {/* Instant hover tooltip */}
+              <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-lg bg-slate-900 border border-slate-700 text-white text-[11px] font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-150 z-30 shadow-xl">
+                {tab.label}
+              </span>
             </button>
           );
         })}
+      </div>
+
+      {/* Active Tab View Label Indicator */}
+      <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/[0.03] border border-white/10">
+        <i className={`${currentTabObj.icon} text-xs text-indigo-400`} />
+        <span className="text-xs font-bold text-white tracking-wide">
+          {currentTabObj.label}
+        </span>
       </div>
     </div>
   );
