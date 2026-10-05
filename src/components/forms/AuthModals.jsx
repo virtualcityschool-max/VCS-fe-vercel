@@ -12,6 +12,7 @@ import {
   resendOtp,
 } from "../../store/slices/authSlice";
 import GoogleSignInButton from "../common/GoogleSignInButton";
+import { GOOGLE_AUTH_ENABLED } from "../../constants";
 import { fetchCategories } from "../../store/slices/coursesSlice";
 import { authService } from "../../services/authService";
 import { normalizeApiError } from "../../utils/errorHandler";
@@ -146,7 +147,7 @@ const AuthModals = () => {
     setOtpError("");
 
     // Reset OTP states
-    setRegistrationStep("google_prompt");
+    setRegistrationStep(GOOGLE_AUTH_ENABLED ? "google_prompt" : "form");
     setOtp("");
 
     // Reset password visibility states
@@ -235,7 +236,7 @@ const AuthModals = () => {
       setGradeLevel("");
       setChildInput("");
       setChildEntries([]);
-      setRegistrationStep(isOpen === "register" ? "google_prompt" : "form");
+      setRegistrationStep(isOpen === "register" && GOOGLE_AUTH_ENABLED ? "google_prompt" : "form");
       setGoogleCredential("");
       setGoogleProfile(null);
       setPhone("");
@@ -835,7 +836,7 @@ const AuthModals = () => {
               </div>
             )}
 
-            {!adminMode && (
+            {!adminMode && GOOGLE_AUTH_ENABLED && (
               <div className="flex flex-col items-center mb-5">
                 <GoogleSignInButton
                   text="signin_with"
@@ -1612,6 +1613,7 @@ const AuthModals = () => {
                   <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-2">
                     Join the Virtual City School terminal
                   </p>
+                  {GOOGLE_AUTH_ENABLED && (
                   <button
                     type="button"
                     onClick={() => setRegistrationStep("google_prompt")}
@@ -1620,6 +1622,7 @@ const AuthModals = () => {
                     <i className="fab fa-google text-xs" />
                     Sign up with Google (Recommended)
                   </button>
+                  )}
                 </div>
                 
                 {/* Add all other form fields (first/last name, password, confirmPassword, role) */}

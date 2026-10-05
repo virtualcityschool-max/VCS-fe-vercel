@@ -11,6 +11,11 @@ export const GOOGLE_CLIENT_ID =
   import.meta.env.VITE_GOOGLE_CLIENT_ID ||
   "953842157843-0mifojo7s7nbsq8fhl9e4bo594g9p55h.apps.googleusercontent.com";
 
+// Google Sign-In needs the /auth/google/ endpoints, which only the new
+// Supabase backend has. Keep it off until the backend cutover.
+export const GOOGLE_AUTH_ENABLED =
+  import.meta.env.VITE_ENABLE_GOOGLE_AUTH === "true";
+
 
 // Role Constants
 export const ROLES = {
