@@ -86,32 +86,38 @@ const TimezoneIndicator = ({ isCollapsed, onOpenTimezoneModal }) => {
 
 const NAV_CONFIG = {
   admin: [
-    { id: "overview",    label: "Overview",     icon: "fas fa-chart-line",    to: "/admin/overview" },
+    { id: "overview",            label: "Overview",             icon: "fas fa-chart-line",      to: "/admin/overview" },
 
-    { id: "courses",             label: "Subjects",            icon: "fas fa-book",            to: "/admin/courses",               section: "Academics" },
-    { id: "teachers",            label: "Teachers",            icon: "fas fa-chalkboard-user", to: "/admin/users?role=teacher",    section: "Academics" },
-    { id: "teacher-allocations", label: "Teacher Allocations", icon: "fas fa-thumbtack",       to: "/admin/teacher-allocations",   section: "Academics" },
-    { id: "students",            label: "Students",            icon: "fas fa-user-graduate",   to: "/admin/users?role=student",    section: "Academics" },
-    { id: "enrollments",         label: "Student Enrollments", icon: "fas fa-clipboard-list", to: "/admin/enrollments",           section: "Academics" },
-    { id: "sessions",            label: "Timetable",           icon: "fas fa-chalkboard",      to: "/admin/sessions",              section: "Academics" },
-    { id: "teacher-planner",     label: "Teacher Meetings",     icon: "fas fa-user-clock",      to: "/admin/teacher-planner",       section: "Academics" },
+    // ── Academics ──
+    { id: "courses",             label: "Subjects",             icon: "fas fa-book",            to: "/admin/courses",               section: "Academics" },
+    { id: "teachers",            label: "Teachers",             icon: "fas fa-chalkboard-user", to: "/admin/users?role=teacher",    section: "Academics" },
+    { id: "teacher-allocations", label: "Teacher Allocations",  icon: "fas fa-thumbtack",       to: "/admin/teacher-allocations",   section: "Academics" },
+    { id: "sessions",            label: "Timetable",            icon: "fas fa-chalkboard",      to: "/admin/sessions",              section: "Academics" },
+    { id: "teacher-planner",     label: "Teacher Meetings",      icon: "fas fa-user-clock",      to: "/admin/teacher-planner",       section: "Academics" },
 
-    { id: "approvals",   label: "Pending Approvals",    icon: "fas fa-user-check",    to: "/admin/approvals",  section: "People & Admissions" },
-    { id: "parents",     label: "Parents",              icon: "fas fa-people-roof",   to: "/admin/users?role=parent", section: "People & Admissions" },
-    { id: "users",       label: "All Users",            icon: "fas fa-users",         to: "/admin/users",      section: "People & Admissions" },
-    { id: "referrals",   label: "Referrals",            icon: "fas fa-share-nodes",    to: "/admin/referrals", section: "People & Admissions" },
+    // ── Students & Records ──
+    { id: "students",            label: "Students",             icon: "fas fa-user-graduate",   to: "/admin/users?role=student",    section: "Students & Records" },
+    { id: "enrollments",         label: "Student Enrollments",  icon: "fas fa-clipboard-list",  to: "/admin/enrollments",           section: "Students & Records" },
+    { id: "parents",             label: "Parents",               icon: "fas fa-people-roof",    to: "/admin/users?role=parent",     section: "Students & Records" },
+    { id: "attendance",          label: "Attendance",            icon: "fas fa-clipboard-user", to: "/admin/attendance",           section: "Students & Records" },
+    { id: "evaluations",         label: "Evaluations",           icon: "fas fa-chart-bar",       to: "/admin/evaluations",          section: "Students & Records" },
 
-    { id: "subscriptions",   label: "Subscriptions", icon: "fas fa-credit-card", to: "/admin/subscriptions", section: "Finance & Records" },
-    { id: "attendance",  label: "Attendance",   icon: "fas fa-clipboard-user", to: "/admin/attendance",   section: "Finance & Records" },
-    { id: "evaluations", label: "Evaluations",  icon: "fas fa-chart-bar",      to: "/admin/evaluations",  section: "Finance & Records" },
+    // ── Admissions ──
+    { id: "approvals",           label: "Pending Approvals",     icon: "fas fa-user-check",     to: "/admin/approvals",             section: "Admissions" },
 
-    { id: "blogs",       label: "Blogs",        icon: "fas fa-newspaper",     to: "/admin/blogs", section: "Content" },
-    { id: "vlogs",       label: "Vlogs",        icon: "fas fa-circle-play",   to: "/admin/vlogs", section: "Content" },
-    { id: "testimonials", label: "Testimonials", icon: "fas fa-quote-left",   to: "/admin/testimonials", section: "Content" },
+    // ── Finance ──
+    { id: "subscriptions",       label: "Subscriptions",         icon: "fas fa-credit-card",    to: "/admin/subscriptions",         section: "Finance" },
+    { id: "referrals",           label: "Referrals",             icon: "fas fa-share-nodes",     to: "/admin/referrals",             section: "Finance" },
 
-    { id: "levels",  label: "Levels",   icon: "fas fa-tags",           to: "/admin/course-levels", section: "Settings" },
-    { id: "about",    label: "About Us",          icon: "fas fa-info-circle", to: "/admin/about",  section: "Settings" },
-    { id: "settings", label: "Platform Settings",  icon: "fas fa-sliders-h",   to: "/admin/settings", section: "Settings" },
+    // ── Content ──
+    { id: "blogs",               label: "Blogs",                 icon: "fas fa-newspaper",      to: "/admin/blogs",                 section: "Content" },
+    { id: "vlogs",               label: "Vlogs",                 icon: "fas fa-circle-play",    to: "/admin/vlogs",                 section: "Content" },
+    { id: "testimonials",        label: "Testimonials",          icon: "fas fa-quote-left",    to: "/admin/testimonials",          section: "Content" },
+
+    // ── Settings ──
+    { id: "levels",              label: "Levels",                icon: "fas fa-tags",            to: "/admin/course-levels",         section: "Settings" },
+    { id: "about",               label: "About Us",              icon: "fas fa-info-circle",    to: "/admin/about",                 section: "Settings" },
+    { id: "settings",            label: "Platform Settings",     icon: "fas fa-sliders-h",      to: "/admin/settings",              section: "Settings" },
   ],
   teacher: [
     { label: "Dashboard",    to: "/teacher",                  icon: "fas fa-table-columns",   end: true },

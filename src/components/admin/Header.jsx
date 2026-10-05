@@ -74,10 +74,15 @@ const Header = ({ activeTab, children }) => {
           title: "Teacher Meetings",
           description: "Schedule and manage meetings and consultation slots for teachers",
         };
+      case "subscriptions":
+        return {
+          title: "Subscriptions",
+          description: "Track Gumroad student memberships, active course subscriptions, and billing records",
+        };
       case "referrals":
         return {
-          title: "Referral Management",
-          description: "Track referral signups and enrollments across users",
+          title: "Referrals",
+          description: "Track affiliate referral links, signups, and referral reward earnings",
         };
       case "testimonials":
         return {
