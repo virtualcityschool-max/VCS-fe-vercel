@@ -1,0 +1,4 @@
+# Never upload local env files (.env.local points at the live Grayphite API)
+.env
+.env.*
+!.env.example
