@@ -10,59 +10,60 @@ const Header = ({ activeTab, children }) => {
         };
       case "approvals":
         return {
-          title: "User Approvals",
+          title: "Pending Approvals",
           description: "Review and manage pending user registration requests",
         };
       case "courses":
         return {
-          title: "Subjects & Courses Catalog",
-          description: "Manage Cambridge IGCSE, O-Level & A-Level subjects, assigned tutors, and class rosters",
+          title: "Subjects",
+          description: "Manage Cambridge IGCSE, O-Level & A-Level subjects, assigned teachers, and student rosters",
         };
       case "teachers":
         return {
-          title: "Teachers & Tutors Directory",
-          description: "Faculty management, subject allocations, and engaged vs standby teaching workload",
+          title: "Teachers",
+          description: "Teacher directory, subject allocations, and teaching workload",
         };
       case "guardians":
+      case "parents":
         return {
-          title: "Guardians & Parents Directory",
-          description: "Parent accounts, emergency WhatsApp contacts, and linked students",
+          title: "Parents",
+          description: "Parent directory, WhatsApp contacts, and linked students",
         };
       case "users":
         return {
-          title: "All Users & Staff Directory",
-          description: "Manage all system user accounts, roles, and administrative permissions",
+          title: "All Users",
+          description: "Manage system user accounts, roles, and administrative permissions",
         };
       case "enrollments":
       case "students":
         return {
-          title: "Students & Academic Enrollments",
-          description: "One-student view with instant subject add/drop (+ / ×) and fee verification",
+          title: "Students",
+          description: "Student roster, enrolled subjects, fee verification, and subject enrollment",
         };
       case "sessions":
         return {
-          title: "Class Timetable",
-          description: "Create, edit, and manage course sessions",
+          title: "Timetable",
+          description: "Create, edit, and manage live class sessions",
         };
       case "evaluations":
         return {
           title: "Evaluations",
-          description: "Review student performance across tutors and courses",
+          description: "Review student academic performance across subjects",
         };
       case "attendance":
         return {
           title: "Attendance",
-          description: "Session-wise attendance matrix for all courses.",
+          description: "Session-wise attendance matrix across all subjects.",
         };
       case "levels":
         return {
-          title: "Course Levels",
-          description: "Manage course levels for organizing your curriculum",
+          title: "Levels",
+          description: "Manage education levels for organizing your curriculum",
         };
       case "teacher-planner":
         return {
-          title: "Tutor Meetings",
-          description: "Schedule and manage recurring meetings for tutors",
+          title: "Teacher Meetings",
+          description: "Schedule and manage meetings and consultation slots for teachers",
         };
       case "referrals":
         return {

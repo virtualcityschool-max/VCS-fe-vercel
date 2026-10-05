@@ -74,7 +74,7 @@ const AppInner = () => {
     if (p.includes("/admin/settings")) return "settings";
     if (p.includes("/admin/users")) {
       if (search.includes("role=teacher")) return "teachers";
-      if (search.includes("role=parent")) return "guardians";
+      if (search.includes("role=parent")) return "parents";
       return "users";
     }
     return null;

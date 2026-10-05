@@ -292,13 +292,13 @@ const AdminCoursesPage = () => {
   // Handle instructor assignment
   const handleAssignInstructor = async (courseId, instructorId) => {
     if (!instructorId) {
-      toastManager.error("Please select an tutor");
+      toastManager.error("Please select a teacher");
       return;
     }
 
     try {
       await dispatch(assignInstructor({ courseId, instructorId })).unwrap();
-      toastManager.success("Tutor assigned successfully");
+      toastManager.success("Teacher assigned successfully");
       setActiveModal(null);
     } catch (error) {
       showApiError(error);

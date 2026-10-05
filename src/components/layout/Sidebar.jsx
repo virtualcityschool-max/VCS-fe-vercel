@@ -88,18 +88,18 @@ const NAV_CONFIG = {
   admin: [
     { id: "overview",    label: "Overview",     icon: "fas fa-chart-line",    to: "/admin/overview" },
 
-    { id: "courses",     label: "Subjects & Courses",   icon: "fas fa-book",            to: "/admin/courses",               section: "Academics" },
-    { id: "teachers",    label: "Teachers & Tutors",    icon: "fas fa-chalkboard-user", to: "/admin/users?role=teacher",    section: "Academics" },
+    { id: "courses",     label: "Subjects",             icon: "fas fa-book",            to: "/admin/courses",               section: "Academics" },
+    { id: "teachers",    label: "Teachers",             icon: "fas fa-chalkboard-user", to: "/admin/users?role=teacher",    section: "Academics" },
     { id: "students",    label: "Students",             icon: "fas fa-user-graduate",   to: "/admin/enrollments",           section: "Academics" },
-    { id: "sessions",        label: "Class Timetable",   icon: "fas fa-chalkboard",      to: "/admin/sessions",              section: "Academics" },
-    { id: "teacher-planner", label: "Tutor Meetings",    icon: "fas fa-user-clock",      to: "/admin/teacher-planner",       section: "Academics" },
+    { id: "sessions",    label: "Timetable",            icon: "fas fa-chalkboard",      to: "/admin/sessions",              section: "Academics" },
+    { id: "teacher-planner", label: "Teacher Meetings",  icon: "fas fa-user-clock",      to: "/admin/teacher-planner",       section: "Academics" },
 
-    { id: "approvals",   label: "Approval(s) Pending",    icon: "fas fa-user-check",    to: "/admin/approvals",  section: "People & Admissions" },
-    { id: "guardians",   label: "Guardians & Parents",    icon: "fas fa-people-roof",   to: "/admin/users?role=parent", section: "People & Admissions" },
-    { id: "users",       label: "All Users & Staff",      icon: "fas fa-users",         to: "/admin/users",      section: "People & Admissions" },
-    { id: "referrals",   label: "Referrals",              icon: "fas fa-share-nodes",    to: "/admin/referrals", section: "People & Admissions" },
+    { id: "approvals",   label: "Pending Approvals",    icon: "fas fa-user-check",    to: "/admin/approvals",  section: "People & Admissions" },
+    { id: "parents",     label: "Parents",              icon: "fas fa-people-roof",   to: "/admin/users?role=parent", section: "People & Admissions" },
+    { id: "users",       label: "All Users",            icon: "fas fa-users",         to: "/admin/users",      section: "People & Admissions" },
+    { id: "referrals",   label: "Referrals",            icon: "fas fa-share-nodes",    to: "/admin/referrals", section: "People & Admissions" },
 
-    { id: "subscriptions",   label: "Subscriptions & Fees", icon: "fas fa-credit-card", to: "/admin/subscriptions", section: "Finance & Records" },
+    { id: "subscriptions",   label: "Subscriptions", icon: "fas fa-credit-card", to: "/admin/subscriptions", section: "Finance & Records" },
     { id: "attendance",  label: "Attendance",   icon: "fas fa-clipboard-user", to: "/admin/attendance",   section: "Finance & Records" },
     { id: "evaluations", label: "Evaluations",  icon: "fas fa-chart-bar",      to: "/admin/evaluations",  section: "Finance & Records" },
 
@@ -145,9 +145,9 @@ const NAV_CONFIG = {
 
 const PORTAL_LABEL = {
   admin:   "Admin Portal",
-  teacher: "Tutor Portal",
+  teacher: "Teacher Portal",
   student: "Student Portal",
-  parent:  "Guardian Portal",
+  parent:  "Parent Portal",
 };
 
 // ── Unified nav item - works for all roles ────────────────────────────────────

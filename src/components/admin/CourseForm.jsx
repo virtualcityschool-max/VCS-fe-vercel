@@ -76,7 +76,7 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
         {/* Title */}
         <div>
           <label className="block text-sm font-medium text-slate-300 mb-2">
-            Course Title <span className="text-red-400">*</span>
+            Subject Title <span className="text-red-400">*</span>
           </label>
           <Input
             type="text"
@@ -198,7 +198,7 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
         {/* Instructor */}
         <div>
           <label className="block text-sm font-medium text-slate-300 mb-2">
-            Tutor <span className="text-red-400">*</span>
+            Teacher <span className="text-red-400">*</span>
           </label>
           {mode === "edit" && (formData.has_session || formData.enrolled_students_count) ? (
             <>
@@ -212,7 +212,7 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
                 disabled
                 className="w-full px-3 py-2 bg-slate-700/40 border border-slate-700/40 rounded-lg text-slate-400 cursor-not-allowed text-sm"
               />
-              <p className="text-[10px] text-slate-500 mt-1">Tutor cannot be changed once a class has been created for this course.</p>
+              <p className="text-[10px] text-slate-500 mt-1">Teacher cannot be changed once a session has been created for this subject.</p>
             </>
           ) : (
             <>
@@ -225,7 +225,7 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
                 onChange={(e) => onChange("instructor_id", e.target.value)}
                 className={fieldClass(errors.instructor_id)}
               >
-                <option value="">Select a tutor</option>
+                <option value="">Select a teacher</option>
                 {users.map((user) => (
                   <option key={user.id} value={user.id}>
                     {user.email

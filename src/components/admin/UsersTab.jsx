@@ -91,7 +91,7 @@ const ADMIN_GOVERNANCE_ROLES = [
     border: "border-emerald-500/30",
     badgeBg: "bg-emerald-500/15 text-emerald-300",
     tagline: "Admissions & Gatekeeper",
-    description: "Vets, approves, and rejects new student sign-ups, tutor credential verification, and parent linkage.",
+    description: "Vets, approves, and rejects new student sign-ups, teacher credential verification, and parent linkage.",
   },
   {
     role: "Subject & Class Expert",
@@ -130,16 +130,16 @@ const SearchControls = ({
   const roleTabs = [
     { value: "", label: "All" },
     { value: "admin", label: "Admin(s)" },
-    { value: "teacher", label: "Tutor(s)" },
+    { value: "teacher", label: "Teacher(s)" },
     { value: "student", label: "Student(s)" },
-    { value: "parent", label: "Guardian(s)" },
+    { value: "parent", label: "Parent(s)" },
   ];
 
   const CREATE_LABEL_BY_ROLE = {
     admin: "New Admin",
-    teacher: "New Tutor",
+    teacher: "New Teacher",
     student: "New Student",
-    parent: "New Guardian",
+    parent: "New Parent",
   };
   const createUserLabel = CREATE_LABEL_BY_ROLE[usersFilters.role] || "Create User";
 
@@ -214,7 +214,7 @@ const SearchControls = ({
               usersFilters.role === "student"
                 ? "Search by name, email, roll no..."
                 : usersFilters.role === "teacher"
-                  ? "Search tutors, subjects, expertise..."
+                  ? "Search teachers, subjects, expertise..."
                   : "Search users..."
             }
             className="w-full sm:w-64 sm:mr-auto xl:mr-0"
@@ -584,7 +584,7 @@ const TutorCard = ({
         {/* User Identity: Full Name & Full Email (Zero Truncation) */}
         <div className="space-y-1">
           <h4 className="font-bold text-white text-base leading-snug break-words">
-            {getDisplayName(user) || "Tutor"}
+            {getDisplayName(user) || "Teacher"}
           </h4>
           <p className="text-xs text-slate-400 font-mono break-all select-all">
             {user.email}
@@ -616,16 +616,16 @@ const TutorCard = ({
         {/* Assigned Classes vs Standby Notification */}
         <div className="space-y-1.5 pt-2 border-t border-slate-800/80">
           <div className="text-[11px] text-slate-400 font-semibold uppercase tracking-wider flex items-center justify-between">
-            <span>{engaged ? `Assigned Courses (${courses.length})` : "Current Status"}</span>
+            <span>{engaged ? `Assigned Subjects (${courses.length})` : "Current Status"}</span>
             {onAssignClass && (
               <button
                 type="button"
                 onClick={() => onAssignClass(user)}
                 className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 text-[10px] font-semibold hover:bg-indigo-600/30 transition cursor-pointer"
-                title="Assign Cambridge course to this tutor"
+                title="Assign Cambridge subject to this teacher"
               >
                 <i className="fas fa-plus text-[9px]" />
-                <span>Assign Class</span>
+                <span>Assign Subject</span>
               </button>
             )}
           </div>
@@ -668,7 +668,7 @@ const TutorCard = ({
             <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <i className="fas fa-clock text-amber-400" />
-                <span>Available for new class allocation</span>
+                <span>Available for new subject allocation</span>
               </div>
               {onAssignClass && (
                 <button
@@ -677,7 +677,7 @@ const TutorCard = ({
                   className="px-2.5 py-1 bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold rounded-lg text-xs transition flex items-center gap-1 shrink-0 cursor-pointer"
                 >
                   <i className="fas fa-plus text-[10px]" />
-                  <span>Assign</span>
+                  <span>Assign Subject</span>
                 </button>
               )}
             </div>
@@ -691,14 +691,14 @@ const TutorCard = ({
           <button
             onClick={() => handleViewUser(user.id)}
             className="w-8 h-8 flex items-center justify-center bg-slate-800 text-slate-400 rounded-lg hover:bg-slate-700 hover:text-white transition"
-            title="View tutor profile"
+            title="View teacher profile"
           >
             <i className="fas fa-eye text-xs" />
           </button>
           <button
             onClick={() => handleEditUser(user.id)}
             className="w-8 h-8 flex items-center justify-center bg-slate-800 text-slate-400 rounded-lg hover:bg-slate-700 hover:text-white transition"
-            title="Edit tutor"
+            title="Edit teacher"
           >
             <i className="fas fa-edit text-xs" />
           </button>
@@ -773,7 +773,7 @@ const GuardianCard = ({
         {/* User Identity: Full Name & Full Email (Zero Truncation) */}
         <div className="space-y-1">
           <h4 className="font-bold text-white text-base leading-snug break-words">
-            {getDisplayName(user) || "Guardian"}
+            {getDisplayName(user) || "Parent"}
           </h4>
           <p className="text-xs text-slate-400 font-mono break-all select-all">
             {user.email}
@@ -816,7 +816,7 @@ const GuardianCard = ({
             </div>
           ) : (
             <div className="p-3 rounded-xl bg-slate-800/50 border border-slate-700/60 text-slate-400 text-xs">
-              No students currently linked to this guardian
+              No students currently linked to this parent
             </div>
           )}
         </div>
@@ -843,14 +843,14 @@ const GuardianCard = ({
           <button
             onClick={() => handleViewUser(user.id)}
             className="w-8 h-8 flex items-center justify-center bg-slate-800 text-slate-400 rounded-lg hover:bg-slate-700 hover:text-white transition"
-            title="View guardian profile"
+            title="View parent profile"
           >
             <i className="fas fa-eye text-xs" />
           </button>
           <button
             onClick={() => handleEditUser(user.id)}
             className="w-8 h-8 flex items-center justify-center bg-slate-800 text-slate-400 rounded-lg hover:bg-slate-700 hover:text-white transition"
-            title="Edit guardian"
+            title="Edit parent"
           >
             <i className="fas fa-edit text-xs" />
           </button>
@@ -1067,7 +1067,7 @@ const AssignCourseModal = ({
             </div>
             <div>
               <h3 className="text-lg font-bold text-white leading-tight">
-                Assign Class to Tutor
+                Assign Subject to Teacher
               </h3>
               <p className="text-xs text-slate-400 mt-0.5">
                 Allocate a Cambridge subject to{" "}
@@ -1101,7 +1101,7 @@ const AssignCourseModal = ({
         <div className="flex-1 overflow-y-auto max-h-72 space-y-1.5 py-2 pr-1">
           {filtered.length === 0 ? (
             <div className="p-8 text-center text-slate-500 text-xs">
-              No matching courses found.
+              No matching subjects found.
             </div>
           ) : (
             filtered.map((course) => {
@@ -1186,7 +1186,7 @@ const AssignCourseModal = ({
           <div className="mt-3 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-start gap-2">
             <i className="fas fa-exclamation-triangle text-amber-400 mt-0.5 shrink-0" />
             <span>
-              This course is currently assigned to <strong className="text-white">{currentInstructorName}</strong>. Assigning it to {getDisplayName(teacher)} will transfer all upcoming live sessions and assignments.
+              This subject is currently assigned to <strong className="text-white">{currentInstructorName}</strong>. Assigning it to {getDisplayName(teacher)} will transfer all upcoming live sessions and assignments.
             </span>
           </div>
         )}
@@ -1214,7 +1214,7 @@ const AssignCourseModal = ({
             ) : (
               <>
                 <i className="fas fa-user-plus text-xs" />
-                <span>Assign Class</span>
+                <span>Assign Subject</span>
               </>
             )}
           </button>
@@ -1453,7 +1453,7 @@ const UsersTab = ({
     if (onCreateUser) onCreateUser();
   };
 
-  const ROLE_DISPLAY = { teacher: "Tutor", parent: "Guardian", student: "Student", admin: "Admin" };
+  const ROLE_DISPLAY = { teacher: "Teacher", parent: "Parent", student: "Student", admin: "Admin" };
   const displayRole = (r) => ROLE_DISPLAY[r] || r;
 
   const getRoleColor = (role) => {
@@ -1894,10 +1894,10 @@ const UsersTab = ({
             </div>
           )}
 
-          {/* 2. TUTOR VIEW (Responsive 3-Column Grid like Others with Subject Department Filter) */}
+          {/* 2. TEACHER VIEW (Responsive 3-Column Grid like Others with Subject Department Filter) */}
           {usersFilters.role === "teacher" && (
             <div className="space-y-6">
-              {/* Tutor Metrics Header */}
+              {/* Teacher Metrics Header */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 flex items-center justify-between">
                   <div>
@@ -1911,7 +1911,7 @@ const UsersTab = ({
 
                 <div className="p-4 rounded-2xl bg-emerald-950/20 border border-emerald-500/30 flex items-center justify-between">
                   <div>
-                    <p className="text-xs text-emerald-400 uppercase font-semibold">Engaged in Classes</p>
+                    <p className="text-xs text-emerald-400 uppercase font-semibold">Assigned to Subjects</p>
                     <p className="text-2xl font-black text-emerald-300 mt-0.5">{tutorMetrics.engaged}</p>
                   </div>
                   <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
@@ -1930,7 +1930,7 @@ const UsersTab = ({
                 </div>
               </div>
 
-              {/* Responsive 3-Column Tutor Grid: Cards wrap cleanly like others! */}
+              {/* Responsive 3-Column Teacher Grid: Cards wrap cleanly like others! */}
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {filteredTutors.map((tutor) => {
                   const assigned = getTeacherCourses(tutor);
@@ -1964,20 +1964,20 @@ const UsersTab = ({
               {filteredTutors.length === 0 && (
                 <div className="p-12 text-center rounded-2xl bg-slate-900/40 border border-slate-800 text-slate-400">
                   <i className="fas fa-filter text-2xl mb-2 text-slate-500" />
-                  <p className="text-sm">No tutors match the selected department or status filters.</p>
+                  <p className="text-sm">No teachers match the selected department or status filters.</p>
                 </div>
               )}
             </div>
           )}
 
-          {/* 3. GUARDIAN VIEW (Grid of Cards) */}
+          {/* 3. PARENT VIEW (Grid of Cards) */}
           {usersFilters.role === "parent" && (
             <div className="space-y-6">
               <div className="p-4 rounded-2xl bg-purple-950/20 border border-purple-500/30 flex items-center justify-between">
                 <div>
-                  <h4 className="text-sm font-bold text-white">Guardian Direct Communication Hub</h4>
+                  <h4 className="text-sm font-bold text-white">Parent Direct Communication Hub</h4>
                   <p className="text-xs text-purple-300 mt-0.5">
-                    Connect directly to student guardians via WhatsApp or phone call.
+                    Connect directly to student parents via WhatsApp or phone call.
                   </p>
                 </div>
                 <div className="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-300 flex items-center justify-center">
@@ -2313,16 +2313,16 @@ const UsersTab = ({
                     <th className="px-3 py-3">Email</th>
                     <th className="px-3 py-3">Grade</th>
                     <th className="px-3 py-3">Enrolled Subjects</th>
-                    <th className="px-3 py-3">Guardian</th>
+                    <th className="px-3 py-3">Parent</th>
                     <th className="px-3 py-3">Status</th>
                     <th className="px-4 py-3 text-right">Actions</th>
                   </tr>
                 ) : usersFilters.role === "teacher" ? (
                   <tr>
-                    <th className="px-4 py-3">Tutor</th>
+                    <th className="px-4 py-3">Teacher</th>
                     <th className="px-3 py-3">Email</th>
                     <th className="px-3 py-3">Department</th>
-                    <th className="px-3 py-3">Assigned Classes</th>
+                    <th className="px-3 py-3">Assigned Subjects</th>
                     <th className="px-3 py-3">Exp & Qual.</th>
                     <th className="px-3 py-3">Phone</th>
                     <th className="px-3 py-3">Status</th>
@@ -2330,7 +2330,7 @@ const UsersTab = ({
                   </tr>
                 ) : usersFilters.role === "parent" ? (
                   <tr>
-                    <th className="px-4 py-3">Guardian</th>
+                    <th className="px-4 py-3">Parent</th>
                     <th className="px-3 py-3">Email</th>
                     <th className="px-3 py-3">Phone & WhatsApp</th>
                     <th className="px-3 py-3">Linked Students</th>
@@ -2353,7 +2353,7 @@ const UsersTab = ({
                     <th className="px-3 py-3">Email</th>
                     <th className="px-3 py-3">Role</th>
                     <th className="px-3 py-3">ID / Department</th>
-                    <th className="px-3 py-3">Academic & Class Details</th>
+                    <th className="px-3 py-3">Academic & Subject Details</th>
                     <th className="px-3 py-3">Status</th>
                     <th className="px-4 py-3 text-right">Actions</th>
                   </tr>
@@ -2555,7 +2555,7 @@ const UsersTab = ({
                       const dept = getTeacherDepartment(user);
                       return (
                         <tr key={user.id} className="hover:bg-slate-800/30 transition-colors group">
-                          {/* Tutor */}
+                          {/* Teacher */}
                           <td className="px-4 py-2.5 whitespace-nowrap">
                             <div className="flex items-center gap-2.5">
                               {getStorageUrl(user.avatar) ? (
@@ -2570,7 +2570,7 @@ const UsersTab = ({
                                 </div>
                               )}
                               <p className="font-semibold text-white text-xs leading-none">
-                                {getDisplayName(user) || "Unknown Tutor"}
+                                {getDisplayName(user) || "Unknown Teacher"}
                               </p>
                             </div>
                           </td>
@@ -2590,7 +2590,7 @@ const UsersTab = ({
                             </span>
                           </td>
 
-                          {/* Assigned Classes (Workflow 2: Teacher workload & quick assign/unassign) */}
+                          {/* Assigned Subjects (Workflow 2: Teacher workload & quick assign/unassign) */}
                           <td className="px-3 py-2.5">
                             <div className="flex items-center gap-1.5 flex-wrap max-w-sm">
                               {assigned.length > 0 ? (
@@ -2625,10 +2625,10 @@ const UsersTab = ({
                                     type="button"
                                     onClick={() => setAssignClassModalTeacher(user)}
                                     className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 hover:bg-indigo-500/20 transition cursor-pointer"
-                                    title="Assign additional subject to this tutor"
+                                    title="Assign additional subject to this teacher"
                                   >
                                     <i className="fas fa-plus text-[8px]" />
-                                    <span>Class</span>
+                                    <span>Subject</span>
                                   </button>
                                 </>
                               ) : (
@@ -2636,10 +2636,10 @@ const UsersTab = ({
                                   type="button"
                                   onClick={() => setAssignClassModalTeacher(user)}
                                   className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-semibold hover:bg-amber-500/25 transition cursor-pointer"
-                                  title="Allocate Cambridge subject to available tutor"
+                                  title="Allocate Cambridge subject to available teacher"
                                 >
                                   <i className="fas fa-user-plus text-[10px]" />
-                                  <span>Standby • Assign Class</span>
+                                  <span>Standby • Assign Subject</span>
                                 </button>
                               )}
                             </div>
@@ -2693,21 +2693,21 @@ const UsersTab = ({
                               <button
                                 onClick={() => setAssignClassModalTeacher(user)}
                                 className="w-7 h-7 flex items-center justify-center bg-indigo-600/20 text-indigo-300 rounded-lg hover:bg-indigo-600/40 hover:text-white transition"
-                                title="Assign Class to this Tutor"
+                                title="Assign Subject to this Teacher"
                               >
                                 <i className="fas fa-plus text-[11px]" />
                               </button>
                               <button
                                 onClick={() => handleViewUser(user.id)}
                                 className="w-7 h-7 flex items-center justify-center bg-slate-800 text-slate-400 rounded-lg hover:bg-slate-700 hover:text-white transition"
-                                title="View tutor"
+                                title="View teacher"
                               >
                                 <i className="fas fa-eye text-[11px]" />
                               </button>
                               <button
                                 onClick={() => handleEditUser(user.id)}
                                 className="w-7 h-7 flex items-center justify-center bg-slate-800 text-slate-400 rounded-lg hover:bg-slate-700 hover:text-white transition"
-                                title="Edit tutor"
+                                title="Edit teacher"
                               >
                                 <i className="fas fa-edit text-[11px]" />
                               </button>
@@ -2743,7 +2743,7 @@ const UsersTab = ({
                     if (usersFilters.role === "parent") {
                       return (
                         <tr key={user.id} className="hover:bg-slate-800/30 transition-colors group">
-                          {/* Guardian */}
+                          {/* Parent */}
                           <td className="px-4 py-2.5 whitespace-nowrap">
                             <div className="flex items-center gap-2.5">
                               {getStorageUrl(user.avatar) ? (
@@ -2758,7 +2758,7 @@ const UsersTab = ({
                                 </div>
                               )}
                               <p className="font-semibold text-white text-xs leading-none">
-                                {getDisplayName(user) || "Unknown Guardian"}
+                                {getDisplayName(user) || "Unknown Parent"}
                               </p>
                             </div>
                           </td>
@@ -2824,14 +2824,14 @@ const UsersTab = ({
                               <button
                                 onClick={() => handleViewUser(user.id)}
                                 className="w-7 h-7 flex items-center justify-center bg-slate-800 text-slate-400 rounded-lg hover:bg-slate-700 hover:text-white transition"
-                                title="View guardian"
+                                title="View parent"
                               >
                                 <i className="fas fa-eye text-[11px]" />
                               </button>
                               <button
                                 onClick={() => handleEditUser(user.id)}
                                 className="w-7 h-7 flex items-center justify-center bg-slate-800 text-slate-400 rounded-lg hover:bg-slate-700 hover:text-white transition"
-                                title="Edit guardian"
+                                title="Edit parent"
                               >
                                 <i className="fas fa-edit text-[11px]" />
                               </button>
@@ -3073,7 +3073,7 @@ const UsersTab = ({
                           )}
                         </td>
 
-                        {/* Academic / Class Assignments */}
+                        {/* Academic / Subject Assignments */}
                         <td className="px-3 py-2.5">
                           {user.role === "student" && (
                             user.enrolled_courses && user.enrolled_courses.length > 0 ? (
@@ -3083,7 +3083,7 @@ const UsersTab = ({
                                 {user.enrolled_courses.length > 2 ? "..." : ""}
                               </span>
                             ) : (
-                              <span className="text-xs text-rose-400 italic">0 courses enrolled</span>
+                              <span className="text-xs text-rose-400 italic">0 subjects enrolled</span>
                             )
                           )}
                           {user.role === "teacher" && (
@@ -3091,15 +3091,15 @@ const UsersTab = ({
                               {assigned.length > 0 ? (
                                 <>
                                   <span className="text-xs text-emerald-400 font-semibold">
-                                    {assigned.length} class(es)
+                                    {assigned.length} subject(s)
                                   </span>
                                   <button
                                     type="button"
                                     onClick={() => setAssignClassModalTeacher(user)}
                                     className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 hover:bg-indigo-500/20 transition cursor-pointer"
-                                    title="Assign class to this tutor"
+                                    title="Assign subject to this teacher"
                                   >
-                                    <i className="fas fa-plus text-[8px]" /> Assign
+                                    <i className="fas fa-plus text-[8px]" /> Assign Subject
                                   </button>
                                 </>
                               ) : (
@@ -3107,9 +3107,9 @@ const UsersTab = ({
                                   type="button"
                                   onClick={() => setAssignClassModalTeacher(user)}
                                   className="inline-flex items-center gap-1 text-xs text-amber-400 hover:text-amber-300 font-medium transition cursor-pointer"
-                                  title="Assign class to this available tutor"
+                                  title="Assign subject to this available teacher"
                                 >
-                                  <i className="fas fa-plus text-[9px]" /> Standby • Assign Class
+                                  <i className="fas fa-plus text-[9px]" /> Standby • Assign Subject
                                 </button>
                               )}
                             </div>
@@ -3299,8 +3299,8 @@ const UsersTab = ({
         title="Unassign Subject"
         message={
           unassignDialog.teacher && unassignDialog.courseTitle
-            ? `Are you sure you want to remove "${unassignDialog.courseTitle}" from ${getDisplayName(unassignDialog.teacher)}? The course will become available for reassignment to another tutor.`
-            : "Are you sure you want to unassign this course?"
+            ? `Are you sure you want to remove "${unassignDialog.courseTitle}" from ${getDisplayName(unassignDialog.teacher)}? The subject will become available for reassignment to another teacher.`
+            : "Are you sure you want to unassign this subject?"
         }
         loading={isUnassigning}
         confirmLabel={isUnassigning ? "Unassigning..." : "Unassign Subject"}

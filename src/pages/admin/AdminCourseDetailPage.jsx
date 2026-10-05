@@ -166,7 +166,7 @@ const AdminCourseDetailPage = () => {
       if (formData.price === "" || !Number.isInteger(price) || price <= 0) errors.price = "Price must be a positive whole number for paid courses";
     }
     if (!formData.status) errors.status = "Status is required";
-    if (!formData.instructor_id) errors.instructor_id = "Tutor is required";
+    if (!formData.instructor_id) errors.instructor_id = "Teacher is required";
     return errors;
   };
 
@@ -318,7 +318,7 @@ const AdminCourseDetailPage = () => {
                 {course.description}
               </p>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <MetaTile icon="user" label="Tutor" value={getDisplayName(course.instructor) || "-"} />
+                <MetaTile icon="user" label="Teacher" value={getDisplayName(course.instructor) || "-"} />
                 <MetaTile icon="tag" label="Category" value={formatCategoryLabel(course.category) || "-"} />
                 <MetaTile
                   icon="wallet"

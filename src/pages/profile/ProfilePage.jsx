@@ -17,9 +17,9 @@ import { getDisplayName } from "../../utils/userDisplay";
 
 const ROLE_LABEL = {
   admin: "Administrator",
-  teacher: "Tutor",
+  teacher: "Teacher",
   student: "Student",
-  parent: "Guardian",
+  parent: "Parent",
 };
 
 const ROLE_COLOR = {

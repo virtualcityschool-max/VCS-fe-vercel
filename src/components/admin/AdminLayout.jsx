@@ -31,7 +31,7 @@ const AdminLayout = () => {
     if (path.includes("/admin/users")) {
       const search = location.search;
       if (search.includes("role=teacher")) return "teachers";
-      if (search.includes("role=parent")) return "guardians";
+      if (search.includes("role=parent")) return "parents";
       return "users";
     }
     if (path.includes("/admin/subscriptions")) return "subscriptions";
@@ -73,7 +73,7 @@ const AdminLayout = () => {
   React.useEffect(() => {
     if (activeTab === "teachers") {
       dispatch(fetchUsers({ role: "teacher" }));
-    } else if (activeTab === "guardians") {
+    } else if (activeTab === "parents") {
       dispatch(fetchUsers({ role: "parent" }));
     } else if (activeTab === "users" && !location.state?.skipFetch) {
       dispatch(fetchUsers());

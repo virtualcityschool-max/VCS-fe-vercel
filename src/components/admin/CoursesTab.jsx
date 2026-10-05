@@ -663,7 +663,7 @@ const CoursesTab = ({
             value={courseFilters.instructor}
             onChange={(e) => setCourseFilters({ ...courseFilters, instructor: e.target.value })}
           >
-            <option value="">All Tutors</option>
+            <option value="">All Teachers</option>
             {users?.map((user) => (
               <option key={user.id} value={user.id}>{getDisplayName(user)}</option>
             ))}
@@ -778,10 +778,10 @@ const CoursesTab = ({
               <thead className="bg-slate-950/60 border-b border-slate-800">
                 <tr>
                   <th className="px-6 py-4 text-xs font-black uppercase text-slate-500">
-                    Course
+                    Subject
                   </th>
                   <th className="px-6 py-4 text-xs font-black uppercase text-slate-500">
-                    Tutor
+                    Teacher
                   </th>
                   <th className="px-6 py-4 text-xs font-black uppercase text-slate-500">
                     Level
@@ -875,7 +875,7 @@ const CoursesTab = ({
                             setEditCourseForm((prev) => ({ ...prev, instructor_id: course.instructor?.id || "" }));
                             setActiveModal({ type: "assign-instructor", courseId: course.id });
                           }}
-                          title="Click to change tutor"
+                          title="Click to change teacher"
                         >
                           <i className="fas fa-user text-indigo-400"></i>
                           <span>{getDisplayName(course.instructor)}</span>
@@ -891,7 +891,7 @@ const CoursesTab = ({
                           }}
                         >
                           <i className="fas fa-user-plus text-xs"></i>
-                          <span>Assign Tutor</span>
+                          <span>Assign Teacher</span>
                         </button>
                       )}
                       <button
@@ -959,10 +959,10 @@ const CoursesTab = ({
                 <thead className="bg-slate-950/80 border-b border-slate-800 text-[11px] font-bold text-slate-400 uppercase tracking-wider sticky top-0 z-10 backdrop-blur-md">
                   <tr>
                     <th className="px-2.5 py-3 w-8 text-center">#</th>
-                    <th className="px-3.5 py-3">Course</th>
+                    <th className="px-3.5 py-3">Subject</th>
                     <th className="px-2.5 py-3">Department</th>
                     <th className="px-2.5 py-3">Level</th>
-                    <th className="px-2.5 py-3">Tutor</th>
+                    <th className="px-2.5 py-3">Teacher</th>
                     <th className="px-2.5 py-3">Price</th>
                     <th className="px-2.5 py-3">Status</th>
                     <th className="px-2 py-3 text-center">Students</th>
@@ -1030,7 +1030,7 @@ const CoursesTab = ({
                           </span>
                         </td>
 
-                        {/* Tutor (Workflow 1: 1-click assign or change tutor) */}
+                        {/* Teacher (Workflow 1: 1-click assign or change teacher) */}
                         <td className="px-2.5 py-2.5 whitespace-nowrap">
                           {course.instructor ? (
                             <button
@@ -1040,13 +1040,13 @@ const CoursesTab = ({
                                 setEditCourseForm({ instructor_id: course.instructor?.id || "" });
                                 setActiveModal({ type: "assign-instructor", courseId: course.id });
                               }}
-                              className="flex items-center gap-1.5 max-w-[125px] hover:opacity-80 transition text-left cursor-pointer group/tutor"
-                              title={`Assigned Tutor: ${getDisplayName(course.instructor)} (Click to change)`}
+                              className="flex items-center gap-1.5 max-w-[125px] hover:opacity-80 transition text-left cursor-pointer group/teacher"
+                              title={`Assigned Teacher: ${getDisplayName(course.instructor)} (Click to change)`}
                             >
-                              <div className="w-5 h-5 rounded-md bg-indigo-500/20 text-indigo-300 flex items-center justify-center font-bold text-[10px] shrink-0 group-hover/tutor:ring-1 group-hover/tutor:ring-indigo-400">
+                              <div className="w-5 h-5 rounded-md bg-indigo-500/20 text-indigo-300 flex items-center justify-center font-bold text-[10px] shrink-0 group-hover/teacher:ring-1 group-hover/teacher:ring-indigo-400">
                                 {(getDisplayName(course.instructor) || "T")[0].toUpperCase()}
                               </div>
-                              <span className="text-slate-300 group-hover/tutor:text-indigo-300 text-xs font-medium truncate transition">
+                              <span className="text-slate-300 group-hover/teacher:text-indigo-300 text-xs font-medium truncate transition">
                                 {getDisplayName(course.instructor)}
                               </span>
                             </button>
@@ -1059,10 +1059,10 @@ const CoursesTab = ({
                                 setActiveModal({ type: "assign-instructor", courseId: course.id });
                               }}
                               className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-500/15 border border-amber-500/30 text-amber-300 text-[10px] font-semibold hover:bg-amber-500/25 transition cursor-pointer"
-                              title="Assign qualified tutor to this subject"
+                              title="Assign qualified teacher to this subject"
                             >
                               <i className="fas fa-user-plus text-[9px]" />
-                              <span>Assign Tutor</span>
+                              <span>Assign Teacher</span>
                             </button>
                           )}
                         </td>
@@ -1307,7 +1307,7 @@ const CoursesTab = ({
             <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-xl font-bold text-white">
-                  Assign Tutor
+                  Assign Teacher
                 </h3>
                 <button
                   onClick={() => setActiveModal(null)}
@@ -1333,7 +1333,7 @@ const CoursesTab = ({
               >
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Select Tutor <span className="text-red-400">*</span>
+                    Select Teacher <span className="text-red-400">*</span>
                   </label>
                   <select
                     value={editCourseForm.instructor_id}
@@ -1347,7 +1347,7 @@ const CoursesTab = ({
                     className="w-full px-3 py-2 bg-slate-800 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     required
                   >
-                    <option value="">Select an tutor</option>
+                    <option value="">Select a teacher</option>
                     {users?.map((user) => (
                       <option key={user.id} value={user.id}>
                         {getDisplayName(user)}
@@ -1368,7 +1368,7 @@ const CoursesTab = ({
                     type="submit"
                     className="bg-indigo-600 hover:bg-indigo-500"
                   >
-                    Assign Tutor
+                    Assign Teacher
                   </Button>
                 </div>
               </form>

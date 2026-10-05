@@ -23,7 +23,7 @@ const RequestedChildrenBadge = ({ user, onPreview }) => {
     <button
       type="button"
       onClick={() => onPreview(user)}
-      title="View the students this guardian requested"
+      title="View the students this parent requested"
       className="mt-2 inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 hover:bg-indigo-500/20 hover:text-indigo-200 transition text-[10px] font-black uppercase tracking-wider"
     >
       <i className="fas fa-child text-[10px]"></i>
@@ -58,7 +58,7 @@ const RequestedChildrenModal = ({ user, onClose }) => {
             </div>
             <div className="min-w-0">
               <h3 className="text-sm font-bold text-white truncate">
-                {getDisplayName(user) || "Guardian"}
+                {getDisplayName(user) || "Parent"}
               </h3>
               <p className="text-[11px] text-slate-500 truncate">{user.email}</p>
             </div>
@@ -118,7 +118,7 @@ const RequestedChildrenModal = ({ user, onClose }) => {
 
           <p className="text-[11px] text-slate-500 mt-4 leading-relaxed">
             <i className="fas fa-circle-info mr-1.5 text-indigo-400"></i>
-            Approving this guardian links these students by default. Untick the
+            Approving this parent links these students by default. Untick the
             option in the approve dialog to decide them separately.
           </p>
         </div>
@@ -175,10 +175,10 @@ const ApprovalsTab = ({
       const name = (getDisplayName(user) || "").toLowerCase();
       const email = (user.email || "").toLowerCase();
       const role = (user.role || "").toLowerCase();
-      // Match the on-screen label too - the UI shows "Tutor"/"Guardian",
+      // Match the on-screen label too - the UI shows "Teacher"/"Parent",
       // not the raw "teacher"/"parent" role values
       const roleLabel = (
-        { teacher: "tutor", parent: "guardian" }[role] || role
+        { teacher: "teacher", parent: "parent" }[role] || role
       );
       // Guardians are also findable by the children they asked to be linked to
       const childMatch = (user.requested_children || []).some((c) =>
@@ -468,7 +468,7 @@ const ApprovalsTab = ({
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                       <div className="flex items-center gap-2">
                         <span className="bg-slate-700/50 text-slate-300 px-2 sm:px-3 py-1 rounded-full text-[8px] sm:text-xs font-black uppercase border border-slate-600">
-                          {{ teacher: "Tutor", parent: "Guardian" }[user.role] || user.role || "user"}
+                          {{ teacher: "Teacher", parent: "Parent" }[user.role] || user.role || "user"}
                         </span>
                       </div>
 
@@ -575,7 +575,7 @@ const ApprovalsTab = ({
                       </td>
                       <td className="px-8 py-6">
                         <span className="bg-slate-700/50 text-slate-300 px-3 py-1 rounded-full text-[8px] font-black uppercase border border-slate-600">
-                          {{ teacher: "Tutor", parent: "Guardian" }[user.role] || user.role || "user"}
+                          {{ teacher: "Teacher", parent: "Parent" }[user.role] || user.role || "user"}
                         </span>
                       </td>
                       <td className="px-8 py-6">

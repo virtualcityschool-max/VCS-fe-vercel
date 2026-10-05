@@ -105,7 +105,7 @@ const OverviewTab = ({
           <div className="w-7 h-7 bg-indigo-600/20 rounded-lg flex items-center justify-center">
             <i className="fas fa-user-clock text-indigo-400 text-xs"></i>
           </div>
-          Upcoming Tutor Meetings
+          Upcoming Teacher Meetings
         </h3>
         <button
           onClick={() => navigate("/admin/teacher-planner")}
@@ -278,7 +278,7 @@ const OverviewTab = ({
           onClick={toUsersTab(navigate, "admin")}
         />
         <StatCard
-          label="Tutors"
+          label="Teachers"
           value={analytics.users.teachers}
           icon="fas fa-chalkboard-teacher"
           color="pink"
@@ -286,7 +286,7 @@ const OverviewTab = ({
           onClick={toUsersTab(navigate, "teacher")}
         />
         <StatCard
-          label="Guardians"
+          label="Parents"
           value={analytics.users.parents}
           icon="fas fa-user-friends"
           color="amber"
