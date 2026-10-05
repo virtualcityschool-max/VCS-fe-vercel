@@ -16,12 +16,27 @@ const Header = ({ activeTab, children }) => {
       case "courses":
         return {
           title: "Subjects",
-          description: "Manage Cambridge IGCSE, O-Level & A-Level subjects, assigned teachers, and student rosters",
+          description: "Cambridge IGCSE, O-Level & A-Level curriculum catalog, syllabus outline, and subject settings",
         };
       case "teachers":
         return {
           title: "Teachers",
-          description: "Teacher directory, subject allocations, and teaching workload",
+          description: "Faculty directory, qualification credentials, teaching experience, and contact profiles",
+        };
+      case "teacher-allocations":
+        return {
+          title: "Teacher Allocations",
+          description: "Curriculum staffing matrix, subject-to-teacher assignments, unassigned subject alerts, and faculty workload",
+        };
+      case "students":
+        return {
+          title: "Students",
+          description: "Student master directory, roll numbers, grades, linked parents, custom labels, and account records",
+        };
+      case "enrollments":
+        return {
+          title: "Student Enrollments",
+          description: "Active Cambridge subject enrollments, fee confirmation, and add/drop subject management",
         };
       case "guardians":
       case "parents":
@@ -33,12 +48,6 @@ const Header = ({ activeTab, children }) => {
         return {
           title: "All Users",
           description: "Manage system user accounts, roles, and administrative permissions",
-        };
-      case "enrollments":
-      case "students":
-        return {
-          title: "Students",
-          description: "Student roster, enrolled subjects, fee verification, and subject enrollment",
         };
       case "sessions":
         return {

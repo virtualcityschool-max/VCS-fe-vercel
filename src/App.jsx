@@ -61,7 +61,8 @@ const AppInner = () => {
     if (p.includes("/admin/blogs")) return "blogs";
     if (p.includes("/admin/vlogs")) return "vlogs";
     if (p.includes("/admin/courses")) return "courses";
-    if (p.includes("/admin/enrollments")) return "students";
+    if (p.includes("/admin/teacher-allocations")) return "teacher-allocations";
+    if (p.includes("/admin/enrollments")) return "enrollments";
     if (p.includes("/admin/sessions")) return "sessions";
     if (p.includes("/admin/teacher-planner")) return "teacher-planner";
     if (p.includes("/admin/subscriptions")) return "subscriptions";
@@ -74,6 +75,7 @@ const AppInner = () => {
     if (p.includes("/admin/settings")) return "settings";
     if (p.includes("/admin/users")) {
       if (search.includes("role=teacher")) return "teachers";
+      if (search.includes("role=student")) return "students";
       if (search.includes("role=parent")) return "parents";
       return "users";
     }

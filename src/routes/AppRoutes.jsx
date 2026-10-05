@@ -49,6 +49,7 @@ const AdminLayout = React.lazy(() => import("../components/admin/AdminLayout"));
 const AdminOverviewPage = React.lazy(() => import("../pages/admin/AdminOverviewPage"));
 const AdminApprovalsPage = React.lazy(() => import("../pages/admin/AdminApprovalsPage"));
 const AdminCoursesPage = React.lazy(() => import("../pages/admin/AdminCoursesPage"));
+const AdminTeacherAllocationsPage = React.lazy(() => import("../pages/admin/AdminTeacherAllocationsPage"));
 const AdminCourseDetailPage = React.lazy(() => import("../pages/admin/AdminCourseDetailPage"));
 const AdminUsersPage = React.lazy(() => import("../pages/admin/AdminUsersPage"));
 const AdminEnrollmentsPage = React.lazy(() => import("../pages/admin/AdminEnrollmentsPage"));
@@ -258,6 +259,7 @@ const AppRoutes = () => {
           <Route path="overview" element={<AdminOverviewPage />} />
           <Route path="approvals" element={<AdminApprovalsPage />} />
           <Route path="courses" element={<AdminCoursesPage />} />
+          <Route path="teacher-allocations" element={<AdminTeacherAllocationsPage />} />
           <Route path="blogs" element={<AdminBlogsPage key="blogs" />} />
           <Route path="vlogs" element={<AdminBlogsPage key="vlogs" />} />
           <Route path="users" element={<AdminUsersPage />} />

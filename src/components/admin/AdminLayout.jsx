@@ -28,9 +28,11 @@ const AdminLayout = () => {
     if (path.includes("/admin/overview")) return "overview";
     if (path.includes("/admin/approvals")) return "approvals";
     if (path.includes("/admin/courses")) return "courses";
+    if (path.includes("/admin/teacher-allocations")) return "teacher-allocations";
     if (path.includes("/admin/users")) {
       const search = location.search;
       if (search.includes("role=teacher")) return "teachers";
+      if (search.includes("role=student")) return "students";
       if (search.includes("role=parent")) return "parents";
       return "users";
     }
@@ -64,7 +66,7 @@ const AdminLayout = () => {
   }, [dispatch]);
 
   React.useEffect(() => {
-    if (activeTab === "courses") {
+    if (activeTab === "courses" || activeTab === "teacher-allocations") {
       dispatch(fetchCourses());
       dispatch(fetchUsers({ role: "teacher" }));
     }
@@ -73,6 +75,8 @@ const AdminLayout = () => {
   React.useEffect(() => {
     if (activeTab === "teachers") {
       dispatch(fetchUsers({ role: "teacher" }));
+    } else if (activeTab === "students") {
+      dispatch(fetchUsers({ role: "student" }));
     } else if (activeTab === "parents") {
       dispatch(fetchUsers({ role: "parent" }));
     } else if (activeTab === "users" && !location.state?.skipFetch) {

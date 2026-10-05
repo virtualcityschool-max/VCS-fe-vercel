@@ -88,11 +88,13 @@ const NAV_CONFIG = {
   admin: [
     { id: "overview",    label: "Overview",     icon: "fas fa-chart-line",    to: "/admin/overview" },
 
-    { id: "courses",     label: "Subjects",             icon: "fas fa-book",            to: "/admin/courses",               section: "Academics" },
-    { id: "teachers",    label: "Teachers",             icon: "fas fa-chalkboard-user", to: "/admin/users?role=teacher",    section: "Academics" },
-    { id: "students",    label: "Students",             icon: "fas fa-user-graduate",   to: "/admin/enrollments",           section: "Academics" },
-    { id: "sessions",    label: "Timetable",            icon: "fas fa-chalkboard",      to: "/admin/sessions",              section: "Academics" },
-    { id: "teacher-planner", label: "Teacher Meetings",  icon: "fas fa-user-clock",      to: "/admin/teacher-planner",       section: "Academics" },
+    { id: "courses",             label: "Subjects",            icon: "fas fa-book",            to: "/admin/courses",               section: "Academics" },
+    { id: "teachers",            label: "Teachers",            icon: "fas fa-chalkboard-user", to: "/admin/users?role=teacher",    section: "Academics" },
+    { id: "teacher-allocations", label: "Teacher Allocations", icon: "fas fa-thumbtack",       to: "/admin/teacher-allocations",   section: "Academics" },
+    { id: "students",            label: "Students",            icon: "fas fa-user-graduate",   to: "/admin/users?role=student",    section: "Academics" },
+    { id: "enrollments",         label: "Student Enrollments", icon: "fas fa-clipboard-list", to: "/admin/enrollments",           section: "Academics" },
+    { id: "sessions",            label: "Timetable",           icon: "fas fa-chalkboard",      to: "/admin/sessions",              section: "Academics" },
+    { id: "teacher-planner",     label: "Teacher Meetings",     icon: "fas fa-user-clock",      to: "/admin/teacher-planner",       section: "Academics" },
 
     { id: "approvals",   label: "Pending Approvals",    icon: "fas fa-user-check",    to: "/admin/approvals",  section: "People & Admissions" },
     { id: "parents",     label: "Parents",              icon: "fas fa-people-roof",   to: "/admin/users?role=parent", section: "People & Admissions" },
@@ -155,13 +157,22 @@ const PORTAL_LABEL = {
 function NavItem({ label, icon, isCollapsed, badge, isActive, onClick, to, end, role }) {
   const location = useLocation();
 
-  // If `to` includes query parameter like `?tab=schedule`, compute active matching
+  // If `to` includes query parameter like `?tab=schedule` or `?role=teacher`, compute active matching
   const tabActive = (() => {
+    if (typeof isActive === "boolean") return isActive;
     if (!to) return null;
     if (to.includes("?")) {
       const [toPath, toQuery] = to.split("?");
-      const toTab = new URLSearchParams(toQuery).get("tab");
-      const currTab = new URLSearchParams(location.search).get("tab") || "overview";
+      const toParams = new URLSearchParams(toQuery);
+      const currParams = new URLSearchParams(location.search);
+
+      // Support role filter check in admin/users (e.g. ?role=teacher vs ?role=student vs ?role=parent)
+      if (toParams.has("role")) {
+        return location.pathname === toPath && currParams.get("role") === toParams.get("role");
+      }
+
+      const toTab = toParams.get("tab");
+      const currTab = currParams.get("tab") || "overview";
 
       if (toTab === "assessments") {
         const isAssessmentsTab = ["assessments", "assignments", "quizzes", "evaluations"].includes(currTab);
@@ -186,6 +197,10 @@ function NavItem({ label, icon, isCollapsed, badge, isActive, onClick, to, end, 
       }
 
       return location.pathname === toPath && toTab === currTab;
+    }
+    if (to === "/admin/users") {
+      const roleParam = new URLSearchParams(location.search).get("role");
+      return location.pathname === "/admin/users" && !roleParam;
     }
     if (to === "/student") {
       const currTab = new URLSearchParams(location.search).get("tab");
