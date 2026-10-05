@@ -4,7 +4,6 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   fetchUsers,
   createUser,
-  deleteUser,
   purgeUser,
   toggleUserActive,
   selectUsers,
@@ -37,10 +36,26 @@ const AdminUsersPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Restore filters if navigating back from edit, otherwise use defaults
-  const [usersFilters, setUsersFilters] = useState(
-    () => location.state?.filters ?? DEFAULT_FILTERS,
-  );
+  // Restore filters if navigating back from edit or query params, otherwise use defaults
+  const [usersFilters, setUsersFilters] = useState(() => {
+    if (location.state?.filters) return location.state.filters;
+    const queryParams = new URLSearchParams(location.search);
+    const queryRole = queryParams.get("role");
+    if (queryRole) return { ...DEFAULT_FILTERS, role: queryRole };
+    return DEFAULT_FILTERS;
+  });
+
+  // Sync filter when URL search params change (e.g. clicking Teachers vs Guardians in sidebar)
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const queryRole = queryParams.get("role") || "";
+    setUsersFilters((prev) => {
+      if (prev.role !== queryRole) {
+        return { ...prev, role: queryRole };
+      }
+      return prev;
+    });
+  }, [location.search]);
 
   // Create user form state
   const [createUserForm, setCreateUserForm] = useState({
@@ -63,7 +78,7 @@ const AdminUsersPage = () => {
   const {
     errors: createUserErrors,
     setErrors: setCreateUserErrors,
-    handleApiError: handleCreateUserApiError,
+    handleApiError: _handleCreateUserApiError,
     clearAllErrors: clearAllCreateUserErrors,
   } = useFieldErrors({});
 

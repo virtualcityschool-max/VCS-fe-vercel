@@ -8,6 +8,7 @@ import { showApiError } from "../../utils/apiErrorHandler";
 import { getDisplayName } from "../../utils/userDisplay";
 
 import { GradingScaleButton } from "./GradingScaleModal";
+import CourseStudentsModal from "../courses/CourseStudentsModal";
 
 // ── Course Categories Modal ───────────────────────────────────────────────────
 const CourseCategoriesModal = ({ onClose, onCategoriesChanged, initialEditId, initialDeleteId }) => {
@@ -342,6 +343,7 @@ const CoursesTab = ({
   const [selectedDepartment, setSelectedDepartment] = useState("all");
   const [catDropdownOpen, setCatDropdownOpen]       = useState(false);
   const [categoriesOpenWith, setCategoriesOpenWith] = useState(null); // null | { editId?, deleteId? }
+  const [selectedRosterCourse, setSelectedRosterCourse] = useState(null); // null | { id, title }
   const catDropdownRef = useRef(null);
 
   // Close category dropdown on outside click/tap (works on mobile)
@@ -865,16 +867,44 @@ const CoursesTab = ({
                     {/* Course Details */}
                     <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs text-slate-400">
                       {course.instructor ? (
-                        <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          className="flex items-center gap-2 hover:text-indigo-300 transition text-left"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditCourseForm((prev) => ({ ...prev, instructor_id: course.instructor?.id || "" }));
+                            setActiveModal({ type: "assign-instructor", courseId: course.id });
+                          }}
+                          title="Click to change tutor"
+                        >
                           <i className="fas fa-user text-indigo-400"></i>
                           <span>{getDisplayName(course.instructor)}</span>
-                        </div>
+                        </button>
                       ) : (
-                        <div className="flex items-center gap-2">
-                          <i className="fas fa-user-slash text-slate-500"></i>
-                          <span>Not assigned</span>
-                        </div>
+                        <button
+                          type="button"
+                          className="flex items-center gap-1 text-amber-400 hover:text-amber-300 font-semibold text-left"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditCourseForm((prev) => ({ ...prev, instructor_id: "" }));
+                            setActiveModal({ type: "assign-instructor", courseId: course.id });
+                          }}
+                        >
+                          <i className="fas fa-user-plus text-xs"></i>
+                          <span>Assign Tutor</span>
+                        </button>
                       )}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedRosterCourse({ id: course.id, title: course.title });
+                        }}
+                        className="flex items-center gap-1.5 text-indigo-400 hover:text-indigo-300 font-semibold"
+                      >
+                        <i className="fas fa-user-graduate"></i>
+                        <span>{course.enrolled_students_count || 0} Students</span>
+                      </button>
                       <div className="flex items-center gap-2">
                         <i className="fas fa-tag text-purple-400"></i>
                         <span>{course.category?.name?? course.category}</span>
@@ -1000,22 +1030,40 @@ const CoursesTab = ({
                           </span>
                         </td>
 
-                        {/* Tutor */}
+                        {/* Tutor (Workflow 1: 1-click assign or change tutor) */}
                         <td className="px-2.5 py-2.5 whitespace-nowrap">
                           {course.instructor ? (
-                            <div
-                              className="flex items-center gap-1.5 max-w-[125px]"
-                              title={getDisplayName(course.instructor)}
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setEditCourseForm({ instructor_id: course.instructor?.id || "" });
+                                setActiveModal({ type: "assign-instructor", courseId: course.id });
+                              }}
+                              className="flex items-center gap-1.5 max-w-[125px] hover:opacity-80 transition text-left cursor-pointer group/tutor"
+                              title={`Assigned Tutor: ${getDisplayName(course.instructor)} (Click to change)`}
                             >
-                              <div className="w-5 h-5 rounded-md bg-indigo-500/20 text-indigo-300 flex items-center justify-center font-bold text-[10px] shrink-0">
+                              <div className="w-5 h-5 rounded-md bg-indigo-500/20 text-indigo-300 flex items-center justify-center font-bold text-[10px] shrink-0 group-hover/tutor:ring-1 group-hover/tutor:ring-indigo-400">
                                 {(getDisplayName(course.instructor) || "T")[0].toUpperCase()}
                               </div>
-                              <span className="text-slate-300 text-xs font-medium truncate">
+                              <span className="text-slate-300 group-hover/tutor:text-indigo-300 text-xs font-medium truncate transition">
                                 {getDisplayName(course.instructor)}
                               </span>
-                            </div>
+                            </button>
                           ) : (
-                            <span className="text-slate-500 text-xs italic">Not assigned</span>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setEditCourseForm({ instructor_id: "" });
+                                setActiveModal({ type: "assign-instructor", courseId: course.id });
+                              }}
+                              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-500/15 border border-amber-500/30 text-amber-300 text-[10px] font-semibold hover:bg-amber-500/25 transition cursor-pointer"
+                              title="Assign qualified tutor to this subject"
+                            >
+                              <i className="fas fa-user-plus text-[9px]" />
+                              <span>Assign Tutor</span>
+                            </button>
                           )}
                         </td>
 
@@ -1050,15 +1098,20 @@ const CoursesTab = ({
                           </span>
                         </td>
 
-                        {/* Enrolled Students */}
+                        {/* Enrolled Students (Workflow 4: Click to open Class Roster Drawer) */}
                         <td className="px-2 py-2.5 whitespace-nowrap text-center">
-                          <span
-                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 border border-slate-700 font-mono text-xs font-semibold"
-                            title={`${course.enrolled_students_count || 0} enrolled students`}
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedRosterCourse({ id: course.id, title: course.title });
+                            }}
+                            className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-slate-800 text-slate-300 border border-slate-700 font-mono text-xs font-semibold hover:bg-indigo-600/20 hover:border-indigo-500/40 hover:text-indigo-300 transition cursor-pointer"
+                            title={`View class roster (${course.enrolled_students_count || 0} enrolled students)`}
                           >
                             <i className="fas fa-user-graduate text-[9px] text-indigo-400" />
                             {course.enrolled_students_count || 0}
-                          </span>
+                          </button>
                         </td>
 
                         {/* Actions */}
@@ -1335,6 +1388,15 @@ const CoursesTab = ({
           }}
           initialEditId={categoriesOpenWith?.editId}
           initialDeleteId={categoriesOpenWith?.deleteId}
+        />
+      )}
+
+      {selectedRosterCourse && (
+        <CourseStudentsModal
+          courseId={selectedRosterCourse.id}
+          courseTitle={selectedRosterCourse.title}
+          onClose={() => setSelectedRosterCourse(null)}
+          canUnenroll={true}
         />
       )}
     </div>

@@ -15,18 +15,29 @@ const Header = ({ activeTab, children }) => {
         };
       case "courses":
         return {
-          title: "Course Management",
-          description: "Create, edit, and manage educational courses",
+          title: "Subjects & Courses Catalog",
+          description: "Manage Cambridge IGCSE, O-Level & A-Level subjects, assigned tutors, and class rosters",
+        };
+      case "teachers":
+        return {
+          title: "Teachers & Tutors Directory",
+          description: "Faculty management, subject allocations, and engaged vs standby teaching workload",
+        };
+      case "guardians":
+        return {
+          title: "Guardians & Parents Directory",
+          description: "Parent accounts, emergency WhatsApp contacts, and linked students",
         };
       case "users":
         return {
-          title: "User Management",
-          description: "Manage user accounts and permissions",
+          title: "All Users & Staff Directory",
+          description: "Manage all system user accounts, roles, and administrative permissions",
         };
       case "enrollments":
+      case "students":
         return {
-          title: "Class Enrollments",
-          description: "View and manage course enrollments",
+          title: "Students & Academic Enrollments",
+          description: "One-student view with instant subject add/drop (+ / ×) and fee verification",
         };
       case "sessions":
         return {

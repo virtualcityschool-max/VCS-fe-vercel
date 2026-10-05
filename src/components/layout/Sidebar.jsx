@@ -88,17 +88,20 @@ const NAV_CONFIG = {
   admin: [
     { id: "overview",    label: "Overview",     icon: "fas fa-chart-line",    to: "/admin/overview" },
 
-    { id: "approvals",   label: "Approval(s) Pending",    icon: "fas fa-user-check",    to: "/admin/approvals",  section: "People & Approvals" },
-    { id: "users",       label: "Users",        icon: "fas fa-users",         to: "/admin/users",      section: "People & Approvals" },
-    { id: "referrals",   label: "Referrals",    icon: "fas fa-share-nodes",    to: "/admin/referrals", section: "People & Approvals" },
+    { id: "courses",     label: "Subjects & Courses",   icon: "fas fa-book",            to: "/admin/courses",               section: "Academics" },
+    { id: "teachers",    label: "Teachers & Tutors",    icon: "fas fa-chalkboard-user", to: "/admin/users?role=teacher",    section: "Academics" },
+    { id: "students",    label: "Students",             icon: "fas fa-user-graduate",   to: "/admin/enrollments",           section: "Academics" },
+    { id: "sessions",        label: "Class Timetable",   icon: "fas fa-chalkboard",      to: "/admin/sessions",              section: "Academics" },
+    { id: "teacher-planner", label: "Tutor Meetings",    icon: "fas fa-user-clock",      to: "/admin/teacher-planner",       section: "Academics" },
 
-    { id: "courses",     label: "Courses",      icon: "fas fa-book",          to: "/admin/courses",    section: "Academics" },
-    { id: "enrollments",     label: "Class Enrollments", icon: "fas fa-user-graduate",   to: "/admin/enrollments",       section: "Academics" },
-    { id: "sessions",        label: "Class Timetable",   icon: "fas fa-chalkboard",      to: "/admin/sessions",         section: "Academics" },
-    { id: "teacher-planner", label: "Tutor Meetings",    icon: "fas fa-user-clock",      to: "/admin/teacher-planner",  section: "Academics" },
-    { id: "subscriptions",   label: "Subscriptions",    icon: "fas fa-rotate",          to: "/admin/subscriptions",     section: "Academics" },
-    { id: "attendance",  label: "Attendance",   icon: "fas fa-calendar-check", to: "/admin/attendance",   section: "Academics" },
-    { id: "evaluations", label: "Evaluations",  icon: "fas fa-chart-bar",      to: "/admin/evaluations",  section: "Academics" },
+    { id: "approvals",   label: "Approval(s) Pending",    icon: "fas fa-user-check",    to: "/admin/approvals",  section: "People & Admissions" },
+    { id: "guardians",   label: "Guardians & Parents",    icon: "fas fa-people-roof",   to: "/admin/users?role=parent", section: "People & Admissions" },
+    { id: "users",       label: "All Users & Staff",      icon: "fas fa-users",         to: "/admin/users",      section: "People & Admissions" },
+    { id: "referrals",   label: "Referrals",              icon: "fas fa-share-nodes",    to: "/admin/referrals", section: "People & Admissions" },
+
+    { id: "subscriptions",   label: "Subscriptions & Fees", icon: "fas fa-credit-card", to: "/admin/subscriptions", section: "Finance & Records" },
+    { id: "attendance",  label: "Attendance",   icon: "fas fa-clipboard-user", to: "/admin/attendance",   section: "Finance & Records" },
+    { id: "evaluations", label: "Evaluations",  icon: "fas fa-chart-bar",      to: "/admin/evaluations",  section: "Finance & Records" },
 
     { id: "blogs",       label: "Blogs",        icon: "fas fa-newspaper",     to: "/admin/blogs", section: "Content" },
     { id: "vlogs",       label: "Vlogs",        icon: "fas fa-circle-play",   to: "/admin/vlogs", section: "Content" },

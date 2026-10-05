@@ -17,7 +17,7 @@ import { useOutsideCloseModals } from "./hooks/useOutsideCloseModals";
 
 // Inner app - inside BrowserRouter so useLocation works
 const AppInner = () => {
-  const { isLoggedIn, role, isInitialized } = useSelector(
+  const { isLoggedIn, role } = useSelector(
     (state) => state.auth,
   );
   const { pendingApprovals, pendingEnrollments } = useSelector((state) => state.approvals);
@@ -39,7 +39,7 @@ const AppInner = () => {
   const toggleSidebar = () => {
     setIsSidebarCollapsed((prev) => {
       const next = !prev;
-      try { localStorage.setItem("sidebarCollapsed", String(next)); } catch {}
+      try { localStorage.setItem("sidebarCollapsed", String(next)); } catch { /* ignore */ }
       return next;
     });
   };
@@ -48,22 +48,35 @@ const AppInner = () => {
 
   // Close mobile sidebar on route change
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsSidebarOpen(false);
   }, [location.pathname]);
 
   // Compute active tab for admin sidebar highlight
   const getActiveTab = () => {
     const p = location.pathname;
+    const search = location.search;
     if (p.includes("/admin/overview")) return "overview";
     if (p.includes("/admin/approvals")) return "approvals";
     if (p.includes("/admin/blogs")) return "blogs";
+    if (p.includes("/admin/vlogs")) return "vlogs";
     if (p.includes("/admin/courses")) return "courses";
-    if (p.includes("/admin/users") && p.split("/").length <= 4) return "users";
-    if (p.includes("/admin/enrollments")) return "enrollments";
+    if (p.includes("/admin/enrollments")) return "students";
     if (p.includes("/admin/sessions")) return "sessions";
+    if (p.includes("/admin/teacher-planner")) return "teacher-planner";
+    if (p.includes("/admin/subscriptions")) return "subscriptions";
     if (p.includes("/admin/attendance")) return "attendance";
     if (p.includes("/admin/evaluations")) return "evaluations";
     if (p.includes("/admin/course-levels")) return "levels";
+    if (p.includes("/admin/referrals")) return "referrals";
+    if (p.includes("/admin/testimonials")) return "testimonials";
+    if (p.includes("/admin/about")) return "about";
+    if (p.includes("/admin/settings")) return "settings";
+    if (p.includes("/admin/users")) {
+      if (search.includes("role=teacher")) return "teachers";
+      if (search.includes("role=parent")) return "guardians";
+      return "users";
+    }
     return null;
   };
 
@@ -168,7 +181,7 @@ const AppInner = () => {
 
 const App = () => {
   const dispatch = useDispatch();
-  const { isLoggedIn, role, isInitialized } = useSelector(
+  const { isInitialized } = useSelector(
     (state) => state.auth,
   );
 

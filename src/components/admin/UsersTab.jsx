@@ -528,6 +528,8 @@ const TutorCard = ({
   handlePurgeUser,
   handleDeleteUser,
   processing,
+  onAssignClass,
+  onUnassignCourse,
 }) => {
   const courses = assignedCourses || user.assigned_courses || [];
   const engaged = isEngaged != null ? isEngaged : (user.is_engaged || courses.length > 0);
@@ -615,6 +617,17 @@ const TutorCard = ({
         <div className="space-y-1.5 pt-2 border-t border-slate-800/80">
           <div className="text-[11px] text-slate-400 font-semibold uppercase tracking-wider flex items-center justify-between">
             <span>{engaged ? `Assigned Courses (${courses.length})` : "Current Status"}</span>
+            {onAssignClass && (
+              <button
+                type="button"
+                onClick={() => onAssignClass(user)}
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 text-[10px] font-semibold hover:bg-indigo-600/30 transition cursor-pointer"
+                title="Assign Cambridge course to this tutor"
+              >
+                <i className="fas fa-plus text-[9px]" />
+                <span>Assign Class</span>
+              </button>
+            )}
           </div>
 
           {engaged ? (
@@ -622,21 +635,51 @@ const TutorCard = ({
               {courses.map((course, idx) => (
                 <div
                   key={course.id || idx}
-                  className="p-2 rounded-lg bg-slate-800/80 border border-slate-700/60 text-xs text-white flex items-center justify-between gap-2"
+                  className="p-2 rounded-lg bg-slate-800/80 border border-slate-700/60 text-xs text-white flex items-center justify-between gap-2 group/course"
                 >
-                  <span className="truncate font-medium">{course.title}</span>
-                  {course.category && (
-                    <span className="text-[10px] text-emerald-400 font-mono shrink-0">
-                      {course.category}
-                    </span>
-                  )}
+                  <div className="flex items-center gap-1.5 truncate">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
+                    <span className="truncate font-medium">{course.title}</span>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    {course.category && (
+                      <span className="text-[10px] text-emerald-400 font-mono">
+                        {course.category}
+                      </span>
+                    )}
+                    {onUnassignCourse && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onUnassignCourse(course.id, user);
+                        }}
+                        className="w-5 h-5 flex items-center justify-center rounded text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition opacity-0 group-hover/course:opacity-100"
+                        title={`Remove ${course.title} from ${getDisplayName(user)}`}
+                      >
+                        <i className="fas fa-times text-[10px]" />
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs flex items-center gap-2">
-              <i className="fas fa-clock text-amber-400" />
-              <span>Available for new class allocation</span>
+            <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <i className="fas fa-clock text-amber-400" />
+                <span>Available for new class allocation</span>
+              </div>
+              {onAssignClass && (
+                <button
+                  type="button"
+                  onClick={() => onAssignClass(user)}
+                  className="px-2.5 py-1 bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold rounded-lg text-xs transition flex items-center gap-1 shrink-0 cursor-pointer"
+                >
+                  <i className="fas fa-plus text-[10px]" />
+                  <span>Assign</span>
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -979,6 +1022,208 @@ const AdminCard = ({
   );
 };
 
+// ── Assign Course to Teacher Modal (Workflow 2: Teacher ➔ Subjects) ───────────
+const AssignCourseModal = ({
+  teacher,
+  courses,
+  onClose,
+  onAssign,
+  isAssigning,
+}) => {
+  const [selectedCourseId, setSelectedCourseId] = useState("");
+  const [search, setSearch] = useState("");
+
+  if (!teacher) return null;
+
+  const currentTeacherCourses = (courses || []).filter(
+    (c) => (c.instructor?.id || c.instructor) === teacher.id
+  );
+  const currentIds = new Set(currentTeacherCourses.map((c) => String(c.id)));
+
+  const filtered = (courses || []).filter((c) => {
+    if (!search) return true;
+    const term = search.toLowerCase();
+    const titleMatch = (c.title || "").toLowerCase().includes(term);
+    const catName = typeof c.category === "object" ? c.category?.name : c.category;
+    const catMatch = (catName || "").toLowerCase().includes(term);
+    return titleMatch || catMatch;
+  });
+
+  const selectedCourse = (courses || []).find((c) => String(c.id) === String(selectedCourseId));
+  const isTransferred =
+    selectedCourse &&
+    selectedCourse.instructor &&
+    (selectedCourse.instructor?.id || selectedCourse.instructor) !== teacher.id;
+  const currentInstructorName = isTransferred ? getDisplayName(selectedCourse.instructor) : null;
+
+  return (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[200] p-4">
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-xl max-h-[90vh] flex flex-col shadow-2xl">
+        {/* Modal Header */}
+        <div className="flex items-start justify-between pb-4 border-b border-slate-800">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center font-bold text-base shrink-0">
+              {(getDisplayName(teacher) || "T")[0].toUpperCase()}
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-white leading-tight">
+                Assign Class to Tutor
+              </h3>
+              <p className="text-xs text-slate-400 mt-0.5">
+                Allocate a Cambridge subject to{" "}
+                <span className="text-indigo-300 font-semibold">{getDisplayName(teacher)}</span> ({teacher.email})
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition"
+          >
+            <i className="fas fa-times text-sm" />
+          </button>
+        </div>
+
+        {/* Search */}
+        <div className="pt-4 pb-2">
+          <div className="relative">
+            <i className="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-xs" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search by subject name or code (e.g. Mathematics, 0580)..."
+              className="w-full bg-slate-950/80 border border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            />
+          </div>
+        </div>
+
+        {/* Course List */}
+        <div className="flex-1 overflow-y-auto max-h-72 space-y-1.5 py-2 pr-1">
+          {filtered.length === 0 ? (
+            <div className="p-8 text-center text-slate-500 text-xs">
+              No matching courses found.
+            </div>
+          ) : (
+            filtered.map((course) => {
+              const isCurrent = currentIds.has(String(course.id));
+              const isSelected = String(course.id) === String(selectedCourseId);
+              const hasOtherInstructor =
+                course.instructor && !isCurrent;
+              const otherInstructorName = hasOtherInstructor
+                ? getDisplayName(course.instructor)
+                : null;
+              const catName =
+                typeof course.category === "object"
+                  ? course.category?.name
+                  : course.category;
+
+              return (
+                <div
+                  key={course.id}
+                  onClick={() => {
+                    if (!isCurrent) setSelectedCourseId(String(course.id));
+                  }}
+                  className={`p-3 rounded-xl border transition flex items-center justify-between gap-3 ${
+                    isCurrent
+                      ? "bg-slate-800/40 border-slate-800/80 opacity-60 cursor-not-allowed"
+                      : isSelected
+                        ? "bg-indigo-600/15 border-indigo-500/50 ring-1 ring-indigo-500/50 cursor-pointer"
+                        : "bg-slate-950/40 border-slate-800/70 hover:bg-slate-800/40 hover:border-slate-700 cursor-pointer"
+                  }`}
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-white text-xs truncate">
+                        {course.title}
+                      </span>
+                      {catName && (
+                        <span className="px-1.5 py-0.2 rounded bg-slate-800 text-[10px] text-slate-400 font-medium shrink-0">
+                          {catName}
+                        </span>
+                      )}
+                    </div>
+                    {hasOtherInstructor && (
+                      <p className="text-[10px] text-amber-400/90 mt-0.5 flex items-center gap-1">
+                        <i className="fas fa-exchange-alt text-[9px]" />
+                        <span>Currently assigned to {otherInstructorName}</span>
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="shrink-0 flex items-center gap-2">
+                    {isCurrent ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                        <i className="fas fa-check text-[9px]" /> Assigned
+                      </span>
+                    ) : hasOtherInstructor ? (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                        Reassign
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                        Available
+                      </span>
+                    )}
+
+                    <div
+                      className={`w-4 h-4 rounded-full border flex items-center justify-center ${
+                        isSelected
+                          ? "border-indigo-400 bg-indigo-500 text-white"
+                          : "border-slate-700 bg-slate-900"
+                      }`}
+                    >
+                      {isSelected && <i className="fas fa-check text-[8px]" />}
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        {/* Warning if reassigning */}
+        {isTransferred && (
+          <div className="mt-3 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-start gap-2">
+            <i className="fas fa-exclamation-triangle text-amber-400 mt-0.5 shrink-0" />
+            <span>
+              This course is currently assigned to <strong className="text-white">{currentInstructorName}</strong>. Assigning it to {getDisplayName(teacher)} will transfer all upcoming live sessions and assignments.
+            </span>
+          </div>
+        )}
+
+        {/* Footer */}
+        <div className="flex items-center justify-end gap-3 pt-4 mt-2 border-t border-slate-800">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 text-xs font-semibold transition"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={() => onAssign(selectedCourseId)}
+            disabled={!selectedCourseId || isAssigning || currentIds.has(selectedCourseId)}
+            className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-xs font-semibold shadow-lg shadow-indigo-600/20 transition flex items-center gap-2 cursor-pointer disabled:cursor-not-allowed"
+          >
+            {isAssigning ? (
+              <>
+                <i className="fas fa-spinner fa-spin text-xs" />
+                <span>Assigning...</span>
+              </>
+            ) : (
+              <>
+                <i className="fas fa-user-plus text-xs" />
+                <span>Assign Class</span>
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // ─────────────────────────────────────────────
 // MAIN USERS TAB COMPONENT
 // ─────────────────────────────────────────────
@@ -1000,6 +1245,16 @@ const UsersTab = ({
   const [selectedTutorStatus, setSelectedTutorStatus] = useState("all"); // 'all' | 'engaged' | 'standby'
   const [selectedStudentStatus, setSelectedStudentStatus] = useState("all"); // 'all' | 'active' | 'inactive'
   const [coursesByTeacher, setCoursesByTeacher] = useState({});
+  const [allCoursesList, setAllCoursesList] = useState([]);
+  const [assignClassModalTeacher, setAssignClassModalTeacher] = useState(null);
+  const [isAssigningCourse, setIsAssigningCourse] = useState(false);
+  const [unassignDialog, setUnassignDialog] = useState({
+    open: false,
+    courseId: null,
+    courseTitle: "",
+    teacher: null,
+  });
+  const [isUnassigning, setIsUnassigning] = useState(false);
 
   const [confirmDialog, setConfirmDialog] = useState({
     open: false,
@@ -1021,13 +1276,13 @@ const UsersTab = ({
   const setSearchInput = setLocalSearchInput;
 
   // Fetch all courses in background to establish instructor assignment mapping
-  useEffect(() => {
-    let isMounted = true;
+  const loadCoursesData = useCallback(() => {
     coursesService
       .getAllCourses()
       .then((data) => {
-        if (!isMounted) return;
+        if (!isMountedRef.current) return;
         const list = Array.isArray(data) ? data : (data?.results || data?.data || []);
+        setAllCoursesList(list);
         const map = {};
         list.forEach((c) => {
           const instructorId =
@@ -1044,11 +1299,43 @@ const UsersTab = ({
         setCoursesByTeacher(map);
       })
       .catch((err) => console.warn("Could not load courses for teacher map:", err));
-
-    return () => {
-      isMounted = false;
-    };
   }, []);
+
+  useEffect(() => {
+    loadCoursesData();
+  }, [loadCoursesData]);
+
+  const handleAssignCourseToTeacher = async (courseId) => {
+    if (!courseId || !assignClassModalTeacher) return;
+    setIsAssigningCourse(true);
+    try {
+      await coursesService.assignInstructor(courseId, assignClassModalTeacher.id);
+      toastManager.success(`Course successfully assigned to ${getDisplayName(assignClassModalTeacher)}`);
+      setAssignClassModalTeacher(null);
+      loadCoursesData();
+      if (onFetchUsers) onFetchUsers();
+    } catch (err) {
+      toastManager.error(err?.response?.data?.error || err?.message || "Failed to assign course");
+    } finally {
+      setIsAssigningCourse(false);
+    }
+  };
+
+  const handleConfirmUnassign = async () => {
+    if (!unassignDialog.courseId || !unassignDialog.teacher) return;
+    setIsUnassigning(true);
+    try {
+      await coursesService.updateCourse(unassignDialog.courseId, { instructor_id: null });
+      toastManager.success(`Subject removed from ${getDisplayName(unassignDialog.teacher)}`);
+      setUnassignDialog({ open: false, courseId: null, courseTitle: "", teacher: null });
+      loadCoursesData();
+      if (onFetchUsers) onFetchUsers();
+    } catch (err) {
+      toastManager.error(err?.response?.data?.error || err?.message || "Failed to unassign subject");
+    } finally {
+      setIsUnassigning(false);
+    }
+  };
 
   const handleClearFilters = useCallback(() => {
     setUsersFilters({
@@ -1659,6 +1946,16 @@ const UsersTab = ({
                       handlePurgeUser={handlePurgeUser}
                       handleDeleteUser={handleDeleteUser}
                       processing={processing}
+                      onAssignClass={(u) => setAssignClassModalTeacher(u)}
+                      onUnassignCourse={(courseId, u) => {
+                        const course = (coursesByTeacher[u.id] || []).find((c) => c.id === courseId);
+                        setUnassignDialog({
+                          open: true,
+                          courseId,
+                          courseTitle: course?.title || "Subject",
+                          teacher: u,
+                        });
+                      }}
                     />
                   );
                 })}
@@ -1800,6 +2097,16 @@ const UsersTab = ({
                         handlePurgeUser={handlePurgeUser}
                         handleDeleteUser={handleDeleteUser}
                         processing={processing}
+                        onAssignClass={(u) => setAssignClassModalTeacher(u)}
+                        onUnassignCourse={(courseId, u) => {
+                          const course = (coursesByTeacher[u.id] || []).find((c) => c.id === courseId);
+                          setUnassignDialog({
+                            open: true,
+                            courseId,
+                            courseTitle: course?.title || "Subject",
+                            teacher: u,
+                          });
+                        }}
                       />
                     );
                   }
@@ -1934,6 +2241,15 @@ const UsersTab = ({
                           title="Manage labels"
                         >
                           <i className="fas fa-tags text-xs" />
+                        </button>
+                      )}
+                      {user.role === "teacher" && (
+                        <button
+                          onClick={() => setAssignClassModalTeacher(user)}
+                          className="w-8 h-8 flex items-center justify-center bg-indigo-600/20 text-indigo-300 rounded-lg hover:bg-indigo-600/30 transition"
+                          title="Assign Class"
+                        >
+                          <i className="fas fa-plus text-xs" />
                         </button>
                       )}
                       <button
@@ -2274,24 +2590,59 @@ const UsersTab = ({
                             </span>
                           </td>
 
-                          {/* Assigned Classes */}
+                          {/* Assigned Classes (Workflow 2: Teacher workload & quick assign/unassign) */}
                           <td className="px-3 py-2.5">
-                            {assigned.length > 0 ? (
-                              <div className="flex items-center gap-1.5 flex-wrap max-w-xs">
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-semibold whitespace-nowrap">
-                                  <i className="fas fa-play text-[9px]" />
-                                  {assigned.length} {assigned.length === 1 ? "Class" : "Classes"}
-                                </span>
-                                <span className="text-[11px] text-slate-400 truncate max-w-[130px]" title={assigned.map((c) => c.title).join(", ")}>
-                                  {assigned.map((c) => c.title).join(", ")}
-                                </span>
-                              </div>
-                            ) : (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-medium whitespace-nowrap">
-                                <i className="fas fa-clock text-[9px]" />
-                                Standby (0 assigned)
-                              </span>
-                            )}
+                            <div className="flex items-center gap-1.5 flex-wrap max-w-sm">
+                              {assigned.length > 0 ? (
+                                <>
+                                  {assigned.map((course, idx) => (
+                                    <span
+                                      key={course.id || idx}
+                                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-800/90 border border-slate-700/60 text-slate-200 text-[11px] font-medium whitespace-nowrap group/badge"
+                                      title={course.title}
+                                    >
+                                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
+                                      <span className="max-w-[110px] truncate">{course.title}</span>
+                                      <button
+                                        type="button"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setUnassignDialog({
+                                            open: true,
+                                            courseId: course.id,
+                                            courseTitle: course.title,
+                                            teacher: user,
+                                          });
+                                        }}
+                                        className="text-slate-500 hover:text-red-400 ml-0.5 text-[9px] opacity-70 hover:opacity-100 transition cursor-pointer"
+                                        title={`Unassign ${course.title} from ${getDisplayName(user)}`}
+                                      >
+                                        <i className="fas fa-times" />
+                                      </button>
+                                    </span>
+                                  ))}
+                                  <button
+                                    type="button"
+                                    onClick={() => setAssignClassModalTeacher(user)}
+                                    className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 hover:bg-indigo-500/20 transition cursor-pointer"
+                                    title="Assign additional subject to this tutor"
+                                  >
+                                    <i className="fas fa-plus text-[8px]" />
+                                    <span>Class</span>
+                                  </button>
+                                </>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={() => setAssignClassModalTeacher(user)}
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-semibold hover:bg-amber-500/25 transition cursor-pointer"
+                                  title="Allocate Cambridge subject to available tutor"
+                                >
+                                  <i className="fas fa-user-plus text-[10px]" />
+                                  <span>Standby • Assign Class</span>
+                                </button>
+                              )}
+                            </div>
                           </td>
 
                           {/* Exp & Qual */}
@@ -2339,6 +2690,13 @@ const UsersTab = ({
                           {/* Actions */}
                           <td className="px-4 py-2.5 whitespace-nowrap text-right">
                             <div className="flex items-center justify-end gap-1">
+                              <button
+                                onClick={() => setAssignClassModalTeacher(user)}
+                                className="w-7 h-7 flex items-center justify-center bg-indigo-600/20 text-indigo-300 rounded-lg hover:bg-indigo-600/40 hover:text-white transition"
+                                title="Assign Class to this Tutor"
+                              >
+                                <i className="fas fa-plus text-[11px]" />
+                              </button>
                               <button
                                 onClick={() => handleViewUser(user.id)}
                                 className="w-7 h-7 flex items-center justify-center bg-slate-800 text-slate-400 rounded-lg hover:bg-slate-700 hover:text-white transition"
@@ -2729,13 +3087,32 @@ const UsersTab = ({
                             )
                           )}
                           {user.role === "teacher" && (
-                            assigned.length > 0 ? (
-                              <span className="text-xs text-emerald-400 font-semibold">
-                                {assigned.length} assigned class(es)
-                              </span>
-                            ) : (
-                              <span className="text-xs text-amber-400 italic">Standby (0 assigned)</span>
-                            )
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              {assigned.length > 0 ? (
+                                <>
+                                  <span className="text-xs text-emerald-400 font-semibold">
+                                    {assigned.length} class(es)
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={() => setAssignClassModalTeacher(user)}
+                                    className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 hover:bg-indigo-500/20 transition cursor-pointer"
+                                    title="Assign class to this tutor"
+                                  >
+                                    <i className="fas fa-plus text-[8px]" /> Assign
+                                  </button>
+                                </>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={() => setAssignClassModalTeacher(user)}
+                                  className="inline-flex items-center gap-1 text-xs text-amber-400 hover:text-amber-300 font-medium transition cursor-pointer"
+                                  title="Assign class to this available tutor"
+                                >
+                                  <i className="fas fa-plus text-[9px]" /> Standby • Assign Class
+                                </button>
+                              )}
+                            </div>
                           )}
                           {user.role === "parent" && (
                             user.linked_children && user.linked_children.length > 0 ? (
@@ -2902,6 +3279,36 @@ const UsersTab = ({
         cancelLabel="Cancel"
         onConfirm={confirmPurgeUser}
         onCancel={() => setPurgeDialog({ open: false, userId: null })}
+      />
+
+      {/* Assign Course to Teacher Modal (Workflow 2) */}
+      {assignClassModalTeacher && (
+        <AssignCourseModal
+          teacher={assignClassModalTeacher}
+          courses={allCoursesList}
+          onClose={() => setAssignClassModalTeacher(null)}
+          onAssign={handleAssignCourseToTeacher}
+          isAssigning={isAssigningCourse}
+        />
+      )}
+
+      {/* Unassign Subject Confirm Dialog */}
+      <ConfirmDialog
+        open={unassignDialog.open}
+        variant="warning"
+        title="Unassign Subject"
+        message={
+          unassignDialog.teacher && unassignDialog.courseTitle
+            ? `Are you sure you want to remove "${unassignDialog.courseTitle}" from ${getDisplayName(unassignDialog.teacher)}? The course will become available for reassignment to another tutor.`
+            : "Are you sure you want to unassign this course?"
+        }
+        loading={isUnassigning}
+        confirmLabel={isUnassigning ? "Unassigning..." : "Unassign Subject"}
+        cancelLabel="Cancel"
+        onConfirm={handleConfirmUnassign}
+        onCancel={() =>
+          setUnassignDialog({ open: false, courseId: null, courseTitle: "", teacher: null })
+        }
       />
     </div>
   );
