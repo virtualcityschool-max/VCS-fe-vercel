@@ -52,11 +52,7 @@ export const authService = {
         role: credentials.role,
       };
 
-      console.log("Sending request data:", requestData);
-
       const response = await axiosInstance.post("/auth/login/", requestData);
-
-      console.log("API Response:", response.data);
 
       return {
         success: true,
@@ -126,15 +122,12 @@ export const authService = {
         requestData.student_emails = userData.student_emails;
       }
 
-      console.log("Request data being sent to backend:", requestData);
       console.log(
         "Request URL:",
         `${axiosInstance.defaults.baseURL}/auth/register/`,
       );
 
       const response = await axiosInstance.post("/auth/register/", requestData);
-
-      console.log("Registration Response:", response.data);
 
       return {
         success: true,
