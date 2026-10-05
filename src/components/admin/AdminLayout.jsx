@@ -34,6 +34,7 @@ const AdminLayout = () => {
       if (search.includes("role=teacher")) return "teachers";
       if (search.includes("role=student")) return "students";
       if (search.includes("role=parent")) return "parents";
+      if (search.includes("role=admin")) return "admins";
       return "users";
     }
     if (path.includes("/admin/subscriptions")) return "subscriptions";
@@ -79,6 +80,8 @@ const AdminLayout = () => {
       dispatch(fetchUsers({ role: "student" }));
     } else if (activeTab === "parents") {
       dispatch(fetchUsers({ role: "parent" }));
+    } else if (activeTab === "admins") {
+      dispatch(fetchUsers({ role: "admin" }));
     } else if (activeTab === "users" && !location.state?.skipFetch) {
       dispatch(fetchUsers());
     }

@@ -5,13 +5,13 @@ const Header = ({ activeTab, children }) => {
     switch (activeTab) {
       case "overview":
         return {
-          title: "Dashboard Overview",
-          description: "Monitor your platform's performance and key metrics",
+          title: "Dashboard",
+          description: "Monitor platform performance, enrollment analytics, and key school metrics",
         };
       case "approvals":
         return {
           title: "Pending Approvals",
-          description: "Review and manage pending user registration requests",
+          description: "Review and approve student admissions, faculty applications, and parent requests",
         };
       case "courses":
         return {
@@ -31,18 +31,23 @@ const Header = ({ activeTab, children }) => {
       case "students":
         return {
           title: "Students",
-          description: "Student master directory, roll numbers, grades, linked parents, custom labels, and account records",
+          description: "Admitted student directory, roll numbers, grades, and linked parents",
         };
       case "enrollments":
         return {
           title: "Student Enrollments",
-          description: "Active Cambridge subject enrollments, fee confirmation, and add/drop subject management",
+          description: "Active Cambridge subject enrollments, fee confirmation, and add/drop management",
         };
       case "guardians":
       case "parents":
         return {
           title: "Parents",
-          description: "Parent directory, WhatsApp contacts, and linked students",
+          description: "Parent directory, WhatsApp contacts, and linked student accounts",
+        };
+      case "admins":
+        return {
+          title: "Admin Users",
+          description: "Manage system administrators, staff privileges, and platform credentials",
         };
       case "users":
         return {
@@ -52,27 +57,22 @@ const Header = ({ activeTab, children }) => {
       case "sessions":
         return {
           title: "Timetable",
-          description: "Create, edit, and manage live class sessions",
+          description: "Cambridge live class timetable, schedule, and session management",
         };
-      case "evaluations":
+      case "teacher-planner":
         return {
-          title: "Evaluations",
-          description: "Review student academic performance across subjects",
+          title: "PTM Meetings",
+          description: "Schedule and manage Parent-Teacher Meeting consultation slots and office hours",
         };
       case "attendance":
         return {
           title: "Attendance",
-          description: "Session-wise attendance matrix across all subjects.",
+          description: "Session-wise student attendance matrix for classes and PTM reviews",
         };
-      case "levels":
+      case "evaluations":
         return {
-          title: "Levels",
-          description: "Manage education levels for organizing your curriculum",
-        };
-      case "teacher-planner":
-        return {
-          title: "Teacher Meetings",
-          description: "Schedule and manage meetings and consultation slots for teachers",
+          title: "Evaluations",
+          description: "Student academic performance, evaluation reports, and grading records",
         };
       case "subscriptions":
         return {
@@ -83,6 +83,11 @@ const Header = ({ activeTab, children }) => {
         return {
           title: "Referrals",
           description: "Track affiliate referral links, signups, and referral reward earnings",
+        };
+      case "levels":
+        return {
+          title: "Levels",
+          description: "Manage Cambridge education levels for organizing curriculum",
         };
       case "testimonials":
         return {

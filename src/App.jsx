@@ -77,7 +77,8 @@ const AppInner = () => {
       if (search.includes("role=teacher")) return "teachers";
       if (search.includes("role=student")) return "students";
       if (search.includes("role=parent")) return "parents";
-      return "users";
+      if (search.includes("role=admin")) return "admins";
+      return null;
     }
     return null;
   };

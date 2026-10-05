@@ -86,24 +86,24 @@ const TimezoneIndicator = ({ isCollapsed, onOpenTimezoneModal }) => {
 
 const NAV_CONFIG = {
   admin: [
-    { id: "overview",            label: "Overview",             icon: "fas fa-chart-line",      to: "/admin/overview" },
+    { id: "overview",            label: "Dashboard",            icon: "fas fa-table-columns",   to: "/admin/overview" },
 
-    // ── Academics ──
+    // ── Admissions (Inbound Applicants, Admitted Students & Subject Enrollments) ──
+    { id: "approvals",           label: "Pending Approvals",     icon: "fas fa-user-check",     to: "/admin/approvals",             section: "Admissions" },
+    { id: "students",            label: "Students",             icon: "fas fa-user-graduate",   to: "/admin/users?role=student",    section: "Admissions" },
+    { id: "enrollments",         label: "Student Enrollments",  icon: "fas fa-clipboard-list",  to: "/admin/enrollments",           section: "Admissions" },
+
+    // ── Academics (Curriculum, Faculty, Staffing & Schedule) ──
     { id: "courses",             label: "Subjects",             icon: "fas fa-book",            to: "/admin/courses",               section: "Academics" },
     { id: "teachers",            label: "Teachers",             icon: "fas fa-chalkboard-user", to: "/admin/users?role=teacher",    section: "Academics" },
     { id: "teacher-allocations", label: "Teacher Allocations",  icon: "fas fa-thumbtack",       to: "/admin/teacher-allocations",   section: "Academics" },
     { id: "sessions",            label: "Timetable",            icon: "fas fa-chalkboard",      to: "/admin/sessions",              section: "Academics" },
-    { id: "teacher-planner",     label: "Teacher Meetings",      icon: "fas fa-user-clock",      to: "/admin/teacher-planner",       section: "Academics" },
 
-    // ── Students & Records ──
-    { id: "students",            label: "Students",             icon: "fas fa-user-graduate",   to: "/admin/users?role=student",    section: "Students & Records" },
-    { id: "enrollments",         label: "Student Enrollments",  icon: "fas fa-clipboard-list",  to: "/admin/enrollments",           section: "Students & Records" },
-    { id: "parents",             label: "Parents",               icon: "fas fa-people-roof",    to: "/admin/users?role=parent",     section: "Students & Records" },
-    { id: "attendance",          label: "Attendance",            icon: "fas fa-clipboard-user", to: "/admin/attendance",           section: "Students & Records" },
-    { id: "evaluations",         label: "Evaluations",           icon: "fas fa-chart-bar",       to: "/admin/evaluations",          section: "Students & Records" },
-
-    // ── Admissions ──
-    { id: "approvals",           label: "Pending Approvals",     icon: "fas fa-user-check",     to: "/admin/approvals",             section: "Admissions" },
+    // ── PTM (Parent-Teacher Meetings, Guardians & Academic Records) ──
+    { id: "teacher-planner",     label: "PTM Meetings",         icon: "fas fa-user-clock",      to: "/admin/teacher-planner",       section: "PTM" },
+    { id: "parents",             label: "Parents",               icon: "fas fa-people-roof",    to: "/admin/users?role=parent",     section: "PTM" },
+    { id: "attendance",          label: "Attendance",            icon: "fas fa-clipboard-user", to: "/admin/attendance",           section: "PTM" },
+    { id: "evaluations",         label: "Evaluations",           icon: "fas fa-chart-bar",       to: "/admin/evaluations",          section: "PTM" },
 
     // ── Finance ──
     { id: "subscriptions",       label: "Subscriptions",         icon: "fas fa-credit-card",    to: "/admin/subscriptions",         section: "Finance" },
@@ -115,6 +115,7 @@ const NAV_CONFIG = {
     { id: "testimonials",        label: "Testimonials",          icon: "fas fa-quote-left",    to: "/admin/testimonials",          section: "Content" },
 
     // ── Settings ──
+    { id: "admins",              label: "Admin Users",           icon: "fas fa-user-shield",    to: "/admin/users?role=admin",      section: "Settings" },
     { id: "levels",              label: "Levels",                icon: "fas fa-tags",            to: "/admin/course-levels",         section: "Settings" },
     { id: "about",               label: "About Us",              icon: "fas fa-info-circle",    to: "/admin/about",                 section: "Settings" },
     { id: "settings",            label: "Platform Settings",     icon: "fas fa-sliders-h",      to: "/admin/settings",              section: "Settings" },
