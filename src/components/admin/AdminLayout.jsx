@@ -103,8 +103,9 @@ const AdminLayout = () => {
   }, [dispatch, activeTab]);
 
   return (
-    <section className="min-h-screen bg-slate-950 text-white font-inter px-4 sm:px-6 lg:px-8 py-6 pt-16 lg:pt-8">
-      {activeTab !== null && <Header activeTab={activeTab} />}
+    <section className="min-h-screen bg-[#0B1020] text-white font-inter px-4 sm:px-6 lg:px-8 py-6">
+      {/* The dashboard has its own greeting instead of the shared Header */}
+      {activeTab !== null && activeTab !== "overview" && <Header activeTab={activeTab} />}
       <Outlet />
     </section>
   );

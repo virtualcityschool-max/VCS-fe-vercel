@@ -10,6 +10,9 @@ import { toastManager } from "./utils/toastManager";
 // Components
 import { AIChat, AuthModals, Navbar, Footer, ScrollToTop } from "./components";
 import Sidebar from "./components/layout/Sidebar";
+import AdminSidebar from "./components/admin/shell/AdminSidebar";
+import AdminTopBar from "./components/admin/shell/AdminTopBar";
+import { AdminSignalsProvider } from "./components/admin/shell/AdminSignals";
 
 // Routes
 import AppRoutes from "./routes/AppRoutes";
@@ -45,6 +48,10 @@ const AppInner = () => {
   };
 
   const hasSidebar = isLoggedIn && (role === "admin" || role === "teacher" || role === "student" || role === "parent");
+  // Admin pages get their own shell (menu + top bar) instead of the public
+  // navbar. Student, teacher and parent screens are unchanged.
+  const isAdminArea = isLoggedIn && role === "admin" && location.pathname.startsWith("/admin");
+  const Shell = isAdminArea ? AdminSignalsProvider : React.Fragment;
 
   // Close mobile sidebar on route change
   useEffect(() => {
@@ -94,12 +101,22 @@ const AppInner = () => {
   // Blog/About without logging out. Its UserProfileDropdown already shows a
   // role label (Administrator/Tutor/Student/Guardian) next to the name, so
   // it's clear at a glance which dashboard is open.
-  const showNavbar = true;
+  const showNavbar = !isAdminArea;
 
   return (
-    <div className="min-h-screen bg-slate-950 selection:bg-indigo-500/30 overflow-x-hidden">
+    <Shell>
+    <div className={`min-h-screen selection:bg-indigo-500/30 overflow-x-hidden ${isAdminArea ? "bg-[#0B1020]" : "bg-slate-950"}`}>
+      {isAdminArea && (
+        <AdminSidebar
+          isOpen={isSidebarOpen}
+          onMobileClose={() => setIsSidebarOpen(false)}
+          isCollapsed={isSidebarCollapsed}
+          onToggleCollapse={toggleSidebar}
+        />
+      )}
+
       {/* Unified sidebar for admin / teacher / student */}
-      {hasSidebar && (
+      {hasSidebar && !isAdminArea && (
         <Sidebar
           role={role}
           isSidebarOpen={isSidebarOpen}
@@ -131,8 +148,10 @@ const AppInner = () => {
           </header>
         )}
 
+        {isAdminArea && <AdminTopBar onOpenMenu={() => setIsSidebarOpen(true)} />}
+
         {/* Floating mobile hamburger (sidebar roles only) */}
-        {hasSidebar && (
+        {hasSidebar && !isAdminArea && (
           <button
             className={`lg:hidden fixed top-4 left-4 z-40 w-10 h-10 bg-slate-900 border border-slate-700 rounded-lg flex items-center justify-center text-slate-400 hover:text-white transition shadow-lg ${
               isSidebarOpen ? "hidden" : ""
@@ -149,6 +168,7 @@ const AppInner = () => {
         {showNavbar && <Footer />}
 
         {/* Floating WhatsApp support button */}
+        {!isAdminArea && (
         <a
           href="https://wa.me/966556687417"
           target="_blank"
@@ -161,6 +181,7 @@ const AppInner = () => {
             24/7 Support
           </span>
         </a>
+        )}
 
         {/* Global Overlays */}
         <section className="relative z-[9999]">
@@ -179,6 +200,7 @@ const AppInner = () => {
         </section>
       </div>
     </div>
+    </Shell>
   );
 };
 

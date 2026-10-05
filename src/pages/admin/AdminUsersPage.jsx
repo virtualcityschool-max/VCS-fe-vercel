@@ -221,6 +221,17 @@ const AdminUsersPage = () => {
     setActiveModal("create-user");
   };
 
+  // "Quick add" in the admin top bar links here with ?new=1: open the create
+  // form once, then drop the flag so a refresh doesn't reopen it.
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get("new") !== "1") return;
+    handleCreateUser();
+    params.delete("new");
+    navigate({ search: params.toString() ? `?${params}` : "" }, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.search]);
+
   // Handle close create user modal
   const handleCloseCreateUserModal = () => {
     resetCreateUserModal();
