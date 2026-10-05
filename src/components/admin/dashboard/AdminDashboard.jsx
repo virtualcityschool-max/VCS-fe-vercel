@@ -95,6 +95,11 @@ const AdminDashboard = ({ analytics, analyticsError, teacherMeetings, recentActi
   const todayKey = dayKey(now, timeZone);
   const hour = Number(now.toLocaleString("en-US", { hour: "numeric", hour12: false, ...(timeZone ? { timeZone } : {}) }));
 
+  const liveIds = useMemo(
+    () => new Set((signals?.liveSessions || []).map((s) => s.id)),
+    [signals?.liveSessions],
+  );
+
   const { absentees, heldToday } = useMemo(() => {
     const rows = attendance || [];
     const absences = new Map();
@@ -105,7 +110,8 @@ const AdminDashboard = ({ analytics, analyticsError, teacherMeetings, recentActi
         cur.n += 1;
         absences.set(r.student, cur);
       }
-      if (r.scheduled_at && dayKey(new Date(r.scheduled_at), timeZone) === todayKey) {
+      // Classes still running are listed under LIVE NOW instead.
+      if (r.scheduled_at && !liveIds.has(r.session) && dayKey(new Date(r.scheduled_at), timeZone) === todayKey) {
         const s = sessions.get(r.session) || { id: r.session, title: r.session_title, at: r.scheduled_at, total: 0, present: 0 };
         s.total += 1;
         if (r.status === "present" || r.status === "late") s.present += 1;
@@ -116,7 +122,7 @@ const AdminDashboard = ({ analytics, analyticsError, teacherMeetings, recentActi
       absentees: [...absences.values()].filter((a) => a.n >= 2).sort((a, b) => b.n - a.n),
       heldToday: [...sessions.values()].sort((a, b) => new Date(b.at) - new Date(a.at)),
     };
-  }, [attendance, timeZone, todayKey]);
+  }, [attendance, timeZone, todayKey, liveIds]);
 
   if (!signals) return null;
   const { pendingApprovals, pendingChildLinks, pendingEnrollments, pendingFreeAccess, expiring, unassigned, liveSessions, coursesLoaded } = signals;
