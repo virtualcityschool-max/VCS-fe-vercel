@@ -1,24 +1,5 @@
-import {
-  DepartmentName,
-  Student,
-  Teacher,
-  Parent,
-  BaseUser,
-  Subject,
-  TimetableSession,
-  TeacherMeeting,
-  AttendanceRecord,
-  GradeRecord,
-  Subscription,
-  Referral,
-  ContentPost,
-  Testimonial,
-  PlatformSettings,
-  ApprovalItem,
-  RecentActivity,
-  AcademicLevel,
-  EnrollmentRecord,
-} from '../types';
+// Colours and labels for each department chip in the admin.
+import { DepartmentName } from '../types';
 
 export const DEPARTMENT_CONFIG: Record<
   DepartmentName,
@@ -96,18 +77,3 @@ export const DEPARTMENT_CONFIG: Record<
     hex: '#E11D48',
   },
 };
-
-export const INITIAL_LEVELS: AcademicLevel[] = [
-  'A Level',
-  'AS Level',
-  'O Level',
-  'IGCSE',
-  'FSc',
-  'Matric',
-  'Grade 8',
-  'Grade 7',
-  'Grade 6',
-  'Grade 5',
-  'Primary (1-4)',
-];
-

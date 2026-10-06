@@ -18,7 +18,7 @@ import {
   Send,
 } from 'lucide-react';
 import { StatusPill } from './StatusPill';
-import { DEPARTMENT_CONFIG } from '../../data/mockData';
+import { DEPARTMENT_CONFIG } from '../../data/departments';
 import { DepartmentName } from '../../types';
 
 export const DetailDrawer: React.FC = () => {

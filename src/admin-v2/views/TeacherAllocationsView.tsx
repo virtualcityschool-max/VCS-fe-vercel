@@ -17,7 +17,7 @@ import {
   Clock,
   Sparkles,
 } from 'lucide-react';
-import { DEPARTMENT_CONFIG } from '../data/mockData';
+import { DEPARTMENT_CONFIG } from '../data/departments';
 
 export const TeacherAllocationsView: React.FC = () => {
   const {

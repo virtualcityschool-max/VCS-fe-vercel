@@ -7,7 +7,7 @@ import { DataTable, Column } from '../components/common/DataTable';
 import { StatusPill } from '../components/common/StatusPill';
 import { Subject, DepartmentName, AcademicLevel } from '../types';
 import { BookOpen, Plus, Sparkles, Users } from 'lucide-react';
-import { DEPARTMENT_CONFIG } from '../data/mockData';
+import { DEPARTMENT_CONFIG } from '../data/departments';
 
 export const SubjectsView: React.FC = () => {
   const {

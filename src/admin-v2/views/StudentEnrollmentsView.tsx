@@ -6,7 +6,7 @@ import { DataTable, Column } from '../components/common/DataTable';
 import { StatusPill } from '../components/common/StatusPill';
 import { EnrollmentRecord, DepartmentName } from '../types';
 import { UserCheck, Plus, BookOpen, Layers, DollarSign, Calendar, Sparkles } from 'lucide-react';
-import { DEPARTMENT_CONFIG } from '../data/mockData';
+import { DEPARTMENT_CONFIG } from '../data/departments';
 import { Field, MultiPick, SelectInput } from '../components/common/FormControls';
 
 export const StudentEnrollmentsView: React.FC = () => {

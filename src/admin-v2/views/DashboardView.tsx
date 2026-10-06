@@ -34,7 +34,7 @@ import {
   CartesianGrid,
 } from 'recharts';
 import { StatusPill } from '../components/common/StatusPill';
-import { DEPARTMENT_CONFIG } from '../data/mockData';
+import { DEPARTMENT_CONFIG } from '../data/departments';
 import { DepartmentName } from '../types';
 
 export const DashboardView: React.FC = () => {
