@@ -24,7 +24,7 @@ import { platformSettingsService } from '../../services/platformSettingsService'
 import { freeAccessService } from '../../services/freeAccessService';
 import { axiosInstance } from '../../utils';
 import { teacherService } from '../../services/teacherService';
-import { approveUser, rejectUser, actionEnrollment, fetchPendingApprovals, fetchPendingEnrollments } from '../../store/slices/approvalsSlice';
+import { approveUser, rejectUser, actionEnrollment, fetchPendingApprovals, fetchPendingEnrollments, fetchRejectedApprovals } from '../../store/slices/approvalsSlice';
 import { approveChildLink, rejectChildLink, fetchPendingChildLinks } from '../../store/slices/childLinksSlice';
 import { fetchFreeAccessRequests } from '../../store/slices/freeAccessSlice';
 import { getDisplayName } from '../../utils/userDisplay';
@@ -184,11 +184,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // ── Raw API data ──────────────────────────────────────────────────────────
   const [raw, setRaw] = useState<any>({
     users: [], courses: [], enrollments: [], categories: [], sessions: [], meetings: [], subs: { active: [], expired: [], needs_gumroad_cancellation: [] },
-    referrals: [], posts: [], testimonials: [], about: null, settings: null, analytics: null, attendance: [], grading: null,
+    referrals: [], posts: [], testimonials: [], reviews: [], about: null, settings: null, analytics: null, attendance: [], grading: null,
   });
   const [loaded, setLoaded] = useState<Record<string, boolean>>({});
   const pendingApprovals = useSelector((s: any) => s.approvals.pendingApprovals);
   const pendingEnrollments = useSelector((s: any) => s.approvals.pendingEnrollments);
+  const rejectedAccounts = useSelector((s: any) => s.approvals.rejectedApprovals) || [];
   const pendingChildLinks = useSelector((s: any) => s.childLinks.pendingChildLinks);
   const freeAccess = useSelector((s: any) => s.freeAccess.requests);
   const [approvedTodayCount, setApprovedTodayCount] = useState(0);
@@ -206,6 +207,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     referrals: () => axiosInstance.get('/referrals/admin/', { params: { page_size: 500 } }).then((r: any) => r.data),
     posts: () => blogsService.getAllBlogs({ ordering: '-created_at' }),
     testimonials: () => testimonialsService.getAllTestimonials(),
+    reviews: () => axiosInstance.get('/admin/approval-reviews/').then((r: any) => r.data),
     about: () => aboutService.get(),
     settings: () => axiosInstance.get('/messaging/platform-settings/').then((r: any) => r.data),
     analytics: () => adminService.getDashboardAnalytics(),
@@ -235,6 +237,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const refreshApprovals = useCallback(() => {
     dispatch(fetchPendingApprovals());
+    dispatch(fetchRejectedApprovals());
     dispatch(fetchPendingEnrollments());
     dispatch(fetchPendingChildLinks());
     dispatch(fetchFreeAccessRequests({ status: 'pending' }));
@@ -500,8 +503,39 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       requesterEmail: l.parent_email || '', targetEntityName: `Link to ${l.student || 'student'}`,
       details: 'Parent asked to follow this student\'s progress.', requestedAt: relTime(l.requested_at), status: 'pending', _raw: l,
     }));
-    return items;
-  }, [pendingApprovals, pendingEnrollments, freeAccess, pendingChildLinks]);
+    // Attach the admissions workflow stage, waiting time and the full request.
+    const reviewByKey = new Map(raw.reviews.map((r: any) => [r.key, r]));
+    const DAY = 86400000;
+    return items.map((it: any) => {
+      const r: any = it._raw || {};
+      const review: any = reviewByKey.get(it.id);
+      const openStage = review && ['under_review', 'info_requested', 'on_hold'].includes(review.status) ? review.status : 'new';
+      const at = r.date_joined || r.enrolled_at || r.created_at || r.requested_at;
+      const waitingDays = at ? Math.max(0, Math.floor((Date.now() - new Date(at).getTime()) / DAY)) : 0;
+      const facts: { label: string; value: string }[] = [];
+      if (it.id.startsWith('user-')) {
+        facts.push({ label: 'Role', value: r.role || '' });
+        if ((r.requested_children || []).length) facts.push({ label: 'Children to link', value: r.requested_children.map((c: any) => c.email || c.name || c).join(', ') });
+      } else if (it.id.startsWith('free-')) {
+        facts.push({ label: 'Country', value: r.country || '—' });
+        if (r.occupation) facts.push({ label: 'Occupation', value: r.occupation });
+        facts.push({ label: 'Subjects', value: it.targetEntityName });
+        facts.push({ label: 'Why they need it', value: r.eligibility_statement || '—' });
+        if (r.goals_statement) facts.push({ label: 'Their goals', value: r.goals_statement });
+      } else if (it.id.startsWith('enr-')) {
+        facts.push({ label: 'Subject', value: r.course_title || '' });
+        if (r.teacher_name) facts.push({ label: 'Teacher', value: r.teacher_name });
+      } else if (it.id.startsWith('link-')) {
+        facts.push({ label: 'Student', value: r.student || '' });
+      }
+      return { ...it, stage: openStage, review, waitingDays, requestedIso: at, facts: facts.filter((f) => f.value) };
+    });
+  }, [pendingApprovals, pendingEnrollments, freeAccess, pendingChildLinks, raw.reviews]);
+
+  // Decisions recorded through the inbox (approved / rejected), newest first.
+  const decisions = useMemo(() => raw.reviews
+    .filter((r: any) => r.status === 'approved' || r.status === 'rejected')
+    .sort((a: any, b: any) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()), [raw.reviews]);
 
   const activities: RecentActivity[] = useMemo(() => {
     const list: any[] = [];
@@ -530,7 +564,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const rawUser = (id: string) => raw.users.find((u: any) => sid(u.id) === sid(id));
   const setActive = (u: any, active: boolean) => adminService.updateUser(u.id, { email: u.email, is_active: active, is_staff: u.is_staff ?? false, role: u.role });
 
-  const approveItem = async (id: string) => {
+  // Records an inbox step (stage or decision) with who/when; never blocks the decision itself.
+  const recordReview = async (item: any, status: string, reason = '', note = '') => {
+    try {
+      await axiosInstance.post(`/admin/approval-reviews/${item.id}/`, {
+        status, reason, note,
+        summary: { title: item.title, name: item.requesterName, email: item.requesterEmail, target: item.targetEntityName },
+      });
+    } catch (e) {
+      addToast(`Saved, but the history note failed: ${errText(e)}`, 'warning');
+    }
+  };
+
+  const approveItem = async (id: string, note = '') => {
     const item: any = approvals.find((a) => a.id === id);
     if (!item) return;
     const ok = await confirmAction({ title: `Approve ${item.requesterName}?`, message: `${item.title}: ${item.targetEntityName}. They are notified as usual.`, confirmLabel: 'Approve', isDestructive: false });
@@ -538,24 +584,73 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const done = await run(async () => {
       if (item.type === 'account_signup') await dispatch(approveUser({ userId: item._raw.id })).unwrap();
       else if (item.type === 'parent_link') await dispatch(approveChildLink(item._raw.link_id)).unwrap();
-      else if (id.startsWith('free-')) await freeAccessService.resolve(item._raw.id, (item._raw.courses || []).map((c: any) => ({ course_id: c.course?.id ?? c.id, action: 'approve' })), '');
+      else if (id.startsWith('free-')) await freeAccessService.resolve(item._raw.id, (item._raw.courses || []).map((c: any) => ({ course_id: c.course?.id ?? c.id, action: 'approve' })), note);
       else await dispatch(actionEnrollment({ enrollmentId: item._raw.id, action: 'approve' })).unwrap();
     }, `Approved: ${item.requesterName}`, ['users', 'enrollments']);
-    if (done) { setApprovedTodayCount((n) => n + 1); refreshApprovals(); }
+    if (done) {
+      await recordReview(item, 'approved', '', note);
+      setApprovedTodayCount((n) => n + 1);
+      refreshApprovals();
+      reload('reviews');
+    }
   };
 
-  const rejectItem = async (id: string) => {
+  // The reject dialog collects the reason, so there is no second confirm here.
+  // Sign-ups and scholarship requests include the reason in the email.
+  const rejectItem = async (id: string, reason = '', note = '') => {
     const item: any = approvals.find((a) => a.id === id);
-    if (!item) return;
-    const ok = await confirmAction({ title: `Reject ${item.requesterName}?`, message: `${item.title}: ${item.targetEntityName}.`, confirmLabel: 'Reject' });
-    if (!ok) return;
+    if (!item) return false;
+    const emailReason = [reason, note].filter(Boolean).join(' — ');
     const done = await run(async () => {
-      if (item.type === 'account_signup') await dispatch(rejectUser(item._raw.id)).unwrap();
+      if (item.type === 'account_signup') await dispatch(rejectUser({ userId: item._raw.id, reason: emailReason })).unwrap();
       else if (item.type === 'parent_link') await dispatch(rejectChildLink(item._raw.link_id)).unwrap();
-      else if (id.startsWith('free-')) await freeAccessService.resolve(item._raw.id, (item._raw.courses || []).map((c: any) => ({ course_id: c.course?.id ?? c.id, action: 'reject' })), '');
+      else if (id.startsWith('free-')) await freeAccessService.resolve(item._raw.id, (item._raw.courses || []).map((c: any) => ({ course_id: c.course?.id ?? c.id, action: 'reject' })), emailReason);
       else await dispatch(actionEnrollment({ enrollmentId: item._raw.id, action: 'reject' })).unwrap();
     }, `Rejected: ${item.requesterName}`);
-    if (done) { setRejectedTodayCount((n) => n + 1); refreshApprovals(); }
+    if (done) {
+      await recordReview(item, 'rejected', reason || 'Other', note);
+      setRejectedTodayCount((n) => n + 1);
+      refreshApprovals();
+      reload('reviews');
+    }
+    return done;
+  };
+
+  // Rejected sign-ups stay on file: approve after all, or delete for good.
+  const reconsiderAccount = async (u: any) => {
+    const ok = await confirmAction({ title: `Approve ${getDisplayName(u) || u.email} after all?`, message: 'Their account becomes active and they receive the approval email.', confirmLabel: 'Approve', isDestructive: false });
+    if (!ok) return;
+    const done = await run(() => dispatch(approveUser({ userId: u.id })).unwrap(), `Approved: ${getDisplayName(u) || u.email}`, ['users']);
+    if (done) {
+      try {
+        await axiosInstance.post(`/admin/approval-reviews/user-${u.id}/`, {
+          status: 'approved', note: 'Approved after an earlier rejection',
+          summary: { title: 'Account sign-up', name: getDisplayName(u) || u.email, email: u.email, target: `${u.role} account` },
+        });
+      } catch { /* history only */ }
+      refreshApprovals();
+      reload('reviews');
+    }
+  };
+  const purgeAccount = async (u: any) => {
+    const ok = await confirmAction({ title: `Delete ${getDisplayName(u) || u.email} permanently?`, message: 'The rejected account and its data are removed for good. This cannot be undone. They can sign up again later.', confirmLabel: 'Delete permanently' });
+    if (!ok) return;
+    const done = await run(() => adminService.purgeUser(u.id), 'Account deleted permanently');
+    if (done) refreshApprovals();
+  };
+
+  // Moves a request to Under review / Information requested / On hold, or back to New.
+  const setReviewStage = async (id: string, stage: string, note = '') => {
+    const item: any = approvals.find((a) => a.id === id);
+    if (!item) return false;
+    const labels: Record<string, string> = { under_review: 'Under review', info_requested: 'Waiting for the applicant', on_hold: 'On hold', new: 'Back to New' };
+    const done = await run(() => (stage === 'new'
+      ? axiosInstance.delete(`/admin/approval-reviews/${id}/`)
+      : axiosInstance.post(`/admin/approval-reviews/${id}/`, {
+          status: stage, note,
+          summary: { title: item.title, name: item.requesterName, email: item.requesterEmail, target: item.targetEntityName },
+        })), `${item.requesterName}: ${labels[stage] || stage}`, ['reviews']);
+    return done;
   };
 
   // Creates the account, then saves the optional extras (profile, timezone,
@@ -783,7 +878,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     theme, toggleTheme, currentView, setCurrentView, sidebarCollapsed, toggleSidebar, mobileMenuOpen, setMobileMenuOpen,
     timezone, setTimezone, tzIana,
     commandPaletteOpen, setCommandPaletteOpen, detailDrawer, openDetailDrawer, closeDetailDrawer, quickAddModal, openQuickAdd, closeQuickAdd,
-    approvals, approveItem, rejectItem, approvedTodayCount, rejectedTodayCount,
+    approvals, approveItem, rejectItem, setReviewStage, decisions, rejectedAccounts, reconsiderAccount, purgeAccount, approvedTodayCount, rejectedTodayCount,
     students, addStudent, updateStudent, deleteStudent, bulkUpdateStudentStatus,
     enrollments, addEnrollment, addEnrollments, removeEnrollment,
     teachers, addTeacher, updateTeacher, toggleTeacherStatus, bulkAssignSubject, allocateTeacherSubject, deallocateTeacherSubject,

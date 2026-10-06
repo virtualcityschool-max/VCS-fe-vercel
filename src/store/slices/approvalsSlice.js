@@ -59,9 +59,12 @@ export const approveUser = createAsyncThunk(
 
 export const rejectUser = createAsyncThunk(
   "approvals/rejectUser",
-  async (userId, { rejectWithValue, dispatch }) => {
+  async (arg, { rejectWithValue, dispatch }) => {
+    // Accepts a user id, or { userId, reason } to include a reason in the email.
+    const userId = typeof arg === "object" && arg !== null ? arg.userId : arg;
+    const reason = typeof arg === "object" && arg !== null ? arg.reason || "" : "";
     try {
-      const result = await authService.rejectUser(userId);
+      const result = await authService.rejectUser(userId, reason);
       // Rejecting moves the user from the pending tab to the rejected tab
       dispatch(fetchPendingApprovals());
       dispatch(fetchRejectedApprovals());

@@ -6,7 +6,10 @@ import { FilterBar, FilterConfig, SortOption } from '../components/common/Filter
 import { DataTable, Column } from '../components/common/DataTable';
 import { StatusPill } from '../components/common/StatusPill';
 import { Student } from '../types';
-import { UserPlus, UserCheck, UserX, Download } from 'lucide-react';
+import { UserPlus, UserCheck, UserX, Download, Tag, Plus } from 'lucide-react';
+// Labels reuse the live admin's components, so they behave the same as before.
+import { TagChip, StudentTagsModal } from '../../components/admin/StudentTags';
+import { useStudentTags } from '../../hooks/useStudentTags';
 
 export const StudentsView: React.FC = () => {
   const {
@@ -18,7 +21,15 @@ export const StudentsView: React.FC = () => {
     bulkUpdateStudentStatus,
     addToast,
     levels,
-  } = useApp();
+    reload,
+  } = useApp() as any;
+
+  const { tags, refresh: refreshTags } = useStudentTags();
+  const [tagFilter, setTagFilter] = useState('all');
+  const [tagOverrides, setTagOverrides] = useState<Record<string, any[]>>({});
+  const [tagModalStudent, setTagModalStudent] = useState<any>(null);
+  const [labelLibraryOpen, setLabelLibraryOpen] = useState(false);
+  const tagsFor = (st: any): any[] => tagOverrides[st.id] ?? st._raw?.tags ?? [];
 
   const [searchQuery, setSearchQuery] = useState('');
   const [levelFilter, setLevelFilter] = useState('all');
@@ -28,6 +39,17 @@ export const StudentsView: React.FC = () => {
 
   // Filters setup
   const filters: FilterConfig[] = [
+    {
+      id: 'tag',
+      label: 'Label',
+      value: tagFilter,
+      onChange: setTagFilter,
+      options: tags.map((t: any) => ({
+        label: t.name,
+        value: String(t.id),
+        count: students.filter((st) => tagsFor(st).some((x: any) => String(x.id) === String(t.id))).length,
+      })),
+    },
     {
       id: 'level',
       label: 'Level',
@@ -79,7 +101,9 @@ export const StudentsView: React.FC = () => {
     const matchFee = feeFilter === 'all' || student.feeStatus === feeFilter;
     const matchStatus = statusFilter === 'all' || student.status === statusFilter;
 
-    return matchSearch && matchLevel && matchFee && matchStatus;
+    const matchTag = tagFilter === 'all' || tagsFor(student).some((x: any) => String(x.id) === tagFilter);
+
+    return matchSearch && matchLevel && matchFee && matchStatus && matchTag;
   });
 
   if (currentSort === 'name-asc') {
@@ -152,6 +176,23 @@ export const StudentsView: React.FC = () => {
       ),
     },
     {
+      header: 'Labels',
+      cell: (row) => (
+        <div className="flex flex-wrap items-center gap-1 max-w-[220px]" onClick={(e) => e.stopPropagation()}>
+          {tagsFor(row).map((t: any) => (
+            <TagChip key={t.id} tag={t} onClick={() => setTagFilter(String(t.id))} />
+          ))}
+          <button
+            onClick={() => setTagModalStudent(row)}
+            title="Edit labels"
+            className="p-1 rounded-md text-slate-500 hover:text-white hover:bg-[#1A2346]"
+          >
+            <Plus className="w-3 h-3" />
+          </button>
+        </div>
+      ),
+    },
+    {
       header: 'Status',
       cell: (row) => <StatusPill status={row.status} />,
     },
@@ -167,6 +208,15 @@ export const StudentsView: React.FC = () => {
           onClick: () => openQuickAdd('student'),
           icon: UserPlus,
         }}
+        extraActions={
+          <button
+            onClick={() => setLabelLibraryOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl border border-[#232D52] bg-[#121831] text-slate-300 hover:text-white transition-colors"
+          >
+            <Tag className="w-3.5 h-3.5" />
+            <span>Manage labels</span>
+          </button>
+        }
       />
 
       <FilterBar
@@ -220,6 +270,29 @@ export const StudentsView: React.FC = () => {
           },
         ]}
       />
+      {labelLibraryOpen && (
+        <StudentTagsModal
+          student={null}
+          tags={tags}
+          onClose={() => setLabelLibraryOpen(false)}
+          onTagsChanged={refreshTags}
+          onStudentsStale={() => reload('users')}
+          onSaved={() => {}}
+        />
+      )}
+      {tagModalStudent && (
+        <StudentTagsModal
+          student={{ id: tagModalStudent.id, name: tagModalStudent.name, roll_no: tagModalStudent._raw?.roll_no, tags: tagsFor(tagModalStudent) }}
+          tags={tags}
+          onClose={() => setTagModalStudent(null)}
+          onTagsChanged={refreshTags}
+          onStudentsStale={() => reload('users')}
+          onSaved={(userId: any, saved: any[]) => {
+            setTagOverrides((prev) => ({ ...prev, [String(userId)]: saved }));
+            refreshTags();
+          }}
+        />
+      )}
     </div>
   );
 };
