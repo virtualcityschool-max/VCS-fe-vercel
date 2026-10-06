@@ -1,26 +1,27 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { PageHeader } from '../components/common/PageHeader';
 import { Sliders, Clock, User, Save, Check } from 'lucide-react';
 
 export const PlatformSettingsView: React.FC = () => {
-  const { settings, updateSettings, timezone, setTimezone, addToast } = useApp();
+  const { settings, updateSettings, setTimezone, tzIana, profile } = useApp() as any;
   const [activeTab, setActiveTab] = useState<'defaults' | 'timezone'>('defaults');
 
   // Form states
   const [defaultsForm, setDefaultsForm] = useState(settings);
-  const [selectedTz, setSelectedTz] = useState(timezone);
-  const [adminName, setAdminName] = useState('School Principal (Admin)');
-  const [adminEmail, setAdminEmail] = useState('admin@virtualcityschool.com');
-  const [emailAlerts, setEmailAlerts] = useState(true);
-  const [smsAlerts, setSmsAlerts] = useState(false);
+  useEffect(() => setDefaultsForm(settings), [settings]);
+  const browserTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const [selectedTz, setSelectedTz] = useState(tzIana || browserTz);
+  useEffect(() => setSelectedTz(tzIana || browserTz), [tzIana, browserTz]);
+  const adminName = [profile?.first_name, profile?.last_name].filter(Boolean).join(' ') || profile?.username || '';
+  const adminEmail = profile?.email || '';
 
   const availableTimezones = [
-    { label: 'Asia/Riyadh (AST, UTC+3) — Gulf Standard', value: 'Asia/Riyadh AST' },
-    { label: 'Asia/Dubai (GST, UTC+4) — UAE / Oman', value: 'Asia/Dubai GST' },
-    { label: 'Asia/Karachi (PKT, UTC+5) — Pakistan Standard', value: 'Asia/Karachi PKT' },
-    { label: 'Asia/Qatar (AST, UTC+3) — Doha Desk', value: 'Asia/Qatar AST' },
-    { label: 'Europe/London (BST, UTC+1) — Cambridge UK Desk', value: 'Europe/London BST' },
+    { label: 'Asia/Riyadh (AST, UTC+3) — Gulf Standard', value: 'Asia/Riyadh' },
+    { label: 'Asia/Dubai (GST, UTC+4) — UAE / Oman', value: 'Asia/Dubai' },
+    { label: 'Asia/Karachi (PKT, UTC+5) — Pakistan Standard', value: 'Asia/Karachi' },
+    { label: 'Asia/Qatar (AST, UTC+3) — Doha Desk', value: 'Asia/Qatar' },
+    { label: 'Europe/London (BST, UTC+1) — Cambridge UK Desk', value: 'Europe/London' },
     { label: 'UTC (Coordinated Universal Time)', value: 'UTC' },
   ];
 
@@ -32,7 +33,6 @@ export const PlatformSettingsView: React.FC = () => {
   const handleSaveTimezone = (e: React.FormEvent) => {
     e.preventDefault();
     setTimezone(selectedTz);
-    addToast(`Preferences updated. Active timezone set to ${selectedTz}.`, 'success');
   };
 
   return (
@@ -180,23 +180,6 @@ export const PlatformSettingsView: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex items-center gap-3 pt-3">
-              <input
-                type="checkbox"
-                id="recordingCheck"
-                checked={defaultsForm.recordingAutoPublish}
-                onChange={(e) => setDefaultsForm({ ...defaultsForm, recordingAutoPublish: e.target.checked })}
-                className="rounded border-[#232D52] bg-[#0E1428] text-indigo-500 focus:ring-0"
-              />
-              <label htmlFor="recordingCheck" className="text-slate-300 cursor-pointer text-xs">
-                <span className="font-semibold block text-slate-200">
-                  Auto-process and publish class recordings to student portals
-                </span>
-                <span className="text-slate-500 text-[11px]">
-                  Enables absent students to watch session replay within 2 hours.
-                </span>
-              </label>
-            </div>
           </div>
 
           <div className="flex justify-end">
@@ -232,6 +215,9 @@ export const PlatformSettingsView: React.FC = () => {
                 onChange={(e) => setSelectedTz(e.target.value)}
                 className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-[#232D52] bg-[#0E1428] text-slate-100 font-mono focus:outline-none focus:border-indigo-500 cursor-pointer"
               >
+                {!availableTimezones.some((tz) => tz.value === selectedTz) && (
+                  <option value={selectedTz}>{selectedTz}</option>
+                )}
                 {availableTimezones.map((tz) => (
                   <option key={tz.value} value={tz.value}>
                     {tz.label}
@@ -250,7 +236,7 @@ export const PlatformSettingsView: React.FC = () => {
               <div>
                 <h3 className="text-sm font-bold text-slate-100">Administrator Credentials</h3>
                 <p className="text-xs text-slate-400">
-                  Account identity displayed on notices, approvals, and certificates.
+                  The account you are signed in with. Change names from Users.
                 </p>
               </div>
             </div>
@@ -261,7 +247,7 @@ export const PlatformSettingsView: React.FC = () => {
                 <input
                   type="text"
                   value={adminName}
-                  onChange={(e) => setAdminName(e.target.value)}
+                  readOnly
                   className="w-full px-3.5 py-2 text-sm rounded-xl border border-[#232D52] bg-[#0E1428] text-slate-100"
                 />
               </div>
@@ -270,7 +256,7 @@ export const PlatformSettingsView: React.FC = () => {
                 <input
                   type="email"
                   value={adminEmail}
-                  onChange={(e) => setAdminEmail(e.target.value)}
+                  readOnly
                   className="w-full px-3.5 py-2 text-sm rounded-xl border border-[#232D52] bg-[#0E1428] text-slate-100"
                 />
               </div>
@@ -283,7 +269,7 @@ export const PlatformSettingsView: React.FC = () => {
               className="flex items-center gap-2 px-5 py-2.5 text-xs font-semibold rounded-xl bg-[#6D5BFF] hover:bg-[#5B47FB] text-white shadow-md shadow-indigo-600/25 transition-all cursor-pointer"
             >
               <Save className="w-4 h-4" />
-              <span>Update Timezone & Profile</span>
+              <span>Save Timezone</span>
             </button>
           </div>
         </form>

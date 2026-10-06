@@ -129,7 +129,7 @@ export const SubscriptionsView: React.FC = () => {
           <button
             onClick={() => renewSubscription(row.id, 1)}
             className="flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white transition-colors cursor-pointer"
-            title="Renew 1 month on Gumroad"
+            title="Add 1 month of access"
           >
             <RotateCcw className="w-3 h-3" />
             <span>Renew</span>
@@ -138,7 +138,7 @@ export const SubscriptionsView: React.FC = () => {
             <button
               onClick={() => cancelSubscription(row.id)}
               className="p-1 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
-              title="Cancel on Gumroad"
+              title="End access now"
             >
               <XCircle className="w-4 h-4" />
             </button>
@@ -151,7 +151,7 @@ export const SubscriptionsView: React.FC = () => {
   return (
     <div className="space-y-6 max-w-[1400px] mx-auto animate-in fade-in duration-150">
       <PageHeader
-        title="Gumroad Subscriptions"
+        title="Subscriptions"
         subtitle="Manage student recurring seats, gateway renewal sync, and expired access windows."
       />
 
@@ -187,7 +187,7 @@ export const SubscriptionsView: React.FC = () => {
       <FilterBar
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
-        searchPlaceholder="Search student name, subject, or Gumroad ID..."
+        searchPlaceholder="Search student or subject..."
       />
 
       <DataTable

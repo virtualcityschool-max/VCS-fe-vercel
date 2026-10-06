@@ -22,10 +22,7 @@ export const ParentsView: React.FC = () => {
   // New parent form state
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
-  const [whatsapp, setWhatsapp] = useState('');
-  const [location, setLocation] = useState('Riyadh, Saudi Arabia');
-  const [studentId, setStudentId] = useState(students[0]?.id || '');
+  const [password, setPassword] = useState('');
 
   const filtered = parents.filter(
     (p) =>
@@ -34,26 +31,16 @@ export const ParentsView: React.FC = () => {
       p.location.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleCreateParent = (e: React.FormEvent) => {
+  const handleCreateParent = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !email.trim()) return;
 
-    addParent({
-      name: name.trim(),
-      email: email.trim(),
-      role: 'parent',
-      status: 'Active',
-      phone: phone || '+966 50 000 0000',
-      whatsappNumber: whatsapp || phone || '+966500000000',
-      location,
-      linkedStudentIds: studentId ? [studentId] : [],
-    });
-
+    const done = await addParent({ name: name.trim(), email: email.trim(), password });
+    if (done === false) return;
     setNewParentModalOpen(false);
     setName('');
     setEmail('');
-    setPhone('');
-    setWhatsapp('');
+    setPassword('');
   };
 
   const columns: Column<Parent>[] = [
@@ -163,7 +150,7 @@ export const ParentsView: React.FC = () => {
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. Khalid Al-Nuaimi"
+                  placeholder="Full name"
                   className="w-full px-3.5 py-2 text-sm rounded-xl border border-[#232D52] bg-[#0E1428] text-slate-100 focus:outline-none focus:border-indigo-500"
                 />
               </div>
@@ -180,43 +167,20 @@ export const ParentsView: React.FC = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-slate-300 font-medium mb-1">Phone</label>
-                  <input
-                    type="text"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="+966 50 123 4567"
-                    className="w-full px-3.5 py-2 text-sm rounded-xl border border-[#232D52] bg-[#0E1428] text-slate-100 focus:outline-none focus:border-indigo-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-slate-300 font-medium mb-1">WhatsApp #</label>
-                  <input
-                    type="text"
-                    value={whatsapp}
-                    onChange={(e) => setWhatsapp(e.target.value)}
-                    placeholder="+966501234567"
-                    className="w-full px-3.5 py-2 text-sm rounded-xl border border-[#232D52] bg-[#0E1428] text-slate-100 focus:outline-none focus:border-indigo-500"
-                  />
-                </div>
-              </div>
-
               <div>
-                <label className="block text-slate-300 font-medium mb-1">Link Student Child</label>
-                <select
-                  value={studentId}
-                  onChange={(e) => setStudentId(e.target.value)}
+                <label className="block text-slate-300 font-medium mb-1">Temporary password *</label>
+                <input
+                  type="text"
+                  required
+                  minLength={8}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="At least 8 characters"
                   className="w-full px-3.5 py-2 text-sm rounded-xl border border-[#232D52] bg-[#0E1428] text-slate-100 focus:outline-none focus:border-indigo-500"
-                >
-                  <option value="">None / Pending link</option>
-                  {students.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.name} ({s.rollNo} - {s.level})
-                    </option>
-                  ))}
-                </select>
+                />
+                <p className="text-[11px] text-slate-500 mt-1">
+                  Share it with the parent. They link their children from their own portal, and you approve the link under Pending Approvals.
+                </p>
               </div>
 
               <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#1E2648]">

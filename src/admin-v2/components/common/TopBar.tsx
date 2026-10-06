@@ -203,11 +203,11 @@ export const TopBar: React.FC = () => {
           {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
         </button>
 
-        {/* Reset Demo Data Button */}
+        {/* Reload data from the server */}
         <button
           onClick={resetDemoData}
           className="p-2 rounded-xl border border-[#232D52] bg-[#121831] text-slate-400 hover:text-sky-400 hover:border-slate-600 transition-colors"
-          title="Reset demo data to initial state"
+          title="Reload latest data"
         >
           <RotateCcw className="w-4 h-4" />
         </button>

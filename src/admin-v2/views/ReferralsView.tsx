@@ -13,7 +13,7 @@ export const ReferralsView: React.FC = () => {
   const totalSignups = referrals.reduce((sum, r) => sum + r.signups, 0);
   const totalEnrolled = referrals.reduce((sum, r) => sum + r.enrolled, 0);
   const overallConversion = totalSignups > 0 ? ((totalEnrolled / totalSignups) * 100).toFixed(1) : '0';
-  const totalCommission = referrals.reduce((sum, r) => sum + r.earnedUSD, 0);
+  const topReferrer = [...referrals].sort((a, b) => b.enrolled - a.enrolled || b.signups - a.signups)[0];
 
   const handleCopy = (code: string) => {
     navigator.clipboard.writeText(code);
@@ -24,11 +24,11 @@ export const ReferralsView: React.FC = () => {
 
   const columns: Column<Referral>[] = [
     {
-      header: 'Affiliate User',
+      header: 'User',
       cell: (row) => (
         <div>
           <div className="font-semibold text-slate-100">{row.userName}</div>
-          <div className="text-[11px] text-slate-400 capitalize">{row.userRole} Advocate</div>
+          <div className="text-[11px] text-slate-400 capitalize">{row.userRole}</div>
         </div>
       ),
     },
@@ -50,7 +50,7 @@ export const ReferralsView: React.FC = () => {
       ),
     },
     {
-      header: 'Lead Signups',
+      header: 'Sign-ups',
       cell: (row) => <span className="font-mono text-xs text-slate-300">{row.signups}</span>,
     },
     {
@@ -62,14 +62,6 @@ export const ReferralsView: React.FC = () => {
       cell: (row) => (
         <span className="font-mono text-xs font-bold text-emerald-400">
           {row.conversionRate.toFixed(1)}%
-        </span>
-      ),
-    },
-    {
-      header: 'Commission (USD)',
-      cell: (row) => (
-        <span className="font-mono text-xs font-bold text-slate-200">
-          ${row.earnedUSD}
         </span>
       ),
     },
@@ -91,25 +83,25 @@ export const ReferralsView: React.FC = () => {
         <div className="p-4 rounded-xl border border-[#232D52] bg-[#121831]">
           <div className="text-xs text-slate-400">Referring Advocates</div>
           <div className="text-2xl font-bold font-mono text-slate-100 mt-1">{totalReferringUsers}</div>
-          <div className="text-xs text-slate-500 mt-1">Teachers, Parents & Alumni</div>
+          <div className="text-xs text-slate-500 mt-1">Users with a referral code</div>
         </div>
 
         <div className="p-4 rounded-xl border border-[#232D52] bg-[#121831]">
           <div className="text-xs text-slate-400">Total Leads Generated</div>
           <div className="text-2xl font-bold font-mono text-indigo-400 mt-1">{totalSignups}</div>
-          <div className="text-xs text-slate-500 mt-1">Landing page visits & forms</div>
+          <div className="text-xs text-slate-500 mt-1">Accounts created with a code</div>
         </div>
 
         <div className="p-4 rounded-xl border border-[#232D52] bg-[#121831]">
-          <div className="text-xs text-slate-400">Paid Cambridge Enrollees</div>
+          <div className="text-xs text-slate-400">Enrolled From Referrals</div>
           <div className="text-2xl font-bold font-mono text-emerald-400 mt-1">{totalEnrolled}</div>
           <div className="text-xs text-emerald-400 mt-1 font-semibold">{overallConversion}% Conversion Rate</div>
         </div>
 
         <div className="p-4 rounded-xl border border-[#232D52] bg-[#121831]">
-          <div className="text-xs text-slate-400">Total Commissions Credited</div>
-          <div className="text-2xl font-bold font-mono text-slate-100 mt-1">${totalCommission}</div>
-          <div className="text-xs text-slate-500 mt-1">Disbursed via Gumroad payout</div>
+          <div className="text-xs text-slate-400">Top Referrer</div>
+          <div className="text-lg font-bold text-slate-100 mt-1 truncate">{topReferrer && topReferrer.signups > 0 ? topReferrer.userName : '—'}</div>
+          <div className="text-xs text-slate-500 mt-1">{topReferrer && topReferrer.signups > 0 ? `${topReferrer.signups} sign-ups · ${topReferrer.enrolled} enrolled` : 'No sign-ups yet'}</div>
         </div>
       </div>
 

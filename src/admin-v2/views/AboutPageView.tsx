@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { PageHeader } from '../components/common/PageHeader';
 import { Globe, Save, Eye, Check, ExternalLink, X } from 'lucide-react';
@@ -7,6 +7,8 @@ export const AboutPageView: React.FC = () => {
   const { aboutPage, updateAboutPage, addToast } = useApp();
   const [formData, setFormData] = useState(aboutPage);
   const [previewOpen, setPreviewOpen] = useState(false);
+  // Fill the form once the saved content arrives from the server.
+  useEffect(() => setFormData(aboutPage), [aboutPage]);
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -105,7 +107,7 @@ export const AboutPageView: React.FC = () => {
               />
             </div>
             <div>
-              <label className="block text-slate-300 font-semibold mb-1.5">Regional Address (Riyadh / Gulf)</label>
+              <label className="block text-slate-300 font-semibold mb-1.5">Address</label>
               <input
                 type="text"
                 value={formData.address}
@@ -123,6 +125,24 @@ export const AboutPageView: React.FC = () => {
           </h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label className="block text-slate-300 font-semibold mb-1">Facebook</label>
+              <input
+                type="text"
+                value={formData.facebook}
+                onChange={(e) => setFormData({ ...formData, facebook: e.target.value })}
+                className="w-full px-3.5 py-2 text-sm rounded-xl border border-[#232D52] bg-[#0E1428] text-slate-100"
+              />
+            </div>
+            <div>
+              <label className="block text-slate-300 font-semibold mb-1">Instagram</label>
+              <input
+                type="text"
+                value={formData.instagram}
+                onChange={(e) => setFormData({ ...formData, instagram: e.target.value })}
+                className="w-full px-3.5 py-2 text-sm rounded-xl border border-[#232D52] bg-[#0E1428] text-slate-100"
+              />
+            </div>
             <div>
               <label className="block text-slate-300 font-semibold mb-1">X / Twitter</label>
               <input

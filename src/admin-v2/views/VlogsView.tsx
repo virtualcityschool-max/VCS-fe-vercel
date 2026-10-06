@@ -99,9 +99,23 @@ export const VlogsView: React.FC = () => {
             </div>
 
             <div className="p-4 border-t border-[#1E2648] bg-[#0E1428] flex items-center justify-between text-xs">
-              <span className="text-slate-500 font-mono flex items-center gap-1">
-                <Eye className="w-3.5 h-3.5" />
-                <span>{post.views} views</span>
+              <span className="flex items-center gap-3">
+                <a
+                  href={`/admin/blogs/${post.slug}/edit`}
+                  className="text-indigo-300 hover:text-indigo-200 font-semibold"
+                >
+                  Edit
+                </a>
+                {post.status === 'Published' && (
+                  <a
+                    href={`/blogs/${post.slug}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-slate-400 hover:text-white flex items-center gap-1"
+                  >
+                    <Eye className="w-3.5 h-3.5" /> View on site
+                  </a>
+                )}
               </span>
               <button
                 onClick={() => togglePostStatus(post.id)}

@@ -1,34 +1,36 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { PageHeader } from '../components/common/PageHeader';
-import { MessageSquare, Star, Plus, Eye, EyeOff, Quote } from 'lucide-react';
+import { MessageSquare, Star, Plus, Eye, EyeOff, Quote, Trash2 } from 'lucide-react';
 import { Testimonial } from '../types';
 
 export const TestimonialsView: React.FC = () => {
-  const { testimonials, addTestimonial, toggleTestimonialVisibility } = useApp();
+  const { testimonials, addTestimonial, toggleTestimonialVisibility, deleteTestimonial } = useApp() as any;
   const [modalOpen, setModalOpen] = useState(false);
 
   // New testimonial form
   const [authorName, setAuthorName] = useState('');
-  const [roleDescription, setRoleDescription] = useState('O Level Student, Dubai');
+  const [roleDescription, setRoleDescription] = useState('');
   const [quote, setQuote] = useState('');
   const [rating, setRating] = useState(5);
   const [visible, setVisible] = useState(true);
 
-  const handleCreate = (e: React.FormEvent) => {
+  const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!authorName.trim() || !quote.trim()) return;
 
-    addTestimonial({
+    const saved = await addTestimonial({
       authorName: authorName.trim(),
       roleDescription: roleDescription.trim(),
       quote: quote.trim(),
       rating: Number(rating),
       visibleOnHomepage: visible,
     });
+    if (saved === false) return;
 
     setModalOpen(false);
     setAuthorName('');
+    setRoleDescription('');
     setQuote('');
   };
 
@@ -45,7 +47,12 @@ export const TestimonialsView: React.FC = () => {
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {testimonials.map((item) => (
+        {testimonials.length === 0 && (
+          <div className="md:col-span-2 p-10 rounded-2xl border border-dashed border-[#232D52] text-center text-xs text-slate-400">
+            No testimonials yet. Add one and switch it to visible to show it on the home page.
+          </div>
+        )}
+        {testimonials.map((item: Testimonial) => (
           <div
             key={item.id}
             className="p-5 rounded-2xl border border-[#232D52] bg-[#121831] shadow-xl flex flex-col justify-between space-y-4 hover:border-slate-600 transition-colors"
@@ -92,7 +99,13 @@ export const TestimonialsView: React.FC = () => {
                 <p className="text-[11px] text-slate-400">{item.roleDescription}</p>
               </div>
 
-              <span className="text-[10px] font-mono text-slate-500">Verified VCS Family</span>
+              <button
+                onClick={() => deleteTestimonial(item.id)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
+                title="Delete testimonial"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
             </div>
           </div>
         ))}
@@ -112,7 +125,7 @@ export const TestimonialsView: React.FC = () => {
                   required
                   value={authorName}
                   onChange={(e) => setAuthorName(e.target.value)}
-                  placeholder="e.g. Ammar Al-Shehri"
+                  placeholder="Full name"
                   className="w-full px-3.5 py-2 text-sm rounded-xl border border-[#232D52] bg-[#0E1428] text-slate-100 focus:outline-none focus:border-indigo-500"
                 />
               </div>

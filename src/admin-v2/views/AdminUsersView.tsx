@@ -8,7 +8,9 @@ import { BaseUser, UserRole } from '../types';
 import { ShieldCheck, Shield, UserPlus, KeyRound } from 'lucide-react';
 
 export const AdminUsersView: React.FC = () => {
-  const { allUsers, updateUserRole, toggleUserStatus, addToast } = useApp();
+  const { allUsers, updateUserRole, toggleUserStatus, addToast,
+    openQuickAdd,
+  } = useApp();
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
 
@@ -93,7 +95,7 @@ export const AdminUsersView: React.FC = () => {
         subtitle="Manage administrative credentials, security roles, elevated permissions, and account activation."
         primaryAction={{
           label: 'Invite admin',
-          onClick: () => addToast('Admin invitation link generated for staff member.', 'info'),
+          onClick: () => openQuickAdd('admin' as any),
           icon: UserPlus,
         }}
       />

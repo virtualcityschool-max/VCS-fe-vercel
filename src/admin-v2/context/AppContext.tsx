@@ -19,6 +19,7 @@ import { adminSessionService } from '../../services/adminSessionService';
 import { adminTeacherSessionService } from '../../services/adminTeacherSessionService';
 import { blogsService } from '../../services/blogsService';
 import { aboutService } from '../../services/aboutService';
+import { testimonialsService } from '../../services/testimonialsService';
 import { platformSettingsService } from '../../services/platformSettingsService';
 import { freeAccessService } from '../../services/freeAccessService';
 import { axiosInstance } from '../../utils';
@@ -183,7 +184,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // ── Raw API data ──────────────────────────────────────────────────────────
   const [raw, setRaw] = useState<any>({
     users: [], courses: [], enrollments: [], categories: [], sessions: [], meetings: [], subs: { active: [], expired: [], needs_gumroad_cancellation: [] },
-    referrals: [], posts: [], about: null, settings: null, analytics: null, attendance: [], grading: null,
+    referrals: [], posts: [], testimonials: [], about: null, settings: null, analytics: null, attendance: [], grading: null,
   });
   const [loaded, setLoaded] = useState<Record<string, boolean>>({});
   const pendingApprovals = useSelector((s: any) => s.approvals.pendingApprovals);
@@ -204,6 +205,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     subs: () => adminService.getSubscriptions(),
     referrals: () => axiosInstance.get('/referrals/admin/', { params: { page_size: 500 } }).then((r: any) => r.data),
     posts: () => blogsService.getAllBlogs({ ordering: '-created_at' }),
+    testimonials: () => testimonialsService.getAllTestimonials(),
     about: () => aboutService.get(),
     settings: () => axiosInstance.get('/messaging/platform-settings/').then((r: any) => r.data),
     analytics: () => adminService.getDashboardAnalytics(),
@@ -430,7 +432,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     readTimeOrDuration: p.post_type === 'video' ? 'Video' : `${p.read_time || 1} min read`, views: null as any, slug: p.slug, _raw: p,
   })), [raw.posts]);
 
-  const testimonials: Testimonial[] = [];
+  const testimonials: Testimonial[] = useMemo(() => raw.testimonials.map((t: any) => ({
+    id: sid(t.id), quote: t.quote, authorName: t.name, roleDescription: t.role || '',
+    visibleOnHomepage: !!t.published, rating: 0, avatar: t.avatar || undefined,
+  })), [raw.testimonials]);
 
   const aboutPage = useMemo(() => {
     const a = raw.about || {};
@@ -568,6 +573,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const addStudent = (s: any) => createPerson('student', s);
   const addTeacher = (t: any) => createPerson('teacher', t);
   const addParent = (p: any) => createPerson('parent', p);
+  const addAdmin = (a: any) => createPerson('admin', a);
 
   const updateStudent = (id: string, updates: any) => {
     const u = rawUser(id);
@@ -679,14 +685,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
   const addPost = (p: any) => navigate('/admin/blogs/new', { state: { post_type: p?.type === 'Video' ? 'video' : 'article' } });
 
-  const addTestimonial = () => addToast('Testimonials are not stored by the server yet.', 'warning');
-  const toggleTestimonialVisibility = addTestimonial;
+  const addTestimonial = (t: any) => run(() => testimonialsService.createTestimonial({
+    quote: t.quote, name: t.authorName, role: t.roleDescription || '', published: !!t.visibleOnHomepage,
+  }), t.visibleOnHomepage ? 'Testimonial added to the home page' : 'Testimonial saved as hidden', ['testimonials']);
+  const toggleTestimonialVisibility = (id: string) => {
+    const t = testimonials.find((x) => x.id === id);
+    if (!t) return;
+    return run(() => testimonialsService.updateTestimonial(id, { published: !t.visibleOnHomepage }),
+      t.visibleOnHomepage ? 'Hidden from the home page' : 'Now showing on the home page', ['testimonials']);
+  };
+  const deleteTestimonial = async (id: string) => {
+    const t = testimonials.find((x) => x.id === id);
+    const ok = await confirmAction({ title: 'Delete testimonial?', message: `The quote from ${t?.authorName || 'this person'} will be removed for good.`, confirmLabel: 'Delete' });
+    if (!ok) return;
+    return run(() => testimonialsService.deleteTestimonial(id), 'Testimonial deleted', ['testimonials']);
+  };
 
   const updateAboutPage = (d: any) => {
     const next = { ...aboutPage, ...d };
     return run(() => aboutService.update({
       vision: next.vision, mission: next.mission, about: next.aboutText, contact_email: next.email, contact_phone: next.phone,
       contact_whatsapp: next.whatsapp, contact_address: next.address, social_facebook: next.facebook, social_instagram: next.instagram,
+      social_twitter: next.twitter, social_linkedin: next.linkedin, social_youtube: next.youtube,
     }), 'About page saved. The public page shows it now.', ['about']);
   };
 
@@ -728,11 +748,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     students, addStudent, updateStudent, deleteStudent, bulkUpdateStudentStatus,
     enrollments, addEnrollment, removeEnrollment,
     teachers, addTeacher, updateTeacher, toggleTeacherStatus, bulkAssignSubject, allocateTeacherSubject, deallocateTeacherSubject,
-    parents, addParent, allUsers, updateUserRole, toggleUserStatus,
+    parents, addParent, addAdmin, allUsers, updateUserRole, toggleUserStatus,
     subjects, addSubject, updateSubject, toggleSubjectStatus, levels, addLevel, removeLevel,
     sessions, addSession, updateSession, deleteSession, meetings, addMeeting,
     subscriptions, renewSubscription, cancelSubscription, referrals,
-    posts, addPost, togglePostStatus, testimonials, addTestimonial, toggleTestimonialVisibility,
+    posts, addPost, togglePostStatus, testimonials, addTestimonial, toggleTestimonialVisibility, deleteTestimonial,
     aboutPage, updateAboutPage, settings, updateSettings, grades, updateGrade,
     attendanceMatrix, toggleAttendanceCell, activities, addActivity,
     toasts, addToast, removeToast, resetDemoData,

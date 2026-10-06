@@ -15,9 +15,10 @@ export const QuickAddModal: React.FC = () => {
     subjects,
     teachers,
     levels,
+    addAdmin,
   } = useApp();
 
-  const [activeType, setActiveType] = useState<'student' | 'teacher' | 'subject' | 'session' | 'post'>('student');
+  const [activeType, setActiveType] = useState<'student' | 'teacher' | 'admin' | 'subject' | 'session' | 'post'>('student');
 
   useEffect(() => {
     if (quickAddModal.isOpen) {
@@ -79,6 +80,8 @@ export const QuickAddModal: React.FC = () => {
       ok = await addStudent({ name: studentName, email: studentEmail, password, subjectId: studentSubjectId });
     } else if (activeType === 'teacher') {
       ok = await addTeacher({ name: teacherName, email: teacherEmail, password });
+    } else if (activeType === 'admin') {
+      ok = await addAdmin({ name: teacherName, email: teacherEmail, password });
     } else if (activeType === 'subject') {
       const title = subCode.trim() && !subName.includes(subCode.trim()) ? `${subName.trim()} (${subCode.trim()})` : subName.trim();
       ok = await addSubject({ name: title, level: subLevel, teacherId: subTeacherId, priceUSD: Number(subPrice), status: 'Published' });
@@ -109,6 +112,7 @@ export const QuickAddModal: React.FC = () => {
           {[
             { id: 'student', label: 'Student', icon: UserPlus },
             { id: 'teacher', label: 'Teacher', icon: GraduationCap },
+            ...(quickAddModal.initialType === ('admin' as any) ? [{ id: 'admin', label: 'Admin', icon: UserPlus }] : []),
             { id: 'subject', label: 'Subject', icon: BookOpen },
             { id: 'session', label: 'Class Session', icon: Calendar },
             { id: 'post', label: 'Blog / Video', icon: FileText },
@@ -241,6 +245,55 @@ export const QuickAddModal: React.FC = () => {
               </p>
               <p className="text-[11px] text-slate-400">
                 Qualifications, experience and subjects are added on the teacher's profile and in Teacher Allocations.
+              </p>
+            </>
+          )}
+
+          {activeType === 'admin' && (
+            <>
+              <div>
+                <label className="block font-medium text-slate-300 mb-1">Admin Full Name *</label>
+                <input
+                  type="text"
+                  required
+                  
+                  value={teacherName}
+                  onChange={(e) => setTeacherName(e.target.value)}
+                  placeholder="Full name"
+                  className="w-full px-3.5 py-2 text-sm rounded-xl border border-[#232D52] bg-[#0E1428] text-slate-100 focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                <label className="block font-medium text-slate-300 mb-1">Email Address *</label>
+                <input
+                  type="email"
+                  required
+                  
+                  value={teacherEmail}
+                  onChange={(e) => setTeacherEmail(e.target.value)}
+                  placeholder="name@gmail.com"
+                  className="w-full px-3.5 py-2 text-sm rounded-xl border border-[#232D52] bg-[#0E1428] text-slate-100 focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+                <div>
+                <label className="block font-medium text-slate-300 mb-1">Temporary Password *</label>
+                <input
+                  type="text"
+                  required
+                  minLength={8}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="min. 8 characters"
+                  className="w-full px-3.5 py-2 text-sm rounded-xl border border-[#232D52] bg-[#0E1428] text-slate-100 focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+              </div>
+              <p className="text-[11px] text-slate-400">
+                Share the password with them privately; they can change it after logging in. Use their Gmail so they join Google Meet classes without waiting.
+              </p>
+              <p className="text-[11px] text-slate-400">
+                Admins can see and change everything in this panel. Only add staff you trust.
               </p>
             </>
           )}
