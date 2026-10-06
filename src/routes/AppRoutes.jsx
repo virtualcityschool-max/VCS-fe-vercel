@@ -45,7 +45,28 @@ const TeacherEvaluationPage = React.lazy(() => import("../pages/teacher/TeacherE
 const TeacherHireLeads = React.lazy(() => import("../pages/teacher/TeacherHireLeads"));
 const TeacherAvailabilityPage = React.lazy(() => import("../pages/teacher/TeacherAvailabilityPage"));
 
-const AdminLayout = React.lazy(() => import("../components/admin/AdminLayout"));
+const AdminV2Layout = React.lazy(() => import("../admin-v2/AdminV2Layout"));
+const v2 = (file, name) => React.lazy(() => import(`../admin-v2/views/${file}.tsx`).then((m) => ({ default: m[name] })));
+const V2 = {
+  Dashboard: v2("DashboardView", "DashboardView"),
+  Approvals: v2("ApprovalsView", "ApprovalsView"),
+  UsersByRole: v2("UsersByRole", "UsersByRole"),
+  Enrollments: v2("StudentEnrollmentsView", "StudentEnrollmentsView"),
+  Subjects: v2("SubjectsView", "SubjectsView"),
+  Allocations: v2("TeacherAllocationsView", "TeacherAllocationsView"),
+  Timetable: v2("TimetableView", "TimetableView"),
+  PTM: v2("PTMMeetingsView", "PTMMeetingsView"),
+  Attendance: v2("AttendanceView", "AttendanceView"),
+  Evaluations: v2("EvaluationsView", "EvaluationsView"),
+  Subscriptions: v2("SubscriptionsView", "SubscriptionsView"),
+  Referrals: v2("ReferralsView", "ReferralsView"),
+  Blogs: v2("BlogsView", "BlogsView"),
+  Vlogs: v2("VlogsView", "VlogsView"),
+  Testimonials: v2("TestimonialsView", "TestimonialsView"),
+  Levels: v2("LevelsView", "LevelsView"),
+  About: v2("AboutPageView", "AboutPageView"),
+  Settings: v2("PlatformSettingsView", "PlatformSettingsView"),
+};
 const AdminOverviewPage = React.lazy(() => import("../pages/admin/AdminOverviewPage"));
 const AdminApprovalsPage = React.lazy(() => import("../pages/admin/AdminApprovalsPage"));
 const AdminCoursesPage = React.lazy(() => import("../pages/admin/AdminCoursesPage"));
@@ -251,34 +272,35 @@ const AppRoutes = () => {
 
       {/* Admin-Only Routes */}
       <Route element={<AdminAuthGate />}>
-        <Route path="/admin" element={<AdminLayout />}>
-          <Route
-            index
-            element={<Navigate to="/admin/overview" replace />}
-          />
-          <Route path="overview" element={<AdminOverviewPage />} />
-          <Route path="approvals" element={<AdminApprovalsPage />} />
-          <Route path="courses" element={<AdminCoursesPage />} />
-          <Route path="teacher-allocations" element={<AdminTeacherAllocationsPage />} />
-          <Route path="blogs" element={<AdminBlogsPage key="blogs" />} />
-          <Route path="vlogs" element={<AdminBlogsPage key="vlogs" />} />
-          <Route path="users" element={<AdminUsersPage />} />
-          <Route path="enrollments" element={<AdminEnrollmentsPage />} />
-          <Route path="subscriptions" element={<AdminSubscriptionsPage />} />
-          <Route path="sessions" element={<AdminSessionsPage />} />
-          <Route path="teacher-planner" element={<AdminTeacherPlannerPage />} />
-          <Route path="attendance" element={<AdminAttendancePage />} />
-          <Route path="evaluations" element={<AdminEvaluationPage />} />
-          <Route path="course-levels" element={<AdminCategoriesPage />} />
-          <Route path="referrals" element={<AdminReferralsPage />} />
-          <Route path="testimonials" element={<AdminTestimonialsPage />} />
-          <Route path="about" element={<AdminAboutPage />} />
-          <Route path="settings" element={<AdminPlatformSettingsPage />} />
+        {/* Admin area: the AI Studio redesign on real data. The classic pages
+            stay reachable for the full class planner and detail screens. */}
+        <Route path="/admin" element={<AdminV2Layout />}>
+          <Route index element={<Navigate to="/admin/overview" replace />} />
+          <Route path="overview" element={<V2.Dashboard />} />
+          <Route path="approvals" element={<V2.Approvals />} />
+          <Route path="users" element={<V2.UsersByRole />} />
+          <Route path="enrollments" element={<V2.Enrollments />} />
+          <Route path="courses" element={<V2.Subjects />} />
+          <Route path="teacher-allocations" element={<V2.Allocations />} />
+          <Route path="sessions" element={<V2.Timetable />} />
+          <Route path="teacher-planner" element={<V2.PTM />} />
+          <Route path="attendance" element={<V2.Attendance />} />
+          <Route path="evaluations" element={<V2.Evaluations />} />
+          <Route path="subscriptions" element={<V2.Subscriptions />} />
+          <Route path="referrals" element={<V2.Referrals />} />
+          <Route path="blogs" element={<V2.Blogs />} />
+          <Route path="vlogs" element={<V2.Vlogs />} />
+          <Route path="testimonials" element={<V2.Testimonials />} />
+          <Route path="course-levels" element={<V2.Levels />} />
+          <Route path="about" element={<V2.About />} />
+          <Route path="settings" element={<V2.Settings />} />
+          <Route path="sessions/plan" element={<AdminSessionsPage />} />
+          <Route path="teacher-planner/plan" element={<AdminTeacherPlannerPage />} />
+          <Route path="users/:id" element={<UserDetailsPage />} />
+          <Route path="courses/:courseId" element={<AdminCourseDetailPage />} />
+          <Route path="blogs/new" element={<AdminBlogEditorPage />} />
+          <Route path="blogs/:slug/edit" element={<AdminBlogEditorPage />} />
         </Route>
-        <Route path="/admin/users/:id" element={<UserDetailsPage />} />
-        <Route path="/admin/courses/:courseId" element={<AdminCourseDetailPage />} />
-        <Route path="/admin/blogs/new" element={<AdminBlogEditorPage />} />
-        <Route path="/admin/blogs/:slug/edit" element={<AdminBlogEditorPage />} />
       </Route>
 
       {/* Profile - all authenticated roles */}

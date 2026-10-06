@@ -10,9 +10,6 @@ import { toastManager } from "./utils/toastManager";
 // Components
 import { AIChat, AuthModals, Navbar, Footer, ScrollToTop } from "./components";
 import Sidebar from "./components/layout/Sidebar";
-import AdminSidebar from "./components/admin/shell/AdminSidebar";
-import AdminTopBar from "./components/admin/shell/AdminTopBar";
-import { AdminSignalsProvider } from "./components/admin/shell/AdminSignals";
 
 // Routes
 import AppRoutes from "./routes/AppRoutes";
@@ -51,7 +48,6 @@ const AppInner = () => {
   // Admin pages get their own shell (menu + top bar) instead of the public
   // navbar. Student, teacher and parent screens are unchanged.
   const isAdminArea = isLoggedIn && role === "admin" && location.pathname.startsWith("/admin");
-  const Shell = isAdminArea ? AdminSignalsProvider : React.Fragment;
 
   // Close mobile sidebar on route change
   useEffect(() => {
@@ -104,17 +100,7 @@ const AppInner = () => {
   const showNavbar = !isAdminArea;
 
   return (
-    <Shell>
     <div className={`min-h-screen selection:bg-indigo-500/30 overflow-x-hidden ${isAdminArea ? "bg-[#0B1020]" : "bg-slate-950"}`}>
-      {isAdminArea && (
-        <AdminSidebar
-          isOpen={isSidebarOpen}
-          onMobileClose={() => setIsSidebarOpen(false)}
-          isCollapsed={isSidebarCollapsed}
-          onToggleCollapse={toggleSidebar}
-        />
-      )}
-
       {/* Unified sidebar for admin / teacher / student */}
       {hasSidebar && !isAdminArea && (
         <Sidebar
@@ -137,7 +123,8 @@ const AppInner = () => {
       )}
 
       {/* Content area - offset by sidebar width on desktop */}
-      <div className={hasSidebar ? (isSidebarCollapsed ? "lg:ml-20" : "lg:ml-64") : ""} style={{ transition: "margin-left 0.3s ease" }}>
+      {/* The admin area draws its own sidebar (admin-v2), so no offset there. */}
+      <div className={hasSidebar && !isAdminArea ? (isSidebarCollapsed ? "lg:ml-20" : "lg:ml-64") : ""} style={{ transition: "margin-left 0.3s ease" }}>
         {/* Navbar - public variant for everyone (it already swaps
             Login/Register for the profile dropdown once logged in).
             Logo is hidden when a sidebar is present - the sidebar already
@@ -147,8 +134,6 @@ const AppInner = () => {
             <Navbar variant="public" hideLogo={hasSidebar} />
           </header>
         )}
-
-        {isAdminArea && <AdminTopBar onOpenMenu={() => setIsSidebarOpen(true)} />}
 
         {/* Floating mobile hamburger (sidebar roles only) */}
         {hasSidebar && !isAdminArea && (
@@ -200,7 +185,6 @@ const AppInner = () => {
         </section>
       </div>
     </div>
-    </Shell>
   );
 };
 
