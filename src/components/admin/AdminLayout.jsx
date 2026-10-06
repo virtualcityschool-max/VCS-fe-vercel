@@ -18,7 +18,7 @@ import {
 import Header from "./Header";
 
 // Pages already on the new design draw their own header.
-const REDESIGNED = new Set(["overview", "students", "teachers", "parents", "admins", "courses", "enrollments", "teacher-allocations"]);
+const REDESIGNED = new Set(["overview", "students", "teachers", "parents", "admins", "courses", "enrollments", "teacher-allocations", "approvals"]);
 
 const AdminLayout = () => {
   const dispatch = useDispatch();
