@@ -68,8 +68,11 @@ export const VlogsView: React.FC = () => {
             className="rounded-2xl border border-[#232D52] bg-[#121831] overflow-hidden shadow-xl flex flex-col justify-between hover:border-slate-600 transition-all group"
           >
             <div>
-              <div className="h-44 bg-gradient-to-tr from-[#0F172A] to-[#1E293B] border-b border-[#1E2648] relative flex items-center justify-center">
-                <div className="w-12 h-12 rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/30 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <div className="h-44 bg-gradient-to-tr from-[#0F172A] to-[#1E293B] border-b border-[#1E2648] relative flex items-center justify-center overflow-hidden">
+                {post.thumbnailUrl && (
+                  <img src={post.thumbnailUrl} alt="" loading="lazy" className="absolute inset-0 w-full h-full object-cover opacity-70" />
+                )}
+                <div className="relative w-12 h-12 rounded-full bg-rose-500/20 backdrop-blur-sm text-rose-400 border border-rose-500/30 flex items-center justify-center group-hover:scale-110 transition-transform">
                   <Play className="w-5 h-5 ml-0.5 fill-current" />
                 </div>
 
