@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Eye,
   Edit2,
@@ -56,6 +56,18 @@ export function DataTable<T extends { id: string }>({
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [actionMenuOpenId, setActionMenuOpenId] = useState<string | null>(null);
+  const [menuPos, setMenuPos] = useState({ top: 0, right: 0 });
+  // A floating menu would drift away from its row on scroll, so close it instead.
+  useEffect(() => {
+    if (!actionMenuOpenId) return;
+    const close = () => setActionMenuOpenId(null);
+    window.addEventListener('scroll', close, true);
+    window.addEventListener('resize', close);
+    return () => {
+      window.removeEventListener('scroll', close, true);
+      window.removeEventListener('resize', close);
+    };
+  }, [actionMenuOpenId]);
 
   // Confirm dialog state
   const [confirmDialog, setConfirmDialog] = useState<{
@@ -224,16 +236,22 @@ export function DataTable<T extends { id: string }>({
 
                       <div className="relative">
                         <button
-                          onClick={() =>
-                            setActionMenuOpenId(actionMenuOpenId === row.id ? null : row.id)
-                          }
+                          onClick={(e) => {
+                            // Float the menu over the page so the table's scroll box can't clip it.
+                            const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                            setMenuPos({ top: r.bottom + 4, right: window.innerWidth - r.right });
+                            setActionMenuOpenId(actionMenuOpenId === row.id ? null : row.id);
+                          }}
                           className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
                         >
                           <MoreVertical className="w-4 h-4" />
                         </button>
 
                         {actionMenuOpenId === row.id && (
-                          <div className="absolute right-0 mt-1 w-36 rounded-xl border border-[#232D52] bg-[#121831] p-1.5 shadow-2xl z-30 text-xs">
+                          <div
+                            style={{ top: menuPos.top, right: menuPos.right }}
+                            className="fixed w-36 rounded-xl border border-[#232D52] bg-[#121831] p-1.5 shadow-2xl z-50 text-xs"
+                          >
                             {onToggleStatus && (
                               <button
                                 onClick={() => {

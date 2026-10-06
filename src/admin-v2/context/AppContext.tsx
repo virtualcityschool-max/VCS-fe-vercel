@@ -636,7 +636,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const addSubject = (s: any) => {
     const cat = raw.categories.find((c: any) => c.name === s.level);
     return run(() => coursesService.createCourse({
-      title: s.name, description: s.description || s.name, category_id: cat?.id, price: s.priceUSD || 0, is_paid: (s.priceUSD || 0) > 0,
+      title: s.name, description: s.description || s.name, ...(cat ? { category: cat.id } : {}), price: s.priceUSD || 0, is_paid: (s.priceUSD || 0) > 0,
       status: s.status === 'Published' ? 'published' : 'draft', ...(s.teacherId ? { instructor_id: Number(s.teacherId) } : {}),
     }), `Subject created: ${s.name}`, ['courses']);
   };

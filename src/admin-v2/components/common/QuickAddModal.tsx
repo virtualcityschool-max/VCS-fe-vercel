@@ -49,7 +49,7 @@ export const QuickAddModal: React.FC = () => {
   const [subCode, setSubCode] = useState('');
   const [subName, setSubName] = useState('');
   const [subDept, setSubDept] = useState<DepartmentName>('Mathematics');
-  const [subLevel, setSubLevel] = useState<AcademicLevel>('IGCSE');
+  const [subLevel, setSubLevel] = useState<AcademicLevel>('' as AcademicLevel);
   const [subTeacherId, setSubTeacherId] = useState('');
   const [subPrice, setSubPrice] = useState(120);
 
@@ -84,7 +84,7 @@ export const QuickAddModal: React.FC = () => {
       ok = await addAdmin({ name: teacherName, email: teacherEmail, password });
     } else if (activeType === 'subject') {
       const title = subCode.trim() && !subName.includes(subCode.trim()) ? `${subName.trim()} (${subCode.trim()})` : subName.trim();
-      ok = await addSubject({ name: title, level: subLevel, teacherId: subTeacherId, priceUSD: Number(subPrice), status: 'Published' });
+      ok = await addSubject({ name: title, level: subLevel, teacherId: subTeacherId, priceUSD: Number(subPrice), status: subTeacherId ? 'Published' : 'Draft' });
     }
     setSaving(false);
     if (ok) {
@@ -330,10 +330,12 @@ export const QuickAddModal: React.FC = () => {
                 <div>
                   <label className="block font-medium text-slate-300 mb-1">Level</label>
                   <select
+                    required
                     value={subLevel}
                     onChange={(e) => setSubLevel(e.target.value as AcademicLevel)}
                     className="w-full px-3.5 py-2 text-sm rounded-xl border border-[#232D52] bg-[#0E1428] text-slate-100 focus:outline-none focus:border-indigo-500"
                   >
+                    {!levels.includes(subLevel) && <option value="">Choose a level</option>}
                     {levels.map((lvl) => (
                       <option key={lvl} value={lvl}>
                         {lvl}
@@ -351,7 +353,8 @@ export const QuickAddModal: React.FC = () => {
                     onChange={(e) => setSubTeacherId(e.target.value)}
                     className="w-full px-3.5 py-2 text-sm rounded-xl border border-[#232D52] bg-[#0E1428] text-slate-100 focus:outline-none focus:border-indigo-500"
                   >
-                    {teachers.map((t) => (
+                    <option value="">No teacher yet (saved as draft)</option>
+                    {[...teachers].sort((a, b) => a.name.localeCompare(b.name)).map((t) => (
                       <option key={t.id} value={t.id}>
                         {t.name} ({t.department})
                       </option>

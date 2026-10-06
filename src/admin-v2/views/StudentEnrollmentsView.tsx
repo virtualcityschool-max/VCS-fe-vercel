@@ -219,10 +219,12 @@ export const StudentEnrollmentsView: React.FC = () => {
               <div>
                 <label className="block text-slate-300 font-medium mb-1">Select Student Candidate *</label>
                 <select
+                  required
                   value={selectedStudentId}
                   onChange={(e) => setSelectedStudentId(e.target.value)}
                   className="w-full px-3.5 py-2 text-sm rounded-xl border border-[#232D52] bg-[#0E1428] text-slate-100 focus:outline-none focus:border-indigo-500"
                 >
+                  <option value="">Choose a student</option>
                   {students.map((s) => (
                     <option key={s.id} value={s.id}>
                       {s.name} ({s.rollNo} - {s.level})
@@ -234,13 +236,15 @@ export const StudentEnrollmentsView: React.FC = () => {
               <div>
                 <label className="block text-slate-300 font-medium mb-1">Select Cambridge Course *</label>
                 <select
+                  required
                   value={selectedSubjectId}
                   onChange={(e) => setSelectedSubjectId(e.target.value)}
                   className="w-full px-3.5 py-2 text-sm rounded-xl border border-[#232D52] bg-[#0E1428] text-slate-100 focus:outline-none focus:border-indigo-500"
                 >
+                  <option value="">Choose a subject</option>
                   {subjects.map((sub) => (
                     <option key={sub.id} value={sub.id}>
-                      {sub.code} {sub.name} ({sub.level} - ${sub.priceUSD}/mo)
+                      {sub.name} ({sub.level || "no level"} - {sub.priceUSD ? `$${sub.priceUSD}/mo` : "Free"})
                     </option>
                   ))}
                 </select>

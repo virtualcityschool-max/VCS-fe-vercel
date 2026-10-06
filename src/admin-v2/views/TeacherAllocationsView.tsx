@@ -274,11 +274,13 @@ export const TeacherAllocationsView: React.FC = () => {
               <div>
                 <label className="block text-slate-300 font-medium mb-1">Select Faculty Tutor *</label>
                 <select
+                  required
                   value={targetTeacherId}
                   onChange={(e) => setTargetTeacherId(e.target.value)}
                   className="w-full px-3.5 py-2 text-sm rounded-xl border border-[#232D52] bg-[#0E1428] text-slate-100 focus:outline-none focus:border-indigo-500"
                 >
-                  {teachers.map((t) => (
+                  <option value="">Choose a teacher</option>
+                  {[...teachers].sort((a, b) => a.name.localeCompare(b.name)).map((t) => (
                     <option key={t.id} value={t.id}>
                       {t.name} ({t.department} - {t.weeklyHours}h/wk)
                     </option>
@@ -289,13 +291,15 @@ export const TeacherAllocationsView: React.FC = () => {
               <div>
                 <label className="block text-slate-300 font-medium mb-1">Select Cambridge Course *</label>
                 <select
+                  required
                   value={targetSubjectId}
                   onChange={(e) => setTargetSubjectId(e.target.value)}
                   className="w-full px-3.5 py-2 text-sm rounded-xl border border-[#232D52] bg-[#0E1428] text-slate-100 focus:outline-none focus:border-indigo-500"
                 >
+                  <option value="">Choose a subject</option>
                   {subjects.map((s) => (
                     <option key={s.id} value={s.id}>
-                      {s.code} {s.name} ({s.department} · {s.level})
+                      {s.name} ({[s.department, s.level].filter(Boolean).join(' · ')})
                     </option>
                   ))}
                 </select>

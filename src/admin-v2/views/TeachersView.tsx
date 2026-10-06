@@ -317,13 +317,15 @@ export const TeachersView: React.FC = () => {
             <div>
               <label className="block text-xs font-semibold text-slate-300 mb-1.5">Select Subject</label>
               <select
+                required
                 value={selectedSubjectToAssign}
                 onChange={(e) => setSelectedSubjectToAssign(e.target.value)}
                 className="w-full px-3.5 py-2 text-xs rounded-xl border border-[#232D52] bg-[#0E1428] text-slate-100 focus:outline-none focus:border-indigo-500"
               >
-                {subjects.map((s) => (
+                <option value="">Choose a subject</option>
+                  {subjects.map((s) => (
                   <option key={s.id} value={s.id}>
-                    {s.code} {s.name} ({s.department})
+                    {s.name} ({s.department})
                   </option>
                 ))}
               </select>
