@@ -104,22 +104,14 @@ const Header = ({ activeTab, children }) => {
 
   const { title, description } = getTabInfo();
 
+  // Same look as the redesign's PageHeader, for pages not rebuilt yet.
   return (
-    <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8 animate-fadeInUp">
+    <header className="max-w-[1400px] mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-6 mb-6 border-b border-[#1E2648]">
       <div>
-        <p className="text-[10px] font-black uppercase tracking-[0.35em] text-indigo-400/80 mb-2">
-          Admin Portal
-        </p>
-        <h2 className="text-3xl md:text-4xl font-black font-poppins text-white capitalize mb-2">
-          {title}
-        </h2>
-        <p className="text-slate-400 text-sm">{description}</p>
+        <h1 className="text-2xl font-bold tracking-tight text-slate-100">{title}</h1>
+        {description && <p className="mt-1 text-sm text-slate-400">{description}</p>}
       </div>
-      {children && (
-        <div className="w-full md:w-auto shrink-0">
-          {children}
-        </div>
-      )}
+      {children && <div className="w-full md:w-auto shrink-0">{children}</div>}
     </header>
   );
 };

@@ -108,8 +108,10 @@ const AdminLayout = () => {
   return (
     <section className="min-h-screen bg-[#0B1020] text-white font-inter px-4 sm:px-6 lg:px-8 py-6">
       {/* The dashboard has its own greeting instead of the shared Header */}
-      {activeTab !== null && !REDESIGNED.has(activeTab) && <Header activeTab={activeTab} />}
-      <Outlet />
+      <div className="max-w-[1400px] mx-auto">
+        {activeTab !== null && !REDESIGNED.has(activeTab) && <Header activeTab={activeTab} />}
+        <Outlet />
+      </div>
     </section>
   );
 };

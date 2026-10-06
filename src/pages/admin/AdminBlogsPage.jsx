@@ -153,17 +153,14 @@ const AdminBlogsPage = () => {
   };
 
   return (
-    <div className="p-5 sm:p-8 max-w-7xl mx-auto">
+    <div className="max-w-[1400px] mx-auto">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 mb-6 border-b border-[#1E2648]">
         <div>
-          <p className="text-[10px] font-black uppercase tracking-[0.4em] text-indigo-500 mb-1.5">
-            Content
-          </p>
-          <h1 className="text-2xl md:text-3xl font-black font-poppins tracking-tight text-white">
-            {isVlogsRoute ? "Vlog Manager" : "Blog Manager"}
+          <h1 className="text-2xl font-bold tracking-tight text-slate-100">
+            {isVlogsRoute ? "Vlogs" : "Blogs"}
           </h1>
-          <p className="text-slate-500 text-sm mt-1.5">
+          <p className="text-slate-400 text-sm mt-1">
             {isVlogsRoute
               ? "Create, publish and manage videos shown on the public site."
               : "Create, publish and manage articles shown on the public site."}
@@ -171,9 +168,9 @@ const AdminBlogsPage = () => {
         </div>
         <button
           onClick={() => navigate("/admin/blogs/new", { state: { post_type: isVlogsRoute ? "video" : "article" } })}
-          className="btn-glow px-5 py-3 rounded-xl text-white text-[12px] font-black uppercase tracking-wider flex items-center gap-2 self-start"
+          className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl bg-[#6D5BFF] hover:bg-[#5B47FB] text-white shadow-lg shadow-indigo-600/20 self-start"
         >
-          <i className="fas fa-plus text-[10px]" /> {isVlogsRoute ? "New Vlog" : "New Blog"}
+          <i className="fas fa-plus text-xs" /> {isVlogsRoute ? "New vlog" : "New blog post"}
         </button>
       </div>
 

@@ -67,11 +67,11 @@ const AdminPlatformSettingsPage = () => {
   const sel = "bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition";
 
   return (
-    <div className="text-white space-y-8 pb-16 animate-fadeIn">
+    <div className="text-white space-y-8 pb-16 max-w-[1400px] mx-auto">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-black font-poppins tracking-tight">Platform Settings</h1>
-        <p className="text-slate-500 text-sm mt-1">Configure default values that pre-fill creation forms across the portal.</p>
+      <div className="pb-6 border-b border-[#1E2648]">
+        <h1 className="text-2xl font-bold tracking-tight text-slate-100">Platform Settings</h1>
+        <p className="text-slate-400 text-sm mt-1">Configure default values that pre-fill creation forms across the portal.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

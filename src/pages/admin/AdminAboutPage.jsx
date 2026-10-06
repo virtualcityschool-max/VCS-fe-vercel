@@ -74,12 +74,12 @@ const AdminAboutPage = () => {
   }
 
   return (
-    <div className="text-white space-y-10 pb-16 animate-fadeIn">
+    <div className="text-white space-y-10 pb-16 max-w-[1400px] mx-auto">
 
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-black font-poppins tracking-tight">About Us - CMS</h1>
-        <p className="text-slate-500 text-sm mt-1">All fields here populate the public /about page. Changes are live immediately after saving.</p>
+      <div className="pb-6 border-b border-[#1E2648]">
+        <h1 className="text-2xl font-bold tracking-tight text-slate-100">About Us</h1>
+        <p className="text-slate-400 text-sm mt-1">All fields here populate the public /about page. Changes are live immediately after saving.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

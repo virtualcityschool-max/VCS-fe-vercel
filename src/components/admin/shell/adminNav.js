@@ -100,3 +100,14 @@ export const findNavItem = (id) => {
   }
   return null;
 };
+
+// "Quick add" menu: each entry opens the page (or form) that creates it.
+export const QUICK_ADD = [
+  { label: "Student", icon: "fa-user-graduate", to: "/admin/users?role=student&new=1" },
+  { label: "Teacher", icon: "fa-chalkboard-user", to: "/admin/users?role=teacher&new=1" },
+  { label: "Parent", icon: "fa-people-roof", to: "/admin/users?role=parent&new=1" },
+  { label: "Enroll a student", icon: "fa-clipboard-list", to: "/admin/enrollments" },
+  { label: "Subject", icon: "fa-book", to: "/admin/courses" },
+  { label: "Class", icon: "fa-chalkboard", to: "/admin/sessions" },
+  { label: "Blog post", icon: "fa-newspaper", to: "/admin/blogs/new" },
+];

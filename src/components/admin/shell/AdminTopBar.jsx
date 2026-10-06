@@ -1,18 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { findNavItem, getActiveNavId } from "./adminNav";
+import { QUICK_ADD, findNavItem, getActiveNavId } from "./adminNav";
 import { useAdminSignals } from "./adminSignalsContext";
 import CommandPalette from "./CommandPalette";
 
-const QUICK_ADD = [
-  { label: "Student", icon: "fa-user-graduate", to: "/admin/users?role=student&new=1" },
-  { label: "Teacher", icon: "fa-chalkboard-user", to: "/admin/users?role=teacher&new=1" },
-  { label: "Parent", icon: "fa-people-roof", to: "/admin/users?role=parent&new=1" },
-  { label: "Enroll a student", icon: "fa-clipboard-list", to: "/admin/enrollments" },
-  { label: "Subject", icon: "fa-book", to: "/admin/courses" },
-  { label: "Class", icon: "fa-chalkboard", to: "/admin/sessions" },
-  { label: "Blog post", icon: "fa-newspaper", to: "/admin/blogs/new" },
-];
 
 // Closes a dropdown on an outside click.
 const useOutside = (open, setOpen) => {

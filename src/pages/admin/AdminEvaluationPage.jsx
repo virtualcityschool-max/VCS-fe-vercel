@@ -128,7 +128,7 @@ const AdminEvaluationPage = () => {
   return (
     <div className="min-h-screen text-white">
       {/* Header Actions (Course & Grading Scale) - Positioned to align with the global header */}
-      <div className="flex flex-col sm:flex-row sm:flex-wrap lg:flex-nowrap sm:justify-end gap-3 mb-4 mt-2 sm:-mt-20 lg:-mt-24 relative z-20">
+      <div className="flex flex-col sm:flex-row sm:flex-wrap lg:flex-nowrap sm:justify-end gap-3 mb-4 relative z-20">
         <div className="flex flex-col sm:flex-row sm:items-end gap-3">
           <div className="sm:mb-0.5">
              <GradingScaleButton onUpdated={handleGradingScaleUpdate} />
