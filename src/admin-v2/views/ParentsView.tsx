@@ -15,15 +15,8 @@ import {
 } from 'lucide-react';
 
 export const ParentsView: React.FC = () => {
-  const { parents, students, openDetailDrawer, addParent, addToast } = useApp();
+  const { parents, students, openDetailDrawer, openQuickAdd } = useApp() as any;
   const [searchQuery, setSearchQuery] = useState('');
-  const [newParentModalOpen, setNewParentModalOpen] = useState(false);
-
-  // New parent form state
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-
   const filtered = parents.filter(
     (p) =>
       p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -31,17 +24,6 @@ export const ParentsView: React.FC = () => {
       p.location.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleCreateParent = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name.trim() || !email.trim()) return;
-
-    const done = await addParent({ name: name.trim(), email: email.trim(), password });
-    if (done === false) return;
-    setNewParentModalOpen(false);
-    setName('');
-    setEmail('');
-    setPassword('');
-  };
 
   const columns: Column<Parent>[] = [
     {
@@ -119,7 +101,7 @@ export const ParentsView: React.FC = () => {
         subtitle="Maintain direct guardian communication, progress monitoring, and WhatsApp accountability."
         primaryAction={{
           label: 'New parent',
-          onClick: () => setNewParentModalOpen(true),
+          onClick: () => openQuickAdd('parent' as any),
           icon: UserPlus,
         }}
       />
@@ -136,72 +118,6 @@ export const ParentsView: React.FC = () => {
         onRowClick={(row) => openDetailDrawer('parent', row)}
       />
 
-      {/* New Parent Modal */}
-      {newParentModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <div className="w-full max-w-md rounded-2xl border border-[#232D52] bg-[#121831] p-6 shadow-2xl space-y-4 text-slate-100">
-            <h3 className="text-base font-bold text-slate-100">Register Parent / Guardian</h3>
-
-            <form onSubmit={handleCreateParent} className="space-y-3.5 text-xs">
-              <div>
-                <label className="block text-slate-300 font-medium mb-1">Guardian Name *</label>
-                <input
-                  type="text"
-                  required
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Full name"
-                  className="w-full px-3.5 py-2 text-sm rounded-xl border border-[#232D52] bg-[#0E1428] text-slate-100 focus:outline-none focus:border-indigo-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-slate-300 font-medium mb-1">Email *</label>
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="parent@example.com"
-                  className="w-full px-3.5 py-2 text-sm rounded-xl border border-[#232D52] bg-[#0E1428] text-slate-100 focus:outline-none focus:border-indigo-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-slate-300 font-medium mb-1">Temporary password *</label>
-                <input
-                  type="text"
-                  required
-                  minLength={8}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="At least 8 characters"
-                  className="w-full px-3.5 py-2 text-sm rounded-xl border border-[#232D52] bg-[#0E1428] text-slate-100 focus:outline-none focus:border-indigo-500"
-                />
-                <p className="text-[11px] text-slate-500 mt-1">
-                  Share it with the parent. They link their children from their own portal, and you approve the link under Pending Approvals.
-                </p>
-              </div>
-
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#1E2648]">
-                <button
-                  type="button"
-                  onClick={() => setNewParentModalOpen(false)}
-                  className="px-4 py-2 text-xs font-semibold rounded-xl text-slate-400 hover:text-white"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 text-xs font-semibold rounded-xl bg-[#6D5BFF] hover:bg-[#5B47FB] text-white"
-                >
-                  Create Parent
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

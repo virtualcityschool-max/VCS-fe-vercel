@@ -229,6 +229,16 @@ export const DashboardView: React.FC = () => {
               <button
                 onClick={() => {
                   setDashboardQuickAddOpen(false);
+                  openQuickAdd('parent' as any);
+                }}
+                className="flex items-center gap-2.5 w-full px-3 py-2 text-slate-300 hover:text-white hover:bg-slate-800/80 rounded-lg text-left transition-colors cursor-pointer"
+              >
+                <Users className="w-4 h-4 text-pink-400" />
+                <span>Parent</span>
+              </button>
+              <button
+                onClick={() => {
+                  setDashboardQuickAddOpen(false);
                   openQuickAdd('subject');
                 }}
                 className="flex items-center gap-2.5 w-full px-3 py-2 text-slate-300 hover:text-white hover:bg-slate-800/80 rounded-lg text-left transition-colors cursor-pointer"

@@ -558,17 +558,39 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (done) { setRejectedTodayCount((n) => n + 1); refreshApprovals(); }
   };
 
-  const createPerson = (role: string, data: any) =>
-    run(async () => {
+  // Creates the account, then saves the optional extras (profile, timezone,
+  // subjects, children). Extras that fail are reported but keep the account.
+  const createPerson = async (role: string, data: any) => {
+    const email = (data.email || '').trim();
+    const roleLabel = `${role.charAt(0).toUpperCase()}${role.slice(1)}`;
+    const missed: string[] = [];
+    let enrolled = 0;
+    const ok = await run(async () => {
       const created: any = await adminService.createUser({
-        email: (data.email || '').trim(), password: data.password, confirm_password: data.password, role,
+        email, password: data.password, confirm_password: data.password, role,
         first_name: (data.name || '').trim().split(' ')[0] || '', last_name: (data.name || '').trim().split(' ').slice(1).join(' '), is_active: true,
+        ...(data.timezone ? { timezone: data.timezone } : {}),
+        ...(role === 'parent' && data.childEmails?.length ? { student_emails: data.childEmails } : {}),
       });
       const newId = created?.id ?? created?.user?.id ?? created?.data?.id;
-      if (role === 'student' && data.subjectId && newId) {
-        await adminService.createEnrollment({ course_id: Number(data.subjectId), student_id: Number(newId) });
+      if (!newId) return;
+      const step = async (label: string, fn: () => Promise<any>) => {
+        try { await fn(); return true; } catch (e) { missed.push(`${label}: ${errText(e)}`); return false; }
+      };
+      const profile = Object.fromEntries(Object.entries(data.profile || {}).filter(([, v]) => v !== '' && v != null && !(Array.isArray(v) && !v.length)));
+      if (Object.keys(profile).length) await step('profile details', () => adminService.updateUserProfile(newId, profile));
+      for (const cid of data.subjectIds || []) {
+        const title = courseById.get(sid(cid))?.title || 'subject';
+        if (role === 'student' && await step(`enrol in ${title}`, () => adminService.createEnrollment({ course_id: Number(cid), student_id: Number(newId) }))) enrolled += 1;
+        if (role === 'teacher') await step(`assign ${title}`, () => coursesService.assignInstructor(Number(cid), Number(newId)));
       }
-    }, `${role.charAt(0).toUpperCase()}${role.slice(1)} account created for ${data.email}${role === 'student' && data.subjectId ? ' and enrolled' : ''}`, ['users', 'enrollments']);
+    }, '', ['users', 'enrollments', 'courses']);
+    if (ok) {
+      if (missed.length) addToast(`${roleLabel} account created for ${email}, but some details were not saved: ${missed.join('; ')}`, 'warning');
+      else addToast(`${roleLabel} account created for ${email}${enrolled ? ` and enrolled in ${enrolled} subject${enrolled > 1 ? 's' : ''}` : ''}`, 'success');
+    }
+    return ok;
+  };
 
   const addStudent = (s: any) => createPerson('student', s);
   const addTeacher = (t: any) => createPerson('teacher', t);
@@ -606,6 +628,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const addEnrollment = (r: any) =>
     run(() => adminService.createEnrollment({ course_id: Number(r.subjectId), student_id: Number(r.studentId) }), 'Student enrolled', ['enrollments', 'subs']);
+  // Enrol one student in several subjects; failures are listed, the rest still go through.
+  const addEnrollments = async (studentId: string, subjectIds: string[]) => {
+    const failed: string[] = [];
+    let done = 0;
+    for (const cid of subjectIds) {
+      try {
+        await adminService.createEnrollment({ course_id: Number(cid), student_id: Number(studentId) });
+        done += 1;
+      } catch (e) {
+        failed.push(`${courseById.get(sid(cid))?.title || 'subject'}: ${errText(e)}`);
+      }
+    }
+    if (done) await reload('enrollments', 'subs');
+    if (failed.length) addToast(`Enrolled in ${done} of ${subjectIds.length}. Not done: ${failed.join('; ')}`, done ? 'warning' : 'error');
+    else addToast(`Enrolled in ${done} subject${done > 1 ? 's' : ''}`, 'success');
+    return done > 0;
+  };
   const removeEnrollment = async (id: string) => {
     const e = raw.enrollments.find((x: any) => sid(x.id) === sid(id));
     if (!e) return;
@@ -746,9 +785,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     commandPaletteOpen, setCommandPaletteOpen, detailDrawer, openDetailDrawer, closeDetailDrawer, quickAddModal, openQuickAdd, closeQuickAdd,
     approvals, approveItem, rejectItem, approvedTodayCount, rejectedTodayCount,
     students, addStudent, updateStudent, deleteStudent, bulkUpdateStudentStatus,
-    enrollments, addEnrollment, removeEnrollment,
+    enrollments, addEnrollment, addEnrollments, removeEnrollment,
     teachers, addTeacher, updateTeacher, toggleTeacherStatus, bulkAssignSubject, allocateTeacherSubject, deallocateTeacherSubject,
-    parents, addParent, addAdmin, allUsers, updateUserRole, toggleUserStatus,
+    levelOptions: raw.categories, parents, addParent, addAdmin, allUsers, updateUserRole, toggleUserStatus,
     subjects, addSubject, updateSubject, toggleSubjectStatus, levels, addLevel, removeLevel,
     sessions, addSession, updateSession, deleteSession, meetings, addMeeting,
     subscriptions, renewSubscription, cancelSubscription, referrals,

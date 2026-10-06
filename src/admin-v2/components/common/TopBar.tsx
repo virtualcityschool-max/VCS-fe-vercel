@@ -14,8 +14,7 @@ import {
   Calendar,
   FileText,
   ChevronDown,
-  CheckCircle,
-} from 'lucide-react';
+  CheckCircle, Users } from 'lucide-react';
 
 export const TopBar: React.FC = () => {
   const {
@@ -134,7 +133,7 @@ export const TopBar: React.FC = () => {
                 className="flex items-center gap-2.5 w-full px-3 py-2 text-slate-300 hover:text-white hover:bg-slate-800/80 rounded-lg text-left transition-colors"
               >
                 <UserPlus className="w-4 h-4 text-emerald-400" />
-                <span>Enroll Student</span>
+                <span>Add student</span>
               </button>
               <button
                 onClick={() => {
@@ -144,7 +143,17 @@ export const TopBar: React.FC = () => {
                 className="flex items-center gap-2.5 w-full px-3 py-2 text-slate-300 hover:text-white hover:bg-slate-800/80 rounded-lg text-left transition-colors"
               >
                 <GraduationCap className="w-4 h-4 text-indigo-400" />
-                <span>Onboard Teacher</span>
+                <span>Add teacher</span>
+              </button>
+              <button
+                onClick={() => {
+                  setQuickAddMenuOpen(false);
+                  openQuickAdd('parent' as any);
+                }}
+                className="flex items-center gap-2.5 w-full px-3 py-2 text-slate-300 hover:text-white hover:bg-slate-800/80 rounded-lg text-left transition-colors"
+              >
+                <Users className="w-4 h-4 text-pink-400" />
+                <span>Add parent</span>
               </button>
               <button
                 onClick={() => {
@@ -154,7 +163,7 @@ export const TopBar: React.FC = () => {
                 className="flex items-center gap-2.5 w-full px-3 py-2 text-slate-300 hover:text-white hover:bg-slate-800/80 rounded-lg text-left transition-colors"
               >
                 <BookOpen className="w-4 h-4 text-sky-400" />
-                <span>Create Subject</span>
+                <span>Add subject</span>
               </button>
               <button
                 onClick={() => {
@@ -164,7 +173,7 @@ export const TopBar: React.FC = () => {
                 className="flex items-center gap-2.5 w-full px-3 py-2 text-slate-300 hover:text-white hover:bg-slate-800/80 rounded-lg text-left transition-colors"
               >
                 <Calendar className="w-4 h-4 text-amber-400" />
-                <span>Plan Class Session</span>
+                <span>Plan a class</span>
               </button>
               <button
                 onClick={() => {
@@ -174,7 +183,7 @@ export const TopBar: React.FC = () => {
                 className="flex items-center gap-2.5 w-full px-3 py-2 text-slate-300 hover:text-white hover:bg-slate-800/80 rounded-lg text-left transition-colors"
               >
                 <FileText className="w-4 h-4 text-rose-400" />
-                <span>Publish Blog / Video</span>
+                <span>Write blog / video</span>
               </button>
             </div>
           )}

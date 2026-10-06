@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { PageHeader } from '../components/common/PageHeader';
 import { FilterBar, FilterConfig, SortOption } from '../components/common/FilterBar';
@@ -7,17 +7,18 @@ import { StatusPill } from '../components/common/StatusPill';
 import { EnrollmentRecord, DepartmentName } from '../types';
 import { UserCheck, Plus, BookOpen, Layers, DollarSign, Calendar, Sparkles } from 'lucide-react';
 import { DEPARTMENT_CONFIG } from '../data/mockData';
+import { Field, MultiPick, SelectInput } from '../components/common/FormControls';
 
 export const StudentEnrollmentsView: React.FC = () => {
   const {
     enrollments,
     students,
     subjects,
-    addEnrollment,
+    addEnrollments,
     removeEnrollment,
     openDetailDrawer,
     addToast,
-  } = useApp();
+  } = useApp() as any;
 
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -26,10 +27,19 @@ export const StudentEnrollmentsView: React.FC = () => {
   const [modalOpen, setModalOpen] = useState(false);
 
   // New enrollment form state
-  const [selectedStudentId, setSelectedStudentId] = useState(students[0]?.id || '');
-  const [selectedSubjectId, setSelectedSubjectId] = useState(subjects[0]?.id || '');
-  const [electiveGroup, setElectiveGroup] = useState('Core Major');
-  const [enrollmentStatus, setEnrollmentStatus] = useState<EnrollmentRecord['status']>('Active');
+  const [selectedStudentId, setSelectedStudentId] = useState('');
+  const [pickedSubjects, setPickedSubjects] = useState<string[]>([]);
+  const pickedStudent = students.find((s: any) => s.id === selectedStudentId);
+  // Published subjects at the student's level that they are not already taking.
+  const subjectChoices = useMemo(() => {
+    if (!pickedStudent) return [];
+    const taken = new Set(pickedStudent.enrolledSubjectIds || []);
+    const atLevel = subjects.filter((s: any) => s.status === 'Published' && !taken.has(s.id));
+    const sameLevel = pickedStudent.level ? atLevel.filter((s: any) => s.level === pickedStudent.level) : [];
+    return (sameLevel.length ? sameLevel : atLevel)
+      .sort((a: any, b: any) => a.name.localeCompare(b.name))
+      .map((s: any) => ({ value: s.id, label: s.name, sub: s.priceUSD ? `$${s.priceUSD}/mo` : 'Free' }));
+  }, [pickedStudent, subjects]);
 
   const filters: FilterConfig[] = [
     {
@@ -87,23 +97,14 @@ export const StudentEnrollmentsView: React.FC = () => {
     filtered.sort((a, b) => b.monthlyFeeUSD - a.monthlyFeeUSD);
   }
 
-  const handleEnrollSubmit = (e: React.FormEvent) => {
+  const handleEnrollSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const subject = subjects.find((s) => s.id === selectedSubjectId);
-    const student = students.find((s) => s.id === selectedStudentId);
-    if (!subject || !student) return;
-
-    addEnrollment({
-      studentId: selectedStudentId,
-      subjectId: selectedSubjectId,
-      enrollmentDate: new Date().toISOString().split('T')[0],
-      status: enrollmentStatus,
-      feeStatus: enrollmentStatus === 'Trial' ? 'Free Trial' : 'Paid',
-      monthlyFeeUSD: subject.priceUSD,
-      electiveGroup,
-    });
-
-    setModalOpen(false);
+    if (!selectedStudentId || pickedSubjects.length === 0) return;
+    const ok = await addEnrollments(selectedStudentId, pickedSubjects);
+    if (ok) {
+      setModalOpen(false);
+      setPickedSubjects([]);
+    }
   };
 
   const columns: Column<EnrollmentRecord>[] = [
@@ -209,52 +210,42 @@ export const StudentEnrollmentsView: React.FC = () => {
       {/* Enroll in course modal */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <div className="w-full max-w-md rounded-2xl border border-[#232D52] bg-[#121831] p-6 shadow-2xl space-y-4 text-slate-100">
-            <h3 className="text-base font-bold text-slate-100">Enroll Student in Course</h3>
-            <p className="text-xs text-slate-400">
-              Assign a student to a live Cambridge course module and allocate timetable seat.
-            </p>
+          <div className="w-full max-w-lg rounded-2xl border border-[#232D52] bg-[#121831] p-6 shadow-2xl space-y-4 text-slate-100">
+            <div>
+              <h3 className="text-base font-bold text-slate-100">Enrol a student</h3>
+              <p className="text-xs text-slate-400">Pick the student, then tick one or more subjects.</p>
+            </div>
 
-            <form onSubmit={handleEnrollSubmit} className="space-y-3.5 text-xs">
-              <div>
-                <label className="block text-slate-300 font-medium mb-1">Select Student Candidate *</label>
-                <select
+            <form onSubmit={handleEnrollSubmit} className="space-y-4 text-xs">
+              <Field label="Student" required>
+                <SelectInput
                   required
                   value={selectedStudentId}
-                  onChange={(e) => setSelectedStudentId(e.target.value)}
-                  className="w-full px-3.5 py-2 text-sm rounded-xl border border-[#232D52] bg-[#0E1428] text-slate-100 focus:outline-none focus:border-indigo-500"
-                >
-                  <option value="">Choose a student</option>
-                  {students.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.name} ({s.rollNo} - {s.level})
-                    </option>
-                  ))}
-                </select>
-              </div>
+                  onChange={(v) => { setSelectedStudentId(v); setPickedSubjects([]); }}
+                  placeholder="Choose a student"
+                  options={[...students]
+                    .sort((a, b) => a.name.localeCompare(b.name))
+                    .map((s) => ({ value: s.id, label: `${s.name}${s.level ? ` · ${s.level}` : ''}` }))}
+                />
+              </Field>
 
-              <div>
-                <label className="block text-slate-300 font-medium mb-1">Select Cambridge Course *</label>
-                <select
-                  required
-                  value={selectedSubjectId}
-                  onChange={(e) => setSelectedSubjectId(e.target.value)}
-                  className="w-full px-3.5 py-2 text-sm rounded-xl border border-[#232D52] bg-[#0E1428] text-slate-100 focus:outline-none focus:border-indigo-500"
-                >
-                  <option value="">Choose a subject</option>
-                  {subjects.map((sub) => (
-                    <option key={sub.id} value={sub.id}>
-                      {sub.name} ({sub.level || "no level"} - {sub.priceUSD ? `$${sub.priceUSD}/mo` : "Free"})
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <Field
+                label="Subjects"
+                required
+                hint={pickedStudent?.level ? `Showing ${pickedStudent.level} subjects they are not already taking.` : 'Showing all published subjects they are not already taking.'}
+              >
+                <MultiPick
+                  options={subjectChoices}
+                  selected={pickedSubjects}
+                  onChange={setPickedSubjects}
+                  placeholder="Search subjects…"
+                  emptyText={selectedStudentId ? 'No more subjects to add at this level.' : 'Choose a student first.'}
+                />
+              </Field>
 
-              <div className="grid grid-cols-2 gap-3">
-                <p className="sm:col-span-2 text-xs text-slate-400">
-                  Paid subjects start a one-month access window from today; free subjects never expire.
-                </p>
-              </div>
+              <p className="text-[11px] text-slate-500">
+                Paid subjects start a one-month access window from today; free subjects never expire.
+              </p>
 
               <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#1E2648]">
                 <button
@@ -266,9 +257,10 @@ export const StudentEnrollmentsView: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 text-xs font-semibold rounded-xl bg-[#6D5BFF] hover:bg-[#5B47FB] text-white"
+                  disabled={!selectedStudentId || pickedSubjects.length === 0}
+                  className="px-4 py-2 text-xs font-semibold rounded-xl bg-[#6D5BFF] hover:bg-[#5B47FB] text-white disabled:opacity-50"
                 >
-                  Confirm Enrollment
+                  {pickedSubjects.length > 1 ? `Enrol in ${pickedSubjects.length} subjects` : 'Enrol'}
                 </button>
               </div>
             </form>

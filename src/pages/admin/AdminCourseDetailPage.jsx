@@ -23,7 +23,7 @@ import { getDisplayName } from "../../utils/userDisplay";
 const Badge = ({ children, color = "slate" }) => {
   const colors = {
     green: "bg-emerald-500/15 text-emerald-400 border-emerald-500/20",
-    slate: "bg-slate-700/50 text-slate-300 border-slate-600/30",
+    slate: "bg-[#1A2346]/50 text-slate-300 border-[#232D52]/30",
     indigo: "bg-indigo-500/15 text-indigo-400 border-indigo-500/20",
   };
   return (
@@ -34,7 +34,7 @@ const Badge = ({ children, color = "slate" }) => {
 };
 
 const MetaTile = ({ icon, label, value, valueClass = "text-white" }) => (
-  <div className="bg-slate-800/50 rounded-2xl p-4 border border-slate-700/40">
+  <div className="bg-[#0E1428]/50 rounded-2xl p-4 border border-[#232D52]/40">
     <div className="flex items-center gap-2 mb-1.5">
       <i className={`fas fa-${icon} text-slate-500 text-xs`}></i>
       <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">{label}</p>
@@ -49,7 +49,7 @@ const ConfirmUnenroll = ({ student, onConfirm, onCancel, loading }) => (
     onClick={onCancel}
   >
     <div
-      className="bg-slate-900 border border-slate-700 rounded-2xl p-6 w-full max-w-sm shadow-2xl"
+      className="bg-[#121831] border border-[#232D52] rounded-2xl p-6 w-full max-w-sm shadow-2xl"
       onClick={(e) => e.stopPropagation()}
     >
       <div className="flex items-center gap-3 mb-4">
@@ -62,7 +62,7 @@ const ConfirmUnenroll = ({ student, onConfirm, onCancel, loading }) => (
       <p className="text-white font-semibold text-sm">{student.username}</p>
       <p className="text-slate-400 text-xs mt-0.5 mb-5">{student.email}</p>
       <div className="flex gap-3">
-        <button onClick={onCancel} className="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-2 rounded-xl text-sm font-medium transition">Cancel</button>
+        <button onClick={onCancel} className="flex-1 bg-[#1A2346] hover:bg-slate-600 text-white py-2 rounded-xl text-sm font-medium transition">Cancel</button>
         <button onClick={onConfirm} disabled={loading} className="flex-1 bg-red-600 hover:bg-red-500 text-white py-2 rounded-xl text-sm font-medium transition disabled:opacity-50">
           {loading ? "Removing..." : "Yes, Remove"}
         </button>
@@ -240,14 +240,14 @@ const AdminCourseDetailPage = () => {
     return (
       <div className="min-h-screen p-6 md:p-12 pt-16 lg:pt-12">
         <div className="animate-pulse space-y-6 max-w-7xl mx-auto">
-          <div className="h-6 bg-slate-800 rounded w-56"></div>
-          <div className="h-40 bg-slate-800 rounded-3xl"></div>
+          <div className="h-6 bg-[#0E1428] rounded w-56"></div>
+          <div className="h-40 bg-[#0E1428] rounded-3xl"></div>
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
             <div className="lg:col-span-3 space-y-4">
-              <div className="h-32 bg-slate-800 rounded-3xl"></div>
-              <div className="h-48 bg-slate-800 rounded-3xl"></div>
+              <div className="h-32 bg-[#0E1428] rounded-3xl"></div>
+              <div className="h-48 bg-[#0E1428] rounded-3xl"></div>
             </div>
-            <div className="lg:col-span-2 h-80 bg-slate-800 rounded-3xl"></div>
+            <div className="lg:col-span-2 h-80 bg-[#0E1428] rounded-3xl"></div>
           </div>
         </div>
       </div>
@@ -283,9 +283,9 @@ const AdminCourseDetailPage = () => {
         </nav>
 
         {/* Hero header */}
-        <div className="bg-gradient-to-br from-slate-900 to-slate-800/60 border border-slate-700/50 rounded-3xl p-6 lg:p-8">
+        <div className="bg-gradient-to-br from-slate-900 to-slate-800/60 border border-[#232D52]/50 rounded-3xl p-6 lg:p-8">
           <div className="flex flex-col sm:flex-row sm:items-start gap-5">
-            <div className="w-16 h-16 bg-indigo-600/20 rounded-2xl flex items-center justify-center flex-shrink-0 border border-indigo-500/20">
+            <div className="w-16 h-16 bg-[#6D5BFF]/20 rounded-2xl flex items-center justify-center flex-shrink-0 border border-indigo-500/20">
               <i className="fas fa-graduation-cap text-indigo-400 text-2xl"></i>
             </div>
             <div className="flex-1 min-w-0">
@@ -300,7 +300,7 @@ const AdminCourseDetailPage = () => {
                 <div className="flex items-center gap-2 flex-shrink-0">
                   <button
                     onClick={openEdit}
-                    className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl transition active:scale-95"
+                    className="flex items-center gap-2 px-4 py-2 bg-[#6D5BFF] hover:bg-[#5B47FB] text-white text-xs font-bold rounded-xl transition active:scale-95"
                   >
                     <i className="fas fa-pen text-[10px]"></i>
                     Edit
@@ -338,13 +338,13 @@ const AdminCourseDetailPage = () => {
         </div>
 
         {/* Mobile tab switcher */}
-        <div className="flex lg:hidden gap-2 bg-slate-900/50 border border-slate-800 rounded-2xl p-1">
+        <div className="flex lg:hidden gap-2 bg-[#121831]/50 border border-[#232D52] rounded-2xl p-1">
           {["details", "students"].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`flex-1 py-2 rounded-xl text-sm font-semibold transition capitalize ${
-                activeTab === tab ? "bg-indigo-600 text-white" : "text-slate-400 hover:text-white"
+                activeTab === tab ? "bg-[#6D5BFF] text-white" : "text-slate-400 hover:text-white"
               }`}
             >
               {tab === "students" ? `Students (${students.length})` : "Details"}
@@ -358,9 +358,9 @@ const AdminCourseDetailPage = () => {
           {/* LEFT: Course details */}
           <div className={`lg:col-span-3 space-y-5 ${activeTab === "students" ? "hidden lg:block" : ""}`}>
             {hasOutline && (
-              <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6">
+              <div className="bg-[#121831]/50 border border-[#232D52] rounded-3xl p-6">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-8 h-8 bg-indigo-600/15 rounded-xl flex items-center justify-center">
+                  <div className="w-8 h-8 bg-[#6D5BFF]/15 rounded-xl flex items-center justify-center">
                     <i className="fas fa-list-alt text-indigo-400 text-xs"></i>
                   </div>
                   <h2 className="text-base font-bold text-white">Course Outline</h2>
@@ -370,7 +370,7 @@ const AdminCourseDetailPage = () => {
             )}
 
             {hasAttachment && (
-              <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6">
+              <div className="bg-[#121831]/50 border border-[#232D52] rounded-3xl p-6">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-8 h-8 bg-amber-500/15 rounded-xl flex items-center justify-center">
                     <i className="fas fa-paperclip text-amber-400 text-xs"></i>
@@ -379,9 +379,9 @@ const AdminCourseDetailPage = () => {
                 </div>
                 <button
                   onClick={() => setViewerUrl(getStorageUrl(course.attachment))}
-                  className="inline-flex items-center gap-3 px-5 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-indigo-500/40 rounded-2xl text-sm text-white font-medium transition group"
+                  className="inline-flex items-center gap-3 px-5 py-3 bg-[#0E1428] hover:bg-[#1A2346] border border-[#232D52] hover:border-indigo-500/40 rounded-2xl text-sm text-white font-medium transition group"
                 >
-                  <div className="w-8 h-8 bg-indigo-500/20 rounded-xl flex items-center justify-center group-hover:bg-indigo-500/30 transition">
+                  <div className="w-8 h-8 bg-indigo-500/20 rounded-xl flex items-center justify-center group-hover:bg-[#5B47FB]/30 transition">
                     <i className="fas fa-eye text-indigo-400 text-xs"></i>
                   </div>
                   <span>Preview Attachment</span>
@@ -390,8 +390,8 @@ const AdminCourseDetailPage = () => {
             )}
 
             {!hasOutline && !hasAttachment && (
-              <div className="bg-slate-900/50 border border-slate-800 border-dashed rounded-3xl p-10 text-center">
-                <div className="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-3">
+              <div className="bg-[#121831]/50 border border-[#232D52] border-dashed rounded-3xl p-10 text-center">
+                <div className="w-12 h-12 bg-[#0E1428] rounded-full flex items-center justify-center mx-auto mb-3">
                   <i className="fas fa-info-circle text-slate-500 text-xl"></i>
                 </div>
                 <p className="text-slate-400 text-sm">No outline or attachment added yet.</p>
@@ -401,9 +401,9 @@ const AdminCourseDetailPage = () => {
 
           {/* RIGHT: Enrolled Students */}
           <div className={`lg:col-span-2 ${activeTab === "details" ? "hidden lg:block" : ""}`}>
-            <div className="bg-slate-900/50 border border-slate-800 rounded-3xl overflow-hidden">
-              <div className="px-5 py-4 border-b border-slate-800 flex items-center gap-3">
-                <div className="w-8 h-8 bg-indigo-600/15 rounded-xl flex items-center justify-center">
+            <div className="bg-[#121831]/50 border border-[#232D52] rounded-3xl overflow-hidden">
+              <div className="px-5 py-4 border-b border-[#232D52] flex items-center gap-3">
+                <div className="w-8 h-8 bg-[#6D5BFF]/15 rounded-xl flex items-center justify-center">
                   <i className="fas fa-user-graduate text-indigo-400 text-xs"></i>
                 </div>
                 <div>
@@ -414,7 +414,7 @@ const AdminCourseDetailPage = () => {
               <div className="p-4 space-y-2 max-h-[60vh] overflow-y-auto custom-scrollbar">
                 {students.length === 0 ? (
                   <div className="py-12 text-center">
-                    <div className="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <div className="w-12 h-12 bg-[#0E1428] rounded-full flex items-center justify-center mx-auto mb-3">
                       <i className="fas fa-user-slash text-slate-500 text-lg"></i>
                     </div>
                     <p className="text-slate-400 text-sm">No students enrolled yet</p>
@@ -423,9 +423,9 @@ const AdminCourseDetailPage = () => {
                   students.map((student) => (
                     <div
                       key={student.id}
-                      className="flex items-center gap-3 p-3 bg-slate-800/40 hover:bg-slate-800/70 rounded-2xl border border-slate-700/40 hover:border-slate-600/60 transition"
+                      className="flex items-center gap-3 p-3 bg-[#0E1428]/40 hover:bg-[#1A2346]/70 rounded-2xl border border-[#232D52]/40 hover:border-[#232D52]/60 transition"
                     >
-                      <div className="w-9 h-9 bg-indigo-600/20 rounded-full flex items-center justify-center flex-shrink-0">
+                      <div className="w-9 h-9 bg-[#6D5BFF]/20 rounded-full flex items-center justify-center flex-shrink-0">
                         <span className="text-indigo-400 text-xs font-bold">
                           {student.username?.charAt(0).toUpperCase()}
                         </span>
@@ -457,8 +457,8 @@ const AdminCourseDetailPage = () => {
       {/* ── Edit Modal ── */}
       {editModalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[200] p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-5xl max-h-[92vh] overflow-y-auto">
-            <div className="flex justify-between items-center px-6 py-5 border-b border-slate-800 sticky top-0 bg-slate-900 z-10">
+          <div className="bg-[#121831] border border-[#232D52] rounded-2xl w-full max-w-5xl max-h-[92vh] overflow-y-auto">
+            <div className="flex justify-between items-center px-6 py-5 border-b border-[#232D52] sticky top-0 bg-[#121831] z-10">
               <h3 className="text-lg font-bold text-white">Edit Course</h3>
               <button onClick={() => setEditModalOpen(false)} className="text-slate-400 hover:text-white transition">
                 <i className="fas fa-times text-xl"></i>
@@ -474,17 +474,17 @@ const AdminCourseDetailPage = () => {
                 mode="edit"
               />
             </div>
-            <div className="flex gap-3 px-6 py-5 border-t border-slate-800 sticky bottom-0 bg-slate-900">
+            <div className="flex gap-3 px-6 py-5 border-t border-[#232D52] sticky bottom-0 bg-[#121831]">
               <button
                 onClick={() => setEditModalOpen(false)}
-                className="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-3 rounded-xl text-sm font-semibold transition"
+                className="flex-1 bg-[#1A2346] hover:bg-slate-600 text-white py-3 rounded-xl text-sm font-semibold transition"
               >
                 Cancel
               </button>
               <button
                 onClick={handleUpdate}
                 disabled={updating}
-                className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white py-3 rounded-xl text-sm font-semibold transition disabled:opacity-50"
+                className="flex-1 bg-[#6D5BFF] hover:bg-[#5B47FB] text-white py-3 rounded-xl text-sm font-semibold transition disabled:opacity-50"
               >
                 {updating ? <><i className="fas fa-spinner fa-spin mr-2"></i>Saving…</> : "Save Changes"}
               </button>

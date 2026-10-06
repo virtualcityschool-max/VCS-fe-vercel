@@ -184,7 +184,7 @@ const UserDetailsPage = () => {
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center">
+      <div className="min-h-screen bg-[#0B1020] text-white flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 bg-blue-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
             <i className="fas fa-spinner text-blue-500 text-2xl animate-spin"></i>
@@ -198,7 +198,7 @@ const UserDetailsPage = () => {
   // Error state
   if (error || !userData) {
     return (
-      <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center">
+      <div className="min-h-screen bg-[#0B1020] text-white flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 bg-red-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
             <i className="fas fa-exclamation-triangle text-red-500 text-2xl"></i>
@@ -206,7 +206,7 @@ const UserDetailsPage = () => {
           <p className="text-white text-lg mb-4">{error || "User not found"}</p>
           <button
             onClick={handleBackToUsers}
-            className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2 rounded-lg font-medium transition"
+            className="bg-[#6D5BFF] hover:bg-[#5B47FB] text-white px-6 py-2 rounded-lg font-medium transition"
           >
             Back to Users
           </button>
@@ -216,7 +216,7 @@ const UserDetailsPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
+    <div className="min-h-screen bg-[#0B1020] text-white">
       <div className="max-w-6xl mx-auto px-4 md:px-8 pb-8 pt-16 lg:pt-12">
         {/* Header Section */}
         <UserDetailsHeader
@@ -226,7 +226,7 @@ const UserDetailsPage = () => {
         />
 
         {/* Tab Content */}
-        <div className="bg-slate-900/60 border border-slate-800/50 rounded-2xl shadow-2xl backdrop-blur-sm mt-4">
+        <div className="bg-[#121831]/60 border border-[#232D52]/50 rounded-2xl shadow-2xl backdrop-blur-sm mt-4">
           {viewOnly && (
             <div className="flex items-center justify-between gap-3 px-5 py-3 bg-indigo-500/10 border-b border-indigo-500/20">
               <div className="flex items-center gap-2 text-indigo-300 text-xs font-bold">
@@ -235,7 +235,7 @@ const UserDetailsPage = () => {
               </div>
               <button
                 onClick={() => navigate(`/admin/users/${id}`, { state: { filters: location.state?.filters } })}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-black uppercase tracking-widest transition"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#6D5BFF] hover:bg-[#5B47FB] text-white text-[10px] font-black uppercase tracking-widest transition"
               >
                 <i className="fas fa-edit text-[9px]" />
                 Switch to Edit
@@ -260,7 +260,7 @@ const UserDetailsPage = () => {
               )}
 
               {activeTab === "profile" && userData?.role === "teacher" && (
-                <div className="pt-2 border-t border-slate-800">
+                <div className="pt-2 border-t border-[#232D52]">
                   <TeacherProfileTab
                     profile={userProfile}
                     onUpdate={handleProfileUpdate}
@@ -272,13 +272,13 @@ const UserDetailsPage = () => {
               )}
 
               {activeTab === "availability-slots" && userData?.role === "teacher" && (
-                <div className="pt-2 border-t border-slate-800">
+                <div className="pt-2 border-t border-[#232D52]">
                   <TeacherSlotsCalendarSection teacherId={userData.id} />
                 </div>
               )}
 
               {activeTab === "profile" && userData?.role === "student" && (
-                <div className="pt-2 border-t border-slate-800">
+                <div className="pt-2 border-t border-[#232D52]">
                   <StudentProfileTab
                     profile={userProfile}
                     userId={userData?.id}
@@ -292,7 +292,7 @@ const UserDetailsPage = () => {
               )}
 
               {activeTab === "profile" && userData?.role === "parent" && (
-                <div className="pt-2 border-t border-slate-800">
+                <div className="pt-2 border-t border-[#232D52]">
                   <ParentProfileTab
                     profile={{ ...userProfile, id }}
                     onUpdate={handleProfileUpdate}
