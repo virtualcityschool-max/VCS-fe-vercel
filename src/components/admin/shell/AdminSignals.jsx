@@ -68,6 +68,7 @@ export const AdminSignalsProvider = ({ children }) => {
     return {
       refresh,
       subscriptionsLoaded: subscriptions !== null,
+      subscriptions: subscriptions || { active: [], expired: [], needs_gumroad_cancellation: [] },
       expiring,
       liveSessions,
       coursesLoaded: unassigned !== null,
