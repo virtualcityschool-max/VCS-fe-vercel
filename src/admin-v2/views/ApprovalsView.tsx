@@ -324,6 +324,10 @@ export const ApprovalsView: React.FC = () => {
                         Status <ChevronDown className="w-3.5 h-3.5" />
                       </button>
                       {menuFor === item.id && (
+                        // Click anywhere outside the menu to close it.
+                        <div className="fixed inset-0 z-20" onClick={() => setMenuFor(null)} />
+                      )}
+                      {menuFor === item.id && (
                         <div className="absolute right-0 mt-1 w-56 rounded-xl border border-[#232D52] bg-[#121831] p-1.5 shadow-2xl z-30 text-xs">
                           {item.stage !== 'under_review' && (
                             <button

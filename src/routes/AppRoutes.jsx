@@ -67,26 +67,11 @@ const V2 = {
   About: v2("AboutPageView", "AboutPageView"),
   Settings: v2("PlatformSettingsView", "PlatformSettingsView"),
 };
-const AdminOverviewPage = React.lazy(() => import("../pages/admin/AdminOverviewPage"));
-const AdminApprovalsPage = React.lazy(() => import("../pages/admin/AdminApprovalsPage"));
-const AdminCoursesPage = React.lazy(() => import("../pages/admin/AdminCoursesPage"));
-const AdminTeacherAllocationsPage = React.lazy(() => import("../pages/admin/AdminTeacherAllocationsPage"));
 const AdminCourseDetailPage = React.lazy(() => import("../pages/admin/AdminCourseDetailPage"));
-const AdminUsersPage = React.lazy(() => import("../pages/admin/AdminUsersPage"));
-const AdminEnrollmentsPage = React.lazy(() => import("../pages/admin/AdminEnrollmentsPage"));
 const AdminSessionsPage = React.lazy(() => import("../pages/admin/AdminSessionsPage"));
-const AdminAttendancePage = React.lazy(() => import("../pages/admin/AdminAttendance"));
-const AdminEvaluationPage = React.lazy(() => import("../pages/admin/AdminEvaluationPage"));
-const AdminCategoriesPage = React.lazy(() => import("../pages/admin/AdminCategoriesPage"));
-const AdminReferralsPage = React.lazy(() => import("../pages/admin/AdminReferralsPage"));
-const AdminTestimonialsPage = React.lazy(() => import("../pages/admin/AdminTestimonialsPage"));
 const UserDetailsPage = React.lazy(() => import("../pages/admin/UserDetailsPage"));
 const AdminTeacherPlannerPage = React.lazy(() => import("../pages/admin/AdminTeacherPlannerPage"));
-const AdminBlogsPage = React.lazy(() => import("../pages/admin/AdminBlogsPage"));
 const AdminBlogEditorPage = React.lazy(() => import("../pages/admin/AdminBlogEditorPage"));
-const AdminAboutPage = React.lazy(() => import("../pages/admin/AdminAboutPage"));
-const AdminPlatformSettingsPage = React.lazy(() => import("../pages/admin/AdminPlatformSettingsPage"));
-const AdminSubscriptionsPage = React.lazy(() => import("../pages/admin/AdminSubscriptionsPage"));
 
 const ProfilePage = React.lazy(() => import("../pages/profile/ProfilePage"));
 

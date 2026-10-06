@@ -109,11 +109,11 @@ export const EvaluationsView: React.FC = () => {
 
         <div className="flex items-center gap-2 text-xs font-mono text-slate-400">
           <span>Active Scale Thresholds: </span>
-          <span className="text-emerald-400 font-bold">A+ ≥ {thresholds.AStar}%</span>
+          <span className="text-emerald-400 font-bold">A+ ≥ {settings.gradeThresholds.AStar}%</span>
           <span>·</span>
-          <span className="text-indigo-400 font-bold">A ≥ {thresholds.A}%</span>
+          <span className="text-indigo-400 font-bold">A ≥ {settings.gradeThresholds.A}%</span>
           <span>·</span>
-          <span className="text-amber-400 font-bold">B ≥ {thresholds.B}%</span>
+          <span className="text-amber-400 font-bold">B ≥ {settings.gradeThresholds.B}%</span>
         </div>
       </div>
 

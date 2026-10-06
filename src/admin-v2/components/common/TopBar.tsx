@@ -3,8 +3,6 @@ import { useApp } from '../../context/AppContext';
 import {
   Search,
   Plus,
-  Sun,
-  Moon,
   Bell,
   Menu,
   RotateCcw,
@@ -18,8 +16,6 @@ import {
 
 export const TopBar: React.FC = () => {
   const {
-    theme,
-    toggleTheme,
     timezone,
     approvals,
     setCommandPaletteOpen,
@@ -204,13 +200,6 @@ export const TopBar: React.FC = () => {
         </button>
 
         {/* Theme toggle */}
-        <button
-          onClick={toggleTheme}
-          className="p-2 rounded-xl border border-[#232D52] bg-[#121831] text-slate-400 hover:text-amber-400 hover:border-slate-600 transition-colors"
-          title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} mode`}
-        >
-          {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-        </button>
 
         {/* Reload data from the server */}
         <button

@@ -25,7 +25,7 @@ export const TeachersView: React.FC = () => {
     subjects,
     openDetailDrawer,
     openQuickAdd,
-    toggleTeacherStatus,
+    toggleUserStatus,
     bulkAssignSubject,
     addToast,
   } = useApp();
@@ -38,7 +38,7 @@ export const TeachersView: React.FC = () => {
 
   // Bulk subject modal
   const [assignModalOpen, setAssignModalOpen] = useState(false);
-  const [selectedSubjectToAssign, setSelectedSubjectToAssign] = useState(subjects[0]?.id || '');
+  const [selectedSubjectToAssign, setSelectedSubjectToAssign] = useState('');
   const [pendingBulkTeacherIds, setPendingBulkTeacherIds] = useState<string[]>([]);
 
   const engagedCount = teachers.filter((t) => t.status === 'Engaged').length;
@@ -251,7 +251,7 @@ export const TeachersView: React.FC = () => {
           columns={columns}
           data={filtered}
           onRowClick={(row) => openDetailDrawer('teacher', row)}
-          onToggleStatus={(row) => toggleTeacherStatus(row.id)}
+          onToggleStatus={(row) => toggleUserStatus(row.id)}
           bulkActions={[
             {
               label: 'Assign Subject',

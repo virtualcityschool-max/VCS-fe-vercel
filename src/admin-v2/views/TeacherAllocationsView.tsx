@@ -36,8 +36,8 @@ export const TeacherAllocationsView: React.FC = () => {
 
   // Allocation modal
   const [allocModalOpen, setAllocModalOpen] = useState(false);
-  const [targetTeacherId, setTargetTeacherId] = useState(teachers[0]?.id || '');
-  const [targetSubjectId, setTargetSubjectId] = useState(subjects[0]?.id || '');
+  const [targetTeacherId, setTargetTeacherId] = useState('');
+  const [targetSubjectId, setTargetSubjectId] = useState('');
 
   // Subjects without assigned teacher
   const unassignedSubjects = subjects.filter(

@@ -4,7 +4,7 @@ import { TimezoneTag } from "../../components/ui";
 import { useDateFormatters } from "../../hooks";
 import SessionCalendarView from "../common/SessionCalendarView";
 import { getDisplayName } from "../../utils/userDisplay";
-import { timeOptions } from "../../utils/timeSlots";
+import { TimeOptions } from "../../utils/timeSlots";
 
 const StatusHeaderTooltip = () => {
   const [pos, setPos] = useState(null);
@@ -692,7 +692,7 @@ const TeacherPlannerTab = ({
                     className={`w-full px-3 py-2.5 bg-[#0E1428]/60 border ${
                       errors.time ? "border-red-500/60" : "border-[#232D52]/60"
                     } rounded-xl text-white text-sm focus:outline-none focus:border-[#6D5BFF] transition`}
-                  >{timeOptions(form.time)}</select>
+                  ><TimeOptions current={form.time} /></select>
                   {errors.time && <p className="text-red-400 text-xs mt-1">{errors.time}</p>}
                 </div>
                 <div>

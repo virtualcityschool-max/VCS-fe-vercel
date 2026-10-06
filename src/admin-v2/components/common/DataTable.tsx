@@ -248,6 +248,10 @@ export function DataTable<T extends { id: string }>({
                         </button>
 
                         {actionMenuOpenId === row.id && (
+                          // Click anywhere outside the menu to close it.
+                          <div className="fixed inset-0 z-40" onClick={() => setActionMenuOpenId(null)} />
+                        )}
+                        {actionMenuOpenId === row.id && (
                           <div
                             style={{ top: menuPos.top, right: menuPos.right }}
                             className="fixed w-36 rounded-xl border border-[#232D52] bg-[#121831] p-1.5 shadow-2xl z-50 text-xs"

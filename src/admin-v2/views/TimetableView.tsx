@@ -22,7 +22,6 @@ export const TimetableView: React.FC = () => {
     subjects,
     teachers,
     openQuickAdd,
-    deleteSession,
     timezone,
     tzIana,
   } = useApp();
@@ -165,7 +164,6 @@ export const TimetableView: React.FC = () => {
         <DataTable
           columns={columns}
           data={[...sessions].sort((a, b) => (b.date + b.startTime).localeCompare(a.date + a.startTime))}
-          onDelete={(row) => deleteSession(row.id)}
         />
       ) : (
         /* Week Calendar View with Department color-coding */

@@ -205,6 +205,10 @@ export const DashboardView: React.FC = () => {
           </button>
 
           {dashboardQuickAddOpen && (
+            // Click anywhere outside the menu to close it.
+            <div className="fixed inset-0 z-20" onClick={() => setDashboardQuickAddOpen(false)} />
+          )}
+          {dashboardQuickAddOpen && (
             <div className="absolute right-0 mt-2 w-52 rounded-xl border border-[#232D52] bg-[#121831] p-1.5 shadow-2xl z-40 text-xs animate-in fade-in zoom-in-95">
               <button
                 onClick={() => {

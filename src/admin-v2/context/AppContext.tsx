@@ -204,7 +204,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     sessions: () => adminSessionService.getSessions(),
     meetings: () => adminTeacherSessionService.getSessions(),
     subs: () => adminService.getSubscriptions(),
-    referrals: () => axiosInstance.get('/referrals/admin/', { params: { page_size: 500 } }).then((r: any) => r.data),
+    // Paginated (max 100 per page on the server), so follow every page.
+    referrals: async () => {
+      const all: any[] = [];
+      for (let page = 1; page <= 50; page += 1) {
+        const r: any = await axiosInstance.get('/referrals/admin/', { params: { page_size: 100, page } });
+        all.push(...asList(r.data));
+        if (!r.data?.next) break;
+      }
+      return all;
+    },
     posts: () => blogsService.getAllBlogs({ ordering: '-created_at' }),
     testimonials: () => testimonialsService.getAllTestimonials(),
     reviews: () => axiosInstance.get('/admin/approval-reviews/').then((r: any) => r.data),
@@ -233,6 +242,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return next;
     });
     setLoaded((p) => ({ ...p, ...Object.fromEntries(list.map((k) => [k, true])) }));
+    // Say so when something could not load, rather than showing it as empty.
+    const failed = list.filter((_, i) => results[i].status === 'rejected');
+    if (failed.length) {
+      addToast(`Could not load: ${failed.join(', ')}. Those sections may look empty; use the reload button to try again.`, 'warning');
+    }
   }, []);
 
   const refreshApprovals = useCallback(() => {
@@ -256,7 +270,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return (v: any) => (v == null || v === '' ? '' : (m.get(String(v)) as string) || String(v));
   }, [raw.categories]);
 
-  const courseById = useMemo(() => new Map(raw.courses.map((c: any) => [String(c.id), c])), [raw.courses]);
+  const courseById = useMemo(() => new Map<string, any>(raw.courses.map((c: any) => [String(c.id), c])), [raw.courses]);
   const coursePrice = (c: any) => (c?.is_paid ? parseFloat(c?.price) || 0 : 0);
 
   const feeByStudent = useMemo(() => {
@@ -303,10 +317,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [raw.sessions]);
 
   const sessionCourse = useMemo(() => new Map(raw.sessions.map((s: any) => [sid(s.id), s.course])), [raw.sessions]);
-  const activeEnrollments = raw.enrollments.filter((e: any) => e.status === 'active');
+  const activeEnrollments = useMemo(() => raw.enrollments.filter((e: any) => e.status === 'active'), [raw.enrollments]);
 
   const students: Student[] = useMemo(() => raw.users.filter((u: any) => u.role === 'student').map((u: any) => {
-    const mine = raw.enrollments.filter((e: any) => sid(e.student?.id) === sid(u.id) && e.status !== 'cancelled');
+    // Active seats decide fees and subjects; pending/rejected requests are not enrolments.
+    const mine = activeEnrollments.filter((e: any) => sid(e.student?.id) === sid(u.id));
     const att = attendanceByStudent.get(sid(u.id));
     const latest = mine.map((e: any) => e.enrolled_at).filter(Boolean).sort().pop();
     const fee = feeByStudent.get(sid(u.id)) || (mine.length ? 'Free Access' : 'Not Enrolled');
@@ -315,16 +330,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       avatar: u.avatar ? getStorageUrl(u.avatar) : undefined,
       status: u.is_active ? 'Active' : 'Inactive', createdAt: u.date_joined, phone: u.phone || '',
       rollNo: u.roll_no != null ? String(u.roll_no) : '—', level: levelName(u.grade_level) as AcademicLevel,
-      enrolledSubjectIds: mine.filter((e: any) => e.status === 'active').map((e: any) => sid(e.course?.id)),
+      enrolledSubjectIds: mine.map((e: any) => sid(e.course?.id)),
       feeStatus: fee as any,
       guardianName: u.guardian?.name || '', guardianPhone: u.guardian?.phone || '',
       latestEnrollmentDate: latest ? latest.slice(0, 10) : '',
       attendanceRate: att && att.marked ? Math.round((att.ok / att.marked) * 100) : (null as any),
       absencesThisWeek: att?.weekAbsent || 0,
-      totalPaidUSD: mine.filter((e: any) => e.status === 'active').reduce((s: number, e: any) => s + coursePrice(courseById.get(sid(e.course?.id)) || e.course), 0),
+      totalPaidUSD: mine.reduce((s: number, e: any) => s + coursePrice(courseById.get(sid(e.course?.id)) || e.course), 0),
       _raw: u,
     } as any;
-  }), [raw.users, raw.enrollments, attendanceByStudent, feeByStudent, levelName, courseById]);
+  }), [raw.users, activeEnrollments, attendanceByStudent, feeByStudent, levelName, courseById]);
 
   const teachers: Teacher[] = useMemo(() => raw.users.filter((u: any) => u.role === 'teacher').map((u: any) => {
     const taught = raw.courses.filter((c: any) => sid(c.instructor?.id ?? c.instructor_id) === sid(u.id));
@@ -376,7 +391,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       id: sid(s.id), title: s.title, subjectId: sid(s.course), department: deptName(s.course_title || s.title),
       level: ((c && (typeof c.category === 'object' ? c.category?.name : levelName(c.category))) || '') as AcademicLevel,
       teacherId: sid(s.teacher), startTime: hm(start, tzIana), endTime: hm(end, tzIana),
-      dayOfWeek: Number(start.toLocaleDateString('en-US', { weekday: 'short', timeZone: tzIana }) && new Date(start.toLocaleString('en-US', { timeZone: tzIana })).getDay()),
+      // Weekday as seen in the admin's timezone.
+      dayOfWeek: new Date(start.toLocaleString('en-US', tzIana ? { timeZone: tzIana } : undefined)).getDay(),
       date: ymd(start, tzIana),
       status: s.status === 'scheduled' ? 'upcoming' : s.status,
       recurrence: s.is_recurring ? 'Weekly' : 'One-off', meetingLink: s.meeting_link || undefined,

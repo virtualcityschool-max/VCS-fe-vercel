@@ -6,7 +6,7 @@ import { clampDate } from "../../utils/validation";
 import { useDateFormatters } from "../../hooks";
 import CourseSelect from "../common/CourseSelect";
 import { getDisplayName } from "../../utils/userDisplay";
-import { timeOptions } from "../../utils/timeSlots";
+import { TimeOptions } from "../../utils/timeSlots";
 
 const StatusHeaderTooltip = () => {
   const [pos, setPos] = useState(null);
@@ -804,7 +804,7 @@ const SessionsTab = ({
                       <select value={createSessionForm.time}
                         onChange={(e) => { setCreateSessionForm({ ...createSessionForm, time: e.target.value }); clearCreateSessionFieldError("time"); }}
                         className={`w-full px-3 py-2.5 bg-[#0E1428] border rounded-xl text-white focus:outline-none focus:ring-2 text-sm [color-scheme:dark] ${createSessionErrors?.time ? "border-red-500 focus:ring-red-500" : "border-[#232D52] focus:ring-[#6D5BFF]"}`}
-                  >{timeOptions(createSessionForm.time)}</select>
+                  ><TimeOptions current={createSessionForm.time} /></select>
                       {createSessionErrors?.time && <p className="text-red-400 text-xs mt-1">{createSessionErrors.time}</p>}
                       <p className="text-slate-500 text-xs mt-1.5 flex items-center gap-1">
                         <i className="fas fa-globe text-[10px]"></i>
@@ -976,7 +976,7 @@ const SessionsTab = ({
                     value={editSessionForm.time || ""}
                     onChange={(e) => { setEditSessionForm({ ...editSessionForm, time: e.target.value }); clearEditSessionFieldError("time"); }}
                     className={`w-full px-3 py-2.5 bg-[#0E1428] border rounded-xl text-white focus:outline-none focus:ring-2 text-sm [color-scheme:dark] ${editSessionErrors?.time ? "border-red-500 focus:ring-red-500" : "border-[#232D52] focus:ring-[#6D5BFF]"}`}
-                  >{timeOptions(editSessionForm.time || "")}</select>
+                  ><TimeOptions current={editSessionForm.time || ""} /></select>
                   {editSessionErrors?.time && <p className="text-red-400 text-xs mt-1">{editSessionErrors.time}</p>}
                   <p className="text-slate-500 text-xs mt-1.5 flex items-center gap-1">
                     <i className="fas fa-globe text-[10px]"></i>
