@@ -6,6 +6,7 @@ import { StatusPill } from '../components/common/StatusPill';
 import { EnrollmentRecord } from '../types';
 import { Plus, Trash2 } from 'lucide-react';
 import { Field, MultiPick, SelectInput } from '../components/common/FormControls';
+import { CategoryBar } from '../components/common/CategoryBar';
 
 export const StudentEnrollmentsView: React.FC = () => {
   const {
@@ -22,6 +23,7 @@ export const StudentEnrollmentsView: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [deptFilter, setDeptFilter] = useState('all');
   const [currentSort, setCurrentSort] = useState('date-desc');
+  const [scope, setScope] = useState<'all' | 'multi' | 'single'>('all');
   const [modalOpen, setModalOpen] = useState(false);
 
   // New enrollment form state
@@ -50,21 +52,6 @@ export const StudentEnrollmentsView: React.FC = () => {
         { label: 'Pending', value: 'Pending', count: enrollments.filter((e) => (e.status as string) === 'Pending').length },
       ],
     },
-    {
-      id: 'dept',
-      label: 'Department',
-      value: deptFilter,
-      onChange: setDeptFilter,
-      options: [
-        { label: 'Mathematics', value: 'Mathematics' },
-        { label: 'Physics', value: 'Physics' },
-        { label: 'Chemistry', value: 'Chemistry' },
-        { label: 'Biology', value: 'Biology' },
-        { label: 'Computer Science', value: 'Computer Science' },
-        { label: 'English & Urdu', value: 'English & Urdu' },
-        { label: 'General', value: 'General' },
-      ],
-    },
   ];
 
   const sortOptions: SortOption[] = [
@@ -90,6 +77,14 @@ export const StudentEnrollmentsView: React.FC = () => {
     return matchSearch && matchStatus && matchDept;
   });
 
+  // Active subjects per student across all enrolments (for the Multi / Single groups).
+  const activeCount = useMemo(() => {
+    const m = new Map<string, number>();
+    enrollments.forEach((r: any) => r.status === 'Active' && m.set(r.studentId, (m.get(r.studentId) || 0) + 1));
+    return m;
+  }, [enrollments]);
+  const studentsWithActive = [...activeCount.values()];
+
   // One group per student: the student once, then each of their subjects.
   const groups = useMemo(() => {
     const byStudent = new Map<string, EnrollmentRecord[]>();
@@ -100,15 +95,21 @@ export const StudentEnrollmentsView: React.FC = () => {
       rows: [...rows].sort((a, b) => b.enrollmentDate.localeCompare(a.enrollmentDate)),
       latest: rows.reduce((m, r) => (r.enrollmentDate > m ? r.enrollmentDate : m), ''),
     }));
+    const scoped = list.filter((g) => {
+      const n = activeCount.get(g.studentId) || 0;
+      return scope === 'all' || (scope === 'multi' ? n >= 2 : n === 1);
+    });
+    list.length = 0;
+    list.push(...scoped);
     if (currentSort === 'name-asc') list.sort((a, b) => (a.student?.name || '').localeCompare(b.student?.name || ''));
     else if (currentSort === 'count-desc') list.sort((a, b) => b.rows.length - a.rows.length);
     else list.sort((a, b) => b.latest.localeCompare(a.latest));
     return list;
-  }, [filtered, students, currentSort]);
+  }, [filtered, students, currentSort, scope, activeCount]);
 
   const PAGE = 10;
   const [page, setPage] = useState(1);
-  useEffect(() => setPage(1), [searchQuery, statusFilter, deptFilter, currentSort]);
+  useEffect(() => setPage(1), [searchQuery, statusFilter, deptFilter, currentSort, scope]);
   const pages = Math.max(1, Math.ceil(groups.length / PAGE));
   const pageGroups = groups.slice((Math.min(page, pages) - 1) * PAGE, Math.min(page, pages) * PAGE);
 
@@ -132,6 +133,26 @@ export const StudentEnrollmentsView: React.FC = () => {
           onClick: () => setModalOpen(true),
           icon: Plus,
         }}
+      />
+
+      <CategoryBar
+        allLabel="All Subjects"
+        dept={deptFilter}
+        onDept={setDeptFilter}
+        total={enrollments.filter((r: any) => r.status === 'Active').length}
+        counts={enrollments
+          .filter((r: any) => r.status === 'Active')
+          .reduce((m: any, r: any) => {
+            const d = subjects.find((x: any) => x.id === r.subjectId)?.department || 'General';
+            return { ...m, [d]: (m[d] || 0) + 1 };
+          }, {})}
+        segments={[
+          { id: 'all', label: 'All Students', count: studentsWithActive.length },
+          { id: 'multi', label: 'Multi-Subject 2+', count: studentsWithActive.filter((n) => n >= 2).length, dot: 'bg-emerald-400' },
+          { id: 'single', label: 'Single (1)', count: studentsWithActive.filter((n) => n === 1).length, dot: 'bg-sky-400' },
+        ]}
+        segment={scope}
+        onSegment={(id) => setScope(id as any)}
       />
 
       <FilterBar

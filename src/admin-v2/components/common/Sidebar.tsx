@@ -112,7 +112,7 @@ export const Sidebar: React.FC = () => {
     {
       label: 'TEACHING',
       items: [
-        { id: 'subjects', label: 'Subjects', icon: BookOpen },
+        { id: 'subjects', label: 'Subjects Catalogue', icon: BookOpen },
         { id: 'teachers', label: 'Teachers Register', icon: Users },
         { id: 'teacher-allocations', label: 'Teacher Allocations', icon: GitFork },
         { id: 'timetable', label: 'Timetable', icon: Calendar },

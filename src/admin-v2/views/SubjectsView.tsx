@@ -7,6 +7,7 @@ import { StatusPill } from '../components/common/StatusPill';
 import { Subject, DepartmentName, AcademicLevel } from '../types';
 import { BookOpen, Plus, Sparkles, Users } from 'lucide-react';
 import { DEPARTMENT_CONFIG, DEPARTMENT_ICONS } from '../data/departments';
+import { CategoryBar } from '../components/common/CategoryBar';
 
 export const SubjectsView: React.FC = () => {
   const {
@@ -175,56 +176,20 @@ export const SubjectsView: React.FC = () => {
         }}
       />
 
-      {/* Segmented Status Split */}
-      <div className="flex items-center gap-1.5 p-1 bg-[#121831] border border-[#232D52] rounded-xl w-fit">
-        {[
-          { id: 'all', label: 'All Subjects', count: subjects.length },
-          { id: 'published', label: 'Published', count: publishedCount },
-          { id: 'draft', label: 'Draft', count: draftCount },
-        ].map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id as any)}
-            className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors cursor-pointer flex items-center gap-2 ${
-              activeTab === tab.id
-                ? 'bg-[#6D5BFF] text-white shadow-sm'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
-            }`}
-          >
-            <span>{tab.label}</span>
-            <span
-              className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${
-                activeTab === tab.id ? 'bg-white/20 text-white' : 'bg-slate-800 text-slate-400'
-              }`}
-            >
-              {tab.count}
-            </span>
-          </button>
-        ))}
-      </div>
-
-      {/* Department quick filter */}
-      <div className="flex flex-wrap items-center gap-2">
-        {[{ name: 'all', label: 'All departments', count: subjects.length },
-          ...(Object.keys(DEPARTMENT_ICONS) as DepartmentName[]).map((d) => ({ name: d, label: d, count: subjects.filter((x) => x.department === d).length })).filter((d) => d.count > 0),
-        ].map((d) => {
-          const active = deptFilter === d.name;
-          const Icon = d.name === 'all' ? null : DEPARTMENT_ICONS[d.name as DepartmentName];
-          const hex = d.name === 'all' ? '#6D5BFF' : (DEPARTMENT_CONFIG[d.name as DepartmentName] || DEPARTMENT_CONFIG.General).hex;
-          return (
-            <button
-              key={d.name}
-              onClick={() => setDeptFilter(d.name)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-colors"
-              style={active ? { backgroundColor: hex, borderColor: hex, color: '#fff' } : { backgroundColor: `${hex}12`, borderColor: `${hex}35`, color: hex }}
-            >
-              {Icon && <Icon className="w-3.5 h-3.5" />}
-              {d.label}
-              <span className={`font-mono text-[10px] px-1.5 rounded ${active ? 'bg-white/20' : 'bg-black/20'}`}>{d.count}</span>
-            </button>
-          );
-        })}
-      </div>
+      <CategoryBar
+        allLabel="All Subjects"
+        dept={deptFilter}
+        onDept={setDeptFilter}
+        total={subjects.length}
+        counts={subjects.reduce((m: any, x) => ({ ...m, [x.department]: (m[x.department] || 0) + 1 }), {})}
+        segments={[
+          { id: 'all', label: 'All', count: subjects.length },
+          { id: 'published', label: 'Published', count: publishedCount, dot: 'bg-emerald-400' },
+          { id: 'draft', label: 'Draft', count: subjects.length - publishedCount, dot: 'bg-amber-400' },
+        ]}
+        segment={activeTab}
+        onSegment={(id) => setActiveTab(id as any)}
+      />
 
       <FilterBar
         searchQuery={searchQuery}
