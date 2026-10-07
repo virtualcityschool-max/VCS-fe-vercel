@@ -1,45 +1,30 @@
-// A plain list of world country names, used to populate country dropdowns.
-// Kept dependency-free - just an alphabetically ordered array of strings.
+// Countries for sign-up and profile forms: dial code (no "+") and timezone.
+// Gulf and Pakistan first, where most VCS families are.
 export const COUNTRIES = [
-  "Afghanistan", "Albania", "Algeria", "Andorra", "Angola",
-  "Antigua and Barbuda", "Argentina", "Armenia", "Australia", "Austria",
-  "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados",
-  "Belarus", "Belgium", "Belize", "Benin", "Bhutan",
-  "Bolivia", "Bosnia and Herzegovina", "Botswana", "Brazil", "Brunei",
-  "Bulgaria", "Burkina Faso", "Burundi", "Cabo Verde", "Cambodia",
-  "Cameroon", "Canada", "Central African Republic", "Chad", "Chile",
-  "China", "Colombia", "Comoros", "Congo (Brazzaville)", "Congo (Kinshasa)",
-  "Costa Rica", "Côte d'Ivoire", "Croatia", "Cuba", "Cyprus",
-  "Czechia", "Denmark", "Djibouti", "Dominica", "Dominican Republic",
-  "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea",
-  "Estonia", "Eswatini", "Ethiopia", "Fiji", "Finland",
-  "France", "Gabon", "Gambia", "Georgia", "Germany",
-  "Ghana", "Greece", "Grenada", "Guatemala", "Guinea",
-  "Guinea-Bissau", "Guyana", "Haiti", "Honduras", "Hungary",
-  "Iceland", "India", "Indonesia", "Iran", "Iraq",
-  "Ireland", "Israel", "Italy", "Jamaica", "Japan",
-  "Jordan", "Kazakhstan", "Kenya", "Kiribati", "Kuwait",
-  "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho",
-  "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg",
-  "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali",
-  "Malta", "Marshall Islands", "Mauritania", "Mauritius", "Mexico",
-  "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro",
-  "Morocco", "Mozambique", "Myanmar", "Namibia", "Nauru",
-  "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger",
-  "Nigeria", "North Korea", "North Macedonia", "Norway", "Oman",
-  "Pakistan", "Palau", "Palestine", "Panama", "Papua New Guinea",
-  "Paraguay", "Peru", "Philippines", "Poland", "Portugal",
-  "Qatar", "Romania", "Russia", "Rwanda", "Saint Kitts and Nevis",
-  "Saint Lucia", "Saint Vincent and the Grenadines", "Samoa", "San Marino", "Sao Tome and Principe",
-  "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone",
-  "Singapore", "Slovakia", "Slovenia", "Solomon Islands", "Somalia",
-  "South Africa", "South Korea", "South Sudan", "Spain", "Sri Lanka",
-  "Sudan", "Suriname", "Sweden", "Switzerland", "Syria",
-  "Taiwan", "Tajikistan", "Tanzania", "Thailand", "Timor-Leste",
-  "Togo", "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey",
-  "Turkmenistan", "Tuvalu", "Uganda", "Ukraine", "United Arab Emirates",
-  "United Kingdom", "United States", "Uruguay", "Uzbekistan", "Vanuatu",
-  "Vatican City", "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe",
+  { name: "Saudi Arabia", dial: "966", tz: "Asia/Riyadh" },
+  { name: "United Arab Emirates", dial: "971", tz: "Asia/Dubai" },
+  { name: "Qatar", dial: "974", tz: "Asia/Qatar" },
+  { name: "Kuwait", dial: "965", tz: "Asia/Kuwait" },
+  { name: "Bahrain", dial: "973", tz: "Asia/Bahrain" },
+  { name: "Oman", dial: "968", tz: "Asia/Muscat" },
+  { name: "Pakistan", dial: "92", tz: "Asia/Karachi" },
+  { name: "United Kingdom", dial: "44", tz: "Europe/London" },
+  { name: "United States", dial: "1", tz: "America/New_York" },
+  { name: "Canada", dial: "1", tz: "America/Toronto" },
+  { name: "India", dial: "91", tz: "Asia/Kolkata" },
+  { name: "Bangladesh", dial: "880", tz: "Asia/Dhaka" },
+  { name: "Egypt", dial: "20", tz: "Africa/Cairo" },
+  { name: "Jordan", dial: "962", tz: "Asia/Amman" },
+  { name: "Palestine", dial: "970", tz: "Asia/Hebron" },
+  { name: "Malaysia", dial: "60", tz: "Asia/Kuala_Lumpur" },
+  { name: "Turkey", dial: "90", tz: "Europe/Istanbul" },
+  { name: "Australia", dial: "61", tz: "Australia/Sydney" },
 ];
 
-export default COUNTRIES;
+export const DIAL_CODES = Array.from(new Map(COUNTRIES.map((c) => [c.dial, c])).values());
+
+// "+966 050-123" + dial "966" → "966501 23…" digits, leading zeros dropped.
+export const joinPhone = (dial, number) => {
+  const n = String(number || "").replace(/[^\d]/g, "").replace(/^0+/, "");
+  return n ? `${dial}${n}` : "";
+};
