@@ -209,3 +209,25 @@ export const MultiPick: React.FC<{
     </div>
   );
 };
+
+// Small icon button that copies a value (email, phone…) and confirms with a tick.
+export const CopyButton: React.FC<{ value?: string | null; title?: string }> = ({ value, title = 'Copy' }) => {
+  const [done, setDone] = useState(false);
+  if (!value) return null;
+  return (
+    <button
+      type="button"
+      title={title}
+      onClick={(e) => {
+        e.stopPropagation();
+        navigator.clipboard?.writeText(value).then(() => {
+          setDone(true);
+          setTimeout(() => setDone(false), 1400);
+        });
+      }}
+      className="shrink-0 p-1 rounded-md text-slate-400 hover:text-white hover:bg-[#1A2346] transition-colors"
+    >
+      {done ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+    </button>
+  );
+};

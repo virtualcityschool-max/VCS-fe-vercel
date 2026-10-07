@@ -18,6 +18,7 @@ import {
   Send,
 } from 'lucide-react';
 import { StatusPill } from './StatusPill';
+import { StudentProfilePanel } from './StudentProfilePanel';
 import { DEPARTMENT_CONFIG } from '../../data/departments';
 import { DepartmentName } from '../../types';
 
@@ -119,7 +120,9 @@ export const DetailDrawer: React.FC = () => {
 
         {/* Content Area */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
-          {activeTab === 'overview' && (
+          {activeTab === 'overview' && type === 'student' && <StudentProfilePanel studentId={data.id} />}
+
+          {activeTab === 'overview' && type !== 'student' && (
             <div className="space-y-6">
               {/* Primary Profile Card */}
               <div className="p-4 rounded-xl border border-[#232D52] bg-[#0E1428] space-y-3">

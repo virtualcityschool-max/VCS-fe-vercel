@@ -157,3 +157,18 @@ export const generatePassword = () => {
 };
 
 export const countryByName = (name?: string) => COUNTRIES.find((c) => c.name === name);
+
+// Class / year group within a level (set by the school on each student).
+export const CLASS_YEARS: { group: string; options: string[] }[] = [
+  { group: 'Primary', options: ['KG', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5'] },
+  { group: 'Middle school', options: ['Grade 6', 'Grade 7', 'Grade 8'] },
+  { group: 'O Level / IGCSE', options: ['O1', 'O2', 'O3'] },
+  { group: 'AS & A Level', options: ['A1', 'A2'] },
+  { group: 'Matric / FSc', options: ['Class 9', 'Class 10', 'Class 11', 'Class 12'] },
+  { group: 'Other', options: ['Short course', 'Adult learner'] },
+];
+
+// Phones are stored as digits with the country code (no '+').
+export const formatPhone = (digits?: string | null) => (digits ? `+${String(digits).replace(/^\+/, '')}` : '');
+export const whatsappLink = (digits?: string | null) =>
+  digits ? `https://wa.me/${String(digits).replace(/[^\d]/g, '')}` : '';

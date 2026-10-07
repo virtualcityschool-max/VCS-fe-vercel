@@ -338,6 +338,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       enrolledSubjectIds: mine.map((e: any) => sid(e.course?.id)),
       feeStatus: fee as any,
       guardianName: u.guardian?.name || '', guardianPhone: u.guardian?.phone || '',
+      guardianRelationship: u.guardian?.relationship || '', guardianEmail: u.guardian?.email || '',
+      classYear: u.class_year || '',
+      // Parent accounts linked to this student (approved links).
+      parentAccounts: raw.users
+        .filter((p: any) => p.role === 'parent' && (p.linked_children || []).some((c: any) => sid(c.id) === sid(u.id) && c.status === 'approved'))
+        .map((p: any) => ({ id: sid(p.id), name: getDisplayName(p) || p.email, email: p.email, phone: p.phone || '' })),
       latestEnrollmentDate: latest ? latest.slice(0, 10) : '',
       attendanceRate: att && att.marked ? Math.round((att.ok / att.marked) * 100) : (null as any),
       absencesThisWeek: att?.weekAbsent || 0,
