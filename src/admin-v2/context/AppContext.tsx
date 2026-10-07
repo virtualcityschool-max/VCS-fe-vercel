@@ -184,7 +184,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // ── Raw API data ──────────────────────────────────────────────────────────
   const [raw, setRaw] = useState<any>({
     users: [], courses: [], enrollments: [], categories: [], sessions: [], meetings: [], subs: { active: [], expired: [], needs_gumroad_cancellation: [] },
-    referrals: [], posts: [], testimonials: [], reviews: [], about: null, settings: null, analytics: null, attendance: [], grading: null,
+    referrals: [], posts: [], testimonials: [], reviews: [], catalog: [], about: null, settings: null, analytics: null, attendance: [], grading: null,
   });
   const [loaded, setLoaded] = useState<Record<string, boolean>>({});
   const pendingApprovals = useSelector((s: any) => s.approvals.pendingApprovals);
@@ -217,6 +217,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     posts: () => blogsService.getAllBlogs({ ordering: '-created_at' }),
     testimonials: () => testimonialsService.getAllTestimonials(),
     reviews: () => axiosInstance.get('/admin/approval-reviews/').then((r: any) => r.data),
+    catalog: () => axiosInstance.get('/courses/subjects/').then((r: any) => r.data),
     about: () => aboutService.get(),
     settings: () => axiosInstance.get('/messaging/platform-settings/').then((r: any) => r.data),
     analytics: () => adminService.getDashboardAnalytics(),
@@ -390,7 +391,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     studentCount: activeEnrollments.filter((e: any) => sid(e.course?.id) === sid(c.id)).length,
     weeklySessions: Math.round(((recentLoad.count.get(sid(c.id)) || 0) / 4) * 2) / 2,
     description: (c.description || '').replace(/<[^>]+>/g, ''), _raw: c,
+    catalogId: sid(c.subject), batchName: c.batch_name || '',
   } as any)), [raw.courses, recentLoad, activeEnrollments, levelName]);
+
+  // Catalogue: one entry per subject with its batches (each batch is a course above).
+  const catalog = useMemo(() => raw.catalog.map((x: any) => ({
+    id: sid(x.id), code: x.code || '', name: x.name, level: x.category_name || '', categoryId: x.category,
+    department: deptName(`${x.name} ${x.code || ''}`), description: x.description || '',
+    batches: (x.batches || []).map((b: any) => ({
+      id: sid(b.id), title: b.title, batchName: b.batch_name || '', teacherId: sid(b.instructor?.id), teacherName: b.instructor?.name || '',
+      status: b.status === 'published' ? 'Published' : 'Draft', priceUSD: b.is_paid ? Number(b.price) || 0 : 0, students: b.active_students || 0,
+      weeklySessions: Math.round(((recentLoad.count.get(sid(b.id)) || 0) / 4) * 2) / 2,
+    })),
+  })), [raw.catalog, recentLoad]);
 
   const levels: AcademicLevel[] = useMemo(() => raw.categories.map((c: any) => c.name as AcademicLevel), [raw.categories]);
 
@@ -649,6 +662,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return done;
   };
 
+  // ── Subjects & batches ──
+  const addBatch = (subjectId: string, b: { batchName: string; teacherId?: string; priceUSD?: number; publish?: boolean }) =>
+    run(() => axiosInstance.post(`/courses/subjects/${subjectId}/batches/`, {
+      batch_name: b.batchName, ...(b.teacherId ? { instructor_id: Number(b.teacherId) } : {}),
+      ...(b.priceUSD !== undefined ? { price: b.priceUSD, is_paid: b.priceUSD > 0 } : {}),
+      status: b.publish && b.teacherId ? 'published' : 'draft',
+    }), `Batch "${b.batchName}" added`, ['catalog', 'courses']);
+  const renameBatch = (courseId: string, name: string) =>
+    run(() => coursesService.updateCourse(Number(courseId), { batch_name: name.trim() }), name.trim() ? `Batch renamed to "${name.trim()}"` : 'Batch name cleared', ['catalog', 'courses']);
+  const moveBatch = (targetSubjectId: string, courseId: string, batchName?: string) =>
+    run(() => axiosInstance.post(`/courses/subjects/${targetSubjectId}/move-batch/`, { course_id: Number(courseId), ...(batchName ? { batch_name: batchName } : {}) }),
+      'Batch moved; its students, classes and marks moved with it', ['catalog', 'courses']);
+  const updateCatalogSubject = (subjectId: string, data: any) =>
+    run(() => axiosInstance.patch(`/courses/subjects/${subjectId}/`, data), 'Subject saved', ['catalog', 'courses']);
+
   // Rejected sign-ups stay on file: approve after all, or delete for good.
   const reconsiderAccount = async (u: any) => {
     const ok = await confirmAction({ title: `Approve ${getDisplayName(u) || u.email} after all?`, message: 'Their account becomes active and they receive the approval email.', confirmLabel: 'Approve', isDestructive: false });
@@ -787,12 +815,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const ok = await confirmAction({ title: 'Replace the current teacher?', message: `${c.title} is taught by ${getDisplayName(c.instructor) || 'another teacher'}. Saving replaces them.`, confirmLabel: 'Replace', isDestructive: false });
       if (!ok) return;
     }
-    await run(() => coursesService.assignInstructor(Number(subjectId), Number(teacherId)), 'Teacher allocated', ['courses']);
+    await run(() => coursesService.assignInstructor(Number(subjectId), Number(teacherId)), 'Teacher allocated', ['courses', 'catalog']);
   };
   const deallocateTeacherSubject = async (_teacherId: string, subjectId: string) => {
     const c: any = courseById.get(sid(subjectId));
     const ok = await confirmAction({ title: 'Remove this allocation?', message: `${c?.title || 'This subject'} will have no teacher until you assign one.`, confirmLabel: 'Remove' });
-    if (ok) await run(() => coursesService.updateCourse(Number(subjectId), { instructor_id: null }), 'Allocation removed', ['courses']);
+    if (ok) await run(() => coursesService.updateCourse(Number(subjectId), { instructor_id: null }), 'Allocation removed', ['courses', 'catalog']);
   };
   const bulkAssignSubject = async (teacherIds: string[], subjectId: string) => {
     if (teacherIds.length > 1) addToast('A subject has one teacher; the first selected teacher was used.', 'warning');
@@ -805,7 +833,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return run(() => coursesService.createCourse({
       title: s.name, description: s.description || s.name, ...(cat ? { category: cat.id } : {}), price: s.priceUSD || 0, is_paid: (s.priceUSD || 0) > 0,
       status: s.status === 'Published' ? 'published' : 'draft', ...(s.teacherId ? { instructor_id: Number(s.teacherId) } : {}),
-    }), `Subject created: ${s.name}`, ['courses']);
+      ...(s.batchName ? { batch_name: s.batchName } : {}),
+    }), `Subject created: ${s.name}`, ['courses', 'catalog']);
   };
   const updateSubject = (id: string) => navigate(`/admin/courses/${id}`);
   const toggleSubjectStatus = async (id: string) => {
@@ -813,7 +842,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (!c) return;
     const next = c.status === 'published' ? 'draft' : 'published';
     const ok = await confirmAction({ title: next === 'draft' ? 'Unpublish this subject?' : 'Publish this subject?', message: next === 'draft' ? `${c.title} will be hidden from the website.` : `${c.title} will appear on the website.`, confirmLabel: next === 'draft' ? 'Unpublish' : 'Publish', isDestructive: next === 'draft' });
-    if (ok) await run(() => coursesService.updateCourse(c.id, { status: next }), `${c.title} is now ${next}`, ['courses']);
+    if (ok) await run(() => coursesService.updateCourse(c.id, { status: next }), `${c.title} is now ${next}`, ['courses', 'catalog']);
   };
 
   const addLevel = (name: string) =>
@@ -916,7 +945,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     enrollments, addEnrollment, addEnrollments, removeEnrollment,
     teachers, addTeacher, updateTeacher, toggleTeacherStatus, bulkAssignSubject, allocateTeacherSubject, deallocateTeacherSubject,
     levelOptions: raw.categories, parents, addParent, addAdmin, allUsers, updateUserRole, toggleUserStatus,
-    subjects, addSubject, updateSubject, toggleSubjectStatus, levels, addLevel, removeLevel,
+    subjects, catalog, addBatch, renameBatch, moveBatch, updateCatalogSubject, addSubject, updateSubject, toggleSubjectStatus, levels, addLevel, removeLevel,
     sessions, addSession, updateSession, deleteSession, meetings, addMeeting,
     subscriptions, renewSubscription, cancelSubscription, referrals,
     posts, addPost, togglePostStatus, testimonials, addTestimonial, toggleTestimonialVisibility, deleteTestimonial,

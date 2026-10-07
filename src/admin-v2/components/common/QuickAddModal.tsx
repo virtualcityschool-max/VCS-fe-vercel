@@ -120,6 +120,7 @@ export const QuickAddModal: React.FC = () => {
   const [feeChoice, setFeeChoice] = useState('30');
   const [feeOther, setFeeOther] = useState('');
   const [subDescription, setSubDescription] = useState('');
+  const [subBatch, setSubBatch] = useState('');
 
   const resetAll = () => {
     setName(''); setEmail(''); setPassword(''); setGender(''); contact.reset();
@@ -127,7 +128,7 @@ export const QuickAddModal: React.FC = () => {
     setGuardianName(''); setGuardianRel('parent'); setGuardianPhone(''); setGuardianEmail('');
     setArea(''); setTeachLevels([]); setTeacherSubjects([]); setQualification(''); setExperience('');
     setChildEmails([]);
-    setSyllabus(''); setSubName(''); setSubCode(''); setSubLevel(''); setSubTeacherId(''); setFeeChoice('30'); setFeeOther(''); setSubDescription('');
+    setSyllabus(''); setSubName(''); setSubCode(''); setSubLevel(''); setSubTeacherId(''); setFeeChoice('30'); setFeeOther(''); setSubDescription(''); setSubBatch('');
   };
 
   useEffect(() => {
@@ -217,7 +218,7 @@ export const QuickAddModal: React.FC = () => {
       const code = subCode.trim();
       const title = code && !subName.includes(code) ? `${subName.trim()} (${code})` : subName.trim();
       ok = await addSubject({
-        name: title, level: subLevel, teacherId: subTeacherId, priceUSD: fee, description: subDescription,
+        name: title, level: subLevel, teacherId: subTeacherId, priceUSD: fee, description: subDescription, batchName: subBatch.trim(),
         status: subTeacherId ? 'Published' : 'Draft',
       });
     }
@@ -433,6 +434,9 @@ export const QuickAddModal: React.FC = () => {
                     <input type="text" value={subCode} onChange={(e) => setSubCode(e.target.value.replace(/[^\dA-Za-z]/g, ''))} placeholder="0580" className={`${inputCls} font-mono`} />
                   </Field>
                 </div>
+                <Field label="Batch name" hint="Optional, e.g. Morning. Add more batches later from the Subjects Catalogue.">
+                  <input type="text" value={subBatch} onChange={(e) => setSubBatch(e.target.value)} placeholder="Leave empty if this is the only batch" className={inputCls} />
+                </Field>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <Field label="Level" required>
                     <SelectInput required value={subLevel} onChange={setSubLevel} placeholder="Choose a level" options={levelOptions.map((l: any) => l.name)} />
