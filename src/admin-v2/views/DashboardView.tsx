@@ -118,13 +118,16 @@ export const DashboardView: React.FC = () => {
     classesWithoutTeacher.length +
     chronicAbsentees.length;
 
-  // Monthly fees of all active paid enrollments (same figure as /admin/dashboard/).
-  const monthlyRevenue =
-    analytics?.revenue?.total ??
-    enrollments.filter((e) => e.status === 'Active').reduce((sum, e) => sum + (e.monthlyFeeUSD || 0), 0);
-  const activeEnrollmentCount = enrollments.filter((e) => e.status === 'Active').length;
+  // Money actually received through Gumroad (completed charges), from the
+  // server. Listed prices are not income: free, test and admin-added
+  // enrolments never paid. null = the server does not report payments yet.
+  const rev: any = analytics?.revenue || {};
+  const hasPayments = rev.payments_30d !== undefined;
+  const receivedLast30: number | null = hasPayments ? Number(rev.total || 0) : null;
+  const paymentsLast30: number = rev.payments_30d || 0;
+  const receivedAllTime: number = Number(rev.received_all_time || 0);
 
-  // Monthly fees added by new enrollments, last 6 months (real enrollment dates).
+  // Gumroad payments received per month, last 6 months.
   const revenueChartData = (() => {
     const out: { key: string; month: string; revenue: number; count: number }[] = [];
     const d = new Date();
@@ -134,11 +137,11 @@ export const DashboardView: React.FC = () => {
       out.push({ key: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`, month: d.toLocaleString('en-US', { month: 'short' }), revenue: 0, count: 0 });
       d.setMonth(d.getMonth() + 1);
     }
-    enrollments.forEach((e) => {
-      const m = out.find((x) => (e.enrollmentDate || '').startsWith(x.key));
+    (rev.received_by_month || []).forEach((r: any) => {
+      const m = out.find((x) => x.key === r.month);
       if (!m) return;
-      m.count += 1;
-      m.revenue += e.monthlyFeeUSD || 0;
+      m.revenue = Number(r.amount) || 0;
+      m.count = r.payments || 0;
     });
     return out;
   })();
@@ -540,16 +543,16 @@ export const DashboardView: React.FC = () => {
         {/* KPI 3: Monthly revenue USD */}
         <div className="p-4 rounded-2xl border border-[#232D52] bg-[#121831] shadow-lg">
           <div className="flex items-center justify-between text-xs text-slate-400">
-            <span>Monthly Revenue</span>
-            <span className="text-[10px] text-emerald-400 font-mono">USD</span>
+            <span>Gumroad Payments</span>
+            <span className="text-[10px] text-emerald-400 font-mono">Last 30 days</span>
           </div>
           <div className="mt-2 text-2xl font-bold font-mono tabular-nums text-slate-100">
-            ${monthlyRevenue.toLocaleString()}
+            {receivedLast30 === null ? '—' : `$${receivedLast30.toLocaleString()}`}
           </div>
           <div className="mt-1.5 flex items-center gap-1.5 text-xs text-emerald-400">
             <DollarSign className="w-3.5 h-3.5" />
-            <span className="font-semibold">{activeEnrollmentCount}</span>
-            <span className="text-slate-400">active paid & free enrollments</span>
+            <span className="font-semibold">{paymentsLast30}</span>
+            <span className="text-slate-400">payments · ${receivedAllTime.toLocaleString()} all time</span>
           </div>
         </div>
 
@@ -727,7 +730,7 @@ export const DashboardView: React.FC = () => {
                       <div className="flex items-center gap-3 font-mono">
                         <span className="font-semibold text-slate-300">{sub.studentCount} students</span>
                         <span className="text-emerald-400 font-bold">
-                          {sub.priceUSD > 0 ? `$${(sub.studentCount * sub.priceUSD).toLocaleString()}/mo` : 'Free'}
+                          {sub.priceUSD > 0 ? `$${sub.priceUSD.toLocaleString()}/mo listed` : 'Free'}
                         </span>
                       </div>
                     </div>
@@ -757,9 +760,9 @@ export const DashboardView: React.FC = () => {
             <div className="flex items-center justify-between pb-3 border-b border-[#1E2648]">
               <div className="flex items-center gap-2">
                 <DollarSign className="w-4 h-4 text-emerald-400" />
-                <h3 className="text-sm font-bold text-slate-100">New Monthly Fees (Last 6 Months)</h3>
+                <h3 className="text-sm font-bold text-slate-100">Gumroad Payments (Last 6 Months)</h3>
               </div>
-              <span className="text-xs font-mono font-bold text-emerald-400">From new enrollments</span>
+              <span className="text-xs font-mono font-bold text-emerald-400">Money received</span>
             </div>
 
             <div className="h-56 mt-4">
@@ -781,7 +784,7 @@ export const DashboardView: React.FC = () => {
                       color: '#F8FAFC',
                       fontSize: '12px',
                     }}
-                    formatter={(val: any, _n: any, item: any) => [`$${Number(val).toLocaleString()}/mo · ${item?.payload?.count || 0} enrollments`, 'Fees added']}
+                    formatter={(val: any, _n: any, item: any) => [`$${Number(val).toLocaleString()} · ${item?.payload?.count || 0} payments`, 'Received']}
                   />
                   <Bar dataKey="revenue" fill="#6D5BFF" radius={[6, 6, 0, 0]} />
                 </BarChart>
@@ -790,7 +793,7 @@ export const DashboardView: React.FC = () => {
           </div>
 
           <div className="pt-4 mt-2 border-t border-[#1E2648] flex items-center justify-between text-xs text-slate-400">
-            <span>Total monthly fees now: <strong className="text-slate-200">${Number(monthlyRevenue).toLocaleString()}</strong></span>
+            <span>Received all time: <strong className="text-slate-200">${receivedAllTime.toLocaleString()}</strong></span>
             <button
               onClick={() => setCurrentView('enrollments')}
               className="text-indigo-400 hover:text-indigo-300 font-semibold"

@@ -173,7 +173,7 @@ export const DetailDrawer: React.FC = () => {
                     <div className="mt-1">
                       <StatusPill status={data.feeStatus || 'Paid'} />
                     </div>
-                    <div className="text-xs text-slate-500 mt-0.5">Monthly fees: ${data.totalPaidUSD || 0}</div>
+                    <div className="text-xs text-slate-500 mt-0.5">Listed fees for active subjects: ${data.totalPaidUSD || 0}</div>
                   </div>
                   <div className="p-3.5 rounded-xl border border-[#232D52] bg-[#0E1428]">
                     <div className="text-xs text-slate-400">Attendance Rate</div>

@@ -558,7 +558,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     approvals.forEach((a: any) => list.push({ id: `a-${a.id}`, title: a.type === 'account_signup' ? 'Account approval pending' : a.type === 'parent_link' ? 'Parent link requested' : 'New enrollment request', description: `${a.requesterName} · ${a.targetEntityName}`, at: a._raw?.date_joined || a._raw?.enrolled_at || a._raw?.created_at || a._raw?.requested_at, category: a.type === 'enrollment_request' ? 'enrollment' : 'approval' }));
     raw.enrollments.slice().sort((x: any, y: any) => new Date(y.enrolled_at).getTime() - new Date(x.enrolled_at).getTime()).slice(0, 10)
       .forEach((e: any) => list.push({ id: `e-${e.id}`, title: 'Student enrolled', description: `${e.student?.username} enrolled in ${e.course?.title}`, at: e.enrolled_at, category: 'enrollment' }));
-    raw.subs.active?.filter((r: any) => r.last_charge_at).forEach((r: any) => list.push({ id: `p-${r.enrollment_id}`, title: 'Fee recorded', description: `${r.student?.name} · ${r.course?.title}`, at: r.last_charge_at, category: 'payment' }));
+    raw.subs.active?.filter((r: any) => r.last_charge_at).forEach((r: any) => list.push({ id: `p-${r.enrollment_id}`, title: r.enrollment_source === 'gumroad' ? 'Gumroad payment' : 'Access period started', description: `${r.student?.name} · ${r.course?.title}`, at: r.last_charge_at, category: 'payment' }));
     return list.filter((x) => x.at).sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime()).slice(0, 30)
       .map((x) => ({ ...x, timestamp: relTime(x.at), actorName: 'VCS' }));
   }, [approvals, raw.enrollments, raw.subs]);
