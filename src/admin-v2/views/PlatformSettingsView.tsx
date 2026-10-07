@@ -36,7 +36,7 @@ export const PlatformSettingsView: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 max-w-[950px] mx-auto animate-in fade-in duration-150 pb-12">
+    <div className="space-y-6 max-w-[1240px] mx-auto animate-in fade-in duration-150 pb-12">
       <PageHeader
         title="Platform Settings & Regional Timezone"
         subtitle="Configure system-wide academic automation rules, quiz parameters, and master timezone clock."

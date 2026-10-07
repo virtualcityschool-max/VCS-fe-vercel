@@ -149,7 +149,7 @@ export const SubscriptionsView: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-6 max-w-[1400px] mx-auto animate-in fade-in duration-150">
+    <div className="space-y-6 w-full animate-in fade-in duration-150">
       <PageHeader
         title="Subscriptions"
         subtitle="Manage student recurring seats, gateway renewal sync, and expired access windows."

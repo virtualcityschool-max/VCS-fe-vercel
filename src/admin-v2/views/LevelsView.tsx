@@ -18,7 +18,7 @@ export const LevelsView: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 max-w-[1000px] mx-auto animate-in fade-in duration-150">
+    <div className="space-y-6 w-full animate-in fade-in duration-150">
       <PageHeader
         title="Curriculum Levels"
         subtitle="Manage academic stages and certification tiers across Cambridge International and National tracks."

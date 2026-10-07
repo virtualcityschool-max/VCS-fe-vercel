@@ -21,7 +21,7 @@ export const VlogsView: React.FC = () => {
   });
 
   return (
-    <div className="space-y-6 max-w-[1400px] mx-auto animate-in fade-in duration-150">
+    <div className="space-y-6 w-full animate-in fade-in duration-150">
       <PageHeader
         title="Vlogs & Video Masterclasses"
         subtitle="Publish Cambridge past paper walk-throughs, laboratory demonstrations, and recorded webinars."

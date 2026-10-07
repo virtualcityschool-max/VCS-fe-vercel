@@ -77,3 +77,15 @@ export const DEPARTMENT_CONFIG: Record<
     hex: '#E11D48',
   },
 };
+
+// Symbol shown next to each subject and department.
+import { Atom, BookOpen, Calculator, Dna, FlaskConical, GraduationCap, Monitor, type LucideIcon } from 'lucide-react';
+export const DEPARTMENT_ICONS: Record<DepartmentName, LucideIcon> = {
+  Mathematics: Calculator,
+  Physics: Atom,
+  Chemistry: FlaskConical,
+  Biology: Dna,
+  'English & Urdu': BookOpen,
+  'Computer Science': Monitor,
+  General: GraduationCap,
+};

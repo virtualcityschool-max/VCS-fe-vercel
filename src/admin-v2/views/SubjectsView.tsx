@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { subjectChip } from '../utils';
 import { useApp } from '../context/AppContext';
 import { PageHeader } from '../components/common/PageHeader';
 import { FilterBar, FilterConfig, SortOption } from '../components/common/FilterBar';
@@ -7,7 +6,7 @@ import { DataTable, Column } from '../components/common/DataTable';
 import { StatusPill } from '../components/common/StatusPill';
 import { Subject, DepartmentName, AcademicLevel } from '../types';
 import { BookOpen, Plus, Sparkles, Users } from 'lucide-react';
-import { DEPARTMENT_CONFIG } from '../data/departments';
+import { DEPARTMENT_CONFIG, DEPARTMENT_ICONS } from '../data/departments';
 
 export const SubjectsView: React.FC = () => {
   const {
@@ -31,21 +30,6 @@ export const SubjectsView: React.FC = () => {
 
   const filters: FilterConfig[] = [
     {
-      id: 'department',
-      label: 'Department',
-      value: deptFilter,
-      onChange: setDeptFilter,
-      options: [
-        { label: 'Mathematics', value: 'Mathematics', count: subjects.filter((s) => s.department === 'Mathematics').length },
-        { label: 'Physics', value: 'Physics', count: subjects.filter((s) => s.department === 'Physics').length },
-        { label: 'Chemistry', value: 'Chemistry', count: subjects.filter((s) => s.department === 'Chemistry').length },
-        { label: 'Biology', value: 'Biology', count: subjects.filter((s) => s.department === 'Biology').length },
-        { label: 'Computer Science', value: 'Computer Science', count: subjects.filter((s) => s.department === 'Computer Science').length },
-        { label: 'English & Urdu', value: 'English & Urdu', count: subjects.filter((s) => s.department === 'English & Urdu').length },
-        { label: 'General', value: 'General', count: subjects.filter((s) => s.department === 'General').length },
-      ],
-    },
-    {
       id: 'level',
       label: 'Level',
       value: levelFilter,
@@ -59,7 +43,8 @@ export const SubjectsView: React.FC = () => {
   ];
 
   const sortOptions: SortOption[] = [
-    { label: 'Course Code', value: 'code-asc' },
+    { label: 'Code', value: 'code-asc' },
+    { label: 'Name (A-Z)', value: 'name-asc' },
     { label: 'Student Count (Highest)', value: 'students-desc' },
     { label: 'Price (Lowest)', value: 'price-asc' },
   ];
@@ -81,7 +66,10 @@ export const SubjectsView: React.FC = () => {
   });
 
   if (currentSort === 'code-asc') {
-    filtered.sort((a, b) => a.code.localeCompare(b.code));
+    // Coded (Cambridge) subjects first in code order, then the rest by name.
+    filtered.sort((a, b) => (a.code ? 0 : 1) - (b.code ? 0 : 1) || a.code.localeCompare(b.code) || a.name.localeCompare(b.name));
+  } else if (currentSort === 'name-asc') {
+    filtered.sort((a, b) => a.name.localeCompare(b.name));
   } else if (currentSort === 'students-desc') {
     filtered.sort((a, b) => b.studentCount - a.studentCount);
   } else if (currentSort === 'price-asc') {
@@ -90,34 +78,46 @@ export const SubjectsView: React.FC = () => {
 
   const columns: Column<Subject>[] = [
     {
-      header: 'Subject & Cambridge Code',
-      cell: (row) => (
-        <div className="flex items-center gap-3">
-          <div className="px-2.5 py-1.5 rounded-lg bg-indigo-500/15 border border-indigo-500/30 text-indigo-400 font-mono font-bold text-xs shrink-0">
-            {subjectChip(row)}
-          </div>
-          <div className="truncate">
-            <div className="font-semibold text-slate-100">{row.name}</div>
-            <div className="text-[11px] text-slate-400 flex items-center gap-1.5 mt-0.5">
-              <span>{row.weeklySessions} sessions/week</span>
+      header: 'Code',
+      cell: (row) =>
+        row.code ? (
+          <span className="font-mono text-sm font-bold text-sky-400">{row.code}</span>
+        ) : (
+          <span className="text-slate-600">—</span>
+        ),
+    },
+    {
+      header: 'Subject',
+      cell: (row) => {
+        const dept = DEPARTMENT_CONFIG[row.department as DepartmentName] || DEPARTMENT_CONFIG.General;
+        const Icon = DEPARTMENT_ICONS[row.department as DepartmentName] || DEPARTMENT_ICONS.General;
+        return (
+          <div className="flex items-center gap-3 min-w-[240px]">
+            <div
+              className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border"
+              style={{ backgroundColor: `${dept.hex}1f`, borderColor: `${dept.hex}40`, color: dept.hex }}
+            >
+              <Icon className="w-4 h-4" />
+            </div>
+            <div className="min-w-0">
+              <div className="text-sm font-semibold text-slate-100 truncate">{row.name}</div>
+              <div className="text-[11px] text-slate-500">{row.weeklySessions} sessions/week</div>
             </div>
           </div>
-        </div>
-      ),
+        );
+      },
     },
     {
       header: 'Department',
       cell: (row) => {
         const dept = DEPARTMENT_CONFIG[row.department as DepartmentName] || DEPARTMENT_CONFIG.General;
+        const Icon = DEPARTMENT_ICONS[row.department as DepartmentName] || DEPARTMENT_ICONS.General;
         return (
           <span
-            className="px-2.5 py-0.5 rounded-full text-xs font-medium border"
-            style={{
-              backgroundColor: `${dept.hex}15`,
-              color: dept.hex,
-              borderColor: `${dept.hex}30`,
-            }}
+            className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium border whitespace-nowrap"
+            style={{ backgroundColor: `${dept.hex}15`, color: dept.hex, borderColor: `${dept.hex}30` }}
           >
+            <Icon className="w-3 h-3" />
             {row.department}
           </span>
         );
@@ -126,7 +126,7 @@ export const SubjectsView: React.FC = () => {
     {
       header: 'Curriculum Level',
       cell: (row) => (
-        <span className="font-mono text-xs text-slate-300 font-medium">{row.level}</span>
+        <span className="text-xs text-slate-300">{row.level || '—'}</span>
       ),
     },
     {
@@ -164,10 +164,10 @@ export const SubjectsView: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-6 max-w-[1400px] mx-auto animate-in fade-in duration-150">
+    <div className="space-y-6 w-full animate-in fade-in duration-150">
       <PageHeader
         title="Subjects Catalogue"
-        subtitle="105 Cambridge International & national curriculum courses across 7 departments."
+        subtitle={`${subjects.length} Cambridge and national curriculum subjects across ${new Set(subjects.map((x) => x.department)).size} departments.`}
         primaryAction={{
           label: 'New subject',
           onClick: () => openQuickAdd('subject'),
@@ -201,6 +201,29 @@ export const SubjectsView: React.FC = () => {
             </span>
           </button>
         ))}
+      </div>
+
+      {/* Department quick filter */}
+      <div className="flex flex-wrap items-center gap-2">
+        {[{ name: 'all', label: 'All departments', count: subjects.length },
+          ...(Object.keys(DEPARTMENT_ICONS) as DepartmentName[]).map((d) => ({ name: d, label: d, count: subjects.filter((x) => x.department === d).length })).filter((d) => d.count > 0),
+        ].map((d) => {
+          const active = deptFilter === d.name;
+          const Icon = d.name === 'all' ? null : DEPARTMENT_ICONS[d.name as DepartmentName];
+          const hex = d.name === 'all' ? '#6D5BFF' : (DEPARTMENT_CONFIG[d.name as DepartmentName] || DEPARTMENT_CONFIG.General).hex;
+          return (
+            <button
+              key={d.name}
+              onClick={() => setDeptFilter(d.name)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-colors"
+              style={active ? { backgroundColor: hex, borderColor: hex, color: '#fff' } : { backgroundColor: `${hex}12`, borderColor: `${hex}35`, color: hex }}
+            >
+              {Icon && <Icon className="w-3.5 h-3.5" />}
+              {d.label}
+              <span className={`font-mono text-[10px] px-1.5 rounded ${active ? 'bg-white/20' : 'bg-black/20'}`}>{d.count}</span>
+            </button>
+          );
+        })}
       </div>
 
       <FilterBar

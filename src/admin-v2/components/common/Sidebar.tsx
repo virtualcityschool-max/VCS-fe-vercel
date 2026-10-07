@@ -105,26 +105,31 @@ export const Sidebar: React.FC = () => {
           badge: pendingApprovalsCount > 0 ? pendingApprovalsCount : undefined,
           badgeColor: 'bg-rose-500 text-white',
         },
-        { id: 'students', label: 'Students', icon: GraduationCap },
+        { id: 'students', label: 'Students Register', icon: GraduationCap },
         { id: 'enrollments', label: 'Student Enrollments', icon: UserCheck },
       ],
     },
     {
-      label: 'ACADEMICS',
+      label: 'TEACHING',
       items: [
         { id: 'subjects', label: 'Subjects', icon: BookOpen },
-        { id: 'teachers', label: 'Teachers', icon: Users },
+        { id: 'teachers', label: 'Teachers Register', icon: Users },
         { id: 'teacher-allocations', label: 'Teacher Allocations', icon: GitFork },
         { id: 'timetable', label: 'Timetable', icon: Calendar },
       ],
     },
     {
-      label: 'PTM',
+      label: 'RECORDS',
       items: [
-        { id: 'ptm-meetings', label: 'PTM Meetings', icon: CalendarClock },
-        { id: 'parents', label: 'Parents', icon: HeartHandshake },
         { id: 'attendance', label: 'Attendance', icon: ClipboardCheck },
         { id: 'evaluations', label: 'Evaluations', icon: Award },
+      ],
+    },
+    {
+      label: 'PARENTS',
+      items: [
+        { id: 'parents', label: 'Parents Register', icon: HeartHandshake },
+        { id: 'ptm-meetings', label: 'PTM Meetings', icon: CalendarClock },
       ],
     },
     {
@@ -141,11 +146,12 @@ export const Sidebar: React.FC = () => {
       ],
     },
     {
-      label: 'CONTENT',
+      label: 'WEBSITE',
       items: [
         { id: 'blogs', label: 'Blogs', icon: FileText },
         { id: 'vlogs', label: 'Vlogs', icon: Video },
         { id: 'testimonials', label: 'Testimonials', icon: MessageSquare },
+        { id: 'about', label: 'About Us', icon: Globe },
       ],
     },
     {
@@ -153,7 +159,6 @@ export const Sidebar: React.FC = () => {
       items: [
         { id: 'admin-users', label: 'Admin Users', icon: ShieldCheck },
         { id: 'levels', label: 'Levels', icon: Layers },
-        { id: 'about', label: 'About Us', icon: Globe },
         { id: 'settings', label: 'Platform Settings', icon: Sliders },
       ],
     },

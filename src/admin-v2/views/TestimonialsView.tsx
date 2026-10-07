@@ -35,7 +35,7 @@ export const TestimonialsView: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 max-w-[1400px] mx-auto animate-in fade-in duration-150">
+    <div className="space-y-6 w-full animate-in fade-in duration-150">
       <PageHeader
         title="Homepage Testimonials"
         subtitle="Manage verified student and parent recommendations displayed on the public VCS portal."

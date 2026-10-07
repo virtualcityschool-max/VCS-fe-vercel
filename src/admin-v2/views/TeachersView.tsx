@@ -175,9 +175,9 @@ export const TeachersView: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-6 max-w-[1400px] mx-auto animate-in fade-in duration-150">
+    <div className="space-y-6 w-full animate-in fade-in duration-150">
       <PageHeader
-        title="Teachers Directory"
+        title="Teachers Register"
         subtitle="Manage faculty across 7 academic departments, weekly class loads, and standby talent pool."
         primaryAction={{
           label: 'New teacher',

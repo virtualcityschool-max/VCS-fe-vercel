@@ -16,7 +16,7 @@ export const AboutPageView: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 max-w-[1000px] mx-auto animate-in fade-in duration-150 pb-20">
+    <div className="space-y-6 max-w-[1240px] mx-auto animate-in fade-in duration-150 pb-20">
       <PageHeader
         title="About Page Content CMS"
         subtitle="Manage the public school identity, vision statement, international mission, and contact information."
@@ -175,7 +175,7 @@ export const AboutPageView: React.FC = () => {
 
         {/* Sticky Save Bar */}
         <div className="fixed bottom-0 inset-x-0 z-20 bg-[#0E1428]/95 backdrop-blur-md border-t border-[#1E2648] py-3.5 px-6">
-          <div className="max-w-[1000px] mx-auto flex items-center justify-between">
+          <div className="max-w-[1240px] mx-auto flex items-center justify-between">
             <span className="text-xs text-slate-400">All modifications immediately update live landing page</span>
             <div className="flex items-center gap-3">
               <button

@@ -89,7 +89,7 @@ export const AdminUsersView: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-6 max-w-[1400px] mx-auto animate-in fade-in duration-150">
+    <div className="space-y-6 w-full animate-in fade-in duration-150">
       <PageHeader
         title="Admin Users & Role Governance"
         subtitle="Manage administrative credentials, security roles, elevated permissions, and account activation."

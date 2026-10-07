@@ -173,7 +173,7 @@ export const DashboardView: React.FC = () => {
   const maxStudents = Math.max(...topSubjects.map((s) => s.studentCount), 1);
 
   return (
-    <div className="space-y-6 pb-12 max-w-[1400px] mx-auto animate-in fade-in duration-150">
+    <div className="space-y-6 pb-12 w-full animate-in fade-in duration-150">
       {/* 0. Greeting Bar: "Good afternoon, Admin" + date + time + Quick add ▾ */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl border border-[#232D52] bg-gradient-to-r from-[#121831] via-[#10152c] to-[#121831] shadow-xl">
         <div>
