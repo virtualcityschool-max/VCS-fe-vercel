@@ -7,6 +7,15 @@ import { EnrollmentRecord } from '../types';
 import { Plus, Trash2 } from 'lucide-react';
 import { Field, MultiPick, SelectInput } from '../components/common/FormControls';
 
+// Alternating accents so neighbouring students are easy to tell apart.
+const TONES = [
+  { border: 'border-[#6D5BFF]', avatar: 'bg-[#6D5BFF]/25 text-[#C9C2FF] border border-[#6D5BFF]/40' },
+  { border: 'border-emerald-400', avatar: 'bg-emerald-500/20 text-emerald-200 border border-emerald-400/40' },
+  { border: 'border-amber-400', avatar: 'bg-amber-500/20 text-amber-200 border border-amber-400/40' },
+  { border: 'border-sky-400', avatar: 'bg-sky-500/20 text-sky-200 border border-sky-400/40' },
+  { border: 'border-pink-400', avatar: 'bg-pink-500/20 text-pink-200 border border-pink-400/40' },
+];
+
 export const StudentEnrollmentsView: React.FC = () => {
   const {
     enrollments,
@@ -148,23 +157,24 @@ export const StudentEnrollmentsView: React.FC = () => {
         {pageGroups.length === 0 && (
           <div className="py-12 text-center text-xs text-slate-400">No enrolments match these filters.</div>
         )}
-        {pageGroups.map(({ studentId, student, rows }) => {
+        {pageGroups.map(({ studentId, student, rows }, gi) => {
+          const tone = TONES[gi % TONES.length];
           const active = rows.filter((r) => r.status === 'Active');
           const listed = active.reduce((sum, r) => sum + (r.monthlyFeeUSD || 0), 0);
           const attention = rows.filter((r) => ['Expiring Soon', 'Overdue', 'Access expired', 'Pending'].includes(r.feeStatus as string)).length;
           return (
             <div key={studentId} className="border-b border-[#1E2648] last:border-b-0">
               {/* Student */}
-              <div className="flex flex-wrap items-center gap-3 px-4 py-3 bg-[#0E1428]/60">
+              <div className={`flex flex-wrap items-center gap-3 px-4 py-3 bg-[#18204A] border-l-4 ${tone.border}`}>
                 <button
                   onClick={() => student && openDetailDrawer('student', student)}
                   className="flex items-center gap-3 min-w-0 flex-1 text-left group"
                 >
-                  <div className="w-9 h-9 rounded-xl bg-indigo-500/15 border border-indigo-500/25 text-indigo-300 flex items-center justify-center font-bold text-sm shrink-0">
+                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 ${tone.avatar}`}>
                     {(student?.name || 'S')[0].toUpperCase()}
                   </div>
                   <div className="min-w-0">
-                    <div className="font-semibold text-slate-100 group-hover:text-white truncate">{student?.name || 'Student'}</div>
+                    <div className="text-[15px] font-bold text-[#C9C2FF] group-hover:text-white truncate">{student?.name || 'Student'}</div>
                     <div className="text-[11px] text-slate-400 font-mono truncate">
                       Roll {student?.rollNo ?? '—'}{student?.level ? ` · ${student.level}` : ''}
                     </div>
@@ -194,8 +204,8 @@ export const StudentEnrollmentsView: React.FC = () => {
                     <div key={r.id} className="grid grid-cols-12 items-center gap-3 pl-16 pr-4 py-2.5 text-xs hover:bg-[#1A2346]/30">
                       <div className="col-span-12 md:col-span-5 min-w-0">
                         <div className="flex items-center gap-2 min-w-0">
-                          {subject?.code && <span className="font-mono font-bold text-indigo-400">{subject.code}</span>}
-                          <span className="font-semibold text-slate-200 truncate">{subject?.name || 'Subject'}</span>
+                          {subject?.code && <span className="font-mono font-bold text-sky-400">{subject.code}</span>}
+                          <span className="font-medium text-slate-300 truncate">{subject?.name || 'Subject'}</span>
                         </div>
                         <div className="text-[11px] text-slate-500 truncate">{[subject?.department, subject?.level].filter(Boolean).join(' · ')}</div>
                       </div>
