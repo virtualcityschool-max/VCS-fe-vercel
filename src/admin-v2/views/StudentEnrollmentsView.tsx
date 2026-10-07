@@ -155,16 +155,16 @@ export const StudentEnrollmentsView: React.FC = () => {
           return (
             <div key={studentId} className="border-b border-[#1E2648] last:border-b-0">
               {/* Student */}
-              <div className="flex flex-wrap items-center gap-3 px-4 py-3 bg-gradient-to-r from-[#6D5BFF]/20 via-[#6D5BFF]/[0.07] to-transparent border-l-4 border-[#6D5BFF]">
+              <div className="flex flex-wrap items-center gap-3 px-4 py-3 bg-gradient-to-r from-sky-500/[0.16] via-sky-500/[0.05] to-transparent border-l-4 border-sky-400">
                 <button
                   onClick={() => student && openDetailDrawer('student', student)}
                   className="flex items-center gap-3 min-w-0 flex-1 text-left group"
                 >
-                  <div className="w-9 h-9 rounded-xl bg-[#6D5BFF] text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-md shadow-indigo-900/40">
+                  <div className="w-9 h-9 rounded-xl bg-sky-400 text-[#0B1020] flex items-center justify-center font-bold text-sm shrink-0 shadow-md shadow-sky-900/40">
                     {(student?.name || 'S')[0].toUpperCase()}
                   </div>
                   <div className="min-w-0">
-                    <div className="text-base font-bold text-white group-hover:text-[#C9C2FF] truncate">{student?.name || 'Student'}</div>
+                    <div className="text-base font-bold text-sky-300 group-hover:text-sky-200 truncate">{student?.name || 'Student'}</div>
                     <div className="text-[11px] text-slate-400 font-mono truncate">
                       Roll {student?.rollNo ?? '—'}{student?.level ? ` · ${student.level}` : ''}
                     </div>
