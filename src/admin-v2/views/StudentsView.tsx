@@ -105,13 +105,20 @@ export const StudentsView: React.FC = () => {
   if (currentSort === 'name-asc') {
     filtered.sort((a, b) => a.name.localeCompare(b.name));
   } else if (currentSort === 'roll-asc') {
-    filtered.sort((a, b) => a.rollNo.localeCompare(b.rollNo));
+    // Numeric, so roll 37 comes before 100; students without a roll number go last.
+    filtered.sort((a, b) => (parseInt(a.rollNo, 10) || Infinity) - (parseInt(b.rollNo, 10) || Infinity));
   } else if (currentSort === 'att-desc') {
     filtered.sort((a, b) => b.attendanceRate - a.attendanceRate);
   }
 
   // Table Columns
   const columns: Column<Student>[] = [
+    {
+      header: 'Roll #',
+      cell: (row) => (
+        <span className="font-mono text-xs text-indigo-300 font-semibold">{row.rollNo}</span>
+      ),
+    },
     {
       header: 'Student',
       cell: (row) => (
@@ -124,12 +131,6 @@ export const StudentsView: React.FC = () => {
             <div className="text-[11px] text-slate-400 font-mono truncate">{row.email}</div>
           </div>
         </div>
-      ),
-    },
-    {
-      header: 'Roll #',
-      cell: (row) => (
-        <span className="font-mono text-xs text-indigo-300 font-semibold">{row.rollNo}</span>
       ),
     },
     {
@@ -197,7 +198,7 @@ export const StudentsView: React.FC = () => {
   return (
     <div className="space-y-6 max-w-[1400px] mx-auto animate-in fade-in duration-150">
       <PageHeader
-        title="Student Roster"
+        title="Student Log"
         subtitle={`Managing ${students.length} active Cambridge and national curriculum candidates.`}
         primaryAction={{
           label: 'Enroll student',
