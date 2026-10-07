@@ -64,13 +64,9 @@ export const StudentsView: React.FC = () => {
       label: 'Fee Status',
       value: feeFilter,
       onChange: setFeeFilter,
-      options: [
-        { label: 'Paid', value: 'Paid', count: students.filter((s) => s.feeStatus === 'Paid').length },
-        { label: 'Expiring Soon', value: 'Expiring Soon', count: students.filter((s) => s.feeStatus === 'Expiring Soon').length },
-        { label: 'Overdue', value: 'Overdue', count: students.filter((s) => s.feeStatus === 'Overdue').length },
-        { label: 'Free Access', value: 'Free Access', count: students.filter((s) => (s.feeStatus as string) === 'Free Access').length },
-        { label: 'Not Enrolled', value: 'Not Enrolled', count: students.filter((s) => (s.feeStatus as string) === 'Not Enrolled').length },
-      ],
+      options: ['Paid', 'Access active', 'Expiring Soon', 'Overdue', 'Access expired', 'Free Access', 'Not Enrolled']
+        .map((v) => ({ label: v === 'Paid' ? 'Paid (Gumroad)' : v, value: v, count: students.filter((s) => (s.feeStatus as string) === v).length }))
+        .filter((o) => o.count > 0),
     },
     {
       id: 'status',

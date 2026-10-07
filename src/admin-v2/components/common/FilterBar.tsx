@@ -82,7 +82,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                 onChange={(e) => filter.onChange(e.target.value)}
                 className="appearance-none pl-3.5 pr-8 py-2 text-xs font-medium rounded-xl border border-[#232D52] bg-[#121831] text-slate-200 hover:border-slate-600 focus:outline-none focus:border-indigo-500 transition-colors cursor-pointer"
               >
-                <option value="all">All {filter.label}s</option>
+                <option value="all">All {/(s|us)$/i.test(filter.label) ? filter.label : `${filter.label}s`}</option>
                 {filter.options.map((opt) => (
                   <option key={opt.value} value={opt.value}>
                     {opt.label} {opt.count !== undefined ? `(${opt.count})` : ''}

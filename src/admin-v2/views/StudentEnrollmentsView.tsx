@@ -1,12 +1,10 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { PageHeader } from '../components/common/PageHeader';
 import { FilterBar, FilterConfig, SortOption } from '../components/common/FilterBar';
-import { DataTable, Column } from '../components/common/DataTable';
 import { StatusPill } from '../components/common/StatusPill';
-import { EnrollmentRecord, DepartmentName } from '../types';
-import { UserCheck, Plus, BookOpen, Layers, DollarSign, Calendar, Sparkles } from 'lucide-react';
-import { DEPARTMENT_CONFIG } from '../data/departments';
+import { EnrollmentRecord } from '../types';
+import { Plus, Trash2 } from 'lucide-react';
 import { Field, MultiPick, SelectInput } from '../components/common/FormControls';
 
 export const StudentEnrollmentsView: React.FC = () => {
@@ -70,8 +68,9 @@ export const StudentEnrollmentsView: React.FC = () => {
   ];
 
   const sortOptions: SortOption[] = [
-    { label: 'Latest Date', value: 'date-desc' },
-    { label: 'Fee (Highest)', value: 'fee-desc' },
+    { label: 'Latest enrolment', value: 'date-desc' },
+    { label: 'Name (A-Z)', value: 'name-asc' },
+    { label: 'Most subjects', value: 'count-desc' },
   ];
 
   const filtered = enrollments.filter((record) => {
@@ -91,11 +90,27 @@ export const StudentEnrollmentsView: React.FC = () => {
     return matchSearch && matchStatus && matchDept;
   });
 
-  if (currentSort === 'date-desc') {
-    filtered.sort((a, b) => b.enrollmentDate.localeCompare(a.enrollmentDate));
-  } else if (currentSort === 'fee-desc') {
-    filtered.sort((a, b) => b.monthlyFeeUSD - a.monthlyFeeUSD);
-  }
+  // One group per student: the student once, then each of their subjects.
+  const groups = useMemo(() => {
+    const byStudent = new Map<string, EnrollmentRecord[]>();
+    filtered.forEach((r) => byStudent.set(r.studentId, [...(byStudent.get(r.studentId) || []), r]));
+    const list = [...byStudent.entries()].map(([studentId, rows]) => ({
+      studentId,
+      student: students.find((st) => st.id === studentId),
+      rows: [...rows].sort((a, b) => b.enrollmentDate.localeCompare(a.enrollmentDate)),
+      latest: rows.reduce((m, r) => (r.enrollmentDate > m ? r.enrollmentDate : m), ''),
+    }));
+    if (currentSort === 'name-asc') list.sort((a, b) => (a.student?.name || '').localeCompare(b.student?.name || ''));
+    else if (currentSort === 'count-desc') list.sort((a, b) => b.rows.length - a.rows.length);
+    else list.sort((a, b) => b.latest.localeCompare(a.latest));
+    return list;
+  }, [filtered, students, currentSort]);
+
+  const PAGE = 10;
+  const [page, setPage] = useState(1);
+  useEffect(() => setPage(1), [searchQuery, statusFilter, deptFilter, currentSort]);
+  const pages = Math.max(1, Math.ceil(groups.length / PAGE));
+  const pageGroups = groups.slice((Math.min(page, pages) - 1) * PAGE, Math.min(page, pages) * PAGE);
 
   const handleEnrollSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -106,74 +121,6 @@ export const StudentEnrollmentsView: React.FC = () => {
       setPickedSubjects([]);
     }
   };
-
-  const columns: Column<EnrollmentRecord>[] = [
-    {
-      header: 'Student Candidate',
-      cell: (row) => {
-        const student = students.find((s) => s.id === row.studentId);
-        return (
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-indigo-500/15 border border-indigo-500/25 text-indigo-400 flex items-center justify-center font-bold text-xs shrink-0">
-              {student ? student.name[0] : 'S'}
-            </div>
-            <div>
-              <div className="font-semibold text-slate-100">{student?.name || 'Student'}</div>
-              <div className="text-[11px] text-slate-400 font-mono">{student?.rollNo} · {student?.level}</div>
-            </div>
-          </div>
-        );
-      },
-    },
-    {
-      header: 'Enrolled Course & Code',
-      cell: (row) => {
-        const subject = subjects.find((s) => s.id === row.subjectId);
-        const dept = DEPARTMENT_CONFIG[subject?.department as DepartmentName] || DEPARTMENT_CONFIG.General;
-        return (
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-xs font-bold text-indigo-400">{subject?.code || ''}</span>
-              <span className="font-semibold text-slate-200">{subject?.name}</span>
-            </div>
-            <div className="flex items-center gap-2 text-[11px] text-slate-400 mt-0.5">
-              <span>{subject?.department}</span>
-              <span>·</span>
-              <span>{subject?.level}</span>
-            </div>
-          </div>
-        );
-      },
-    },
-    {
-      header: 'Elective Track',
-      cell: (row) => (
-        <span className="px-2 py-0.5 rounded text-xs font-medium bg-[#151D3A] text-slate-300 border border-[#232D52]">
-          {row.electiveGroup || 'Standard Track'}
-        </span>
-      ),
-    },
-    {
-      header: 'Enrollment Date',
-      cell: (row) => <span className="font-mono text-xs text-slate-400">{row.enrollmentDate}</span>,
-    },
-    {
-      header: 'Course Fee',
-      cell: (row) => (
-        <span className="font-mono text-xs text-emerald-400 font-bold">
-          ${row.monthlyFeeUSD}/mo
-        </span>
-      ),
-    },
-    {
-      header: 'Fee Status',
-      cell: (row) => <StatusPill status={row.feeStatus} />,
-    },
-    {
-      header: 'Status',
-      cell: (row) => <StatusPill status={row.status} />,
-    },
-  ];
 
   return (
     <div className="space-y-6 max-w-[1400px] mx-auto animate-in fade-in duration-150">
@@ -197,15 +144,103 @@ export const StudentEnrollmentsView: React.FC = () => {
         onSortChange={setCurrentSort}
       />
 
-      <DataTable
-        columns={columns}
-        data={filtered}
-        onDelete={(row) => removeEnrollment(row.id)}
-        onRowClick={(row) => {
-          const student = students.find((s) => s.id === row.studentId);
-          if (student) openDetailDrawer('student', student);
-        }}
-      />
+      <div className="rounded-2xl border border-[#232D52] bg-[#121831] shadow-xl overflow-hidden">
+        {pageGroups.length === 0 && (
+          <div className="py-12 text-center text-xs text-slate-400">No enrolments match these filters.</div>
+        )}
+        {pageGroups.map(({ studentId, student, rows }) => {
+          const active = rows.filter((r) => r.status === 'Active');
+          const listed = active.reduce((sum, r) => sum + (r.monthlyFeeUSD || 0), 0);
+          const attention = rows.filter((r) => ['Expiring Soon', 'Overdue', 'Access expired', 'Pending'].includes(r.feeStatus as string)).length;
+          return (
+            <div key={studentId} className="border-b border-[#1E2648] last:border-b-0">
+              {/* Student */}
+              <div className="flex flex-wrap items-center gap-3 px-4 py-3 bg-[#0E1428]/60">
+                <button
+                  onClick={() => student && openDetailDrawer('student', student)}
+                  className="flex items-center gap-3 min-w-0 flex-1 text-left group"
+                >
+                  <div className="w-9 h-9 rounded-xl bg-indigo-500/15 border border-indigo-500/25 text-indigo-300 flex items-center justify-center font-bold text-sm shrink-0">
+                    {(student?.name || 'S')[0].toUpperCase()}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="font-semibold text-slate-100 group-hover:text-white truncate">{student?.name || 'Student'}</div>
+                    <div className="text-[11px] text-slate-400 font-mono truncate">
+                      Roll {student?.rollNo ?? '—'}{student?.level ? ` · ${student.level}` : ''}
+                    </div>
+                  </div>
+                </button>
+                <div className="flex flex-wrap items-center gap-2 text-[11px]">
+                  <span className="px-2 py-0.5 rounded-full bg-[#1A2346] border border-[#232D52] text-slate-200 font-semibold">
+                    {active.length} active subject{active.length === 1 ? '' : 's'}
+                  </span>
+                  {listed > 0 && <span className="text-slate-400 font-mono">${listed}/mo listed</span>}
+                  {attention > 0 && (
+                    <span className="px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300">{attention} need attention</span>
+                  )}
+                  <button
+                    onClick={() => { setSelectedStudentId(studentId); setPickedSubjects([]); setModalOpen(true); }}
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-[#232D52] text-slate-300 hover:text-white hover:border-[#6D5BFF]"
+                  >
+                    <Plus className="w-3 h-3" /> Add subject
+                  </button>
+                </div>
+              </div>
+              {/* Their subjects */}
+              <div className="divide-y divide-[#1E2648]/50">
+                {rows.map((r) => {
+                  const subject = subjects.find((x) => x.id === r.subjectId);
+                  return (
+                    <div key={r.id} className="grid grid-cols-12 items-center gap-3 pl-16 pr-4 py-2.5 text-xs hover:bg-[#1A2346]/30">
+                      <div className="col-span-12 md:col-span-5 min-w-0">
+                        <div className="flex items-center gap-2 min-w-0">
+                          {subject?.code && <span className="font-mono font-bold text-indigo-400">{subject.code}</span>}
+                          <span className="font-semibold text-slate-200 truncate">{subject?.name || 'Subject'}</span>
+                        </div>
+                        <div className="text-[11px] text-slate-500 truncate">{[subject?.department, subject?.level].filter(Boolean).join(' · ')}</div>
+                      </div>
+                      <div className="col-span-4 md:col-span-2 text-slate-400">
+                        <div className="font-mono">{r.enrollmentDate}</div>
+                        <div className="text-[10px] text-slate-500">{(r as any).source}</div>
+                      </div>
+                      <div className="col-span-3 md:col-span-1 font-mono text-slate-300">
+                        {r.monthlyFeeUSD ? `$${r.monthlyFeeUSD}/mo` : 'Free'}
+                      </div>
+                      <div className="col-span-5 md:col-span-3 flex flex-wrap gap-1.5">
+                        <StatusPill status={r.feeStatus} />
+                        {r.status !== 'Active' && <StatusPill status={r.status} />}
+                        {r.electiveGroup && r.electiveGroup !== 'Group class' && (
+                          <span className="px-2 py-0.5 rounded text-[10px] bg-[#151D3A] text-slate-300 border border-[#232D52]">{r.electiveGroup}</span>
+                        )}
+                      </div>
+                      <div className="col-span-12 md:col-span-1 flex justify-end">
+                        <button
+                          onClick={() => removeEnrollment(r.id)}
+                          title="Remove from this subject"
+                          className="p-1.5 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+        {/* Pages of students */}
+        <div className="flex items-center justify-between px-5 py-3 border-t border-[#1E2648] bg-[#0E1428] text-xs text-slate-400">
+          <span>
+            {groups.length} student{groups.length === 1 ? '' : 's'} · {filtered.length} enrolment{filtered.length === 1 ? '' : 's'}
+          </span>
+          <div className="flex items-center gap-2">
+            <button disabled={page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))} className="px-2.5 py-1 rounded-lg border border-[#232D52] disabled:opacity-40">‹</button>
+            <span className="font-mono">{Math.min(page, pages)} / {pages}</span>
+            <button disabled={page >= pages} onClick={() => setPage((p) => Math.min(pages, p + 1))} className="px-2.5 py-1 rounded-lg border border-[#232D52] disabled:opacity-40">›</button>
+          </div>
+        </div>
+      </div>
 
       {/* Enroll in course modal */}
       {modalOpen && (

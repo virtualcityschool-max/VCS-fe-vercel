@@ -275,12 +275,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const feeByStudent = useMemo(() => {
     const m = new Map<string, Student['feeStatus'] | string>();
-    raw.subs.expired?.forEach((r: any) => m.set(sid(r.student?.id), 'Overdue'));
+    // 'Paid' / 'Overdue' only for Gumroad memberships; admin-added access is not a payment.
+    raw.subs.expired?.forEach((r: any) => {
+      const k = sid(r.student?.id);
+      if (r.enrollment_source === 'gumroad') m.set(k, 'Overdue');
+      else if (m.get(k) !== 'Overdue') m.set(k, 'Access expired');
+    });
     raw.subs.active?.forEach((r: any) => {
       const k = sid(r.student?.id);
-      if (m.get(k) === 'Overdue') return;
+      if (m.get(k) === 'Overdue' || m.get(k) === 'Access expired') return;
       const soon = typeof r.days_remaining === 'number' && r.days_remaining <= 7;
-      if (soon || !m.has(k)) m.set(k, soon ? 'Expiring Soon' : 'Paid');
+      if (soon || !m.has(k)) m.set(k, soon ? 'Expiring Soon' : r.enrollment_source === 'gumroad' ? 'Paid' : 'Access active');
     });
     return m;
   }, [raw.subs]);
@@ -427,12 +432,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const enrollments: EnrollmentRecord[] = useMemo(() => raw.enrollments.map((e: any) => {
     const c: any = courseById.get(sid(e.course?.id)) || e.course;
+    // 'Paid' only when Gumroad actually charged; admin-added access is not a payment.
+    const viaGumroad = e.enrollment_source === 'gumroad';
     const fee = e.status !== 'active' ? (e.status === 'pending' ? 'Pending' : 'Cancelled')
-      : !e.access_expires_at ? 'Free Access' : !e.has_access ? 'Overdue' : (e.days_remaining ?? 99) <= 7 ? 'Expiring Soon' : 'Paid';
+      : !e.access_expires_at ? 'Free Access'
+      : !e.has_access ? (viaGumroad ? 'Overdue' : 'Access expired')
+      : (e.days_remaining ?? 99) <= 7 ? 'Expiring Soon' : viaGumroad ? 'Paid' : 'Access active';
+    const sourceLabel = viaGumroad ? 'Gumroad' : e.enrollment_source === 'free_access' ? 'Scholarship'
+      : e.enrollment_source === 'free' ? 'Free subject' : 'Added by admin';
     return {
       id: sid(e.id), studentId: sid(e.student?.id), subjectId: sid(e.course?.id), enrollmentDate: (e.enrolled_at || '').slice(0, 10),
       status: e.status === 'active' ? 'Active' : e.status === 'pending' ? 'Pending' : 'Cancelled',
-      feeStatus: fee as any, monthlyFeeUSD: coursePrice(c), electiveGroup: e.is_private ? '1-to-1 private' : 'Group class',
+      feeStatus: fee as any, source: sourceLabel, monthlyFeeUSD: coursePrice(c), electiveGroup: e.is_private ? '1-to-1 private' : 'Group class',
       studentName: e.student?.username, rollNo: e.student?.roll_no, _raw: e,
     } as any;
   }), [raw.enrollments, courseById]);
