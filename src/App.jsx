@@ -13,6 +13,7 @@ import Sidebar from "./components/layout/Sidebar";
 
 // Routes
 import AppRoutes from "./routes/AppRoutes";
+import CompleteProfileGate from "./components/common/CompleteProfileGate";
 import { useOutsideCloseModals } from "./hooks/useOutsideCloseModals";
 
 // Inner app - inside BrowserRouter so useLocation works
@@ -165,6 +166,7 @@ const AppInner = () => {
         {/* Global Overlays */}
         <section className="relative z-[9999]">
           <AuthModals />
+          <CompleteProfileGate />
           {/* <AIChat /> */}
           <ToastContainer
             position="top-right"
