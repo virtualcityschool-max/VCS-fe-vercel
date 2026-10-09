@@ -172,3 +172,29 @@ export const CLASS_YEARS: { group: string; options: string[] }[] = [
 export const formatPhone = (digits?: string | null) => (digits ? `+${String(digits).replace(/^\+/, '')}` : '');
 export const whatsappLink = (digits?: string | null) =>
   digits ? `https://wa.me/${String(digits).replace(/[^\d]/g, '')}` : '';
+
+// Subjects a teacher can teach (Teachers Register). Stored on the teacher's
+// profile as a list; a teacher can have several, a subject many teachers.
+export const TEACHING_AREAS = [
+  'Mathematics', 'Physics', 'Biology', 'Chemistry', 'Computer Science',
+  'English', 'Urdu', 'Pakistan Studies', 'Islamiat', 'Others',
+] as const;
+
+// Best guess from free text a teacher typed (used only as a suggestion).
+export const guessTeachingAreas = (text?: string | null): string[] => {
+  const t = (text || '').normalize('NFKC');
+  if (!t.trim()) return [];
+  const rules: [string, RegExp][] = [
+    ['Mathematics', /math|algebra|calculus|trigonometr/i],
+    ['Physics', /physics/i],
+    ['Biology', /biolog|\bbio\b/i],
+    ['Chemistry', /chemist/i],
+    ['Computer Science', /computer|programming|\bict\b|ms office/i],
+    ['English', /english|grammar|creative writing/i],
+    ['Urdu', /urdu/i],
+    ['Pakistan Studies', /pak(istan)?\s*stud/i],
+    ['Islamiat', /islam/i],
+  ];
+  const found = rules.filter(([, re]) => re.test(t)).map(([name]) => name);
+  return found.length ? found : ['Others'];
+};

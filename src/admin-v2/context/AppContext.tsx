@@ -30,6 +30,7 @@ import { fetchFreeAccessRequests } from '../../store/slices/freeAccessSlice';
 import { getDisplayName } from '../../utils/userDisplay';
 import { getStorageUrl } from '../../utils/storageUrl';
 import { departmentOf } from '../../components/admin/ui/departments';
+import { TEACHING_AREAS, guessTeachingAreas } from '../data/formOptions';
 import { ConfirmDialog } from '../components/common/ConfirmDialog';
 
 export interface ToastMessage {
@@ -368,6 +369,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       qualification: u.qualification || u.expertise || '', experienceYears: u.experience_years || 0,
       weeklyHours: Math.round(((recentLoad.hours.get(sid(u.id)) || 0) / 4) * 10) / 10, rating: 0,
       isActive: u.is_active, _raw: u,
+      // Subjects they teach: the saved list, or a suggestion from their profile text.
+      ...(() => {
+        const saved: string[] = Array.isArray(u.subjects) ? u.subjects : [];
+        const confirmed = saved.length > 0 && saved.every((x) => (TEACHING_AREAS as readonly string[]).includes(x));
+        return confirmed
+          ? { areas: saved, areasSuggested: false }
+          : { areas: guessTeachingAreas([u.expertise, ...saved].filter(Boolean).join(', ')), areasSuggested: true };
+      })(),
     } as any;
   }), [raw.users, raw.courses, recentLoad]);
 
@@ -666,6 +675,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return done;
   };
 
+  // Teachers Register: the subjects a teacher teaches (profile list).
+  const setTeacherAreas = (teacherId: string, areas: string[]) =>
+    run(() => adminService.updateUserProfile(Number(teacherId), { subjects: areas }), 'Subjects saved', ['users']);
+
   // ── Subjects & batches ──
   const addBatch = (subjectId: string, b: { batchName: string; teacherId?: string; priceUSD?: number; publish?: boolean }) =>
     run(() => axiosInstance.post(`/courses/subjects/${subjectId}/batches/`, {
@@ -949,7 +962,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     enrollments, addEnrollment, addEnrollments, removeEnrollment,
     teachers, addTeacher, updateTeacher, toggleTeacherStatus, bulkAssignSubject, allocateTeacherSubject, deallocateTeacherSubject,
     levelOptions: raw.categories, parents, addParent, addAdmin, allUsers, updateUserRole, toggleUserStatus,
-    liveNowCount, subjects, catalog, addBatch, renameBatch, moveBatch, updateCatalogSubject, addSubject, updateSubject, toggleSubjectStatus, levels, addLevel, removeLevel,
+    liveNowCount, setTeacherAreas, subjects, catalog, addBatch, renameBatch, moveBatch, updateCatalogSubject, addSubject, updateSubject, toggleSubjectStatus, levels, addLevel, removeLevel,
     sessions, addSession, updateSession, deleteSession, meetings, addMeeting,
     subscriptions, renewSubscription, cancelSubscription, referrals,
     posts, addPost, togglePostStatus, testimonials, addTestimonial, toggleTestimonialVisibility, deleteTestimonial,

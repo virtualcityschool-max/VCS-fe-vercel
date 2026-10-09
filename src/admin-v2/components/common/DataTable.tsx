@@ -39,6 +39,8 @@ interface DataTableProps<T extends { id: string }> {
   bulkActions?: BulkAction[];
   pageSize?: number;
   emptyState?: React.ReactNode;
+  /** Alternate row shading + stronger dividers, for rows with tall wrapped content. */
+  striped?: boolean;
 }
 
 export function DataTable<T extends { id: string }>({
@@ -52,6 +54,7 @@ export function DataTable<T extends { id: string }>({
   bulkActions = [],
   pageSize = 10,
   emptyState,
+  striped = false,
 }: DataTableProps<T>) {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -181,8 +184,8 @@ export function DataTable<T extends { id: string }>({
               <th className="py-3 px-4 text-right w-24">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#1E2648]/60 text-xs">
-            {currentData.map((row) => {
+          <tbody className={`divide-y text-xs ${striped ? 'divide-[#2A3560]' : 'divide-[#1E2648]/60'}`}>
+            {currentData.map((row, rowIdx) => {
               const isSelected = selectedIds.includes(row.id);
               return (
                 <tr
@@ -190,7 +193,7 @@ export function DataTable<T extends { id: string }>({
                   onClick={() => onRowClick?.(row)}
                   className={`group transition-colors cursor-pointer ${
                     isSelected ? 'bg-indigo-500/10' : 'hover:bg-[#1A2346]/70'
-                  }`}
+                  } ${striped && !isSelected && rowIdx % 2 === 1 ? 'bg-[#0B1124]' : ''}`}
                 >
                   <td className="py-3 px-4" onClick={(e) => handleToggleRow(e, row.id)}>
                     <input

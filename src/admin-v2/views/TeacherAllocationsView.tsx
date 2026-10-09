@@ -131,8 +131,17 @@ export const TeacherAllocationsView: React.FC = () => {
       cell: (row) => {
         const assigned = subjects.filter((s) => row.assignedSubjectIds.includes(s.id));
 
+        if (assigned.length === 0) {
+          return <span className="text-slate-500 text-xs italic">Unallocated (Standby capacity)</span>;
+        }
+
+        // One outlined tray per teacher so neighbouring rows' chips never blur together.
         return (
-          <div className="flex items-center gap-1.5 flex-wrap max-w-md">
+          <div className="max-w-xl rounded-xl border border-indigo-500/25 bg-indigo-500/[0.04] p-2">
+            <div className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-indigo-300/80">
+              {row.name.split(/[\s_]+/)[0]} · {assigned.length} {assigned.length === 1 ? 'course' : 'courses'}
+            </div>
+            <div className="flex items-center gap-1.5 flex-wrap">
             {assigned.map((sub) => (
               <span
                 key={sub.id}
@@ -152,9 +161,7 @@ export const TeacherAllocationsView: React.FC = () => {
                 </button>
               </span>
             ))}
-            {assigned.length === 0 && (
-              <span className="text-slate-500 text-xs italic">Unallocated (Standby capacity)</span>
-            )}
+            </div>
           </div>
         );
       },
@@ -258,6 +265,7 @@ export const TeacherAllocationsView: React.FC = () => {
       <DataTable
         columns={columns}
         data={filtered}
+        striped
         onRowClick={(row) => openDetailDrawer('teacher', row)}
       />
 

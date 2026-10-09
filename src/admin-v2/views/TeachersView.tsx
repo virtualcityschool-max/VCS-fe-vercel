@@ -5,7 +5,7 @@ import { PageHeader } from '../components/common/PageHeader';
 import { FilterBar, FilterConfig, SortOption } from '../components/common/FilterBar';
 import { DataTable, Column } from '../components/common/DataTable';
 import { StatusPill } from '../components/common/StatusPill';
-import { Teacher, DepartmentName } from '../types';
+import { Teacher } from '../types';
 import {
   GraduationCap,
   LayoutGrid,
@@ -17,7 +17,8 @@ import {
   Clock,
   CheckSquare,
 } from 'lucide-react';
-import { DEPARTMENT_CONFIG } from '../data/departments';
+import { TEACHING_AREAS } from '../data/formOptions';
+import { TeachingAreasPicker } from '../components/common/TeachingAreasPicker';
 
 export const TeachersView: React.FC = () => {
   const {
@@ -28,12 +29,15 @@ export const TeachersView: React.FC = () => {
     toggleUserStatus,
     bulkAssignSubject,
     addToast,
-  } = useApp();
+    setTeacherAreas,
+  } = useApp() as any;
 
   const [activeTab, setActiveTab] = useState<'all' | 'engaged' | 'standby'>('all');
   const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
   const [searchQuery, setSearchQuery] = useState('');
   const [deptFilter, setDeptFilter] = useState('all');
+  // Saved instantly; shown at once while the list reloads.
+  const [areaOverrides, setAreaOverrides] = useState<Record<string, string[]>>({});
   const [currentSort, setCurrentSort] = useState('name-asc');
 
   // Bulk subject modal
@@ -46,19 +50,15 @@ export const TeachersView: React.FC = () => {
 
   const filters: FilterConfig[] = [
     {
-      id: 'department',
-      label: 'Department',
+      id: 'area',
+      label: 'Subject',
       value: deptFilter,
       onChange: setDeptFilter,
-      options: [
-        { label: 'Mathematics', value: 'Mathematics', count: teachers.filter((t) => t.department === 'Mathematics').length },
-        { label: 'Physics', value: 'Physics', count: teachers.filter((t) => t.department === 'Physics').length },
-        { label: 'Chemistry', value: 'Chemistry', count: teachers.filter((t) => t.department === 'Chemistry').length },
-        { label: 'Biology', value: 'Biology', count: teachers.filter((t) => t.department === 'Biology').length },
-        { label: 'Computer Science', value: 'Computer Science', count: teachers.filter((t) => t.department === 'Computer Science').length },
-        { label: 'English & Urdu', value: 'English & Urdu', count: teachers.filter((t) => t.department === 'English & Urdu').length },
-        { label: 'General', value: 'General', count: teachers.filter((t) => t.department === 'General').length },
-      ],
+      options: TEACHING_AREAS.map((a) => ({
+        label: a,
+        value: a,
+        count: teachers.filter((t: any) => (areaOverrides[t.id] ?? t.areas ?? []).includes(a)).length,
+      })),
     },
   ];
 
@@ -79,7 +79,7 @@ export const TeachersView: React.FC = () => {
       (activeTab === 'engaged' && teacher.status === 'Engaged') ||
       (activeTab === 'standby' && teacher.status === 'Standby');
 
-    const matchDept = deptFilter === 'all' || teacher.department === deptFilter;
+    const matchDept = deptFilter === 'all' || ((areaOverrides as any)[teacher.id] ?? (teacher as any).areas ?? []).includes(deptFilter);
 
     return matchSearch && matchTab && matchDept;
   });
@@ -108,25 +108,23 @@ export const TeachersView: React.FC = () => {
       ),
     },
     {
-      header: 'Department',
-      cell: (row) => {
-        const dept = DEPARTMENT_CONFIG[row.department as DepartmentName] || DEPARTMENT_CONFIG.General;
+      header: 'Subjects',
+      cell: (row: any) => {
+        const areas = areaOverrides[row.id] ?? row.areas ?? [];
         return (
-          <span
-            className="px-2.5 py-0.5 rounded-full text-xs font-medium border"
-            style={{
-              backgroundColor: `${dept.hex}15`,
-              color: dept.hex,
-              borderColor: `${dept.hex}30`,
+          <TeachingAreasPicker
+            value={areas}
+            suggested={!(row.id in areaOverrides) && row.areasSuggested}
+            onChange={(next) => {
+              setAreaOverrides((m) => ({ ...m, [row.id]: next }));
+              setTeacherAreas(row.id, next);
             }}
-          >
-            {row.department}
-          </span>
+          />
         );
       },
     },
     {
-      header: 'Assigned Subjects',
+      header: 'Teaching now',
       cell: (row) => {
         const assigned = subjects.filter((s) => row.assignedSubjectIds.includes(s.id));
         return (
