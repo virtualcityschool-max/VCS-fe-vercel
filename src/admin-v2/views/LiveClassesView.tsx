@@ -22,6 +22,7 @@ const dur = (m: number) => (m >= 60 ? `${Math.floor(m / 60)} h ${m % 60 ? `${m %
 // button so an admin can drop in and observe a class.
 export const LiveClassesView: React.FC = () => {
   const { sessions = [], rawAttendanceAll = [], subjects = [], reload, tzIana, setCurrentView } = useApp() as any;
+  const [mode, setMode] = useState<'upcoming' | 'past'>('upcoming');
   const [dayOffset, setDayOffset] = useState(0);
   const [query, setQuery] = useState('');
   const [now, setNow] = useState(Date.now());
@@ -52,10 +53,10 @@ export const LiveClassesView: React.FC = () => {
     return m;
   }, [rawAttendanceAll]);
 
-  const rows = useMemo(() => {
+  const rowsFor = (key: string) => {
     const q = query.trim().toLowerCase();
     return sessions
-      .filter((s: any) => s.date === dayKey)
+      .filter((s: any) => s.date === key)
       .map((s: any) => {
         const r = s._raw || {};
         const start = new Date(r.scheduled_at);
@@ -87,19 +88,32 @@ export const LiveClassesView: React.FC = () => {
       })
       .filter((x: any) => !q || `${x.title} ${x.course} ${x.batch} ${x.teacher}`.toLowerCase().includes(q))
       .sort((a: any, b: any) => a.start.getTime() - b.start.getTime());
-  }, [sessions, dayKey, now, attendanceBySession, subjects, query]);
+  };
+  const keyFor = (offset: number) =>
+    new Date(now + offset * 86400000).toLocaleDateString('en-CA', tzIana ? { timeZone: tzIana } : undefined);
+  const labelFor = (offset: number) =>
+    new Date(now + offset * 86400000).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', ...(tzIana ? { timeZone: tzIana } : {}) });
+  // Today drives the live sections and counts; the chosen day drives "Past classes".
+  const todayRows = useMemo(() => rowsFor(keyFor(0)), [sessions, now, attendanceBySession, subjects, query]);
+  const rows = useMemo(() => (mode === 'upcoming' ? todayRows : rowsFor(dayKey)), [todayRows, sessions, dayKey, now, attendanceBySession, subjects, query, mode]);
+  // Next 7 days for the "coming up" list.
+  const nextDays = useMemo(
+    () => [1, 2, 3, 4, 5, 6, 7].map((o) => ({ offset: o, label: o === 1 ? `Tomorrow · ${labelFor(o)}` : labelFor(o), rows: rowsFor(keyFor(o)).filter((x: any) => x.phase !== 'cancelled') })),
+    [sessions, now, attendanceBySession, subjects, query]
+  );
 
-  const group = (phases: Phase[]) => rows.filter((x: any) => phases.includes(x.phase));
+  const group = (phases: Phase[]) => todayRows.filter((x: any) => phases.includes(x.phase));
   const liveRows = group(['live', 'late']);
   const soonRows = group(['soon']);
   const laterRows = group(['later']);
-  const endedRows = group(['ended', 'cancelled']).reverse();
+  const endedRows = rows.filter((x: any) => x.phase === 'ended' || x.phase === 'cancelled').reverse();
 
+  const comingUp = nextDays.reduce((n, d) => n + d.rows.length, 0);
   const kpis = [
-    { label: 'Live now', value: rows.filter((x: any) => x.phase === 'live').length, tint: 'text-rose-400' },
-    { label: 'Should have started', value: rows.filter((x: any) => x.phase === 'late').length, tint: 'text-amber-400' },
-    { label: 'Starting within the hour', value: soonRows.length, tint: 'text-sky-400' },
-    { label: 'Classes this day', value: rows.filter((x: any) => x.phase !== 'cancelled').length, tint: 'text-slate-100' },
+    { label: 'Live now', value: todayRows.filter((x: any) => x.phase === 'live').length, tint: 'text-rose-400' },
+    { label: 'Should have started', value: todayRows.filter((x: any) => x.phase === 'late').length, tint: 'text-amber-400' },
+    { label: 'Later today', value: soonRows.length + laterRows.length, tint: 'text-sky-400' },
+    { label: 'Coming up · next 7 days', value: comingUp, tint: 'text-slate-100' },
   ];
 
   const Row: React.FC<{ x: any }> = ({ x }) => {
@@ -177,9 +191,18 @@ export const LiveClassesView: React.FC = () => {
       </div>
     );
 
+  const tab = (id: 'upcoming' | 'past', label: string) => (
+    <button
+      onClick={() => { setMode(id); setDayOffset(0); }}
+      className={`px-4 py-2 rounded-lg text-xs font-semibold ${mode === id ? 'bg-[#6D5BFF] text-white' : 'text-slate-400 hover:text-white'}`}
+    >
+      {label}
+    </button>
+  );
+
   return (
     <div className="space-y-6 w-full animate-in fade-in duration-150">
-      <PageHeader title="Live Classes" subtitle="Every Google Meet class of the day. Join any class to see how it is going." />
+      <PageHeader title="Live Classes" subtitle="Classes running now and coming up. Join any class to see how it is going." />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {kpis.map((k) => (
@@ -192,44 +215,55 @@ export const LiveClassesView: React.FC = () => {
 
       <div className="flex flex-col md:flex-row md:items-center gap-3">
         <div className="flex items-center gap-1 p-1 rounded-xl border border-[#232D52] bg-[#121831] w-fit">
-          <button onClick={() => setDayOffset((d) => d - 1)} className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-[#1A2346]"><ChevronLeft className="w-4 h-4" /></button>
-          <button onClick={() => setDayOffset(0)} className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${dayOffset === 0 ? 'bg-[#6D5BFF] text-white' : 'text-slate-300 hover:bg-[#1A2346]'}`}>Today</button>
-          <button onClick={() => setDayOffset((d) => d + 1)} className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-[#1A2346]"><ChevronRight className="w-4 h-4" /></button>
-          <span className="flex items-center gap-1.5 px-3 text-xs text-slate-300"><CalendarDays className="w-3.5 h-3.5 text-sky-300" />{dayLabel}</span>
+          {tab('upcoming', 'Now & coming up')}
+          {tab('past', 'Past classes')}
         </div>
+        {mode === 'past' && (
+          <div className="flex items-center gap-1 p-1 rounded-xl border border-[#232D52] bg-[#121831] w-fit">
+            <button onClick={() => setDayOffset((d) => d - 1)} className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-[#1A2346]"><ChevronLeft className="w-4 h-4" /></button>
+            <span className="flex items-center gap-1.5 px-3 text-xs text-slate-300"><CalendarDays className="w-3.5 h-3.5 text-sky-300" />{dayOffset === 0 ? `Today · ${dayLabel}` : dayLabel}</span>
+            <button disabled={dayOffset >= 0} onClick={() => setDayOffset((d) => Math.min(0, d + 1))} className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-[#1A2346] disabled:opacity-30"><ChevronRight className="w-4 h-4" /></button>
+          </div>
+        )}
         <div className="relative flex-1 max-w-md">
           <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
           <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search class, subject, batch or teacher…" className={`${inputCls} pl-9`} />
         </div>
       </div>
 
-      <div className="flex items-start gap-2 p-3 rounded-xl border border-sky-500/20 bg-sky-500/[0.06] text-xs text-slate-300">
-        <Info className="w-4 h-4 text-sky-300 shrink-0 mt-0.5" />
-        <span>
-          Join opens the class in Google Meet with the Google account signed in to this browser. Signed in as
-          <b className="text-white"> virtualcityschool@gmail.com</b> (the account that creates the classes) you enter straight away; with another
-          account the teacher has to let you in. Everyone in the class can see you join, so keep your camera and microphone off to observe quietly.
-        </span>
-      </div>
-
-      {dayOffset === 0 && (
-        <Section title="Live now" icon={Radio} tone="text-rose-300" items={liveRows} empty="No class is running at the moment." />
-      )}
-      {liveRows.some((x: any) => x.phase === 'late') && (
-        <div className="flex items-center gap-2 text-xs text-amber-300 -mt-3">
-          <AlertTriangle className="w-3.5 h-3.5" /> “Not started yet” means the class time has begun but the teacher has not started it in the system.
+      {mode === 'upcoming' && (
+        <div className="flex items-start gap-2 p-3 rounded-xl border border-sky-500/20 bg-sky-500/[0.06] text-xs text-slate-300">
+          <Info className="w-4 h-4 text-sky-300 shrink-0 mt-0.5" />
+          <span>
+            Join opens the class in Google Meet with the Google account signed in to this browser. <b className="text-white">virtualcityschool@gmail.com</b> hosts every
+            class and enters straight away; other admin Gmail addresses listed under <button onClick={() => setCurrentView('settings')} className="text-sky-300 hover:underline">Platform Settings → Class observers</button> are
+            invited to every new class and also enter without waiting. Everyone in the class can see who joins, so keep camera and microphone off to observe quietly.
+          </span>
         </div>
       )}
-      {dayOffset !== 0 && <Section title="Classes" icon={CalendarDays} tone="text-slate-200" items={[...liveRows, ...soonRows, ...laterRows]} />}
-      {dayOffset === 0 && <Section title="Starting within the hour" icon={Video} tone="text-sky-300" items={soonRows} />}
-      {dayOffset === 0 && <Section title="Later today" icon={CalendarDays} tone="text-slate-200" items={laterRows} />}
-      <Section title={dayOffset === 0 ? 'Ended today' : 'Ended'} icon={CalendarDays} tone="text-slate-400" items={endedRows} />
 
-      {rows.length === 0 && (
-        <div className="text-center text-xs text-slate-500">
-          No classes on this day. Plan classes in the{' '}
-          <button onClick={() => setCurrentView('timetable')} className="text-sky-300 hover:underline">Timetable</button>.
-        </div>
+      {mode === 'upcoming' ? (
+        <>
+          <Section title="Live now" icon={Radio} tone="text-rose-300" items={liveRows} empty="No class is running at the moment." />
+          {liveRows.some((x: any) => x.phase === 'late') && (
+            <div className="flex items-center gap-2 text-xs text-amber-300 -mt-3">
+              <AlertTriangle className="w-3.5 h-3.5" /> “Not started yet” means the class time has begun but the teacher has not started it in the system.
+            </div>
+          )}
+          <Section title="Starting within the hour" icon={Video} tone="text-sky-300" items={soonRows} />
+          <Section title="Later today" icon={CalendarDays} tone="text-slate-200" items={laterRows} />
+          {nextDays.filter((d) => d.rows.length).map((d) => (
+            <Section key={d.offset} title={d.label} icon={CalendarDays} tone="text-slate-300" items={d.rows} />
+          ))}
+          {liveRows.length + soonRows.length + laterRows.length + comingUp === 0 && (
+            <div className="text-center text-xs text-slate-500">
+              No classes planned for the next 7 days. Plan classes in the{' '}
+              <button onClick={() => setCurrentView('timetable')} className="text-sky-300 hover:underline">Timetable</button>.
+            </div>
+          )}
+        </>
+      ) : (
+        <Section title={dayOffset === 0 ? 'Ended today' : 'Classes held'} icon={CalendarDays} tone="text-slate-300" items={endedRows} empty="No classes held on this day." />
       )}
     </div>
   );
