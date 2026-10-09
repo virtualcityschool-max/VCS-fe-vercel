@@ -1,6 +1,7 @@
 export type NavigationId =
   // DASHBOARD
   | 'dashboard'
+  | 'live-classes'
   // ADMISSIONS
   | 'approvals'
   | 'students'

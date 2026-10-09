@@ -30,8 +30,7 @@ import {
   School,
   GitFork,
   CalendarClock,
-  UserCheck,
-} from 'lucide-react';
+  UserCheck, Radio } from 'lucide-react';
 import { NavigationId } from '../../types';
 
 interface NavGroup {
@@ -58,7 +57,8 @@ export const Sidebar: React.FC = () => {
     mobileMenuOpen,
     setMobileMenuOpen,
     tzIana,
-  } = useApp();
+    liveNowCount = 0,
+  } = useApp() as any;
 
   const [currentTimeStr, setCurrentTimeStr] = useState('');
 
@@ -112,6 +112,13 @@ export const Sidebar: React.FC = () => {
     {
       label: 'TEACHING',
       items: [
+        {
+          id: 'live-classes',
+          label: 'Live Classes',
+          icon: Radio,
+          badge: liveNowCount > 0 ? liveNowCount : undefined,
+          badgeColor: 'bg-rose-500 text-white animate-pulse',
+        },
         { id: 'subjects', label: 'Subjects Catalogue', icon: BookOpen },
         { id: 'teachers', label: 'Teachers Register', icon: Users },
         { id: 'teacher-allocations', label: 'Teacher Allocations', icon: GitFork },

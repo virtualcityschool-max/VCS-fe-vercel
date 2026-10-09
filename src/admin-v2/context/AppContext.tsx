@@ -60,6 +60,7 @@ export const VIEW_TO_PATH: Record<string, string> = {
   teachers: '/admin/users?role=teacher',
   'teacher-allocations': '/admin/teacher-allocations',
   timetable: '/admin/sessions',
+  'live-classes': '/admin/live-classes',
   'ptm-meetings': '/admin/teacher-planner',
   meetings: '/admin/teacher-planner',
   parents: '/admin/users?role=parent',
@@ -393,6 +394,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     description: (c.description || '').replace(/<[^>]+>/g, ''), _raw: c,
     catalogId: sid(c.subject), batchName: c.batch_name || '',
   } as any)), [raw.courses, recentLoad, activeEnrollments, levelName]);
+
+  // Classes running right now (for the menu badge).
+  const liveNowCount = useMemo(() => raw.sessions.filter((x: any) => x.status === 'live').length, [raw.sessions]);
 
   // Catalogue: one entry per subject with its batches (each batch is a course above).
   const catalog = useMemo(() => raw.catalog.map((x: any) => ({
@@ -945,7 +949,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     enrollments, addEnrollment, addEnrollments, removeEnrollment,
     teachers, addTeacher, updateTeacher, toggleTeacherStatus, bulkAssignSubject, allocateTeacherSubject, deallocateTeacherSubject,
     levelOptions: raw.categories, parents, addParent, addAdmin, allUsers, updateUserRole, toggleUserStatus,
-    subjects, catalog, addBatch, renameBatch, moveBatch, updateCatalogSubject, addSubject, updateSubject, toggleSubjectStatus, levels, addLevel, removeLevel,
+    liveNowCount, subjects, catalog, addBatch, renameBatch, moveBatch, updateCatalogSubject, addSubject, updateSubject, toggleSubjectStatus, levels, addLevel, removeLevel,
     sessions, addSession, updateSession, deleteSession, meetings, addMeeting,
     subscriptions, renewSubscription, cancelSubscription, referrals,
     posts, addPost, togglePostStatus, testimonials, addTestimonial, toggleTestimonialVisibility, deleteTestimonial,

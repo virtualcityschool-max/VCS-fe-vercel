@@ -55,6 +55,7 @@ const V2 = {
   Subjects: v2("SubjectsView", "SubjectsView"),
   Allocations: v2("TeacherAllocationsView", "TeacherAllocationsView"),
   Timetable: v2("TimetableView", "TimetableView"),
+  LiveClasses: v2("LiveClassesView", "LiveClassesView"),
   PTM: v2("PTMMeetingsView", "PTMMeetingsView"),
   Attendance: v2("AttendanceView", "AttendanceView"),
   Evaluations: v2("EvaluationsView", "EvaluationsView"),
@@ -268,6 +269,7 @@ const AppRoutes = () => {
           <Route path="courses" element={<V2.Subjects />} />
           <Route path="teacher-allocations" element={<V2.Allocations />} />
           <Route path="sessions" element={<V2.Timetable />} />
+          <Route path="live-classes" element={<V2.LiveClasses />} />
           <Route path="teacher-planner" element={<V2.PTM />} />
           <Route path="attendance" element={<V2.Attendance />} />
           <Route path="evaluations" element={<V2.Evaluations />} />
