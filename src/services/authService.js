@@ -446,14 +446,12 @@ export const authService = {
   },
 
   // Reject user (admin only)
-  rejectUser: async (userId) => {
+  rejectUser: async (userId, reason = "") => {
     try {
-      console.log("Rejecting user:", userId);
-
       const response = await axiosInstance.patch(`/auth/approve/${userId}/`, {
         action: "reject",
+        ...(reason ? { reason } : {}),
       });
-      console.log("Reject User Response:", response.data);
 
       return {
         success: true,

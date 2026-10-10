@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { PageHeader, SegmentedTabs } from "../../components/admin/ui";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchPendingApprovals,
@@ -294,84 +295,35 @@ const AdminApprovalsPage = () => {
           : "Search...";
 
   return (
-    <div className="space-y-6">
-      {/* Tab Navigation */}
-      <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-3 mb-2">
-        <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-1 backdrop-blur-sm w-fit max-w-full overflow-x-auto no-scrollbar">
-          <div className="flex items-center gap-1 min-w-max">
-            <button
-              onClick={() => setActiveTab("users")}
-              className={`inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-                activeTab === "users"
-                  ? "bg-indigo-600 text-white shadow-lg"
-                  : "text-slate-400 hover:text-white hover:bg-slate-800/50"
-              }`}
-            >
-              <i className="fas fa-user-check"></i>
-              Account(s) Approvals
-              {pendingApprovals?.length > 0 && (
-                <span className="bg-indigo-500 text-white text-xs px-2 py-0.5 rounded-full">
-                  {pendingApprovals.length}
-                </span>
-              )}
-            </button>
-
-            <button
-              onClick={() => setActiveTab("enrollments")}
-              className={`inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-                activeTab === "enrollments"
-                  ? "bg-indigo-600 text-white shadow-lg"
-                  : "text-slate-400 hover:text-white hover:bg-slate-800/50"
-              }`}
-            >
-              <i className="fas fa-user-graduate"></i>
-              Enrollment Requests
-              {(pendingEnrollments?.length || 0) + freeAccessPendingCount > 0 && (
-                <span className="bg-indigo-500 text-white text-xs px-2 py-0.5 rounded-full">
-                  {(pendingEnrollments?.length || 0) + freeAccessPendingCount}
-                </span>
-              )}
-            </button>
-            <button
-              onClick={() => setActiveTab("childLinks")}
-              className={`inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-                activeTab === "childLinks"
-                  ? "bg-indigo-600 text-white shadow-lg"
-                  : "text-slate-400 hover:text-white hover:bg-slate-800/50"
-              }`}
-            >
-              <i className="fas fa-link"></i>
-              Child Link Requests
-              {pendingChildLinks?.length > 0 && (
-                <span className="bg-indigo-500 text-white text-xs px-2 py-0.5 rounded-full">
-                  {pendingChildLinks.length}
-                </span>
-              )}
-            </button>
-          </div>
-        </div>
-        <div className="flex items-center gap-3 flex-wrap">
-          {activeTab !== "hireRequests" && (
-            <SearchInput
-              value={activeSearch}
-              onChange={(e) => setActiveSearch(e.target.value)}
-              onClear={() => setActiveSearch("")}
-              placeholder={activeSearchPlaceholder}
-              className="w-full sm:w-72"
-            />
-          )}
-          <button
-            onClick={activeRefreshHandler}
-            className="text-white px-5 py-2 rounded-xl text-sm font-medium shadow-lg active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500"
-            disabled={isActiveTabLoading}
-          >
-            <i
-              className={`fas ${isActiveTabLoading ? "fa-spinner fa-spin" : "fa-refresh"}`}
-            ></i>
-            {isActiveTabLoading ? "Refreshing..." : "Refresh"}
-          </button>
-        </div>
+    <div className="space-y-6 max-w-[1400px] mx-auto">
+      <PageHeader
+        title="Approvals"
+        subtitle={`${(pendingApprovals?.length || 0) + (pendingEnrollments?.length || 0) + freeAccessPendingCount + (pendingChildLinks?.length || 0)} waiting · new accounts, enrollment and free-access requests, parent-child links`}
+        onRefresh={activeRefreshHandler}
+      />
+      <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-3">
+        <SegmentedTabs
+          tabs={[
+            { id: "users", label: "New accounts", count: pendingApprovals?.length || 0 },
+            { id: "enrollments", label: "Enrollment requests", count: (pendingEnrollments?.length || 0) + freeAccessPendingCount },
+            { id: "childLinks", label: "Parent-child links", count: pendingChildLinks?.length || 0 },
+          ]}
+          value={activeTab}
+          onChange={setActiveTab}
+        />
+        <label className="relative w-full sm:w-80">
+          <span className="sr-only">Search</span>
+          <i className="fas fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400" aria-hidden="true" />
+          <input
+            type="text"
+            value={activeSearch}
+            onChange={(e) => setActiveSearch(e.target.value)}
+            placeholder={activeSearchPlaceholder}
+            className="w-full h-10 pl-10 pr-3 text-sm rounded-xl border border-[#232D52] bg-[#121831] text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-indigo-500"
+          />
+        </label>
       </div>
+      {isActiveTabLoading && <p className="text-xs text-slate-400"><i className="fas fa-spinner fa-spin mr-2" aria-hidden="true" />Refreshing…</p>}
 
       {/* Tab Content */}
       {activeTab === "users" && (

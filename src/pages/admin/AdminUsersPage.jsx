@@ -27,6 +27,7 @@ import {
 } from "../../utils/validation";
 import { toastManager } from "../../utils/toastManager";
 import UsersTab from "../../components/admin/UsersTab";
+import PeopleDirectory from "../../components/admin/people/PeopleDirectory";
 import { showApiError } from "../../utils/apiErrorHandler";
 
 const DEFAULT_FILTERS = { search: "", role: "", is_active: "", tags: "", ordering: "-date_joined" };
@@ -221,6 +222,17 @@ const AdminUsersPage = () => {
     setActiveModal("create-user");
   };
 
+  // "Quick add" in the admin top bar links here with ?new=1: open the create
+  // form once, then drop the flag so a refresh doesn't reopen it.
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get("new") !== "1") return;
+    handleCreateUser();
+    params.delete("new");
+    navigate({ search: params.toString() ? `?${params}` : "" }, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.search]);
+
   // Handle close create user modal
   const handleCloseCreateUserModal = () => {
     resetCreateUserModal();
@@ -306,6 +318,20 @@ const AdminUsersPage = () => {
 
   return (
     <>
+      {["student", "teacher", "parent", "admin"].includes(usersFilters.role) ? (
+        <PeopleDirectory
+          key={usersFilters.role}
+          role={usersFilters.role}
+          users={users?.data || []}
+          loading={users?.loading || false}
+          onCreate={handleCreateUser}
+          onView={handleViewUser}
+          onEdit={handleEditUser}
+          onToggleActive={handleDeleteUser}
+          onPurge={handlePurgeUser}
+          onRefresh={handleFetchUsers}
+        />
+      ) : (
       <UsersTab
         users={users?.data || []}
         loading={users?.loading || false}
@@ -318,6 +344,7 @@ const AdminUsersPage = () => {
         onUserEdit={handleEditUser}
         onCreateUser={handleCreateUser}
       />
+      )}
 
       {/* Create User Modal */}
       {activeModal === "create-user" && (

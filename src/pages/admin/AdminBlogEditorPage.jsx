@@ -11,6 +11,7 @@ import { showApiError } from "../../utils/apiErrorHandler";
 import { getStorageUrl } from "../../utils/storageUrl";
 import { parseYouTubeId, youTubeThumbnail } from "../../utils/youtube";
 import VideoEmbed from "../../components/blogs/VideoEmbed";
+import { BLOG_CATEGORIES } from "../../admin-v2/data/formOptions";
 
 const MAX_IMAGE_MB = 5;
 const EMPTY_FORM = {
@@ -26,9 +27,9 @@ const EMPTY_FORM = {
   video_url: "",
 };
 
-const labelCls = "block text-[11px] font-black uppercase tracking-[0.15em] text-slate-400";
+const labelCls = "block text-xs font-semibold text-slate-300 mb-1.5";
 const inputCls =
-  "w-full bg-slate-900/70 border border-slate-700/70 rounded-xl px-4 py-2.5 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-indigo-500/60 focus:ring-2 focus:ring-indigo-500/15 transition";
+  "w-full bg-[#0E1428] border border-[#232D52] rounded-xl px-4 py-2.5 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-[#6D5BFF] focus:ring-2 focus:ring-[#6D5BFF]/20 transition";
 
 const AdminBlogEditorPage = () => {
   const { slug } = useParams();
@@ -201,16 +202,16 @@ const AdminBlogEditorPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+      <div className="min-h-screen bg-[#0B1020] flex items-center justify-center">
         <LoadingSpinner />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
+    <div className="min-h-screen bg-[#0B1020] text-white">
       {/* Sticky action bar - no divider so the page header stays clean */}
-      <div className="sticky top-0 z-30 bg-slate-950/85 backdrop-blur-xl">
+      <div className="sticky top-0 z-30 bg-[#0B1020]/85 backdrop-blur-xl">
         <div className="max-w-6xl mx-auto px-5 sm:px-8 h-16 flex items-center justify-between gap-4">
           <button
             onClick={handleBack}
@@ -277,7 +278,7 @@ const AdminBlogEditorPage = () => {
                   className={`text-left rounded-2xl border p-4 transition ${
                     active
                       ? "border-indigo-500/60 bg-indigo-500/10 ring-2 ring-indigo-500/20"
-                      : "border-slate-800 bg-slate-900/50 hover:border-slate-700"
+                      : "border-[#232D52] bg-[#121831] hover:border-[#232D52]"
                   }`}
                 >
                   <div className="flex items-center gap-2.5 mb-1">
@@ -304,7 +305,7 @@ const AdminBlogEditorPage = () => {
           {/* Main column */}
           <div className="space-y-6">
             {isVideoPost && (
-              <div className="rounded-2xl border border-slate-800 bg-slate-900/50 p-5">
+              <div className="rounded-2xl border border-[#232D52] bg-[#121831] p-5">
                 <div className="flex items-center gap-2 mb-3">
                   <i className="fab fa-youtube text-red-500" />
                   <label className={`${labelCls} mb-0`}>YouTube Video Link</label>
@@ -356,7 +357,7 @@ const AdminBlogEditorPage = () => {
                         ID: {previewVideoId}
                       </span>
                     </div>
-                    <div className="rounded-xl overflow-hidden border border-slate-700/70 max-w-xl">
+                    <div className="rounded-xl overflow-hidden border border-[#232D52] max-w-xl">
                       <VideoEmbed
                         videoId={previewVideoId}
                         title={form.title || "Video preview"}
@@ -369,7 +370,7 @@ const AdminBlogEditorPage = () => {
                     </p>
                   </div>
                 ) : (
-                  <div className="mt-5 rounded-xl border border-dashed border-slate-700 bg-slate-950/40 max-w-xl aspect-video flex flex-col items-center justify-center text-center px-6">
+                  <div className="mt-5 rounded-xl border border-dashed border-[#232D52] bg-[#0B1020]/40 max-w-xl aspect-video flex flex-col items-center justify-center text-center px-6">
                     <i className="fab fa-youtube text-slate-700 text-3xl mb-3" />
                     <p className="text-slate-500 text-xs font-semibold">
                       Paste a YouTube link to see the preview
@@ -414,7 +415,7 @@ const AdminBlogEditorPage = () => {
               <label className={labelCls}>
                 {isVideoPost ? "Description (optional)" : "Content"}
               </label>
-              <div className="bg-slate-900/60 border border-slate-700/70 rounded-xl overflow-hidden blog-editor-shell">
+              <div className="bg-[#121831] border border-[#232D52] rounded-xl overflow-hidden blog-editor-shell">
                 <QuillEditor
                   value={form.content}
                   onChange={(val) => onChange("content", val)}
@@ -436,7 +437,7 @@ const AdminBlogEditorPage = () => {
           <aside className="space-y-6">
             {/* Current status (read-only indicator - actions live in the top bar) */}
             {isEdit && (
-              <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-5 flex items-center gap-3">
+              <div className="bg-[#121831] border border-[#232D52] rounded-2xl p-5 flex items-center gap-3">
                 <span
                   className={`w-2.5 h-2.5 rounded-full ${
                     form.status === "published"
@@ -456,13 +457,13 @@ const AdminBlogEditorPage = () => {
             )}
 
             {/* Cover image */}
-            <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-5">
+            <div className="bg-[#121831] border border-[#232D52] rounded-2xl p-5">
               <label className={labelCls}>
                 {isVideoPost ? "Cover Image (optional)" : "Cover Image"}
               </label>
               <div
                 onClick={() => fileRef.current?.click()}
-                className="relative h-40 rounded-xl border-2 border-dashed border-slate-700 hover:border-indigo-500/50 bg-slate-900/60 cursor-pointer overflow-hidden flex items-center justify-center transition group"
+                className="relative h-40 rounded-xl border-2 border-dashed border-[#232D52] hover:border-indigo-500/50 bg-[#121831] cursor-pointer overflow-hidden flex items-center justify-center transition group"
               >
                 {coverPreview ? (
                   <>
@@ -481,7 +482,7 @@ const AdminBlogEditorPage = () => {
                       alt="video thumbnail"
                       className="w-full h-full object-cover opacity-70"
                     />
-                    <div className="absolute inset-0 bg-slate-950/60 flex flex-col items-center justify-center text-center px-4">
+                    <div className="absolute inset-0 bg-[#0B1020]/60 flex flex-col items-center justify-center text-center px-4">
                       <p className="text-[10px] font-black uppercase tracking-wider text-slate-300">
                         Using video thumbnail
                       </p>
@@ -513,15 +514,28 @@ const AdminBlogEditorPage = () => {
             </div>
 
             {/* Meta */}
-            <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-5 space-y-4">
+            <div className="bg-[#121831] border border-[#232D52] rounded-2xl p-5 space-y-4">
               <div>
                 <label className={labelCls}>Category</label>
-                <input
-                  className={inputCls}
-                  placeholder="e.g. Study Tips"
-                  value={form.category}
-                  onChange={(e) => onChange("category", e.target.value)}
-                />
+                <select
+                  className={`${inputCls} cursor-pointer`}
+                  value={BLOG_CATEGORIES.includes(form.category) || !form.category ? form.category : "__custom"}
+                  onChange={(e) => onChange("category", e.target.value === "__custom" ? " " : e.target.value)}
+                >
+                  <option value="">Choose a category</option>
+                  {BLOG_CATEGORIES.map((c) => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                  <option value="__custom">Other (type a new one)…</option>
+                </select>
+                {form.category && !BLOG_CATEGORIES.includes(form.category) && (
+                  <input
+                    className={`${inputCls} mt-2`}
+                    placeholder="New category name"
+                    value={form.category.trimStart()}
+                    onChange={(e) => onChange("category", e.target.value || " ")}
+                  />
+                )}
               </div>
               <div>
                 <div className="flex gap-1.5 mb-2">
@@ -529,7 +543,7 @@ const AdminBlogEditorPage = () => {
                   {/* Info tooltip: explains that this value is the public byline. */}
                   <span className="group relative inline-flex">
                     <i className="fas fa-circle-info text-slate-500 hover:text-indigo-400 text-[11px] cursor-pointer" />
-                    <span className="pointer-events-none absolute left-1/2 bottom-full mb-2 -translate-x-1/2 w-52 rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-[11px] font-medium normal-case tracking-normal text-slate-200 leading-snug opacity-0 group-hover:opacity-100 transition z-20 shadow-xl">
+                    <span className="pointer-events-none absolute left-1/2 bottom-full mb-2 -translate-x-1/2 w-52 rounded-lg bg-[#1A2346] border border-[#232D52] px-3 py-2 text-[11px] font-medium normal-case tracking-normal text-slate-200 leading-snug opacity-0 group-hover:opacity-100 transition z-20 shadow-xl">
                       This name is shown publicly as the article's author. It
                       defaults to your admin name.
                     </span>
@@ -556,7 +570,7 @@ const AdminBlogEditorPage = () => {
             </div>
 
             {/* SEO */}
-            <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-5 space-y-4">
+            <div className="bg-[#121831] border border-[#232D52] rounded-2xl p-5 space-y-4">
               <div className="flex items-center gap-2">
                 <i className="fas fa-magnifying-glass text-indigo-400 text-xs" />
                 <span className="text-[11px] font-black uppercase tracking-[0.15em] text-slate-300">

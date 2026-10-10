@@ -1,0 +1,18 @@
+/* Typography and scrollbars of the AI Studio redesign, scoped to the admin area. */
+.vcs-admin-v2 {
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+}
+.vcs-admin-v2 ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.vcs-admin-v2 ::-webkit-scrollbar-track {
+  background: transparent;
+}
+.vcs-admin-v2 ::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.2);
+  border-radius: 9999px;
+}
+.vcs-admin-v2 ::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.4);
+}

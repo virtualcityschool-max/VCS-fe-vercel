@@ -2,10 +2,14 @@ import axios from "axios";
 import { API_BASE_URL } from "../constants";
 import { authStorage } from "./authStorage";
 
+// Request/response logs are for local development only: they slow the
+// page and would print personal data in a production console.
+const debugLog = import.meta.env.DEV ? console.log.bind(console) : () => {};
+
 const baseURL = API_BASE_URL;
 
-console.log("🔧 Axios Instance Base URL:", baseURL);
-console.log("🔧 Environment API_BASE_URL:", API_BASE_URL);
+debugLog("🔧 Axios Instance Base URL:", baseURL);
+debugLog("🔧 Environment API_BASE_URL:", API_BASE_URL);
 
 const axiosInstance = axios.create({
   baseURL: baseURL,
@@ -53,7 +57,7 @@ axiosInstance.interceptors.request.use(
 
     // Enhanced debugging for auth endpoints
     if (config.url?.includes("auth/me")) {
-      console.log("🔍 AUTH DEBUG - Request to /auth/me:", {
+      debugLog("🔍 AUTH DEBUG - Request to /auth/me:", {
         hasToken: !!token,
         tokenLength: token?.length,
         tokenPreview: token ? `${token.substring(0, 20)}...` : null,
@@ -64,7 +68,7 @@ axiosInstance.interceptors.request.use(
       });
     }
 
-    console.log("🚀 Request:", {
+    debugLog("🚀 Request:", {
       method: config.method?.toUpperCase(),
       url: config.url,
       baseURL: config.baseURL,
@@ -87,7 +91,7 @@ axiosInstance.interceptors.request.use(
 // Add response interceptor for debugging and token refresh
 axiosInstance.interceptors.response.use(
   (response) => {
-    console.log("✅ Response:", {
+    debugLog("✅ Response:", {
       status: response.status,
       statusText: response.statusText,
       url: response.config.url,

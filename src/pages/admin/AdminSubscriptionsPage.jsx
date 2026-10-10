@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { adminService } from "../../services/adminService";
 import { toastManager } from "../../utils/toastManager";
 import ConfirmDialog from "../../components/common/ConfirmDialog";
+import { PageHeader, SegmentedTabs, FilterBar, DataTable, StatusPill, Avatar } from "../../components/admin/ui";
 
 /**
  * Monthly access for paid courses.
@@ -32,22 +33,6 @@ const formatDate = (value) =>
       })
     : "-";
 
-const Pill = ({ tone, children }) => {
-  const tones = {
-    green: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-    amber: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-    rose: "bg-rose-500/10 text-rose-400 border-rose-500/20",
-    slate: "bg-slate-700/40 text-slate-300 border-white/10",
-  };
-  return (
-    <span
-      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${tones[tone] || tones.slate}`}
-    >
-      {children}
-    </span>
-  );
-};
-
 const AdminSubscriptionsPage = () => {
   const [data, setData] = useState({
     active: [],
@@ -56,7 +41,9 @@ const AdminSubscriptionsPage = () => {
   });
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState(null);
-  const [tab, setTab] = useState("expired");
+  const [tab, setTab] = useState("active");
+  const [search, setSearch] = useState("");
+  const [source, setSource] = useState("all");
   // { action: "extend" | "revoke" | "cancelled", row }
   const [confirm, setConfirm] = useState(null);
 
@@ -140,9 +127,11 @@ const AdminSubscriptionsPage = () => {
     }
   };
 
+  const ending = (data.active || []).filter((r) => typeof r.days_remaining === "number" && r.days_remaining <= 7);
   const tabs = [
-    { id: "expired", label: "Expired", count: data.expired?.length || 0 },
     { id: "active", label: "Active", count: data.active?.length || 0 },
+    { id: "ending", label: "Ending within 7 days", count: ending.length },
+    { id: "expired", label: "Expired", count: data.expired?.length || 0 },
     {
       id: "cancel",
       label: "Cancel on Gumroad",
@@ -150,12 +139,20 @@ const AdminSubscriptionsPage = () => {
     },
   ];
 
-  const rows =
+  const tabRows =
     tab === "active"
       ? data.active
-      : tab === "expired"
-        ? data.expired
-        : data.needs_gumroad_cancellation;
+      : tab === "ending"
+        ? ending
+        : tab === "expired"
+          ? data.expired
+          : data.needs_gumroad_cancellation;
+  const q = search.trim().toLowerCase();
+  const rows = (tabRows || []).filter(
+    (r) =>
+      (source === "all" || r.enrollment_source === source) &&
+      (!q || [r.student?.name, r.student?.email, r.course?.title].some((v) => (v || "").toLowerCase().includes(q))),
+  );
 
   // Copy for the confirm step, per action. Each one spells out the consequence
   // that is easy to forget: months stack, grades survive, Gumroad keeps billing.
@@ -205,188 +202,110 @@ const AdminSubscriptionsPage = () => {
     };
   };
 
+  const columns = [
+    {
+      header: "Student",
+      cell: (r) => (
+        <div className="flex items-center gap-3 min-w-[170px]">
+          <Avatar name={r.student?.name || ""} />
+          <div className="min-w-0">
+            <div className="font-semibold text-slate-100 truncate">{r.student?.name}</div>
+            <div className="text-[11px] text-slate-400 truncate">{r.student?.email}</div>
+          </div>
+        </div>
+      ),
+    },
+    { header: "Subject", cell: (r) => <span className="text-slate-200 block max-w-[260px] truncate" title={r.course?.title}>{r.course?.title}</span> },
+    { header: "Paid via", cell: (r) => <span className="text-slate-300 whitespace-nowrap">{SOURCE_LABELS[r.enrollment_source] || r.enrollment_source || "—"}</span> },
+    {
+      header: "Access until",
+      cell: (r) => (
+        <div className="whitespace-nowrap">
+          <div className="text-slate-200 tabular-nums">{formatDate(r.access_expires_at)}</div>
+          {typeof r.days_remaining === "number" && r.has_access && <div className={`text-[11px] ${r.days_remaining <= 7 ? "text-amber-300" : "text-slate-500"}`}>{r.days_remaining} days left</div>}
+        </div>
+      ),
+    },
+    { header: "Last payment", cell: (r) => <span className="text-slate-400 whitespace-nowrap tabular-nums">{formatDate(r.last_charge_at)}</span> },
+    {
+      header: "Status",
+      cell: (r) => (
+        <StatusPill status={tab === "cancel" ? "Cancel on Gumroad" : !r.has_access ? "Expired" : r.days_remaining <= 7 ? `Ends in ${Math.max(r.days_remaining, 0)}d` : "Active"} />
+      ),
+    },
+  ];
+
+  const actions = (r) =>
+    tab === "cancel" ? (
+      <div className="flex items-center gap-2">
+        {r.gumroad_cancel_url && (
+          <a href={r.gumroad_cancel_url} target="_blank" rel="noopener noreferrer" className="px-2.5 h-8 leading-8 rounded-lg border border-[#2A3766] text-slate-200 hover:bg-white/5 text-xs font-semibold whitespace-nowrap">
+            Open on Gumroad ↗
+          </a>
+        )}
+        <button type="button" onClick={() => setConfirm({ action: "cancelled", row: r })} disabled={busyId === r.enrollment_id} className="px-2.5 h-8 rounded-lg bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-semibold whitespace-nowrap disabled:opacity-50">
+          Mark cancelled
+        </button>
+      </div>
+    ) : (
+      <div className="flex items-center gap-2">
+        {r.can_extend && (
+          <button
+            type="button"
+            onClick={() => setConfirm({ action: "extend", row: r })}
+            disabled={busyId === r.enrollment_id}
+            title={r.has_access ? "Record next month's payment; it stacks on the current expiry." : "Record a month of manual payment and switch access back on."}
+            className="px-2.5 h-8 rounded-lg bg-[#6D5BFF] hover:bg-[#5B47FB] text-white text-xs font-semibold whitespace-nowrap disabled:opacity-50"
+          >
+            {r.has_access ? "Add 1 month" : "Renew 1 month"}
+          </button>
+        )}
+        {!r.can_extend && r.renewal_due_at && (
+          <span className="text-slate-500 text-[11px] whitespace-nowrap" title={`Renew unlocks on ${formatDate(r.renewal_due_at)}, a week before expiry.`}>
+            Paid until {formatDate(r.access_expires_at)}
+          </span>
+        )}
+        {!r.can_extend && !r.renewal_due_at && !r.has_access && <span className="text-slate-500 text-[11px]">Awaiting renewal</span>}
+        {r.has_access && (
+          <button type="button" onClick={() => setConfirm({ action: "revoke", row: r })} disabled={busyId === r.enrollment_id} className="px-2.5 h-8 rounded-lg border border-rose-500/30 text-rose-300 hover:bg-rose-500/10 text-xs font-semibold whitespace-nowrap disabled:opacity-50">
+            End access
+          </button>
+        )}
+      </div>
+    );
+
+  const monthlyActive = (data.active || []).length;
+  const emptyText = { cancel: "Nothing to cancel on Gumroad ✓", expired: "No expired subscriptions", ending: "Nothing ends in the next 7 days ✓", active: "No active subscriptions" }[tab];
+
   return (
     <section className="space-y-6">
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-white/5">
-        <div className="flex items-center gap-4">          
-        </div>
-
-        <div className="flex items-center gap-2 overflow-x-auto pb-1">
-          {tabs.map((t) => (
-            <button
-              key={t.id}
-              onClick={() => setTab(t.id)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all shrink-0 ${
-                tab === t.id
-                  ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20"
-                  : "bg-slate-800/40 text-slate-400 hover:bg-slate-800 hover:text-white border border-white/5"
-              }`}
-            >
-              <span className="text-[10px] font-black uppercase tracking-widest whitespace-nowrap">
-                {t.label}
-              </span>
-              {t.count > 0 && (
-                <span
-                  className={`flex items-center justify-center min-w-[18px] h-4 px-1 rounded-md text-[9px] font-black ${
-                    tab === t.id
-                      ? "bg-white/20 text-white"
-                      : t.id === "cancel"
-                        ? "bg-rose-500/20 text-rose-300"
-                        : "bg-slate-700 text-slate-300"
-                  }`}
-                >
-                  {t.count}
-                </span>
-              )}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Stays a banner on purpose: this explains what the tab is for, it is not
-          the result of an action, so it must not disappear on a timer. */}
+      <PageHeader
+        title="Subscriptions"
+        subtitle={`${monthlyActive} paid subjects active · ${ending.length} ending within 7 days · ${data.expired?.length || 0} expired${data.needs_gumroad_cancellation?.length ? ` · ${data.needs_gumroad_cancellation.length} to cancel on Gumroad` : ""}`}
+        onRefresh={load}
+      />
+      <SegmentedTabs tabs={tabs} value={tab} onChange={setTab} />
       {tab === "cancel" && (data.needs_gumroad_cancellation?.length || 0) > 0 && (
-        <div className="flex items-start gap-3 px-5 py-4 rounded-2xl bg-rose-500/10 border border-rose-500/20">
-          <i className="fas fa-triangle-exclamation text-rose-400 mt-0.5" />
-          <p className="text-xs text-rose-200/80 leading-relaxed">
-            These students are no longer entitled to access but if their Gumroad
-            membership is open please open it on Gumroad, cancel it there,
-            then mark it done here.
-          </p>
-        </div>
+        <p className="text-xs text-amber-200 bg-amber-500/10 border border-amber-500/30 rounded-xl p-3">
+          Gumroad can't be cancelled from here. These students were unenrolled but Gumroad will keep charging them until you cancel the membership on Gumroad, then mark it cancelled here.
+        </p>
       )}
-
+      <FilterBar
+        search={search}
+        onSearch={setSearch}
+        placeholder="Search student or subject…"
+        filters={[{ id: "source", label: "Payment source", value: source, onChange: setSource, options: Object.entries(SOURCE_LABELS).map(([value, label]) => ({ value, label })) }]}
+      />
       {loading ? (
-        <div className="text-center py-16 text-slate-500">
-          <i className="fas fa-spinner animate-spin text-2xl mb-3" />
-          <p className="text-sm">Loading subscriptions...</p>
-        </div>
-      ) : rows?.length ? (
-        <div className="overflow-x-auto rounded-2xl border border-white/5 bg-slate-900/40">
-          <table className="w-full text-sm min-w-[720px]">
-            <thead>
-              <tr className="text-left text-[10px] font-black uppercase tracking-widest text-slate-500 border-b border-white/5">
-                <th className="px-4 py-3">Student</th>
-                <th className="px-4 py-3">Course</th>
-                <th className="px-4 py-3">Source</th>
-                <th className="px-4 py-3">Access until</th>
-                <th className="px-4 py-3">Last charge</th>
-                <th className="px-4 py-3 text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((r) => (
-                <tr
-                  key={r.enrollment_id}
-                  className="border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition-colors"
-                >
-                  <td className="px-4 py-3">
-                    <p className="text-white font-semibold">{r.student?.name}</p>
-                    <p className="text-slate-500 text-xs">{r.student?.email}</p>
-                  </td>
-                  <td className="px-4 py-3 text-slate-300">{r.course?.title}</td>
-                  <td className="px-4 py-3">
-                    <Pill tone={r.enrollment_source === "gumroad" ? "green" : "slate"}>
-                      {SOURCE_LABELS[r.enrollment_source] || r.enrollment_source}
-                    </Pill>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className="text-slate-300">
-                      {formatDate(r.access_expires_at)}
-                    </span>
-                    {r.access_state === "expired" ? (
-                      <span className="ml-2">
-                        <Pill tone="amber">Ended</Pill>
-                      </span>
-                    ) : typeof r.days_remaining === "number" &&
-                      r.days_remaining <= 7 ? (
-                      <span className="ml-2">
-                        <Pill tone="amber">{r.days_remaining}d left</Pill>
-                      </span>
-                    ) : null}
-                  </td>
-                  <td className="px-4 py-3 text-slate-500 text-xs">
-                    {formatDate(r.last_charge_at)}
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    {tab === "cancel" ? (
-                      <div className="flex items-center justify-end gap-2">
-                        <a
-                          href={r.gumroad_cancel_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest bg-slate-800 border border-white/10 text-slate-300 hover:text-white hover:border-white/20 transition"
-                        >
-                          Open in Gumroad
-                        </a>
-                        <button
-                          onClick={() => setConfirm({ action: "cancelled", row: r })}
-                          disabled={busyId === r.enrollment_id}
-                          className="px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest bg-emerald-600 hover:bg-emerald-500 text-white transition disabled:opacity-50"
-                        >
-                          Mark cancelled
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-end gap-2">
-                        {r.can_extend && (
-                          <button
-                            onClick={() => setConfirm({ action: "extend", row: r })}
-                            disabled={busyId === r.enrollment_id}
-                            title={
-                              r.has_access
-                                ? "This month is nearly up and nothing renews it automatically. Recording the next month adds it on top of the current expiry, so no days are lost."
-                                : "Record a month of manual payment and switch their access back on."
-                            }
-                            className="px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest bg-blue-600 hover:bg-blue-500 text-white transition disabled:opacity-50"
-                          >
-                            {r.has_access ? "Add 1 month" : "Renew 1 month"}
-                          </button>
-                        )}
-                        {/* Shows the date their month actually ends, not the date
-                            the button unlocks. Those are a week apart, and showing
-                            the unlock date here read as an early expiry. */}
-                        {!r.can_extend && r.renewal_due_at && (
-                          <span
-                            className="text-slate-600 text-xs"
-                            title={`Their month runs to ${formatDate(r.access_expires_at)}. The renew button unlocks on ${formatDate(r.renewal_due_at)}, a week before that.`}
-                          >
-                            Paid until {formatDate(r.access_expires_at)}
-                          </span>
-                        )}
-                        {!r.can_extend && !r.renewal_due_at && !r.has_access && (
-                          <span className="text-slate-600 text-xs">Awaiting renewal</span>
-                        )}
-                        {r.has_access && (
-                          <button
-                            onClick={() => setConfirm({ action: "revoke", row: r })}
-                            disabled={busyId === r.enrollment_id}
-                            className="px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest bg-slate-800 border border-rose-500/30 text-rose-300 hover:bg-rose-500/10 transition disabled:opacity-50"
-                          >
-                            End access
-                          </button>
-                        )}
-                      </div>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <div className="space-y-2">{[0, 1, 2, 3].map((i) => <div key={i} className="h-14 rounded-xl bg-[#121831] animate-pulse" />)}</div>
       ) : (
-        <div className="flex flex-col items-center justify-center py-20 bg-slate-900/20 rounded-[2rem] border border-white/5 border-dashed">
-          <div className="w-16 h-16 rounded-2xl bg-slate-800 flex items-center justify-center mb-4 text-slate-600">
-            <i className="fas fa-check text-2xl" />
-          </div>
-          <h3 className="text-lg font-bold text-slate-400">
-            {tab === "cancel"
-              ? "Nothing to cancel"
-              : tab === "expired"
-                ? "No expired subscriptions"
-                : "No active subscriptions"}
-          </h3>
-        </div>
+        <DataTable
+          columns={columns}
+          rows={rows}
+          rowKey="enrollment_id"
+          rowActions={actions}
+          empty={<p className="py-16 text-center text-sm text-slate-400 rounded-2xl border border-[#232D52] bg-[#121831]">{emptyText}</p>}
+        />
       )}
 
       <ConfirmDialog

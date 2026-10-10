@@ -1,7 +1,9 @@
-import React, { useMemo, useState, useEffect, useRef } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, Card, Input, FilterSelect, SearchInput } from "../../components/ui";
 import CourseForm from "./CourseForm";
+import { PageHeader, SegmentedTabs, FilterBar, DataTable, StatusPill, DeptPill, Avatar, IconButton } from "./ui";
+import { DEPARTMENTS, departmentOf } from "./ui/departments";
 import { coursesService } from "../../services/coursesService";
 import { toastManager } from "../../utils/toastManager";
 import { showApiError } from "../../utils/apiErrorHandler";
@@ -228,89 +230,6 @@ const CourseCategoriesModal = ({ onClose, onCategoriesChanged, initialEditId, in
 };
 
 // Subject department definitions matching VCS standard
-const COURSE_DEPARTMENTS = [
-  {
-    id: "all",
-    name: "All Courses",
-    icon: "fa-layer-group",
-    color: "text-indigo-400",
-    bg: "bg-indigo-500/10 border-indigo-500/20",
-    keywords: [],
-  },
-  {
-    id: "mathematics",
-    name: "Mathematics",
-    icon: "fa-calculator",
-    color: "text-blue-400",
-    bg: "bg-blue-500/10 border-blue-500/20",
-    keywords: ["math", "mathematics", "calculus", "algebra", "geometry", "0580", "4024", "9709"],
-  },
-  {
-    id: "physics",
-    name: "Physics",
-    icon: "fa-atom",
-    color: "text-indigo-400",
-    bg: "bg-indigo-500/10 border-indigo-500/20",
-    keywords: ["physics", "mechanics", "astrophysics", "quantum", "0625", "5054", "9702"],
-  },
-  {
-    id: "chemistry",
-    name: "Chemistry",
-    icon: "fa-flask",
-    color: "text-purple-400",
-    bg: "bg-purple-500/10 border-purple-500/20",
-    keywords: ["chemistry", "organic", "inorganic", "biochemistry", "0620", "5070", "9701"],
-  },
-  {
-    id: "biology",
-    name: "Biology",
-    icon: "fa-dna",
-    color: "text-emerald-400",
-    bg: "bg-emerald-500/10 border-emerald-500/20",
-    keywords: ["biology", "bio", "zoology", "botany", "life science", "genetics", "0610", "5090", "9700"],
-  },
-  {
-    id: "english_urdu",
-    name: "English & Urdu",
-    icon: "fa-book-open",
-    color: "text-amber-400",
-    bg: "bg-amber-500/10 border-amber-500/20",
-    keywords: ["english", "urdu", "literature", "language", "grammar", "ielts", "toefl", "0500", "1123", "3248"],
-  },
-  {
-    id: "computer_science",
-    name: "Computer Science",
-    icon: "fa-laptop-code",
-    color: "text-cyan-400",
-    bg: "bg-cyan-500/10 border-cyan-500/20",
-    keywords: ["computer", "programming", "coding", "software", "python", "cs", "0478", "2210", "9618"],
-  },
-  {
-    id: "general_sciences",
-    name: "General & Other Subjects",
-    icon: "fa-graduation-cap",
-    color: "text-slate-400",
-    bg: "bg-slate-500/10 border-slate-500/20",
-    keywords: [],
-  },
-];
-
-const getCourseDepartment = (course) => {
-  if (!course) return COURSE_DEPARTMENTS[COURSE_DEPARTMENTS.length - 1];
-  const catName = typeof course.category === "object" ? course.category?.name : course.category || "";
-  const title = course.title || "";
-  const text = `${title} ${catName}`.toLowerCase();
-
-  for (const dept of COURSE_DEPARTMENTS) {
-    if (dept.id !== "all" && dept.keywords.length > 0) {
-      if (dept.keywords.some((kw) => text.includes(kw))) {
-        return dept;
-      }
-    }
-  }
-  return COURSE_DEPARTMENTS[COURSE_DEPARTMENTS.length - 1];
-};
-
 const CoursesTab = ({
   courses,
   users,
@@ -341,27 +260,8 @@ const CoursesTab = ({
   const navigate = useNavigate();
 
   const [selectedDepartment, setSelectedDepartment] = useState("all");
-  const [catDropdownOpen, setCatDropdownOpen]       = useState(false);
   const [categoriesOpenWith, setCategoriesOpenWith] = useState(null); // null | { editId?, deleteId? }
   const [selectedRosterCourse, setSelectedRosterCourse] = useState(null); // null | { id, title }
-  const catDropdownRef = useRef(null);
-
-  // Close category dropdown on outside click/tap (works on mobile)
-  useEffect(() => {
-    if (!catDropdownOpen) return;
-    const handler = (e) => {
-      if (catDropdownRef.current && !catDropdownRef.current.contains(e.target)) {
-        setCatDropdownOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    document.addEventListener("touchstart", handler);
-    return () => {
-      document.removeEventListener("mousedown", handler);
-      document.removeEventListener("touchstart", handler);
-    };
-  }, [catDropdownOpen]);
-
   // Filter courses based on search term, filters, and department
   const filteredCourses = useMemo(() => {
     if (!courses || courses.length === 0) return [];
@@ -397,8 +297,7 @@ const CoursesTab = ({
       const matchesDept =
         selectedDepartment === "all" ||
         (() => {
-          const dept = getCourseDepartment(course);
-          return dept.id === selectedDepartment;
+          return departmentOf(course.title).id === selectedDepartment;
         })();
 
       // Price range filter
@@ -462,21 +361,6 @@ const CoursesTab = ({
     setSelectedDepartment("all");
   };
 
-  // Department counts for quick filter pills
-  const departmentCounts = useMemo(() => {
-    const counts = { all: courses?.length || 0 };
-    COURSE_DEPARTMENTS.forEach((dept) => {
-      if (dept.id !== "all") counts[dept.id] = 0;
-    });
-    (courses || []).forEach((c) => {
-      const dept = getCourseDepartment(c);
-      if (counts[dept.id] !== undefined) {
-        counts[dept.id]++;
-      }
-    });
-    return counts;
-  }, [courses]);
-
   // Course metrics
   const courseMetrics = useMemo(() => {
     let published = 0;
@@ -508,678 +392,139 @@ const CoursesTab = ({
     }
   };
 
- const filterOptions = useMemo(() => {
-    const instructors = courses ? [
-      ...new Set(
-        courses.map((course) => getDisplayName(course.instructor)).filter(Boolean),
+  const [sort, setSort] = useState("title");
+  const statusTab = courseFilters.status || "all";
+  const levelOptions = (categories || []).map((c) => ({
+    label: c.name,
+    value: (c.name || "").toLowerCase().replace(/\s+/g, ""),
+    count: (courses || []).filter((x) => ((typeof x.category === "object" ? x.category?.name : x.category) || "").toLowerCase().replace(/\s+/g, "") === (c.name || "").toLowerCase().replace(/\s+/g, "")).length,
+  }));
+  const teacherOptions = [...new Map((courses || []).filter((c) => c.instructor?.id).map((c) => [String(c.instructor.id), getDisplayName(c.instructor)])).entries()]
+    .sort((a, b) => a[1].localeCompare(b[1]))
+    .map(([value, label]) => ({ value, label }));
+  const sortedCourses = [...filteredCourses].sort((a, b) => {
+    if (sort === "students") return (b.enrolled_students_count || 0) - (a.enrolled_students_count || 0);
+    if (sort === "price") return (parseFloat(a.price) || 0) - (parseFloat(b.price) || 0);
+    if (sort === "unassigned") return (a.instructor ? 1 : 0) - (b.instructor ? 1 : 0);
+    return (a.title || "").localeCompare(b.title || "");
+  });
+
+  const openAssign = (course) => {
+    setEditCourseForm((prev) => ({ ...prev, instructor_id: course.instructor?.id || "" }));
+    setActiveModal({ type: "assign-instructor", courseId: course.id });
+  };
+
+  const subjectColumns = [
+    {
+      header: "Subject",
+      cell: (c) => (
+        <div className="min-w-[220px] max-w-[320px]">
+          <div className="font-semibold text-slate-100 truncate">{c.title}</div>
+          <div className="text-[11px] text-slate-400 truncate">{(c.description || "").replace(/<[^>]+>/g, "").slice(0, 80)}</div>
+        </div>
       ),
-    ] : [];
-
-    // Dynamic price ranges based on course prices
-    const prices = (courses || []).map((c) => parseFloat(c.price) || 0);
-    const maxPrice = Math.max(...prices, 0);
-    
-    let priceRanges = [];
-    if (maxPrice === 0) {
-      priceRanges = [{ value: "0-0", label: "Free" }];
-    } else {
-      // Determine a reasonable step based on max price, ensuring it ends with 0
-      // We aim for approximately 5 ranges
-      let step = Math.ceil(maxPrice / 5 / 10) * 10;
-      if (step === 0) step = 10;
-      
-      for (let i = 0; i < maxPrice; i += step) {
-        const lower = i;
-        const upper = i + step;
-        priceRanges.push({
-          value: `${lower}-${upper}`,
-          label: `$${lower.toFixed(0)} – $${upper.toFixed(0)} USD`,
-        });
-      }
-    }
-
-    return {
-      instructors: instructors.sort(),
-      priceRanges,
-    };
-  }, [courses]);
+    },
+    { header: "Department", cell: (c) => <DeptPill dept={departmentOf(c.title)} /> },
+    { header: "Level", cell: (c) => <span className="text-slate-300 whitespace-nowrap">{(typeof c.category === "object" ? c.category?.name : c.category) || "—"}</span> },
+    {
+      header: "Teacher",
+      cell: (c) =>
+        c.instructor ? (
+          <button type="button" onClick={(e) => { e.stopPropagation(); openAssign(c); }} className="flex items-center gap-2 text-left hover:text-indigo-300" title="Change teacher">
+            <Avatar name={getDisplayName(c.instructor)} />
+            <span className="text-slate-200 whitespace-nowrap">{getDisplayName(c.instructor)}</span>
+          </button>
+        ) : (
+          <button type="button" onClick={(e) => { e.stopPropagation(); openAssign(c); }} className="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/30 hover:bg-amber-500/25 whitespace-nowrap">
+            + Assign teacher
+          </button>
+        ),
+    },
+    { header: "Price", align: "right", cell: (c) => <span className="tabular-nums font-semibold text-slate-200 whitespace-nowrap">{c.is_paid && parseFloat(c.price) > 0 ? `$${parseFloat(c.price)}/mo` : <span className="text-emerald-400">Free</span>}</span> },
+    {
+      header: "Students",
+      align: "right",
+      cell: (c) => (
+        <button type="button" onClick={(e) => { e.stopPropagation(); setSelectedRosterCourse({ id: c.id, title: c.title }); }} className="px-2.5 py-1 rounded-lg bg-indigo-500/15 text-indigo-300 hover:bg-indigo-500/25 tabular-nums text-xs font-semibold" title="See enrolled students">
+          <i className="fas fa-users text-[10px] mr-1" aria-hidden="true" />{c.enrolled_students_count ?? 0}
+        </button>
+      ),
+    },
+    { header: "Status", cell: (c) => <StatusPill status={c.status === "published" ? "Published" : "Draft"} /> },
+  ];
 
   return (
-    <div className="space-y-6">
-      {/* Course Management Header */}
-      <div className="mb-6">
-        <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2 sm:justify-end">
-          <SearchInput
-            value={courseFilters.search}
-            onChange={(e) => setCourseFilters({ ...courseFilters, search: e.target.value })}
-            onClear={() => setCourseFilters({ ...courseFilters, search: "" })}
-            placeholder="Search courses..."
-            className="w-full sm:w-56"
-          />
-          {/* 2-per-row on mobile for category + selects */}
-          <div className="grid grid-cols-2 sm:contents gap-2">
-          {/* Category filter dropdown with inline add/edit/delete */}
-          <div className="relative" ref={catDropdownRef}>
-            <button
-              onClick={() => setCatDropdownOpen((o) => !o)}
-              className="flex items-center gap-2 px-3 py-2 bg-slate-800/60 border border-slate-700/70 text-slate-300 hover:text-white rounded-xl text-sm font-medium transition-all w-full sm:w-[160px] justify-between"
-            >
-              <span className="flex items-center gap-1.5 truncate">
-                <i className="fas fa-tags text-xs text-indigo-400 shrink-0" />
-                <span className="truncate">
-                  {courseFilters.category
-                    ? (categories.find((c) => c.name.toLowerCase().replace(/\s+/g, "") === courseFilters.category)?.name ?? "Category")
-                    : "All levels"}
-                </span>
-              </span>
-              <i className={`fas fa-chevron-down text-xs text-slate-500 shrink-0 transition-transform duration-200 ${catDropdownOpen ? "rotate-180" : ""}`} />
-            </button>
-
-            {catDropdownOpen && (
-              <div className="absolute top-full right-0 sm:left-0 sm:right-auto mt-1.5 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-30 w-full overflow-hidden">
-                {/* All Categories - fixed, not scrolled */}
-                <button
-                  onClick={() => { setCourseFilters({ ...courseFilters, category: "" }); setCatDropdownOpen(false); }}
-                  className={`w-full text-left px-3 py-2.5 text-sm transition flex items-center gap-2 ${courseFilters.category === "" ? "text-indigo-400 bg-indigo-500/10" : "text-slate-300 hover:bg-slate-800 hover:text-white"}`}
-                >
-                  <i className="fas fa-border-all text-xs opacity-60" />
-                  All Levels
-                </button>
-
-                {categories.length > 0 && <div className="border-t border-slate-800" />}
-
-                {/* Scrollable category list with fixed height */}
-                <div className="max-h-48 overflow-y-auto overscroll-contain">
-                  {categories.map((cat) => (
-                    <div
-                      key={cat.id}
-                      className="flex items-center gap-1 px-2 py-1.5 hover:bg-slate-800/70 group"
-                    >
-                      <button
-                        onClick={() => { 
-                          const normalized = cat.name.toLowerCase().replace(/\s+/g, "");
-                          setCourseFilters({ ...courseFilters, category: normalized }); 
-                          setCatDropdownOpen(false); 
-                        }}
-                        className={`flex-1 text-left text-sm px-1.5 py-1 rounded-lg transition truncate ${courseFilters.category === cat.name.toLowerCase().replace(/\s+/g, "") ? "text-indigo-400 font-semibold" : "text-slate-300 group-hover:text-white"}`}
-                      >
-                        {cat.name}
-                      </button>
-                      {/* Always visible on mobile, hover-only on desktop */}
-                      <button
-                        onClick={() => { setCatDropdownOpen(false); setCategoriesOpenWith({ editId: cat.id }); }}
-                        title="Rename"
-                        className="w-6 h-6 flex items-center justify-center rounded-md text-slate-500 hover:text-white hover:bg-slate-700 transition text-xs opacity-100 sm:opacity-0 sm:group-hover:opacity-100 shrink-0"
-                      >
-                        <i className="fas fa-pencil-alt" />
-                      </button>
-                      <button
-                        onClick={() => { setCatDropdownOpen(false); setCategoriesOpenWith({ deleteId: cat.id }); }}
-                        title="Delete"
-                        className="w-6 h-6 flex items-center justify-center rounded-md text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition text-xs opacity-100 sm:opacity-0 sm:group-hover:opacity-100 shrink-0"
-                      >
-                        <i className="fas fa-trash-alt" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="border-t border-slate-800" />
-
-                {/* Add Category - fixed at bottom */}
-                <button
-                  onClick={() => { setCatDropdownOpen(false); setCategoriesOpenWith({}); }}
-                  className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-indigo-400 hover:bg-indigo-500/10 hover:text-indigo-300 transition font-semibold"
-                >
-                  <i className="fas fa-plus text-xs" />
-                  Add Level
-                </button>
-              </div>
-            )}
-          </div>
-
-          <FilterSelect
-            className="w-full sm:w-[160px]"
-            value={courseFilters.priceRange}
-            onChange={(e) => setCourseFilters({ ...courseFilters, priceRange: e.target.value })}
-          >
-            <option value="">All Prices</option>
-                {filterOptions.priceRanges.map((range) => (
-                  <option key={range.value} value={range.value}>{range.label}</option>
-                ))}
-          </FilterSelect>
-          <FilterSelect
-            className="w-full sm:w-[160px]"
-            value={courseFilters.status}
-            onChange={(e) => setCourseFilters({ ...courseFilters, status: e.target.value })}
-          >
-            <option value="">All Status</option>
-            <option value="published">Published</option>
-            <option value="draft">Draft</option>
-            <option value="completed">Completed</option>
-          </FilterSelect>
-          <FilterSelect
-            className="w-full sm:w-[160px]"
-            value={courseFilters.instructor}
-            onChange={(e) => setCourseFilters({ ...courseFilters, instructor: e.target.value })}
-          >
-            <option value="">All Teachers</option>
-            {users?.map((user) => (
-              <option key={user.id} value={user.id}>{getDisplayName(user)}</option>
-            ))}
-          </FilterSelect>
-          </div>{/* end 2-col grid */}
-
-          <div className="flex items-center gap-2 flex-wrap">
-            <GradingScaleButton />
-            <button
-              onClick={() => setActiveModal("create-course")}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold shadow-lg shadow-indigo-500/20 active:scale-95 transition-all duration-150"
-            >
-              <i className="fas fa-plus text-xs"></i>
-              <span>Create Course</span>
-            </button>
-            {hasActiveCourseFilters && (
-              <button
-                onClick={resetCourseFilters}
-                title="Clear all filters"
-                className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-slate-700/70 bg-slate-900 hover:bg-rose-500/10 hover:border-rose-500/40 text-slate-400 hover:text-rose-400 text-sm font-medium transition-all duration-150"
-              >
-                <i className="fas fa-times text-xs"></i>
-                <span className="hidden sm:inline">Clear</span>
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* ─────────────────────────────────────────────
-         QUICK-CLICK DEPARTMENT & STATUS FILTER BAR
-         ───────────────────────────────────────────── */}
-      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3 p-3 bg-slate-900/60 border border-slate-800/80 rounded-2xl shadow-lg">
-        {/* Department Pills */}
-        <div className="flex flex-wrap items-center gap-1.5 py-0.5">
-          {COURSE_DEPARTMENTS.map((dept) => {
-            const active = selectedDepartment === dept.id;
-            const count = departmentCounts[dept.id] || 0;
-            return (
-              <button
-                key={dept.id}
-                onClick={() => setSelectedDepartment(dept.id)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition border ${
-                  active
-                    ? "bg-indigo-600 text-white border-indigo-500 shadow-md shadow-indigo-500/20 ring-1 ring-indigo-400"
-                    : "bg-slate-800/40 text-slate-400 hover:text-white hover:bg-slate-800 border-slate-800"
-                }`}
-              >
-                <i className={`fas ${dept.icon} text-[11px] ${active ? "text-white" : dept.color}`} />
-                <span>{dept.name}</span>
-                <span
-                  className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
-                    active ? "bg-indigo-700/80 text-white" : "bg-slate-800 text-slate-400"
-                  }`}
-                >
-                  {count}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Status / Publication Quick Toggles */}
-        <div className="flex items-center gap-1.5 shrink-0 border-t lg:border-t-0 border-slate-800 pt-2 lg:pt-0">
-          <button
-            onClick={() => setCourseFilters((prev) => ({ ...prev, status: "" }))}
-            className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition ${
-              courseFilters.status === ""
-                ? "bg-slate-700 text-white"
-                : "text-slate-400 hover:text-white"
-            }`}
-          >
-            All ({courseMetrics.total})
+    <div className="space-y-6 max-w-[1400px] mx-auto">
+      <PageHeader
+        title="Subjects"
+        subtitle={`${courseMetrics.total} subjects · ${courseMetrics.published} published · ${courseMetrics.draft} draft · ${courseMetrics.paid} paid, ${courseMetrics.free} free`}
+        primaryAction={{ label: "New subject", icon: "fa-book-medical", onClick: () => setActiveModal("create-course") }}
+        extraActions={
+          <button type="button" onClick={() => setCategoriesOpenWith({})} className="h-10 px-4 rounded-xl border border-[#232D52] bg-[#121831] text-slate-200 hover:border-indigo-500/40 text-sm font-semibold flex items-center gap-2">
+            <i className="fas fa-layer-group text-xs" aria-hidden="true" /> Levels
           </button>
-          <button
-            onClick={() => setCourseFilters((prev) => ({ ...prev, status: "published" }))}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition border ${
-              courseFilters.status === "published"
-                ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
-                : "border-slate-800 text-slate-400 hover:text-emerald-300"
-            }`}
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span>Published ({courseMetrics.published})</span>
-          </button>
-          <button
-            onClick={() => setCourseFilters((prev) => ({ ...prev, status: "draft" }))}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition border ${
-              courseFilters.status === "draft"
-                ? "bg-amber-500/20 text-amber-300 border-amber-500/40"
-                : "border-slate-800 text-slate-400 hover:text-amber-300"
-            }`}
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-            <span>Draft ({courseMetrics.draft})</span>
-          </button>
-        </div>
-      </div>
+        }
+      />
 
-      {/* Filter Results Info */}
-      {hasActiveCourseFilters && (
-        <div className="mb-4 text-sm text-slate-400">
-          Showing {filteredCourses.length} of {courses?.length || 0} courses
-        </div>
+      <SegmentedTabs
+        tabs={[
+          { id: "all", label: "All", count: courseMetrics.total },
+          { id: "published", label: "Published", count: courseMetrics.published },
+          { id: "draft", label: "Draft", count: courseMetrics.draft },
+        ]}
+        value={statusTab}
+        onChange={(v) => setCourseFilters((prev) => ({ ...prev, status: v === "all" ? "" : v }))}
+      />
+
+      <FilterBar
+        search={courseFilters.search}
+        onSearch={(v) => setCourseFilters((prev) => ({ ...prev, search: v }))}
+        placeholder="Search subject, teacher or level…"
+        filters={[
+          {
+            id: "dept",
+            label: "Department",
+            value: selectedDepartment,
+            onChange: setSelectedDepartment,
+            options: DEPARTMENTS.map((d) => ({ label: d.name, value: d.id, count: (courses || []).filter((c) => departmentOf(c.title).id === d.id).length })),
+          },
+          { id: "level", label: "Level", value: courseFilters.category || "all", onChange: (v) => setCourseFilters((prev) => ({ ...prev, category: v === "all" ? "" : v })), options: levelOptions },
+          { id: "teacher", label: "Teacher", value: courseFilters.instructor || "all", onChange: (v) => setCourseFilters((prev) => ({ ...prev, instructor: v === "all" ? "" : v })), options: teacherOptions },
+        ]}
+        sortOptions={[
+          { label: "Name (A–Z)", value: "title" },
+          { label: "Most students", value: "students" },
+          { label: "Price (lowest)", value: "price" },
+          { label: "No teacher first", value: "unassigned" },
+        ]}
+        sort={sort}
+        onSort={setSort}
+      />
+
+      {loading && (courses || []).length === 0 ? (
+        <div className="space-y-2">{[0, 1, 2, 3].map((i) => <div key={i} className="h-14 rounded-xl bg-[#121831] animate-pulse" />)}</div>
+      ) : (
+        <DataTable
+          columns={subjectColumns}
+          rows={sortedCourses}
+          onRowClick={(c) => navigate(`/admin/courses/${c.id}`)}
+          rowActions={(c) => (
+            <>
+              <IconButton icon="fa-eye" label="Open subject" onClick={() => navigate(`/admin/courses/${c.id}`)} />
+              <IconButton icon="fa-pen" label="Edit" onClick={() => onCourseEdit(c.id)} tone="hover:text-emerald-300" disabled={loadingCourseIds?.has?.(c.id) || updatingCourseId === c.id} />
+              <IconButton icon="fa-trash" label="Delete" onClick={() => onCourseDelete(c.id)} tone="hover:text-rose-300" />
+            </>
+          )}
+          empty={
+            <div className="py-16 text-center rounded-2xl border border-[#232D52] bg-[#121831]">
+              <p className="text-sm text-slate-400">No subjects match these filters.</p>
+              {hasActiveCourseFilters && (
+                <button type="button" onClick={resetCourseFilters} className="mt-3 text-xs text-indigo-300 hover:text-indigo-200 underline">Clear all filters</button>
+              )}
+            </div>
+          }
+        />
       )}
-
-      {/* Courses List */}
-      <div className="bg-slate-900/50 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-sm">
-        {loading ? (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead className="bg-slate-950/60 border-b border-slate-800">
-                <tr>
-                  <th className="px-6 py-4 text-xs font-black uppercase text-slate-500">
-                    Subject
-                  </th>
-                  <th className="px-6 py-4 text-xs font-black uppercase text-slate-500">
-                    Teacher
-                  </th>
-                  <th className="px-6 py-4 text-xs font-black uppercase text-slate-500">
-                    Level
-                  </th>
-                  <th className="px-6 py-4 text-xs font-black uppercase text-slate-500">
-                    Price
-                  </th>
-                  <th className="px-6 py-4 text-xs font-black uppercase text-slate-500">
-                    Type
-                  </th>
-                  <th className="px-6 py-4 text-xs font-black uppercase text-slate-500">
-                    Status
-                  </th>
-                  <th className="px-6 py-4 text-xs font-black uppercase text-slate-500 text-right">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800/50">
-                {[...Array(5)].map((_, index) => (
-                  <tr key={index} className="animate-pulse">
-                    <td className="px-6 py-4">
-                      <div className="space-y-2">
-                        <div className="h-4 bg-slate-700 rounded w-48"></div>
-                        <div className="h-3 bg-slate-700 rounded w-64"></div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 bg-slate-700 rounded-full"></div>
-                        <div className="h-4 bg-slate-700 rounded w-24"></div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="h-6 bg-slate-700 rounded w-20"></div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="h-4 bg-slate-700 rounded w-16"></div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="h-6 bg-slate-700 rounded w-14"></div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="h-6 bg-slate-700 rounded w-16"></div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2 justify-end">
-                        <div className="h-8 bg-slate-700 rounded w-12"></div>
-                        <div className="h-8 bg-slate-700 rounded w-12"></div>
-                        <div className="h-8 bg-slate-700 rounded w-16"></div>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <div>
-            {/* Mobile Card View */}
-            <div className="lg:hidden divide-y divide-slate-800/50 space-y-4">
-              {filteredCourses?.map((course) => (
-                <div
-                  key={course.id}
-                  className="p-4 sm:p-6 hover:bg-slate-800/30 transition cursor-pointer"
-                  onClick={() =>
-                    navigate(`/admin/courses/${course.id}`)
-                  }
-                >
-                  <div className="flex flex-col gap-4">
-                    {/* Course Info */}
-                    <div className="flex items-start gap-3">
-                      <div className="w-12 h-12 bg-indigo-600/20 rounded-xl flex items-center justify-center">
-                        <i className="fas fa-book text-indigo-400 text-sm"></i>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-bold text-white text-sm sm:text-base mb-1">
-                          {course.title}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Course Details */}
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs text-slate-400">
-                      {course.instructor ? (
-                        <button
-                          type="button"
-                          className="flex items-center gap-2 hover:text-indigo-300 transition text-left"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setEditCourseForm((prev) => ({ ...prev, instructor_id: course.instructor?.id || "" }));
-                            setActiveModal({ type: "assign-instructor", courseId: course.id });
-                          }}
-                          title="Click to change teacher"
-                        >
-                          <i className="fas fa-user text-indigo-400"></i>
-                          <span>{getDisplayName(course.instructor)}</span>
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          className="flex items-center gap-1 text-amber-400 hover:text-amber-300 font-semibold text-left"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setEditCourseForm((prev) => ({ ...prev, instructor_id: "" }));
-                            setActiveModal({ type: "assign-instructor", courseId: course.id });
-                          }}
-                        >
-                          <i className="fas fa-user-plus text-xs"></i>
-                          <span>Assign Teacher</span>
-                        </button>
-                      )}
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedRosterCourse({ id: course.id, title: course.title });
-                        }}
-                        className="flex items-center gap-1.5 text-indigo-400 hover:text-indigo-300 font-semibold"
-                      >
-                        <i className="fas fa-user-graduate"></i>
-                        <span>{course.enrolled_students_count || 0} Students</span>
-                      </button>
-                      <div className="flex items-center gap-2">
-                        <i className="fas fa-tag text-purple-400"></i>
-                        <span>{course.category?.name?? course.category}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <i className="fas fa-dollar-sign text-amber-400"></i>
-                        <span>{course.is_paid ? `$${(course.price || 0).toLocaleString("en-US")} USD` : "Free"}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <i
-                          className={`fas fa-circle text-xs ${
-                            course.status === "published"
-                              ? "text-emerald-400"
-                              : "text-slate-500"
-                          }`}
-                        ></i>
-                        <span>{course.status}</span>
-                      </div>
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div
-                      className="flex items-center gap-2"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <button
-                        onClick={() => onCourseEdit(course.id)}
-                        className="w-8 h-8 flex items-center justify-center bg-slate-700/50 text-slate-300 rounded-lg hover:bg-slate-600/50 transition"
-                        title="Edit course"
-                      >
-                        <i className="fas fa-edit text-xs"></i>
-                      </button>
-                      <button
-                        onClick={() => onCourseDelete(course.id)}
-                        disabled={loadingCourseIds.has(course.id)}
-                        className="w-8 h-8 flex items-center justify-center bg-red-600/10 text-red-400 rounded-lg hover:bg-red-600/20 transition disabled:opacity-50"
-                        title="Delete course"
-                      >
-                        {loadingCourseIds.has(course.id)
-                          ? <i className="fas fa-spinner fa-spin text-xs"></i>
-                          : <i className="fas fa-trash text-xs"></i>}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Desktop Table View */}
-            <div className="hidden lg:block overflow-x-auto table-scrollbar pb-1">
-              <table className="w-full text-left border-collapse">
-                <thead className="bg-slate-950/80 border-b border-slate-800 text-[11px] font-bold text-slate-400 uppercase tracking-wider sticky top-0 z-10 backdrop-blur-md">
-                  <tr>
-                    <th className="px-2.5 py-3 w-8 text-center">#</th>
-                    <th className="px-3.5 py-3">Subject</th>
-                    <th className="px-2.5 py-3">Department</th>
-                    <th className="px-2.5 py-3">Level</th>
-                    <th className="px-2.5 py-3">Teacher</th>
-                    <th className="px-2.5 py-3">Price</th>
-                    <th className="px-2.5 py-3">Status</th>
-                    <th className="px-2 py-3 text-center">Students</th>
-                    <th className="px-3 py-3 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800/40 text-xs">
-                  {filteredCourses?.map((course, index) => {
-                    const dept = getCourseDepartment(course);
-                    const levelName = course.category?.name ?? course.category ?? "General";
-                    const codeMatch = course.title?.match(/\(([0-9]{4})\)/);
-                    const courseCode = codeMatch ? codeMatch[1] : null;
-
-                    return (
-                      <tr
-                        key={course.id}
-                        className="hover:bg-slate-800/30 transition-colors group cursor-pointer"
-                        onClick={() => navigate(`/admin/courses/${course.id}`)}
-                      >
-                        {/* Index */}
-                        <td className="px-2.5 py-2.5 text-center font-mono text-slate-500">
-                          {index + 1}
-                        </td>
-
-                        {/* Course (Clean single-line with title, code, department icon, and description in tooltip) */}
-                        <td className="px-3.5 py-2.5">
-                          <div
-                            className="flex items-center gap-2 max-w-[220px] xl:max-w-[300px]"
-                            title={course.description ? `${course.title}\n\n${course.description}` : course.title}
-                          >
-                            <div className={`w-6 h-6 rounded-md ${dept.bg} ${dept.color} flex items-center justify-center shrink-0 shadow-sm`}>
-                              <i className={`fas ${dept.icon} text-[10px]`} />
-                            </div>
-                            <div className="min-w-0 flex items-center gap-1.5 flex-1">
-                              <p className="font-semibold text-white text-xs leading-none group-hover:text-indigo-300 transition truncate">
-                                {course.title}
-                              </p>
-                              {courseCode && (
-                                <span className="px-1.5 py-0.2 rounded font-mono text-[9px] bg-slate-800 text-indigo-300 border border-slate-700/80 font-semibold shrink-0">
-                                  {courseCode}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        </td>
-
-                        {/* Department */}
-                        <td className="px-2.5 py-2.5 whitespace-nowrap">
-                          <span
-                            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold border ${dept.bg} ${dept.color} max-w-[115px] truncate`}
-                            title={dept.name}
-                          >
-                            <i className={`fas ${dept.icon} text-[9px] shrink-0`} />
-                            <span className="truncate">{dept.name}</span>
-                          </span>
-                        </td>
-
-                        {/* Level */}
-                        <td className="px-2.5 py-2.5 whitespace-nowrap">
-                          <span
-                            className="bg-slate-800/80 text-slate-300 px-2 py-0.5 rounded text-[10px] font-medium border border-slate-700/80 max-w-[125px] truncate inline-block align-middle"
-                            title={levelName}
-                          >
-                            {levelName}
-                          </span>
-                        </td>
-
-                        {/* Teacher (Workflow 1: 1-click assign or change teacher) */}
-                        <td className="px-2.5 py-2.5 whitespace-nowrap">
-                          {course.instructor ? (
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setEditCourseForm({ instructor_id: course.instructor?.id || "" });
-                                setActiveModal({ type: "assign-instructor", courseId: course.id });
-                              }}
-                              className="flex items-center gap-1.5 max-w-[125px] hover:opacity-80 transition text-left cursor-pointer group/teacher"
-                              title={`Assigned Teacher: ${getDisplayName(course.instructor)} (Click to change)`}
-                            >
-                              <div className="w-5 h-5 rounded-md bg-indigo-500/20 text-indigo-300 flex items-center justify-center font-bold text-[10px] shrink-0 group-hover/teacher:ring-1 group-hover/teacher:ring-indigo-400">
-                                {(getDisplayName(course.instructor) || "T")[0].toUpperCase()}
-                              </div>
-                              <span className="text-slate-300 group-hover/teacher:text-indigo-300 text-xs font-medium truncate transition">
-                                {getDisplayName(course.instructor)}
-                              </span>
-                            </button>
-                          ) : (
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setEditCourseForm({ instructor_id: "" });
-                                setActiveModal({ type: "assign-instructor", courseId: course.id });
-                              }}
-                              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-500/15 border border-amber-500/30 text-amber-300 text-[10px] font-semibold hover:bg-amber-500/25 transition cursor-pointer"
-                              title="Assign qualified teacher to this subject"
-                            >
-                              <i className="fas fa-user-plus text-[9px]" />
-                              <span>Assign Teacher</span>
-                            </button>
-                          )}
-                        </td>
-
-                        {/* Price (Smart badge combining amount & free/paid status) */}
-                        <td className="px-2.5 py-2.5 whitespace-nowrap font-mono text-xs">
-                          {course.is_paid ? (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-                              ${(course.price || 0).toLocaleString("en-US")} USD
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium bg-slate-800 text-slate-400 border border-slate-700">
-                              Free
-                            </span>
-                          )}
-                        </td>
-
-                        {/* Status */}
-                        <td className="px-2.5 py-2.5 whitespace-nowrap">
-                          <span
-                            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${
-                              course.status === "published"
-                                ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
-                                : "bg-amber-500/15 text-amber-300 border-amber-500/30"
-                            }`}
-                          >
-                            <span
-                              className={`w-1.5 h-1.5 rounded-full ${
-                                course.status === "published" ? "bg-emerald-400 animate-pulse" : "bg-amber-400"
-                              }`}
-                            />
-                            {course.status}
-                          </span>
-                        </td>
-
-                        {/* Enrolled Students (Workflow 4: Click to open Class Roster Drawer) */}
-                        <td className="px-2 py-2.5 whitespace-nowrap text-center">
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedRosterCourse({ id: course.id, title: course.title });
-                            }}
-                            className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-slate-800 text-slate-300 border border-slate-700 font-mono text-xs font-semibold hover:bg-indigo-600/20 hover:border-indigo-500/40 hover:text-indigo-300 transition cursor-pointer"
-                            title={`View class roster (${course.enrolled_students_count || 0} enrolled students)`}
-                          >
-                            <i className="fas fa-user-graduate text-[9px] text-indigo-400" />
-                            {course.enrolled_students_count || 0}
-                          </button>
-                        </td>
-
-                        {/* Actions */}
-                        <td className="px-3 py-2.5 whitespace-nowrap text-right">
-                          <div
-                            className="flex items-center justify-end gap-1"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <button
-                              onClick={() => navigate(`/admin/courses/${course.id}`)}
-                              className="w-7 h-7 flex items-center justify-center bg-slate-800 text-slate-400 rounded-lg hover:bg-slate-700 hover:text-white transition"
-                              title="View course details"
-                            >
-                              <i className="fas fa-eye text-[11px]" />
-                            </button>
-                            <button
-                              onClick={() => onCourseEdit(course.id)}
-                              className="w-7 h-7 flex items-center justify-center bg-slate-800 text-slate-400 rounded-lg hover:bg-slate-700 hover:text-white transition"
-                              title="Edit course"
-                            >
-                              <i className="fas fa-edit text-[11px]" />
-                            </button>
-                            <button
-                              onClick={() => onCourseDelete(course.id)}
-                              disabled={loadingCourseIds.has(course.id)}
-                              className="w-7 h-7 flex items-center justify-center bg-red-900/20 text-red-400 rounded-lg hover:bg-red-900/40 transition disabled:opacity-50"
-                              title="Delete course"
-                            >
-                              {loadingCourseIds.has(course.id) ? (
-                                <i className="fas fa-spinner fa-spin text-[11px]" />
-                              ) : (
-                                <i className="fas fa-trash text-[11px]" />
-                              )}
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {/* No Results State */}
-        {!loading && filteredCourses.length === 0 && hasActiveCourseFilters && (
-          <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-16 text-center">
-            <div className="w-20 h-20 bg-slate-700/20 rounded-full flex items-center justify-center mx-auto mb-6">
-              <i className="fas fa-search text-slate-400 text-2xl"></i>
-            </div>
-            <h3 className="text-xl font-bold text-white mb-4">
-              No Courses Found
-            </h3>
-            <p className="text-slate-400 text-center mb-6 max-w-md mx-auto">
-              No courses match your current filter criteria. Try adjusting your
-              filters or clearing them to see more results.
-            </p>
-            <button
-              onClick={resetCourseFilters}
-              className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-xl text-sm font-medium shadow-lg active:scale-95 transition-all duration-200"
-            >
-              <i className="fas fa-times mr-2"></i>
-              Clear All Filters
-            </button>
-          </div>
-        )}
-      </div>
 
       {/* Create Course Modal */}
       {activeModal === "create-course" && (

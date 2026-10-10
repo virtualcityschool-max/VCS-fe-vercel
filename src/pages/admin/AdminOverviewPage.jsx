@@ -2,7 +2,9 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { adminService } from "../../services/adminService";
 import { adminTeacherSessionService } from "../../services/adminTeacherSessionService";
-import OverviewTab from "../../components/admin/OverviewTab";
+import AdminDashboard from "../../components/admin/dashboard/AdminDashboard";
+import TeacherMeetings from "../../components/admin/dashboard/TeacherMeetings";
+import { useDateFormat } from "../../hooks";
 import { toastManager } from "../../utils/toastManager";
 import { showApiError, extractApiErrorMessage } from "../../utils/apiErrorHandler";
 import { isSessionExpired, isWithinSessionWindow } from "../../utils/helper/StartSession";
@@ -63,6 +65,7 @@ const useRecentActivity = (limit = 6) => {
 
 const AdminOverviewPage = () => {
   const recentActivity = useRecentActivity();
+  const { formatRelativeTime } = useDateFormat();
   const [analytics, setAnalytics] = useState(null);
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
   const [analyticsError, setAnalyticsError] = useState(null);
@@ -172,16 +175,21 @@ const AdminOverviewPage = () => {
 
   return (
     <>
-      <OverviewTab
+      <AdminDashboard
         analytics={analytics}
         analyticsLoading={analyticsLoading}
         analyticsError={analyticsError}
-        upcomingSessions={upcomingSessions}
-        sessionsLoading={sessionsLoading}
-        actionLoadingIds={actionLoadingIds}
-        onStartSession={handleStartSession}
-        onEndSession={handleEndSession}
         recentActivity={recentActivity}
+        formatRelativeTime={formatRelativeTime}
+        teacherMeetings={
+          <TeacherMeetings
+            sessions={upcomingSessions}
+            loading={sessionsLoading}
+            actionLoadingIds={actionLoadingIds}
+            onStart={handleStartSession}
+            onEnd={handleEndSession}
+          />
+        }
       />
 
       <ConfirmDialog

@@ -219,7 +219,7 @@ const AdminAttendance = () => {
   return (
     <div className="text-white space-y-8">
       {/* Header filters */}
-      <div className="flex flex-col sm:flex-row sm:flex-wrap lg:flex-nowrap sm:justify-end gap-3 mb-4 mt-2 sm:-mt-20 lg:-mt-24 relative z-20">
+      <div className="flex flex-col sm:flex-row sm:flex-wrap lg:flex-nowrap sm:justify-end gap-3 mb-4 relative z-20">
         <div className="w-full sm:w-48">
           <label className="text-[10px] uppercase tracking-widest text-slate-500 font-bold px-0.5 mb-1.5 block uppercase tracking-[0.2em]">Date Range</label>
           <FilterSelect

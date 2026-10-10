@@ -6,6 +6,7 @@ import { clampDate } from "../../utils/validation";
 import { useDateFormatters } from "../../hooks";
 import CourseSelect from "../common/CourseSelect";
 import { getDisplayName } from "../../utils/userDisplay";
+import { TimeOptions } from "../../utils/timeSlots";
 
 const StatusHeaderTooltip = () => {
   const [pos, setPos] = useState(null);
@@ -29,7 +30,7 @@ const StatusHeaderTooltip = () => {
           className="fixed z-[9999] w-64 pointer-events-none"
           style={{ top: pos.top, left: pos.left, transform: "translate(-50%, calc(-100% - 10px))" }}
         >
-          <div className="bg-slate-800 border border-slate-700 rounded-xl shadow-2xl px-3 py-2.5 text-[11px] text-slate-300 leading-relaxed">
+          <div className="bg-[#0E1428] border border-[#232D52] rounded-xl shadow-2xl px-3 py-2.5 text-[11px] text-slate-300 leading-relaxed">
             For recurring sessions, this is the first occurrence's status - not the overall series status.
           </div>
           <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-700 -mt-px" />
@@ -288,17 +289,17 @@ const SessionsTab = ({
       {/* ── Header bar ── */}
       <div className="flex flex-wrap items-center gap-2 sm:gap-3">
         {/* View toggle - hidden on mobile (calendar-only on mobile) */}
-        <div className="hidden sm:flex bg-slate-800 border border-slate-700 rounded-lg overflow-hidden shrink-0">
+        <div className="hidden sm:flex bg-[#0E1428] border border-[#232D52] rounded-lg overflow-hidden shrink-0">
           <button
             onClick={() => setView("table")}
-            className={`px-3 py-2 text-sm font-medium transition flex items-center gap-1.5 ${view === "table" ? "bg-indigo-600 text-white" : "text-slate-400 hover:text-white"}`}
+            className={`px-3 py-2 text-sm font-medium transition flex items-center gap-1.5 ${view === "table" ? "bg-[#6D5BFF] text-white" : "text-slate-400 hover:text-white"}`}
           >
             <i className="fas fa-table text-xs"></i>
             <span className="hidden sm:inline">Table</span>
           </button>
           <button
             onClick={() => setView("calendar")}
-            className={`px-3 py-2 text-sm font-medium transition flex items-center gap-1.5 ${view === "calendar" ? "bg-indigo-600 text-white" : "text-slate-400 hover:text-white"}`}
+            className={`px-3 py-2 text-sm font-medium transition flex items-center gap-1.5 ${view === "calendar" ? "bg-[#6D5BFF] text-white" : "text-slate-400 hover:text-white"}`}
           >
             <i className="fas fa-calendar-alt text-xs"></i>
             <span className="hidden sm:inline">Calendar</span>
@@ -308,11 +309,11 @@ const SessionsTab = ({
 
         {/* Month nav - inline, only in calendar view with data */}
         {/* {view === "calendar" && activeMonthData && (
-          <div className="flex items-center gap-1 bg-slate-800 border border-slate-700 rounded-lg px-1 py-1 shrink-0">
+          <div className="flex items-center gap-1 bg-[#0E1428] border border-[#232D52] rounded-lg px-1 py-1 shrink-0">
             <button
               onClick={() => setCalendarMonth(monthRange[Math.max(0, activeMonthIdx - 1)])}
               disabled={activeMonthIdx === 0}
-              className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-slate-700 text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition"
+              className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-[#1A2346] text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition"
             >
               <i className="fas fa-chevron-left text-xs"></i>
             </button>
@@ -322,7 +323,7 @@ const SessionsTab = ({
             <button
               onClick={() => setCalendarMonth(monthRange[Math.min(monthRange.length - 1, activeMonthIdx + 1)])}
               disabled={activeMonthIdx === monthRange.length - 1}
-              className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-slate-700 text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition"
+              className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-[#1A2346] text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition"
             >
               <i className="fas fa-chevron-right text-xs"></i>
             </button>
@@ -331,7 +332,7 @@ const SessionsTab = ({
 
         {/* Date range - only in calendar view when range is known */}
         {view === "calendar" && calendarStart && calendarEnd && (
-          <div className="col-span-2 sm:col-auto flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 shrink-0">
+          <div className="col-span-2 sm:col-auto flex items-center gap-1.5 bg-[#0E1428] border border-[#232D52] rounded-lg px-3 py-2 shrink-0">
             <i className="fas fa-calendar-alt text-indigo-400 text-xs"></i>
             <span className="text-xs font-semibold text-white">
               {calendarStart.toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" })}
@@ -380,7 +381,7 @@ const SessionsTab = ({
         {/* Create Class - pushed to the right */}
         <button
           onClick={() => setActiveModal("create-session")}
-          className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-lg active:scale-95 transition flex items-center gap-2 shrink-0"
+          className="bg-[#6D5BFF] hover:bg-[#5B47FB] text-white px-4 py-2 rounded-lg text-sm font-medium shadow-lg active:scale-95 transition flex items-center gap-2 shrink-0"
         >
           <i className="fas fa-plus text-xs"></i>
           <span>Plan Class</span>
@@ -389,11 +390,11 @@ const SessionsTab = ({
 
       {/* ── TABLE VIEW ── (always on mobile, toggled on sm+) */}
       <div className={view === "calendar" ? "sm:hidden" : ""}>
-        <div className="bg-slate-900/50 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-sm">
+        <div className="bg-[#121831]/50 border border-[#232D52] rounded-2xl overflow-hidden shadow-2xl backdrop-blur-sm">
           {loading ? (
             <div className="overflow-x-auto">
               <table className="w-full text-left">
-                <thead className="bg-slate-950/60 border-b border-slate-800">
+                <thead className="bg-[#0B1020]/60 border-b border-[#232D52]">
                   <tr>
                     {["Session", "Course", "Tutor", "Start Date", "Recurrence", "End Date", "Status", "Actions"].map((h) => (
                       <th key={h} className="px-5 py-4 text-xs font-black uppercase text-slate-500">
@@ -407,11 +408,11 @@ const SessionsTab = ({
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/50">
+                <tbody className="divide-y divide-[#1E2648]/50">
                   {[...Array(5)].map((_, i) => (
                     <tr key={i} className="animate-pulse">
                       {[...Array(8)].map((__, j) => (
-                        <td key={j} className="px-5 py-4"><div className="h-4 bg-slate-700 rounded w-24"></div></td>
+                        <td key={j} className="px-5 py-4"><div className="h-4 bg-[#1A2346] rounded w-24"></div></td>
                       ))}
                     </tr>
                   ))}
@@ -420,7 +421,7 @@ const SessionsTab = ({
             </div>
           ) : filteredSessions.length === 0 ? (
             <div className="p-16 text-center">
-              {/* <div className="w-16 h-16 bg-slate-700/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              {/* <div className="w-16 h-16 bg-[#1A2346]/20 rounded-full flex items-center justify-center mx-auto mb-4">
                 <i className={`fas ${hasActiveSessionFilters ? "fa-search" : "fa-video"} text-slate-400 text-xl`}></i>
               </div> */}
               <p className="text-white font-bold mb-1">No data to show</p>
@@ -428,17 +429,17 @@ const SessionsTab = ({
                 {hasActiveSessionFilters ? "Try adjusting your filters." : "Create your first class to get started."}
               </p> */}
               {/* {hasActiveSessionFilters ? (
-                <button onClick={() => setSessionFilters({ ...sessionFilters, search: "" })} className="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2 rounded-xl text-sm font-medium transition">Clear Filters</button>
+                <button onClick={() => setSessionFilters({ ...sessionFilters, search: "" })} className="bg-[#6D5BFF] hover:bg-[#5B47FB] text-white px-5 py-2 rounded-xl text-sm font-medium transition">Clear Filters</button>
               ) : (
-                <button onClick={() => setActiveModal("create-session")} className="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2 rounded-xl text-sm font-medium transition">Create First Class</button>
+                <button onClick={() => setActiveModal("create-session")} className="bg-[#6D5BFF] hover:bg-[#5B47FB] text-white px-5 py-2 rounded-xl text-sm font-medium transition">Create First Class</button>
               )} */}
             </div>
           ) : (
             <div className="overflow-x-auto">
               {/* Mobile cards */}
-              <div className="lg:hidden divide-y divide-slate-800/50">
+              <div className="lg:hidden divide-y divide-[#1E2648]/50">
                 {filteredSessions.map((session) => (
-                  <div key={session.id} className="p-4 hover:bg-slate-800/30 transition">
+                  <div key={session.id} className="p-4 hover:bg-[#1A2346]/30 transition">
                     <div className="flex items-start justify-between gap-3 mb-3">
                       <div>
                         <p className="font-bold text-white text-sm">{session.title}</p>
@@ -470,7 +471,7 @@ const SessionsTab = ({
                         <button
                           onClick={() => onSessionEdit(session.id)}
                           title="Edit session"
-                          className="w-8 h-8 flex items-center justify-center bg-slate-700/50 text-slate-300 rounded-lg hover:bg-slate-600/50 transition"
+                          className="w-8 h-8 flex items-center justify-center bg-[#1A2346]/50 text-slate-300 rounded-lg hover:bg-slate-600/50 transition"
                         >
                           <i className="fas fa-edit text-xs"></i>
                         </button>
@@ -485,7 +486,7 @@ const SessionsTab = ({
 
               {/* Desktop table */}
               <table className="hidden lg:table w-full text-left">
-                <thead className="bg-slate-950/60 border-b border-slate-800">
+                <thead className="bg-[#0B1020]/60 border-b border-[#232D52]">
                   <tr>
                     <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Session</th>
                     <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Course</th>
@@ -502,9 +503,9 @@ const SessionsTab = ({
                     <th className="px-5 py-4 text-xs font-black uppercase text-slate-500 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/50">
+                <tbody className="divide-y divide-[#1E2648]/50">
                   {filteredSessions.map((session) => (
-                    <tr key={session.id} className="hover:bg-slate-800/30 transition">
+                    <tr key={session.id} className="hover:bg-[#1A2346]/30 transition">
                       <td className="px-5 py-4">
                         <p className="font-semibold text-white text-sm">{session.title}</p>
                         {session.category == "special" && (
@@ -526,13 +527,13 @@ const SessionsTab = ({
                         {session.recurrence_days?.length > 0 ? (
                           <div className="flex flex-wrap gap-1">
                             {sortDays(session.recurrence_days).map((d) => (
-                              <span key={d} className="px-1.5 py-0.5 bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 rounded text-xs font-medium">{d}</span>
+                              <span key={d} className="px-1.5 py-0.5 bg-[#6D5BFF]/20 text-indigo-300 border border-indigo-500/30 rounded text-xs font-medium">{d}</span>
                             ))}
                           </div>
                         ) : (() => {
                           const derived = getDayFromScheduledAt(session.scheduled_at || session.start_time);
                           return derived
-                            ? <span className="px-1.5 py-0.5 bg-slate-700/50 text-slate-400 border border-slate-600/40 rounded text-xs font-medium">{derived}</span>
+                            ? <span className="px-1.5 py-0.5 bg-[#1A2346]/50 text-slate-400 border border-[#232D52]/40 rounded text-xs font-medium">{derived}</span>
                             : <span className="text-slate-500 text-xs">-</span>;
                         })()}
                       </td>
@@ -543,7 +544,7 @@ const SessionsTab = ({
                             <button
                               onClick={() => onSessionEdit(session.id)}
                               title="Edit session"
-                              className="w-8 h-8 flex items-center justify-center bg-slate-700/50 text-slate-300 rounded-lg hover:bg-slate-600/50 transition"
+                              className="w-8 h-8 flex items-center justify-center bg-[#1A2346]/50 text-slate-300 rounded-lg hover:bg-slate-600/50 transition"
                             >
                               <i className="fas fa-edit text-xs"></i>
                             </button>
@@ -572,7 +573,7 @@ const SessionsTab = ({
       {/* ── CREATE SESSION MODAL ── */}
       {activeModal === "create-session" && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200] p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-[1.5rem] p-4 sm:p-8 w-full max-w-2xl lg:max-w-4xl max-h-[92vh] overflow-y-auto shadow-2xl transition-all duration-300">
+          <div className="bg-[#121831] border border-[#232D52] rounded-[1.5rem] p-4 sm:p-8 w-full max-w-2xl lg:max-w-4xl max-h-[92vh] overflow-y-auto shadow-2xl transition-all duration-300">
 
             {/* Header */}
             <div className="flex justify-between items-start mb-6 pb-5 border-b border-white/5">
@@ -590,7 +591,7 @@ const SessionsTab = ({
             </div>
 
             {/* Scheduling mode tabs */}
-            <div className="flex gap-1 bg-slate-800/60 border border-white/5 rounded-xl p-1 mb-6">
+            <div className="flex gap-1 bg-[#0E1428]/60 border border-white/5 rounded-xl p-1 mb-6">
               {[
                 { key: "now",       icon: "fa-bolt",           label: "Start Now"     },
                 { key: "delayed",   icon: "fa-hourglass-half", label: "Delayed Start" },
@@ -602,7 +603,7 @@ const SessionsTab = ({
                   onClick={() => setCreateMode?.(key)}
                   className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition ${
                     createMode === key
-                      ? "bg-indigo-600 text-white shadow-lg shadow-indigo-900/40"
+                      ? "bg-[#6D5BFF] text-white shadow-lg shadow-indigo-900/40"
                       : "text-slate-400 hover:text-slate-300"
                   }`}
                 >
@@ -637,7 +638,7 @@ const SessionsTab = ({
                       <input type="text"
                         value={createSessionForm.instructor_username ? `${createSessionForm.instructor_username}${createSessionForm.instructor_email ? ` (${createSessionForm.instructor_email})` : ""}` : ""}
                         disabled placeholder="Auto-filled from course"
-                        className="w-full px-3 py-2.5 bg-slate-700/50 border border-slate-600/50 rounded-xl text-slate-400 text-sm cursor-not-allowed placeholder-slate-600" />
+                        className="w-full px-3 py-2.5 bg-[#1A2346]/50 border border-[#232D52]/50 rounded-xl text-slate-400 text-sm cursor-not-allowed placeholder-slate-600" />
                     </div>
                   </div>
 
@@ -647,7 +648,7 @@ const SessionsTab = ({
                     <Input type="text" placeholder="e.g. Python Basics - Live Q&A"
                       value={createSessionForm.title}
                       onChange={(e) => { setCreateSessionForm({ ...createSessionForm, title: e.target.value }); clearCreateSessionFieldError("title"); }}
-                      className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 text-sm ${createSessionErrors?.title ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
+                      className={`w-full px-3 py-2.5 bg-[#0E1428] border rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 text-sm ${createSessionErrors?.title ? "border-red-500 focus:ring-red-500" : "border-[#232D52] focus:ring-[#6D5BFF]"}`}
                       error={createSessionErrors?.title}
                     />
                   </div>
@@ -657,14 +658,14 @@ const SessionsTab = ({
                     <div>
                       <label className="block text-sm font-medium text-slate-300 mb-2">Start After <span className="text-red-400">*</span></label>
                       <div className="flex items-center gap-3">
-                        <div className="flex items-center gap-2 bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5">
+                        <div className="flex items-center gap-2 bg-[#0E1428] border border-[#232D52] rounded-xl px-4 py-2.5">
                           <input type="number" min={0} max={23} value={delayHours}
                             onChange={(e) => setDelayHours?.(Math.min(23, Math.max(0, Number(e.target.value))))}
                             className="w-12 bg-transparent text-white text-center text-sm font-black outline-none" />
                           <span className="text-slate-500 text-xs font-bold uppercase tracking-widest">hrs</span>
                         </div>
                         <span className="text-slate-600 font-black">:</span>
-                        <div className="flex items-center gap-2 bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5">
+                        <div className="flex items-center gap-2 bg-[#0E1428] border border-[#232D52] rounded-xl px-4 py-2.5">
                           <input type="number" min={0} max={59} value={delayMins}
                             onChange={(e) => setDelayMins?.(Math.min(59, Math.max(0, Number(e.target.value))))}
                             className="w-12 bg-transparent text-white text-center text-sm font-black outline-none" />
@@ -736,7 +737,7 @@ const SessionsTab = ({
                       <input type="text"
                         value={createSessionForm.instructor_username ? `${createSessionForm.instructor_username}${createSessionForm.instructor_email ? ` (${createSessionForm.instructor_email})` : ""}` : ""}
                         disabled placeholder="Auto-filled from course"
-                        className="w-full px-3 py-2.5 bg-slate-700/50 border border-slate-600/50 rounded-xl text-slate-400 text-sm cursor-not-allowed placeholder-slate-600" />
+                        className="w-full px-3 py-2.5 bg-[#1A2346]/50 border border-[#232D52]/50 rounded-xl text-slate-400 text-sm cursor-not-allowed placeholder-slate-600" />
                     </div>
                   </div>
 
@@ -746,7 +747,7 @@ const SessionsTab = ({
                     <Input type="text" placeholder="e.g. Python Basics - Batch 2"
                       value={createSessionForm.title}
                       onChange={(e) => { setCreateSessionForm({ ...createSessionForm, title: e.target.value }); clearCreateSessionFieldError("title"); }}
-                      className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 text-sm ${createSessionErrors?.title ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
+                      className={`w-full px-3 py-2.5 bg-[#0E1428] border rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 text-sm ${createSessionErrors?.title ? "border-red-500 focus:ring-red-500" : "border-[#232D52] focus:ring-[#6D5BFF]"}`}
                       error={createSessionErrors?.title}
                     />
                   </div>
@@ -758,7 +759,7 @@ const SessionsTab = ({
                       <Input type="date" value={createSessionForm.scheduled_date}
                         min={new Date().toISOString().split("T")[0]} max="9999-12-31"
                         onChange={(e) => { const v = clampDate(e.target.value); setCreateSessionForm({ ...createSessionForm, scheduled_date: v }); clearCreateSessionFieldError("scheduled_date"); }}
-                        className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white focus:outline-none focus:ring-2 text-sm ${createSessionErrors?.scheduled_date ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
+                        className={`w-full px-3 py-2.5 bg-[#0E1428] border rounded-xl text-white focus:outline-none focus:ring-2 text-sm ${createSessionErrors?.scheduled_date ? "border-red-500 focus:ring-red-500" : "border-[#232D52] focus:ring-[#6D5BFF]"}`}
                         error={createSessionErrors?.scheduled_date}
                       />
                     </div>
@@ -767,7 +768,7 @@ const SessionsTab = ({
                       <Input type="date" value={createSessionForm.recurrence_end_date}
                         min={createSessionForm.scheduled_date || new Date().toISOString().split("T")[0]} max="9999-12-31"
                         onChange={(e) => { const v = clampDate(e.target.value); setCreateSessionForm({ ...createSessionForm, recurrence_end_date: v }); clearCreateSessionFieldError("recurrence_end_date"); }}
-                        className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white focus:outline-none focus:ring-2 text-sm ${createSessionErrors?.recurrence_end_date ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
+                        className={`w-full px-3 py-2.5 bg-[#0E1428] border rounded-xl text-white focus:outline-none focus:ring-2 text-sm ${createSessionErrors?.recurrence_end_date ? "border-red-500 focus:ring-red-500" : "border-[#232D52] focus:ring-[#6D5BFF]"}`}
                         error={createSessionErrors?.recurrence_end_date}
                       />
                       {createSessionForm.scheduled_date && createSessionForm.recurrence_end_date && (
@@ -791,7 +792,7 @@ const SessionsTab = ({
                                 setCreateSessionForm({ ...createSessionForm, recurrence_days: next });
                                 clearCreateSessionFieldError("recurrence_days");
                               }}
-                              className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition ${active ? "bg-indigo-600/40 border-indigo-500/50 text-indigo-300" : "bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-600 hover:text-white"}`}
+                              className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition ${active ? "bg-[#6D5BFF]/40 border-indigo-500/50 text-indigo-300" : "bg-[#0E1428] border-[#232D52] text-slate-400 hover:border-[#232D52] hover:text-white"}`}
                             >{day}</button>
                           );
                         })}
@@ -800,10 +801,10 @@ const SessionsTab = ({
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-slate-300 mb-2">Session Time <span className="text-red-400">*</span></label>
-                      <input type="time" value={createSessionForm.time}
+                      <select value={createSessionForm.time}
                         onChange={(e) => { setCreateSessionForm({ ...createSessionForm, time: e.target.value }); clearCreateSessionFieldError("time"); }}
-                        className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white focus:outline-none focus:ring-2 text-sm [color-scheme:dark] ${createSessionErrors?.time ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
-                      />
+                        className={`w-full px-3 py-2.5 bg-[#0E1428] border rounded-xl text-white focus:outline-none focus:ring-2 text-sm [color-scheme:dark] ${createSessionErrors?.time ? "border-red-500 focus:ring-red-500" : "border-[#232D52] focus:ring-[#6D5BFF]"}`}
+                  ><TimeOptions current={createSessionForm.time} /></select>
                       {createSessionErrors?.time && <p className="text-red-400 text-xs mt-1">{createSessionErrors.time}</p>}
                       <p className="text-slate-500 text-xs mt-1.5 flex items-center gap-1">
                         <i className="fas fa-globe text-[10px]"></i>
@@ -816,9 +817,9 @@ const SessionsTab = ({
 
               {/* Footer */}
               <div className="flex justify-end gap-4 pt-8 mt-4 border-t border-white/5">
-                <button type="button" onClick={() => setActiveModal(null)} className="px-6 py-2.5 rounded-xl text-sm font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition">Cancel</button>
+                <button type="button" onClick={() => setActiveModal(null)} className="px-6 py-2.5 rounded-xl text-sm font-semibold bg-[#0E1428] hover:bg-[#1A2346] text-slate-300 hover:text-white border border-[#232D52] transition">Cancel</button>
                 <button type="submit" disabled={isCreatingSession}
-                  className="px-6 py-2.5 rounded-xl text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition disabled:opacity-50 flex items-center gap-2">
+                  className="px-6 py-2.5 rounded-xl text-sm font-semibold bg-[#6D5BFF] hover:bg-[#5B47FB] text-white transition disabled:opacity-50 flex items-center gap-2">
                   {isCreatingSession
                     ? <><i className="fas fa-spinner fa-spin text-xs"></i>Planning…</>
                     : createMode === "now"     ? "Start Session"
@@ -834,7 +835,7 @@ const SessionsTab = ({
       {/* ── EDIT SESSION MODAL ── */}
       {activeModal && typeof activeModal === "object" && activeModal.type === "edit-session" && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200] p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-[1.5rem] p-4 sm:p-8 w-full max-w-2xl lg:max-w-4xl max-h-[92vh] overflow-y-auto shadow-2xl transition-all duration-300">
+          <div className="bg-[#121831] border border-[#232D52] rounded-[1.5rem] p-4 sm:p-8 w-full max-w-2xl lg:max-w-4xl max-h-[92vh] overflow-y-auto shadow-2xl transition-all duration-300">
 
             {/* Header */}
             <div className="flex justify-between items-start mb-8 pb-6 border-b border-white/5">
@@ -879,7 +880,7 @@ const SessionsTab = ({
                   <input type="text"
                     value={editSessionForm.teacher_name ? `${editSessionForm.teacher_name}${editSessionForm.teacher_email ? ` (${editSessionForm.teacher_email})` : ""}` : ""}
                     disabled
-                    className="w-full px-3 py-2.5 bg-slate-700/50 border border-slate-600/50 rounded-xl text-slate-400 text-sm cursor-not-allowed" />
+                    className="w-full px-3 py-2.5 bg-[#1A2346]/50 border border-[#232D52]/50 rounded-xl text-slate-400 text-sm cursor-not-allowed" />
                 </div>
               </div>
 
@@ -893,7 +894,7 @@ const SessionsTab = ({
                   placeholder="Enter class title"
                   value={editSessionForm.title || ""}
                   onChange={(e) => { setEditSessionForm({ ...editSessionForm, title: e.target.value }); clearEditSessionFieldError("title"); }}
-                  className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 text-sm ${editSessionErrors?.title ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
+                  className={`w-full px-3 py-2.5 bg-[#0E1428] border rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 text-sm ${editSessionErrors?.title ? "border-red-500 focus:ring-red-500" : "border-[#232D52] focus:ring-[#6D5BFF]"}`}
                   error={editSessionErrors?.title}
                 />
               </div>
@@ -906,7 +907,7 @@ const SessionsTab = ({
                   value={editSessionForm.description || ""}
                   onChange={(e) => setEditSessionForm({ ...editSessionForm, description: e.target.value })}
                   rows={3}
-                  className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm resize-none"
+                  className="w-full px-3 py-2.5 bg-[#0E1428] border border-[#232D52] rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#6D5BFF] text-sm resize-none"
                 />
               </div> */}
 
@@ -920,7 +921,7 @@ const SessionsTab = ({
                     type="date"
                     value={editSessionForm.start_date || ""}
                     disabled
-                    className="w-full px-3 py-2.5 bg-slate-800/50 border border-slate-700 rounded-xl text-slate-400 text-sm [color-scheme:dark] cursor-not-allowed opacity-60"
+                    className="w-full px-3 py-2.5 bg-[#0E1428]/50 border border-[#232D52] rounded-xl text-slate-400 text-sm [color-scheme:dark] cursor-not-allowed opacity-60"
                   />
                 </div>
                 <div>
@@ -932,7 +933,7 @@ const SessionsTab = ({
                     value={editSessionForm.recurrence_end_date || ""}
                     {...(!onlyTitleChanged && { min: editSessionForm.start_date, max: "9999-12-31" })}
                     onChange={(e) => { const v = clampDate(e.target.value); setEditSessionForm({ ...editSessionForm, recurrence_end_date: v }); clearEditSessionFieldError("recurrence_end_date"); }}
-                    className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white focus:outline-none focus:ring-2 text-sm [color-scheme:dark] ${editSessionErrors?.recurrence_end_date ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
+                    className={`w-full px-3 py-2.5 bg-[#0E1428] border rounded-xl text-white focus:outline-none focus:ring-2 text-sm [color-scheme:dark] ${editSessionErrors?.recurrence_end_date ? "border-red-500 focus:ring-red-500" : "border-[#232D52] focus:ring-[#6D5BFF]"}`}
                   />
                   {editSessionErrors?.recurrence_end_date && <p className="text-red-400 text-xs mt-1">{editSessionErrors.recurrence_end_date}</p>}
                 </div>
@@ -957,7 +958,7 @@ const SessionsTab = ({
                             setEditSessionForm({ ...editSessionForm, recurrence_days: next });
                             clearEditSessionFieldError("recurrence_days");
                           }}
-                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition ${active ? "bg-indigo-600/40 border-indigo-500/50 text-indigo-300" : "bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-600 hover:text-white"}`}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition ${active ? "bg-[#6D5BFF]/40 border-indigo-500/50 text-indigo-300" : "bg-[#0E1428] border-[#232D52] text-slate-400 hover:border-[#232D52] hover:text-white"}`}
                         >
                           {day}
                         </button>
@@ -970,12 +971,12 @@ const SessionsTab = ({
                   <label className="block text-sm font-medium text-slate-300 mb-2">
                     Class Time <span className="text-red-400">*</span>
                   </label>
-                  <input
-                    type="time"
+                  <select
+                    
                     value={editSessionForm.time || ""}
                     onChange={(e) => { setEditSessionForm({ ...editSessionForm, time: e.target.value }); clearEditSessionFieldError("time"); }}
-                    className={`w-full px-3 py-2.5 bg-slate-800 border rounded-xl text-white focus:outline-none focus:ring-2 text-sm [color-scheme:dark] ${editSessionErrors?.time ? "border-red-500 focus:ring-red-500" : "border-slate-700 focus:ring-indigo-500"}`}
-                  />
+                    className={`w-full px-3 py-2.5 bg-[#0E1428] border rounded-xl text-white focus:outline-none focus:ring-2 text-sm [color-scheme:dark] ${editSessionErrors?.time ? "border-red-500 focus:ring-red-500" : "border-[#232D52] focus:ring-[#6D5BFF]"}`}
+                  ><TimeOptions current={editSessionForm.time || ""} /></select>
                   {editSessionErrors?.time && <p className="text-red-400 text-xs mt-1">{editSessionErrors.time}</p>}
                   <p className="text-slate-500 text-xs mt-1.5 flex items-center gap-1">
                     <i className="fas fa-globe text-[10px]"></i>
@@ -987,11 +988,11 @@ const SessionsTab = ({
               {/* Footer */}
               <div className="flex justify-end gap-4 pt-8 mt-4 border-t border-white/5">
                 <button type="button" onClick={() => setActiveModal(null)}
-                  className="px-6 py-2.5 rounded-xl text-sm font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition">
+                  className="px-6 py-2.5 rounded-xl text-sm font-semibold bg-[#0E1428] hover:bg-[#1A2346] text-slate-300 hover:text-white border border-[#232D52] transition">
                   Cancel
                 </button>
                 <button type="submit" disabled={!!updatingSessionId}
-                  className="px-6 py-2.5 rounded-xl text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition disabled:opacity-50 flex items-center gap-2">
+                  className="px-6 py-2.5 rounded-xl text-sm font-semibold bg-[#6D5BFF] hover:bg-[#5B47FB] text-white transition disabled:opacity-50 flex items-center gap-2">
                   {updatingSessionId ? <><i className="fas fa-spinner fa-spin text-xs"></i>Updating…</> : "Update Class"}
                 </button>
               </div>

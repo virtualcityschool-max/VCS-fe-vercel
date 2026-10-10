@@ -493,6 +493,12 @@ export const adminService = {
     }
   },
 
+  // Attendance rows, e.g. { from, to, participant_role: "student" }. Read-only.
+  getAttendance: async (params = {}) => {
+    const response = await axiosInstance.get("/classroom/attendance/", { params });
+    return response.data;
+  },
+
   // ── Subscriptions ────────────────────────────────────────────────────────
   getSubscriptions: async () => {
     const response = await axiosInstance.get(ADMIN_ENDPOINTS.SUBSCRIPTIONS);

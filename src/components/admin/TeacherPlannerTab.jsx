@@ -4,6 +4,7 @@ import { TimezoneTag } from "../../components/ui";
 import { useDateFormatters } from "../../hooks";
 import SessionCalendarView from "../common/SessionCalendarView";
 import { getDisplayName } from "../../utils/userDisplay";
+import { TimeOptions } from "../../utils/timeSlots";
 
 const StatusHeaderTooltip = () => {
   const [pos, setPos] = useState(null);
@@ -27,7 +28,7 @@ const StatusHeaderTooltip = () => {
           className="fixed z-[9999] w-64 pointer-events-none"
           style={{ top: pos.top, left: pos.left, transform: "translate(-50%, calc(-100% - 10px))" }}
         >
-          <div className="bg-slate-800 border border-slate-700 rounded-xl shadow-2xl px-3 py-2.5 text-[11px] text-slate-300 leading-relaxed">
+          <div className="bg-[#0E1428] border border-[#232D52] rounded-xl shadow-2xl px-3 py-2.5 text-[11px] text-slate-300 leading-relaxed">
             For recurring sessions, this is the first occurrence's status - not the overall series status.
           </div>
           <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-700 -mt-px" />
@@ -123,9 +124,9 @@ const TeacherMultiSelect = ({ teachers = [], selectedIds = [], onChange, error }
           }
           if (e.key === "Escape") close();
         }}
-        className={`w-full flex items-center gap-2 px-3 py-2 pr-9 min-h-[42px] bg-slate-800/60 border ${
-          error ? "border-red-500/60" : "border-slate-700/60"
-        } rounded-xl text-sm text-left transition hover:border-slate-600 cursor-pointer relative`}
+        className={`w-full flex items-center gap-2 px-3 py-2 pr-9 min-h-[42px] bg-[#0E1428]/60 border ${
+          error ? "border-red-500/60" : "border-[#232D52]/60"
+        } rounded-xl text-sm text-left transition hover:border-[#232D52] cursor-pointer relative`}
       >
         {selected.length === 0 ? (
           <span className="text-slate-500 py-0.5">Search and select tutors...</span>
@@ -134,7 +135,7 @@ const TeacherMultiSelect = ({ teachers = [], selectedIds = [], onChange, error }
             {selected.map((t) => (
               <span
                 key={t.id}
-                className="inline-flex items-center gap-1.5 bg-indigo-600/90 text-white text-xs pl-2.5 pr-1.5 py-1 rounded-lg"
+                className="inline-flex items-center gap-1.5 bg-[#6D5BFF]/90 text-white text-xs pl-2.5 pr-1.5 py-1 rounded-lg"
               >
                 {getDisplayName(t)}
                 <button
@@ -160,9 +161,9 @@ const TeacherMultiSelect = ({ teachers = [], selectedIds = [], onChange, error }
       </div>
 
       {open && (
-        <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl overflow-hidden">
+        <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-[#121831] border border-[#232D52] rounded-xl shadow-2xl overflow-hidden">
           {/* Search */}
-          <div className="p-2 border-b border-slate-700/70">
+          <div className="p-2 border-b border-[#232D52]/70">
             <div className="relative">
               <input
                 ref={searchRef}
@@ -171,7 +172,7 @@ const TeacherMultiSelect = ({ teachers = [], selectedIds = [], onChange, error }
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={(e) => e.key === "Escape" && close()}
                 placeholder="Search tutors by name or email..."
-                className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg pl-9 pr-8 py-2 text-sm placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition"
+                className="w-full bg-[#0E1428] border border-[#232D52] text-white rounded-lg pl-9 pr-8 py-2 text-sm placeholder-slate-500 focus:outline-none focus:border-[#6D5BFF] focus:ring-2 focus:ring-[#6D5BFF]/20 transition"
               />
               <i className="fas fa-search text-slate-500 text-xs absolute left-3 top-1/2 -translate-y-1/2"></i>
               {query && (
@@ -192,7 +193,7 @@ const TeacherMultiSelect = ({ teachers = [], selectedIds = [], onChange, error }
 
           {/* Selection summary */}
           {selected.length > 0 && (
-            <div className="flex items-center justify-between px-3 py-1.5 bg-slate-950/40 border-b border-slate-800">
+            <div className="flex items-center justify-between px-3 py-1.5 bg-[#0B1020]/40 border-b border-[#232D52]">
               <span className="text-[10px] font-black uppercase tracking-wider text-slate-500">
                 {selected.length} selected
               </span>
@@ -223,7 +224,7 @@ const TeacherMultiSelect = ({ teachers = [], selectedIds = [], onChange, error }
                   <label
                     key={t.id}
                     className={`flex items-center gap-3 px-3 py-2.5 cursor-pointer transition ${
-                      isSelected ? "bg-indigo-600/15" : "hover:bg-slate-800"
+                      isSelected ? "bg-[#6D5BFF]/15" : "hover:bg-[#1A2346]"
                     }`}
                   >
                     <input
@@ -371,17 +372,17 @@ const TeacherPlannerTab = ({
       {/* Header bar - view toggle left, create button right */}
       <div className="flex items-center justify-between gap-3 flex-wrap">
         {/* View toggle */}
-        <div className="flex bg-slate-800 border border-slate-700 rounded-lg overflow-hidden shrink-0">
+        <div className="flex bg-[#0E1428] border border-[#232D52] rounded-lg overflow-hidden shrink-0">
           <button
             onClick={() => setView("table")}
-            className={`px-3 py-2 text-sm font-medium transition flex items-center gap-1.5 ${view === "table" ? "bg-indigo-600 text-white" : "text-slate-400 hover:text-white"}`}
+            className={`px-3 py-2 text-sm font-medium transition flex items-center gap-1.5 ${view === "table" ? "bg-[#6D5BFF] text-white" : "text-slate-400 hover:text-white"}`}
           >
             <i className="fas fa-table text-xs" />
             <span className="hidden sm:inline">Table</span>
           </button>
           <button
             onClick={() => setView("calendar")}
-            className={`px-3 py-2 text-sm font-medium transition flex items-center gap-1.5 ${view === "calendar" ? "bg-indigo-600 text-white" : "text-slate-400 hover:text-white"}`}
+            className={`px-3 py-2 text-sm font-medium transition flex items-center gap-1.5 ${view === "calendar" ? "bg-[#6D5BFF] text-white" : "text-slate-400 hover:text-white"}`}
           >
             <i className="fas fa-calendar-alt text-xs" />
             <span className="hidden sm:inline">Calendar</span>
@@ -391,7 +392,7 @@ const TeacherPlannerTab = ({
         {/* Create button */}
         <button
           onClick={openCreate}
-          className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-lg active:scale-95 transition flex items-center gap-2 shrink-0 ml-auto"
+          className="bg-[#6D5BFF] hover:bg-[#5B47FB] text-white px-4 py-2 rounded-lg text-sm font-medium shadow-lg active:scale-95 transition flex items-center gap-2 shrink-0 ml-auto"
         >
           <i className="fas fa-plus text-xs" />
           <span>Plan Tutor Meeting</span>
@@ -404,11 +405,11 @@ const TeacherPlannerTab = ({
       )}
 
       {/* Sessions table */}
-      {view === "table" && <div className="bg-slate-900/50 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-sm">
+      {view === "table" && <div className="bg-[#121831]/50 border border-[#232D52] rounded-2xl overflow-hidden shadow-2xl backdrop-blur-sm">
         {loading ? (
           <div className="overflow-x-auto">
             <table className="w-full text-left">
-              <thead className="bg-slate-950/60 border-b border-slate-800">
+              <thead className="bg-[#0B1020]/60 border-b border-[#232D52]">
                 <tr>
                   {["Session", "Tutors", "Date & Time", "Recurrence", "End Date", "Status", "Actions"].map((h) => (
                     <th key={h} className="px-5 py-4 text-xs font-black uppercase text-slate-500">
@@ -422,11 +423,11 @@ const TeacherPlannerTab = ({
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/50">
+              <tbody className="divide-y divide-[#1E2648]/50">
                 {[...Array(4)].map((_, i) => (
                   <tr key={i} className="animate-pulse">
                     {[...Array(8)].map((__, j) => (
-                      <td key={j} className="px-5 py-4"><div className="h-4 bg-slate-700 rounded w-24"></div></td>
+                      <td key={j} className="px-5 py-4"><div className="h-4 bg-[#1A2346] rounded w-24"></div></td>
                     ))}
                   </tr>
                 ))}
@@ -441,9 +442,9 @@ const TeacherPlannerTab = ({
         ) : (
           <div className="overflow-x-auto">
             {/* Mobile cards */}
-            <div className="lg:hidden divide-y divide-slate-800/50">
+            <div className="lg:hidden divide-y divide-[#1E2648]/50">
               {sessions.map((session) => (
-                <div key={session.id} className="p-4 hover:bg-slate-800/30 transition">
+                <div key={session.id} className="p-4 hover:bg-[#1A2346]/30 transition">
                   <div className="flex items-start justify-between gap-3 mb-3">
                     <div>
                       <p className="font-bold text-white text-sm">{session.title}</p>
@@ -465,7 +466,7 @@ const TeacherPlannerTab = ({
                   <div className="flex flex-wrap gap-2">
                     {!session.is_child && (
                       <button onClick={() => openEdit(session)}
-                        className="w-7 h-7 flex items-center justify-center bg-slate-700/50 text-slate-300 rounded-lg hover:bg-slate-600/50 transition">
+                        className="w-7 h-7 flex items-center justify-center bg-[#1A2346]/50 text-slate-300 rounded-lg hover:bg-slate-600/50 transition">
                         <i className="fas fa-edit text-xs"></i>
                       </button>
                     )}
@@ -484,7 +485,7 @@ const TeacherPlannerTab = ({
 
             {/* Desktop table */}
             <table className="hidden lg:table w-full text-left">
-              <thead className="bg-slate-950/60 border-b border-slate-800">
+              <thead className="bg-[#0B1020]/60 border-b border-[#232D52]">
                 <tr>
                   <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Session</th>
                   <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Tutors</th>
@@ -502,13 +503,13 @@ const TeacherPlannerTab = ({
                   <th className="px-5 py-4 text-xs font-black uppercase text-slate-500 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/50">
+              <tbody className="divide-y divide-[#1E2648]/50">
                 {sessions.map((session) => (
-                  <tr key={session.id} className="hover:bg-slate-800/30 transition">
+                  <tr key={session.id} className="hover:bg-[#1A2346]/30 transition">
                     <td className="px-5 py-4">
                       <p className="font-semibold text-white text-sm">{session.title}</p>
                       {session.is_child && (
-                        <span className="mt-1 inline-block px-1.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-slate-700/60 text-slate-400 border border-slate-600/30">
+                        <span className="mt-1 inline-block px-1.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-[#1A2346]/60 text-slate-400 border border-[#232D52]/30">
                           Child
                         </span>
                       )}
@@ -536,7 +537,7 @@ const TeacherPlannerTab = ({
                       {session.recurrence_days?.length > 0 ? (
                         <div className="flex flex-wrap gap-1">
                           {sortDays(session.recurrence_days).map((d) => (
-                            <span key={d} className="px-1.5 py-0.5 bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 rounded text-xs font-medium">{d}</span>
+                            <span key={d} className="px-1.5 py-0.5 bg-[#6D5BFF]/20 text-indigo-300 border border-indigo-500/30 rounded text-xs font-medium">{d}</span>
                           ))}
                         </div>
                       ) : (
@@ -551,7 +552,7 @@ const TeacherPlannerTab = ({
                       <div className="flex items-center gap-2 justify-end">
                         {!session.is_child && (
                           <button onClick={() => openEdit(session)} title="Edit session"
-                            className="w-8 h-8 flex items-center justify-center bg-slate-700/50 text-slate-300 rounded-lg hover:bg-slate-600/50 transition">
+                            className="w-8 h-8 flex items-center justify-center bg-[#1A2346]/50 text-slate-300 rounded-lg hover:bg-slate-600/50 transition">
                             <i className="fas fa-edit text-xs"></i>
                           </button>
                         )}
@@ -577,7 +578,7 @@ const TeacherPlannerTab = ({
       {/* Create / Edit Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200] p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-[1.5rem] p-4 sm:p-8 w-full max-w-xl max-h-[92vh] overflow-y-auto shadow-2xl">
+          <div className="bg-[#121831] border border-[#232D52] rounded-[1.5rem] p-4 sm:p-8 w-full max-w-xl max-h-[92vh] overflow-y-auto shadow-2xl">
             {/* Header */}
             <div className="flex justify-between items-start mb-6 pb-5 border-b border-white/5">
               <div>
@@ -611,9 +612,9 @@ const TeacherPlannerTab = ({
                     setForm({ ...form, title: e.target.value });
                     if (errors.title) setErrors({ ...errors, title: undefined });
                   }}
-                  className={`w-full px-3 py-2.5 bg-slate-800/60 border ${
-                    errors.title ? "border-red-500/60" : "border-slate-700/60"
-                  } rounded-xl text-white text-sm placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition`}
+                  className={`w-full px-3 py-2.5 bg-[#0E1428]/60 border ${
+                    errors.title ? "border-red-500/60" : "border-[#232D52]/60"
+                  } rounded-xl text-white text-sm placeholder-slate-500 focus:outline-none focus:border-[#6D5BFF] transition`}
                 />
                 {errors.title && <p className="text-red-400 text-xs mt-1">{errors.title}</p>}
               </div>
@@ -648,9 +649,9 @@ const TeacherPlannerTab = ({
                       setForm({ ...form, scheduled_date: e.target.value });
                       if (errors.scheduled_date) setErrors({ ...errors, scheduled_date: undefined });
                     }}
-                    className={`w-full px-3 py-2.5 bg-slate-800/60 border ${
-                      errors.scheduled_date ? "border-red-500/60" : "border-slate-700/60"
-                    } rounded-xl text-white text-sm focus:outline-none focus:border-indigo-500 transition`}
+                    className={`w-full px-3 py-2.5 bg-[#0E1428]/60 border ${
+                      errors.scheduled_date ? "border-red-500/60" : "border-[#232D52]/60"
+                    } rounded-xl text-white text-sm focus:outline-none focus:border-[#6D5BFF] transition`}
                   />
                   {errors.scheduled_date && <p className="text-red-400 text-xs mt-1">{errors.scheduled_date}</p>}
                 </div>
@@ -666,9 +667,9 @@ const TeacherPlannerTab = ({
                       setForm({ ...form, recurrence_end_date: e.target.value });
                       if (errors.recurrence_end_date) setErrors({ ...errors, recurrence_end_date: undefined });
                     }}
-                    className={`w-full px-3 py-2.5 bg-slate-800/60 border ${
-                      errors.recurrence_end_date ? "border-red-500/60" : "border-slate-700/60"
-                    } rounded-xl text-white text-sm focus:outline-none focus:border-indigo-500 transition`}
+                    className={`w-full px-3 py-2.5 bg-[#0E1428]/60 border ${
+                      errors.recurrence_end_date ? "border-red-500/60" : "border-[#232D52]/60"
+                    } rounded-xl text-white text-sm focus:outline-none focus:border-[#6D5BFF] transition`}
                   />
                   {errors.recurrence_end_date && <p className="text-red-400 text-xs mt-1">{errors.recurrence_end_date}</p>}
                 </div>
@@ -681,17 +682,17 @@ const TeacherPlannerTab = ({
                     Time <span className="text-red-400">*</span>{" "}
                     <span className="text-slate-500 text-xs">({timezoneAbbr})</span>
                   </label>
-                  <input
-                    type="time"
+                  <select
+                    
                     value={form.time}
                     onChange={(e) => {
                       setForm({ ...form, time: e.target.value });
                       if (errors.time) setErrors({ ...errors, time: undefined });
                     }}
-                    className={`w-full px-3 py-2.5 bg-slate-800/60 border ${
-                      errors.time ? "border-red-500/60" : "border-slate-700/60"
-                    } rounded-xl text-white text-sm focus:outline-none focus:border-indigo-500 transition`}
-                  />
+                    className={`w-full px-3 py-2.5 bg-[#0E1428]/60 border ${
+                      errors.time ? "border-red-500/60" : "border-[#232D52]/60"
+                    } rounded-xl text-white text-sm focus:outline-none focus:border-[#6D5BFF] transition`}
+                  ><TimeOptions current={form.time} /></select>
                   {errors.time && <p className="text-red-400 text-xs mt-1">{errors.time}</p>}
                 </div>
                 <div>
@@ -706,8 +707,8 @@ const TeacherPlannerTab = ({
                         onClick={() => toggleDay(key)}
                         className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold transition ${
                           form.recurrence_days.includes(key)
-                            ? "bg-indigo-600 text-white"
-                            : "bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-700"
+                            ? "bg-[#6D5BFF] text-white"
+                            : "bg-[#0E1428] text-slate-400 hover:text-slate-200 border border-[#232D52]"
                         }`}
                       >
                         {label}
@@ -723,14 +724,14 @@ const TeacherPlannerTab = ({
                 <button
                   type="button"
                   onClick={() => { setActiveModal(null); resetForm(); }}
-                  className="flex-1 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-sm font-medium transition"
+                  className="flex-1 px-4 py-2.5 bg-[#0E1428] hover:bg-[#1A2346] text-slate-300 rounded-xl text-sm font-medium transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isCreating}
-                  className="flex-1 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white rounded-xl text-sm font-medium transition flex items-center justify-center gap-2"
+                  className="flex-1 px-4 py-2.5 bg-[#6D5BFF] hover:bg-[#5B47FB] disabled:opacity-50 text-white rounded-xl text-sm font-medium transition flex items-center justify-center gap-2"
                 >
                   {isCreating ? (
                     <><i className="fas fa-spinner fa-spin text-xs"></i> Saving...</>

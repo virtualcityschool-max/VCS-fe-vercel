@@ -17,6 +17,9 @@ import {
 } from "../../store/slices/adminSlice";
 import Header from "./Header";
 
+// Pages already on the new design draw their own header.
+const REDESIGNED = new Set(["overview", "students", "teachers", "parents", "admins", "courses", "enrollments", "teacher-allocations", "approvals", "subscriptions"]);
+
 const AdminLayout = () => {
   const dispatch = useDispatch();
   const location = useLocation();
@@ -103,9 +106,12 @@ const AdminLayout = () => {
   }, [dispatch, activeTab]);
 
   return (
-    <section className="min-h-screen bg-slate-950 text-white font-inter px-4 sm:px-6 lg:px-8 py-6 pt-16 lg:pt-8">
-      {activeTab !== null && <Header activeTab={activeTab} />}
-      <Outlet />
+    <section className="min-h-screen bg-[#0B1020] text-white font-inter px-4 sm:px-6 lg:px-8 py-6">
+      {/* The dashboard has its own greeting instead of the shared Header */}
+      <div className="max-w-[1400px] mx-auto">
+        {activeTab !== null && !REDESIGNED.has(activeTab) && <Header activeTab={activeTab} />}
+        <Outlet />
+      </div>
     </section>
   );
 };
