@@ -162,7 +162,7 @@ export const MultiPick: React.FC<{
   const [q, setQ] = useState('');
   const list = options.filter((o) => `${o.label} ${o.sub || ''}`.toLowerCase().includes(q.toLowerCase()));
   const toggle = (v: string) => onChange(selected.includes(v) ? selected.filter((x) => x !== v) : [...selected, v]);
-  const byValue = new Map(options.map((o) => [o.value, o]));
+  const byValue = new Map(options.map((o) => [o.value, o] as const));
   return (
     <div className="rounded-xl border border-[#232D52] bg-[#0E1428]">
       {selected.length > 0 && (

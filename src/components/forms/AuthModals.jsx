@@ -406,8 +406,12 @@ const AuthModals = () => {
     if (selectedRole === "student" && !gradeLevel) {
       newErrors.gradeLevel = "Please select your course level";
     }
-    if (selectedRole === "student" && !phone.trim()) {
-      newErrors.phone = "Phone or WhatsApp number is required";
+    // Same contact rules as the normal sign-up form (backend: require_contact_fields).
+    if (!joinPhone(phoneDial, phone)) newErrors.phone = "WhatsApp / phone number is required";
+    if (selectedRole === "student") {
+      if (!country) newErrors.country = "Country is required";
+      if (!guardianName.trim()) newErrors.guardian_name = "Guardian name is required";
+      if (!joinPhone(guardianDial, guardianPhone)) newErrors.guardian_phone = "Guardian WhatsApp / phone number is required";
     }
 
     let children = childEntries;
@@ -432,15 +436,15 @@ const AuthModals = () => {
         role: selectedRole,
         first_name: firstName,
         last_name: lastName,
-        phone,
+        phone: joinPhone(phoneDial, phone),
+        country,
       };
 
       if (selectedRole === "student") {
         payload.grade_level = gradeLevel;
-        payload.guardian_name = guardianName;
-        payload.guardian_phone = guardianPhone;
+        payload.guardian_name = guardianName.trim();
+        payload.guardian_phone = joinPhone(guardianDial, guardianPhone);
         payload.guardian_relationship = guardianRelationship || "parent";
-        payload.country = country;
         payload.school_name = schoolName;
       } else if (selectedRole === "parent") {
         payload.student_roll_nos = children
@@ -803,6 +807,71 @@ const AuthModals = () => {
       setFpLoading(false);
     }
   };
+
+  // Contact details (country, WhatsApp, guardian) — the same block on the
+  // normal sign-up form and the Google sign-up step. `r` is the chosen role.
+  const renderContactDetails = (r) => (
+            <div className="md:col-span-2 bg-slate-950/60 border border-white/5 rounded-2xl p-5 space-y-4">
+              <p className="text-[10px] font-black uppercase text-indigo-400 tracking-widest">Contact details</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block">Country {r === "student" && <span className="text-red-500">*</span>}</label>
+                  <select
+                    value={country}
+                    onChange={(e) => {
+                      setCountry(e.target.value);
+                      const c = COUNTRIES.find((x) => x.name === e.target.value);
+                      if (c) { setPhoneDial(c.dial); setGuardianDial(c.dial); }
+                      clearRegistrationFieldError("country");
+                    }}
+                    className="w-full bg-slate-950 border border-white/5 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
+                  >
+                    {COUNTRIES.map((c) => (<option key={c.name} value={c.name}>{c.name}</option>))}
+                  </select>
+                  {registrationErrors.country && (<p className="text-red-500 text-xs mt-2 animate-shake">{Array.isArray(registrationErrors.country) ? registrationErrors.country[0] : registrationErrors.country}</p>)}
+                </div>
+                <div>
+                  <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block">{r === "student" ? "Student" : "Your"} WhatsApp number <span className="text-red-500">*</span></label>
+                  <div className="flex gap-2">
+                    <select value={phoneDial} onChange={(e) => setPhoneDial(e.target.value)} className="bg-slate-950 border border-white/5 rounded-2xl px-3 py-4 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm w-[110px] shrink-0">
+                    {DIAL_CODES.map((c) => (<option key={c.dial} value={c.dial}>+{c.dial}</option>))}
+                  </select>
+                    <input type="tel" inputMode="numeric" value={phone} onChange={(e) => { setPhone(e.target.value); clearRegistrationFieldError("phone"); }} placeholder="50 123 4567" className="w-full bg-slate-950 border border-white/5 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm" />
+                  </div>
+                  {registrationErrors.phone && (<p className="text-red-500 text-xs mt-2 animate-shake">{Array.isArray(registrationErrors.phone) ? registrationErrors.phone[0] : registrationErrors.phone}</p>)}
+                </div>
+              </div>
+              {r === "student" && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-white/5">
+                  <div>
+                    <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block">Guardian name <span className="text-red-500">*</span></label>
+                    <input type="text" value={guardianName} onChange={(e) => { setGuardianName(e.target.value); clearRegistrationFieldError("guardian_name"); }} placeholder="Parent or guardian full name" className="w-full bg-slate-950 border border-white/5 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm" />
+                    {registrationErrors.guardian_name && (<p className="text-red-500 text-xs mt-2 animate-shake">{Array.isArray(registrationErrors.guardian_name) ? registrationErrors.guardian_name[0] : registrationErrors.guardian_name}</p>)}
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block">Relationship</label>
+                    <select value={guardianRelationship} onChange={(e) => setGuardianRelationship(e.target.value)} className="w-full bg-slate-950 border border-white/5 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm">
+                      <option value="parent">Parent</option>
+                      <option value="sibling">Sibling</option>
+                      <option value="relative">Relative</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block">Guardian WhatsApp number <span className="text-red-500">*</span></label>
+                    <div className="flex gap-2">
+                      <select value={guardianDial} onChange={(e) => setGuardianDial(e.target.value)} className="bg-slate-950 border border-white/5 rounded-2xl px-3 py-4 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm w-[110px] shrink-0">
+                    {DIAL_CODES.map((c) => (<option key={c.dial} value={c.dial}>+{c.dial}</option>))}
+                  </select>
+                      <input type="tel" inputMode="numeric" value={guardianPhone} onChange={(e) => { setGuardianPhone(e.target.value); clearRegistrationFieldError("guardian_phone"); }} placeholder="50 123 4567" className="w-full bg-slate-950 border border-white/5 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm" />
+                    </div>
+                    {registrationErrors.guardian_phone && (<p className="text-red-500 text-xs mt-2 animate-shake">{Array.isArray(registrationErrors.guardian_phone) ? registrationErrors.guardian_phone[0] : registrationErrors.guardian_phone}</p>)}
+                    <p className="text-slate-500 text-[11px] mt-2">Used only for class reminders and progress updates.</p>
+                  </div>
+                </div>
+              )}
+            </div>
+  );
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-slate-950/80 backdrop-blur-md animate-fadeIn">
@@ -1371,55 +1440,6 @@ const AuthModals = () => {
 
                       <div>
                         <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-1.5 block">
-                          Student WhatsApp / Phone Number <span className="text-red-400">*</span>
-                        </label>
-                        <input
-                          type="tel"
-                          value={phone}
-                          onChange={(e) => {
-                            setPhone(e.target.value);
-                            clearRegistrationFieldError("phone");
-                          }}
-                          placeholder="e.g. +966 50 123 4567 or +92 300 1234567"
-                          className="w-full bg-slate-950 border border-white/5 rounded-2xl px-5 py-3.5 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
-                          required
-                        />
-                        {registrationErrors.phone && (
-                          <p className="text-red-500 text-xs mt-1.5 animate-shake">
-                            {registrationErrors.phone}
-                          </p>
-                        )}
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-1.5 block">
-                            Guardian Name
-                          </label>
-                          <input
-                            type="text"
-                            value={guardianName}
-                            onChange={(e) => setGuardianName(e.target.value)}
-                            placeholder="Parent / Guardian Name"
-                            className="w-full bg-slate-950 border border-white/5 rounded-2xl px-5 py-3.5 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
-                          />
-                        </div>
-                        <div>
-                          <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-1.5 block">
-                            Guardian WhatsApp / Phone
-                          </label>
-                          <input
-                            type="tel"
-                            value={guardianPhone}
-                            onChange={(e) => setGuardianPhone(e.target.value)}
-                            placeholder="e.g. +966 50 000 0000"
-                            className="w-full bg-slate-950 border border-white/5 rounded-2xl px-5 py-3.5 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-1.5 block">
                           Current School / College (Optional)
                         </label>
                         <input
@@ -1436,20 +1456,6 @@ const AuthModals = () => {
                   {/* Guardian Specific Fields */}
                   {(role || activeRoleTab) === "parent" && (
                     <>
-                      <div>
-                        <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-1.5 block">
-                          Guardian WhatsApp / Phone Number <span className="text-red-400">*</span>
-                        </label>
-                        <input
-                          type="tel"
-                          value={phone}
-                          onChange={(e) => setPhone(e.target.value)}
-                          placeholder="e.g. +966 50 123 4567"
-                          className="w-full bg-slate-950 border border-white/5 rounded-2xl px-5 py-3.5 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
-                          required
-                        />
-                      </div>
-
                       <div>
                         <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-1.5 block">
                           Child's Roll Number or Registered Email <span className="text-red-400">*</span>
@@ -1502,20 +1508,6 @@ const AuthModals = () => {
                   {/* Tutor Specific Fields */}
                   {(role || activeRoleTab) === "teacher" && (
                     <>
-                      <div>
-                        <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-1.5 block">
-                          WhatsApp / Phone Number <span className="text-red-400">*</span>
-                        </label>
-                        <input
-                          type="tel"
-                          value={phone}
-                          onChange={(e) => setPhone(e.target.value)}
-                          placeholder="e.g. +92 300 1234567"
-                          className="w-full bg-slate-950 border border-white/5 rounded-2xl px-5 py-3.5 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
-                          required
-                        />
-                      </div>
-
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                           <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-1.5 block">
@@ -1558,6 +1550,8 @@ const AuthModals = () => {
                       </div>
                     </>
                   )}
+
+                  {renderContactDetails(role || activeRoleTab || "student")}
 
                   {registrationFormError && (
                     <p className="text-red-500 text-xs font-bold animate-shake text-center">
@@ -2083,68 +2077,7 @@ const AuthModals = () => {
                   </div>
                 )}
 
-                {role && (
-                  <div className="md:col-span-2 bg-slate-950/60 border border-white/5 rounded-2xl p-5 space-y-4">
-                    <p className="text-[10px] font-black uppercase text-indigo-400 tracking-widest">Contact details</p>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block">Country {role === "student" && <span className="text-red-500">*</span>}</label>
-                        <select
-                          value={country}
-                          onChange={(e) => {
-                            setCountry(e.target.value);
-                            const c = COUNTRIES.find((x) => x.name === e.target.value);
-                            if (c) { setPhoneDial(c.dial); setGuardianDial(c.dial); }
-                            clearRegistrationFieldError("country");
-                          }}
-                          className="w-full bg-slate-950 border border-white/5 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm"
-                        >
-                          {COUNTRIES.map((c) => (<option key={c.name} value={c.name}>{c.name}</option>))}
-                        </select>
-                        {registrationErrors.country && (<p className="text-red-500 text-xs mt-2 animate-shake">{Array.isArray(registrationErrors.country) ? registrationErrors.country[0] : registrationErrors.country}</p>)}
-                      </div>
-                      <div>
-                        <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block">{role === "student" ? "Student" : "Your"} WhatsApp number <span className="text-red-500">*</span></label>
-                        <div className="flex gap-2">
-                          <select value={phoneDial} onChange={(e) => setPhoneDial(e.target.value)} className="bg-slate-950 border border-white/5 rounded-2xl px-3 py-4 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm w-[110px] shrink-0">
-                          {DIAL_CODES.map((c) => (<option key={c.dial} value={c.dial}>+{c.dial}</option>))}
-                        </select>
-                          <input type="tel" inputMode="numeric" value={phone} onChange={(e) => { setPhone(e.target.value); clearRegistrationFieldError("phone"); }} placeholder="50 123 4567" className="w-full bg-slate-950 border border-white/5 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm" />
-                        </div>
-                        {registrationErrors.phone && (<p className="text-red-500 text-xs mt-2 animate-shake">{Array.isArray(registrationErrors.phone) ? registrationErrors.phone[0] : registrationErrors.phone}</p>)}
-                      </div>
-                    </div>
-                    {role === "student" && (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-white/5">
-                        <div>
-                          <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block">Guardian name <span className="text-red-500">*</span></label>
-                          <input type="text" value={guardianName} onChange={(e) => { setGuardianName(e.target.value); clearRegistrationFieldError("guardian_name"); }} placeholder="Parent or guardian full name" className="w-full bg-slate-950 border border-white/5 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm" />
-                          {registrationErrors.guardian_name && (<p className="text-red-500 text-xs mt-2 animate-shake">{Array.isArray(registrationErrors.guardian_name) ? registrationErrors.guardian_name[0] : registrationErrors.guardian_name}</p>)}
-                        </div>
-                        <div>
-                          <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block">Relationship</label>
-                          <select value={guardianRelationship} onChange={(e) => setGuardianRelationship(e.target.value)} className="w-full bg-slate-950 border border-white/5 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm">
-                            <option value="parent">Parent</option>
-                            <option value="sibling">Sibling</option>
-                            <option value="relative">Relative</option>
-                            <option value="other">Other</option>
-                          </select>
-                        </div>
-                        <div className="sm:col-span-2">
-                          <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block">Guardian WhatsApp number <span className="text-red-500">*</span></label>
-                          <div className="flex gap-2">
-                            <select value={guardianDial} onChange={(e) => setGuardianDial(e.target.value)} className="bg-slate-950 border border-white/5 rounded-2xl px-3 py-4 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm w-[110px] shrink-0">
-                          {DIAL_CODES.map((c) => (<option key={c.dial} value={c.dial}>+{c.dial}</option>))}
-                        </select>
-                            <input type="tel" inputMode="numeric" value={guardianPhone} onChange={(e) => { setGuardianPhone(e.target.value); clearRegistrationFieldError("guardian_phone"); }} placeholder="50 123 4567" className="w-full bg-slate-950 border border-white/5 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm" />
-                          </div>
-                          {registrationErrors.guardian_phone && (<p className="text-red-500 text-xs mt-2 animate-shake">{Array.isArray(registrationErrors.guardian_phone) ? registrationErrors.guardian_phone[0] : registrationErrors.guardian_phone}</p>)}
-                          <p className="text-slate-500 text-[11px] mt-2">Used only for class reminders and progress updates.</p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
+                {role && renderContactDetails(role)}
 
                 {registrationFormError && (
                   <div className="md:col-span-2">
