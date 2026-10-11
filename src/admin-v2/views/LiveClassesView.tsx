@@ -6,11 +6,12 @@ import { AlertTriangle, CalendarDays, ChevronLeft, ChevronRight, Info, Radio, Se
 // @ts-ignore
 import DigitalSessionClock from '../../components/common/DigitalSessionClock';
 
-type Phase = 'live' | 'late' | 'soon' | 'later' | 'ended' | 'cancelled';
+type Phase = 'live' | 'late' | 'missed' | 'soon' | 'later' | 'ended' | 'cancelled';
 
 const PHASE_STYLE: Record<Phase, { label: string; pill: string }> = {
   live: { label: 'Live now', pill: 'bg-rose-500/15 text-rose-300 border-rose-500/40' },
-  late: { label: 'Not started yet', pill: 'bg-amber-500/15 text-amber-300 border-amber-500/40' },
+  late: { label: 'Should have started', pill: 'bg-amber-500/15 text-amber-300 border-amber-500/40' },
+  missed: { label: 'Missed / Not started', pill: 'bg-rose-500/15 text-rose-300 border-rose-500/40' },
   soon: { label: 'Starting soon', pill: 'bg-sky-500/15 text-sky-300 border-sky-500/40' },
   later: { label: 'Scheduled', pill: 'bg-slate-500/15 text-slate-300 border-slate-500/30' },
   ended: { label: 'Ended', pill: 'bg-slate-700/30 text-slate-400 border-slate-600/40' },
@@ -23,7 +24,8 @@ const dur = (m: number) => (m >= 60 ? `${Math.floor(m / 60)} h ${m % 60 ? `${m %
 // Live Classes: today's Google Meet classes with who is in them, and a Join
 // button so an admin can drop in and observe a class.
 export const LiveClassesView: React.FC = () => {
-  const { sessions = [], rawAttendanceAll = [], subjects = [], reload, tzIana, setCurrentView } = useApp() as any;
+  const { sessions = [], rawAttendanceAll = [], subjects = [], reload, tzIana, setCurrentView, resolveMissedSession, can } = useApp() as any;
+  const canResolve = can('manage_academics');
   const [mode, setMode] = useState<'upcoming' | 'past'>('upcoming');
   const [dayOffset, setDayOffset] = useState(0);
   const [query, setQuery] = useState('');
@@ -55,18 +57,21 @@ export const LiveClassesView: React.FC = () => {
     return m;
   }, [rawAttendanceAll]);
 
-  const rowsFor = (key: string) => {
+  const rowsFor = (key: string | null) => {
     const q = query.trim().toLowerCase();
     return sessions
-      .filter((s: any) => s.date === key)
+      .filter((s: any) => (key === null ? s.status === 'missed' : s.date === key))
       .map((s: any) => {
         const r = s._raw || {};
         const start = new Date(r.scheduled_at);
         const end = new Date(start.getTime() + (r.duration_mins || 60) * 60000);
         const t = now;
+        // Not started 15 min after its time: missed, and it stays flagged until
+        // an admin resolves it (held / cancelled / rescheduled).
         const phase: Phase =
           r.status === 'cancelled' ? 'cancelled'
           : r.status === 'live' ? 'live'
+          : r.status === 'missed' || (r.status === 'scheduled' && t > start.getTime() + 15 * 60000) ? 'missed'
           : r.status === 'ended' || t > end.getTime() ? 'ended'
           : t >= start.getTime() ? 'late'
           : start.getTime() - t <= 60 * 60000 ? 'soon'
@@ -105,15 +110,17 @@ export const LiveClassesView: React.FC = () => {
   );
 
   const group = (phases: Phase[]) => todayRows.filter((x: any) => phases.includes(x.phase));
+  // Every unresolved missed class, whatever its day, newest first.
+  const missedRows = useMemo(() => rowsFor(null).filter((x: any) => x.phase === 'missed').reverse(), [sessions, now, attendanceBySession, subjects, query]);
   const liveRows = group(['live', 'late']);
   const soonRows = group(['soon']);
   const laterRows = group(['later']);
-  const endedRows = rows.filter((x: any) => x.phase === 'ended' || x.phase === 'cancelled').reverse();
+  const endedRows = rows.filter((x: any) => x.phase === 'ended' || x.phase === 'cancelled' || x.phase === 'missed').reverse();
 
   const comingUp = nextDays.reduce((n, d) => n + d.rows.length, 0);
   const kpis = [
     { label: 'Live now', value: todayRows.filter((x: any) => x.phase === 'live').length, tint: 'text-rose-400' },
-    { label: 'Should have started', value: todayRows.filter((x: any) => x.phase === 'late').length, tint: 'text-amber-400' },
+    { label: 'Missed / not started', value: missedRows.length + todayRows.filter((x: any) => x.phase === 'late').length, tint: 'text-amber-400' },
     { label: 'Later today', value: soonRows.length + laterRows.length, tint: 'text-sky-400' },
     { label: 'Coming up · next 7 days', value: comingUp, tint: 'text-slate-100' },
   ];
@@ -124,10 +131,11 @@ export const LiveClassesView: React.FC = () => {
     const timing =
       x.phase === 'live' ? `Live for ${dur(mins(t - x.start.getTime()))} · ends ${timeOf(x.end)}`
       : x.phase === 'late' ? `Was due ${dur(mins(t - x.start.getTime()))} ago`
+      : x.phase === 'missed' ? `${x.start.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', ...(tzIana ? { timeZone: tzIana } : {}) })} · never started`
       : x.phase === 'soon' || x.phase === 'later' ? `Starts in ${dur(mins(x.start.getTime() - t))}`
       : x.phase === 'cancelled' ? 'Cancelled'
       : `Ended ${timeOf(x.end)}`;
-    const ended = x.phase === 'ended' || x.phase === 'cancelled';
+    const ended = x.phase === 'ended' || x.phase === 'cancelled' || x.phase === 'missed';
     return (
       <div className={`grid grid-cols-12 gap-3 items-center px-4 py-3 border-t border-[#1E2648]/60 ${x.phase === 'live' ? 'bg-rose-500/[0.04]' : ''}`}>
         <div className="col-span-4 md:col-span-2">
@@ -185,6 +193,13 @@ export const LiveClassesView: React.FC = () => {
             </a>
           )}
           {!ended && !x.link && <span className="text-[11px] text-amber-300">No Meet link</span>}
+          {x.phase === 'missed' && canResolve && (
+            <span className="flex items-center gap-1">
+              <button onClick={() => resolveMissedSession(x.id, 'held')} className="px-2 py-1 rounded-lg text-[11px] font-semibold bg-emerald-600 hover:bg-emerald-500 text-white whitespace-nowrap">Held</button>
+              <button onClick={() => resolveMissedSession(x.id, 'rescheduled')} className="px-2 py-1 rounded-lg text-[11px] font-semibold bg-[#6D5BFF] hover:bg-[#5B47FB] text-white whitespace-nowrap">Reschedule</button>
+              <button onClick={() => resolveMissedSession(x.id, 'cancelled')} className="px-2 py-1 rounded-lg text-[11px] font-semibold border border-rose-500/40 text-rose-300 hover:bg-rose-500/10 whitespace-nowrap">Cancel</button>
+            </span>
+          )}
         </div>
       </div>
     );
@@ -255,10 +270,11 @@ export const LiveClassesView: React.FC = () => {
 
       {mode === 'upcoming' ? (
         <>
+          <Section title="Missed / not started — needs a decision" icon={AlertTriangle} tone="text-rose-300" items={missedRows} />
           <Section title="Live now" icon={Radio} tone="text-rose-300" items={liveRows} empty="No class is running at the moment." />
           {liveRows.some((x: any) => x.phase === 'late') && (
             <div className="flex items-center gap-2 text-xs text-amber-300 -mt-3">
-              <AlertTriangle className="w-3.5 h-3.5" /> “Not started yet” means the class time has begun but the teacher has not started it in the system.
+              <AlertTriangle className="w-3.5 h-3.5" /> “Should have started” means the class time has begun but the teacher has not started it. After 15 minutes it moves to Missed until someone resolves it.
             </div>
           )}
           <Section title="Starting within the hour" icon={Video} tone="text-sky-300" items={soonRows} />

@@ -44,7 +44,7 @@ export const ParentsView: React.FC = () => {
       header: 'Phone & WhatsApp',
       cell: (row) => (
         <div className="flex items-center gap-3">
-          <span className="font-mono text-xs text-slate-300">{row.phone}</span>
+          <span className="font-mono text-xs text-slate-300">{row.phone || <span className="font-sans text-slate-500">Not provided yet</span>}</span>
           {row.whatsappNumber && (
             <a
               href={`https://wa.me/${row.whatsappNumber.replace(/[^0-9]/g, '')}`}
@@ -86,7 +86,7 @@ export const ParentsView: React.FC = () => {
     },
     {
       header: 'Location',
-      cell: (row) => <span className="text-xs text-slate-400">{row.location}</span>,
+      cell: (row) => <span className="text-xs text-slate-400">{row.location || <span className="text-slate-500">Not provided yet</span>}</span>,
     },
     {
       header: 'Status',
@@ -100,6 +100,7 @@ export const ParentsView: React.FC = () => {
         title="Parents Register"
         subtitle="Maintain direct guardian communication, progress monitoring, and WhatsApp accountability."
         primaryAction={{
+          cap: 'manage_students',
           label: 'New parent',
           onClick: () => openQuickAdd('parent' as any),
           icon: UserPlus,

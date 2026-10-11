@@ -129,6 +129,7 @@ export const StudentEnrollmentsView: React.FC = () => {
         title="Student Enrollments"
         subtitle="Manage subject seat allocations, elective groups, free trial conversions, and curriculum tracking."
         primaryAction={{
+          cap: 'manage_enrolments',
           label: 'Enroll in course',
           onClick: () => setModalOpen(true),
           icon: Plus,

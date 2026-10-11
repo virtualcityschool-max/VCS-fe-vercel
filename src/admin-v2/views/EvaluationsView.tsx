@@ -67,6 +67,7 @@ export const EvaluationsView: React.FC = () => {
         title="Student Evaluations & Assessment Sheets"
         subtitle="Manage Cambridge exam marks, coursework evaluations, quiz scoring, and predicted grades."
         primaryAction={{
+          cap: 'manage_settings',
           label: 'Grading scale rules',
           onClick: () => {
             setThresholds(settings.gradeThresholds);

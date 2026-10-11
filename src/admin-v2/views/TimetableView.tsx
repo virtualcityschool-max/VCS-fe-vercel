@@ -128,6 +128,7 @@ export const TimetableView: React.FC = () => {
         title="Timetable & Live Seminars"
         subtitle={`Live interactive Cambridge sessions scheduled in ${timezone}.`}
         primaryAction={{
+          cap: 'manage_academics',
           label: 'Plan class',
           onClick: () => openQuickAdd('session'),
           icon: Plus,

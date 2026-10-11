@@ -272,6 +272,7 @@ const TeacherPlannerTab = ({
   onSessionCreate,
   onSessionUpdate,
   onSessionDelete,
+  canDelete = true,
   isCreating = false,
 }) => {
   const { formatDate, formatTime, timezoneAbbr, toPayloadISO, toDatetimeInput } = useDateFormatters();
@@ -395,7 +396,7 @@ const TeacherPlannerTab = ({
           className="bg-[#6D5BFF] hover:bg-[#5B47FB] text-white px-4 py-2 rounded-lg text-sm font-medium shadow-lg active:scale-95 transition flex items-center gap-2 shrink-0 ml-auto"
         >
           <i className="fas fa-plus text-xs" />
-          <span>Plan Tutor Meeting</span>
+          <span>Schedule staff meeting</span>
         </button>
       </div>
 
@@ -470,7 +471,8 @@ const TeacherPlannerTab = ({
                         <i className="fas fa-edit text-xs"></i>
                       </button>
                     )}
-                    <button onClick={() => onSessionDelete(session.id)} disabled={loadingSessionIds.has(session.id)}
+                    {canDelete && !['live', 'ended'].includes(session.status) && (
+<button onClick={() => onSessionDelete(session.id)} disabled={loadingSessionIds.has(session.id)}
                       className="w-7 h-7 flex items-center justify-center bg-red-600/10 text-red-400 rounded-lg hover:bg-red-600/20 transition disabled:opacity-50">
                       {loadingSessionIds.has(session.id) ? (
                         <i className="fas fa-spinner fa-spin text-xs"></i>
@@ -478,6 +480,7 @@ const TeacherPlannerTab = ({
                         <i className="fas fa-trash text-xs"></i>
                       )}
                     </button>
+)}
                   </div>
                 </div>
               ))}
@@ -556,7 +559,8 @@ const TeacherPlannerTab = ({
                             <i className="fas fa-edit text-xs"></i>
                           </button>
                         )}
-                        <button onClick={() => onSessionDelete(session.id)} disabled={loadingSessionIds.has(session.id)}
+                        {canDelete && !['live', 'ended'].includes(session.status) && (
+<button onClick={() => onSessionDelete(session.id)} disabled={loadingSessionIds.has(session.id)}
                           title="Delete session"
                           className="w-8 h-8 flex items-center justify-center bg-red-600/10 text-red-400 rounded-lg hover:bg-red-600/20 transition disabled:opacity-50">
                           {loadingSessionIds.has(session.id) ? (
@@ -565,6 +569,7 @@ const TeacherPlannerTab = ({
                             <i className="fas fa-trash text-xs"></i>
                           )}
                         </button>
+)}
                       </div>
                     </td>
                   </tr>
@@ -583,7 +588,7 @@ const TeacherPlannerTab = ({
             <div className="flex justify-between items-start mb-6 pb-5 border-b border-white/5">
               <div>
                 <h3 className="text-xl font-black text-white tracking-tight">
-                  {isEditMode ? "Edit Session" : "Create Teacher Session"}
+                  {isEditMode ? "Edit staff meeting" : "Schedule staff meeting"}
                 </h3>
                 <p className="text-slate-500 text-[12px] font-medium mt-1">
                   Schedule a recurring meeting for teachers
@@ -738,7 +743,7 @@ const TeacherPlannerTab = ({
                   ) : isEditMode ? (
                     "Save Changes"
                   ) : (
-                    "Plan Tutor Meeting"
+                    "Schedule staff meeting"
                   )}
                 </button>
               </div>

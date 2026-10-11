@@ -23,7 +23,11 @@ import ConfirmDialog from "../../components/common/ConfirmDialog";
 import SessionsTab from "../../components/admin/SessionsTab";
 import { showApiError } from "../../utils/apiErrorHandler";
 import { useDateFormatters } from "../../hooks";
+import { useApp } from "../../admin-v2/context/AppContext";
 const AdminSessionsPage = () => {
+  // Deleting classes is Super Admin only (the server checks too).
+  const { can } = useApp();
+  const canDelete = can("delete");
   const dispatch = useDispatch();
   const { timezone, toPayloadISO, toDatetimeInput } = useDateFormatters();
 
@@ -471,6 +475,7 @@ const AdminSessionsPage = () => {
       onSessionCreate={handleCreateSession}
       onSessionUpdate={handleUpdateSession}
       onSessionDelete={handleDeleteSession}
+      canDelete={canDelete}
       onSessionEdit={fetchSessionDetailsForEdit}
       activeModal={activeModal}
       setActiveModal={setActiveModal}
@@ -491,12 +496,9 @@ const AdminSessionsPage = () => {
       open={confirmDialog.open}
       variant="danger"
       title="Delete Session"
-      message={`Delete "${confirmDialog.sessionTitle}"? Future scheduled sessions will be removed. Past sessions and attendance are kept by default.`}
+      message={`Delete "${confirmDialog.sessionTitle}"? Its upcoming classes that have not started are removed. Classes already held and their attendance are always kept (a class with attendance cannot be deleted; cancel it instead).`}
       confirmLabel="Delete"
       cancelLabel="Cancel"
-      checkboxLabel="Also delete past sessions & attendance"
-      checkboxChecked={deletePast}
-      onCheckboxChange={setDeletePast}
       onConfirm={confirmDeleteSession}
       onCancel={() => { setConfirmDialog({ open: false, sessionId: null, sessionTitle: "" }); setDeletePast(false); }}
     />

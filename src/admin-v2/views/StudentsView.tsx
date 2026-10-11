@@ -23,7 +23,13 @@ export const StudentsView: React.FC = () => {
     levels,
     subjects,
     reload,
+    can,
   } = useApp() as any;
+  const canEdit = can('manage_students');
+  // Class (O1, A2, Grade 7…) is set per student by admins. Until any student
+  // has one, the column and filter stay hidden instead of showing "Not set".
+  const anyClassSet = students.some((st: any) => st.classYear);
+  const activeCount = students.filter((st: any) => st.status === 'Active').length;
 
   const { tags, refresh: refreshTags } = useStudentTags();
   const [tagFilter, setTagFilter] = useState('all');
@@ -41,7 +47,7 @@ export const StudentsView: React.FC = () => {
 
   // Filters setup
   const filters: FilterConfig[] = [
-    {
+    ...(anyClassSet ? [{
       id: 'class',
       label: 'Class',
       value: classFilter,
@@ -50,7 +56,7 @@ export const StudentsView: React.FC = () => {
         ...CLASS_YEARS.flatMap((g) => g.options).map((c) => ({ label: c, value: c, count: students.filter((st: any) => st.classYear === c).length })).filter((o) => o.count > 0),
         { label: 'Not set', value: '__none', count: students.filter((st: any) => !st.classYear).length },
       ],
-    },
+    }] : []),
     {
       id: 'tag',
       label: 'Label',
@@ -152,7 +158,7 @@ export const StudentsView: React.FC = () => {
         </div>
       ),
     },
-    {
+    ...(!anyClassSet ? [] : [{
       header: 'Class',
       cell: (row: any) =>
         row.classYear ? (
@@ -166,7 +172,7 @@ export const StudentsView: React.FC = () => {
             {row.level && <div className="text-[11px] text-slate-500 mt-0.5 truncate max-w-[140px]">{row.level}</div>}
           </div>
         ),
-    },
+    }]),
     {
       header: 'Contact',
       cell: (row: any) =>
@@ -254,12 +260,12 @@ export const StudentsView: React.FC = () => {
     <div className="space-y-6 w-full animate-in fade-in duration-150">
       <PageHeader
         title="Students Register"
-        subtitle={`Managing ${students.length} active Cambridge and national curriculum candidates.`}
-        primaryAction={{
+        subtitle={`${activeCount} active students · ${students.length} total (${students.length - activeCount} inactive).`}
+        primaryAction={canEdit ? {
           label: 'Enroll student',
           onClick: () => openQuickAdd('student'),
           icon: UserPlus,
-        }}
+        } : undefined}
         extraActions={
           <button
             onClick={() => setLabelLibraryOpen(true)}
@@ -285,12 +291,13 @@ export const StudentsView: React.FC = () => {
         columns={columns}
         data={filtered}
         onRowClick={(row) => openDetailDrawer('student', row)}
-        onDelete={(row) => deleteStudent(row.id)}
-        onToggleStatus={(row) => {
+        onDelete={canEdit ? (row) => deleteStudent(row.id) : undefined}
+        deleteLabel="Deactivate"
+        onToggleStatus={canEdit ? (row) => {
           bulkUpdateStudentStatus([row.id], row.status === 'Active' ? 'Inactive' : 'Active');
-        }}
+        } : undefined}
         bulkActions={[
-          {
+          ...(!canEdit ? [] : [{
             label: 'Activate Selected',
             icon: UserCheck,
             onClick: (ids) => bulkUpdateStudentStatus(ids, 'Active'),
@@ -300,7 +307,7 @@ export const StudentsView: React.FC = () => {
             icon: UserX,
             onClick: (ids) => bulkUpdateStudentStatus(ids, 'Inactive'),
             isDestructive: true,
-          },
+          }]),
           {
             label: 'Export CSV',
             icon: Download,

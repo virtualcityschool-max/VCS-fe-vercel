@@ -16,6 +16,7 @@ import {
   RotateCcw
 } from "lucide-react";
 import { toastManager } from "../../../utils/toastManager";
+import { defaultQuizMarks } from "../../../utils/quizDefaults";
 import { extractApiErrorMessage } from "../../../utils/apiErrorHandler";
 export const CreateAssignmentModal = ({
   isOpen,
@@ -385,7 +386,7 @@ const createBlankQuestion = (type = "multiple_choice") => {
       questionText: "",
       options: ["Yes", "No"],
       correctAnswer: "",
-      marks: 5,
+      marks: defaultQuizMarks(),
     };
   }
   if (type === "fill_in_blank") {
@@ -395,7 +396,7 @@ const createBlankQuestion = (type = "multiple_choice") => {
       questionText: "",
       options: [],
       correctAnswer: "",
-      marks: 5,
+      marks: defaultQuizMarks(),
     };
   }
   if (type === "short_answer") {
@@ -405,7 +406,7 @@ const createBlankQuestion = (type = "multiple_choice") => {
       questionText: "",
       options: [],
       correctAnswer: "",
-      marks: 10,
+      marks: defaultQuizMarks(),
     };
   }
   return {
@@ -414,7 +415,7 @@ const createBlankQuestion = (type = "multiple_choice") => {
     questionText: "",
     options: ["", "", "", ""],
     correctAnswer: "",
-    marks: 5,
+    marks: defaultQuizMarks(),
   };
 };
 
@@ -570,7 +571,7 @@ multiple_choice,"Which electromagnetic radiation has the highest frequency?",5,"
       else type = "multiple_choice";
       const questionText = parts[1]?.replace(/^["']|["']$/g, "").trim();
       if (!questionText) continue;
-      const marks = parts[2] && !isNaN(Number(parts[2])) ? Number(parts[2]) : 5;
+      const marks = parts[2] && !isNaN(Number(parts[2])) ? Number(parts[2]) : defaultQuizMarks();
       const optionsRaw = parts[3]?.replace(/^["']|["']$/g, "").trim() || "";
       const options = type === "multiple_choice" ? optionsRaw ? optionsRaw.split("|").map((o) => o.trim()).filter(Boolean) : ["Option A", "Option B", "Option C", "Option D"] : void 0;
       const correctAnswer = parts[4]?.replace(/^["']|["']$/g, "").trim() || (type === "yes_no" ? "Yes" : "");
@@ -607,7 +608,7 @@ multiple_choice,"Which electromagnetic radiation has the highest frequency?",5,"
       else if (rawType.includes("short") || rawType.includes("essay") || rawType.includes("write")) type = "short_answer";
       else type = "multiple_choice";
       const questionText = item.questionText || item.question || item.prompt || `Question ${idx + 1}`;
-      const marks = typeof item.marks === "number" ? item.marks : 5;
+      const marks = typeof item.marks === "number" ? item.marks : defaultQuizMarks();
       const options = type === "multiple_choice" ? Array.isArray(item.options) && item.options.length > 0 ? item.options.map(String) : ["Option A", "Option B", "Option C", "Option D"] : void 0;
       const correctAnswer = item.correctAnswer || item.answer || (type === "yes_no" ? "Yes" : "");
       return {

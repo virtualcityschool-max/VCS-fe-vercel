@@ -13,8 +13,10 @@ import TeacherPlannerTab from "../../components/admin/TeacherPlannerTab";
 import ConfirmDialog from "../../components/common/ConfirmDialog";
 import { toastManager } from "../../utils/toastManager";
 import { showApiError } from "../../utils/apiErrorHandler";
+import { useApp } from "../../admin-v2/context/AppContext";
 
 const AdminTeacherPlannerPage = () => {
+  const { can } = useApp();
   const dispatch = useDispatch();
 
   const sessions = useSelector(selectTeacherPlannerSessions);
@@ -95,6 +97,7 @@ const AdminTeacherPlannerPage = () => {
         onSessionCreate={handleCreate}
         onSessionUpdate={handleUpdate}
         onSessionDelete={handleDelete}
+        canDelete={can("delete")}
       />
 
       <ConfirmDialog

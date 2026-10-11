@@ -25,7 +25,8 @@ export const TopBar: React.FC = () => {
     setMobileMenuOpen,
     tzIana,
     profile,
-  } = useApp();
+    can,
+  } = useApp() as any;
 
   const [quickAddMenuOpen, setQuickAddMenuOpen] = useState(false);
   const quickAddRef = useRef<HTMLDivElement>(null);
@@ -109,7 +110,7 @@ export const TopBar: React.FC = () => {
         </button>
 
         {/* Quick Add ▾ dropdown */}
-        <div className="relative" ref={quickAddRef}>
+        <div className={`relative ${['manage_students', 'manage_teachers', 'manage_academics', 'manage_content'].some((c) => can(c)) ? '' : 'hidden'}`} ref={quickAddRef}>
           <button
             onClick={() => setQuickAddMenuOpen(!quickAddMenuOpen)}
             className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-xl bg-[#6D5BFF] hover:bg-[#5B47FB] text-white shadow-md shadow-indigo-600/20 active:scale-[0.98] transition-all cursor-pointer"
@@ -121,7 +122,7 @@ export const TopBar: React.FC = () => {
 
           {quickAddMenuOpen && (
             <div className="absolute right-0 mt-2 w-52 rounded-xl border border-[#232D52] bg-[#121831] p-1.5 shadow-2xl z-40 text-xs">
-              <button
+              {can('manage_students') && <button
                 onClick={() => {
                   setQuickAddMenuOpen(false);
                   openQuickAdd('student');
@@ -130,8 +131,8 @@ export const TopBar: React.FC = () => {
               >
                 <UserPlus className="w-4 h-4 text-emerald-400" />
                 <span>Add student</span>
-              </button>
-              <button
+              </button>}
+              {can('manage_teachers') && <button
                 onClick={() => {
                   setQuickAddMenuOpen(false);
                   openQuickAdd('teacher');
@@ -140,8 +141,8 @@ export const TopBar: React.FC = () => {
               >
                 <GraduationCap className="w-4 h-4 text-indigo-400" />
                 <span>Add teacher</span>
-              </button>
-              <button
+              </button>}
+              {can('manage_students') && <button
                 onClick={() => {
                   setQuickAddMenuOpen(false);
                   openQuickAdd('parent' as any);
@@ -150,8 +151,8 @@ export const TopBar: React.FC = () => {
               >
                 <Users className="w-4 h-4 text-pink-400" />
                 <span>Add parent</span>
-              </button>
-              <button
+              </button>}
+              {can('manage_academics') && <button
                 onClick={() => {
                   setQuickAddMenuOpen(false);
                   openQuickAdd('subject');
@@ -160,8 +161,8 @@ export const TopBar: React.FC = () => {
               >
                 <BookOpen className="w-4 h-4 text-sky-400" />
                 <span>Add subject</span>
-              </button>
-              <button
+              </button>}
+              {can('manage_academics') && <button
                 onClick={() => {
                   setQuickAddMenuOpen(false);
                   openQuickAdd('session');
@@ -170,8 +171,8 @@ export const TopBar: React.FC = () => {
               >
                 <Calendar className="w-4 h-4 text-amber-400" />
                 <span>Plan a class</span>
-              </button>
-              <button
+              </button>}
+              {can('manage_content') && <button
                 onClick={() => {
                   setQuickAddMenuOpen(false);
                   openQuickAdd('post');
@@ -180,7 +181,7 @@ export const TopBar: React.FC = () => {
               >
                 <FileText className="w-4 h-4 text-rose-400" />
                 <span>Write blog / video</span>
-              </button>
+              </button>}
             </div>
           )}
         </div>

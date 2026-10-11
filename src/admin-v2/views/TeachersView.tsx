@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { TEACHING_AREAS } from '../data/formOptions';
 import { TeachingAreasPicker } from '../components/common/TeachingAreasPicker';
+import { MultiPick } from '../components/common/FormControls';
 
 export const TeachersView: React.FC = () => {
   const {
@@ -30,9 +31,15 @@ export const TeachersView: React.FC = () => {
     bulkAssignSubject,
     addToast,
     setTeacherAreas,
+    setTeacherShowcase,
+    can,
   } = useApp() as any;
+  const canEdit = can('manage_teachers');
+  const [showcaseFor, setShowcaseFor] = useState<any>(null);
+  const [showcasePick, setShowcasePick] = useState<string[]>([]);
+  const [showcaseOn, setShowcaseOn] = useState(false);
 
-  const [activeTab, setActiveTab] = useState<'all' | 'engaged' | 'standby'>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'engaged' | 'showcase' | 'standby'>('all');
   const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
   const [searchQuery, setSearchQuery] = useState('');
   const [deptFilter, setDeptFilter] = useState('all');
@@ -45,7 +52,8 @@ export const TeachersView: React.FC = () => {
   const [selectedSubjectToAssign, setSelectedSubjectToAssign] = useState('');
   const [pendingBulkTeacherIds, setPendingBulkTeacherIds] = useState<string[]>([]);
 
-  const engagedCount = teachers.filter((t) => t.status === 'Engaged').length;
+  const engagedCount = teachers.filter((t) => t.status === 'Active teaching').length;
+  const showcaseCount = teachers.filter((t) => t.status === 'Showcase').length;
   const standbyCount = teachers.filter((t) => t.status === 'Standby').length;
 
   const filters: FilterConfig[] = [
@@ -76,7 +84,8 @@ export const TeachersView: React.FC = () => {
 
     const matchTab =
       activeTab === 'all' ||
-      (activeTab === 'engaged' && teacher.status === 'Engaged') ||
+      (activeTab === 'engaged' && teacher.status === 'Active teaching') ||
+      (activeTab === 'showcase' && teacher.status === 'Showcase') ||
       (activeTab === 'standby' && teacher.status === 'Standby');
 
     const matchDept = deptFilter === 'all' || ((areaOverrides as any)[teacher.id] ?? (teacher as any).areas ?? []).includes(deptFilter);
@@ -124,9 +133,30 @@ export const TeachersView: React.FC = () => {
       },
     },
     {
+      header: 'Homepage',
+      cell: (row: any) => (
+        <button
+          type="button"
+          disabled={!canEdit}
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowcaseFor(row);
+            setShowcaseOn(!!row.showOnHomepage);
+            setShowcasePick(row.offeredCourseIds || []);
+          }}
+          className="text-left disabled:cursor-default"
+          title={canEdit ? 'Show on the homepage and the subjects they offer' : undefined}
+        >
+          <div className={`text-xs font-semibold ${row.showOnHomepage ? 'text-violet-300' : 'text-slate-500'}`}>{row.showOnHomepage ? 'Shown' : 'Hidden'}</div>
+          <div className="text-[11px] text-slate-500">{(row.offeredCourseIds || []).length} subject{(row.offeredCourseIds || []).length === 1 ? '' : 's'} offered</div>
+        </button>
+      ),
+    },
+    {
       header: 'Teaching now',
       cell: (row) => {
-        const assigned = subjects.filter((s) => row.assignedSubjectIds.includes(s.id));
+        // Real teaching only: allocations count once the teacher actually has classes.
+        const assigned = row.status === 'Active teaching' ? subjects.filter((s) => row.assignedSubjectIds.includes(s.id)) : [];
         return (
           <div className="flex items-center gap-1.5 flex-wrap">
             {assigned.slice(0, 2).map((s) => (
@@ -143,7 +173,7 @@ export const TeachersView: React.FC = () => {
               </span>
             )}
             {assigned.length === 0 && (
-              <span className="text-slate-500 text-[11px] italic">Standby pool</span>
+              <span className="text-slate-500 text-[11px] italic">{row.status === 'Showcase' ? 'Showcase only' : 'Not teaching yet'}</span>
             )}
           </div>
         );
@@ -161,8 +191,8 @@ export const TeachersView: React.FC = () => {
     {
       header: 'Workload',
       cell: (row) => (
-        <span className="font-mono text-slate-300 text-xs font-medium">
-          {row.weeklyHours} hrs/wk
+        <span className="font-mono text-slate-300 text-xs font-medium" title="Average of classes held in the last 4 weeks (same figure as Teacher Allocations)">
+          {row.weeklyHours ? `${row.weeklyHours} hrs/wk` : '—'}
         </span>
       ),
     },
@@ -176,12 +206,12 @@ export const TeachersView: React.FC = () => {
     <div className="space-y-6 w-full animate-in fade-in duration-150">
       <PageHeader
         title="Teachers Register"
-        subtitle="Manage faculty across 7 academic departments, weekly class loads, and standby talent pool."
-        primaryAction={{
+        subtitle="Active teaching = classes with enrolled students in the last 4 weeks or next 2. Showcase = on the homepage, not teaching yet."
+        primaryAction={canEdit ? {
           label: 'New teacher',
           onClick: () => openQuickAdd('teacher'),
           icon: GraduationCap,
-        }}
+        } : undefined}
         extraActions={
           <div className="flex items-center rounded-xl border border-[#232D52] bg-[#121831] p-0.5">
             <button
@@ -210,8 +240,9 @@ export const TeachersView: React.FC = () => {
       <div className="flex items-center gap-1.5 p-1 bg-[#121831] border border-[#232D52] rounded-xl w-fit">
         {[
           { id: 'all', label: 'All Faculty', count: teachers.length },
-          { id: 'engaged', label: 'Engaged', count: engagedCount },
-          { id: 'standby', label: 'Standby Pool', count: standbyCount },
+          { id: 'engaged', label: 'Active teaching', count: engagedCount },
+          { id: 'showcase', label: 'Showcase', count: showcaseCount },
+          { id: 'standby', label: 'Standby', count: standbyCount },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -249,7 +280,7 @@ export const TeachersView: React.FC = () => {
           columns={columns}
           data={filtered}
           onRowClick={(row) => openDetailDrawer('teacher', row)}
-          onToggleStatus={(row) => toggleUserStatus(row.id)}
+          onToggleStatus={canEdit ? (row) => toggleUserStatus(row.id) : undefined}
           bulkActions={[
             {
               label: 'Assign Subject',
@@ -345,6 +376,36 @@ export const TeachersView: React.FC = () => {
               >
                 Confirm Assignment
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showcaseFor && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75" onClick={() => setShowcaseFor(null)}>
+          <div className="w-full max-w-lg rounded-2xl border border-[#232D52] bg-[#121831] p-5 space-y-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div>
+              <h3 className="text-sm font-bold text-white">Homepage showcase: {showcaseFor.name}</h3>
+              <p className="text-[11px] text-slate-400 mt-1">What the public website shows. This is not an allocation: use Teacher Allocations only when classes actually run.</p>
+            </div>
+            <label className="flex items-center gap-2 text-xs text-slate-200 cursor-pointer">
+              <input type="checkbox" checked={showcaseOn} onChange={(e) => setShowcaseOn(e.target.checked)} />
+              Show this teacher on the homepage
+            </label>
+            <div>
+              <div className="text-xs font-semibold text-slate-300 mb-1.5">Subjects offered</div>
+              <MultiPick
+                options={subjects.filter((x: any) => x.status === 'Published').map((x: any) => ({ value: x.id, label: x.name, sub: x.level }))}
+                selected={showcasePick}
+                onChange={setShowcasePick}
+                placeholder="Search published subjects…"
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <button onClick={() => setShowcaseFor(null)} className="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 text-slate-200">Cancel</button>
+              <button
+                onClick={async () => { if (await setTeacherShowcase(showcaseFor.id, showcaseOn, showcasePick)) setShowcaseFor(null); }}
+                className="px-4 py-2 rounded-xl text-xs font-semibold bg-[#6D5BFF] text-white"
+              >Save</button>
             </div>
           </div>
         </div>

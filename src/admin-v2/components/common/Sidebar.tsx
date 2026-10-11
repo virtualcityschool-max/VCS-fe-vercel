@@ -32,6 +32,7 @@ import {
   CalendarClock,
   UserCheck, Radio } from 'lucide-react';
 import { NavigationId } from '../../types';
+import { staffRoleLabel } from '../../data/staffRoles';
 
 interface NavGroup {
   label: string;
@@ -58,6 +59,7 @@ export const Sidebar: React.FC = () => {
     setMobileMenuOpen,
     tzIana,
     liveNowCount = 0,
+    canView,
   } = useApp() as any;
 
   const [currentTimeStr, setCurrentTimeStr] = useState('');
@@ -123,6 +125,7 @@ export const Sidebar: React.FC = () => {
         { id: 'teachers', label: 'Teachers Register', icon: Users },
         { id: 'teacher-allocations', label: 'Teacher Allocations', icon: GitFork },
         { id: 'timetable', label: 'Timetable', icon: Calendar },
+        { id: 'ptm-meetings', label: 'Staff Meetings', icon: CalendarClock },
       ],
     },
     {
@@ -136,7 +139,6 @@ export const Sidebar: React.FC = () => {
       label: 'PARENTS',
       items: [
         { id: 'parents', label: 'Parents Register', icon: HeartHandshake },
-        { id: 'ptm-meetings', label: 'PTM Meetings', icon: CalendarClock },
       ],
     },
     {
@@ -164,7 +166,7 @@ export const Sidebar: React.FC = () => {
     {
       label: 'SETTINGS',
       items: [
-        { id: 'admin-users', label: 'Admin Users', icon: ShieldCheck },
+        { id: 'admin-users', label: 'Staff & Roles', icon: ShieldCheck },
         { id: 'levels', label: 'Levels', icon: Layers },
         { id: 'settings', label: 'Platform Settings', icon: Sliders },
       ],
@@ -225,7 +227,10 @@ export const Sidebar: React.FC = () => {
 
         {/* Navigation Items (Scrollable) */}
         <div className="flex-1 overflow-y-auto px-3 py-4 space-y-6">
-          {navGroups.map((group, gIdx) => (
+          {navGroups
+            .map((g) => ({ ...g, items: g.items.filter((it) => !canView || canView(it.id)) }))
+            .filter((g) => g.items.length > 0)
+            .map((group, gIdx) => (
             <div key={gIdx} className="space-y-1">
               {!sidebarCollapsed && (
                 <div className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
@@ -294,6 +299,9 @@ export const Sidebar: React.FC = () => {
                 <div className="text-xs font-semibold text-slate-200 group-hover:text-white truncate">
                   {adminName}
                 </div>
+                {profile?.admin_role && (
+                  <div className="text-[10px] text-indigo-300 truncate">{staffRoleLabel(profile.admin_role)}</div>
+                )}
                 <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-mono mt-0.5">
                   <Clock className="w-3 h-3 text-indigo-400" />
                   <span>{currentTimeStr}</span>

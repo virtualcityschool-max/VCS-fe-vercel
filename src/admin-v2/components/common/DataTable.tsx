@@ -35,12 +35,16 @@ interface DataTableProps<T extends { id: string }> {
   onRowClick?: (row: T) => void;
   onEdit?: (row: T) => void;
   onDelete?: (row: T) => void;
+  /** Label for the delete action, e.g. "Deactivate" when nothing is removed for good. */
+  deleteLabel?: string;
   onToggleStatus?: (row: T) => void;
   bulkActions?: BulkAction[];
   pageSize?: number;
   emptyState?: React.ReactNode;
   /** Alternate row shading + stronger dividers, for rows with tall wrapped content. */
   striped?: boolean;
+  /** Set false when the page draws its own actions column. */
+  rowActions?: boolean;
 }
 
 export function DataTable<T extends { id: string }>({
@@ -50,10 +54,12 @@ export function DataTable<T extends { id: string }>({
   onRowClick,
   onEdit,
   onDelete,
+  deleteLabel = 'Delete',
   onToggleStatus,
   bulkActions = [],
   pageSize = 10,
   emptyState,
+  rowActions = true,
   striped = false,
 }: DataTableProps<T>) {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -109,8 +115,8 @@ export function DataTable<T extends { id: string }>({
     setActionMenuOpenId(null);
     setConfirmDialog({
       isOpen: true,
-      title: 'Remove Record?',
-      message: 'Are you sure you wish to remove or deactivate this record? This action can be undone from the activity history.',
+      title: `${deleteLabel}?`,
+      message: deleteLabel === 'Delete' ? 'This removes the record for good.' : `${deleteLabel} this record? You can switch it back later.`,
       onConfirm: () => onDelete?.(row),
     });
   };
@@ -181,7 +187,7 @@ export function DataTable<T extends { id: string }>({
                   {col.header}
                 </th>
               ))}
-              <th className="py-3 px-4 text-right w-24">Actions</th>
+              {rowActions && <th className="py-3 px-4 text-right w-24">Actions</th>}
             </tr>
           </thead>
           <tbody className={`divide-y text-xs ${striped ? 'divide-[#2A3560]' : 'divide-[#1E2648]/60'}`}>
@@ -215,6 +221,7 @@ export function DataTable<T extends { id: string }>({
                     </td>
                   ))}
 
+                  {rowActions && (
                   <td className="py-3 px-4 text-right" onClick={(e) => e.stopPropagation()}>
                     <div className="flex items-center justify-end gap-1.5">
                       {onRowClick && (
@@ -278,7 +285,7 @@ export function DataTable<T extends { id: string }>({
                                 className="flex items-center gap-2 w-full px-2.5 py-1.5 text-rose-400 hover:bg-rose-500/15 rounded-lg text-left"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
-                                Delete
+                                {deleteLabel}
                               </button>
                             )}
                           </div>
@@ -286,6 +293,7 @@ export function DataTable<T extends { id: string }>({
                       </div>
                     </div>
                   </td>
+                  )}
                 </tr>
               );
             })}

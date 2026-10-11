@@ -32,6 +32,7 @@ import { getStorageUrl } from '../../utils/storageUrl';
 import { departmentOf } from '../../components/admin/ui/departments';
 import { TEACHING_AREAS, guessTeachingAreas } from '../data/formOptions';
 import { ConfirmDialog } from '../components/common/ConfirmDialog';
+import { NAV_CAP, type Cap } from '../data/staffRoles';
 
 export interface ToastMessage {
   id: string;
@@ -62,8 +63,8 @@ export const VIEW_TO_PATH: Record<string, string> = {
   'teacher-allocations': '/admin/teacher-allocations',
   timetable: '/admin/sessions',
   'live-classes': '/admin/live-classes',
-  'ptm-meetings': '/admin/teacher-planner',
-  meetings: '/admin/teacher-planner',
+  'ptm-meetings': '/admin/staff-meetings',
+  meetings: '/admin/staff-meetings',
   parents: '/admin/users?role=parent',
   attendance: '/admin/attendance',
   evaluations: '/admin/evaluations',
@@ -122,8 +123,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch<any>();
-  const profile = useSelector((s: any) => s.auth.profile);
+  const storedProfile = useSelector((s: any) => s.auth.profile);
+  // Fresh copy from the server: it carries the staff role and what it allows.
+  const [me, setMe] = useState<any>(null);
+  useEffect(() => {
+    axiosInstance.get('/auth/me/').then((r: any) => setMe(r.data?.data || r.data)).catch(() => setMe({}));
+  }, []);
+  const profile = me && me.id ? { ...storedProfile, ...me } : storedProfile;
   const tzIana: string | undefined = profile?.timezone || undefined;
+  // Older servers send no capabilities: then everything is shown, as before.
+  const caps: string[] | null = Array.isArray(me?.capabilities) ? me.capabilities : null;
+  const can = useCallback((cap?: Cap | null) => !cap || !caps || caps.includes(cap), [caps]);
+  const canView = useCallback((view: string) => me?.admin_role === 'viewer' || can(NAV_CAP[view] as Cap), [can, me]);
+  const isSuperAdmin = !caps || caps.includes('manage_staff');
 
   // ── Layout & navigation ───────────────────────────────────────────────────
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
@@ -150,7 +162,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const timezone = `${tzIana || Intl.DateTimeFormat().resolvedOptions().timeZone} ${tzAbbr}`.trim();
   const setTimezone = (tz: string) => {
     const iana = tz.split(' ')[0];
-    adminService.updateUser(profile?.id, { email: profile?.email, role: 'admin', timezone: iana })
+    axiosInstance.patch('/auth/me/', { timezone: iana })
       .then(() => addToast(`Timezone set to ${iana}. Reload to apply everywhere.`, 'success'))
       .catch((e: any) => addToast(errText(e), 'error'));
   };
@@ -187,6 +199,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [raw, setRaw] = useState<any>({
     users: [], courses: [], enrollments: [], categories: [], sessions: [], meetings: [], subs: { active: [], expired: [], needs_gumroad_cancellation: [] },
     referrals: [], posts: [], testimonials: [], reviews: [], catalog: [], about: null, settings: null, analytics: null, attendance: [], grading: null,
+    audit: [],
   });
   const [loaded, setLoaded] = useState<Record<string, boolean>>({});
   const pendingApprovals = useSelector((s: any) => s.approvals.pendingApprovals);
@@ -229,10 +242,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const from = new Date(to.getTime() - 30 * 86400000);
       return adminService.getAttendance({ from: ymd(from, tzIana), to: ymd(to, tzIana) });
     },
+    audit: () => axiosInstance.get('/admin/audit-log/', { params: { limit: 200 } }).then((r: any) => r.data),
+  };
+  // What each loader needs; the panel only asks for what this staff role may read.
+  const LOADER_CAP: Record<string, Cap> = {
+    users: 'view_people', enrollments: 'view_people', referrals: 'view_people', analytics: 'view_people',
+    sessions: 'view_academics', meetings: 'view_academics', subs: 'view_billing', reviews: 'view_approvals',
+    attendance: 'view_attendance', audit: 'view_audit',
   };
 
   const reload = useCallback(async (...keys: string[]) => {
-    const list = keys.length ? keys : Object.keys(loaders.current);
+    const list = (keys.length ? keys : Object.keys(loaders.current)).filter((k) => can(LOADER_CAP[k]));
+    if (!list.length) return;
     const results = await Promise.allSettled(list.map((k) => loaders.current[k]()));
     setRaw((prev: any) => {
       const next = { ...prev };
@@ -250,22 +271,33 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (failed.length) {
       addToast(`Could not load: ${failed.join(', ')}. Those sections may look empty; use the reload button to try again.`, 'warning');
     }
-  }, []);
+  }, [can]);
 
   const refreshApprovals = useCallback(() => {
+    if (!can('view_approvals')) return;
     dispatch(fetchPendingApprovals());
     dispatch(fetchRejectedApprovals());
     dispatch(fetchPendingEnrollments());
     dispatch(fetchPendingChildLinks());
     dispatch(fetchFreeAccessRequests({ status: 'pending' }));
-  }, [dispatch]);
+  }, [dispatch, can]);
 
+  // Wait for the staff role before the first load.
   useEffect(() => {
+    if (!me) return undefined;
     reload();
     refreshApprovals();
-    const id = setInterval(() => reload('subs', 'sessions'), 120000);
+    const id = setInterval(() => reload('subs', 'sessions', 'audit'), 120000);
     return () => clearInterval(id);
-  }, [reload, refreshApprovals]);
+  }, [me, reload, refreshApprovals]);
+
+  // Opening a page this role may not see goes back to the dashboard.
+  useEffect(() => {
+    if (me && !canView(currentView)) {
+      addToast('Your staff role does not include that page.', 'info');
+      navigate('/admin/overview', { replace: true });
+    }
+  }, [me, currentView, canView]);
 
   // ── Mapping helpers ───────────────────────────────────────────────────────
   const levelName = useMemo(() => {
@@ -325,6 +357,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [raw.sessions]);
 
   const sessionCourse = useMemo(() => new Map(raw.sessions.map((s: any) => [sid(s.id), s.course])), [raw.sessions]);
+
+  // "Active teaching" = teaches a subject with enrolled students and has
+  // classes held in the last 4 weeks or booked in the next 2 weeks. Subjects
+  // given only so a teacher shows on the website do not count.
+  const activeTeacherIds = useMemo(() => {
+    const now = Date.now();
+    const seated = new Set(raw.enrollments.filter((e: any) => e.status === 'active').map((e: any) => sid(e.course?.id)));
+    const ids = new Set<string>();
+    raw.sessions.forEach((s: any) => {
+      const t = new Date(s.scheduled_at).getTime();
+      if (!s.teacher || s.status === 'cancelled' || s.status === 'missed' || s.session_type === 'admin_teacher') return;
+      if (t >= now - 28 * 86400000 && t <= now + 14 * 86400000 && seated.has(sid(s.course))) ids.add(sid(s.teacher));
+    });
+    return ids;
+  }, [raw.sessions, raw.enrollments]);
+  const teacherStatus = (u: any) => (activeTeacherIds.has(sid(u.id)) ? 'Active teaching' : u.show_on_homepage ? 'Showcase' : 'Standby');
   const activeEnrollments = useMemo(() => raw.enrollments.filter((e: any) => e.status === 'active'), [raw.enrollments]);
 
   const students: Student[] = useMemo(() => raw.users.filter((u: any) => u.role === 'student').map((u: any) => {
@@ -364,7 +412,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const dept = [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] || (fromProfile ? deptName(fromProfile) : 'General');
     return {
       id: sid(u.id), name: getDisplayName(u) || u.email, email: u.email, role: 'teacher',
-      status: taught.length ? 'Engaged' : 'Standby', createdAt: u.date_joined, phone: u.phone || '',
+      status: teacherStatus(u), showOnHomepage: !!u.show_on_homepage, offeredCourseIds: (u.offered_course_ids || []).map(sid),
+      createdAt: u.date_joined, phone: u.phone || '',
       department: dept as DepartmentName, assignedSubjectIds: taught.map((c: any) => sid(c.id)),
       qualification: u.qualification || u.expertise || '', experienceYears: u.experience_years || 0,
       weeklyHours: Math.round(((recentLoad.hours.get(sid(u.id)) || 0) / 4) * 10) / 10, rating: 0,
@@ -378,7 +427,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           : { areas: guessTeachingAreas([u.expertise, ...saved].filter(Boolean).join(', ')), areasSuggested: true };
       })(),
     } as any;
-  }), [raw.users, raw.courses, recentLoad]);
+  }), [raw.users, raw.courses, recentLoad, activeTeacherIds]);
 
   const parents: Parent[] = useMemo(() => raw.users.filter((u: any) => u.role === 'parent').map((u: any) => ({
     id: sid(u.id), name: getDisplayName(u) || u.email, email: u.email, role: 'parent',
@@ -389,9 +438,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const allUsers: BaseUser[] = useMemo(() => raw.users.map((u: any) => ({
     id: sid(u.id), name: getDisplayName(u) || u.email, email: u.email, role: u.role,
-    status: !u.is_active ? 'Inactive' : u.role === 'teacher' ? (raw.courses.some((c: any) => sid(c.instructor?.id ?? c.instructor_id) === sid(u.id)) ? 'Engaged' : 'Standby') : 'Active',
-    createdAt: (u.date_joined || '').slice(0, 10), phone: u.phone || '', isSuperuser: u.is_superuser, _raw: u,
-  } as any)), [raw.users, raw.courses]);
+    status: !u.is_active ? 'Inactive' : u.role === 'teacher' ? teacherStatus(u) : 'Active',
+    createdAt: (u.date_joined || '').slice(0, 10), phone: u.phone || '', isSuperuser: u.is_superuser, adminRole: u.admin_role || '', _raw: u,
+  } as any)), [raw.users, activeTeacherIds]);
 
   const subjects: Subject[] = useMemo(() => raw.courses.map((c: any) => ({
     id: sid(c.id), code: cambridgeCode(c.title), name: c.title, department: deptName(c.title),
@@ -431,7 +480,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       // Weekday as seen in the admin's timezone.
       dayOfWeek: new Date(start.toLocaleString('en-US', tzIana ? { timeZone: tzIana } : undefined)).getDay(),
       date: ymd(start, tzIana),
-      status: s.status === 'scheduled' ? 'upcoming' : s.status,
+      // A class still "scheduled" 15+ minutes after its start never began:
+      // shown as missed at once (the server's 5-minute job flags it too).
+      status: s.status === 'missed' || (s.status === 'scheduled' && start.getTime() < Date.now() - 15 * 60000) ? 'missed'
+        : s.status === 'scheduled' ? 'upcoming' : s.status,
       recurrence: s.is_recurring ? 'Weekly' : 'One-off', meetingLink: s.meeting_link || undefined,
       hasTeacherAssigned: !!s.teacher, courseTitle: s.course_title, teacherName: s.teacher_name, _raw: s,
     } as any;
@@ -515,7 +567,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return {
       marksPerQuestion: s.quiz_marks_per_question ?? 1, publishImmediately: !!s.quiz_publish_immediately,
       submissionWindowDays: s.quiz_submission_days ?? 7,
-      sessionStartMode: s.session_default_start_type === 'now' ? 'Start now' : 'Scheduled',
+      sessionStartMode: s.session_auto_open === false ? 'Start now' : 'Scheduled',
+      meetingPlatform: s.session_meeting_platform || 'google_meet',
       recordingAutoPublish: false, defaultDurationMinutes: s.session_duration_mins ?? 60,
       gradeThresholds: { AStar: g.a_plus_min ?? 90, A: g.a_min ?? 80, B: g.b_min ?? 70, C: g.c_min ?? 60, D: g.d_min ?? 50, E: 0 },
     } as any;
@@ -568,7 +621,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return items.map((it: any) => {
       const r: any = it._raw || {};
       const review: any = reviewByKey.get(it.id);
-      const openStage = review && ['under_review', 'info_requested', 'on_hold'].includes(review.status) ? review.status : 'new';
+      const openStage = review && ['under_review', 'recommended', 'info_requested', 'on_hold'].includes(review.status) ? review.status : 'new';
       const at = r.date_joined || r.enrolled_at || r.created_at || r.requested_at;
       const waitingDays = at ? Math.max(0, Math.floor((Date.now() - new Date(at).getTime()) / DAY)) : 0;
       const facts: { label: string; value: string }[] = [];
@@ -587,7 +640,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       } else if (it.id.startsWith('link-')) {
         facts.push({ label: 'Student', value: r.student || '' });
       }
-      return { ...it, stage: openStage, review, waitingDays, requestedIso: at, facts: facts.filter((f) => f.value) };
+      // Free access: who recommended it (a second person must approve).
+      const recommendedBy = (review?.history || []).filter((h: any) => h.status === 'recommended').map((h: any) => ({ id: h.by_id, name: h.by }));
+      return { ...it, stage: openStage, review, waitingDays, requestedIso: at, facts: facts.filter((f) => f.value), recommendedBy };
     });
   }, [pendingApprovals, pendingEnrollments, freeAccess, pendingChildLinks, raw.reviews]);
 
@@ -596,15 +651,33 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     .filter((r: any) => r.status === 'approved' || r.status === 'rejected')
     .sort((a: any, b: any) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()), [raw.reviews]);
 
+  // Recent School Operations Log: every staff action (with the staff member's
+  // name) from the server's audit log, plus system events (sign-ups, payments).
   const activities: RecentActivity[] = useMemo(() => {
     const list: any[] = [];
-    approvals.forEach((a: any) => list.push({ id: `a-${a.id}`, title: a.type === 'account_signup' ? 'Account approval pending' : a.type === 'parent_link' ? 'Parent link requested' : 'New enrollment request', description: `${a.requesterName} · ${a.targetEntityName}`, at: a._raw?.date_joined || a._raw?.enrolled_at || a._raw?.created_at || a._raw?.requested_at, category: a.type === 'enrollment_request' ? 'enrollment' : 'approval' }));
-    raw.enrollments.slice().sort((x: any, y: any) => new Date(y.enrolled_at).getTime() - new Date(x.enrolled_at).getTime()).slice(0, 10)
-      .forEach((e: any) => list.push({ id: `e-${e.id}`, title: 'Student enrolled', description: `${e.student?.username} enrolled in ${e.course?.title}`, at: e.enrolled_at, category: 'enrollment' }));
-    raw.subs.active?.filter((r: any) => r.last_charge_at).forEach((r: any) => list.push({ id: `p-${r.enrollment_id}`, title: r.enrollment_source === 'gumroad' ? 'Gumroad payment' : 'Access period started', description: `${r.student?.name} · ${r.course?.title}`, at: r.last_charge_at, category: 'payment' }));
-    return list.filter((x) => x.at).sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime()).slice(0, 30)
-      .map((x) => ({ ...x, timestamp: relTime(x.at), actorName: 'VCS' }));
-  }, [approvals, raw.enrollments, raw.subs]);
+    (raw.audit || []).forEach((a: any) => list.push({ id: `audit-${a.id}`, title: a.action, description: a.summary, at: a.at, category: 'staff', actorName: a.actor_name || 'Staff', actorRole: a.actor_role || '' }));
+    approvals.forEach((a: any) => list.push({ id: `a-${a.id}`, title: a.type === 'account_signup' ? 'Account approval pending' : a.type === 'parent_link' ? 'Parent link requested' : 'New enrollment request', description: `${a.requesterName} · ${a.targetEntityName}`, at: a._raw?.date_joined || a._raw?.enrolled_at || a._raw?.created_at || a._raw?.requested_at, category: a.type === 'enrollment_request' ? 'enrollment' : 'approval', actorName: 'Website' }));
+    raw.subs.active?.filter((r: any) => r.last_charge_at && r.enrollment_source === 'gumroad').forEach((r: any) => list.push({ id: `p-${r.enrollment_id}`, title: 'Gumroad payment', description: `${r.student?.name} · ${r.course?.title}`, at: r.last_charge_at, category: 'payment', actorName: 'Gumroad' }));
+    return list.filter((x) => x.at).sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime()).slice(0, 60)
+      .map((x) => ({ ...x, timestamp: relTime(x.at) }));
+  }, [approvals, raw.audit, raw.subs]);
+
+  // One attendance calculation for the dashboard and the Attendance page:
+  // every class record (one per student per class) marked present, late or
+  // absent counts once; records never marked are left out.
+  const attendanceSummary = useCallback((fromIso: string, toIso?: string, courseId?: string) => {
+    const from = new Date(fromIso).getTime();
+    const to = toIso ? new Date(toIso).getTime() : Infinity;
+    const rows = raw.attendance.filter((r: any) => r.participant_role !== 'teacher' && ['present', 'late', 'absent'].includes(r.status)
+      && r.scheduled_at && new Date(r.scheduled_at).getTime() >= from && new Date(r.scheduled_at).getTime() < to
+      && (!courseId || sid(sessionCourse.get(sid(r.session))) === sid(courseId)));
+    const present = rows.filter((r: any) => r.status === 'present').length;
+    const late = rows.filter((r: any) => r.status === 'late').length;
+    const absent = rows.length - present - late;
+    const unmarked = raw.attendance.filter((r: any) => r.participant_role !== 'teacher' && !r.status && r.scheduled_at
+      && new Date(r.scheduled_at).getTime() >= from && new Date(r.scheduled_at).getTime() < to).length;
+    return { total: rows.length, present, late, absent, unmarked, rate: rows.length ? Math.round(((present + late) / rows.length) * 1000) / 10 : null };
+  }, [raw.attendance, sessionCourse]);
 
   const grades: GradeRecord[] = [];
 
@@ -635,24 +708,36 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
-  const approveItem = async (id: string, note = '') => {
+  // The Approvals Inbox review panel confirms first (opts.confirmed); any other
+  // caller gets a confirmation step here, so nothing is approved in one click.
+  const approveItem = async (id: string, note = '', opts: { confirmed?: boolean; overrideReason?: string } = {}) => {
     const item: any = approvals.find((a) => a.id === id);
-    if (!item) return;
-    const ok = await confirmAction({ title: `Approve ${item.requesterName}?`, message: `${item.title}: ${item.targetEntityName}. They are notified as usual.`, confirmLabel: 'Approve', isDestructive: false });
-    if (!ok) return;
+    if (!item) return false;
+    if (!opts.confirmed) {
+      const waiting = item.stage === 'info_requested' ? ' This request is still waiting for the applicant.' : '';
+      const ok = await confirmAction({ title: `Approve ${item.requesterName}?`, message: `${item.title}: ${item.targetEntityName}. They are notified as usual.${waiting}`, confirmLabel: 'Approve', isDestructive: false });
+      if (!ok) return false;
+    }
     const done = await run(async () => {
       if (item.type === 'account_signup') await dispatch(approveUser({ userId: item._raw.id })).unwrap();
       else if (item.type === 'parent_link') await dispatch(approveChildLink(item._raw.link_id)).unwrap();
-      else if (id.startsWith('free-')) await freeAccessService.resolve(item._raw.id, (item._raw.courses || []).map((c: any) => ({ course_id: c.course?.id ?? c.id, action: 'approve' })), note);
+      else if (id.startsWith('free-')) await axiosInstance.post(`/free-access/requests/${item._raw.id}/resolve/`, {
+        decisions: (item._raw.courses || []).map((c: any) => ({ course_id: c.course?.id ?? c.id, action: 'approve' })),
+        note, ...(opts.overrideReason ? { override_reason: opts.overrideReason } : {}),
+      });
       else await dispatch(actionEnrollment({ enrollmentId: item._raw.id, action: 'approve' })).unwrap();
     }, `Approved: ${item.requesterName}`, ['users', 'enrollments']);
     if (done) {
-      await recordReview(item, 'approved', '', note);
+      await recordReview(item, 'approved', '', [note, opts.overrideReason ? `Approved without a second person: ${opts.overrideReason}` : ''].filter(Boolean).join(' — '));
       setApprovedTodayCount((n) => n + 1);
       refreshApprovals();
-      reload('reviews');
+      reload('reviews', 'audit');
     }
+    return done;
   };
+
+  // Admissions recommends a free access request; Finance or a Super Admin approves it.
+  const recommendFreeAccess = (id: string, note = '') => setReviewStage(id, 'recommended', note);
 
   // The reject dialog collects the reason, so there is no second confirm here.
   // Sign-ups and scholarship requests include the reason in the email.
@@ -670,7 +755,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       await recordReview(item, 'rejected', reason || 'Other', note);
       setRejectedTodayCount((n) => n + 1);
       refreshApprovals();
-      reload('reviews');
+      reload('reviews', 'audit');
     }
     return done;
   };
@@ -678,6 +763,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Teachers Register: the subjects a teacher teaches (profile list).
   const setTeacherAreas = (teacherId: string, areas: string[]) =>
     run(() => adminService.updateUserProfile(Number(teacherId), { subjects: areas }), 'Subjects saved', ['users']);
+
+  // Homepage showcase: separate from allocations (which are real teaching).
+  const setTeacherShowcase = (teacherId: string, show: boolean, courseIds: string[]) =>
+    run(() => adminService.updateUserProfile(Number(teacherId), { show_on_homepage: show, offered_courses: courseIds.map(Number) }),
+      show ? 'Shown on the homepage' : 'Hidden from the homepage', ['users']);
 
   // ── Subjects & batches ──
   const addBatch = (subjectId: string, b: { batchName: string; teacherId?: string; priceUSD?: number; publish?: boolean }) =>
@@ -721,13 +811,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const setReviewStage = async (id: string, stage: string, note = '') => {
     const item: any = approvals.find((a) => a.id === id);
     if (!item) return false;
-    const labels: Record<string, string> = { under_review: 'Under review', info_requested: 'Waiting for the applicant', on_hold: 'On hold', new: 'Back to New' };
+    const labels: Record<string, string> = { under_review: 'Under review', recommended: 'Recommended for approval', info_requested: 'Waiting for the applicant', on_hold: 'On hold', new: 'Back to New' };
     const done = await run(() => (stage === 'new'
       ? axiosInstance.delete(`/admin/approval-reviews/${id}/`)
       : axiosInstance.post(`/admin/approval-reviews/${id}/`, {
           status: stage, note,
           summary: { title: item.title, name: item.requesterName, email: item.requesterEmail, target: item.targetEntityName },
-        })), `${item.requesterName}: ${labels[stage] || stage}`, ['reviews']);
+        })), `${item.requesterName}: ${labels[stage] || stage}`, ['reviews', 'audit']);
     return done;
   };
 
@@ -743,6 +833,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         email, password: data.password, confirm_password: data.password, role,
         first_name: (data.name || '').trim().split(' ')[0] || '', last_name: (data.name || '').trim().split(' ').slice(1).join(' '), is_active: true,
         ...(data.timezone ? { timezone: data.timezone } : {}),
+        ...(role === 'admin' ? { admin_role: data.adminRole } : {}),
         ...(role === 'parent' && data.childEmails?.length ? { student_emails: data.childEmails } : {}),
       });
       const newId = created?.id ?? created?.user?.id ?? created?.data?.id;
@@ -792,11 +883,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const ok = await confirmAction({ title: `${u.is_active ? 'Deactivate' : 'Activate'} ${getDisplayName(u)}?`, message: u.is_active ? 'They will not be able to log in until activated again.' : 'They will be able to log in again.', confirmLabel: u.is_active ? 'Deactivate' : 'Activate', isDestructive: u.is_active });
     if (ok) await run(() => setActive(u, !u.is_active), `${getDisplayName(u)} ${u.is_active ? 'deactivated' : 'activated'}`, ['users']);
   };
-  const updateUserRole = async (id: string, role: string) => {
+  // Staff role change: Super Admin only (the server checks too), with a confirmation.
+  const updateStaffRole = async (id: string, adminRole: string, roleLabel: string) => {
     const u = rawUser(id);
-    if (!u || u.role === role) return;
-    const ok = await confirmAction({ title: `Change ${getDisplayName(u)} to ${role}?`, message: 'This changes what they can see and do after their next login.', confirmLabel: 'Change role' });
-    if (ok) await run(() => adminService.updateUser(u.id, { email: u.email, role, is_active: u.is_active, is_staff: u.is_staff ?? false }), `Role changed to ${role}`, ['users']);
+    if (!u || u.role !== 'admin' || u.admin_role === adminRole) return false;
+    const ok = await confirmAction({ title: `Make ${getDisplayName(u)} ${roleLabel}?`, message: 'Their menu and what they can change follow the new role from their next page load. This is recorded in the operations log.', confirmLabel: 'Change role', isDestructive: false });
+    if (!ok) return false;
+    return run(() => axiosInstance.patch(`/users/${u.id}/`, { admin_role: adminRole }), `${getDisplayName(u)} is now ${roleLabel}`, ['users', 'audit']);
   };
 
   const addEnrollment = (r: any) =>
@@ -874,7 +967,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const addSession = () => navigate('/admin/sessions/plan');
   const updateSession = () => navigate('/admin/sessions/plan');
   const deleteSession = () => navigate('/admin/sessions/plan');
-  const addMeeting = () => navigate('/admin/teacher-planner/plan');
+  const addMeeting = () => navigate('/admin/staff-meetings/plan');
+
+  // A class that passed its time without starting stays flagged until resolved.
+  const resolveMissedSession = async (id: string, resolution: 'held' | 'cancelled' | 'rescheduled', note = '') => {
+    const s0: any = raw.sessions.find((x: any) => sid(x.id) === sid(id));
+    const words = { held: 'Mark as held', cancelled: 'Cancel this class', rescheduled: 'Cancel and plan a new time' };
+    const ok = await confirmAction({
+      title: `${words[resolution]}?`,
+      message: resolution === 'held'
+        ? `${s0?.title || 'This class'} is recorded as taught. Use this when the class did take place.`
+        : `${s0?.title || 'This class'} is marked cancelled.${resolution === 'rescheduled' ? ' The class planner opens next so you can book the new time.' : ''}`,
+      confirmLabel: words[resolution], isDestructive: resolution !== 'held',
+    });
+    if (!ok) return false;
+    const done = await run(() => axiosInstance.post(`/classroom/sessions/${id}/resolve/`, { resolution, note }), 'Class resolved', ['sessions', 'audit']);
+    if (done && resolution === 'rescheduled') navigate('/admin/sessions/plan');
+    return done;
+  };
 
   const renewSubscription = async (id: string) => {
     const r: any = subscriptions.find((s) => s.id === sid(id));
@@ -927,7 +1037,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const next = { ...settings, ...s };
     const calls: Promise<any>[] = [platformSettingsService.update({
       quiz_marks_per_question: next.marksPerQuestion, quiz_publish_immediately: next.publishImmediately, quiz_submission_days: next.submissionWindowDays,
-      session_duration_mins: next.defaultDurationMinutes, session_default_start_type: next.sessionStartMode === 'Start now' ? 'now' : 'scheduled',
+      session_duration_mins: next.defaultDurationMinutes, session_auto_open: next.sessionStartMode !== 'Start now',
+      session_meeting_platform: next.meetingPlatform || 'google_meet',
     })];
     if (s.gradeThresholds) {
       const g = next.gradeThresholds;
@@ -938,16 +1049,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const updateGrade = () => addToast('Grades are entered by teachers when marking work.', 'info');
 
-  // Click-to-cycle in the attendance matrix edits that day's class record.
-  const toggleAttendanceCell = async (studentId: string, date: string, courseId?: string) => {
-    const rows = raw.attendance.filter((r: any) => r.participant_role !== 'teacher' && sid(r.student) === sid(studentId) && r.scheduled_at && ymd(new Date(r.scheduled_at), tzIana) === date && (!courseId || sid(sessionCourse.get(sid(r.session))) === sid(courseId)));
-    if (rows.length !== 1) {
-      addToast(rows.length ? 'This student had more than one class that day. Open Attendance → pick the subject to edit a single class.' : 'No class recorded for this student on that day.', 'info');
-      return;
-    }
-    const r = rows[0];
-    const next = r.status === 'present' ? 'late' : r.status === 'late' ? 'absent' : 'present';
-    await run(() => teacherService.updateStudentAttendance(r.session, r.student, { status: next }), `Marked ${next}`, ['attendance']);
+  // Attendance correction (Edit mode on the Attendance page): one class record,
+  // confirmed first, written to the operations log by the server.
+  const setAttendanceStatus = async (record: any, status: 'present' | 'late' | 'absent') => {
+    if (!record || record.status === status) return false;
+    const who = students.find((x) => x.id === sid(record.student))?.name || 'this student';
+    const when = record.scheduled_at ? new Date(record.scheduled_at).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short', ...(tzIana ? { timeZone: tzIana } : {}) }) : '';
+    const ok = await confirmAction({
+      title: `Change attendance to ${status}?`,
+      message: `${who} · ${record.session_title || record.course_title || 'class'}${when ? ` · ${when}` : ''}: ${record.status || 'not marked'} → ${status}. This is recorded in the operations log.`,
+      confirmLabel: `Mark ${status}`, isDestructive: false,
+    });
+    if (!ok) return false;
+    return run(() => teacherService.updateStudentAttendance(record.session, record.student, { status }), `Marked ${status}`, ['attendance', 'audit']);
   };
 
   const addActivity = () => undefined;
@@ -961,13 +1075,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     students, addStudent, updateStudent, deleteStudent, bulkUpdateStudentStatus,
     enrollments, addEnrollment, addEnrollments, removeEnrollment,
     teachers, addTeacher, updateTeacher, toggleTeacherStatus, bulkAssignSubject, allocateTeacherSubject, deallocateTeacherSubject,
-    levelOptions: raw.categories, parents, addParent, addAdmin, allUsers, updateUserRole, toggleUserStatus,
-    liveNowCount, setTeacherAreas, subjects, catalog, addBatch, renameBatch, moveBatch, updateCatalogSubject, addSubject, updateSubject, toggleSubjectStatus, levels, addLevel, removeLevel,
+    levelOptions: raw.categories, parents, addParent, addAdmin, allUsers, updateStaffRole, toggleUserStatus,
+    can, canView, isSuperAdmin, recommendFreeAccess, resolveMissedSession, setAttendanceStatus, attendanceSummary,
+    liveNowCount, setTeacherAreas, setTeacherShowcase, subjects, catalog, addBatch, renameBatch, moveBatch, updateCatalogSubject, addSubject, updateSubject, toggleSubjectStatus, levels, addLevel, removeLevel,
     sessions, addSession, updateSession, deleteSession, meetings, addMeeting,
     subscriptions, renewSubscription, cancelSubscription, referrals,
     posts, addPost, togglePostStatus, testimonials, addTestimonial, toggleTestimonialVisibility, deleteTestimonial,
     aboutPage, updateAboutPage, settings, updateSettings, grades, updateGrade,
-    attendanceMatrix, toggleAttendanceCell, activities, addActivity,
+    attendanceMatrix, activities, addActivity,
     toasts, addToast, removeToast, resetDemoData,
     // Extras used by the real-data views.
     loaded, reload, analytics: raw.analytics, rawAttendance: raw.attendance.filter((r: any) => r.participant_role !== 'teacher'), rawAttendanceAll: raw.attendance, sessionCourse, rawCourses: raw.courses, categories: raw.categories,

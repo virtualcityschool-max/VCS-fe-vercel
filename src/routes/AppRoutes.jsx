@@ -56,7 +56,7 @@ const V2 = {
   Allocations: v2("TeacherAllocationsView", "TeacherAllocationsView"),
   Timetable: v2("TimetableView", "TimetableView"),
   LiveClasses: v2("LiveClassesView", "LiveClassesView"),
-  PTM: v2("PTMMeetingsView", "PTMMeetingsView"),
+  StaffMeetings: v2("PTMMeetingsView", "PTMMeetingsView"),
   Attendance: v2("AttendanceView", "AttendanceView"),
   Evaluations: v2("EvaluationsView", "EvaluationsView"),
   Subscriptions: v2("SubscriptionsView", "SubscriptionsView"),
@@ -270,7 +270,8 @@ const AppRoutes = () => {
           <Route path="teacher-allocations" element={<V2.Allocations />} />
           <Route path="sessions" element={<V2.Timetable />} />
           <Route path="live-classes" element={<V2.LiveClasses />} />
-          <Route path="teacher-planner" element={<V2.PTM />} />
+          <Route path="staff-meetings" element={<V2.StaffMeetings />} />
+          <Route path="teacher-planner" element={<Navigate to="/admin/staff-meetings" replace />} />
           <Route path="attendance" element={<V2.Attendance />} />
           <Route path="evaluations" element={<V2.Evaluations />} />
           <Route path="subscriptions" element={<V2.Subscriptions />} />
@@ -282,7 +283,8 @@ const AppRoutes = () => {
           <Route path="about" element={<V2.About />} />
           <Route path="settings" element={<V2.Settings />} />
           <Route path="sessions/plan" element={<AdminSessionsPage />} />
-          <Route path="teacher-planner/plan" element={<AdminTeacherPlannerPage />} />
+          <Route path="staff-meetings/plan" element={<AdminTeacherPlannerPage />} />
+          <Route path="teacher-planner/plan" element={<Navigate to="/admin/staff-meetings/plan" replace />} />
           <Route path="users/:id" element={<UserDetailsPage />} />
           <Route path="courses/:courseId" element={<AdminCourseDetailPage />} />
           <Route path="blogs/new" element={<AdminBlogEditorPage />} />

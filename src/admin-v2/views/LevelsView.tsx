@@ -23,6 +23,7 @@ export const LevelsView: React.FC = () => {
         title="Curriculum Levels"
         subtitle="Manage academic stages and certification tiers across Cambridge International and National tracks."
         primaryAction={{
+          cap: 'manage_academics',
           label: 'Add level',
           onClick: () => setIsAdding(true),
           icon: Plus,

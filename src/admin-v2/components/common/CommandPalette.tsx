@@ -26,7 +26,7 @@ import { NavigationId } from '../../types';
 interface SearchResultItem {
   id: string;
   title: string;
-  category: 'Pages' | 'Students' | 'Teachers' | 'Subjects';
+  category: 'Pages' | 'Students' | 'Teachers' | 'Parents' | 'Subjects';
   icon: any;
   action: () => void;
   meta?: string;
@@ -39,10 +39,11 @@ export const CommandPalette: React.FC = () => {
     setCurrentView,
     students,
     teachers,
+    parents,
     subjects,
     openDetailDrawer,
-    openQuickAdd,
-  } = useApp();
+    canView,
+  } = useApp() as any;
 
   const [query, setQuery] = useState('');
 
@@ -67,7 +68,7 @@ export const CommandPalette: React.FC = () => {
     { id: 'teacher-allocations', title: 'Teacher Allocations (/admin/teacher-allocations)', icon: Layers },
     { id: 'timetable', title: 'Timetable (/admin/sessions)', icon: Calendar },
     // PTM
-    { id: 'ptm-meetings', title: 'PTM Meetings (/admin/teacher-planner)', icon: Calendar },
+    { id: 'ptm-meetings', title: 'Staff Meetings (/admin/staff-meetings)', icon: Calendar },
     { id: 'parents', title: 'Parents (/admin/users?role=parent)', icon: HeartHandshake },
     { id: 'attendance', title: 'Attendance (/admin/attendance)', icon: Calendar },
     { id: 'evaluations', title: 'Evaluations (/admin/evaluations)', icon: BookOpen },
@@ -85,18 +86,24 @@ export const CommandPalette: React.FC = () => {
     { id: 'settings', title: 'Platform Settings (/admin/settings)', icon: Sliders },
   ];
 
-  const filteredPages = pages.filter((p) =>
-    p.title.toLowerCase().includes(query.toLowerCase())
-  );
+  const q = query.toLowerCase();
+  const filteredPages = pages.filter((p) => p.title.toLowerCase().includes(q) && canView(p.id));
+  const showPeople = canView('students');
 
-  const filteredStudents = students.filter(
+  // Parents: name, email or phone, and the children they are linked to.
+  const filteredParents = !showPeople ? [] : (parents || []).filter((p: any) => {
+    const kids = (p._raw?.linked_children || []).map((c: any) => `${c.name || ''} ${c.email || ''}`).join(' ');
+    return `${p.name} ${p.email} ${p.phone || ''} ${kids}`.toLowerCase().includes(q);
+  });
+
+  const filteredStudents = !showPeople ? [] : students.filter(
     (s) =>
       s.name.toLowerCase().includes(query.toLowerCase()) ||
       s.rollNo.toLowerCase().includes(query.toLowerCase()) ||
       s.email.toLowerCase().includes(query.toLowerCase())
   );
 
-  const filteredTeachers = teachers.filter(
+  const filteredTeachers = !showPeople ? [] : teachers.filter(
     (t) =>
       t.name.toLowerCase().includes(query.toLowerCase()) ||
       t.department.toLowerCase().includes(query.toLowerCase())
@@ -143,6 +150,18 @@ export const CommandPalette: React.FC = () => {
         setCommandPaletteOpen(false);
       },
     })),
+    ...filteredParents.map((p: any) => ({
+      id: `par-${p.id}`,
+      title: p.name,
+      category: 'Parents' as const,
+      icon: HeartHandshake,
+      meta: [p.email, (p._raw?.linked_children || []).length ? `${p._raw.linked_children.length} child(ren)` : ''].filter(Boolean).join(' · '),
+      action: () => {
+        setCurrentView('parents');
+        openDetailDrawer('parent', p);
+        setCommandPaletteOpen(false);
+      },
+    })),
     ...filteredSubjects.map((s) => ({
       id: `sub-${s.id}`,
       title: `${s.code} ${s.name}`,
@@ -168,7 +187,7 @@ export const CommandPalette: React.FC = () => {
             autoFocus
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search students, teachers, subjects, or jump to page... (esc to close)"
+            placeholder="Search students, teachers, parents, subjects, or jump to page... (esc to close)"
             className="w-full bg-transparent text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none"
           />
           {query && (

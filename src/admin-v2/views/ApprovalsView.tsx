@@ -19,13 +19,15 @@ import {
   Eye,
   RotateCcw,
   History,
+  ThumbsUp,
 } from 'lucide-react';
 
-type Stage = 'new' | 'under_review' | 'info_requested' | 'on_hold';
+type Stage = 'new' | 'under_review' | 'recommended' | 'info_requested' | 'on_hold';
 
 const STAGES: { id: Stage; label: string; pill: string }[] = [
   { id: 'new', label: 'New', pill: 'bg-sky-500/15 text-sky-300 border-sky-500/30' },
   { id: 'under_review', label: 'Under review', pill: 'bg-indigo-500/15 text-indigo-300 border-indigo-500/30' },
+  { id: 'recommended', label: 'Recommended for approval', pill: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30' },
   { id: 'info_requested', label: 'Waiting for applicant', pill: 'bg-amber-500/15 text-amber-300 border-amber-500/30' },
   { id: 'on_hold', label: 'On hold', pill: 'bg-slate-500/20 text-slate-300 border-slate-500/30' },
 ];
@@ -59,7 +61,15 @@ const ageBadge = (days: number) =>
 
 
 export const ApprovalsView: React.FC = () => {
-  const { approvals, approveItem, rejectItem, setReviewStage, decisions = [], tzIana, rejectedAccounts = [], reconsiderAccount, purgeAccount } = useApp() as any;
+  const { approvals, approveItem, rejectItem, setReviewStage, decisions = [], tzIana, rejectedAccounts = [], reconsiderAccount, purgeAccount, can, recommendFreeAccess, profile } = useApp() as any;
+  // What this staff role may do here (the server checks every action too).
+  const isFree = (item: any) => String(item.id).startsWith('free-');
+  const canReview = can('review_approvals');
+  const canApprove = (item: any) => (isFree(item) ? can('approve_free_access') : can('decide_approvals'));
+  const canReject = (item: any) => can('decide_approvals') || (isFree(item) && can('approve_free_access'));
+  // Free access needs two people: someone else must have recommended it.
+  const recommendedByOther = (item: any) => (item.recommendedBy || []).some((r: any) => String(r.id) !== String(profile?.id));
+  const canOverride = can('manage_staff');
   // Times in the admin's own timezone, like the rest of the dashboard.
   const fmtDate = (iso?: string) =>
     iso ? new Date(iso).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', ...(tzIana ? { timeZone: tzIana } : {}) }) : '';
@@ -77,6 +87,10 @@ export const ApprovalsView: React.FC = () => {
   const [staging, setStaging] = useState<{ item: any; stage: Stage } | null>(null);
   const [stageNote, setStageNote] = useState('');
   const [busy, setBusy] = useState(false);
+  const [overriding, setOverriding] = useState<any>(null);
+  const [overrideReason, setOverrideReason] = useState('');
+  const [recommending, setRecommending] = useState<any>(null);
+  const [recommendNote, setRecommendNote] = useState('');
 
   const open = approvals.filter((a: any) => a.status === 'pending');
   const weekAgo = Date.now() - 7 * 86400000;
@@ -126,6 +140,33 @@ export const ApprovalsView: React.FC = () => {
       setStaging(null);
       setStageNote('');
     }
+  };
+
+  const onApprove = (item: any) => {
+    if (isFree(item) && !recommendedByOther(item)) {
+      setOverriding(item);
+      setOverrideReason('');
+      return;
+    }
+    approveItem(item.id);
+  };
+
+  const submitOverride = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!overriding || overrideReason.trim().length < 10) return;
+    setBusy(true);
+    const ok = await approveItem(overriding.id, '', { confirmed: true, overrideReason: overrideReason.trim() });
+    setBusy(false);
+    if (ok) setOverriding(null);
+  };
+
+  const submitRecommend = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!recommending) return;
+    setBusy(true);
+    const ok = await recommendFreeAccess(recommending.id, recommendNote.trim());
+    setBusy(false);
+    if (ok) setRecommending(null);
   };
 
   const mailto = (item: any, body = '') =>
@@ -216,12 +257,12 @@ export const ApprovalsView: React.FC = () => {
                     <div className="text-slate-500">{u.email} · {u.role} · signed up {fmtDate(u.date_joined)}</div>
                   </div>
                   <div className="flex gap-2">
-                    <button onClick={() => purgeAccount(u)} className="px-3 py-1.5 rounded-lg border border-rose-500/40 text-rose-300 font-semibold hover:bg-rose-500/10">
+                    {can('delete') && <button onClick={() => purgeAccount(u)} className="px-3 py-1.5 rounded-lg border border-rose-500/40 text-rose-300 font-semibold hover:bg-rose-500/10">
                       Delete permanently
-                    </button>
-                    <button onClick={() => reconsiderAccount(u)} className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold">
+                    </button>}
+                    {can('decide_approvals') && <button onClick={() => reconsiderAccount(u)} className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold">
                       Approve after all
-                    </button>
+                    </button>}
                   </div>
                 </div>
               ))}
@@ -298,6 +339,11 @@ export const ApprovalsView: React.FC = () => {
                         <span className={`px-2 py-0.5 rounded-full border text-[10px] font-mono ${ageBadge(item.waitingDays)}`}>
                           {item.waitingDays === 0 ? 'Today' : `Waiting ${item.waitingDays} day${item.waitingDays > 1 ? 's' : ''}`}
                         </span>
+                        {isFree(item) && (item.recommendedBy || []).length > 0 && (
+                          <span className="px-2 py-0.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-[10px] text-emerald-300">
+                            Recommended by {item.recommendedBy[item.recommendedBy.length - 1].name}
+                          </span>
+                        )}
                         {item.review?.reviewer && item.stage !== 'new' && (
                           <span className="text-[10px] text-slate-500">by {item.review.reviewer} · {fmtDate(item.review.updated_at)}</span>
                         )}
@@ -316,7 +362,7 @@ export const ApprovalsView: React.FC = () => {
                       {isOpen ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />} Details
                     </button>
 
-                    <div className="relative">
+                    <div className={`relative ${canReview ? '' : 'hidden'}`}>
                       <button
                         onClick={() => setMenuFor(menuFor === item.id ? null : item.id)}
                         className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-[#232D52] bg-[#0E1428] text-xs font-semibold text-slate-200 hover:border-[#6D5BFF]"
@@ -370,18 +416,39 @@ export const ApprovalsView: React.FC = () => {
                       )}
                     </div>
 
-                    <button
-                      onClick={() => { setRejecting(item); setRejectReason(''); setRejectNote(''); }}
-                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border border-rose-500/40 text-rose-300 hover:bg-rose-500/10"
-                    >
-                      <X className="w-3.5 h-3.5" /> Reject
-                    </button>
-                    <button
-                      onClick={() => approveItem(item.id)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white"
-                    >
-                      <Check className="w-3.5 h-3.5" /> Approve
-                    </button>
+                    {isFree(item) && can('recommend_free_access') && !can('approve_free_access') && (
+                      <button
+                        disabled={item.stage === 'recommended'}
+                        onClick={() => { setRecommending(item); setRecommendNote(''); }}
+                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white disabled:opacity-50"
+                        title="Finance or a Super Admin gives the final approval"
+                      >
+                        <ThumbsUp className="w-3.5 h-3.5" /> {item.stage === 'recommended' ? 'Recommended' : 'Recommend'}
+                      </button>
+                    )}
+                    {canReject(item) && (
+                      <button
+                        onClick={() => { setRejecting(item); setRejectReason(''); setRejectNote(''); }}
+                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border border-rose-500/40 text-rose-300 hover:bg-rose-500/10"
+                      >
+                        <X className="w-3.5 h-3.5" /> Reject
+                      </button>
+                    )}
+                    {canApprove(item) && (isFree(item) && !recommendedByOther(item) && !canOverride ? (
+                      <span className="px-3 py-1.5 text-[11px] rounded-lg border border-[#232D52] text-slate-400" title="Free access needs two people">
+                        Waiting for Admissions to recommend
+                      </span>
+                    ) : (
+                      <button
+                        onClick={() => onApprove(item)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white"
+                      >
+                        <Check className="w-3.5 h-3.5" /> Approve
+                      </button>
+                    ))}
+                    {!canReview && !canApprove(item) && !canReject(item) && (
+                      <span className="text-[11px] text-slate-500">View only</span>
+                    )}
                   </div>
                 </div>
 
@@ -448,6 +515,51 @@ export const ApprovalsView: React.FC = () => {
               </button>
               <button type="submit" disabled={busy || !rejectReason} className="px-4 py-2 rounded-xl font-semibold bg-rose-600 hover:bg-rose-500 text-white disabled:opacity-50">
                 {busy ? 'Rejecting…' : 'Reject'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* Free access: recommend (Admissions) */}
+      {recommending && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <form onSubmit={submitRecommend} className="w-full max-w-md rounded-2xl border border-[#232D52] bg-[#121831] p-6 shadow-2xl space-y-4 text-slate-100 text-xs">
+            <div>
+              <h3 className="text-base font-bold">Recommend free access for {recommending.requesterName}?</h3>
+              <p className="text-slate-400 mt-1">{recommending.targetEntityName}. Finance or a Super Admin gives the final approval.</p>
+            </div>
+            <Field label="Why do you recommend it? (optional)" hint="Shown to the person who approves.">
+              <textarea rows={3} autoFocus value={recommendNote} onChange={(e) => setRecommendNote(e.target.value)} className={inputCls} />
+            </Field>
+            <div className="flex justify-end gap-3 pt-3 border-t border-[#1E2648]">
+              <button type="button" onClick={() => setRecommending(null)} className="px-4 py-2 rounded-xl font-semibold text-slate-400 hover:text-white">Cancel</button>
+              <button type="submit" disabled={busy} className="px-4 py-2 rounded-xl font-semibold bg-emerald-600 hover:bg-emerald-500 text-white disabled:opacity-50">
+                {busy ? 'Saving…' : 'Recommend'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* Free access: Super Admin approving without a second person */}
+      {overriding && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <form onSubmit={submitOverride} className="w-full max-w-md rounded-2xl border border-[#232D52] bg-[#121831] p-6 shadow-2xl space-y-4 text-slate-100 text-xs">
+            <div>
+              <h3 className="text-base font-bold">Approve free access without a second person?</h3>
+              <p className="text-slate-400 mt-1">
+                {overriding.requesterName} · {overriding.targetEntityName}. Nobody else has recommended this request yet.
+                As Super Admin you can still approve it; the reason is recorded in the operations log.
+              </p>
+            </div>
+            <Field label="Reason" required hint="At least 10 characters.">
+              <textarea rows={3} required autoFocus value={overrideReason} onChange={(e) => setOverrideReason(e.target.value)} className={inputCls} />
+            </Field>
+            <div className="flex justify-end gap-3 pt-3 border-t border-[#1E2648]">
+              <button type="button" onClick={() => setOverriding(null)} className="px-4 py-2 rounded-xl font-semibold text-slate-400 hover:text-white">Cancel</button>
+              <button type="submit" disabled={busy || overrideReason.trim().length < 10} className="px-4 py-2 rounded-xl font-semibold bg-emerald-600 hover:bg-emerald-500 text-white disabled:opacity-50">
+                {busy ? 'Approving…' : 'Approve'}
               </button>
             </div>
           </form>

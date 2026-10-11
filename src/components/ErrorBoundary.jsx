@@ -1,5 +1,6 @@
 import React from "react";
 import { toastManager } from "../utils/toastManager";
+import { isChunkLoadError, reloadOnceForNewVersion } from "../utils/chunkReload";
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -7,12 +8,16 @@ class ErrorBoundary extends React.Component {
     this.state = { hasError: false, error: null, errorInfo: null };
   }
 
-  static getDerivedStateFromError() {
-    // Update state so the next render will show the fallback UI
+  static getDerivedStateFromError(error) {
+    // A new version was deployed while this tab was open: show a short
+    // "updating" note while the page reloads instead of the error screen.
+    if (isChunkLoadError(error)) return { hasError: true, reloading: true };
     return { hasError: true };
   }
 
   componentDidCatch(error, errorInfo) {
+    if (isChunkLoadError(error) && reloadOnceForNewVersion()) return;
+    if (this.state.reloading) this.setState({ reloading: false });
     // Log the error to console for developers
     console.error("🔴 Error Boundary caught an error:", {
       error,
@@ -32,7 +37,7 @@ class ErrorBoundary extends React.Component {
   }
 
   handleReset = () => {
-    this.setState({ hasError: false, error: null, errorInfo: null });
+    this.setState({ hasError: false, reloading: false, error: null, errorInfo: null });
   };
 
   // Sanitize error message for display to prevent XSS
@@ -50,6 +55,13 @@ class ErrorBoundary extends React.Component {
   };
 
   render() {
+    if (this.state.hasError && this.state.reloading) {
+      return (
+        <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6 text-slate-300">
+          Updating to the latest version…
+        </div>
+      );
+    }
     if (this.state.hasError) {
       return (
         <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6">

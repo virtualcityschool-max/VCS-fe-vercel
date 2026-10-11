@@ -69,11 +69,20 @@ function SessionForm({ form, setForm, errors, clearError, isCreate, courses }) {
           {(() => {
             const courseId = isCreate ? form.course : form.course_id;
             const sel = courses.find(c => String(c.id) === String(courseId));
-            if (sel?.has_session && sel?.upcoming_session === false) {
+            if (sel && sel.upcoming_session === false && sel.next_session_at) {
+                          // A one-off class is booked, but no weekly series yet.
+                          return (
+                            <p className="text-[10px] text-blue-400 mt-1.5 flex items-center gap-1">
+                              <i className="fas fa-info-circle" />
+                              Next class {new Date(sel.next_session_at).toLocaleString(undefined, { weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit" })} (one-off). No weekly series yet - you can plan one.
+                            </p>
+                          );
+                        }
+                        if (sel?.has_session && sel?.upcoming_session === false) {
               return (
                 <p className="text-[10px] text-blue-400 mt-1.5 flex items-center gap-1">
                   <i className="fas fa-info-circle" />
-                  No upcoming session - you can create a new one.
+                  No upcoming classes - you can plan a new series.
                 </p>
               );
             }

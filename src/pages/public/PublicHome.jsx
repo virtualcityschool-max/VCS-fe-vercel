@@ -64,7 +64,10 @@ const PublicHome = () => {
   // photo - a tutor without one still shows up normally on /teachers. O/A
   // Level tutors are shown first since that's VCS's core offering.
   const featuredTeachers = useMemo(() => {
-    const withAvatar = teachers.filter((t) => t.avatar);
+    // Admins choose who appears here (Teachers Register → Homepage), separate
+    // from who is allocated to teach. Older servers send no flag: use photos.
+    const flagged = teachers.some((t) => "show_on_homepage" in t);
+    const withAvatar = teachers.filter((t) => (flagged ? t.show_on_homepage : true) && t.avatar);
     const oaLevel = withAvatar.filter(isOALevelTutor);
     const rest = withAvatar.filter((t) => !isOALevelTutor(t));
     return [...oaLevel, ...rest].slice(0, 4);

@@ -50,8 +50,9 @@ export const DashboardView: React.FC = () => {
     setCurrentView,
     openDetailDrawer,
     openQuickAdd,
-    approveItem,
     renewSubscription,
+    can,
+    attendanceSummary,
     timezone,
     tzIana,
     enrollments,
@@ -110,13 +111,18 @@ export const DashboardView: React.FC = () => {
     (s) => s.status === 'upcoming' && (!s.hasTeacherAssigned || !s.teacherId)
   );
   const chronicAbsentees = students.filter((s) => s.absencesThisWeek >= 2);
+  // Classes that passed their time without starting, until an admin resolves them.
+  const missedClasses = sessions
+    .filter((s: any) => s.status === 'missed')
+    .sort((a: any, b: any) => `${b.date} ${b.startTime}`.localeCompare(`${a.date} ${a.startTime}`));
 
   const totalActionItems =
     pendingAccounts.length +
     pendingEnrollments.length +
     expiringSubs.length +
     classesWithoutTeacher.length +
-    chronicAbsentees.length;
+    chronicAbsentees.length +
+    missedClasses.length;
 
   // Money actually received through Gumroad (completed charges), from the
   // server. Listed prices are not income: free, test and admin-added
@@ -146,20 +152,16 @@ export const DashboardView: React.FC = () => {
     return out;
   })();
 
-  // Share of this week's marked student attendances that were present/late.
-  const attendanceRate = (() => {
-    const weekStart = new Date();
-    weekStart.setDate(weekStart.getDate() - ((weekStart.getDay() + 6) % 7));
-    weekStart.setHours(0, 0, 0, 0);
-    const marked = (rawAttendance || []).filter(
-      (r: any) => ['present', 'late', 'absent'].includes(r.status) && new Date(r.scheduled_at) >= weekStart
-    );
-    if (!marked.length) return null;
-    return Math.round((marked.filter((r: any) => r.status !== 'absent').length / marked.length) * 1000) / 10;
-  })();
+  // Same calculation as the Attendance page: every class record this week.
+  const weekStart = new Date();
+  weekStart.setDate(weekStart.getDate() - ((weekStart.getDay() + 6) % 7));
+  weekStart.setHours(0, 0, 0, 0);
+  const attendanceRate: number | null = attendanceSummary(weekStart.toISOString()).rate;
   const departmentCount = new Set(subjects.map((s) => s.department)).size;
-  const engagedTeachers = teachers.filter((t) => t.status === 'Engaged').length;
-  const enrolledStudents = students.filter((s) => s.enrolledSubjectIds.length > 0).length;
+  const engagedTeachers = teachers.filter((t) => t.status === 'Active teaching').length;
+  const showcaseTeachers = teachers.filter((t) => t.status === 'Showcase').length;
+  const activeStudents = students.filter((s) => s.status === 'Active');
+  const enrolledStudents = activeStudents.filter((s) => s.enrolledSubjectIds.length > 0).length;
   const hour = Number(new Date().toLocaleString('en-US', { hour: 'numeric', hour12: false, ...(tzIana ? { timeZone: tzIana } : {}) }));
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
   const adminFirstName = profile?.first_name || 'Admin';
@@ -171,6 +173,9 @@ export const DashboardView: React.FC = () => {
     .slice(0, 5);
 
   const maxStudents = Math.max(...topSubjects.map((s) => s.studentCount), 1);
+
+  // School operations (people, classes, attendance): not for website-only roles.
+  const showOps = can('view_people');
 
   return (
     <div className="space-y-6 pb-12 w-full animate-in fade-in duration-150">
@@ -197,7 +202,7 @@ export const DashboardView: React.FC = () => {
         </div>
 
         {/* Quick add ▾ (Student, Teacher, Subject, Class, Blog post) */}
-        <div className="relative">
+        <div className={`relative ${['manage_students', 'manage_teachers', 'manage_academics', 'manage_content'].some((c: any) => can(c)) ? '' : 'hidden'}`}>
           <button
             onClick={() => setDashboardQuickAddOpen(!dashboardQuickAddOpen)}
             className="flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-xl bg-[#6D5BFF] hover:bg-[#5B47FB] text-white shadow-lg shadow-indigo-600/30 transition-all cursor-pointer active:scale-95"
@@ -213,7 +218,7 @@ export const DashboardView: React.FC = () => {
           )}
           {dashboardQuickAddOpen && (
             <div className="absolute right-0 mt-2 w-52 rounded-xl border border-[#232D52] bg-[#121831] p-1.5 shadow-2xl z-40 text-xs animate-in fade-in zoom-in-95">
-              <button
+              {can('manage_students') && <button
                 onClick={() => {
                   setDashboardQuickAddOpen(false);
                   openQuickAdd('student');
@@ -222,8 +227,8 @@ export const DashboardView: React.FC = () => {
               >
                 <UserPlus className="w-4 h-4 text-emerald-400" />
                 <span>Student</span>
-              </button>
-              <button
+              </button>}
+              {can('manage_teachers') && <button
                 onClick={() => {
                   setDashboardQuickAddOpen(false);
                   openQuickAdd('teacher');
@@ -232,8 +237,8 @@ export const DashboardView: React.FC = () => {
               >
                 <GraduationCap className="w-4 h-4 text-indigo-400" />
                 <span>Teacher</span>
-              </button>
-              <button
+              </button>}
+              {can('manage_students') && <button
                 onClick={() => {
                   setDashboardQuickAddOpen(false);
                   openQuickAdd('parent' as any);
@@ -242,8 +247,8 @@ export const DashboardView: React.FC = () => {
               >
                 <Users className="w-4 h-4 text-pink-400" />
                 <span>Parent</span>
-              </button>
-              <button
+              </button>}
+              {can('manage_academics') && <button
                 onClick={() => {
                   setDashboardQuickAddOpen(false);
                   openQuickAdd('subject');
@@ -252,8 +257,8 @@ export const DashboardView: React.FC = () => {
               >
                 <BookOpen className="w-4 h-4 text-sky-400" />
                 <span>Subject</span>
-              </button>
-              <button
+              </button>}
+              {can('manage_academics') && <button
                 onClick={() => {
                   setDashboardQuickAddOpen(false);
                   openQuickAdd('session');
@@ -262,8 +267,8 @@ export const DashboardView: React.FC = () => {
               >
                 <Calendar className="w-4 h-4 text-amber-400" />
                 <span>Class</span>
-              </button>
-              <button
+              </button>}
+              {can('manage_content') && <button
                 onClick={() => {
                   setDashboardQuickAddOpen(false);
                   openQuickAdd('post');
@@ -272,14 +277,20 @@ export const DashboardView: React.FC = () => {
               >
                 <FileText className="w-4 h-4 text-rose-400" />
                 <span>Blog post</span>
-              </button>
+              </button>}
             </div>
           )}
         </div>
       </div>
 
+      {!showOps && (
+        <div className="rounded-2xl border border-[#232D52] bg-[#121831] p-5 text-sm text-slate-300">
+          Your staff role covers the public website. Use the Website menu on the left for blogs, vlogs, testimonials and the About page.
+        </div>
+      )}
+
       {/* 1. Action Center (Topmost & Most Prominent) */}
-      <div className="rounded-2xl border border-[#232D52] bg-[#121831] p-5 shadow-xl">
+      <div className={`rounded-2xl border border-[#232D52] bg-[#121831] p-5 shadow-xl ${showOps ? '' : 'hidden'}`}>
         <div className="flex items-center justify-between pb-4 border-b border-[#1E2648]">
           <div className="flex items-center gap-2.5">
             <div
@@ -330,7 +341,7 @@ export const DashboardView: React.FC = () => {
             </div>
             <p className="text-sm font-semibold text-slate-200">Everything is up to date</p>
             <p className="text-xs text-slate-400 mt-0.5">
-              No pending registrations, missing teachers, or critical subscription alerts.
+              No pending registrations, missed classes, missing teachers, or critical subscription alerts.
             </p>
           </div>
         ) : (
@@ -351,23 +362,14 @@ export const DashboardView: React.FC = () => {
                   {pendingAccounts[0]?.requesterName}
                   {pendingAccounts.length > 1 ? ` and ${pendingAccounts.length - 1} other${pendingAccounts.length > 2 ? 's' : ''}` : ''} waiting for account approval.
                 </p>
-                <div className="flex items-center gap-2 pt-1">
-                  <button
-                    onClick={() => approveItem(pendingAccounts[0].id)}
-                    className="flex-1 py-1.5 px-3 text-xs font-semibold rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white transition-colors flex items-center justify-center gap-1 cursor-pointer"
-                    title={`Approve ${pendingAccounts[0]?.requesterName}`}
-                  >
-                    <Check className="w-3.5 h-3.5" />
-                    <span>Approve</span>
-                  </button>
-                  <button
-                    onClick={() => setCurrentView('approvals')}
-                    className="flex-1 py-1.5 px-3 text-xs font-semibold rounded-lg bg-amber-500 text-slate-950 hover:bg-amber-400 transition-colors flex items-center justify-center gap-1 cursor-pointer"
-                  >
-                    <span>Review</span>
-                    <ArrowRight className="w-3 h-3" />
-                  </button>
-                </div>
+                {/* Decisions are made in the Approvals Inbox review panel, never in one click here. */}
+                <button
+                  onClick={() => setCurrentView('approvals')}
+                  className="w-full py-1.5 px-3 text-xs font-semibold rounded-lg bg-amber-500 text-slate-950 hover:bg-amber-400 transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                >
+                  <span>Review in Approvals Inbox</span>
+                  <ArrowRight className="w-3 h-3" />
+                </button>
               </div>
             )}
 
@@ -387,23 +389,13 @@ export const DashboardView: React.FC = () => {
                   {pendingEnrollments[0]?.requesterName} → {pendingEnrollments[0]?.targetEntityName}
                   {pendingEnrollments.length > 1 ? ` and ${pendingEnrollments.length - 1} more request${pendingEnrollments.length > 2 ? 's' : ''}` : ''}.
                 </p>
-                <div className="flex items-center gap-2 pt-1">
-                  <button
-                    onClick={() => approveItem(pendingEnrollments[0].id)}
-                    className="flex-1 py-1.5 px-3 text-xs font-semibold rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white transition-colors flex items-center justify-center gap-1 cursor-pointer"
-                    title={`Approve ${pendingEnrollments[0]?.requesterName}`}
-                  >
-                    <Check className="w-3.5 h-3.5" />
-                    <span>Approve</span>
-                  </button>
-                  <button
-                    onClick={() => setCurrentView('approvals')}
-                    className="flex-1 py-1.5 px-3 text-xs font-semibold rounded-lg bg-[#6D5BFF] text-white hover:bg-[#5B47FB] transition-colors flex items-center justify-center gap-1 cursor-pointer"
-                  >
-                    <span>Requests</span>
-                    <ArrowRight className="w-3 h-3" />
-                  </button>
-                </div>
+                <button
+                  onClick={() => setCurrentView('approvals')}
+                  className="w-full py-1.5 px-3 text-xs font-semibold rounded-lg bg-[#6D5BFF] text-white hover:bg-[#5B47FB] transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                >
+                  <span>Review in Approvals Inbox</span>
+                  <ArrowRight className="w-3 h-3" />
+                </button>
               </div>
             )}
 
@@ -427,13 +419,13 @@ export const DashboardView: React.FC = () => {
                   {expiringSubs.length > 3 ? ` and ${expiringSubs.length - 3} more` : ''} — access ends within 7 days.
                 </p>
                 <div className="flex items-center gap-2 pt-1">
-                  <button
+                  {can('manage_billing') && <button
                     onClick={() => renewSubscription(expiringSubs[0].id, 1)}
                     className="flex-1 py-1.5 px-3 text-xs font-semibold rounded-lg bg-rose-600 hover:bg-rose-500 text-white transition-colors flex items-center justify-center gap-1 cursor-pointer"
                     title={`Record next month for ${(expiringSubs[0] as any)?.studentName}`}
                   >
                     <span>Renew</span>
-                  </button>
+                  </button>}
                   <button
                     onClick={() => setCurrentView('subscriptions')}
                     className="flex-1 py-1.5 px-3 text-xs font-semibold rounded-lg bg-slate-800 text-slate-200 hover:bg-slate-700 transition-colors flex items-center justify-center gap-1 cursor-pointer"
@@ -494,12 +486,38 @@ export const DashboardView: React.FC = () => {
                 </button>
               </div>
             )}
+
+            {/* Card 6: Missed / not started classes, until resolved */}
+            {missedClasses.length > 0 && (
+              <div className="p-3.5 rounded-xl border border-rose-500/30 bg-rose-950/20 flex flex-col justify-between space-y-3">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-lg bg-rose-500 text-white text-xs font-mono font-bold flex items-center justify-center">
+                      {missedClasses.length}
+                    </span>
+                    <span className="text-xs font-bold text-slate-200">Missed / Not Started</span>
+                  </div>
+                  <span className="text-[10px] text-rose-300/80 font-mono">Resolve</span>
+                </div>
+                <p className="text-xs text-slate-300 leading-snug">
+                  {missedClasses.slice(0, 2).map((s: any) => `${s.title} (${s.date} ${s.startTime})`).join(', ')}
+                  {missedClasses.length > 2 ? ` and ${missedClasses.length - 2} more` : ''} never started. Mark as held, cancel or reschedule.
+                </p>
+                <button
+                  onClick={() => setCurrentView('live-classes')}
+                  className="w-full py-1.5 px-3 text-xs font-semibold rounded-lg bg-rose-600 text-white hover:bg-rose-500 transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                >
+                  <span>Resolve in Live Classes</span>
+                  <ArrowRight className="w-3 h-3" />
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>
 
       {/* 2. KPI Strip (4 tiles only, neutral style, small trend vs last month) */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className={`grid grid-cols-2 lg:grid-cols-4 gap-4 ${showOps ? '' : 'hidden'}`}>
         {/* KPI 1: Active students */}
         <div className="p-4 rounded-2xl border border-[#232D52] bg-[#121831] shadow-lg">
           <div className="flex items-center justify-between text-xs text-slate-400">
@@ -515,12 +533,12 @@ export const DashboardView: React.FC = () => {
             </div>
           </div>
           <div className="mt-2 text-2xl font-bold font-mono tabular-nums text-slate-100">
-            {students.length}
+            {activeStudents.length}
           </div>
           <div className="mt-1.5 flex items-center gap-1.5 text-xs text-emerald-400">
             <Users className="w-3.5 h-3.5" />
             <span className="font-semibold">{enrolledStudents}</span>
-            <span className="text-slate-400">enrolled in subjects</span>
+            <span className="text-slate-400">enrolled · {students.length} total ({students.length - activeStudents.length} inactive)</span>
           </div>
         </div>
 
@@ -536,12 +554,12 @@ export const DashboardView: React.FC = () => {
           <div className="mt-1.5 flex items-center gap-1.5 text-xs text-emerald-400">
             <GraduationCap className="w-3.5 h-3.5" />
             <span className="font-semibold">{engagedTeachers}</span>
-            <span className="text-slate-400">engaged · {teachers.length - engagedTeachers} standby</span>
+            <span className="text-slate-400">active teaching · {showcaseTeachers} showcase · {teachers.length - engagedTeachers - showcaseTeachers} standby</span>
           </div>
         </div>
 
         {/* KPI 3: Monthly revenue USD */}
-        <div className="p-4 rounded-2xl border border-[#232D52] bg-[#121831] shadow-lg">
+        <div className={`p-4 rounded-2xl border border-[#232D52] bg-[#121831] shadow-lg ${can('view_billing') ? '' : 'hidden'}`}>
           <div className="flex items-center justify-between text-xs text-slate-400">
             <span>Gumroad Payments</span>
             <span className="text-[10px] text-emerald-400 font-mono">Last 30 days</span>
@@ -579,7 +597,7 @@ export const DashboardView: React.FC = () => {
           <div>
             <span className="font-semibold text-white">Full User Base Breakdown: </span>
             <span className="font-mono">
-              {allUsers.filter((u: any) => u.role === 'admin').length} Admins · {teachers.length} Faculty ({engagedTeachers} Engaged, {teachers.length - engagedTeachers} Standby) · {students.length} Students ({enrolledStudents} enrolled) · {parents.length} Parents = {allUsers.length} Total Accounts
+              {allUsers.filter((u: any) => u.role === 'admin').length} Admins · {teachers.length} Faculty ({engagedTeachers} active teaching, {showcaseTeachers} showcase, {teachers.length - engagedTeachers - showcaseTeachers} standby) · {students.length} Students ({activeStudents.length} active, {enrolledStudents} enrolled) · {parents.length} Parents = {allUsers.length} Total Accounts
             </span>
           </div>
           <button
@@ -592,7 +610,7 @@ export const DashboardView: React.FC = () => {
       )}
 
       {/* 3. Today's Classes & Sessions Timeline */}
-      <div className="rounded-2xl border border-[#232D52] bg-[#121831] p-5 shadow-xl">
+      <div className={`rounded-2xl border border-[#232D52] bg-[#121831] p-5 shadow-xl ${showOps ? '' : 'hidden'}`}>
         <div className="flex items-center justify-between pb-3 border-b border-[#1E2648]">
           <div className="flex items-center gap-2">
             <Calendar className="w-4 h-4 text-indigo-400" />
@@ -680,7 +698,7 @@ export const DashboardView: React.FC = () => {
               <div className="flex items-center gap-2">
                 <Video className="w-4 h-4 text-indigo-400" />
                 <span>
-                  <strong>Consultation scheduled today:</strong>{' '}
+                  <strong>Staff meeting today:</strong>{' '}
                   {todaysMeetings[0]?.title} at {todaysMeetings[0]?.time} ({(todaysMeetings[0] as any)?.invitedNames || 'teachers'})
                 </span>
               </div>
@@ -696,7 +714,7 @@ export const DashboardView: React.FC = () => {
       </div>
 
       {/* 4. Two-Column Row: Top Subjects & Revenue Chart */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className={`grid grid-cols-1 lg:grid-cols-2 gap-6 ${showOps ? '' : 'hidden'}`}>
         {/* Top Ranked Subjects */}
         <div className="rounded-2xl border border-[#232D52] bg-[#121831] p-5 shadow-xl flex flex-col justify-between">
           <div>
@@ -755,7 +773,7 @@ export const DashboardView: React.FC = () => {
         </div>
 
         {/* Revenue 6 Months Chart */}
-        <div className="rounded-2xl border border-[#232D52] bg-[#121831] p-5 shadow-xl flex flex-col justify-between">
+        <div className={`rounded-2xl border border-[#232D52] bg-[#121831] p-5 shadow-xl flex flex-col justify-between ${can('view_billing') ? '' : 'hidden'}`}>
           <div>
             <div className="flex items-center justify-between pb-3 border-b border-[#1E2648]">
               <div className="flex items-center gap-2">
@@ -805,7 +823,7 @@ export const DashboardView: React.FC = () => {
       </div>
 
       {/* 5. Recent Activity Feed (8 Items) */}
-      <div className="rounded-2xl border border-[#232D52] bg-[#121831] p-5 shadow-xl">
+      <div className={`rounded-2xl border border-[#232D52] bg-[#121831] p-5 shadow-xl ${can('view_audit') ? '' : 'hidden'}`}>
         <div className="flex items-center justify-between pb-3 border-b border-[#1E2648]">
           <div className="flex items-center gap-2">
             <Clock className="w-4 h-4 text-indigo-400" />
@@ -821,6 +839,9 @@ export const DashboardView: React.FC = () => {
         </div>
 
         <div className="mt-4 divide-y divide-[#1E2648]/60">
+          {activities.length === 0 && (
+            <p className="py-6 text-center text-xs text-slate-400">No staff actions recorded yet. Approvals, fee changes, attendance edits and other changes will appear here with who made them.</p>
+          )}
           {activities.slice(0, 8).map((act) => (
             <div key={act.id} className="py-2.5 flex items-center justify-between gap-4 text-xs">
               <div className="flex items-center gap-3">
@@ -830,7 +851,8 @@ export const DashboardView: React.FC = () => {
                   <span className="text-slate-400">{act.description}</span>
                 </div>
               </div>
-              <div className="text-[11px] text-slate-500 font-mono whitespace-nowrap shrink-0">
+              <div className="text-[11px] text-slate-500 font-mono whitespace-nowrap shrink-0 text-right">
+                <div className="text-slate-300 font-sans font-semibold">{act.actorName}</div>
                 {act.timestamp}
               </div>
             </div>
@@ -864,7 +886,8 @@ export const DashboardView: React.FC = () => {
                       <span className="text-slate-400">{act.description}</span>
                     </div>
                   </div>
-                  <span className="text-[11px] text-slate-500 font-mono whitespace-nowrap shrink-0">
+                  <span className="text-[11px] text-slate-500 font-mono whitespace-nowrap shrink-0 text-right">
+                    <span className="block text-slate-300 font-sans font-semibold">{act.actorName}{act.actorRole ? ` · ${act.actorRole}` : ''}</span>
                     {act.timestamp}
                   </span>
                 </div>

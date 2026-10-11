@@ -5,6 +5,9 @@ import App from "./App.jsx";
 import { Provider } from "react-redux";
 import { store } from "./store";
 import ErrorBoundary from "./components/ErrorBoundary";
+import { installChunkReloadHandlers } from "./utils/chunkReload";
+
+installChunkReloadHandlers();
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>

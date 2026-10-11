@@ -220,6 +220,7 @@ export const TeacherAllocationsView: React.FC = () => {
         title="Teacher Allocations"
         subtitle="Distribute Cambridge course syllabi, balance faculty weekly seminar hours, and manage standby pools."
         primaryAction={{
+          cap: 'manage_academics',
           label: 'Allocate course',
           onClick: () => setAllocModalOpen(true),
           icon: GitFork,

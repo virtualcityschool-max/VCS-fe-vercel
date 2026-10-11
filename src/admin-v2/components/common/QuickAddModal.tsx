@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { STAFF_ROLES } from '../../data/staffRoles';
 import { useApp } from '../../context/AppContext';
 import { X, UserPlus, GraduationCap, BookOpen, Calendar, FileText, Users, ShieldCheck } from 'lucide-react';
 import {
@@ -65,6 +66,7 @@ const ContactFields: React.FC<{ c: ReturnType<typeof useContact>; phoneLabel: st
 
 export const QuickAddModal: React.FC = () => {
   const app = useApp() as any;
+  const [staffRole, setStaffRole] = React.useState('');
   const {
     quickAddModal,
     closeQuickAdd,
@@ -213,7 +215,8 @@ export const QuickAddModal: React.FC = () => {
     } else if (activeType === 'parent') {
       ok = await addParent({ name, email, password, timezone: contact.timezone, childEmails, profile: { phone } });
     } else if (activeType === 'admin') {
-      ok = await addAdmin({ name, email, password, timezone: contact.timezone });
+      if (!staffRole) { setSaving(false); return; }
+      ok = await addAdmin({ name, email, password, timezone: contact.timezone, adminRole: staffRole });
     } else if (activeType === 'subject') {
       const code = subCode.trim();
       const title = code && !subName.includes(code) ? `${subName.trim()} (${code})` : subName.trim();
@@ -233,7 +236,7 @@ export const QuickAddModal: React.FC = () => {
     { id: 'student', label: 'Student', icon: UserPlus },
     { id: 'teacher', label: 'Teacher', icon: GraduationCap },
     { id: 'parent', label: 'Parent', icon: Users },
-    ...(quickAddModal.initialType === ('admin' as any) ? [{ id: 'admin' as QuickType, label: 'Admin', icon: ShieldCheck }] : []),
+    ...(quickAddModal.initialType === ('admin' as any) ? [{ id: 'admin' as QuickType, label: 'Staff member', icon: ShieldCheck }] : []),
     { id: 'subject', label: 'Subject', icon: BookOpen },
     { id: 'session', label: 'Class', icon: Calendar },
     { id: 'post', label: 'Blog / Video', icon: FileText },
@@ -398,13 +401,19 @@ export const QuickAddModal: React.FC = () => {
 
           {activeType === 'admin' && (
             <>
-              {accountFields('Admin')}
+              {accountFields('Staff member')}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <Field label="Staff role" required hint={STAFF_ROLES.find((r) => r.id === staffRole)?.allowed}>
+                  <SelectInput value={staffRole} onChange={setStaffRole} placeholder="Choose a role…" required
+                    options={STAFF_ROLES.map((r) => ({ value: r.id, label: r.label }))} />
+                </Field>
                 <Field label="Timezone">
                   <SelectInput value={contact.timezone} onChange={contact.setTimezone} options={TIMEZONES} />
                 </Field>
               </div>
-              <p className="text-[11px] text-amber-300/80">Admins can see and change everything in this panel. Only add staff you trust.</p>
+              {staffRole === 'super_admin' && (
+                <p className="text-[11px] text-amber-300/80">Super Admins can see and change everything, including staff roles and permanent deletes. Only give this to people you fully trust.</p>
+              )}
             </>
           )}
 

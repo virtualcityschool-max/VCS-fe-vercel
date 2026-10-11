@@ -55,7 +55,7 @@ export const BlogsView: React.FC = () => {
                 statusFilter === s ? 'bg-[#6D5BFF] text-white shadow-xs' : 'text-slate-400 hover:text-white'
               }`}
             >
-              {s === 'all' ? `All (${articles.length})` : s}
+              {s === 'all' ? `All (${articles.length})` : `${s} (${articles.filter((p: any) => p.status === s).length})`}
             </button>
           ))}
         </div>

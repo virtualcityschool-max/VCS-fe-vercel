@@ -14,9 +14,12 @@ export const SubscriptionsView: React.FC = () => {
     subjects,
     renewSubscription,
     cancelSubscription,
+    can,
     openDetailDrawer,
     addToast,
-  } = useApp();
+  } = useApp() as any;
+  // Add 1 month / End access: Finance or Super Admin only (confirmed, and logged by the server).
+  const canBill = can('manage_billing');
 
   const [activeTab, setActiveTab] = useState<'all' | 'active' | 'expiring' | 'expired'>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -124,7 +127,7 @@ export const SubscriptionsView: React.FC = () => {
     },
     {
       header: 'Actions',
-      cell: (row) => (
+      cell: (row) => (!canBill ? <span className="text-[11px] text-slate-500">View only</span> :
         <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
           <button
             onClick={() => renewSubscription(row.id, 1)}
@@ -194,6 +197,7 @@ export const SubscriptionsView: React.FC = () => {
         columns={columns}
         data={filtered}
         onRowClick={(row) => openDetailDrawer('subscription', row)}
+        rowActions={false}
       />
     </div>
   );

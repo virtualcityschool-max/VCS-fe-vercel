@@ -104,6 +104,7 @@ const SessionsTab = ({
   onSessionCreate,
   onSessionUpdate,
   onSessionDelete,
+  canDelete = true,
   onSessionEdit,
   activeModal,
   setActiveModal,
@@ -476,9 +477,11 @@ const SessionsTab = ({
                           <i className="fas fa-edit text-xs"></i>
                         </button>
                       )}
-                      <button onClick={() => onSessionDelete(session.id)} disabled={loadingSessionIds.has(session.id)} title="Delete session" className="w-8 h-8 flex items-center justify-center bg-red-600/10 text-red-400 rounded-lg hover:bg-red-600/20 transition disabled:opacity-50">
+                      {canDelete && !['live', 'ended'].includes(session.status) && (
+<button onClick={() => onSessionDelete(session.id)} disabled={loadingSessionIds.has(session.id)} title="Delete session" className="w-8 h-8 flex items-center justify-center bg-red-600/10 text-red-400 rounded-lg hover:bg-red-600/20 transition disabled:opacity-50">
                         {loadingSessionIds.has(session.id) ? <i className="fas fa-spinner fa-spin text-xs"></i> : <i className="fas fa-trash text-xs"></i>}
                       </button>
+)}
                     </div>
                   </div>
                 ))}
@@ -549,9 +552,11 @@ const SessionsTab = ({
                               <i className="fas fa-edit text-xs"></i>
                             </button>
                           )}
-                          <button onClick={() => onSessionDelete(session.id)} disabled={loadingSessionIds.has(session.id)} title="Delete session" className="w-8 h-8 flex items-center justify-center bg-red-600/10 text-red-400 rounded-lg hover:bg-red-600/20 transition disabled:opacity-50">
+                          {canDelete && !['live', 'ended'].includes(session.status) && (
+<button onClick={() => onSessionDelete(session.id)} disabled={loadingSessionIds.has(session.id)} title="Delete session" className="w-8 h-8 flex items-center justify-center bg-red-600/10 text-red-400 rounded-lg hover:bg-red-600/20 transition disabled:opacity-50">
                             {loadingSessionIds.has(session.id) ? <i className="fas fa-spinner fa-spin text-xs"></i> : <i className="fas fa-trash text-xs"></i>}
                           </button>
+)}
                         </div>
                       </td>
                     </tr>
@@ -721,11 +726,20 @@ const SessionsTab = ({
                       {createSessionErrors?.course && <p className="text-red-400 text-xs mt-1">{createSessionErrors.course}</p>}
                       {(() => {
                         const sel = (courses || []).find(c => String(c.id) === String(createSessionForm.course));
+                        if (sel && sel.upcoming_session === false && sel.next_session_at) {
+                          // A one-off class is booked, but no weekly series yet.
+                          return (
+                            <p className="text-[10px] text-blue-400 mt-1.5 flex items-center gap-1">
+                              <i className="fas fa-info-circle" />
+                              Next class {new Date(sel.next_session_at).toLocaleString(undefined, { weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit" })} (one-off). No weekly series yet - you can plan one.
+                            </p>
+                          );
+                        }
                         if (sel?.has_session && sel?.upcoming_session === false) {
                           return (
                             <p className="text-[10px] text-blue-400 mt-1.5 flex items-center gap-1">
                               <i className="fas fa-info-circle" />
-                              No upcoming session - you can create a new one.
+                              No upcoming classes - you can plan a new series.
                             </p>
                           );
                         }

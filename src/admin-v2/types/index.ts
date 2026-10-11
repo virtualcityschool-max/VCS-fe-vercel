@@ -63,7 +63,7 @@ export type AcademicLevel =
 
 export type FeeStatus = 'Paid' | 'Expiring Soon' | 'Overdue' | 'Free Trial';
 
-export type UserStatus = 'Active' | 'Standby' | 'Engaged' | 'Pending' | 'Inactive';
+export type UserStatus = 'Active' | 'Standby' | 'Engaged' | 'Active teaching' | 'Showcase' | 'Pending' | 'Inactive';
 
 export interface BaseUser {
   id: string;
@@ -94,7 +94,7 @@ export interface Teacher extends BaseUser {
   assignedSubjectIds: string[];
   qualification: string;
   experienceYears: number;
-  status: 'Engaged' | 'Standby';
+  status: 'Active teaching' | 'Showcase' | 'Standby';
   weeklyHours: number;
   rating: number;
 }
@@ -268,6 +268,7 @@ export interface RecentActivity {
   title: string;
   description: string;
   timestamp: string;
-  category: 'approval' | 'enrollment' | 'payment' | 'session' | 'content' | 'user';
+  category: 'approval' | 'enrollment' | 'payment' | 'session' | 'content' | 'user' | 'staff';
   actorName: string;
+  actorRole?: string;
 }

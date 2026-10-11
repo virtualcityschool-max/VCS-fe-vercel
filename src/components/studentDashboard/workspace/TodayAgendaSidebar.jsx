@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { TuitionCard } from "./Tuition";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
@@ -313,43 +314,8 @@ const TodayAgendaSidebar = ({
         )}
       </div>
 
-      {/* 3. Financial Status Card (ALWAYS PAID IN FULL - As Requested) */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-b from-slate-900 via-slate-900 to-emerald-950/20 border border-emerald-500/20 p-5 shadow-xl space-y-3.5">
-        <div className="flex items-center justify-between pb-3 border-b border-white/10">
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
-            <h3 className="text-sm font-bold text-white tracking-tight leading-none">
-              Financial Status
-            </h3>
-          </div>
-          <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[9px] font-black uppercase tracking-wider">
-            PAID IN FULL
-          </span>
-        </div>
-
-        <div className="text-center py-2.5 bg-white/[0.02] rounded-xl border border-white/5">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-            Total Amount Due
-          </p>
-          <p className="text-2xl font-black text-emerald-400 tracking-tight mt-0.5 font-poppins">
-            $0.00
-          </p>
-          <p className="text-[10px] text-slate-300 mt-1 flex items-center justify-center gap-1.5">
-            <i className="fas fa-check-circle text-emerald-400 text-xs" />
-            <span>All enrolled courses &amp; active term covered</span>
-          </p>
-        </div>
-
-        <div className="py-2 px-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 font-bold text-[11px] flex items-center justify-center gap-2">
-          <i className="fas fa-shield-alt text-emerald-400 text-xs" />
-          <span>Active Student Membership • Good Standing</span>
-        </div>
-
-        <div className="pt-2 border-t border-white/5 flex items-center justify-between text-[11px] text-slate-400">
-          <span>Billing Status:</span>
-          <span className="text-emerald-400 font-semibold">Up to Date</span>
-        </div>
-      </div>
+      {/* Fees: real figures from the student's enrolments */}
+      <TuitionCard />
 
       {/* 4. Quick Actions Card */}
       <div className="rounded-2xl bg-slate-900/80 border border-white/10 p-5 shadow-xl space-y-3">

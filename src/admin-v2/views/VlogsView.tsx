@@ -55,7 +55,7 @@ export const VlogsView: React.FC = () => {
                 statusFilter === s ? 'bg-[#6D5BFF] text-white shadow-xs' : 'text-slate-400 hover:text-white'
               }`}
             >
-              {s === 'all' ? `All (${vlogs.length})` : s}
+              {s === 'all' ? `All (${vlogs.length})` : `${s} (${vlogs.filter((p: any) => p.status === s).length})`}
             </button>
           ))}
         </div>

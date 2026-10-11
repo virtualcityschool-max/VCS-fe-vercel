@@ -126,8 +126,8 @@ export const SubjectsView: React.FC = () => {
     <div className="space-y-6 w-full animate-in fade-in duration-150">
       <PageHeader
         title="Subjects Catalogue"
-        subtitle={`${catalog.length} subjects in ${allBatches.length} batches across ${new Set(catalog.map((x: any) => x.department)).size} departments.`}
-        primaryAction={{ label: 'New subject', onClick: () => openQuickAdd('subject'), icon: Plus }}
+        subtitle={`${catalog.length} subjects · ${allBatches.length} batches (${catalog.filter((x: any) => x.batches.length > 1).length} subjects have more than one) · ${new Set(catalog.map((x: any) => x.department)).size} departments.`}
+        primaryAction={{ cap: 'manage_academics', label: 'New subject', onClick: () => openQuickAdd('subject'), icon: Plus }}
       />
 
       <CategoryBar
@@ -138,7 +138,7 @@ export const SubjectsView: React.FC = () => {
         counts={catalog.reduce((m: any, x: any) => ({ ...m, [x.department]: (m[x.department] || 0) + 1 }), {})}
         segments={[
           { id: 'all', label: 'All', count: catalog.length },
-          { id: 'multi', label: 'With batches', count: catalog.filter((s: any) => s.batches.length > 1).length, dot: 'bg-sky-400' },
+          { id: 'multi', label: 'Several batches', count: catalog.filter((s: any) => s.batches.length > 1).length, dot: 'bg-sky-400' },
           { id: 'published', label: 'Published', count: publishedBatches, dot: 'bg-emerald-400' },
           { id: 'draft', label: 'Draft', count: allBatches.length - publishedBatches, dot: 'bg-amber-400' },
         ]}

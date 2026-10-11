@@ -4,6 +4,7 @@ import { selectStudent } from "../../../store/slices/studentDashboardSlice";
 import { profileUpdated } from "../../../store/slices/authSlice";
 import { authService } from "../../../services/authService";
 import { toastManager } from "../../../utils/toastManager";
+import { TuitionPill } from "./Tuition";
 import { getDisplayName } from "../../../utils/userDisplay";
 import { getStorageUrl } from "../../../utils/storageUrl";
 import { getTimezoneAbbr } from "../../../utils/validation";
@@ -122,7 +123,7 @@ const StudentWorkspaceCard = ({ onOpenTimezone }) => {
             {gradeLevel} • Term 2025–26
           </p>
 
-          {/* Timezone pill button & Clean Paid Tuition Status */}
+          {/* Timezone pill button & tuition status */}
           <div className="mt-2.5 flex items-center gap-2 flex-wrap">
             <button
               type="button"
@@ -136,11 +137,7 @@ const StudentWorkspaceCard = ({ onOpenTimezone }) => {
               <span className="text-slate-400 text-[10px] ml-0.5">Switch</span>
             </button>
 
-            {/* Clean Tuition Status (Always Paid) */}
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/25 text-emerald-300 text-[11px] font-bold shadow-sm">
-              <i className="fas fa-check-circle text-emerald-400 text-xs" />
-              <span>Tuition: Paid ($0.00)</span>
-            </span>
+            <TuitionPill />
           </div>
         </div>
       </div>

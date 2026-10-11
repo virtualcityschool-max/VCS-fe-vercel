@@ -40,6 +40,7 @@ export const TestimonialsView: React.FC = () => {
         title="Homepage Testimonials"
         subtitle="Manage verified student and parent recommendations displayed on the public VCS portal."
         primaryAction={{
+          cap: 'manage_content',
           label: 'Add testimonial',
           onClick: () => setModalOpen(true),
           icon: Plus,

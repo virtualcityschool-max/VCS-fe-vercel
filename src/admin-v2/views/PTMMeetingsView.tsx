@@ -5,14 +5,14 @@ import { DataTable, Column } from '../components/common/DataTable';
 import { StatusPill } from '../components/common/StatusPill';
 import { EmptyState } from '../components/common/EmptyState';
 import { TeacherMeeting } from '../types';
-import { Video, Plus, Calendar, Clock, ExternalLink } from 'lucide-react';
+import { Video, Plus, ExternalLink } from 'lucide-react';
 
 export const PTMMeetingsView: React.FC = () => {
-  const { meetings, teachers, parents, students, addMeeting, timezone, addToast } = useApp();
+  const { meetings, addMeeting, timezone, can } = useApp() as any;
 
   const columns: Column<TeacherMeeting>[] = [
     {
-      header: 'PTM Conference Title & Agenda',
+      header: 'Staff Meeting & Agenda',
       cell: (row) => (
         <div>
           <div className="font-semibold text-slate-100">{row.title}</div>
@@ -21,18 +21,8 @@ export const PTMMeetingsView: React.FC = () => {
       ),
     },
     {
-      header: 'Teacher',
-      cell: (row) => {
-        const teacher = teachers.find((t) => t.id === row.teacherId);
-        return <span className="font-semibold text-slate-200 text-xs">{teacher?.name || 'Tutor'}</span>;
-      },
-    },
-    {
-      header: 'Parent / Guardian',
-      cell: (row) => {
-        const parent = parents.find((p) => p.id === row.parentId);
-        return <span className="text-xs text-indigo-300 font-medium">{parent?.name || 'Guardian'}</span>;
-      },
+      header: 'Teachers invited',
+      cell: (row: any) => <span className="font-semibold text-slate-200 text-xs">{row.invitedNames || '—'}</span>,
     },
     {
       header: `Date & Time (${timezone.split(' ')[0]})`,
@@ -70,28 +60,27 @@ export const PTMMeetingsView: React.FC = () => {
   return (
     <div className="space-y-6 w-full animate-in fade-in duration-150">
       <PageHeader
-        title="PTM Meetings & Conferences"
-        subtitle="Schedule and track one-on-one parent-teacher conferences, academic counseling, and student diagnostic feedback."
-        primaryAction={{
-          label: 'Schedule PTM meeting',
+        title="Staff Meetings"
+        subtitle="Meetings between the school admin team and teachers, with their Google Meet links."
+        primaryAction={can('manage_academics') ? {
+          label: 'Schedule staff meeting',
           onClick: () => addMeeting(),
           icon: Plus,
-        }}
+        } : undefined}
       />
 
       {meetings.length === 0 ? (
         <EmptyState
           icon={Video}
-          title="No upcoming PTM meetings"
-          description="When parents book progress reviews or teachers schedule diagnostic sessions, they will be tracked here."
-          actionLabel="Schedule first meeting"
-          onAction={() => addMeeting()}
+          title="No staff meetings yet"
+          description="Staff meetings you schedule with teachers appear here."
+          actionLabel={can('manage_academics') ? 'Schedule staff meeting' : undefined}
+          onAction={can('manage_academics') ? () => addMeeting() : undefined}
         />
       ) : (
         <DataTable columns={columns} data={meetings} />
       )}
 
-      {/* Schedule Modal */}
     </div>
   );
 };

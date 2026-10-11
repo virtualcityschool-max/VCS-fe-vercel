@@ -10,6 +10,8 @@ interface PageHeaderProps {
     label: string;
     onClick: () => void;
     icon?: LucideIcon;
+    /** Staff capability needed; the button is hidden without it. */
+    cap?: string;
   };
   onExportCsv?: () => void;
   onRefresh?: () => void;
@@ -26,7 +28,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  const { addToast, resetDemoData } = useApp();
+  const { addToast, resetDemoData, can } = useApp() as any;
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -69,7 +71,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
       <div className="flex items-center gap-3">
         {extraActions}
 
-        {primaryAction && (
+        {primaryAction && (!primaryAction.cap || can(primaryAction.cap)) && (
           <button
             onClick={primaryAction.onClick}
             className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl bg-[#6D5BFF] hover:bg-[#5B47FB] text-white shadow-lg shadow-indigo-600/20 active:scale-[0.98] transition-all whitespace-nowrap cursor-pointer"

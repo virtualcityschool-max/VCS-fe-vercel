@@ -10,6 +10,7 @@ import {
 import { profileUpdated } from "../../../store/slices/authSlice";
 import { authService } from "../../../services/authService";
 import { toastManager } from "../../../utils/toastManager";
+import { TuitionPill } from "./Tuition";
 import { getDisplayName } from "../../../utils/userDisplay";
 import { getStorageUrl } from "../../../utils/storageUrl";
 import { getTimezoneAbbr, formatTime } from "../../../utils/validation";
@@ -104,7 +105,7 @@ const StudentWorkspaceHeader = ({ onResolveOverdue, onJoinNextClass, onOpenTimez
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      {/* 1. Welcome Card with Interactive Student Photo Space, Timezone & Paid Tuition Badge */}
+      {/* 1. Welcome Card with Interactive Student Photo Space, Timezone & tuition badge */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-slate-900/90 to-indigo-950/40 border border-white/10 p-5 shadow-xl flex flex-col justify-between">
         <div className="absolute top-0 right-0 w-40 h-40 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none" />
 
@@ -169,7 +170,7 @@ const StudentWorkspaceHeader = ({ onResolveOverdue, onJoinNextClass, onOpenTimez
               {gradeLevel} • Term 2025–26
             </p>
 
-            {/* Timezone pill button & Clean Paid Tuition Status */}
+            {/* Timezone pill button & tuition status */}
             <div className="mt-2.5 flex items-center gap-2 flex-wrap">
               <button
                 type="button"
@@ -183,11 +184,7 @@ const StudentWorkspaceHeader = ({ onResolveOverdue, onJoinNextClass, onOpenTimez
                 <span className="text-slate-400 text-[10px] ml-0.5">Switch</span>
               </button>
 
-              {/* Clean Tuition Status (Always Paid) */}
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/25 text-emerald-300 text-[11px] font-bold shadow-sm">
-                <i className="fas fa-check-circle text-emerald-400 text-xs" />
-                <span>Tuition: Paid ($0.00)</span>
-              </span>
+            <TuitionPill />
             </div>
           </div>
         </div>

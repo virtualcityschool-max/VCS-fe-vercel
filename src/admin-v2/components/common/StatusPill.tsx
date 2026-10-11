@@ -41,9 +41,14 @@ export const StatusPill: React.FC<StatusPillProps> = ({ status, size = 'sm' }) =
     normalized.includes('overdue') ||
     normalized.includes('absent') ||
     normalized.includes('rejected') ||
+    normalized.includes('missed') ||
     normalized.includes('cancelled')
   ) {
     colorClasses = 'bg-rose-950/60 text-rose-400 border-rose-800/60 dark:bg-rose-950/60 dark:text-rose-400';
+  }
+  // Violet: on the website only (showcase), not teaching yet
+  else if (normalized.includes('showcase')) {
+    colorClasses = 'bg-violet-950/60 text-violet-300 border-violet-800/60';
   }
   // Blue / Info / Live
   else if (
