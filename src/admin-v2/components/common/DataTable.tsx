@@ -34,6 +34,8 @@ interface DataTableProps<T extends { id: string }> {
   keyField?: keyof T;
   onRowClick?: (row: T) => void;
   onEdit?: (row: T) => void;
+  /** Menu text for the status action, e.g. "Deactivate" for an active row. */
+  toggleLabel?: (row: T) => string;
   onDelete?: (row: T) => void;
   /** Label for the delete action, e.g. "Deactivate" when nothing is removed for good. */
   deleteLabel?: string;
@@ -53,6 +55,7 @@ export function DataTable<T extends { id: string }>({
   keyField = 'id',
   onRowClick,
   onEdit,
+  toggleLabel,
   onDelete,
   deleteLabel = 'Delete',
   onToggleStatus,
@@ -275,7 +278,7 @@ export function DataTable<T extends { id: string }>({
                                 className="flex items-center gap-2 w-full px-2.5 py-1.5 text-slate-300 hover:text-white hover:bg-slate-800/80 rounded-lg text-left"
                               >
                                 <UserX className="w-3.5 h-3.5 text-amber-400" />
-                                Toggle Status
+                                {toggleLabel ? toggleLabel(row) : 'Toggle Status'}
                               </button>
                             )}
 

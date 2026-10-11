@@ -412,7 +412,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const dept = [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] || (fromProfile ? deptName(fromProfile) : 'General');
     return {
       id: sid(u.id), name: getDisplayName(u) || u.email, email: u.email, role: 'teacher',
-      status: teacherStatus(u), showOnHomepage: !!u.show_on_homepage, offeredCourseIds: (u.offered_course_ids || []).map(sid),
+      status: teacherStatus(u), isActive: u.is_active !== false, showOnHomepage: !!u.show_on_homepage, offeredCourseIds: (u.offered_course_ids || []).map(sid),
       createdAt: u.date_joined, phone: u.phone || '',
       department: dept as DepartmentName, assignedSubjectIds: taught.map((c: any) => sid(c.id)),
       qualification: u.qualification || u.expertise || '', experienceYears: u.experience_years || 0,
@@ -469,10 +469,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const levels: AcademicLevel[] = useMemo(() => raw.categories.map((c: any) => c.name as AcademicLevel), [raw.categories]);
 
+  const teacherJoinedIds = useMemo(
+    () => new Set(raw.attendance.filter((a: any) => a.participant_role === 'teacher' && a.joined_at).map((a: any) => sid(a.session))),
+    [raw.attendance]
+  );
+
   const sessions: TimetableSession[] = useMemo(() => raw.sessions.map((s: any) => {
     const start = new Date(s.scheduled_at);
     const end = new Date(start.getTime() + (s.duration_mins || 60) * 60000);
     const c: any = courseById.get(sid(s.course));
+    // A class opens by itself at its time, so "live" does not mean it is being
+    // taught: 20 minutes in with no teacher, it is flagged as missed.
+    const teacherNotJoined = s.status === 'live' && s.session_type !== 'admin_teacher'
+      && start.getTime() < Date.now() - 20 * 60000 && !teacherJoinedIds.has(sid(s.id));
     return {
       id: sid(s.id), title: s.title, subjectId: sid(s.course), department: deptName(s.course_title || s.title),
       level: ((c && (typeof c.category === 'object' ? c.category?.name : levelName(c.category))) || '') as AcademicLevel,
@@ -482,12 +491,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       date: ymd(start, tzIana),
       // A class still "scheduled" 15+ minutes after its start never began:
       // shown as missed at once (the server's 5-minute job flags it too).
-      status: s.status === 'missed' || (s.status === 'scheduled' && start.getTime() < Date.now() - 15 * 60000) ? 'missed'
+      status: s.status === 'missed' || (s.status === 'scheduled' && start.getTime() < Date.now() - 15 * 60000) || teacherNotJoined ? 'missed'
         : s.status === 'scheduled' ? 'upcoming' : s.status,
+      teacherNotJoined,
       recurrence: s.is_recurring ? 'Weekly' : 'One-off', meetingLink: s.meeting_link || undefined,
       hasTeacherAssigned: !!s.teacher, courseTitle: s.course_title, teacherName: s.teacher_name, _raw: s,
     } as any;
-  }), [raw.sessions, courseById, levelName, tzIana]);
+  }), [raw.sessions, courseById, levelName, tzIana, teacherJoinedIds]);
 
   const meetings: TeacherMeeting[] = useMemo(() => raw.meetings.map((m: any) => {
     const start = new Date(m.scheduled_at);

@@ -514,7 +514,7 @@ export const QuickAddModal: React.FC = () => {
                 ? 'Open editor'
                 : saving
                 ? 'Saving…'
-                : `Create ${activeType}`}
+                : activeType === 'admin' ? 'Create staff member' : `Create ${activeType}`}
             </button>
           </div>
         </form>

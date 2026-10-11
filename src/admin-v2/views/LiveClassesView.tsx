@@ -11,7 +11,7 @@ type Phase = 'live' | 'late' | 'missed' | 'soon' | 'later' | 'ended' | 'cancelle
 const PHASE_STYLE: Record<Phase, { label: string; pill: string }> = {
   live: { label: 'Live now', pill: 'bg-rose-500/15 text-rose-300 border-rose-500/40' },
   late: { label: 'Should have started', pill: 'bg-amber-500/15 text-amber-300 border-amber-500/40' },
-  missed: { label: 'Missed / Not started', pill: 'bg-rose-500/15 text-rose-300 border-rose-500/40' },
+  missed: { label: 'Missed', pill: 'bg-rose-500/15 text-rose-300 border-rose-500/40' },
   soon: { label: 'Starting soon', pill: 'bg-sky-500/15 text-sky-300 border-sky-500/40' },
   later: { label: 'Scheduled', pill: 'bg-slate-500/15 text-slate-300 border-slate-500/30' },
   ended: { label: 'Ended', pill: 'bg-slate-700/30 text-slate-400 border-slate-600/40' },
@@ -66,10 +66,12 @@ export const LiveClassesView: React.FC = () => {
         const start = new Date(r.scheduled_at);
         const end = new Date(start.getTime() + (r.duration_mins || 60) * 60000);
         const t = now;
-        // Not started 15 min after its time: missed, and it stays flagged until
-        // an admin resolves it (held / cancelled / rescheduled).
+        // Not started 15 min after its time, or opened by itself but the teacher
+        // has not joined after 20 min: missed, and it stays flagged until an
+        // admin resolves it (held / cancelled / rescheduled).
         const phase: Phase =
           r.status === 'cancelled' ? 'cancelled'
+          : s.teacherNotJoined ? 'missed'
           : r.status === 'live' ? 'live'
           : r.status === 'missed' || (r.status === 'scheduled' && t > start.getTime() + 15 * 60000) ? 'missed'
           : r.status === 'ended' || t > end.getTime() ? 'ended'
@@ -131,11 +133,12 @@ export const LiveClassesView: React.FC = () => {
     const timing =
       x.phase === 'live' ? `Live for ${dur(mins(t - x.start.getTime()))} · ends ${timeOf(x.end)}`
       : x.phase === 'late' ? `Was due ${dur(mins(t - x.start.getTime()))} ago`
-      : x.phase === 'missed' ? `${x.start.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', ...(tzIana ? { timeZone: tzIana } : {}) })} · never started`
+      : x.phase === 'missed' ? `${x.start.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', ...(tzIana ? { timeZone: tzIana } : {}) })} · ${x.r.status === 'live' ? `teacher not joined · open until ${timeOf(x.end)}` : 'never started'}`
       : x.phase === 'soon' || x.phase === 'later' ? `Starts in ${dur(mins(x.start.getTime() - t))}`
       : x.phase === 'cancelled' ? 'Cancelled'
       : `Ended ${timeOf(x.end)}`;
-    const ended = x.phase === 'ended' || x.phase === 'cancelled' || x.phase === 'missed';
+    // A flagged class that is still open keeps its Join button.
+    const ended = x.phase === 'ended' || x.phase === 'cancelled' || (x.phase === 'missed' && x.r.status !== 'live');
     return (
       <div className={`grid grid-cols-12 gap-3 items-center px-4 py-3 border-t border-[#1E2648]/60 ${x.phase === 'live' ? 'bg-rose-500/[0.04]' : ''}`}>
         <div className="col-span-4 md:col-span-2">
@@ -274,7 +277,7 @@ export const LiveClassesView: React.FC = () => {
           <Section title="Live now" icon={Radio} tone="text-rose-300" items={liveRows} empty="No class is running at the moment." />
           {liveRows.some((x: any) => x.phase === 'late') && (
             <div className="flex items-center gap-2 text-xs text-amber-300 -mt-3">
-              <AlertTriangle className="w-3.5 h-3.5" /> “Should have started” means the class time has begun but the teacher has not started it. After 15 minutes it moves to Missed until someone resolves it.
+              <AlertTriangle className="w-3.5 h-3.5" /> “Should have started” means the class time has begun but the teacher has not started it. After 15 minutes it moves to Missed until someone resolves it. A class that opened by itself also moves to Missed when the teacher has not joined after 20 minutes; students can still enter until its end time.
             </div>
           )}
           <Section title="Starting within the hour" icon={Video} tone="text-sky-300" items={soonRows} />

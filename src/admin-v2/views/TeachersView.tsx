@@ -28,6 +28,7 @@ export const TeachersView: React.FC = () => {
     openDetailDrawer,
     openQuickAdd,
     toggleUserStatus,
+    updateTeacher,
     bulkAssignSubject,
     addToast,
     setTeacherAreas,
@@ -281,6 +282,8 @@ export const TeachersView: React.FC = () => {
           data={filtered}
           onRowClick={(row) => openDetailDrawer('teacher', row)}
           onToggleStatus={canEdit ? (row) => toggleUserStatus(row.id) : undefined}
+          toggleLabel={(row: any) => (row.isActive === false ? 'Activate…' : 'Deactivate…')}
+          onEdit={canEdit ? (row) => updateTeacher(row.id) : undefined}
           bulkActions={[
             {
               label: 'Assign Subject',

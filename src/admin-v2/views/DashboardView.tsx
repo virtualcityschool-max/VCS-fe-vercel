@@ -495,13 +495,13 @@ export const DashboardView: React.FC = () => {
                     <span className="w-6 h-6 rounded-lg bg-rose-500 text-white text-xs font-mono font-bold flex items-center justify-center">
                       {missedClasses.length}
                     </span>
-                    <span className="text-xs font-bold text-slate-200">Missed / Not Started</span>
+                    <span className="text-xs font-bold text-slate-200">Missed / Teacher Not Joined</span>
                   </div>
                   <span className="text-[10px] text-rose-300/80 font-mono">Resolve</span>
                 </div>
                 <p className="text-xs text-slate-300 leading-snug">
                   {missedClasses.slice(0, 2).map((s: any) => `${s.title} (${s.date} ${s.startTime})`).join(', ')}
-                  {missedClasses.length > 2 ? ` and ${missedClasses.length - 2} more` : ''} never started. Mark as held, cancel or reschedule.
+                  {missedClasses.length > 2 ? ` and ${missedClasses.length - 2} more` : ''} had no teacher. Mark as held, cancel or reschedule.
                 </p>
                 <button
                   onClick={() => setCurrentView('live-classes')}
