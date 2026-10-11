@@ -126,6 +126,17 @@ const StudentQuizList = ({ hideHeader = false, filterCourse: externalFilterCours
                                 <span className="text-[11px] text-slate-300 font-bold">{quiz.total_marks}</span>
                               </div>
                             </div>
+                            {quiz.duration_minutes && (
+                              <div className="flex items-center gap-2">
+                                <div className="w-8 h-8 rounded-lg bg-slate-800/50 flex items-center justify-center text-amber-400/70">
+                                  <i className="fas fa-stopwatch text-[10px]" />
+                                </div>
+                                <div className="flex flex-col">
+                                  <span className="text-[8px] text-slate-500 uppercase font-black leading-none mb-0.5">Time</span>
+                                  <span className="text-[11px] text-slate-300 font-bold">{quiz.duration_minutes} min</span>
+                                </div>
+                              </div>
+                            )}
                           </div>
                           {quiz.due_date && (
                             <div className="flex items-center justify-between">

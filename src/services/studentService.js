@@ -572,6 +572,12 @@ export const studentService = {
     return response.data;
   },
 
+  // Starts the student's timed attempt (or returns the one already running)
+  startQuiz: async (quizId) => {
+    const response = await axiosInstance.post(`/quizzes/${quizId}/start/`);
+    return response.data;
+  },
+
   submitQuiz: async (quizId, answers) => {
     const response = await axiosInstance.post(`/quizzes/${quizId}/submit/`, { answers });
     return response.data;

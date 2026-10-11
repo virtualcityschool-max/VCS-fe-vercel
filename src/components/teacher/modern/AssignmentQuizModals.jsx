@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   X,
   Trash2,
@@ -21,6 +21,26 @@ import { extractApiErrorMessage } from "../../../utils/apiErrorHandler";
 const pad2 = (n) => String(n).padStart(2, "0");
 const localDateStr = (d) => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
 const localDateTimeStr = (d) => `${localDateStr(d)}T${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+
+// Same, but on the clock of the teacher's workspace timezone (the one the entered times are saved in)
+const zonedDateTimeStr = (d, timeZone) => {
+  if (!timeZone) return localDateTimeStr(d);
+  try {
+    const parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h23",
+    }).formatToParts(d);
+    const get = (type) => parts.find((p) => p.type === type)?.value;
+    return `${get("year")}-${get("month")}-${get("day")}T${get("hour")}:${get("minute")}`;
+  } catch {
+    return localDateTimeStr(d);
+  }
+};
 
 export const CreateAssignmentModal = ({
   isOpen,
@@ -317,13 +337,16 @@ export const AdvancedQuizBuilderModal = ({
   isOpen,
   onClose,
   courses,
-  onSaveQuiz
+  onSaveQuiz,
+  timezone
 }) => {
   const [title, setTitle] = useState("");
   const [courseId, setCourseId] = useState("");
   const [description, setDescription] = useState("");
   const [launchDateTime, setLaunchDateTime] = useState(() => localDateTimeStr(new Date()));
   const [dueDateTime, setDueDateTime] = useState(() => localDateTimeStr(new Date(Date.now() + 7 * 86400000)));
+  const [durationMinutes, setDurationMinutes] = useState("30");
+  const [datesEdited, setDatesEdited] = useState(false);
   const [questions, setQuestions] = useState(() => [createBlankQuestion("multiple_choice")]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState(null);
@@ -333,6 +356,13 @@ export const AdvancedQuizBuilderModal = ({
   const [importAppendMode, setImportAppendMode] = useState("append");
   const [bulkImportError, setBulkImportError] = useState(null);
   const [bulkImportSuccess, setBulkImportSuccess] = useState(null);
+  // Until the teacher picks dates, "launch" means now, on the workspace clock, each time the form opens
+  useEffect(() => {
+    if (!isOpen || datesEdited) return;
+    setLaunchDateTime(zonedDateTimeStr(new Date(), timezone));
+    setDueDateTime(zonedDateTimeStr(new Date(Date.now() + 7 * 86400000), timezone));
+  }, [isOpen, datesEdited, timezone]);
+
   if (!isOpen) return null;
   const selectedCourseId = courseId || courses[0]?.id || "";
   const totalMarks = questions.reduce((sum, q) => sum + Number(q.marks || 0), 0);
@@ -506,8 +536,10 @@ multiple_choice,"Which electromagnetic radiation has the highest frequency?",5,"
   const handleResetForm = () => {
     setTitle("");
     setDescription("");
-    setLaunchDateTime(localDateTimeStr(new Date()));
-    setDueDateTime(localDateTimeStr(new Date(Date.now() + 7 * 86400000)));
+    setLaunchDateTime(zonedDateTimeStr(new Date(), timezone));
+    setDueDateTime(zonedDateTimeStr(new Date(Date.now() + 7 * 86400000), timezone));
+    setDatesEdited(false);
+    setDurationMinutes("30");
     setQuestions([createBlankQuestion("multiple_choice")]);
     setFormError(null);
   };
@@ -594,6 +626,10 @@ multiple_choice,"Which electromagnetic radiation has the highest frequency?",5,"
         return "The solve & submit deadline must be after the launch date & time.";
       }
     }
+    const minutes = Number(durationMinutes);
+    if (!Number.isInteger(minutes) || minutes < 1 || minutes > 300) {
+      return "Please set the time limit, between 1 and 300 minutes.";
+    }
 
     return null;
   };
@@ -617,6 +653,7 @@ multiple_choice,"Which electromagnetic radiation has the highest frequency?",5,"
         description: description.trim(),
         launchDateTime,
         dueDateTime,
+        durationMinutes: Number(durationMinutes),
         questions,
       });
       handleResetForm();
@@ -713,7 +750,7 @@ multiple_choice,"Which electromagnetic radiation has the highest frequency?",5,"
           {
     /* Timing & Windows */
   }
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 rounded-xl bg-[#0B0E1A] border border-[#1A223B]">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 rounded-xl bg-[#0B0E1A] border border-[#1A223B]">
             <div>
               <label className="block text-[11px] font-semibold text-slate-300 mb-1">
                 Launch Date & Time
@@ -721,7 +758,10 @@ multiple_choice,"Which electromagnetic radiation has the highest frequency?",5,"
               <input
     type="datetime-local"
     value={launchDateTime}
-    onChange={(e) => setLaunchDateTime(e.target.value)}
+    onChange={(e) => {
+      setDatesEdited(true);
+      setLaunchDateTime(e.target.value);
+    }}
     className="w-full px-3 py-1.5 rounded-lg bg-[#121628] border border-[#1E2642] text-xs text-white [color-scheme:dark]"
   />
             </div>
@@ -732,10 +772,31 @@ multiple_choice,"Which electromagnetic radiation has the highest frequency?",5,"
               <input
     type="datetime-local"
     value={dueDateTime}
-    onChange={(e) => setDueDateTime(e.target.value)}
+    onChange={(e) => {
+      setDatesEdited(true);
+      setDueDateTime(e.target.value);
+    }}
     className="w-full px-3 py-1.5 rounded-lg bg-[#121628] border border-[#1E2642] text-xs text-white [color-scheme:dark]"
   />
             </div>
+            <div>
+              <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+                Time Limit (minutes)
+              </label>
+              <input
+    type="number"
+    min={1}
+    max={300}
+    step={1}
+    required
+    value={durationMinutes}
+    onChange={(e) => setDurationMinutes(e.target.value)}
+    className="w-full px-3 py-1.5 rounded-lg bg-[#121628] border border-[#1E2642] text-xs text-white"
+  />
+            </div>
+            <p className="sm:col-span-3 text-[11px] text-slate-400">
+              Each student's clock starts when they press Start and cannot be paused. The quiz submits itself when the time runs out.
+            </p>
           </div>
 
           {

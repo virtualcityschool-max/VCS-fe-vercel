@@ -213,6 +213,7 @@ const TeacherPortal = () => {
         description: q.description || "",
         marks: q.total_marks || 0,
         questionsCount: q.questions_count ?? q.questions?.length ?? 0,
+        durationMinutes: q.duration_minutes ?? null,
         launchLabel: fmt(q.published_at),
         dueLabel: fmt(q.due_date),
         status: !published ? "scheduled" : closed ? "closed" : "published",
@@ -689,6 +690,7 @@ const TeacherPortal = () => {
         course: courseId,
         description: quizData.description?.trim() || "",
         total_marks,
+        duration_minutes: quizData.durationMinutes,
         published_at,
         due_date,
         questions,
@@ -841,6 +843,7 @@ const TeacherPortal = () => {
         onClose={() => setAdvancedQuizBuilderModalOpen(false)}
         courses={mappedCourses}
         onSaveQuiz={handleSaveQuiz}
+        timezone={profileTimezone || TZ_IANA_MAP[currentTz] || "Asia/Riyadh"}
       />
 
       {/* Review Quiz Submission Modal */}

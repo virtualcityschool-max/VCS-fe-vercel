@@ -104,6 +104,34 @@ export const toastManager = {
     return toastId;
   },
 
+  // Neutral notices ("Sample questions loaded", "Downloading…")
+  info: (message, options = {}) => {
+    const key = generateToastKey("info", message);
+
+    if (toastDeduplicationMap.has(key)) {
+      return;
+    }
+
+    const toastId = toast.info(message, {
+      autoClose: options.duration || 4000,
+      position: options.position || "top-right",
+      ...options,
+    });
+
+    toastDeduplicationMap.set(key, {
+      id: toastId,
+      timestamp: Date.now(),
+    });
+
+    const cleanupTimeout = setTimeout(() => {
+      toastDeduplicationMap.delete(key);
+    }, 5000);
+
+    toastDeduplicationMap.get(key).cleanupTimeout = cleanupTimeout;
+
+    return toastId;
+  },
+
   loading: (message, options = {}) => {
     return toast.loading(message, {
       position: options.position || "top-right",

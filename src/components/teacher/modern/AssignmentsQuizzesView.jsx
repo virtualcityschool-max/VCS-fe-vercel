@@ -260,7 +260,7 @@ export const AssignmentsQuizzesView = ({
                       {quiz.marks} Marks
                     </div>
                     <div className="text-[10px] text-slate-400 uppercase">
-                      {quiz.questionsCount} Questions
+                      {quiz.questionsCount} Questions{quiz.durationMinutes ? ` · ${quiz.durationMinutes} min` : ""}
                     </div>
                   </div>
                   <span
