@@ -270,10 +270,11 @@ const SessionsTab = ({
       live:      "bg-emerald-500/20 text-emerald-400 border-emerald-500/20",
       ended:     "bg-slate-500/20 text-slate-400 border-slate-500/20",
       cancelled: "bg-red-500/20 text-red-400 border-red-500/20",
+      missed:    "bg-rose-500/20 text-rose-300 border-rose-500/30",
     };
     const cls = cfg[status] || cfg.scheduled;
     return (
-      <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${cls}`}>
+      <span className={`px-2 py-0.5 rounded-full text-xs font-medium border capitalize whitespace-nowrap ${cls}`}>
         {status || "scheduled"}
       </span>
     );
@@ -491,42 +492,46 @@ const SessionsTab = ({
               <table className="hidden lg:table w-full text-left">
                 <thead className="bg-[#0B1020]/60 border-b border-[#232D52]">
                   <tr>
-                    <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Session</th>
-                    <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Course</th>
-                    <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Tutor</th>
-                    <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Start Date & Time</th>
-                    <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">End Date</th>
-                    <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">Recurrence</th>
-                    <th className="px-5 py-4 text-xs font-black uppercase text-slate-500">
+                    <th className="px-4 py-2.5 text-[11px] font-black uppercase text-slate-500 whitespace-nowrap">Session</th>
+                    <th className="px-4 py-2.5 text-[11px] font-black uppercase text-slate-500 whitespace-nowrap">Course</th>
+                    <th className="px-4 py-2.5 text-[11px] font-black uppercase text-slate-500 whitespace-nowrap">Tutor</th>
+                    <th className="px-4 py-2.5 text-[11px] font-black uppercase text-slate-500 whitespace-nowrap">Date & Time</th>
+                    <th className="px-4 py-2.5 text-[11px] font-black uppercase text-slate-500 whitespace-nowrap">End Date</th>
+                    <th className="px-4 py-2.5 text-[11px] font-black uppercase text-slate-500 whitespace-nowrap">Recurrence</th>
+                    <th className="px-4 py-2.5 text-[11px] font-black uppercase text-slate-500 whitespace-nowrap">
                       <div className="flex items-center gap-1">
                         Status
                         <StatusHeaderTooltip />
                       </div>
                     </th>
-                    <th className="px-5 py-4 text-xs font-black uppercase text-slate-500 text-right">Actions</th>
+                    <th className="px-4 py-2.5 text-[11px] font-black uppercase text-slate-500 whitespace-nowrap text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#1E2648]/50">
                   {filteredSessions.map((session) => (
                     <tr key={session.id} className="hover:bg-[#1A2346]/30 transition">
-                      <td className="px-5 py-4">
-                        <p className="font-semibold text-white text-sm">{session.title}</p>
-                        {session.category == "special" && (
-                          <span className="mt-1 inline-block px-1.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-violet-500/20 text-violet-300 border border-violet-500/20">Special Session</span>
-                        )}
+                      <td className="px-4 py-2">
+                        <p className="font-semibold text-white text-sm">
+                          {session.title}
+                          {session.category == "special" && (
+                            <span title="Special session" className="ml-2 align-middle inline-block px-1.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-violet-500/20 text-violet-300 border border-violet-500/20">Special</span>
+                          )}
+                        </p>
                       </td>
-                      <td className="px-5 py-4 text-slate-300 text-sm">{session.course?.title || session.course_title || "-"}</td>
-                      <td className="px-5 py-4 text-slate-300 text-sm">{session.teacher_name || "-"}</td>
-                      <td className="px-5 py-4">
-                        <div className="text-slate-300 text-sm">{formatDate(session.scheduled_at || session.start_time)}</div>
-                        {formatTime(session.scheduled_at || session.start_time) && (
-                          <div className="text-slate-500 text-xs mt-0.5">
-                            <i className="fas fa-clock mr-1"></i>{formatTime(session.scheduled_at || session.start_time)}{" "}<TimezoneTag />
-                          </div>
-                        )}
+                      <td className="px-4 py-2 text-slate-300 text-sm">{session.course?.title || session.course_title || "-"}</td>
+                      <td className="px-4 py-2 text-slate-300 text-sm">{session.teacher_name || "-"}</td>
+                      <td className="px-4 py-2">
+                        <div className="text-slate-300 text-sm whitespace-nowrap">
+                          {formatDate(session.scheduled_at || session.start_time)}
+                          {formatTime(session.scheduled_at || session.start_time) && (
+                            <span className="text-slate-400 text-xs ml-2">
+                              {formatTime(session.scheduled_at || session.start_time)}{" "}<TimezoneTag />
+                            </span>
+                          )}
+                        </div>
                       </td>
-                      <td className="px-5 py-4 text-slate-300 text-sm">{formatDate(session.recurrence_end_date) || "-"}</td>
-                      <td className="px-5 py-4">
+                      <td className="px-4 py-2 text-slate-300 text-sm whitespace-nowrap">{formatDate(session.recurrence_end_date) || "-"}</td>
+                      <td className="px-4 py-2">
                         {session.recurrence_days?.length > 0 ? (
                           <div className="flex flex-wrap gap-1">
                             {sortDays(session.recurrence_days).map((d) => (
@@ -540,20 +545,20 @@ const SessionsTab = ({
                             : <span className="text-slate-500 text-xs">-</span>;
                         })()}
                       </td>
-                      <td className="px-5 py-4">{getStatusBadge(session.status)}</td>
-                      <td className="px-5 py-4">
+                      <td className="px-4 py-2">{getStatusBadge(session.status)}</td>
+                      <td className="px-4 py-2">
                         <div className="flex items-center gap-2 justify-end">
                           {!session.is_child && session.is_recurring && (
                             <button
                               onClick={() => onSessionEdit(session.id)}
                               title="Edit session"
-                              className="w-8 h-8 flex items-center justify-center bg-[#1A2346]/50 text-slate-300 rounded-lg hover:bg-slate-600/50 transition"
+                              className="w-7 h-7 flex items-center justify-center bg-[#1A2346]/50 text-slate-300 rounded-lg hover:bg-slate-600/50 transition"
                             >
                               <i className="fas fa-edit text-xs"></i>
                             </button>
                           )}
                           {canDelete && !['live', 'ended'].includes(session.status) && (
-<button onClick={() => onSessionDelete(session.id)} disabled={loadingSessionIds.has(session.id)} title="Delete session" className="w-8 h-8 flex items-center justify-center bg-red-600/10 text-red-400 rounded-lg hover:bg-red-600/20 transition disabled:opacity-50">
+<button onClick={() => onSessionDelete(session.id)} disabled={loadingSessionIds.has(session.id)} title="Delete session" className="w-7 h-7 flex items-center justify-center bg-red-600/10 text-red-400 rounded-lg hover:bg-red-600/20 transition disabled:opacity-50">
                             {loadingSessionIds.has(session.id) ? <i className="fas fa-spinner fa-spin text-xs"></i> : <i className="fas fa-trash text-xs"></i>}
                           </button>
 )}
