@@ -29,9 +29,9 @@ export const CreateAssignmentModal = ({
   const [submissionMethod, setSubmissionMethod] = useState("online_text");
   const [allowedFormats, setAllowedFormats] = useState(["PDF", "PNG", "DOCX"]);
   const [launchDate, setLaunchDate] = useState("2026-10-10");
-  const [launchTime, setLaunchTime] = useState("02:00 PM AST");
+  const [launchTime, setLaunchTime] = useState("14:00");
   const [dueDate, setDueDate] = useState("2026-10-16");
-  const [dueTime, setDueTime] = useState("11:59 PM AST");
+  const [dueTime, setDueTime] = useState("23:59");
   const [maxMarks, setMaxMarks] = useState(20);
   const [rubricCriterion, setRubricCriterion] = useState(
     "Conceptual understanding (10m), Calculation accuracy (10m)"
@@ -295,11 +295,10 @@ export const CreateAssignmentModal = ({
     className="px-2.5 py-1.5 rounded-lg bg-[#121628] border border-[#1E2642] text-xs text-white"
   />
                 <input
-    type="text"
+    type="time"
     value={launchTime}
     onChange={(e) => setLaunchTime(e.target.value)}
-    placeholder="02:00 PM AST"
-    className="px-2.5 py-1.5 rounded-lg bg-[#121628] border border-[#1E2642] text-xs font-mono text-white"
+    className="px-2.5 py-1.5 rounded-lg bg-[#121628] border border-[#1E2642] text-xs font-mono text-white [color-scheme:dark]"
   />
               </div>
             </div>
@@ -317,11 +316,10 @@ export const CreateAssignmentModal = ({
     className="px-2.5 py-1.5 rounded-lg bg-[#121628] border border-[#1E2642] text-xs text-white"
   />
                 <input
-    type="text"
+    type="time"
     value={dueTime}
     onChange={(e) => setDueTime(e.target.value)}
-    placeholder="11:59 PM AST"
-    className="px-2.5 py-1.5 rounded-lg bg-[#121628] border border-[#1E2642] text-xs font-mono text-white"
+    className="px-2.5 py-1.5 rounded-lg bg-[#121628] border border-[#1E2642] text-xs font-mono text-white [color-scheme:dark]"
   />
               </div>
             </div>

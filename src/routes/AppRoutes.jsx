@@ -225,8 +225,8 @@ const AppRoutes = () => {
         </Route>
       </Route>
 
-      {/* Teacher Routes */}
-      <Route element={<ProtectedRoute allowedRoles={["teacher", "admin"]} />}>
+      {/* Teacher-Only Routes */}
+      <Route element={<ProtectedRoute allowedRoles={["teacher"]} />}>
         <Route path="/teacher" element={<TeacherLayout />}>
           <Route index element={<TeacherPortal />} />
           <Route path="classes" element={<TeacherClasses />} />

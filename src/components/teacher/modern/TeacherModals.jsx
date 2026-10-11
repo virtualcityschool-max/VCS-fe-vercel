@@ -133,21 +133,47 @@ export const ScheduleSessionModal = ({
   isOpen,
   onClose,
   courses,
-  onCreateSession
+  onCreateSession,
+  timezone
 }) => {
   const [title, setTitle] = useState("");
-  const [courseName, setCourseName] = useState(courses[0]?.title || "University Entry Test Prep");
-  const [category, setCategory] = useState("classes");
-  const [timeAST, setTimeAST] = useState("07:30 PM AST");
-  const [duration, setDuration] = useState("60 min");
+  const [courseName, setCourseName] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const tz = timezone || "Asia/Riyadh";
+  const todayStr = (() => {
+    try {
+      return new Intl.DateTimeFormat("en-CA", { timeZone: tz }).format(new Date());
+    } catch {
+      return new Date().toISOString().split("T")[0];
+    }
+  })();
+  const [scheduledDate, setScheduledDate] = useState(todayStr);
+  const [scheduledTime, setScheduledTime] = useState("19:30");
+
+  const effectiveCourse = courseName || courses[0]?.title || "";
+
   if (!isOpen) return null;
-  const handleSubmit = (e) => {
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!title.trim()) return;
-    onCreateSession(title.trim(), courseName, category, timeAST, duration);
-    setTitle("");
-    onClose();
+    if (!title.trim() || isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      const ok = await onCreateSession({
+        title: title.trim(),
+        courseName: effectiveCourse,
+        date: scheduledDate,
+        time: scheduledTime,
+      });
+      if (ok) {
+        setTitle("");
+        onClose();
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
   return <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
       <div className="w-full max-w-md bg-[#101424] border border-[#242D4C] rounded-2xl shadow-2xl overflow-hidden">
         <div className="px-5 py-4 border-b border-[#1C233D] flex items-center justify-between">
@@ -171,69 +197,60 @@ export const ScheduleSessionModal = ({
               Session Topic
             </label>
             <input
-    type="text"
-    required
-    value={title}
-    onChange={(e) => setTitle(e.target.value)}
-    placeholder="e.g. Verbal Reasoning & Critical Reading Drill"
-    className="w-full px-3.5 py-2 rounded-xl bg-[#0B0E1A] border border-[#1E2642] text-xs text-white focus:outline-none focus:border-indigo-500"
-  />
+              type="text"
+              required
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="e.g. Verbal Reasoning & Critical Reading Drill"
+              className="w-full px-3.5 py-2 rounded-xl bg-[#0B0E1A] border border-[#1E2642] text-xs text-white focus:outline-none focus:border-indigo-500"
+            />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                Category
-              </label>
-              <select
-    value={category}
-    onChange={(e) => setCategory(e.target.value)}
-    className="w-full px-3 py-2 rounded-xl bg-[#0B0E1A] border border-[#1E2642] text-xs text-white"
-  >
-                <option value="classes">Classes</option>
-                <option value="admin_session">Admin Session</option>
-                <option value="reserved_slots">Reserved Slots</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                Course Cohort
-              </label>
-              <select
-    value={courseName}
-    onChange={(e) => setCourseName(e.target.value)}
-    className="w-full px-3 py-2 rounded-xl bg-[#0B0E1A] border border-[#1E2642] text-xs text-white"
-  >
-                {courses.map((c) => <option key={c.id} value={c.title}>
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+              Course Cohort
+            </label>
+            <select
+              value={effectiveCourse}
+              onChange={(e) => setCourseName(e.target.value)}
+              className="w-full px-3 py-2 rounded-xl bg-[#0B0E1A] border border-[#1E2642] text-xs text-white"
+            >
+              {courses.length === 0 ? (
+                <option value="">No Active Courses</option>
+              ) : (
+                courses.map((c) => (
+                  <option key={c.id} value={c.title}>
                     {c.title}
-                  </option>)}
-              </select>
-            </div>
+                  </option>
+                ))
+              )}
+            </select>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                Start Time (AST)
+                Date
               </label>
               <input
-    type="text"
-    value={timeAST}
-    onChange={(e) => setTimeAST(e.target.value)}
-    className="w-full px-3 py-2 rounded-xl bg-[#0B0E1A] border border-[#1E2642] text-xs font-mono text-white"
-  />
+                type="date"
+                required
+                value={scheduledDate}
+                onChange={(e) => setScheduledDate(e.target.value)}
+                className="w-full px-2.5 py-2 rounded-xl bg-[#0B0E1A] border border-[#1E2642] text-xs text-white"
+              />
             </div>
             <div>
               <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                Duration
+                Time
               </label>
               <input
-    type="text"
-    value={duration}
-    onChange={(e) => setDuration(e.target.value)}
-    className="w-full px-3 py-2 rounded-xl bg-[#0B0E1A] border border-[#1E2642] text-xs font-mono text-white"
-  />
+                type="time"
+                required
+                value={scheduledTime}
+                onChange={(e) => setScheduledTime(e.target.value)}
+                className="w-full px-2.5 py-2 rounded-xl bg-[#0B0E1A] border border-[#1E2642] text-xs font-mono text-white"
+              />
             </div>
           </div>
 
@@ -246,10 +263,11 @@ export const ScheduleSessionModal = ({
               Cancel
             </button>
             <button
-    type="submit"
-    className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-xs font-bold text-white cursor-pointer"
-  >
-              Create Session
+              type="submit"
+              disabled={isSubmitting}
+              className={`px-4 py-2 rounded-xl text-xs font-bold text-white transition-colors ${isSubmitting ? "bg-emerald-800 cursor-not-allowed opacity-70" : "bg-emerald-600 hover:bg-emerald-500 cursor-pointer"}`}
+            >
+              {isSubmitting ? "Creating Session..." : "Create Session"}
             </button>
           </div>
         </form>

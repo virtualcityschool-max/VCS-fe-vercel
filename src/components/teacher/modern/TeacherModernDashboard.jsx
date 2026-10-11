@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import {
   LayoutGrid,
   BookOpen,
@@ -26,7 +27,9 @@ import {
   Printer,
   Edit3,
   CheckCheck,
-  X
+  X,
+  Square,
+  LogOut
 } from "lucide-react";
 import {
   INITIAL_BLOGS
@@ -51,22 +54,17 @@ export const TeacherDashboard = ({
   onOpenAnnouncementModal,
   onOpenNewSessionModal,
   onOpenGradeModal,
-  onOpenCreateCourseModal,
   onOpenCreateAssignmentModal,
   onOpenAdvancedQuizBuilderModal,
   onOpenReviewQuizModal,
-  onToggleSlotStatus,
-  onToggleAttendanceStatus,
   onAddResource,
-  onTogglePinResource,
-  onSaveEvaluation,
-  onMarkAllClassAttendance,
   user,
   onStartSession,
+  onEndSession,
+  onLeaveAdminSession,
   referralCode,
 }) => {
   const [sessionCategory, setSessionCategory] = useState("classes");
-  const [showDemoEmptySessions, setShowDemoEmptySessions] = useState(false);
   const [taskFilter, setTaskFilter] = useState("all");
   const [quizFilter, setQuizFilter] = useState("all");
   const [copiedLink, setCopiedLink] = useState(false);
@@ -79,17 +77,17 @@ export const TeacherDashboard = ({
     courses[0]?.title || "Cambridge O & A Level Physics"
   );
   const [evaluationTab, setEvaluationTab] = useState("rubrics_reports");
-  const [editingEvaluation, setEditingEvaluation] = useState(null);
   const [viewingReportCard, setViewingReportCard] = useState(null);
-  const refCode = referralCode || user?.referral_code || "aamirwaqas670";
-  const referralUrl = `https://virtualcityschool.com/signup?ref=${refCode}`;
+  const refCode = referralCode || user?.referral_code || null;
+  const referralUrl = refCode ? `https://virtualcityschool.com/signup?ref=${refCode}` : "";
   const handleCopyReferral = () => {
+    if (!referralUrl) return;
     navigator.clipboard?.writeText(referralUrl).catch(() => {
     });
     setCopiedLink(true);
     setTimeout(() => setCopiedLink(false), 2200);
   };
-  const filteredSessions = showDemoEmptySessions ? [] : sessions.filter((s) => s.category === sessionCategory);
+  const filteredSessions = sessions.filter((s) => s.category === sessionCategory);
   const filteredTasks = tasks.filter((t) => {
     if (taskFilter === "all") return true;
     return t.status === taskFilter;
@@ -130,21 +128,12 @@ export const TeacherDashboard = ({
             Manage course frameworks, syllabus milestones, student rosters, and upcoming live lectures.
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <button
-    onClick={() => onSelectTab("dashboard")}
-    className="px-3.5 py-2 rounded-xl bg-[#171D33] hover:bg-[#1E2642] text-xs font-semibold text-slate-300 border border-[#273154] transition-colors cursor-pointer"
-  >
-            ← Back to Bento Dashboard
-          </button>
-          <button
-    onClick={onOpenCreateCourseModal}
-    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#5B46F8] hover:bg-[#4C38E6] text-white text-xs font-bold transition-all shadow-md cursor-pointer"
-  >
-            <Plus className="w-4 h-4" />
-            <span>Launch New Course</span>
-          </button>
-        </div>
+        <button
+          onClick={() => onSelectTab("dashboard")}
+          className="px-3.5 py-2 rounded-xl bg-[#171D33] hover:bg-[#1E2642] text-xs font-semibold text-slate-300 border border-[#273154] transition-colors cursor-pointer"
+        >
+          ← Back to Bento Dashboard
+        </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -222,7 +211,7 @@ export const TeacherDashboard = ({
   const renderAttendanceView = () => {
     const classStudents = attendance.filter((rec) => rec.course === selectedAttendanceCourse);
     const selectedCourseObj = courses.find((c) => c.title === selectedAttendanceCourse);
-    const presentCount = classStudents.filter((s) => s.statusToday === "present").length;
+    const presentCount = classStudents.filter((s) => s.statusToday === "present" || s.statusToday === "attended").length;
     const lateCount = classStudents.filter((s) => s.statusToday === "late").length;
     const absentCount = classStudents.filter((s) => s.statusToday === "absent").length;
     const classRate = classStudents.length > 0 ? Math.round((presentCount + lateCount * 0.5) / classStudents.length * 100) : 100;
@@ -243,12 +232,20 @@ export const TeacherDashboard = ({
               Dedicated roll call for each course. Select a class below to review and mark attendance without mixing cohorts.
             </p>
           </div>
-          <button
-      onClick={() => onSelectTab("dashboard")}
-      className="px-3.5 py-2 rounded-xl bg-[#171D33] hover:bg-[#1E2642] text-xs font-semibold text-slate-300 border border-[#273154] transition-colors cursor-pointer"
-    >
-            ← Back to Bento Dashboard
-          </button>
+          <div className="flex items-center gap-3">
+            <Link
+              to="/teacher/attendance"
+              className="px-3.5 py-2 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 text-xs font-semibold text-indigo-300 border border-indigo-500/30 transition-colors inline-flex items-center gap-1.5"
+            >
+              <span>Open Full Attendance Matrix →</span>
+            </Link>
+            <button
+              onClick={() => onSelectTab("dashboard")}
+              className="px-3.5 py-2 rounded-xl bg-[#171D33] hover:bg-[#1E2642] text-xs font-semibold text-slate-300 border border-[#273154] transition-colors cursor-pointer"
+            >
+              ← Back to Bento Dashboard
+            </button>
+          </div>
         </div>
 
         {
@@ -302,24 +299,21 @@ export const TeacherDashboard = ({
 
             <div className="flex flex-wrap items-center gap-2">
               <button
-      onClick={() => onMarkAllClassAttendance(selectedAttendanceCourse, "present")}
-      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 text-xs font-bold transition-colors cursor-pointer"
-    >
+                type="button"
+                disabled
+                title="Roll call marking is recorded during live sessions"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 text-slate-500 border border-slate-700/50 text-xs font-semibold opacity-60 cursor-not-allowed"
+              >
                 <CheckCheck className="w-3.5 h-3.5" />
-                <span>Mark All Present</span>
+                <span>Mark All Present (Live Class Only)</span>
               </button>
               <button
-      onClick={() => onMarkAllClassAttendance(selectedAttendanceCourse, "late")}
-      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-500/40 text-xs font-bold transition-colors cursor-pointer"
-    >
-                <span>Mark All Late</span>
-              </button>
-              <button
-      onClick={() => alert(`Attendance report exported for ${selectedAttendanceCourse} (${classStudents.length} students)`)}
-      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#171D33] hover:bg-[#1E2642] text-slate-300 border border-[#273154] text-xs font-semibold cursor-pointer"
-    >
-                <Printer className="w-3.5 h-3.5" />
-                <span>Export Roll</span>
+                type="button"
+                disabled
+                title="Roll call marking is recorded during live sessions"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 text-slate-500 border border-slate-700/50 text-xs font-semibold opacity-60 cursor-not-allowed"
+              >
+                <span>Mark All Late (Live Class Only)</span>
               </button>
             </div>
           </div>
@@ -372,17 +366,19 @@ export const TeacherDashboard = ({
                     <td className="py-3.5 px-4 text-slate-400 font-mono text-[11px]">{rec.lastSeen}</td>
                     <td className="py-3.5 px-4 text-center">
                       <span className="font-mono font-bold text-emerald-400 tabular-nums">
-                        {rec.attendanceRate}%
+                        {rec.attendanceRate != null ? `${rec.attendanceRate}%` : "—"}
                       </span>
                     </td>
                     <td className="py-3.5 px-4 text-right">
-                      <button
-      onClick={() => onToggleAttendanceStatus(rec.id)}
-      title="Click to toggle status (Present / Late / Absent)"
-      className={`px-3 py-1 rounded-xl text-[11px] font-bold uppercase transition-all cursor-pointer ${rec.statusToday === "present" ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm" : rec.statusToday === "late" ? "bg-amber-500/20 text-amber-300 border border-amber-500/40" : "bg-rose-500/20 text-rose-300 border border-rose-500/40"}`}
-    >
-                        {rec.statusToday} ▾
-                      </button>
+                      {rec.statusToday ? (
+                        <span
+                          className={`inline-block px-3 py-1 rounded-xl text-[11px] font-bold uppercase ${rec.statusToday === "present" || rec.statusToday === "attended" ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm" : rec.statusToday === "late" ? "bg-amber-500/20 text-amber-300 border border-amber-500/40" : "bg-rose-500/20 text-rose-300 border border-rose-500/40"}`}
+                        >
+                          {rec.statusToday}
+                        </span>
+                      ) : (
+                        <span className="text-slate-500 font-mono text-xs">—</span>
+                      )}
                     </td>
                   </tr>)}
               </tbody>
@@ -453,22 +449,22 @@ export const TeacherDashboard = ({
           </div>
           <h2 className="text-xl font-extrabold text-white mt-1">1-on-1 Tutoring Slots Management</h2>
           <p className="text-xs text-slate-400 mt-0.5">
-            Click any slot badge to toggle availability between Available, Reserved, and Blocked.
+            Consultation availability is managed via your weekly availability schedule.
           </p>
         </div>
         <button
-    onClick={() => onSelectTab("dashboard")}
-    className="px-3.5 py-2 rounded-xl bg-[#171D33] hover:bg-[#1E2642] text-xs font-semibold text-slate-300 border border-[#273154] transition-colors cursor-pointer"
-  >
+          onClick={() => onSelectTab("dashboard")}
+          className="px-3.5 py-2 rounded-xl bg-[#171D33] hover:bg-[#1E2642] text-xs font-semibold text-slate-300 border border-[#273154] transition-colors cursor-pointer"
+        >
           ← Back to Bento Dashboard
         </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {slots.map((slot) => <div
-    key={slot.id}
-    className="p-4 rounded-2xl bg-[#101424] border border-[#1E2540] flex items-center justify-between gap-4"
-  >
+          key={slot.id}
+          className="p-4 rounded-2xl bg-[#101424] border border-[#1E2540] flex items-center justify-between gap-4"
+        >
             <div>
               <div className="text-sm font-bold text-white">
                 {slot.day} · <span className="font-mono tabular-nums">{slot.timeRangeAST}</span>
@@ -477,12 +473,11 @@ export const TeacherDashboard = ({
                 {slot.bookedByStudent ? `Booked by ${slot.bookedByStudent} \u2014 ${slot.courseTopic}` : slot.status === "available" ? "Open for student 1-on-1 booking" : "Blocked for faculty prep work"}
               </div>
             </div>
-            <button
-    onClick={() => onToggleSlotStatus(slot.id)}
-    className={`px-3 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider cursor-pointer transition-colors ${slot.status === "available" ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40" : slot.status === "reserved" ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/40" : "bg-slate-800 text-slate-400 border border-slate-700"}`}
-  >
+            <span
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider ${slot.status === "available" ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40" : slot.status === "reserved" ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/40" : "bg-slate-800 text-slate-400 border border-slate-700"}`}
+            >
               {slot.status}
-            </button>
+            </span>
           </div>)}
       </div>
     </div>;
@@ -654,18 +649,11 @@ export const TeacherDashboard = ({
 
                   <div className="flex items-center gap-2">
                     <button
-      onClick={() => setViewingReportCard(ev)}
-      className="px-3 py-1.5 rounded-xl bg-[#171D33] hover:bg-[#1E2642] text-xs font-semibold text-slate-300 border border-[#273154] transition-colors cursor-pointer inline-flex items-center gap-1.5"
-    >
+                      onClick={() => setViewingReportCard(ev)}
+                      className="px-3 py-1.5 rounded-xl bg-[#171D33] hover:bg-[#1E2642] text-xs font-semibold text-slate-300 border border-[#273154] transition-colors cursor-pointer inline-flex items-center gap-1.5"
+                    >
                       <Printer className="w-3.5 h-3.5" />
                       <span>Print Card</span>
-                    </button>
-                    <button
-      onClick={() => setEditingEvaluation(ev)}
-      className="px-3 py-1.5 rounded-xl bg-[#5B46F8] hover:bg-[#4C38E6] text-xs font-bold text-white transition-all shadow-sm cursor-pointer inline-flex items-center gap-1.5"
-    >
-                      <Edit3 className="w-3.5 h-3.5" />
-                      <span>Edit Rubric</span>
                     </button>
                   </div>
                 </div>
@@ -726,154 +714,7 @@ export const TeacherDashboard = ({
         {
       /* ------------------------------------------------------------------ */
     }
-        {editingEvaluation && <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-            <div className="w-full max-w-xl bg-[#101424] border border-[#242D4C] rounded-2xl shadow-2xl overflow-hidden my-6">
-              <div className="px-6 py-4 border-b border-[#1C233D] flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
-                    <Edit3 className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h3 className="text-base font-bold text-white">
-                      Edit Evaluation: {editingEvaluation.studentName}
-                    </h3>
-                    <p className="text-xs text-slate-400">
-                      {editingEvaluation.courseTitle} · {editingEvaluation.studentRoll}
-                    </p>
-                  </div>
-                </div>
-                <button
-      onClick={() => setEditingEvaluation(null)}
-      className="text-slate-400 hover:text-white p-1 rounded-lg cursor-pointer"
-    >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
 
-              <div className="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
-                {
-      /* Overall Grade & Score */
-    }
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                      Overall Letter Grade
-                    </label>
-                    <select
-      value={editingEvaluation.overallGrade}
-      onChange={(e) => setEditingEvaluation({ ...editingEvaluation, overallGrade: e.target.value })}
-      className="w-full px-3 py-2 rounded-xl bg-[#0B0E1A] border border-[#1E2642] text-xs text-white"
-    >
-                      <option value="A*">A* (Distinction)</option>
-                      <option value="A">A (Excellent)</option>
-                      <option value="B">B (Commendable)</option>
-                      <option value="C">C (Satisfactory)</option>
-                      <option value="D">D (Needs Improvement)</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                      Composite Term Score (%)
-                    </label>
-                    <input
-      type="number"
-      min={0}
-      max={100}
-      value={editingEvaluation.overallScore}
-      onChange={(e) => setEditingEvaluation({
-        ...editingEvaluation,
-        overallScore: Number(e.target.value)
-      })}
-      className="w-full px-3.5 py-2 rounded-xl bg-[#0B0E1A] border border-[#1E2642] text-xs font-mono font-bold text-white tabular-nums"
-    />
-                  </div>
-                </div>
-
-                {
-      /* Criteria Score Sliders */
-    }
-                <div className="space-y-3 p-4 rounded-xl bg-[#0B0E1A] border border-[#1A223B]">
-                  <span className="text-xs font-bold text-white">Adjust Competency Scores:</span>
-                  {editingEvaluation.criteria.map((c, idx) => <div key={idx} className="space-y-1">
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="text-slate-300">{c.name}</span>
-                        <span className="font-mono font-bold text-indigo-400">{c.score}%</span>
-                      </div>
-                      <input
-      type="range"
-      min={40}
-      max={100}
-      value={c.score}
-      onChange={(e) => {
-        const newScore = Number(e.target.value);
-        const updated = [...editingEvaluation.criteria];
-        updated[idx] = { ...updated[idx], score: newScore };
-        setEditingEvaluation({ ...editingEvaluation, criteria: updated });
-      }}
-      className="w-full accent-indigo-500"
-    />
-                    </div>)}
-                </div>
-
-                {
-      /* Written Remarks */
-    }
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                    Faculty Qualitative Remarks
-                  </label>
-                  <textarea
-      rows={3}
-      value={editingEvaluation.teacherRemarks}
-      onChange={(e) => setEditingEvaluation({
-        ...editingEvaluation,
-        teacherRemarks: e.target.value
-      })}
-      className="w-full px-3.5 py-2 rounded-xl bg-[#0B0E1A] border border-[#1E2642] text-xs text-white"
-    />
-                </div>
-
-                {
-      /* Conduct Rating */
-    }
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                    Conduct & Classroom Effort
-                  </label>
-                  <div className="flex items-center gap-2">
-                    {["Outstanding", "Good", "Needs Attention"].map((lvl) => <button
-      type="button"
-      key={lvl}
-      onClick={() => setEditingEvaluation({ ...editingEvaluation, conduct: lvl })}
-      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors cursor-pointer ${editingEvaluation.conduct === lvl ? "bg-indigo-600 text-white" : "bg-[#12162A] text-slate-400 border border-[#1E2642]"}`}
-    >
-                        {lvl}
-                      </button>)}
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#1C233D]">
-                  <button
-      type="button"
-      onClick={() => setEditingEvaluation(null)}
-      className="px-4 py-2 rounded-xl bg-[#161C30] text-xs font-semibold text-slate-300 hover:text-white cursor-pointer"
-    >
-                    Cancel
-                  </button>
-                  <button
-      type="button"
-      onClick={() => {
-        onSaveEvaluation(editingEvaluation.id, editingEvaluation);
-        setEditingEvaluation(null);
-      }}
-      className="px-5 py-2 rounded-xl bg-[#5B46F8] hover:bg-[#4C38E6] text-xs font-bold text-white shadow-lg cursor-pointer"
-    >
-                    Save Evaluation
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>}
 
         {
       /* ------------------------------------------------------------------ */
@@ -1089,7 +930,6 @@ export const TeacherDashboard = ({
       courses={courses}
       resources={resources}
       onAddResource={onAddResource}
-      onTogglePinResource={onTogglePinResource}
       onBackToDashboard={() => onSelectTab("dashboard")}
       timezone={timezone}
     />;
@@ -1178,13 +1018,9 @@ export const TeacherDashboard = ({
                   <p className="text-[11px] text-slate-400">Google Meet · {timezone}</p>
                 </div>
               </div>
-              <button
-    onClick={() => setShowDemoEmptySessions(!showDemoEmptySessions)}
-    title="Toggle populated vs empty state"
-    className="px-2.5 py-1 rounded-lg bg-[#161C30] hover:bg-[#1E2640] border border-[#263052] text-[11px] font-semibold text-slate-300 tabular-nums transition-colors cursor-pointer"
-  >
+              <span className="px-2.5 py-1 rounded-lg bg-[#161C30] border border-[#263052] text-[11px] font-semibold text-slate-300 tabular-nums">
                 {filteredSessions.length} {filteredSessions.length === 1 ? "Session" : "Sessions"}
-              </button>
+              </span>
             </div>
 
             {
@@ -1192,19 +1028,13 @@ export const TeacherDashboard = ({
   }
             <div className="grid grid-cols-3 gap-1 p-1 rounded-xl bg-[#0B0E1A] border border-[#1A2138] mb-4">
               <button
-    onClick={() => {
-      setSessionCategory("admin_session");
-      setShowDemoEmptySessions(false);
-    }}
+    onClick={() => setSessionCategory("admin_session")}
     className={`py-1.5 px-2 rounded-lg text-[10px] font-bold tracking-wider uppercase transition-all truncate cursor-pointer ${sessionCategory === "admin_session" ? "bg-[#1D2540] text-white border border-indigo-500/40" : "text-slate-400 hover:text-slate-200"}`}
   >
                 Admin Session
               </button>
               <button
-    onClick={() => {
-      setSessionCategory("classes");
-      setShowDemoEmptySessions(false);
-    }}
+    onClick={() => setSessionCategory("classes")}
     className={`py-1.5 px-2 rounded-lg text-[10px] font-bold tracking-wider uppercase transition-all flex items-center justify-center gap-1.5 truncate cursor-pointer ${sessionCategory === "classes" ? "bg-emerald-600 text-white shadow-sm" : "text-slate-400 hover:text-slate-200"}`}
   >
                 <span>Classes</span>
@@ -1213,10 +1043,7 @@ export const TeacherDashboard = ({
                 </span>
               </button>
               <button
-    onClick={() => {
-      setSessionCategory("reserved_slots");
-      setShowDemoEmptySessions(false);
-    }}
+    onClick={() => setSessionCategory("reserved_slots")}
     className={`py-1.5 px-2 rounded-lg text-[10px] font-bold tracking-wider uppercase transition-all truncate cursor-pointer ${sessionCategory === "reserved_slots" ? "bg-[#1D2540] text-white border border-indigo-500/40" : "text-slate-400 hover:text-slate-200"}`}
   >
                 Reserved Slots
@@ -1262,22 +1089,49 @@ export const TeacherDashboard = ({
                         <span className="text-[11px] text-slate-400 truncate font-mono">
                           {ses.meetLink.replace("https://", "")}
                         </span>
-                        <button
-                          onClick={() => {
-                            if (onStartSession && ses.rawSession) {
-                              onStartSession(ses.rawSession);
-                            } else if (onStartSession) {
-                              onStartSession(ses);
-                            } else if (ses.meetLink) {
-                              window.open(ses.meetLink, "_blank", "noopener,noreferrer");
-                            }
-                            setLaunchedSessionId(isLaunched ? null : ses.id);
-                          }}
-                          className={`px-3 py-1 rounded-lg text-[11px] font-semibold transition-colors whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${isLaunched ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40" : "bg-indigo-600 hover:bg-indigo-500 text-white"}`}
-                        >
-                          <span>{isLaunched ? "Room Active" : "Launch Meet"}</span>
-                          <ExternalLink className="w-3 h-3" />
-                        </button>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          {/* End Button: ONLY for regular live classes */}
+                          {onEndSession && ses.category === "classes" && (ses.status === "live" || isLaunched) && (
+                            <button
+                              type="button"
+                              onClick={() => onEndSession(ses)}
+                              className="px-2.5 py-1 rounded-lg text-[11px] font-bold transition-colors whitespace-nowrap flex items-center gap-1 bg-rose-500/20 text-rose-300 border border-rose-500/40 hover:bg-rose-500/30 cursor-pointer"
+                            >
+                              <Square className="w-2.5 h-2.5 fill-current" />
+                              <span>End</span>
+                            </button>
+                          )}
+                          {/* Leave Button: ONLY for admin faculty sessions */}
+                          {onLeaveAdminSession && ses.category === "admin_session" && (ses.status === "live" || isLaunched) && (
+                            <button
+                              type="button"
+                              onClick={() => onLeaveAdminSession(ses)}
+                              className="px-2.5 py-1 rounded-lg text-[11px] font-bold transition-colors whitespace-nowrap flex items-center gap-1 bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30 cursor-pointer"
+                            >
+                              <LogOut className="w-2.5 h-2.5" />
+                              <span>Leave</span>
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              let ok = false;
+                              if (onStartSession) {
+                                ok = await onStartSession(ses);
+                              } else if (ses.meetLink) {
+                                window.open(ses.meetLink, "_blank", "noopener,noreferrer");
+                                ok = true;
+                              }
+                              if (ok) {
+                                setLaunchedSessionId(ses.id);
+                              }
+                            }}
+                            className={`px-3 py-1 rounded-lg text-[11px] font-semibold transition-colors whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${isLaunched ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40" : "bg-indigo-600 hover:bg-indigo-500 text-white"}`}
+                          >
+                            <span>{isLaunched ? "Room Active" : "Launch Meet"}</span>
+                            <ExternalLink className="w-3 h-3" />
+                          </button>
+                        </div>
                       </div>
                     </div>;
   })}
@@ -1301,42 +1155,46 @@ export const TeacherDashboard = ({
             </div>
           </div>
 
-          {
-    /* 3. Invite & Refer Widget */
-  }
-          <div className="bg-[#101424] border border-[#1E2540] rounded-2xl p-5 space-y-4">
-            <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-lg bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shrink-0">
-                <Share2 className="w-3.5 h-3.5" />
-              </div>
-              <div>
-                <div className="text-xs font-bold text-white">Invite & Refer</div>
-                <div className="text-[11px] text-slate-400">
-                  Share your link, anyone who joins through it is credited to you.
+          {/* 3. Invite & Refer Widget */}
+          {refCode && (
+            <div className="bg-[#101424] border border-[#1E2540] rounded-2xl p-5 space-y-4">
+              <div className="flex items-center gap-2.5">
+                <div className="w-7 h-7 rounded-lg bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shrink-0">
+                  <Share2 className="w-3.5 h-3.5" />
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-white">Invite & Refer</div>
+                  <div className="text-[11px] text-slate-400">
+                    Share your link, anyone who joins through it is credited to you.
+                  </div>
                 </div>
               </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  readOnly
+                  value={referralUrl}
+                  className="w-full px-3 py-2 rounded-xl bg-[#0A0D18] border border-[#1E2642] text-[11px] font-mono text-slate-300 focus:outline-none"
+                />
+                <button
+                  onClick={handleCopyReferral}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#5B46F8] hover:bg-[#4E38E8] text-white text-xs font-semibold transition-colors shrink-0 cursor-pointer"
+                >
+                  {copiedLink ? (
+                    <>
+                      <Check className="w-3.5 h-3.5" />
+                      <span>Copied</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5" />
+                      <span>Copy</span>
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <input
-    type="text"
-    readOnly
-    value={referralUrl}
-    className="w-full px-3 py-2 rounded-xl bg-[#0A0D18] border border-[#1E2642] text-[11px] font-mono text-slate-300 focus:outline-none"
-  />
-              <button
-    onClick={handleCopyReferral}
-    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#5B46F8] hover:bg-[#4E38E8] text-white text-xs font-semibold transition-colors shrink-0 cursor-pointer"
-  >
-                {copiedLink ? <>
-                    <Check className="w-3.5 h-3.5" />
-                    <span>Copied</span>
-                  </> : <>
-                    <Copy className="w-3.5 h-3.5" />
-                    <span>Copy</span>
-                  </>}
-              </button>
-            </div>
-          </div>
+          )}
         </div>
 
         {

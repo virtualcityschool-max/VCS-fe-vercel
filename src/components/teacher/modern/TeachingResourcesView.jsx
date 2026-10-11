@@ -23,7 +23,6 @@ export const TeachingResourcesView = ({
   courses,
   resources,
   onAddResource,
-  onTogglePinResource,
   onBackToDashboard,
   timezone
 }) => {
@@ -123,11 +122,13 @@ export const TeachingResourcesView = ({
             ← Back to Bento Dashboard
           </button>
           <button
-    onClick={() => setIsAddModalOpen(true)}
-    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#5B46F8] hover:bg-[#4C38E6] text-white text-xs font-bold transition-all shadow-md cursor-pointer"
-  >
+            type="button"
+            disabled
+            title="Curriculum materials repository is managed by academic administration"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800 text-slate-500 border border-slate-700/50 text-xs font-semibold opacity-60 cursor-not-allowed"
+          >
             <Plus className="w-4 h-4" />
-            <span>Add Class Resource</span>
+            <span>Add Class Resource (Preview Only)</span>
           </button>
         </div>
       </div>
@@ -319,13 +320,14 @@ export const TeachingResourcesView = ({
                 </div>
 
                 <div className="flex items-center gap-1.5">
-                  <button
-    onClick={() => onTogglePinResource(res.id)}
-    title={res.pinnedForNextClass ? "Pinned for upcoming class" : "Pin to lecture desk"}
-    className={`p-1.5 rounded-lg border text-xs cursor-pointer transition-colors ${res.pinnedForNextClass ? "bg-amber-500/20 text-amber-300 border-amber-500/40" : "bg-[#161C33] text-slate-400 border-[#222B4A] hover:text-white"}`}
-  >
-                    <Pin className="w-3.5 h-3.5" />
-                  </button>
+                  {res.pinnedForNextClass && (
+                    <span
+                      title="Pinned for upcoming class"
+                      className="p-1.5 rounded-lg border text-xs bg-amber-500/20 text-amber-300 border-amber-500/40"
+                    >
+                      <Pin className="w-3.5 h-3.5" />
+                    </span>
+                  )}
 
                   <span
     className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${res.visibility === "shared_with_students" ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30" : "bg-amber-500/20 text-amber-300 border border-amber-500/30"}`}

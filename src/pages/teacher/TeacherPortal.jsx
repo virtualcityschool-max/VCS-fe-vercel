@@ -8,9 +8,14 @@ import {
   createAssignment,
   startLiveSession,
   endLiveSession,
+  createTeacherSession,
+  fetchAllAttendance,
 } from "../../store/slices/teacherSlice";
 import { createAnnouncement } from "../../store/slices/announcementsSlice";
 import { teacherService } from "../../services/teacherService";
+import { adminTeacherSessionService } from "../../services/adminTeacherSessionService";
+import { useDateFormatters } from "../../hooks/useDateFormatters";
+import { formatDate, formatTime } from "../../utils/validation";
 import { toastManager } from "../../utils/toastManager";
 import { showApiError, extractApiErrorMessage } from "../../utils/apiErrorHandler";
 import ConfirmDialog from "../../components/common/ConfirmDialog";
@@ -22,29 +27,60 @@ import {
   PostAnnouncementModal,
   ScheduleSessionModal,
   GradeTaskModal,
-  CreateCourseModal,
 } from "../../components/teacher/modern/TeacherModals";
 import {
   CreateAssignmentModal,
   AdvancedQuizBuilderModal,
 } from "../../components/teacher/modern/AssignmentQuizModals";
 import { ReviewQuizModal } from "../../components/teacher/modern/ReviewQuizModal";
-import {
-  INITIAL_TEACHER_SESSIONS,
-  INITIAL_COURSES,
-  INITIAL_TASKS,
-  INITIAL_ASSIGNMENTS,
-  INITIAL_QUIZZES,
-  INITIAL_SLOTS,
-  INITIAL_ANNOUNCEMENTS,
-  INITIAL_ATTENDANCE,
-  INITIAL_TEACHING_RESOURCES,
-  INITIAL_EVALUATIONS,
-} from "../../components/teacher/modern/vcsTeacherData";
+
+// Top-level Unified Timezone Mapping (Finding R2-9)
+const TZ_IANA_MAP = { AST: "Asia/Riyadh", PKT: "Asia/Karachi", BST: "Europe/London" };
+
+// Helper: Convert a naive date + time string living in `tz` into UTC milliseconds
+const tzToUTCMs = (dateStr, timeStr, tz) => {
+  if (!dateStr) return Date.now();
+  const tStr = timeStr ? (timeStr.length === 5 ? `${timeStr}:00` : timeStr) : "00:00:00";
+  const naiveUTC = new Date(`${dateStr}T${tStr}Z`).getTime();
+  if (!tz) return naiveUTC;
+  try {
+    const tzName = TZ_IANA_MAP[tz] || tz || "Asia/Riyadh";
+    const parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone: tzName,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    }).formatToParts(new Date(naiveUTC));
+    const g = (t) => parts.find((p) => p.type === t)?.value ?? "00";
+    const h = g("hour") === "24" ? "00" : g("hour");
+    const tzUTC = Date.parse(`${g("year")}-${g("month")}-${g("day")}T${h}:${g("minute")}:${g("second")}Z`);
+    return naiveUTC + (naiveUTC - tzUTC);
+  } catch {
+    return naiveUTC;
+  }
+};
+
+const isSlotJoinable = (slot, tz) => {
+  if (!slot?.date || !slot?.start_time) return true;
+  const now = Date.now();
+  const startUTC = tzToUTCMs(slot.date, slot.start_time, tz);
+  const endUTC = tzToUTCMs(slot.date, slot.end_time || slot.start_time, tz);
+  return now >= startUTC - 30 * 60 * 1000 && now <= endUTC + 30 * 60 * 1000;
+};
+
+const isSlotExpired = (slot, tz) => {
+  if (!slot?.date || !slot?.end_time) return false;
+  return Date.now() > tzToUTCMs(slot.date, slot.end_time, tz) + 30 * 60 * 1000;
+};
 
 const TeacherPortal = () => {
   const dispatch = useDispatch();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { timezone: profileTimezone, toPayloadISO } = useDateFormatters();
 
   // Active Tab from URL search params (e.g. /teacher?tab=attendance)
   const activeTab = searchParams.get("tab") || "dashboard";
@@ -63,9 +99,10 @@ const TeacherPortal = () => {
     dashboard,
     myCourses,
     assignments,
+    allAttendance,
   } = useSelector((state) => state.teachers);
 
-  // Timezone Switcher state
+  // Timezone Switcher state (display toggle)
   const [currentTz, setCurrentTz] = useState("AST");
 
   const handleCycleTimezone = () => {
@@ -75,20 +112,18 @@ const TeacherPortal = () => {
     toastManager.info(`Workspace timezone switched to ${next}`);
   };
 
-  // Stateful VCS collections (initialized with AI Studio defaults + live updates)
-  const [customCourses, setCustomCourses] = useState([]);
-  const [customSessions, setCustomSessions] = useState([]);
-  const [quizzes, setQuizzes] = useState(INITIAL_QUIZZES);
-  const [slots, setSlots] = useState(INITIAL_SLOTS);
-  const [attendance, setAttendance] = useState(INITIAL_ATTENDANCE);
-  const [resources, setResources] = useState(INITIAL_TEACHING_RESOURCES);
-  const [evaluations, setEvaluations] = useState(INITIAL_EVALUATIONS);
-  const [announcements, setAnnouncements] = useState(INITIAL_ANNOUNCEMENTS);
+  const activeTzId = TZ_IANA_MAP[currentTz] || "Asia/Riyadh";
+
+  // Stateful collections initialized clean with live API backing
+  const [quizzes, setQuizzes] = useState([]);
+  const [slots] = useState([]);
+  const [resources, setResources] = useState([]);
+  const [evaluations] = useState([]);
+  const [announcements, setAnnouncements] = useState([]);
 
   // Modals state
   const [announcementModalOpen, setAnnouncementModalOpen] = useState(false);
   const [newSessionModalOpen, setNewSessionModalOpen] = useState(false);
-  const [createCourseModalOpen, setCreateCourseModalOpen] = useState(false);
   const [createAssignmentModalOpen, setCreateAssignmentModalOpen] = useState(false);
   const [advancedQuizBuilderModalOpen, setAdvancedQuizBuilderModalOpen] = useState(false);
   const [reviewingQuiz, setReviewingQuiz] = useState(null);
@@ -98,31 +133,32 @@ const TeacherPortal = () => {
   const [tooEarlyOpen, setTooEarlyOpen] = useState(false);
   const [sessionExpiredOpen, setSessionExpiredOpen] = useState(false);
   const [endSessionConfirm, setEndSessionConfirm] = useState({ open: false, sessionId: null });
+  const [leaveAdminConfirm, setLeaveAdminConfirm] = useState({ open: false, sessionId: null });
 
   // Initial Data Fetch
   useEffect(() => {
     dispatch(fetchTeacherDashboard());
     dispatch(fetchMyCourses());
     dispatch(fetchAssignments());
+    dispatch(fetchAllAttendance());
   }, [dispatch]);
 
-  // Map Live Courses
+  // Map Live Courses (Production clean: empty when no courses enrolled)
   const mappedCourses = useMemo(() => {
-    let base = INITIAL_COURSES;
     if (Array.isArray(myCourses) && myCourses.length > 0) {
-      base = myCourses.map((c, idx) => ({
+      return myCourses.map((c, idx) => ({
         id: String(c.id),
         title: c.title,
         code: c.category?.name || c.code || `VCS-${c.id}`,
-        category: c.category?.name || "CAMBRIDGE CURRICULUM",
+        category: c.category?.name || "CURRICULUM",
         level: c.level?.name || c.level || "Standard Tier",
-        enrolledCount: c.enrolled_count || c.students_count || 0,
+        enrolledCount: c.enrolled_count ?? c.students_count ?? 0,
         published: c.status === "published",
-        progress: c.progress || 70 + (idx * 5) % 25,
-        syllabusUnitsCompleted: c.syllabus_completed || 8,
-        syllabusTotalUnits: c.syllabus_total || 12,
+        progress: c.progress ?? 0,
+        syllabusUnitsCompleted: c.syllabus_completed ?? null,
+        syllabusTotalUnits: c.syllabus_total ?? null,
         nextSessionTime: c.next_session || "Scheduled Class",
-        description: c.description || "Comprehensive curriculum progression with structured assessments.",
+        description: c.description || "",
         accentGradient:
           idx % 4 === 0
             ? "from-emerald-900/80 via-slate-900 to-indigo-950"
@@ -134,8 +170,96 @@ const TeacherPortal = () => {
         rawCourse: c,
       }));
     }
-    return [...customCourses, ...base];
-  }, [myCourses, customCourses]);
+    return [];
+  }, [myCourses]);
+
+  // Derived real attendance mapped into view shape (Findings R2-7, R3-1)
+  const attendance = useMemo(() => {
+    const base = Array.isArray(allAttendance) ? allAttendance : [];
+    const studentRecords = base.filter((r) => r.participant_role === "student");
+    if (studentRecords.length === 0) return [];
+
+    const todayStr = (() => {
+      try {
+        return new Intl.DateTimeFormat("en-CA", { timeZone: profileTimezone || "Asia/Riyadh" }).format(new Date());
+      } catch {
+        return new Date().toISOString().split("T")[0];
+      }
+    })();
+    const groups = new Map();
+
+    studentRecords.forEach((r) => {
+      const studentObj = typeof r.student === "object" ? r.student : {};
+      const sIdRaw = r.student?.id ?? r.student_id ?? (typeof r.student !== "object" ? r.student : null) ?? r.rollNo;
+      const sId = sIdRaw != null ? String(sIdRaw) : "";
+      if (!sId) return;
+
+      const sName =
+        r.student_name ||
+        (studentObj.first_name ? `${studentObj.first_name} ${studentObj.last_name || ""}`.trim() : null) ||
+        studentObj.username ||
+        r.name ||
+        `Student #${sId}`;
+
+      const cTitle =
+        r.course_title ||
+        r.course?.title ||
+        (typeof r.course === "string" ? r.course : null) ||
+        mappedCourses.find((c) => String(c.id) === String(r.course_id || r.course || r.session?.course_id || r.session?.course))?.title ||
+        "Unassigned";
+
+      const groupKey = `${cTitle}::${sId}`;
+      if (!groups.has(groupKey)) {
+        groups.set(groupKey, {
+          id: `${cTitle}-${sId}`,
+          course: cTitle,
+          name: sName,
+          rollNo: sId,
+          records: [],
+        });
+      }
+      groups.get(groupKey).records.push(r);
+    });
+
+    return Array.from(groups.values()).map((g) => {
+      const records = g.records;
+      const totalSessions = records.length;
+      const presentCount = records.filter((r) => r.status === "present" || r.status === "attended").length;
+      const lateCount = records.filter((r) => r.status === "late").length;
+
+      const attendanceRate = totalSessions > 0
+        ? Math.round(((presentCount + lateCount * 0.5) / totalSessions) * 100)
+        : null;
+
+      const todayRecord = records.find((r) => {
+        const d = r.date || r.session_date || r.scheduled_at || r.created_at || r.joined_at;
+        return d && typeof d === "string" && d.startsWith(todayStr);
+      });
+      const statusToday = todayRecord ? todayRecord.status : null;
+
+      let mostRecentTime = 0;
+      records.forEach((r) => {
+        const ts = r.updated_at || r.joined_at || r.created_at || r.date;
+        if (ts) {
+          const ms = new Date(ts).getTime();
+          if (ms > mostRecentTime) mostRecentTime = ms;
+        }
+      });
+      const lastSeen = mostRecentTime > 0
+        ? formatDate(new Date(mostRecentTime).toISOString(), profileTimezone)
+        : "—";
+
+      return {
+        id: g.id,
+        course: g.course,
+        name: g.name,
+        rollNo: g.rollNo,
+        lastSeen,
+        attendanceRate,
+        statusToday,
+      };
+    });
+  }, [allAttendance, mappedCourses, profileTimezone]);
 
   // Map Live Sessions (Live classes + Admin sessions + Booked slots)
   const mappedSessions = useMemo(() => {
@@ -147,14 +271,16 @@ const TeacherPortal = () => {
           title: s.title,
           courseName: s.course_title || "Live Class",
           category: "classes",
-          timeAST: s.schedule_at ? new Date(s.schedule_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "Upcoming",
-          duration: "60 min",
-          meetLink: s.meeting_link || "https://meet.google.com",
+          timeAST: s.schedule_at
+            ? new Date(s.schedule_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", timeZone: activeTzId })
+            : "Upcoming",
+          duration: s.duration ? `${s.duration} min` : "—",
+          meetLink: s.meeting_link || "",
           status: s.status === "live" ? "live" : "upcoming",
-          attendeesCount: s.total_learners || 1,
-          maxAttendees: 15,
+          attendeesCount: s.total_learners ?? 0,
+          maxAttendees: s.max_learners || s.max_attendees || "—",
           instructor: user?.first_name ? `${user.first_name} ${user.last_name || ""}`.trim() : (user?.username || "Tutor"),
-          rawSession: s,
+          rawSession: { ...s, category: "classes" },
         });
       });
     }
@@ -166,14 +292,16 @@ const TeacherPortal = () => {
           title: s.title,
           courseName: "Faculty Administration Board",
           category: "admin_session",
-          timeAST: s.scheduled_at ? new Date(s.scheduled_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "Scheduled",
-          duration: "45 min",
-          meetLink: s.meeting_link || "https://meet.google.com",
+          timeAST: s.scheduled_at
+            ? new Date(s.scheduled_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", timeZone: activeTzId })
+            : "Scheduled",
+          duration: s.duration ? `${s.duration} min` : "—",
+          meetLink: s.meeting_link || "",
           status: s.status === "live" ? "live" : s.status === "completed" ? "completed" : "upcoming",
-          attendeesCount: 6,
-          maxAttendees: 6,
+          attendeesCount: s.attendees_count ?? "—",
+          maxAttendees: s.max_attendees ?? "—",
           instructor: "Academic Administration",
-          rawSession: s,
+          rawSession: { ...s, category: "admin_session" },
         });
       });
     }
@@ -182,26 +310,25 @@ const TeacherPortal = () => {
       dashboard.upcoming_slots.forEach((s) => {
         list.push({
           id: `slot-${s.id}`,
-          title: `1-on-1 Consultation: ${s.student_name || "Learner"}`,
+          title: `1-on-1 Consultation: ${s.student_name || s.booked_by_name || "Learner"}`,
           courseName: "Office Hours & Consultation",
           category: "reserved_slots",
           timeAST: `${s.start_time} - ${s.end_time}`,
           duration: "30 min",
-          meetLink: s.meeting_link || "https://meet.google.com",
+          meetLink: s.meeting_link || "",
           status: s.can_join ? "live" : "upcoming",
           attendeesCount: 1,
           maxAttendees: 1,
           instructor: user?.first_name ? `${user.first_name} ${user.last_name || ""}`.trim() : (user?.username || "Tutor"),
-          rawSession: s,
+          rawSession: { ...s, category: "reserved_slots" },
         });
       });
     }
 
-    const base = list.length > 0 ? list : INITIAL_TEACHER_SESSIONS;
-    return [...customSessions, ...base];
-  }, [dashboard, user, customSessions]);
+    return list;
+  }, [dashboard, user, activeTzId]);
 
-  // Map Tasks / Submissions Needing Grading
+  // Map Tasks / Submissions Needing Grading (Empty when queue is clean)
   const mappedTasks = useMemo(() => {
     const list = [];
     const pendingAssignments = dashboard?.recent_assessment_activity?.pending_assignment_grading || [];
@@ -215,7 +342,7 @@ const TeacherPortal = () => {
         submittedAt: s.submitted_at ? new Date(s.submitted_at).toLocaleDateString() : "Recent",
         dueDate: "Active Queue",
         status: "queued",
-        maxMarks: 25,
+        maxMarks: s.max_marks || 25,
         rubricCriterion: "Conceptual understanding and calculation accuracy",
         rawSubmission: s,
       });
@@ -232,53 +359,115 @@ const TeacherPortal = () => {
         submittedAt: qs.submitted_at ? new Date(qs.submitted_at).toLocaleDateString() : "Recent",
         dueDate: "Active Queue",
         status: "queued",
-        maxMarks: 20,
+        maxMarks: qs.max_marks || 20,
         rubricCriterion: "Automated & short-answer evaluation",
         rawSubmission: qs,
       });
     });
 
-    if (list.length > 0) return list;
-    return INITIAL_TASKS;
+    return list;
   }, [dashboard]);
 
-  // Map Assignments
+  // Map Assignments (Empty when no assignments exist - Finding R3-6)
   const mappedAssignments = useMemo(() => {
     if (Array.isArray(assignments) && assignments.length > 0) {
       return assignments.map((a) => ({
         id: String(a.id),
         title: a.title,
-        courseTitle: a.course_title || a.course?.title || "Cambridge Subject",
-        description: a.description || "Review reference material and submit solutions.",
+        courseTitle: a.course_title || a.course?.title || "Enrolled Course",
+        maxMarks: a.max_marks || 20,
         submissionMethod: a.submission_type || "file_upload",
         allowedFormats: ["PDF", "PNG", "DOCX"],
-        launchDate: a.created_at ? a.created_at.split("T")[0] : "2026-10-10",
-        launchTime: "09:00 AM AST",
-        dueDate: a.due_date ? a.due_date.split("T")[0] : "2026-10-15",
-        dueTime: "11:59 PM AST",
-        maxMarks: a.max_marks || a.total_marks || 25,
-        rubricCriterion: "Structured problem breakdown & reasoning clarity",
+        launchDate: a.created_at ? formatDate(a.created_at, profileTimezone) : "Active",
+        launchTime: a.created_at ? formatTime(a.created_at, profileTimezone) : "—",
+        dueDate: a.due_date ? formatDate(a.due_date, profileTimezone) : "Upcoming",
+        dueTime: a.due_date ? formatTime(a.due_date, profileTimezone) : "—",
         status: "published",
         submissionsCount: a.submissions_count || 0,
-        reviewedCount: a.reviewed_count || 0,
-        rawAssignment: a,
+        gradedCount: a.graded_count || 0,
+        description: a.description || "",
+        rubricCriterion: "Evaluation rubric and criteria",
       }));
     }
-    return INITIAL_ASSIGNMENTS;
-  }, [assignments]);
+    return [];
+  }, [assignments, profileTimezone]);
 
   // Live Session Launch & Meet Handling
   const handleStartSession = async (session) => {
     const raw = session?.rawSession || session;
-    const scheduleAt = raw?.schedule_at || raw?.scheduled_at;
+    const cat = session?.category || raw?.category;
 
+    // 1. Reserved 1-on-1 Slots Routing (Findings R2-1, R2-3)
+    if (cat === "reserved_slots") {
+      const effectiveTz = profileTimezone || "Asia/Riyadh";
+      if (isSlotExpired(raw, effectiveTz)) {
+        setSessionExpiredOpen(true);
+        return false;
+      }
+      if (!isSlotJoinable(raw, effectiveTz)) {
+        setTooEarlyOpen(true);
+        return false;
+      }
+      const link = raw?.meeting_link || session?.meetLink;
+      if (link && link.startsWith("http")) {
+        window.open(link, "_blank", "noopener,noreferrer");
+        return true;
+      }
+      toastManager.error("No valid meeting link found for this slot");
+      return false;
+    }
+
+    // 2. Admin / Faculty Meetings Routing (Findings R2-1, R2-2)
+    if (cat === "admin_session") {
+      const scheduledAt = raw?.scheduled_at;
+      if (scheduledAt && isSessionExpired(scheduledAt)) {
+        setSessionExpiredOpen(true);
+        return false;
+      }
+      if (scheduledAt && !isWithinSessionWindow(scheduledAt)) {
+        setTooEarlyOpen(true);
+        return false;
+      }
+      const sessionId = raw?.id ?? raw?.session_id ?? session?.id;
+      const isMobile = /Mobi|Android|iPad|iPhone|iPod/i.test(navigator.userAgent);
+      const meetWin = isMobile ? null : window.open("", "_blank");
+      try {
+        const result = await adminTeacherSessionService.joinSession(sessionId);
+        const meetingLink = result?.meeting_link || raw?.meeting_link || session?.meetLink;
+        if (meetingLink && meetingLink.startsWith("http")) {
+          if (meetWin) meetWin.location.href = meetingLink;
+          else window.open(meetingLink, "_blank", "noopener,noreferrer");
+          await dispatch(fetchTeacherDashboard()).unwrap();
+          return true;
+        } else {
+          meetWin?.close();
+          toastManager.error("No valid meeting link found");
+          return false;
+        }
+      } catch (err) {
+        meetWin?.close();
+        const msg = extractApiErrorMessage(err);
+        if (
+          msg === "You cannot join before the scheduled time." ||
+          msg === "You can join up to 30 minutes before the scheduled time."
+        ) {
+          setTooEarlyOpen(true);
+        } else {
+          showApiError(err);
+        }
+        return false;
+      }
+    }
+
+    // 3. Regular Live Classes (Findings R2-1, R2-2)
+    const scheduleAt = raw?.schedule_at;
     if (scheduleAt && isSessionExpired(scheduleAt)) {
       setSessionExpiredOpen(true);
-      return;
+      return false;
     }
     if (scheduleAt && !isWithinSessionWindow(scheduleAt)) {
       setTooEarlyOpen(true);
-      return;
+      return false;
     }
 
     const sessionId = raw?.id ?? raw?.session_id ?? session?.id;
@@ -295,16 +484,18 @@ const TeacherPortal = () => {
           new URL(meetingLink);
           if (meetWin) meetWin.location.href = meetingLink;
           else window.open(meetingLink, "_blank", "noopener,noreferrer");
+          await dispatch(fetchTeacherDashboard()).unwrap();
+          return true;
         } catch {
           meetWin?.close();
           toastManager.error("Invalid meeting link format");
+          return false;
         }
       } else {
         meetWin?.close();
         toastManager.error("No valid meeting link found for this session");
+        return false;
       }
-
-      await dispatch(fetchTeacherDashboard()).unwrap();
     } catch (err) {
       meetWin?.close();
       const msg = extractApiErrorMessage(err);
@@ -314,14 +505,26 @@ const TeacherPortal = () => {
       ) {
         setTooEarlyOpen(true);
       } else {
-        // Fallback: open meeting link directly if available
-        if (fallbackLink && fallbackLink.startsWith("http")) {
-          window.open(fallbackLink, "_blank", "noopener,noreferrer");
-        } else {
-          showApiError(err);
-        }
+        showApiError(err);
       }
+      return false;
     }
+  };
+
+  // End Session Handling (Regular live classes ONLY - Finding R2-2)
+  const handleEndSession = (session) => {
+    const raw = session?.rawSession || session;
+    const cat = session?.category || raw?.category;
+    if (cat !== "classes") {
+      return;
+    }
+    const scheduleAt = raw?.schedule_at;
+    if (scheduleAt && isSessionExpired(scheduleAt)) {
+      setSessionExpiredOpen(true);
+      return;
+    }
+    const sessionId = raw?.id ?? raw?.session_id ?? session?.id;
+    setEndSessionConfirm({ open: true, sessionId });
   };
 
   const confirmEndSession = async () => {
@@ -329,7 +532,30 @@ const TeacherPortal = () => {
     setEndSessionConfirm({ open: false, sessionId: null });
     try {
       await dispatch(endLiveSession(sessionId)).unwrap();
-      toastManager.success("Session closed successfully");
+      toastManager.success("Session ended successfully");
+      await dispatch(fetchTeacherDashboard()).unwrap();
+    } catch (err) {
+      showApiError(err);
+    }
+  };
+
+  // Leave Admin Session Handling (Admin meetings ONLY - Findings R2-1, R2-2)
+  const handleLeaveAdminSession = (session) => {
+    const raw = session?.rawSession || session;
+    const cat = session?.category || raw?.category;
+    if (cat !== "admin_session") {
+      return;
+    }
+    const sessionId = raw?.id ?? raw?.session_id ?? session?.id;
+    setLeaveAdminConfirm({ open: true, sessionId });
+  };
+
+  const confirmLeaveAdminSession = async () => {
+    const { sessionId } = leaveAdminConfirm;
+    setLeaveAdminConfirm({ open: false, sessionId: null });
+    try {
+      await adminTeacherSessionService.leaveSession(sessionId);
+      toastManager.success("Left admin session successfully");
       await dispatch(fetchTeacherDashboard()).unwrap();
     } catch (err) {
       showApiError(err);
@@ -347,184 +573,206 @@ const TeacherPortal = () => {
           ...(matchedCourse?.rawCourse?.id ? { course_id: Number(matchedCourse.rawCourse.id) } : {}),
         })
       ).unwrap();
-
-      const newAnn = {
-        id: `ann-${Date.now()}`,
-        title,
-        content,
-        audience,
-        postedAt: `Just now · ${currentTz}`,
-        author: user?.first_name ? `${user.first_name} ${user.last_name || ""}`.trim() : (user?.username || "Tutor"),
-      };
-      setAnnouncements((prev) => [newAnn, ...prev]);
+      setAnnouncements((prev) => [
+        { id: Date.now(), title, content, audience, created_at: new Date().toISOString() },
+        ...prev,
+      ]);
       toastManager.success(`Announcement broadcasted to ${audience}`);
     } catch (err) {
       showApiError(err);
     }
   };
 
-  // Create Assignment
+  // Create Assignment (Findings 7, 8)
   const handleCreateAssignment = async (data) => {
     try {
       const matchedCourse = mappedCourses.find((c) => c.title === data.courseTitle);
-      const courseId = matchedCourse?.rawCourse?.id || matchedCourse?.id;
+      const rawId = matchedCourse?.rawCourse?.id;
+      const courseId = rawId ? Number(rawId) : null;
 
-      if (courseId) {
-        await dispatch(
-          createAssignment({
-            title: data.title,
-            description: data.description,
-            course: Number(courseId),
-            max_marks: data.maxMarks,
-            due_date: `${data.dueDate}T${data.dueTime.split(" ")[0] || "23:59:00"}Z`,
-          })
-        ).unwrap();
-        toastManager.success("Assignment published to class");
-        dispatch(fetchAssignments());
-      } else {
-        toastManager.success(`Assignment "${data.title}" drafted for ${data.courseTitle}`);
+      if (!courseId || isNaN(courseId)) {
+        toastManager.error("Please select a valid enrolled course for this assignment.");
+        return;
       }
+
+      // Convert dueDate + dueTime properly into ISO UTC datetime using profile timezone (Finding R2-8)
+      const effectiveAssignmentTz = profileTimezone || TZ_IANA_MAP[currentTz] || "Asia/Riyadh";
+      const dueUTCMs = tzToUTCMs(data.dueDate, data.dueTime, effectiveAssignmentTz);
+      const dueISO = new Date(dueUTCMs).toISOString();
+
+      await dispatch(
+        createAssignment({
+          title: data.title,
+          description: data.description,
+          course: courseId,
+          max_marks: data.maxMarks,
+          due_date: dueISO,
+        })
+      ).unwrap();
+      toastManager.success("Assignment published to class");
+      dispatch(fetchAssignments());
     } catch (err) {
       showApiError(err);
     }
   };
 
-  // Create / Save Interactive Quiz
+  // Create / Save Interactive Quiz (Findings 5, 8)
   const handleSaveQuiz = async (quizData) => {
     try {
       const matchedCourse = mappedCourses.find((c) => c.title === quizData.courseTitle);
-      const courseId = matchedCourse?.rawCourse?.id || matchedCourse?.id;
+      const rawId = matchedCourse?.rawCourse?.id;
+      const courseId = rawId ? Number(rawId) : null;
 
-      if (courseId) {
-        await teacherService.createQuiz({
-          title: quizData.title,
-          course: Number(courseId),
-          description: quizData.description,
-          duration_minutes: quizData.durationMins,
-          total_marks: quizData.questions.reduce((s, q) => s + q.marks, 0),
-          questions: quizData.questions,
-        });
-        toastManager.success(`Interactive quiz "${quizData.title}" published!`);
+      if (!courseId || isNaN(courseId)) {
+        toastManager.error("Please select a valid enrolled course for this quiz.");
+        return;
       }
-    } catch {
-      // Fallback local state if API payload schema varies
-      toastManager.success(`Quiz "${quizData.title}" created with ${quizData.questions.length} questions!`);
-    }
 
-    const newQuizItem = {
-      id: `qz-${Date.now()}`,
-      title: quizData.title,
-      courseTitle: quizData.courseTitle,
-      description: quizData.description,
-      marks: quizData.questions.reduce((s, q) => s + q.marks, 0),
-      questionsCount: quizData.questions.length,
-      durationMins: quizData.durationMins,
-      launchDateTime: quizData.launchDateTime,
-      dueDateTime: quizData.dueDateTime,
-      status: "published",
-      submissionsCount: 0,
-      averageScore: undefined,
-      questions: quizData.questions,
-      submissions: [],
-    };
-    setQuizzes((prev) => [newQuizItem, ...prev]);
+      await teacherService.createQuiz({
+        title: quizData.title,
+        course: courseId,
+        description: quizData.description,
+        duration_minutes: quizData.durationMins,
+        total_marks: quizData.questions.reduce((s, q) => s + (Number(q.marks) || 0), 0),
+        questions: quizData.questions,
+      });
+
+      toastManager.success(`Interactive quiz "${quizData.title}" published!`);
+
+      const newQuizItem = {
+        id: `qz-${Date.now()}`,
+        title: quizData.title,
+        courseTitle: quizData.courseTitle,
+        description: quizData.description,
+        marks: quizData.questions.reduce((s, q) => s + (Number(q.marks) || 0), 0),
+        questionsCount: quizData.questions.length,
+        durationMins: quizData.durationMins,
+        launchDateTime: quizData.launchDateTime,
+        dueDateTime: quizData.dueDateTime,
+        status: "published",
+        submissionsCount: 0,
+        averageScore: undefined,
+        questions: quizData.questions,
+        submissions: [],
+      };
+      setQuizzes((prev) => [newQuizItem, ...prev]);
+    } catch (err) {
+      showApiError(err);
+    }
   };
 
-  // Grade Quiz Submission
+  // Grade Quiz Submission (Finding 5)
   const handleSaveQuizMarking = async (quizId, submissionId, gradedAnswers, overallFeedback) => {
     try {
       await teacherService.gradeQuizSubmission(submissionId, gradedAnswers);
       toastManager.success("Quiz submission graded and feedback released!");
-    } catch {
-      toastManager.success("Quiz grades recorded successfully");
-    }
 
-    setQuizzes((prev) =>
-      prev.map((qz) => {
-        if (qz.id !== quizId) return qz;
-        return {
-          ...qz,
-          submissions: qz.submissions.map((sub) => {
-            if (sub.id !== submissionId) return sub;
-            const awardedTotal = gradedAnswers.reduce((a, b) => a + Number(b.scoreAwarded || 0), 0);
-            return {
-              ...sub,
-              status: "reviewed",
-              totalScore: awardedTotal,
-              overallFeedback,
-              answers: sub.answers.map((ans) => {
-                const g = gradedAnswers.find((x) => x.questionId === ans.questionId);
-                return g ? { ...ans, scoreAwarded: g.scoreAwarded, teacherComment: g.teacherComment } : ans;
-              }),
-            };
-          }),
-        };
-      })
-    );
+      setQuizzes((prev) =>
+        prev.map((qz) => {
+          if (qz.id !== quizId) return qz;
+          return {
+            ...qz,
+            submissions: qz.submissions.map((sub) => {
+              if (sub.id !== submissionId) return sub;
+              const awardedTotal = gradedAnswers.reduce((a, b) => a + Number(b.scoreAwarded || 0), 0);
+              return {
+                ...sub,
+                status: "reviewed",
+                totalScore: awardedTotal,
+                overallFeedback,
+                answers: sub.answers.map((ans) => {
+                  const g = gradedAnswers.find((x) => x.questionId === ans.questionId);
+                  return g ? { ...ans, scoreAwarded: g.scoreAwarded, teacherComment: g.teacherComment } : ans;
+                }),
+              };
+            }),
+          };
+        })
+      );
+    } catch (err) {
+      showApiError(err);
+    }
   };
 
-  // Grade Task
+  // Grade Task (Finding 5)
   const handleGradeTask = async (task, awardedMarks, feedback) => {
     try {
-      if (task.rawSubmission?.submission_id) {
-        await teacherService.gradeSubmission(task.rawSubmission.submission_id, {
-          marks: awardedMarks,
-          feedback,
-        });
+      if (!task.rawSubmission?.submission_id) {
+        toastManager.error("Submission ID not found");
+        return;
       }
+      await teacherService.gradeSubmission(task.rawSubmission.submission_id, {
+        marks: awardedMarks,
+        feedback,
+      });
       toastManager.success(`Grade (${awardedMarks}/${task.maxMarks}) recorded for ${task.studentName}`);
       dispatch(fetchTeacherDashboard());
-    } catch {
-      toastManager.success(`Grade (${awardedMarks}/${task.maxMarks}) recorded for ${task.studentName}`);
+    } catch (err) {
+      showApiError(err);
     }
   };
 
-  // Attendance Handlers
-  const handleMarkAllClassAttendance = async (courseTitle, status) => {
-    setAttendance((prev) =>
-      prev.map((rec) => (rec.course === courseTitle ? { ...rec, statusToday: status } : rec))
-    );
-    toastManager.success(`Marked all students in "${courseTitle}" as ${status.toUpperCase()}`);
+  // Schedule Session Handler (Findings R2-4, R3-2, R3-3, R3-5, R4-2)
+  const handleScheduleSession = async (sessionData) => {
+    try {
+      const title = sessionData?.title?.trim() || "";
+      if (!title) {
+        toastManager.error("Please enter a session topic.");
+        return false;
+      }
+      const courseName = sessionData?.courseName || "";
+      const matchedCourse = mappedCourses.find((c) => c.title === courseName);
+      if (!matchedCourse) {
+        toastManager.error("Please select a valid enrolled course for this session.");
+        return false;
+      }
+      const rawId = matchedCourse.rawCourse?.id;
+      const courseId = rawId ? Number(rawId) : null;
+      if (!courseId || isNaN(courseId)) {
+        toastManager.error("Invalid course selected.");
+        return false;
+      }
+
+      const dateStr = sessionData?.date;
+      const timeStr = sessionData?.time;
+      if (!dateStr || !timeStr) {
+        toastManager.error("Please select both a date and time for the session.");
+        return false;
+      }
+
+      let scheduledAtISO;
+      if (toPayloadISO) {
+        scheduledAtISO = toPayloadISO(`${dateStr}T${timeStr}`);
+      } else {
+        const effectiveTz = profileTimezone || "Asia/Riyadh";
+        scheduledAtISO = new Date(tzToUTCMs(dateStr, timeStr, effectiveTz)).toISOString();
+      }
+
+      const payload = {
+        title,
+        course: courseId,
+        scheduled_at: scheduledAtISO,
+        is_recurring: false,
+      };
+
+      await dispatch(createTeacherSession(payload)).unwrap();
+      toastManager.success(`Live session "${title}" created successfully`);
+      dispatch(fetchTeacherDashboard());
+      return true;
+    } catch (err) {
+      showApiError(err);
+      return false;
+    }
   };
 
-  const handleToggleAttendanceStatus = (recordId) => {
-    const cycle = { present: "late", late: "absent", absent: "present" };
-    setAttendance((prev) =>
-      prev.map((r) => (r.id === recordId ? { ...r, statusToday: cycle[r.statusToday] || "present" } : r))
-    );
-  };
-
-  // Slots Handler
-  const handleToggleSlotStatus = async (slotId) => {
-    const cycle = { available: "reserved", reserved: "blocked", blocked: "available" };
-    setSlots((prev) =>
-      prev.map((s) => (s.id === slotId ? { ...s, status: cycle[s.status] || "available" } : s))
-    );
-  };
-
-  // Resources Handlers
+  // Resources Handlers (Finding R2-6)
   const handleAddResource = (r) => {
     const newRes = {
       ...r,
       id: `res-${Date.now()}`,
-      uploadedAt: `Just now · ${currentTz}`,
+      uploadedAt: "Recently added",
     };
     setResources((prev) => [newRes, ...prev]);
-    toastManager.success(`Resource "${r.title}" uploaded & cataloged`);
-  };
-
-  const handleTogglePinResource = (id) => {
-    setResources((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, pinnedForNextClass: !r.pinnedForNextClass } : r))
-    );
-  };
-
-  // Evaluation Handler
-  const handleSaveEvaluation = (evaluationId, updates) => {
-    setEvaluations((prev) =>
-      prev.map((ev) => (ev.id === evaluationId ? { ...ev, ...updates } : ev))
-    );
-    toastManager.success("Student evaluation report updated");
   };
 
   return (
@@ -546,38 +794,14 @@ const TeacherPortal = () => {
         onOpenAnnouncementModal={() => setAnnouncementModalOpen(true)}
         onOpenNewSessionModal={() => setNewSessionModalOpen(true)}
         onOpenGradeModal={(task) => setGradingTask(task)}
-        onOpenCreateCourseModal={() => setCreateCourseModalOpen(true)}
         onOpenCreateAssignmentModal={() => setCreateAssignmentModalOpen(true)}
         onOpenAdvancedQuizBuilderModal={() => setAdvancedQuizBuilderModalOpen(true)}
         onOpenReviewQuizModal={(quiz, submission) => setReviewingQuiz({ quiz, submission })}
-        onToggleSlotStatus={handleToggleSlotStatus}
-        onToggleAttendanceStatus={handleToggleAttendanceStatus}
-        onAddQuiz={(title, courseTitle, marks) =>
-          handleSaveQuiz({
-            title,
-            courseTitle,
-            description: "Quick quiz created by instructor",
-            durationMins: 20,
-            launchDateTime: new Date().toISOString().slice(0, 16),
-            dueDateTime: new Date(Date.now() + 5 * 86400000).toISOString().slice(0, 16),
-            questions: [
-              {
-                id: `q-gen-1`,
-                type: "multiple_choice",
-                questionText: "Sample question: Select the correct conceptual response.",
-                options: ["Option A", "Option B", "Option C", "Option D"],
-                correctAnswer: "Option A",
-                marks,
-              },
-            ],
-          })
-        }
         onAddResource={handleAddResource}
-        onTogglePinResource={handleTogglePinResource}
-        onSaveEvaluation={handleSaveEvaluation}
-        onMarkAllClassAttendance={handleMarkAllClassAttendance}
         user={user}
         onStartSession={handleStartSession}
+        onEndSession={handleEndSession}
+        onLeaveAdminSession={handleLeaveAdminSession}
         referralCode={profile?.referral_code || user?.referral_code}
       />
 
@@ -595,48 +819,8 @@ const TeacherPortal = () => {
         isOpen={newSessionModalOpen}
         onClose={() => setNewSessionModalOpen(false)}
         courses={mappedCourses}
-        onCreateSession={(title, courseName, category, timeAST, duration) => {
-          const newSes = {
-            id: `ses-${Date.now()}`,
-            title,
-            courseName,
-            category,
-            timeAST,
-            duration,
-            meetLink: `https://meet.google.com/vcs-${Math.random().toString(36).substring(7)}`,
-            status: "upcoming",
-            attendeesCount: 0,
-            maxAttendees: 15,
-            instructor: user?.first_name ? `${user.first_name} ${user.last_name || ""}`.trim() : (user?.username || "Tutor"),
-          };
-          setCustomSessions((prev) => [newSes, ...prev]);
-          toastManager.success(`Live class "${title}" scheduled`);
-        }}
-      />
-
-      {/* Create Course Modal */}
-      <CreateCourseModal
-        isOpen={createCourseModalOpen}
-        onClose={() => setCreateCourseModalOpen(false)}
-        onCreateCourse={(title, code, category, level, description) => {
-          const newC = {
-            id: `course-${Date.now()}`,
-            title,
-            code: code || `VCS-${Date.now().toString().slice(-4)}`,
-            category: category || "CAMBRIDGE CURRICULUM",
-            level: level || "Standard Tier",
-            enrolledCount: 0,
-            published: true,
-            progress: 0,
-            syllabusUnitsCompleted: 0,
-            syllabusTotalUnits: 12,
-            nextSessionTime: "Orientation Scheduled",
-            description: description || "Newly authorized curriculum course.",
-            accentGradient: "from-indigo-900/80 via-slate-900 to-slate-950",
-          };
-          setCustomCourses((prev) => [newC, ...prev]);
-          toastManager.success(`Course "${title}" created and added to faculty roster`);
-        }}
+        onCreateSession={handleScheduleSession}
+        timezone={profileTimezone}
       />
 
       {/* Create Assignment Modal (Quick Text Task + File Upload) */}
@@ -702,6 +886,7 @@ const TeacherPortal = () => {
         onCancel={() => setSessionExpiredOpen(false)}
       />
 
+      {/* End Live Class Confirmation */}
       <ConfirmDialog
         open={endSessionConfirm.open}
         variant="danger"
@@ -711,6 +896,18 @@ const TeacherPortal = () => {
         cancelLabel="Keep Active"
         onConfirm={confirmEndSession}
         onCancel={() => setEndSessionConfirm({ open: false, sessionId: null })}
+      />
+
+      {/* Leave Admin Session Confirmation */}
+      <ConfirmDialog
+        open={leaveAdminConfirm.open}
+        variant="warning"
+        title="Leave Faculty Session?"
+        message="Are you sure you want to leave this administrative faculty meeting?"
+        confirmLabel="Leave Meeting"
+        cancelLabel="Stay in Meeting"
+        onConfirm={confirmLeaveAdminSession}
+        onCancel={() => setLeaveAdminConfirm({ open: false, sessionId: null })}
       />
     </div>
   );
