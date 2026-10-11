@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   X,
   Trash2,
@@ -46,7 +46,8 @@ export const CreateAssignmentModal = ({
   isOpen,
   onClose,
   courses,
-  onCreateAssignment
+  onCreateAssignment,
+  initialAssignment = null,
 }) => {
   const [title, setTitle] = useState("");
   const [courseId, setCourseId] = useState("");
@@ -57,8 +58,7 @@ export const CreateAssignmentModal = ({
   const [file, setFile] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState(null);
-  if (!isOpen) return null;
-  const selectedCourseId = courseId || courses[0]?.id || "";
+
   const reset = () => {
     setTitle("");
     setDescription("");
@@ -68,6 +68,29 @@ export const CreateAssignmentModal = ({
     setDueTime("23:59");
     setFormError(null);
   };
+
+  useEffect(() => {
+    if (!isOpen) return;
+    if (initialAssignment) {
+      setTitle(initialAssignment.title || "");
+      const cid = initialAssignment.course?.id || initialAssignment.course || initialAssignment.courseId;
+      setCourseId(cid ? String(cid) : (courses[0]?.id ? String(courses[0].id) : ""));
+      setDescription(initialAssignment.description || "");
+      setMaxMarks(initialAssignment.max_score ?? initialAssignment.maxMarks ?? 20);
+      if (initialAssignment.due_date) {
+        const d = new Date(initialAssignment.due_date);
+        setDueDate(localDateStr(d));
+        setDueTime(`${pad2(d.getHours())}:${pad2(d.getMinutes())}`);
+      }
+      setFormError(null);
+    } else {
+      reset();
+    }
+  }, [isOpen, initialAssignment, courses]);
+
+  if (!isOpen) return null;
+  const selectedCourseId = courseId || courses[0]?.id || "";
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!title.trim() || !description.trim()) {
@@ -86,6 +109,7 @@ export const CreateAssignmentModal = ({
     setFormError(null);
     try {
       await onCreateAssignment({
+        id: initialAssignment?.id,
         title: title.trim(),
         courseId: selectedCourseId,
         description: description.trim(),
@@ -110,9 +134,13 @@ export const CreateAssignmentModal = ({
               <FileText className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white">Create & Issue Assignment</h3>
+              <h3 className="text-base font-bold text-white">
+                {initialAssignment ? "Edit Task / Assignment" : "Create & Issue Assignment"}
+              </h3>
               <p className="text-xs text-slate-400">
-                Students see it straight away and can answer in text or upload a file.
+                {initialAssignment
+                  ? "Update instructions, maximum score, or extend the deadline for students."
+                  : "Students see it straight away and can answer in text or upload a file."}
               </p>
             </div>
           </div>
@@ -208,7 +236,7 @@ export const CreateAssignmentModal = ({
     type="date"
     required
     value={dueDate}
-    min={localDateStr(new Date())}
+    min={initialAssignment ? undefined : localDateStr(new Date())}
     onChange={(e) => setDueDate(e.target.value)}
     className="px-2.5 py-1.5 rounded-lg bg-[#121628] border border-[#1E2642] text-xs text-white [color-scheme:dark]"
   />
@@ -249,7 +277,7 @@ export const CreateAssignmentModal = ({
     disabled={isSubmitting}
     className="px-5 py-2 rounded-xl bg-[#5B46F8] hover:bg-[#4C38E6] disabled:opacity-60 text-xs font-bold text-white shadow-lg cursor-pointer"
   >
-              {isSubmitting ? "Publishing…" : "Publish Assignment"}
+              {isSubmitting ? (initialAssignment ? "Saving…" : "Publishing…") : (initialAssignment ? "Save Changes" : "Publish Assignment")}
             </button>
           </div>
         </form>
@@ -333,20 +361,77 @@ const SAMPLE_QUIZ_QUESTIONS = [
   },
 ];
 
+const mapInitialQuestions = (rawQuestions) => {
+  if (!Array.isArray(rawQuestions) || rawQuestions.length === 0) {
+    return [createBlankQuestion("multiple_choice")];
+  }
+  return rawQuestions.map((q, idx) => {
+    const id = q.id || `q-init-${idx}-${Date.now()}`;
+    const questionText = q.questionText || q.question_text || "";
+    const marks = Number(q.marks ?? q.max_marks ?? defaultQuizMarks());
+    const rawType = (q.type || q.question_type || "").toLowerCase();
+    const rawOpts = q.options || [];
+
+    let type = "multiple_choice";
+    let options = [];
+    let correctAnswer = "";
+
+    if (rawType === "yes_no") {
+      type = "yes_no";
+      options = ["Yes", "No"];
+      const correctObj = rawOpts.find((o) => typeof o === "object" && o.is_correct);
+      correctAnswer = correctObj ? correctObj.option_text : (q.correctAnswer || "");
+    } else if (rawType === "fill_in_blank") {
+      type = "fill_in_blank";
+      options = [];
+      correctAnswer = q.correctAnswer || "";
+    } else if (rawType === "short_answer" || rawType === "text_format") {
+      type = "short_answer";
+      options = [];
+      correctAnswer = q.correctAnswer || "";
+    } else {
+      const stringOpts = rawOpts.map((o) => (typeof o === "string" ? o : (o.option_text || "")));
+      if (stringOpts.length === 2 && stringOpts.includes("Yes") && stringOpts.includes("No")) {
+        type = "yes_no";
+        options = ["Yes", "No"];
+        const correctObj = rawOpts.find((o) => typeof o === "object" && o.is_correct);
+        correctAnswer = correctObj ? correctObj.option_text : (q.correctAnswer || "");
+      } else {
+        type = "multiple_choice";
+        options = stringOpts.length >= 2 ? stringOpts : ["", "", "", ""];
+        const correctObj = rawOpts.find((o) => typeof o === "object" && o.is_correct);
+        correctAnswer = correctObj ? correctObj.option_text : (q.correctAnswer || "");
+      }
+    }
+
+    return {
+      id,
+      type,
+      questionText,
+      options,
+      correctAnswer,
+      marks,
+    };
+  });
+};
+
 export const AdvancedQuizBuilderModal = ({
   isOpen,
   onClose,
   courses,
   onSaveQuiz,
-  timezone
+  timezone,
+  initialQuiz = null,
 }) => {
+  const isEditing = Boolean(initialQuiz);
+  const isLocked = Boolean(initialQuiz?.isLocked ?? initialQuiz?.is_locked ?? initialQuiz?.rawQuiz?.is_locked);
+
   const [title, setTitle] = useState("");
   const [courseId, setCourseId] = useState("");
   const [description, setDescription] = useState("");
   const [launchDateTime, setLaunchDateTime] = useState(() => localDateTimeStr(new Date()));
   const [dueDateTime, setDueDateTime] = useState(() => localDateTimeStr(new Date(Date.now() + 7 * 86400000)));
   const [durationMinutes, setDurationMinutes] = useState("30");
-  const [datesEdited, setDatesEdited] = useState(false);
   const [questions, setQuestions] = useState(() => [createBlankQuestion("multiple_choice")]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState(null);
@@ -356,12 +441,44 @@ export const AdvancedQuizBuilderModal = ({
   const [importAppendMode, setImportAppendMode] = useState("append");
   const [bulkImportError, setBulkImportError] = useState(null);
   const [bulkImportSuccess, setBulkImportSuccess] = useState(null);
-  // Until the teacher picks dates, "launch" means now, on the workspace clock, each time the form opens
-  useEffect(() => {
-    if (!isOpen || datesEdited) return;
+
+  const handleResetForm = useCallback(() => {
+    setTitle("");
+    setCourseId("");
+    setDescription("");
     setLaunchDateTime(zonedDateTimeStr(new Date(), timezone));
     setDueDateTime(zonedDateTimeStr(new Date(Date.now() + 7 * 86400000), timezone));
-  }, [isOpen, datesEdited, timezone]);
+    setDurationMinutes("30");
+    setQuestions([createBlankQuestion("multiple_choice")]);
+    setFormError(null);
+  }, [timezone]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    if (initialQuiz) {
+      setTitle(initialQuiz.title || "");
+      const cid = initialQuiz.courseId || initialQuiz.course?.id || initialQuiz.course || initialQuiz.rawQuiz?.course;
+      setCourseId(cid ? String(cid) : (courses[0]?.id ? String(courses[0].id) : ""));
+      setDescription(initialQuiz.description || "");
+      const pub = initialQuiz.published_at || initialQuiz.rawQuiz?.published_at;
+      if (pub) {
+        setLaunchDateTime(localDateTimeStr(new Date(pub)));
+      } else {
+        setLaunchDateTime(zonedDateTimeStr(new Date(), timezone));
+      }
+      const due = initialQuiz.due_date || initialQuiz.rawQuiz?.due_date;
+      if (due) {
+        setDueDateTime(localDateTimeStr(new Date(due)));
+      } else {
+        setDueDateTime(zonedDateTimeStr(new Date(Date.now() + 7 * 86400000), timezone));
+      }
+      setDurationMinutes(String(initialQuiz.durationMinutes ?? initialQuiz.duration_minutes ?? initialQuiz.rawQuiz?.duration_minutes ?? "30"));
+      setQuestions(mapInitialQuestions(initialQuiz.questions || initialQuiz.rawQuiz?.questions));
+      setFormError(null);
+    } else {
+      handleResetForm();
+    }
+  }, [isOpen, initialQuiz, courses, timezone, handleResetForm]);
 
   if (!isOpen) return null;
   const selectedCourseId = courseId || courses[0]?.id || "";
@@ -533,16 +650,6 @@ multiple_choice,"Which electromagnetic radiation has the highest frequency?",5,"
       setBulkImportError(err.message || "Error parsing imported questions.");
     }
   };
-  const handleResetForm = () => {
-    setTitle("");
-    setDescription("");
-    setLaunchDateTime(zonedDateTimeStr(new Date(), timezone));
-    setDueDateTime(zonedDateTimeStr(new Date(Date.now() + 7 * 86400000), timezone));
-    setDatesEdited(false);
-    setDurationMinutes("30");
-    setQuestions([createBlankQuestion("multiple_choice")]);
-    setFormError(null);
-  };
 
   const handleLoadSample = () => {
     setTitle("Cambridge Physics Paper 2 Diagnostic Mock");
@@ -582,6 +689,16 @@ multiple_choice,"Which electromagnetic radiation has the highest frequency?",5,"
 
   const validateQuiz = () => {
     if (!title.trim()) return "Please enter a quiz title.";
+    if (!dueDateTime) return "Please set the deadline.";
+    if (launchDateTime && dueDateTime) {
+      if (new Date(dueDateTime) <= new Date(launchDateTime)) {
+        return "The solve & submit deadline must be after the launch date & time.";
+      }
+    }
+    if (isLocked) {
+      return null;
+    }
+
     if (!questions.length) return "Please add at least one question to the quiz.";
 
     for (let i = 0; i < questions.length; i++) {
@@ -618,13 +735,8 @@ multiple_choice,"Which electromagnetic radiation has the highest frequency?",5,"
     if (!selectedCourseId) {
       return "You have no course to publish this quiz to.";
     }
-    if (!launchDateTime || !dueDateTime) {
+    if (!launchDateTime) {
       return "Please set both the launch time and the deadline.";
-    }
-    if (launchDateTime && dueDateTime) {
-      if (new Date(dueDateTime) <= new Date(launchDateTime)) {
-        return "The solve & submit deadline must be after the launch date & time.";
-      }
     }
     const minutes = Number(durationMinutes);
     if (!Number.isInteger(minutes) || minutes < 1 || minutes > 300) {
@@ -648,6 +760,8 @@ multiple_choice,"Which electromagnetic radiation has the highest frequency?",5,"
     setIsSubmitting(true);
     try {
       await onSaveQuiz({
+        id: initialQuiz?.id,
+        isLocked,
         title: title.trim(),
         courseId: selectedCourseId,
         description: description.trim(),
@@ -674,22 +788,28 @@ multiple_choice,"Which electromagnetic radiation has the highest frequency?",5,"
               <Award className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white">Interactive Quiz & Test Authoring</h3>
+              <h3 className="text-base font-bold text-white">
+                {initialQuiz ? (isLocked ? "Extend / Update Quiz" : "Edit Interactive Quiz") : "Interactive Quiz & Test Authoring"}
+              </h3>
               <p className="text-xs text-slate-400">
-                Author multiple options, yes/no, fill-in-blanks, and short writing questions with release windows.
+                {isLocked
+                  ? "Update quiz details or extend the deadline for students."
+                  : "Author multiple options, yes/no, fill-in-blanks, and short writing questions with release windows."}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={handleResetForm}
-              title="Clear all fields and start fresh"
-              className="text-xs text-slate-400 hover:text-white px-2.5 py-1 rounded-lg border border-[#242D4C] hover:border-slate-500 transition-colors flex items-center gap-1.5 cursor-pointer"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-              <span>Clear Draft</span>
-            </button>
+            {!isEditing && (
+              <button
+                type="button"
+                onClick={handleResetForm}
+                title="Clear all fields and start fresh"
+                className="text-xs text-slate-400 hover:text-white px-2.5 py-1 rounded-lg border border-[#242D4C] hover:border-slate-500 transition-colors flex items-center gap-1.5 cursor-pointer"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Clear Draft</span>
+              </button>
+            )}
             <button onClick={onClose} className="text-slate-400 hover:text-white p-1 rounded-lg cursor-pointer">
               <X className="w-5 h-5" />
             </button>
@@ -697,11 +817,23 @@ multiple_choice,"Which electromagnetic radiation has the highest frequency?",5,"
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-5 max-h-[80vh] overflow-y-auto">
+          {isLocked && (
+            <div className="p-3.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-200 text-xs flex items-start gap-2.5">
+              <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-amber-400" />
+              <div className="flex-1">
+                <p className="font-semibold text-amber-200">Quiz In Progress or Completed (Locked Structure)</p>
+                <p className="mt-0.5 text-slate-300 leading-relaxed">
+                  Students have already started or submitted this quiz. The question structure, course, and time limit are locked to preserve existing scores.
+                  You can safely update the <strong>Quiz Title</strong>, <strong>Description</strong>, and extend the <strong>Solve & Submit Deadline</strong>.
+                </p>
+              </div>
+            </div>
+          )}
           {formError && (
             <div className="p-3.5 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs flex items-start gap-2.5">
               <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-rose-400" />
               <div className="flex-1">
-                <p className="font-semibold text-rose-200">Unable to Publish Quiz</p>
+                <p className="font-semibold text-rose-200">Unable to Save Quiz</p>
                 <p className="mt-0.5 whitespace-pre-wrap">{formError}</p>
               </div>
               <button
@@ -735,10 +867,11 @@ multiple_choice,"Which electromagnetic radiation has the highest frequency?",5,"
                 Course Cohort
               </label>
               <select
-    value={selectedCourseId}
-    onChange={(e) => setCourseId(e.target.value)}
-    className="w-full px-3 py-2 rounded-xl bg-[#0B0E1A] border border-[#1E2642] text-xs text-slate-200 focus:outline-none"
-  >
+                disabled={isLocked}
+                value={selectedCourseId}
+                onChange={(e) => setCourseId(e.target.value)}
+                className={`w-full px-3 py-2 rounded-xl bg-[#0B0E1A] border border-[#1E2642] text-xs text-slate-200 focus:outline-none ${isLocked ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`}
+              >
                 {courses.length === 0 && <option value="">No courses assigned</option>}
                 {courses.map((c) => <option key={c.id} value={c.id}>
                     {c.title}
@@ -756,43 +889,39 @@ multiple_choice,"Which electromagnetic radiation has the highest frequency?",5,"
                 Launch Date & Time
               </label>
               <input
-    type="datetime-local"
-    value={launchDateTime}
-    onChange={(e) => {
-      setDatesEdited(true);
-      setLaunchDateTime(e.target.value);
-    }}
-    className="w-full px-3 py-1.5 rounded-lg bg-[#121628] border border-[#1E2642] text-xs text-white [color-scheme:dark]"
-  />
+                type="datetime-local"
+                disabled={isLocked}
+                value={launchDateTime}
+                onChange={(e) => setLaunchDateTime(e.target.value)}
+                className={`w-full px-3 py-1.5 rounded-lg bg-[#121628] border border-[#1E2642] text-xs text-white [color-scheme:dark] ${isLocked ? "opacity-60 cursor-not-allowed" : ""}`}
+              />
             </div>
             <div>
               <label className="block text-[11px] font-semibold text-slate-300 mb-1">
                 Solve & Submit Deadline
               </label>
               <input
-    type="datetime-local"
-    value={dueDateTime}
-    onChange={(e) => {
-      setDatesEdited(true);
-      setDueDateTime(e.target.value);
-    }}
-    className="w-full px-3 py-1.5 rounded-lg bg-[#121628] border border-[#1E2642] text-xs text-white [color-scheme:dark]"
-  />
+                type="datetime-local"
+                value={dueDateTime}
+                onChange={(e) => setDueDateTime(e.target.value)}
+                className="w-full px-3 py-1.5 rounded-lg bg-[#121628] border border-[#1E2642] text-xs text-white [color-scheme:dark]"
+              />
             </div>
             <div>
               <label className="block text-[11px] font-semibold text-slate-300 mb-1">
                 Time Limit (minutes)
               </label>
               <input
-    type="number"
-    min={1}
-    max={300}
-    step={1}
-    required
-    value={durationMinutes}
-    onChange={(e) => setDurationMinutes(e.target.value)}
-    className="w-full px-3 py-1.5 rounded-lg bg-[#121628] border border-[#1E2642] text-xs text-white"
-  />
+                type="number"
+                min={1}
+                max={300}
+                step={1}
+                disabled={isLocked}
+                required
+                value={durationMinutes}
+                onChange={(e) => setDurationMinutes(e.target.value)}
+                className={`w-full px-3 py-1.5 rounded-lg bg-[#121628] border border-[#1E2642] text-xs text-white ${isLocked ? "opacity-60 cursor-not-allowed" : ""}`}
+              />
             </div>
             <p className="sm:col-span-3 text-[11px] text-slate-400">
               Each student's clock starts when they press Start and cannot be paused. The quiz submits itself when the time runs out.
@@ -816,54 +945,56 @@ multiple_choice,"Which electromagnetic radiation has the highest frequency?",5,"
               {
     /* Add Question & Bulk Import Buttons */
   }
-              <div className="flex flex-wrap items-center gap-1.5">
-                <button
-                  type="button"
-                  onClick={handleLoadSample}
-                  className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-[11px] font-semibold flex items-center gap-1.5 cursor-pointer shadow-sm transition-all"
-                  title="Load sample physics quiz template"
-                >
-                  <span>Load Sample</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowBulkImportModal(true)}
-                  className="px-2.5 py-1 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-[11px] font-bold flex items-center gap-1.5 cursor-pointer shadow-sm transition-all"
-                  title="Import questions in bulk from CSV or JSON file"
-                >
-                  <FileSpreadsheet className="w-3.5 h-3.5" />
-                  <span>Bulk Import (CSV / JSON)</span>
-                </button>
-                <div className="h-4 w-px bg-[#242D4C] mx-0.5" />
-                <button
-                  type="button"
-                  onClick={() => handleAddQuestion("multiple_choice")}
-                  className="px-2.5 py-1 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 text-[11px] font-semibold cursor-pointer"
-                >
-                  + Multi Choice
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleAddQuestion("yes_no")}
-                  className="px-2.5 py-1 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-[11px] font-semibold cursor-pointer"
-                >
-                  + Yes/No
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleAddQuestion("fill_in_blank")}
-                  className="px-2.5 py-1 rounded-lg bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-500/30 text-[11px] font-semibold cursor-pointer"
-                >
-                  + Fill Blank
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleAddQuestion("short_answer")}
-                  className="px-2.5 py-1 rounded-lg bg-cyan-600/20 hover:bg-cyan-600/30 text-cyan-300 border border-cyan-500/30 text-[11px] font-semibold cursor-pointer"
-                >
-                  + Short Writing
-                </button>
-              </div>
+              {!isLocked && (
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={handleLoadSample}
+                    className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-[11px] font-semibold flex items-center gap-1.5 cursor-pointer shadow-sm transition-all"
+                    title="Load sample physics quiz template"
+                  >
+                    <span>Load Sample</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowBulkImportModal(true)}
+                    className="px-2.5 py-1 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-[11px] font-bold flex items-center gap-1.5 cursor-pointer shadow-sm transition-all"
+                    title="Import questions in bulk from CSV or JSON file"
+                  >
+                    <FileSpreadsheet className="w-3.5 h-3.5" />
+                    <span>Bulk Import (CSV / JSON)</span>
+                  </button>
+                  <div className="h-4 w-px bg-[#242D4C] mx-0.5" />
+                  <button
+                    type="button"
+                    onClick={() => handleAddQuestion("multiple_choice")}
+                    className="px-2.5 py-1 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 text-[11px] font-semibold cursor-pointer"
+                  >
+                    + Multi Choice
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleAddQuestion("yes_no")}
+                    className="px-2.5 py-1 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-[11px] font-semibold cursor-pointer"
+                  >
+                    + Yes/No
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleAddQuestion("fill_in_blank")}
+                    className="px-2.5 py-1 rounded-lg bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-500/30 text-[11px] font-semibold cursor-pointer"
+                  >
+                    + Fill Blank
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleAddQuestion("short_answer")}
+                    className="px-2.5 py-1 rounded-lg bg-cyan-600/20 hover:bg-cyan-600/30 text-cyan-300 border border-cyan-500/30 text-[11px] font-semibold cursor-pointer"
+                  >
+                    + Short Writing
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Questions Editor Container */}
@@ -890,29 +1021,33 @@ multiple_choice,"Which electromagnetic radiation has the highest frequency?",5,"
                           type="number"
                           min={1}
                           max={50}
+                          disabled={isLocked}
                           value={q.marks}
                           onChange={(e) => updateQuestion(q.id, { marks: Number(e.target.value) })}
-                          className="w-14 px-2 py-0.5 rounded bg-[#121628] border border-[#1E2642] text-xs font-mono font-bold text-white tabular-nums text-center"
+                          className={`w-14 px-2 py-0.5 rounded bg-[#121628] border border-[#1E2642] text-xs font-mono font-bold text-white tabular-nums text-center ${isLocked ? "opacity-60 cursor-not-allowed" : ""}`}
                         />
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveQuestion(q.id)}
-                        className="text-slate-500 hover:text-rose-400 p-1 transition-colors cursor-pointer"
-                        title="Delete Question"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
+                      {!isLocked && (
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveQuestion(q.id)}
+                          className="text-slate-500 hover:text-rose-400 p-1 transition-colors cursor-pointer"
+                          title="Delete Question"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
                     </div>
                   </div>
 
                   {/* Question Text */}
                   <textarea
                     rows={2}
+                    disabled={isLocked}
                     value={q.questionText}
                     onChange={(e) => updateQuestion(q.id, { questionText: e.target.value })}
                     placeholder="Enter question wording..."
-                    className="w-full px-3 py-1.5 rounded-lg bg-[#121628] border border-[#1E2642] text-xs text-white focus:outline-none focus:border-indigo-500 placeholder-slate-500"
+                    className={`w-full px-3 py-1.5 rounded-lg bg-[#121628] border border-[#1E2642] text-xs text-white focus:outline-none focus:border-indigo-500 placeholder-slate-500 ${isLocked ? "opacity-60 cursor-not-allowed" : ""}`}
                   />
 
                   {/* Multiple Choice Options */}
@@ -920,7 +1055,7 @@ multiple_choice,"Which electromagnetic radiation has the highest frequency?",5,"
                     <div className="space-y-2 pt-1">
                       <div className="flex items-center justify-between text-[11px]">
                         <span className="text-slate-400">Options (Select radio for correct answer):</span>
-                        {(!q.correctAnswer || !q.options.some((o) => o && o.trim() === (q.correctAnswer || "").trim())) && (
+                        {(!isLocked && (!q.correctAnswer || !q.options.some((o) => o && o.trim() === (q.correctAnswer || "").trim()))) && (
                           <span className="text-amber-400 font-semibold flex items-center gap-1 text-[11px]">
                             <AlertCircle className="w-3.5 h-3.5" /> No correct answer selected
                           </span>
@@ -933,18 +1068,20 @@ multiple_choice,"Which electromagnetic radiation has the highest frequency?",5,"
                             <div key={oIdx} className="flex items-center gap-2">
                               <input
                                 type="radio"
+                                disabled={isLocked}
                                 name={`correct-${q.id}`}
                                 checked={isChecked}
                                 onChange={() => updateQuestion(q.id, { correctAnswer: opt })}
-                                className="accent-indigo-500 cursor-pointer"
+                                className={`accent-indigo-500 ${isLocked ? "cursor-not-allowed" : "cursor-pointer"}`}
                                 title="Mark as correct answer"
                               />
                               <input
                                 type="text"
+                                disabled={isLocked}
                                 value={opt}
                                 placeholder={`Option ${String.fromCharCode(65 + oIdx)}`}
                                 onChange={(e) => updateOption(q.id, oIdx, e.target.value)}
-                                className="flex-1 px-2.5 py-1 rounded bg-[#121628] border border-[#1E2642] text-xs text-white placeholder-slate-500"
+                                className={`flex-1 px-2.5 py-1 rounded bg-[#121628] border border-[#1E2642] text-xs text-white placeholder-slate-500 ${isLocked ? "opacity-60 cursor-not-allowed" : ""}`}
                               />
                             </div>
                           );
@@ -958,32 +1095,34 @@ multiple_choice,"Which electromagnetic radiation has the highest frequency?",5,"
                     <div className="space-y-1.5 pt-1">
                       <div className="flex items-center justify-between text-xs">
                         <span className="text-slate-400">Correct Proposition Answer:</span>
-                        {(!q.correctAnswer || (q.correctAnswer !== "Yes" && q.correctAnswer !== "No")) && (
+                        {(!isLocked && (!q.correctAnswer || (q.correctAnswer !== "Yes" && q.correctAnswer !== "No"))) && (
                           <span className="text-amber-400 font-semibold flex items-center gap-1 text-[11px]">
                             <AlertCircle className="w-3.5 h-3.5" /> Select Yes or No
                           </span>
                         )}
                       </div>
                       <div className="flex items-center gap-4 text-xs">
-                        <label className="flex items-center gap-1.5 text-white cursor-pointer">
+                        <label className={`flex items-center gap-1.5 text-white ${isLocked ? "cursor-not-allowed opacity-60" : "cursor-pointer"}`}>
                           <input
                             type="radio"
+                            disabled={isLocked}
                             name={`yn-${q.id}`}
                             value="Yes"
                             checked={q.correctAnswer === "Yes"}
                             onChange={() => updateQuestion(q.id, { correctAnswer: "Yes" })}
-                            className="accent-emerald-500 cursor-pointer"
+                            className="accent-emerald-500"
                           />
                           <span>Yes</span>
                         </label>
-                        <label className="flex items-center gap-1.5 text-white cursor-pointer">
+                        <label className={`flex items-center gap-1.5 text-white ${isLocked ? "cursor-not-allowed opacity-60" : "cursor-pointer"}`}>
                           <input
                             type="radio"
+                            disabled={isLocked}
                             name={`yn-${q.id}`}
                             value="No"
                             checked={q.correctAnswer === "No"}
                             onChange={() => updateQuestion(q.id, { correctAnswer: "No" })}
-                            className="accent-emerald-500 cursor-pointer"
+                            className="accent-emerald-500"
                           />
                           <span>No</span>
                         </label>
@@ -1001,10 +1140,11 @@ multiple_choice,"Which electromagnetic radiation has the highest frequency?",5,"
                       </label>
                       <input
                         type="text"
+                        disabled={isLocked}
                         value={q.correctAnswer || ""}
                         onChange={(e) => updateQuestion(q.id, { correctAnswer: e.target.value })}
                         placeholder="Expected answer or benchmark..."
-                        className="w-full px-2.5 py-1.5 rounded-lg bg-[#121628] border border-[#1E2642] text-xs text-indigo-300 font-mono placeholder-slate-600"
+                        className={`w-full px-2.5 py-1.5 rounded-lg bg-[#121628] border border-[#1E2642] text-xs text-indigo-300 font-mono placeholder-slate-600 ${isLocked ? "opacity-60 cursor-not-allowed" : ""}`}
                       />
                     </div>
                   )}
@@ -1030,10 +1170,14 @@ multiple_choice,"Which electromagnetic radiation has the highest frequency?",5,"
               {isSubmitting ? (
                 <>
                   <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>Publishing Quiz...</span>
+                  <span>{initialQuiz ? "Saving Changes..." : "Publishing Quiz..."}</span>
                 </>
               ) : (
-                <span>Launch & Publish Quiz ({totalMarks} Marks)</span>
+                <span>
+                  {initialQuiz
+                    ? (isLocked ? "Save & Extend Deadline" : "Save Changes")
+                    : `Launch & Publish Quiz (${totalMarks} Marks)`}
+                </span>
               )}
             </button>
           </div>

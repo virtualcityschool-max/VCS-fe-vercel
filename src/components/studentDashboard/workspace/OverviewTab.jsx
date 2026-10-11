@@ -20,33 +20,39 @@ const OverviewTab = ({ onOpenSubmitModal }) => {
   const [assignmentFilter, setAssignmentFilter] = useState("all");
 
   // Real quiz statistics & filtering (NO dummy fallback arrays)
-  const completedQuizzes = quizzes.filter(
-    (q) =>
-      q.my_submission &&
-      (q.my_submission.status === "submitted" ||
-        q.my_submission.status === "graded" ||
-        q.my_submission.status === "auto_graded")
-  );
+  const getQuizState = (q) => {
+    const sub = q.my_submission;
+    const att = q.my_attempt;
+    const status = q.status;
+
+    if (sub && (sub.status === "graded" || sub.status === "auto_graded")) {
+      return { state: "graded", label: "View", badge: "Graded", isDone: true, score: sub.obtained_marks, max: sub.total_marks ?? q.total_marks };
+    }
+    if (status === "graded" || status === "auto_graded") {
+      return { state: "graded", label: "View", badge: "Graded", isDone: true, score: q.obtained_marks ?? sub?.obtained_marks, max: q.total_marks };
+    }
+    if ((sub && sub.status === "submitted") || status === "submitted") {
+      return { state: "submitted", label: "View", badge: "Awaiting marks", isDone: true, score: null, max: q.total_marks };
+    }
+    if (status === "missed" || (att && att.time_is_up) || (sub && sub.status === "missed")) {
+      return { state: "missed", label: "View", badge: "Missed", isDone: false, score: 0, max: q.total_marks };
+    }
+    if (status === "in_progress" || (att && !att.time_is_up)) {
+      return { state: "in_progress", label: "Resume", badge: "In Progress", isDone: false, score: null, max: q.total_marks };
+    }
+    if (q.is_overdue || (q.due_date && new Date(q.due_date) < new Date())) {
+      return { state: "missed", label: "View", badge: "Missed", isDone: false, score: null, max: q.total_marks };
+    }
+    return { state: "open", label: "Attempt", badge: "Attempt", isDone: false, score: null, max: q.total_marks };
+  };
+
+  const completedQuizzes = quizzes.filter((q) => getQuizState(q).isDone);
 
   const filteredQuizzes = quizzes.filter((q) => {
     if (quizFilter === "all") return true;
-    const sub = q.my_submission;
-    if (quizFilter === "completed") {
-      return (
-        sub &&
-        (sub.status === "submitted" ||
-          sub.status === "graded" ||
-          sub.status === "auto_graded")
-      );
-    }
-    if (quizFilter === "pending") {
-      return (
-        !sub ||
-        (sub.status !== "submitted" &&
-          sub.status !== "graded" &&
-          sub.status !== "auto_graded")
-      );
-    }
+    const st = getQuizState(q);
+    if (quizFilter === "completed") return st.isDone;
+    if (quizFilter === "pending") return !st.isDone;
     return true;
   });
 
@@ -180,14 +186,7 @@ const OverviewTab = ({ onOpenSubmitModal }) => {
           {filteredQuizzes.length > 0 ? (
             <div className="space-y-2 max-h-52 overflow-y-auto pr-1 custom-scrollbar">
               {filteredQuizzes.map((q) => {
-                const sub = q.my_submission;
-                const hasScore =
-                  sub &&
-                  (sub.status === "graded" || sub.status === "auto_graded") &&
-                  sub.obtained_marks != null;
-                const isSubmitted = sub && sub.status === "submitted";
-                const isClosed = !hasScore && !isSubmitted && (sub?.status === "missed" || q.is_overdue);
-
+                const st = getQuizState(q);
                 return (
                   <div
                     key={q.id}
@@ -204,18 +203,13 @@ const OverviewTab = ({ onOpenSubmitModal }) => {
                     </div>
 
                     <div className="flex items-center gap-2.5 shrink-0">
-                      {hasScore ? (
+                      {st.score != null ? (
                         <div className="text-right">
                           <span className="text-xs font-mono font-black text-emerald-400">
-                            {sub.obtained_marks} / {sub.total_marks_snapshot ?? q.total_marks}
+                            {st.score} / {st.max}
                           </span>
                           <span className="block text-[9px] text-slate-400 font-mono">
-                            {Math.round(
-                              (sub.obtained_marks /
-                                (sub.total_marks_snapshot ?? q.total_marks)) *
-                                100
-                            )}
-                            %
+                            {st.max ? Math.round((Number(st.score) / Number(st.max)) * 100) : 0}%
                           </span>
                         </div>
                       ) : (
@@ -226,16 +220,18 @@ const OverviewTab = ({ onOpenSubmitModal }) => {
 
                       <span
                         className={`px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase ${
-                          hasScore
+                          st.state === "graded"
                             ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/20"
-                            : isSubmitted
+                            : st.state === "submitted"
                             ? "bg-blue-500/15 text-blue-400 border border-blue-500/20"
-                            : isClosed
+                            : st.state === "in_progress"
+                            ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
+                            : st.state === "missed"
                             ? "bg-rose-500/15 text-rose-400 border border-rose-500/20"
                             : "bg-yellow-500/15 text-yellow-400 border border-yellow-500/20"
                         }`}
                       >
-                        {hasScore ? "Graded" : isSubmitted ? "Awaiting marks" : isClosed ? "Missed" : "Attempt"}
+                        {st.badge}
                       </span>
 
                       <i className="fas fa-chevron-right text-[10px] text-slate-500 group-hover:text-white transition" />

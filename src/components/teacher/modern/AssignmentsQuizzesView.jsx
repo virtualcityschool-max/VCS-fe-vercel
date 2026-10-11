@@ -6,7 +6,9 @@ import {
   CheckCircle2,
   Search,
   UploadCloud,
-  UserCheck
+  UserCheck,
+  Edit2,
+  Trash2,
 } from "lucide-react";
 export const AssignmentsQuizzesView = ({
   courses,
@@ -16,7 +18,10 @@ export const AssignmentsQuizzesView = ({
   onOpenAdvancedQuizBuilderModal,
   onOpenReviewQuizModal,
   onBackToDashboard,
-  timezone
+  timezone,
+  onEditQuiz,
+  onDeleteQuiz,
+  onEditAssignment,
 }) => {
   const [activeSection, setActiveSection] = useState("assignments");
   const [searchParams] = useSearchParams();
@@ -205,9 +210,22 @@ export const AssignmentsQuizzesView = ({
                   <span className="text-xs text-slate-400">
                     <strong className="text-white tabular-nums font-mono">{asg.submissionsCount}</strong> submissions
                   </span>
-                  <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase border ${asg.isOverdue ? "bg-slate-800 text-slate-400 border-slate-700" : asg.status === "published" ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30" : "bg-amber-500/15 text-amber-300 border-amber-500/30"}`}>
-                    {asg.isOverdue ? "closed" : asg.status}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase border ${asg.isOverdue ? "bg-slate-800 text-slate-400 border-slate-700" : asg.status === "published" ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30" : "bg-amber-500/15 text-amber-300 border-amber-500/30"}`}>
+                      {asg.isOverdue ? "closed" : asg.status}
+                    </span>
+                    {onEditAssignment && (
+                      <button
+                        type="button"
+                        onClick={() => onEditAssignment(asg)}
+                        title="Edit title, description, marks, or extend deadline"
+                        className="px-2 py-1 rounded-lg bg-[#182038] hover:bg-[#202B4C] text-slate-300 hover:text-white text-xs font-semibold border border-[#273154] transition-colors cursor-pointer flex items-center gap-1"
+                      >
+                        <Edit2 className="w-3 h-3 text-indigo-400" />
+                        <span>Edit</span>
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>)}
           </div>
@@ -264,10 +282,42 @@ export const AssignmentsQuizzesView = ({
                     </div>
                   </div>
                   <span
-    className={`px-3 py-1 rounded-xl text-xs font-bold uppercase ${quiz.status === "published" ? "bg-amber-500/20 text-amber-300 border border-amber-500/30" : quiz.status === "scheduled" ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30" : "bg-slate-800 text-slate-400"}`}
-  >
+                    className={`px-3 py-1 rounded-xl text-xs font-bold uppercase ${quiz.status === "published" ? "bg-amber-500/20 text-amber-300 border border-amber-500/30" : quiz.status === "scheduled" ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30" : "bg-slate-800 text-slate-400"}`}
+                  >
                     {quiz.status === "published" ? "live" : quiz.status}
                   </span>
+
+                  {(onEditQuiz || onDeleteQuiz) && (
+                    <div className="flex items-center gap-1.5 ml-1">
+                      {onEditQuiz && (
+                        <button
+                          type="button"
+                          onClick={() => onEditQuiz(quiz)}
+                          title={quiz.isLocked ? "Edit title, description, or deadline (questions locked)" : "Edit quiz"}
+                          className="px-2.5 py-1 rounded-lg bg-[#182038] hover:bg-[#202B4C] text-slate-300 hover:text-white text-xs font-semibold border border-[#273154] transition-colors cursor-pointer flex items-center gap-1.5"
+                        >
+                          <Edit2 className="w-3.5 h-3.5 text-indigo-400" />
+                          <span>Edit</span>
+                        </button>
+                      )}
+                      {onDeleteQuiz && (
+                        <button
+                          type="button"
+                          onClick={() => onDeleteQuiz(quiz.id, quiz.isLocked)}
+                          disabled={quiz.isLocked}
+                          title={quiz.isLocked ? "Cannot delete a quiz with student attempts or submissions" : "Delete quiz"}
+                          className={`px-2.5 py-1 rounded-lg text-xs font-semibold border transition-colors flex items-center gap-1.5 ${
+                            quiz.isLocked
+                              ? "bg-slate-800/40 text-slate-500 border-slate-700/50 cursor-not-allowed"
+                              : "bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border-rose-500/30 cursor-pointer"
+                          }`}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          <span>Delete</span>
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
 

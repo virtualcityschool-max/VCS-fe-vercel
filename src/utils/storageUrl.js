@@ -6,6 +6,17 @@ export const getStorageUrl = (path) => {
   return BASE + "/" + path.replace(/^\//, "");
 };
 
+export const getPreviewUrl = (url) => {
+  if (!url) return null;
+  const fullUrl = getStorageUrl(url);
+  const ext = fullUrl.split("?")[0].split(".").pop()?.toLowerCase();
+  const officeExtensions = ["ppt", "pptx", "doc", "docx", "xls", "xlsx"];
+  if (officeExtensions.includes(ext)) {
+    return `https://view.officeapps.live.com/op/view.aspx?src=${encodeURIComponent(fullUrl)}`;
+  }
+  return fullUrl;
+};
+
 export const handleFileDownload = async (url, customFileName) => {
   if (!url) return;
   try {

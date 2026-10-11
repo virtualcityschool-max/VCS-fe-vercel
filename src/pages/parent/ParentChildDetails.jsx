@@ -19,13 +19,8 @@ const fmt12 = (t) => {
   return `${h % 12 || 12}:${String(m).padStart(2, "0")} ${suffix}`;
 };
 
-const fmtDate = (d) =>
-  new Date(d + "T00:00:00").toLocaleDateString(undefined, {
-    weekday: "short", month: "short", day: "numeric", year: "numeric",
-  });
-
 const ParentChildDetails = () => {
-  const { formatTime, timezone, timezoneAbbr } = useDateFormatters();
+  const { timezone } = useDateFormatters();
   const { childId } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -79,7 +74,6 @@ const ParentChildDetails = () => {
   };
 
   // Cancel requests are already scoped to this child by the backend.
-  const childName = getDisplayName(data?.student) || data?.student?.username;
   const myCancelRequests = cancelRequests;
 
   useEffect(() => {
@@ -576,10 +570,13 @@ const ParentChildDetails = () => {
 
 // Helper Components
 const STATUS_MAP = {
-  graded:    { label: "Graded",    icon: "fa-star",        iconCls: "text-emerald-400", textCls: "text-emerald-400", bg: "bg-emerald-500/10", cardBg: "bg-slate-800/30 border-white/5" },
-  submitted: { label: "Submitted", icon: "fa-check",       iconCls: "text-blue-400",    textCls: "text-blue-400",    bg: "bg-blue-500/10",    cardBg: "bg-slate-800/30 border-white/5" },
-  overdue:   { label: "Overdue",   icon: "fa-exclamation", iconCls: "text-rose-400",    textCls: "text-rose-400",    bg: "bg-rose-500/10",    cardBg: "bg-slate-800/30 border-white/5" },
-  pending:   { label: "Pending",   icon: "fa-clock",       iconCls: "text-amber-400",   textCls: "text-amber-400",   bg: "bg-amber-500/10",   cardBg: "bg-slate-800/30 border-white/5" },
+  graded:      { label: "Graded",    icon: "fa-star",         iconCls: "text-emerald-400", textCls: "text-emerald-400", bg: "bg-emerald-500/10", cardBg: "bg-slate-800/30 border-white/5" },
+  auto_graded: { label: "Graded",    icon: "fa-star",         iconCls: "text-emerald-400", textCls: "text-emerald-400", bg: "bg-emerald-500/10", cardBg: "bg-slate-800/30 border-white/5" },
+  completed:   { label: "Completed", icon: "fa-check",        iconCls: "text-emerald-400", textCls: "text-emerald-400", bg: "bg-emerald-500/10", cardBg: "bg-slate-800/30 border-white/5" },
+  submitted:   { label: "Submitted", icon: "fa-check",        iconCls: "text-blue-400",    textCls: "text-blue-400",    bg: "bg-blue-500/10",    cardBg: "bg-slate-800/30 border-white/5" },
+  missed:      { label: "Missed",    icon: "fa-circle-xmark", iconCls: "text-rose-400",    textCls: "text-rose-400",    bg: "bg-rose-500/10",    cardBg: "bg-slate-800/30 border-white/5" },
+  overdue:     { label: "Overdue",   icon: "fa-exclamation",  iconCls: "text-rose-400",    textCls: "text-rose-400",    bg: "bg-rose-500/10",    cardBg: "bg-slate-800/30 border-white/5" },
+  pending:     { label: "Pending",   icon: "fa-clock",        iconCls: "text-amber-400",   textCls: "text-amber-400",   bg: "bg-amber-500/10",   cardBg: "bg-slate-800/30 border-white/5" },
 };
 
 const AssessmentCard = ({ item }) => {

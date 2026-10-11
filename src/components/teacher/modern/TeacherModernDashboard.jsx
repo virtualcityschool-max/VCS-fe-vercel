@@ -54,6 +54,9 @@ export const TeacherDashboard = ({
   onOpenCreateAssignmentModal,
   onOpenAdvancedQuizBuilderModal,
   onOpenReviewQuizModal,
+  onEditQuiz,
+  onDeleteQuiz,
+  onEditAssignment,
   user,
   onStartSession,
   onEndSession,
@@ -658,6 +661,9 @@ export const TeacherDashboard = ({
       onOpenReviewQuizModal={onOpenReviewQuizModal}
       onBackToDashboard={() => onSelectTab("dashboard")}
       timezone={timezone}
+      onEditQuiz={onEditQuiz}
+      onDeleteQuiz={onDeleteQuiz}
+      onEditAssignment={onEditAssignment}
     />;
   if (activeTab === "teaching_resources")
     return <TeachingResourcesView

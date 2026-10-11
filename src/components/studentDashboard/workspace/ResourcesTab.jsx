@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { selectEnrolledCourses } from "../../../store/slices/studentDashboardSlice";
-import { handleFileDownload, getStorageUrl } from "../../../utils/storageUrl";
+import { handleFileDownload, getPreviewUrl } from "../../../utils/storageUrl";
 import { toastManager } from "../../../utils/toastManager";
 import axiosInstance from "../../../utils/axiosInstance";
 
@@ -146,9 +146,9 @@ const ResourcesTab = () => {
   };
 
   const handlePreview = (doc) => {
-    const fullUrl = getStorageUrl(doc.url);
-    if (fullUrl) {
-      window.open(fullUrl, "_blank", "noopener,noreferrer");
+    const previewUrl = getPreviewUrl(doc.url);
+    if (previewUrl) {
+      window.open(previewUrl, "_blank", "noopener,noreferrer");
     } else {
       toastManager.info("Preview not available. Please click Download.");
     }
@@ -247,14 +247,16 @@ const ResourcesTab = () => {
                 </div>
 
                 <div className="flex items-center justify-end gap-2 pt-3 border-t border-white/5">
-                  <button
-                    type="button"
-                    onClick={() => handlePreview(doc)}
-                    className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer"
-                  >
-                    <i className="fas fa-eye text-[11px]" />
-                    <span>Preview</span>
-                  </button>
+                  {!doc.isLink && (
+                    <button
+                      type="button"
+                      onClick={() => handlePreview(doc)}
+                      className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer"
+                    >
+                      <i className="fas fa-eye text-[11px]" />
+                      <span>Preview</span>
+                    </button>
+                  )}
 
                   <button
                     type="button"

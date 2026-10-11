@@ -11,6 +11,7 @@ import {
   endLiveSession,
   createTeacherSession,
   fetchAllAttendance,
+  updateAssignment,
 } from "../../store/slices/teacherSlice";
 import { createAnnouncement } from "../../store/slices/announcementsSlice";
 import { teacherService } from "../../services/teacherService";
@@ -127,6 +128,8 @@ const TeacherPortal = () => {
   const [newSessionModalOpen, setNewSessionModalOpen] = useState(false);
   const [createAssignmentModalOpen, setCreateAssignmentModalOpen] = useState(false);
   const [advancedQuizBuilderModalOpen, setAdvancedQuizBuilderModalOpen] = useState(false);
+  const [editingAssignment, setEditingAssignment] = useState(null);
+  const [editingQuiz, setEditingQuiz] = useState(null);
   const [reviewingQuizSubmissionId, setReviewingQuizSubmissionId] = useState(null);
   const [gradingTask, setGradingTask] = useState(null);
 
@@ -205,6 +208,7 @@ const TeacherPortal = () => {
       return {
         id: String(q.id),
         title: q.title,
+        courseId: String(q.course_id || (typeof q.course === "object" ? q.course?.id : q.course) || ""),
         courseTitle:
           q.course_title ||
           (typeof q.course === "object" ? q.course?.title : null) ||
@@ -216,6 +220,9 @@ const TeacherPortal = () => {
         durationMinutes: q.duration_minutes ?? null,
         launchLabel: fmt(q.published_at),
         dueLabel: fmt(q.due_date),
+        published_at: q.published_at,
+        due_date: q.due_date,
+        isLocked: Boolean(q.is_locked),
         status: !published ? "scheduled" : closed ? "closed" : "published",
         submissionsCount: q.submissions_count ?? subs.length,
         averageScore: scored.length
@@ -223,11 +230,12 @@ const TeacherPortal = () => {
           : undefined,
         topScore: scored.length ? Math.max(...scored.map((s) => s.percentage)) : undefined,
         questions: (q.questions || []).map((ques) => ({
-          id: String(ques.id),
+          id: String(ques.id || `q-${Math.random()}`),
           type: (ques.question_type || "").toLowerCase(),
           questionText: ques.question_text || "",
           marks: ques.max_marks || 0,
           options: (ques.options || []).map((opt) => (typeof opt === "string" ? opt : opt.option_text)),
+          correctAnswer: (ques.options || []).find((opt) => typeof opt === "object" && opt.is_correct)?.option_text || "",
         })),
         submissions: subs,
         rawQuiz: q,
@@ -405,17 +413,22 @@ const TeacherPortal = () => {
     return assignments.map((a) => ({
       id: String(a.id),
       title: a.title,
+      course: a.course?.id || a.course,
+      courseId: a.course?.id || a.course,
       courseTitle: a.course_title || a.course?.title || "",
       maxMarks: a.max_score ?? null,
+      max_score: a.max_score ?? null,
       hasAttachment: Boolean(a.file_url),
       launchDate: a.created_at ? formatDate(a.created_at, profileTimezone) : "",
       launchTime: a.created_at ? formatTime(a.created_at, profileTimezone) : "",
       dueDate: a.due_date ? formatDate(a.due_date, profileTimezone) : "",
       dueTime: a.due_date ? formatTime(a.due_date, profileTimezone) : "",
+      due_date: a.due_date,
       status: a.status || "published",
       isOverdue: Boolean(a.is_overdue),
       submissionsCount: a.submissions_count || 0,
       description: a.description || "",
+      rawAssignment: a,
     }));
   }, [assignments, profileTimezone]);
 
@@ -621,85 +634,182 @@ const TeacherPortal = () => {
     }
   };
 
-  // Create Assignment — throws on failure so the form stays open with the error
-  const handleCreateAssignment = async (data) => {
+  // Create or Update Assignment — throws on failure so the form stays open with the error
+  const handleSaveAssignment = async (data) => {
     const courseId = Number(data.courseId);
     if (!courseId) throw new Error("Please choose a course.");
     const effectiveTz = profileTimezone || TZ_IANA_MAP[currentTz] || "Asia/Riyadh";
     const dueISO = new Date(tzToUTCMs(data.dueDate, data.dueTime, effectiveTz)).toISOString();
-    await dispatch(
-      createAssignment({
-        title: data.title,
-        description: data.description,
-        course: courseId,
-        max_score: data.maxMarks,
-        due_date: dueISO,
-        status: "published",
-        ...(data.file ? { file: data.file } : {}),
-      })
-    ).unwrap();
+    if (data.id) {
+      await dispatch(
+        updateAssignment({
+          id: data.id,
+          data: {
+            title: data.title,
+            description: data.description,
+            course: courseId,
+            max_score: data.maxMarks,
+            due_date: dueISO,
+            status: "published",
+            ...(data.file ? { file: data.file } : {}),
+          },
+        })
+      ).unwrap();
+      toastManager.success(`Assignment "${data.title}" updated`);
+    } else {
+      await dispatch(
+        createAssignment({
+          title: data.title,
+          description: data.description,
+          course: courseId,
+          max_score: data.maxMarks,
+          due_date: dueISO,
+          status: "published",
+          ...(data.file ? { file: data.file } : {}),
+        })
+      ).unwrap();
+      toastManager.success(`Assignment "${data.title}" published`);
+    }
     dispatch(fetchAssignments());
-    toastManager.success(`Assignment "${data.title}" published`);
   };
 
-  // Create Quiz — maps builder question types onto the backend's types
+  // Create or Update Quiz — maps builder question types onto the backend's types
   const handleSaveQuiz = async (quizData) => {
     const courseId = Number(quizData.courseId);
     if (!courseId) throw new Error("Please choose a course.");
 
     const effectiveTz = profileTimezone || TZ_IANA_MAP[currentTz] || "Asia/Riyadh";
     const toISO = (local) => formatTimezoneISO(local, effectiveTz) || new Date(local).toISOString();
-    const published_at = quizData.launchDateTime ? toISO(quizData.launchDateTime) : new Date().toISOString();
     const due_date = toISO(quizData.dueDateTime);
 
-    const questions = (quizData.questions || []).map((q) => {
-      const text = (q.questionText || "").trim();
-      const marks = Number(q.marks) || 1;
-      if (q.type === "multiple_choice") {
-        const correct = String(q.correctAnswer || "").trim();
-        return {
-          question_text: text,
-          question_type: "SINGLE_CHOICE",
-          max_marks: marks,
-          options: (q.options || []).map((opt) => ({
-            option_text: String(opt).trim(),
-            is_correct: String(opt).trim() === correct,
-          })),
-        };
-      }
-      if (q.type === "yes_no") {
-        const ans = String(q.correctAnswer || "").trim().toLowerCase();
-        return {
-          question_text: text,
-          question_type: "SINGLE_CHOICE",
-          max_marks: marks,
-          options: [
-            { option_text: "Yes", is_correct: ans === "yes" },
-            { option_text: "No", is_correct: ans === "no" },
-          ],
-        };
-      }
-      // fill_in_blank and short_answer are marked by the teacher
-      return { question_text: text, question_type: "TEXT_FORMAT", max_marks: marks, options: [] };
-    });
+    if (quizData.id) {
+      if (quizData.isLocked) {
+        try {
+          await teacherService.updateQuiz(quizData.id, {
+            title: quizData.title.trim(),
+            description: quizData.description?.trim() || "",
+            due_date,
+          });
+        } catch (err) {
+          throw new Error(extractApiErrorMessage(err) || "Could not update the quiz.");
+        }
+        toastManager.success(`Quiz "${quizData.title}" updated (deadline extended)`);
+      } else {
+        const published_at = quizData.launchDateTime ? toISO(quizData.launchDateTime) : new Date().toISOString();
+        const questions = (quizData.questions || []).map((q) => {
+          const text = (q.questionText || "").trim();
+          const marks = Number(q.marks) || 1;
+          if (q.type === "multiple_choice") {
+            const correct = String(q.correctAnswer || "").trim();
+            return {
+              question_text: text,
+              question_type: "SINGLE_CHOICE",
+              max_marks: marks,
+              options: (q.options || []).map((opt) => ({
+                option_text: String(opt).trim(),
+                is_correct: String(opt).trim() === correct,
+              })),
+            };
+          }
+          if (q.type === "yes_no") {
+            const ans = String(q.correctAnswer || "").trim().toLowerCase();
+            return {
+              question_text: text,
+              question_type: "SINGLE_CHOICE",
+              max_marks: marks,
+              options: [
+                { option_text: "Yes", is_correct: ans === "yes" },
+                { option_text: "No", is_correct: ans === "no" },
+              ],
+            };
+          }
+          return { question_text: text, question_type: "TEXT_FORMAT", max_marks: marks, options: [] };
+        });
 
-    const total_marks = questions.reduce((s, q) => s + q.max_marks, 0);
-    try {
-      await teacherService.createQuiz({
-        title: quizData.title.trim(),
-        course: courseId,
-        description: quizData.description?.trim() || "",
-        total_marks,
-        duration_minutes: quizData.durationMinutes,
-        published_at,
-        due_date,
-        questions,
+        const total_marks = questions.reduce((s, q) => s + q.max_marks, 0);
+        try {
+          await teacherService.updateQuiz(quizData.id, {
+            title: quizData.title.trim(),
+            course: courseId,
+            description: quizData.description?.trim() || "",
+            total_marks,
+            duration_minutes: quizData.durationMinutes,
+            published_at,
+            due_date,
+            questions,
+          });
+        } catch (err) {
+          throw new Error(extractApiErrorMessage(err) || "Could not update the quiz.");
+        }
+        toastManager.success(`Quiz "${quizData.title}" updated`);
+      }
+    } else {
+      const published_at = quizData.launchDateTime ? toISO(quizData.launchDateTime) : new Date().toISOString();
+      const questions = (quizData.questions || []).map((q) => {
+        const text = (q.questionText || "").trim();
+        const marks = Number(q.marks) || 1;
+        if (q.type === "multiple_choice") {
+          const correct = String(q.correctAnswer || "").trim();
+          return {
+            question_text: text,
+            question_type: "SINGLE_CHOICE",
+            max_marks: marks,
+            options: (q.options || []).map((opt) => ({
+              option_text: String(opt).trim(),
+              is_correct: String(opt).trim() === correct,
+            })),
+          };
+        }
+        if (q.type === "yes_no") {
+          const ans = String(q.correctAnswer || "").trim().toLowerCase();
+          return {
+            question_text: text,
+            question_type: "SINGLE_CHOICE",
+            max_marks: marks,
+            options: [
+              { option_text: "Yes", is_correct: ans === "yes" },
+              { option_text: "No", is_correct: ans === "no" },
+            ],
+          };
+        }
+        return { question_text: text, question_type: "TEXT_FORMAT", max_marks: marks, options: [] };
       });
-    } catch (err) {
-      throw new Error(extractApiErrorMessage(err) || "Could not publish the quiz.");
+
+      const total_marks = questions.reduce((s, q) => s + q.max_marks, 0);
+      try {
+        await teacherService.createQuiz({
+          title: quizData.title.trim(),
+          course: courseId,
+          description: quizData.description?.trim() || "",
+          total_marks,
+          duration_minutes: quizData.durationMinutes,
+          published_at,
+          due_date,
+          questions,
+        });
+      } catch (err) {
+        throw new Error(extractApiErrorMessage(err) || "Could not publish the quiz.");
+      }
+      toastManager.success(`Quiz "${quizData.title}" published`);
     }
-    toastManager.success(`Quiz "${quizData.title}" published`);
     dispatch(fetchQuizzes());
+  };
+
+  const handleDeleteQuiz = async (quizId, isLocked) => {
+    if (isLocked) {
+      toastManager.error("Cannot delete a quiz with student attempts or submissions.");
+      return;
+    }
+    if (!window.confirm("Are you sure you want to delete this quiz? This action cannot be undone.")) {
+      return;
+    }
+    try {
+      await teacherService.deleteQuiz(quizId);
+      toastManager.success("Quiz deleted successfully");
+      dispatch(fetchQuizzes());
+    } catch (err) {
+      toastManager.error(extractApiErrorMessage(err) || "Failed to delete quiz.");
+    }
   };
 
   // After a quiz submission is marked: refresh lists, flip the dashboard row at once
@@ -801,8 +911,23 @@ const TeacherPortal = () => {
         onOpenGradeModal={(task) =>
           task.kind === "quiz" ? setReviewingQuizSubmissionId(task.submissionId) : setGradingTask(task)
         }
-        onOpenCreateAssignmentModal={() => setCreateAssignmentModalOpen(true)}
-        onOpenAdvancedQuizBuilderModal={() => setAdvancedQuizBuilderModalOpen(true)}
+        onOpenCreateAssignmentModal={() => {
+          setEditingAssignment(null);
+          setCreateAssignmentModalOpen(true);
+        }}
+        onOpenAdvancedQuizBuilderModal={() => {
+          setEditingQuiz(null);
+          setAdvancedQuizBuilderModalOpen(true);
+        }}
+        onEditAssignment={(asg) => {
+          setEditingAssignment(asg);
+          setCreateAssignmentModalOpen(true);
+        }}
+        onEditQuiz={(quiz) => {
+          setEditingQuiz(quiz);
+          setAdvancedQuizBuilderModalOpen(true);
+        }}
+        onDeleteQuiz={handleDeleteQuiz}
         onOpenReviewQuizModal={(quiz, submission) => setReviewingQuizSubmissionId(submission?.id ?? null)}
         user={user}
         onStartSession={handleStartSession}
@@ -829,19 +954,27 @@ const TeacherPortal = () => {
         timezone={profileTimezone}
       />
 
-      {/* Create Assignment Modal (Quick Text Task + File Upload) */}
+      {/* Create / Edit Assignment Modal */}
       <CreateAssignmentModal
         isOpen={createAssignmentModalOpen}
-        onClose={() => setCreateAssignmentModalOpen(false)}
+        onClose={() => {
+          setCreateAssignmentModalOpen(false);
+          setEditingAssignment(null);
+        }}
         courses={mappedCourses}
-        onCreateAssignment={handleCreateAssignment}
+        initialAssignment={editingAssignment}
+        onCreateAssignment={handleSaveAssignment}
       />
 
-      {/* Advanced Interactive Quiz Builder (with CSV / JSON Bulk Import) */}
+      {/* Advanced Interactive Quiz Builder */}
       <AdvancedQuizBuilderModal
         isOpen={advancedQuizBuilderModalOpen}
-        onClose={() => setAdvancedQuizBuilderModalOpen(false)}
+        onClose={() => {
+          setAdvancedQuizBuilderModalOpen(false);
+          setEditingQuiz(null);
+        }}
         courses={mappedCourses}
+        initialQuiz={editingQuiz}
         onSaveQuiz={handleSaveQuiz}
         timezone={profileTimezone || TZ_IANA_MAP[currentTz] || "Asia/Riyadh"}
       />
