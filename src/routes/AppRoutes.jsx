@@ -231,7 +231,7 @@ const AppRoutes = () => {
           <Route index element={<TeacherPortal />} />
           <Route path="classes" element={<TeacherClasses />} />
           <Route path="attendance" element={<TeacherAttendance />} />
-          <Route path="assessments" element={<TeacherAssessments />} />
+          <Route path="assessments" element={<Navigate to="/teacher?tab=assignments_quizzes" replace />} />
           <Route path="grading" element={<TeacherGrading />} />
           <Route path="sessions" element={<TeacherSessionCalendar />} />
           <Route path="submissions" element={<TeacherSubmissions />} />

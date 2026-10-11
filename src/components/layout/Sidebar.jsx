@@ -121,17 +121,17 @@ const NAV_CONFIG = {
     { id: "settings",            label: "Platform Settings",     icon: "fas fa-sliders-h",      to: "/admin/settings",              section: "Settings" },
   ],
   teacher: [
-    { label: "Dashboard",    to: "/teacher",                  icon: "fas fa-table-columns",   end: true },
-    { label: "My Courses",   to: "/teacher/classes",          icon: "fas fa-book-open" },
-    { label: "Attendance",   to: "/teacher/attendance",       icon: "fas fa-user-check" },
-    { label: "Assessments",  to: "/teacher/assessments",      icon: "fas fa-clipboard-check" },
-    { label: "Teaching Resources", to: "/teacher?tab=teaching_resources", icon: "fas fa-folder-open" },
-    { label: "Evaluations",  to: "/teacher/evaluations",      icon: "fas fa-chart-bar" },
-    { label: "Performance Analytics", to: "/teacher?tab=analytics", icon: "fas fa-chart-line" },
-    { label: "Planner",      to: "/teacher/sessions",         icon: "fas fa-calendar-alt" },
-    { label: "Slots Management", to: "/teacher/availability", icon: "fas fa-calendar-plus" },
-    { label: "Blogs",        to: "/blogs",                    icon: "fas fa-newspaper" },
-    { label: "About Us",     to: "/about",                    icon: "fas fa-info-circle" },
+    { label: "Dashboard", to: "/teacher", icon: "fas fa-table-columns", end: true },
+    { label: "My Courses", to: "/teacher?tab=courses", icon: "fas fa-book-open", badge: "4" },
+    { label: "Attendance (Per Class)", to: "/teacher?tab=attendance", icon: "fas fa-user-check" },
+    { label: "Assignments & Quizzes", to: "/teacher?tab=assignments_quizzes", icon: "fas fa-clipboard-check", badge: "6" },
+    { label: "Teaching Resources & Desk", to: "/teacher?tab=teaching_resources", icon: "fas fa-folder-open", badge: "5" },
+    { label: "Evaluations & Gradebook", to: "/teacher?tab=evaluations", icon: "fas fa-chart-bar", badge: "4" },
+    { label: "Performance Analytics", to: "/teacher?tab=analytics", icon: "fas fa-chart-line", badgeText: "Live" },
+    { label: "Planner", to: "/teacher?tab=planner", icon: "fas fa-calendar-alt" },
+    { label: "Slots Management", to: "/teacher?tab=slots", icon: "fas fa-calendar-plus" },
+    { label: "Blogs", to: "/blogs", icon: "fas fa-newspaper" },
+    { label: "About Us", to: "/about", icon: "fas fa-info-circle" },
   ],
   student: [
     { label: "Overview",        to: "/student?tab=overview",   icon: "fas fa-th-large" },
@@ -162,7 +162,7 @@ const PORTAL_LABEL = {
 
 // ── Unified nav item - works for all roles ────────────────────────────────────
 // Pass `to` for NavLink-based (teacher/student), omit for button-based (admin).
-function NavItem({ label, icon, isCollapsed, badge, isActive, onClick, to, end, role }) {
+function NavItem({ label, icon, isCollapsed, badge, badgeText, isActive, onClick, to, end, role }) {
   const location = useLocation();
 
   // If `to` includes query parameter like `?tab=schedule` or `?role=teacher`, compute active matching
@@ -181,6 +181,33 @@ function NavItem({ label, icon, isCollapsed, badge, isActive, onClick, to, end, 
 
       const toTab = toParams.get("tab");
       const currTab = currParams.get("tab") || "overview";
+
+      if (role === "teacher") {
+        if (toTab === "assignments_quizzes") {
+          const isAssessmentsTab = ["assignments_quizzes", "assessments", "assignments", "quizzes"].includes(currTab);
+          const isAssessmentsPath =
+            location.pathname.startsWith("/teacher/assessments") ||
+            location.pathname.startsWith("/teacher/submissions") ||
+            location.pathname.startsWith("/teacher/grading");
+          return (location.pathname === toPath && isAssessmentsTab) || isAssessmentsPath;
+        }
+        if (toTab === "courses") {
+          return (location.pathname === toPath && currTab === "courses") || location.pathname.startsWith("/teacher/classes") || location.pathname.startsWith("/teacher/courses");
+        }
+        if (toTab === "attendance") {
+          return (location.pathname === toPath && currTab === "attendance") || location.pathname.startsWith("/teacher/attendance");
+        }
+        if (toTab === "evaluations") {
+          return (location.pathname === toPath && currTab === "evaluations") || location.pathname.startsWith("/teacher/evaluations");
+        }
+        if (toTab === "planner") {
+          return (location.pathname === toPath && currTab === "planner") || location.pathname.startsWith("/teacher/sessions");
+        }
+        if (toTab === "slots") {
+          return (location.pathname === toPath && currTab === "slots") || location.pathname.startsWith("/teacher/availability");
+        }
+        return location.pathname === toPath && toTab === currTab;
+      }
 
       if (toTab === "assessments") {
         const isAssessmentsTab = ["assessments", "assignments", "quizzes", "evaluations"].includes(currTab);
@@ -214,6 +241,10 @@ function NavItem({ label, icon, isCollapsed, badge, isActive, onClick, to, end, 
       const currTab = new URLSearchParams(location.search).get("tab");
       return location.pathname === "/student" && (!currTab || currTab === "overview");
     }
+    if (to === "/teacher") {
+      const currTab = new URLSearchParams(location.search).get("tab");
+      return location.pathname === "/teacher" && (!currTab || currTab === "dashboard");
+    }
     return null;
   })();
 
@@ -239,14 +270,39 @@ function NavItem({ label, icon, isCollapsed, badge, isActive, onClick, to, end, 
       <span className={`whitespace-nowrap overflow-hidden transition-all duration-300 ${isCollapsed ? "w-0 opacity-0" : "flex-1 opacity-100"}`}>
         {label}
       </span>
-      {badge > 0 && (
-        <span className={`bg-rose-500 text-white font-bold rounded-full flex-shrink-0 transition-all duration-300 ${
-          isCollapsed
-            ? "absolute -top-1 -right-1 w-4 h-4 text-[9px] flex items-center justify-center"
-            : "ml-auto text-xs px-2 py-0.5"
+      {badgeText && !isCollapsed && (
+        <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-semibold tabular-nums ml-auto ${
+          active
+            ? "bg-white/20 text-white"
+            : "bg-emerald-500/20 text-emerald-300 border border-emerald-400/30"
         }`}>
-          {badge > 99 ? "99+" : badge}
+          {badgeText}
         </span>
+      )}
+      {badge !== undefined && badge !== null && badge !== "" && !badgeText && (
+        role === "teacher" ? (
+          !isCollapsed ? (
+            <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-mono tabular-nums ml-auto ${
+              active ? "bg-white/20 text-white" : "bg-[#181F36] text-slate-400"
+            }`}>
+              {badge}
+            </span>
+          ) : (
+            <span className="absolute -top-1 -right-1 w-4 h-4 text-[9px] font-bold rounded-full bg-indigo-500 text-white flex items-center justify-center">
+              {badge}
+            </span>
+          )
+        ) : (
+          badge > 0 && (
+            <span className={`bg-rose-500 text-white font-bold rounded-full flex-shrink-0 transition-all duration-300 ${
+              isCollapsed
+                ? "absolute -top-1 -right-1 w-4 h-4 text-[9px] flex items-center justify-center"
+                : "ml-auto text-xs px-2 py-0.5"
+            }`}>
+              {badge > 99 ? "99+" : badge}
+            </span>
+          )
+        )
       )}
     </>
   );
@@ -276,8 +332,11 @@ function NavItem({ label, icon, isCollapsed, badge, isActive, onClick, to, end, 
           <div className="bg-slate-800 border border-slate-700 text-white text-xs font-medium px-3 py-1.5 rounded-lg shadow-xl whitespace-nowrap flex items-center gap-2">
             <span className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-slate-700" />
             {label}
-            {badge > 0 && (
-              <span className="bg-rose-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">{badge}</span>
+            {badge && (
+              <span className="bg-indigo-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">{badge}</span>
+            )}
+            {badgeText && (
+              <span className="bg-emerald-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">{badgeText}</span>
             )}
           </div>
         </div>
@@ -303,20 +362,20 @@ const Sidebar = ({
 
   const [isTimezoneModalOpen, setIsTimezoneModalOpen] = useState(false);
 
-  // Student announcements
+  // Student & Teacher announcements
   const { unreadCount, items: announcements, loadingItems } = useSelector(
-    (state) => state.auth.role === "student" ? state.announcements : { unreadCount: 0, items: [], loadingItems: false },
+    (state) => (state.auth.role === "student" || state.auth.role === "teacher") ? state.announcements : { unreadCount: 0, items: [], loadingItems: false },
   );
   const [isBellOpen, setIsBellOpen] = useState(false);
   const bellRef = useRef(null);
 
   useEffect(() => {
-    if (role !== "student") return;
+    if (role !== "student" && role !== "teacher") return;
     dispatch(fetchUnreadAnnouncementsCount());
   }, [dispatch, role]);
 
   useEffect(() => {
-    if (role !== "student") return;
+    if (role !== "student" && role !== "teacher") return;
     const handleOutside = (e) => {
       if (bellRef.current && !bellRef.current.contains(e.target)) setIsBellOpen(false);
     };
@@ -446,14 +505,16 @@ const Sidebar = ({
                   end={item.end}
                   onClick={onMobileClose}
                   role={role}
+                  badge={item.badge}
+                  badgeText={item.badgeText}
                 />
               ))
           }
         </nav>
       </div>
 
-      {/* ── Student: Announcements bell ── */}
-      {role === "student" && (
+      {/* ── Student / Teacher: Announcements bell ── */}
+      {(role === "student" || role === "teacher") && (
         <div className="border-t border-slate-800/80 flex-shrink-0 overflow-visible relative" ref={bellRef}>
           <div className={isCollapsed ? "px-3 py-3" : "px-4 py-3"}>
             <button

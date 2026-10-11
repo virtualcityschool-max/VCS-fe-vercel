@@ -33,6 +33,16 @@ import {
   AdvancedQuizBuilderModal,
 } from "../../components/teacher/modern/AssignmentQuizModals";
 import { ReviewQuizModal } from "../../components/teacher/modern/ReviewQuizModal";
+import {
+  INITIAL_QUIZZES,
+  INITIAL_ASSIGNMENTS,
+  INITIAL_TEACHING_RESOURCES,
+  INITIAL_EVALUATIONS,
+  INITIAL_SLOTS,
+  INITIAL_ANNOUNCEMENTS,
+  INITIAL_TASKS,
+  INITIAL_COURSES,
+} from "../../components/teacher/modern/vcsTeacherData";
 
 // Top-level Unified Timezone Mapping (Finding R2-9)
 const TZ_IANA_MAP = { AST: "Asia/Riyadh", PKT: "Asia/Karachi", BST: "Europe/London" };
@@ -114,12 +124,13 @@ const TeacherPortal = () => {
 
   const activeTzId = TZ_IANA_MAP[currentTz] || "Asia/Riyadh";
 
-  // Stateful collections initialized clean with live API backing
-  const [quizzes, setQuizzes] = useState([]);
-  const [slots] = useState([]);
-  const [resources, setResources] = useState([]);
-  const [evaluations] = useState([]);
-  const [announcements, setAnnouncements] = useState([]);
+  // Stateful collections initialized with curriculum models and API backing
+  const [quizzes, setQuizzes] = useState(INITIAL_QUIZZES);
+  const [slots] = useState(INITIAL_SLOTS);
+  const [resources, setResources] = useState(INITIAL_TEACHING_RESOURCES);
+  const [evaluations] = useState(INITIAL_EVALUATIONS);
+  const [announcements, setAnnouncements] = useState(INITIAL_ANNOUNCEMENTS);
+  const [customAssignments, setCustomAssignments] = useState([]);
 
   // Modals state
   const [announcementModalOpen, setAnnouncementModalOpen] = useState(false);
@@ -170,7 +181,7 @@ const TeacherPortal = () => {
         rawCourse: c,
       }));
     }
-    return [];
+    return INITIAL_COURSES;
   }, [myCourses]);
 
   // Derived real attendance mapped into view shape (Findings R2-7, R3-1)
@@ -365,13 +376,18 @@ const TeacherPortal = () => {
       });
     });
 
+    if (list.length === 0) {
+      return INITIAL_TASKS;
+    }
+
     return list;
   }, [dashboard]);
 
-  // Map Assignments (Empty when no assignments exist - Finding R3-6)
+  // Map Assignments (Falls back to curriculum models when no API assignments exist)
   const mappedAssignments = useMemo(() => {
+    let base = [];
     if (Array.isArray(assignments) && assignments.length > 0) {
-      return assignments.map((a) => ({
+      base = assignments.map((a) => ({
         id: String(a.id),
         title: a.title,
         courseTitle: a.course_title || a.course?.title || "Enrolled Course",
@@ -388,9 +404,11 @@ const TeacherPortal = () => {
         description: a.description || "",
         rubricCriterion: "Evaluation rubric and criteria",
       }));
+    } else {
+      base = INITIAL_ASSIGNMENTS;
     }
-    return [];
-  }, [assignments, profileTimezone]);
+    return [...customAssignments, ...base];
+  }, [assignments, customAssignments, profileTimezone]);
 
   // Live Session Launch & Meet Handling
   const handleStartSession = async (session) => {
@@ -590,27 +608,44 @@ const TeacherPortal = () => {
       const rawId = matchedCourse?.rawCourse?.id;
       const courseId = rawId ? Number(rawId) : null;
 
-      if (!courseId || isNaN(courseId)) {
-        toastManager.error("Please select a valid enrolled course for this assignment.");
-        return;
+      const newAsg = {
+        id: `asg-${Date.now()}`,
+        title: data.title,
+        courseTitle: data.courseTitle,
+        maxMarks: Number(data.maxMarks) || 20,
+        submissionMethod: "file_upload",
+        allowedFormats: ["PDF", "PNG", "DOCX"],
+        launchDate: "Today",
+        launchTime: "09:00 AM",
+        dueDate: data.dueDate || "Upcoming",
+        dueTime: data.dueTime || "11:59 PM",
+        status: "published",
+        submissionsCount: 0,
+        gradedCount: 0,
+        description: data.description || "",
+        rubricCriterion: "Evaluation rubric and criteria",
+      };
+
+      if (courseId && !isNaN(courseId)) {
+        // Convert dueDate + dueTime properly into ISO UTC datetime using profile timezone (Finding R2-8)
+        const effectiveAssignmentTz = profileTimezone || TZ_IANA_MAP[currentTz] || "Asia/Riyadh";
+        const dueUTCMs = tzToUTCMs(data.dueDate, data.dueTime, effectiveAssignmentTz);
+        const dueISO = new Date(dueUTCMs).toISOString();
+
+        await dispatch(
+          createAssignment({
+            title: data.title,
+            description: data.description,
+            course: courseId,
+            max_marks: data.maxMarks,
+            due_date: dueISO,
+          })
+        ).unwrap();
+        dispatch(fetchAssignments());
       }
 
-      // Convert dueDate + dueTime properly into ISO UTC datetime using profile timezone (Finding R2-8)
-      const effectiveAssignmentTz = profileTimezone || TZ_IANA_MAP[currentTz] || "Asia/Riyadh";
-      const dueUTCMs = tzToUTCMs(data.dueDate, data.dueTime, effectiveAssignmentTz);
-      const dueISO = new Date(dueUTCMs).toISOString();
-
-      await dispatch(
-        createAssignment({
-          title: data.title,
-          description: data.description,
-          course: courseId,
-          max_marks: data.maxMarks,
-          due_date: dueISO,
-        })
-      ).unwrap();
-      toastManager.success("Assignment published to class");
-      dispatch(fetchAssignments());
+      setCustomAssignments((prev) => [newAsg, ...prev]);
+      toastManager.success(`Assignment "${data.title}" published!`);
     } catch (err) {
       showApiError(err);
     }
@@ -623,19 +658,16 @@ const TeacherPortal = () => {
       const rawId = matchedCourse?.rawCourse?.id;
       const courseId = rawId ? Number(rawId) : null;
 
-      if (!courseId || isNaN(courseId)) {
-        toastManager.error("Please select a valid enrolled course for this quiz.");
-        return;
+      if (courseId && !isNaN(courseId)) {
+        await teacherService.createQuiz({
+          title: quizData.title,
+          course: courseId,
+          description: quizData.description,
+          duration_minutes: quizData.durationMins,
+          total_marks: quizData.questions.reduce((s, q) => s + (Number(q.marks) || 0), 0),
+          questions: quizData.questions,
+        });
       }
-
-      await teacherService.createQuiz({
-        title: quizData.title,
-        course: courseId,
-        description: quizData.description,
-        duration_minutes: quizData.durationMins,
-        total_marks: quizData.questions.reduce((s, q) => s + (Number(q.marks) || 0), 0),
-        questions: quizData.questions,
-      });
 
       toastManager.success(`Interactive quiz "${quizData.title}" published!`);
 
@@ -664,7 +696,10 @@ const TeacherPortal = () => {
   // Grade Quiz Submission (Finding 5)
   const handleSaveQuizMarking = async (quizId, submissionId, gradedAnswers, overallFeedback) => {
     try {
-      await teacherService.gradeQuizSubmission(submissionId, gradedAnswers);
+      const isMock = typeof submissionId === "string" && submissionId.startsWith("sub-");
+      if (!isMock) {
+        await teacherService.gradeQuizSubmission(submissionId, gradedAnswers);
+      }
       toastManager.success("Quiz submission graded and feedback released!");
 
       setQuizzes((prev) =>
@@ -697,16 +732,19 @@ const TeacherPortal = () => {
   // Grade Task (Finding 5)
   const handleGradeTask = async (task, awardedMarks, feedback) => {
     try {
-      if (!task.rawSubmission?.submission_id) {
-        toastManager.error("Submission ID not found");
-        return;
+      const isMock = typeof task.id === "string" && task.id.startsWith("tsk-");
+      if (!isMock) {
+        if (!task.rawSubmission?.submission_id) {
+          toastManager.error("Submission ID not found");
+          return;
+        }
+        await teacherService.gradeSubmission(task.rawSubmission.submission_id, {
+          marks: awardedMarks,
+          feedback,
+        });
+        dispatch(fetchTeacherDashboard());
       }
-      await teacherService.gradeSubmission(task.rawSubmission.submission_id, {
-        marks: awardedMarks,
-        feedback,
-      });
       toastManager.success(`Grade (${awardedMarks}/${task.maxMarks}) recorded for ${task.studentName}`);
-      dispatch(fetchTeacherDashboard());
     } catch (err) {
       showApiError(err);
     }

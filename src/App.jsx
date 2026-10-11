@@ -46,9 +46,8 @@ const AppInner = () => {
   };
 
   const hasSidebar = isLoggedIn && (role === "admin" || role === "teacher" || role === "student" || role === "parent");
-  // Admin pages get their own shell (menu + top bar) instead of the public
-  // navbar. Student, teacher and parent screens are unchanged.
   const isAdminArea = isLoggedIn && role === "admin" && location.pathname.startsWith("/admin");
+  const isTeacherArea = isLoggedIn && role === "teacher" && location.pathname.startsWith("/teacher");
 
   // Close mobile sidebar on route change
   useEffect(() => {
@@ -98,7 +97,7 @@ const AppInner = () => {
   // Blog/About without logging out. Its UserProfileDropdown already shows a
   // role label (Administrator/Tutor/Student/Guardian) next to the name, so
   // it's clear at a glance which dashboard is open.
-  const showNavbar = !isAdminArea;
+  const showNavbar = !isAdminArea && !isTeacherArea;
 
   return (
     <div className={`min-h-screen selection:bg-indigo-500/30 overflow-x-hidden ${isAdminArea ? "bg-[#0B1020]" : "bg-slate-950"}`}>
