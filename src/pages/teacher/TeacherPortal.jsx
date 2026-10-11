@@ -15,7 +15,7 @@ import { createAnnouncement } from "../../store/slices/announcementsSlice";
 import { teacherService } from "../../services/teacherService";
 import { adminTeacherSessionService } from "../../services/adminTeacherSessionService";
 import { useDateFormatters } from "../../hooks/useDateFormatters";
-import { formatDate, formatTime } from "../../utils/validation";
+import { formatDate, formatTime, formatTimezoneISO } from "../../utils/validation";
 import { toastManager } from "../../utils/toastManager";
 import { showApiError, extractApiErrorMessage } from "../../utils/apiErrorHandler";
 import ConfirmDialog from "../../components/common/ConfirmDialog";
@@ -654,42 +654,129 @@ const TeacherPortal = () => {
   // Create / Save Interactive Quiz (Findings 5, 8)
   const handleSaveQuiz = async (quizData) => {
     try {
-      const matchedCourse = mappedCourses.find((c) => c.title === quizData.courseTitle);
-      const rawId = matchedCourse?.rawCourse?.id;
+      const matchedCourse =
+        mappedCourses.find(
+          (c) => c.title?.trim().toLowerCase() === quizData.courseTitle?.trim().toLowerCase()
+        ) || mappedCourses[0];
+      const rawId = matchedCourse?.rawCourse?.id || matchedCourse?.id;
       const courseId = rawId ? Number(rawId) : null;
 
-      if (courseId && !isNaN(courseId)) {
-        await teacherService.createQuiz({
-          title: quizData.title,
-          course: courseId,
-          description: quizData.description,
-          duration_minutes: quizData.durationMins,
-          total_marks: quizData.questions.reduce((s, q) => s + (Number(q.marks) || 0), 0),
-          questions: quizData.questions,
-        });
+      if (!courseId || isNaN(courseId)) {
+        throw new Error(`Course "${quizData.courseTitle}" could not be found.`);
       }
 
+      const effectiveTz = profileTimezone || TZ_IANA_MAP[currentTz] || "Asia/Karachi";
+      const published_at = quizData.launchDateTime
+        ? (formatTimezoneISO(quizData.launchDateTime, effectiveTz) || new Date(quizData.launchDateTime).toISOString())
+        : new Date().toISOString();
+      const due_date = quizData.dueDateTime
+        ? (formatTimezoneISO(quizData.dueDateTime, effectiveTz) || new Date(quizData.dueDateTime).toISOString())
+        : new Date(Date.now() + 7 * 86400000).toISOString();
+
+      const transformedQuestions = (quizData.questions || []).map((q) => {
+        const text = (q.questionText || q.question_text || "").trim();
+        const marks = Number(q.marks || q.max_marks) || 1;
+        const rawType = String(q.type || q.question_type || "").trim();
+
+        if (rawType === "multiple_choice" || rawType === "SINGLE_CHOICE") {
+          return {
+            question_text: text,
+            question_type: "SINGLE_CHOICE",
+            max_marks: marks,
+            options: (q.options || []).map((opt) => {
+              const optText = String(opt).trim();
+              return {
+                option_text: optText,
+                is_correct: optText === String(q.correctAnswer || "").trim(),
+              };
+            }),
+          };
+        }
+
+        if (rawType === "yes_no") {
+          const ans = String(q.correctAnswer || "").trim().toLowerCase();
+          return {
+            question_text: text,
+            question_type: "SINGLE_CHOICE",
+            max_marks: marks,
+            options: [
+              { option_text: "Yes", is_correct: ans === "yes" },
+              { option_text: "No", is_correct: ans === "no" },
+            ],
+          };
+        }
+
+        if (rawType === "fill_in_blank" || rawType === "short_answer" || rawType === "TEXT_FORMAT") {
+          return {
+            question_text: text,
+            question_type: "TEXT_FORMAT",
+            max_marks: marks,
+            options: [],
+          };
+        }
+
+        if (rawType === "MULTIPLE_CHOICE") {
+          const correctArr = Array.isArray(q.correctAnswer) ? q.correctAnswer : [q.correctAnswer];
+          const correctStrArr = correctArr.map((c) => String(c).trim());
+          return {
+            question_text: text,
+            question_type: "MULTIPLE_CHOICE",
+            max_marks: marks,
+            options: (q.options || []).map((opt) => {
+              const optText = String(opt).trim();
+              return {
+                option_text: optText,
+                is_correct: correctStrArr.includes(optText),
+              };
+            }),
+          };
+        }
+
+        return {
+          question_text: text,
+          question_type: "TEXT_FORMAT",
+          max_marks: marks,
+          options: [],
+        };
+      });
+
+      const totalMarks = transformedQuestions.reduce((s, q) => s + (Number(q.max_marks) || 0), 0);
+
+      const payload = {
+        title: quizData.title.trim(),
+        course: courseId,
+        description: quizData.description?.trim() || "",
+        duration_minutes: quizData.durationMins || 25,
+        total_marks: totalMarks,
+        published_at,
+        due_date,
+        questions: transformedQuestions,
+      };
+
+      const createdQuiz = await teacherService.createQuiz(payload);
       toastManager.success(`Interactive quiz "${quizData.title}" published!`);
 
       const newQuizItem = {
-        id: `qz-${Date.now()}`,
+        id: createdQuiz?.id || `qz-${Date.now()}`,
         title: quizData.title,
         courseTitle: quizData.courseTitle,
         description: quizData.description,
-        marks: quizData.questions.reduce((s, q) => s + (Number(q.marks) || 0), 0),
-        questionsCount: quizData.questions.length,
-        durationMins: quizData.durationMins,
+        marks: totalMarks,
+        questionsCount: transformedQuestions.length,
+        durationMins: quizData.durationMins || 25,
         launchDateTime: quizData.launchDateTime,
         dueDateTime: quizData.dueDateTime,
         status: "published",
         submissionsCount: 0,
         averageScore: undefined,
-        questions: quizData.questions,
+        questions: transformedQuestions,
         submissions: [],
       };
       setQuizzes((prev) => [newQuizItem, ...prev]);
+      return createdQuiz;
     } catch (err) {
       showApiError(err);
+      throw err;
     }
   };
 

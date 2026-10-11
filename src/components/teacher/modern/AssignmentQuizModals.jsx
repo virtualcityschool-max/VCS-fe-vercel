@@ -7,15 +7,16 @@ import {
   Award,
   CheckCircle2,
   FileText,
-  UploadCloud
-} from "lucide-react";
-import {
+  UploadCloud,
   FileSpreadsheet,
   Download,
   AlertCircle,
   Code,
-  FileUp
+  FileUp,
+  RotateCcw
 } from "lucide-react";
+import { toastManager } from "../../../utils/toastManager";
+import { extractApiErrorMessage } from "../../../utils/apiErrorHandler";
 export const CreateAssignmentModal = ({
   isOpen,
   onClose,
@@ -375,6 +376,83 @@ export const CreateAssignmentModal = ({
       </div>
     </div>;
 };
+const createBlankQuestion = (type = "multiple_choice") => {
+  const id = `q-new-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+  if (type === "yes_no") {
+    return {
+      id,
+      type: "yes_no",
+      questionText: "",
+      options: ["Yes", "No"],
+      correctAnswer: "",
+      marks: 5,
+    };
+  }
+  if (type === "fill_in_blank") {
+    return {
+      id,
+      type: "fill_in_blank",
+      questionText: "",
+      options: [],
+      correctAnswer: "",
+      marks: 5,
+    };
+  }
+  if (type === "short_answer") {
+    return {
+      id,
+      type: "short_answer",
+      questionText: "",
+      options: [],
+      correctAnswer: "",
+      marks: 10,
+    };
+  }
+  return {
+    id,
+    type: "multiple_choice",
+    questionText: "",
+    options: ["", "", "", ""],
+    correctAnswer: "",
+    marks: 5,
+  };
+};
+
+const SAMPLE_QUIZ_QUESTIONS = [
+  {
+    id: "sample-1",
+    type: "multiple_choice",
+    questionText: "What is the SI unit of electric capacitance?",
+    options: ["Henry", "Farad", "Coulomb", "Weber"],
+    correctAnswer: "Farad",
+    marks: 5,
+  },
+  {
+    id: "sample-2",
+    type: "yes_no",
+    questionText: "Is kinetic energy conserved during an inelastic collision?",
+    options: ["Yes", "No"],
+    correctAnswer: "No",
+    marks: 5,
+  },
+  {
+    id: "sample-3",
+    type: "fill_in_blank",
+    questionText: "The derivative of sin(2x) with respect to x is ____.",
+    options: [],
+    correctAnswer: "2cos(2x)",
+    marks: 5,
+  },
+  {
+    id: "sample-4",
+    type: "short_answer",
+    questionText: "Define Lenz\u2019s Law and explain how it relates to conservation of energy.",
+    options: [],
+    correctAnswer: "The direction of induced current opposes the change in magnetic flux that produces it.",
+    marks: 10,
+  },
+];
+
 export const AdvancedQuizBuilderModal = ({
   isOpen,
   onClose,
@@ -383,41 +461,13 @@ export const AdvancedQuizBuilderModal = ({
 }) => {
   const [title, setTitle] = useState("");
   const [courseTitle, setCourseTitle] = useState(courses[0]?.title || "University Entry Test Prep");
-  const [description] = useState("Timed diagnostic assessment with multiple question formats.");
+  const [description, setDescription] = useState("Timed diagnostic assessment with multiple question formats.");
   const [durationMins, setDurationMins] = useState(25);
   const [launchDateTime, setLaunchDateTime] = useState("2026-10-10T15:00");
   const [dueDateTime, setDueDateTime] = useState("2026-10-15T22:00");
-  const [questions, setQuestions] = useState([
-    {
-      id: "q-new-1",
-      type: "multiple_choice",
-      questionText: "What is the SI unit of electric capacitance?",
-      options: ["Henry", "Farad", "Coulomb", "Weber"],
-      correctAnswer: "Farad",
-      marks: 5
-    },
-    {
-      id: "q-new-2",
-      type: "yes_no",
-      questionText: "Is kinetic energy conserved during an inelastic collision?",
-      correctAnswer: "No",
-      marks: 5
-    },
-    {
-      id: "q-new-3",
-      type: "fill_in_blank",
-      questionText: "The derivative of sin(2x) with respect to x is ____.",
-      correctAnswer: "2cos(2x)",
-      marks: 5
-    },
-    {
-      id: "q-new-4",
-      type: "short_answer",
-      questionText: "Define Lenz\u2019s Law and explain how it relates to conservation of energy.",
-      correctAnswer: "The direction of induced current opposes the change in magnetic flux that produces it.",
-      marks: 10
-    }
-  ]);
+  const [questions, setQuestions] = useState(() => [createBlankQuestion("multiple_choice")]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState(null);
   const [showBulkImportModal, setShowBulkImportModal] = useState(false);
   const [bulkImportText, setBulkImportText] = useState("");
   const [bulkImportMode, setBulkImportMode] = useState("csv");
@@ -593,37 +643,131 @@ multiple_choice,"Which electromagnetic radiation has the highest frequency?",5,"
       setBulkImportError(err.message || "Error parsing imported questions.");
     }
   };
+  const handleResetForm = () => {
+    setTitle("");
+    setCourseTitle(courses[0]?.title || "University Entry Test Prep");
+    setDescription("Timed diagnostic assessment with multiple question formats.");
+    setDurationMins(25);
+    setLaunchDateTime("2026-10-10T15:00");
+    setDueDateTime("2026-10-15T22:00");
+    setQuestions([createBlankQuestion("multiple_choice")]);
+    setFormError(null);
+  };
+
+  const handleLoadSample = () => {
+    setTitle("Cambridge Physics Paper 2 Diagnostic Mock");
+    setCourseTitle(courses[0]?.title || "University Entry Test Prep");
+    setDescription("Timed diagnostic assessment with multiple question formats.");
+    setDurationMins(25);
+    setQuestions(SAMPLE_QUIZ_QUESTIONS);
+    setFormError(null);
+    toastManager.info("Sample questions loaded");
+  };
+
   const handleAddQuestion = (type) => {
-    const newQ = {
-      id: `q-new-${Date.now()}`,
-      type,
-      questionText: type === "multiple_choice" ? "Enter your multiple choice question text here" : type === "yes_no" ? "Enter your yes/no proposition here" : type === "fill_in_blank" ? "Enter your question with a blank ____ here" : "Enter short written essay prompt",
-      options: type === "multiple_choice" ? ["Option A", "Option B", "Option C", "Option D"] : void 0,
-      correctAnswer: type === "yes_no" ? "Yes" : "Model Answer",
-      marks: 5
-    };
-    setQuestions([...questions, newQ]);
+    setQuestions((prev) => [...prev, createBlankQuestion(type)]);
   };
+
   const handleRemoveQuestion = (id) => {
-    setQuestions(questions.filter((q) => q.id !== id));
+    setQuestions((prev) => prev.filter((q) => q.id !== id));
   };
+
   const updateQuestion = (id, updates) => {
-    setQuestions(questions.map((q) => q.id === id ? { ...q, ...updates } : q));
+    setQuestions((prev) => prev.map((q) => (q.id === id ? { ...q, ...updates } : q)));
   };
-  const handleSubmit = (e) => {
+
+  const updateOption = (qId, oIdx, newVal) => {
+    setQuestions((prev) =>
+      prev.map((q) => {
+        if (q.id !== qId) return q;
+        const oldVal = q.options[oIdx];
+        const newOpts = [...q.options];
+        newOpts[oIdx] = newVal;
+        return {
+          ...q,
+          options: newOpts,
+          correctAnswer: q.correctAnswer === oldVal ? newVal : q.correctAnswer,
+        };
+      })
+    );
+  };
+
+  const validateQuiz = () => {
+    if (!title.trim()) return "Please enter a quiz title.";
+    if (!questions.length) return "Please add at least one question to the quiz.";
+
+    for (let i = 0; i < questions.length; i++) {
+      const q = questions[i];
+      const qNum = i + 1;
+      if (!q.questionText?.trim()) {
+        return `Question ${qNum}: Question text is required.`;
+      }
+      if (!q.marks || Number(q.marks) <= 0) {
+        return `Question ${qNum}: Marks must be a positive number.`;
+      }
+
+      if (q.type === "multiple_choice") {
+        if (!q.options || q.options.length < 2) {
+          return `Question ${qNum}: Multiple choice question must have at least 2 options.`;
+        }
+        if (q.options.some((o) => !o.trim())) {
+          return `Question ${qNum}: All option text fields must be filled in.`;
+        }
+        const hasCorrect = q.options.some((o) => o && o.trim() === (q.correctAnswer || "").trim());
+        if (!q.correctAnswer || !hasCorrect) {
+          return `Question ${qNum}: Please select a correct answer from the options.`;
+        }
+      }
+
+      if (q.type === "yes_no") {
+        const ca = (q.correctAnswer || "").trim().toLowerCase();
+        if (ca !== "yes" && ca !== "no") {
+          return `Question ${qNum}: Please select whether "Yes" or "No" is the correct answer.`;
+        }
+      }
+    }
+
+    if (launchDateTime && dueDateTime) {
+      if (new Date(dueDateTime) <= new Date(launchDateTime)) {
+        return "The solve & submit deadline must be after the launch date & time.";
+      }
+    }
+
+    return null;
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!title.trim() || questions.length === 0) return;
-    onSaveQuiz({
-      title: title.trim(),
-      courseTitle,
-      description: description.trim(),
-      durationMins,
-      launchDateTime,
-      dueDateTime,
-      questions
-    });
-    onClose();
+    setFormError(null);
+
+    const validationError = validateQuiz();
+    if (validationError) {
+      setFormError(validationError);
+      toastManager.error(validationError);
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await onSaveQuiz({
+        title: title.trim(),
+        courseTitle,
+        description: description.trim(),
+        durationMins,
+        launchDateTime,
+        dueDateTime,
+        questions,
+      });
+      handleResetForm();
+      onClose();
+    } catch (err) {
+      const msg = extractApiErrorMessage(err) || err?.message || "Failed to publish quiz.";
+      setFormError(msg);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
   return <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
       <div className="w-full max-w-3xl bg-[#101424] border border-[#242D4C] rounded-2xl shadow-2xl overflow-hidden my-6">
         <div className="px-6 py-4 border-b border-[#1C233D] flex items-center justify-between">
@@ -638,12 +782,39 @@ multiple_choice,"Which electromagnetic radiation has the highest frequency?",5,"
               </p>
             </div>
           </div>
-          <button onClick={onClose} className="text-slate-400 hover:text-white p-1 rounded-lg cursor-pointer">
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleResetForm}
+              title="Clear all fields and start fresh"
+              className="text-xs text-slate-400 hover:text-white px-2.5 py-1 rounded-lg border border-[#242D4C] hover:border-slate-500 transition-colors flex items-center gap-1.5 cursor-pointer"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>Clear Draft</span>
+            </button>
+            <button onClick={onClose} className="text-slate-400 hover:text-white p-1 rounded-lg cursor-pointer">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-5 max-h-[80vh] overflow-y-auto">
+          {formError && (
+            <div className="p-3.5 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs flex items-start gap-2.5">
+              <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-rose-400" />
+              <div className="flex-1">
+                <p className="font-semibold text-rose-200">Unable to Publish Quiz</p>
+                <p className="mt-0.5 whitespace-pre-wrap">{formError}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setFormError(null)}
+                className="text-rose-400 hover:text-white cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          )}
           {
     /* Header Metadata */
   }
@@ -737,54 +908,61 @@ multiple_choice,"Which electromagnetic radiation has the highest frequency?",5,"
   }
               <div className="flex flex-wrap items-center gap-1.5">
                 <button
-    type="button"
-    onClick={() => setShowBulkImportModal(true)}
-    className="px-2.5 py-1 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-[11px] font-bold flex items-center gap-1.5 cursor-pointer shadow-sm transition-all"
-    title="Import questions in bulk from CSV or JSON file"
-  >
+                  type="button"
+                  onClick={handleLoadSample}
+                  className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-[11px] font-semibold flex items-center gap-1.5 cursor-pointer shadow-sm transition-all"
+                  title="Load sample physics quiz template"
+                >
+                  <span>Load Sample</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowBulkImportModal(true)}
+                  className="px-2.5 py-1 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-[11px] font-bold flex items-center gap-1.5 cursor-pointer shadow-sm transition-all"
+                  title="Import questions in bulk from CSV or JSON file"
+                >
                   <FileSpreadsheet className="w-3.5 h-3.5" />
                   <span>Bulk Import (CSV / JSON)</span>
                 </button>
                 <div className="h-4 w-px bg-[#242D4C] mx-0.5" />
                 <button
-    type="button"
-    onClick={() => handleAddQuestion("multiple_choice")}
-    className="px-2.5 py-1 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 text-[11px] font-semibold cursor-pointer"
-  >
+                  type="button"
+                  onClick={() => handleAddQuestion("multiple_choice")}
+                  className="px-2.5 py-1 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 text-[11px] font-semibold cursor-pointer"
+                >
                   + Multi Choice
                 </button>
                 <button
-    type="button"
-    onClick={() => handleAddQuestion("yes_no")}
-    className="px-2.5 py-1 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-[11px] font-semibold cursor-pointer"
-  >
+                  type="button"
+                  onClick={() => handleAddQuestion("yes_no")}
+                  className="px-2.5 py-1 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-[11px] font-semibold cursor-pointer"
+                >
                   + Yes/No
                 </button>
                 <button
-    type="button"
-    onClick={() => handleAddQuestion("fill_in_blank")}
-    className="px-2.5 py-1 rounded-lg bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-500/30 text-[11px] font-semibold cursor-pointer"
-  >
+                  type="button"
+                  onClick={() => handleAddQuestion("fill_in_blank")}
+                  className="px-2.5 py-1 rounded-lg bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-500/30 text-[11px] font-semibold cursor-pointer"
+                >
                   + Fill Blank
                 </button>
                 <button
-    type="button"
-    onClick={() => handleAddQuestion("short_answer")}
-    className="px-2.5 py-1 rounded-lg bg-cyan-600/20 hover:bg-cyan-600/30 text-cyan-300 border border-cyan-500/30 text-[11px] font-semibold cursor-pointer"
-  >
+                  type="button"
+                  onClick={() => handleAddQuestion("short_answer")}
+                  className="px-2.5 py-1 rounded-lg bg-cyan-600/20 hover:bg-cyan-600/30 text-cyan-300 border border-cyan-500/30 text-[11px] font-semibold cursor-pointer"
+                >
                   + Short Writing
                 </button>
               </div>
             </div>
 
-            {
-    /* Questions Editor Container */
-  }
+            {/* Questions Editor Container */}
             <div className="space-y-4">
-              {questions.map((q, idx) => <div
-    key={q.id}
-    className="p-4 rounded-xl bg-[#0B0E1A] border border-[#1A223B] space-y-3 relative group"
-  >
+              {questions.map((q, idx) => (
+                <div
+                  key={q.id}
+                  className="p-4 rounded-xl bg-[#0B0E1A] border border-[#1A223B] space-y-3 relative group"
+                >
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                       <span className="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-300 text-[10px] font-bold flex items-center justify-center font-mono">
@@ -799,128 +977,154 @@ multiple_choice,"Which electromagnetic radiation has the highest frequency?",5,"
                       <div className="flex items-center gap-1 text-xs text-slate-300">
                         <span>Marks:</span>
                         <input
-    type="number"
-    min={1}
-    max={50}
-    value={q.marks}
-    onChange={(e) => updateQuestion(q.id, { marks: Number(e.target.value) })}
-    className="w-14 px-2 py-0.5 rounded bg-[#121628] border border-[#1E2642] text-xs font-mono font-bold text-white tabular-nums text-center"
-  />
+                          type="number"
+                          min={1}
+                          max={50}
+                          value={q.marks}
+                          onChange={(e) => updateQuestion(q.id, { marks: Number(e.target.value) })}
+                          className="w-14 px-2 py-0.5 rounded bg-[#121628] border border-[#1E2642] text-xs font-mono font-bold text-white tabular-nums text-center"
+                        />
                       </div>
                       <button
-    type="button"
-    onClick={() => handleRemoveQuestion(q.id)}
-    className="text-slate-500 hover:text-rose-400 p-1 transition-colors cursor-pointer"
-    title="Delete Question"
-  >
+                        type="button"
+                        onClick={() => handleRemoveQuestion(q.id)}
+                        className="text-slate-500 hover:text-rose-400 p-1 transition-colors cursor-pointer"
+                        title="Delete Question"
+                      >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   </div>
 
-                  {
-    /* Question Text */
-  }
+                  {/* Question Text */}
                   <textarea
-    rows={2}
-    value={q.questionText}
-    onChange={(e) => updateQuestion(q.id, { questionText: e.target.value })}
-    placeholder="Enter question wording..."
-    className="w-full px-3 py-1.5 rounded-lg bg-[#121628] border border-[#1E2642] text-xs text-white focus:outline-none focus:border-indigo-500"
-  />
+                    rows={2}
+                    value={q.questionText}
+                    onChange={(e) => updateQuestion(q.id, { questionText: e.target.value })}
+                    placeholder="Enter question wording..."
+                    className="w-full px-3 py-1.5 rounded-lg bg-[#121628] border border-[#1E2642] text-xs text-white focus:outline-none focus:border-indigo-500 placeholder-slate-500"
+                  />
 
-                  {
-    /* Multiple Choice Options */
-  }
-                  {q.type === "multiple_choice" && q.options && <div className="space-y-2 pt-1">
-                      <div className="text-[11px] text-slate-400">Options (Click radio to mark correct answer):</div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        {q.options.map((opt, oIdx) => <div key={oIdx} className="flex items-center gap-2">
-                            <input
-    type="radio"
-    name={`correct-${q.id}`}
-    checked={q.correctAnswer === opt}
-    onChange={() => updateQuestion(q.id, { correctAnswer: opt })}
-    className="accent-indigo-500 cursor-pointer"
-  />
-                            <input
-    type="text"
-    value={opt}
-    onChange={(e) => {
-      const newOpts = [...q.options];
-      newOpts[oIdx] = e.target.value;
-      updateQuestion(q.id, {
-        options: newOpts,
-        correctAnswer: q.correctAnswer === opt ? e.target.value : q.correctAnswer
-      });
-    }}
-    className="flex-1 px-2.5 py-1 rounded bg-[#121628] border border-[#1E2642] text-xs text-white"
-  />
-                          </div>)}
+                  {/* Multiple Choice Options */}
+                  {q.type === "multiple_choice" && q.options && (
+                    <div className="space-y-2 pt-1">
+                      <div className="flex items-center justify-between text-[11px]">
+                        <span className="text-slate-400">Options (Select radio for correct answer):</span>
+                        {(!q.correctAnswer || !q.options.some((o) => o && o.trim() === (q.correctAnswer || "").trim())) && (
+                          <span className="text-amber-400 font-semibold flex items-center gap-1 text-[11px]">
+                            <AlertCircle className="w-3.5 h-3.5" /> No correct answer selected
+                          </span>
+                        )}
                       </div>
-                    </div>}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {q.options.map((opt, oIdx) => {
+                          const isChecked = Boolean(q.correctAnswer && opt && q.correctAnswer.trim() === opt.trim());
+                          return (
+                            <div key={oIdx} className="flex items-center gap-2">
+                              <input
+                                type="radio"
+                                name={`correct-${q.id}`}
+                                checked={isChecked}
+                                onChange={() => updateQuestion(q.id, { correctAnswer: opt })}
+                                className="accent-indigo-500 cursor-pointer"
+                                title="Mark as correct answer"
+                              />
+                              <input
+                                type="text"
+                                value={opt}
+                                placeholder={`Option ${String.fromCharCode(65 + oIdx)}`}
+                                onChange={(e) => updateOption(q.id, oIdx, e.target.value)}
+                                className="flex-1 px-2.5 py-1 rounded bg-[#121628] border border-[#1E2642] text-xs text-white placeholder-slate-500"
+                              />
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
 
-                  {
-    /* Yes / No Options */
-  }
-                  {q.type === "yes_no" && <div className="flex items-center gap-4 text-xs pt-1">
-                      <span className="text-slate-400">Correct Proposition Answer:</span>
-                      <label className="flex items-center gap-1.5 text-white cursor-pointer">
-                        <input
-    type="radio"
-    name={`yn-${q.id}`}
-    value="Yes"
-    checked={q.correctAnswer === "Yes"}
-    onChange={() => updateQuestion(q.id, { correctAnswer: "Yes" })}
-    className="accent-emerald-500"
-  />
-                        <span>Yes</span>
-                      </label>
-                      <label className="flex items-center gap-1.5 text-white cursor-pointer">
-                        <input
-    type="radio"
-    name={`yn-${q.id}`}
-    value="No"
-    checked={q.correctAnswer === "No"}
-    onChange={() => updateQuestion(q.id, { correctAnswer: "No" })}
-    className="accent-emerald-500"
-  />
-                        <span>No</span>
-                      </label>
-                    </div>}
+                  {/* Yes / No Options */}
+                  {q.type === "yes_no" && (
+                    <div className="space-y-1.5 pt-1">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-slate-400">Correct Proposition Answer:</span>
+                        {(!q.correctAnswer || (q.correctAnswer !== "Yes" && q.correctAnswer !== "No")) && (
+                          <span className="text-amber-400 font-semibold flex items-center gap-1 text-[11px]">
+                            <AlertCircle className="w-3.5 h-3.5" /> Select Yes or No
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-4 text-xs">
+                        <label className="flex items-center gap-1.5 text-white cursor-pointer">
+                          <input
+                            type="radio"
+                            name={`yn-${q.id}`}
+                            value="Yes"
+                            checked={q.correctAnswer === "Yes"}
+                            onChange={() => updateQuestion(q.id, { correctAnswer: "Yes" })}
+                            className="accent-emerald-500 cursor-pointer"
+                          />
+                          <span>Yes</span>
+                        </label>
+                        <label className="flex items-center gap-1.5 text-white cursor-pointer">
+                          <input
+                            type="radio"
+                            name={`yn-${q.id}`}
+                            value="No"
+                            checked={q.correctAnswer === "No"}
+                            onChange={() => updateQuestion(q.id, { correctAnswer: "No" })}
+                            className="accent-emerald-500 cursor-pointer"
+                          />
+                          <span>No</span>
+                        </label>
+                      </div>
+                    </div>
+                  )}
 
-                  {
-    /* Fill in Blank / Short Answer */
-  }
-                  {(q.type === "fill_in_blank" || q.type === "short_answer") && <div className="space-y-1 pt-1">
+                  {/* Fill in Blank / Short Answer */}
+                  {(q.type === "fill_in_blank" || q.type === "short_answer") && (
+                    <div className="space-y-1 pt-1">
                       <label className="block text-[11px] text-slate-400">
-                        {q.type === "fill_in_blank" ? "Expected Keyword / Exact Blank Text:" : "Sample Grading Key / Benchmark Answer for Teacher Review:"}
+                        {q.type === "fill_in_blank"
+                          ? "Expected Keyword / Exact Blank Text:"
+                          : "Sample Grading Key / Benchmark Answer for Teacher Review:"}
                       </label>
                       <input
-    type="text"
-    value={q.correctAnswer || ""}
-    onChange={(e) => updateQuestion(q.id, { correctAnswer: e.target.value })}
-    placeholder="Expected answer or benchmark..."
-    className="w-full px-2.5 py-1.5 rounded-lg bg-[#121628] border border-[#1E2642] text-xs text-indigo-300 font-mono"
-  />
-                    </div>}
-                </div>)}
+                        type="text"
+                        value={q.correctAnswer || ""}
+                        onChange={(e) => updateQuestion(q.id, { correctAnswer: e.target.value })}
+                        placeholder="Expected answer or benchmark..."
+                        className="w-full px-2.5 py-1.5 rounded-lg bg-[#121628] border border-[#1E2642] text-xs text-indigo-300 font-mono placeholder-slate-600"
+                      />
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
 
           <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#1A223B]">
             <button
-    type="button"
-    onClick={onClose}
-    className="px-4 py-2 rounded-xl bg-[#161C30] text-xs font-semibold text-slate-300 hover:text-white cursor-pointer"
-  >
+              type="button"
+              onClick={onClose}
+              disabled={isSubmitting}
+              className="px-4 py-2 rounded-xl bg-[#161C30] text-xs font-semibold text-slate-300 hover:text-white cursor-pointer disabled:opacity-50"
+            >
               Cancel
             </button>
             <button
-    type="submit"
-    className="px-5 py-2 rounded-xl bg-[#5B46F8] hover:bg-[#4C38E6] text-xs font-bold text-white shadow-lg cursor-pointer"
-  >
-              Launch & Publish Quiz ({totalMarks} Marks)
+              type="submit"
+              disabled={isSubmitting}
+              className="px-5 py-2 rounded-xl bg-[#5B46F8] hover:bg-[#4C38E6] disabled:opacity-50 text-xs font-bold text-white shadow-lg cursor-pointer flex items-center gap-2"
+            >
+              {isSubmitting ? (
+                <>
+                  <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span>Publishing Quiz...</span>
+                </>
+              ) : (
+                <span>Launch & Publish Quiz ({totalMarks} Marks)</span>
+              )}
             </button>
           </div>
         </form>

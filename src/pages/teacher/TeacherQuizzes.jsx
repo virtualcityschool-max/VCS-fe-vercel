@@ -233,13 +233,13 @@ const validateQuizForm = (form, questions, timezone, publishImmediately = false)
     if (!q.max_marks || Number(q.max_marks) <= 0) return `Question ${i + 1}: marks must be > 0`;
 
     if (q.question_type === "SINGLE_CHOICE") {
-      if (q.options.length !== 4) return `Question ${i + 1}: must have exactly 4 options`;
+      if (q.options.length < 2) return `Question ${i + 1}: must have at least 2 options`;
       if (q.options.some((o) => !o.option_text.trim())) return `Question ${i + 1}: all option texts required`;
       if (q.options.filter((o) => o.is_correct).length !== 1)
         return `Question ${i + 1}: must mark exactly 1 correct option`;
     }
     if (q.question_type === "MULTIPLE_CHOICE") {
-      if (q.options.length !== 4) return `Question ${i + 1}: must have exactly 4 options`;
+      if (q.options.length < 2) return `Question ${i + 1}: must have at least 2 options`;
       if (q.options.some((o) => !o.option_text.trim())) return `Question ${i + 1}: all option texts required`;
       if (!q.options.some((o) => o.is_correct))
         return `Question ${i + 1}: must mark at least 1 correct option`;

@@ -11,6 +11,7 @@ import { useDateFormatters } from "../../../hooks/useDateFormatters";
 import ReferralLinkCard from "../../common/ReferralLinkCard";
 import StudentWorkspaceCard from "./StudentWorkspaceCard";
 import { toastManager } from "../../../utils/toastManager";
+import DigitalSessionClock from "../../common/DigitalSessionClock";
 
 const TodayAgendaSidebar = ({
   onOpenSubmitModal,
@@ -166,7 +167,14 @@ const TodayAgendaSidebar = ({
                       </p>
                     </div>
 
-                    <div className="shrink-0">
+                    <div className="shrink-0 flex items-center gap-1.5">
+                      {!isJoinable && session.scheduled_at && (
+                        <DigitalSessionClock
+                          scheduledAt={session.scheduled_at}
+                          status={session.status}
+                          variant="inline"
+                        />
+                      )}
                       {isJoinable ? (
                         <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[9px] font-black uppercase tracking-wider animate-pulse">
                           {session.status === "live" ? "Live Now" : "Join Now"}

@@ -9,6 +9,7 @@ import {
 import { useDateFormatters } from "../../../hooks/useDateFormatters";
 import TimezoneTag from "../../ui/TimezoneTag";
 import { toastManager } from "../../../utils/toastManager";
+import DigitalSessionClock from "../../common/DigitalSessionClock";
 
 const LiveScheduleTab = ({ onOpenWeeklyPlanner }) => {
   const dispatch = useDispatch();
@@ -228,9 +229,15 @@ const LiveScheduleTab = ({ onOpenWeeklyPlanner }) => {
               </div>
             </div>
 
-            {/* Action Join Box */}
-            <div className="shrink-0 flex flex-col items-start lg:items-end gap-2">
-              {isNextJoinable ? (
+            {/* Action Join Box with Digital Clock */}
+            <div className="shrink-0 flex flex-col items-start lg:items-end gap-3">
+              <DigitalSessionClock
+                scheduledAt={nextClass.scheduled_at}
+                status={nextClass.status}
+                variant="hero"
+              />
+
+              {isNextJoinable && (
                 <div className="space-y-1.5 w-full sm:w-auto">
                   <button
                     onClick={() => handleJoinClass(nextClass)}
@@ -251,18 +258,6 @@ const LiveScheduleTab = ({ onOpenWeeklyPlanner }) => {
                   <p className="text-[11px] text-emerald-400 text-center lg:text-right font-medium">
                     <i className="fas fa-check-circle mr-1" />
                     Within 30-min window • Direct classroom link active
-                  </p>
-                </div>
-              ) : (
-                <div className="p-3.5 rounded-xl bg-slate-800/80 border border-slate-700 space-y-1 text-right">
-                  <div className="flex items-center gap-2 text-xs font-bold text-slate-300">
-                    <i className="fas fa-lock text-indigo-400" />
-                    <span>Google Meet opens 30 min before class</span>
-                  </div>
-                  <p className="text-[11px] text-indigo-300 font-mono">
-                    {nextClass.scheduled_at
-                      ? `Starts at ${formatTime(nextClass.scheduled_at, timezone)} (${timezoneAbbr})`
-                      : "Schedule Pending"}
                   </p>
                 </div>
               )}
@@ -405,7 +400,15 @@ const LiveScheduleTab = ({ onOpenWeeklyPlanner }) => {
                     </p>
                   </div>
 
-                  <div className="shrink-0 flex items-center gap-2">
+                  <div className="shrink-0 flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                    {!canJoin && session.scheduled_at && (
+                      <DigitalSessionClock
+                        scheduledAt={session.scheduled_at}
+                        status={session.status}
+                        variant="card"
+                      />
+                    )}
+
                     {canJoin ? (
                       <button
                         onClick={() => handleJoinClass(session)}
@@ -422,9 +425,9 @@ const LiveScheduleTab = ({ onOpenWeeklyPlanner }) => {
                         </span>
                       </button>
                     ) : (
-                      <div className="px-3.5 py-2 rounded-xl bg-white/5 border border-white/10 text-slate-400 text-xs font-medium flex items-center gap-2">
-                        <i className="fas fa-lock text-indigo-400 text-xs" />
-                        <span>Opens at {unlockTimeStr}</span>
+                      <div className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-slate-400 text-xs font-medium flex items-center gap-1.5">
+                        <i className="fas fa-lock text-indigo-400 text-[11px]" />
+                        <span>Opens {unlockTimeStr}</span>
                       </div>
                     )}
                   </div>

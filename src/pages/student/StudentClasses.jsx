@@ -11,6 +11,7 @@ import axiosInstance from "../../utils/axiosInstance";
 import { FilterSelect } from "../../components/ui";
 import TimezoneTag from "../../components/ui/TimezoneTag";
 import { useDateFormatters } from "../../hooks";
+import DigitalSessionClock from "../../components/common/DigitalSessionClock";
 
 const STATUS_COLORS = {
   scheduled: "bg-blue-500/10 text-blue-400 border-blue-500/20",
@@ -60,6 +61,13 @@ const SessionListView = ({ sessions, formatTime, formatDate, onJoin, joiningId }
               </p>
             </div>
             <div className="flex items-center gap-2 shrink-0">
+              {session.scheduled_at && session.status !== "ended" && session.status !== "cancelled" && (
+                <DigitalSessionClock
+                  scheduledAt={session.scheduled_at}
+                  status={session.status}
+                  variant="inline"
+                />
+              )}
               <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-full border ${
                 STATUS_COLORS[session.status] || STATUS_COLORS.scheduled
               }`}>

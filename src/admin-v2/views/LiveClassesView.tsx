@@ -3,6 +3,8 @@ import { useApp } from '../context/AppContext';
 import { PageHeader } from '../components/common/PageHeader';
 import { inputCls } from '../components/common/FormControls';
 import { AlertTriangle, CalendarDays, ChevronLeft, ChevronRight, Info, Radio, Search, Users, Video } from 'lucide-react';
+// @ts-ignore
+import DigitalSessionClock from '../../components/common/DigitalSessionClock';
 
 type Phase = 'live' | 'late' | 'soon' | 'later' | 'ended' | 'cancelled';
 
@@ -131,6 +133,15 @@ export const LiveClassesView: React.FC = () => {
         <div className="col-span-4 md:col-span-2">
           <div className="text-sm font-bold text-slate-100 font-mono">{timeOf(x.start)}</div>
           <div className="text-[11px] text-slate-500">{timing}</div>
+          {!ended && (
+            <div className="mt-1">
+              <DigitalSessionClock
+                scheduledAt={x.start.toISOString()}
+                status={x.phase === 'live' ? 'live' : 'scheduled'}
+                variant="inline"
+              />
+            </div>
+          )}
         </div>
         <div className="col-span-8 md:col-span-4 min-w-0">
           <div className="text-sm font-semibold text-slate-100 truncate">{x.course || x.title}</div>

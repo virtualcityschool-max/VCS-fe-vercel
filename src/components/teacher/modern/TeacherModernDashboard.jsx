@@ -37,6 +37,7 @@ import {
 import { PerformanceAnalyticsView } from "./PerformanceAnalyticsView";
 import { AssignmentsQuizzesView } from "./AssignmentsQuizzesView";
 import { TeachingResourcesView } from "./TeachingResourcesView";
+import DigitalSessionClock from "../../common/DigitalSessionClock";
 export const TeacherDashboard = ({
   activeTab,
   onSelectTab,
@@ -1081,9 +1082,18 @@ export const TeacherDashboard = ({
                             {ses.courseName} · <span className="font-mono tabular-nums">{ses.timeAST}</span> ({ses.duration})
                           </div>
                         </div>
-                        <span className="text-[11px] font-mono text-slate-300 tabular-nums shrink-0">
-                          {ses.attendeesCount}/{ses.maxAttendees}
-                        </span>
+                        <div className="flex items-center gap-2 shrink-0">
+                          {ses.rawSession?.scheduled_at && (
+                            <DigitalSessionClock
+                              scheduledAt={ses.rawSession?.scheduled_at}
+                              status={ses.status}
+                              variant="inline"
+                            />
+                          )}
+                          <span className="text-[11px] font-mono text-slate-300 tabular-nums">
+                            {ses.attendeesCount}/{ses.maxAttendees}
+                          </span>
+                        </div>
                       </div>
                       <div className="mt-3 flex items-center justify-between gap-2 pt-2.5 border-t border-[#151B30]">
                         <span className="text-[11px] text-slate-400 truncate font-mono">
