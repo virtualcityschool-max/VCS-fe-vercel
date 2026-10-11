@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useSearchParams } from "react-router-dom";
 import {
   fetchStudentDashboard,
+  fetchStudentSessions,
   fetchMyEnrollments,
   fetchStudentQuizzes,
   selectDashboardLoading,
@@ -68,10 +69,11 @@ const StudentPortal = () => {
     setTimeout(() => setHasMounted(true), 0);
   }, []);
 
-  // Fetch dashboard data & quizzes on component mount
+  // Fetch dashboard data, sessions & quizzes on component mount
   useEffect(() => {
     if (hasMounted) {
       dispatch(fetchStudentDashboard());
+      dispatch(fetchStudentSessions());
       dispatch(fetchMyEnrollments());
       dispatch(fetchStudentQuizzes());
     }
@@ -147,6 +149,7 @@ const StudentPortal = () => {
                 onClick={() => {
                   dispatch(clearError());
                   dispatch(fetchStudentDashboard());
+                  dispatch(fetchStudentSessions());
                   dispatch(fetchMyEnrollments());
                   dispatch(fetchStudentQuizzes());
                 }}

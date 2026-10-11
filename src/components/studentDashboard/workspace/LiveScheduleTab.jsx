@@ -1,32 +1,59 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
   selectLiveSchedule,
   selectNextSession,
+  selectSessions,
   joinLiveSession,
 } from "../../../store/slices/studentDashboardSlice";
 import { useDateFormatters } from "../../../hooks/useDateFormatters";
 import TimezoneTag from "../../ui/TimezoneTag";
+import { toastManager } from "../../../utils/toastManager";
 
 const LiveScheduleTab = ({ onOpenWeeklyPlanner }) => {
   const dispatch = useDispatch();
   const liveSchedule = useSelector(selectLiveSchedule) || [];
+  const allSessions = useSelector(selectSessions) || [];
   const nextSession = useSelector(selectNextSession);
   const { timezone, timezoneAbbr, formatTime, formatDate } = useDateFormatters();
 
   const [activeFilter, setActiveFilter] = useState("all");
+  const [joiningId, setJoiningId] = useState(null);
 
-  // Real live schedule from Redux (no dummy fallbacks)
-  const sessions = liveSchedule || [];
+  // Merge and deduplicate sessions from /classroom/sessions/ and live_schedule
+  const sessions = useMemo(() => {
+    const map = new Map();
+    (allSessions || []).forEach((s) => {
+      const id = s.id || s.session_id;
+      if (id) map.set(id, s);
+    });
+    (liveSchedule || []).forEach((s) => {
+      const id = s.id || s.session_id;
+      if (id) {
+        map.set(id, { ...(map.get(id) || {}), ...s });
+      }
+    });
+    const list = Array.from(map.values());
+    return list.sort((a, b) => new Date(a.scheduled_at) - new Date(b.scheduled_at));
+  }, [allSessions, liveSchedule]);
 
   // The immediate next class spotlight
-  const nextClass = nextSession || (sessions.length > 0 ? sessions[0] : null);
+  const nextClass = useMemo(() => {
+    if (nextSession) return nextSession;
+    const upcoming = sessions.filter(
+      (s) => s.status === "live" || (s.scheduled_at && new Date(s.scheduled_at).getTime() > Date.now() - 60 * 60000)
+    );
+    return upcoming.length > 0 ? upcoming[0] : null;
+  }, [nextSession, sessions]);
 
   // Real-time minutes remaining calculation for the spotlight class
   const [minsToNext, setMinsToNext] = useState(null);
 
   useEffect(() => {
-    if (!nextClass?.scheduled_at) return;
+    if (!nextClass?.scheduled_at) {
+      setMinsToNext(null);
+      return;
+    }
     const updateCountdown = () => {
       const diff = Math.floor(
         (new Date(nextClass.scheduled_at).getTime() - Date.now()) / 60000
@@ -38,7 +65,44 @@ const LiveScheduleTab = ({ onOpenWeeklyPlanner }) => {
     return () => clearInterval(interval);
   }, [nextClass]);
 
-  const isNextJoinable = minsToNext <= 30 && minsToNext >= -60;
+  const isNextJoinable = Boolean(
+    nextClass && (
+      nextClass.status === "live" ||
+      nextClass.can_join === true ||
+      (minsToNext !== null && minsToNext <= 30 && minsToNext >= -90)
+    )
+  );
+
+  const handleJoinClass = async (sessionToJoin) => {
+    if (!sessionToJoin) return;
+    const sId = sessionToJoin.id || sessionToJoin.session_id;
+    if (!sId) {
+      toastManager.error("Invalid session identifier");
+      return;
+    }
+
+    setJoiningId(sId);
+    try {
+      const result = await dispatch(joinLiveSession(sId)).unwrap();
+      const link = result?.meeting_link || sessionToJoin.meeting_link;
+      if (link && typeof link === "string" && link.startsWith("http")) {
+        window.open(link, "_blank", "noopener,noreferrer");
+      } else {
+        toastManager.error("Google Meet link not available yet. Please notify admin or faculty.");
+      }
+    } catch (err) {
+      const fallbackLink = sessionToJoin.meeting_link;
+      if (fallbackLink && typeof fallbackLink === "string" && fallbackLink.startsWith("http")) {
+        window.open(fallbackLink, "_blank", "noopener,noreferrer");
+      } else {
+        toastManager.error(
+          typeof err === "string" ? err : err?.message || "Failed to join session. Meet link unavailable."
+        );
+      }
+    } finally {
+      setJoiningId(null);
+    }
+  };
 
   // Filter sessions
   const filteredSessions = sessions.filter((s) => {
@@ -110,22 +174,26 @@ const LiveScheduleTab = ({ onOpenWeeklyPlanner }) => {
               </div>
 
               <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
-                {nextClass.course_title}
+                {nextClass.course_title || (nextClass.course && nextClass.course.title) || nextClass.title}
               </h2>
 
               <p className="text-sm font-semibold text-indigo-200">
-                {nextClass.title}
+                {nextClass.title || nextClass.course_title}
               </p>
 
               <div className="flex flex-wrap items-center gap-y-2 gap-x-4 pt-1 text-xs text-slate-300">
                 <span className="flex items-center gap-1.5">
                   <i className="fas fa-user-tie text-indigo-400" />
-                  Faculty: <strong className="text-white">{nextClass.teacher_name || "Assigned Instructor"}</strong>
+                  Faculty: <strong className="text-white">{nextClass.teacher_name || nextClass.instructor_name || "Assigned Instructor"}</strong>
                 </span>
 
                 <span className="flex items-center gap-1.5 font-mono">
                   <i className="far fa-clock text-indigo-400" />
-                  {formatTime(nextClass.scheduled_at, timezone)} ({timezoneAbbr}) • {formatDate(nextClass.scheduled_at, timezone)}
+                  {nextClass.scheduled_at ? (
+                    `${formatTime(nextClass.scheduled_at, timezone)} (${timezoneAbbr}) • ${formatDate(nextClass.scheduled_at, timezone)}`
+                  ) : (
+                    "Schedule Pending"
+                  )}
                 </span>
               </div>
             </div>
@@ -134,15 +202,22 @@ const LiveScheduleTab = ({ onOpenWeeklyPlanner }) => {
             <div className="shrink-0 flex flex-col items-start lg:items-end gap-2">
               {isNextJoinable ? (
                 <div className="space-y-1.5 w-full sm:w-auto">
-                  <a
-                    href={nextClass.meeting_link || "https://meet.google.com"}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-black transition shadow-xl shadow-emerald-900/40 cursor-pointer"
+                  <button
+                    onClick={() => handleJoinClass(nextClass)}
+                    disabled={joiningId === (nextClass.id || nextClass.session_id)}
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-sm font-black transition shadow-xl shadow-emerald-900/40 cursor-pointer"
                   >
                     <i className="fas fa-video text-base" />
-                    <span>Join Google Meet (Starts in {minsToNext}m)</span>
-                  </a>
+                    <span>
+                      {joiningId === (nextClass.id || nextClass.session_id)
+                        ? "Entering Class..."
+                        : nextClass.status === "live"
+                        ? "Join Google Meet (Live Now)"
+                        : minsToNext !== null && minsToNext > 0
+                        ? `Join Google Meet (Starts in ${minsToNext}m)`
+                        : "Join Google Meet"}
+                    </span>
+                  </button>
                   <p className="text-[11px] text-emerald-400 text-center lg:text-right font-medium">
                     <i className="fas fa-check-circle mr-1" />
                     Within 30-min window • Direct classroom link active
@@ -155,7 +230,9 @@ const LiveScheduleTab = ({ onOpenWeeklyPlanner }) => {
                     <span>Google Meet opens 30 min before class</span>
                   </div>
                   <p className="text-[11px] text-indigo-300 font-mono">
-                    Starts at {formatTime(nextClass.scheduled_at, timezone)} ({timezoneAbbr})
+                    {nextClass.scheduled_at
+                      ? `Starts at ${formatTime(nextClass.scheduled_at, timezone)} (${timezoneAbbr})`
+                      : "Schedule Pending"}
                   </p>
                 </div>
               )}
@@ -228,18 +305,23 @@ const LiveScheduleTab = ({ onOpenWeeklyPlanner }) => {
         {filteredSessions.length > 0 ? (
           <div className="space-y-3">
             {filteredSessions.map((session) => {
-              const diffMins = Math.floor(
-                (new Date(session.scheduled_at).getTime() - Date.now()) / 60000
+              const sId = session.id || session.session_id;
+              const diffMins = session.scheduled_at
+                ? Math.floor((new Date(session.scheduled_at).getTime() - Date.now()) / 60000)
+                : null;
+              const canJoin = Boolean(
+                session.status === "live" ||
+                session.can_join === true ||
+                (diffMins !== null && diffMins <= 30 && diffMins >= -90)
               );
-              const canJoin = diffMins <= 30 && diffMins >= -60;
-              const unlockDate = new Date(
-                new Date(session.scheduled_at).getTime() - 30 * 60000
-              );
-              const unlockTimeStr = formatTime(unlockDate.toISOString(), timezone);
+              const unlockDate = session.scheduled_at
+                ? new Date(new Date(session.scheduled_at).getTime() - 30 * 60000)
+                : null;
+              const unlockTimeStr = unlockDate ? formatTime(unlockDate.toISOString(), timezone) : "--";
 
               return (
                 <div
-                  key={session.id}
+                  key={sId}
                   className={`p-4 rounded-xl border transition flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
                     canJoin
                       ? "bg-emerald-950/20 border-emerald-500/40 shadow-lg shadow-emerald-950/30"
@@ -254,7 +336,7 @@ const LiveScheduleTab = ({ onOpenWeeklyPlanner }) => {
                         }`}
                       />
                       <span className="text-[10px] font-black uppercase tracking-wider text-indigo-400">
-                        {session.course_title}
+                        {session.course_title || (session.course && session.course.title) || session.title}
                       </span>
                       <span
                         className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${
@@ -264,7 +346,7 @@ const LiveScheduleTab = ({ onOpenWeeklyPlanner }) => {
                         }`}
                       >
                         {canJoin
-                          ? diffMins <= 0
+                          ? session.status === "live" || (diffMins !== null && diffMins <= 0)
                             ? "LIVE NOW"
                             : `JOINABLE (IN ${diffMins}M)`
                           : `OPENS 30M PRIOR (${unlockTimeStr})`}
@@ -272,32 +354,43 @@ const LiveScheduleTab = ({ onOpenWeeklyPlanner }) => {
                     </div>
 
                     <h4 className="text-sm font-bold text-white truncate">
-                      {session.title}
+                      {session.title || session.course_title}
                     </h4>
 
                     <p className="text-xs text-slate-400 mt-0.5">
-                      Faculty: <span className="text-slate-200 font-semibold">{session.teacher_name}</span> • {session.room || "Google Meet"}
+                      Faculty: <span className="text-slate-200 font-semibold">{session.teacher_name || session.instructor_name || "Assigned Faculty"}</span> • {session.room || "Google Meet"}
                     </p>
 
                     <p className="text-[11px] text-slate-400 font-mono mt-1 flex items-center gap-1.5">
                       <i className="far fa-clock text-slate-500" />
-                      <span>{formatTime(session.scheduled_at, timezone)} <TimezoneTag /></span>
-                      <span>•</span>
-                      <span>{formatDate(session.scheduled_at, timezone)}</span>
+                      {session.scheduled_at ? (
+                        <>
+                          <span>{formatTime(session.scheduled_at, timezone)} <TimezoneTag /></span>
+                          <span>•</span>
+                          <span>{formatDate(session.scheduled_at, timezone)}</span>
+                        </>
+                      ) : (
+                        <span>Schedule Pending</span>
+                      )}
                     </p>
                   </div>
 
                   <div className="shrink-0 flex items-center gap-2">
                     {canJoin ? (
-                      <a
-                        href={session.meeting_link || "https://meet.google.com"}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-2 transition shadow-lg shadow-emerald-900/30 cursor-pointer"
+                      <button
+                        onClick={() => handleJoinClass(session)}
+                        disabled={joiningId === sId}
+                        className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-xs font-bold flex items-center gap-2 transition shadow-lg shadow-emerald-900/30 cursor-pointer"
                       >
                         <i className="fas fa-video text-xs" />
-                        <span>Join Class (Google Meet)</span>
-                      </a>
+                        <span>
+                          {joiningId === sId
+                            ? "Entering Class..."
+                            : session.status === "live"
+                            ? "Join Class (Live Now)"
+                            : "Join Class (Google Meet)"}
+                        </span>
+                      </button>
                     ) : (
                       <div className="px-3.5 py-2 rounded-xl bg-white/5 border border-white/10 text-slate-400 text-xs font-medium flex items-center gap-2">
                         <i className="fas fa-lock text-indigo-400 text-xs" />

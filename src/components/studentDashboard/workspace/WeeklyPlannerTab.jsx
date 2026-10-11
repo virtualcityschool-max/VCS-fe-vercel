@@ -1,8 +1,20 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import {
+  selectSessions,
+  selectLiveSchedule,
+  joinLiveSession,
+} from "../../../store/slices/studentDashboardSlice";
 import { useDateFormatters } from "../../../hooks/useDateFormatters";
+import { toastManager } from "../../../utils/toastManager";
 
 const WeeklyPlannerTab = ({ onOpenLiveSchedule }) => {
-  const { timezoneAbbr } = useDateFormatters();
+  const dispatch = useDispatch();
+  const allSessions = useSelector(selectSessions) || [];
+  const liveSchedule = useSelector(selectLiveSchedule) || [];
+  const { timezone, timezoneAbbr, formatTime, formatDate } = useDateFormatters();
+
+  const [joiningId, setJoiningId] = useState(null);
 
   // Determine current day of week (0 = Sunday, 1 = Monday ... 6 = Saturday)
   const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -11,56 +23,102 @@ const WeeklyPlannerTab = ({ onOpenLiveSchedule }) => {
 
   const [selectedDay, setSelectedDay] = useState(initialDay);
 
-  // Full 7-Day Curriculum Timetable (Sunday through Saturday for Gulf & Global Frameworks)
-  const weeklyTimetable = [
-    // SUNDAY (GCC / Gulf School Week Starter)
-    { day: "Sunday", time: "08:00 – 09:30", subject: "Mathematics", code: "IGCSE 0580", tutor: "Faculty Mathematics", room: "Room 204", topic: "Differential Calculus & Rate of Change Core" },
-    { day: "Sunday", time: "09:45 – 11:15", subject: "Chemistry", code: "IGCSE 0620", tutor: "Faculty Chemistry", room: "Lab 2", topic: "Chemical Bonding, Covalent & Ionic Structures" },
-    { day: "Sunday", time: "11:30 – 13:00", subject: "English", code: "Literature 0475", tutor: "Faculty English", room: "Hall A", topic: "Prose Analysis & Critical Commentary" },
-    { day: "Sunday", time: "13:30 – 15:00", subject: "Physics", code: "IGCSE 0625", tutor: "Faculty Physics", room: "Lab 1", topic: "Kinematics & Newton's Laws of Motion" },
+  // Merge real sessions from /classroom/sessions/ and live_schedule
+  const realSessions = useMemo(() => {
+    const map = new Map();
+    (allSessions || []).forEach((s) => {
+      const id = s.id || s.session_id;
+      if (id) map.set(id, s);
+    });
+    (liveSchedule || []).forEach((s) => {
+      const id = s.id || s.session_id;
+      if (id) map.set(id, { ...(map.get(id) || {}), ...s });
+    });
+    return Array.from(map.values()).sort(
+      (a, b) => new Date(a.scheduled_at) - new Date(b.scheduled_at)
+    );
+  }, [allSessions, liveSchedule]);
 
-    // MONDAY
-    { day: "Monday", time: "08:00 – 09:30", subject: "Mathematics", code: "IGCSE 0580", tutor: "Faculty Mathematics", room: "Room 204", topic: "Functions, Quad Equations & Graphs" },
-    { day: "Monday", time: "09:45 – 11:15", subject: "Physics", code: "IGCSE 0625", tutor: "Faculty Physics", room: "Lab 1", topic: "Electromagnetism & Induced Currents" },
-    { day: "Monday", time: "11:30 – 13:00", subject: "English", code: "Literature 0475", tutor: "Faculty English", room: "Hall A", topic: "Macbeth: Analysis of Act III Scene II" },
-    { day: "Monday", time: "13:30 – 15:00", subject: "Urdu", code: "First Lang 3247", tutor: "Faculty Urdu", room: "Room 105", topic: "Poetry Analysis: Ghalib & Allama Iqbal" },
+  const handleJoinClass = async (sessionToJoin) => {
+    if (!sessionToJoin) return;
+    const sId = sessionToJoin.id || sessionToJoin.session_id;
+    if (!sId) {
+      toastManager.error("Invalid session identifier");
+      return;
+    }
 
-    // TUESDAY
-    { day: "Tuesday", time: "08:00 – 09:30", subject: "Chemistry", code: "IGCSE 0620", tutor: "Faculty Chemistry", room: "Lab 2", topic: "Organic Chemistry: Functional Groups" },
-    { day: "Tuesday", time: "09:45 – 11:15", subject: "History", code: "Cambridge 0470", tutor: "Faculty History", room: "Room 302", topic: "World War I & Modern Treaties (1919-1923)" },
-    { day: "Tuesday", time: "11:30 – 13:00", subject: "Islamic Study", code: "Islamiyat 2058", tutor: "Faculty Islamiyat", room: "Hall B", topic: "The Major Themes of the Holy Quran" },
-    { day: "Tuesday", time: "13:30 – 15:00", subject: "Pakistan Study", code: "Pak Studies 2059", tutor: "Faculty Pak Studies", room: "Room 108", topic: "Decline of Mughal Empire & 1857 Movement" },
+    setJoiningId(sId);
+    try {
+      const result = await dispatch(joinLiveSession(sId)).unwrap();
+      const link = result?.meeting_link || sessionToJoin.meeting_link;
+      if (link && typeof link === "string" && link.startsWith("http")) {
+        window.open(link, "_blank", "noopener,noreferrer");
+      } else {
+        toastManager.error("Google Meet link not available yet. Please notify admin or faculty.");
+      }
+    } catch (err) {
+      const fallbackLink = sessionToJoin.meeting_link;
+      if (fallbackLink && typeof fallbackLink === "string" && fallbackLink.startsWith("http")) {
+        window.open(fallbackLink, "_blank", "noopener,noreferrer");
+      } else {
+        toastManager.error(
+          typeof err === "string" ? err : err?.message || "Failed to join session. Meet link unavailable."
+        );
+      }
+    } finally {
+      setJoiningId(null);
+    }
+  };
 
-    // WEDNESDAY
-    { day: "Wednesday", time: "08:00 – 09:30", subject: "Mathematics", code: "IGCSE 0580", tutor: "Faculty Mathematics", room: "Room 204", topic: "Trigonometric Identities & Sine/Cosine Rules" },
-    { day: "Wednesday", time: "09:45 – 11:15", subject: "Physics", code: "IGCSE 0625", tutor: "Faculty Physics", room: "Lab 1", topic: "Thermal Physics & Gas Laws Demonstration" },
-    { day: "Wednesday", time: "11:30 – 13:00", subject: "Chemistry", code: "IGCSE 0620", tutor: "Faculty Chemistry", room: "Lab 2", topic: "Stoichiometry & Mole Calculations" },
-    { day: "Wednesday", time: "13:30 – 15:00", subject: "English", code: "Literature 0475", tutor: "Faculty English", room: "Hall A", topic: "Discursive Essay Writing & Argumentation" },
+  // Map real sessions into weekly timetable rows
+  const mappedSchedule = useMemo(() => {
+    if (!realSessions.length) return [];
+    return realSessions.map((s) => {
+      const dateObj = new Date(s.scheduled_at);
+      let dayName = "Sunday";
+      try {
+        dayName = new Intl.DateTimeFormat("en-US", {
+          weekday: "long",
+          timeZone: timezone || undefined,
+        }).format(dateObj);
+      } catch (e) {
+        dayName = DAY_NAMES[dateObj.getDay()] || "Sunday";
+      }
 
-    // THURSDAY
-    { day: "Thursday", time: "08:00 – 09:30", subject: "Urdu", code: "First Lang 3247", tutor: "Faculty Urdu", room: "Room 105", topic: "Formal Letter Writing & Grammar Drill" },
-    { day: "Thursday", time: "09:45 – 11:15", subject: "History", code: "Cambridge 0470", tutor: "Faculty History", room: "Room 302", topic: "The League of Nations & Collective Security" },
-    { day: "Thursday", time: "11:30 – 13:00", subject: "Pakistan Study", code: "Pak Studies 2059", tutor: "Faculty Pak Studies", room: "Room 108", topic: "Sir Syed Ahmad Khan & Educational Reforms" },
-    { day: "Thursday", time: "13:30 – 15:00", subject: "Islamic Study", code: "Islamiyat 2058", tutor: "Faculty Islamiyat", room: "Hall B", topic: "Life in Makkah: Opposition & Migration" },
+      const diffMins = s.scheduled_at
+        ? Math.floor((dateObj.getTime() - Date.now()) / 60000)
+        : null;
+      const canJoin = Boolean(
+        s.status === "live" ||
+        s.can_join === true ||
+        (diffMins !== null && diffMins <= 30 && diffMins >= -90)
+      );
 
-    // FRIDAY (GCC Prayer Day & Cambridge Masterclasses)
-    { day: "Friday", time: "08:30 – 10:00", subject: "Mathematics Past Paper Drill", code: "IGCSE 0580", tutor: "Faculty Mathematics", room: "Room 204", topic: "Cambridge Paper 2 & 4 Past Paper Solutions" },
-    { day: "Friday", time: "10:15 – 11:45", subject: "Islamic Study", code: "Islamiyat 2058", tutor: "Faculty Islamiyat", room: "Hall B", topic: "Prophetic Traditions & Ethical Jurisprudence" },
-    { day: "Friday", time: "12:00 – 14:00", subject: "Jumu'ah Prayer & Midday Recess", code: "Recess", tutor: "All Faculty", room: "Campus / Online", topic: "Spiritual Prayer Break & Midday Fellowship" },
-    { day: "Friday", time: "14:30 – 16:00", subject: "Guided Science Mentorship", code: "Tutorial", tutor: "Faculty Science", room: "Lab 1", topic: "Weekly Academic Q&A and Faculty Office Hours" },
-
-    // SATURDAY (Weekend Practical Defenses & Exam Prep)
-    { day: "Saturday", time: "09:00 – 10:30", subject: "Physics Practical Laboratory", code: "IGCSE 0625", tutor: "Faculty Physics", room: "Lab 1", topic: "Alternative to Practical (Paper 6) Mechanics" },
-    { day: "Saturday", time: "10:45 – 12:15", subject: "Chemistry Laboratory Practical", code: "IGCSE 0620", tutor: "Faculty Chemistry", room: "Lab 2", topic: "Salt Analysis & Titration Experimental Technique" },
-    { day: "Saturday", time: "13:00 – 14:30", subject: "Exam Defense Masterclass", code: "Workshop", tutor: "Lead Examiners", room: "Hall A", topic: "Cambridge Exam Rubric & High-Grade Strategies" },
-  ];
+      return {
+        id: s.id || s.session_id,
+        rawSession: s,
+        day: dayName,
+        time: s.scheduled_at ? formatTime(s.scheduled_at, timezone) : "TBD",
+        dateFormatted: s.scheduled_at ? formatDate(s.scheduled_at, timezone) : "",
+        subject: s.course_title || (s.course && s.course.title) || s.title || "Live Class",
+        code: s.category || (s.course && s.course.code) || "Curriculum",
+        tutor: s.teacher_name || s.instructor_name || "Faculty Instructor",
+        room: s.room || "Google Meet",
+        topic: s.title || s.description || s.course_title || "Class Session",
+        status: s.status,
+        canJoin,
+        diffMins,
+        meeting_link: s.meeting_link,
+      };
+    });
+  }, [realSessions, timezone, formatTime, formatDate]);
 
   const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "All Days"];
 
   const filteredSchedule =
     selectedDay === "All Days"
-      ? weeklyTimetable
-      : weeklyTimetable.filter((item) => item.day === selectedDay);
+      ? mappedSchedule
+      : mappedSchedule.filter((item) => item.day === selectedDay);
 
   const upcomingExams = [
     {
@@ -167,34 +225,64 @@ const WeeklyPlannerTab = ({ onOpenLiveSchedule }) => {
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              {filteredSchedule.map((row, idx) => (
-                <tr key={idx} className="hover:bg-white/[0.02] transition">
-                  {selectedDay === "All Days" && (
-                    <td className="py-3.5 px-3 font-bold text-indigo-400 whitespace-nowrap">
-                      {row.day}
+              {filteredSchedule.length > 0 ? (
+                filteredSchedule.map((row, idx) => (
+                  <tr key={row.id || idx} className="hover:bg-white/[0.02] transition">
+                    {selectedDay === "All Days" && (
+                      <td className="py-3.5 px-3 font-bold text-indigo-400 whitespace-nowrap">
+                        {row.day}
+                      </td>
+                    )}
+                    <td className="py-3.5 px-3 text-slate-300 font-mono text-[11px] whitespace-nowrap">
+                      {row.time}
+                      {row.dateFormatted && (
+                        <span className="block text-[10px] text-slate-500 font-sans mt-0.5">
+                          {row.dateFormatted}
+                        </span>
+                      )}
                     </td>
-                  )}
-                  <td className="py-3.5 px-3 text-slate-300 font-mono text-[11px] whitespace-nowrap">
-                    {row.time}
-                  </td>
-                  <td className="py-3.5 px-3">
-                    <span className="font-bold text-white block">{row.subject}</span>
-                    <span className="text-[10px] font-mono text-indigo-400">{row.code}</span>
-                  </td>
-                  <td className="py-3.5 px-3 text-slate-300 text-xs max-w-xs">
-                    {row.topic}
-                  </td>
-                  <td className="py-3.5 px-3 text-slate-300 whitespace-nowrap">
-                    <i className="fas fa-chalkboard-teacher text-slate-500 mr-1.5" />
-                    {row.tutor}
-                  </td>
-                  <td className="py-3.5 px-3 text-right whitespace-nowrap">
-                    <span className="px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-[10px] font-mono text-slate-300">
-                      {row.room}
-                    </span>
+                    <td className="py-3.5 px-3">
+                      <span className="font-bold text-white block">{row.subject}</span>
+                      <span className="text-[10px] font-mono text-indigo-400">{row.code}</span>
+                    </td>
+                    <td className="py-3.5 px-3 text-slate-300 text-xs max-w-xs">
+                      {row.topic}
+                    </td>
+                    <td className="py-3.5 px-3 text-slate-300 whitespace-nowrap">
+                      <i className="fas fa-chalkboard-teacher text-slate-500 mr-1.5" />
+                      {row.tutor}
+                    </td>
+                    <td className="py-3.5 px-3 text-right whitespace-nowrap">
+                      {row.canJoin ? (
+                        <button
+                          onClick={() => handleJoinClass(row.rawSession)}
+                          disabled={joiningId === row.id}
+                          className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold text-[11px] inline-flex items-center gap-1.5 shadow-md shadow-emerald-950/20 cursor-pointer"
+                        >
+                          <i className="fas fa-video text-[10px]" />
+                          <span>{joiningId === row.id ? "Entering..." : "Join Now"}</span>
+                        </button>
+                      ) : (
+                        <span className="px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-[10px] font-mono text-slate-300">
+                          {row.room}
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={selectedDay === "All Days" ? 6 : 5} className="py-12 px-4 text-center">
+                    <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center mx-auto mb-3 border border-indigo-500/20">
+                      <i className="fas fa-calendar-times text-xl" />
+                    </div>
+                    <p className="text-white font-bold text-sm">No Live Classes Scheduled for {selectedDay}</p>
+                    <p className="text-slate-400 text-xs mt-1 max-w-md mx-auto">
+                      Classes planned on the admin dashboard will automatically appear here in your weekly planner. Select &quot;All Days&quot; to inspect all scheduled sessions.
+                    </p>
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>

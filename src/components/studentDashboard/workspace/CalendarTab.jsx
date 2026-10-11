@@ -1,13 +1,18 @@
-import React, { useState } from "react";
-import { useSelector } from "react-redux";
+import React, { useState, useMemo } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import {
   selectLiveSchedule,
+  selectSessions,
   selectAssignments,
+  joinLiveSession,
 } from "../../../store/slices/studentDashboardSlice";
 import { useDateFormatters } from "../../../hooks/useDateFormatters";
+import { toastManager } from "../../../utils/toastManager";
 
 const CalendarTab = ({ onOpenSubmitModal }) => {
+  const dispatch = useDispatch();
   const liveSchedule = useSelector(selectLiveSchedule) || [];
+  const allSessions = useSelector(selectSessions) || [];
   const assignments = useSelector(selectAssignments) || [];
   const { timezone, timezoneAbbr, formatTime, formatDate } = useDateFormatters();
 
@@ -15,6 +20,52 @@ const CalendarTab = ({ onOpenSubmitModal }) => {
   const [selectedDay, setSelectedDay] = useState(() => new Date().getDate());
   const [eventFilter, setEventFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [joiningId, setJoiningId] = useState(null);
+
+  // Merge all sessions from /classroom/sessions/ and live_schedule
+  const sessions = useMemo(() => {
+    const map = new Map();
+    (allSessions || []).forEach((s) => {
+      const id = s.id || s.session_id;
+      if (id) map.set(id, s);
+    });
+    (liveSchedule || []).forEach((s) => {
+      const id = s.id || s.session_id;
+      if (id) map.set(id, { ...(map.get(id) || {}), ...s });
+    });
+    return Array.from(map.values());
+  }, [allSessions, liveSchedule]);
+
+  const handleJoinClass = async (sessionToJoin) => {
+    if (!sessionToJoin) return;
+    const sId = sessionToJoin.id || sessionToJoin.session_id;
+    if (!sId) {
+      toastManager.error("Invalid session identifier");
+      return;
+    }
+
+    setJoiningId(sId);
+    try {
+      const result = await dispatch(joinLiveSession(sId)).unwrap();
+      const link = result?.meeting_link || sessionToJoin.meeting_link;
+      if (link && typeof link === "string" && link.startsWith("http")) {
+        window.open(link, "_blank", "noopener,noreferrer");
+      } else {
+        toastManager.error("Google Meet link not available yet. Please notify admin or faculty.");
+      }
+    } catch (err) {
+      const fallbackLink = sessionToJoin.meeting_link;
+      if (fallbackLink && typeof fallbackLink === "string" && fallbackLink.startsWith("http")) {
+        window.open(fallbackLink, "_blank", "noopener,noreferrer");
+      } else {
+        toastManager.error(
+          typeof err === "string" ? err : err?.message || "Failed to join session. Meet link unavailable."
+        );
+      }
+    } finally {
+      setJoiningId(null);
+    }
+  };
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
@@ -30,7 +81,7 @@ const CalendarTab = ({ onOpenSubmitModal }) => {
   const selectedDateStr = selectedDateObj.toDateString();
 
   // Filter actual sessions for selected day
-  const daySessions = liveSchedule.filter((s) => {
+  const daySessions = sessions.filter((s) => {
     if (!s.scheduled_at) return false;
     return new Date(s.scheduled_at).toDateString() === selectedDateStr;
   });
@@ -91,7 +142,7 @@ const CalendarTab = ({ onOpenSubmitModal }) => {
             <i className="fas fa-video text-indigo-400" />
           </div>
           <p className="text-2xl font-black text-white mt-1">
-            {liveSchedule.length}
+            {sessions.length}
           </p>
           <p className="text-[10px] text-slate-500 mt-0.5">Scheduled sessions</p>
         </div>
@@ -230,7 +281,7 @@ const CalendarTab = ({ onOpenSubmitModal }) => {
               const loopDate = new Date(year, month, day);
               const loopDateStr = loopDate.toDateString();
 
-              const hasSession = liveSchedule.some(
+              const hasSession = sessions.some(
                 (s) =>
                   s.scheduled_at &&
                   new Date(s.scheduled_at).toDateString() === loopDateStr
@@ -362,39 +413,41 @@ const CalendarTab = ({ onOpenSubmitModal }) => {
               Live Google Meet Classes ({filteredDaySessions.length})
             </h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {filteredDaySessions.map((session) => (
-                <div
-                  key={session.id}
-                  className="p-3.5 rounded-xl bg-slate-800/40 border border-white/5 hover:border-indigo-500/30 transition flex items-center justify-between gap-3 group"
-                >
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-mono font-bold text-indigo-400">
-                        {formatTime(session.scheduled_at, timezone)}
-                      </span>
-                      <span className="px-2 py-0.5 rounded bg-white/5 text-slate-300 text-[10px] font-bold">
-                        {session.room || "Google Meet"}
-                      </span>
-                    </div>
-                    <h5 className="text-sm font-bold text-white mt-1 group-hover:text-indigo-300 transition truncate">
-                      {session.course_title || session.title}
-                    </h5>
-                    <p className="text-xs text-slate-400 truncate">
-                      {session.teacher_name || "Assigned Faculty"}
-                    </p>
-                  </div>
-
-                  <a
-                    href={session.meeting_link || "https://meet.google.com"}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-10 h-10 rounded-xl bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white flex items-center justify-center transition shadow-lg shrink-0 cursor-pointer"
-                    title="Join Live Class Session"
+              {filteredDaySessions.map((session) => {
+                const sId = session.id || session.session_id;
+                return (
+                  <div
+                    key={sId}
+                    className="p-3.5 rounded-xl bg-slate-800/40 border border-white/5 hover:border-indigo-500/30 transition flex items-center justify-between gap-3 group"
                   >
-                    <i className="fas fa-video text-sm" />
-                  </a>
-                </div>
-              ))}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-mono font-bold text-indigo-400">
+                          {formatTime(session.scheduled_at, timezone)}
+                        </span>
+                        <span className="px-2 py-0.5 rounded bg-white/5 text-slate-300 text-[10px] font-bold">
+                          {session.room || "Google Meet"}
+                        </span>
+                      </div>
+                      <h5 className="text-sm font-bold text-white mt-1 group-hover:text-indigo-300 transition truncate">
+                        {session.title || session.course_title}
+                      </h5>
+                      <p className="text-xs text-slate-400 truncate">
+                        {session.teacher_name || session.instructor_name || "Assigned Faculty"}
+                      </p>
+                    </div>
+
+                    <button
+                      onClick={() => handleJoinClass(session)}
+                      disabled={joiningId === sId}
+                      className="w-10 h-10 rounded-xl bg-blue-600/20 hover:bg-blue-600 disabled:opacity-50 text-blue-400 hover:text-white flex items-center justify-center transition shadow-lg shrink-0 cursor-pointer"
+                      title="Join Live Class Session"
+                    >
+                      <i className={`fas ${joiningId === sId ? "fa-spinner fa-spin" : "fa-video"} text-sm`} />
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}

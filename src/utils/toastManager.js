@@ -148,3 +148,5 @@ export const useToastCleanup = () => {
     };
   }, []);
 };
+
+export default toastManager;

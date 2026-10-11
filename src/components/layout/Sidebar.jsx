@@ -136,6 +136,7 @@ const NAV_CONFIG = {
   student: [
     { label: "Overview",        to: "/student?tab=overview",   icon: "fas fa-th-large" },
     { label: "Live Schedule",   to: "/student?tab=schedule",   icon: "fas fa-video" },
+    { label: "My Classes",      to: "/student/classes",        icon: "fas fa-chalkboard" },
     { label: "Weekly Planner",  to: "/student?tab=planner",    icon: "fas fa-calendar-alt" },
     { label: "Calendar",        to: "/student?tab=calendar",   icon: "fas fa-calendar-days" },
     { label: "Attendance",      to: "/student?tab=attendance", icon: "fas fa-user-check" },

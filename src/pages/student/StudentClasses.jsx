@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { toastManager } from "../../utils/toastManager";
 import {
   fetchStudentSessions,
   fetchStudentDashboard,
+  joinLiveSession,
 } from "../../store/slices/studentDashboardSlice";
 import SessionCalendarView from "../../components/common/SessionCalendarView";
 import axiosInstance from "../../utils/axiosInstance";
@@ -17,7 +19,7 @@ const STATUS_COLORS = {
   cancelled: "bg-red-500/10 text-red-400 border-red-500/20",
 };
 
-const SessionListView = ({ sessions, formatTime, formatDate }) => {
+const SessionListView = ({ sessions, formatTime, formatDate, onJoin, joiningId }) => {
   const sorted = [...sessions].sort(
     (a, b) => new Date(a.scheduled_at) - new Date(b.scheduled_at)
   );
@@ -55,11 +57,23 @@ const SessionListView = ({ sessions, formatTime, formatDate }) => {
                 {formatDate(session.scheduled_at)}
               </p>
             </div>
-            <span className={`shrink-0 text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-full border ${
-              STATUS_COLORS[session.status] || STATUS_COLORS.scheduled
-            }`}>
-              {session.status || "scheduled"}
-            </span>
+            <div className="flex items-center gap-2 shrink-0">
+              <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-full border ${
+                STATUS_COLORS[session.status] || STATUS_COLORS.scheduled
+              }`}>
+                {session.status || "scheduled"}
+              </span>
+              {(session.status === "live" || session.can_join) && onJoin && (
+                <button
+                  onClick={() => onJoin(session)}
+                  disabled={joiningId === session.id}
+                  className="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold text-xs flex items-center gap-1.5 transition shadow-sm cursor-pointer"
+                >
+                  <i className="fas fa-video text-[10px]" />
+                  <span>{joiningId === session.id ? "Entering..." : "Join"}</span>
+                </button>
+              )}
+            </div>
           </div>
         ))}
       </div>
@@ -78,6 +92,38 @@ const StudentClasses = () => {
   const [courses, setCourses] = useState([]);
   const [coursesLoading, setCoursesLoading] = useState(false);
   const [view, setView] = useState("table");
+  const [joiningId, setJoiningId] = useState(null);
+
+  const handleJoinClass = async (sessionToJoin) => {
+    if (!sessionToJoin) return;
+    const sId = sessionToJoin.id || sessionToJoin.session_id;
+    if (!sId) {
+      toastManager.error("Invalid session identifier");
+      return;
+    }
+
+    setJoiningId(sId);
+    try {
+      const result = await dispatch(joinLiveSession(sId)).unwrap();
+      const link = result?.meeting_link || sessionToJoin.meeting_link;
+      if (link && typeof link === "string" && link.startsWith("http")) {
+        window.open(link, "_blank", "noopener,noreferrer");
+      } else {
+        toastManager.error("Google Meet link not available yet. Please notify admin or faculty.");
+      }
+    } catch (err) {
+      const fallbackLink = sessionToJoin.meeting_link;
+      if (fallbackLink && typeof fallbackLink === "string" && fallbackLink.startsWith("http")) {
+        window.open(fallbackLink, "_blank", "noopener,noreferrer");
+      } else {
+        toastManager.error(
+          typeof err === "string" ? err : err?.message || "Failed to join session. Meet link unavailable."
+        );
+      }
+    } finally {
+      setJoiningId(null);
+    }
+  };
 
   // Fetch courses from /courses/ for the dropdown
   useEffect(() => {
@@ -154,7 +200,13 @@ const StudentClasses = () => {
           </div>
       </div>
       <div className="sm:hidden">
-        <SessionListView sessions={sessionList} formatTime={formatTime} formatDate={formatDate} />
+        <SessionListView
+          sessions={sessionList}
+          formatTime={formatTime}
+          formatDate={formatDate}
+          onJoin={handleJoinClass}
+          joiningId={joiningId}
+        />
       </div>
 
       {/* sm+: selected view */}
@@ -162,7 +214,13 @@ const StudentClasses = () => {
         {view === "calendar" ? (
           <SessionCalendarView sessions={sessionList} loading={!!isFetchingSessions} />
         ) : (
-          <SessionListView sessions={sessionList} formatTime={formatTime} formatDate={formatDate} />
+          <SessionListView
+            sessions={sessionList}
+            formatTime={formatTime}
+            formatDate={formatDate}
+            onJoin={handleJoinClass}
+            joiningId={joiningId}
+          />
         )}
       </div>
     </div>

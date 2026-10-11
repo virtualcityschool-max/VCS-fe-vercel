@@ -1,13 +1,16 @@
-import React from "react";
-import { useSelector } from "react-redux";
+import React, { useMemo, useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
   selectLiveSchedule,
+  selectSessions,
   selectAssignments,
+  joinLiveSession,
 } from "../../../store/slices/studentDashboardSlice";
 import { useDateFormatters } from "../../../hooks/useDateFormatters";
 import ReferralLinkCard from "../../common/ReferralLinkCard";
 import StudentWorkspaceCard from "./StudentWorkspaceCard";
+import { toastManager } from "../../../utils/toastManager";
 
 const TodayAgendaSidebar = ({
   onOpenSubmitModal,
@@ -16,12 +19,15 @@ const TodayAgendaSidebar = ({
   onViewAllSchedule,
   onViewAllPlanner,
 }) => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const liveSchedule = useSelector(selectLiveSchedule) || [];
+  const allSessions = useSelector(selectSessions) || [];
   const assignments = useSelector(selectAssignments) || [];
   const { timezone, timezoneAbbr, formatTime } = useDateFormatters();
 
-  const [currentTime, setCurrentTime] = React.useState(() => Date.now());
+  const [currentTime, setCurrentTime] = useState(() => Date.now());
+  const [joiningId, setJoiningId] = useState(null);
 
   React.useEffect(() => {
     const id = setInterval(() => setCurrentTime(Date.now()), 30000);
@@ -30,11 +36,54 @@ const TodayAgendaSidebar = ({
 
   const todayStr = new Date(currentTime).toDateString();
 
-  // Filter actual today's live sessions from Redux (no mock dummy fallbacks)
-  const sessions = liveSchedule.filter((s) => {
-    if (!s.scheduled_at) return false;
-    return new Date(s.scheduled_at).toDateString() === todayStr;
-  });
+  // Merge sessions from /classroom/sessions/ and live_schedule for today
+  const sessions = useMemo(() => {
+    const map = new Map();
+    (allSessions || []).forEach((s) => {
+      const id = s.id || s.session_id;
+      if (id) map.set(id, s);
+    });
+    (liveSchedule || []).forEach((s) => {
+      const id = s.id || s.session_id;
+      if (id) map.set(id, { ...(map.get(id) || {}), ...s });
+    });
+    const list = Array.from(map.values()).filter((s) => {
+      if (!s.scheduled_at) return false;
+      return new Date(s.scheduled_at).toDateString() === todayStr;
+    });
+    return list.sort((a, b) => new Date(a.scheduled_at) - new Date(b.scheduled_at));
+  }, [allSessions, liveSchedule, todayStr]);
+
+  const handleJoinSession = async (sessionToJoin) => {
+    if (!sessionToJoin) return;
+    const sId = sessionToJoin.id || sessionToJoin.session_id;
+    if (!sId) {
+      toastManager.error("Invalid session identifier");
+      return;
+    }
+
+    setJoiningId(sId);
+    try {
+      const result = await dispatch(joinLiveSession(sId)).unwrap();
+      const link = result?.meeting_link || sessionToJoin.meeting_link;
+      if (link && typeof link === "string" && link.startsWith("http")) {
+        window.open(link, "_blank", "noopener,noreferrer");
+      } else {
+        toastManager.error("Google Meet link not available yet. Please notify admin or faculty.");
+      }
+    } catch (err) {
+      const fallbackLink = sessionToJoin.meeting_link;
+      if (fallbackLink && typeof fallbackLink === "string" && fallbackLink.startsWith("http")) {
+        window.open(fallbackLink, "_blank", "noopener,noreferrer");
+      } else {
+        toastManager.error(
+          typeof err === "string" ? err : err?.message || "Failed to join session. Meet link unavailable."
+        );
+      }
+    } finally {
+      setJoiningId(null);
+    }
+  };
 
   // Filter actual pending & overdue assignments (no mock dummy fallbacks)
   const pendingAssignments = assignments.filter(
@@ -70,10 +119,15 @@ const TodayAgendaSidebar = ({
         {sessions.length > 0 ? (
           <div className="space-y-3">
             {sessions.slice(0, 3).map((session) => {
+              const sId = session.id || session.session_id;
               const diffMins = Math.floor(
                 (new Date(session.scheduled_at).getTime() - currentTime) / 60000
               );
-              const isJoinable = diffMins <= 30 && diffMins >= -60;
+              const isJoinable = Boolean(
+                session.status === "live" ||
+                session.can_join === true ||
+                (diffMins <= 30 && diffMins >= -90)
+              );
               const unlockDate = new Date(
                 new Date(session.scheduled_at).getTime() - 30 * 60000
               );
@@ -81,7 +135,7 @@ const TodayAgendaSidebar = ({
 
               return (
                 <div
-                  key={session.id}
+                  key={sId}
                   className={`p-3 rounded-xl border transition flex flex-col gap-2 ${
                     isJoinable
                       ? "bg-emerald-950/20 border-emerald-500/30 shadow-md shadow-emerald-950/20"
@@ -101,7 +155,7 @@ const TodayAgendaSidebar = ({
                         </span>
                       </div>
                       <h4 className="text-xs font-bold text-white truncate">
-                        {session.course_title || session.title}
+                        {session.title || session.course_title}
                       </h4>
                       <p className="text-[11px] text-slate-400 truncate">
                         {session.teacher_name || session.instructor_name || "Assigned Faculty"} • {session.room || "Google Meet"}
@@ -111,7 +165,7 @@ const TodayAgendaSidebar = ({
                     <div className="shrink-0">
                       {isJoinable ? (
                         <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[9px] font-black uppercase tracking-wider animate-pulse">
-                          Join Now
+                          {session.status === "live" ? "Live Now" : "Join Now"}
                         </span>
                       ) : (
                         <span className="px-2 py-0.5 rounded-full bg-white/5 text-slate-400 text-[9px] font-mono">
@@ -122,15 +176,20 @@ const TodayAgendaSidebar = ({
                   </div>
 
                   {isJoinable ? (
-                    <a
-                      href={session.meeting_link || "https://meet.google.com"}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-full py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold transition flex items-center justify-center gap-1.5 shadow-md shadow-emerald-900/30 cursor-pointer"
+                    <button
+                      onClick={() => handleJoinSession(session)}
+                      disabled={joiningId === sId}
+                      className="w-full py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-[11px] font-bold transition flex items-center justify-center gap-1.5 shadow-md shadow-emerald-900/30 cursor-pointer"
                     >
                       <i className="fas fa-video text-[10px]" />
-                      <span>Enter Google Meet (Starts in {Math.max(0, diffMins)}m)</span>
-                    </a>
+                      <span>
+                        {joiningId === sId
+                          ? "Entering Room..."
+                          : session.status === "live"
+                          ? "Enter Google Meet (Live Now)"
+                          : `Enter Google Meet (Starts in ${Math.max(0, diffMins)}m)`}
+                      </span>
+                    </button>
                   ) : (
                     <div className="text-[10px] text-slate-500 flex items-center gap-1">
                       <i className="fas fa-lock text-[9px] text-slate-400" />
