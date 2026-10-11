@@ -5,6 +5,7 @@ import {
   fetchTeacherDashboard,
   fetchMyCourses,
   fetchAssignments,
+  fetchQuizzes,
   createAssignment,
   startLiveSession,
   endLiveSession,
@@ -33,16 +34,6 @@ import {
   AdvancedQuizBuilderModal,
 } from "../../components/teacher/modern/AssignmentQuizModals";
 import { ReviewQuizModal } from "../../components/teacher/modern/ReviewQuizModal";
-import {
-  INITIAL_QUIZZES,
-  INITIAL_ASSIGNMENTS,
-  INITIAL_TEACHING_RESOURCES,
-  INITIAL_EVALUATIONS,
-  INITIAL_SLOTS,
-  INITIAL_ANNOUNCEMENTS,
-  INITIAL_TASKS,
-  INITIAL_COURSES,
-} from "../../components/teacher/modern/vcsTeacherData";
 
 // Top-level Unified Timezone Mapping (Finding R2-9)
 const TZ_IANA_MAP = { AST: "Asia/Riyadh", PKT: "Asia/Karachi", BST: "Europe/London" };
@@ -95,11 +86,11 @@ const TeacherPortal = () => {
   // Active Tab from URL search params (e.g. /teacher?tab=attendance)
   const activeTab = searchParams.get("tab") || "dashboard";
 
-  const handleSelectTab = (tab) => {
+  const handleSelectTab = (tab, extra = {}) => {
     if (tab === "dashboard") {
       setSearchParams({});
     } else {
-      setSearchParams({ tab });
+      setSearchParams({ tab, ...extra });
     }
   };
 
@@ -110,6 +101,7 @@ const TeacherPortal = () => {
     myCourses,
     assignments,
     allAttendance,
+    quizzes: apiQuizzes,
   } = useSelector((state) => state.teachers);
 
   // Timezone Switcher state (display toggle)
@@ -124,20 +116,18 @@ const TeacherPortal = () => {
 
   const activeTzId = TZ_IANA_MAP[currentTz] || "Asia/Riyadh";
 
-  // Stateful collections initialized with curriculum models and API backing
-  const [quizzes, setQuizzes] = useState(INITIAL_QUIZZES);
-  const [slots] = useState(INITIAL_SLOTS);
-  const [resources, setResources] = useState(INITIAL_TEACHING_RESOURCES);
-  const [evaluations] = useState(INITIAL_EVALUATIONS);
-  const [announcements, setAnnouncements] = useState(INITIAL_ANNOUNCEMENTS);
-  const [customAssignments, setCustomAssignments] = useState([]);
+  // Real data only — every list starts empty and is filled from the backend
+  const [quizSubmissions, setQuizSubmissions] = useState([]);
+  const [announcements, setAnnouncements] = useState([]);
+  // Submissions graded in this visit, shown as graded before the dashboard refetch lands
+  const [gradedLocally, setGradedLocally] = useState({});
 
   // Modals state
   const [announcementModalOpen, setAnnouncementModalOpen] = useState(false);
   const [newSessionModalOpen, setNewSessionModalOpen] = useState(false);
   const [createAssignmentModalOpen, setCreateAssignmentModalOpen] = useState(false);
   const [advancedQuizBuilderModalOpen, setAdvancedQuizBuilderModalOpen] = useState(false);
-  const [reviewingQuiz, setReviewingQuiz] = useState(null);
+  const [reviewingQuizSubmissionId, setReviewingQuizSubmissionId] = useState(null);
   const [gradingTask, setGradingTask] = useState(null);
 
   // Session Alert & Confirm Dialogs
@@ -146,29 +136,35 @@ const TeacherPortal = () => {
   const [endSessionConfirm, setEndSessionConfirm] = useState({ open: false, sessionId: null });
   const [leaveAdminConfirm, setLeaveAdminConfirm] = useState({ open: false, sessionId: null });
 
+  const loadQuizSubmissions = () =>
+    teacherService
+      .getAllQuizSubmissions()
+      .then((data) => setQuizSubmissions(Array.isArray(data) ? data : data?.results || []))
+      .catch(() => setQuizSubmissions([]));
+
   // Initial Data Fetch
   useEffect(() => {
     dispatch(fetchTeacherDashboard());
     dispatch(fetchMyCourses());
     dispatch(fetchAssignments());
     dispatch(fetchAllAttendance());
+    dispatch(fetchQuizzes());
+    loadQuizSubmissions();
   }, [dispatch]);
 
-  // Map Live Courses (Production clean: empty when no courses enrolled)
+  // Map Live Courses (empty when the teacher has no courses)
   const mappedCourses = useMemo(() => {
     if (Array.isArray(myCourses) && myCourses.length > 0) {
       return myCourses.map((c, idx) => ({
         id: String(c.id),
         title: c.title,
-        code: c.category?.name || c.code || `VCS-${c.id}`,
-        category: c.category?.name || "CURRICULUM",
-        level: c.level?.name || c.level || "Standard Tier",
-        enrolledCount: c.enrolled_count ?? c.students_count ?? 0,
+        code: c.subject_code || c.category?.name || c.category || `VCS-${c.id}`,
+        category: c.category?.name || c.category || "",
+        level: c.level?.name || c.level || "",
+        enrolledCount: c.total_enrolled ?? c.enrolled_students?.length ?? 0,
+        enrolledStudents: Array.isArray(c.enrolled_students) ? c.enrolled_students : [],
         published: c.status === "published",
-        progress: c.progress ?? 0,
-        syllabusUnitsCompleted: c.syllabus_completed ?? null,
-        syllabusTotalUnits: c.syllabus_total ?? null,
-        nextSessionTime: c.next_session || "Scheduled Class",
+        nextSessionTime: c.upcoming_session ? "Class scheduled" : "No upcoming class",
         description: c.description || "",
         accentGradient:
           idx % 4 === 0
@@ -181,95 +177,109 @@ const TeacherPortal = () => {
         rawCourse: c,
       }));
     }
-    return INITIAL_COURSES;
+    return [];
   }, [myCourses]);
 
-  // Derived real attendance mapped into view shape (Findings R2-7, R3-1)
-  const attendance = useMemo(() => {
-    const base = Array.isArray(allAttendance) ? allAttendance : [];
-    const studentRecords = base.filter((r) => r.participant_role === "student");
-    if (studentRecords.length === 0) return [];
+  // Quizzes from /quizzes/ with their real submissions attached
+  const quizzes = useMemo(() => {
+    if (!Array.isArray(apiQuizzes)) return [];
+    const fmt = (iso) =>
+      iso ? `${formatDate(iso, profileTimezone)} · ${formatTime(iso, profileTimezone)}` : "";
+    return apiQuizzes.map((q) => {
+      const subs = quizSubmissions
+        .filter((s) => String(s.quiz) === String(q.id))
+        .map((s) => ({
+          id: s.id,
+          studentName: s.student_name || "Student",
+          studentRoll: `Submission #${s.id}`,
+          submittedAt: s.submitted_at ? fmt(s.submitted_at) : "",
+          // backend "submitted" = written answers still waiting for the teacher
+          status: s.status === "submitted" ? "submitted" : "reviewed",
+          totalScore: Number(s.obtained_marks ?? 0),
+          maxScore: s.total_marks_snapshot ?? q.total_marks ?? 0,
+          percentage: typeof s.percentage === "number" ? s.percentage : null,
+        }));
+      const scored = subs.filter((s) => s.status === "reviewed" && s.percentage != null);
+      const published = Boolean(q.is_published);
+      const closed = Boolean(q.is_overdue);
+      return {
+        id: String(q.id),
+        title: q.title,
+        courseTitle:
+          q.course_title ||
+          (typeof q.course === "object" ? q.course?.title : null) ||
+          mappedCourses.find((c) => String(c.id) === String(q.course))?.title ||
+          "",
+        description: q.description || "",
+        marks: q.total_marks || 0,
+        questionsCount: q.questions_count ?? q.questions?.length ?? 0,
+        launchLabel: fmt(q.published_at),
+        dueLabel: fmt(q.due_date),
+        status: !published ? "scheduled" : closed ? "closed" : "published",
+        submissionsCount: q.submissions_count ?? subs.length,
+        averageScore: scored.length
+          ? scored.reduce((a, s) => a + s.percentage, 0) / scored.length
+          : undefined,
+        topScore: scored.length ? Math.max(...scored.map((s) => s.percentage)) : undefined,
+        questions: (q.questions || []).map((ques) => ({
+          id: String(ques.id),
+          type: (ques.question_type || "").toLowerCase(),
+          questionText: ques.question_text || "",
+          marks: ques.max_marks || 0,
+          options: (ques.options || []).map((opt) => (typeof opt === "string" ? opt : opt.option_text)),
+        })),
+        submissions: subs,
+        rawQuiz: q,
+      };
+    });
+  }, [apiQuizzes, quizSubmissions, mappedCourses, profileTimezone]);
 
+  // Per-class roster: every enrolled student of each course, enriched with their attendance records
+  const attendance = useMemo(() => {
+    const records = (Array.isArray(allAttendance) ? allAttendance : []).filter(
+      (r) => r.participant_role === "student"
+    );
     const todayStr = (() => {
       try {
-        return new Intl.DateTimeFormat("en-CA", { timeZone: profileTimezone || "Asia/Riyadh" }).format(new Date());
+        return new Intl.DateTimeFormat("en-CA", { timeZone: profileTimezone || undefined }).format(new Date());
       } catch {
         return new Date().toISOString().split("T")[0];
       }
     })();
-    const groups = new Map();
-
-    studentRecords.forEach((r) => {
-      const studentObj = typeof r.student === "object" ? r.student : {};
-      const sIdRaw = r.student?.id ?? r.student_id ?? (typeof r.student !== "object" ? r.student : null) ?? r.rollNo;
-      const sId = sIdRaw != null ? String(sIdRaw) : "";
-      if (!sId) return;
-
-      const sName =
-        r.student_name ||
-        (studentObj.first_name ? `${studentObj.first_name} ${studentObj.last_name || ""}`.trim() : null) ||
-        studentObj.username ||
-        r.name ||
-        `Student #${sId}`;
-
-      const cTitle =
-        r.course_title ||
-        r.course?.title ||
-        (typeof r.course === "string" ? r.course : null) ||
-        mappedCourses.find((c) => String(c.id) === String(r.course_id || r.course || r.session?.course_id || r.session?.course))?.title ||
-        "Unassigned";
-
-      const groupKey = `${cTitle}::${sId}`;
-      if (!groups.has(groupKey)) {
-        groups.set(groupKey, {
-          id: `${cTitle}-${sId}`,
-          course: cTitle,
-          name: sName,
-          rollNo: sId,
-          records: [],
-        });
+    const dayOf = (iso) => {
+      try {
+        return new Intl.DateTimeFormat("en-CA", { timeZone: profileTimezone || undefined }).format(new Date(iso));
+      } catch {
+        return String(iso).slice(0, 10);
       }
-      groups.get(groupKey).records.push(r);
-    });
+    };
 
-    return Array.from(groups.values()).map((g) => {
-      const records = g.records;
-      const totalSessions = records.length;
-      const presentCount = records.filter((r) => r.status === "present" || r.status === "attended").length;
-      const lateCount = records.filter((r) => r.status === "late").length;
-
-      const attendanceRate = totalSessions > 0
-        ? Math.round(((presentCount + lateCount * 0.5) / totalSessions) * 100)
-        : null;
-
-      const todayRecord = records.find((r) => {
-        const d = r.date || r.session_date || r.scheduled_at || r.created_at || r.joined_at;
-        return d && typeof d === "string" && d.startsWith(todayStr);
+    const rows = [];
+    mappedCourses.forEach((course) => {
+      const courseRecords = records.filter((r) => String(r.course_id) === String(course.id));
+      course.enrolledStudents.forEach((st) => {
+        const mine = courseRecords.filter((r) => String(r.student) === String(st.id));
+        const total = mine.length;
+        const present = mine.filter((r) => r.status === "present" || r.status === "attended").length;
+        const late = mine.filter((r) => r.status === "late").length;
+        const today = mine.find((r) => r.scheduled_at && dayOf(r.scheduled_at) === todayStr);
+        const latest = mine.reduce((acc, r) => {
+          const ms = new Date(r.joined_at || r.scheduled_at || r.created_at || 0).getTime();
+          return ms > acc ? ms : acc;
+        }, 0);
+        rows.push({
+          id: `${course.id}-${st.id}`,
+          course: course.title,
+          courseId: course.id,
+          name: st.username || st.email || `Student #${st.id}`,
+          rollNo: mine.find((r) => r.student_roll_no != null)?.student_roll_no ?? st.id,
+          lastSeen: latest > 0 ? formatDate(new Date(latest).toISOString(), profileTimezone) : "—",
+          attendanceRate: total > 0 ? Math.round(((present + late * 0.5) / total) * 100) : null,
+          statusToday: today ? today.status : null,
+        });
       });
-      const statusToday = todayRecord ? todayRecord.status : null;
-
-      let mostRecentTime = 0;
-      records.forEach((r) => {
-        const ts = r.updated_at || r.joined_at || r.created_at || r.date;
-        if (ts) {
-          const ms = new Date(ts).getTime();
-          if (ms > mostRecentTime) mostRecentTime = ms;
-        }
-      });
-      const lastSeen = mostRecentTime > 0
-        ? formatDate(new Date(mostRecentTime).toISOString(), profileTimezone)
-        : "—";
-
-      return {
-        id: g.id,
-        course: g.course,
-        name: g.name,
-        rollNo: g.rollNo,
-        lastSeen,
-        attendanceRate,
-        statusToday,
-      };
     });
+    return rows;
   }, [allAttendance, mappedCourses, profileTimezone]);
 
   // Map Live Sessions (Live classes + Admin sessions + Booked slots)
@@ -339,76 +349,74 @@ const TeacherPortal = () => {
     return list;
   }, [dashboard, user, activeTzId]);
 
-  // Map Tasks / Submissions Needing Grading (Empty when queue is clean)
+  // Grading queue from the dashboard (assignment submissions + quizzes with written answers)
   const mappedTasks = useMemo(() => {
+    const fmtDay = (iso) => (iso ? formatDate(iso, profileTimezone) : "");
     const list = [];
     const pendingAssignments = dashboard?.recent_assessment_activity?.pending_assignment_grading || [];
     pendingAssignments.forEach((s) => {
+      const key = `asg-${s.submission_id}`;
+      const done = gradedLocally[key];
       list.push({
-        id: String(s.submission_id),
+        id: key,
+        kind: "assignment",
+        submissionId: s.submission_id,
         studentName: s.student_name || "Student",
         studentRoll: `Submission #${s.submission_id}`,
-        courseTitle: s.course_title || "Enrolled Course",
-        assignmentTitle: s.assignment || "Class Assignment",
-        submittedAt: s.submitted_at ? new Date(s.submitted_at).toLocaleDateString() : "Recent",
-        dueDate: "Active Queue",
-        status: "queued",
-        maxMarks: s.max_marks || 25,
-        rubricCriterion: "Conceptual understanding and calculation accuracy",
+        courseTitle: s.course_title || "",
+        assignmentTitle: s.assignment || "Assignment",
+        submittedAt: fmtDay(s.submitted_at),
+        dueDate: fmtDay(s.due_date),
+        status: done ? "graded" : s.is_late ? "overdue" : "queued",
+        awardedMarks: done?.score,
+        feedback: done?.feedback,
+        maxMarks: s.max_score ?? null,
         rawSubmission: s,
       });
     });
 
     const pendingQuizzes = dashboard?.recent_assessment_activity?.pending_quiz_grading || [];
     pendingQuizzes.forEach((qs) => {
+      const key = `qz-${qs.submission_id}`;
+      const done = gradedLocally[key];
       list.push({
-        id: `qz-sub-${qs.submission_id}`,
+        id: key,
+        kind: "quiz",
+        submissionId: qs.submission_id,
         studentName: qs.student_name || "Student",
-        studentRoll: `Quiz #${qs.submission_id}`,
-        courseTitle: qs.course_title || "Enrolled Course",
-        assignmentTitle: qs.quiz || "Interactive Quiz",
-        submittedAt: qs.submitted_at ? new Date(qs.submitted_at).toLocaleDateString() : "Recent",
-        dueDate: "Active Queue",
-        status: "queued",
-        maxMarks: qs.max_marks || 20,
-        rubricCriterion: "Automated & short-answer evaluation",
+        studentRoll: `Quiz submission #${qs.submission_id}`,
+        courseTitle: qs.course_title || "",
+        assignmentTitle: qs.quiz || "Quiz",
+        submittedAt: fmtDay(qs.submitted_at),
+        dueDate: fmtDay(qs.due_date),
+        status: done ? "graded" : "queued",
+        awardedMarks: done?.score,
+        maxMarks: qs.max_score ?? null,
         rawSubmission: qs,
       });
     });
-
-    if (list.length === 0) {
-      return INITIAL_TASKS;
-    }
-
     return list;
-  }, [dashboard]);
+  }, [dashboard, gradedLocally, profileTimezone]);
 
-  // Map Assignments (Falls back to curriculum models when no API assignments exist)
+  // Assignments from /assignments/ (empty when the teacher has none)
   const mappedAssignments = useMemo(() => {
-    let base = [];
-    if (Array.isArray(assignments) && assignments.length > 0) {
-      base = assignments.map((a) => ({
-        id: String(a.id),
-        title: a.title,
-        courseTitle: a.course_title || a.course?.title || "Enrolled Course",
-        maxMarks: a.max_marks || 20,
-        submissionMethod: a.submission_type || "file_upload",
-        allowedFormats: ["PDF", "PNG", "DOCX"],
-        launchDate: a.created_at ? formatDate(a.created_at, profileTimezone) : "Active",
-        launchTime: a.created_at ? formatTime(a.created_at, profileTimezone) : "—",
-        dueDate: a.due_date ? formatDate(a.due_date, profileTimezone) : "Upcoming",
-        dueTime: a.due_date ? formatTime(a.due_date, profileTimezone) : "—",
-        status: "published",
-        submissionsCount: a.submissions_count || 0,
-        gradedCount: a.graded_count || 0,
-        description: a.description || "",
-        rubricCriterion: "Evaluation rubric and criteria",
-      }));
-    } else {
-      base = INITIAL_ASSIGNMENTS;
-    }
-    return [...customAssignments, ...base];
-  }, [assignments, customAssignments, profileTimezone]);
+    if (!Array.isArray(assignments)) return [];
+    return assignments.map((a) => ({
+      id: String(a.id),
+      title: a.title,
+      courseTitle: a.course_title || a.course?.title || "",
+      maxMarks: a.max_score ?? null,
+      hasAttachment: Boolean(a.file_url),
+      launchDate: a.created_at ? formatDate(a.created_at, profileTimezone) : "",
+      launchTime: a.created_at ? formatTime(a.created_at, profileTimezone) : "",
+      dueDate: a.due_date ? formatDate(a.due_date, profileTimezone) : "",
+      dueTime: a.due_date ? formatTime(a.due_date, profileTimezone) : "",
+      status: a.status || "published",
+      isOverdue: Boolean(a.is_overdue),
+      submissionsCount: a.submissions_count || 0,
+      description: a.description || "",
+    }));
+  }, [assignments, profileTimezone]);
 
   // Live Session Launch & Meet Handling
   const handleStartSession = async (session) => {
@@ -490,6 +498,17 @@ const TeacherPortal = () => {
 
     const sessionId = raw?.id ?? raw?.session_id ?? session?.id;
     const fallbackLink = raw?.meeting_link || session?.meetLink;
+
+    // Already live (e.g. teacher closed the Meet tab): rejoin without calling start again
+    if (raw?.status === "live" || session?.status === "live") {
+      if (fallbackLink && fallbackLink.startsWith("http")) {
+        window.open(fallbackLink, "_blank", "noopener,noreferrer");
+        return true;
+      }
+      toastManager.error("No valid meeting link found for this session");
+      return false;
+    }
+
     const isMobile = /Mobi|Android|iPad|iPhone|iPod/i.test(navigator.userAgent);
     const meetWin = isMobile ? null : window.open("", "_blank");
 
@@ -601,240 +620,110 @@ const TeacherPortal = () => {
     }
   };
 
-  // Create Assignment (Findings 7, 8)
+  // Create Assignment — throws on failure so the form stays open with the error
   const handleCreateAssignment = async (data) => {
-    try {
-      const matchedCourse = mappedCourses.find((c) => c.title === data.courseTitle);
-      const rawId = matchedCourse?.rawCourse?.id;
-      const courseId = rawId ? Number(rawId) : null;
-
-      const newAsg = {
-        id: `asg-${Date.now()}`,
+    const courseId = Number(data.courseId);
+    if (!courseId) throw new Error("Please choose a course.");
+    const effectiveTz = profileTimezone || TZ_IANA_MAP[currentTz] || "Asia/Riyadh";
+    const dueISO = new Date(tzToUTCMs(data.dueDate, data.dueTime, effectiveTz)).toISOString();
+    await dispatch(
+      createAssignment({
         title: data.title,
-        courseTitle: data.courseTitle,
-        maxMarks: Number(data.maxMarks) || 20,
-        submissionMethod: "file_upload",
-        allowedFormats: ["PDF", "PNG", "DOCX"],
-        launchDate: "Today",
-        launchTime: "09:00 AM",
-        dueDate: data.dueDate || "Upcoming",
-        dueTime: data.dueTime || "11:59 PM",
+        description: data.description,
+        course: courseId,
+        max_score: data.maxMarks,
+        due_date: dueISO,
         status: "published",
-        submissionsCount: 0,
-        gradedCount: 0,
-        description: data.description || "",
-        rubricCriterion: "Evaluation rubric and criteria",
-      };
-
-      if (courseId && !isNaN(courseId)) {
-        // Convert dueDate + dueTime properly into ISO UTC datetime using profile timezone (Finding R2-8)
-        const effectiveAssignmentTz = profileTimezone || TZ_IANA_MAP[currentTz] || "Asia/Riyadh";
-        const dueUTCMs = tzToUTCMs(data.dueDate, data.dueTime, effectiveAssignmentTz);
-        const dueISO = new Date(dueUTCMs).toISOString();
-
-        await dispatch(
-          createAssignment({
-            title: data.title,
-            description: data.description,
-            course: courseId,
-            max_marks: data.maxMarks,
-            due_date: dueISO,
-          })
-        ).unwrap();
-        dispatch(fetchAssignments());
-      }
-
-      setCustomAssignments((prev) => [newAsg, ...prev]);
-      toastManager.success(`Assignment "${data.title}" published!`);
-    } catch (err) {
-      showApiError(err);
-    }
+        ...(data.file ? { file: data.file } : {}),
+      })
+    ).unwrap();
+    dispatch(fetchAssignments());
+    toastManager.success(`Assignment "${data.title}" published`);
   };
 
-  // Create / Save Interactive Quiz (Findings 5, 8)
+  // Create Quiz — maps builder question types onto the backend's types
   const handleSaveQuiz = async (quizData) => {
-    try {
-      const matchedCourse =
-        mappedCourses.find(
-          (c) => c.title?.trim().toLowerCase() === quizData.courseTitle?.trim().toLowerCase()
-        ) || mappedCourses[0];
-      const rawId = matchedCourse?.rawCourse?.id || matchedCourse?.id;
-      const courseId = rawId ? Number(rawId) : null;
+    const courseId = Number(quizData.courseId);
+    if (!courseId) throw new Error("Please choose a course.");
 
-      if (!courseId || isNaN(courseId)) {
-        throw new Error(`Course "${quizData.courseTitle}" could not be found.`);
-      }
+    const effectiveTz = profileTimezone || TZ_IANA_MAP[currentTz] || "Asia/Riyadh";
+    const toISO = (local) => formatTimezoneISO(local, effectiveTz) || new Date(local).toISOString();
+    const published_at = quizData.launchDateTime ? toISO(quizData.launchDateTime) : new Date().toISOString();
+    const due_date = toISO(quizData.dueDateTime);
 
-      const effectiveTz = profileTimezone || TZ_IANA_MAP[currentTz] || "Asia/Karachi";
-      const published_at = quizData.launchDateTime
-        ? (formatTimezoneISO(quizData.launchDateTime, effectiveTz) || new Date(quizData.launchDateTime).toISOString())
-        : new Date().toISOString();
-      const due_date = quizData.dueDateTime
-        ? (formatTimezoneISO(quizData.dueDateTime, effectiveTz) || new Date(quizData.dueDateTime).toISOString())
-        : new Date(Date.now() + 7 * 86400000).toISOString();
-
-      const transformedQuestions = (quizData.questions || []).map((q) => {
-        const text = (q.questionText || q.question_text || "").trim();
-        const marks = Number(q.marks || q.max_marks) || 1;
-        const rawType = String(q.type || q.question_type || "").trim();
-
-        if (rawType === "multiple_choice" || rawType === "SINGLE_CHOICE") {
-          return {
-            question_text: text,
-            question_type: "SINGLE_CHOICE",
-            max_marks: marks,
-            options: (q.options || []).map((opt) => {
-              const optText = String(opt).trim();
-              return {
-                option_text: optText,
-                is_correct: optText === String(q.correctAnswer || "").trim(),
-              };
-            }),
-          };
-        }
-
-        if (rawType === "yes_no") {
-          const ans = String(q.correctAnswer || "").trim().toLowerCase();
-          return {
-            question_text: text,
-            question_type: "SINGLE_CHOICE",
-            max_marks: marks,
-            options: [
-              { option_text: "Yes", is_correct: ans === "yes" },
-              { option_text: "No", is_correct: ans === "no" },
-            ],
-          };
-        }
-
-        if (rawType === "fill_in_blank" || rawType === "short_answer" || rawType === "TEXT_FORMAT") {
-          return {
-            question_text: text,
-            question_type: "TEXT_FORMAT",
-            max_marks: marks,
-            options: [],
-          };
-        }
-
-        if (rawType === "MULTIPLE_CHOICE") {
-          const correctArr = Array.isArray(q.correctAnswer) ? q.correctAnswer : [q.correctAnswer];
-          const correctStrArr = correctArr.map((c) => String(c).trim());
-          return {
-            question_text: text,
-            question_type: "MULTIPLE_CHOICE",
-            max_marks: marks,
-            options: (q.options || []).map((opt) => {
-              const optText = String(opt).trim();
-              return {
-                option_text: optText,
-                is_correct: correctStrArr.includes(optText),
-              };
-            }),
-          };
-        }
-
+    const questions = (quizData.questions || []).map((q) => {
+      const text = (q.questionText || "").trim();
+      const marks = Number(q.marks) || 1;
+      if (q.type === "multiple_choice") {
+        const correct = String(q.correctAnswer || "").trim();
         return {
           question_text: text,
-          question_type: "TEXT_FORMAT",
+          question_type: "SINGLE_CHOICE",
           max_marks: marks,
-          options: [],
+          options: (q.options || []).map((opt) => ({
+            option_text: String(opt).trim(),
+            is_correct: String(opt).trim() === correct,
+          })),
         };
-      });
+      }
+      if (q.type === "yes_no") {
+        const ans = String(q.correctAnswer || "").trim().toLowerCase();
+        return {
+          question_text: text,
+          question_type: "SINGLE_CHOICE",
+          max_marks: marks,
+          options: [
+            { option_text: "Yes", is_correct: ans === "yes" },
+            { option_text: "No", is_correct: ans === "no" },
+          ],
+        };
+      }
+      // fill_in_blank and short_answer are marked by the teacher
+      return { question_text: text, question_type: "TEXT_FORMAT", max_marks: marks, options: [] };
+    });
 
-      const totalMarks = transformedQuestions.reduce((s, q) => s + (Number(q.max_marks) || 0), 0);
-
-      const payload = {
+    const total_marks = questions.reduce((s, q) => s + q.max_marks, 0);
+    try {
+      await teacherService.createQuiz({
         title: quizData.title.trim(),
         course: courseId,
         description: quizData.description?.trim() || "",
-        duration_minutes: quizData.durationMins || 25,
-        total_marks: totalMarks,
+        total_marks,
         published_at,
         due_date,
-        questions: transformedQuestions,
-      };
-
-      const createdQuiz = await teacherService.createQuiz(payload);
-      toastManager.success(`Interactive quiz "${quizData.title}" published!`);
-
-      const newQuizItem = {
-        id: createdQuiz?.id || `qz-${Date.now()}`,
-        title: quizData.title,
-        courseTitle: quizData.courseTitle,
-        description: quizData.description,
-        marks: totalMarks,
-        questionsCount: transformedQuestions.length,
-        durationMins: quizData.durationMins || 25,
-        launchDateTime: quizData.launchDateTime,
-        dueDateTime: quizData.dueDateTime,
-        status: "published",
-        submissionsCount: 0,
-        averageScore: undefined,
-        questions: transformedQuestions,
-        submissions: [],
-      };
-      setQuizzes((prev) => [newQuizItem, ...prev]);
-      return createdQuiz;
+        questions,
+      });
     } catch (err) {
-      showApiError(err);
-      throw err;
+      throw new Error(extractApiErrorMessage(err) || "Could not publish the quiz.");
     }
+    toastManager.success(`Quiz "${quizData.title}" published`);
+    dispatch(fetchQuizzes());
   };
 
-  // Grade Quiz Submission (Finding 5)
-  const handleSaveQuizMarking = async (quizId, submissionId, gradedAnswers, overallFeedback) => {
-    try {
-      const isMock = typeof submissionId === "string" && submissionId.startsWith("sub-");
-      if (!isMock) {
-        await teacherService.gradeQuizSubmission(submissionId, gradedAnswers);
-      }
-      toastManager.success("Quiz submission graded and feedback released!");
-
-      setQuizzes((prev) =>
-        prev.map((qz) => {
-          if (qz.id !== quizId) return qz;
-          return {
-            ...qz,
-            submissions: qz.submissions.map((sub) => {
-              if (sub.id !== submissionId) return sub;
-              const awardedTotal = gradedAnswers.reduce((a, b) => a + Number(b.scoreAwarded || 0), 0);
-              return {
-                ...sub,
-                status: "reviewed",
-                totalScore: awardedTotal,
-                overallFeedback,
-                answers: sub.answers.map((ans) => {
-                  const g = gradedAnswers.find((x) => x.questionId === ans.questionId);
-                  return g ? { ...ans, scoreAwarded: g.scoreAwarded, teacherComment: g.teacherComment } : ans;
-                }),
-              };
-            }),
-          };
-        })
-      );
-    } catch (err) {
-      showApiError(err);
+  // After a quiz submission is marked: refresh lists, flip the dashboard row at once
+  const handleQuizGraded = (submission) => {
+    if (submission?.id) {
+      setGradedLocally((prev) => ({
+        ...prev,
+        [`qz-${submission.id}`]: { score: Number(submission.obtained_marks ?? 0) },
+      }));
     }
+    loadQuizSubmissions();
+    dispatch(fetchTeacherDashboard());
   };
 
-  // Grade Task (Finding 5)
-  const handleGradeTask = async (task, awardedMarks, feedback) => {
-    try {
-      const isMock = typeof task.id === "string" && task.id.startsWith("tsk-");
-      if (!isMock) {
-        if (!task.rawSubmission?.submission_id) {
-          toastManager.error("Submission ID not found");
-          return;
-        }
-        await teacherService.gradeSubmission(task.rawSubmission.submission_id, {
-          marks: awardedMarks,
-          feedback,
-        });
-        dispatch(fetchTeacherDashboard());
-      }
-      toastManager.success(`Grade (${awardedMarks}/${task.maxMarks}) recorded for ${task.studentName}`);
-    } catch (err) {
-      showApiError(err);
+  // Grade an assignment submission (POST, or PATCH when a grade already exists)
+  const handleGradeTask = async (task, score, feedback, alreadyGraded) => {
+    const payload = { score, feedback };
+    if (alreadyGraded) {
+      await teacherService.updateSubmissionGrade(task.submissionId, payload);
+    } else {
+      await teacherService.gradeSubmission(task.submissionId, payload);
     }
+    setGradedLocally((prev) => ({ ...prev, [task.id]: { score, feedback } }));
+    toastManager.success(`Marks (${score}/${task.maxMarks ?? "?"}) released to ${task.studentName}`);
+    dispatch(fetchTeacherDashboard());
+    dispatch(fetchAssignments());
   };
 
   // Schedule Session Handler (Findings R2-4, R3-2, R3-3, R3-5, R4-2)
@@ -890,16 +779,6 @@ const TeacherPortal = () => {
     }
   };
 
-  // Resources Handlers (Finding R2-6)
-  const handleAddResource = (r) => {
-    const newRes = {
-      ...r,
-      id: `res-${Date.now()}`,
-      uploadedAt: "Recently added",
-    };
-    setResources((prev) => [newRes, ...prev]);
-  };
-
   return (
     <div className="w-full">
       <TeacherModernDashboard
@@ -910,19 +789,19 @@ const TeacherPortal = () => {
         tasks={mappedTasks}
         assignments={mappedAssignments}
         quizzes={quizzes}
-        slots={slots}
+        upcomingSlots={dashboard?.upcoming_slots || []}
         attendance={attendance}
-        resources={resources}
-        evaluations={evaluations}
+        attendanceRecords={Array.isArray(allAttendance) ? allAttendance : []}
         timezone={currentTz}
         onCycleTimezone={handleCycleTimezone}
         onOpenAnnouncementModal={() => setAnnouncementModalOpen(true)}
         onOpenNewSessionModal={() => setNewSessionModalOpen(true)}
-        onOpenGradeModal={(task) => setGradingTask(task)}
+        onOpenGradeModal={(task) =>
+          task.kind === "quiz" ? setReviewingQuizSubmissionId(task.submissionId) : setGradingTask(task)
+        }
         onOpenCreateAssignmentModal={() => setCreateAssignmentModalOpen(true)}
         onOpenAdvancedQuizBuilderModal={() => setAdvancedQuizBuilderModalOpen(true)}
-        onOpenReviewQuizModal={(quiz, submission) => setReviewingQuiz({ quiz, submission })}
-        onAddResource={handleAddResource}
+        onOpenReviewQuizModal={(quiz, submission) => setReviewingQuizSubmissionId(submission?.id ?? null)}
         user={user}
         onStartSession={handleStartSession}
         onEndSession={handleEndSession}
@@ -965,26 +844,20 @@ const TeacherPortal = () => {
       />
 
       {/* Review Quiz Submission Modal */}
-      {reviewingQuiz && (
+      {reviewingQuizSubmissionId && (
         <ReviewQuizModal
-          isOpen={Boolean(reviewingQuiz)}
-          quiz={reviewingQuiz.quiz}
-          submission={reviewingQuiz.submission}
-          onClose={() => setReviewingQuiz(null)}
-          onSaveMarking={handleSaveQuizMarking}
+          submissionId={reviewingQuizSubmissionId}
+          onClose={() => setReviewingQuizSubmissionId(null)}
+          onGraded={handleQuizGraded}
         />
       )}
 
-      {/* Grade Queued Task Modal */}
+      {/* Grade an assignment submission */}
       {gradingTask && (
         <GradeTaskModal
-          isOpen={Boolean(gradingTask)}
-          onClose={() => setGradingTask(null)}
           task={gradingTask}
-          onGradeSubmit={(taskId, marks, feedback) => {
-            handleGradeTask(gradingTask, marks, feedback);
-            setGradingTask(null);
-          }}
+          onClose={() => setGradingTask(null)}
+          onGradeSubmit={handleGradeTask}
         />
       )}
 

@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { submitAssignment } from "../../../store/slices/studentDashboardSlice";
 import { toastManager } from "../../../utils/toastManager";
+import { useDateFormatters } from "../../../hooks/useDateFormatters";
 
 const AssignmentSubmitModal = ({ assignment, onClose, onSubmitted }) => {
+  const { formatDate, formatTime } = useDateFormatters();
   const dispatch = useDispatch();
   const [file, setFile] = useState(null);
   const [textAnswer, setTextAnswer] = useState("");
@@ -52,7 +54,7 @@ const AssignmentSubmitModal = ({ assignment, onClose, onSubmitted }) => {
               {assignment.title}
             </h3>
             <p className="text-xs text-slate-400 mt-0.5">
-              Due Date: <span className="text-slate-200 font-semibold">{assignment.due_date ? new Date(assignment.due_date).toLocaleDateString() : "Upcoming"}</span>
+              Due Date: <span className="text-slate-200 font-semibold">{assignment.due_date ? `${formatDate(assignment.due_date)} · ${formatTime(assignment.due_date)}` : "Upcoming"}</span>
             </p>
           </div>
           <button

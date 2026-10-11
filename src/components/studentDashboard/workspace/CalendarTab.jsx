@@ -9,6 +9,16 @@ import {
 import { useDateFormatters } from "../../../hooks/useDateFormatters";
 import { toastManager } from "../../../utils/toastManager";
 
+// "YYYY-MM-DD" of an instant as seen in the student's own timezone (not the server's Dubai time)
+const dayKeyIn = (iso, tz) => {
+  try {
+    return new Intl.DateTimeFormat("en-CA", { timeZone: tz || undefined }).format(new Date(iso));
+  } catch {
+    return new Intl.DateTimeFormat("en-CA").format(new Date(iso));
+  }
+};
+const pad2 = (n) => String(n).padStart(2, "0");
+
 const CalendarTab = ({ onOpenSubmitModal }) => {
   const dispatch = useDispatch();
   const liveSchedule = useSelector(selectLiveSchedule) || [];
@@ -16,8 +26,12 @@ const CalendarTab = ({ onOpenSubmitModal }) => {
   const assignments = useSelector(selectAssignments) || [];
   const { timezone, timezoneAbbr, formatTime, formatDate } = useDateFormatters();
 
-  const [currentDate, setCurrentDate] = useState(() => new Date());
-  const [selectedDay, setSelectedDay] = useState(() => new Date().getDate());
+  // Month/day start from "today" in the student's timezone
+  const [currentDate, setCurrentDate] = useState(() => {
+    const [y, m] = dayKeyIn(new Date().toISOString(), timezone).split("-").map(Number);
+    return new Date(y, m - 1, 1);
+  });
+  const [selectedDay, setSelectedDay] = useState(() => Number(dayKeyIn(new Date().toISOString(), timezone).split("-")[2]));
   const [eventFilter, setEventFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [joiningId, setJoiningId] = useState(null);
@@ -76,21 +90,16 @@ const CalendarTab = ({ onOpenSubmitModal }) => {
     year: "numeric",
   });
 
-  // Selected date string for comparison
+  // Selected date as "YYYY-MM-DD" for comparison in the student's timezone
+  const keyFor = (day) => `${year}-${pad2(month + 1)}-${pad2(day)}`;
   const selectedDateObj = new Date(year, month, selectedDay);
-  const selectedDateStr = selectedDateObj.toDateString();
+  const selectedKey = keyFor(selectedDay);
 
   // Filter actual sessions for selected day
-  const daySessions = sessions.filter((s) => {
-    if (!s.scheduled_at) return false;
-    return new Date(s.scheduled_at).toDateString() === selectedDateStr;
-  });
+  const daySessions = sessions.filter((s) => s.scheduled_at && dayKeyIn(s.scheduled_at, timezone) === selectedKey);
 
   // Filter actual assignments for selected day
-  const dayAssignments = assignments.filter((a) => {
-    if (!a.due_date) return false;
-    return new Date(a.due_date).toDateString() === selectedDateStr;
-  });
+  const dayAssignments = assignments.filter((a) => a.due_date && dayKeyIn(a.due_date, timezone) === selectedKey);
 
   // Filter with search & eventFilter
   const filteredDayAssignments = dayAssignments.filter((a) => {
@@ -278,18 +287,12 @@ const CalendarTab = ({ onOpenSubmitModal }) => {
             {Array.from({ length: daysInMonth }).map((_, idx) => {
               const day = idx + 1;
               const isSelected = selectedDay === day;
-              const loopDate = new Date(year, month, day);
-              const loopDateStr = loopDate.toDateString();
-
+              const loopKey = keyFor(day);
               const hasSession = sessions.some(
-                (s) =>
-                  s.scheduled_at &&
-                  new Date(s.scheduled_at).toDateString() === loopDateStr
+                (s) => s.scheduled_at && dayKeyIn(s.scheduled_at, timezone) === loopKey
               );
               const hasAssignment = assignments.some(
-                (a) =>
-                  a.due_date &&
-                  new Date(a.due_date).toDateString() === loopDateStr
+                (a) => a.due_date && dayKeyIn(a.due_date, timezone) === loopKey
               );
 
               return (

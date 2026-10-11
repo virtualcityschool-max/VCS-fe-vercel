@@ -6,6 +6,9 @@ import {
   Award,
   Plus
 } from "lucide-react";
+import { teacherService } from "../../../services/teacherService";
+import { getStorageUrl } from "../../../utils/storageUrl";
+import { extractApiErrorMessage } from "../../../utils/apiErrorHandler";
 export const PostAnnouncementModal = ({
   isOpen,
   onClose,
@@ -274,40 +277,82 @@ export const ScheduleSessionModal = ({
       </div>
     </div>;
 };
+// Student text answers come from a rich-text editor; show them as plain text (never inject HTML)
+const richTextToPlain = (html) => {
+  if (!html) return "";
+  if (!/<[a-z][\s\S]*>/i.test(html)) return html;
+  const withBreaks = html.replace(/<br\s*\/?>/gi, "\n").replace(/<\/(p|div|li|h[1-6])>/gi, "\n");
+  const doc = new DOMParser().parseFromString(withBreaks, "text/html");
+  return (doc.body.textContent || "").replace(/\n{3,}/g, "\n\n").trim();
+};
+
 export const GradeTaskModal = ({
   task,
   onClose,
-  onSaveGrade
+  onGradeSubmit
 }) => {
-  const [marks, setMarks] = useState(task?.awardedMarks ?? task?.maxMarks ?? 20);
-  const [feedback, setFeedback] = useState(
-    task?.feedback ?? "Clear logical deductions and accurate rubric steps."
-  );
+  const [detail, setDetail] = useState(null);
+  const [loadError, setLoadError] = useState(null);
+  const [marks, setMarks] = useState("");
+  const [feedback, setFeedback] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState(null);
+
   React.useEffect(() => {
-    if (task) {
-      setMarks(task.awardedMarks ?? Math.round(task.maxMarks * 0.9));
-      setFeedback(
-        task.feedback ?? "Well-structured response; all analytical steps verified."
-      );
-    }
-  }, [task]);
+    if (!task?.submissionId) return;
+    let cancelled = false;
+    setDetail(null);
+    setLoadError(null);
+    teacherService
+      .getSubmissionById(task.submissionId)
+      .then((d) => {
+        if (cancelled) return;
+        setDetail(d);
+        // Pre-fill only with a grade that really exists
+        setMarks(d?.grade?.score ?? "");
+        setFeedback(d?.grade?.feedback ?? "");
+      })
+      .catch((err) => !cancelled && setLoadError(extractApiErrorMessage(err) || "Could not load this submission."));
+    return () => {
+      cancelled = true;
+    };
+  }, [task?.submissionId]);
+
   if (!task) return null;
-  const handleSubmit = (e) => {
+  const maxMarks = detail?.assignment_max_score ?? task.maxMarks ?? null;
+  const alreadyGraded = Boolean(detail?.grade);
+  const fileUrl = detail?.file_url ? getStorageUrl(detail.file_url) : null;
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSaveGrade(task.id, Math.min(task.maxMarks, Math.max(0, marks)), feedback);
-    onClose();
+    const score = Number(marks);
+    if (marks === "" || Number.isNaN(score) || score < 0 || (maxMarks != null && score > maxMarks)) {
+      setSaveError(`Enter marks between 0 and ${maxMarks ?? "the maximum"}.`);
+      return;
+    }
+    setSaving(true);
+    setSaveError(null);
+    try {
+      await onGradeSubmit({ ...task, maxMarks }, Math.round(score), feedback.trim(), alreadyGraded);
+      onClose();
+    } catch (err) {
+      setSaveError(extractApiErrorMessage(err) || "Could not save the marks. Please try again.");
+    } finally {
+      setSaving(false);
+    }
   };
-  return <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-[#101424] border border-[#242D4C] rounded-2xl shadow-2xl overflow-hidden">
+
+  return <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+      <div className="w-full max-w-xl bg-[#101424] border border-[#242D4C] rounded-2xl shadow-2xl overflow-hidden my-6">
         <div className="px-5 py-4 border-b border-[#1C233D] flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
               <Award className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-white">Rubric Evaluation</h3>
+              <h3 className="text-sm font-bold text-white">Grade Submission</h3>
               <p className="text-[11px] text-slate-400">
-                {task.studentName} ({task.studentRoll})
+                {task.studentName} · {task.studentRoll}
               </p>
             </div>
           </div>
@@ -316,44 +361,68 @@ export const GradeTaskModal = ({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-5 space-y-4">
+        <form onSubmit={handleSubmit} className="p-5 space-y-4 max-h-[80vh] overflow-y-auto">
           <div className="p-3 rounded-xl bg-[#0B0E1A] border border-[#1B223B]">
             <div className="text-xs font-bold text-white">{task.assignmentTitle}</div>
-            <div className="text-[11px] text-slate-400 mt-0.5">{task.courseTitle}</div>
-            {task.rubricCriterion && <div className="text-[10px] text-indigo-400 mt-1">
-                Criterion: {task.rubricCriterion}
-              </div>}
+            <div className="text-[11px] text-slate-400 mt-0.5">
+              {task.courseTitle}
+              {task.submittedAt ? ` · Submitted ${task.submittedAt}` : ""}
+              {detail?.status === "late" ? " · Late" : ""}
+            </div>
           </div>
 
-          <div>
-            <div className="flex items-center justify-between text-xs font-semibold text-slate-300 mb-1.5">
-              <span>Awarded Marks</span>
-              <span className="font-mono text-indigo-400 tabular-nums">
-                {marks} / {task.maxMarks}
-              </span>
-            </div>
-            <input
-    type="range"
-    min={0}
-    max={task.maxMarks}
-    value={marks}
-    onChange={(e) => setMarks(Number(e.target.value))}
-    className="w-full accent-indigo-500"
-  />
+          {/* Student's work */}
+          <div className="space-y-2">
+            <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Student's answer</div>
+            {loadError ? <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-xs text-rose-300">{loadError}</div> : !detail ? <div className="p-3 rounded-xl bg-[#0B0E1A] border border-[#1B223B] text-xs text-slate-500">Loading submission…</div> : <>
+                {detail.text_answer ? <div className="p-3 rounded-xl bg-[#0B0E1A] border border-[#1B223B] text-xs text-slate-100 whitespace-pre-wrap max-h-64 overflow-y-auto">
+                    {richTextToPlain(detail.text_answer)}
+                  </div> : null}
+                {fileUrl ? <a
+    href={fileUrl}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600/20 border border-indigo-500/30 text-xs font-semibold text-indigo-300 hover:bg-indigo-600/30"
+  >
+                    Open attached file
+                  </a> : null}
+                {!detail.text_answer && !fileUrl ? <div className="p-3 rounded-xl bg-[#0B0E1A] border border-[#1B223B] text-xs text-slate-500">No answer content found.</div> : null}
+              </>}
           </div>
 
           <div>
             <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-              Written Faculty Feedback
+              Marks {maxMarks != null ? `(out of ${maxMarks})` : ""}
+            </label>
+            <div className="flex items-center gap-2">
+              <input
+    type="number"
+    min={0}
+    max={maxMarks ?? undefined}
+    step={1}
+    required
+    value={marks}
+    onChange={(e) => setMarks(e.target.value)}
+    className="w-24 px-3 py-2 rounded-xl bg-[#0B0E1A] border border-[#1E2642] text-sm font-mono font-bold text-white tabular-nums focus:outline-none focus:border-indigo-500"
+  />
+              {maxMarks != null && <span className="text-xs text-slate-400 font-mono">/ {maxMarks}</span>}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+              Feedback for the student (optional)
             </label>
             <textarea
     rows={3}
-    required
     value={feedback}
     onChange={(e) => setFeedback(e.target.value)}
-    className="w-full px-3.5 py-2 rounded-xl bg-[#0B0E1A] border border-[#1E2642] text-xs text-white focus:outline-none focus:border-indigo-500"
+    placeholder="What went well, and what to improve…"
+    className="w-full px-3.5 py-2 rounded-xl bg-[#0B0E1A] border border-[#1E2642] text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500"
   />
           </div>
+
+          {saveError && <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-xs text-rose-300">{saveError}</div>}
 
           <div className="flex items-center justify-end gap-2 pt-2">
             <button
@@ -365,9 +434,10 @@ export const GradeTaskModal = ({
             </button>
             <button
     type="submit"
-    className="px-4 py-2 rounded-xl bg-[#5B46F8] hover:bg-[#4B36E6] text-xs font-bold text-white cursor-pointer"
+    disabled={saving || !detail}
+    className="px-4 py-2 rounded-xl bg-[#5B46F8] hover:bg-[#4B36E6] disabled:opacity-60 text-xs font-bold text-white cursor-pointer"
   >
-              Release Marks & Feedback
+              {saving ? "Saving…" : alreadyGraded ? "Update Marks & Feedback" : "Release Marks & Feedback"}
             </button>
           </div>
         </form>

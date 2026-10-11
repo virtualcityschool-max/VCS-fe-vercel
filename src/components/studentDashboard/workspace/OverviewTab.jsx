@@ -186,6 +186,7 @@ const OverviewTab = ({ onOpenSubmitModal }) => {
                   (sub.status === "graded" || sub.status === "auto_graded") &&
                   sub.obtained_marks != null;
                 const isSubmitted = sub && sub.status === "submitted";
+                const isClosed = !hasScore && !isSubmitted && (sub?.status === "missed" || q.is_overdue);
 
                 return (
                   <div
@@ -229,10 +230,12 @@ const OverviewTab = ({ onOpenSubmitModal }) => {
                             ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/20"
                             : isSubmitted
                             ? "bg-blue-500/15 text-blue-400 border border-blue-500/20"
+                            : isClosed
+                            ? "bg-rose-500/15 text-rose-400 border border-rose-500/20"
                             : "bg-yellow-500/15 text-yellow-400 border border-yellow-500/20"
                         }`}
                       >
-                        {hasScore ? "Graded" : isSubmitted ? "Submitted" : "Attempt"}
+                        {hasScore ? "Graded" : isSubmitted ? "Awaiting marks" : isClosed ? "Missed" : "Attempt"}
                       </span>
 
                       <i className="fas fa-chevron-right text-[10px] text-slate-500 group-hover:text-white transition" />

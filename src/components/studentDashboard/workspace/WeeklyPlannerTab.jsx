@@ -3,6 +3,8 @@ import { useSelector, useDispatch } from "react-redux";
 import {
   selectSessions,
   selectLiveSchedule,
+  selectAssignments,
+  selectDashboardQuizzes,
   joinLiveSession,
 } from "../../../store/slices/studentDashboardSlice";
 import { useDateFormatters } from "../../../hooks/useDateFormatters";
@@ -12,6 +14,9 @@ const WeeklyPlannerTab = ({ onOpenLiveSchedule }) => {
   const dispatch = useDispatch();
   const allSessions = useSelector(selectSessions) || [];
   const liveSchedule = useSelector(selectLiveSchedule) || [];
+  const assignments = useSelector(selectAssignments) || [];
+  const quizzes = useSelector(selectDashboardQuizzes) || [];
+  const [nowMs] = useState(() => Date.now());
   const { timezone, timezoneAbbr, formatTime, formatDate } = useDateFormatters();
 
   const [joiningId, setJoiningId] = useState(null);
@@ -122,26 +127,18 @@ const WeeklyPlannerTab = ({ onOpenLiveSchedule }) => {
       ? mappedSchedule
       : mappedSchedule.filter((item) => item.day === selectedDay);
 
-  const upcomingExams = [
-    {
-      date: "DEC 15, 2025",
-      title: "Mathematics Midterm Examination",
-      format: "Cambridge Paper 2 & 4 • 2 Hours",
-      border: "border-l-indigo-500",
-    },
-    {
-      date: "JAN 10, 2026",
-      title: "Physics Practical Defense",
-      format: "Lab Investigation • 45 Mins",
-      border: "border-l-blue-500",
-    },
-    {
-      date: "JAN 25, 2026",
-      title: "Islamic Study Oral Defense",
-      format: "Oral Recitation • 15 Mins",
-      border: "border-l-emerald-500",
-    },
-  ];
+  // Next real deadlines: unsubmitted assignments and unattempted quizzes that are still open
+  const upcomingDeadlines = [
+    ...assignments
+      .filter((a) => a.due_date && (a.status === "pending" || !a.status))
+      .map((a) => ({ id: `a-${a.id}`, due: a.due_date, title: a.title, kind: "Assignment", course: a.course_title, border: "border-l-indigo-500" })),
+    ...quizzes
+      .filter((q) => q.due_date && !q.is_overdue && (!q.my_submission || q.my_submission.status === "pending"))
+      .map((q) => ({ id: `q-${q.id}`, due: q.due_date, title: q.title, kind: "Quiz", course: q.course_title, border: "border-l-emerald-500" })),
+  ]
+    .filter((d) => new Date(d.due).getTime() >= nowMs)
+    .sort((a, b) => new Date(a.due) - new Date(b.due))
+    .slice(0, 3);
 
   return (
     <div className="space-y-6 animate-fadeIn">
@@ -290,36 +287,32 @@ const WeeklyPlannerTab = ({ onOpenLiveSchedule }) => {
         </div>
       </div>
 
-      {/* 4. Upcoming Major Cambridge Exams Strip */}
+      {/* 4. Upcoming deadlines (real assignments & quizzes) */}
       <div className="rounded-2xl bg-slate-900/80 border border-white/10 p-5 shadow-xl">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <i className="fas fa-graduation-cap text-indigo-400 text-sm" />
-            <h3 className="text-sm font-bold text-white tracking-tight">
-              Term 1 Examination Milestones
-            </h3>
-          </div>
-          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 bg-white/5 px-2.5 py-1 rounded-full">
-            Cambridge Schedule
-          </span>
+        <div className="flex items-center gap-2 mb-4">
+          <i className="fas fa-hourglass-half text-indigo-400 text-sm" />
+          <h3 className="text-sm font-bold text-white tracking-tight">Upcoming Deadlines</h3>
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {upcomingExams.map((exam, i) => (
-            <div
-              key={i}
-              className={`p-4 rounded-xl bg-white/[0.02] border border-white/5 border-l-4 ${exam.border} flex flex-col justify-between space-y-2`}
-            >
-              <div>
-                <span className="text-[10px] font-mono font-bold text-slate-400">
-                  {exam.date}
-                </span>
-                <h4 className="font-bold text-xs text-white mt-1">{exam.title}</h4>
+        {upcomingDeadlines.length === 0 ? (
+          <p className="text-xs text-slate-400">No assignment or quiz deadlines coming up.</p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {upcomingDeadlines.map((d) => (
+              <div
+                key={d.id}
+                className={`p-4 rounded-xl bg-white/[0.02] border border-white/5 border-l-4 ${d.border} flex flex-col justify-between space-y-2`}
+              >
+                <div>
+                  <span className="text-[10px] font-mono font-bold text-slate-400">
+                    {formatDate(d.due)} · {formatTime(d.due)}
+                  </span>
+                  <h4 className="font-bold text-xs text-white mt-1">{d.title}</h4>
+                </div>
+                <p className="text-[11px] text-slate-400">{d.kind}{d.course ? ` · ${d.course}` : ""}</p>
               </div>
-              <p className="text-[11px] text-slate-400">{exam.format}</p>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

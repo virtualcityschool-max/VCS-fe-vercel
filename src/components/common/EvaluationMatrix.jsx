@@ -35,6 +35,21 @@ const GRADE_W      = 90;
 const OBTAINED_W   = 85;
 const PERCENTAGE_W = 75;
 
+// A student's own totals: a teacher/admin override wins, otherwise the computed combined totals.
+// (Each student has their own total — private assignments differ between students.)
+const studentTotals = (s) => {
+  const f = s.final_totals;
+  if (f?.is_override) {
+    return { obtained: f.obtained_marks, total: f.total_marks, pct: f.percentage };
+  }
+  const c = s.combined_totals || {};
+  return {
+    obtained: c.computed_obtained ?? null,
+    total: c.computed_total ?? f?.total_marks ?? null,
+    pct: c.computed_percentage ?? f?.percentage ?? null,
+  };
+};
+
 const EvaluationMatrix = ({ students = [], courseStatus, gradingScale: gradingScaleProp }) => {
   const isCompleted = courseStatus === "completed";
   const gradingScale = gradingScaleProp?.scales || [];
@@ -65,11 +80,6 @@ const EvaluationMatrix = ({ students = [], courseStatus, gradingScale: gradingSc
     return Array.from(map.values());
   }, [students]);
 
-  const totalCourseMarks = useMemo(() => {
-    const aSum = allAssignments.reduce((sum, a) => sum + (Number(a.max_score) || 0), 0);
-    const qSum = allQuizzes.reduce((sum, q) => sum + (Number(q.max_score) || 0), 0);
-    return aSum + qSum;
-  }, [allAssignments, allQuizzes]);
 
   if (students.length === 0) {
     return (
@@ -117,8 +127,7 @@ const EvaluationMatrix = ({ students = [], courseStatus, gradingScale: gradingSc
           ];
           const assignmentMap = Object.fromEntries(allStudentAssignments.map((a) => [a.assignment_id, a]));
           const quizMap       = Object.fromEntries((s.quizzes?.items || []).map((q) => [q.quiz_id, q]));
-          const pct           = s.combined_totals?.computed_percentage ?? s.final_totals?.percentage ?? null;
-          const obtained      = s.combined_totals?.computed_obtained ?? s.assignment_totals?.computed_obtained ?? null;
+          const { obtained, total, pct } = studentTotals(s);
 
           return (
             <div key={s.enrollment_id ?? s.student?.id ?? idx} className="bg-slate-800/40 border border-slate-700/50 rounded-2xl overflow-hidden">
@@ -151,7 +160,7 @@ const EvaluationMatrix = ({ students = [], courseStatus, gradingScale: gradingSc
                 <div className="flex-1 px-3 py-2.5 text-center">
                   <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-0.5">Obtained</p>
                   <p className="text-white font-bold text-sm tabular-nums">
-                    {obtained ?? "-"} <span className="text-slate-600 font-normal text-xs">/{totalCourseMarks}</span>
+                    {obtained ?? "-"} <span className="text-slate-600 font-normal text-xs">/{total ?? "-"}</span>
                   </p>
                 </div>
                 <div className="flex-1 px-3 py-2.5 text-center">
@@ -310,8 +319,7 @@ const EvaluationMatrix = ({ students = [], courseStatus, gradingScale: gradingSc
                   className="sticky z-20 bg-slate-900 px-4 py-4 text-center text-[10px] uppercase tracking-wider text-slate-500 font-semibold border-l border-slate-800"
                   style={{ right: GRADE_W, minWidth: OBTAINED_W }}
                 >
-                  Obtained /
-                  <span className="text-slate-600 normal-case ml-0.5">{totalCourseMarks}</span>
+                  Obtained
                 </th>
 
                 <th
@@ -336,9 +344,7 @@ const EvaluationMatrix = ({ students = [], courseStatus, gradingScale: gradingSc
                   (s.quizzes?.items || []).map((q) => [q.quiz_id, q])
                 );
 
-                const pct = s.combined_totals?.computed_percentage
-                  ?? s.final_totals?.percentage
-                  ?? null;
+                const { pct } = studentTotals(s);
 
                 return (
                   <tr
@@ -409,7 +415,7 @@ const EvaluationMatrix = ({ students = [], courseStatus, gradingScale: gradingSc
                       style={{ right: GRADE_W, minWidth: OBTAINED_W }}
                     >
                       <span className="text-white font-bold tabular-nums">
-                        {s.combined_totals?.computed_obtained ?? "-"}/{s.combined_totals?.computed_total}
+                        {studentTotals(s).obtained ?? "-"}/{studentTotals(s).total ?? "-"}
                       </span>
                     </td>
 

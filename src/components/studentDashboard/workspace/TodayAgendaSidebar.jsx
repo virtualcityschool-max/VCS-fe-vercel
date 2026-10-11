@@ -26,7 +26,7 @@ const TodayAgendaSidebar = ({
   const liveSchedule = useSelector(selectLiveSchedule) || [];
   const allSessions = useSelector(selectSessions) || [];
   const assignments = useSelector(selectAssignments) || [];
-  const { timezone, timezoneAbbr, formatTime } = useDateFormatters();
+  const { timezone, timezoneAbbr, formatTime, formatDate } = useDateFormatters();
 
   const [currentTime, setCurrentTime] = useState(() => Date.now());
   const [joiningId, setJoiningId] = useState(null);
@@ -36,7 +36,15 @@ const TodayAgendaSidebar = ({
     return () => clearInterval(id);
   }, []);
 
-  const todayStr = new Date(currentTime).toDateString();
+  // "Today" and each class's day are both judged in the student's own timezone
+  const dayKey = (v) => {
+    try {
+      return new Intl.DateTimeFormat("en-CA", { timeZone: timezone || undefined }).format(new Date(v));
+    } catch {
+      return new Intl.DateTimeFormat("en-CA").format(new Date(v));
+    }
+  };
+  const todayStr = dayKey(currentTime);
 
   // Merge sessions from /classroom/sessions/ and live_schedule for today
   const sessions = useMemo(() => {
@@ -51,14 +59,14 @@ const TodayAgendaSidebar = ({
     });
     const list = Array.from(map.values()).filter((s) => {
       if (!s.scheduled_at) return false;
-      return new Date(s.scheduled_at).toDateString() === todayStr;
+      return dayKey(s.scheduled_at) === todayStr;
     });
     return list.sort((a, b) => {
       if (a.status === "live" && b.status !== "live") return -1;
       if (b.status === "live" && a.status !== "live") return 1;
       return new Date(a.scheduled_at) - new Date(b.scheduled_at);
     });
-  }, [allSessions, liveSchedule, todayStr]);
+  }, [allSessions, liveSchedule, todayStr, timezone]);
 
   const handleJoinSession = async (sessionToJoin) => {
     if (!sessionToJoin) return;
@@ -285,7 +293,7 @@ const TodayAgendaSidebar = ({
                     {asg.title}
                   </h4>
                   <p className="text-[10px] text-slate-400 truncate">
-                    {asg.course_title || "Course"} • Due {asg.due_date || "This Term"}
+                    {asg.course_title || "Course"} • {asg.due_date ? `Due ${formatDate(asg.due_date)} · ${formatTime(asg.due_date)}` : "No deadline"}
                   </p>
                 </div>
 

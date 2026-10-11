@@ -168,6 +168,11 @@ const getQuizSubmissionById = async (submissionId) => {
   return response.data;
 };
 
+const getAllQuizSubmissions = async (params = {}) => {
+  const response = await axiosInstance.get("/quizzes/submissions/all/", { params });
+  return response.data;
+};
+
 const gradeQuizSubmission = async (submissionId, grades) => {
   const response = await axiosInstance.patch(`/quizzes/submissions/${submissionId}/grade/`, { grades });
   return response.data;
@@ -255,7 +260,38 @@ const endSession = async (sessionId) => {
   return response.data;
 };
 
+const getResources = async (params = {}) => {
+  const response = await axiosInstance.get("/courses/resources/", { params });
+  return response.data;
+};
+
+const createResource = async ({ file, ...rest }) => {
+  const formData = new FormData();
+  Object.entries(rest).forEach(([k, v]) => {
+    if (v !== undefined && v !== null && v !== "") formData.append(k, v);
+  });
+  if (file) formData.append("file", file);
+  const response = await axiosInstance.post("/courses/resources/", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return response.data;
+};
+
+const updateResource = async (id, data) => {
+  const response = await axiosInstance.patch(`/courses/resources/${id}/`, data);
+  return response.data;
+};
+
+const deleteResource = async (id) => {
+  await axiosInstance.delete(`/courses/resources/${id}/`);
+  return id;
+};
+
 export const teacherService = {
+  getResources,
+  createResource,
+  updateResource,
+  deleteResource,
   getTeachers,
   getTeacherById,
   getTeacherDashboard,
@@ -277,6 +313,7 @@ export const teacherService = {
   deleteQuiz,
   getQuizSubmissions,
   getQuizSubmissionById,
+  getAllQuizSubmissions,
   gradeQuizSubmission,
   createAnnouncement,
   getTeacherSessions,

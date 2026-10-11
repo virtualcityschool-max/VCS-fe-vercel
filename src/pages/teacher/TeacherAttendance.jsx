@@ -120,25 +120,37 @@ const TeacherAttendance = () => {
 
   // ── Mark modal helpers ────────────────────────────────────────────────────────
 
+  // Every enrolled student is listed; records of the selected session only add their current status
   const markStudents = useMemo(() => {
     if (!markModal) return [];
-    const fromRecords = (attendanceRecords || [])
-      .filter((r) => r.participant_role === "student")
+    const courseRoster = myCourses?.find((c) => String(c.id) === activeCourseId)?.enrolled_students || [];
+    const roster = enrolledStudents.length ? enrolledStudents : courseRoster;
+    const sessionRecords = markSessionId
+      ? (attendanceRecords || []).filter(
+          (r) => r.participant_role === "student" && String(r.session?.id ?? r.session) === String(markSessionId)
+        )
+      : [];
+    const recordById = new Map(sessionRecords.map((r) => [String(r.student?.id ?? r.student), r]));
+    const fromRoster = roster.map((s) => {
+      const r = recordById.get(String(s.id));
+      return {
+        id: String(s.id),
+        username: s.username || r?.student_name || `Student #${s.id}`,
+        joinedAt: r?.joined_at ?? null, leftAt: r?.left_at ?? null,
+        existingStatus: r?.status ?? null, hasRecord: Boolean(r),
+      };
+    });
+    const rosterIds = new Set(fromRoster.map((s) => s.id));
+    const extra = sessionRecords
+      .filter((r) => !rosterIds.has(String(r.student?.id ?? r.student)))
       .map((r) => ({
         id: String(r.student?.id ?? r.student),
         username: r.student_name || `Student #${r.student?.id ?? r.student}`,
         joinedAt: r.joined_at, leftAt: r.left_at,
         existingStatus: r.status, hasRecord: true,
       }));
-    const recordedIds = new Set(fromRecords.map((s) => s.id));
-    const fromEnrolled = enrolledStudents
-      .filter((s) => !recordedIds.has(String(s.id)))
-      .map((s) => ({
-        id: String(s.id), username: s.username,
-        joinedAt: null, leftAt: null, existingStatus: null, hasRecord: false,
-      }));
-    return [...fromRecords, ...fromEnrolled];
-  }, [markModal, attendanceRecords, enrolledStudents]);
+    return [...fromRoster, ...extra];
+  }, [markModal, markSessionId, attendanceRecords, enrolledStudents, myCourses, activeCourseId]);
 
   useEffect(() => {
     if (markModal && markStudents.length > 0) {
@@ -182,12 +194,8 @@ const TeacherAttendance = () => {
   };
 
   const openMarkModal = () => {
-    const initial = {};
-    (attendanceRecords || []).filter((r) => r.participant_role === "student").forEach((r) => {
-      const sid = r.student?.id ?? r.student;
-      if (sid != null) initial[String(sid)] = r.status;
-    });
-    setMarkStatuses(initial);
+    // statuses come from the selected session's records (existingStatus); start with no overrides
+    setMarkStatuses({});
     setSelectedStudentIds(new Set());
     setMarkModal(true);
   };
@@ -353,7 +361,7 @@ const TeacherAttendance = () => {
                   ) : (
                     <select
                       value={markSessionId}
-                      onChange={(e) => setMarkSessionId(e.target.value)}
+                      onChange={(e) => { setMarkSessionId(e.target.value); setMarkStatuses({}); }}
                       className="w-full px-4 py-2.5 bg-slate-800/60 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 appearance-none"
                     >
                       <option value="">- Select a session -</option>

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { fetchStudentQuizzes } from "../../store/slices/studentDashboardSlice";
@@ -7,8 +7,8 @@ import { useDateFormatters } from "../../hooks";
 
 const statusConfig = (sub) => {
   if (!sub || sub.status === "pending") return { label: "Pending",    color: "text-yellow-400 bg-yellow-500/10" };
-  if (sub.status === "missed")          return { label: "overdue",     color: "text-red-400 bg-red-500/10" };
-  if (sub.status === "submitted")       return { label: "Submitted",  color: "text-blue-400 bg-blue-500/10" };
+  if (sub.status === "missed")          return { label: "Missed · closed", color: "text-red-400 bg-red-500/10" };
+  if (sub.status === "submitted")       return { label: "Awaiting marks", color: "text-blue-400 bg-blue-500/10" };
   if (sub.status === "auto_graded")     return { label: "Graded",     color: "text-emerald-400 bg-emerald-500/10" };
   if (sub.status === "graded")          return { label: "Graded",     color: "text-emerald-400 bg-emerald-500/10" };
   return { label: sub.status, color: "text-slate-400 bg-slate-500/10" };
@@ -17,7 +17,7 @@ const statusConfig = (sub) => {
 const StudentQuizList = ({ hideHeader = false, filterCourse: externalFilterCourse }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { formatTime } = useDateFormatters();
+  const { formatTime, formatDate } = useDateFormatters();
   const { quizzes, isFetchingQuizzes } = useSelector((s) => s.studentDashboard);
 
   const filterCourse = externalFilterCourse || "";
@@ -41,17 +41,6 @@ const StudentQuizList = ({ hideHeader = false, filterCourse: externalFilterCours
       </div>
     );
   }
-
-  const filterRow = (
-    <div className="flex flex-wrap items-center gap-2 shrink-0">
-      <FilterSelect value={filterCourse} onChange={(e) => setFilterCourse(e.target.value)} style={{ minWidth: 160 }}>
-        <option value="">All Courses</option>
-        {courseOptions.map((c) => (
-          <option key={c.id} value={c.id}>{c.title}</option>
-        ))}
-      </FilterSelect>
-    </div>
-  );
 
   return (
     <div>
@@ -80,7 +69,7 @@ const StudentQuizList = ({ hideHeader = false, filterCourse: externalFilterCours
             <div className="w-8 h-8 rounded-lg bg-yellow-500/10 flex items-center justify-center text-yellow-500 border border-yellow-500/20">
               <i className="fas fa-hourglass-half text-xs"></i>
             </div>
-            <h2 className="text-sm font-black uppercase tracking-[0.2em] text-slate-400">Pending & Overdue Quizzes</h2>
+            <h2 className="text-sm font-black uppercase tracking-[0.2em] text-slate-400">To Do & Missed Quizzes</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -147,7 +136,7 @@ const StudentQuizList = ({ hideHeader = false, filterCourse: externalFilterCours
                                 <div className="flex flex-col">
                                   <span className="text-[8px] text-slate-500 uppercase font-black leading-none mb-0.5">Due</span>
                                   <span className="text-[11px] font-bold">
-                                    {new Date(quiz.due_date).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}
+                                    {formatDate(quiz.due_date)}
                                   </span>
                                   <span className="text-[10px] text-slate-500">
                                     {formatTime(quiz.due_date)}

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   FileText,
   Award,
@@ -18,21 +19,26 @@ export const AssignmentsQuizzesView = ({
   timezone
 }) => {
   const [activeSection, setActiveSection] = useState("assignments");
-  const [selectedCourseFilter, setSelectedCourseFilter] = useState("all");
+  const [searchParams] = useSearchParams();
+  const [selectedCourseFilter, setSelectedCourseFilter] = useState(() => searchParams.get("course") || "all");
   const [searchQuery, setSearchQuery] = useState("");
   const filteredAssignments = assignments.filter((a) => {
     const matchCourse = selectedCourseFilter === "all" || a.courseTitle === selectedCourseFilter;
-    const matchSearch = a.title.toLowerCase().includes(searchQuery.toLowerCase()) || a.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchSearch = a.title.toLowerCase().includes(searchQuery.toLowerCase()) || (a.description || "").toLowerCase().includes(searchQuery.toLowerCase());
     return matchCourse && matchSearch;
   });
   const filteredQuizzes = quizzes.filter((q) => {
     const matchCourse = selectedCourseFilter === "all" || q.courseTitle === selectedCourseFilter;
-    const matchSearch = q.title.toLowerCase().includes(searchQuery.toLowerCase()) || q.questions.some((ques) => ques.questionText.toLowerCase().includes(searchQuery.toLowerCase()));
+    const matchSearch =
+      q.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (q.questions || []).some((ques) =>
+        (ques.questionText || ques.question_text || "").toLowerCase().includes(searchQuery.toLowerCase())
+      );
     return matchCourse && matchSearch;
   });
   const allPendingQuizReviews = [];
   quizzes.forEach((q) => {
-    q.submissions.forEach((sub) => {
+    (q.submissions || []).forEach((sub) => {
       if (sub.status === "submitted") {
         allPendingQuizReviews.push({ quiz: q, submission: sub });
       }
@@ -58,7 +64,7 @@ export const AssignmentsQuizzesView = ({
             Assignments & Quizzes
           </h2>
           <p className="text-xs text-slate-400 mt-0.5">
-            Issue quick text tasks (no files required) or formal problem sheets, build interactive timed quizzes, and review & mark student answers.
+            Give assignments, build quizzes, and mark student answers.
           </p>
         </div>
 
@@ -163,7 +169,7 @@ export const AssignmentsQuizzesView = ({
                       {asg.courseTitle}
                     </span>
                     <span className="font-mono font-bold text-white text-xs tabular-nums">
-                      {asg.maxMarks} Marks
+                      {asg.maxMarks != null ? `${asg.maxMarks} Marks` : ""}
                     </span>
                   </div>
 
@@ -177,19 +183,11 @@ export const AssignmentsQuizzesView = ({
   }
                   <div className="mt-3 pt-3 border-t border-[#181F36] space-y-1.5 text-[11px]">
                     <div className="flex items-center justify-between text-slate-400">
-                      <span>Method:</span>
-                      <span className="text-slate-200 font-semibold capitalize">
-                        {asg.submissionMethod.replace("_", " ")}
-                      </span>
+                      <span>Worksheet attached:</span>
+                      <span className="text-slate-200 font-semibold">{asg.hasAttachment ? "Yes" : "No"}</span>
                     </div>
-                    {asg.allowedFormats && <div className="flex items-center justify-between text-slate-400">
-                        <span>Formats:</span>
-                        <span className="font-mono text-indigo-300 font-semibold">
-                          {asg.allowedFormats.join(", ")}
-                        </span>
-                      </div>}
                     <div className="flex items-center justify-between text-slate-400">
-                      <span>Launch Date:</span>
+                      <span>Created:</span>
                       <span className="text-slate-300 font-mono">
                         {asg.launchDate} · {asg.launchTime}
                       </span>
@@ -205,11 +203,10 @@ export const AssignmentsQuizzesView = ({
 
                 <div className="pt-3 border-t border-[#181F36] flex items-center justify-between">
                   <span className="text-xs text-slate-400">
-                    <strong className="text-white tabular-nums font-mono">{asg.submissionsCount}</strong> submissions (
-                    {asg.reviewedCount} graded)
+                    <strong className="text-white tabular-nums font-mono">{asg.submissionsCount}</strong> submissions
                   </span>
-                  <span className="px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-300 text-[10px] font-bold uppercase border border-emerald-500/30">
-                    {asg.status}
+                  <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase border ${asg.isOverdue ? "bg-slate-800 text-slate-400 border-slate-700" : asg.status === "published" ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30" : "bg-amber-500/15 text-amber-300 border-amber-500/30"}`}>
+                    {asg.isOverdue ? "closed" : asg.status}
                   </span>
                 </div>
               </div>)}
@@ -219,7 +216,7 @@ export const AssignmentsQuizzesView = ({
               <FileText className="w-8 h-8 text-slate-500 mx-auto mb-2" />
               <div className="text-sm font-bold text-white">No assignments found</div>
               <p className="text-xs text-slate-400 mt-1">
-                Click "+ Upload / Give Assignment" to distribute coursework to students.
+                Click "+ Create Task / Assignment" to give coursework to students.
               </p>
             </div>}
         </div>}
@@ -227,11 +224,22 @@ export const AssignmentsQuizzesView = ({
       {
     /* ================= SECTION B: QUIZZES VIEW ================= */
   }
-      {activeSection === "quizzes" && <div className="space-y-5">
-          {filteredQuizzes.map((quiz) => <div
-    key={quiz.id}
-    className="p-5 rounded-2xl bg-[#101424] border border-[#1E2540] space-y-4 shadow-sm"
-  >
+      {activeSection === "quizzes" && (
+        <div className="space-y-5">
+          {filteredQuizzes.length === 0 && (
+            <div className="p-12 rounded-2xl bg-[#101424] border border-[#1E2540] text-center space-y-2">
+              <Award className="w-8 h-8 text-slate-500 mx-auto" />
+              <div className="text-sm font-bold text-white">No quizzes found</div>
+              <p className="text-xs text-slate-400 mt-1">
+                Click "+ Author Interactive Quiz" to create and publish timed quizzes for students.
+              </p>
+            </div>
+          )}
+          {filteredQuizzes.map((quiz) => (
+            <div
+              key={quiz.id}
+              className="p-5 rounded-2xl bg-[#101424] border border-[#1E2540] space-y-4 shadow-sm"
+            >
               {
     /* Quiz Header Bar */
   }
@@ -240,10 +248,6 @@ export const AssignmentsQuizzesView = ({
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider">
                       {quiz.courseTitle}
-                    </span>
-                    <span className="text-slate-500">·</span>
-                    <span className="text-xs text-slate-400 font-mono">
-                      Duration: {quiz.durationMins} mins
                     </span>
                   </div>
                   <h3 className="text-base font-extrabold text-white mt-0.5">{quiz.title}</h3>
@@ -260,9 +264,9 @@ export const AssignmentsQuizzesView = ({
                     </div>
                   </div>
                   <span
-    className={`px-3 py-1 rounded-xl text-xs font-bold uppercase ${quiz.status === "published" ? "bg-amber-500/20 text-amber-300 border border-amber-500/30" : "bg-slate-800 text-slate-400"}`}
+    className={`px-3 py-1 rounded-xl text-xs font-bold uppercase ${quiz.status === "published" ? "bg-amber-500/20 text-amber-300 border border-amber-500/30" : quiz.status === "scheduled" ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30" : "bg-slate-800 text-slate-400"}`}
   >
-                    {quiz.status}
+                    {quiz.status === "published" ? "live" : quiz.status}
                   </span>
                 </div>
               </div>
@@ -274,45 +278,60 @@ export const AssignmentsQuizzesView = ({
                 <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
                   Configured Questions Breakdown:
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2.5">
-                  {quiz.questions.map((q, qIdx) => <div
-    key={q.id}
-    className="p-3 rounded-xl bg-[#0B0E1A] border border-[#1A223B] space-y-1.5"
-  >
-                      <div className="flex items-center justify-between text-[10px]">
-                        <span className="font-bold text-indigo-400 uppercase">
-                          Q{qIdx + 1} · {q.type.replace("_", " ")}
-                        </span>
-                        <span className="font-mono text-white font-bold tabular-nums">
-                          {q.marks}m
-                        </span>
+                {!(quiz.questions && quiz.questions.length) ? (
+                  <div className="p-3 rounded-xl bg-[#0B0E1A] border border-[#1A223B] text-xs text-slate-500 text-center">
+                    {quiz.questionsCount} questions · {quiz.marks} marks
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2.5">
+                    {quiz.questions.map((q, qIdx) => (
+                      <div
+                        key={q.id || qIdx}
+                        className="p-3 rounded-xl bg-[#0B0E1A] border border-[#1A223B] space-y-1.5"
+                      >
+                        <div className="flex items-center justify-between text-[10px]">
+                          <span className="font-bold text-indigo-400 uppercase">
+                            Q{qIdx + 1} · {(q.type || q.question_type || "text").replace("_", " ")}
+                          </span>
+                          <span className="font-mono text-white font-bold tabular-nums">
+                            {q.marks ?? q.max_marks ?? 0}m
+                          </span>
+                        </div>
+                        <div className="text-xs text-slate-200 line-clamp-2">
+                          {q.questionText || q.question_text}
+                        </div>
+                        {q.options && (
+                          <div className="text-[10px] text-slate-400">
+                            {q.options.length} options provided
+                          </div>
+                        )}
                       </div>
-                      <div className="text-xs text-slate-200 line-clamp-2">{q.questionText}</div>
-                      {q.options && <div className="text-[10px] text-slate-400">
-                          {q.options.length} options provided
-                        </div>}
-                    </div>)}
-                </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
-              {
-    /* Submissions & Teacher Marking Queue */
-  }
+              {/* Submissions & Teacher Marking Queue */}
               <div className="pt-3 border-t border-[#181F36]">
                 <div className="flex items-center justify-between mb-2">
                   <div className="text-xs font-bold text-white flex items-center gap-1.5">
                     <UserCheck className="w-3.5 h-3.5 text-emerald-400" />
-                    <span>Student Submissions ({quiz.submissions.length})</span>
+                    <span>Student Submissions ({(quiz.submissions || []).length})</span>
                   </div>
                   <span className="text-xs text-slate-400">
-                    Solve & Submit Window: <span className="font-mono text-slate-300">{quiz.launchDateTime.replace("T", " ")}</span> to{" "}
-                    <span className="font-mono text-rose-400">{quiz.dueDateTime.replace("T", " ")}</span>
+                    Open:{" "}
+                    <span className="font-mono text-slate-300">{quiz.launchLabel || "—"}</span>{" "}
+                    to{" "}
+                    <span className="font-mono text-rose-400">{quiz.dueLabel || "—"}</span>
                   </span>
                 </div>
 
-                {quiz.submissions.length === 0 ? <div className="p-3 rounded-xl bg-[#0B0E1A] border border-[#1A223B] text-xs text-slate-400 text-center">
+                {!(quiz.submissions && quiz.submissions.length) ? (
+                  <div className="p-3 rounded-xl bg-[#0B0E1A] border border-[#1A223B] text-xs text-slate-400 text-center">
                     No submissions recorded yet for this quiz.
-                  </div> : <div className="space-y-2">
+                  </div>
+                ) : (
+                  <div className="space-y-2">
                     {quiz.submissions.map((sub) => <div
     key={sub.id}
     className="p-3 rounded-xl bg-[#0B0E1A] border border-[#1A223B] flex flex-wrap items-center justify-between gap-3"
@@ -322,14 +341,14 @@ export const AssignmentsQuizzesView = ({
                             {sub.studentName} <span className="text-slate-400 font-mono font-normal">({sub.studentRoll})</span>
                           </div>
                           <div className="text-[11px] text-slate-400 mt-0.5">
-                            Turned in {sub.submittedAt} · {sub.answers.length} question responses
+                            Turned in {sub.submittedAt}
                           </div>
                         </div>
 
                         <div className="flex items-center gap-3">
                           <div className="text-right">
                             <div className="text-xs font-mono font-bold text-white tabular-nums">
-                              {sub.status === "reviewed" ? `${sub.totalScore} / ${sub.maxScore} Marks` : "Pending Teacher Marking"}
+                              {sub.status === "reviewed" ? `${sub.totalScore} / ${sub.maxScore} Marks` : "Written answers to mark"}
                             </div>
                             <div
     className={`text-[10px] font-bold uppercase ${sub.status === "reviewed" ? "text-emerald-400" : "text-amber-400"}`}
@@ -342,14 +361,18 @@ export const AssignmentsQuizzesView = ({
     onClick={() => onOpenReviewQuizModal(quiz, sub)}
     className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${sub.status === "reviewed" ? "bg-[#182038] text-slate-300 hover:bg-[#202B4C]" : "bg-emerald-600 hover:bg-emerald-500 text-white shadow-md"}`}
   >
-                            {sub.status === "reviewed" ? "Edit Marks" : "Review & Mark"}
+                            {sub.status === "reviewed" ? "View" : "Review & Mark"}
                           </button>
                         </div>
-                      </div>)}
-                  </div>}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
-            </div>)}
-        </div>}
+            </div>
+          ))}
+        </div>
+      )}
 
       {
     /* ================= SECTION C: PENDING SUBMISSIONS MARKING QUEUE ================= */
@@ -359,7 +382,7 @@ export const AssignmentsQuizzesView = ({
             <div>
               <h3 className="text-sm font-bold text-white">Submitted Quizzes & Diagnostic Papers</h3>
               <p className="text-xs text-slate-400">
-                Review submitted student answers, score auto/manual questions, write faculty feedback, and release marks.
+                Quizzes with written answers waiting for your marks. Choice questions are marked automatically.
               </p>
             </div>
             <span className="font-mono text-xs font-bold text-amber-300 bg-amber-500/10 px-3 py-1 rounded-xl border border-amber-500/30">
@@ -391,8 +414,6 @@ export const AssignmentsQuizzesView = ({
                       <span>Course: {item.quiz.courseTitle}</span>
                       <span>·</span>
                       <span>Turned in: {item.submission.submittedAt}</span>
-                      <span>·</span>
-                      <span className="font-mono">{item.submission.answers.length} Answers</span>
                     </div>
                   </div>
 

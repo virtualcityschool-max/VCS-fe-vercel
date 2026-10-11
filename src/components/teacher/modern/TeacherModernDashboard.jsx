@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   LayoutGrid,
   BookOpen,
@@ -31,9 +31,6 @@ import {
   Square,
   LogOut
 } from "lucide-react";
-import {
-  INITIAL_BLOGS
-} from "./vcsTeacherData";
 import { PerformanceAnalyticsView } from "./PerformanceAnalyticsView";
 import { AssignmentsQuizzesView } from "./AssignmentsQuizzesView";
 import { TeachingResourcesView } from "./TeachingResourcesView";
@@ -46,10 +43,9 @@ export const TeacherDashboard = ({
   tasks,
   assignments,
   quizzes,
-  slots,
+  upcomingSlots = [],
   attendance,
-  resources,
-  evaluations,
+  attendanceRecords = [],
   timezone,
   onCycleTimezone,
   onOpenAnnouncementModal,
@@ -58,7 +54,6 @@ export const TeacherDashboard = ({
   onOpenCreateAssignmentModal,
   onOpenAdvancedQuizBuilderModal,
   onOpenReviewQuizModal,
-  onAddResource,
   user,
   onStartSession,
   onEndSession,
@@ -70,15 +65,11 @@ export const TeacherDashboard = ({
   const [quizFilter, setQuizFilter] = useState("all");
   const [copiedLink, setCopiedLink] = useState(false);
   const [launchedSessionId, setLaunchedSessionId] = useState(null);
-  const [blogs] = useState(INITIAL_BLOGS);
-  const [selectedAttendanceCourse, setSelectedAttendanceCourse] = useState(
-    courses[0]?.title || "Cambridge O & A Level Physics"
-  );
-  const [selectedEvaluationCourse, setSelectedEvaluationCourse] = useState(
-    courses[0]?.title || "Cambridge O & A Level Physics"
-  );
-  const [evaluationTab, setEvaluationTab] = useState("rubrics_reports");
-  const [viewingReportCard, setViewingReportCard] = useState(null);
+  const navigate = useNavigate();
+  const [attendanceCoursePick, setAttendanceCoursePick] = useState("");
+  const selectedAttendanceCourse = attendanceCoursePick || courses[0]?.title || "";
+  const setSelectedAttendanceCourse = setAttendanceCoursePick;
+  const [selectedEvaluationCourse, setSelectedEvaluationCourse] = useState("all");
   const refCode = referralCode || user?.referral_code || null;
   const referralUrl = refCode ? `https://virtualcityschool.com/signup?ref=${refCode}` : "";
   const handleCopyReferral = () => {
@@ -97,9 +88,19 @@ export const TeacherDashboard = ({
     if (quizFilter === "all") return true;
     return q.status === quizFilter;
   });
-  const totalEnrolledStudents = courses.reduce((acc, c) => acc + c.enrolledCount, 0);
-  const gradedCount = tasks.filter((t) => t.status === "graded").length;
-  const completionRate = tasks.length > 0 ? Math.round(gradedCount / tasks.length * 100) : 100;
+  const totalEnrolledStudents = courses.reduce((acc, c) => acc + (c.enrolledCount || 0), 0);
+  const pendingCount = tasks.filter((t) => t.status !== "graded").length;
+  const gradedCount = tasks.length - pendingCount;
+  // Overall student attendance across all recorded classes (present = 1, late = 0.5)
+  const studentAttendance = attendanceRecords.filter((r) => r.participant_role === "student" && r.status);
+  const overallAttendanceRate = studentAttendance.length > 0
+    ? Math.round(
+        studentAttendance.reduce(
+          (acc, r) => acc + (r.status === "present" || r.status === "attended" ? 1 : r.status === "late" ? 0.5 : 0),
+          0
+        ) / studentAttendance.length * 100
+      )
+    : null;
   const tzDetails = {
     AST: "Riyadh (AST)",
     PKT: "Karachi (PKT)",
@@ -115,8 +116,8 @@ export const TeacherDashboard = ({
     { id: "analytics", icon: <LineChart className="w-4 h-4" />, title: "Performance Analytics" },
     { id: "planner", icon: <Calendar className="w-4 h-4" />, title: "Planner" },
     { id: "slots", icon: <Clock className="w-4 h-4" />, title: "Slots Management" },
-    { id: "blogs", icon: <Newspaper className="w-4 h-4" />, title: "Blogs" },
-    { id: "about", icon: <Info className="w-4 h-4" />, title: "About Us" }
+    { id: "blogs", icon: <Newspaper className="w-4 h-4" />, title: "Blogs", href: "/blogs" },
+    { id: "about", icon: <Info className="w-4 h-4" />, title: "About Us", href: "/about" }
   ];
   const renderCoursesView = () => <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4 bg-[#101424] border border-[#1E2540] rounded-2xl p-5">
@@ -147,8 +148,8 @@ export const TeacherDashboard = ({
                 <span className="px-2.5 py-1 rounded-lg bg-black/50 text-[10px] font-mono font-bold text-white uppercase border border-white/10">
                   {course.code || "VCS-CRS"}
                 </span>
-                <span className="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 text-[10px] font-extrabold uppercase border border-emerald-400/30">
-                  Active Term
+                <span className={`px-2.5 py-1 rounded-lg text-[10px] font-extrabold uppercase border ${course.published ? "bg-emerald-500/20 text-emerald-300 border-emerald-400/30" : "bg-slate-800 text-slate-400 border-slate-700"}`}>
+                  {course.published ? "Published" : "Draft"}
                 </span>
               </div>
               <div className="text-xs font-bold text-indigo-200 uppercase tracking-wider">{course.category}</div>
@@ -157,24 +158,9 @@ export const TeacherDashboard = ({
             </div>
 
             <div className="p-5 space-y-4">
-              <p className="text-xs text-slate-300 leading-relaxed">
-                {course.description || "Comprehensive curriculum progression with structured assessments."}
-              </p>
-
-              <div>
-                <div className="flex items-center justify-between text-xs mb-1.5">
-                  <span className="text-slate-400">Syllabus Progress</span>
-                  <span className="font-mono font-bold text-indigo-400 tabular-nums">
-                    {course.progress}% ({course.syllabusUnitsCompleted}/{course.syllabusTotalUnits} Units)
-                  </span>
-                </div>
-                <div className="w-full h-2 rounded-full bg-[#181F36] overflow-hidden">
-                  <div
-    className="h-full bg-gradient-to-r from-indigo-500 to-emerald-400 rounded-full"
-    style={{ width: `${course.progress}%` }}
-  />
-                </div>
-              </div>
+              {course.description && <p className="text-xs text-slate-300 leading-relaxed line-clamp-3">
+                  {course.description}
+                </p>}
 
               <div className="grid grid-cols-2 gap-3 pt-2 border-t border-[#181F36] text-xs">
                 <div>
@@ -192,12 +178,20 @@ export const TeacherDashboard = ({
               </div>
 
               <div className="pt-2 flex items-center justify-between gap-2">
-                <button
-    onClick={() => onSelectTab("assignments_quizzes")}
-    className="text-xs font-semibold text-indigo-400 hover:text-indigo-300 cursor-pointer"
+                <div className="flex items-center gap-3">
+                  <Link
+    to={`/teacher/courses/${course.id}`}
+    className="text-xs font-semibold text-indigo-400 hover:text-indigo-300"
   >
-                  View Course Assessments →
-                </button>
+                    Open Course →
+                  </Link>
+                  <button
+    onClick={() => onSelectTab("assignments_quizzes", { course: course.title })}
+    className="text-xs font-semibold text-slate-400 hover:text-slate-200 cursor-pointer"
+  >
+                    Assessments
+                  </button>
+                </div>
                 <button
     onClick={onOpenNewSessionModal}
     className="px-3 py-1.5 rounded-lg bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 text-xs font-semibold hover:bg-indigo-600/30 transition-colors cursor-pointer"
@@ -215,7 +209,8 @@ export const TeacherDashboard = ({
     const presentCount = classStudents.filter((s) => s.statusToday === "present" || s.statusToday === "attended").length;
     const lateCount = classStudents.filter((s) => s.statusToday === "late").length;
     const absentCount = classStudents.filter((s) => s.statusToday === "absent").length;
-    const classRate = classStudents.length > 0 ? Math.round((presentCount + lateCount * 0.5) / classStudents.length * 100) : 100;
+    const rated = classStudents.filter((s) => s.attendanceRate != null);
+    const classRate = rated.length > 0 ? Math.round(rated.reduce((a, s) => a + s.attendanceRate, 0) / rated.length) : null;
     return <div className="space-y-6">
         {
       /* Top Header */
@@ -294,7 +289,7 @@ export const TeacherDashboard = ({
                 {selectedAttendanceCourse}
               </h3>
               <p className="text-xs text-slate-400 mt-0.5">
-                {selectedCourseObj?.category} · Next Scheduled: {selectedCourseObj?.nextSessionTime} · Roll Call Turnout: {classRate}%
+                {[selectedCourseObj?.category, `Average attendance: ${classRate != null ? `${classRate}%` : "—"}`].filter(Boolean).join(" · ")}
               </p>
             </div>
 
@@ -351,11 +346,16 @@ export const TeacherDashboard = ({
                   <th className="py-3 px-4">Student Name</th>
                   <th className="py-3 px-4">Roll Number</th>
                   <th className="py-3 px-4">Last Activity</th>
-                  <th className="py-3 px-4 text-center">Semester Rate</th>
+                  <th className="py-3 px-4 text-center">Attendance Rate</th>
                   <th className="py-3 px-4 text-right">Today's Roll Call Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#161C33] text-xs">
+                {classStudents.length === 0 && <tr>
+                    <td colSpan={5} className="py-8 text-center text-xs text-slate-500">
+                      {courses.length === 0 ? "You have no courses assigned yet." : "No students are enrolled in this class yet."}
+                    </td>
+                  </tr>}
                 {classStudents.map((rec) => <tr key={rec.id} className="hover:bg-[#14192E] transition-colors">
                     <td className="py-3.5 px-4 font-bold text-white flex items-center gap-2.5">
                       <div className="w-7 h-7 rounded-full bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-xs font-bold text-indigo-300">
@@ -442,81 +442,86 @@ export const TeacherDashboard = ({
           </div>)}
       </div>
     </div>;
+  const backButton = <button
+      onClick={() => onSelectTab("dashboard")}
+      className="px-3.5 py-2 rounded-xl bg-[#171D33] hover:bg-[#1E2642] text-xs font-semibold text-slate-300 border border-[#273154] transition-colors cursor-pointer"
+    >
+      ← Back to Bento Dashboard
+    </button>;
   const renderSlotsView = () => <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4 bg-[#101424] border border-[#1E2540] rounded-2xl p-5">
         <div>
           <div className="text-[10px] font-bold tracking-wider uppercase text-indigo-400">
             OFFICE HOURS & CONSULTATION WINDOWS
           </div>
-          <h2 className="text-xl font-extrabold text-white mt-1">1-on-1 Tutoring Slots Management</h2>
+          <h2 className="text-xl font-extrabold text-white mt-1">1-on-1 Tutoring Slots</h2>
           <p className="text-xs text-slate-400 mt-0.5">
-            Consultation availability is managed via your weekly availability schedule.
+            Your booked slots are listed here. Open slots are set on the availability page.
           </p>
         </div>
-        <button
-          onClick={() => onSelectTab("dashboard")}
-          className="px-3.5 py-2 rounded-xl bg-[#171D33] hover:bg-[#1E2642] text-xs font-semibold text-slate-300 border border-[#273154] transition-colors cursor-pointer"
-        >
-          ← Back to Bento Dashboard
-        </button>
+        <div className="flex items-center gap-3">
+          <Link
+            to="/teacher/availability"
+            className="px-4 py-2 rounded-xl bg-[#5B46F8] hover:bg-[#4C38E6] text-white text-xs font-bold transition-all shadow-md"
+          >
+            Manage Availability →
+          </Link>
+          {backButton}
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {slots.map((slot) => <div
-          key={slot.id}
-          className="p-4 rounded-2xl bg-[#101424] border border-[#1E2540] flex items-center justify-between gap-4"
-        >
-            <div>
-              <div className="text-sm font-bold text-white">
-                {slot.day} · <span className="font-mono tabular-nums">{slot.timeRangeAST}</span>
+      {upcomingSlots.length === 0 ? <div className="p-10 rounded-2xl bg-[#101424] border border-[#1E2540] text-center">
+          <Clock className="w-8 h-8 text-slate-500 mx-auto mb-2" />
+          <div className="text-sm font-bold text-white">No booked slots coming up</div>
+          <p className="text-xs text-slate-400 mt-1">When a student books one of your slots it will appear here.</p>
+        </div> : <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {upcomingSlots.map((slot) => <div
+            key={slot.id}
+            className="p-4 rounded-2xl bg-[#101424] border border-[#1E2540] flex items-center justify-between gap-4"
+          >
+              <div>
+                <div className="text-sm font-bold text-white">
+                  {slot.date} · <span className="font-mono tabular-nums">{slot.start_time}–{slot.end_time}</span>
+                </div>
+                <div className="text-xs text-slate-400 mt-1">
+                  Booked by {slot.student_name || slot.student_email || "a student"}
+                </div>
               </div>
-              <div className="text-xs text-slate-400 mt-1">
-                {slot.bookedByStudent ? `Booked by ${slot.bookedByStudent} \u2014 ${slot.courseTopic}` : slot.status === "available" ? "Open for student 1-on-1 booking" : "Blocked for faculty prep work"}
-              </div>
-            </div>
-            <span
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider ${slot.status === "available" ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40" : slot.status === "reserved" ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/40" : "bg-slate-800 text-slate-400 border border-slate-700"}`}
-            >
-              {slot.status}
-            </span>
-          </div>)}
-      </div>
+              <span className={`px-3 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider ${slot.can_join ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40" : "bg-indigo-500/20 text-indigo-300 border border-indigo-500/40"}`}>
+                {slot.can_join ? "Join now" : "Booked"}
+              </span>
+            </div>)}
+        </div>}
     </div>;
   const renderEvaluationsView = () => {
-    const courseEvaluations = evaluations.filter(
-      (ev) => selectedEvaluationCourse === "all" || ev.courseTitle === selectedEvaluationCourse
-    );
     const courseTasks = tasks.filter(
       (t) => selectedEvaluationCourse === "all" || t.courseTitle === selectedEvaluationCourse
     );
     return <div className="space-y-6">
-        {
-      /* Top Header Banner */
-    }
         <div className="flex flex-wrap items-center justify-between gap-4 bg-[#101424] border border-[#1E2540] rounded-2xl p-5 shadow-lg">
           <div>
             <div className="text-[10px] font-bold tracking-wider uppercase text-indigo-400 flex items-center gap-1.5">
               <FileSpreadsheet className="w-3.5 h-3.5" />
-              <span>ACADEMIC EVALUATIONS & COMPETENCY GRADEBOOK</span>
+              <span>EVALUATIONS & GRADEBOOK</span>
             </div>
             <h2 className="text-xl font-extrabold text-white mt-1">
-              Evaluations & Student Progress Reports
+              Evaluations & Grading Queue
             </h2>
             <p className="text-xs text-slate-400 mt-0.5">
-              Comprehensive Cambridge competency rubrics, term assessment reports, qualitative faculty remarks, and printable student evaluation cards.
+              Mark waiting submissions here. Student term evaluations are written on the evaluations page.
             </p>
           </div>
-          <button
-      onClick={() => onSelectTab("dashboard")}
-      className="px-3.5 py-2 rounded-xl bg-[#171D33] hover:bg-[#1E2642] text-xs font-semibold text-slate-300 border border-[#273154] transition-colors cursor-pointer"
-    >
-            ← Back to Bento Dashboard
-          </button>
+          <div className="flex items-center gap-3">
+            <Link
+              to="/teacher/evaluations"
+              className="px-4 py-2 rounded-xl bg-[#5B46F8] hover:bg-[#4C38E6] text-white text-xs font-bold transition-all shadow-md"
+            >
+              Student Evaluations →
+            </Link>
+            {backButton}
+          </div>
         </div>
 
-        {
-      /* Course Filter Tabs */
-    }
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-xs text-slate-400 font-semibold mr-1">Filter by Course:</span>
           <button
@@ -534,332 +539,60 @@ export const TeacherDashboard = ({
             </button>)}
         </div>
 
-        {
-      /* Sub-Tabs: Competency Reports vs Homework Grading Queue */
-    }
-        <div className="flex items-center gap-2 border-b border-[#1E2642] pb-2">
-          <button
-      onClick={() => setEvaluationTab("rubrics_reports")}
-      className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${evaluationTab === "rubrics_reports" ? "bg-[#161D38] text-white border border-indigo-500/40 shadow-sm" : "text-slate-400 hover:text-slate-200"}`}
-    >
-            <Star className="w-3.5 h-3.5 text-amber-400" />
-            <span>Student Term Evaluations ({courseEvaluations.length})</span>
-          </button>
-          <button
-      onClick={() => setEvaluationTab("homework_queue")}
-      className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${evaluationTab === "homework_queue" ? "bg-[#161D38] text-white border border-indigo-500/40 shadow-sm" : "text-slate-400 hover:text-slate-200"}`}
-    >
-            <ClipboardCheck className="w-3.5 h-3.5 text-indigo-400" />
-            <span>Homework Grading Queue ({courseTasks.length})</span>
-          </button>
-        </div>
-
-        {
-      /* TAB 1: FORMAL STUDENT EVALUATION CARDS */
-    }
-        {evaluationTab === "rubrics_reports" && <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {courseEvaluations.map((ev) => <div
-      key={ev.id}
-      className="rounded-2xl bg-[#101424] border border-[#1E2540] hover:border-indigo-500/40 transition-all p-5 flex flex-col justify-between space-y-4 shadow-lg"
-    >
-                <div>
-                  {
-      /* Student Header */
-    }
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-600 to-cyan-500 flex items-center justify-center text-sm font-bold text-white shadow-md">
-                        {ev.studentName.charAt(0)}
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h4 className="text-base font-bold text-white">{ev.studentName}</h4>
-                          <span className="font-mono text-[11px] text-slate-400">({ev.studentRoll})</span>
-                        </div>
-                        <div className="text-xs text-indigo-400 font-semibold mt-0.5">{ev.courseTitle}</div>
-                      </div>
-                    </div>
-
-                    <div className="text-right">
-                      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 text-xs font-mono font-bold">
-                        <span>Grade {ev.overallGrade}</span>
-                        <span>·</span>
-                        <span>{ev.overallScore}%</span>
-                      </div>
-                      <div className="text-[10px] text-slate-400 mt-1 font-mono">{ev.term}</div>
-                    </div>
-                  </div>
-
-                  {
-      /* Cambridge Criteria Gauges */
-    }
-                  <div className="mt-4 p-3.5 rounded-xl bg-[#0B0E1A] border border-[#1A223B] space-y-2.5">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                      Cambridge Rubric Competency Breakdown:
-                    </span>
-                    <div className="space-y-2 text-xs">
-                      {ev.criteria.map((c, i) => <div key={i}>
-                          <div className="flex items-center justify-between text-[11px] mb-1">
-                            <span className="text-slate-300 font-medium">{c.name}</span>
-                            <span className="font-mono font-bold text-indigo-300">{c.score}%</span>
-                          </div>
-                          <div className="w-full h-1.5 rounded-full bg-[#161D36] overflow-hidden">
-                            <div
-      className="h-full bg-gradient-to-r from-indigo-500 to-cyan-400 rounded-full"
-      style={{ width: `${c.score}%` }}
-    />
-                          </div>
-                        </div>)}
-                    </div>
-                  </div>
-
-                  {
-      /* Faculty Written Remarks */
-    }
-                  <div className="mt-3.5 p-3 rounded-xl bg-indigo-950/20 border border-indigo-500/20 text-xs text-slate-300 leading-relaxed">
-                    <span className="font-bold text-indigo-300 mr-1.5">Teacher Appraisal:</span>
-                    “{ev.teacherRemarks}”
-                  </div>
-
-                  {
-      /* Strengths & Growth Areas */
-    }
-                  <div className="mt-3 flex flex-wrap gap-1.5">
-                    {ev.strengths.map((str, sIdx) => <span
-      key={sIdx}
-      className="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 text-[10px] font-semibold"
-    >
-                        ✓ {str}
-                      </span>)}
-                    {ev.growthAreas.map((gr, gIdx) => <span
-      key={gIdx}
-      className="px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-300 border border-amber-500/20 text-[10px] font-semibold"
-    >
-                        ↗ {gr}
-                      </span>)}
-                  </div>
-                </div>
-
-                {
-      /* Bottom Actions */
-    }
-                <div className="pt-3 border-t border-[#181F36] flex items-center justify-between gap-3">
-                  <span className="text-[11px] text-slate-400 font-mono">
-                    Conduct: <strong className="text-emerald-400">{ev.conduct}</strong>
-                  </span>
-
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => setViewingReportCard(ev)}
-                      className="px-3 py-1.5 rounded-xl bg-[#171D33] hover:bg-[#1E2642] text-xs font-semibold text-slate-300 border border-[#273154] transition-colors cursor-pointer inline-flex items-center gap-1.5"
-                    >
-                      <Printer className="w-3.5 h-3.5" />
-                      <span>Print Card</span>
-                    </button>
-                  </div>
-                </div>
-              </div>)}
-          </div>}
-
-        {
-      /* TAB 2: HOMEWORK / TASK GRADING QUEUE */
-    }
-        {evaluationTab === "homework_queue" && <div className="space-y-3">
-            {courseTasks.map((task) => <div
+        <div className="space-y-3">
+          {courseTasks.length === 0 && <div className="p-10 rounded-2xl bg-[#101424] border border-[#1E2540] text-center">
+              <CheckCircle2 className="w-8 h-8 text-emerald-400 mx-auto mb-2" />
+              <div className="text-sm font-bold text-white">Nothing waiting to be marked</div>
+            </div>}
+          {courseTasks.map((task) => <div
       key={task.id}
       className="p-4 rounded-2xl bg-[#101424] border border-[#1E2540] flex flex-wrap items-center justify-between gap-4"
     >
-                <div className="min-w-0 flex-1">
-                  <div className="text-sm font-bold text-white">{task.assignmentTitle}</div>
-                  <div className="text-xs text-slate-400 mt-1 flex flex-wrap items-center gap-2">
-                    <span className="font-semibold text-slate-200">{task.studentName}</span>
-                    <span>·</span>
-                    <span className="font-mono">{task.studentRoll}</span>
-                    <span>·</span>
-                    <span>{task.courseTitle}</span>
-                    <span>·</span>
-                    <span>Due: {task.dueDate}</span>
-                  </div>
-                  {task.feedback && <div className="mt-2 text-xs text-emerald-300 bg-emerald-500/10 p-2 rounded-lg border border-emerald-500/20">
-                      Faculty Feedback: “{task.feedback}”
-                    </div>}
+              <div className="min-w-0 flex-1">
+                <div className="text-sm font-bold text-white">{task.assignmentTitle}</div>
+                <div className="text-xs text-slate-400 mt-1 flex flex-wrap items-center gap-2">
+                  <span className="font-semibold text-slate-200">{task.studentName}</span>
+                  <span>·</span>
+                  <span>{task.courseTitle}</span>
+                  {task.submittedAt && <><span>·</span><span>Submitted {task.submittedAt}</span></>}
                 </div>
+                {task.feedback && <div className="mt-2 text-xs text-emerald-300 bg-emerald-500/10 p-2 rounded-lg border border-emerald-500/20">
+                    Feedback: “{task.feedback}”
+                  </div>}
+              </div>
 
-                <div className="flex items-center gap-4">
-                  <div className="text-right">
-                    <div className="text-sm font-mono font-bold text-white tabular-nums">
-                      {task.status === "graded" ? `${task.awardedMarks} / ${task.maxMarks} Marks` : `Max ${task.maxMarks} Marks`}
-                    </div>
-                    <div
-      className={`text-[10px] font-bold uppercase ${task.status === "graded" ? "text-emerald-400" : task.status === "overdue" ? "text-amber-400" : "text-indigo-400"}`}
-    >
-                      {task.status}
-                    </div>
+              <div className="flex items-center gap-4">
+                <div className="text-right">
+                  <div className="text-sm font-mono font-bold text-white tabular-nums">
+                    {task.status === "graded" ? `${task.awardedMarks} / ${task.maxMarks ?? "?"} Marks` : task.maxMarks != null ? `Out of ${task.maxMarks}` : ""}
                   </div>
-                  <button
+                  <div className={`text-[10px] font-bold uppercase ${task.status === "graded" ? "text-emerald-400" : task.status === "overdue" ? "text-amber-400" : "text-indigo-400"}`}>
+                    {task.status === "overdue" ? "late" : task.status}
+                  </div>
+                </div>
+                <button
       onClick={() => onOpenGradeModal(task)}
       className="px-4 py-2 rounded-xl bg-[#5B46F8] hover:bg-[#4C38E6] text-white text-xs font-bold transition-all cursor-pointer"
     >
-                    {task.status === "graded" ? "Edit Evaluation" : "Score Rubric"}
-                  </button>
-                </div>
-              </div>)}
-          </div>}
-
-        {
-      /* ------------------------------------------------------------------ */
-    }
-        {
-      /*           MODAL: EDIT STUDENT EVALUATION & RUBRIC SCORES           */
-    }
-        {
-      /* ------------------------------------------------------------------ */
-    }
-
-
-        {
-      /* ------------------------------------------------------------------ */
-    }
-        {
-      /*           MODAL: VIEW / PRINT OFFICIAL REPORT CARD                 */
-    }
-        {
-      /* ------------------------------------------------------------------ */
-    }
-        {viewingReportCard && <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-            <div className="w-full max-w-2xl bg-[#0E1222] border border-[#273256] rounded-2xl shadow-2xl overflow-hidden my-6">
-              <div className="px-6 py-4 border-b border-[#1C233D] flex items-center justify-between bg-[#12162B]">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
-                    <Printer className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h3 className="text-base font-bold text-white">
-                      Official Academic Evaluation Card
-                    </h3>
-                    <p className="text-xs text-slate-400">Virtual City School · Term 2026 Appraisal</p>
-                  </div>
-                </div>
-                <button
-      onClick={() => setViewingReportCard(null)}
-      className="text-slate-400 hover:text-white p-1 rounded-lg cursor-pointer"
-    >
-                  <X className="w-5 h-5" />
+                  {task.status === "graded" ? "Edit Marks" : "Mark"}
                 </button>
               </div>
-
-              <div className="p-8 space-y-6 bg-[#0E1222] text-slate-100">
-                <div className="flex items-center justify-between border-b border-white/10 pb-4">
-                  <div>
-                    <div className="text-xs font-bold text-indigo-400 uppercase tracking-widest">
-                      VIRTUAL CITY SCHOOL
-                    </div>
-                    <h2 className="text-xl font-extrabold text-white mt-1">Student Performance Transcript</h2>
-                    <p className="text-xs text-slate-400 mt-0.5">{viewingReportCard.term}</p>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-3xl font-black text-emerald-400 font-mono">
-                      {viewingReportCard.overallGrade}
-                    </div>
-                    <div className="text-xs font-mono font-bold text-slate-300">
-                      {viewingReportCard.overallScore}% Aggregate
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 text-xs">
-                  <div>
-                    <span className="text-slate-400">Learner Name:</span>
-                    <div className="text-white font-bold text-sm mt-0.5">{viewingReportCard.studentName}</div>
-                  </div>
-                  <div>
-                    <span className="text-slate-400">Roll Identification:</span>
-                    <div className="text-white font-bold text-sm font-mono mt-0.5">{viewingReportCard.studentRoll}</div>
-                  </div>
-                  <div>
-                    <span className="text-slate-400">Curriculum Course:</span>
-                    <div className="text-white font-bold mt-0.5">{viewingReportCard.courseTitle}</div>
-                  </div>
-                  <div>
-                    <span className="text-slate-400">Faculty Conduct Appraisal:</span>
-                    <div className="text-emerald-400 font-bold mt-0.5">{viewingReportCard.conduct}</div>
-                  </div>
-                </div>
-
-                <div className="space-y-3 pt-3 border-t border-white/10">
-                  <div className="text-xs font-bold text-slate-300 uppercase tracking-wider">
-                    Competency Rubric Assessment:
-                  </div>
-                  <div className="space-y-2">
-                    {viewingReportCard.criteria.map((cr, idx) => <div key={idx} className="flex items-center justify-between text-xs py-1 border-b border-white/5">
-                        <span className="text-slate-300">{cr.name}</span>
-                        <span className="font-mono font-bold text-indigo-300">{cr.score} / {cr.maxScore}</span>
-                      </div>)}
-                  </div>
-                </div>
-
-                <div className="p-4 rounded-xl bg-[#141A33] border border-[#222B4D] space-y-1">
-                  <div className="text-xs font-bold text-indigo-300">Dean of Academics & Tutor Commentary:</div>
-                  <p className="text-xs text-slate-200 leading-relaxed italic">
-                    “{viewingReportCard.teacherRemarks}”
-                  </p>
-                </div>
-              </div>
-
-              <div className="px-6 py-3 border-t border-[#1C233D] flex items-center justify-between bg-[#12162B]">
-                <span className="text-xs text-slate-400 font-mono">Issued by: Aamir Waqas · Senior Tutor</span>
-                <button
-      onClick={() => {
-        alert("Print dialog initiated. Progress card ready for PDF download.");
-      }}
-      className="px-4 py-2 rounded-xl bg-[#5B46F8] hover:bg-[#4C38E6] text-xs font-bold text-white cursor-pointer inline-flex items-center gap-1.5"
-    >
-                  <Printer className="w-3.5 h-3.5" />
-                  <span>Download / Print Transcript</span>
-                </button>
-              </div>
-            </div>
-          </div>}
+            </div>)}
+        </div>
       </div>;
   };
   const renderBlogsView = () => <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4 bg-[#101424] border border-[#1E2540] rounded-2xl p-5">
         <div>
-          <div className="text-[10px] font-bold tracking-wider uppercase text-indigo-400">
-            ACADEMIC INSIGHTS & ARTICLES
-          </div>
-          <h2 className="text-xl font-extrabold text-white mt-1">Faculty Academic Blogs ({blogs.length})</h2>
-          <p className="text-xs text-slate-400 mt-0.5">
-            Published advice, exam blueprints, and pedagogical articles for Virtual City School candidates.
-          </p>
+          <h2 className="text-xl font-extrabold text-white">Blogs</h2>
+          <p className="text-xs text-slate-400 mt-0.5">Articles published by Virtual City School.</p>
         </div>
-        <button
-    onClick={() => onSelectTab("dashboard")}
-    className="px-3.5 py-2 rounded-xl bg-[#171D33] hover:bg-[#1E2642] text-xs font-semibold text-slate-300 border border-[#273154] transition-colors cursor-pointer"
-  >
-          ← Back to Bento Dashboard
-        </button>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        {blogs.map((b) => <div
-    key={b.id}
-    className="p-5 rounded-2xl bg-[#101424] border border-[#1E2540] flex flex-col justify-between space-y-4"
-  >
-            <div>
-              <div className="flex items-center justify-between text-[11px] text-slate-400 mb-2">
-                <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider">{b.category}</span>
-                <span>{b.readTime}</span>
-              </div>
-              <h3 className="text-base font-bold text-white leading-snug">{b.title}</h3>
-              <p className="text-xs text-slate-300 mt-2 leading-relaxed">{b.snippet}</p>
-            </div>
-
-            <div className="pt-3 border-t border-[#181F36] flex items-center justify-between text-xs text-slate-400">
-              <span>{b.author}</span>
-              <span className="font-mono tabular-nums">{b.views} reads</span>
-            </div>
-          </div>)}
+        <div className="flex items-center gap-3">
+          <Link to="/blogs" className="px-4 py-2 rounded-xl bg-[#5B46F8] hover:bg-[#4C38E6] text-white text-xs font-bold">
+            Open Blogs →
+          </Link>
+          {backButton}
+        </div>
       </div>
     </div>;
   const renderAboutView = () => <div className="space-y-6">
@@ -929,8 +662,6 @@ export const TeacherDashboard = ({
   if (activeTab === "teaching_resources")
     return <TeachingResourcesView
       courses={courses}
-      resources={resources}
-      onAddResource={onAddResource}
       onBackToDashboard={() => onSelectTab("dashboard")}
       timezone={timezone}
     />;
@@ -938,6 +669,9 @@ export const TeacherDashboard = ({
     return <PerformanceAnalyticsView
       courses={courses}
       quizzes={quizzes}
+      attendance={attendance}
+      attendanceRecords={attendanceRecords}
+      assignments={assignments}
       onBackToDashboard={() => onSelectTab("dashboard")}
       timezone={timezone}
     />;
@@ -958,17 +692,17 @@ export const TeacherDashboard = ({
           <div className="bg-[#101424] border border-[#1E2540] rounded-2xl p-5 shadow-lg">
             <div className="flex items-start gap-4">
               <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#635BFF] to-[#4F46E5] flex items-center justify-center text-lg font-extrabold text-white shadow-[0_0_25px_rgba(99,91,255,0.4)] shrink-0">
-                {(user?.first_name ? `${user.first_name[0]}${(user.last_name || "")[0] || ""}` : (user?.username?.slice(0, 2) || "AW")).toUpperCase()}
+                {(user?.first_name ? `${user.first_name[0]}${(user.last_name || "")[0] || ""}` : (user?.username?.slice(0, 2) || "")).toUpperCase()}
               </div>
               <div className="min-w-0 flex-1">
                 <div className="text-[10px] font-bold tracking-[0.14em] text-indigo-400 uppercase">
                   FACULTY WORKSPACE
                 </div>
                 <h1 className="text-xl font-extrabold text-white truncate mt-0.5 capitalize">
-                  {user?.first_name ? `${user.first_name} ${user.last_name || ""}`.trim() : (user?.username || user?.display_name || "aamir waqas")}
+                  {user?.first_name ? `${user.first_name} ${user.last_name || ""}`.trim() : (user?.display_name || user?.username || "")}
                 </h1>
                 <div className="text-xs text-slate-400 mt-0.5">
-                  Senior Tutor · Term 2025–26
+                  Teacher · {courses.length} {courses.length === 1 ? "course" : "courses"} · {totalEnrolledStudents} {totalEnrolledStudents === 1 ? "student" : "students"}
                 </div>
 
                 <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -984,16 +718,12 @@ export const TeacherDashboard = ({
                   </div>
                 </div>
 
-                <div className="mt-2.5 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-[11px] font-semibold text-emerald-300">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Stipend: Verified ($1,450.00)</span>
-                </div>
               </div>
             </div>
 
             <div className="mt-4 pt-4 border-t border-[#1B223B] flex items-center justify-between gap-2">
-              <div className="text-xs text-slate-400">
-                Faculty ID: <span className="font-mono font-semibold text-slate-200 tabular-nums">VCS-T{user?.id || "04"}</span>
+              <div className="text-xs text-slate-400 truncate">
+                {user?.email || ""}
               </div>
               <button
     onClick={onOpenAnnouncementModal}
@@ -1152,7 +882,7 @@ export const TeacherDashboard = ({
     onClick={onOpenNewSessionModal}
     className="text-indigo-400 hover:text-indigo-300 font-semibold inline-flex items-center gap-1 transition-colors cursor-pointer"
   >
-                <span>+ Host Instant Class</span>
+                <span>+ Schedule a Class</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
               <button
@@ -1218,7 +948,7 @@ export const TeacherDashboard = ({
             <div className="flex items-center gap-1.5">
               {quickToolbarButtons.map((btn) => <button
     key={btn.id}
-    onClick={() => onSelectTab(btn.id)}
+    onClick={() => (btn.href ? navigate(btn.href) : onSelectTab(btn.id))}
     title={btn.title}
     className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all cursor-pointer ${activeTab === btn.id ? "bg-gradient-to-br from-[#5B46F8] to-[#4C6EF5] text-white shadow-[0_0_15px_rgba(91,70,248,0.4)]" : "text-slate-400 hover:text-slate-200 hover:bg-[#161C30]"}`}
   >
@@ -1233,13 +963,6 @@ export const TeacherDashboard = ({
   >
                 <Plus className="w-3.5 h-3.5" />
                 <span>New Live Class</span>
-              </button>
-              <button
-    onClick={() => onSelectTab("dashboard")}
-    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#161C30] border border-[#263052] text-xs font-semibold text-slate-200"
-  >
-                <LayoutGrid className="w-3.5 h-3.5 text-indigo-400" />
-                <span>Faculty Overview</span>
               </button>
             </div>
           </div>
@@ -1277,37 +1000,22 @@ export const TeacherDashboard = ({
     stroke="#635BFF"
     strokeWidth="8"
     strokeDasharray={2 * Math.PI * 40}
-    strokeDashoffset={2 * Math.PI * 40 * (1 - completionRate / 100)}
+    strokeDashoffset={2 * Math.PI * 40 * (1 - (tasks.length > 0 ? gradedCount / tasks.length : 1))}
     strokeLinecap="round"
     fill="transparent"
   />
                   </svg>
                   <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
                     <span className="text-lg font-extrabold text-white tabular-nums">
-                      {completionRate}%
+                      {pendingCount}
                     </span>
                     <span className="text-[9px] font-bold tracking-wider text-slate-400 uppercase">
-                      GRADED
+                      TO MARK
                     </span>
                   </div>
                 </div>
 
                 <div className="flex-1 space-y-3">
-                  <div>
-                    <div className="flex items-center justify-between text-xs mb-1">
-                      <span className="text-slate-400">Rubric Evaluations</span>
-                      <span className="font-mono font-bold text-indigo-400 tabular-nums">
-                        {gradedCount} / {tasks.length}
-                      </span>
-                    </div>
-                    <div className="w-full h-1.5 rounded-full bg-[#192038] overflow-hidden">
-                      <div
-    className="h-full bg-indigo-500 rounded-full transition-all"
-    style={{ width: `${completionRate}%` }}
-  />
-                    </div>
-                  </div>
-
                   <div className="grid grid-cols-2 gap-2.5">
                     <div
     onClick={() => onSelectTab("courses")}
@@ -1329,7 +1037,7 @@ export const TeacherDashboard = ({
                         ATTENDANCE
                       </div>
                       <div className="text-base font-extrabold text-emerald-400 mt-0.5 tabular-nums">
-                        95%
+                        {overallAttendanceRate != null ? `${overallAttendanceRate}%` : "—"}
                       </div>
                       <div className="text-[11px] text-emerald-400">Roll Call →</div>
                     </div>
@@ -1360,7 +1068,7 @@ export const TeacherDashboard = ({
                     Assessments & Quizzes ({filteredQuizzes.length})
                   </h2>
                   <div className="flex items-center gap-1 p-1 rounded-xl bg-[#0B0E1A] border border-[#1A2138]">
-                    {["all", "published", "pending"].map((tab) => <button
+                    {["all", "published", "scheduled", "closed"].map((tab) => <button
     key={tab}
     onClick={() => setQuizFilter(tab)}
     className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer ${quizFilter === tab ? "bg-[#5B46F8] text-white" : "text-slate-400 hover:text-slate-200"}`}
@@ -1371,34 +1079,54 @@ export const TeacherDashboard = ({
                 </div>
 
                 <div className="space-y-2.5">
-                  {filteredQuizzes.map((qz) => <div
-    key={qz.id}
-    onClick={() => onSelectTab("assignments_quizzes")}
-    className="p-3 rounded-xl bg-[#0C0F1D] border border-[#1B223B] hover:border-indigo-500/40 flex items-center justify-between gap-3 cursor-pointer transition-all"
-  >
-                      <div className="min-w-0">
-                        <div className="text-xs font-bold text-white truncate">{qz.title}</div>
-                        <div className="text-[11px] text-slate-400 truncate mt-0.5">
-                          {qz.courseTitle} · {qz.submissionsCount} submissions
+                  {filteredQuizzes.length === 0 ? (
+                    <div className="py-6 text-center text-xs text-slate-500">
+                      No {quizFilter === "all" ? "" : quizFilter} quizzes found.
+                    </div>
+                  ) : (
+                    filteredQuizzes.map((qz) => (
+                      <div
+                        key={qz.id}
+                        onClick={() => onSelectTab("assignments_quizzes")}
+                        className="p-3 rounded-xl bg-[#0C0F1D] border border-[#1B223B] hover:border-indigo-500/40 flex items-center justify-between gap-3 cursor-pointer transition-all"
+                      >
+                        <div className="min-w-0">
+                          <div className="text-xs font-bold text-white truncate">{qz.title}</div>
+                          <div className="text-[11px] text-slate-400 truncate mt-0.5">
+                            {qz.courseTitle} · {qz.submissionsCount || 0} submissions
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2.5 shrink-0">
+                          <span className="text-xs font-extrabold text-white font-mono tabular-nums">
+                            {qz.marks} Marks
+                          </span>
+                          <span
+                            className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase ${
+                              qz.status === "published"
+                                ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
+                                : "bg-slate-700/40 text-slate-300"
+                            }`}
+                          >
+                            {qz.status === "published" ? "LIVE" : qz.status.toUpperCase()}
+                          </span>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2.5 shrink-0">
-                        <span className="text-xs font-extrabold text-white font-mono tabular-nums">
-                          {qz.marks} Marks
-                        </span>
-                        <span
-    className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase ${qz.status === "published" ? "bg-amber-500/20 text-amber-300 border border-amber-500/30" : "bg-slate-700/40 text-slate-300"}`}
-  >
-                          {qz.status === "published" ? "LIVE" : "DRAFT"}
-                        </span>
-                      </div>
-                    </div>)}
+                    ))
+                  )}
                 </div>
               </div>
 
               <div className="pt-3 mt-4 border-t border-[#181F36] flex items-center justify-between">
                 <span className="text-[11px] text-slate-400">
-                  Avg Score: <strong className="text-slate-200 tabular-nums">86.4%</strong>
+                  Avg Score:{" "}
+                  <strong className="text-slate-200 tabular-nums">
+                    {(() => {
+                      const scored = filteredQuizzes.filter((q) => typeof q.averageScore === "number");
+                      if (scored.length === 0) return "—";
+                      const avg = scored.reduce((acc, q) => acc + q.averageScore, 0) / scored.length;
+                      return `${avg.toFixed(1)}%`;
+                    })()}
+                  </strong>
                 </span>
                 <button
     onClick={() => onSelectTab("assignments_quizzes")}
@@ -1434,12 +1162,15 @@ export const TeacherDashboard = ({
     onClick={() => setTaskFilter(st)}
     className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer ${taskFilter === st ? "bg-[#5B46F8] text-white" : "text-slate-400 hover:text-slate-200"}`}
   >
-                    {st}
+                    {{ queued: "waiting", overdue: "late", graded: "marked" }[st] || st}
                   </button>)}
               </div>
             </div>
 
             <div className="space-y-2.5">
+              {filteredTasks.length === 0 && <div className="py-6 text-center text-xs text-slate-500">
+                  {taskFilter === "all" ? "No submissions are waiting to be marked." : `No ${taskFilter} submissions.`}
+                </div>}
               {filteredTasks.map((task) => <div
     key={task.id}
     className="p-3.5 rounded-xl bg-[#0C0F1D] border border-[#1B223B] hover:border-[#2C375E] flex flex-wrap items-center justify-between gap-4 transition-all"
@@ -1462,12 +1193,12 @@ export const TeacherDashboard = ({
                   <div className="flex items-center gap-3 shrink-0">
                     <div className="text-right">
                       <div className="text-xs font-mono font-bold text-white tabular-nums">
-                        {task.status === "graded" ? `${task.awardedMarks} / ${task.maxMarks} Marks` : `Max ${task.maxMarks} Marks`}
+                        {task.status === "graded" ? `${task.awardedMarks} / ${task.maxMarks ?? "?"} Marks` : task.maxMarks != null ? `Out of ${task.maxMarks}` : ""}
                       </div>
                       <div
     className={`text-[10px] font-semibold uppercase ${task.status === "graded" ? "text-emerald-400" : task.status === "overdue" ? "text-amber-400" : "text-indigo-400"}`}
   >
-                        {task.status === "graded" ? "\u2713 Evaluated" : "\u25CF Queued"}
+                        {task.status === "graded" ? "\u2713 Marked" : task.status === "overdue" ? "\u25CF Late" : "\u25CF Waiting"}
                       </div>
                     </div>
 
@@ -1475,7 +1206,7 @@ export const TeacherDashboard = ({
     onClick={() => onOpenGradeModal(task)}
     className={`px-3.5 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap ${task.status === "graded" ? "bg-[#171D33] hover:bg-[#202846] text-slate-200 border border-[#273154]" : "bg-[#5B46F8] hover:bg-[#4C38E6] text-white"}`}
   >
-                      {task.status === "graded" ? "Edit Grade" : "Evaluate Rubric"}
+                      {task.status === "graded" ? "Edit Marks" : task.kind === "quiz" ? "Mark Quiz" : "Mark"}
                     </button>
                   </div>
                 </div>)}
@@ -1495,7 +1226,7 @@ export const TeacherDashboard = ({
                   </h2>
                 </div>
                 <p className="text-xs text-slate-400 mt-0.5">
-                  Published curriculum frameworks and syllabus completion progress
+                  Courses you teach
                 </p>
               </div>
 
@@ -1519,10 +1250,10 @@ export const TeacherDashboard = ({
                   <div className={`h-28 bg-gradient-to-br ${course.accentGradient} p-3.5 flex flex-col justify-between`}>
                     <div className="flex items-center justify-between gap-2">
                       <span className="text-[10px] font-extrabold uppercase text-emerald-300 bg-black/40 px-2 py-0.5 rounded-md border border-emerald-400/30">
-                        PUBLISHED
+                        {course.published ? "PUBLISHED" : "DRAFT"}
                       </span>
-                      <span className="text-[10px] font-mono font-bold text-white bg-black/50 px-2 py-0.5 rounded-md tabular-nums">
-                        {course.progress}%
+                      <span className="text-[10px] font-mono font-bold text-white bg-black/50 px-2 py-0.5 rounded-md">
+                        {course.code}
                       </span>
                     </div>
 
@@ -1539,13 +1270,7 @@ export const TeacherDashboard = ({
                   <div className="p-3.5 space-y-2">
                     <div className="flex items-center justify-between text-[11px] text-slate-400">
                       <span>{course.enrolledCount} Enrolled</span>
-                      <span className="font-mono">{course.syllabusUnitsCompleted}/{course.syllabusTotalUnits} Units</span>
-                    </div>
-                    <div className="w-full h-1.5 rounded-full bg-[#171E35] overflow-hidden">
-                      <div
-    className="h-full bg-gradient-to-r from-indigo-500 to-emerald-400 rounded-full"
-    style={{ width: `${course.progress}%` }}
-  />
+                      <span>{course.nextSessionTime}</span>
                     </div>
                   </div>
                 </div>)}

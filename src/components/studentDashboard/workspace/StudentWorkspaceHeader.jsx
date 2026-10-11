@@ -26,7 +26,7 @@ const StudentWorkspaceHeader = ({ onResolveOverdue, onJoinNextClass, onOpenTimez
 
   const displayName = getDisplayName(student) || getDisplayName(authProfile) || "Scholar";
   const rollNo = authProfile?.student_profile?.roll_no;
-  const gradeLevel = authProfile?.student_profile?.grade_level || "Grade Level";
+  const gradeLevel = authProfile?.student_profile?.class_year || authProfile?.student_profile?.grade_level || "";
 
   // Avatar upload handling
   const avatarInputRef = useRef(null);
@@ -166,9 +166,9 @@ const StudentWorkspaceHeader = ({ onResolveOverdue, onJoinNextClass, onOpenTimez
             <h2 className="text-base lg:text-lg font-black text-white tracking-tight truncate">
               {displayName}
             </h2>
-            <p className="text-[11px] text-indigo-300/80 font-medium truncate">
-              {gradeLevel} • Term 2025–26
-            </p>
+            {gradeLevel && (
+              <p className="text-[11px] text-indigo-300/80 font-medium truncate">{gradeLevel}</p>
+            )}
 
             {/* Timezone pill button & tuition status */}
             <div className="mt-2.5 flex items-center gap-2 flex-wrap">

@@ -122,12 +122,12 @@ const NAV_CONFIG = {
   ],
   teacher: [
     { label: "Dashboard", to: "/teacher", icon: "fas fa-table-columns", end: true },
-    { label: "My Courses", to: "/teacher?tab=courses", icon: "fas fa-book-open", badge: "4" },
+    { label: "My Courses", to: "/teacher?tab=courses", icon: "fas fa-book-open" },
     { label: "Attendance (Per Class)", to: "/teacher?tab=attendance", icon: "fas fa-user-check" },
-    { label: "Assignments & Quizzes", to: "/teacher?tab=assignments_quizzes", icon: "fas fa-clipboard-check", badge: "6" },
-    { label: "Teaching Resources & Desk", to: "/teacher?tab=teaching_resources", icon: "fas fa-folder-open", badge: "5" },
-    { label: "Evaluations & Gradebook", to: "/teacher?tab=evaluations", icon: "fas fa-chart-bar", badge: "4" },
-    { label: "Performance Analytics", to: "/teacher?tab=analytics", icon: "fas fa-chart-line", badgeText: "Live" },
+    { label: "Assignments & Quizzes", to: "/teacher?tab=assignments_quizzes", icon: "fas fa-clipboard-check" },
+    { label: "Teaching Resources & Desk", to: "/teacher?tab=teaching_resources", icon: "fas fa-folder-open" },
+    { label: "Evaluations & Gradebook", to: "/teacher?tab=evaluations", icon: "fas fa-chart-bar" },
+    { label: "Performance Analytics", to: "/teacher?tab=analytics", icon: "fas fa-chart-line" },
     { label: "Planner", to: "/teacher?tab=planner", icon: "fas fa-calendar-alt" },
     { label: "Slots Management", to: "/teacher?tab=slots", icon: "fas fa-calendar-plus" },
     { label: "Blogs", to: "/blogs", icon: "fas fa-newspaper" },
@@ -363,20 +363,20 @@ const Sidebar = ({
 
   const [isTimezoneModalOpen, setIsTimezoneModalOpen] = useState(false);
 
-  // Student & Teacher announcements
+  // Student announcements (the backend bell endpoints are students-only)
   const { unreadCount, items: announcements, loadingItems } = useSelector(
-    (state) => (state.auth.role === "student" || state.auth.role === "teacher") ? state.announcements : { unreadCount: 0, items: [], loadingItems: false },
+    (state) => state.auth.role === "student" ? state.announcements : { unreadCount: 0, items: [], loadingItems: false },
   );
   const [isBellOpen, setIsBellOpen] = useState(false);
   const bellRef = useRef(null);
 
   useEffect(() => {
-    if (role !== "student" && role !== "teacher") return;
+    if (role !== "student") return;
     dispatch(fetchUnreadAnnouncementsCount());
   }, [dispatch, role]);
 
   useEffect(() => {
-    if (role !== "student" && role !== "teacher") return;
+    if (role !== "student") return;
     const handleOutside = (e) => {
       if (bellRef.current && !bellRef.current.contains(e.target)) setIsBellOpen(false);
     };
@@ -515,7 +515,7 @@ const Sidebar = ({
       </div>
 
       {/* ── Student / Teacher: Announcements bell ── */}
-      {(role === "student" || role === "teacher") && (
+      {role === "student" && (
         <div className="border-t border-slate-800/80 flex-shrink-0 overflow-visible relative" ref={bellRef}>
           <div className={isCollapsed ? "px-3 py-3" : "px-4 py-3"}>
             <button

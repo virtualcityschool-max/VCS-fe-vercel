@@ -1,9 +1,10 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { selectEnrolledCourses } from "../../../store/slices/studentDashboardSlice";
 import { handleFileDownload, getStorageUrl } from "../../../utils/storageUrl";
 import { toastManager } from "../../../utils/toastManager";
+import axiosInstance from "../../../utils/axiosInstance";
 
 const getFileIcon = (url = "") => {
   const match = (url || "").split("?")[0].match(/\.([a-z0-9]{1,5})$/i);
@@ -44,6 +45,15 @@ const ResourcesTab = () => {
 
   const [selectedCourseId, setSelectedCourseId] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [teacherResources, setTeacherResources] = useState([]);
+
+  // Materials teachers shared with this student's courses
+  useEffect(() => {
+    axiosInstance
+      .get("/courses/resources/")
+      .then((res) => setTeacherResources(Array.isArray(res.data) ? res.data : res.data?.results || []))
+      .catch(() => setTeacherResources([]));
+  }, []);
 
   // Extract real official attachments from enrolled courses (de-duplicated by course ID)
   const documents = useMemo(() => {
@@ -70,8 +80,26 @@ const ResourcesTab = () => {
         }
       }
     });
+    teacherResources.forEach((r) => {
+      const ref = r.file_url || r.link || "";
+      const match = (r.file_name || "").match(/\.([a-z0-9]{1,5})$/i);
+      docs.push({
+        id: `res_${r.id}`,
+        title: r.title,
+        description: r.description || "",
+        courseId: String(r.course),
+        courseTitle: r.course_title || "Course",
+        subject: r.uploaded_by_name ? `From ${r.uploaded_by_name}` : "Teacher",
+        badge: "Teacher Resource",
+        url: ref,
+        isLink: !r.file_url,
+        fileName: r.file_name,
+        fileType: r.file_url ? (match ? match[1].toUpperCase() : "FILE") : "LINK",
+        icon: r.file_url ? getFileIcon(r.file_name || ref) : "fa-link text-indigo-400",
+      });
+    });
     return docs;
-  }, [enrolledCourses]);
+  }, [enrolledCourses, teacherResources]);
 
   // Extract enrolled course options for filter dropdown (de-duplicated by course ID)
   const courseOptions = useMemo(() => {
@@ -109,8 +137,12 @@ const ResourcesTab = () => {
   }, [documents, selectedCourseId, searchQuery]);
 
   const handleDownload = (doc) => {
+    if (doc.isLink) {
+      window.open(doc.url, "_blank", "noopener,noreferrer");
+      return;
+    }
     toastManager.info(`Downloading ${doc.title}...`);
-    handleFileDownload(doc.url, `${doc.courseTitle}_Syllabus.${doc.fileType.toLowerCase()}`);
+    handleFileDownload(doc.url, doc.fileName || `${doc.courseTitle}_Syllabus.${doc.fileType.toLowerCase()}`);
   };
 
   const handlePreview = (doc) => {
@@ -135,7 +167,7 @@ const ResourcesTab = () => {
               </h2>
             </div>
             <p className="text-xs text-slate-400">
-              Download the official syllabus pack and learning materials for each enrolled course.
+              Syllabus packs and the materials your teachers share for each enrolled course.
             </p>
           </div>
 
@@ -191,7 +223,7 @@ const ResourcesTab = () => {
                         {doc.subject || "Academics"}
                       </span>
                       <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-amber-500/10 text-amber-300 border border-amber-500/20">
-                        Official Pack
+                        {doc.badge || "Official Pack"}
                       </span>
                       <span className="text-[10px] text-slate-500 font-mono">
                         {doc.fileType}
@@ -229,8 +261,8 @@ const ResourcesTab = () => {
                     onClick={() => handleDownload(doc)}
                     className="px-4 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5 transition shadow-lg shadow-emerald-600/20 hover:scale-[1.02] cursor-pointer"
                   >
-                    <i className="fas fa-download text-[11px]" />
-                    <span>Download</span>
+                    <i className={`fas ${doc.isLink ? "fa-arrow-up-right-from-square" : "fa-download"} text-[11px]`} />
+                    <span>{doc.isLink ? "Open Link" : "Download"}</span>
                   </button>
                 </div>
               </div>

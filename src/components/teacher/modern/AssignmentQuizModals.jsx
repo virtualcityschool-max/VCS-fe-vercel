@@ -18,57 +18,68 @@ import {
 import { toastManager } from "../../../utils/toastManager";
 import { defaultQuizMarks } from "../../../utils/quizDefaults";
 import { extractApiErrorMessage } from "../../../utils/apiErrorHandler";
+const pad2 = (n) => String(n).padStart(2, "0");
+const localDateStr = (d) => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+const localDateTimeStr = (d) => `${localDateStr(d)}T${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+
 export const CreateAssignmentModal = ({
   isOpen,
   onClose,
   courses,
   onCreateAssignment
 }) => {
-  const [assignmentMode, setAssignmentMode] = useState("quick_task");
   const [title, setTitle] = useState("");
-  const [courseTitle, setCourseTitle] = useState(courses[0]?.title || "University Entry Test Prep");
+  const [courseId, setCourseId] = useState("");
   const [description, setDescription] = useState("");
-  const [submissionMethod, setSubmissionMethod] = useState("online_text");
-  const [allowedFormats, setAllowedFormats] = useState(["PDF", "PNG", "DOCX"]);
-  const [launchDate, setLaunchDate] = useState("2026-10-10");
-  const [launchTime, setLaunchTime] = useState("14:00");
-  const [dueDate, setDueDate] = useState("2026-10-16");
+  const [dueDate, setDueDate] = useState(() => localDateStr(new Date(Date.now() + 7 * 86400000)));
   const [dueTime, setDueTime] = useState("23:59");
   const [maxMarks, setMaxMarks] = useState(20);
-  const [rubricCriterion, setRubricCriterion] = useState(
-    "Conceptual understanding (10m), Calculation accuracy (10m)"
-  );
-  const [attachedFileName, setAttachedFileName] = useState(null);
+  const [file, setFile] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState(null);
   if (!isOpen) return null;
-  const handleApplyPreset = (presetTitle, promptText, marks, method) => {
-    setTitle(presetTitle);
-    setDescription(promptText);
-    setMaxMarks(marks);
-    setSubmissionMethod(method);
+  const selectedCourseId = courseId || courses[0]?.id || "";
+  const reset = () => {
+    setTitle("");
+    setDescription("");
+    setFile(null);
+    setMaxMarks(20);
+    setDueDate(localDateStr(new Date(Date.now() + 7 * 86400000)));
+    setDueTime("23:59");
+    setFormError(null);
   };
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!title.trim()) return;
-    onCreateAssignment({
-      title: title.trim(),
-      courseTitle,
-      description: description.trim() || "Review textbook reference and complete the questions assigned by instructor.",
-      submissionMethod,
-      allowedFormats,
-      launchDate,
-      launchTime,
-      dueDate,
-      dueTime,
-      maxMarks,
-      rubricCriterion: rubricCriterion.trim()
-    });
-    onClose();
-  };
-  const toggleFormat = (fmt) => {
-    if (allowedFormats.includes(fmt)) {
-      setAllowedFormats(allowedFormats.filter((f) => f !== fmt));
-    } else {
-      setAllowedFormats([...allowedFormats, fmt]);
+    if (!title.trim() || !description.trim()) {
+      setFormError("Please enter a title and the task instructions.");
+      return;
+    }
+    if (!selectedCourseId) {
+      setFormError("You have no course to assign this to.");
+      return;
+    }
+    if (!(Number(maxMarks) > 0)) {
+      setFormError("Max marks must be more than 0.");
+      return;
+    }
+    setIsSubmitting(true);
+    setFormError(null);
+    try {
+      await onCreateAssignment({
+        title: title.trim(),
+        courseId: selectedCourseId,
+        description: description.trim(),
+        dueDate,
+        dueTime,
+        maxMarks: Number(maxMarks),
+        file
+      });
+      reset();
+      onClose();
+    } catch (err) {
+      setFormError(extractApiErrorMessage(err) || "Could not publish the assignment.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
   return <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
@@ -81,7 +92,7 @@ export const CreateAssignmentModal = ({
             <div>
               <h3 className="text-base font-bold text-white">Create & Issue Assignment</h3>
               <p className="text-xs text-slate-400">
-                Easily assign a quick text task (few lines, no files needed) or a formal problem sheet with dates & marks.
+                Students see it straight away and can answer in text or upload a file.
               </p>
             </div>
           </div>
@@ -90,85 +101,12 @@ export const CreateAssignmentModal = ({
           </button>
         </div>
 
-        {
-    /* Quick Mode Toggle */
-  }
-        <div className="px-6 pt-4 pb-2 bg-[#0C0F1D] border-b border-[#1A223B] flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <button
-    type="button"
-    onClick={() => {
-      setAssignmentMode("quick_task");
-      setSubmissionMethod("online_text");
-    }}
-    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${assignmentMode === "quick_task" ? "bg-indigo-600 text-white shadow-md" : "bg-[#14192E] text-slate-400 hover:text-white border border-[#202848]"}`}
-  >
-              ⚡ Quick Text Task (No files needed · few lines)
-            </button>
-            <button
-    type="button"
-    onClick={() => {
-      setAssignmentMode("file_structured");
-      setSubmissionMethod("file_upload");
-    }}
-    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${assignmentMode === "file_structured" ? "bg-indigo-600 text-white shadow-md" : "bg-[#14192E] text-slate-400 hover:text-white border border-[#202848]"}`}
-  >
-              📄 Structured File / Worksheet Upload
-            </button>
-          </div>
-        </div>
-
         <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
-          {
-    /* Quick Presets for Teachers */
-  }
-          {assignmentMode === "quick_task" && <div className="p-3.5 rounded-xl bg-indigo-950/30 border border-indigo-500/20 space-y-2">
-              <span className="text-[11px] font-bold text-indigo-300 uppercase tracking-wider">
-                1-Click Quick Task Presets:
-              </span>
-              <div className="flex flex-wrap gap-2">
-                <button
-    type="button"
-    onClick={() => handleApplyPreset(
-      "Textbook Practice: Chapter 3 Questions 8 & 9",
-      "Solve question 8 and 9 from page 46 of course textbook. Show formula substitution steps clearly.",
-      15,
-      "online_text"
-    )}
-    className="px-2.5 py-1 rounded-lg bg-[#161D38] hover:bg-[#1E274A] border border-indigo-500/30 text-indigo-200 text-[11px] cursor-pointer"
-  >
-                  📖 Solve Textbook Questions (15 Marks)
-                </button>
-                <button
-    type="button"
-    onClick={() => handleApplyPreset(
-      "Short Concept Summary: Newton Second Law",
-      "Write 150 words explaining how net resultant force relates to rate of change of momentum with real-world examples.",
-      10,
-      "online_text"
-    )}
-    className="px-2.5 py-1 rounded-lg bg-[#161D38] hover:bg-[#1E274A] border border-indigo-500/30 text-indigo-200 text-[11px] cursor-pointer"
-  >
-                  ✍️ 150-Word Concept Reflection (10 Marks)
-                </button>
-                <button
-    type="button"
-    onClick={() => handleApplyPreset(
-      "Past Paper 10-Mark Calculation Drill",
-      "Solve the structured kinematics problem posted in class. Calculate final projectile velocity and flight time.",
-      20,
-      "file_upload"
-    )}
-    className="px-2.5 py-1 rounded-lg bg-[#161D38] hover:bg-[#1E274A] border border-indigo-500/30 text-indigo-200 text-[11px] cursor-pointer"
-  >
-                  🎯 Past Paper Problem (20 Marks)
-                </button>
-              </div>
+          {formError && <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-xs text-rose-300 flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+              <span>{formError}</span>
             </div>}
 
-          {
-    /* Assignment Title & Target Course */
-  }
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="md:col-span-2">
               <label className="block text-xs font-semibold text-slate-300 mb-1.5">
@@ -179,133 +117,68 @@ export const CreateAssignmentModal = ({
     required
     value={title}
     onChange={(e) => setTitle(e.target.value)}
-    placeholder={assignmentMode === "quick_task" ? "e.g. Solve Chapter 3 Exercises 12 to 14" : "e.g. Kinematics Free Body Vectors & Projectile Investigation"}
+    placeholder="e.g. Solve Chapter 3 Exercises 12 to 14"
     className="w-full px-3.5 py-2 rounded-xl bg-[#0B0E1A] border border-[#1E2642] text-xs text-white focus:outline-none focus:border-indigo-500"
   />
             </div>
             <div>
               <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                Target Course Cohort
+                Course
               </label>
               <select
-    value={courseTitle}
-    onChange={(e) => setCourseTitle(e.target.value)}
+    value={selectedCourseId}
+    onChange={(e) => setCourseId(e.target.value)}
     className="w-full px-3 py-2 rounded-xl bg-[#0B0E1A] border border-[#1E2642] text-xs text-slate-200 focus:outline-none cursor-pointer"
   >
-                {courses.map((c) => <option key={c.id} value={c.title}>
+                {courses.length === 0 && <option value="">No courses assigned</option>}
+                {courses.map((c) => <option key={c.id} value={c.id}>
                     {c.title}
                   </option>)}
               </select>
             </div>
           </div>
 
-          {
-    /* Description / Few Lines Prompt */
-  }
           <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="text-xs font-semibold text-slate-300">
-                {assignmentMode === "quick_task" ? "Teacher's Task Prompt (just a few lines from teacher):" : "Task Guidelines & Instructions:"}
-              </label>
-              {assignmentMode === "quick_task" && <span className="text-[11px] font-mono text-emerald-400 font-semibold">
-                  ✓ No file needed · typed instructions
-                </span>}
-            </div>
+            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+              Task Instructions <span className="text-rose-400">*</span>
+            </label>
             <textarea
-    rows={3}
+    rows={4}
+    required
     value={description}
     onChange={(e) => setDescription(e.target.value)}
-    placeholder={assignmentMode === "quick_task" ? 'Type your task here: e.g. "Read pages 14\u201316 in the textbook and solve questions 3 & 4. Submit your written answer or upload photo of handwritten notebook."' : "Detail step-by-step questions, reference textbook pages, or mandatory formula sheets required for this assignment..."}
+    placeholder='e.g. "Read pages 14–16 and solve questions 3 & 4. Type your answer or upload a photo of your notebook."'
     className="w-full px-3.5 py-2 rounded-xl bg-[#0B0E1A] border border-[#1E2642] text-xs text-white focus:outline-none focus:border-indigo-500"
   />
           </div>
 
-          {
-    /* Submission Method & Allowed Formats */
-  }
-          <div className="p-4 rounded-xl bg-[#0B0E1A] border border-[#1A223B] space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-white">Student Submission Method</span>
-              <span className="text-[11px] text-slate-400">Select how students turn in their work</span>
+          <div className="p-3.5 rounded-xl bg-[#0B0E1A] border border-[#1A223B] flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-2 text-xs text-slate-300">
+              <UploadCloud className="w-4 h-4 text-indigo-400" />
+              <span>Attach worksheet / prompt (optional)</span>
             </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              {[
-    { id: "file_upload", label: "File Upload (PDF/Image)" },
-    { id: "online_text", label: "Online Text Editor" },
-    { id: "google_drive", label: "Google Drive Share" },
-    { id: "github_link", label: "GitHub Repository" }
-  ].map((m) => <button
+            <div className="flex items-center gap-2">
+              {file && <button
     type="button"
-    key={m.id}
-    onClick={() => setSubmissionMethod(m.id)}
-    className={`p-2.5 rounded-xl text-[11px] font-semibold border text-left transition-colors cursor-pointer ${submissionMethod === m.id ? "bg-indigo-600/20 border-indigo-500 text-white shadow-sm" : "bg-[#12162A] border-[#1E2642] text-slate-400 hover:text-slate-200"}`}
+    onClick={() => setFile(null)}
+    className="text-[11px] text-slate-400 hover:text-rose-300 cursor-pointer"
   >
-                  {m.label}
-                </button>)}
-            </div>
-
-            {submissionMethod === "file_upload" && <div className="pt-2 flex flex-wrap items-center gap-2">
-                <span className="text-[11px] text-slate-400">Accepted formats:</span>
-                {["PDF", "PNG", "JPG", "DOCX", "ZIP"].map((fmt) => <button
-    type="button"
-    key={fmt}
-    onClick={() => toggleFormat(fmt)}
-    className={`px-2 py-0.5 rounded-md text-[10px] font-mono font-bold cursor-pointer transition-colors ${allowedFormats.includes(fmt) ? "bg-indigo-500 text-white" : "bg-[#182038] text-slate-400"}`}
-  >
-                    .{fmt}
-                  </button>)}
-              </div>}
-
-            {
-    /* Teacher File Attachment Simulator */
-  }
-            <div className="pt-2 border-t border-[#161C33] flex items-center justify-between">
-              <div className="flex items-center gap-2 text-xs text-slate-300">
-                <UploadCloud className="w-4 h-4 text-indigo-400" />
-                <span>Attach Problem Sheet / Prompt Document (Optional):</span>
-              </div>
-              <label className="px-3 py-1 rounded-lg bg-[#182038] hover:bg-[#202B4C] text-xs font-semibold text-slate-200 border border-[#273254] cursor-pointer">
-                <span>{attachedFileName ? attachedFileName : "Choose File"}</span>
+                  Remove
+                </button>}
+              <label className="px-3 py-1 rounded-lg bg-[#182038] hover:bg-[#202B4C] text-xs font-semibold text-slate-200 border border-[#273254] cursor-pointer max-w-[220px] truncate">
+                <span>{file ? file.name : "Choose File"}</span>
                 <input
     type="file"
     className="hidden"
-    onChange={(e) => {
-      if (e.target.files && e.target.files[0]) {
-        setAttachedFileName(e.target.files[0].name);
-      }
-    }}
+    accept=".pdf,.png,.jpg,.jpeg,.doc,.docx,.ppt,.pptx,.txt,.zip"
+    onChange={(e) => setFile(e.target.files?.[0] || null)}
   />
               </label>
             </div>
           </div>
 
-          {
-    /* Timestamps: Launch Date/Time and Due Date/Time */
-  }
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="p-3.5 rounded-xl bg-[#0B0E1A] border border-[#1A223B] space-y-2">
-              <div className="text-xs font-bold text-white flex items-center gap-1.5">
-                <Calendar className="w-3.5 h-3.5 text-indigo-400" />
-                <span>Launch & Release Schedule</span>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <input
-    type="date"
-    value={launchDate}
-    onChange={(e) => setLaunchDate(e.target.value)}
-    className="px-2.5 py-1.5 rounded-lg bg-[#121628] border border-[#1E2642] text-xs text-white"
-  />
-                <input
-    type="time"
-    value={launchTime}
-    onChange={(e) => setLaunchTime(e.target.value)}
-    className="px-2.5 py-1.5 rounded-lg bg-[#121628] border border-[#1E2642] text-xs font-mono text-white [color-scheme:dark]"
-  />
-              </div>
-            </div>
-
-            <div className="p-3.5 rounded-xl bg-[#0B0E1A] border border-[#1A223B] space-y-2">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="sm:col-span-2 p-3.5 rounded-xl bg-[#0B0E1A] border border-[#1A223B] space-y-2">
               <div className="text-xs font-bold text-white flex items-center gap-1.5">
                 <Clock className="w-3.5 h-3.5 text-rose-400" />
                 <span>Submission Deadline</span>
@@ -313,47 +186,32 @@ export const CreateAssignmentModal = ({
               <div className="grid grid-cols-2 gap-2">
                 <input
     type="date"
+    required
     value={dueDate}
+    min={localDateStr(new Date())}
     onChange={(e) => setDueDate(e.target.value)}
-    className="px-2.5 py-1.5 rounded-lg bg-[#121628] border border-[#1E2642] text-xs text-white"
+    className="px-2.5 py-1.5 rounded-lg bg-[#121628] border border-[#1E2642] text-xs text-white [color-scheme:dark]"
   />
                 <input
     type="time"
+    required
     value={dueTime}
     onChange={(e) => setDueTime(e.target.value)}
     className="px-2.5 py-1.5 rounded-lg bg-[#121628] border border-[#1E2642] text-xs font-mono text-white [color-scheme:dark]"
   />
               </div>
             </div>
-          </div>
-
-          {
-    /* Marks & Rubric */
-  }
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                Total Max Marks
+                Max Marks
               </label>
               <input
     type="number"
-    min={5}
-    max={100}
+    min={1}
+    max={1000}
     value={maxMarks}
-    onChange={(e) => setMaxMarks(Number(e.target.value))}
+    onChange={(e) => setMaxMarks(e.target.value)}
     className="w-full px-3.5 py-2 rounded-xl bg-[#0B0E1A] border border-[#1E2642] text-xs font-mono font-bold text-white tabular-nums"
-  />
-            </div>
-            <div className="sm:col-span-2">
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                Rubric Breakdown / Scoring Guide
-              </label>
-              <input
-    type="text"
-    value={rubricCriterion}
-    onChange={(e) => setRubricCriterion(e.target.value)}
-    placeholder="e.g. Method (10m), Calculation (10m), Final Answer (5m)"
-    className="w-full px-3.5 py-2 rounded-xl bg-[#0B0E1A] border border-[#1E2642] text-xs text-white"
   />
             </div>
           </div>
@@ -368,9 +226,10 @@ export const CreateAssignmentModal = ({
             </button>
             <button
     type="submit"
-    className="px-5 py-2 rounded-xl bg-[#5B46F8] hover:bg-[#4C38E6] text-xs font-bold text-white shadow-lg cursor-pointer"
+    disabled={isSubmitting}
+    className="px-5 py-2 rounded-xl bg-[#5B46F8] hover:bg-[#4C38E6] disabled:opacity-60 text-xs font-bold text-white shadow-lg cursor-pointer"
   >
-              Publish Assignment
+              {isSubmitting ? "Publishing…" : "Publish Assignment"}
             </button>
           </div>
         </form>
@@ -461,11 +320,10 @@ export const AdvancedQuizBuilderModal = ({
   onSaveQuiz
 }) => {
   const [title, setTitle] = useState("");
-  const [courseTitle, setCourseTitle] = useState(courses[0]?.title || "University Entry Test Prep");
-  const [description, setDescription] = useState("Timed diagnostic assessment with multiple question formats.");
-  const [durationMins, setDurationMins] = useState(25);
-  const [launchDateTime, setLaunchDateTime] = useState("2026-10-10T15:00");
-  const [dueDateTime, setDueDateTime] = useState("2026-10-15T22:00");
+  const [courseId, setCourseId] = useState("");
+  const [description, setDescription] = useState("");
+  const [launchDateTime, setLaunchDateTime] = useState(() => localDateTimeStr(new Date()));
+  const [dueDateTime, setDueDateTime] = useState(() => localDateTimeStr(new Date(Date.now() + 7 * 86400000)));
   const [questions, setQuestions] = useState(() => [createBlankQuestion("multiple_choice")]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState(null);
@@ -476,7 +334,8 @@ export const AdvancedQuizBuilderModal = ({
   const [bulkImportError, setBulkImportError] = useState(null);
   const [bulkImportSuccess, setBulkImportSuccess] = useState(null);
   if (!isOpen) return null;
-  const totalMarks = questions.reduce((sum, q) => sum + q.marks, 0);
+  const selectedCourseId = courseId || courses[0]?.id || "";
+  const totalMarks = questions.reduce((sum, q) => sum + Number(q.marks || 0), 0);
   const CSV_SAMPLE = `type,questionText,marks,options,correctAnswer
 multiple_choice,"What is Newton's third law of motion?",5,"F=ma|For every action there is an equal and opposite reaction|v=u+at|E=mc^2","For every action there is an equal and opposite reaction"
 yes_no,"Is absolute zero equivalent to 0 Kelvin?",5,"","Yes"
@@ -646,20 +505,16 @@ multiple_choice,"Which electromagnetic radiation has the highest frequency?",5,"
   };
   const handleResetForm = () => {
     setTitle("");
-    setCourseTitle(courses[0]?.title || "University Entry Test Prep");
-    setDescription("Timed diagnostic assessment with multiple question formats.");
-    setDurationMins(25);
-    setLaunchDateTime("2026-10-10T15:00");
-    setDueDateTime("2026-10-15T22:00");
+    setDescription("");
+    setLaunchDateTime(localDateTimeStr(new Date()));
+    setDueDateTime(localDateTimeStr(new Date(Date.now() + 7 * 86400000)));
     setQuestions([createBlankQuestion("multiple_choice")]);
     setFormError(null);
   };
 
   const handleLoadSample = () => {
     setTitle("Cambridge Physics Paper 2 Diagnostic Mock");
-    setCourseTitle(courses[0]?.title || "University Entry Test Prep");
-    setDescription("Timed diagnostic assessment with multiple question formats.");
-    setDurationMins(25);
+    setDescription("Diagnostic assessment with multiple question formats.");
     setQuestions(SAMPLE_QUIZ_QUESTIONS);
     setFormError(null);
     toastManager.info("Sample questions loaded");
@@ -728,6 +583,12 @@ multiple_choice,"Which electromagnetic radiation has the highest frequency?",5,"
       }
     }
 
+    if (!selectedCourseId) {
+      return "You have no course to publish this quiz to.";
+    }
+    if (!launchDateTime || !dueDateTime) {
+      return "Please set both the launch time and the deadline.";
+    }
     if (launchDateTime && dueDateTime) {
       if (new Date(dueDateTime) <= new Date(launchDateTime)) {
         return "The solve & submit deadline must be after the launch date & time.";
@@ -752,9 +613,8 @@ multiple_choice,"Which electromagnetic radiation has the highest frequency?",5,"
     try {
       await onSaveQuiz({
         title: title.trim(),
-        courseTitle,
+        courseId: selectedCourseId,
         description: description.trim(),
-        durationMins,
         launchDateTime,
         dueDateTime,
         questions,
@@ -838,11 +698,12 @@ multiple_choice,"Which electromagnetic radiation has the highest frequency?",5,"
                 Course Cohort
               </label>
               <select
-    value={courseTitle}
-    onChange={(e) => setCourseTitle(e.target.value)}
+    value={selectedCourseId}
+    onChange={(e) => setCourseId(e.target.value)}
     className="w-full px-3 py-2 rounded-xl bg-[#0B0E1A] border border-[#1E2642] text-xs text-slate-200 focus:outline-none"
   >
-                {courses.map((c) => <option key={c.id} value={c.title}>
+                {courses.length === 0 && <option value="">No courses assigned</option>}
+                {courses.map((c) => <option key={c.id} value={c.id}>
                     {c.title}
                   </option>)}
               </select>
@@ -852,20 +713,7 @@ multiple_choice,"Which electromagnetic radiation has the highest frequency?",5,"
           {
     /* Timing & Windows */
   }
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 rounded-xl bg-[#0B0E1A] border border-[#1A223B]">
-            <div>
-              <label className="block text-[11px] font-semibold text-slate-300 mb-1">
-                Duration (Minutes)
-              </label>
-              <input
-    type="number"
-    min={5}
-    max={180}
-    value={durationMins}
-    onChange={(e) => setDurationMins(Number(e.target.value))}
-    className="w-full px-3 py-1.5 rounded-lg bg-[#121628] border border-[#1E2642] text-xs font-mono text-white tabular-nums"
-  />
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 rounded-xl bg-[#0B0E1A] border border-[#1A223B]">
             <div>
               <label className="block text-[11px] font-semibold text-slate-300 mb-1">
                 Launch Date & Time
@@ -874,7 +722,7 @@ multiple_choice,"Which electromagnetic radiation has the highest frequency?",5,"
     type="datetime-local"
     value={launchDateTime}
     onChange={(e) => setLaunchDateTime(e.target.value)}
-    className="w-full px-3 py-1.5 rounded-lg bg-[#121628] border border-[#1E2642] text-xs text-white"
+    className="w-full px-3 py-1.5 rounded-lg bg-[#121628] border border-[#1E2642] text-xs text-white [color-scheme:dark]"
   />
             </div>
             <div>
@@ -885,7 +733,7 @@ multiple_choice,"Which electromagnetic radiation has the highest frequency?",5,"
     type="datetime-local"
     value={dueDateTime}
     onChange={(e) => setDueDateTime(e.target.value)}
-    className="w-full px-3 py-1.5 rounded-lg bg-[#121628] border border-[#1E2642] text-xs text-white"
+    className="w-full px-3 py-1.5 rounded-lg bg-[#121628] border border-[#1E2642] text-xs text-white [color-scheme:dark]"
   />
             </div>
           </div>
