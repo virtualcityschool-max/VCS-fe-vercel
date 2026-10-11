@@ -45,24 +45,6 @@ const TeacherLayout = () => {
           <span className="text-white font-bold">{viewTitle}</span>
         </div>
 
-        {/* Workspace Switcher */}
-        <nav className="hidden sm:flex items-center gap-6 text-xs font-medium">
-          <button
-            type="button"
-            onClick={() => navigate("/teacher")}
-            className="whitespace-nowrap shrink-0 transition-colors cursor-pointer text-white font-semibold underline decoration-indigo-500 decoration-2 underline-offset-8"
-          >
-            Teacher Workspace
-          </button>
-          <button
-            type="button"
-            onClick={() => navigate("/student")}
-            className="whitespace-nowrap shrink-0 transition-colors cursor-pointer text-slate-400 hover:text-slate-200"
-          >
-            Student Workspace
-          </button>
-        </nav>
-
         {/* User Pill / Profile Dropdown */}
         <div className="flex items-center gap-3 shrink-0">
           <UserProfileDropdown />
