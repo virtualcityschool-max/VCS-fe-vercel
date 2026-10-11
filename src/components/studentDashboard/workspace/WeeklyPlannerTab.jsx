@@ -34,9 +34,11 @@ const WeeklyPlannerTab = ({ onOpenLiveSchedule }) => {
       const id = s.id || s.session_id;
       if (id) map.set(id, { ...(map.get(id) || {}), ...s });
     });
-    return Array.from(map.values()).sort(
-      (a, b) => new Date(a.scheduled_at) - new Date(b.scheduled_at)
-    );
+    return Array.from(map.values()).sort((a, b) => {
+      if (a.status === "live" && b.status !== "live") return -1;
+      if (b.status === "live" && a.status !== "live") return 1;
+      return new Date(b.scheduled_at) - new Date(a.scheduled_at);
+    });
   }, [allSessions, liveSchedule]);
 
   const handleJoinClass = async (sessionToJoin) => {

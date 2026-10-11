@@ -34,15 +34,25 @@ const LiveScheduleTab = ({ onOpenWeeklyPlanner }) => {
       }
     });
     const list = Array.from(map.values());
-    return list.sort((a, b) => new Date(a.scheduled_at) - new Date(b.scheduled_at));
+    return list.sort((a, b) => {
+      if (a.status === "live" && b.status !== "live") return -1;
+      if (b.status === "live" && a.status !== "live") return 1;
+      return new Date(b.scheduled_at) - new Date(a.scheduled_at);
+    });
   }, [allSessions, liveSchedule]);
 
   // The immediate next class spotlight
   const nextClass = useMemo(() => {
     if (nextSession) return nextSession;
-    const upcoming = sessions.filter(
-      (s) => s.status === "live" || (s.scheduled_at && new Date(s.scheduled_at).getTime() > Date.now() - 60 * 60000)
-    );
+    const upcoming = [...sessions]
+      .filter(
+        (s) => s.status === "live" || (s.scheduled_at && new Date(s.scheduled_at).getTime() > Date.now() - 60 * 60000)
+      )
+      .sort((a, b) => {
+        if (a.status === "live" && b.status !== "live") return -1;
+        if (b.status === "live" && a.status !== "live") return 1;
+        return new Date(a.scheduled_at) - new Date(b.scheduled_at);
+      });
     return upcoming.length > 0 ? upcoming[0] : null;
   }, [nextSession, sessions]);
 
@@ -108,16 +118,36 @@ const LiveScheduleTab = ({ onOpenWeeklyPlanner }) => {
   const filteredSessions = sessions.filter((s) => {
     if (activeFilter === "all") return true;
     if (activeFilter === "today") {
-      const date = new Date(s.scheduled_at);
-      const today = new Date();
-      return (
-        date.getDate() === today.getDate() &&
-        date.getMonth() === today.getMonth() &&
-        date.getFullYear() === today.getFullYear()
-      );
+      if (!s.scheduled_at) return false;
+      try {
+        const todayStr = new Intl.DateTimeFormat("en-CA", {
+          timeZone: timezone || undefined,
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        }).format(new Date());
+        const sessionDateStr = new Intl.DateTimeFormat("en-CA", {
+          timeZone: timezone || undefined,
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        }).format(new Date(s.scheduled_at));
+        return todayStr === sessionDateStr;
+      } catch (e) {
+        const date = new Date(s.scheduled_at);
+        const today = new Date();
+        return (
+          date.getDate() === today.getDate() &&
+          date.getMonth() === today.getMonth() &&
+          date.getFullYear() === today.getFullYear()
+        );
+      }
     }
     if (activeFilter === "upcoming") {
-      return new Date(s.scheduled_at).getTime() > Date.now();
+      return (
+        s.status === "live" ||
+        (s.scheduled_at && new Date(s.scheduled_at).getTime() > Date.now() - 90 * 60000)
+      );
     }
     return true;
   });

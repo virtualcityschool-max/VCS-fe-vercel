@@ -51,7 +51,11 @@ const TodayAgendaSidebar = ({
       if (!s.scheduled_at) return false;
       return new Date(s.scheduled_at).toDateString() === todayStr;
     });
-    return list.sort((a, b) => new Date(a.scheduled_at) - new Date(b.scheduled_at));
+    return list.sort((a, b) => {
+      if (a.status === "live" && b.status !== "live") return -1;
+      if (b.status === "live" && a.status !== "live") return 1;
+      return new Date(a.scheduled_at) - new Date(b.scheduled_at);
+    });
   }, [allSessions, liveSchedule, todayStr]);
 
   const handleJoinSession = async (sessionToJoin) => {

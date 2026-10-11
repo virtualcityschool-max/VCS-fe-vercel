@@ -20,9 +20,11 @@ const STATUS_COLORS = {
 };
 
 const SessionListView = ({ sessions, formatTime, formatDate, onJoin, joiningId }) => {
-  const sorted = [...sessions].sort(
-    (a, b) => new Date(a.scheduled_at) - new Date(b.scheduled_at)
-  );
+  const sorted = [...sessions].sort((a, b) => {
+    if (a.status === "live" && b.status !== "live") return -1;
+    if (b.status === "live" && a.status !== "live") return 1;
+    return new Date(b.scheduled_at) - new Date(a.scheduled_at);
+  });
 
   if (!sorted.length) return (
     <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-12 text-center">
