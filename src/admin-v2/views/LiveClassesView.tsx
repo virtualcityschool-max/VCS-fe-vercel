@@ -305,9 +305,7 @@ export const LiveClassesView: React.FC = () => {
         <div className="flex items-start gap-2 p-3 rounded-xl border border-sky-500/20 bg-sky-500/[0.06] text-xs text-slate-300">
           <Info className="w-4 h-4 text-sky-300 shrink-0 mt-0.5" />
           <span>
-            Join opens the class in Google Meet with the Google account signed in to this browser. <b className="text-white">virtualcityschool@gmail.com</b> hosts every
-            class and enters straight away; other admin Gmail addresses listed under <button onClick={() => setCurrentView('settings')} className="text-sky-300 hover:underline">Platform Settings → Class observers</button> are
-            invited to every new class and also enter without waiting. Everyone in the class can see who joins, so keep camera and microphone off to observe quietly.
+            Join opens the class in Google Meet with the Google account signed in to this browser. <b className="text-white">virtualcityschool@gmail.com</b> hosts every class. To ensure everyone enters without asking to join: in Meet, open <b>Host controls</b> (shield icon), keep <b>Host management ON</b>, and set <b>Meeting access</b> to <b>Open</b>. Teachers and enrolled students are also automatically added as invited guests on the Google Calendar event so they enter directly.
           </span>
         </div>
       )}
