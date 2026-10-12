@@ -597,6 +597,16 @@ const TeacherSessionCalendar = () => {
                       )}
                     </div>
                     <div className="flex gap-2">
+                      {s.meeting_link && (
+                        <a
+                          href={s.meeting_link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-3 py-1.5 rounded-lg text-xs font-semibold flex-1 flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white transition shadow-sm"
+                        >
+                          <i className="fas fa-video"></i> Join Meet
+                        </a>
+                      )}
                       {!s.is_child && s.is_recurring && (
                         <button
                           onClick={() => openEdit(s)}
@@ -660,6 +670,16 @@ const TeacherSessionCalendar = () => {
                       </td>
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-2 justify-end">
+                          {s.meeting_link && (
+                            <a
+                              href={s.meeting_link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white transition flex items-center gap-1.5 shadow-sm"
+                            >
+                              <i className="fas fa-video"></i> Join Meet
+                            </a>
+                          )}
                           {!s.is_child && s.is_recurring && (
                             <button
                               onClick={() => openEdit(s)}

@@ -78,9 +78,9 @@ const LiveScheduleTab = ({ onOpenWeeklyPlanner }) => {
 
   const isNextJoinable = Boolean(
     nextClass && (
+      nextClass.meeting_link ||
       nextClass.status === "live" ||
-      nextClass.can_join === true ||
-      (minsToNext !== null && minsToNext <= 30 && minsToNext >= -90)
+      nextClass.can_join === true
     )
   );
 
@@ -257,7 +257,7 @@ const LiveScheduleTab = ({ onOpenWeeklyPlanner }) => {
                   </button>
                   <p className="text-[11px] text-emerald-400 text-center lg:text-right font-medium">
                     <i className="fas fa-check-circle mr-1" />
-                    Within 30-min window • Direct classroom link active
+                    Direct classroom link active
                   </p>
                 </div>
               )}
@@ -335,46 +335,28 @@ const LiveScheduleTab = ({ onOpenWeeklyPlanner }) => {
                 ? Math.floor((new Date(session.scheduled_at).getTime() - Date.now()) / 60000)
                 : null;
               const canJoin = Boolean(
+                session.meeting_link ||
                 session.status === "live" ||
-                session.can_join === true ||
-                (diffMins !== null && diffMins <= 30 && diffMins >= -90)
+                session.can_join === true
               );
-              const unlockDate = session.scheduled_at
-                ? new Date(new Date(session.scheduled_at).getTime() - 30 * 60000)
-                : null;
-              const unlockTimeStr = unlockDate ? formatTime(unlockDate.toISOString(), timezone) : "--";
 
               return (
                 <div
                   key={sId}
-                  className={`p-4 rounded-xl border transition flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
-                    canJoin
-                      ? "bg-emerald-950/20 border-emerald-500/40 shadow-lg shadow-emerald-950/30"
-                      : "bg-white/[0.02] border-white/5 hover:border-white/10"
-                  }`}
+                  className="p-4 rounded-xl border transition flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-emerald-950/20 border-emerald-500/40 shadow-lg shadow-emerald-950/30"
                 >
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                      <span
-                        className={`w-2 h-2 rounded-full ${
-                          canJoin ? "bg-emerald-400 animate-pulse" : "bg-blue-400"
-                        }`}
-                      />
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                       <span className="text-[10px] font-black uppercase tracking-wider text-indigo-400">
                         {session.course_title || (session.course && session.course.title) || session.title}
                       </span>
-                      <span
-                        className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${
-                          canJoin
-                            ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
-                            : "bg-blue-500/15 text-blue-300 border border-blue-500/25"
-                        }`}
-                      >
-                        {canJoin
-                          ? session.status === "live" || (diffMins !== null && diffMins <= 0)
-                            ? "LIVE NOW"
-                            : `JOINABLE (IN ${diffMins}M)`
-                          : `OPENS 30M PRIOR (${unlockTimeStr})`}
+                      <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                        {session.status === "live" || (diffMins !== null && diffMins <= 0)
+                          ? "LIVE NOW"
+                          : diffMins !== null && diffMins > 0
+                          ? `STARTS IN ${diffMins}M`
+                          : "JOIN CLASS"}
                       </span>
                     </div>
 
@@ -401,7 +383,7 @@ const LiveScheduleTab = ({ onOpenWeeklyPlanner }) => {
                   </div>
 
                   <div className="shrink-0 flex flex-col sm:flex-row items-start sm:items-center gap-2">
-                    {!canJoin && session.scheduled_at && (
+                    {session.scheduled_at && (
                       <DigitalSessionClock
                         scheduledAt={session.scheduled_at}
                         status={session.status}
@@ -409,27 +391,20 @@ const LiveScheduleTab = ({ onOpenWeeklyPlanner }) => {
                       />
                     )}
 
-                    {canJoin ? (
-                      <button
-                        onClick={() => handleJoinClass(session)}
-                        disabled={joiningId === sId}
-                        className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-xs font-bold flex items-center gap-2 transition shadow-lg shadow-emerald-900/30 cursor-pointer"
-                      >
-                        <i className="fas fa-video text-xs" />
-                        <span>
-                          {joiningId === sId
-                            ? "Entering Class..."
-                            : session.status === "live"
-                            ? "Join Class (Live Now)"
-                            : "Join Class (Google Meet)"}
-                        </span>
-                      </button>
-                    ) : (
-                      <div className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-slate-400 text-xs font-medium flex items-center gap-1.5">
-                        <i className="fas fa-lock text-indigo-400 text-[11px]" />
-                        <span>Opens {unlockTimeStr}</span>
-                      </div>
-                    )}
+                    <button
+                      onClick={() => handleJoinClass(session)}
+                      disabled={joiningId === sId}
+                      className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-xs font-bold flex items-center gap-2 transition shadow-lg shadow-emerald-900/30 cursor-pointer"
+                    >
+                      <i className="fas fa-video text-xs" />
+                      <span>
+                        {joiningId === sId
+                          ? "Entering Class..."
+                          : session.status === "live"
+                          ? "Join Class (Live Now)"
+                          : "Join Class (Google Meet)"}
+                      </span>
+                    </button>
                   </div>
                 </div>
               );

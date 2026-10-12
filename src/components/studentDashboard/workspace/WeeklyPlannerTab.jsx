@@ -96,9 +96,9 @@ const WeeklyPlannerTab = ({ onOpenLiveSchedule }) => {
         ? Math.floor((dateObj.getTime() - Date.now()) / 60000)
         : null;
       const canJoin = Boolean(
+        s.meeting_link ||
         s.status === "live" ||
-        s.can_join === true ||
-        (diffMins !== null && diffMins <= 30 && diffMins >= -90)
+        s.can_join === true
       );
 
       return {

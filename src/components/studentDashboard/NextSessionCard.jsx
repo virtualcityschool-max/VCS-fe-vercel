@@ -75,8 +75,11 @@ const NextSessionCard = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nextSession?.id ?? nextSession?.session_id, nextSession?.starts_in_mins]);
 
-  const canJoinNow =
-    nextSession?.can_join === true || nextSession?.status === "live";
+  const canJoinNow = Boolean(
+    nextSession?.meeting_link ||
+    nextSession?.can_join === true ||
+    nextSession?.status === "live"
+  );
 
   if (!nextSession) {
     return (

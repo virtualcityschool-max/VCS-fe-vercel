@@ -138,32 +138,20 @@ const TodayAgendaSidebar = ({
                 (new Date(session.scheduled_at).getTime() - currentTime) / 60000
               );
               const isJoinable = Boolean(
+                session.meeting_link ||
                 session.status === "live" ||
-                session.can_join === true ||
-                (diffMins <= 30 && diffMins >= -90)
+                session.can_join === true
               );
-              const unlockDate = new Date(
-                new Date(session.scheduled_at).getTime() - 30 * 60000
-              );
-              const unlockTime = formatTime(unlockDate.toISOString(), timezone);
 
               return (
                 <div
                   key={sId}
-                  className={`p-3 rounded-xl border transition flex flex-col gap-2 ${
-                    isJoinable
-                      ? "bg-emerald-950/20 border-emerald-500/30 shadow-md shadow-emerald-950/20"
-                      : "bg-white/[0.02] border-white/5 hover:border-white/10"
-                  }`}
+                  className="p-3 rounded-xl border transition flex flex-col gap-2 bg-emerald-950/20 border-emerald-500/30 shadow-md shadow-emerald-950/20"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5 mb-0.5">
-                        <span
-                          className={`w-2 h-2 rounded-full ${
-                            isJoinable ? "bg-emerald-400 animate-pulse" : "bg-blue-400"
-                          }`}
-                        />
+                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                         <span className="text-[10px] font-mono font-bold text-indigo-300 truncate">
                           {formatTime(session.scheduled_at, timezone)} ({timezoneAbbr})
                         </span>
@@ -177,46 +165,35 @@ const TodayAgendaSidebar = ({
                     </div>
 
                     <div className="shrink-0 flex items-center gap-1.5">
-                      {!isJoinable && session.scheduled_at && (
+                      {session.scheduled_at && (
                         <DigitalSessionClock
                           scheduledAt={session.scheduled_at}
                           status={session.status}
                           variant="inline"
                         />
                       )}
-                      {isJoinable ? (
-                        <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[9px] font-black uppercase tracking-wider animate-pulse">
-                          {session.status === "live" ? "Live Now" : "Join Now"}
-                        </span>
-                      ) : (
-                        <span className="px-2 py-0.5 rounded-full bg-white/5 text-slate-400 text-[9px] font-mono">
-                          Opens {unlockTime}
-                        </span>
-                      )}
+                      <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[9px] font-black uppercase tracking-wider animate-pulse">
+                        {session.status === "live" ? "Live Now" : "Join Now"}
+                      </span>
                     </div>
                   </div>
 
-                  {isJoinable ? (
-                    <button
-                      onClick={() => handleJoinSession(session)}
-                      disabled={joiningId === sId}
-                      className="w-full py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-[11px] font-bold transition flex items-center justify-center gap-1.5 shadow-md shadow-emerald-900/30 cursor-pointer"
-                    >
-                      <i className="fas fa-video text-[10px]" />
-                      <span>
-                        {joiningId === sId
-                          ? "Entering Room..."
-                          : session.status === "live"
-                          ? "Enter Google Meet (Live Now)"
-                          : `Enter Google Meet (Starts in ${Math.max(0, diffMins)}m)`}
-                      </span>
-                    </button>
-                  ) : (
-                    <div className="text-[10px] text-slate-500 flex items-center gap-1">
-                      <i className="fas fa-lock text-[9px] text-slate-400" />
-                      <span>Meet link unlocks 30 min before class ({unlockTime})</span>
-                    </div>
-                  )}
+                  <button
+                    onClick={() => handleJoinSession(session)}
+                    disabled={joiningId === sId}
+                    className="w-full py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-[11px] font-bold transition flex items-center justify-center gap-1.5 shadow-md shadow-emerald-900/30 cursor-pointer"
+                  >
+                    <i className="fas fa-video text-[10px]" />
+                    <span>
+                      {joiningId === sId
+                        ? "Entering Room..."
+                        : session.status === "live"
+                        ? "Enter Google Meet (Live Now)"
+                        : diffMins !== null && diffMins > 0
+                        ? `Enter Google Meet (Starts in ${diffMins}m)`
+                        : "Enter Google Meet"}
+                    </span>
+                  </button>
                 </div>
               );
             })}

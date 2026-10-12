@@ -66,18 +66,8 @@ const tzToUTCMs = (dateStr, timeStr, tz) => {
   }
 };
 
-const isSlotJoinable = (slot, tz) => {
-  if (!slot?.date || !slot?.start_time) return true;
-  const now = Date.now();
-  const startUTC = tzToUTCMs(slot.date, slot.start_time, tz);
-  const endUTC = tzToUTCMs(slot.date, slot.end_time || slot.start_time, tz);
-  return now >= startUTC - 30 * 60 * 1000 && now <= endUTC + 30 * 60 * 1000;
-};
-
-const isSlotExpired = (slot, tz) => {
-  if (!slot?.date || !slot?.end_time) return false;
-  return Date.now() > tzToUTCMs(slot.date, slot.end_time, tz) + 30 * 60 * 1000;
-};
+const isSlotJoinable = () => true;
+const isSlotExpired = () => false;
 
 const TeacherPortal = () => {
   const dispatch = useDispatch();
@@ -459,15 +449,6 @@ const TeacherPortal = () => {
 
     // 2. Admin / Faculty Meetings Routing (Findings R2-1, R2-2)
     if (cat === "admin_session") {
-      const scheduledAt = raw?.scheduled_at;
-      if (scheduledAt && isSessionExpired(scheduledAt)) {
-        setSessionExpiredOpen(true);
-        return false;
-      }
-      if (scheduledAt && !isWithinSessionWindow(scheduledAt)) {
-        setTooEarlyOpen(true);
-        return false;
-      }
       const sessionId = raw?.id ?? raw?.session_id ?? session?.id;
       const isMobile = /Mobi|Android|iPad|iPhone|iPod/i.test(navigator.userAgent);
       const meetWin = isMobile ? null : window.open("", "_blank");
@@ -486,30 +467,12 @@ const TeacherPortal = () => {
         }
       } catch (err) {
         meetWin?.close();
-        const msg = extractApiErrorMessage(err);
-        if (
-          msg === "You cannot join before the scheduled time." ||
-          msg === "You can join up to 30 minutes before the scheduled time."
-        ) {
-          setTooEarlyOpen(true);
-        } else {
-          showApiError(err);
-        }
+        showApiError(err);
         return false;
       }
     }
 
     // 3. Regular Live Classes (Findings R2-1, R2-2)
-    const scheduleAt = raw?.schedule_at;
-    if (scheduleAt && isSessionExpired(scheduleAt)) {
-      setSessionExpiredOpen(true);
-      return false;
-    }
-    if (scheduleAt && !isWithinSessionWindow(scheduleAt)) {
-      setTooEarlyOpen(true);
-      return false;
-    }
-
     const sessionId = raw?.id ?? raw?.session_id ?? session?.id;
     const fallbackLink = raw?.meeting_link || session?.meetLink;
 
