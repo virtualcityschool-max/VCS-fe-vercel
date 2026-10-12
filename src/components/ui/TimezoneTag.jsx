@@ -4,8 +4,7 @@ import { getTimezoneAbbr } from "../../utils/validation";
 const TimezoneTag = ({ className = "", tz: tzOverride }) => {
   const profileTimezone = useSelector((s) => s.auth.profile?.timezone) || undefined;
   const timezone = tzOverride || profileTimezone;
-  const abbr = getTimezoneAbbr(timezone);
-  if (!abbr) return null;
+  const abbr = getTimezoneAbbr(timezone) || "AST";
   return (
     <span className={`relative inline-block ${timezone ? "group/tztag" : ""}`}>
       <span className={`${timezone ? "cursor-pointer" : ""} ${className}`}>

@@ -671,7 +671,7 @@ const SessionsTab = ({
             {/* Header */}
             <div className="flex justify-between items-start mb-6 pb-5 border-b border-white/5">
               <div>
-                <h3 className="text-xl font-black text-white tracking-tight">Create New Session</h3>
+                <h3 className="text-xl font-black text-white tracking-tight">Create New Class</h3>
                 <p className="text-slate-500 text-[12px] font-medium mt-1">
                   {createMode === "now"     ? "Launches immediately - max 1 hour" :
                    createMode === "delayed" ? "Starts after a set delay - max 1 hour" :
@@ -720,7 +720,8 @@ const SessionsTab = ({
                         value={createSessionForm.course}
                         error={createSessionErrors?.course}
                         onChange={(c) => {
-                          setCreateSessionForm({ ...createSessionForm, course: String(c.id), instructor_id: c.instructor?.id || "", instructor_username: getDisplayName(c.instructor) || "", instructor_email: c.instructor?.email || "" });
+                          const autoTitle = createSessionForm.title || `${c.title} - Live Class`;
+                          setCreateSessionForm({ ...createSessionForm, course: String(c.id), title: autoTitle, instructor_id: c.instructor?.id || "", instructor_username: getDisplayName(c.instructor) || "", instructor_email: c.instructor?.email || "" });
                           clearCreateSessionFieldError("course");
                         }}
                       />
@@ -737,8 +738,8 @@ const SessionsTab = ({
 
                   {/* Title */}
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">Session Title <span className="text-red-400">*</span></label>
-                    <Input type="text" placeholder="e.g. Python Basics - Live Q&A"
+                    <label className="block text-sm font-medium text-slate-300 mb-2">Class Title <span className="text-red-400">*</span></label>
+                    <Input type="text" placeholder="e.g. Mathematics - Live Class"
                       value={createSessionForm.title}
                       onChange={(e) => { setCreateSessionForm({ ...createSessionForm, title: e.target.value }); clearCreateSessionFieldError("title"); }}
                       className={`w-full px-3 py-2.5 bg-[#0E1428] border rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 text-sm ${createSessionErrors?.title ? "border-red-500 focus:ring-red-500" : "border-[#232D52] focus:ring-[#6D5BFF]"}`}
@@ -746,21 +747,10 @@ const SessionsTab = ({
                     />
                   </div>
 
-                  {/* Google Meet Link (optional) */}
-                  <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
-                      Google Meet Link <span className="text-slate-500 font-normal text-xs">(optional - leave blank to auto-create)</span>
-                    </label>
-                    <Input
-                      type="url"
-                      placeholder="e.g. https://meet.google.com/xxx-yyyy-zzz"
-                      value={createSessionForm.meeting_link || ""}
-                      onChange={(e) => {
-                        setCreateSessionForm({ ...createSessionForm, meeting_link: e.target.value });
-                        clearCreateSessionFieldError("meeting_link");
-                      }}
-                      className="w-full px-3 py-2.5 bg-[#0E1428] border border-[#232D52] rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#6D5BFF] text-sm"
-                    />
+                  {/* Google Meet Auto-Creation Notice */}
+                  <div className="flex items-center gap-2.5 px-3.5 py-2.5 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-xs text-indigo-300">
+                    <i className="fas fa-video text-indigo-400 shrink-0" />
+                    <span>Google Meet link will be automatically generated and synced with Google Calendar.</span>
                   </div>
 
                   {/* Delay picker */}
@@ -824,7 +814,8 @@ const SessionsTab = ({
                         error={createSessionErrors?.course}
                         getDisabledReason={scheduledCourseReason}
                         onChange={(c) => {
-                          setCreateSessionForm({ ...createSessionForm, course: String(c.id), instructor_id: c.instructor?.id || "", instructor_username: getDisplayName(c.instructor) || "", instructor_email: c.instructor?.email || "" });
+                          const autoTitle = createSessionForm.title || `${c.title} - Live Class`;
+                          setCreateSessionForm({ ...createSessionForm, course: String(c.id), title: autoTitle, instructor_id: c.instructor?.id || "", instructor_username: getDisplayName(c.instructor) || "", instructor_email: c.instructor?.email || "" });
                           clearCreateSessionFieldError("course");
                         }}
                       />
@@ -862,8 +853,8 @@ const SessionsTab = ({
 
                   {/* Title */}
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">Session Title <span className="text-red-400">*</span></label>
-                    <Input type="text" placeholder="e.g. Python Basics - Batch 2"
+                    <label className="block text-sm font-medium text-slate-300 mb-2">Class Title <span className="text-red-400">*</span></label>
+                    <Input type="text" placeholder="e.g. Mathematics - Batch 2"
                       value={createSessionForm.title}
                       onChange={(e) => { setCreateSessionForm({ ...createSessionForm, title: e.target.value }); clearCreateSessionFieldError("title"); }}
                       className={`w-full px-3 py-2.5 bg-[#0E1428] border rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 text-sm ${createSessionErrors?.title ? "border-red-500 focus:ring-red-500" : "border-[#232D52] focus:ring-[#6D5BFF]"}`}
@@ -871,21 +862,10 @@ const SessionsTab = ({
                     />
                   </div>
 
-                  {/* Google Meet Link (optional) */}
-                  <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
-                      Google Meet Link <span className="text-slate-500 font-normal text-xs">(optional - leave blank to auto-create)</span>
-                    </label>
-                    <Input
-                      type="url"
-                      placeholder="e.g. https://meet.google.com/xxx-yyyy-zzz"
-                      value={createSessionForm.meeting_link || ""}
-                      onChange={(e) => {
-                        setCreateSessionForm({ ...createSessionForm, meeting_link: e.target.value });
-                        clearCreateSessionFieldError("meeting_link");
-                      }}
-                      className="w-full px-3 py-2.5 bg-[#0E1428] border border-[#232D52] rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#6D5BFF] text-sm"
-                    />
+                  {/* Google Meet Auto-Creation Notice */}
+                  <div className="flex items-center gap-2.5 px-3.5 py-2.5 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-xs text-indigo-300">
+                    <i className="fas fa-video text-indigo-400 shrink-0" />
+                    <span>Google Meet link will be automatically generated and synced with Google Calendar.</span>
                   </div>
 
                   {/* Start Date | End Date */}

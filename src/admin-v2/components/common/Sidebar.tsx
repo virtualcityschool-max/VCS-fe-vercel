@@ -116,7 +116,7 @@ export const Sidebar: React.FC = () => {
       items: [
         {
           id: 'live-classes',
-          label: 'Live Classes',
+          label: 'Live Planned Classes',
           icon: Radio,
           badge: liveNowCount > 0 ? liveNowCount : undefined,
           badgeColor: 'bg-rose-500 text-white animate-pulse',

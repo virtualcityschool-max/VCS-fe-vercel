@@ -16,6 +16,7 @@ import {
   countryByName,
 } from '../../data/formOptions';
 import { Field, FormSection, MultiPick, PasswordField, PhoneField, SelectInput, fullPhone, inputCls } from './FormControls';
+import { AdminPlanClassModal } from './AdminPlanClassModal';
 
 type QuickType = 'student' | 'teacher' | 'parent' | 'admin' | 'subject' | 'session' | 'post';
 
@@ -85,6 +86,7 @@ export const QuickAddModal: React.FC = () => {
 
   const [activeType, setActiveType] = useState<QuickType>('student');
   const [saving, setSaving] = useState(false);
+  const [isPlanClassOpen, setIsPlanClassOpen] = useState(false);
 
   // Shared account fields (each tab keeps its own copy via a key below).
   const [name, setName] = useState('');
@@ -181,13 +183,17 @@ export const QuickAddModal: React.FC = () => {
     if (match) setSubLevel(match.name);
   };
 
-  if (!quickAddModal.isOpen) return null;
+  if (!quickAddModal.isOpen) {
+    return isPlanClassOpen ? (
+      <AdminPlanClassModal isOpen={isPlanClassOpen} onClose={() => setIsPlanClassOpen(false)} />
+    ) : null;
+  }
 
   const fee = feeChoice === 'other' ? Number(feeOther || 0) : Number(feeChoice);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (activeType === 'session') { closeQuickAdd(); addSession(); return; }
+    if (activeType === 'session') { closeQuickAdd(); setIsPlanClassOpen(true); return; }
     if (activeType === 'post') { closeQuickAdd(); addPost({ type: 'Article' }); return; }
     setSaving(true);
     let ok: any = false;
@@ -519,6 +525,10 @@ export const QuickAddModal: React.FC = () => {
           </div>
         </form>
       </div>
+      <AdminPlanClassModal
+        isOpen={isPlanClassOpen}
+        onClose={() => setIsPlanClassOpen(false)}
+      />
     </div>
   );
 };

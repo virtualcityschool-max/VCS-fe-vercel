@@ -281,7 +281,7 @@ const TeacherPortal = () => {
     return rows;
   }, [allAttendance, mappedCourses, profileTimezone]);
 
-  // Map Live Sessions (Live classes + Admin sessions + Booked slots)
+  // Map Live Sessions (Live classes + Admin sessions)
   const mappedSessions = useMemo(() => {
     const list = [];
     if (dashboard?.todays_schedule && dashboard.todays_schedule.length > 0) {
@@ -292,7 +292,7 @@ const TeacherPortal = () => {
           courseName: s.course_title || "Live Class",
           category: "classes",
           timeAST: s.schedule_at
-            ? new Date(s.schedule_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", timeZone: activeTzId })
+            ? `${new Date(s.schedule_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", timeZone: activeTzId })} ${currentTz}`
             : "Upcoming",
           duration: s.duration ? `${s.duration} min` : "—",
           meetLink: s.meeting_link || "",
@@ -300,7 +300,7 @@ const TeacherPortal = () => {
           attendeesCount: s.total_learners ?? 0,
           maxAttendees: s.max_learners || s.max_attendees || "—",
           instructor: user?.first_name ? `${user.first_name} ${user.last_name || ""}`.trim() : (user?.username || "Tutor"),
-          rawSession: { ...s, category: "classes" },
+          rawSession: { ...s, scheduled_at: s.schedule_at || s.scheduled_at, category: "classes" },
         });
       });
     }
@@ -313,7 +313,7 @@ const TeacherPortal = () => {
           courseName: "Faculty Administration Board",
           category: "admin_session",
           timeAST: s.scheduled_at
-            ? new Date(s.scheduled_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", timeZone: activeTzId })
+            ? `${new Date(s.scheduled_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", timeZone: activeTzId })} ${currentTz}`
             : "Scheduled",
           duration: s.duration ? `${s.duration} min` : "—",
           meetLink: s.meeting_link || "",
@@ -321,32 +321,13 @@ const TeacherPortal = () => {
           attendeesCount: s.attendees_count ?? "—",
           maxAttendees: s.max_attendees ?? "—",
           instructor: "Academic Administration",
-          rawSession: { ...s, category: "admin_session" },
-        });
-      });
-    }
-
-    if (dashboard?.upcoming_slots && dashboard.upcoming_slots.length > 0) {
-      dashboard.upcoming_slots.forEach((s) => {
-        list.push({
-          id: `slot-${s.id}`,
-          title: `1-on-1 Consultation: ${s.student_name || s.booked_by_name || "Learner"}`,
-          courseName: "Office Hours & Consultation",
-          category: "reserved_slots",
-          timeAST: `${s.start_time} - ${s.end_time}`,
-          duration: "30 min",
-          meetLink: s.meeting_link || "",
-          status: s.can_join ? "live" : "upcoming",
-          attendeesCount: 1,
-          maxAttendees: 1,
-          instructor: user?.first_name ? `${user.first_name} ${user.last_name || ""}`.trim() : (user?.username || "Tutor"),
-          rawSession: { ...s, category: "reserved_slots" },
+          rawSession: { ...s, scheduled_at: s.scheduled_at, category: "admin_session" },
         });
       });
     }
 
     return list;
-  }, [dashboard, user, activeTzId]);
+  }, [dashboard, user, activeTzId, currentTz]);
 
   // Grading queue from the dashboard (assignment submissions + quizzes with written answers)
   const mappedTasks = useMemo(() => {

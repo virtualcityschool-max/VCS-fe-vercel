@@ -15,6 +15,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { DEPARTMENT_CONFIG } from '../data/departments';
+import { AdminPlanClassModal } from '../components/common/AdminPlanClassModal';
 
 export const TimetableView: React.FC = () => {
   const {
@@ -28,6 +29,7 @@ export const TimetableView: React.FC = () => {
 
   const [viewMode, setViewMode] = useState<'calendar' | 'table'>('calendar');
   const [weekOffset, setWeekOffset] = useState(0);
+  const [isPlanClassOpen, setIsPlanClassOpen] = useState(false);
 
   // Real calendar week (Monday–Sunday) in the admin's timezone.
   const dayKey = (d: Date) => d.toLocaleDateString('en-CA', tzIana ? { timeZone: tzIana } : undefined);
@@ -129,8 +131,8 @@ export const TimetableView: React.FC = () => {
         subtitle={`Live interactive Cambridge sessions scheduled in ${timezone}.`}
         primaryAction={{
           cap: 'manage_academics',
-          label: 'Plan class',
-          onClick: () => openQuickAdd('session'),
+          label: 'Plan New Class',
+          onClick: () => setIsPlanClassOpen(true),
           icon: Plus,
         }}
         extraActions={
@@ -274,6 +276,11 @@ export const TimetableView: React.FC = () => {
           </div>
         </div>
       )}
+
+      <AdminPlanClassModal
+        isOpen={isPlanClassOpen}
+        onClose={() => setIsPlanClassOpen(false)}
+      />
     </div>
   );
 };

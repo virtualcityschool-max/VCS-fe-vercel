@@ -249,16 +249,16 @@ export const DigitalSessionClock = ({
     }
 
     return (
-      <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-950/80 border border-indigo-500/30 text-white font-mono text-xs shadow-md ${className}`}>
-        <i className="far fa-clock text-indigo-400 text-xs animate-pulse" />
-        <span className="text-[10px] font-black uppercase tracking-wider text-indigo-300">
-          Time to go:
+      <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-rose-950/40 border border-rose-500/40 text-rose-300 font-mono text-xs shadow-md ${className}`}>
+        <span className="w-2 h-2 rounded-full bg-rose-400" />
+        <span className="text-[10px] font-black uppercase tracking-wider text-rose-300">
+          Locked ·
         </span>
-        <div className="flex items-center gap-1 font-black text-cyan-300 tabular-nums">
+        <div className="flex items-center gap-1 font-black text-rose-200 tabular-nums">
           {days > 0 ? (
-            <span>{days}d {pad(hours)}h {pad(minutes)}m</span>
+            <span>{days}d {pad(hours)}h {pad(minutes)}m to go</span>
           ) : (
-            <span>{pad(hours)}h {pad(minutes)}m</span>
+            <span>{pad(hours)}h {pad(minutes)}m to go</span>
           )}
         </div>
       </div>
@@ -287,10 +287,10 @@ export const DigitalSessionClock = ({
   }
 
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-slate-900/90 border border-indigo-500/30 font-mono text-[11px] text-slate-200 ${className}`}>
-      <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
-      <span className="text-slate-400 text-[9px] uppercase tracking-wider">In:</span>
-      <span className="font-bold text-cyan-300 tabular-nums">
+    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-rose-950/40 border border-rose-500/30 font-mono text-[11px] text-rose-300 font-medium ${className}`}>
+      <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
+      <span className="text-rose-400 text-[9px] uppercase tracking-wider">Locked:</span>
+      <span className="font-bold text-rose-200 tabular-nums">
         {days > 0 ? `${days}d ${pad(hours)}h` : `${pad(hours)}h ${pad(minutes)}m`}
       </span>
     </span>

@@ -29,12 +29,16 @@ import {
   CheckCheck,
   X,
   Square,
-  LogOut
+  LogOut,
+  HelpCircle,
+  Lock,
+  Users
 } from "lucide-react";
 import { PerformanceAnalyticsView } from "./PerformanceAnalyticsView";
 import { AssignmentsQuizzesView } from "./AssignmentsQuizzesView";
 import { TeachingResourcesView } from "./TeachingResourcesView";
 import DigitalSessionClock from "../../common/DigitalSessionClock";
+import { SessionTroubleshootModal } from "../../common/SessionTroubleshootModal";
 export const TeacherDashboard = ({
   activeTab,
   onSelectTab,
@@ -64,6 +68,7 @@ export const TeacherDashboard = ({
   referralCode,
 }) => {
   const [sessionCategory, setSessionCategory] = useState("classes");
+  const [isTroubleshootOpen, setIsTroubleshootOpen] = useState(false);
   const [taskFilter, setTaskFilter] = useState("all");
   const [quizFilter, setQuizFilter] = useState("all");
   const [copiedLink, setCopiedLink] = useState(false);
@@ -82,7 +87,9 @@ export const TeacherDashboard = ({
     setCopiedLink(true);
     setTimeout(() => setCopiedLink(false), 2200);
   };
-  const filteredSessions = sessions.filter((s) => s.category === sessionCategory);
+  const liveClasses = sessions.filter((s) => s.category === "classes");
+  const adminMeetings = sessions.filter((s) => s.category === "admin_session");
+  const filteredSessions = liveClasses;
   const filteredTasks = tasks.filter((t) => {
     if (taskFilter === "all") return true;
     return t.status === taskFilter;
@@ -729,68 +736,195 @@ export const TeacherDashboard = ({
             </div>
           </div>
 
-          {
-    /* 2. Upcoming Sessions Card */
-  }
-          <div className="bg-[#101424] border border-[#1E2540] rounded-2xl p-5">
-            <div className="flex items-center justify-between gap-2 mb-3">
+          {/* 2A. Live Classes Card (Separate, NO tab toggle) */}
+          <div className="bg-[#101424] border border-[#1E2540] rounded-2xl p-5 space-y-4">
+            <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shrink-0">
+                <div className="w-9 h-9 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
                   <Video className="w-4 h-4" />
                 </div>
                 <div>
-                  <h2 className="text-sm font-bold text-white">Upcoming Sessions</h2>
+                  <h2 className="text-sm font-bold text-white">Live Classes</h2>
                   <p className="text-[11px] text-slate-400">Google Meet · {timezone}</p>
                 </div>
               </div>
-              <span className="px-2.5 py-1 rounded-lg bg-[#161C30] border border-[#263052] text-[11px] font-semibold text-slate-300 tabular-nums">
-                {filteredSessions.length} {filteredSessions.length === 1 ? "Session" : "Sessions"}
+              <span className="px-2.5 py-1 rounded-lg bg-[#161C30] border border-[#263052] text-[11px] font-semibold text-emerald-400 tabular-nums">
+                {liveClasses.length} {liveClasses.length === 1 ? "Class" : "Classes"}
               </span>
             </div>
 
-            {
-    /* 3-Tab Segmented Control from Teacher Screenshot */
-  }
-            <div className="grid grid-cols-2 gap-1 p-1 rounded-xl bg-[#0B0E1A] border border-[#1A2138] mb-4">
-              <button
-    onClick={() => setSessionCategory("admin_session")}
-    className={`py-1.5 px-2 rounded-lg text-[10px] font-bold tracking-wider uppercase transition-all truncate cursor-pointer ${sessionCategory === "admin_session" ? "bg-[#1D2540] text-white border border-indigo-500/40" : "text-slate-400 hover:text-slate-200"}`}
-  >
-                Admin Session
-              </button>
-              <button
-    onClick={() => setSessionCategory("classes")}
-    className={`py-1.5 px-2 rounded-lg text-[10px] font-bold tracking-wider uppercase transition-all flex items-center justify-center gap-1.5 truncate cursor-pointer ${sessionCategory === "classes" ? "bg-emerald-600 text-white shadow-sm" : "text-slate-400 hover:text-slate-200"}`}
-  >
-                <span>Classes</span>
-                <span className="px-1.5 py-0.2 rounded-full bg-black/25 text-[10px] tabular-nums">
-                  {sessions.filter((s) => s.category === "classes").length}
-                </span>
-              </button>
+            {liveClasses.length === 0 ? (
+              <div className="rounded-xl bg-[#0C0F1D] border border-[#192038] p-6 text-center">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-3 text-emerald-400">
+                  <Video className="w-5 h-5" />
+                </div>
+                <div className="text-xs font-bold text-white">No live classes scheduled for today</div>
+                <p className="text-[11px] text-slate-400 mt-1 max-w-xs mx-auto leading-relaxed">
+                  Classes planned by administration will appear here automatically.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {liveClasses.map((ses) => {
+                  const isLaunched = launchedSessionId === ses.id;
+                  const schedIso = ses.rawSession?.scheduled_at;
+                  const schedTime = schedIso ? new Date(schedIso).getTime() : 0;
+                  const diffMs = schedTime > 0 ? schedTime - Date.now() : 0;
+                  const is20mOpen = diffMs <= 20 * 60 * 1000;
+                  const isLive = ses.status === "live";
+                  const canEnter = isLive || is20mOpen;
+
+                  return (
+                    <div
+                      key={ses.id}
+                      className="p-4 rounded-xl bg-[#0C0F1D] border border-[#1B223B] hover:border-emerald-500/40 transition-all space-y-3"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <div className="text-sm font-bold text-white leading-snug">
+                            {ses.title}
+                          </div>
+                          <div className="text-[11px] text-slate-400 mt-0.5">
+                            {ses.courseName} · <span className="font-mono tabular-nums text-slate-200">{ses.timeAST}</span> ({ses.duration})
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          {schedIso && (
+                            <DigitalSessionClock
+                              scheduledAt={schedIso}
+                              status={ses.status}
+                              variant="card"
+                            />
+                          )}
+                          <span className="text-[11px] font-mono text-slate-400 tabular-nums">
+                            {ses.attendeesCount}/{ses.maxAttendees}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between gap-2 pt-2.5 border-t border-[#151B30]">
+                        <span className="text-[11px] text-slate-400 flex items-center gap-1.5 font-medium">
+                          <span className={`w-2 h-2 rounded-full ${canEnter ? "bg-emerald-400 animate-pulse" : "bg-rose-400"}`} />
+                          <span className={canEnter ? "text-emerald-300 font-semibold" : "text-slate-400"}>
+                            {canEnter ? "Classroom Open" : "Early Access Locked"}
+                          </span>
+                        </span>
+
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          {onEndSession && (ses.status === "live" || isLaunched) && (
+                            <button
+                              type="button"
+                              onClick={() => onEndSession(ses)}
+                              className="px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-colors whitespace-nowrap flex items-center gap-1 bg-rose-500/20 text-rose-300 border border-rose-500/40 hover:bg-rose-500/30 cursor-pointer"
+                            >
+                              <Square className="w-2.5 h-2.5 fill-current" />
+                              <span>End Class</span>
+                            </button>
+                          )}
+
+                          {canEnter ? (
+                            <button
+                              type="button"
+                              onClick={async () => {
+                                let ok = false;
+                                if (onStartSession) {
+                                  ok = await onStartSession(ses);
+                                } else if (ses.meetLink) {
+                                  window.open(ses.meetLink, "_blank", "noopener,noreferrer");
+                                  ok = true;
+                                }
+                                if (ok) {
+                                  setLaunchedSessionId(ses.id);
+                                }
+                              }}
+                              className={`px-3.5 py-1.5 rounded-lg text-[11px] font-semibold transition-colors whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
+                                isLaunched
+                                  ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
+                                  : "bg-emerald-600 hover:bg-emerald-500 text-white shadow-md shadow-emerald-900/30"
+                              }`}
+                            >
+                              <span>{isLaunched ? "Room Active" : "Launch Meet"}</span>
+                              <ExternalLink className="w-3 h-3" />
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => setIsTroubleshootOpen(true)}
+                              title="Unlocked 20 minutes before session start"
+                              className="px-3.5 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap flex items-center gap-1.5 bg-rose-500/20 text-rose-300 border border-rose-500/40 hover:bg-rose-500/30 cursor-pointer"
+                            >
+                              <Lock className="w-3 h-3 text-rose-400" />
+                              <span>Opens 20m Prior</span>
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Chrome Sign-in Helper & Troubleshoot Link */}
+                      <div className="pt-2 border-t border-[#151B30]/60 flex flex-wrap items-center justify-between gap-2 text-[10px] text-slate-400">
+                        <span className="flex items-center gap-1 truncate">
+                          <Info className="w-3 h-3 text-indigo-400 shrink-0" />
+                          <span>Signed in Chrome as: <b className="text-slate-200">{user?.email || "Gmail"}</b></span>
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setIsTroubleshootOpen(true)}
+                          className="text-amber-400 hover:text-amber-300 flex items-center gap-1 font-semibold underline underline-offset-2 cursor-pointer ml-auto"
+                        >
+                          <HelpCircle className="w-3 h-3" />
+                          <span>Issues Joining?</span>
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* 2B. In-House & Staff Meetings Card (Separate section) */}
+          <div className="bg-[#101424] border border-[#1E2540] rounded-2xl p-5 space-y-4">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shrink-0">
+                  <Users className="w-4 h-4" />
+                </div>
+                <div>
+                  <h2 className="text-sm font-bold text-white">In-House &amp; Staff Meetings</h2>
+                  <p className="text-[11px] text-slate-400">Academic Administration · {timezone}</p>
+                </div>
+              </div>
+              <span className="px-2.5 py-1 rounded-lg bg-[#161C30] border border-[#263052] text-[11px] font-semibold text-slate-300 tabular-nums">
+                {adminMeetings.length}
+              </span>
             </div>
 
-            {filteredSessions.length === 0 ? <div className="rounded-xl bg-[#0C0F1D] border border-[#192038] p-6 text-center">
-                <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mx-auto mb-3 text-indigo-400">
-                  <Calendar className="w-5 h-5" />
+            {adminMeetings.length === 0 ? (
+              <div className="rounded-xl bg-[#0C0F1D] border border-[#192038] p-5 text-center">
+                <div className="w-9 h-9 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mx-auto mb-2 text-indigo-400">
+                  <Users className="w-4 h-4" />
                 </div>
-                <div className="text-xs font-bold text-white">No sessions scheduled</div>
+                <div className="text-xs font-bold text-white">No in-house meetings scheduled</div>
                 <p className="text-[11px] text-slate-400 mt-1 max-w-xs mx-auto leading-relaxed">
-                  You have no upcoming sessions in this view.
+                  Faculty staff and coordination meetings will appear here when scheduled by administration.
                 </p>
-              </div> : <div className="space-y-2.5">
-                {filteredSessions.map((ses) => {
-    const isLaunched = launchedSessionId === ses.id;
-    return <div
-      key={ses.id}
-      className="p-3.5 rounded-xl bg-[#0C0F1D] border border-[#1B223B] hover:border-indigo-500/40 transition-all"
-    >
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {adminMeetings.map((ses) => {
+                  const isLaunched = launchedSessionId === ses.id;
+                  return (
+                    <div
+                      key={ses.id}
+                      className="p-3.5 rounded-xl bg-[#0C0F1D] border border-[#1B223B] hover:border-indigo-500/40 transition-all space-y-2.5"
+                    >
                       <div className="flex items-start justify-between gap-2">
                         <div>
                           <div className="text-xs font-bold text-white leading-snug">
                             {ses.title}
                           </div>
                           <div className="text-[11px] text-slate-400 mt-0.5">
-                            {ses.courseName} · <span className="font-mono tabular-nums">{ses.timeAST}</span> ({ses.duration})
+                            {ses.courseName} · <span className="font-mono tabular-nums text-slate-200">{ses.timeAST}</span> ({ses.duration})
                           </div>
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
@@ -801,30 +935,19 @@ export const TeacherDashboard = ({
                               variant="inline"
                             />
                           )}
-                          <span className="text-[11px] font-mono text-slate-300 tabular-nums">
-                            {ses.attendeesCount}/{ses.maxAttendees}
+                          <span className="text-[11px] font-mono text-slate-400 tabular-nums">
+                            {ses.attendeesCount}
                           </span>
                         </div>
                       </div>
-                      <div className="mt-3 flex items-center justify-between gap-2 pt-2.5 border-t border-[#151B30]">
+
+                      <div className="flex items-center justify-between gap-2 pt-2 border-t border-[#151B30]">
                         <span className="text-[11px] text-slate-400 flex items-center gap-1.5 font-medium">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                          <span>Live Classroom</span>
+                          <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
+                          <span>Staff Room</span>
                         </span>
                         <div className="flex items-center gap-1.5 shrink-0">
-                          {/* End Button: ONLY for regular live classes */}
-                          {onEndSession && ses.category === "classes" && (ses.status === "live" || isLaunched) && (
-                            <button
-                              type="button"
-                              onClick={() => onEndSession(ses)}
-                              className="px-2.5 py-1 rounded-lg text-[11px] font-bold transition-colors whitespace-nowrap flex items-center gap-1 bg-rose-500/20 text-rose-300 border border-rose-500/40 hover:bg-rose-500/30 cursor-pointer"
-                            >
-                              <Square className="w-2.5 h-2.5 fill-current" />
-                              <span>End</span>
-                            </button>
-                          )}
-                          {/* Leave Button: ONLY for admin faculty sessions */}
-                          {onLeaveAdminSession && ses.category === "admin_session" && (ses.status === "live" || isLaunched) && (
+                          {onLeaveAdminSession && (ses.status === "live" || isLaunched) && (
                             <button
                               type="button"
                               onClick={() => onLeaveAdminSession(ses)}
@@ -848,26 +971,20 @@ export const TeacherDashboard = ({
                                 setLaunchedSessionId(ses.id);
                               }
                             }}
-                            className={`px-3 py-1 rounded-lg text-[11px] font-semibold transition-colors whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${isLaunched ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40" : "bg-indigo-600 hover:bg-indigo-500 text-white"}`}
+                            className={`px-3 py-1 rounded-lg text-[11px] font-semibold transition-colors whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
+                              isLaunched ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40" : "bg-indigo-600 hover:bg-indigo-500 text-white"
+                            }`}
                           >
                             <span>{isLaunched ? "Room Active" : "Launch Meet"}</span>
                             <ExternalLink className="w-3 h-3" />
                           </button>
                         </div>
                       </div>
-                    </div>;
-  })}
-              </div>}
-
-            <div className="mt-4 pt-3 border-t border-[#171D33] flex items-center justify-end text-xs">
-              <button
-                onClick={() => onSelectTab("planner")}
-                className="text-slate-400 hover:text-slate-200 inline-flex items-center gap-1 transition-colors cursor-pointer"
-              >
-                <span>Faculty Planner</span>
-                <Calendar className="w-3.5 h-3.5" />
-              </button>
-            </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {/* 3. Invite & Refer Widget */}
@@ -1243,5 +1360,10 @@ export const TeacherDashboard = ({
           </div>
         </div>
       </div>
+      <SessionTroubleshootModal
+        isOpen={isTroubleshootOpen}
+        onClose={() => setIsTroubleshootOpen(false)}
+        userEmail={user?.email || ""}
+      />
     </div>;
 };

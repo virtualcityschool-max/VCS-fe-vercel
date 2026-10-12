@@ -2,7 +2,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { PageHeader } from '../components/common/PageHeader';
 import { inputCls } from '../components/common/FormControls';
-import { AlertTriangle, CalendarDays, Check, ChevronLeft, ChevronRight, Copy, Info, Radio, Search, Share2, Users, Video } from 'lucide-react';
+import { AlertTriangle, CalendarDays, Check, ChevronLeft, ChevronRight, Copy, Info, Plus, Radio, Search, Share2, Users, Video } from 'lucide-react';
+import { AdminPlanClassModal } from '../components/common/AdminPlanClassModal';
 // @ts-ignore
 import DigitalSessionClock from '../../components/common/DigitalSessionClock';
 
@@ -31,6 +32,7 @@ export const LiveClassesView: React.FC = () => {
   const [query, setQuery] = useState('');
   const [now, setNow] = useState(Date.now());
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [isPlanClassOpen, setIsPlanClassOpen] = useState(false);
 
   // Countdowns tick every 30 s; classes and attendance refresh every minute.
   useEffect(() => {
@@ -40,6 +42,13 @@ export const LiveClassesView: React.FC = () => {
     return () => { clearInterval(t); clearInterval(r); };
   }, []);
 
+  const tzAbbr = useMemo(() => {
+    try {
+      return new Intl.DateTimeFormat('en-US', { timeZoneName: 'short', ...(tzIana ? { timeZone: tzIana } : {}) })
+        .formatToParts(new Date()).find((p) => p.type === 'timeZoneName')?.value || 'AST';
+    } catch { return 'AST'; }
+  }, [tzIana]);
+
   const dayKey = useMemo(() => {
     const d = new Date(now + dayOffset * 86400000);
     return d.toLocaleDateString('en-CA', tzIana ? { timeZone: tzIana } : undefined);
@@ -47,7 +56,10 @@ export const LiveClassesView: React.FC = () => {
   const dayLabel = new Date(now + dayOffset * 86400000).toLocaleDateString('en-GB', {
     weekday: 'long', day: 'numeric', month: 'long', ...(tzIana ? { timeZone: tzIana } : {}),
   });
-  const timeOf = (d: Date) => d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', ...(tzIana ? { timeZone: tzIana } : {}) });
+  const timeOf = (d: Date) => {
+    const t = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', ...(tzIana ? { timeZone: tzIana } : {}) });
+    return `${t} ${tzAbbr}`;
+  };
 
   const attendanceBySession = useMemo(() => {
     const m = new Map<string, any[]>();
@@ -272,7 +284,16 @@ export const LiveClassesView: React.FC = () => {
 
   return (
     <div className="space-y-6 w-full animate-in fade-in duration-150">
-      <PageHeader title="Live Classes" subtitle="Classes running now and coming up. Join any class to see how it is going." />
+      <PageHeader
+        title="Live Planned Classes"
+        subtitle="Classes running now and coming up. Join any class to see how it is going."
+        primaryAction={{
+          label: 'Plan New Class',
+          icon: Plus,
+          onClick: () => setIsPlanClassOpen(true),
+          cap: 'manage_academics',
+        }}
+      />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {kpis.map((k) => (
@@ -312,7 +333,6 @@ export const LiveClassesView: React.FC = () => {
 
       {mode === 'upcoming' ? (
         <>
-          <Section title="Missed / not started — needs a decision" icon={AlertTriangle} tone="text-rose-300" items={missedRows} />
           <Section title="Live now" icon={Radio} tone="text-rose-300" items={liveRows} empty="No class is running at the moment." />
           {liveRows.some((x: any) => x.phase === 'late') && (
             <div className="flex items-center gap-2 text-xs text-amber-300 -mt-3">
@@ -321,19 +341,27 @@ export const LiveClassesView: React.FC = () => {
           )}
           <Section title="Starting within the hour" icon={Video} tone="text-sky-300" items={soonRows} />
           <Section title="Later today" icon={CalendarDays} tone="text-slate-200" items={laterRows} />
+          {missedRows.length > 0 && (
+            <Section title="Missed / not started — needs a decision" icon={AlertTriangle} tone="text-rose-300" items={missedRows} />
+          )}
           {nextDays.filter((d) => d.rows.length).map((d) => (
             <Section key={d.offset} title={d.label} icon={CalendarDays} tone="text-slate-300" items={d.rows} />
           ))}
           {liveRows.length + soonRows.length + laterRows.length + comingUp === 0 && (
             <div className="text-center text-xs text-slate-500">
-              No classes planned for the next 7 days. Plan classes in the{' '}
-              <button onClick={() => setCurrentView('timetable')} className="text-sky-300 hover:underline">Timetable</button>.
+              No classes planned for the next 7 days. Plan classes with the{' '}
+              <button onClick={() => setIsPlanClassOpen(true)} className="text-sky-300 hover:underline">Plan New Class</button> button.
             </div>
           )}
         </>
       ) : (
         <Section title={dayOffset === 0 ? 'Ended today' : 'Classes held'} icon={CalendarDays} tone="text-slate-300" items={endedRows} empty="No classes held on this day." />
       )}
+
+      <AdminPlanClassModal
+        isOpen={isPlanClassOpen}
+        onClose={() => setIsPlanClassOpen(false)}
+      />
     </div>
   );
 };

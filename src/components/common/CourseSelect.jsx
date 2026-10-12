@@ -23,6 +23,7 @@ const CourseSelect = ({
 }) => {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const [selectedLevel, setSelectedLevel] = useState("All");
   const [dropPos, setDropPos] = useState({ top: 0, left: 0, width: 0 });
   const triggerRef = useRef(null);
   const dropdownRef = useRef(null);
@@ -33,7 +34,7 @@ const CourseSelect = ({
     const rect = triggerRef.current.getBoundingClientRect();
     const spaceBelow = window.innerHeight - rect.bottom;
     const spaceAbove = rect.top;
-    const dropH = 256; // max-h-64
+    const dropH = 290; // max height with level pills
     const openBelow = spaceBelow >= dropH || spaceBelow >= spaceAbove;
     
     // ✅ CHANGED: Uses window scroll offsets to build an absolute anchor coordinates grid
@@ -72,13 +73,25 @@ const CourseSelect = ({
 
   const selected = courses.find((c) => String(c.id) === String(value));
 
+  const matchesLevel = (c, lvl) => {
+    if (lvl === "All") return true;
+    const text = `${c.title || ""} ${c.category?.name || c.level || ""}`.toLowerCase();
+    if (lvl === "O Level") return text.includes("o level") || text.includes("olevel") || text.includes("ol ") || text.includes("4037") || text.includes("0580") || text.includes("5070");
+    if (lvl === "A Level") return text.includes("a level") || text.includes("alevel") || text.includes("al ") || text.includes("as level") || text.includes("9709") || text.includes("9701") || text.includes("9702");
+    if (lvl === "IGCSE") return text.includes("igcse");
+    if (lvl === "Primary") return text.includes("primary") || text.includes("grade") || text.includes("checkpoint");
+    return text.includes(lvl.toLowerCase());
+  };
+
+  const levelFiltered = selectedLevel === "All" ? courses : courses.filter((c) => matchesLevel(c, selectedLevel));
+
   const filtered = search.trim()
-    ? courses.filter((c) =>
+    ? levelFiltered.filter((c) =>
         c.title?.toLowerCase().includes(search.toLowerCase()) ||
         getDisplayName(c.instructor)?.toLowerCase().includes(search.toLowerCase()) ||
         c.instructor?.email?.toLowerCase().includes(search.toLowerCase())
       )
-    : courses;
+    : levelFiltered;
 
   return (
     <div className="relative">
@@ -121,6 +134,24 @@ const CourseSelect = ({
               onClick={(e) => e.stopPropagation()} // ✅ CHANGED: Uses click event bubbling controls
               className="bg-slate-900 border border-slate-700 rounded-xl shadow-2xl overflow-hidden"
             >
+              {/* Level Filter Pills */}
+              <div className="flex items-center gap-1.5 px-2.5 py-1.5 overflow-x-auto no-scrollbar border-b border-slate-800 bg-slate-950/70">
+                {["All", "O Level", "A Level", "IGCSE", "Primary"].map((lvl) => (
+                  <button
+                    key={lvl}
+                    type="button"
+                    onClick={() => setSelectedLevel(lvl)}
+                    className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider whitespace-nowrap transition cursor-pointer ${
+                      selectedLevel === lvl
+                        ? "bg-indigo-600 text-white shadow-sm"
+                        : "bg-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-700"
+                    }`}
+                  >
+                    {lvl}
+                  </button>
+                ))}
+              </div>
+
               {/* Search */}
               <div className="px-2 pt-2 pb-1.5 border-b border-slate-800">
                 <div className="relative">
@@ -130,7 +161,7 @@ const CourseSelect = ({
                     type="text"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Search..."
+                    placeholder="Search courses or teachers…"
                     style={{ fontSize: 16 }}
                     className="w-full bg-slate-800 border border-slate-700/60 rounded-lg pl-7 pr-3 py-1.5 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 text-sm"
                   />
