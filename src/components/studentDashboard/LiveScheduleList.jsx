@@ -114,7 +114,11 @@ const LiveScheduleList = () => {
     } catch (err) {
       meetWin?.close();
       const msg = extractApiErrorMessage(err);
-      if ((msg === "You cannot join before the scheduled time.") || (msg === "You can join up to 30 minutes before the scheduled time.")) {
+      if (
+        msg === "You cannot join before the scheduled time." ||
+        msg === "You can join up to 30 minutes before the scheduled time." ||
+        msg.includes("up to 20 minutes before")
+      ) {
         setTooEarlyOpen(true);
       } else {
         showApiError(err);
@@ -404,7 +408,7 @@ const LiveScheduleList = () => {
         open={tooEarlyOpen}
         variant="primary"
         title="Too Early to Join"
-        message="You can join 30 minutes earlier only."
+        message="You can join up to 20 minutes before the scheduled time."
         confirmLabel="Got it"
         cancelLabel={null}
         onConfirm={() => setTooEarlyOpen(false)}
@@ -415,7 +419,7 @@ const LiveScheduleList = () => {
         open={sessionExpiredOpen}
         variant="warning"
         title="Session Time Has Passed"
-        message="This session's time has already passed. The session window (1 hour from the scheduled time) has ended."
+        message="This session's time has already passed. The maximum session duration is 90 minutes."
         confirmLabel="Got it"
         cancelLabel={null}
         onConfirm={() => setSessionExpiredOpen(false)}

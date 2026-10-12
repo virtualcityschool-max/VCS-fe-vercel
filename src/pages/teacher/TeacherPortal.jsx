@@ -515,7 +515,8 @@ const TeacherPortal = () => {
       const msg = extractApiErrorMessage(err);
       if (
         msg === "You cannot join before the scheduled time." ||
-        msg === "You can join up to 30 minutes before the scheduled time."
+        msg === "You can join up to 30 minutes before the scheduled time." ||
+        msg.includes("up to 20 minutes before")
       ) {
         setTooEarlyOpen(true);
       } else {
@@ -908,15 +909,6 @@ const TeacherPortal = () => {
         onPostAnnouncement={handlePostAnnouncement}
       />
 
-      {/* Schedule Live Session Modal */}
-      <ScheduleSessionModal
-        isOpen={newSessionModalOpen}
-        onClose={() => setNewSessionModalOpen(false)}
-        courses={mappedCourses}
-        onCreateSession={handleScheduleSession}
-        timezone={profileTimezone}
-      />
-
       {/* Create / Edit Assignment Modal */}
       <CreateAssignmentModal
         isOpen={createAssignmentModalOpen}
@@ -965,7 +957,7 @@ const TeacherPortal = () => {
         open={tooEarlyOpen}
         variant="primary"
         title="Too Early to Join"
-        message="You can join up to 30 minutes before the scheduled class time."
+        message="You can join up to 20 minutes before the scheduled class time."
         confirmLabel="Got it"
         cancelLabel={null}
         onConfirm={() => setTooEarlyOpen(false)}
@@ -976,7 +968,7 @@ const TeacherPortal = () => {
         open={sessionExpiredOpen}
         variant="warning"
         title="Session Time Has Passed"
-        message="This session's scheduled window has ended. Please check the session calendar for upcoming classes."
+        message="This session's scheduled window has ended (maximum duration is 90 minutes)."
         confirmLabel="Got it"
         cancelLabel={null}
         onConfirm={() => setSessionExpiredOpen(false)}

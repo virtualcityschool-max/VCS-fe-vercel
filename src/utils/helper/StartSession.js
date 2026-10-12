@@ -1,16 +1,31 @@
 
 const DAY_MAP = { SUN: 0, MON: 1, TUE: 2, WED: 3, THU: 4, FRI: 5, SAT: 6 };
 
-  const SESSION_DURATION_MS = 60 * 60 * 1000;
-  const SESSION_BUFFER_MS  = 30 * 60 * 1000;
-  const SESSION_WINDOW_MS  = SESSION_DURATION_MS + SESSION_BUFFER_MS; // 75 min
+  const SESSION_DURATION_MS = 90 * 60 * 1000; // max 90 minutes
+  const SESSION_EARLY_BUFFER_MS = 20 * 60 * 1000; // 20 minutes early
+  const SESSION_WINDOW_MS  = SESSION_DURATION_MS;
 
   export const isWithinSessionWindow = (scheduleAt) => {
-    return true;
+    if (!scheduleAt) return true;
+    const now = Date.now();
+    const start = new Date(scheduleAt).getTime();
+    const windowStart = start - SESSION_EARLY_BUFFER_MS;
+    const windowEnd = start + SESSION_DURATION_MS;
+    return now >= windowStart && now <= windowEnd;
+  };
+
+  export const isTooEarly = (scheduleAt) => {
+    if (!scheduleAt) return false;
+    const now = Date.now();
+    const start = new Date(scheduleAt).getTime();
+    return now < (start - SESSION_EARLY_BUFFER_MS);
   };
 
   export const isSessionExpired = (scheduleAt) => {
-    return false;
+    if (!scheduleAt) return false;
+    const now = Date.now();
+    const start = new Date(scheduleAt).getTime();
+    return now > (start + SESSION_DURATION_MS);
   };
   export const getWindowLabel = (scheduleAt, timeZone, abbr = "") => {
     if (scheduleAt) {

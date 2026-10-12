@@ -28,9 +28,9 @@ export const DigitalSessionClock = ({
 
   const targetMs = new Date(scheduledAt).getTime();
   const diffMs = targetMs - now;
-  const unlockDiffMs = diffMs - 30 * 60 * 1000;
+  const unlockDiffMs = diffMs - 20 * 60 * 1000;
   const isStarted = diffMs <= 0;
-  const isUnlockOpen = diffMs <= 30 * 60 * 1000;
+  const isUnlockOpen = diffMs <= 20 * 60 * 1000;
   const isLive = status === "live";
 
   // Hide for completed or cancelled sessions
@@ -212,7 +212,7 @@ export const DigitalSessionClock = ({
         <div className="mt-2.5 pt-2 border-t border-white/10 flex items-center justify-between text-[10px] text-slate-400">
           <span className="flex items-center gap-1.5">
             <i className="fas fa-lock text-indigo-400 text-[10px]" />
-            Room unlocks 30m prior
+            Room unlocks 20m prior
           </span>
           <span className="font-mono text-indigo-300 font-bold">
             {unlockDiffMs > 0

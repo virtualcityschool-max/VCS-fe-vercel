@@ -13,6 +13,7 @@ import ReferralLinkCard from "../../common/ReferralLinkCard";
 import StudentWorkspaceCard from "./StudentWorkspaceCard";
 import { toastManager } from "../../../utils/toastManager";
 import DigitalSessionClock from "../../common/DigitalSessionClock";
+import { isWithinSessionWindow, isSessionExpired } from "../../../utils/helper/StartSession";
 
 const TodayAgendaSidebar = ({
   onOpenSubmitModal,
@@ -76,6 +77,18 @@ const TodayAgendaSidebar = ({
       return;
     }
 
+    const scheduledAt = sessionToJoin.scheduled_at || sessionToJoin.schedule_at;
+    if (scheduledAt) {
+      if (isSessionExpired(scheduledAt)) {
+        toastManager.error("This session has expired (maximum duration is 90 minutes).");
+        return;
+      }
+      if (!isWithinSessionWindow(scheduledAt) && sessionToJoin.status !== "live") {
+        toastManager.info("You can join up to 20 minutes before the scheduled class time.");
+        return;
+      }
+    }
+
     setJoiningId(sId);
     try {
       const result = await dispatch(joinLiveSession(sId)).unwrap();
@@ -86,6 +99,11 @@ const TodayAgendaSidebar = ({
         toastManager.error("Google Meet link not available yet. Please notify admin or faculty.");
       }
     } catch (err) {
+      const msg = typeof err === "string" ? err : err?.message || "";
+      if (msg.includes("20 minutes") || msg.includes("expired") || msg.includes("cannot join")) {
+        toastManager.error(msg);
+        return;
+      }
       const fallbackLink = sessionToJoin.meeting_link;
       if (fallbackLink && typeof fallbackLink === "string" && fallbackLink.startsWith("http")) {
         window.open(fallbackLink, "_blank", "noopener,noreferrer");

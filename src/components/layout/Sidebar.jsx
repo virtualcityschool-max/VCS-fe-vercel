@@ -129,7 +129,6 @@ const NAV_CONFIG = {
     { label: "Evaluations & Gradebook", to: "/teacher?tab=evaluations", icon: "fas fa-chart-bar" },
     { label: "Performance Analytics", to: "/teacher?tab=analytics", icon: "fas fa-chart-line" },
     { label: "Planner", to: "/teacher?tab=planner", icon: "fas fa-calendar-alt" },
-    { label: "Slots Management", to: "/teacher?tab=slots", icon: "fas fa-calendar-plus" },
     { label: "Blogs", to: "/blogs", icon: "fas fa-newspaper" },
     { label: "About Us", to: "/about", icon: "fas fa-info-circle" },
   ],

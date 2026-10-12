@@ -196,7 +196,7 @@ const AdminOverviewPage = () => {
         open={tooEarlyOpen}
         variant="primary"
         title="Too Early to Join"
-        message="You can join 30 minutes earlier only."
+        message="You can join up to 20 minutes before the scheduled time."
         confirmLabel="Got it"
         cancelLabel={null}
         onConfirm={() => setTooEarlyOpen(false)}
@@ -207,7 +207,7 @@ const AdminOverviewPage = () => {
         open={sessionExpiredOpen}
         variant="warning"
         title="Session Time Has Passed"
-        message="This session's time has already passed. The session window (1 hour from the scheduled time) has ended."
+        message="This session's time has already passed. The maximum session duration is 90 minutes."
         confirmLabel="Got it"
         cancelLabel={null}
         onConfirm={() => setSessionExpiredOpen(false)}

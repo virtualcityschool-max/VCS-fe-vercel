@@ -118,7 +118,6 @@ export const TeacherDashboard = ({
     { id: "evaluations", icon: <FileSpreadsheet className="w-4 h-4" />, title: "Evaluations & Gradebook" },
     { id: "analytics", icon: <LineChart className="w-4 h-4" />, title: "Performance Analytics" },
     { id: "planner", icon: <Calendar className="w-4 h-4" />, title: "Planner" },
-    { id: "slots", icon: <Clock className="w-4 h-4" />, title: "Slots Management" },
     { id: "blogs", icon: <Newspaper className="w-4 h-4" />, title: "Blogs", href: "/blogs" },
     { id: "about", icon: <Info className="w-4 h-4" />, title: "About Us", href: "/about" }
   ];
@@ -195,12 +194,6 @@ export const TeacherDashboard = ({
                     Assessments
                   </button>
                 </div>
-                <button
-    onClick={onOpenNewSessionModal}
-    className="px-3 py-1.5 rounded-lg bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 text-xs font-semibold hover:bg-indigo-600/30 transition-colors cursor-pointer"
-  >
-                  Schedule Class
-                </button>
               </div>
             </div>
           </div>)}
@@ -404,16 +397,10 @@ export const TeacherDashboard = ({
         </div>
         <div className="flex items-center gap-3">
           <button
-    onClick={() => onSelectTab("dashboard")}
-    className="px-3.5 py-2 rounded-xl bg-[#171D33] hover:bg-[#1E2642] text-xs font-semibold text-slate-300 border border-[#273154] transition-colors cursor-pointer"
-  >
+            onClick={() => onSelectTab("dashboard")}
+            className="px-3.5 py-2 rounded-xl bg-[#171D33] hover:bg-[#1E2642] text-xs font-semibold text-slate-300 border border-[#273154] transition-colors cursor-pointer"
+          >
             ← Back to Bento Dashboard
-          </button>
-          <button
-    onClick={onOpenNewSessionModal}
-    className="px-4 py-2 rounded-xl bg-[#5B46F8] hover:bg-[#4C38E6] text-white text-xs font-bold transition-all shadow-md cursor-pointer"
-  >
-            + Add Live Class
           </button>
         </div>
       </div>
@@ -435,8 +422,9 @@ export const TeacherDashboard = ({
             </div>
 
             <div className="pt-3 border-t border-[#181F36] flex items-center justify-between">
-              <span className="text-[11px] font-mono text-slate-400 truncate max-w-[200px]">
-                {ses.meetLink}
+              <span className="text-[11px] font-medium text-slate-400 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span>Live Classroom</span>
               </span>
               <span className="text-xs font-semibold text-emerald-400">
                 {ses.attendeesCount}/{ses.maxAttendees} Enrolled
@@ -763,7 +751,7 @@ export const TeacherDashboard = ({
             {
     /* 3-Tab Segmented Control from Teacher Screenshot */
   }
-            <div className="grid grid-cols-3 gap-1 p-1 rounded-xl bg-[#0B0E1A] border border-[#1A2138] mb-4">
+            <div className="grid grid-cols-2 gap-1 p-1 rounded-xl bg-[#0B0E1A] border border-[#1A2138] mb-4">
               <button
     onClick={() => setSessionCategory("admin_session")}
     className={`py-1.5 px-2 rounded-lg text-[10px] font-bold tracking-wider uppercase transition-all truncate cursor-pointer ${sessionCategory === "admin_session" ? "bg-[#1D2540] text-white border border-indigo-500/40" : "text-slate-400 hover:text-slate-200"}`}
@@ -779,12 +767,6 @@ export const TeacherDashboard = ({
                   {sessions.filter((s) => s.category === "classes").length}
                 </span>
               </button>
-              <button
-    onClick={() => setSessionCategory("reserved_slots")}
-    className={`py-1.5 px-2 rounded-lg text-[10px] font-bold tracking-wider uppercase transition-all truncate cursor-pointer ${sessionCategory === "reserved_slots" ? "bg-[#1D2540] text-white border border-indigo-500/40" : "text-slate-400 hover:text-slate-200"}`}
-  >
-                Reserved Slots
-              </button>
             </div>
 
             {filteredSessions.length === 0 ? <div className="rounded-xl bg-[#0C0F1D] border border-[#192038] p-6 text-center">
@@ -795,13 +777,6 @@ export const TeacherDashboard = ({
                 <p className="text-[11px] text-slate-400 mt-1 max-w-xs mx-auto leading-relaxed">
                   You have no upcoming sessions in this view.
                 </p>
-                <button
-    onClick={onOpenNewSessionModal}
-    className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 text-xs font-semibold transition-colors cursor-pointer"
-  >
-                  <Plus className="w-3.5 h-3.5" />
-                  <span>Schedule Live Session</span>
-                </button>
               </div> : <div className="space-y-2.5">
                 {filteredSessions.map((ses) => {
     const isLaunched = launchedSessionId === ses.id;
@@ -832,8 +807,9 @@ export const TeacherDashboard = ({
                         </div>
                       </div>
                       <div className="mt-3 flex items-center justify-between gap-2 pt-2.5 border-t border-[#151B30]">
-                        <span className="text-[11px] text-slate-400 truncate font-mono">
-                          {ses.meetLink.replace("https://", "")}
+                        <span className="text-[11px] text-slate-400 flex items-center gap-1.5 font-medium">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                          <span>Live Classroom</span>
                         </span>
                         <div className="flex items-center gap-1.5 shrink-0">
                           {/* End Button: ONLY for regular live classes */}
@@ -883,18 +859,11 @@ export const TeacherDashboard = ({
   })}
               </div>}
 
-            <div className="mt-4 pt-3 border-t border-[#171D33] flex items-center justify-between text-xs">
+            <div className="mt-4 pt-3 border-t border-[#171D33] flex items-center justify-end text-xs">
               <button
-    onClick={onOpenNewSessionModal}
-    className="text-indigo-400 hover:text-indigo-300 font-semibold inline-flex items-center gap-1 transition-colors cursor-pointer"
-  >
-                <span>+ Schedule a Class</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
-              <button
-    onClick={() => onSelectTab("planner")}
-    className="text-slate-400 hover:text-slate-200 inline-flex items-center gap-1 transition-colors cursor-pointer"
-  >
+                onClick={() => onSelectTab("planner")}
+                className="text-slate-400 hover:text-slate-200 inline-flex items-center gap-1 transition-colors cursor-pointer"
+              >
                 <span>Faculty Planner</span>
                 <Calendar className="w-3.5 h-3.5" />
               </button>
@@ -960,16 +929,6 @@ export const TeacherDashboard = ({
   >
                   {btn.icon}
                 </button>)}
-            </div>
-
-            <div className="flex items-center gap-2">
-              <button
-    onClick={onOpenNewSessionModal}
-    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-600/15 hover:bg-indigo-600/25 border border-indigo-500/30 text-xs font-semibold text-indigo-300 transition-colors cursor-pointer"
-  >
-                <Plus className="w-3.5 h-3.5" />
-                <span>New Live Class</span>
-              </button>
             </div>
           </div>
 

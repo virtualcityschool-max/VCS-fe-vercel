@@ -57,7 +57,11 @@ const NextSessionCard = () => {
     } catch (error) {
       meetWin?.close();
       const msg = extractApiErrorMessage(error);
-      if ((msg === "You cannot join before the scheduled time.") || (msg === "You can join up to 30 minutes before the scheduled time.")) {
+      if (
+        msg === "You cannot join before the scheduled time." ||
+        msg === "You can join up to 30 minutes before the scheduled time." ||
+        msg.includes("up to 20 minutes before")
+      ) {
         setTooEarlyOpen(true);
       } else {
         console.error("Failed to join session:", error);
@@ -161,7 +165,7 @@ const NextSessionCard = () => {
         open={tooEarlyOpen}
         variant="primary"
         title="Too Early to Join"
-        message="You can join 30 minutes earlier only."
+        message="You can join up to 20 minutes before the scheduled time."
         confirmLabel="Got it"
         cancelLabel={null}
         onConfirm={() => setTooEarlyOpen(false)}
