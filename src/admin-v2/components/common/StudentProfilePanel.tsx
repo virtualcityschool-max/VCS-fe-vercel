@@ -100,7 +100,7 @@ export const StudentProfilePanel: React.FC<{ studentId: string }> = ({ studentId
       // The server refuses blank names, so only send the parts that are filled in.
       if (form.first_name.trim()) account.first_name = form.first_name.trim();
       if (form.last_name.trim()) account.last_name = form.last_name.trim();
-      if (form.password) account.password = form.password;
+      if (form.password && form.password.trim()) account.password = form.password.trim();
       await adminService.updateUser(studentId, account);
       await adminService.updateUserProfile(studentId, {
         full_name: [form.first_name, form.last_name].filter(Boolean).join(' ').trim(),
@@ -111,7 +111,7 @@ export const StudentProfilePanel: React.FC<{ studentId: string }> = ({ studentId
         guardian_name: form.guardian_name, guardian_relationship: form.guardian_relationship || null,
         guardian_phone: fullPhone(form.gdial, form.guardian_phone) || null, guardian_email: form.guardian_email || null,
       });
-      addToast(form.password ? 'Saved. The new password was emailed to the student.' : 'Student details saved', 'success');
+      addToast(form.password && form.password.trim() ? 'Saved. The new password was emailed to the student.' : 'Student details saved', 'success');
       setEditing(false);
       await Promise.all([loadProfile(), reload('users')]);
     } catch (err: any) {
@@ -185,8 +185,15 @@ export const StudentProfilePanel: React.FC<{ studentId: string }> = ({ studentId
         </FormSection>
 
         <FormSection title="Password" subtitle="optional">
-          <PasswordField value={form.password} onChange={set('password')} />
-          <p className="text-[11px] text-amber-300/80">Leave empty to keep their password. A new one is emailed to the student.</p>
+          <PasswordField
+            value={form.password}
+            onChange={set('password')}
+            required={false}
+            label="New password"
+            placeholder="Leave empty to keep current password"
+            hint="Upper & lower case, a number and a symbol. Only fill or generate if you want to reset their password."
+          />
+          <p className="text-[11px] text-amber-300/80">Leave empty to keep current password. If changed, the new password is emailed to the student.</p>
         </FormSection>
 
         <div className="sticky bottom-0 -mx-6 px-6 py-3 bg-[#121831]/95 backdrop-blur border-t border-[#1E2648] flex justify-end gap-2">

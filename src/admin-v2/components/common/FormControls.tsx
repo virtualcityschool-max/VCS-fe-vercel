@@ -68,18 +68,32 @@ export const SelectInput: React.FC<{
 );
 
 // Temporary password with one-click generate and copy.
-export const PasswordField: React.FC<{ value: string; onChange: (v: string) => void }> = ({ value, onChange }) => {
+export const PasswordField: React.FC<{
+  value: string;
+  onChange: (v: string) => void;
+  required?: boolean;
+  label?: string;
+  hint?: string;
+  placeholder?: string;
+}> = ({
+  value,
+  onChange,
+  required = true,
+  label = 'Temporary password',
+  hint = 'Upper & lower case, a number and a symbol. Share it privately; they can change it later.',
+  placeholder = 'Click Generate',
+}) => {
   const [copied, setCopied] = useState(false);
   return (
-    <Field label="Temporary password" required hint="Upper & lower case, a number and a symbol. Share it privately; they can change it later.">
+    <Field label={label} required={required} hint={hint}>
       <div className="flex gap-2">
         <input
           type="text"
-          required
-          minLength={8}
+          required={required}
+          minLength={value ? 8 : undefined}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          placeholder="Click Generate"
+          placeholder={placeholder}
           className={`${inputCls} font-mono`}
         />
         <button
@@ -90,6 +104,16 @@ export const PasswordField: React.FC<{ value: string; onChange: (v: string) => v
         >
           <RefreshCw className="w-3.5 h-3.5" /> Generate
         </button>
+        {value && !required && (
+          <button
+            type="button"
+            onClick={() => onChange('')}
+            title="Clear password (keep current)"
+            className="shrink-0 px-2.5 rounded-xl border border-[#232D52] bg-[#1A2346] text-xs text-slate-400 hover:text-white"
+          >
+            Clear
+          </button>
+        )}
         <button
           type="button"
           disabled={!value}
