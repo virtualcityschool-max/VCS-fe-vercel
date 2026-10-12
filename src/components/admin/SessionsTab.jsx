@@ -122,6 +122,7 @@ const SessionsTab = ({
   const { formatDate, formatTime, timezoneAbbr } = useDateFormatters();
   const [view, setView] = useState("table");
   const [calendarMonth, setCalendarMonth] = useState(null); // { year, month } - null = auto from data
+  const [copiedSessionId, setCopiedSessionId] = useState(null);
 
   // ── filtered sessions (search only; teacher filtering is done server-side) ──
   const filteredSessions = useMemo(() => {
@@ -398,7 +399,7 @@ const SessionsTab = ({
               <table className="w-full text-left">
                 <thead className="bg-[#0B1020]/60 border-b border-[#232D52]">
                   <tr>
-                    {["Session", "Course", "Tutor", "Start Date", "Recurrence", "End Date", "Status", "Actions"].map((h) => (
+                    {["Session", "Course", "Tutor", "Start Date", "Recurrence", "End Date", "Meet Link", "Status", "Actions"].map((h) => (
                       <th key={h} className="px-5 py-4 text-xs font-black uppercase text-slate-500">
                         {h === "Status" ? (
                           <div className="flex items-center gap-1">
@@ -413,7 +414,7 @@ const SessionsTab = ({
                 <tbody className="divide-y divide-[#1E2648]/50">
                   {[...Array(5)].map((_, i) => (
                     <tr key={i} className="animate-pulse">
-                      {[...Array(8)].map((__, j) => (
+                      {[...Array(9)].map((__, j) => (
                         <td key={j} className="px-5 py-4"><div className="h-4 bg-[#1A2346] rounded w-24"></div></td>
                       ))}
                     </tr>
@@ -468,6 +469,46 @@ const SessionsTab = ({
                         <span><i className="fas fa-flag-checkered mr-1 text-slate-500"></i>Until {session.recurrence_end_date}</span>
                       )}
                     </div>
+                    {session.meeting_link && (
+                      <div className="flex items-center justify-between gap-2 p-2.5 bg-[#0E1428]/80 border border-[#232D52] rounded-xl mb-3">
+                        <div className="min-w-0">
+                          <span className="text-[9px] uppercase font-bold text-slate-500 block">Google Meet Link</span>
+                          <span className="text-xs font-mono text-indigo-300 truncate block select-all">{session.meeting_link.replace(/^https?:\/\//, '')}</span>
+                        </div>
+                        <div className="flex items-center gap-1 shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              navigator.clipboard.writeText(session.meeting_link);
+                              setCopiedSessionId(session.id);
+                              setTimeout(() => setCopiedSessionId(null), 2000);
+                            }}
+                            title="Copy Meet Link"
+                            className="px-2 py-1 rounded-lg bg-[#1A2346] hover:bg-indigo-600/30 text-indigo-300 text-xs flex items-center gap-1 transition"
+                          >
+                            <i className={`fas ${copiedSessionId === session.id ? 'fa-check text-emerald-400' : 'fa-copy'} text-[10px]`}></i>
+                            <span>{copiedSessionId === session.id ? "Copied" : "Copy"}</span>
+                          </button>
+                          <a
+                            href={`https://wa.me/?text=${encodeURIComponent(`Join Class: ${session.title || session.course?.title || session.course_title}\nGoogle Meet Link: ${session.meeting_link}`)}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            title="Share on WhatsApp"
+                            className="w-7 h-7 flex items-center justify-center rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 transition"
+                          >
+                            <i className="fab fa-whatsapp text-xs"></i>
+                          </a>
+                          <a
+                            href={session.meeting_link}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="px-2.5 py-1 rounded-lg bg-[#6D5BFF] hover:bg-[#5B47FB] text-white text-xs font-semibold flex items-center gap-1 transition"
+                          >
+                            <i className="fas fa-video text-[10px]"></i> Join
+                          </a>
+                        </div>
+                      </div>
+                    )}
                     <div className="flex gap-2">
                       {!session.is_child && session.is_recurring && (
                         <button
@@ -498,6 +539,7 @@ const SessionsTab = ({
                     <th className="px-4 py-2.5 text-[11px] font-black uppercase text-slate-500 whitespace-nowrap">Date & Time</th>
                     <th className="px-4 py-2.5 text-[11px] font-black uppercase text-slate-500 whitespace-nowrap">End Date</th>
                     <th className="px-4 py-2.5 text-[11px] font-black uppercase text-slate-500 whitespace-nowrap">Recurrence</th>
+                    <th className="px-4 py-2.5 text-[11px] font-black uppercase text-slate-500 whitespace-nowrap">Meet Link</th>
                     <th className="px-4 py-2.5 text-[11px] font-black uppercase text-slate-500 whitespace-nowrap">
                       <div className="flex items-center gap-1">
                         Status
@@ -544,6 +586,47 @@ const SessionsTab = ({
                             ? <span className="px-1.5 py-0.5 bg-[#1A2346]/50 text-slate-400 border border-[#232D52]/40 rounded text-xs font-medium">{derived}</span>
                             : <span className="text-slate-500 text-xs">-</span>;
                         })()}
+                      </td>
+                      <td className="px-4 py-2">
+                        {session.meeting_link ? (
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[11px] font-mono text-indigo-300 max-w-[130px] truncate select-all" title={session.meeting_link}>
+                              {session.meeting_link.replace(/^https?:\/\//, '')}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                navigator.clipboard.writeText(session.meeting_link);
+                                setCopiedSessionId(session.id);
+                                setTimeout(() => setCopiedSessionId(null), 2000);
+                              }}
+                              title="Copy Google Meet Link"
+                              className="w-6 h-6 flex items-center justify-center rounded bg-[#1A2346] hover:bg-indigo-600/30 text-indigo-300 hover:text-white transition"
+                            >
+                              <i className={`fas ${copiedSessionId === session.id ? 'fa-check text-emerald-400' : 'fa-copy'} text-[11px]`}></i>
+                            </button>
+                            <a
+                              href={`https://wa.me/?text=${encodeURIComponent(`Join Class: ${session.title || session.course?.title || session.course_title}\nGoogle Meet Link: ${session.meeting_link}`)}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              title="Share on WhatsApp"
+                              className="w-6 h-6 flex items-center justify-center rounded bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 transition"
+                            >
+                              <i className="fab fa-whatsapp text-[11px]"></i>
+                            </a>
+                            <a
+                              href={session.meeting_link}
+                              target="_blank"
+                              rel="noreferrer"
+                              title="Join Google Meet"
+                              className="px-2 py-1 rounded bg-[#6D5BFF] hover:bg-[#5B47FB] text-white text-[11px] font-semibold flex items-center gap-1 whitespace-nowrap transition"
+                            >
+                              <i className="fas fa-video text-[10px]"></i> Join
+                            </a>
+                          </div>
+                        ) : (
+                          <span className="text-slate-500 text-xs italic">No link</span>
+                        )}
                       </td>
                       <td className="px-4 py-2">{getStatusBadge(session.status)}</td>
                       <td className="px-4 py-2">
@@ -663,6 +746,23 @@ const SessionsTab = ({
                     />
                   </div>
 
+                  {/* Google Meet Link (optional) */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                      Google Meet Link <span className="text-slate-500 font-normal text-xs">(optional - leave blank to auto-create)</span>
+                    </label>
+                    <Input
+                      type="url"
+                      placeholder="e.g. https://meet.google.com/xxx-yyyy-zzz"
+                      value={createSessionForm.meeting_link || ""}
+                      onChange={(e) => {
+                        setCreateSessionForm({ ...createSessionForm, meeting_link: e.target.value });
+                        clearCreateSessionFieldError("meeting_link");
+                      }}
+                      className="w-full px-3 py-2.5 bg-[#0E1428] border border-[#232D52] rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#6D5BFF] text-sm"
+                    />
+                  </div>
+
                   {/* Delay picker */}
                   {createMode === "delayed" && (
                     <div>
@@ -768,6 +868,23 @@ const SessionsTab = ({
                       onChange={(e) => { setCreateSessionForm({ ...createSessionForm, title: e.target.value }); clearCreateSessionFieldError("title"); }}
                       className={`w-full px-3 py-2.5 bg-[#0E1428] border rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 text-sm ${createSessionErrors?.title ? "border-red-500 focus:ring-red-500" : "border-[#232D52] focus:ring-[#6D5BFF]"}`}
                       error={createSessionErrors?.title}
+                    />
+                  </div>
+
+                  {/* Google Meet Link (optional) */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                      Google Meet Link <span className="text-slate-500 font-normal text-xs">(optional - leave blank to auto-create)</span>
+                    </label>
+                    <Input
+                      type="url"
+                      placeholder="e.g. https://meet.google.com/xxx-yyyy-zzz"
+                      value={createSessionForm.meeting_link || ""}
+                      onChange={(e) => {
+                        setCreateSessionForm({ ...createSessionForm, meeting_link: e.target.value });
+                        clearCreateSessionFieldError("meeting_link");
+                      }}
+                      className="w-full px-3 py-2.5 bg-[#0E1428] border border-[#232D52] rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#6D5BFF] text-sm"
                     />
                   </div>
 
@@ -915,6 +1032,23 @@ const SessionsTab = ({
                   onChange={(e) => { setEditSessionForm({ ...editSessionForm, title: e.target.value }); clearEditSessionFieldError("title"); }}
                   className={`w-full px-3 py-2.5 bg-[#0E1428] border rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 text-sm ${editSessionErrors?.title ? "border-red-500 focus:ring-red-500" : "border-[#232D52] focus:ring-[#6D5BFF]"}`}
                   error={editSessionErrors?.title}
+                />
+              </div>
+
+              {/* Google Meet Link */}
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  Google Meet Link
+                </label>
+                <Input
+                  type="url"
+                  placeholder="e.g. https://meet.google.com/xxx-yyyy-zzz"
+                  value={editSessionForm.meeting_link || ""}
+                  onChange={(e) => {
+                    setEditSessionForm({ ...editSessionForm, meeting_link: e.target.value });
+                    clearEditSessionFieldError?.("meeting_link");
+                  }}
+                  className="w-full px-3 py-2.5 bg-[#0E1428] border border-[#232D52] rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#6D5BFF] text-sm"
                 />
               </div>
 

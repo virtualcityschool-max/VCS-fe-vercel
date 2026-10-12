@@ -58,6 +58,7 @@ const AdminSessionsPage = () => {
     title: "",
     time: "",
     scheduled_date: "",
+    meeting_link: "",
     is_recurring: true,
     recurrence_days: [],
     recurrence_end_date: "",
@@ -65,6 +66,7 @@ const AdminSessionsPage = () => {
     instructor_username: "",
   });
 
+  const [newlyCreatedSession, setNewlyCreatedSession] = useState(null);
   const [editSessionForm, setEditSessionForm] = useState({});
   const originalEditFormRef = useRef({});
   const [showSessionFilters, setShowSessionFilters] = useState(false);
@@ -127,6 +129,7 @@ const AdminSessionsPage = () => {
         title: "",
         time: "",
         scheduled_date: "",
+        meeting_link: "",
         is_recurring: true,
         recurrence_days: [],
         recurrence_end_date: "",
@@ -183,6 +186,7 @@ const AdminSessionsPage = () => {
       description: session.description || "",
       start_date: startDate,
       time: startTime,
+      meeting_link: session.meeting_link || "",
       recurrence_days: session.recurrence_days || [],
       recurrence_end_date: session.recurrence_end_date || "",
     };
@@ -298,11 +302,19 @@ const AdminSessionsPage = () => {
         recurrence_end_date: sessionData.recurrence_end_date,
       };
     }
+    if (sessionData.meeting_link?.trim()) {
+      payload.meeting_link = sessionData.meeting_link.trim();
+    }
     try {
       setIsCreatingSession(true);
-      await dispatch(createSession(payload)).unwrap();
+      const created = await dispatch(createSession(payload)).unwrap();
       toastManager.success("Session created successfully");
-      setActiveModal(null);
+      if (created?.meeting_link) {
+        setNewlyCreatedSession(created);
+        setActiveModal("created-success");
+      } else {
+        setActiveModal(null);
+      }
       const params = {};
       if (sessionFilters.teacher) params.teacher = sessionFilters.teacher;
       if (sessionFilters.course) params.course = sessionFilters.course;
@@ -314,6 +326,7 @@ const AdminSessionsPage = () => {
         title: "",
         time: "",
         scheduled_date: "",
+        meeting_link: "",
         is_recurring: true,
         recurrence_days: [],
         recurrence_end_date: "",
@@ -356,7 +369,7 @@ const AdminSessionsPage = () => {
         JSON.stringify([...(orig.recurrence_days || [])].sort());
 
     if (!scheduleFieldsChanged) {
-      // Only title (or description) changed - validate title only, send minimal payload
+      // Only title (or description/meeting_link) changed - validate title only, send minimal payload
       const titleErrors = {};
       if (!sessionData.title?.trim()) {
         titleErrors.title = "Session title is required";
@@ -370,7 +383,11 @@ const AdminSessionsPage = () => {
       }
       setUpdatingSessionId(editingSession.id);
       try {
-        await dispatch(updateSession({ sessionId: editingSession.id, sessionData: { title: sessionData.title } })).unwrap();
+        const miniPayload = { title: sessionData.title };
+        if (sessionData.meeting_link !== undefined) {
+          miniPayload.meeting_link = sessionData.meeting_link.trim();
+        }
+        await dispatch(updateSession({ sessionId: editingSession.id, sessionData: miniPayload })).unwrap();
         toastManager.success("Session updated successfully");
         setActiveModal(null);
         refreshSessions();
@@ -399,6 +416,7 @@ const AdminSessionsPage = () => {
       recurrence_days: sessionData.recurrence_days || [],
       recurrence_end_date: sessionData.recurrence_end_date,
     };
+    if (sessionData.meeting_link?.trim()) payload.meeting_link = sessionData.meeting_link.trim();
     if (sessionData.course_id) payload.course = Number(sessionData.course_id);
     if (sessionData.instructor_id) payload.instructor_id = Number(sessionData.instructor_id);
     if (sessionData.start_date && sessionData.time) {
@@ -502,6 +520,72 @@ const AdminSessionsPage = () => {
       onConfirm={confirmDeleteSession}
       onCancel={() => { setConfirmDialog({ open: false, sessionId: null, sessionTitle: "" }); setDeletePast(false); }}
     />
+
+    {/* Class Created Success Modal with Meet Link */}
+    {activeModal === "created-success" && newlyCreatedSession && (
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[250] p-4 animate-in fade-in">
+        <div className="bg-[#121831] border border-[#232D52] rounded-2xl p-6 sm:p-8 w-full max-w-lg shadow-2xl space-y-5">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-2xl">
+              <i className="fas fa-check-circle"></i>
+            </div>
+            <div>
+              <h3 className="text-lg font-black text-white">Class Planned Successfully!</h3>
+              <p className="text-xs text-slate-400 mt-0.5">{newlyCreatedSession.title}</p>
+            </div>
+          </div>
+
+          <div className="p-4 bg-[#0E1428] border border-[#232D52] rounded-xl space-y-2">
+            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">Google Meet Link</span>
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-sm font-mono text-indigo-300 truncate select-all">{newlyCreatedSession.meeting_link}</span>
+              <button
+                type="button"
+                onClick={() => {
+                  navigator.clipboard.writeText(newlyCreatedSession.meeting_link);
+                  toastManager.success("Google Meet link copied!");
+                }}
+                className="px-3 py-1.5 rounded-lg bg-[#6D5BFF] hover:bg-[#5B47FB] text-white text-xs font-semibold flex items-center gap-1.5 shrink-0 transition"
+              >
+                <i className="fas fa-copy text-xs"></i> Copy Link
+              </button>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 pt-2">
+            <a
+              href={`https://wa.me/?text=${encodeURIComponent(`Join Class: ${newlyCreatedSession.title}\nGoogle Meet Link: ${newlyCreatedSession.meeting_link}`)}`}
+              target="_blank"
+              rel="noreferrer"
+              className="flex-1 py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center gap-2 transition"
+            >
+              <i className="fab fa-whatsapp text-sm"></i> Share on WhatsApp
+            </a>
+            <a
+              href={newlyCreatedSession.meeting_link}
+              target="_blank"
+              rel="noreferrer"
+              className="py-2.5 px-4 rounded-xl bg-[#1A2346] hover:bg-[#232D52] text-slate-200 hover:text-white text-xs font-bold flex items-center justify-center gap-2 border border-[#232D52] transition"
+            >
+              <i className="fas fa-video text-xs"></i> Open Meet
+            </a>
+          </div>
+
+          <div className="text-right pt-2 border-t border-white/5">
+            <button
+              type="button"
+              onClick={() => {
+                setActiveModal(null);
+                setNewlyCreatedSession(null);
+              }}
+              className="px-5 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-semibold transition"
+            >
+              Done
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
     </>
   );
 };

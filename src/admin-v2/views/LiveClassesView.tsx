@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { PageHeader } from '../components/common/PageHeader';
 import { inputCls } from '../components/common/FormControls';
-import { AlertTriangle, CalendarDays, ChevronLeft, ChevronRight, Info, Radio, Search, Users, Video } from 'lucide-react';
+import { AlertTriangle, CalendarDays, Check, ChevronLeft, ChevronRight, Copy, Info, Radio, Search, Share2, Users, Video } from 'lucide-react';
 // @ts-ignore
 import DigitalSessionClock from '../../components/common/DigitalSessionClock';
 
@@ -30,6 +30,7 @@ export const LiveClassesView: React.FC = () => {
   const [dayOffset, setDayOffset] = useState(0);
   const [query, setQuery] = useState('');
   const [now, setNow] = useState(Date.now());
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   // Countdowns tick every 30 s; classes and attendance refresh every minute.
   useEffect(() => {
@@ -160,6 +161,11 @@ export const LiveClassesView: React.FC = () => {
             {x.batch && <span className="text-sky-300">{x.batch} · </span>}
             {x.title !== x.course ? x.title : ''}
           </div>
+          {x.link && (
+            <div className="text-[10px] text-indigo-300/80 font-mono truncate mt-0.5 select-all hover:text-indigo-200">
+              {x.link.replace(/^https?:\/\//, '')}
+            </div>
+          )}
         </div>
         <div className="col-span-6 md:col-span-2 min-w-0">
           <div className="text-[13px] text-slate-200 truncate">{x.teacher}</div>
@@ -180,11 +186,46 @@ export const LiveClassesView: React.FC = () => {
             </span>
           )}
         </div>
-        <div className="col-span-12 md:col-span-2 flex items-center justify-end gap-2">
+        <div className="col-span-12 md:col-span-2 flex items-center justify-end gap-1.5 flex-wrap">
           <span className={`px-2 py-0.5 rounded-full border text-[10px] font-semibold whitespace-nowrap ${st.pill}`}>
             {x.phase === 'live' && <span className="inline-block w-1.5 h-1.5 rounded-full bg-rose-400 mr-1 animate-pulse align-middle" />}
             {st.label}
           </span>
+          {x.link && (
+            <div className="inline-flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => {
+                  navigator.clipboard.writeText(x.link);
+                  setCopiedId(x.id);
+                  setTimeout(() => setCopiedId(null), 2000);
+                }}
+                title="Copy Google Meet Link"
+                className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold bg-[#1E2648] hover:bg-[#2A3563] text-slate-200 hover:text-white border border-[#2A3563]/50 transition"
+              >
+                {copiedId === x.id ? (
+                  <>
+                    <Check className="w-3.5 h-3.5 text-emerald-400" />
+                    <span className="text-[10px] text-emerald-300">Copied</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-3.5 h-3.5 text-indigo-400" />
+                    <span className="text-[10px] text-slate-300">Copy</span>
+                  </>
+                )}
+              </button>
+              <a
+                href={`https://wa.me/?text=${encodeURIComponent(`Join Class: ${x.title || x.course}\nGoogle Meet Link: ${x.link}`)}`}
+                target="_blank"
+                rel="noreferrer"
+                title="Share Google Meet Link on WhatsApp"
+                className="inline-flex items-center justify-center w-6 h-6 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/30 transition"
+              >
+                <Share2 className="w-3 h-3" />
+              </a>
+            </div>
+          )}
           {!ended && x.link && (
             <a
               href={x.link}
