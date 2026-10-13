@@ -15,6 +15,7 @@ import CourseSelect from "../../components/common/CourseSelect";
 import TimezoneTag from "../../components/ui/TimezoneTag";
 import { useDateFormatters } from "../../hooks";
 import { toastManager } from "../../utils/toastManager";
+import IssueInJoiningClassBanner from "../../components/common/IssueInJoiningClassBanner";
 import { clampDate, validateSessionCreate, validateSessionEdit } from "../../utils/validation";
 
 const DAYS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
@@ -520,6 +521,8 @@ const TeacherSessionCalendar = () => {
             ))}
           </FilterSelect>
 
+          <IssueInJoiningClassBanner variant="button" userRole="teacher" />
+
           {(courseFilter || statusFilter) && (
             <button
               onClick={() => { setCourseFilter(""); setStatusFilter(""); }}
@@ -530,6 +533,9 @@ const TeacherSessionCalendar = () => {
           )}
         </div>
       </div>
+
+      {/* Prominent Troubleshoot Banner for Teachers */}
+      <IssueInJoiningClassBanner variant="banner" userRole="teacher" className="mb-6" />
 
       {/* ── TABLE VIEW ── */}
       <div className={view === "calendar" ? "sm:hidden" : ""}>

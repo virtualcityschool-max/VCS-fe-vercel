@@ -10,6 +10,7 @@ import { useDateFormatters } from "../../../hooks/useDateFormatters";
 import TimezoneTag from "../../ui/TimezoneTag";
 import { toastManager } from "../../../utils/toastManager";
 import DigitalSessionClock from "../../common/DigitalSessionClock";
+import IssueInJoiningClassBanner from "../../common/IssueInJoiningClassBanner";
 
 const LiveScheduleTab = ({ onOpenWeeklyPlanner }) => {
   const dispatch = useDispatch();
@@ -171,7 +172,7 @@ const LiveScheduleTab = ({ onOpenWeeklyPlanner }) => {
               </span>
             </div>
             <p className="text-xs text-slate-300 mt-0.5">
-              Live classes are initiated by VCS Administration and Faculty. Students can enter the Google Meet room starting <strong>30 minutes before each class</strong>.
+              Live classes are initiated by VCS Administration and Faculty. Students can enter the Google Meet room starting <strong>20 minutes before each class</strong>.
             </p>
           </div>
         </div>
@@ -186,6 +187,9 @@ const LiveScheduleTab = ({ onOpenWeeklyPlanner }) => {
           </button>
         )}
       </div>
+
+      {/* Prominent Flashing Trouble-Joining Banner */}
+      <IssueInJoiningClassBanner variant="banner" />
 
       {/* 2. "WHAT IS MY NEXT CLASS?" Spotlight Hero Card */}
       {nextClass ? (
@@ -279,7 +283,7 @@ const LiveScheduleTab = ({ onOpenWeeklyPlanner }) => {
                   No Live Classes Scheduled Right Now
                 </h3>
                 <p className="text-xs text-slate-400 mt-0.5">
-                  Live classes initiated by administration or faculty will appear here. Links unlock 30 minutes before start.
+                  Live classes initiated by administration or faculty will appear here. Links unlock 20 minutes before start.
                 </p>
               </div>
             </div>
@@ -419,6 +423,9 @@ const LiveScheduleTab = ({ onOpenWeeklyPlanner }) => {
             <p className="text-xs text-slate-400 max-w-md mx-auto">
               There are no live Google Meet classes scheduled under this filter. Check your weekly timetable for recurring curriculum periods.
             </p>
+            <div className="pt-2">
+              <IssueInJoiningClassBanner variant="alert" className="max-w-lg mx-auto text-left" />
+            </div>
             {onOpenWeeklyPlanner && (
               <button
                 onClick={onOpenWeeklyPlanner}

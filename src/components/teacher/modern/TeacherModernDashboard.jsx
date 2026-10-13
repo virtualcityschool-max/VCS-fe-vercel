@@ -39,6 +39,7 @@ import { AssignmentsQuizzesView } from "./AssignmentsQuizzesView";
 import { TeachingResourcesView } from "./TeachingResourcesView";
 import DigitalSessionClock from "../../common/DigitalSessionClock";
 import { SessionTroubleshootModal } from "../../common/SessionTroubleshootModal";
+import IssueInJoiningClassBanner from "../../common/IssueInJoiningClassBanner";
 export const TeacherDashboard = ({
   activeTab,
   onSelectTab,
@@ -748,20 +749,28 @@ export const TeacherDashboard = ({
                   <p className="text-[11px] text-slate-400">Google Meet · {timezone}</p>
                 </div>
               </div>
-              <span className="px-2.5 py-1 rounded-lg bg-[#161C30] border border-[#263052] text-[11px] font-semibold text-emerald-400 tabular-nums">
-                {liveClasses.length} {liveClasses.length === 1 ? "Class" : "Classes"}
-              </span>
+              <div className="flex items-center gap-2">
+                <IssueInJoiningClassBanner variant="button" userRole="teacher" userEmail={user?.email} />
+                <span className="px-2.5 py-1 rounded-lg bg-[#161C30] border border-[#263052] text-[11px] font-semibold text-emerald-400 tabular-nums">
+                  {liveClasses.length} {liveClasses.length === 1 ? "Class" : "Classes"}
+                </span>
+              </div>
             </div>
 
+            <IssueInJoiningClassBanner variant="banner" userRole="teacher" userEmail={user?.email} className="mb-2" />
+
             {liveClasses.length === 0 ? (
-              <div className="rounded-xl bg-[#0C0F1D] border border-[#192038] p-6 text-center">
-                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-3 text-emerald-400">
+              <div className="rounded-xl bg-[#0C0F1D] border border-[#192038] p-6 text-center space-y-2">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-2 text-emerald-400">
                   <Video className="w-5 h-5" />
                 </div>
                 <div className="text-xs font-bold text-white">No live classes scheduled for today</div>
-                <p className="text-[11px] text-slate-400 mt-1 max-w-xs mx-auto leading-relaxed">
+                <p className="text-[11px] text-slate-400 max-w-xs mx-auto leading-relaxed">
                   Classes planned by administration will appear here automatically.
                 </p>
+                <div className="pt-2 max-w-md mx-auto text-left">
+                  <IssueInJoiningClassBanner variant="alert" userRole="teacher" userEmail={user?.email} />
+                </div>
               </div>
             ) : (
               <div className="space-y-3">

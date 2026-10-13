@@ -18,6 +18,7 @@ import ConfirmDialog from "../common/ConfirmDialog";
 import TimezoneTag from "../ui/TimezoneTag";
 import SessionCountdown from "../common/SessionCountdown";
 import GmailNotice from "../common/GmailNotice";
+import IssueInJoiningClassBanner from "../common/IssueInJoiningClassBanner";
 import StudentSessionCard from "../sessions/StudentSessionCard";
 
 const tzToUTCMs = (dateStr, timeStr, tz) => {
@@ -198,6 +199,7 @@ const LiveScheduleList = () => {
           Upcoming Sessions
         </h2>
         <div className="flex items-center gap-3">
+          <IssueInJoiningClassBanner variant="button" />
           {/* Tabs */}
           <div className="flex items-center gap-1 bg-slate-900/60 border border-white/5 rounded-xl p-1">
             <button
@@ -356,11 +358,15 @@ const LiveScheduleList = () => {
           <p className="text-slate-500 text-[10px] font-medium uppercase tracking-wider">
             You have no upcoming sessions scheduled.
           </p>
+          <div className="mt-4 max-w-md mx-auto text-left">
+            <IssueInJoiningClassBanner variant="alert" />
+          </div>
         </div>
       )}
 
       {activeTab === "classes" && hasLive && (
       <div className="max-h-[480px] overflow-y-auto custom-scrollbar pr-1 space-y-4">
+        <IssueInJoiningClassBanner variant="banner" className="mb-2" />
         <GmailNotice />
         {liveSchedule.map((session) => {
           const sessionId = session?.session_id ?? session?.id;

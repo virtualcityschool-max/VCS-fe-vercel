@@ -12,6 +12,7 @@ import { FilterSelect } from "../../components/ui";
 import TimezoneTag from "../../components/ui/TimezoneTag";
 import { useDateFormatters } from "../../hooks";
 import DigitalSessionClock from "../../components/common/DigitalSessionClock";
+import IssueInJoiningClassBanner from "../../components/common/IssueInJoiningClassBanner";
 
 const STATUS_COLORS = {
   scheduled: "bg-blue-500/10 text-blue-400 border-blue-500/20",
@@ -28,12 +29,15 @@ const SessionListView = ({ sessions, formatTime, formatDate, onJoin, joiningId }
   });
 
   if (!sorted.length) return (
-    <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-12 text-center">
-      <div className="w-16 h-16 bg-slate-700/20 rounded-full flex items-center justify-center mx-auto mb-4">
+    <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-12 text-center space-y-3">
+      <div className="w-16 h-16 bg-slate-700/20 rounded-full flex items-center justify-center mx-auto mb-2">
         <i className="fas fa-calendar text-slate-400 text-xl" />
       </div>
       <p className="text-white font-bold mb-1">No Classes Found</p>
-      <p className="text-slate-400 text-sm">No sessions available yet.</p>
+      <p className="text-slate-400 text-sm max-w-md mx-auto">No sessions available yet under this course filter.</p>
+      <div className="pt-2 max-w-lg mx-auto text-left">
+        <IssueInJoiningClassBanner variant="alert" />
+      </div>
     </div>
   );
 
@@ -167,8 +171,7 @@ const StudentClasses = () => {
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
-          
-
+          <IssueInJoiningClassBanner variant="button" />
           <FilterSelect
             value={selectedCourse}
             onChange={(e) => setSelectedCourse(e.target.value)}
@@ -190,6 +193,9 @@ const StudentClasses = () => {
           )}
         </div>
       </div>
+
+      {/* Prominent Flashing Troubleshoot Banner */}
+      <IssueInJoiningClassBanner variant="banner" />
 
       {/* Mobile: always table */}
       {/* View toggle - hidden on mobile (always table there) */}

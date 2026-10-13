@@ -14,6 +14,7 @@ import StudentWorkspaceCard from "./StudentWorkspaceCard";
 import { toastManager } from "../../../utils/toastManager";
 import DigitalSessionClock from "../../common/DigitalSessionClock";
 import { isWithinSessionWindow, isSessionExpired } from "../../../utils/helper/StartSession";
+import IssueInJoiningClassBanner from "../../common/IssueInJoiningClassBanner";
 
 const TodayAgendaSidebar = ({
   onOpenSubmitModal,
@@ -143,9 +144,12 @@ const TodayAgendaSidebar = ({
               </p>
             </div>
           </div>
-          <span className="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-slate-300 text-[10px] font-bold">
-            {sessions.length} Session{sessions.length === 1 ? "" : "s"}
-          </span>
+          <div className="flex items-center gap-2">
+            <IssueInJoiningClassBanner variant="button" />
+            <span className="hidden sm:inline-block px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-slate-300 text-[10px] font-bold">
+              {sessions.length} Session{sessions.length === 1 ? "" : "s"}
+            </span>
+          </div>
         </div>
 
         {sessions.length > 0 ? (
@@ -217,14 +221,15 @@ const TodayAgendaSidebar = ({
             })}
           </div>
         ) : (
-          <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5 text-center space-y-2">
+          <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5 text-center space-y-3">
             <div className="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center mx-auto">
               <i className="fas fa-calendar-check text-xs" />
             </div>
             <p className="text-xs font-bold text-white">No Live Classes Today</p>
             <p className="text-[11px] text-slate-400">
-              When faculty initiates a session, your Google Meet link unlocks 30 minutes prior.
+              When faculty initiates a session, your Google Meet link unlocks 20 minutes prior.
             </p>
+            <IssueInJoiningClassBanner variant="alert" />
           </div>
         )}
 
