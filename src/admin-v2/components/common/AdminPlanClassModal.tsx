@@ -42,8 +42,12 @@ export const AdminPlanClassModal: React.FC<{
   const [scheduledDate, setScheduledDate] = useState<string>(todayStr);
   const [scheduledTime, setScheduledTime] = useState<string>('16:00');
   const [isRecurring, setIsRecurring] = useState<boolean>(true);
-  const [recurrenceWeeks, setRecurrenceWeeks] = useState<'4' | '8' | '12' | 'custom'>('4');
+  const [recurrenceWeeks, setRecurrenceWeeks] = useState<'1' | '2' | '3' | '4' | 'custom'>('1');
   const [customEndDate, setCustomEndDate] = useState<string>('');
+
+  const dateInputRef = React.useRef<HTMLInputElement>(null);
+  const timeInputRef = React.useRef<HTMLInputElement>(null);
+  const customEndDateRef = React.useRef<HTMLInputElement>(null);
 
   // Delayed start fields
   const [delayMinutes, setDelayMinutes] = useState<number>(30);
@@ -99,7 +103,7 @@ export const AdminPlanClassModal: React.FC<{
     }
     const parts = scheduledDate.split('-').map(Number);
     const d = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2], 12, 0, 0));
-    const weeks = Number(recurrenceWeeks) || 4;
+    const weeks = Number(recurrenceWeeks) || 1;
     d.setUTCDate(d.getUTCDate() + weeks * 7);
     return d.toISOString().split('T')[0];
   }, [scheduledDate, recurrenceWeeks, customEndDate]);
@@ -384,38 +388,110 @@ export const AdminPlanClassModal: React.FC<{
             {/* Mode-specific Fields */}
             {mode === 'scheduled' && (
               <div className="p-4 rounded-xl bg-[#0E1428] border border-[#232D52] space-y-4">
+                <style>{`
+                  .vcs-picker-box {
+                    background-color: #172146 !important;
+                    border: 2px solid #3B4E85 !important;
+                    transition: all 0.2s ease !important;
+                  }
+                  .vcs-picker-box:hover, .vcs-picker-box:focus-within {
+                    border-color: #6366F1 !important;
+                    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3) !important;
+                    background-color: #1A2652 !important;
+                  }
+                  .vcs-picker-box input {
+                    color-scheme: dark !important;
+                  }
+                  .vcs-picker-box input::-webkit-calendar-picker-indicator {
+                    filter: invert(1) brightness(1.8) !important;
+                    cursor: pointer !important;
+                    opacity: 1 !important;
+                    background-color: #4F46E5 !important;
+                    border-radius: 6px !important;
+                    padding: 5px !important;
+                    transform: scale(1.15) !important;
+                    transition: all 0.2s ease !important;
+                  }
+                  .vcs-picker-box input::-webkit-calendar-picker-indicator:hover {
+                    background-color: #6366F1 !important;
+                    transform: scale(1.25) !important;
+                  }
+                `}</style>
+
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-400">Schedule Time & Date</span>
-                  <span className="text-[10px] px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-300 font-mono">
-                    Time Zone: AST (Arabia Standard Time)
+                  <span className="text-[10px] px-2.5 py-0.5 rounded-md bg-indigo-500/15 border border-indigo-500/30 text-indigo-200 font-mono font-bold">
+                    Zone: AST (Arabia Standard Time · UTC+3)
                   </span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Field label="Start Date" required hint={formattedStartDate ? `Selected: ${formattedStartDate}` : 'Defaults to today; click to change'}>
-                    <div className="relative flex items-center">
-                      <Calendar className="w-4 h-4 text-indigo-400 absolute left-3.5 pointer-events-none z-10" />
-                      <input
-                        type="date"
-                        required
-                        min={todayStr}
-                        value={scheduledDate}
-                        onChange={(e) => setScheduledDate(e.target.value)}
-                        className={`${inputCls} pl-10 cursor-pointer [color-scheme:dark] [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-85 hover:[&::-webkit-calendar-picker-indicator]:opacity-100`}
-                      />
+                    <div
+                      onClick={() => {
+                        try { dateInputRef.current?.showPicker?.(); } catch (_) { dateInputRef.current?.focus(); }
+                      }}
+                      className="vcs-picker-box relative flex items-center justify-between rounded-xl px-3 py-2 cursor-pointer shadow-sm"
+                    >
+                      <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                        <div className="w-8 h-8 rounded-lg bg-indigo-500/25 border border-indigo-400/40 flex items-center justify-center text-indigo-300 shrink-0">
+                          <Calendar className="w-4 h-4 text-indigo-300" />
+                        </div>
+                        <input
+                          ref={dateInputRef}
+                          type="date"
+                          required
+                          min={todayStr}
+                          value={scheduledDate}
+                          onChange={(e) => setScheduledDate(e.target.value)}
+                          className="w-full bg-transparent text-white font-bold text-sm tracking-wide outline-none cursor-pointer"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          try { dateInputRef.current?.showPicker?.(); } catch (_) { dateInputRef.current?.focus(); }
+                        }}
+                        className="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold shadow-md shadow-indigo-600/30 transition-all shrink-0 cursor-pointer flex items-center gap-1.5 border border-indigo-400/30"
+                      >
+                        <Calendar className="w-3.5 h-3.5" />
+                        <span>Pick Date</span>
+                      </button>
                     </div>
                   </Field>
 
                   <Field label="Start Time (AST)" required hint="Time in Saudi Arabia / AST (24h or AM/PM)">
-                    <div className="relative flex items-center">
-                      <Clock className="w-4 h-4 text-indigo-400 absolute left-3.5 pointer-events-none z-10" />
-                      <input
-                        type="time"
-                        required
-                        value={scheduledTime}
-                        onChange={(e) => setScheduledTime(e.target.value)}
-                        className={`${inputCls} pl-10 cursor-pointer [color-scheme:dark] [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-85 hover:[&::-webkit-calendar-picker-indicator]:opacity-100`}
-                      />
+                    <div
+                      onClick={() => {
+                        try { timeInputRef.current?.showPicker?.(); } catch (_) { timeInputRef.current?.focus(); }
+                      }}
+                      className="vcs-picker-box relative flex items-center justify-between rounded-xl px-3 py-2 cursor-pointer shadow-sm"
+                    >
+                      <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                        <div className="w-8 h-8 rounded-lg bg-indigo-500/25 border border-indigo-400/40 flex items-center justify-center text-indigo-300 shrink-0">
+                          <Clock className="w-4 h-4 text-indigo-300" />
+                        </div>
+                        <input
+                          ref={timeInputRef}
+                          type="time"
+                          required
+                          value={scheduledTime}
+                          onChange={(e) => setScheduledTime(e.target.value)}
+                          className="w-full bg-transparent text-white font-bold text-sm tracking-wide outline-none cursor-pointer"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          try { timeInputRef.current?.showPicker?.(); } catch (_) { timeInputRef.current?.focus(); }
+                        }}
+                        className="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold shadow-md shadow-indigo-600/30 transition-all shrink-0 cursor-pointer flex items-center gap-1.5 border border-indigo-400/30"
+                      >
+                        <Clock className="w-3.5 h-3.5" />
+                        <span>Pick Time</span>
+                      </button>
                     </div>
                   </Field>
                 </div>
@@ -432,7 +508,7 @@ export const AdminPlanClassModal: React.FC<{
                       onClick={() => setIsRecurring(false)}
                       className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex items-start gap-2.5 ${
                         !isRecurring
-                          ? 'bg-indigo-600/15 border-indigo-500 text-white shadow-sm ring-1 ring-indigo-500/40'
+                          ? 'bg-indigo-600/20 border-indigo-400 text-white shadow-sm ring-1 ring-indigo-400/50'
                           : 'bg-[#0B0F20] border-[#1E2648] text-slate-400 hover:text-slate-200 hover:border-slate-700'
                       }`}
                     >
@@ -452,7 +528,7 @@ export const AdminPlanClassModal: React.FC<{
                       onClick={() => setIsRecurring(true)}
                       className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex items-start gap-2.5 ${
                         isRecurring
-                          ? 'bg-indigo-600/15 border-indigo-500 text-white shadow-sm ring-1 ring-indigo-500/40'
+                          ? 'bg-indigo-600/20 border-indigo-400 text-white shadow-sm ring-1 ring-indigo-400/50'
                           : 'bg-[#0B0F20] border-[#1E2648] text-slate-400 hover:text-slate-200 hover:border-slate-700'
                       }`}
                     >
@@ -464,7 +540,7 @@ export const AdminPlanClassModal: React.FC<{
                       <div>
                         <div className="text-xs font-bold text-white flex items-center gap-1.5">
                           <span>Weekly Series</span>
-                          <span className="text-[9px] px-1.5 py-0.2 rounded bg-indigo-500/20 text-indigo-300 font-semibold">Standard</span>
+                          <span className="text-[9px] px-1.5 py-0.2 rounded bg-indigo-500/25 text-indigo-300 font-bold border border-indigo-400/30">Active</span>
                         </div>
                         <div className="text-[11px] text-slate-400 mt-0.5">Repeats every {dayFullName} at {scheduledTime} AST</div>
                       </div>
@@ -477,32 +553,34 @@ export const AdminPlanClassModal: React.FC<{
                       <div className="flex items-center justify-between flex-wrap gap-2">
                         <span className="text-[11px] font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
                           <Repeat className="w-3.5 h-3.5 text-indigo-400" />
-                          <span>Series Length (End Date)</span>
+                          <span>Series Length (Weeks)</span>
                         </span>
                         <span className="text-[11px] text-emerald-400 font-semibold">
                           Every {dayFullName} until {formattedEndDate}
                         </span>
                       </div>
 
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+                      {/* 1 Week (Default), 2 Weeks, 3 Weeks, 4 Weeks, Custom */}
+                      <div className="grid grid-cols-2 sm:grid-cols-5 gap-1.5">
                         {[
-                          { key: '4', label: '4 Weeks', sub: '1 Month (Default)' },
-                          { key: '8', label: '8 Weeks', sub: '2 Months' },
-                          { key: '12', label: '12 Weeks', sub: '1 Term' },
+                          { key: '1', label: '1 Week', sub: 'Default (2 classes)' },
+                          { key: '2', label: '2 Weeks', sub: '3 classes total' },
+                          { key: '3', label: '3 Weeks', sub: '4 classes total' },
+                          { key: '4', label: '4 Weeks', sub: '1 Month (5 classes)' },
                           { key: 'custom', label: 'Custom', sub: 'Pick End Date' },
                         ].map((opt) => (
                           <button
                             key={opt.key}
                             type="button"
                             onClick={() => setRecurrenceWeeks(opt.key as any)}
-                            className={`p-2 rounded-lg border text-center transition-all cursor-pointer ${
+                            className={`p-2.5 rounded-xl border text-center transition-all cursor-pointer ${
                               recurrenceWeeks === opt.key
-                                ? 'bg-indigo-600 text-white border-indigo-500 font-bold shadow-sm'
-                                : 'bg-[#121832] text-slate-400 hover:text-slate-200 border-[#1E2648]'
+                                ? 'bg-indigo-600 text-white border-indigo-400 font-bold shadow-md shadow-indigo-600/30 ring-1 ring-white/20'
+                                : 'bg-[#141C3C] text-slate-300 hover:text-white hover:bg-[#1A2552] border-[#2A396A]'
                             }`}
                           >
                             <div className="text-xs font-bold leading-tight">{opt.label}</div>
-                            <div className="text-[10px] opacity-75 mt-0.5 leading-tight">{opt.sub}</div>
+                            <div className="text-[10px] opacity-80 mt-1 leading-tight">{opt.sub}</div>
                           </button>
                         ))}
                       </div>
@@ -510,16 +588,37 @@ export const AdminPlanClassModal: React.FC<{
                       {recurrenceWeeks === 'custom' && (
                         <div className="pt-1">
                           <Field label="Custom Series End Date" required hint="Must be on or after start date">
-                            <div className="relative flex items-center">
-                              <Calendar className="w-4 h-4 text-indigo-400 absolute left-3.5 pointer-events-none z-10" />
-                              <input
-                                type="date"
-                                required
-                                min={scheduledDate}
-                                value={customEndDate || calculatedEndDate}
-                                onChange={(e) => setCustomEndDate(e.target.value)}
-                                className={`${inputCls} pl-10 cursor-pointer [color-scheme:dark] [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-85`}
-                              />
+                            <div
+                              onClick={() => {
+                                try { customEndDateRef.current?.showPicker?.(); } catch (_) { customEndDateRef.current?.focus(); }
+                              }}
+                              className="vcs-picker-box relative flex items-center justify-between rounded-xl px-3 py-2 cursor-pointer shadow-sm"
+                            >
+                              <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                                <div className="w-8 h-8 rounded-lg bg-indigo-500/25 border border-indigo-400/40 flex items-center justify-center text-indigo-300 shrink-0">
+                                  <Calendar className="w-4 h-4 text-indigo-300" />
+                                </div>
+                                <input
+                                  ref={customEndDateRef}
+                                  type="date"
+                                  required
+                                  min={scheduledDate}
+                                  value={customEndDate || calculatedEndDate}
+                                  onChange={(e) => setCustomEndDate(e.target.value)}
+                                  className="w-full bg-transparent text-white font-bold text-sm tracking-wide outline-none cursor-pointer"
+                                />
+                              </div>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  try { customEndDateRef.current?.showPicker?.(); } catch (_) { customEndDateRef.current?.focus(); }
+                                }}
+                                className="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold shadow-md shadow-indigo-600/30 transition-all shrink-0 cursor-pointer flex items-center gap-1.5 border border-indigo-400/30"
+                              >
+                                <Calendar className="w-3.5 h-3.5" />
+                                <span>Pick Date</span>
+                              </button>
                             </div>
                           </Field>
                         </div>

@@ -869,13 +869,23 @@ const SessionsTab = ({
                   </div>
 
                   {/* Start Date | End Date */}
+                  <style>{`
+                    .vcs-tab-date::-webkit-calendar-picker-indicator {
+                      filter: invert(1) brightness(1.8) !important;
+                      cursor: pointer !important;
+                      background-color: #4F46E5 !important;
+                      border-radius: 6px !important;
+                      padding: 5px !important;
+                      transform: scale(1.15) !important;
+                    }
+                  `}</style>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-slate-300 mb-2">Start Date <span className="text-red-400">*</span></label>
                       <Input type="date" value={createSessionForm.scheduled_date}
                         min={new Date().toISOString().split("T")[0]} max="9999-12-31"
                         onChange={(e) => { const v = clampDate(e.target.value); setCreateSessionForm({ ...createSessionForm, scheduled_date: v }); clearCreateSessionFieldError("scheduled_date"); }}
-                        className={`w-full px-3 py-2.5 bg-[#0E1428] border rounded-xl text-white focus:outline-none focus:ring-2 text-sm ${createSessionErrors?.scheduled_date ? "border-red-500 focus:ring-red-500" : "border-[#232D52] focus:ring-[#6D5BFF]"}`}
+                        className={`vcs-tab-date w-full px-3 py-2.5 bg-[#172146] border-2 rounded-xl text-white font-bold focus:outline-none focus:ring-2 text-sm ${createSessionErrors?.scheduled_date ? "border-red-500 focus:ring-red-500" : "border-[#3B4E85] focus:border-[#6D5BFF]"}`}
                         error={createSessionErrors?.scheduled_date}
                       />
                     </div>
@@ -884,11 +894,11 @@ const SessionsTab = ({
                       <Input type="date" value={createSessionForm.recurrence_end_date}
                         min={createSessionForm.scheduled_date || new Date().toISOString().split("T")[0]} max="9999-12-31"
                         onChange={(e) => { const v = clampDate(e.target.value); setCreateSessionForm({ ...createSessionForm, recurrence_end_date: v }); clearCreateSessionFieldError("recurrence_end_date"); }}
-                        className={`w-full px-3 py-2.5 bg-[#0E1428] border rounded-xl text-white focus:outline-none focus:ring-2 text-sm ${createSessionErrors?.recurrence_end_date ? "border-red-500 focus:ring-red-500" : "border-[#232D52] focus:ring-[#6D5BFF]"}`}
+                        className={`vcs-tab-date w-full px-3 py-2.5 bg-[#172146] border-2 rounded-xl text-white font-bold focus:outline-none focus:ring-2 text-sm ${createSessionErrors?.recurrence_end_date ? "border-red-500 focus:ring-red-500" : "border-[#3B4E85] focus:border-[#6D5BFF]"}`}
                         error={createSessionErrors?.recurrence_end_date}
                       />
                       {createSessionForm.scheduled_date && createSessionForm.recurrence_end_date && (
-                        <p className="text-slate-500 text-xs mt-1">From {createSessionForm.scheduled_date} to {createSessionForm.recurrence_end_date}</p>
+                        <p className="text-slate-400 text-xs mt-1 font-medium">From {createSessionForm.scheduled_date} to {createSessionForm.recurrence_end_date}</p>
                       )}
                     </div>
                   </div>
