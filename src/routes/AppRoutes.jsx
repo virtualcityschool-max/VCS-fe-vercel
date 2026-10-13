@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { setAuthModal } from "../store/slices/uiSlice";
 import { LoadingSpinner } from "../components/ui";
 import ImpersonationBanner from "../components/common/ImpersonationBanner";
+import { restoreAdminSession } from "../utils/impersonate";
 
 // Public pages load eagerly - anonymous visitors and prerendering hit these directly.
 import PublicHome from "../pages/public/PublicHome";
@@ -127,6 +128,13 @@ const AdminAuthGate = () => {
   const { isLoggedIn, isInitialized, role } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const hasOpenedRef = React.useRef(false);
+
+  // If entering /admin while an impersonation session was active, immediately restore the admin session!
+  if (typeof window !== "undefined" && localStorage.getItem("vcs_impersonator_backup")) {
+    restoreAdminSession();
+    window.location.reload();
+    return null;
+  }
 
   React.useEffect(() => {
     if (isInitialized && !isLoggedIn && !hasOpenedRef.current) {

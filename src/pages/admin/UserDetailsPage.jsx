@@ -111,7 +111,8 @@ const UserDetailsPage = () => {
   }, [id]);
 
   const handleBackToUsers = () => {
-    navigate("/admin/users", { state: { skipFetch: true, filters: location.state?.filters } });
+    const role = userData?.role || new URLSearchParams(location.search).get("role") || "student";
+    navigate(`/admin/users?role=${role}`, { state: { skipFetch: true, filters: location.state?.filters } });
   };
 
   const handleDeleteUser = () => {

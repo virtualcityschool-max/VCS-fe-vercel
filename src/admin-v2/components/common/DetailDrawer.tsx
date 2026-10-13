@@ -211,7 +211,7 @@ export const DetailDrawer: React.FC = () => {
               {/* Quick Actions */}
               <div className="pt-2 flex flex-wrap gap-2.5">
                 <a
-                  href={`/admin/users/${data.id}`}
+                  href={`/admin/users/${data.id}?role=${data.role || type}`}
                   className="px-3.5 py-2 text-xs font-semibold rounded-xl bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 hover:bg-indigo-600/30 transition-colors"
                 >
                   Open full profile / edit

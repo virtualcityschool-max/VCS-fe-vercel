@@ -2,6 +2,46 @@ import { adminService } from '../services/adminService';
 import authStorage from './authStorage';
 
 /**
+ * Check if impersonation is currently active.
+ */
+export const isImpersonating = () => {
+  if (typeof window === 'undefined') return false;
+  return !!localStorage.getItem('vcs_impersonator_backup');
+};
+
+/**
+ * Restore the backed-up admin session and clear impersonation state.
+ */
+export const restoreAdminSession = (redirectUrl = null) => {
+  if (typeof window === 'undefined') return false;
+  const backupStr = localStorage.getItem('vcs_impersonator_backup');
+  if (!backupStr) return false;
+
+  try {
+    const backup = JSON.parse(backupStr);
+    if (backup.access) {
+      authStorage.setAccessToken(backup.access);
+    }
+    if (backup.refresh) {
+      localStorage.setItem('vcs_refresh_token', backup.refresh);
+    }
+    if (backup.user) {
+      authStorage.setStoredAuthUser(backup.user);
+    }
+    localStorage.removeItem('vcs_impersonator_backup');
+
+    if (redirectUrl) {
+      window.location.href = redirectUrl;
+    }
+    return true;
+  } catch (err) {
+    console.error('Error restoring admin auth:', err);
+    localStorage.removeItem('vcs_impersonator_backup');
+    return false;
+  }
+};
+
+/**
  * Log in as a target user (impersonation) and redirect to their workspace.
  * Saves current admin credentials so the admin can safely return anytime.
  */
@@ -45,3 +85,4 @@ export const handleImpersonateUser = async (userId, userRole = 'student') => {
 };
 
 export default handleImpersonateUser;
+

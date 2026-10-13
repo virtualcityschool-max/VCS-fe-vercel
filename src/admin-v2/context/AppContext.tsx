@@ -33,6 +33,7 @@ import { departmentOf } from '../../components/admin/ui/departments';
 import { TEACHING_AREAS, guessTeachingAreas } from '../data/formOptions';
 import { ConfirmDialog } from '../components/common/ConfirmDialog';
 import { NAV_CAP, type Cap } from '../data/staffRoles';
+import { restoreAdminSession } from '../../utils/impersonate';
 
 export interface ToastMessage {
   id: string;
@@ -127,6 +128,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Fresh copy from the server: it carries the staff role and what it allows.
   const [me, setMe] = useState<any>(null);
   useEffect(() => {
+    if (typeof window !== 'undefined' && localStorage.getItem('vcs_impersonator_backup')) {
+      restoreAdminSession();
+      window.location.reload();
+      return;
+    }
     axiosInstance.get('/auth/me/').then((r: any) => setMe(r.data?.data || r.data)).catch(() => setMe({}));
   }, []);
   const profile = me && me.id ? { ...storedProfile, ...me } : storedProfile;
@@ -874,9 +880,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const updateStudent = (id: string, updates: any) => {
     const u = rawUser(id);
     if (u && updates.status) return run(() => setActive(u, updates.status === 'Active'), `${getDisplayName(u)} is now ${updates.status.toLowerCase()}`, ['users']);
-    navigate(`/admin/users/${id}`);
+    navigate(`/admin/users/${id}?role=student`);
   };
-  const updateTeacher = (id: string) => navigate(`/admin/users/${id}`);
+  const updateTeacher = (id: string) => navigate(`/admin/users/${id}?role=teacher`);
 
   const deleteStudent = async (id: string) => {
     const u = rawUser(id);

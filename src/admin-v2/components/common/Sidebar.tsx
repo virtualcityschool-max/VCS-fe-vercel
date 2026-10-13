@@ -248,7 +248,7 @@ export const Sidebar: React.FC = () => {
                       key={item.id}
                       onClick={() => handleNavClick(item.id)}
                       title={sidebarCollapsed ? item.label : undefined}
-                      className={`relative flex items-center gap-3 w-full px-3 py-2 rounded-xl text-xs font-medium transition-all group cursor-pointer ${
+                      className={`relative flex items-center gap-3 w-full px-3 py-2 rounded-xl text-xs font-medium transition-all group cursor-pointer outline-none focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
                         isActive
                           ? 'bg-[#6D5BFF] text-white shadow-md shadow-indigo-600/25 font-semibold'
                           : 'text-slate-300 hover:text-white hover:bg-[#151D3A]'

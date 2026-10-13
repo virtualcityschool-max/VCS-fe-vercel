@@ -15,6 +15,7 @@ import Sidebar from "./components/layout/Sidebar";
 import AppRoutes from "./routes/AppRoutes";
 import CompleteProfileGate from "./components/common/CompleteProfileGate";
 import { useOutsideCloseModals } from "./hooks/useOutsideCloseModals";
+import { isImpersonating, restoreAdminSession } from "./utils/impersonate";
 
 // Inner app - inside BrowserRouter so useLocation works
 const AppInner = () => {
@@ -32,6 +33,17 @@ const AppInner = () => {
   const location = useLocation();
   // One global handler so clicking the dim backdrop closes any modal.
   useOutsideCloseModals();
+
+  // Safety check: Never allow /admin pages to run under an impersonated user session.
+  // If an admin navigates to or opens any /admin URL while an impersonation session was running,
+  // automatically restore the admin credentials immediately.
+  useEffect(() => {
+    if (location.pathname.startsWith("/admin") && isImpersonating()) {
+      restoreAdminSession();
+      window.location.reload();
+    }
+  }, [location.pathname]);
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
     try { return localStorage.getItem("sidebarCollapsed") === "true"; } catch { return false; }
@@ -45,9 +57,9 @@ const AppInner = () => {
     });
   };
 
-  const hasSidebar = isLoggedIn && (role === "admin" || role === "teacher" || role === "student" || role === "parent");
-  const isAdminArea = isLoggedIn && role === "admin" && location.pathname.startsWith("/admin");
-  const isTeacherArea = isLoggedIn && role === "teacher" && location.pathname.startsWith("/teacher");
+  const isAdminArea = location.pathname.startsWith("/admin");
+  const isTeacherArea = location.pathname.startsWith("/teacher");
+  const hasSidebar = isLoggedIn && !isAdminArea && (role === "teacher" || role === "student" || role === "parent");
 
   // Close mobile sidebar on route change
   useEffect(() => {
@@ -101,8 +113,8 @@ const AppInner = () => {
 
   return (
     <div className={`min-h-screen selection:bg-indigo-500/30 overflow-x-hidden ${isAdminArea ? "bg-[#0B1020]" : "bg-slate-950"}`}>
-      {/* Unified sidebar for admin / teacher / student */}
-      {hasSidebar && !isAdminArea && (
+      {/* Unified sidebar for teacher / student / parent */}
+      {hasSidebar && (
         <Sidebar
           role={role}
           isSidebarOpen={isSidebarOpen}
@@ -124,7 +136,7 @@ const AppInner = () => {
 
       {/* Content area - offset by sidebar width on desktop */}
       {/* The admin area draws its own sidebar (admin-v2), so no offset there. */}
-      <div className={hasSidebar && !isAdminArea ? (isSidebarCollapsed ? "lg:ml-20" : "lg:ml-64") : ""} style={{ transition: "margin-left 0.3s ease" }}>
+      <div className={hasSidebar ? (isSidebarCollapsed ? "lg:ml-20" : "lg:ml-64") : ""} style={{ transition: "margin-left 0.3s ease" }}>
         {/* Navbar - public variant for everyone (it already swaps
             Login/Register for the profile dropdown once logged in).
             Logo is hidden when a sidebar is present - the sidebar already
