@@ -106,6 +106,11 @@ export const adminService = {
     }
   },
 
+  impersonateUser: async (userId) => {
+    const response = await axiosInstance.post(`/users/${userId}/impersonate/`);
+    return response.data;
+  },
+
   // ── Student tags (admin labels used to group and find students) ──
   getStudentTags: async () => {
     const response = await axiosInstance.get(ADMIN_ENDPOINTS.STUDENT_TAGS);

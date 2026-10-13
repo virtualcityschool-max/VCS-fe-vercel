@@ -3,6 +3,7 @@ import { Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { setAuthModal } from "../store/slices/uiSlice";
 import { LoadingSpinner } from "../components/ui";
+import ImpersonationBanner from "../components/common/ImpersonationBanner";
 
 // Public pages load eagerly - anonymous visitors and prerendering hit these directly.
 import PublicHome from "../pages/public/PublicHome";
@@ -164,8 +165,10 @@ const AppRoutes = () => {
   const { isLoggedIn, role } = useSelector((state) => state.auth);
 
   return (
-        <Suspense fallback={<LoadingSpinner />}>
-    <Routes>
+    <>
+      <ImpersonationBanner />
+      <Suspense fallback={<LoadingSpinner />}>
+        <Routes>
       {/* Public Routes */}
       <Route
         path="/"
@@ -299,7 +302,8 @@ const AppRoutes = () => {
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
-        </Suspense>
+    </Suspense>
+  </>
   );
 };
 

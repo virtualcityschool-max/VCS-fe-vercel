@@ -21,9 +21,10 @@ import { StatusPill } from './StatusPill';
 import { StudentProfilePanel } from './StudentProfilePanel';
 import { DEPARTMENT_CONFIG } from '../../data/departments';
 import { DepartmentName } from '../../types';
+import { handleImpersonateUser } from '../../../utils/impersonate';
 
 export const DetailDrawer: React.FC = () => {
-  const { detailDrawer, closeDetailDrawer, subjects, renewSubscription, cancelSubscription, setCurrentView, rawAttendance, subscriptions, tzIana, toggleUserStatus } =
+  const { detailDrawer, closeDetailDrawer, subjects, renewSubscription, cancelSubscription, setCurrentView, rawAttendance, subscriptions, tzIana, toggleUserStatus, addToast } =
     useApp();
   const [activeTab, setActiveTab] = useState<'overview' | 'subjects' | 'attendance' | 'finance' | 'notes'>('overview');
   if (!detailDrawer.isOpen || !detailDrawer.data) return null;
@@ -215,6 +216,24 @@ export const DetailDrawer: React.FC = () => {
                 >
                   Open full profile / edit
                 </a>
+                {(type === 'teacher' || type === 'parent' || type === 'user') && (
+                  <button
+                    onClick={async () => {
+                      try {
+                        const targetRole = data.role || type;
+                        addToast(`Switching to ${data.name || 'user'}'s workspace…`, 'info');
+                        await handleImpersonateUser(data.id, targetRole);
+                      } catch (err: any) {
+                        addToast(err?.response?.data?.error || err?.message || 'Could not log in as user', 'error');
+                      }
+                    }}
+                    className="px-3.5 py-2 text-xs font-semibold rounded-xl bg-indigo-600/30 text-indigo-200 border border-indigo-500/40 hover:bg-indigo-600/50 transition-colors flex items-center gap-1.5 cursor-pointer"
+                    title={`Open workspace as this ${type}`}
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    Login as {type === 'teacher' || data.role === 'teacher' ? 'Teacher' : type === 'parent' || data.role === 'parent' ? 'Parent' : 'User'}
+                  </button>
+                )}
                 {(type === 'student' || type === 'teacher' || type === 'parent' || type === 'user') && (
                   <button
                     onClick={() => toggleUserStatus(data.id)}

@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Mail, Phone, MessageCircle, Pencil, Save, X, Users, GraduationCap, UserRound, KeyRound, Trash2 } from 'lucide-react';
+import { Mail, Phone, MessageCircle, Pencil, Save, X, Users, GraduationCap, UserRound, KeyRound, Trash2, ExternalLink } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { adminService } from '../../../services/adminService';
+import { handleImpersonateUser } from '../../../utils/impersonate';
 import { StatusPill } from './StatusPill';
 import { CopyButton, Field, FormSection, PasswordField, PhoneField, SelectInput, fullPhone, inputCls } from './FormControls';
 import {
@@ -271,6 +272,20 @@ export const StudentProfilePanel: React.FC<{ studentId: string }> = ({ studentId
       <div className="flex flex-wrap gap-2 pt-1">
         <button onClick={startEdit} disabled={profile === null} className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-xl bg-[#6D5BFF] hover:bg-[#5B47FB] text-white disabled:opacity-50">
           <Pencil className="w-3.5 h-3.5" /> Edit details
+        </button>
+        <button
+          onClick={async () => {
+            try {
+              addToast(`Switching to ${student.name}'s workspace…`, 'info');
+              await handleImpersonateUser(student.id, 'student');
+            } catch (err: any) {
+              addToast(err?.response?.data?.error || err?.message || 'Could not log in as student', 'error');
+            }
+          }}
+          className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-xl border border-indigo-500/40 bg-indigo-600/20 text-indigo-200 hover:bg-indigo-600/30"
+          title="Open student workspace as this student"
+        >
+          <ExternalLink className="w-3.5 h-3.5" /> Login as Student
         </button>
         <button onClick={() => toggleUserStatus(student.id)} className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-xl border border-[#232D52] bg-[#1A2346] text-slate-200 hover:border-slate-500">
           <KeyRound className="w-3.5 h-3.5" /> {student.status === 'Inactive' ? 'Activate account' : 'Deactivate account'}
