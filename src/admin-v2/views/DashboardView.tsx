@@ -17,6 +17,7 @@ import {
   Info,
   Check,
   Video,
+  Square,
   Plus,
   ChevronDown,
   UserPlus,
@@ -51,6 +52,7 @@ export const DashboardView: React.FC = () => {
     openDetailDrawer,
     openQuickAdd,
     renewSubscription,
+    endSession,
     can,
     attendanceSummary,
     timezone,
@@ -687,6 +689,18 @@ export const DashboardView: React.FC = () => {
                       <span>Link</span>
                     </a>
                   ) : null}
+
+                  {sess.status === 'live' && can('manage_academics') && (
+                    <button
+                      type="button"
+                      onClick={() => endSession(sess.id, sess.title)}
+                      className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-lg bg-rose-600 hover:bg-rose-500 text-white transition-colors cursor-pointer"
+                      title="Force end this live class now"
+                    >
+                      <Square className="w-3 h-3 fill-current" />
+                      <span>End Class</span>
+                    </button>
+                  )}
                 </div>
               </div>
             );

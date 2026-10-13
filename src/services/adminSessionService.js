@@ -50,6 +50,14 @@ const adminSessionService = {
     );
     return response.data;
   },
+
+  // End a live or scheduled session (teacher or admin)
+  endSession: async (sessionId) => {
+    const response = await axiosInstance.patch(
+      `/classroom/sessions/${sessionId}/end/`
+    );
+    return response.data;
+  },
 };
 
 export { adminSessionService };

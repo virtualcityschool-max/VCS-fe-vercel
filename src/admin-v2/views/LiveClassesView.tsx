@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { PageHeader } from '../components/common/PageHeader';
 import { inputCls } from '../components/common/FormControls';
-import { AlertTriangle, CalendarDays, Check, ChevronLeft, ChevronRight, Copy, Info, Plus, Radio, Search, Share2, Users, Video } from 'lucide-react';
+import { AlertTriangle, CalendarDays, Check, ChevronLeft, ChevronRight, Copy, Info, Plus, Radio, Search, Share2, Square, Users, Video } from 'lucide-react';
 import { AdminPlanClassModal } from '../components/common/AdminPlanClassModal';
 // @ts-ignore
 import DigitalSessionClock from '../../components/common/DigitalSessionClock';
@@ -25,7 +25,7 @@ const dur = (m: number) => (m >= 60 ? `${Math.floor(m / 60)} h ${m % 60 ? `${m %
 // Live Classes: today's Google Meet classes with who is in them, and a Join
 // button so an admin can drop in and observe a class.
 export const LiveClassesView: React.FC = () => {
-  const { sessions = [], rawAttendanceAll = [], subjects = [], reload, tzIana, setCurrentView, resolveMissedSession, can } = useApp() as any;
+  const { sessions = [], rawAttendanceAll = [], subjects = [], reload, tzIana, setCurrentView, resolveMissedSession, endSession, can } = useApp() as any;
   const canResolve = can('manage_academics');
   const [mode, setMode] = useState<'upcoming' | 'past'>('upcoming');
   const [dayOffset, setDayOffset] = useState(0);
@@ -243,12 +243,22 @@ export const LiveClassesView: React.FC = () => {
               href={x.link}
               target="_blank"
               rel="noreferrer"
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white whitespace-nowrap ${x.phase === 'live' ? 'bg-rose-600 hover:bg-rose-500' : 'bg-[#6D5BFF] hover:bg-[#5B47FB]'}`}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white whitespace-nowrap bg-[#6D5BFF] hover:bg-[#5B47FB] transition"
             >
               <Video className="w-3.5 h-3.5" /> Join
             </a>
           )}
           {!ended && !x.link && <span className="text-[11px] text-amber-300">No Meet link</span>}
+          {(x.phase === 'live' || x.r?.status === 'live') && canResolve && (
+            <button
+              type="button"
+              onClick={() => endSession(x.id, x.title || x.course)}
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-rose-600 hover:bg-rose-500 text-white shadow-sm border border-rose-500/50 transition whitespace-nowrap active:scale-95 cursor-pointer"
+              title="Force end this live class now"
+            >
+              <Square className="w-3 h-3 fill-current" /> End Class
+            </button>
+          )}
           {x.phase === 'missed' && canResolve && (
             <span className="flex items-center gap-1">
               <button onClick={() => resolveMissedSession(x.id, 'held')} className="px-2 py-1 rounded-lg text-[11px] font-semibold bg-emerald-600 hover:bg-emerald-500 text-white whitespace-nowrap">Held</button>
