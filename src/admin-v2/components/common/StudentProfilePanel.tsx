@@ -236,7 +236,7 @@ export const StudentProfilePanel: React.FC<{ studentId: string }> = ({ studentId
         <Row label="School">{p.school_name}</Row>
         <Row label="Learning goal">{labelOf(LEARNING_GOALS, p.learning_goal)}</Row>
         <Row label="Fee status"><StatusPill status={student.feeStatus} /></Row>
-        <Row label="Attendance">{student.attendanceRate == null ? null : `${student.attendanceRate}% · ${student.absencesThisWeek || 0} absent this week`}</Row>
+        <Row label="Attendance">{student.attendanceRate == null ? null : `${student.attendanceRate}% (30-day) · ${student.absencesThisWeek || 0} absent this week`}</Row>
       </Card>
 
       <Card title="Personal" icon={Phone}>

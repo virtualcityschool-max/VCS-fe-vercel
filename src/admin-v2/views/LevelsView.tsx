@@ -76,7 +76,7 @@ export const LevelsView: React.FC = () => {
                 <div>
                   <h4 className="text-sm font-bold text-slate-100">{lvl}</h4>
                   <p className="text-xs text-slate-400 mt-0.5">
-                    {associatedSubjects} active subjects · {associatedStudents} enrolled candidates
+                    {associatedSubjects} active {associatedSubjects === 1 ? 'subject' : 'subjects'} · {associatedStudents} enrolled {associatedStudents === 1 ? 'candidate' : 'candidates'}
                   </p>
                 </div>
               </div>

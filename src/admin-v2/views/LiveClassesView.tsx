@@ -79,19 +79,23 @@ export const LiveClassesView: React.FC = () => {
         const start = new Date(r.scheduled_at);
         const end = new Date(start.getTime() + (r.duration_mins || 60) * 60000);
         const t = now;
+        const att = attendanceBySession.get(String(r.id)) || [];
+        const teacherJoined = att.some((a: any) => a.participant_role === 'teacher' && a.joined_at);
+        const isPastEnd = t > end.getTime();
         // Not started 15 min after its time, or opened by itself but the teacher
         // has not joined after 20 min: missed, and it stays flagged until an
         // admin resolves it (held / cancelled / rescheduled).
+        // If past end time, class is no longer live.
         const phase: Phase =
           r.status === 'cancelled' ? 'cancelled'
-          : s.teacherNotJoined ? 'missed'
+          : (s.teacherNotJoined || (isPastEnd && r.status === 'live' && !teacherJoined)) ? 'missed'
+          : isPastEnd ? 'ended'
           : r.status === 'live' ? 'live'
           : r.status === 'missed' || (r.status === 'scheduled' && t > start.getTime() + 15 * 60000) ? 'missed'
-          : r.status === 'ended' || t > end.getTime() ? 'ended'
+          : r.status === 'ended' ? 'ended'
           : t >= start.getTime() ? 'late'
           : start.getTime() - t <= 60 * 60000 ? 'soon'
           : 'later';
-        const att = attendanceBySession.get(String(r.id)) || [];
         const inNow = (a: any) => a.joined_at && !a.left_at;
         const studentsAtt = att.filter((a: any) => a.participant_role !== 'teacher');
         const subject = subjects.find((x: any) => x.id === String(r.course));
@@ -101,7 +105,7 @@ export const LiveClassesView: React.FC = () => {
           teacher: r.teacher_name || 'No teacher', link: r.meeting_link || '',
           expected: r.enrollment_count ?? null,
           teacherIn: att.some((a: any) => a.participant_role === 'teacher' && inNow(a)),
-          teacherJoined: att.some((a: any) => a.participant_role === 'teacher' && a.joined_at),
+          teacherJoined,
           studentsNow: studentsAtt.filter(inNow).length,
           present: studentsAtt.filter((a: any) => a.status === 'present').length,
           late: studentsAtt.filter((a: any) => a.status === 'late').length,
@@ -128,15 +132,14 @@ export const LiveClassesView: React.FC = () => {
   // Every unresolved missed class, whatever its day, newest first.
   const missedRows = useMemo(() => rowsFor(null).filter((x: any) => x.phase === 'missed').reverse(), [sessions, now, attendanceBySession, subjects, query]);
   const liveRows = group(['live', 'late']);
-  const soonRows = group(['soon']);
-  const laterRows = group(['later']);
+  const upcomingTodayRows = group(['soon', 'later']);
   const endedRows = rows.filter((x: any) => x.phase === 'ended' || x.phase === 'cancelled' || x.phase === 'missed').reverse();
 
   const comingUp = nextDays.reduce((n, d) => n + d.rows.length, 0);
   const kpis = [
     { label: 'Live now', value: todayRows.filter((x: any) => x.phase === 'live').length, tint: 'text-rose-400' },
     { label: 'Missed / not started', value: missedRows.length + todayRows.filter((x: any) => x.phase === 'late').length, tint: 'text-amber-400' },
-    { label: 'Later today', value: soonRows.length + laterRows.length, tint: 'text-sky-400' },
+    { label: 'Upcoming today', value: upcomingTodayRows.length, tint: 'text-sky-400' },
     { label: 'Coming up · next 7 days', value: comingUp, tint: 'text-slate-100' },
   ];
 
@@ -349,15 +352,14 @@ export const LiveClassesView: React.FC = () => {
               <AlertTriangle className="w-3.5 h-3.5" /> “Should have started” means the class time has begun but the teacher has not started it. After 15 minutes it moves to Missed until someone resolves it. A class that opened by itself also moves to Missed when the teacher has not joined after 20 minutes; students can still enter until its end time.
             </div>
           )}
-          <Section title="Starting within the hour" icon={Video} tone="text-sky-300" items={soonRows} />
-          <Section title="Later today" icon={CalendarDays} tone="text-slate-200" items={laterRows} />
+          <Section title="Upcoming today" icon={CalendarDays} tone="text-sky-300" items={upcomingTodayRows} empty="No more classes scheduled for today." />
           {missedRows.length > 0 && (
             <Section title="Missed / not started — needs a decision" icon={AlertTriangle} tone="text-rose-300" items={missedRows} />
           )}
           {nextDays.filter((d) => d.rows.length).map((d) => (
             <Section key={d.offset} title={d.label} icon={CalendarDays} tone="text-slate-300" items={d.rows} />
           ))}
-          {liveRows.length + soonRows.length + laterRows.length + comingUp === 0 && (
+          {liveRows.length + upcomingTodayRows.length + comingUp === 0 && (
             <div className="text-center text-xs text-slate-500">
               No classes planned for the next 7 days. Plan classes with the{' '}
               <button onClick={() => setIsPlanClassOpen(true)} className="text-sky-300 hover:underline">Plan New Class</button> button.

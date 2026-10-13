@@ -114,7 +114,7 @@ export const AttendanceView: React.FC = () => {
         </div>
       </div>
       {summary.unmarked > 0 && (
-        <p className="text-[11px] text-slate-500 -mt-3">{summary.unmarked} class record{summary.unmarked > 1 ? 's' : ''} this week have no mark (for example the class never started) and are not counted.</p>
+        <p className="text-[11px] text-slate-500 -mt-3">{summary.unmarked} class record{summary.unmarked === 1 ? '' : 's'} this week {summary.unmarked === 1 ? 'has' : 'have'} no mark (for example the class never started) and {summary.unmarked === 1 ? 'is' : 'are'} not counted.</p>
       )}
 
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-4 rounded-xl border border-[#232D52] bg-[#121831]">

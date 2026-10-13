@@ -181,17 +181,17 @@ export const TimetableView: React.FC = () => {
               </span>
             </div>
             <div className="flex items-center gap-2">
-              {weekOffset !== 0 && (
-                <button onClick={() => setWeekOffset(0)} className="px-2.5 py-1 rounded-lg border border-[#232D52] text-xs text-slate-300 hover:text-white">
-                  Today
-                </button>
-              )}
               <button onClick={() => setWeekOffset((w) => w - 1)} aria-label="Previous week" className="p-1.5 rounded-lg border border-[#232D52] text-slate-400 hover:text-white">
                 <ChevronLeft className="w-4 h-4" />
               </button>
               <button onClick={() => setWeekOffset((w) => w + 1)} aria-label="Next week" className="p-1.5 rounded-lg border border-[#232D52] text-slate-400 hover:text-white">
                 <ChevronRight className="w-4 h-4" />
               </button>
+              {weekOffset !== 0 && (
+                <button onClick={() => setWeekOffset(0)} className="px-2.5 py-1 rounded-lg border border-[#232D52] text-xs text-slate-300 hover:text-white">
+                  Today
+                </button>
+              )}
             </div>
           </div>
 

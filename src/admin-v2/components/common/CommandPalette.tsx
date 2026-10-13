@@ -46,12 +46,18 @@ export const CommandPalette: React.FC = () => {
   } = useApp() as any;
 
   const [query, setQuery] = useState('');
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
   useEffect(() => {
     if (commandPaletteOpen) {
       setQuery('');
+      setSelectedIndex(0);
     }
   }, [commandPaletteOpen]);
+
+  useEffect(() => {
+    setSelectedIndex(0);
+  }, [query]);
 
   if (!commandPaletteOpen) return null;
 
@@ -175,10 +181,35 @@ export const CommandPalette: React.FC = () => {
       },
     })),
   ];
+  const visibleResults = results.slice(0, 15);
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setSelectedIndex((prev) => (visibleResults.length ? (prev + 1) % visibleResults.length : 0));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setSelectedIndex((prev) => (visibleResults.length ? (prev - 1 + visibleResults.length) % visibleResults.length : 0));
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (visibleResults[selectedIndex]) {
+        visibleResults[selectedIndex].action();
+      }
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      setCommandPaletteOpen(false);
+    }
+  };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 p-4 bg-black/60 backdrop-blur-xs">
-      <div className="relative w-full max-w-2xl rounded-2xl border border-[#232D52] bg-[#121831] shadow-2xl overflow-hidden text-slate-100 flex flex-col max-h-[75vh]">
+    <div
+      onClick={() => setCommandPaletteOpen(false)}
+      className="fixed inset-0 z-50 flex items-start justify-center pt-20 p-4 bg-black/60 backdrop-blur-xs"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="relative w-full max-w-2xl rounded-2xl border border-[#232D52] bg-[#121831] shadow-2xl overflow-hidden text-slate-100 flex flex-col max-h-[75vh]"
+      >
         {/* Search Input Bar */}
         <div className="flex items-center gap-3 px-4 py-3.5 border-b border-[#1E2648] bg-[#0E1428]">
           <Search className="w-5 h-5 text-indigo-400 shrink-0" />
@@ -187,6 +218,7 @@ export const CommandPalette: React.FC = () => {
             autoFocus
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={handleKeyDown}
             placeholder="Search students, teachers, parents, subjects, or jump to page... (esc to close)"
             className="w-full bg-transparent text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none"
           />
@@ -195,32 +227,39 @@ export const CommandPalette: React.FC = () => {
               <X className="w-4 h-4" />
             </button>
           )}
-          <span className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-mono rounded bg-slate-800 text-slate-400 border border-slate-700">
+          <button
+            onClick={() => setCommandPaletteOpen(false)}
+            className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-mono rounded bg-slate-800 text-slate-400 border border-slate-700 hover:text-white"
+          >
             ESC
-          </span>
+          </button>
         </div>
 
         {/* Results List */}
         <div className="flex-1 overflow-y-auto p-2 divide-y divide-slate-800/40">
-          {results.length === 0 ? (
+          {visibleResults.length === 0 ? (
             <div className="py-12 text-center text-sm text-slate-500">
               No matching records or pages found for "{query}"
             </div>
           ) : (
-            results.slice(0, 15).map((item) => {
+            visibleResults.map((item, idx) => {
               const Icon = item.icon;
+              const isSelected = idx === selectedIndex;
               return (
                 <button
                   key={item.id}
                   onClick={item.action}
-                  className="flex items-center justify-between w-full px-3.5 py-2.5 rounded-xl hover:bg-[#1A2346] text-left transition-colors group cursor-pointer"
+                  onMouseEnter={() => setSelectedIndex(idx)}
+                  className={`flex items-center justify-between w-full px-3.5 py-2.5 rounded-xl text-left transition-colors group cursor-pointer ${
+                    isSelected ? 'bg-[#1A2346] ring-1 ring-indigo-500/50 text-white' : 'hover:bg-[#1A2346]'
+                  }`}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400 group-hover:bg-indigo-500/20 transition-colors">
+                    <div className={`p-2 rounded-lg transition-colors ${isSelected ? 'bg-indigo-500/20 text-indigo-300' : 'bg-indigo-500/10 text-indigo-400 group-hover:bg-indigo-500/20'}`}>
                       <Icon className="w-4 h-4" />
                     </div>
                     <div>
-                      <div className="text-sm font-semibold text-slate-200 group-hover:text-white">
+                      <div className={`text-sm font-semibold transition-colors ${isSelected ? 'text-white' : 'text-slate-200 group-hover:text-white'}`}>
                         {item.title}
                       </div>
                       {item.meta && (
@@ -233,7 +272,7 @@ export const CommandPalette: React.FC = () => {
                     <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-slate-800/80 text-slate-400">
                       {item.category}
                     </span>
-                    <ArrowRight className="w-4 h-4 text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <ArrowRight className={`w-4 h-4 text-slate-500 transition-opacity ${isSelected ? 'opacity-100 text-indigo-300' : 'opacity-0 group-hover:opacity-100'}`} />
                   </div>
                 </button>
               );

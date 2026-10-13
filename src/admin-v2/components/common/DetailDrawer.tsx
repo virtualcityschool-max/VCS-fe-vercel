@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import {
   X,
@@ -27,6 +27,18 @@ export const DetailDrawer: React.FC = () => {
   const { detailDrawer, closeDetailDrawer, subjects, renewSubscription, cancelSubscription, setCurrentView, rawAttendance, subscriptions, tzIana, toggleUserStatus, addToast } =
     useApp();
   const [activeTab, setActiveTab] = useState<'overview' | 'subjects' | 'attendance' | 'finance' | 'notes'>('overview');
+
+  useEffect(() => {
+    if (!detailDrawer.isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        closeDetailDrawer();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [detailDrawer.isOpen, closeDetailDrawer]);
+
   if (!detailDrawer.isOpen || !detailDrawer.data) return null;
 
   const data = detailDrawer.data;
@@ -286,7 +298,7 @@ export const DetailDrawer: React.FC = () => {
                             <span>·</span>
                             <span className="font-medium text-slate-300">{sub.department}</span>
                             <span>·</span>
-                            <span>{sub.weeklySessions} sessions/week</span>
+                            <span>{sub.weeklySessions} {sub.weeklySessions === 1 ? 'session' : 'sessions'}/week</span>
                           </div>
                         </div>
 

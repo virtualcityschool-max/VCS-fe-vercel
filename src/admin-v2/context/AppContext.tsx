@@ -194,6 +194,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const closeQuickAdd = () => setQuickAddModal((p) => ({ ...p, isOpen: false }));
 
   useEffect(() => {
+    closeDetailDrawer();
+    closeQuickAdd();
+    setCommandPaletteOpen(false);
+  }, [location.pathname, location.search]);
+
+  useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); setCommandPaletteOpen((p) => !p); }
     };
@@ -423,7 +429,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       department: dept as DepartmentName, assignedSubjectIds: taught.map((c: any) => sid(c.id)),
       qualification: u.qualification || u.expertise || '', experienceYears: u.experience_years || 0,
       weeklyHours: Math.round(((recentLoad.hours.get(sid(u.id)) || 0) / 4) * 10) / 10, rating: 0,
-      isActive: u.is_active, _raw: u,
+      _raw: u,
       // Subjects they teach: the saved list, or a suggestion from their profile text.
       ...(() => {
         const saved: string[] = Array.isArray(u.subjects) ? u.subjects : [];
@@ -460,7 +466,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   } as any)), [raw.courses, recentLoad, activeEnrollments, levelName]);
 
   // Classes running right now (for the menu badge).
-  const liveNowCount = useMemo(() => raw.sessions.filter((x: any) => x.status === 'live').length, [raw.sessions]);
+  const liveNowCount = useMemo(
+    () =>
+      raw.sessions.filter((x: any) => {
+        if (x.status !== 'live') return false;
+        const start = new Date(x.scheduled_at);
+        const end = new Date(start.getTime() + (x.duration_mins || 60) * 60000);
+        return Date.now() <= end.getTime();
+      }).length,
+    [raw.sessions]
+  );
 
   // Catalogue: one entry per subject with its batches (each batch is a course above).
   const catalog = useMemo(() => raw.catalog.map((x: any) => ({
@@ -484,6 +499,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const start = new Date(s.scheduled_at);
     const end = new Date(start.getTime() + (s.duration_mins || 60) * 60000);
     const c: any = courseById.get(sid(s.course));
+    const isPastEnd = Date.now() > end.getTime();
     // A class opens by itself at its time, so "live" does not mean it is being
     // taught: 20 minutes in with no teacher, it is flagged as missed.
     const teacherNotJoined = s.status === 'live' && s.session_type !== 'admin_teacher'
@@ -497,7 +513,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       date: ymd(start, tzIana),
       // A class still "scheduled" 15+ minutes after its start never began:
       // shown as missed at once (the server's 5-minute job flags it too).
+      // If a class was live but its scheduled end time has passed, treat as ended (or missed if teacher never joined).
       status: s.status === 'missed' || (s.status === 'scheduled' && start.getTime() < Date.now() - 15 * 60000) || teacherNotJoined ? 'missed'
+        : (s.status === 'live' && isPastEnd) ? (teacherJoinedIds.has(sid(s.id)) ? 'ended' : 'missed')
         : s.status === 'scheduled' ? 'upcoming' : s.status,
       teacherNotJoined,
       recurrence: s.is_recurring ? 'Weekly' : 'One-off', meetingLink: s.meeting_link || undefined,

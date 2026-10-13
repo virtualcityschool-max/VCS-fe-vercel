@@ -146,23 +146,39 @@ export const EvaluationsView: React.FC = () => {
                 const q = row.quiz_totals || {};
                 const c = row.combined_totals || {};
                 const f = row.final_totals || {};
-                const hasMarks = (a.computed_total || 0) + (q.computed_total || 0) + (f.total_marks || 0) > 0;
-                const finalPct = hasMarks ? Math.round(f.percentage ?? c.computed_percentage ?? 0) : null;
+                const hasGraded = a.has_graded || q.has_graded || c.has_graded || f.is_override;
+                const finalPct = hasGraded && f.percentage != null ? Math.round(f.percentage) : null;
                 const letterGrade = finalPct === null ? '—' : f.grade || gradeFor(finalPct);
-                const result = !hasMarks ? 'No marks yet' : (f.result || c.computed_result) === 'passed' ? 'Passed' : 'Below pass mark';
+                const result = !hasGraded
+                  ? 'No marks yet'
+                  : (f.result || c.computed_result) === 'passed'
+                  ? 'Passed'
+                  : 'Below pass mark';
 
                 return (
                   <tr key={row.enrollment_id} className="hover:bg-[#1A2346]/40 transition-colors">
                     <td className="py-3 px-4 font-semibold text-slate-100">{row.student?.username}</td>
                     <td className="py-3 px-4 font-mono text-indigo-300">{row.student?.roll_no ?? '—'}</td>
                     <td className="py-3 px-4 text-center font-mono text-slate-200">
-                      {a.computed_total ? `${a.computed_obtained} / ${a.computed_total}` : '—'}
+                      {a.computed_total ? (
+                        a.has_graded
+                          ? `${a.computed_obtained} / ${a.computed_total}`
+                          : `${a.computed_obtained} / ${a.computed_total} (Ungraded)`
+                      ) : '—'}
                     </td>
                     <td className="py-3 px-4 text-center font-mono text-slate-200">
-                      {q.computed_total ? `${q.computed_obtained} / ${q.computed_total}` : '—'}
+                      {q.computed_total ? (
+                        q.has_graded
+                          ? `${q.computed_obtained} / ${q.computed_total}`
+                          : `${q.computed_obtained} / ${q.computed_total} (Ungraded)`
+                      ) : '—'}
                     </td>
                     <td className="py-3 px-4 text-center font-mono text-slate-200">
-                      {c.computed_total ? `${c.computed_obtained} / ${c.computed_total}` : '—'}
+                      {c.computed_total ? (
+                        hasGraded
+                          ? `${c.computed_obtained} / ${c.computed_total}`
+                          : '—'
+                      ) : '—'}
                     </td>
                     <td className="py-3 px-4 text-center font-mono font-bold text-slate-100">
                       {finalPct === null ? '—' : `${finalPct}%`}

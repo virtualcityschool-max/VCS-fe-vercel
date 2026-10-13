@@ -85,7 +85,7 @@ const StudentQuizDetail = () => {
 
   // Initialise answer map when quiz loads, restoring anything already answered in this attempt
   useEffect(() => {
-    if (!currentQuiz?.questions) return;
+    if (!currentQuiz?.questions?.length) return;
     const saved = currentQuiz.my_attempt && !currentQuiz.my_submission ? readSavedAnswers(answersKey) : {};
     const init = {};
     currentQuiz.questions.forEach((q) => {
@@ -96,7 +96,7 @@ const StudentQuizDetail = () => {
       }
     });
     setAnswers(init);
-  }, [currentQuiz?.id]);
+  }, [currentQuiz?.id, currentQuiz?.questions?.length, currentQuiz?.my_attempt?.started_at, answersKey]);
 
   useEffect(() => {
     if (!isRunning || !Object.keys(answers).length) return;
@@ -113,6 +113,7 @@ const StudentQuizDetail = () => {
     const offset = Date.now() - new Date(attempt.server_now).getTime();
     const endsAt = new Date(attempt.ends_at).getTime() + offset;
     const tick = () => setSecondsLeft(Math.max(0, Math.ceil((endsAt - Date.now()) / 1000)));
+    tick();
     const timer = setInterval(tick, 250);
     return () => clearInterval(timer);
   }, [isRunning, attempt?.ends_at, attempt?.server_now]);
