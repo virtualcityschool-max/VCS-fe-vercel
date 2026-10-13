@@ -15,6 +15,7 @@ import {
   Repeat,
   ShieldCheck,
   Info,
+  AlertCircle,
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { inputCls, Field } from './FormControls';
@@ -26,7 +27,7 @@ export const AdminPlanClassModal: React.FC<{
   onClose: () => void;
   onSuccess?: (createdSession: any) => void;
 }> = ({ isOpen, onClose, onSuccess }) => {
-  const { subjects = [], teachers = [], rawCourses = [], levelOptions = [], reload, tzIana, addToast } = useApp() as any;
+  const { subjects = [], teachers = [], rawCourses = [], enrollments = [], levelOptions = [], reload, tzIana, addToast } = useApp() as any;
 
   // Active scheduling mode: 'scheduled' | 'now' | 'delayed'
   const [mode, setMode] = useState<'scheduled' | 'now' | 'delayed'>('scheduled');
@@ -78,6 +79,20 @@ export const AdminPlanClassModal: React.FC<{
       return lvl.includes(selectedLevel.toLowerCase());
     });
   }, [rawCourses, subjects, selectedLevel]);
+
+  // Count active enrollments for each course to ensure admin plans for the right student cohort
+  const getEnrollmentsForCourse = useMemo(() => {
+    return (courseId: any) => {
+      if (!courseId) return [];
+      return (enrollments || []).filter(
+        (e: any) => String(e.subjectId) === String(courseId) && (e.status === 'Active' || e.status === 'active')
+      );
+    };
+  }, [enrollments]);
+
+  const selectedCourseEnrollments = useMemo(() => {
+    return getEnrollmentsForCourse(selectedCourseId);
+  }, [getEnrollmentsForCourse, selectedCourseId]);
 
   // Calculate day code, full name, and formatted start date from scheduledDate
   const { dayCode, dayFullName, formattedStartDate } = useMemo(() => {
@@ -399,12 +414,42 @@ export const AdminPlanClassModal: React.FC<{
                   className={`${inputCls} cursor-pointer`}
                 >
                   <option value="">-- Choose Course ({filteredCourses.length} available) --</option>
-                  {filteredCourses.map((c: any) => (
-                    <option key={c.id} value={c.id}>
-                      {c.title || c.name} {c.category?.name ? `(${c.category.name})` : ''}
-                    </option>
-                  ))}
+                  {filteredCourses.map((c: any) => {
+                    const count = getEnrollmentsForCourse(c.id).length;
+                    return (
+                      <option key={c.id} value={c.id}>
+                        {c.title || c.name} {c.category?.name ? `(${c.category.name})` : ''} — [{count} {count === 1 ? 'student' : 'students'} enrolled]
+                      </option>
+                    );
+                  })}
                 </select>
+
+                {selectedCourseId && (
+                  <div className="mt-2 animate-in fade-in">
+                    {selectedCourseEnrollments.length === 0 ? (
+                      <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[11px] flex items-center gap-2">
+                        <AlertCircle className="w-4 h-4 shrink-0 text-amber-400" />
+                        <span><strong>Warning:</strong> 0 students enrolled. Planned classes will not appear on any student dashboard.</span>
+                      </div>
+                    ) : selectedCourseEnrollments.length === 1 ? (
+                      <div className="p-2.5 rounded-xl bg-blue-500/10 border border-blue-500/30 text-blue-300 text-[11px] flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 truncate">
+                          <Users className="w-3.5 h-3.5 shrink-0 text-blue-400" />
+                          <span className="truncate"><strong>1 enrolled student:</strong> {selectedCourseEnrollments[0]?.studentName || 'Student'}</span>
+                        </div>
+                        <span className="text-[10px] bg-blue-500/20 px-2 py-0.5 rounded-full text-blue-300 font-bold shrink-0">1 enrolled</span>
+                      </div>
+                    ) : (
+                      <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-[11px] flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 truncate">
+                          <Users className="w-3.5 h-3.5 shrink-0 text-emerald-400" />
+                          <span className="truncate"><strong>{selectedCourseEnrollments.length} enrolled:</strong> {selectedCourseEnrollments.slice(0, 3).map((e: any) => e.studentName).join(', ')}{selectedCourseEnrollments.length > 3 ? ` +${selectedCourseEnrollments.length - 3} more` : ''}</span>
+                        </div>
+                        <span className="text-[10px] bg-emerald-500/20 px-2 py-0.5 rounded-full text-emerald-300 font-bold shrink-0">{selectedCourseEnrollments.length} enrolled</span>
+                      </div>
+                    )}
+                  </div>
+                )}
               </Field>
             </div>
 

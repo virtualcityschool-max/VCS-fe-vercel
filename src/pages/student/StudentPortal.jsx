@@ -79,6 +79,16 @@ const StudentPortal = () => {
     }
   }, [dispatch, hasMounted]);
 
+  // Silent auto-refresh every 60s so newly planned sessions appear without needing a page reload
+  useEffect(() => {
+    if (!hasMounted) return;
+    const interval = setInterval(() => {
+      dispatch(fetchStudentDashboard({ silent: true }));
+      dispatch(fetchStudentSessions());
+    }, 60000);
+    return () => clearInterval(interval);
+  }, [dispatch, hasMounted]);
+
   // Show loading state while mounting or loading
   if (!hasMounted || isLoading) {
     return (

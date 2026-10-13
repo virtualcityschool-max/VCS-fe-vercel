@@ -10,7 +10,7 @@ import { extractApiErrorMessage } from "../../utils/apiErrorHandler";
 // Async thunks
 export const fetchStudentDashboard = createAsyncThunk(
   "studentDashboard/fetchDashboard",
-  async (_, { rejectWithValue }) => {
+  async (_arg, { rejectWithValue }) => {
     try {
       const dashboardData = await studentService.getDashboard();
       return dashboardData;
@@ -436,8 +436,10 @@ const studentDashboardSlice = createSlice({
   extraReducers: (builder) => {
     builder
       // Fetch Dashboard
-      .addCase(fetchStudentDashboard.pending, (state) => {
-        state.isLoading = true;
+      .addCase(fetchStudentDashboard.pending, (state, action) => {
+        if (!action.meta?.arg?.silent) {
+          state.isLoading = true;
+        }
         state.error = null;
       })
       .addCase(fetchStudentDashboard.fulfilled, (state, action) => {
@@ -455,7 +457,9 @@ const studentDashboardSlice = createSlice({
       })
       .addCase(fetchStudentDashboard.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload;
+        if (!action.meta?.arg?.silent) {
+          state.error = action.payload;
+        }
       })
 
       // Join Live Session
