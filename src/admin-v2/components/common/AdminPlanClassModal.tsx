@@ -41,8 +41,7 @@ export const AdminPlanClassModal: React.FC<{
   const todayStr = useMemo(() => new Date().toISOString().split('T')[0], []);
   const [scheduledDate, setScheduledDate] = useState<string>(todayStr);
   const [scheduledTime, setScheduledTime] = useState<string>('16:00');
-  const [isRecurring, setIsRecurring] = useState<boolean>(true);
-  const [recurrenceWeeks, setRecurrenceWeeks] = useState<'1' | '2' | '3' | '4' | 'custom'>('1');
+  const [classCount, setClassCount] = useState<'1' | '2' | '3' | '4' | 'custom'>('1');
   const [customEndDate, setCustomEndDate] = useState<string>('');
 
   const dateInputRef = React.useRef<HTMLInputElement>(null);
@@ -96,17 +95,17 @@ export const AdminPlanClassModal: React.FC<{
   }, [scheduledDate]);
 
   // Calculate series recurrence end date
+  // For N classes (weekly): end date is (N - 1) * 7 days after start date
   const calculatedEndDate = useMemo(() => {
     if (!scheduledDate) return '';
-    if (recurrenceWeeks === 'custom') {
-      return customEndDate || scheduledDate;
-    }
+    if (classCount === '1') return scheduledDate;
+    if (classCount === 'custom') return customEndDate || scheduledDate;
     const parts = scheduledDate.split('-').map(Number);
     const d = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2], 12, 0, 0));
-    const weeks = Number(recurrenceWeeks) || 1;
-    d.setUTCDate(d.getUTCDate() + weeks * 7);
+    const count = Number(classCount) || 2;
+    d.setUTCDate(d.getUTCDate() + (count - 1) * 7);
     return d.toISOString().split('T')[0];
-  }, [scheduledDate, recurrenceWeeks, customEndDate]);
+  }, [scheduledDate, classCount, customEndDate]);
 
   // Formatted display of end date
   const formattedEndDate = useMemo(() => {
@@ -115,6 +114,57 @@ export const AdminPlanClassModal: React.FC<{
     const d = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2], 12, 0, 0));
     return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
   }, [calculatedEndDate]);
+
+  // Breakdown list of all exact class occurrences for full admin clarity
+  const scheduledClassesList = useMemo(() => {
+    if (!scheduledDate) return [];
+    const parts = scheduledDate.split('-').map(Number);
+
+    if (classCount === '1') {
+      const d = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2], 12, 0, 0));
+      return [{
+        index: 1,
+        dateStr: d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' }),
+        isoDate: scheduledDate,
+      }];
+    }
+
+    if (classCount === '2' || classCount === '3' || classCount === '4') {
+      const total = Number(classCount);
+      const list = [];
+      for (let i = 0; i < total; i++) {
+        const d = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2], 12, 0, 0));
+        d.setUTCDate(d.getUTCDate() + i * 7);
+        list.push({
+          index: i + 1,
+          dateStr: d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' }),
+          isoDate: d.toISOString().split('T')[0],
+        });
+      }
+      return list;
+    }
+
+    if (classCount === 'custom') {
+      if (!customEndDate) return [];
+      const start = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2], 12, 0, 0));
+      const endParts = customEndDate.split('-').map(Number);
+      const end = new Date(Date.UTC(endParts[0], endParts[1] - 1, endParts[2], 12, 0, 0));
+      const list = [];
+      let cur = new Date(start.getTime());
+      let idx = 1;
+      while (cur <= end) {
+        list.push({
+          index: idx++,
+          dateStr: cur.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' }),
+          isoDate: cur.toISOString().split('T')[0],
+        });
+        cur.setUTCDate(cur.getUTCDate() + 7);
+      }
+      return list;
+    }
+
+    return [];
+  }, [scheduledDate, classCount, customEndDate]);
 
   // When course changes: auto-fill Title and Teacher!
   const handleCourseChange = (courseId: string) => {
@@ -160,14 +210,16 @@ export const AdminPlanClassModal: React.FC<{
         isoDateTime = dt.toISOString();
       }
 
+      const isRecurringSeries = mode === 'scheduled' && classCount !== '1';
+
       const payload: any = {
         course: Number(selectedCourseId),
         title: title.trim() || 'Live Class',
         scheduled_at: isoDateTime,
-        is_recurring: mode === 'scheduled' ? isRecurring : false,
+        is_recurring: isRecurringSeries,
       };
 
-      if (mode === 'scheduled' && isRecurring) {
+      if (isRecurringSeries) {
         payload.recurrence_days = [dayCode];
         payload.recurrence_end_date = calculatedEndDate;
       }
@@ -496,146 +548,125 @@ export const AdminPlanClassModal: React.FC<{
                   </Field>
                 </div>
 
-                {/* Class Frequency: Single vs Recurring */}
+                {/* How Many Classes To Generate: Single vs Series */}
                 <div className="space-y-3 pt-2 border-t border-[#1E2648]">
-                  <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider">
-                    Class Frequency
-                  </label>
-                  
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                    <button
-                      type="button"
-                      onClick={() => setIsRecurring(false)}
-                      className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex items-start gap-2.5 ${
-                        !isRecurring
-                          ? 'bg-indigo-600/20 border-indigo-400 text-white shadow-sm ring-1 ring-indigo-400/50'
-                          : 'bg-[#0B0F20] border-[#1E2648] text-slate-400 hover:text-slate-200 hover:border-slate-700'
-                      }`}
-                    >
-                      <div className={`mt-0.5 w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${
-                        !isRecurring ? 'border-indigo-400 bg-indigo-500' : 'border-slate-600'
-                      }`}>
-                        {!isRecurring && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
-                      </div>
-                      <div>
-                        <div className="text-xs font-bold text-white">Single Class (One-Off)</div>
-                        <div className="text-[11px] text-slate-400 mt-0.5">Runs once on {formattedStartDate || 'selected date'} only</div>
-                      </div>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setIsRecurring(true)}
-                      className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex items-start gap-2.5 ${
-                        isRecurring
-                          ? 'bg-indigo-600/20 border-indigo-400 text-white shadow-sm ring-1 ring-indigo-400/50'
-                          : 'bg-[#0B0F20] border-[#1E2648] text-slate-400 hover:text-slate-200 hover:border-slate-700'
-                      }`}
-                    >
-                      <div className={`mt-0.5 w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${
-                        isRecurring ? 'border-indigo-400 bg-indigo-500' : 'border-slate-600'
-                      }`}>
-                        {isRecurring && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
-                      </div>
-                      <div>
-                        <div className="text-xs font-bold text-white flex items-center gap-1.5">
-                          <span>Weekly Series</span>
-                          <span className="text-[9px] px-1.5 py-0.2 rounded bg-indigo-500/25 text-indigo-300 font-bold border border-indigo-400/30">Active</span>
-                        </div>
-                        <div className="text-[11px] text-slate-400 mt-0.5">Repeats every {dayFullName} at {scheduledTime} AST</div>
-                      </div>
-                    </button>
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider">
+                      How Many Classes To Plan?
+                    </label>
+                    <span className="text-[11px] text-slate-400">
+                      Pick single class or choose weekly series length
+                    </span>
                   </div>
 
-                  {/* Recurring Series Duration Options */}
-                  {isRecurring && (
-                    <div className="p-3.5 rounded-xl bg-[#090D1C] border border-[#1E2648] space-y-3 animate-in fade-in">
-                      <div className="flex items-center justify-between flex-wrap gap-2">
-                        <span className="text-[11px] font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-                          <Repeat className="w-3.5 h-3.5 text-indigo-400" />
-                          <span>Series Length (Weeks)</span>
-                        </span>
-                        <span className="text-[11px] text-emerald-400 font-semibold">
-                          Every {dayFullName} until {formattedEndDate}
-                        </span>
-                      </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-1.5">
+                    {[
+                      { key: '1', label: 'Single Class', badge: '1 Class', sub: 'No repeat · One-off' },
+                      { key: '2', label: '2 Classes', badge: '2 Weeks', sub: '2 classes total' },
+                      { key: '3', label: '3 Classes', badge: '3 Weeks', sub: '3 classes total' },
+                      { key: '4', label: '4 Classes', badge: '4 Weeks', sub: '1 month · 4 classes' },
+                      { key: 'custom', label: 'Custom', badge: 'Calendar', sub: 'Pick end date' },
+                    ].map((opt) => (
+                      <button
+                        key={opt.key}
+                        type="button"
+                        onClick={() => setClassCount(opt.key as any)}
+                        className={`p-2.5 rounded-xl border text-center transition-all cursor-pointer ${
+                          classCount === opt.key
+                            ? 'bg-indigo-600 text-white border-indigo-400 font-bold shadow-md shadow-indigo-600/30 ring-2 ring-indigo-400/50'
+                            : 'bg-[#141C3C] text-slate-300 hover:text-white hover:bg-[#1A2552] border-[#2A396A]'
+                        }`}
+                      >
+                        <div className="text-xs font-bold leading-tight">{opt.label}</div>
+                        <div className="text-[10px] text-indigo-300 font-semibold mt-0.5 leading-tight">{opt.badge}</div>
+                        <div className="text-[9.5px] opacity-75 mt-0.5 leading-tight">{opt.sub}</div>
+                      </button>
+                    ))}
+                  </div>
 
-                      {/* 1 Week (Default), 2 Weeks, 3 Weeks, 4 Weeks, Custom */}
-                      <div className="grid grid-cols-2 sm:grid-cols-5 gap-1.5">
-                        {[
-                          { key: '1', label: '1 Week', sub: 'Default (2 classes)' },
-                          { key: '2', label: '2 Weeks', sub: '3 classes total' },
-                          { key: '3', label: '3 Weeks', sub: '4 classes total' },
-                          { key: '4', label: '4 Weeks', sub: '1 Month (5 classes)' },
-                          { key: 'custom', label: 'Custom', sub: 'Pick End Date' },
-                        ].map((opt) => (
-                          <button
-                            key={opt.key}
-                            type="button"
-                            onClick={() => setRecurrenceWeeks(opt.key as any)}
-                            className={`p-2.5 rounded-xl border text-center transition-all cursor-pointer ${
-                              recurrenceWeeks === opt.key
-                                ? 'bg-indigo-600 text-white border-indigo-400 font-bold shadow-md shadow-indigo-600/30 ring-1 ring-white/20'
-                                : 'bg-[#141C3C] text-slate-300 hover:text-white hover:bg-[#1A2552] border-[#2A396A]'
-                            }`}
-                          >
-                            <div className="text-xs font-bold leading-tight">{opt.label}</div>
-                            <div className="text-[10px] opacity-80 mt-1 leading-tight">{opt.sub}</div>
-                          </button>
-                        ))}
-                      </div>
-
-                      {recurrenceWeeks === 'custom' && (
-                        <div className="pt-1">
-                          <Field label="Custom Series End Date" required hint="Must be on or after start date">
-                            <div
-                              onClick={() => {
-                                try { customEndDateRef.current?.showPicker?.(); } catch (_) { customEndDateRef.current?.focus(); }
-                              }}
-                              className="vcs-picker-box relative flex items-center justify-between rounded-xl px-3 py-2 cursor-pointer shadow-sm"
-                            >
-                              <div className="flex items-center gap-2.5 flex-1 min-w-0">
-                                <div className="w-8 h-8 rounded-lg bg-indigo-500/25 border border-indigo-400/40 flex items-center justify-center text-indigo-300 shrink-0">
-                                  <Calendar className="w-4 h-4 text-indigo-300" />
-                                </div>
-                                <input
-                                  ref={customEndDateRef}
-                                  type="date"
-                                  required
-                                  min={scheduledDate}
-                                  value={customEndDate || calculatedEndDate}
-                                  onChange={(e) => setCustomEndDate(e.target.value)}
-                                  className="w-full bg-transparent text-white font-bold text-sm tracking-wide outline-none cursor-pointer"
-                                />
-                              </div>
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  try { customEndDateRef.current?.showPicker?.(); } catch (_) { customEndDateRef.current?.focus(); }
-                                }}
-                                className="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold shadow-md shadow-indigo-600/30 transition-all shrink-0 cursor-pointer flex items-center gap-1.5 border border-indigo-400/30"
-                              >
-                                <Calendar className="w-3.5 h-3.5" />
-                                <span>Pick Date</span>
-                              </button>
+                  {classCount === 'custom' && (
+                    <div className="pt-1">
+                      <Field label="Custom Series End Date" required hint="Must be on or after start date">
+                        <div
+                          onClick={() => {
+                            try { customEndDateRef.current?.showPicker?.(); } catch (_) { customEndDateRef.current?.focus(); }
+                          }}
+                          className="vcs-picker-box relative flex items-center justify-between rounded-xl px-3 py-2 cursor-pointer shadow-sm"
+                        >
+                          <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                            <div className="w-8 h-8 rounded-lg bg-indigo-500/25 border border-indigo-400/40 flex items-center justify-center text-indigo-300 shrink-0">
+                              <Calendar className="w-4 h-4 text-indigo-300" />
                             </div>
-                          </Field>
+                            <input
+                              ref={customEndDateRef}
+                              type="date"
+                              required
+                              min={scheduledDate}
+                              value={customEndDate || calculatedEndDate}
+                              onChange={(e) => setCustomEndDate(e.target.value)}
+                              className="w-full bg-transparent text-white font-bold text-sm tracking-wide outline-none cursor-pointer"
+                            />
+                          </div>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              try { customEndDateRef.current?.showPicker?.(); } catch (_) { customEndDateRef.current?.focus(); }
+                            }}
+                            className="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold shadow-md shadow-indigo-600/30 transition-all shrink-0 cursor-pointer flex items-center gap-1.5 border border-indigo-400/30"
+                          >
+                            <Calendar className="w-3.5 h-3.5" />
+                            <span>Pick Date</span>
+                          </button>
                         </div>
-                      )}
-
-                      {/* Google Meet & Timetable Safety Notice */}
-                      <div className="p-2.5 rounded-lg bg-indigo-950/40 border border-indigo-500/20 text-[11px] text-indigo-200/90 space-y-1">
-                        <div className="flex items-center gap-1.5 font-semibold text-indigo-300">
-                          <ShieldCheck className="w-3.5 h-3.5 shrink-0 text-emerald-400" />
-                          <span>Google Meet Safe · Single Master Meeting Room</span>
-                        </div>
-                        <p className="text-[10.5px] leading-relaxed text-slate-300 pl-5">
-                          All weekly classes in this series share <b>1 master Google Meet room ID</b> on Google Calendar. Google Meet creation limits are never exceeded. All future lectures across the series are placed immediately on the timetable upon creation.
-                        </p>
-                      </div>
+                      </Field>
                     </div>
                   )}
+
+                  {/* Clarity Summary Box: Planner sees exactly how many classes are generated! */}
+                  <div className="p-3.5 rounded-xl bg-[#090E24] border-2 border-indigo-500/40 space-y-2.5 shadow-lg">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs border border-emerald-500/30">
+                          {scheduledClassesList.length}
+                        </div>
+                        <span className="text-xs font-bold text-white uppercase tracking-wider">
+                          Total Classes Being Generated:{' '}
+                          <span className="text-emerald-400 underline decoration-emerald-500/50">
+                            {scheduledClassesList.length} {scheduledClassesList.length === 1 ? 'Class' : 'Classes'}
+                          </span>
+                        </span>
+                      </div>
+                      <span className="text-[11px] text-indigo-300 font-semibold font-mono bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20">
+                        {classCount === '1' ? 'Single One-Off Class' : `Weekly Series · Every ${dayFullName}`}
+                      </span>
+                    </div>
+
+                    {/* Breakdown of class dates */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-1.5 border-t border-white/10">
+                      {scheduledClassesList.map((item) => (
+                        <div
+                          key={item.index}
+                          className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-[#141C3C] border border-[#233162] text-[11px]"
+                        >
+                          <span className="w-5 h-5 rounded-full bg-indigo-600/40 text-indigo-300 flex items-center justify-center font-bold text-[10px] shrink-0 border border-indigo-400/30">
+                            #{item.index}
+                          </span>
+                          <span className="font-semibold text-slate-200">{item.dateStr}</span>
+                          <span className="text-[10px] text-slate-400 ml-auto font-mono">{scheduledTime} AST</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    {classCount !== '1' && (
+                      <div className="pt-1 flex items-center gap-1.5 text-[10.5px] text-indigo-200/80">
+                        <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                        <span>
+                          All {scheduledClassesList.length} classes share <b>1 master Google Meet room ID</b>. Google Meet rate limits are never exceeded.
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             )}
@@ -686,7 +717,9 @@ export const AdminPlanClassModal: React.FC<{
                 disabled={submitting}
                 className="disabled:opacity-60 px-5 py-2 text-xs font-semibold rounded-xl bg-[#6D5BFF] hover:bg-[#5B47FB] text-white shadow-md shadow-indigo-600/20 transition-all cursor-pointer flex items-center gap-1.5"
               >
-                {submitting ? 'Creating Class…' : 'Create & Schedule Class'}
+                {submitting
+                  ? `Creating ${scheduledClassesList.length} ${scheduledClassesList.length === 1 ? 'Class' : 'Classes'}…`
+                  : `Create & Schedule ${scheduledClassesList.length} ${scheduledClassesList.length === 1 ? 'Class' : 'Classes'}`}
               </button>
             </div>
 
