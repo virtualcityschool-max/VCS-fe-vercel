@@ -13,6 +13,7 @@ import TimezoneTag from "../../components/ui/TimezoneTag";
 import { useDateFormatters } from "../../hooks";
 import DigitalSessionClock from "../../components/common/DigitalSessionClock";
 import IssueInJoiningClassBanner from "../../components/common/IssueInJoiningClassBanner";
+import { canStudentJoin } from "../../utils/helper/StartSession";
 
 const STATUS_COLORS = {
   scheduled: "bg-blue-500/10 text-blue-400 border-blue-500/20",
@@ -77,7 +78,7 @@ const SessionListView = ({ sessions, formatTime, formatDate, onJoin, joiningId }
               }`}>
                 {session.status || "scheduled"}
               </span>
-              {(session.status === "live" || session.can_join) && onJoin && (
+              {canStudentJoin(session) && onJoin && (
                 <button
                   onClick={() => onJoin(session)}
                   disabled={joiningId === session.id}

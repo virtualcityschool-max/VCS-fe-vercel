@@ -27,7 +27,38 @@ const DAY_MAP = { SUN: 0, MON: 1, TUE: 2, WED: 3, THU: 4, FRI: 5, SAT: 6 };
     const start = new Date(scheduleAt).getTime();
     return now > (start + SESSION_DURATION_MS);
   };
-  export const getWindowLabel = (scheduleAt, timeZone, abbr = "") => {
+  /**
+   * Where a class stands for a student right now:
+   *  "upcoming"  – more than 20 min before the start
+   *  "open"      – join window open (20 min before the start until the start)
+   *  "live"      – the teacher has started it, or the start time has passed
+   *  "ended"     – ended/missed, or 90 min past the start
+   *  "cancelled"
+   */
+  export const getSessionPhase = (session, now = Date.now()) => {
+    const status = session?.status;
+    if (status === "cancelled") return "cancelled";
+    if (status === "ended" || status === "missed" || session?.ended_at) return "ended";
+    const at = session?.scheduled_at || session?.schedule_at;
+    const start = at ? new Date(at).getTime() : NaN;
+    if (Number.isNaN(start)) return status === "live" ? "live" : "upcoming";
+    if (now > start + SESSION_DURATION_MS) return "ended";
+    if (status === "live" || now >= start) return "live";
+    if (now >= start - SESSION_EARLY_BUFFER_MS) return "open";
+    return "upcoming";
+  };
+
+  export const isSessionOver = (session, now = Date.now()) => {
+    const phase = getSessionPhase(session, now);
+    return phase === "ended" || phase === "cancelled";
+  };
+
+  export const canStudentJoin = (session, now = Date.now()) => {
+    const phase = getSessionPhase(session, now);
+    return phase === "live" || phase === "open";
+  };
+
+  export const getWindowLabel =(scheduleAt, timeZone, abbr = "") => {
     if (scheduleAt) {
       const windowStart = new Date(scheduleAt);
       const windowEnd = new Date(windowStart.getTime() + SESSION_WINDOW_MS);

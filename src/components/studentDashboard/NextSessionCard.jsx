@@ -10,6 +10,7 @@ import { toastManager } from "../../utils/toastManager";
 import { extractApiErrorMessage } from "../../utils/apiErrorHandler";
 import ConfirmDialog from "../common/ConfirmDialog";
 import SessionCountdown from "../common/SessionCountdown";
+import { canStudentJoin } from "../../utils/helper/StartSession";
 
 const NextSessionCard = () => {
   const dispatch = useDispatch();
@@ -27,7 +28,7 @@ const NextSessionCard = () => {
     }
 
     const canJoinNow =
-      nextSession?.can_join === true || nextSession?.status === "live";
+      nextSession?.can_join === true || canStudentJoin(nextSession);
 
     if (!canJoinNow) {
       toastManager.error("Session is not available to join at this time");

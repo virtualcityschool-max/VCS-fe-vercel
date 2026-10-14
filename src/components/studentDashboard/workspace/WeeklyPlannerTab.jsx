@@ -9,6 +9,7 @@ import {
 } from "../../../store/slices/studentDashboardSlice";
 import { useDateFormatters } from "../../../hooks/useDateFormatters";
 import { toastManager } from "../../../utils/toastManager";
+import { isSessionOver } from "../../../utils/helper/StartSession";
 
 const WeeklyPlannerTab = ({ onOpenLiveSchedule }) => {
   const dispatch = useDispatch();
@@ -95,7 +96,7 @@ const WeeklyPlannerTab = ({ onOpenLiveSchedule }) => {
       const diffMins = s.scheduled_at
         ? Math.floor((dateObj.getTime() - Date.now()) / 60000)
         : null;
-      const canJoin = Boolean(
+      const canJoin = !isSessionOver(s) && Boolean(
         s.meeting_link ||
         s.status === "live" ||
         s.can_join === true

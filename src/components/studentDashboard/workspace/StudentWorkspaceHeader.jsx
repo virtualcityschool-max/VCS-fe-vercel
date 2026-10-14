@@ -14,6 +14,7 @@ import { TuitionPill } from "./Tuition";
 import { getDisplayName } from "../../../utils/userDisplay";
 import { getStorageUrl } from "../../../utils/storageUrl";
 import { getTimezoneAbbr, formatTime } from "../../../utils/validation";
+import { canStudentJoin, getSessionPhase, isSessionOver } from "../../../utils/helper/StartSession";
 
 const StudentWorkspaceHeader = ({ onResolveOverdue, onJoinNextClass, onOpenTimezone }) => {
   const dispatch = useDispatch();
@@ -70,8 +71,8 @@ const StudentWorkspaceHeader = ({ onResolveOverdue, onJoinNextClass, onOpenTimez
 
   // Real live next session from Redux (no dummy fallbacks)
   const activeNextSession =
-    nextSession ||
-    (liveSchedule || []).find((s) => s.can_join || s.status === "scheduled") ||
+    (nextSession && !isSessionOver(nextSession) ? nextSession : null) ||
+    (liveSchedule || []).find((s) => !isSessionOver(s)) ||
     null;
 
   // Countdown timer calculation
@@ -94,9 +95,10 @@ const StudentWorkspaceHeader = ({ onResolveOverdue, onJoinNextClass, onOpenTimez
     return () => clearInterval(interval);
   }, [activeNextSession]);
 
-  const isJoinWindowOpen = minsRemaining !== null && minsRemaining <= 30;
+  const isJoinWindowOpen = Boolean(activeNextSession) && canStudentJoin(activeNextSession);
+  const isNextLive = Boolean(activeNextSession) && getSessionPhase(activeNextSession) === "live";
   const unlockDate = activeNextSession?.scheduled_at
-    ? new Date(new Date(activeNextSession.scheduled_at).getTime() - 30 * 60000)
+    ? new Date(new Date(activeNextSession.scheduled_at).getTime() - 20 * 60000)
     : null;
   const unlockTime = unlockDate ? formatTime(unlockDate.toISOString(), timezone) : "30m prior";
 
@@ -256,17 +258,17 @@ const StudentWorkspaceHeader = ({ onResolveOverdue, onJoinNextClass, onOpenTimez
                   className="w-full inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition shadow-lg shadow-emerald-900/40 cursor-pointer"
                 >
                   <i className="fas fa-video text-xs" />
-                  <span>Join Google Meet (Starts in {minsRemaining}m)</span>
+                  <span>{isNextLive ? "Join Google Meet (Live now)" : `Join Google Meet (Starts in ${minsRemaining}m)`}</span>
                 </a>
                 <p className="text-[10px] text-emerald-400 text-center font-medium">
-                  Classroom open! (Join window active 30 mins before start)
+                  Classroom open! (Join window opens 20 mins before start)
                 </p>
               </div>
             ) : (
               <div className="mt-3 p-2 rounded-xl bg-white/5 border border-white/10 text-[11px] text-slate-400 flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
                   <i className="fas fa-lock text-indigo-400 text-xs" />
-                  <span>Google Meet opens 30 min before class</span>
+                  <span>Google Meet opens 20 min before class</span>
                 </div>
                 <span className="font-mono text-indigo-300 text-[10px] font-bold">
                   Opens {unlockTime}

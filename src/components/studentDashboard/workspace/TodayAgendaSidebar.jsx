@@ -13,7 +13,7 @@ import ReferralLinkCard from "../../common/ReferralLinkCard";
 import StudentWorkspaceCard from "./StudentWorkspaceCard";
 import { toastManager } from "../../../utils/toastManager";
 import DigitalSessionClock from "../../common/DigitalSessionClock";
-import { isWithinSessionWindow, isSessionExpired } from "../../../utils/helper/StartSession";
+import { isWithinSessionWindow, isSessionExpired, getSessionPhase, isSessionOver } from "../../../utils/helper/StartSession";
 import IssueInJoiningClassBanner from "../../common/IssueInJoiningClassBanner";
 
 const TodayAgendaSidebar = ({
@@ -48,7 +48,7 @@ const TodayAgendaSidebar = ({
   };
   const todayStr = dayKey(currentTime);
 
-  // Merge sessions from /classroom/sessions/ and live_schedule for today
+  // Merge sessions from /classroom/sessions/ and live_schedule for today (finished classes drop off)
   const sessions = useMemo(() => {
     const map = new Map();
     (allSessions || []).forEach((s) => {
@@ -61,14 +61,14 @@ const TodayAgendaSidebar = ({
     });
     const list = Array.from(map.values()).filter((s) => {
       if (!s.scheduled_at) return false;
-      return dayKey(s.scheduled_at) === todayStr;
+      return dayKey(s.scheduled_at) === todayStr && !isSessionOver(s, currentTime);
     });
     return list.sort((a, b) => {
       if (a.status === "live" && b.status !== "live") return -1;
       if (b.status === "live" && a.status !== "live") return 1;
       return new Date(a.scheduled_at) - new Date(b.scheduled_at);
     });
-  }, [allSessions, liveSchedule, todayStr, timezone]);
+  }, [allSessions, liveSchedule, todayStr, timezone, currentTime]);
 
   const handleJoinSession = async (sessionToJoin) => {
     if (!sessionToJoin) return;
@@ -159,11 +159,7 @@ const TodayAgendaSidebar = ({
               const diffMins = Math.floor(
                 (new Date(session.scheduled_at).getTime() - currentTime) / 60000
               );
-              const isJoinable = Boolean(
-                session.meeting_link ||
-                session.status === "live" ||
-                session.can_join === true
-              );
+              const phase = getSessionPhase(session, currentTime);
 
               return (
                 <div
@@ -194,9 +190,11 @@ const TodayAgendaSidebar = ({
                           variant="inline"
                         />
                       )}
-                      <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[9px] font-black uppercase tracking-wider animate-pulse">
-                        {session.status === "live" ? "Live Now" : "Join Now"}
-                      </span>
+                      {phase !== "upcoming" && (
+                        <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[9px] font-black uppercase tracking-wider animate-pulse">
+                          {phase === "live" ? "Live Now" : "Join Now"}
+                        </span>
+                      )}
                     </div>
                   </div>
 
@@ -209,7 +207,7 @@ const TodayAgendaSidebar = ({
                     <span>
                       {joiningId === sId
                         ? "Entering Room..."
-                        : session.status === "live"
+                        : phase === "live"
                         ? "Enter Google Meet (Live Now)"
                         : diffMins !== null && diffMins > 0
                         ? `Enter Google Meet (Starts in ${diffMins}m)`

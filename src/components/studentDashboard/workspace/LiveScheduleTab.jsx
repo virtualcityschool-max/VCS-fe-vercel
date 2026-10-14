@@ -11,6 +11,7 @@ import TimezoneTag from "../../ui/TimezoneTag";
 import { toastManager } from "../../../utils/toastManager";
 import DigitalSessionClock from "../../common/DigitalSessionClock";
 import IssueInJoiningClassBanner from "../../common/IssueInJoiningClassBanner";
+import { getSessionPhase, isSessionOver } from "../../../utils/helper/StartSession";
 
 const LiveScheduleTab = ({ onOpenWeeklyPlanner }) => {
   const dispatch = useDispatch();
@@ -45,11 +46,9 @@ const LiveScheduleTab = ({ onOpenWeeklyPlanner }) => {
 
   // The immediate next class spotlight
   const nextClass = useMemo(() => {
-    if (nextSession) return nextSession;
+    if (nextSession && !isSessionOver(nextSession)) return nextSession;
     const upcoming = [...sessions]
-      .filter(
-        (s) => s.status === "live" || (s.scheduled_at && new Date(s.scheduled_at).getTime() > Date.now() - 60 * 60000)
-      )
+      .filter((s) => s.scheduled_at && !isSessionOver(s))
       .sort((a, b) => {
         if (a.status === "live" && b.status !== "live") return -1;
         if (b.status === "live" && a.status !== "live") return 1;
@@ -77,10 +76,11 @@ const LiveScheduleTab = ({ onOpenWeeklyPlanner }) => {
     return () => clearInterval(interval);
   }, [nextClass]);
 
+  const nextPhase = nextClass ? getSessionPhase(nextClass) : null;
   const isNextJoinable = Boolean(
-    nextClass && (
+    nextClass && nextPhase !== "ended" && nextPhase !== "cancelled" && (
       nextClass.meeting_link ||
-      nextClass.status === "live" ||
+      nextPhase === "live" ||
       nextClass.can_join === true
     )
   );
@@ -134,7 +134,7 @@ const LiveScheduleTab = ({ onOpenWeeklyPlanner }) => {
           month: "2-digit",
           day: "2-digit",
         }).format(new Date(s.scheduled_at));
-        return todayStr === sessionDateStr;
+        return todayStr === sessionDateStr && !isSessionOver(s);
       } catch (e) {
         const date = new Date(s.scheduled_at);
         const today = new Date();
@@ -146,10 +146,7 @@ const LiveScheduleTab = ({ onOpenWeeklyPlanner }) => {
       }
     }
     if (activeFilter === "upcoming") {
-      return (
-        s.status === "live" ||
-        (s.scheduled_at && new Date(s.scheduled_at).getTime() > Date.now() - 90 * 60000)
-      );
+      return !isSessionOver(s);
     }
     return true;
   });
@@ -252,7 +249,7 @@ const LiveScheduleTab = ({ onOpenWeeklyPlanner }) => {
                     <span>
                       {joiningId === (nextClass.id || nextClass.session_id)
                         ? "Entering Class..."
-                        : nextClass.status === "live"
+                        : nextPhase === "live"
                         ? "Join Google Meet (Live Now)"
                         : minsToNext !== null && minsToNext > 0
                         ? `Join Google Meet (Starts in ${minsToNext}m)`
@@ -338,11 +335,8 @@ const LiveScheduleTab = ({ onOpenWeeklyPlanner }) => {
               const diffMins = session.scheduled_at
                 ? Math.floor((new Date(session.scheduled_at).getTime() - Date.now()) / 60000)
                 : null;
-              const canJoin = Boolean(
-                session.meeting_link ||
-                session.status === "live" ||
-                session.can_join === true
-              );
+              const phase = getSessionPhase(session);
+              const isOver = phase === "ended" || phase === "cancelled";
 
               return (
                 <div
@@ -356,8 +350,10 @@ const LiveScheduleTab = ({ onOpenWeeklyPlanner }) => {
                         {session.course_title || (session.course && session.course.title) || session.title}
                       </span>
                       <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                        {session.status === "live" || (diffMins !== null && diffMins <= 0)
+                        {phase === "live"
                           ? "LIVE NOW"
+                          : isOver
+                          ? phase.toUpperCase()
                           : diffMins !== null && diffMins > 0
                           ? `STARTS IN ${diffMins}M`
                           : "JOIN CLASS"}
@@ -395,6 +391,7 @@ const LiveScheduleTab = ({ onOpenWeeklyPlanner }) => {
                       />
                     )}
 
+                    {!isOver && (
                     <button
                       onClick={() => handleJoinClass(session)}
                       disabled={joiningId === sId}
@@ -404,11 +401,12 @@ const LiveScheduleTab = ({ onOpenWeeklyPlanner }) => {
                       <span>
                         {joiningId === sId
                           ? "Entering Class..."
-                          : session.status === "live"
+                          : phase === "live"
                           ? "Join Class (Live Now)"
                           : "Join Class (Google Meet)"}
                       </span>
                     </button>
+                    )}
                   </div>
                 </div>
               );

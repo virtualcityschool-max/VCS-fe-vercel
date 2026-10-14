@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
+import { getSessionPhase } from "../../utils/helper/StartSession";
 
 /**
  * DigitalSessionClock
  * Displays a futuristic, glowing digital LED-style clock indicating
  * remaining time to go in Days, Hours, Minutes, and Seconds.
+ * Shows "Starts in …" before the class, "Live now" from the start (or as
+ * soon as the teacher opens the room) and "Ended" afterwards.
  *
  * Variants:
  *  - "hero": Prominent luxury digital clock readout with glowing LED unit boxes
@@ -29,16 +32,23 @@ export const DigitalSessionClock = ({
   const targetMs = new Date(scheduledAt).getTime();
   const diffMs = targetMs - now;
   const unlockDiffMs = diffMs - 20 * 60 * 1000;
-  const isStarted = diffMs <= 0;
-  const isUnlockOpen = diffMs <= 20 * 60 * 1000;
-  const isLive = status === "live";
+  const phase = getSessionPhase({ scheduled_at: scheduledAt, status }, now);
+  const isLive = phase === "live";
+  const isUnlockOpen = phase === "open";
 
-  // Hide for completed or cancelled sessions
-  if (status === "ended" || status === "cancelled") {
-    return null;
+  if (phase === "cancelled") return null;
+
+  if (phase === "ended") {
+    if (variant === "hero") return null;
+    return (
+      <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-slate-500/10 border border-slate-500/30 font-mono text-[11px] text-slate-400 font-bold ${className}`}>
+        <span className="w-1.5 h-1.5 rounded-full bg-slate-500" />
+        <span>Ended</span>
+      </span>
+    );
   }
 
-  const totalSeconds = Math.max(0, Math.floor(Math.abs(diffMs) / 1000));
+  const totalSeconds = Math.max(0, Math.floor(diffMs / 1000));
   const days = Math.floor(totalSeconds / 86400);
   const totalHours = Math.floor(totalSeconds / 3600);
   const hours = days > 0 ? Math.floor((totalSeconds % 86400) / 3600) : totalHours;
@@ -69,13 +79,13 @@ export const DigitalSessionClock = ({
           </div>
           <div className="flex items-center gap-2 font-mono text-emerald-300 text-base font-black">
             <i className="fas fa-broadcast-tower text-emerald-400 text-sm animate-pulse" />
-            <span>Class in Progress</span>
+            <span>Live now</span>
           </div>
         </div>
       );
     }
 
-    if (isUnlockOpen && !isStarted) {
+    if (isUnlockOpen) {
       return (
         <div
           className={`p-4 rounded-2xl bg-gradient-to-br from-emerald-950/60 via-slate-900 to-indigo-950/40 border border-emerald-500/50 shadow-2xl backdrop-blur-md ${className}`}
@@ -237,28 +247,27 @@ export const DigitalSessionClock = ({
       );
     }
 
-    if (isUnlockOpen && !isStarted) {
+    if (isUnlockOpen) {
       return (
         <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-950/50 border border-emerald-500/40 text-emerald-300 font-mono text-xs font-bold shadow-md ${className}`}>
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
           <span className="text-[10px] font-black uppercase text-emerald-400 tracking-wider">Room Open</span>
           <span className="text-slate-400">·</span>
-          <span className="text-white font-black">{pad(minutes)}m {pad(seconds)}s to start</span>
+          <span className="text-white font-black">Starts in {minutes + 1} min</span>
         </div>
       );
     }
 
     return (
-      <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-rose-950/40 border border-rose-500/40 text-rose-300 font-mono text-xs shadow-md ${className}`}>
-        <span className="w-2 h-2 rounded-full bg-rose-400" />
-        <span className="text-[10px] font-black uppercase tracking-wider text-rose-300">
-          Locked ·
-        </span>
-        <div className="flex items-center gap-1 font-black text-rose-200 tabular-nums">
+      <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-indigo-950/40 border border-indigo-500/40 text-indigo-300 font-mono text-xs shadow-md ${className}`}>
+        <span className="w-2 h-2 rounded-full bg-indigo-400" />
+        <div className="flex items-center gap-1 font-black text-indigo-200 tabular-nums">
           {days > 0 ? (
-            <span>{days}d {pad(hours)}h {pad(minutes)}m to go</span>
+            <span>Starts in {days}d {hours}h</span>
+          ) : hours > 0 ? (
+            <span>Starts in {hours}h {pad(minutes)}m</span>
           ) : (
-            <span>{pad(hours)}h {pad(minutes)}m to go</span>
+            <span>Starts in {minutes} min</span>
           )}
         </div>
       </div>
@@ -272,26 +281,29 @@ export const DigitalSessionClock = ({
     return (
       <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-rose-500/15 border border-rose-500/30 font-mono text-[11px] text-rose-300 font-bold ${className}`}>
         <span className="w-1.5 h-1.5 rounded-full bg-rose-400 animate-ping" />
-        <span>LIVE</span>
+        <span>Live now</span>
       </span>
     );
   }
 
-  if (isUnlockOpen && !isStarted) {
+  if (isUnlockOpen) {
     return (
       <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-emerald-500/15 border border-emerald-500/30 font-mono text-[11px] text-emerald-300 font-bold ${className}`}>
         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-        <span>Open · {pad(minutes)}m</span>
+        <span>Starts in {minutes + 1} min</span>
       </span>
     );
   }
 
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-rose-950/40 border border-rose-500/30 font-mono text-[11px] text-rose-300 font-medium ${className}`}>
-      <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
-      <span className="text-rose-400 text-[9px] uppercase tracking-wider">Locked:</span>
-      <span className="font-bold text-rose-200 tabular-nums">
-        {days > 0 ? `${days}d ${pad(hours)}h` : `${pad(hours)}h ${pad(minutes)}m`}
+    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-indigo-950/40 border border-indigo-500/30 font-mono text-[11px] text-indigo-300 font-medium ${className}`}>
+      <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
+      <span className="font-bold text-indigo-200 tabular-nums">
+        {days > 0
+          ? `Starts in ${days}d ${hours}h`
+          : hours > 0
+          ? `Starts in ${hours}h ${pad(minutes)}m`
+          : `Starts in ${minutes} min`}
       </span>
     </span>
   );
