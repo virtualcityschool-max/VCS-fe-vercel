@@ -12,6 +12,16 @@ const PROFILE_KEY = { student: "student_profile", teacher: "teacher_profile", pa
 
 const blank = (v) => !String(v ?? "").trim();
 
+// "Later" hides the form until the next login (kept for this browser tab session)
+const LATER_KEY = "vcs_profile_gate_later";
+const readLater = () => {
+  try {
+    return sessionStorage.getItem(LATER_KEY) === "1";
+  } catch {
+    return false;
+  }
+};
+
 const splitPhone = (digits) => {
   const d = String(digits || "").replace(/[^\d]/g, "");
   const dial = DIAL_CODES.map((c) => c.dial).sort((a, b) => b.length - a.length).find((x) => d.startsWith(x));
@@ -49,6 +59,27 @@ const CompleteProfileGate = () => {
   const [form, setForm] = useState(null);
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
+  const [later, setLater] = useState(readLater);
+
+  // Logging out ends "Later": ask again at the next login
+  useEffect(() => {
+    if (isLoggedIn) return;
+    try {
+      sessionStorage.removeItem(LATER_KEY);
+    } catch {
+      /* storage blocked */
+    }
+    setLater(false);
+  }, [isLoggedIn]);
+
+  const remindLater = () => {
+    try {
+      sessionStorage.setItem(LATER_KEY, "1");
+    } catch {
+      /* storage blocked - hide for this page view only */
+    }
+    setLater(true);
+  };
 
   useEffect(() => {
     if (!missing.length || form) return;
@@ -66,7 +97,7 @@ const CompleteProfileGate = () => {
     });
   }, [missing, p, form]);
 
-  if (!isLoggedIn || !key || !missing.length || !form) return null;
+  if (!isLoggedIn || !key || !missing.length || !form || later) return null;
 
   const set = (k) => (e) => {
     setForm((f) => ({ ...f, [k]: e.target.value }));
@@ -190,9 +221,14 @@ const CompleteProfileGate = () => {
           <button type="button" onClick={() => dispatch(logoutUser())} className="text-slate-400 hover:text-white text-sm">
             Log out
           </button>
-          <button type="submit" disabled={saving} className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 text-white font-bold px-6 py-3 rounded-xl">
-            {saving ? "Saving…" : "Save and continue"}
-          </button>
+          <div className="flex items-center gap-2">
+            <button type="button" onClick={remindLater} className="border border-white/15 hover:bg-white/5 text-slate-200 font-bold px-5 py-3 rounded-xl">
+              Later
+            </button>
+            <button type="submit" disabled={saving} className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 text-white font-bold px-6 py-3 rounded-xl">
+              {saving ? "Saving…" : "Save and continue"}
+            </button>
+          </div>
         </div>
       </form>
     </div>

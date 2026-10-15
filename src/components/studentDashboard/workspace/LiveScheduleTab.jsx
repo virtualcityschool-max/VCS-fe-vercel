@@ -242,13 +242,19 @@ const LiveScheduleTab = ({ onOpenWeeklyPlanner }) => {
                 <div className="space-y-1.5 w-full sm:w-auto">
                   <button
                     onClick={() => handleJoinClass(nextClass)}
-                    disabled={joiningId === (nextClass.id || nextClass.session_id)}
-                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-sm font-black transition shadow-xl shadow-emerald-900/40 cursor-pointer"
+                    disabled={joiningId === (nextClass.id || nextClass.session_id) || nextPhase === "upcoming"}
+                    className={`w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl text-sm font-black transition ${
+                      nextPhase === "upcoming"
+                        ? "bg-slate-700/60 text-slate-400 cursor-not-allowed"
+                        : "bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white shadow-xl shadow-emerald-900/40 cursor-pointer"
+                    }`}
                   >
                     <i className="fas fa-video text-base" />
                     <span>
                       {joiningId === (nextClass.id || nextClass.session_id)
                         ? "Entering Class..."
+                        : nextPhase === "upcoming"
+                        ? `Join opens at ${formatTime(new Date(new Date(nextClass.scheduled_at).getTime() - 20 * 60000).toISOString(), timezone)}`
                         : nextPhase === "live"
                         ? "Join Google Meet (Live Now)"
                         : minsToNext !== null && minsToNext > 0
@@ -256,10 +262,12 @@ const LiveScheduleTab = ({ onOpenWeeklyPlanner }) => {
                         : "Join Google Meet"}
                     </span>
                   </button>
-                  <p className="text-[11px] text-emerald-400 text-center lg:text-right font-medium">
-                    <i className="fas fa-check-circle mr-1" />
-                    Direct classroom link active
-                  </p>
+                  {nextPhase !== "upcoming" && (
+                    <p className="text-[11px] text-emerald-400 text-center lg:text-right font-medium">
+                      <i className="fas fa-check-circle mr-1" />
+                      Direct classroom link active
+                    </p>
+                  )}
                 </div>
               )}
             </div>
@@ -394,13 +402,19 @@ const LiveScheduleTab = ({ onOpenWeeklyPlanner }) => {
                     {!isOver && (
                     <button
                       onClick={() => handleJoinClass(session)}
-                      disabled={joiningId === sId}
-                      className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-xs font-bold flex items-center gap-2 transition shadow-lg shadow-emerald-900/30 cursor-pointer"
+                      disabled={joiningId === sId || phase === "upcoming"}
+                      className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition ${
+                        phase === "upcoming"
+                          ? "bg-slate-700/60 text-slate-400 cursor-not-allowed"
+                          : "bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white shadow-lg shadow-emerald-900/30 cursor-pointer"
+                      }`}
                     >
                       <i className="fas fa-video text-xs" />
                       <span>
                         {joiningId === sId
                           ? "Entering Class..."
+                          : phase === "upcoming"
+                          ? `Join opens at ${formatTime(new Date(new Date(session.scheduled_at).getTime() - 20 * 60000).toISOString(), timezone)}`
                           : phase === "live"
                           ? "Join Class (Live Now)"
                           : "Join Class (Google Meet)"}

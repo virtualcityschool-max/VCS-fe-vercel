@@ -200,13 +200,19 @@ const TodayAgendaSidebar = ({
 
                   <button
                     onClick={() => handleJoinSession(session)}
-                    disabled={joiningId === sId}
-                    className="w-full py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-[11px] font-bold transition flex items-center justify-center gap-1.5 shadow-md shadow-emerald-900/30 cursor-pointer"
+                    disabled={joiningId === sId || phase === "upcoming"}
+                    className={`w-full py-2 rounded-lg text-[11px] font-bold transition flex items-center justify-center gap-1.5 ${
+                      phase === "upcoming"
+                        ? "bg-slate-700/60 text-slate-400 cursor-not-allowed"
+                        : "bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white shadow-md shadow-emerald-900/30 cursor-pointer"
+                    }`}
                   >
                     <i className="fas fa-video text-[10px]" />
                     <span>
                       {joiningId === sId
                         ? "Entering Room..."
+                        : phase === "upcoming"
+                        ? `Join opens at ${formatTime(new Date(new Date(session.scheduled_at).getTime() - 20 * 60000).toISOString(), timezone)}`
                         : phase === "live"
                         ? "Enter Google Meet (Live Now)"
                         : diffMins !== null && diffMins > 0

@@ -77,7 +77,8 @@ export const LiveClassesView: React.FC = () => {
       .map((s: any) => {
         const r = s._raw || {};
         const start = new Date(r.scheduled_at);
-        const end = new Date(start.getTime() + (r.duration_mins || 60) * 60000);
+        // A class ended by hand ends when it was ended, not at its planned time.
+        const end = r.ended_at ? new Date(r.ended_at) : new Date(start.getTime() + (r.duration_mins || 60) * 60000);
         const t = now;
         const att = attendanceBySession.get(String(r.id)) || [];
         const teacherJoined = att.some((a: any) => a.participant_role === 'teacher' && a.joined_at);
