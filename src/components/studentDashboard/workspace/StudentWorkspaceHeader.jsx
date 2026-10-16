@@ -6,6 +6,7 @@ import {
   selectOverdueAssignments,
   selectAssignments,
   selectLiveSchedule,
+  joinLiveSession,
 } from "../../../store/slices/studentDashboardSlice";
 import { profileUpdated } from "../../../store/slices/authSlice";
 import { authService } from "../../../services/authService";
@@ -255,6 +256,11 @@ const StudentWorkspaceHeader = ({ onResolveOverdue, onJoinNextClass, onOpenTimez
                   href={activeNextSession.meeting_link || "https://meet.google.com"}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() => {
+                    // Record the join (attendance) while the link opens Meet in a new tab
+                    const sId = activeNextSession.id || activeNextSession.session_id;
+                    if (sId) dispatch(joinLiveSession(sId));
+                  }}
                   className="w-full inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition shadow-lg shadow-emerald-900/40 cursor-pointer"
                 >
                   <i className="fas fa-video text-xs" />

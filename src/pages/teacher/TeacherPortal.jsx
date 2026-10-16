@@ -143,6 +143,9 @@ const TeacherPortal = () => {
     dispatch(fetchAllAttendance());
     dispatch(fetchQuizzes());
     loadQuizSubmissions();
+    // Admin often plans a class minutes before it starts: refresh so it appears without a reload
+    const refresh = setInterval(() => dispatch(fetchTeacherDashboard()), 60000);
+    return () => clearInterval(refresh);
   }, [dispatch]);
 
   // Map Live Courses (empty when the teacher has no courses)
@@ -465,15 +468,11 @@ const TeacherPortal = () => {
     const sessionId = raw?.id ?? raw?.session_id ?? session?.id;
     const fallbackLink = raw?.meeting_link || session?.meetLink;
 
-    // Already live (e.g. teacher closed the Meet tab): rejoin without calling start again
-    if (raw?.status === "live" || session?.status === "live") {
-      if (fallbackLink && fallbackLink.startsWith("http")) {
-        window.open(fallbackLink, "_blank", "noopener,noreferrer");
-        return true;
-      }
-      toastManager.error("No valid meeting link found for this session");
-      return false;
-    }
+    // A class can already be "live" without the teacher: the platform opens every
+    // class by itself at its start time. So always call start — it is safe to repeat
+    // and it is what records the teacher as present. Skipping it left the class
+    // "missed" at its end even though the teacher taught it in Meet.
+    const alreadyLive = raw?.status === "live" || session?.status === "live";
 
     const isMobile = /Mobi|Android|iPad|iPhone|iPod/i.test(navigator.userAgent);
     const meetWin = isMobile ? null : window.open("", "_blank");
@@ -500,12 +499,19 @@ const TeacherPortal = () => {
         return false;
       }
     } catch (err) {
+      // Never keep a teacher out of a class that is already running
+      if (alreadyLive && fallbackLink && fallbackLink.startsWith("http")) {
+        if (meetWin) meetWin.location.href = fallbackLink;
+        else window.open(fallbackLink, "_blank", "noopener,noreferrer");
+        showApiError(err);
+        return true;
+      }
       meetWin?.close();
       const msg = extractApiErrorMessage(err);
       if (
         msg === "You cannot join before the scheduled time." ||
         msg === "You can join up to 30 minutes before the scheduled time." ||
-        msg.includes("up to 20 minutes before")
+        msg.includes("minutes before")
       ) {
         setTooEarlyOpen(true);
       } else {

@@ -7,6 +7,7 @@ import {
   createTeacherSession,
   updateTeacherSession,
   deleteTeacherSession,
+  startLiveSession,
 } from "../../store/slices/teacherSlice";
 import SessionCalendarView from "../../components/common/SessionCalendarView";
 import ConfirmDialog from "../../components/common/ConfirmDialog";
@@ -282,6 +283,11 @@ const STATUS_BADGE = {
 
 const TeacherSessionCalendar = () => {
   const dispatch = useDispatch();
+  // Opening Meet must also tell the server the teacher started the class,
+  // otherwise it is marked "missed". Fails quietly outside the start window.
+  const recordStart = (s) => {
+    dispatch(startLiveSession(s.id));
+  };
   const { formatDate, formatTime, timezoneAbbr, toPayloadISO, toDatetimeInput } = useDateFormatters();
 
   const {
@@ -608,6 +614,7 @@ const TeacherSessionCalendar = () => {
                           href={s.meeting_link}
                           target="_blank"
                           rel="noopener noreferrer"
+                          onClick={() => recordStart(s)}
                           className="px-3 py-1.5 rounded-lg text-xs font-semibold flex-1 flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white transition shadow-sm"
                         >
                           <i className="fas fa-video"></i> Join Meet
@@ -681,6 +688,7 @@ const TeacherSessionCalendar = () => {
                               href={s.meeting_link}
                               target="_blank"
                               rel="noopener noreferrer"
+                              onClick={() => recordStart(s)}
                               className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white transition flex items-center gap-1.5 shadow-sm"
                             >
                               <i className="fas fa-video"></i> Join Meet
