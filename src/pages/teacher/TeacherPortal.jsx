@@ -290,9 +290,17 @@ const TeacherPortal = () => {
           id: String(s.id),
           title: s.title,
           courseName: s.course_title || "Live Class",
-          category: "classes",
+          category: s.category || "classes",
           timeAST: s.schedule_at
-            ? `${new Date(s.schedule_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", timeZone: activeTzId })} ${currentTz}`
+            ? `${(() => {
+                const dt = new Date(s.schedule_at);
+                const todayStr = new Intl.DateTimeFormat("en-CA", { timeZone: activeTzId }).format(new Date());
+                const sDateStr = new Intl.DateTimeFormat("en-CA", { timeZone: activeTzId }).format(dt);
+                const timePart = dt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", timeZone: activeTzId });
+                if (todayStr === sDateStr) return `Today · ${timePart} ${currentTz}`;
+                const datePart = dt.toLocaleDateString([], { weekday: "short", month: "short", day: "numeric", timeZone: activeTzId });
+                return `${datePart} · ${timePart} ${currentTz}`;
+              })()}`
             : "Upcoming",
           duration: s.duration ? `${s.duration} min` : "—",
           meetLink: s.meeting_link || "",
@@ -300,7 +308,7 @@ const TeacherPortal = () => {
           attendeesCount: s.total_learners ?? 0,
           maxAttendees: s.max_learners || s.max_attendees || "—",
           instructor: user?.first_name ? `${user.first_name} ${user.last_name || ""}`.trim() : (user?.username || "Tutor"),
-          rawSession: { ...s, scheduled_at: s.schedule_at || s.scheduled_at, category: "classes" },
+          rawSession: { ...s, scheduled_at: s.schedule_at || s.scheduled_at, category: s.category || "classes" },
         });
       });
     }

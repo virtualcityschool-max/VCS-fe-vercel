@@ -1,20 +1,40 @@
-import React, { useState } from "react";
-import { useSelector } from "react-redux";
+import React, { useState, useMemo } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
   selectEnrolledCourses,
   selectAssignments,
   selectDashboardQuizzes,
+  selectLiveSchedule,
+  selectSessions,
+  selectNextSession,
+  joinLiveSession,
 } from "../../../store/slices/studentDashboardSlice";
 import { getCourseImage } from "../../../utils/courseImageUtils";
 import { useDateFormatters } from "../../../hooks/useDateFormatters";
+import { toastManager } from "../../../utils/toastManager";
+import { getSessionPhase, isSessionOver, isSessionExpired, isWithinSessionWindow } from "../../../utils/helper/StartSession";
+import DigitalSessionClock from "../../common/DigitalSessionClock";
+import IssueInJoiningClassBanner from "../../common/IssueInJoiningClassBanner";
 
 const OverviewTab = ({ onOpenSubmitModal }) => {
   const navigate = useNavigate();
-  const { formatDate } = useDateFormatters();
+  const dispatch = useDispatch();
+  const { formatDate, formatTime, timezone, timezoneAbbr } = useDateFormatters();
   const enrolledCourses = useSelector(selectEnrolledCourses) || [];
   const assignments = useSelector(selectAssignments) || [];
   const quizzes = useSelector(selectDashboardQuizzes) || [];
+  const liveSchedule = useSelector(selectLiveSchedule) || [];
+  const allSessions = useSelector(selectSessions) || [];
+  const nextSession = useSelector(selectNextSession);
+
+  const [joiningId, setJoiningId] = useState(null);
+  const [currentTime, setCurrentTime] = useState(() => Date.now());
+
+  React.useEffect(() => {
+    const id = setInterval(() => setCurrentTime(Date.now()), 30000);
+    return () => clearInterval(id);
+  }, []);
 
   const [quizFilter, setQuizFilter] = useState("all");
   const [assignmentFilter, setAssignmentFilter] = useState("all");
@@ -66,6 +86,76 @@ const OverviewTab = ({ onOpenSubmitModal }) => {
     return a.status === assignmentFilter;
   });
 
+  // Merge sessions from /classroom/sessions/ and live_schedule
+  const upcomingClasses = useMemo(() => {
+    const map = new Map();
+    (allSessions || []).forEach((s) => {
+      const id = s.id || s.session_id;
+      if (id) map.set(id, s);
+    });
+    (liveSchedule || []).forEach((s) => {
+      const id = s.id || s.session_id;
+      if (id) map.set(id, { ...(map.get(id) || {}), ...s });
+    });
+    const list = Array.from(map.values()).filter((s) => {
+      if (!s.scheduled_at) return false;
+      return !isSessionOver(s, currentTime);
+    });
+    return list.sort((a, b) => {
+      if (a.status === "live" && b.status !== "live") return -1;
+      if (b.status === "live" && a.status !== "live") return 1;
+      return new Date(a.scheduled_at) - new Date(b.scheduled_at);
+    });
+  }, [allSessions, liveSchedule, currentTime]);
+
+  const handleJoinSession = async (sessionToJoin) => {
+    if (!sessionToJoin) return;
+    const sId = sessionToJoin.id || sessionToJoin.session_id;
+    if (!sId) {
+      toastManager.error("Invalid session identifier");
+      return;
+    }
+
+    const scheduledAt = sessionToJoin.scheduled_at || sessionToJoin.schedule_at;
+    if (scheduledAt) {
+      if (isSessionExpired(scheduledAt)) {
+        toastManager.error("This session has expired (maximum duration is 90 minutes).");
+        return;
+      }
+      if (!isWithinSessionWindow(scheduledAt) && sessionToJoin.status !== "live") {
+        toastManager.info("You can join up to 60 minutes before the scheduled class time.");
+        return;
+      }
+    }
+
+    setJoiningId(sId);
+    try {
+      const result = await dispatch(joinLiveSession(sId)).unwrap();
+      const link = result?.meeting_link || sessionToJoin.meeting_link;
+      if (link && typeof link === "string" && link.startsWith("http")) {
+        window.open(link, "_blank", "noopener,noreferrer");
+      } else {
+        toastManager.error("Google Meet link not available yet. Please notify admin or faculty.");
+      }
+    } catch (err) {
+      const msg = typeof err === "string" ? err : err?.message || "";
+      if (msg.includes("minutes") || msg.includes("expired") || msg.includes("cannot join")) {
+        toastManager.error(msg);
+        return;
+      }
+      const fallbackLink = sessionToJoin.meeting_link;
+      if (fallbackLink && typeof fallbackLink === "string" && fallbackLink.startsWith("http")) {
+        window.open(fallbackLink, "_blank", "noopener,noreferrer");
+      } else {
+        toastManager.error(
+          typeof err === "string" ? err : err?.message || "Failed to join session. Meet link unavailable."
+        );
+      }
+    } finally {
+      setJoiningId(null);
+    }
+  };
+
   // Calculate real student progress
   const totalTasks = assignments.length + quizzes.length;
   const completedTasks = submittedAssignments.length + completedQuizzes.length;
@@ -73,6 +163,138 @@ const OverviewTab = ({ onOpenSubmitModal }) => {
 
   return (
     <div className="space-y-8 animate-fadeIn">
+      {/* 0. Live & Upcoming Google Meet Classes Section */}
+      <div className="rounded-2xl bg-slate-900/80 border border-white/10 p-5 sm:p-6 shadow-xl space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-white/10 gap-2">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-indigo-500/15 border border-indigo-500/20 text-indigo-400 flex items-center justify-center text-lg">
+              <i className="fas fa-video text-base" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-base font-bold text-white tracking-tight leading-none">
+                  Live &amp; Upcoming Classes
+                </h3>
+                {upcomingClasses.some((c) => c.status === "live") && (
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-black uppercase tracking-wider animate-pulse">
+                    Live Now
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-slate-400 mt-1">
+                Google Meet · Active Timezone: <span className="font-semibold text-slate-200">{timezoneAbbr}</span>
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <IssueInJoiningClassBanner variant="button" />
+            <button
+              type="button"
+              onClick={() => navigate("/student?tab=schedule")}
+              className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white text-xs font-semibold transition flex items-center gap-1.5 cursor-pointer"
+            >
+              <span>Full Schedule</span>
+              <i className="fas fa-arrow-right text-[10px]" />
+            </button>
+          </div>
+        </div>
+
+        {upcomingClasses.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {upcomingClasses.slice(0, 3).map((ses) => {
+              const sId = ses.id || ses.session_id;
+              const phase = getSessionPhase(ses, currentTime);
+              const isLive = ses.status === "live" || phase === "live";
+              const diffMins = Math.floor(
+                (new Date(ses.scheduled_at).getTime() - currentTime) / 60000
+              );
+
+              return (
+                <div
+                  key={sId}
+                  className={`p-4 rounded-xl border flex flex-col justify-between transition-all space-y-3 ${
+                    isLive
+                      ? "bg-emerald-950/20 border-emerald-500/40 shadow-lg shadow-emerald-950/30 ring-1 ring-emerald-500/20"
+                      : "bg-white/[0.02] hover:bg-white/[0.04] border-white/10"
+                  }`}
+                >
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-[11px] font-mono font-bold text-indigo-300 truncate">
+                        {formatDate(ses.scheduled_at, timezone)} · {formatTime(ses.scheduled_at, timezone)}
+                      </span>
+                      {isLive ? (
+                        <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[9px] font-black uppercase tracking-wider shrink-0 flex items-center gap-1 animate-pulse">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                          Live Now
+                        </span>
+                      ) : (
+                        ses.scheduled_at && (
+                          <DigitalSessionClock
+                            scheduledAt={ses.scheduled_at}
+                            status={ses.status}
+                            variant="inline"
+                          />
+                        )
+                      )}
+                    </div>
+                    <h4 className="text-sm font-bold text-white line-clamp-1">
+                      {ses.title || ses.course_title}
+                    </h4>
+                    <p className="text-xs text-slate-400 line-clamp-1">
+                      {ses.course_title || ses.title}
+                    </p>
+                    <p className="text-[11px] text-slate-400 flex items-center gap-1.5 pt-0.5">
+                      <i className="fas fa-chalkboard-teacher text-indigo-400 text-xs" />
+                      <span>{ses.teacher_name || ses.instructor_name || "Assigned Faculty"}</span>
+                    </p>
+                  </div>
+
+                  <div className="pt-2 border-t border-white/5">
+                    <button
+                      type="button"
+                      onClick={() => handleJoinSession(ses)}
+                      disabled={joiningId === sId || phase === "upcoming"}
+                      className={`w-full py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer ${
+                        phase === "upcoming"
+                          ? "bg-slate-800 text-slate-400 border border-white/5 cursor-not-allowed"
+                          : "bg-emerald-600 hover:bg-emerald-500 text-white shadow-md shadow-emerald-900/30"
+                      }`}
+                    >
+                      <i className="fas fa-video text-xs" />
+                      <span>
+                        {joiningId === sId
+                          ? "Entering Google Meet..."
+                          : isLive
+                          ? "Enter Google Meet (Live Now)"
+                          : phase === "upcoming"
+                          ? `Opens at ${formatTime(new Date(new Date(ses.scheduled_at).getTime() - 60 * 60000).toISOString(), timezone)}`
+                          : diffMins > 0
+                          ? `Join Meet (Starts in ${diffMins}m)`
+                          : "Enter Google Meet"}
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="p-6 rounded-xl bg-white/[0.02] border border-white/5 text-center space-y-2">
+            <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center mx-auto mb-1">
+              <i className="fas fa-calendar-check text-base" />
+            </div>
+            <p className="text-sm font-bold text-white">No Live Classes Scheduled Right Now</p>
+            <p className="text-xs text-slate-400 max-w-md mx-auto">
+              Classes scheduled by administration and faculty will appear here automatically. You can also view your full timetable in the Live Schedule tab.
+            </p>
+            <div className="pt-2 max-w-sm mx-auto">
+              <IssueInJoiningClassBanner variant="alert" />
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Top 2 Cards: Real Academic Standing + Real Quizzes */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* 1. Academic Standing Card (Real metrics) */}

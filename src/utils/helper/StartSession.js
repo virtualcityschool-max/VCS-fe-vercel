@@ -2,7 +2,7 @@
 const DAY_MAP = { SUN: 0, MON: 1, TUE: 2, WED: 3, THU: 4, FRI: 5, SAT: 6 };
 
   const SESSION_DURATION_MS = 90 * 60 * 1000; // max 90 minutes
-  const SESSION_EARLY_BUFFER_MS = 20 * 60 * 1000; // 20 minutes early
+  const SESSION_EARLY_BUFFER_MS = 60 * 60 * 1000; // 60 minutes early
   const SESSION_WINDOW_MS  = SESSION_DURATION_MS;
 
   export const isWithinSessionWindow = (scheduleAt) => {
@@ -29,8 +29,8 @@ const DAY_MAP = { SUN: 0, MON: 1, TUE: 2, WED: 3, THU: 4, FRI: 5, SAT: 6 };
   };
   /**
    * Where a class stands for a student right now:
-   *  "upcoming"  – more than 20 min before the start
-   *  "open"      – join window open (20 min before the start until the start)
+   *  "upcoming"  – more than 60 min before the start
+   *  "open"      – join window open (60 min before the start until the start)
    *  "live"      – the teacher has started it, or the start time has passed
    *  "ended"     – ended/missed, or 90 min past the start
    *  "cancelled"
@@ -88,10 +88,11 @@ const DAY_MAP = { SUN: 0, MON: 1, TUE: 2, WED: 3, THU: 4, FRI: 5, SAT: 6 };
   };
   export const handleJoinSession = async (sessionId, meeting_link, scheduled_at) => {
     if (isSessionExpired(scheduled_at)) {
-      setSessionExpiredOpen(true);
-      return;
+      return false;
     }
-    if(meeting_link) {
-      const meetWin = window.open(meeting_link, "_blank");
+    if (meeting_link) {
+      window.open(meeting_link, "_blank", "noopener,noreferrer");
+      return true;
     }
+    return false;
   };

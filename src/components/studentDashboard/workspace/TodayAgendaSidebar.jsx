@@ -48,8 +48,8 @@ const TodayAgendaSidebar = ({
   };
   const todayStr = dayKey(currentTime);
 
-  // Merge sessions from /classroom/sessions/ and live_schedule for today (finished classes drop off)
-  const sessions = useMemo(() => {
+  // Merge sessions from /classroom/sessions/ and live_schedule
+  const { todaySessions, upcomingPlannedSessions, allActiveSessions } = useMemo(() => {
     const map = new Map();
     (allSessions || []).forEach((s) => {
       const id = s.id || s.session_id;
@@ -61,14 +61,27 @@ const TodayAgendaSidebar = ({
     });
     const list = Array.from(map.values()).filter((s) => {
       if (!s.scheduled_at) return false;
-      return dayKey(s.scheduled_at) === todayStr && !isSessionOver(s, currentTime);
+      return !isSessionOver(s, currentTime);
     });
-    return list.sort((a, b) => {
+
+    const today = list.filter((s) => dayKey(s.scheduled_at) === todayStr).sort((a, b) => {
       if (a.status === "live" && b.status !== "live") return -1;
       if (b.status === "live" && a.status !== "live") return 1;
       return new Date(a.scheduled_at) - new Date(b.scheduled_at);
     });
+
+    const future = list.filter((s) => dayKey(s.scheduled_at) !== todayStr && new Date(s.scheduled_at).getTime() >= currentTime).sort((a, b) => {
+      return new Date(a.scheduled_at) - new Date(b.scheduled_at);
+    });
+
+    return {
+      todaySessions: today,
+      upcomingPlannedSessions: future,
+      allActiveSessions: today.length > 0 ? today : future,
+    };
   }, [allSessions, liveSchedule, todayStr, timezone, currentTime]);
+
+  const sessions = allActiveSessions;
 
   const handleJoinSession = async (sessionToJoin) => {
     if (!sessionToJoin) return;
@@ -85,7 +98,7 @@ const TodayAgendaSidebar = ({
         return;
       }
       if (!isWithinSessionWindow(scheduledAt) && sessionToJoin.status !== "live") {
-        toastManager.info("You can join up to 20 minutes before the scheduled class time.");
+        toastManager.info("You can join up to 60 minutes before the scheduled class time.");
         return;
       }
     }
@@ -101,7 +114,7 @@ const TodayAgendaSidebar = ({
       }
     } catch (err) {
       const msg = typeof err === "string" ? err : err?.message || "";
-      if (msg.includes("20 minutes") || msg.includes("expired") || msg.includes("cannot join")) {
+      if (msg.includes("minutes") || msg.includes("expired") || msg.includes("cannot join")) {
         toastManager.error(msg);
         return;
       }
@@ -137,7 +150,7 @@ const TodayAgendaSidebar = ({
             </div>
             <div>
               <h3 className="text-sm font-bold text-white tracking-tight leading-none">
-                Today's Live Classes
+                {todaySessions.length > 0 ? "Today's Live Classes" : "Upcoming Classes"}
               </h3>
               <p className="text-[10px] text-slate-400 mt-0.5">
                 Google Meet • {timezoneAbbr}
@@ -160,6 +173,7 @@ const TodayAgendaSidebar = ({
                 (new Date(session.scheduled_at).getTime() - currentTime) / 60000
               );
               const phase = getSessionPhase(session, currentTime);
+              const isToday = dayKey(session.scheduled_at) === todayStr;
 
               return (
                 <div
@@ -171,7 +185,7 @@ const TodayAgendaSidebar = ({
                       <div className="flex items-center gap-1.5 mb-0.5">
                         <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                         <span className="text-[10px] font-mono font-bold text-indigo-300 truncate">
-                          {formatTime(session.scheduled_at, timezone)} ({timezoneAbbr})
+                          {isToday ? "Today" : formatDate(session.scheduled_at, timezone)} · {formatTime(session.scheduled_at, timezone)} ({timezoneAbbr})
                         </span>
                       </div>
                       <h4 className="text-xs font-bold text-white truncate">
@@ -212,7 +226,7 @@ const TodayAgendaSidebar = ({
                       {joiningId === sId
                         ? "Entering Room..."
                         : phase === "upcoming"
-                        ? `Join opens at ${formatTime(new Date(new Date(session.scheduled_at).getTime() - 20 * 60000).toISOString(), timezone)}`
+                        ? `Join opens at ${formatTime(new Date(new Date(session.scheduled_at).getTime() - 60 * 60000).toISOString(), timezone)}`
                         : phase === "live"
                         ? "Enter Google Meet (Live Now)"
                         : diffMins !== null && diffMins > 0
@@ -229,9 +243,9 @@ const TodayAgendaSidebar = ({
             <div className="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center mx-auto">
               <i className="fas fa-calendar-check text-xs" />
             </div>
-            <p className="text-xs font-bold text-white">No Live Classes Today</p>
+            <p className="text-xs font-bold text-white">No Live Classes Scheduled</p>
             <p className="text-[11px] text-slate-400">
-              When faculty initiates a session, your Google Meet link unlocks 20 minutes prior.
+              When faculty initiates a session, your Google Meet link unlocks 60 minutes prior.
             </p>
             <IssueInJoiningClassBanner variant="alert" />
           </div>

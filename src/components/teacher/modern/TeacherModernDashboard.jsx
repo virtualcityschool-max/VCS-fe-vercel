@@ -88,7 +88,7 @@ export const TeacherDashboard = ({
     setCopiedLink(true);
     setTimeout(() => setCopiedLink(false), 2200);
   };
-  const liveClasses = sessions.filter((s) => s.category === "classes");
+  const liveClasses = sessions.filter((s) => s.category !== "admin_session" && s.category !== "reserved_slots");
   const adminMeetings = sessions.filter((s) => s.category === "admin_session");
   const filteredSessions = liveClasses;
   const filteredTasks = tasks.filter((t) => {
@@ -421,7 +421,7 @@ export const TeacherDashboard = ({
             <div>
               <div className="flex items-center justify-between text-xs mb-1">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-400">
-                  {ses.category.replace("_", " ")}
+                  {(ses.category || "classes").replace("_", " ")}
                 </span>
                 <span className="font-mono text-slate-300 tabular-nums">{ses.timeAST}</span>
               </div>
@@ -764,7 +764,7 @@ export const TeacherDashboard = ({
                 <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-2 text-emerald-400">
                   <Video className="w-5 h-5" />
                 </div>
-                <div className="text-xs font-bold text-white">No live classes scheduled for today</div>
+                <div className="text-xs font-bold text-white">No live or upcoming classes scheduled</div>
                 <p className="text-[11px] text-slate-400 max-w-xs mx-auto leading-relaxed">
                   Classes planned by administration will appear here automatically.
                 </p>
@@ -779,9 +779,9 @@ export const TeacherDashboard = ({
                   const schedIso = ses.rawSession?.scheduled_at;
                   const schedTime = schedIso ? new Date(schedIso).getTime() : 0;
                   const diffMs = schedTime > 0 ? schedTime - Date.now() : 0;
-                  const is20mOpen = diffMs <= 20 * 60 * 1000;
+                  const is60mOpen = diffMs <= 60 * 60 * 1000;
                   const isLive = ses.status === "live";
-                  const canEnter = isLive || is20mOpen;
+                  const canEnter = isLive || is60mOpen;
 
                   return (
                     <div
@@ -859,11 +859,11 @@ export const TeacherDashboard = ({
                             <button
                               type="button"
                               onClick={() => setIsTroubleshootOpen(true)}
-                              title="Unlocked 20 minutes before session start"
+                              title="Unlocked 60 minutes before session start"
                               className="px-3.5 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap flex items-center gap-1.5 bg-rose-500/20 text-rose-300 border border-rose-500/40 hover:bg-rose-500/30 cursor-pointer"
                             >
                               <Lock className="w-3 h-3 text-rose-400" />
-                              <span>Opens 20m Prior</span>
+                              <span>Opens 60m Prior</span>
                             </button>
                           )}
                         </div>
