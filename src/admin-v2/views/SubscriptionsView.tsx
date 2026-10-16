@@ -5,7 +5,7 @@ import { FilterBar } from '../components/common/FilterBar';
 import { DataTable, Column } from '../components/common/DataTable';
 import { StatusPill } from '../components/common/StatusPill';
 import { Subscription } from '../types';
-import { CreditCard, RotateCcw, XCircle, ExternalLink } from 'lucide-react';
+import { CreditCard, RotateCcw, XCircle, ExternalLink, Gift } from 'lucide-react';
 
 export const SubscriptionsView: React.FC = () => {
   const {
@@ -14,6 +14,7 @@ export const SubscriptionsView: React.FC = () => {
     subjects,
     renewSubscription,
     cancelSubscription,
+    openGrantAccessModal,
     can,
     openDetailDrawer,
     addToast,
@@ -128,19 +129,28 @@ export const SubscriptionsView: React.FC = () => {
     {
       header: 'Actions',
       cell: (row) => (!canBill ? <span className="text-[11px] text-slate-500">View only</span> :
-        <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
           <button
-            onClick={() => renewSubscription(row.id, 1)}
-            className="flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white transition-colors cursor-pointer"
-            title="Add 1 month of access"
+            onClick={() => renewSubscription(row.id, 'renew')}
+            className="flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white transition-colors cursor-pointer shadow-xs"
+            title="Renew subscription (1 month, 3 months, or unlimited)"
           >
             <RotateCcw className="w-3 h-3" />
             <span>Renew</span>
           </button>
+          <button
+            onClick={() => openGrantAccessModal(row, 'free')}
+            className="flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 transition-colors cursor-pointer"
+            title="Grant free / unlimited access (1 month, 3 months, or unlimited)"
+          >
+            <Gift className="w-3 h-3 text-emerald-400" />
+            <span className="hidden xl:inline">Grant Free Access</span>
+            <span className="xl:hidden">Free Access</span>
+          </button>
           {row.status !== 'Expired' && (
             <button
               onClick={() => cancelSubscription(row.id)}
-              className="p-1 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
+              className="p-1 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
               title="End access now"
             >
               <XCircle className="w-4 h-4" />

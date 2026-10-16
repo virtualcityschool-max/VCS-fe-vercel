@@ -30,8 +30,8 @@ import { fetchFreeAccessRequests } from '../../store/slices/freeAccessSlice';
 import { getDisplayName } from '../../utils/userDisplay';
 import { getStorageUrl } from '../../utils/storageUrl';
 import { departmentOf } from '../../components/admin/ui/departments';
-import { TEACHING_AREAS, guessTeachingAreas } from '../data/formOptions';
 import { ConfirmDialog } from '../components/common/ConfirmDialog';
+import { GrantAccessModal } from '../components/common/GrantAccessModal';
 import { NAV_CAP, type Cap } from '../data/staffRoles';
 import { restoreAdminSession } from '../../utils/impersonate';
 
@@ -193,9 +193,42 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const openQuickAdd = (type: QuickAddState['initialType'] = 'student') => setQuickAddModal({ isOpen: true, initialType: type });
   const closeQuickAdd = () => setQuickAddModal((p) => ({ ...p, isOpen: false }));
 
+  const [grantAccessModal, setGrantAccessModal] = useState<{
+    isOpen: boolean;
+    enrollmentId: string | number;
+    studentName?: string;
+    studentRollNo?: string;
+    subjectName?: string;
+    subjectCode?: string;
+    currentAccessUntil?: string;
+    currentStatus?: string;
+    initialMode?: 'renew' | 'free';
+  } | null>(null);
+
+  const openGrantAccessModal = (item: any, mode: 'renew' | 'free' = 'renew') => {
+    if (!item) return;
+    const enrollmentId = item.enrollment_id || item.id || item._raw?.enrollment_id || item._raw?.id;
+    const student = students.find((s: any) => s.id === item.studentId) || item.student || item._raw?.student;
+    const subject = subjects.find((s: any) => s.id === item.subjectId) || item.course || item._raw?.course;
+    setGrantAccessModal({
+      isOpen: true,
+      enrollmentId,
+      studentName: item.studentName || student?.name || student?.username,
+      studentRollNo: student?.rollNo || student?.roll_no,
+      subjectName: item.subjectName || subject?.name || subject?.title,
+      subjectCode: subject?.code,
+      currentAccessUntil: item.accessUntil || (item.access_expires_at ? item.access_expires_at.slice(0, 10) : undefined) || (item._raw?.access_expires_at ? item._raw.access_expires_at.slice(0, 10) : undefined),
+      currentStatus: item.status,
+      initialMode: mode,
+    });
+  };
+
+  const closeGrantAccessModal = () => setGrantAccessModal(null);
+
   useEffect(() => {
     closeDetailDrawer();
     closeQuickAdd();
+    closeGrantAccessModal();
     setCommandPaletteOpen(false);
   }, [location.pathname, location.search]);
 
@@ -1037,12 +1070,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return done;
   };
 
-  const renewSubscription = async (id: string) => {
-    const r: any = subscriptions.find((s) => s.id === sid(id));
+  const renewSubscription = (id: string, mode: 'renew' | 'free' = 'renew') => {
+    const r: any = subscriptions.find((s) => s.id === sid(id)) || enrollments.find((e: any) => e.id === sid(id));
     if (!r) return;
-    if (!r.canExtend) { addToast(r.renewalDueAt ? `Renewal opens on ${new Date(r.renewalDueAt).toLocaleDateString()} (a week before expiry).` : 'This subscription renews on Gumroad by itself.', 'info'); return; }
-    const ok = await confirmAction({ title: r.hasAccess ? 'Record another month?' : 'Restore access?', message: r.hasAccess ? `Add a month to ${r.studentName} on "${r.subjectName}". Only do this once you have their payment.` : `Switch ${r.studentName} back on for "${r.subjectName}" for a month starting today.`, confirmLabel: r.hasAccess ? 'Add 1 month' : 'Restore access', isDestructive: false });
-    if (ok) await run(() => adminService.extendSubscription(Number(id)), `Access extended for ${r.studentName}`, ['subs', 'enrollments']);
+    openGrantAccessModal(r, mode);
   };
   const cancelSubscription = async (id: string) => {
     const r: any = subscriptions.find((s) => s.id === sid(id));
@@ -1131,6 +1162,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     liveNowCount, setTeacherAreas, setTeacherShowcase, subjects, catalog, addBatch, renameBatch, moveBatch, updateCatalogSubject, addSubject, updateSubject, toggleSubjectStatus, levels, addLevel, removeLevel,
     sessions, addSession, updateSession, deleteSession, endSession, meetings, addMeeting,
     subscriptions, renewSubscription, cancelSubscription, referrals,
+    openGrantAccessModal, closeGrantAccessModal, grantAccessModal,
     posts, addPost, togglePostStatus, testimonials, addTestimonial, toggleTestimonialVisibility, deleteTestimonial,
     aboutPage, updateAboutPage, settings, updateSettings, grades, updateGrade,
     attendanceMatrix, activities, addActivity,
@@ -1151,6 +1183,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         isDestructive={confirmReq?.isDestructive ?? true}
         onConfirm={() => { confirmReq?.resolve(true); setConfirmReq(null); }}
         onCancel={() => { confirmReq?.resolve(false); setConfirmReq(null); }}
+      />
+      <GrantAccessModal
+        isOpen={!!grantAccessModal?.isOpen}
+        onClose={closeGrantAccessModal}
+        enrollmentId={grantAccessModal?.enrollmentId || ''}
+        studentName={grantAccessModal?.studentName}
+        studentRollNo={grantAccessModal?.studentRollNo}
+        subjectName={grantAccessModal?.subjectName}
+        subjectCode={grantAccessModal?.subjectCode}
+        currentAccessUntil={grantAccessModal?.currentAccessUntil}
+        currentStatus={grantAccessModal?.currentStatus}
+        initialMode={grantAccessModal?.initialMode || 'renew'}
+        onSuccess={(msg) => {
+          addToast(msg || 'Access updated successfully', 'success');
+          reload('subs', 'enrollments');
+        }}
+        onError={(err) => {
+          const msg = err?.response?.data?.error || err?.message || 'Failed to update access';
+          addToast(msg, 'error');
+        }}
       />
     </AppContext.Provider>
   );

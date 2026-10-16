@@ -16,6 +16,8 @@ import {
   CheckCircle,
   Clock,
   Send,
+  Gift,
+  RotateCcw,
 } from 'lucide-react';
 import { StatusPill } from './StatusPill';
 import { StudentProfilePanel } from './StudentProfilePanel';
@@ -24,7 +26,7 @@ import { DepartmentName } from '../../types';
 import { handleImpersonateUser } from '../../../utils/impersonate';
 
 export const DetailDrawer: React.FC = () => {
-  const { detailDrawer, closeDetailDrawer, subjects, renewSubscription, cancelSubscription, setCurrentView, rawAttendance, subscriptions, tzIana, toggleUserStatus, addToast } =
+  const { detailDrawer, closeDetailDrawer, subjects, renewSubscription, cancelSubscription, setCurrentView, rawAttendance, subscriptions, tzIana, toggleUserStatus, addToast, openGrantAccessModal } =
     useApp();
   const [activeTab, setActiveTab] = useState<'overview' | 'subjects' | 'attendance' | 'finance' | 'notes'>('overview');
 
@@ -368,17 +370,27 @@ export const DetailDrawer: React.FC = () => {
                       <span>{r.source === 'Gumroad' ? 'Paid via Gumroad' : 'Paid to admin'}</span>
                       <span className="font-mono text-slate-300">${r.monthlyAmountUSD}/mo</span>
                     </div>
-                    <div className="flex gap-2 pt-1">
+                    <div className="flex flex-wrap gap-2 pt-1">
                       <button
-                        onClick={() => renewSubscription(r.id)}
-                        className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-[#6D5BFF] hover:bg-[#5B47FB] text-white"
+                        onClick={() => renewSubscription(r.id, 'renew')}
+                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-[#6D5BFF] hover:bg-[#5B47FB] text-white transition-colors cursor-pointer"
+                        title="Renew subscription (1 month, 3 months, or unlimited)"
                       >
-                        {r.hasAccess ? 'Add 1 month' : 'Restore access'}
+                        <RotateCcw className="w-3.5 h-3.5" />
+                        <span>Renew access</span>
+                      </button>
+                      <button
+                        onClick={() => openGrantAccessModal(r, 'free')}
+                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 transition-colors cursor-pointer"
+                        title="Grant free / unlimited access (1 month, 3 months, or unlimited)"
+                      >
+                        <Gift className="w-3.5 h-3.5 text-emerald-400" />
+                        <span>Grant Free / Unlimited</span>
                       </button>
                       {r.hasAccess && (
                         <button
                           onClick={() => cancelSubscription(r.id)}
-                          className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-rose-500/30 text-rose-300 hover:bg-rose-500/10"
+                          className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-rose-500/30 text-rose-300 hover:bg-rose-500/10 transition-colors cursor-pointer"
                         >
                           End access
                         </button>

@@ -29,6 +29,7 @@ const ADMIN_ENDPOINTS = {
   // Subscriptions (monthly paid-course access)
   SUBSCRIPTIONS: "/courses/subscriptions/",
   EXTEND_SUBSCRIPTION: (id) => `/courses/enrollments/${id}/extend/`,
+  GRANT_FREE_ACCESS: (id) => `/courses/enrollments/${id}/grant-free-access/`,
   REVOKE_SUBSCRIPTION: (id) => `/courses/enrollments/${id}/revoke/`,
   MARK_GUMROAD_CANCELLED: (id) => `/courses/enrollments/${id}/gumroad-cancelled/`,
 
@@ -510,10 +511,22 @@ export const adminService = {
     return response.data;
   },
 
-  // Records another month of manual payment for an admin-enrolled student.
-  extendSubscription: async (enrollmentId) => {
+  // Records manual renewal (1 month, 3 months, or unlimited) or grants access.
+  extendSubscription: async (enrollmentId, duration = "1_month", isFree = false) => {
+    const payload = typeof duration === "object" ? duration : { duration, is_free: isFree };
     const response = await axiosInstance.post(
-      ADMIN_ENDPOINTS.EXTEND_SUBSCRIPTION(enrollmentId)
+      ADMIN_ENDPOINTS.EXTEND_SUBSCRIPTION(enrollmentId),
+      payload
+    );
+    return response.data;
+  },
+
+  // Grants free / unlimited access (1 month, 3 months, or unlimited)
+  grantFreeAccess: async (enrollmentId, duration = "unlimited") => {
+    const payload = typeof duration === "object" ? duration : { duration, is_free: true };
+    const response = await axiosInstance.post(
+      ADMIN_ENDPOINTS.GRANT_FREE_ACCESS(enrollmentId),
+      payload
     );
     return response.data;
   },
