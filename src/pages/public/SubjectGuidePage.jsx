@@ -16,6 +16,11 @@ import { guideBySlug, SUBJECT_GUIDES } from "../../data/subjectGuides";
 const ACCENT = {
   emerald: { text: "text-emerald-300", soft: "bg-emerald-500/10 border-emerald-500/25", dot: "bg-emerald-400" },
   violet: { text: "text-violet-300", soft: "bg-violet-500/10 border-violet-500/25", dot: "bg-violet-400" },
+  sky: { text: "text-sky-300", soft: "bg-sky-500/10 border-sky-500/25", dot: "bg-sky-400" },
+  amber: { text: "text-amber-300", soft: "bg-amber-500/10 border-amber-500/25", dot: "bg-amber-400" },
+  rose: { text: "text-rose-300", soft: "bg-rose-500/10 border-rose-500/25", dot: "bg-rose-400" },
+  lime: { text: "text-lime-300", soft: "bg-lime-500/10 border-lime-500/25", dot: "bg-lime-400" },
+  cyan: { text: "text-cyan-300", soft: "bg-cyan-500/10 border-cyan-500/25", dot: "bg-cyan-400" },
 };
 
 const Section = ({ id, n, icon, title, children }) => {
@@ -58,16 +63,21 @@ export const SubjectGuidesIndex = () => {
         <p className="text-slate-400 max-w-2xl mb-10">
           Everything a student should know before and during a Cambridge subject — exam pattern, topics, question types, grades and why the subject is worth loving. Built from Cambridge's official syllabus.
         </p>
-        <div className="grid sm:grid-cols-2 gap-4">
-          {SUBJECT_GUIDES.map((g) => (
-            <Link key={g.slug} to={`/subjects/${g.slug}`} className="group rounded-2xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.06] hover:border-indigo-500/40 p-5 transition">
-              <div className="text-xs font-bold uppercase tracking-widest text-indigo-300 mb-2">{g.level} · {g.code}</div>
-              <div className="text-lg font-bold text-white mb-2">{g.subject}</div>
-              <p className="text-sm text-slate-400 line-clamp-3">{g.tagline}</p>
-              <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-indigo-300 group-hover:text-white">Read the guide <ChevronRight className="w-4 h-4" /></span>
-            </Link>
-          ))}
-        </div>
+        {["O Level", "AS & A Level"].map((lvl) => (
+          <section key={lvl} className="mb-10">
+            <h2 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-4">{lvl}</h2>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {SUBJECT_GUIDES.filter((g) => g.level === lvl).map((g) => (
+                <Link key={g.slug} to={`/subjects/${g.slug}`} className="group rounded-2xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.06] hover:border-indigo-500/40 p-5 transition">
+                  <div className="text-xs font-bold uppercase tracking-widest text-indigo-300 mb-2">{g.level} · {g.code}</div>
+                  <div className="text-lg font-bold text-white mb-2">{g.subject}</div>
+                  <p className="text-sm text-slate-400 line-clamp-3">{g.tagline}</p>
+                  <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-indigo-300 group-hover:text-white">Read the guide <ChevronRight className="w-4 h-4" /></span>
+                </Link>
+              ))}
+            </div>
+          </section>
+        ))}
       </div>
     </main>
   );
@@ -80,27 +90,28 @@ const SubjectGuidePage = () => {
 
   const sections = useMemo(() => {
     if (!g) return [];
+    // A section shows only when the guide has content for it (e.g. maths has no lab practical).
     const s = [
-      ["facts", "Quick facts", LayoutGrid],
-      ["why", `Why study ${g.subject}?`, Heart],
-      ["stories", "Why these topics?", Sparkles],
-      ["topics", "Topic map", ListTree],
-      ["compare", g.level === "O Level" ? "O Level vs A Level" : "From O Level to A Level", GitCompare],
-      ["exam", "Exam pattern", FileText],
-      ["questions", "Types of questions", MessageSquareText],
-      ["command", "Command words", Quote],
-      ["aos", "What examiners reward", Target],
-      ["grades", "Grades", Award],
-      ["practical", "Practical skills", FlaskConical],
-      ["books", "Books & resources", BookOpen],
-      ["mistakes", "Common mistakes", AlertTriangle],
-      ["plan", "Study plan", CalendarDays],
-      ["careers", "Where it can take you", Briefcase],
-      ["real", `${g.subject} in the real world`, Globe2],
-      ["faq", "Frequently asked questions", HelpCircle],
-      ["vcs", "Study it with us", GraduationCap],
-      ["sources", "Official sources", ExternalLink],
-    ];
+      ["facts", "Quick facts", LayoutGrid, g.quickFacts],
+      ["why", `Why study ${g.subject}?`, Heart, g.why],
+      ["stories", "Why these topics?", Sparkles, g.stories],
+      ["topics", "Topic map", ListTree, g.topics || g.topicGroups],
+      ["compare", g.compareTitle || (g.level === "O Level" ? "O Level vs A Level" : "From O Level to A Level"), GitCompare, g.compare],
+      ["exam", "Exam pattern", FileText, g.papers],
+      ["questions", "Types of questions", MessageSquareText, g.questionTypes],
+      ["command", "Command words", Quote, g.commandWords],
+      ["aos", "What examiners reward", Target, g.aos],
+      ["grades", "Grades", Award, g.grades],
+      ["practical", g.practicalTitle || "Practical skills", FlaskConical, g.practical],
+      ["books", "Books & resources", BookOpen, g.books],
+      ["mistakes", "Common mistakes", AlertTriangle, g.mistakes],
+      ["plan", "Study plan", CalendarDays, g.studyPlan],
+      ["careers", "Where it can take you", Briefcase, g.careers],
+      ["real", `${g.subject} in the real world`, Globe2, g.realWorld],
+      ["faq", "Frequently asked questions", HelpCircle, g.faqs],
+      ["vcs", "Study it with us", GraduationCap, true],
+      ["sources", "Official sources", ExternalLink, g.sources],
+    ].filter((x) => x[3]);
     return s.map(([id, title, icon], i) => ({ id, title, icon, n: i + 1 }));
   }, [g]);
 
@@ -162,6 +173,7 @@ const SubjectGuidePage = () => {
   }
 
   // Props for each <Section>: its id, number, icon and title.
+  const has = (id) => sections.some((v) => v.id === id);
   const meta = (id) => { const x = sections.find((v) => v.id === id); return { id, n: x.n, icon: x.icon, title: x.title }; };
 
   return (
@@ -216,13 +228,14 @@ const SubjectGuidePage = () => {
               </ol>
               {g.sibling && (
                 <Link to={`/subjects/${g.sibling.slug}`} className="mt-4 flex items-center justify-between gap-2 rounded-xl border border-white/10 px-3 py-2.5 text-xs text-slate-300 hover:text-white hover:border-indigo-500/40">
-                  <span>Next level: {g.sibling.label}</span><ChevronRight className="w-4 h-4" />
+                  <span>{g.level === "O Level" ? "Next level" : "Also read"}: {g.sibling.label}</span><ChevronRight className="w-4 h-4" />
                 </Link>
               )}
             </div>
           </aside>
 
           <div className="min-w-0">
+            {has("facts") && (
             <Section {...meta("facts")}>
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
                 {g.quickFacts.map((f) => (
@@ -234,7 +247,9 @@ const SubjectGuidePage = () => {
                 ))}
               </div>
             </Section>
+            )}
 
+            {has("why") && (
             <Section {...meta("why")}>
               <Card>
                 <p className="text-slate-300 mb-4">{g.why.intro}</p>
@@ -246,7 +261,9 @@ const SubjectGuidePage = () => {
                 <Note>{g.why.source}</Note>
               </Card>
             </Section>
+            )}
 
+            {has("stories") && (
             <Section {...meta("stories")}>
               <div className="grid md:grid-cols-2 gap-4">
                 {g.stories.map((s) => (
@@ -258,14 +275,16 @@ const SubjectGuidePage = () => {
                 ))}
               </div>
             </Section>
+            )}
 
+            {has("topics") && (
             <Section {...meta("topics")}>
               {g.topics && (
                 <div className="grid md:grid-cols-2 gap-3">
                   {g.topics.map((t) => (
                     <Card key={t.n} className="p-4">
-                      <div className="font-bold text-white text-sm mb-2"><span className="font-mono text-indigo-300 mr-2">{t.n}</span>{t.name}</div>
-                      <ul className="text-xs text-slate-400 space-y-1">{t.parts.map((p, i) => <li key={p}>{t.n}.{i + 1} {p}</li>)}</ul>
+                      <div className={`font-bold text-white text-sm ${t.parts?.length ? "mb-2" : ""}`}><span className="font-mono text-indigo-300 mr-2">{t.n}</span>{t.name}</div>
+                      {t.parts?.length > 0 && <ul className="text-xs text-slate-400 space-y-1">{t.parts.map((p, i) => <li key={p}>{t.n}.{i + 1} {p}</li>)}</ul>}
                     </Card>
                   ))}
                 </div>
@@ -289,13 +308,15 @@ const SubjectGuidePage = () => {
                 </div>
               )}
             </Section>
+            )}
 
+            {has("compare") && (
             <Section {...meta("compare")}>
               <p className="text-slate-300 mb-4">{g.compare.intro}</p>
               <div className="overflow-x-auto rounded-2xl border border-white/10">
                 <table className="w-full text-sm min-w-[560px]">
                   <thead className="bg-white/[0.04] text-slate-400 text-xs uppercase tracking-wider">
-                    <tr><th className="text-left p-3">Idea</th><th className="text-left p-3">{g.level === "O Level" ? "At O Level (this course)" : "At O Level / IGCSE"}</th><th className="text-left p-3">{g.level === "O Level" ? "At AS & A Level" : "At AS & A Level (this course)"}</th></tr>
+                    <tr><th className="text-left p-3">Idea</th><th className="text-left p-3">{g.compare.cols?.[0] || (g.level === "O Level" ? "At O Level (this course)" : "At O Level / IGCSE")}</th><th className="text-left p-3">{g.compare.cols?.[1] || (g.level === "O Level" ? "At AS & A Level" : "At AS & A Level (this course)")}</th></tr>
                   </thead>
                   <tbody className="divide-y divide-white/5">
                     {g.compare.rows.map((r) => (
@@ -306,7 +327,9 @@ const SubjectGuidePage = () => {
               </div>
               {g.sibling && <Link to={`/subjects/${g.sibling.slug}`} className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-indigo-300 hover:text-white">Read the {g.sibling.label} guide <ChevronRight className="w-4 h-4" /></Link>}
             </Section>
+            )}
 
+            {has("exam") && (
             <Section {...meta("exam")}>
               <div className="space-y-3">
                 {g.papers.map((p) => (
@@ -335,7 +358,9 @@ const SubjectGuidePage = () => {
               )}
               <Note>{g.papersNote}</Note>
             </Section>
+            )}
 
+            {has("questions") && (
             <Section {...meta("questions")}>
               <div className="space-y-3">
                 {g.questionTypes.map((q) => (
@@ -348,7 +373,9 @@ const SubjectGuidePage = () => {
               </div>
               <Note>{g.questionNote}</Note>
             </Section>
+            )}
 
+            {has("command") && (
             <Section {...meta("command")}>
               <div className="overflow-x-auto rounded-2xl border border-white/10">
                 <table className="w-full text-sm min-w-[560px]">
@@ -360,7 +387,9 @@ const SubjectGuidePage = () => {
               </div>
               <Note>{g.commandSource}</Note>
             </Section>
+            )}
 
+            {has("aos") && (
             <Section {...meta("aos")}>
               <div className="space-y-3">
                 {g.aos.map((a) => (
@@ -369,14 +398,16 @@ const SubjectGuidePage = () => {
                       <div className="font-bold text-white text-sm"><span className="font-mono text-indigo-300 mr-2">{a.code}</span>{a.name}</div>
                       <div className={`font-mono font-bold ${accent.text}`}>{a.weight}%</div>
                     </div>
-                    <div className="h-2 rounded-full bg-white/5 overflow-hidden mb-2"><div className="h-full bg-gradient-to-r from-indigo-500 to-cyan-400" style={{ width: `${a.weight}%` }} /></div>
+                    <div className="h-2 rounded-full bg-white/5 overflow-hidden mb-2"><div className="h-full bg-gradient-to-r from-indigo-500 to-cyan-400" style={{ width: `${a.bar ?? a.weight}%` }} /></div>
                     <div className="text-xs text-slate-400">{a.plain}</div>
                   </Card>
                 ))}
               </div>
               <Note>{g.aoNote}</Note>
             </Section>
+            )}
 
+            {has("grades") && (
             <Section {...meta("grades")}>
               <Card>
                 <p className="text-sm text-slate-300 mb-4">{g.grades.scale}</p>
@@ -393,27 +424,35 @@ const SubjectGuidePage = () => {
                 <p className="text-sm text-slate-300 mt-4">{g.grades.meaning}</p>
               </Card>
             </Section>
+            )}
 
+            {has("practical") && (
             <Section {...meta("practical")}>
               <Card>
                 <ul className="space-y-2.5">{g.practical.map((p) => <li key={p} className="flex gap-2.5 text-sm text-slate-200"><FlaskConical className={`w-4 h-4 mt-0.5 shrink-0 ${accent.text}`} />{p}</li>)}</ul>
               </Card>
             </Section>
+            )}
 
+            {has("books") && (
             <Section {...meta("books")}>
               <div className="grid md:grid-cols-2 gap-3">
                 {g.books.map((b) => <Card key={b.title} className="p-4"><div className="font-bold text-white text-sm">{b.title}</div><div className="text-xs text-indigo-300 mt-1">{b.by}</div><div className="text-xs text-slate-400 mt-2">{b.note}</div></Card>)}
               </div>
               <Note>{g.booksNote}</Note>
             </Section>
+            )}
 
+            {has("mistakes") && (
             <Section {...meta("mistakes")}>
               <Card>
                 <ul className="space-y-2.5">{g.mistakes.map((m) => <li key={m} className="flex gap-2.5 text-sm text-slate-200"><AlertTriangle className="w-4 h-4 mt-0.5 shrink-0 text-amber-300" />{m}</li>)}</ul>
                 <Note>{g.mistakesNote}</Note>
               </Card>
             </Section>
+            )}
 
+            {has("plan") && (
             <Section {...meta("plan")}>
               <ol className="relative border-l border-white/10 ml-2 space-y-4">
                 {g.studyPlan.map((s) => (
@@ -426,7 +465,9 @@ const SubjectGuidePage = () => {
               </ol>
               <Note>{g.studyNote}</Note>
             </Section>
+            )}
 
+            {has("careers") && (
             <Section {...meta("careers")}>
               <p className="text-slate-300 mb-4">{g.careers.intro}</p>
               <div className="grid sm:grid-cols-2 gap-3">
@@ -434,13 +475,17 @@ const SubjectGuidePage = () => {
               </div>
               <Note>Typical subject requirements — always check each university's own entry rules.</Note>
             </Section>
+            )}
 
+            {has("real") && (
             <Section {...meta("real")}>
               <div className="grid md:grid-cols-2 gap-4">
                 {g.realWorld.map((r) => <Card key={r.title}><h3 className="font-bold text-white text-sm mb-2">{r.title}</h3><p className="text-sm text-slate-300 leading-relaxed">{r.text}</p></Card>)}
               </div>
             </Section>
+            )}
 
+            {has("faq") && (
             <Section {...meta("faq")}>
               <div className="space-y-2">
                 {g.faqs.map((f) => (
@@ -453,7 +498,9 @@ const SubjectGuidePage = () => {
                 ))}
               </div>
             </Section>
+            )}
 
+            {has("vcs") && (
             <Section {...meta("vcs")}>
               <Card className="bg-gradient-to-br from-indigo-600/20 to-violet-600/10 border-indigo-500/30">
                 <p className="text-slate-200 mb-4">
@@ -465,7 +512,9 @@ const SubjectGuidePage = () => {
                 </div>
               </Card>
             </Section>
+            )}
 
+            {has("sources") && (
             <Section {...meta("sources")}>
               <ul className="space-y-2">
                 {g.sources.map((s) => (
@@ -480,6 +529,7 @@ const SubjectGuidePage = () => {
                 Cambridge says its syllabuses and specimen materials are the final authority on the content and structure of its exams. Always check you are using the syllabus for the year you sit the exam.
               </Note>
             </Section>
+            )}
           </div>
         </div>
       </div>

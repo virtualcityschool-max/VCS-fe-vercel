@@ -72,7 +72,9 @@ const COUNTRY_LANDING_SLUGS = [
 
 // Subject guides (src/data/subjectGuides) — keep in step with SUBJECT_GUIDES there
 // and with generate-sitemap.js.
-const SUBJECT_GUIDE_SLUGS = ["chemistry-5070", "chemistry-9701"];
+const SUBJECT_GUIDE_SLUGS = [
+  "mathematics-4024", "additional-mathematics-4037", "physics-5054", "chemistry-5070", "biology-5090", "mathematics-9709", "physics-9702", "chemistry-9701", "biology-9700",
+];
 
 async function buildRouteList() {
   const routes = [
