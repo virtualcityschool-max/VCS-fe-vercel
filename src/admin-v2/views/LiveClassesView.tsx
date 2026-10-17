@@ -112,6 +112,9 @@ export const LiveClassesView: React.FC = () => {
           teacher: r.teacher_name || 'No teacher', link: r.meeting_link || '',
           expected: r.enrollment_count ?? null,
           teacherIn: att.some((a: any) => a.participant_role === 'teacher' && inNow(a)),
+          // The site only sees someone press Join; Google Meet does not tell it when
+          // they leave. So show WHEN they joined, never "in the class now".
+          teacherJoinedAt: (att.find((a: any) => a.participant_role === 'teacher' && a.joined_at) || {}).joined_at || null,
           teacherJoined,
           studentsNow: studentsAtt.filter(inNow).length,
           present: studentsAtt.filter((a: any) => a.status === 'present').length,
@@ -192,7 +195,7 @@ export const LiveClassesView: React.FC = () => {
         <div className="col-span-6 md:col-span-2 min-w-0">
           <div className="text-[13px] text-slate-200 truncate">{x.teacher}</div>
           <div className={`text-[11px] ${x.teacherIn ? 'text-emerald-400' : x.phase === 'late' || x.phase === 'live' ? 'text-amber-300' : 'text-slate-500'}`}>
-            {x.teacherIn ? '● In the class' : ended ? (x.teacherJoined ? 'Taught the class' : 'Did not join') : x.phase === 'late' || x.phase === 'live' ? 'Not in the class yet' : ''}
+            {x.teacherIn ? `● Joined ${x.teacherJoinedAt ? timeOf(new Date(x.teacherJoinedAt)) : ''}` : ended ? (x.teacherJoined ? 'Taught the class' : 'Did not join') : x.phase === 'late' || x.phase === 'live' ? 'Not in the class yet' : ''}
           </div>
         </div>
         <div className="col-span-6 md:col-span-2 text-xs">
@@ -203,7 +206,7 @@ export const LiveClassesView: React.FC = () => {
           ) : (
             <span className="inline-flex items-center gap-1.5 text-slate-200">
               <Users className="w-3.5 h-3.5 text-indigo-400" />
-              {x.phase === 'live' || x.phase === 'late' ? <><b>{x.studentsNow}</b> in class</> : null}
+              {x.phase === 'live' || x.phase === 'late' ? <><b>{x.studentsNow}</b> joined</> : null}
               {x.expected != null && <span className="text-slate-500">{x.phase === 'live' || x.phase === 'late' ? ` of ${x.expected}` : `${x.expected} enrolled`}</span>}
             </span>
           )}
@@ -375,7 +378,7 @@ export const LiveClassesView: React.FC = () => {
         <div className="flex items-start gap-2 p-3 rounded-xl border border-sky-500/20 bg-sky-500/[0.06] text-xs text-slate-300">
           <Info className="w-4 h-4 text-sky-300 shrink-0 mt-0.5" />
           <span>
-            Join opens the class in Google Meet with the Google account signed in to this browser. <b className="text-white">virtualcityschool@gmail.com</b> hosts every class. To ensure everyone enters without asking to join: in Meet, open <b>Host controls</b> (shield icon), keep <b>Host management ON</b>, and set <b>Meeting access</b> to <b>Open</b>. Teachers and enrolled students are also automatically added as invited guests on the Google Calendar event so they enter directly.
+            Join opens the class in Google Meet with the Google account signed in to this browser. <b className="text-white">virtualcityschool@gmail.com</b> hosts every class. To ensure everyone enters without asking to join: in Meet, open <b>Host controls</b> (shield icon), keep <b>Host management ON</b>, and set <b>Meeting access</b> to <b>Open</b>. Teachers and enrolled students are also automatically added as invited guests on the Google Calendar event so they enter directly. <b className="text-white">"Joined"</b> means the person pressed Join on this website at that time; the website cannot see who has since left Google Meet.
           </span>
         </div>
       )}
