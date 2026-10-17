@@ -39,6 +39,10 @@ const STATIC_PAGES = [
   { loc: "/terms", changefreq: "yearly" },
   { loc: "/online-school", changefreq: "monthly", lastmod: COUNTRY_PAGES_LAST_UPDATED },
   { loc: "/exam-dates", changefreq: "weekly", lastmod: EXAM_DATES_LAST_VERIFIED },
+  // Subject guides — keep in step with src/data/subjectGuides and scripts/prerender.js
+  { loc: "/subjects", changefreq: "monthly", lastmod: "2026-10-18" },
+  { loc: "/subjects/chemistry-5070", changefreq: "monthly", lastmod: "2026-10-18" },
+  { loc: "/subjects/chemistry-9701", changefreq: "monthly", lastmod: "2026-10-18" },
   { loc: "/online-school/saudi-arabia", changefreq: "monthly", lastmod: COUNTRY_PAGES_LAST_UPDATED },
   { loc: "/online-school/uae", changefreq: "monthly", lastmod: COUNTRY_PAGES_LAST_UPDATED },
   { loc: "/online-school/qatar", changefreq: "monthly", lastmod: COUNTRY_PAGES_LAST_UPDATED },

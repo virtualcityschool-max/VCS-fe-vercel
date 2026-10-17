@@ -7,6 +7,8 @@
     { "source": "/blogs/:path*", "destination": "/shell.html" },
     { "source": "/teachers/:path*", "destination": "/shell.html" },
     { "source": "/online-school/:path*", "destination": "/shell.html" },
+    { "source": "/subjects", "destination": "/shell.html" },
+    { "source": "/subjects/:path*", "destination": "/shell.html" },
     { "source": "/student", "destination": "/shell.html" },
     { "source": "/student/:path*", "destination": "/shell.html" },
     { "source": "/teacher", "destination": "/shell.html" },

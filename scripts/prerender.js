@@ -70,12 +70,18 @@ const COUNTRY_LANDING_SLUGS = [
   "uk", "us", "canada", "australia", "pakistan",
 ];
 
+// Subject guides (src/data/subjectGuides) — keep in step with SUBJECT_GUIDES there
+// and with generate-sitemap.js.
+const SUBJECT_GUIDE_SLUGS = ["chemistry-5070", "chemistry-9701"];
+
 async function buildRouteList() {
   const routes = [
     "/", "/courses", "/teachers", "/blogs", "/about", "/privacy-policy", "/terms",
     "/online-school",
     ...COUNTRY_LANDING_SLUGS.map((slug) => `/online-school/${slug}`),
     "/exam-dates",
+    "/subjects",
+    ...SUBJECT_GUIDE_SLUGS.map((slug) => `/subjects/${slug}`),
   ];
 
   try {
