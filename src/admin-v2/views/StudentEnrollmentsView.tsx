@@ -178,16 +178,16 @@ export const StudentEnrollmentsView: React.FC = () => {
           return (
             <div key={studentId} className="border-b border-[#1E2648] last:border-b-0">
               {/* Student */}
-              <div className="flex flex-wrap items-center gap-3 px-4 py-3 bg-gradient-to-r from-sky-500/[0.16] via-sky-500/[0.05] to-transparent border-l-4 border-sky-400">
+              <div className="flex flex-wrap items-center gap-3 px-4 py-3 bg-[#151D3A] border-l-2 border-[#6D5BFF]">
                 <button
                   onClick={() => student && openDetailDrawer('student', student)}
                   className="flex items-center gap-3 min-w-0 flex-1 text-left group"
                 >
-                  <div className="w-9 h-9 rounded-xl bg-sky-400 text-[#0B1020] flex items-center justify-center font-bold text-sm shrink-0 shadow-md shadow-sky-900/40">
+                  <div className="w-9 h-9 rounded-xl bg-[#1A2346] border border-[#232D52] text-indigo-300 flex items-center justify-center font-bold text-sm shrink-0">
                     {(student?.name || 'S')[0].toUpperCase()}
                   </div>
                   <div className="min-w-0">
-                    <div className="text-base font-bold text-sky-300 group-hover:text-sky-200 truncate">{student?.name || 'Student'}</div>
+                    <div className="text-base font-bold text-white group-hover:text-indigo-200 truncate">{student?.name || 'Student'}</div>
                     <div className="text-[11px] text-slate-400 font-mono truncate">
                       Roll {student?.rollNo ?? '—'}{student?.level ? ` · ${student.level}` : ''}
                     </div>
@@ -217,7 +217,7 @@ export const StudentEnrollmentsView: React.FC = () => {
                     <div key={r.id} className="grid grid-cols-12 items-center gap-3 pl-16 pr-4 py-2.5 text-xs hover:bg-[#1A2346]/30">
                       <div className="col-span-12 md:col-span-4 min-w-0">
                         <div className="flex items-center gap-2 min-w-0">
-                          {subject?.code && <span className="font-mono font-bold text-sky-400">{subject.code}</span>}
+                          {subject?.code && <span className="font-mono font-bold text-indigo-300">{subject.code}</span>}
                           <span className="font-medium text-slate-300 truncate">{subject?.name || 'Subject'}</span>
                         </div>
                         <div className="text-[11px] text-slate-500 truncate">{[subject?.department, subject?.level].filter(Boolean).join(' · ')}</div>
@@ -240,7 +240,7 @@ export const StudentEnrollmentsView: React.FC = () => {
                         <button
                           onClick={() => openGrantAccessModal(r, 'renew')}
                           title="Renew access (1 month or 3 months)"
-                          className="flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white transition-colors cursor-pointer"
+                          className="flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-lg bg-[#6D5BFF]/15 hover:bg-[#6D5BFF]/25 text-indigo-200 border border-[#6D5BFF]/40 transition-colors cursor-pointer"
                         >
                           <RotateCcw className="w-3 h-3" />
                           <span>Renew</span>
