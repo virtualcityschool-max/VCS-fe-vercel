@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { PageHeader } from '../components/common/PageHeader';
 import { ClassObserversCard } from '../components/common/ClassObserversCard';
+import { StorageUsageCard } from '../components/common/StorageUsageCard';
 import { Sliders, Clock, User, Save, Check } from 'lucide-react';
 
 export const PlatformSettingsView: React.FC = () => {
@@ -290,6 +291,7 @@ export const PlatformSettingsView: React.FC = () => {
         </form>
       )}
       {activeTab === 'defaults' && <ClassObserversCard />}
+      {activeTab === 'defaults' && <StorageUsageCard />}
     </div>
   );
 };
