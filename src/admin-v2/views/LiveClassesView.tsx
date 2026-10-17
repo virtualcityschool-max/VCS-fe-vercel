@@ -35,6 +35,8 @@ export const LiveClassesView: React.FC = () => {
   const [now, setNow] = useState(Date.now());
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [isPlanClassOpen, setIsPlanClassOpen] = useState(false);
+  // The missed class being moved; opens the planner already filled in.
+  const [rescheduling, setRescheduling] = useState<any>(null);
 
   // Countdowns tick every 30 s; classes and attendance refresh every minute.
   useEffect(() => {
@@ -284,9 +286,9 @@ export const LiveClassesView: React.FC = () => {
               </button>
               <button
                 type="button"
-                onClick={() => resolveMissedSession(x.id, 'rescheduled')}
+                onClick={() => setRescheduling(x.r)}
                 className="px-2 py-1 rounded-lg text-[11px] font-semibold bg-[#6D5BFF] hover:bg-[#5B47FB] text-white whitespace-nowrap cursor-pointer transition shadow-xs"
-                title="Cancel and plan a new time"
+                title="Book a new time for this class"
               >
                 Reschedule
               </button>
@@ -445,6 +447,11 @@ export const LiveClassesView: React.FC = () => {
       <AdminPlanClassModal
         isOpen={isPlanClassOpen}
         onClose={() => setIsPlanClassOpen(false)}
+      />
+      <AdminPlanClassModal
+        isOpen={!!rescheduling}
+        reschedule={rescheduling}
+        onClose={() => setRescheduling(null)}
       />
       <MissedClassesReview
         isOpen={missedReviewOpen}

@@ -21,12 +21,16 @@ import { useApp } from '../../context/AppContext';
 import { inputCls, Field } from './FormControls';
 import { adminSessionService } from '../../../services/adminSessionService';
 import { toastManager } from '../../../utils/toastManager';
+import { axiosInstance } from '../../../utils';
 
 export const AdminPlanClassModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: (createdSession: any) => void;
-}> = ({ isOpen, onClose, onSuccess }) => {
+  // A missed class to move: the form opens filled in with its course, teacher,
+  // title and time. It is only marked "rescheduled" once the new class is booked.
+  reschedule?: any;
+}> = ({ isOpen, onClose, onSuccess, reschedule }) => {
   const { subjects = [], teachers = [], rawCourses = [], enrollments = [], levelOptions = [], reload, tzIana, addToast } = useApp() as any;
 
   // Active scheduling mode: 'scheduled' | 'now' | 'delayed'
@@ -56,6 +60,25 @@ export const AdminPlanClassModal: React.FC<{
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [createdSession, setCreatedSession] = useState<any>(null);
   const [copiedLink, setCopiedLink] = useState<boolean>(false);
+
+  // Fill the form from the class being rescheduled (times are in AST, UTC+3).
+  useEffect(() => {
+    if (!isOpen || !reschedule) return;
+    const ast = (ms: number) => new Date(ms + 3 * 3600000).toISOString();
+    const time = reschedule.scheduled_at ? ast(new Date(reschedule.scheduled_at).getTime()).slice(11, 16) : '16:00';
+    const nowAst = ast(Date.now());
+    // Today if that time is still ahead, otherwise tomorrow.
+    const date = nowAst.slice(11, 16) < time ? nowAst.slice(0, 10) : ast(Date.now() + 86400000).slice(0, 10);
+    setMode('scheduled');
+    setSelectedLevel('all');
+    setSelectedCourseId(reschedule.course ? String(reschedule.course) : '');
+    setSelectedTeacherId(reschedule.teacher ? String(reschedule.teacher) : '');
+    setTitle(reschedule.title || '');
+    setScheduledDate(date);
+    setScheduledTime(time);
+    setClassCount('1');
+    setCreatedSession(null);
+  }, [isOpen, reschedule]);
 
   // Derive distinct levels/categories from courses & subjects
   const availableLevels = useMemo(() => {
@@ -246,9 +269,19 @@ export const AdminPlanClassModal: React.FC<{
       // Backend auto-creates the Google Meet link through Google Calendar
       const result = await adminSessionService.createSession(payload);
       
+      if (reschedule?.id) {
+        // The new class is booked; now take the missed one off the list.
+        try {
+          await axiosInstance.post(`/classroom/sessions/${reschedule.id}/resolve/`, {
+            resolution: 'rescheduled', note: `Moved to ${scheduledDate} ${scheduledTime} AST`,
+          });
+        } catch {
+          toastManager.error('New class booked, but the old one is still on the missed list. Press Cancel on it.');
+        }
+      }
       setCreatedSession(result);
       reload('sessions');
-      if (addToast) addToast('Class planned successfully!', 'success');
+      if (addToast) addToast(reschedule ? 'Class rescheduled' : 'Class planned successfully!', 'success');
       if (onSuccess) onSuccess(result);
     } catch (err: any) {
       const msg = err?.response?.data?.error || err?.response?.data?.detail || err?.message || 'Failed to schedule class';
@@ -289,8 +322,12 @@ export const AdminPlanClassModal: React.FC<{
               <Calendar className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white">Create New Class</h3>
-              <p className="text-[11px] text-slate-400">Plan a lecture with auto-generated Google Meet & Calendar attendee sync</p>
+              <h3 className="text-base font-bold text-white">{reschedule ? 'Reschedule Class' : 'Create New Class'}</h3>
+              <p className="text-[11px] text-slate-400">
+                {reschedule
+                  ? 'Everything is filled in from the missed class. Change the date or time and press the button at the bottom.'
+                  : 'Plan a lecture with auto-generated Google Meet & Calendar attendee sync'}
+              </p>
             </div>
           </div>
           <button
@@ -309,7 +346,7 @@ export const AdminPlanClassModal: React.FC<{
                 <CheckCircle2 className="w-6 h-6" />
               </div>
               <div>
-                <h4 className="text-base font-bold text-white">Class Created Successfully!</h4>
+                <h4 className="text-base font-bold text-white">{reschedule ? 'Class Rescheduled' : 'Class Created Successfully!'}</h4>
                 <p className="text-xs text-slate-300 mt-1">{createdSession.title}</p>
               </div>
             </div>
@@ -762,7 +799,9 @@ export const AdminPlanClassModal: React.FC<{
                 disabled={submitting}
                 className="disabled:opacity-60 px-5 py-2 text-xs font-semibold rounded-xl bg-[#6D5BFF] hover:bg-[#5B47FB] text-white shadow-md shadow-indigo-600/20 transition-all cursor-pointer flex items-center gap-1.5"
               >
-                {submitting
+                {reschedule
+                  ? (submitting ? 'Booking new time…' : 'Book the new time')
+                  : submitting
                   ? `Creating ${scheduledClassesList.length} ${scheduledClassesList.length === 1 ? 'Class' : 'Classes'}…`
                   : `Create & Schedule ${scheduledClassesList.length} ${scheduledClassesList.length === 1 ? 'Class' : 'Classes'}`}
               </button>
