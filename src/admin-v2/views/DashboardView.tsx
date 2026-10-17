@@ -24,6 +24,7 @@ import {
   FileText,
   X,
   Sparkles,
+  RotateCcw,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -37,6 +38,12 @@ import {
 import { StatusPill } from '../components/common/StatusPill';
 import { DEPARTMENT_CONFIG } from '../data/departments';
 import { DepartmentName } from '../types';
+import {
+  loadDismissedActionCenterState,
+  dismissCardItems,
+  resetAllDismissedNotices,
+  type ActionCenterDismissState,
+} from '../utils/actionCenterDismiss';
 
 export const DashboardView: React.FC = () => {
   const {
@@ -52,6 +59,7 @@ export const DashboardView: React.FC = () => {
     openDetailDrawer,
     openQuickAdd,
     renewSubscription,
+    batchResolveMissedSessions,
     endSession,
     can,
     attendanceSummary,
@@ -96,6 +104,18 @@ export const DashboardView: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
+  const [dismissedState, setDismissedState] = useState<ActionCenterDismissState>(() => loadDismissedActionCenterState());
+
+  const handleDismissCard = (cardKey: string, ids: (string | number)[]) => {
+    const updated = dismissCardItems(cardKey, ids);
+    setDismissedState({ ...updated });
+  };
+
+  const handleRestoreAll = () => {
+    const updated = resetAllDismissedNotices();
+    setDismissedState({ ...updated });
+  };
+
   // Derived counts for Action Center
   const pendingAccounts = approvals.filter(
     (a) => a.type === 'account_signup' && a.status === 'pending'
@@ -118,13 +138,41 @@ export const DashboardView: React.FC = () => {
     .filter((s: any) => s.status === 'missed')
     .sort((a: any, b: any) => `${b.date} ${b.startTime}`.localeCompare(`${a.date} ${a.startTime}`));
 
+  // Filter out items dismissed by the admin
+  const visiblePendingAccounts = pendingAccounts.filter(
+    (a) => !(dismissedState.dismissedItemIds['pending_accounts'] || []).includes(String(a.id))
+  );
+  const visiblePendingEnrollments = pendingEnrollments.filter(
+    (a) => !(dismissedState.dismissedItemIds['pending_enrollments'] || []).includes(String(a.id))
+  );
+  const visibleExpiringSubs = expiringSubs.filter(
+    (s) => !(dismissedState.dismissedItemIds['expiring_subs'] || []).includes(String(s.id))
+  );
+  const visibleClassesWithoutTeacher = classesWithoutTeacher.filter(
+    (s) => !(dismissedState.dismissedItemIds['classes_without_teacher'] || []).includes(String(s.id))
+  );
+  const visibleChronicAbsentees = chronicAbsentees.filter(
+    (s) => !(dismissedState.dismissedItemIds['chronic_absentees'] || []).includes(String(s.id))
+  );
+  const visibleMissedClasses = missedClasses.filter(
+    (s) => !(dismissedState.dismissedItemIds['missed_classes'] || []).includes(String(s.id))
+  );
+
   const totalActionItems =
-    pendingAccounts.length +
-    pendingEnrollments.length +
-    expiringSubs.length +
-    classesWithoutTeacher.length +
-    chronicAbsentees.length +
-    missedClasses.length;
+    visiblePendingAccounts.length +
+    visiblePendingEnrollments.length +
+    visibleExpiringSubs.length +
+    visibleClassesWithoutTeacher.length +
+    visibleChronicAbsentees.length +
+    visibleMissedClasses.length;
+
+  const totalDismissedCount =
+    (pendingAccounts.length - visiblePendingAccounts.length) +
+    (pendingEnrollments.length - visiblePendingEnrollments.length) +
+    (expiringSubs.length - visibleExpiringSubs.length) +
+    (classesWithoutTeacher.length - visibleClassesWithoutTeacher.length) +
+    (chronicAbsentees.length - visibleChronicAbsentees.length) +
+    (missedClasses.length - visibleMissedClasses.length);
 
   // Money actually received through Gumroad (completed charges), from the
   // server. Listed prices are not income: free, test and admin-added
@@ -327,13 +375,26 @@ export const DashboardView: React.FC = () => {
             </div>
           </div>
 
-          <button
-            onClick={() => setCurrentView('approvals')}
-            className="text-xs font-semibold text-indigo-400 hover:text-indigo-300 flex items-center gap-1 cursor-pointer"
-          >
-            <span>Review all</span>
-            <ChevronRight className="w-3.5 h-3.5" />
-          </button>
+          <div className="flex items-center gap-3">
+            {totalDismissedCount > 0 && (
+              <button
+                type="button"
+                onClick={handleRestoreAll}
+                className="text-xs font-medium text-slate-400 hover:text-slate-200 flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#1E2648]/60 hover:bg-[#1E2648] border border-[#232D52] transition cursor-pointer"
+                title="Restore dismissed alerts"
+              >
+                <RotateCcw className="w-3 h-3 text-indigo-400" />
+                <span>{totalDismissedCount} dismissed · Restore</span>
+              </button>
+            )}
+            <button
+              onClick={() => setCurrentView('approvals')}
+              className="text-xs font-semibold text-indigo-400 hover:text-indigo-300 flex items-center gap-1 cursor-pointer"
+            >
+              <span>Review all</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
 
         {totalActionItems === 0 ? (
@@ -345,86 +406,145 @@ export const DashboardView: React.FC = () => {
             <p className="text-xs text-slate-400 mt-0.5">
               No pending registrations, missed classes, missing teachers, or critical subscription alerts.
             </p>
+            {totalDismissedCount > 0 && (
+              <button
+                type="button"
+                onClick={handleRestoreAll}
+                className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-indigo-400 hover:text-indigo-300 rounded-lg bg-[#1E2648]/50 hover:bg-[#1E2648] border border-[#232D52] transition cursor-pointer"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Restore {totalDismissedCount} dismissed alert{totalDismissedCount > 1 ? 's' : ''}</span>
+              </button>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 pt-4">
             {/* Card 1: Pending account approvals */}
-            {pendingAccounts.length > 0 && (
+            {visiblePendingAccounts.length > 0 && (
               <div className="p-3.5 rounded-xl border border-amber-500/30 bg-amber-950/20 flex flex-col justify-between space-y-3">
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-2">
                     <span className="w-6 h-6 rounded-lg bg-amber-500 text-slate-950 text-xs font-mono font-bold flex items-center justify-center">
-                      {pendingAccounts.length}
+                      {visiblePendingAccounts.length}
                     </span>
                     <span className="text-xs font-bold text-slate-200">Pending Account Approvals</span>
                   </div>
-                  <span className="text-[10px] text-amber-300/80 font-mono">New sign-ups</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] text-amber-300/80 font-mono">New sign-ups</span>
+                    <button
+                      type="button"
+                      onClick={() => handleDismissCard('pending_accounts', visiblePendingAccounts.map(a => a.id))}
+                      className="p-1 rounded-md text-amber-300/60 hover:text-amber-200 hover:bg-amber-500/20 transition cursor-pointer"
+                      title="Dismiss notice"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
                 <p className="text-xs text-slate-300 leading-snug">
-                  {pendingAccounts[0]?.requesterName}
-                  {pendingAccounts.length > 1 ? ` and ${pendingAccounts.length - 1} other${pendingAccounts.length > 2 ? 's' : ''}` : ''} waiting for account approval.
+                  {visiblePendingAccounts[0]?.requesterName}
+                  {visiblePendingAccounts.length > 1 ? ` and ${visiblePendingAccounts.length - 1} other${visiblePendingAccounts.length > 2 ? 's' : ''}` : ''} waiting for account approval.
                 </p>
-                {/* Decisions are made in the Approvals Inbox review panel, never in one click here. */}
-                <button
-                  onClick={() => setCurrentView('approvals')}
-                  className="w-full py-1.5 px-3 text-xs font-semibold rounded-lg bg-amber-500 text-slate-950 hover:bg-amber-400 transition-colors flex items-center justify-center gap-1 cursor-pointer"
-                >
-                  <span>Review in Approvals Inbox</span>
-                  <ArrowRight className="w-3 h-3" />
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setCurrentView('approvals')}
+                    className="flex-1 py-1.5 px-3 text-xs font-semibold rounded-lg bg-amber-500 text-slate-950 hover:bg-amber-400 transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                  >
+                    <span>Review in Approvals Inbox</span>
+                    <ArrowRight className="w-3 h-3" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDismissCard('pending_accounts', visiblePendingAccounts.map(a => a.id))}
+                    className="py-1.5 px-2.5 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition cursor-pointer"
+                    title="Dismiss alert"
+                  >
+                    Dismiss
+                  </button>
+                </div>
               </div>
             )}
 
             {/* Card 2: Enrollment / elective requests */}
-            {pendingEnrollments.length > 0 && (
+            {visiblePendingEnrollments.length > 0 && (
               <div className="p-3.5 rounded-xl border border-indigo-500/30 bg-indigo-950/20 flex flex-col justify-between space-y-3">
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-2">
                     <span className="w-6 h-6 rounded-lg bg-indigo-500 text-white text-xs font-mono font-bold flex items-center justify-center">
-                      {pendingEnrollments.length}
+                      {visiblePendingEnrollments.length}
                     </span>
                     <span className="text-xs font-bold text-slate-200">Enrollment / Access Requests</span>
                   </div>
-                  <span className="text-[10px] text-indigo-300/80 font-mono">Subjects & scholarships</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] text-indigo-300/80 font-mono">Subjects & scholarships</span>
+                    <button
+                      type="button"
+                      onClick={() => handleDismissCard('pending_enrollments', visiblePendingEnrollments.map(e => e.id))}
+                      className="p-1 rounded-md text-indigo-300/60 hover:text-indigo-200 hover:bg-indigo-500/20 transition cursor-pointer"
+                      title="Dismiss notice"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
                 <p className="text-xs text-slate-300 leading-snug">
-                  {pendingEnrollments[0]?.requesterName} → {pendingEnrollments[0]?.targetEntityName}
-                  {pendingEnrollments.length > 1 ? ` and ${pendingEnrollments.length - 1} more request${pendingEnrollments.length > 2 ? 's' : ''}` : ''}.
+                  {visiblePendingEnrollments[0]?.requesterName} → {visiblePendingEnrollments[0]?.targetEntityName}
+                  {visiblePendingEnrollments.length > 1 ? ` and ${visiblePendingEnrollments.length - 1} more request${visiblePendingEnrollments.length > 2 ? 's' : ''}` : ''}.
                 </p>
-                <button
-                  onClick={() => setCurrentView('approvals')}
-                  className="w-full py-1.5 px-3 text-xs font-semibold rounded-lg bg-[#6D5BFF] text-white hover:bg-[#5B47FB] transition-colors flex items-center justify-center gap-1 cursor-pointer"
-                >
-                  <span>Review in Approvals Inbox</span>
-                  <ArrowRight className="w-3 h-3" />
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setCurrentView('approvals')}
+                    className="flex-1 py-1.5 px-3 text-xs font-semibold rounded-lg bg-[#6D5BFF] text-white hover:bg-[#5B47FB] transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                  >
+                    <span>Review in Approvals Inbox</span>
+                    <ArrowRight className="w-3 h-3" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDismissCard('pending_enrollments', visiblePendingEnrollments.map(e => e.id))}
+                    className="py-1.5 px-2.5 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition cursor-pointer"
+                    title="Dismiss alert"
+                  >
+                    Dismiss
+                  </button>
+                </div>
               </div>
             )}
 
             {/* Card 3: Expiring subscriptions in 7 days */}
-            {expiringSubs.length > 0 && (
+            {visibleExpiringSubs.length > 0 && (
               <div className="p-3.5 rounded-xl border border-rose-500/30 bg-rose-950/20 flex flex-col justify-between space-y-3">
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-2">
                     <span className="w-6 h-6 rounded-lg bg-rose-500 text-white text-xs font-mono font-bold flex items-center justify-center">
-                      {expiringSubs.length}
+                      {visibleExpiringSubs.length}
                     </span>
                     <span className="text-xs font-bold text-slate-200">Subscriptions Expiring &lt; 7 Days</span>
                   </div>
-                  <span className="text-[10px] text-rose-300/80 font-mono font-bold">Fees</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] text-rose-300/80 font-mono font-bold">Fees</span>
+                    <button
+                      type="button"
+                      onClick={() => handleDismissCard('expiring_subs', visibleExpiringSubs.map(s => s.id))}
+                      className="p-1 rounded-md text-rose-300/60 hover:text-rose-200 hover:bg-rose-500/20 transition cursor-pointer"
+                      title="Dismiss notice"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
                 <p className="text-xs text-slate-300 leading-snug">
-                  {expiringSubs
+                  {visibleExpiringSubs
                     .slice(0, 3)
                     .map((s: any) => `${s.studentName} (${s.subjectName?.split(' (')[0]})`)
                     .join(', ')}
-                  {expiringSubs.length > 3 ? ` and ${expiringSubs.length - 3} more` : ''} — access ends within 7 days.
+                  {visibleExpiringSubs.length > 3 ? ` and ${visibleExpiringSubs.length - 3} more` : ''} — access ends within 7 days.
                 </p>
                 <div className="flex items-center gap-2 pt-1">
                   {can('manage_billing') && <button
-                    onClick={() => renewSubscription(expiringSubs[0].id, 1)}
+                    onClick={() => renewSubscription(visibleExpiringSubs[0].id, 1)}
                     className="flex-1 py-1.5 px-3 text-xs font-semibold rounded-lg bg-rose-600 hover:bg-rose-500 text-white transition-colors flex items-center justify-center gap-1 cursor-pointer"
-                    title={`Record next month for ${(expiringSubs[0] as any)?.studentName}`}
+                    title={`Record next month for ${(visibleExpiringSubs[0] as any)?.studentName}`}
                   >
                     <span>Renew</span>
                   </button>}
@@ -435,83 +555,162 @@ export const DashboardView: React.FC = () => {
                     <span>Manage</span>
                     <ArrowRight className="w-3 h-3" />
                   </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDismissCard('expiring_subs', visibleExpiringSubs.map(s => s.id))}
+                    className="py-1.5 px-2.5 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition cursor-pointer"
+                    title="Dismiss alert"
+                  >
+                    Dismiss
+                  </button>
                 </div>
               </div>
             )}
 
             {/* Card 4: Classes today without teacher */}
-            {classesWithoutTeacher.length > 0 && (
+            {visibleClassesWithoutTeacher.length > 0 && (
               <div className="p-3.5 rounded-xl border border-amber-500/30 bg-amber-950/20 flex flex-col justify-between space-y-3">
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-2">
                     <span className="w-6 h-6 rounded-lg bg-amber-500 text-slate-950 text-xs font-mono font-bold flex items-center justify-center">
-                      {classesWithoutTeacher.length}
+                      {visibleClassesWithoutTeacher.length}
                     </span>
                     <span className="text-xs font-bold text-slate-200">Classes Need Teacher</span>
                   </div>
-                  <span className="text-[10px] text-amber-300/80 font-mono">Today</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] text-amber-300/80 font-mono">Today</span>
+                    <button
+                      type="button"
+                      onClick={() => handleDismissCard('classes_without_teacher', visibleClassesWithoutTeacher.map(s => s.id))}
+                      className="p-1 rounded-md text-amber-300/60 hover:text-amber-200 hover:bg-amber-500/20 transition cursor-pointer"
+                      title="Dismiss notice"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
                 <p className="text-xs text-slate-300 leading-snug">
-                  {classesWithoutTeacher[0]?.title} at {classesWithoutTeacher[0]?.startTime} today has no teacher assigned yet.
+                  {visibleClassesWithoutTeacher[0]?.title} at {visibleClassesWithoutTeacher[0]?.startTime} today has no teacher assigned yet.
                 </p>
-                <button
-                  onClick={() => setCurrentView('timetable')}
-                  className="w-full py-1.5 px-3 text-xs font-semibold rounded-lg bg-amber-500 text-slate-950 hover:bg-amber-400 transition-colors flex items-center justify-center gap-1 cursor-pointer"
-                >
-                  <span>Fix / Assign Teacher</span>
-                  <ArrowRight className="w-3 h-3" />
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setCurrentView('timetable')}
+                    className="flex-1 py-1.5 px-3 text-xs font-semibold rounded-lg bg-amber-500 text-slate-950 hover:bg-amber-400 transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                  >
+                    <span>Fix / Assign Teacher</span>
+                    <ArrowRight className="w-3 h-3" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDismissCard('classes_without_teacher', visibleClassesWithoutTeacher.map(s => s.id))}
+                    className="py-1.5 px-2.5 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition cursor-pointer"
+                    title="Dismiss alert"
+                  >
+                    Dismiss
+                  </button>
+                </div>
               </div>
             )}
 
             {/* Card 5: Chronic Absentees (2+ absences this week) */}
-            {chronicAbsentees.length > 0 && (
+            {visibleChronicAbsentees.length > 0 && (
               <div className="p-3.5 rounded-xl border border-sky-500/30 bg-sky-950/20 flex flex-col justify-between space-y-3">
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-2">
                     <span className="w-6 h-6 rounded-lg bg-sky-500 text-slate-950 text-xs font-mono font-bold flex items-center justify-center">
-                      {chronicAbsentees.length}
+                      {visibleChronicAbsentees.length}
                     </span>
                     <span className="text-xs font-bold text-slate-200">Students Absent 2+ Times</span>
                   </div>
-                  <span className="text-[10px] text-sky-300/80 font-mono">This Week</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] text-sky-300/80 font-mono">This Week</span>
+                    <button
+                      type="button"
+                      onClick={() => handleDismissCard('chronic_absentees', visibleChronicAbsentees.map(s => s.id))}
+                      className="p-1 rounded-md text-sky-300/60 hover:text-sky-200 hover:bg-sky-500/20 transition cursor-pointer"
+                      title="Dismiss notice"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
                 <p className="text-xs text-slate-300 leading-snug">
-                  {chronicAbsentees.map((s) => s.name).join(', ')} flagged for follow-up with parents.
+                  {visibleChronicAbsentees.map((s) => s.name).join(', ')} flagged for follow-up with parents.
                 </p>
-                <button
-                  onClick={() => setCurrentView('attendance')}
-                  className="w-full py-1.5 px-3 text-xs font-semibold rounded-lg bg-sky-600 text-white hover:bg-sky-500 transition-colors flex items-center justify-center gap-1 cursor-pointer"
-                >
-                  <span>View Attendance</span>
-                  <ArrowRight className="w-3 h-3" />
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setCurrentView('attendance')}
+                    className="flex-1 py-1.5 px-3 text-xs font-semibold rounded-lg bg-sky-600 text-white hover:bg-sky-500 transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                  >
+                    <span>View Attendance</span>
+                    <ArrowRight className="w-3 h-3" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDismissCard('chronic_absentees', visibleChronicAbsentees.map(s => s.id))}
+                    className="py-1.5 px-3 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition cursor-pointer flex items-center gap-1"
+                    title="Acknowledge and clear flagged students"
+                  >
+                    <Check className="w-3 h-3 text-emerald-400" />
+                    <span>Acknowledge</span>
+                  </button>
+                </div>
               </div>
             )}
 
             {/* Card 6: Missed / not started classes, until resolved */}
-            {missedClasses.length > 0 && (
+            {visibleMissedClasses.length > 0 && (
               <div className="p-3.5 rounded-xl border border-rose-500/30 bg-rose-950/20 flex flex-col justify-between space-y-3">
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-2">
                     <span className="w-6 h-6 rounded-lg bg-rose-500 text-white text-xs font-mono font-bold flex items-center justify-center">
-                      {missedClasses.length}
+                      {visibleMissedClasses.length}
                     </span>
                     <span className="text-xs font-bold text-slate-200">Missed / Teacher Not Joined</span>
                   </div>
-                  <span className="text-[10px] text-rose-300/80 font-mono">Resolve</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] text-rose-300/80 font-mono">Resolve</span>
+                    <button
+                      type="button"
+                      onClick={() => handleDismissCard('missed_classes', visibleMissedClasses.map(s => s.id))}
+                      className="p-1 rounded-md text-rose-300/60 hover:text-rose-200 hover:bg-rose-500/20 transition cursor-pointer"
+                      title="Dismiss notice"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
                 <p className="text-xs text-slate-300 leading-snug">
-                  {missedClasses.slice(0, 2).map((s: any) => `${s.title} (${s.date} ${s.startTime})`).join(', ')}
-                  {missedClasses.length > 2 ? ` and ${missedClasses.length - 2} more` : ''} had no teacher. Mark as held, cancel or reschedule.
+                  {visibleMissedClasses.slice(0, 2).map((s: any) => `${s.title} (${s.date} ${s.startTime})`).join(', ')}
+                  {visibleMissedClasses.length > 2 ? ` and ${visibleMissedClasses.length - 2} more` : ''} had no teacher. Mark as held, cancel or reschedule.
                 </p>
-                <button
-                  onClick={() => setCurrentView('live-classes')}
-                  className="w-full py-1.5 px-3 text-xs font-semibold rounded-lg bg-rose-600 text-white hover:bg-rose-500 transition-colors flex items-center justify-center gap-1 cursor-pointer"
-                >
-                  <span>Resolve in Live Classes</span>
-                  <ArrowRight className="w-3 h-3" />
-                </button>
+                <div className="flex items-center gap-2 pt-1 flex-wrap sm:flex-nowrap">
+                  {can('manage_academics') && (
+                    <button
+                      onClick={() => batchResolveMissedSessions(visibleMissedClasses.map((s: any) => s.id), 'held', 'Batch marked as held from Action Center')}
+                      className="flex-1 py-1.5 px-2.5 text-xs font-semibold rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white transition-colors flex items-center justify-center gap-1 cursor-pointer shadow-xs whitespace-nowrap"
+                      title="Mark all missed classes as held / taught"
+                    >
+                      <Check className="w-3 h-3" />
+                      <span>Mark All Held ({visibleMissedClasses.length})</span>
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setCurrentView('live-classes')}
+                    className="flex-1 py-1.5 px-2.5 text-xs font-semibold rounded-lg bg-rose-600 text-white hover:bg-rose-500 transition-colors flex items-center justify-center gap-1 cursor-pointer whitespace-nowrap"
+                  >
+                    <span>Resolve in Live Classes</span>
+                    <ArrowRight className="w-3 h-3" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDismissCard('missed_classes', visibleMissedClasses.map(s => s.id))}
+                    className="py-1.5 px-2.5 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition cursor-pointer"
+                    title="Dismiss alert"
+                  >
+                    Dismiss
+                  </button>
+                </div>
               </div>
             )}
           </div>

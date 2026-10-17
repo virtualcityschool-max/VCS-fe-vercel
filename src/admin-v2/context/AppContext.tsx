@@ -1059,6 +1059,35 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return done;
   };
 
+  const batchResolveMissedSessions = async (ids: string[], resolution: 'held' | 'cancelled', note = '') => {
+    if (!ids || !ids.length) return false;
+    const words = { held: 'Mark as held', cancelled: 'Cancel' };
+    const ok = await confirmAction({
+      title: `${words[resolution]} for all ${ids.length} missed classes?`,
+      message: resolution === 'held'
+        ? `All ${ids.length} missed classes will be recorded as held / taught. This clears them from the missed classes list.`
+        : `All ${ids.length} missed classes will be marked as cancelled. This clears them from the missed classes list.`,
+      confirmLabel: `${words[resolution]} all (${ids.length})`,
+      isDestructive: resolution !== 'held',
+    });
+    if (!ok) return false;
+    const done = await run(async () => {
+      const chunkSize = 5;
+      for (let i = 0; i < ids.length; i += chunkSize) {
+        const chunk = ids.slice(i, i + chunkSize);
+        await Promise.all(
+          chunk.map((id) =>
+            axiosInstance.post(`/classroom/sessions/${id}/resolve/`, {
+              resolution,
+              note: note || (resolution === 'held' ? 'Batch resolved as held by admin' : 'Batch cancelled by admin'),
+            })
+          )
+        );
+      }
+    }, `${ids.length} classes resolved`, ['sessions', 'audit']);
+    return done;
+  };
+
   const openGrantAccessModal = (item: any, mode: 'renew' | 'free' = 'renew') => {
     if (!item) return;
     const enrollmentId = item.enrollment_id || item.id || item._raw?.enrollment_id || item._raw?.id;
@@ -1169,7 +1198,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     enrollments, addEnrollment, addEnrollments, removeEnrollment,
     teachers, addTeacher, updateTeacher, toggleTeacherStatus, bulkAssignSubject, allocateTeacherSubject, deallocateTeacherSubject,
     levelOptions: raw.categories, parents, addParent, addAdmin, allUsers, updateStaffRole, toggleUserStatus,
-    can, canView, isSuperAdmin, recommendFreeAccess, resolveMissedSession, setAttendanceStatus, attendanceSummary,
+    can, canView, isSuperAdmin, recommendFreeAccess, resolveMissedSession, batchResolveMissedSessions, setAttendanceStatus, attendanceSummary,
     liveNowCount, setTeacherAreas, setTeacherShowcase, subjects, catalog, addBatch, renameBatch, moveBatch, updateCatalogSubject, addSubject, updateSubject, toggleSubjectStatus, levels, addLevel, removeLevel,
     sessions, addSession, updateSession, deleteSession, endSession, meetings, addMeeting,
     subscriptions, renewSubscription, cancelSubscription, referrals,

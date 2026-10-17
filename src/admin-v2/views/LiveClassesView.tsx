@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { PageHeader } from '../components/common/PageHeader';
 import { inputCls } from '../components/common/FormControls';
-import { AlertTriangle, CalendarDays, Check, ChevronLeft, ChevronRight, Copy, Info, Plus, Radio, Search, Share2, Square, Users, Video } from 'lucide-react';
+import { AlertTriangle, CalendarDays, Check, ChevronLeft, ChevronRight, Copy, Info, Plus, Radio, Search, Share2, Square, Users, Video, X } from 'lucide-react';
 import { AdminPlanClassModal } from '../components/common/AdminPlanClassModal';
 // @ts-ignore
 import DigitalSessionClock from '../../components/common/DigitalSessionClock';
@@ -25,7 +25,7 @@ const dur = (m: number) => (m >= 60 ? `${Math.floor(m / 60)} h ${m % 60 ? `${m %
 // Live Classes: today's Google Meet classes with who is in them, and a Join
 // button so an admin can drop in and observe a class.
 export const LiveClassesView: React.FC = () => {
-  const { sessions = [], rawAttendanceAll = [], subjects = [], reload, tzIana, setCurrentView, resolveMissedSession, endSession, can } = useApp() as any;
+  const { sessions = [], rawAttendanceAll = [], subjects = [], reload, tzIana, setCurrentView, resolveMissedSession, batchResolveMissedSessions, endSession, can } = useApp() as any;
   const canResolve = can('manage_academics');
   const [mode, setMode] = useState<'upcoming' | 'past'>('upcoming');
   const [dayOffset, setDayOffset] = useState(0);
@@ -83,16 +83,20 @@ export const LiveClassesView: React.FC = () => {
         const att = attendanceBySession.get(String(r.id)) || [];
         const teacherJoined = att.some((a: any) => a.participant_role === 'teacher' && a.joined_at);
         const isPastEnd = t > end.getTime();
-        // Not started 15 min after its time, or opened by itself but the teacher
-        // has not joined after 20 min: missed, and it stays flagged until an
-        // admin resolves it (held / cancelled / rescheduled).
-        // If past end time, class is no longer live.
+        // A class is missed if marked missed in DB, teacher never joined, or scheduled time passed without starting.
+        // It stays flagged as missed until an admin resolves it (held / cancelled / rescheduled / dismissed).
+        const isMissed =
+          r.status === 'missed' ||
+          s.status === 'missed' ||
+          s.teacherNotJoined ||
+          (isPastEnd && r.status === 'live' && !teacherJoined) ||
+          (r.status === 'scheduled' && t > start.getTime() + 15 * 60000);
+
         const phase: Phase =
           r.status === 'cancelled' ? 'cancelled'
-          : (s.teacherNotJoined || (isPastEnd && r.status === 'live' && !teacherJoined)) ? 'missed'
+          : isMissed ? 'missed'
           : isPastEnd ? 'ended'
           : r.status === 'live' ? 'live'
-          : r.status === 'missed' || (r.status === 'scheduled' && t > start.getTime() + 15 * 60000) ? 'missed'
           : r.status === 'ended' ? 'ended'
           : t >= start.getTime() ? 'late'
           : start.getTime() - t <= 60 * 60000 ? 'soon'
@@ -263,11 +267,40 @@ export const LiveClassesView: React.FC = () => {
               <Square className="w-3 h-3 fill-current" /> End Class
             </button>
           )}
-          {x.phase === 'missed' && canResolve && (
+          {(x.phase === 'missed' || x.r?.status === 'missed') && canResolve && (
             <span className="flex items-center gap-1">
-              <button onClick={() => resolveMissedSession(x.id, 'held')} className="px-2 py-1 rounded-lg text-[11px] font-semibold bg-emerald-600 hover:bg-emerald-500 text-white whitespace-nowrap">Held</button>
-              <button onClick={() => resolveMissedSession(x.id, 'rescheduled')} className="px-2 py-1 rounded-lg text-[11px] font-semibold bg-[#6D5BFF] hover:bg-[#5B47FB] text-white whitespace-nowrap">Reschedule</button>
-              <button onClick={() => resolveMissedSession(x.id, 'cancelled')} className="px-2 py-1 rounded-lg text-[11px] font-semibold border border-rose-500/40 text-rose-300 hover:bg-rose-500/10 whitespace-nowrap">Cancel</button>
+              <button
+                type="button"
+                onClick={() => resolveMissedSession(x.id, 'held')}
+                className="px-2 py-1 rounded-lg text-[11px] font-semibold bg-emerald-600 hover:bg-emerald-500 text-white whitespace-nowrap cursor-pointer transition shadow-xs"
+                title="Record this class as held / taught"
+              >
+                Held
+              </button>
+              <button
+                type="button"
+                onClick={() => resolveMissedSession(x.id, 'rescheduled')}
+                className="px-2 py-1 rounded-lg text-[11px] font-semibold bg-[#6D5BFF] hover:bg-[#5B47FB] text-white whitespace-nowrap cursor-pointer transition shadow-xs"
+                title="Cancel and plan a new time"
+              >
+                Reschedule
+              </button>
+              <button
+                type="button"
+                onClick={() => resolveMissedSession(x.id, 'cancelled')}
+                className="px-2 py-1 rounded-lg text-[11px] font-semibold border border-rose-500/40 text-rose-300 hover:bg-rose-500/10 whitespace-nowrap cursor-pointer transition"
+                title="Mark this class as cancelled"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => resolveMissedSession(x.id, 'held', 'Dismissed by admin')}
+                className="px-2 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 whitespace-nowrap cursor-pointer transition"
+                title="Dismiss this alert and mark as resolved"
+              >
+                Dismiss
+              </button>
             </span>
           )}
         </div>
@@ -355,7 +388,51 @@ export const LiveClassesView: React.FC = () => {
           )}
           <Section title="Upcoming today" icon={CalendarDays} tone="text-sky-300" items={upcomingTodayRows} empty="No more classes scheduled for today." />
           {missedRows.length > 0 && (
-            <Section title="Missed / not started — needs a decision" icon={AlertTriangle} tone="text-rose-300" items={missedRows} />
+            <div className="rounded-2xl border border-rose-500/40 bg-[#121831] overflow-hidden shadow-xl">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-3 bg-rose-950/30 border-b border-rose-500/30">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-1.5 rounded-lg bg-rose-500/20 text-rose-300">
+                    <AlertTriangle className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="text-xs font-bold uppercase tracking-wider text-rose-200 flex items-center gap-2">
+                      <span>Missed / Not Started — Needs a Decision</span>
+                      <span className="px-2 py-0.5 text-xs rounded-full bg-rose-500/30 text-rose-300 font-mono font-bold">
+                        {missedRows.length} classes
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-400 mt-0.5">
+                      Teacher did not join or start. Mark as held if taught offline, cancel, reschedule, or dismiss.
+                    </p>
+                  </div>
+                </div>
+                {canResolve && (
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => batchResolveMissedSessions(missedRows.map((x: any) => x.id), 'held', 'Batch marked as held by admin')}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white transition cursor-pointer shadow-xs"
+                      title="Mark all missed classes as held / taught"
+                    >
+                      <Check className="w-3.5 h-3.5" />
+                      <span>Mark All Held ({missedRows.length})</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => batchResolveMissedSessions(missedRows.map((x: any) => x.id), 'cancelled', 'Batch cancelled by admin')}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-rose-500/40 text-rose-300 hover:bg-rose-500/10 transition cursor-pointer"
+                      title="Cancel all missed classes"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                      <span>Cancel All</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+              <div className="divide-y divide-[#1E2648]/60">
+                {missedRows.map((x: any) => <Row key={x.id} x={x} />)}
+              </div>
+            </div>
           )}
           {nextDays.filter((d) => d.rows.length).map((d) => (
             <Section key={d.offset} title={d.label} icon={CalendarDays} tone="text-slate-300" items={d.rows} />
