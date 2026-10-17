@@ -239,7 +239,7 @@ export const StudentEnrollmentsView: React.FC = () => {
                       <div className="col-span-12 md:col-span-3 flex items-center justify-end gap-1.5">
                         <button
                           onClick={() => openGrantAccessModal(r, 'renew')}
-                          title="Renew access (1 month, 3 months, or unlimited)"
+                          title="Renew access (1 month or 3 months)"
                           className="flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white transition-colors cursor-pointer"
                         >
                           <RotateCcw className="w-3 h-3" />
@@ -247,11 +247,11 @@ export const StudentEnrollmentsView: React.FC = () => {
                         </button>
                         <button
                           onClick={() => openGrantAccessModal(r, 'free')}
-                          title="Grant free / unlimited access (1 month, 3 months, or unlimited)"
+                          title="Grant access (1 month, 3 months, or unlimited)"
                           className="flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 transition-colors cursor-pointer"
                         >
                           <Gift className="w-3 h-3 text-emerald-400" />
-                          <span className="hidden xl:inline">Grant Access</span>
+                          <span>Grant Access</span>
                         </button>
                         <button
                           onClick={() => removeEnrollment(r.id)}

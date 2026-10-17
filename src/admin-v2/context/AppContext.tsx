@@ -551,16 +551,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }), [raw.meetings, tzIana]);
 
   const subscriptions: Subscription[] = useMemo(() => {
-    const row = (r: any, expired: boolean) => ({
-      id: sid(r.enrollment_id), studentId: sid(r.student?.id), subjectId: sid(r.course?.id),
-      source: r.enrollment_source === 'gumroad' ? 'Gumroad' : 'Admin Manual',
-      status: expired || !r.has_access ? 'Expired' : (r.days_remaining ?? 99) <= 7 ? 'Expiring soon' : 'Active',
-      accessUntil: (r.access_expires_at || '').slice(0, 10), lastChargeDate: (r.last_charge_at || '').slice(0, 10),
-      monthlyAmountUSD: coursePrice(courseById.get(sid(r.course?.id))),
-      gumroadSubscriptionId: r.gumroad_subscription_id || undefined,
-      studentName: r.student?.name, studentEmail: r.student?.email, subjectName: r.course?.title,
-      canExtend: r.can_extend, hasAccess: r.has_access, renewalDueAt: r.renewal_due_at, _raw: r,
-    } as any);
+    const row = (r: any, expired: boolean) => {
+      const isUnlimited = r.access_expires_at === null || r.enrollment_source === 'free_access';
+      return {
+        id: sid(r.enrollment_id), studentId: sid(r.student?.id), subjectId: sid(r.course?.id),
+        source: r.enrollment_source === 'gumroad' ? 'Gumroad' : r.enrollment_source === 'free_access' ? 'Scholarship' : 'Admin Manual',
+        status: isUnlimited ? 'Active' : (expired || !r.has_access ? 'Expired' : (r.days_remaining ?? 99) <= 7 ? 'Expiring soon' : 'Active'),
+        accessUntil: isUnlimited ? null : (r.access_expires_at || '').slice(0, 10),
+        daysRemaining: r.days_remaining,
+        isUnlimited,
+        lastChargeDate: (r.last_charge_at || '').slice(0, 10),
+        monthlyAmountUSD: coursePrice(courseById.get(sid(r.course?.id))),
+        gumroadSubscriptionId: r.gumroad_subscription_id || undefined,
+        studentName: r.student?.name, studentEmail: r.student?.email, subjectName: r.course?.title,
+        canExtend: r.can_extend, hasAccess: r.has_access, renewalDueAt: r.renewal_due_at, _raw: r,
+      } as any;
+    };
     return [...(raw.subs.active || []).map((r: any) => row(r, false)), ...(raw.subs.expired || []).map((r: any) => row(r, true))];
   }, [raw.subs, courseById]);
 
@@ -1058,6 +1064,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const enrollmentId = item.enrollment_id || item.id || item._raw?.enrollment_id || item._raw?.id;
     const student = students.find((s: any) => s.id === item.studentId) || item.student || item._raw?.student;
     const subject = subjects.find((s: any) => s.id === item.subjectId) || item.course || item._raw?.course;
+    const isUnlimited = item.isUnlimited || item.access_expires_at === null || item._raw?.access_expires_at === null || item.source === 'Scholarship';
+    const accessUntilStr = isUnlimited
+      ? 'Unlimited / Lifetime'
+      : (item.accessUntil || (item.access_expires_at ? item.access_expires_at.slice(0, 10) : undefined) || (item._raw?.access_expires_at ? item._raw.access_expires_at.slice(0, 10) : undefined));
     setGrantAccessModal({
       isOpen: true,
       enrollmentId,
@@ -1065,7 +1075,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       studentRollNo: student?.rollNo || student?.roll_no,
       subjectName: item.subjectName || subject?.name || subject?.title,
       subjectCode: subject?.code,
-      currentAccessUntil: item.accessUntil || (item.access_expires_at ? item.access_expires_at.slice(0, 10) : undefined) || (item._raw?.access_expires_at ? item._raw.access_expires_at.slice(0, 10) : undefined),
+      currentAccessUntil: accessUntilStr,
       currentStatus: item.status,
       initialMode: mode,
     });

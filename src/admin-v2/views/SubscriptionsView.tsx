@@ -6,6 +6,7 @@ import { DataTable, Column } from '../components/common/DataTable';
 import { StatusPill } from '../components/common/StatusPill';
 import { Subscription } from '../types';
 import { CreditCard, RotateCcw, XCircle, ExternalLink, Gift } from 'lucide-react';
+import { AccessValidityCell } from '../utils/accessFormatter';
 
 export const SubscriptionsView: React.FC = () => {
   const {
@@ -101,17 +102,11 @@ export const SubscriptionsView: React.FC = () => {
     {
       header: 'Access Valid Until',
       cell: (row) => (
-        <span
-          className={`font-mono text-xs font-semibold ${
-            row.status === 'Expiring soon'
-              ? 'text-amber-400 font-bold'
-              : row.status === 'Expired'
-              ? 'text-rose-400'
-              : 'text-slate-300'
-          }`}
-        >
-          {row.accessUntil}
-        </span>
+        <AccessValidityCell
+          expiresAt={row.accessUntil || row._raw?.access_expires_at}
+          daysRemaining={row.daysRemaining ?? row._raw?.days_remaining}
+          isUnlimited={row.isUnlimited || !row.accessUntil || row._raw?.access_expires_at === null || row.source === 'Scholarship'}
+        />
       ),
     },
     {
@@ -133,7 +128,7 @@ export const SubscriptionsView: React.FC = () => {
           <button
             onClick={() => renewSubscription(row.id, 'renew')}
             className="flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white transition-colors cursor-pointer shadow-xs"
-            title="Renew subscription (1 month, 3 months, or unlimited)"
+            title="Renew subscription (1 month or 3 months)"
           >
             <RotateCcw className="w-3 h-3" />
             <span>Renew</span>
@@ -141,11 +136,10 @@ export const SubscriptionsView: React.FC = () => {
           <button
             onClick={() => openGrantAccessModal(row, 'free')}
             className="flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 transition-colors cursor-pointer"
-            title="Grant free / unlimited access (1 month, 3 months, or unlimited)"
+            title="Grant access (1 month, 3 months, or unlimited)"
           >
             <Gift className="w-3 h-3 text-emerald-400" />
-            <span className="hidden xl:inline">Grant Free Access</span>
-            <span className="xl:hidden">Free Access</span>
+            <span>Grant Access</span>
           </button>
           {row.status !== 'Expired' && (
             <button

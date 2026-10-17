@@ -365,7 +365,7 @@ export const DetailDrawer: React.FC = () => {
                       <StatusPill status={r.status} />
                     </div>
                     <div className="text-xs text-slate-400 flex flex-wrap gap-x-3">
-                      <span>Access until {r.accessUntil || '—'}</span>
+                      <span>Access: {r.isUnlimited || !r.accessUntil ? 'Unlimited' : `Until ${r.accessUntil}`}</span>
                       {r.lastChargeDate && <span>Last paid {r.lastChargeDate}</span>}
                       <span>{r.source === 'Gumroad' ? 'Paid via Gumroad' : 'Paid to admin'}</span>
                       <span className="font-mono text-slate-300">${r.monthlyAmountUSD}/mo</span>
@@ -374,7 +374,7 @@ export const DetailDrawer: React.FC = () => {
                       <button
                         onClick={() => renewSubscription(r.id, 'renew')}
                         className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-[#6D5BFF] hover:bg-[#5B47FB] text-white transition-colors cursor-pointer"
-                        title="Renew subscription (1 month, 3 months, or unlimited)"
+                        title="Renew subscription (1 month or 3 months)"
                       >
                         <RotateCcw className="w-3.5 h-3.5" />
                         <span>Renew access</span>
@@ -382,10 +382,10 @@ export const DetailDrawer: React.FC = () => {
                       <button
                         onClick={() => openGrantAccessModal(r, 'free')}
                         className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 transition-colors cursor-pointer"
-                        title="Grant free / unlimited access (1 month, 3 months, or unlimited)"
+                        title="Grant access (1 month, 3 months, or unlimited)"
                       >
                         <Gift className="w-3.5 h-3.5 text-emerald-400" />
-                        <span>Grant Free / Unlimited</span>
+                        <span>Grant Access</span>
                       </button>
                       {r.hasAccess && (
                         <button

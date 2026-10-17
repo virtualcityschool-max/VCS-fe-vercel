@@ -59,7 +59,7 @@ export const GrantAccessModal: React.FC<GrantAccessModalProps> = ({
     try {
       const isFree = mode === 'free';
       const res = await adminService.extendSubscription(Number(enrollmentId), duration, isFree);
-      onSuccess?.(res?.message || (isFree ? 'Free access successfully granted!' : 'Subscription successfully renewed!'));
+      onSuccess?.(res?.message || (isFree ? 'Access successfully granted!' : 'Subscription successfully renewed!'));
       onClose();
     } catch (err: any) {
       const msg = err?.response?.data?.error || err?.response?.data?.detail || err?.message || 'Failed to update access.';
@@ -70,32 +70,51 @@ export const GrantAccessModal: React.FC<GrantAccessModalProps> = ({
     }
   };
 
-  const DURATION_OPTIONS = [
-    {
-      id: '1_month' as AccessDuration,
-      title: '1 Month Access',
-      subtitle: 'Extends access for 1 full month from expiry or today',
-      badge: '1 Month',
-      icon: Calendar,
-      recommended: false,
-    },
-    {
-      id: '3_months' as AccessDuration,
-      title: '3 Months Access',
-      subtitle: 'Extends access for 3 full months (Quarterly term)',
-      badge: '3 Months',
-      icon: CalendarRange,
-      recommended: mode === 'renew',
-    },
-    {
-      id: 'unlimited' as AccessDuration,
-      title: 'Unlimited / Lifetime Access',
-      subtitle: 'Permanent unlimited access with no expiration date',
-      badge: 'Lifetime',
-      icon: InfinityIcon,
-      recommended: mode === 'free',
-    },
-  ];
+  const DURATION_OPTIONS = mode === 'free'
+    ? [
+        {
+          id: 'unlimited' as AccessDuration,
+          title: 'Unlimited / Lifetime Access',
+          subtitle: 'Permanent unlimited access with no expiration date or recurring fee',
+          badge: 'Lifetime',
+          icon: InfinityIcon,
+          recommended: true,
+        },
+        {
+          id: '1_month' as AccessDuration,
+          title: '1 Month Access',
+          subtitle: 'Direct complimentary course access for 1 full month',
+          badge: '1 Month',
+          icon: Calendar,
+          recommended: false,
+        },
+        {
+          id: '3_months' as AccessDuration,
+          title: '3 Months Access',
+          subtitle: 'Direct complimentary course access for 3 full months',
+          badge: '3 Months',
+          icon: CalendarRange,
+          recommended: false,
+        },
+      ]
+    : [
+        {
+          id: '1_month' as AccessDuration,
+          title: '1 Month Renewal',
+          subtitle: 'Extend subscription for 1 month from expiry or today',
+          badge: '1 Month',
+          icon: Calendar,
+          recommended: true,
+        },
+        {
+          id: '3_months' as AccessDuration,
+          title: '3 Months Renewal',
+          subtitle: 'Extend subscription for 3 full months (Quarterly term)',
+          badge: '3 Months',
+          icon: CalendarRange,
+          recommended: false,
+        },
+      ];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-150">
@@ -117,12 +136,12 @@ export const GrantAccessModal: React.FC<GrantAccessModalProps> = ({
             </div>
             <div>
               <h3 className="text-base font-bold text-white tracking-tight">
-                {mode === 'free' ? 'Grant Free / Unlimited Access' : 'Renew Subscription Access'}
+                {mode === 'free' ? 'Grant Access' : 'Renew Subscription Access'}
               </h3>
               <p className="text-xs text-slate-400 mt-0.5">
                 {mode === 'free'
-                  ? 'Provide complimentary course access without charging monthly fees'
-                  : 'Extend paid seat duration or switch to free access'}
+                  ? 'Allocate student course access (1 month, 3 months, or unlimited) directly'
+                  : 'Record a paid subscription renewal collected by school administration'}
               </p>
             </div>
           </div>
@@ -139,7 +158,10 @@ export const GrantAccessModal: React.FC<GrantAccessModalProps> = ({
         <div className="mt-4 p-1 bg-[#0E1428] border border-[#1E2648] rounded-xl flex items-center gap-1">
           <button
             type="button"
-            onClick={() => setMode('renew')}
+            onClick={() => {
+              setMode('renew');
+              if (duration === 'unlimited') setDuration('1_month');
+            }}
             className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer ${
               mode === 'renew'
                 ? 'bg-[#6D5BFF] text-white shadow-sm'
@@ -162,7 +184,7 @@ export const GrantAccessModal: React.FC<GrantAccessModalProps> = ({
             }`}
           >
             <Gift className="w-3.5 h-3.5" />
-            <span>Grant Free Access</span>
+            <span>Grant Access</span>
           </button>
         </div>
 
@@ -182,8 +204,8 @@ export const GrantAccessModal: React.FC<GrantAccessModalProps> = ({
           </div>
           <div className="flex items-center justify-between text-slate-300 pt-1 border-t border-white/5">
             <span className="text-slate-400">Current Access:</span>
-            <span className="font-mono font-semibold text-amber-300">
-              {currentAccessUntil ? `Valid until ${currentAccessUntil}` : currentStatus || 'Expired / Inactive'}
+            <span className={`font-mono font-semibold ${String(currentAccessUntil || '').toLowerCase().includes('unlimited') ? 'text-emerald-400' : 'text-amber-300'}`}>
+              {currentAccessUntil || currentStatus || 'Expired / Inactive'}
             </span>
           </div>
         </div>
@@ -271,13 +293,11 @@ export const GrantAccessModal: React.FC<GrantAccessModalProps> = ({
             <div className="leading-relaxed">
               {mode === 'free' ? (
                 <>
-                  <span className="font-bold">Complimentary Free Access:</span> No monthly fee will be billed, and
-                  access will remain fully active for the selected duration without gateway friction.
+                  <span className="font-bold">Grant Access:</span> Directly allocates access to the student without recurring gateway charges or fee requirements.
                 </>
               ) : (
                 <>
-                  <span className="font-bold">Manual Renewal:</span> Records this seat extension as confirmed payment
-                  collected by school administration.
+                  <span className="font-bold">Standard Renewal:</span> Records manual tuition fee collected by school administration and extends the student's active seat.
                 </>
               )}
             </div>
@@ -318,10 +338,8 @@ export const GrantAccessModal: React.FC<GrantAccessModalProps> = ({
                     {mode === 'free'
                       ? duration === 'unlimited'
                         ? 'Grant Unlimited Access'
-                        : `Grant Free (${duration === '3_months' ? '3 Months' : '1 Month'})`
-                      : duration === 'unlimited'
-                      ? 'Confirm Unlimited Renewal'
-                      : `Confirm Renewal (${duration === '3_months' ? '3 Months' : '1 Month'})`}
+                        : `Grant Access (${duration === '3_months' ? '3 Months' : '1 Month'})`
+                      : `Confirm ${duration === '3_months' ? '3 Months' : '1 Month'} Renewal`}
                   </span>
                 </>
               )}
