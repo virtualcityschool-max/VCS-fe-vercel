@@ -14,7 +14,9 @@ const StudentAssignments = ({ hideHeader = false, filterCourse: externalFilterCo
     (state) => state.studentDashboard,
   );
 
-  const filterCourse = externalFilterCourse || "";
+  // The page's own course filter; a parent page can still force one.
+  const [localFilterCourse, setFilterCourse] = useState("");
+  const filterCourse = externalFilterCourse || localFilterCourse;
 
   useEffect(() => {
     dispatch(fetchStudentAssignments(filterCourse ? { course: filterCourse } : {}));

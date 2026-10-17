@@ -189,7 +189,7 @@ const UserProfileTab = ({ profile, onUpdate }) => {
                 <PhoneInput
                   value={formData.phone}
                   onChange={(val) => handleInputChange("phone", val)}
-                  error={getFieldError("phone")}
+                  error={errors.phone}
                 />
               </div>
 

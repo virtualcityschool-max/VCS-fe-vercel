@@ -55,7 +55,6 @@ const UserProfileDropdown = ({ dropUp = false, isCollapsed = false }) => {
       // Always navigate to home regardless of backend success
       navigate("/");
     } catch (error) {
-      toastManager.dismiss(toastId);
       // Even if dispatch fails, try to navigate to home
       toastManager.error("Error signing out. Redirecting to home...");
       setTimeout(() => navigate("/"), 1000);

@@ -3,7 +3,7 @@ import { axiosInstance } from "../utils";
 // Parent service endpoints
 const PARENT_ENDPOINTS = {
   DASHBOARD: "/classroom/parent-dashboard/",
-  CHILD_GRADES: "/assignments/child-grades/",
+  CHILD_GRADES: "/assignments/all-grades/",
   CHILD_ATTENDANCE: "/classroom/child-attendance/",
   ATTENDANCE: "/classroom/attendance/",
   CHILD_COURSES: "/courses/",

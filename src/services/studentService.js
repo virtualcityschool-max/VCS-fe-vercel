@@ -78,7 +78,7 @@ export const studentService = {
   // Get student grades
   getGrades: async () => {
     try {
-      const response = await axiosInstance.get("/assignments/my-grades/");
+      const response = await axiosInstance.get("/assignments/all-grades/");
       return response.data;
     } catch (error) {
       console.error("Error fetching student grades:", error);
@@ -95,7 +95,8 @@ export const studentService = {
       return response.data;
     } catch (error) {
       console.error("Error joining live session:", error);
-      throw new Error("Failed to join live session.");
+      // Keep the server's reason (e.g. "join up to 60 minutes before") so the page can show it.
+      throw new Error(error?.response?.data?.error || "Failed to join live session.");
     }
   },
 
@@ -407,7 +408,7 @@ export const studentService = {
     try {
       console.log("Fetching student grades...");
 
-      const response = await axiosInstance.get("/assignments/my-grades/", {
+      const response = await axiosInstance.get("/assignments/all-grades/", {
         params,
       });
 

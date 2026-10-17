@@ -129,19 +129,22 @@ const AdminAuthGate = () => {
   const dispatch = useDispatch();
   const hasOpenedRef = React.useRef(false);
 
-  // If entering /admin while an impersonation session was active, immediately restore the admin session!
-  if (typeof window !== "undefined" && localStorage.getItem("vcs_impersonator_backup")) {
-    restoreAdminSession();
-    window.location.reload();
-    return null;
-  }
+  const restoringAdmin = typeof window !== "undefined" && !!localStorage.getItem("vcs_impersonator_backup");
 
   React.useEffect(() => {
+    if (restoringAdmin) return;
     if (isInitialized && !isLoggedIn && !hasOpenedRef.current) {
       hasOpenedRef.current = true;
       dispatch(setAuthModal({ type: "login", adminMode: true }));
     }
-  }, [isInitialized, isLoggedIn, dispatch]);
+  }, [restoringAdmin, isInitialized, isLoggedIn, dispatch]);
+
+  // If entering /admin while an impersonation session was active, immediately restore the admin session!
+  if (restoringAdmin) {
+    restoreAdminSession();
+    window.location.reload();
+    return null;
+  }
 
   if (!isInitialized) {
     return (
