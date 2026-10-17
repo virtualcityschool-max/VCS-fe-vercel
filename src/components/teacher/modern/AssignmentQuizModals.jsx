@@ -13,7 +13,8 @@ import {
   AlertCircle,
   Code,
   FileUp,
-  RotateCcw
+  RotateCcw,
+  Plus
 } from "lucide-react";
 import { toastManager } from "../../../utils/toastManager";
 import { defaultQuizMarks } from "../../../utils/quizDefaults";
@@ -331,6 +332,13 @@ export const CreateAssignmentModal = ({
       </div>
     </div>;
 };
+const QUESTION_TYPES = [
+  { id: "multiple_choice", label: "Multiple choice", on: "bg-indigo-600/25 border-indigo-500/50 text-indigo-200" },
+  { id: "yes_no", label: "Yes / No", on: "bg-emerald-600/25 border-emerald-500/50 text-emerald-200" },
+  { id: "fill_in_blank", label: "Fill blank", on: "bg-amber-600/25 border-amber-500/50 text-amber-200" },
+  { id: "short_answer", label: "Short writing", on: "bg-cyan-600/25 border-cyan-500/50 text-cyan-200" },
+];
+
 const createBlankQuestion = (type = "multiple_choice") => {
   const id = `q-new-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
   if (type === "yes_no") {
@@ -488,6 +496,8 @@ export const AdvancedQuizBuilderModal = ({
   const [importAppendMode, setImportAppendMode] = useState("append");
   const [bulkImportError, setBulkImportError] = useState(null);
   const [bulkImportSuccess, setBulkImportSuccess] = useState(null);
+  // The newest question gets the cursor, so the teacher can type straight away.
+  const [focusQuestionId, setFocusQuestionId] = useState(null);
 
   const handleResetForm = useCallback(() => {
     setTitle("");
@@ -707,7 +717,20 @@ multiple_choice,"Which electromagnetic radiation has the highest frequency?",5,"
   };
 
   const handleAddQuestion = (type) => {
-    setQuestions((prev) => [...prev, createBlankQuestion(type)]);
+    const q = createBlankQuestion(type);
+    setQuestions((prev) => [...prev, q]);
+    setFocusQuestionId(q.id);
+  };
+
+  // Switch a question's type; its wording and marks stay.
+  const changeQuestionType = (id, type) => {
+    setQuestions((prev) =>
+      prev.map((q) => {
+        if (q.id !== id || q.type === type) return q;
+        const fresh = createBlankQuestion(type);
+        return { ...fresh, id: q.id, questionText: q.questionText, marks: q.marks };
+      })
+    );
   };
 
   const handleRemoveQuestion = (id) => {
@@ -1011,35 +1034,6 @@ multiple_choice,"Which electromagnetic radiation has the highest frequency?",5,"
                     <FileSpreadsheet className="w-3.5 h-3.5" />
                     <span>Bulk Import (CSV / JSON)</span>
                   </button>
-                  <div className="h-4 w-px bg-[#242D4C] mx-0.5" />
-                  <button
-                    type="button"
-                    onClick={() => handleAddQuestion("multiple_choice")}
-                    className="px-2.5 py-1 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 text-[11px] font-semibold cursor-pointer"
-                  >
-                    + Multi Choice
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleAddQuestion("yes_no")}
-                    className="px-2.5 py-1 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-[11px] font-semibold cursor-pointer"
-                  >
-                    + Yes/No
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleAddQuestion("fill_in_blank")}
-                    className="px-2.5 py-1 rounded-lg bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-500/30 text-[11px] font-semibold cursor-pointer"
-                  >
-                    + Fill Blank
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleAddQuestion("short_answer")}
-                    className="px-2.5 py-1 rounded-lg bg-cyan-600/20 hover:bg-cyan-600/30 text-cyan-300 border border-cyan-500/30 text-[11px] font-semibold cursor-pointer"
-                  >
-                    + Short Writing
-                  </button>
                 </div>
               )}
             </div>
@@ -1056,9 +1050,28 @@ multiple_choice,"Which electromagnetic radiation has the highest frequency?",5,"
                       <span className="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-300 text-[10px] font-bold flex items-center justify-center font-mono">
                         {idx + 1}
                       </span>
-                      <span className="text-xs font-bold text-white uppercase tracking-wider">
-                        {q.type.replace("_", " ")}
-                      </span>
+                      {isLocked ? (
+                        <span className="text-xs font-bold text-white uppercase tracking-wider">
+                          {QUESTION_TYPES.find((t) => t.id === q.type)?.label || q.type}
+                        </span>
+                      ) : (
+                        <div className="flex flex-wrap gap-1" role="radiogroup" aria-label="Question type">
+                          {QUESTION_TYPES.map((t) => (
+                            <button
+                              key={t.id}
+                              type="button"
+                              role="radio"
+                              aria-checked={q.type === t.id}
+                              onClick={() => changeQuestionType(q.id, t.id)}
+                              className={`px-2 py-0.5 rounded-md text-[11px] font-semibold border cursor-pointer transition-colors ${
+                                q.type === t.id ? t.on : "bg-transparent border-[#1E2642] text-slate-400 hover:text-white"
+                              }`}
+                            >
+                              {t.label}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -1091,6 +1104,7 @@ multiple_choice,"Which electromagnetic radiation has the highest frequency?",5,"
                   <textarea
                     rows={2}
                     disabled={isLocked}
+                    autoFocus={q.id === focusQuestionId}
                     value={q.questionText}
                     onChange={(e) => updateQuestion(q.id, { questionText: e.target.value })}
                     placeholder="Enter question wording..."
@@ -1197,6 +1211,31 @@ multiple_choice,"Which electromagnetic radiation has the highest frequency?",5,"
                   )}
                 </div>
               ))}
+
+              {!isLocked && (
+                <button
+                  type="button"
+                  onClick={() => handleAddQuestion(questions[questions.length - 1]?.type || "multiple_choice")}
+                  className="w-full py-3 rounded-xl border-2 border-dashed border-indigo-500/40 hover:border-indigo-400 hover:bg-indigo-500/5 text-indigo-300 hover:text-white text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-colors"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Add question {questions.length + 1}</span>
+                  <span className="font-normal text-slate-400">(change its type at the top of the question)</span>
+                </button>
+              )}
+
+              <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 rounded-xl bg-[#0B0E1A] border border-[#1A223B]">
+                <span className="text-xs text-slate-300">
+                  {questions.length} question{questions.length === 1 ? "" : "s"}
+                  {QUESTION_TYPES.map((t) => {
+                    const n = questions.filter((q) => q.type === t.id).length;
+                    return n ? <span key={t.id} className="text-slate-500"> · {n} {t.label.toLowerCase()}</span> : null;
+                  })}
+                </span>
+                <span className="text-sm font-bold text-white">
+                  Total marks: <span className="font-mono text-indigo-300">{totalMarks}</span>
+                </span>
+              </div>
             </div>
           </div>
 
