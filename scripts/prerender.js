@@ -74,6 +74,7 @@ const COUNTRY_LANDING_SLUGS = [
 // and with generate-sitemap.js.
 const SUBJECT_GUIDE_SLUGS = [
   "mathematics-4024", "additional-mathematics-4037", "physics-5054", "chemistry-5070", "biology-5090", "mathematics-9709", "physics-9702", "chemistry-9701", "biology-9700",
+  "english-1123", "english-9093", "computer-science-2210", "computer-science-9618", "islamiyat-2058", "pakistan-studies-2059", "urdu-3248", "urdu-3247", "urdu-9866",
 ];
 
 async function buildRouteList() {

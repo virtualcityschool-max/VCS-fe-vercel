@@ -194,6 +194,9 @@ const SubjectGuidePage = () => {
           <p className="mt-4 inline-flex items-center gap-2 text-xs text-emerald-300/90 bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-3 py-1.5">
             <CheckCircle2 className="w-3.5 h-3.5" /> Checked against the official Cambridge syllabus for exams in {g.syllabusYears} · {g.verifiedOn}
           </p>
+          {g.notice && (
+            <p className="mt-3 text-sm text-amber-200 bg-amber-500/10 border border-amber-500/30 rounded-xl px-4 py-3 leading-relaxed">{g.notice}</p>
+          )}
         </header>
 
         {/* Phone: table of contents as a scrollable strip */}
@@ -335,7 +338,7 @@ const SubjectGuidePage = () => {
                 {g.papers.map((p) => (
                   <Card key={p.name} className="p-4">
                     <div className="flex flex-wrap items-start justify-between gap-2">
-                      <div>
+                      <div className="flex-1 min-w-[220px]">
                         <div className="font-bold text-white">{p.name}</div>
                         <div className="text-sm text-slate-400 mt-1">{p.what}</div>
                         <div className="text-[11px] text-slate-500 mt-1">{p.who}</div>
