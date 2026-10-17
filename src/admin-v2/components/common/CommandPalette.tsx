@@ -78,6 +78,7 @@ export const CommandPalette: React.FC = () => {
     { id: 'parents', title: 'Parents (/admin/users?role=parent)', icon: HeartHandshake },
     { id: 'attendance', title: 'Attendance (/admin/attendance)', icon: Calendar },
     { id: 'evaluations', title: 'Evaluations (/admin/evaluations)', icon: BookOpen },
+    { id: 'assessments', title: 'Quizzes & Assignments (/admin/assessments)', icon: BookOpen },
     // FINANCE
     { id: 'subscriptions', title: 'Subscriptions (/admin/subscriptions)', icon: CreditCard },
     { id: 'referrals', title: 'Referrals (/admin/referrals)', icon: Share2 },

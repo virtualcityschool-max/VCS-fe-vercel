@@ -30,7 +30,7 @@ import {
   School,
   GitFork,
   CalendarClock,
-  UserCheck, Radio } from 'lucide-react';
+  UserCheck, Radio, FileCheck } from 'lucide-react';
 import { NavigationId } from '../../types';
 import { staffRoleLabel } from '../../data/staffRoles';
 
@@ -133,6 +133,7 @@ export const Sidebar: React.FC = () => {
       items: [
         { id: 'attendance', label: 'Attendance', icon: ClipboardCheck },
         { id: 'evaluations', label: 'Evaluations', icon: Award },
+        { id: 'assessments', label: 'Quizzes & Assignments', icon: FileCheck },
       ],
     },
     {

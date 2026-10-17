@@ -61,6 +61,7 @@ const V2 = {
   StaffMeetings: v2("PTMMeetingsView", "PTMMeetingsView"),
   Attendance: v2("AttendanceView", "AttendanceView"),
   Evaluations: v2("EvaluationsView", "EvaluationsView"),
+  Assessments: v2("AssessmentsView", "AssessmentsView"),
   Subscriptions: v2("SubscriptionsView", "SubscriptionsView"),
   Referrals: v2("ReferralsView", "ReferralsView"),
   Blogs: v2("BlogsView", "BlogsView"),
@@ -288,6 +289,7 @@ const AppRoutes = () => {
           <Route path="teacher-planner" element={<Navigate to="/admin/staff-meetings" replace />} />
           <Route path="attendance" element={<V2.Attendance />} />
           <Route path="evaluations" element={<V2.Evaluations />} />
+          <Route path="assessments" element={<V2.Assessments />} />
           <Route path="subscriptions" element={<V2.Subscriptions />} />
           <Route path="referrals" element={<V2.Referrals />} />
           <Route path="blogs" element={<V2.Blogs />} />

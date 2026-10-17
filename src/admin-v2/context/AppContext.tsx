@@ -70,6 +70,7 @@ export const VIEW_TO_PATH: Record<string, string> = {
   parents: '/admin/users?role=parent',
   attendance: '/admin/attendance',
   evaluations: '/admin/evaluations',
+  assessments: '/admin/assessments',
   grades: '/admin/evaluations',
   subscriptions: '/admin/subscriptions',
   referrals: '/admin/referrals',

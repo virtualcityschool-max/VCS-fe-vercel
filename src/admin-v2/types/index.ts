@@ -16,6 +16,7 @@ export type NavigationId =
   | 'parents'
   | 'attendance'
   | 'evaluations'
+  | 'assessments'
   // FINANCE
   | 'subscriptions'
   | 'referrals'

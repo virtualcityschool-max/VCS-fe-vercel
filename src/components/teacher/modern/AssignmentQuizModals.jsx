@@ -48,6 +48,8 @@ export const CreateAssignmentModal = ({
   courses,
   onCreateAssignment,
   initialAssignment = null,
+  // Admin page only: offer "publish at a set time" (students see it from then on).
+  allowSchedule = false,
 }) => {
   const [title, setTitle] = useState("");
   const [courseId, setCourseId] = useState("");
@@ -58,8 +60,14 @@ export const CreateAssignmentModal = ({
   const [file, setFile] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState(null);
+  const [publishLater, setPublishLater] = useState(false);
+  const [publishDate, setPublishDate] = useState(() => localDateStr(new Date(Date.now() + 86400000)));
+  const [publishTime, setPublishTime] = useState("08:00");
 
   const reset = () => {
+    setPublishLater(false);
+    setPublishDate(localDateStr(new Date(Date.now() + 86400000)));
+    setPublishTime("08:00");
     setTitle("");
     setDescription("");
     setFile(null);
@@ -105,6 +113,10 @@ export const CreateAssignmentModal = ({
       setFormError("Max marks must be more than 0.");
       return;
     }
+    if (allowSchedule && publishLater && `${publishDate}T${publishTime}` >= `${dueDate}T${dueTime}`) {
+      setFormError("The deadline must be after the publish time.");
+      return;
+    }
     setIsSubmitting(true);
     setFormError(null);
     try {
@@ -116,7 +128,8 @@ export const CreateAssignmentModal = ({
         dueDate,
         dueTime,
         maxMarks: Number(maxMarks),
-        file
+        file,
+        ...(allowSchedule && publishLater ? { publishDate, publishTime } : {}),
       });
       reset();
       onClose();
@@ -224,6 +237,40 @@ export const CreateAssignmentModal = ({
               </label>
             </div>
           </div>
+
+          {allowSchedule && !initialAssignment && <div className="p-3.5 rounded-xl bg-[#0B0E1A] border border-[#1A223B] space-y-2">
+              <div className="text-xs font-bold text-white flex items-center gap-1.5">
+                <Calendar className="w-3.5 h-3.5 text-indigo-400" />
+                <span>When should students see it?</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {[[false, "Publish now"], [true, "At a set time"]].map(([v, label]) => <button
+    key={label}
+    type="button"
+    onClick={() => setPublishLater(v)}
+    className={`px-3 py-1.5 rounded-lg text-xs font-semibold border cursor-pointer ${publishLater === v ? "bg-[#5B46F8] border-[#5B46F8] text-white" : "bg-[#121628] border-[#1E2642] text-slate-300 hover:text-white"}`}
+  >
+                    {label}
+                  </button>)}
+              </div>
+              {publishLater && <div className="grid grid-cols-2 gap-2">
+                  <input
+    type="date"
+    required
+    value={publishDate}
+    min={localDateStr(new Date())}
+    onChange={(e) => setPublishDate(e.target.value)}
+    className="px-2.5 py-1.5 rounded-lg bg-[#121628] border border-[#1E2642] text-xs text-white [color-scheme:dark]"
+  />
+                  <input
+    type="time"
+    required
+    value={publishTime}
+    onChange={(e) => setPublishTime(e.target.value)}
+    className="px-2.5 py-1.5 rounded-lg bg-[#121628] border border-[#1E2642] text-xs font-mono text-white [color-scheme:dark]"
+  />
+                </div>}
+            </div>}
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="sm:col-span-2 p-3.5 rounded-xl bg-[#0B0E1A] border border-[#1A223B] space-y-2">

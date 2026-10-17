@@ -36,6 +36,7 @@ export const NAV_CAP: Record<string, Cap> = {
   'ptm-meetings': 'view_academics',
   meetings: 'view_academics',
   evaluations: 'view_academics',
+  assessments: 'view_academics',
   levels: 'view_academics',
   attendance: 'view_attendance',
   subscriptions: 'view_billing',
