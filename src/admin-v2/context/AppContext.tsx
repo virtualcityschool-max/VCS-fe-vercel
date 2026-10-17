@@ -30,6 +30,7 @@ import { fetchFreeAccessRequests } from '../../store/slices/freeAccessSlice';
 import { getDisplayName } from '../../utils/userDisplay';
 import { getStorageUrl } from '../../utils/storageUrl';
 import { departmentOf } from '../../components/admin/ui/departments';
+import { TEACHING_AREAS, guessTeachingAreas } from '../data/formOptions';
 import { ConfirmDialog } from '../components/common/ConfirmDialog';
 import { GrantAccessModal } from '../components/common/GrantAccessModal';
 import { NAV_CAP, type Cap } from '../data/staffRoles';
@@ -204,24 +205,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     currentStatus?: string;
     initialMode?: 'renew' | 'free';
   } | null>(null);
-
-  const openGrantAccessModal = (item: any, mode: 'renew' | 'free' = 'renew') => {
-    if (!item) return;
-    const enrollmentId = item.enrollment_id || item.id || item._raw?.enrollment_id || item._raw?.id;
-    const student = students.find((s: any) => s.id === item.studentId) || item.student || item._raw?.student;
-    const subject = subjects.find((s: any) => s.id === item.subjectId) || item.course || item._raw?.course;
-    setGrantAccessModal({
-      isOpen: true,
-      enrollmentId,
-      studentName: item.studentName || student?.name || student?.username,
-      studentRollNo: student?.rollNo || student?.roll_no,
-      subjectName: item.subjectName || subject?.name || subject?.title,
-      subjectCode: subject?.code,
-      currentAccessUntil: item.accessUntil || (item.access_expires_at ? item.access_expires_at.slice(0, 10) : undefined) || (item._raw?.access_expires_at ? item._raw.access_expires_at.slice(0, 10) : undefined),
-      currentStatus: item.status,
-      initialMode: mode,
-    });
-  };
 
   const closeGrantAccessModal = () => setGrantAccessModal(null);
 
@@ -1068,6 +1051,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const done = await run(() => axiosInstance.post(`/classroom/sessions/${id}/resolve/`, { resolution, note }), 'Class resolved', ['sessions', 'audit']);
     if (done && resolution === 'rescheduled') navigate('/admin/sessions/plan');
     return done;
+  };
+
+  const openGrantAccessModal = (item: any, mode: 'renew' | 'free' = 'renew') => {
+    if (!item) return;
+    const enrollmentId = item.enrollment_id || item.id || item._raw?.enrollment_id || item._raw?.id;
+    const student = students.find((s: any) => s.id === item.studentId) || item.student || item._raw?.student;
+    const subject = subjects.find((s: any) => s.id === item.subjectId) || item.course || item._raw?.course;
+    setGrantAccessModal({
+      isOpen: true,
+      enrollmentId,
+      studentName: item.studentName || student?.name || student?.username,
+      studentRollNo: student?.rollNo || student?.roll_no,
+      subjectName: item.subjectName || subject?.name || subject?.title,
+      subjectCode: subject?.code,
+      currentAccessUntil: item.accessUntil || (item.access_expires_at ? item.access_expires_at.slice(0, 10) : undefined) || (item._raw?.access_expires_at ? item._raw.access_expires_at.slice(0, 10) : undefined),
+      currentStatus: item.status,
+      initialMode: mode,
+    });
   };
 
   const renewSubscription = (id: string, mode: 'renew' | 'free' = 'renew') => {
