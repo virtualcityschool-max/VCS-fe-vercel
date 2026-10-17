@@ -20,6 +20,8 @@ import AboutPage from "../pages/public/AboutPage";
 import OnlineSchoolHub from "../pages/public/OnlineSchoolHub";
 import CountryLandingPage from "../pages/public/CountryLandingPage";
 import ExamDatesPage from "../pages/public/ExamDatesPage";
+const SubjectGuidePage = React.lazy(() => import("../pages/public/SubjectGuidePage"));
+const SubjectGuidesIndex = React.lazy(() => import("../pages/public/SubjectGuidePage").then((m) => ({ default: m.SubjectGuidesIndex })));
 
 // Authenticated dashboards are code-split so public visitors never download them.
 const StudentLayout = React.lazy(() => import("../pages/student/StudentLayout"));
@@ -223,6 +225,8 @@ const AppRoutes = () => {
       <Route path="/online-school" element={<OnlineSchoolHub />} />
       <Route path="/online-school/:countrySlug" element={<CountryLandingPage />} />
       <Route path="/exam-dates" element={<ExamDatesPage />} />
+      <Route path="/subjects" element={<SubjectGuidesIndex />} />
+      <Route path="/subjects/:slug" element={<SubjectGuidePage />} />
 
       {/* Student-Only Routes */}
       <Route element={<ProtectedRoute allowedRoles={["student"]} />}>

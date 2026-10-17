@@ -35,6 +35,7 @@ import { studentService } from "../../services/studentService";
 import QuillViewer from "../../components/common/QuillViewer";
 import { getDisplayName } from "../../utils/userDisplay";
 import { useSeo } from "../../hooks/useSeo";
+import { guideForCourseTitle } from "../../data/subjectGuides";
 import { useWhatsappNumber } from "../../hooks/useWhatsappNumber";
 
 const CourseDetails = () => {
@@ -614,6 +615,22 @@ const CourseDetails = () => {
                     )}
                   </div>
                 </div>
+
+                {/* Subject guide (Cambridge syllabus explained), when we have one */}
+                {guideForCourseTitle(normalizedCourse.title) && (
+                  <Link
+                    to={`/subjects/${guideForCourseTitle(normalizedCourse.title).slug}`}
+                    className="mb-8 flex items-center justify-between gap-4 rounded-2xl border border-indigo-500/30 bg-indigo-500/10 hover:bg-indigo-500/15 px-5 py-4 transition-colors"
+                  >
+                    <div>
+                      <div className="text-xs font-bold uppercase tracking-widest text-indigo-300 mb-1">Subject guide</div>
+                      <div className="text-white font-semibold">
+                        Why study {guideForCourseTitle(normalizedCourse.title).subject}? Exam pattern, topics, question types and grades
+                      </div>
+                    </div>
+                    <i className="fas fa-arrow-right text-indigo-300"></i>
+                  </Link>
+                )}
 
                 {/* Course Description */}
                 <div className="mb-8">
