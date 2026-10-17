@@ -1063,11 +1063,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (!ids || !ids.length) return false;
     const words = { held: 'Mark as held', cancelled: 'Cancel' };
     const ok = await confirmAction({
-      title: `${words[resolution]} for all ${ids.length} missed classes?`,
+      title: `${words[resolution]} — ${ids.length} ticked class${ids.length > 1 ? 'es' : ''}?`,
       message: resolution === 'held'
-        ? `All ${ids.length} missed classes will be recorded as held / taught. This clears them from the missed classes list.`
-        : `All ${ids.length} missed classes will be marked as cancelled. This clears them from the missed classes list.`,
-      confirmLabel: `${words[resolution]} all (${ids.length})`,
+        ? `The ${ids.length} ticked class${ids.length > 1 ? 'es are' : ' is'} recorded as taught. Use this only for classes that did take place.`
+        : `The ${ids.length} ticked class${ids.length > 1 ? 'es are' : ' is'} marked cancelled. The record is kept.`,
+      confirmLabel: `${words[resolution]} (${ids.length})`,
       isDestructive: resolution !== 'held',
     });
     if (!ok) return false;

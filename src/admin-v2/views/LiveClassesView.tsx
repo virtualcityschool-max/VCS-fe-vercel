@@ -4,6 +4,7 @@ import { PageHeader } from '../components/common/PageHeader';
 import { inputCls } from '../components/common/FormControls';
 import { AlertTriangle, CalendarDays, Check, ChevronLeft, ChevronRight, Copy, Info, Plus, Radio, Search, Share2, Square, Users, Video, X } from 'lucide-react';
 import { AdminPlanClassModal } from '../components/common/AdminPlanClassModal';
+import { MissedClassesReview } from '../components/MissedClassesReview';
 // @ts-ignore
 import DigitalSessionClock from '../../components/common/DigitalSessionClock';
 
@@ -25,10 +26,11 @@ const dur = (m: number) => (m >= 60 ? `${Math.floor(m / 60)} h ${m % 60 ? `${m %
 // Live Classes: today's Google Meet classes with who is in them, and a Join
 // button so an admin can drop in and observe a class.
 export const LiveClassesView: React.FC = () => {
-  const { sessions = [], rawAttendanceAll = [], subjects = [], reload, tzIana, setCurrentView, resolveMissedSession, batchResolveMissedSessions, endSession, can } = useApp() as any;
+  const { sessions = [], rawAttendanceAll = [], subjects = [], reload, tzIana, setCurrentView, resolveMissedSession, endSession, can } = useApp() as any;
   const canResolve = can('manage_academics');
   const [mode, setMode] = useState<'upcoming' | 'past'>('upcoming');
   const [dayOffset, setDayOffset] = useState(0);
+  const [missedReviewOpen, setMissedReviewOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [now, setNow] = useState(Date.now());
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -407,26 +409,15 @@ export const LiveClassesView: React.FC = () => {
                   </div>
                 </div>
                 {canResolve && (
-                  <div className="flex items-center gap-2 shrink-0">
-                    <button
-                      type="button"
-                      onClick={() => batchResolveMissedSessions(missedRows.map((x: any) => x.id), 'held', 'Batch marked as held by admin')}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white transition cursor-pointer shadow-xs"
-                      title="Mark all missed classes as held / taught"
-                    >
-                      <Check className="w-3.5 h-3.5" />
-                      <span>Mark All Held ({missedRows.length})</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => batchResolveMissedSessions(missedRows.map((x: any) => x.id), 'cancelled', 'Batch cancelled by admin')}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-rose-500/40 text-rose-300 hover:bg-rose-500/10 transition cursor-pointer"
-                      title="Cancel all missed classes"
-                    >
-                      <X className="w-3.5 h-3.5" />
-                      <span>Cancel All</span>
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setMissedReviewOpen(true)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white transition cursor-pointer shadow-xs shrink-0"
+                    title="See each missed class and mark it held or cancelled"
+                  >
+                    <Check className="w-3.5 h-3.5" />
+                    <span>Review list ({missedRows.length})</span>
+                  </button>
                 )}
               </div>
               <div className="divide-y divide-[#1E2648]/60">
@@ -451,6 +442,11 @@ export const LiveClassesView: React.FC = () => {
       <AdminPlanClassModal
         isOpen={isPlanClassOpen}
         onClose={() => setIsPlanClassOpen(false)}
+      />
+      <MissedClassesReview
+        isOpen={missedReviewOpen}
+        onClose={() => setMissedReviewOpen(false)}
+        classes={sessions.filter((s: any) => s.status === 'missed').sort((a: any, b: any) => `${b.date} ${b.startTime}`.localeCompare(`${a.date} ${a.startTime}`))}
       />
     </div>
   );

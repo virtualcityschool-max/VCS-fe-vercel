@@ -44,6 +44,7 @@ import {
   resetAllDismissedNotices,
   type ActionCenterDismissState,
 } from '../utils/actionCenterDismiss';
+import { MissedClassesReview } from '../components/MissedClassesReview';
 
 export const DashboardView: React.FC = () => {
   const {
@@ -59,7 +60,6 @@ export const DashboardView: React.FC = () => {
     openDetailDrawer,
     openQuickAdd,
     renewSubscription,
-    batchResolveMissedSessions,
     endSession,
     can,
     attendanceSummary,
@@ -76,6 +76,7 @@ export const DashboardView: React.FC = () => {
   const [roleBreakdownOpen, setRoleBreakdownOpen] = useState(false);
   const [dashboardQuickAddOpen, setDashboardQuickAddOpen] = useState(false);
   const [allActivityModalOpen, setAllActivityModalOpen] = useState(false);
+  const [missedReviewOpen, setMissedReviewOpen] = useState(false);
   const [currentTimeStr, setCurrentTimeStr] = useState('');
   const [currentDateStr, setCurrentDateStr] = useState('');
 
@@ -682,19 +683,17 @@ export const DashboardView: React.FC = () => {
                 </div>
                 <p className="text-xs text-slate-300 leading-snug">
                   {visibleMissedClasses.slice(0, 2).map((s: any) => `${s.title} (${s.date} ${s.startTime})`).join(', ')}
-                  {visibleMissedClasses.length > 2 ? ` and ${visibleMissedClasses.length - 2} more` : ''} had no teacher. Mark as held, cancel or reschedule.
+                  {visibleMissedClasses.length > 2 ? ` and ${visibleMissedClasses.length - 2} more` : ''} were not recorded as taught. Mark each one held or cancelled.
                 </p>
                 <div className="flex items-center gap-2 pt-1 flex-wrap sm:flex-nowrap">
-                  {can('manage_academics') && (
-                    <button
-                      onClick={() => batchResolveMissedSessions(visibleMissedClasses.map((s: any) => s.id), 'held', 'Batch marked as held from Action Center')}
-                      className="flex-1 py-1.5 px-2.5 text-xs font-semibold rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white transition-colors flex items-center justify-center gap-1 cursor-pointer shadow-xs whitespace-nowrap"
-                      title="Mark all missed classes as held / taught"
-                    >
-                      <Check className="w-3 h-3" />
-                      <span>Mark All Held ({visibleMissedClasses.length})</span>
-                    </button>
-                  )}
+                  <button
+                    onClick={() => setMissedReviewOpen(true)}
+                    className="flex-1 py-1.5 px-2.5 text-xs font-semibold rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white transition-colors flex items-center justify-center gap-1 cursor-pointer shadow-xs whitespace-nowrap"
+                    title="See each missed class and mark it held or cancelled"
+                  >
+                    <Check className="w-3 h-3" />
+                    <span>Review list ({visibleMissedClasses.length})</span>
+                  </button>
                   <button
                     onClick={() => setCurrentView('live-classes')}
                     className="flex-1 py-1.5 px-2.5 text-xs font-semibold rounded-lg bg-rose-600 text-white hover:bg-rose-500 transition-colors flex items-center justify-center gap-1 cursor-pointer whitespace-nowrap"
@@ -1117,6 +1116,7 @@ export const DashboardView: React.FC = () => {
           </div>
         </div>
       )}
+      <MissedClassesReview isOpen={missedReviewOpen} onClose={() => setMissedReviewOpen(false)} classes={missedClasses} />
     </div>
   );
 };
