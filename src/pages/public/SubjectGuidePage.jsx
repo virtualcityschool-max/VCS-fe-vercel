@@ -22,7 +22,7 @@ export const SubjectGuidesIndex = () => {
   });
   return (
     <main className="min-h-screen bg-[#020617] text-white">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-12 pb-24">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 pt-12 pb-24">
         <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-500 mb-8">
           <Link to="/" className="hover:text-white transition">Home</Link><span>/</span><span className="text-slate-300">Subject Guides</span>
         </nav>
@@ -33,7 +33,7 @@ export const SubjectGuidesIndex = () => {
         {["O Level", "AS & A Level"].map((lvl) => (
           <section key={lvl} id={lvl === "O Level" ? "o-level" : "as-a-level"} className="mb-10 scroll-mt-24">
             <h2 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-4">{lvl}</h2>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {SUBJECT_GUIDES.filter((g) => g.level === lvl).map((g) => (
                 <Link key={g.slug} to={`/subjects/${g.slug}`} className="group rounded-2xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.06] hover:border-indigo-500/40 p-5 transition">
                   <div className="text-xs font-bold uppercase tracking-widest text-indigo-300 mb-2">{g.level} · {g.code}</div>
@@ -141,7 +141,7 @@ const SubjectGuidePage = () => {
 
   return (
     <main className="min-h-screen bg-[#020617] text-white selection:bg-indigo-500/30">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-24">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 pt-10 pb-24">
         <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-500 mb-6">
           <Link to="/" className="hover:text-white transition">Home</Link><span>/</span>
           <Link to="/subjects" className="hover:text-white transition">Subject Guides</Link><span>/</span>
