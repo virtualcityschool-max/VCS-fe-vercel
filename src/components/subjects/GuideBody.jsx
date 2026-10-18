@@ -14,7 +14,7 @@ const Section = ({ id, n, icon, title, children }) => {
         <Icon className="w-4.5 h-4.5" />
       </span>
       <span>
-        <span className="text-slate-500 font-mono text-base mr-1.5">{n}.</span>
+        {n != null && <span className="text-slate-500 font-mono text-base mr-1.5">{n}.</span>}
         {title}
       </span>
     </h2>

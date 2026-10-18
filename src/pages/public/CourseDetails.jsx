@@ -28,13 +28,21 @@ import ConfirmDialog from "../../components/common/ConfirmDialog";
 import { getStorageUrl } from "../../utils/storageUrl";
 import FileViewerModal from "../../components/common/FileViewerModal";
 import { studentService } from "../../services/studentService";
-import QuillViewer from "../../components/common/QuillViewer";
 import { getDisplayName } from "../../utils/userDisplay";
 import { useSeo } from "../../hooks/useSeo";
 import { guideForCourseTitle } from "../../data/subjectGuides";
 import GuideBody from "../../components/subjects/GuideBody";
 import { guideSections } from "../../components/subjects/guideSections";
+import { useActiveSection, useFollowingBox } from "../../hooks/useFollowingBox";
 import { useWhatsappNumber } from "../../hooks/useWhatsappNumber";
+
+// The subject guide's sections, grouped for the side menu.
+const GUIDE_GROUPS = [
+  ["The subject", ["facts", "why", "stories", "topics", "compare"]],
+  ["The exam", ["exam", "questions", "command", "aos", "grades", "practical"]],
+  ["Doing well", ["books", "mistakes", "plan"]],
+  ["Going further", ["careers", "real", "faq", "sources"]],
+];
 
 // Static class names so Tailwind keeps them.
 const SECTION_COLORS = {
@@ -47,8 +55,8 @@ const SECTION_COLORS = {
 };
 
 const CourseSection = ({ id, icon, color, title, children }) => (
-  <section id={id} className="scroll-mt-24 mb-8">
-    <h2 className="text-2xl font-bold font-poppins mb-6 flex items-center gap-3">
+  <section id={id} className="scroll-mt-24 mb-10">
+    <h2 className="text-xl md:text-2xl font-bold font-poppins mb-5 flex items-center gap-3">
       <span className={`w-8 h-8 rounded-lg flex items-center justify-center ${SECTION_COLORS[color]}`}>
         <i className={`fas ${icon} text-sm`}></i>
       </span>
@@ -166,7 +174,19 @@ const CourseDetails = () => {
   const guide = normalizedCourse
     ? guideForCourseTitle(normalizedCourse.details.syllabus_code) || guideForCourseTitle(normalizedCourse.title)
     : null;
-  const guideSecs = React.useMemo(() => guideSections(guide, { withVcs: false }), [guide]);
+  const guideSecs = React.useMemo(
+    () => guideSections(guide, { withVcs: false }).map((x) => ({ ...x, n: null })),
+    [guide],
+  );
+
+  // Side menu: follows the page down and highlights the section being read.
+  const [active, setActive] = useState("course-about");
+  const menuSlotRef = React.useRef(null);
+  const menuBoxRef = React.useRef(null);
+  const gridRef = React.useRef(null);
+  const contentRef = React.useRef(null);
+  useFollowingBox(menuSlotRef, menuBoxRef, gridRef, `${normalizedCourse?.id}-${guide?.slug}`);
+  useActiveSection("#course-content section[id]", `${normalizedCourse?.id}-${guide?.slug}`, setActive);
 
   const courseUrl = typeof window !== "undefined" ? window.location.href : undefined;
 
@@ -543,7 +563,6 @@ const CourseDetails = () => {
   const examSession = details.exam_session || quickFact("Exam sessions", "Exam session");
   const teacherId = normalizedCourse.instructor?.id || normalizedCourse.instructor_id;
   const teacherName = getDisplayName(normalizedCourse.instructor);
-  const hasOutline = !!normalizedCourse.outline && normalizedCourse.outline.replace(/<[^>]*>/g, "").trim().length > 0;
 
   // Facts about the classes themselves, all set by the admin on the course.
   const classFacts = [
@@ -579,16 +598,24 @@ const CourseDetails = () => {
     { icon: "fa-video", label: "Format", value: "Live online classes" },
   ].filter((f) => f.value);
 
-  const pageSections = [
-    { id: "course-about", label: "About" },
-    classFacts.length > 0 && { id: "course-classes", label: "Classes" },
-    details.learning_outcomes?.length > 0 && { id: "course-learn", label: "What you will learn" },
-    details.who_for && { id: "course-who", label: "Who it is for" },
-    { id: "course-includes", label: "What is included" },
-    hasOutline && { id: "course-outline", label: "Outline" },
-    normalizedCourse.attachment && { id: "course-attachment", label: "Material" },
-    ...(guide ? guideSecs.map((x) => ({ id: x.id, label: x.title })) : []),
-  ].filter(Boolean);
+  // The side menu: this course first, then the subject guide in four groups.
+  const menu = [
+    {
+      label: "This course",
+      items: [
+        { id: "course-about", label: "About" },
+        classFacts.length > 0 && { id: "course-classes", label: "Classes" },
+        details.learning_outcomes?.length > 0 && { id: "course-learn", label: "What you will learn" },
+        details.who_for && { id: "course-who", label: "Who it is for" },
+        { id: "course-includes", label: "What is included" },
+        normalizedCourse.attachment && { id: "course-attachment", label: "Course material" },
+      ].filter(Boolean),
+    },
+    ...GUIDE_GROUPS.map(([label, ids]) => ({
+      label,
+      items: guideSecs.filter((x) => ids.includes(x.id)).map((x) => ({ id: x.id, label: x.title })),
+    })),
+  ].filter((grp) => grp.items.length);
 
   const enrolled = isCourseEnrolled(normalizedCourse);
   const isEnrolling = enrollingCourseIds.includes(normalizedCourse.id);
@@ -607,7 +634,7 @@ const CourseDetails = () => {
       </div>
 
       {/* Breadcrumb Navigation */}
-      <div className="max-w-7xl mx-auto px-6 py-8 relative z-10 animate-springyReveal">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 pt-6 pb-5 relative z-10">
         <BreadcrumbNavigation
           items={[
             { label: "Home", to: "/", icon: "fas fa-home" },
@@ -617,204 +644,54 @@ const CourseDetails = () => {
         />
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 pb-20 relative z-10 animate-springyReveal" style={{ animationDelay: '0.15s' }}>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
-          {/* Main Content - 2 columns */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Course Header Card */}
-            <div className="bg-slate-800/40 backdrop-blur-xl rounded-[1.5rem] overflow-hidden border border-slate-700/50 shadow-2xl glass-shine transition-all duration-500">
-              {/* Course Thumbnail */}
-              <div className="relative h-[200px] sm:h-[280px] lg:h-[320px] overflow-hidden bg-slate-900/50">
-                {imageError || !getCourseImage(normalizedCourse) ? (
-                  <div className="w-full h-full bg-slate-800" />
-                ) : (
-                  <img
-                    src={getCourseImage(normalizedCourse)}
-                    alt={normalizedCourse.title || "Course"}
-                    className="w-full h-full object-cover group-hover:scale-105 transition duration-700"
-                    onError={handleImageError}
-                  />
-                )}
-
-                {/* Gradient overlay */}
-                <div className="absolute inset-0 bg-linear-to-t from-slate-900/60 via-transparent to-transparent pointer-events-none"></div>
-
-                {/* Only staff can open an unpublished course; tell them it isn't public. */}
-                {normalizedCourse.status !== "published" && (
-                  <div className="absolute top-6 right-6">
-                    <span className="bg-slate-600/20 backdrop-blur-sm text-slate-300 px-4 py-2 rounded-full text-xs font-bold border border-slate-500/30 flex items-center gap-2">
-                      <div className="w-2 h-2 bg-slate-400 rounded-full"></div>
-                      {capitalize(normalizedCourse.status)} · not on the website
-                    </span>
-                  </div>
-                )}
-
-                {/* Floating action buttons */}
-                {/* <div className="absolute bottom-6 left-6 flex gap-3">
-                  <button className="w-12 h-12 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/20 hover:bg-white/20 transition-all duration-200 hover:scale-110">
-                    <i className="fas fa-heart text-white"></i>
-                  </button>
-                  <button className="w-12 h-12 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/20 hover:bg-white/20 transition-all duration-200 hover:scale-110">
-                    <i className="fas fa-share-alt text-white"></i>
-                  </button>
-                </div> */}
-              </div>
-
-              {/* Course Content */}
-              <div className="p-8 lg:p-10">
-                {/* Course Title and Meta */}
-                <div className="mb-8">
-                  <h1 className="text-3xl md:text-5xl font-black font-poppins mb-6 leading-tight bg-linear-to-r from-white to-slate-300 bg-clip-text text-transparent">
-                    {normalizedCourse.title}
-                  </h1>
-
-                  <div className="flex flex-wrap items-center gap-6 text-sm">
-                    {normalizedCourse.category && (
-                      <div className="flex items-center gap-2 bg-blue-500/10 backdrop-blur-sm px-4 py-2 rounded-full border border-blue-500/20">
-                        <i className="fas fa-tag text-blue-400 text-xs"></i>
-                        <span className="text-blue-300 font-medium">
-                          {normalizedCourse.category}
-                        </span>
-                      </div>
-                    )}
-
-                    {(normalizedCourse.instructor?.id || normalizedCourse.instructor_id) && (
-                      <Link
-                        to={`/teachers/${normalizedCourse.instructor?.id || normalizedCourse.instructor_id}`}
-                        className="flex items-center gap-2 bg-white/5 backdrop-blur-sm px-4 py-2 rounded-full border border-white/10 hover:border-indigo-500/40 hover:bg-indigo-500/10 transition-colors"
-                      >
-                        <i className="fas fa-chalkboard-teacher text-indigo-400 text-xs" />
-                        <span className="text-slate-300 font-medium">
-                          {getDisplayName(normalizedCourse.instructor) || `Instructor #${normalizedCourse.instructor_id}`}
-                        </span>
-                      </Link>
-                    )}
-                  </div>
-                </div>
-
-                {/* Jump links to every part of the page */}
-                <nav aria-label="On this page" className="mb-8 flex flex-wrap gap-2">
-                  {pageSections.map((x) => (
-                    <a key={x.id} href={`#${x.id}`} className="px-3 py-1.5 rounded-full text-xs font-semibold border border-white/10 text-slate-300 hover:text-white hover:border-indigo-400/50 hover:bg-indigo-500/10 transition-colors">
-                      {x.label}
-                    </a>
-                  ))}
-                </nav>
-
-                <CourseSection id="course-about" icon="fa-info-circle" color="blue" title="About this course">
-                  <p className="text-slate-300 leading-relaxed text-lg whitespace-pre-wrap bg-slate-800/30 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50">
-                    {normalizedCourse.description}
-                  </p>
-                </CourseSection>
-
-                {classFacts.length > 0 && (
-                  <CourseSection id="course-classes" icon="fa-calendar-alt" color="purple" title="Classes">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {classFacts.map((f) => (
-                        <div key={f.label} className="rounded-xl p-4 bg-slate-800/30 border border-slate-700/50">
-                          <div className="text-[11px] font-bold uppercase tracking-widest text-slate-500 mb-1">{f.label}</div>
-                          <div className="text-white font-semibold">{f.value}</div>
-                        </div>
-                      ))}
-                    </div>
-                  </CourseSection>
-                )}
-
-                {details.learning_outcomes?.length > 0 && (
-                  <CourseSection id="course-learn" icon="fa-lightbulb" color="amber" title="What you will learn">
-                    <ul className="space-y-2.5 bg-slate-800/30 rounded-xl p-6 border border-slate-700/50">
-                      {details.learning_outcomes.map((x) => (
-                        <li key={x} className="flex gap-3 text-slate-200"><i className="fas fa-check text-emerald-400 mt-1 text-sm"></i>{x}</li>
-                      ))}
-                    </ul>
-                  </CourseSection>
-                )}
-
-                {details.who_for && (
-                  <CourseSection id="course-who" icon="fa-user-graduate" color="teal" title="Who this course is for">
-                    <p className="text-slate-300 leading-relaxed whitespace-pre-wrap bg-slate-800/30 rounded-xl p-6 border border-slate-700/50">{details.who_for}</p>
-                  </CourseSection>
-                )}
-
-                <CourseSection id="course-includes" icon="fa-gift" color="emerald" title="What is included">
-                  <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {includes.map((x) => (
-                      <li key={x} className="flex gap-3 rounded-xl p-4 bg-slate-800/30 border border-slate-700/50 text-slate-200"><i className="fas fa-check-circle text-emerald-400 mt-1 text-sm"></i>{x}</li>
-                    ))}
-                  </ul>
-                </CourseSection>
-
-                {hasOutline && (
-                  <CourseSection id="course-outline" icon="fa-list-alt" color="indigo" title="Course outline">
-                    <div className="bg-slate-800/30 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50">
-                      <QuillViewer value={normalizedCourse.outline} />
-                    </div>
-                  </CourseSection>
-                )}
-
-                {normalizedCourse.attachment && (
-                  <CourseSection id="course-attachment" icon="fa-paperclip" color="amber" title="Course material">
-                    <button
-                      onClick={() => setViewerUrl(getStorageUrl(normalizedCourse.attachment))}
-                      className="inline-flex items-center gap-4 px-6 py-4 bg-slate-800/40 hover:bg-slate-700/50 backdrop-blur-sm border border-slate-700/50 hover:border-indigo-500/30 rounded-2xl text-white font-medium transition-all duration-200 group"
-                    >
-                      <div className="w-10 h-10 bg-indigo-500/20 group-hover:bg-indigo-500/30 rounded-xl flex items-center justify-center transition-colors">
-                        <i className="fas fa-eye text-indigo-400"></i>
-                      </div>
-                      <div>
-                        <p className="text-xs text-slate-400">Click to preview course material</p>
-                      </div>
-                      <i className="fas fa-arrow-right text-slate-500 group-hover:text-indigo-400 group-hover:translate-x-1 transition-all ml-auto"></i>
-                    </button>
-                  </CourseSection>
-                )}
-
-                {/* The full Cambridge subject guide for this syllabus */}
-                {guide && (
-                  <div id="course-syllabus" className="scroll-mt-24 mt-12 pt-8 border-t border-slate-700/50">
-                    <div className="text-xs font-bold uppercase tracking-widest text-indigo-300 mb-2">Cambridge syllabus guide</div>
-                    <h2 className="text-2xl md:text-3xl font-black font-poppins text-white mb-3">{guide.title}</h2>
-                    <p className="text-slate-300 leading-relaxed">{guide.tagline}</p>
-                    <p className="mt-4 inline-flex items-center gap-2 text-xs text-emerald-300/90 bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-3 py-1.5">
-                      <i className="fas fa-check-circle"></i> Checked against the official Cambridge syllabus for exams in {guide.syllabusYears}
-                    </p>
-                    {guide.notice && (
-                      <p className="mt-3 text-sm text-amber-200 bg-amber-500/10 border border-amber-500/30 rounded-xl px-4 py-3 leading-relaxed">{guide.notice}</p>
-                    )}
-                    <GuideBody g={guide} sections={guideSecs} />
-                    <Link to={`/subjects/${guide.slug}`} className="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-indigo-300 hover:text-white">
-                      Open this guide as its own page <i className="fas fa-arrow-right text-xs"></i>
-                    </Link>
-                  </div>
-                )}
-              </div>
-            </div>
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 pb-20 relative z-10">
+        {/* Header: picture, title, key facts, price and enrol */}
+        <header className="rounded-[1.5rem] border border-slate-700/50 bg-slate-800/40 backdrop-blur-xl p-5 md:p-6 flex flex-col lg:flex-row gap-6">
+          <div className="relative w-full lg:w-72 h-44 lg:h-auto lg:min-h-[180px] shrink-0 rounded-2xl overflow-hidden bg-slate-900/50">
+            {imageError || !getCourseImage(normalizedCourse) ? (
+              <div className="w-full h-full bg-slate-800" />
+            ) : (
+              <img src={getCourseImage(normalizedCourse)} alt={normalizedCourse.title || "Course"} className="absolute inset-0 w-full h-full object-cover" onError={handleImageError} />
+            )}
           </div>
 
-          {/* Sidebar - 1 column */}
-          <div className="space-y-6">
-            {/* Price and CTA Card */}
-            <div className="bg-slate-800/40 backdrop-blur-xl rounded-[1.5rem] overflow-hidden border border-slate-700/50 shadow-2xl hover:shadow-blue-500/10 transition-all duration-500 sticky top-6">
-              <div className="p-8">
-                {/* Price Display */}
-                <div className="text-center mb-8">
-                  <div className="relative inline-block">
-                    <div className="absolute inset-0 bg-blue-500/20 blur-xl rounded-full"></div>
-                    <div className="relative text-3xl lg:text-4xl font-black bg-linear-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent wrap-break-word max-w-full">
-                      {formatCurrency(
-                        parseFloat(normalizedCourse.price) || 0,
-                        "USD",
-                      )}
-                    </div>
-                  </div>
-                  <p className="text-slate-400 text-sm mt-3 font-medium">
-                    One-time payment
-                  </p>
+          <div className="flex-1 min-w-0">
+            {/* Only staff can open an unpublished course; tell them it isn't public. */}
+            {normalizedCourse.status !== "published" && (
+              <span className="mb-3 inline-flex items-center gap-2 bg-slate-600/20 text-slate-300 px-3 py-1 rounded-full text-xs font-bold border border-slate-500/30">
+                <span className="w-2 h-2 bg-slate-400 rounded-full"></span>
+                {capitalize(normalizedCourse.status)} · not on the website
+              </span>
+            )}
+            <div className="text-xs font-bold uppercase tracking-[0.2em] text-indigo-300 mb-2">
+              {[normalizedCourse.category, syllabusCode && `${examBoard ? "Cambridge " : ""}${syllabusCode}`].filter(Boolean).join(" · ")}
+            </div>
+            <h1 className="text-3xl md:text-4xl font-black font-poppins leading-tight text-white">{normalizedCourse.title}</h1>
+            {guide?.tagline && <p className="mt-3 text-slate-300 leading-relaxed max-w-3xl">{guide.tagline}</p>}
+            <dl className="mt-5 flex flex-wrap gap-x-7 gap-y-3">
+              {glance.map((f) => (
+                <div key={f.label} className="min-w-0">
+                  <dt className="text-[11px] font-bold uppercase tracking-widest text-slate-500 flex items-center gap-1.5">
+                    <i className={`fas ${f.icon} text-indigo-400`}></i>{f.label}
+                  </dt>
+                  <dd className="text-sm font-semibold text-white mt-0.5">
+                    {f.to ? <Link to={f.to} className="hover:text-indigo-300">{f.value}</Link> : f.value}
+                  </dd>
                 </div>
+              ))}
+            </dl>
+          </div>
 
+          <div className="lg:w-72 shrink-0 lg:border-l lg:border-slate-700/50 lg:pl-6 flex flex-col justify-center">
+            <div className="text-center mb-4">
+              <div className="text-3xl font-black bg-linear-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+                {formatCurrency(parseFloat(normalizedCourse.price) || 0, "USD")}
+              </div>
+              <p className="text-slate-400 text-xs mt-1 font-medium">One-time payment</p>
+            </div>
                 {/* CTA Button */}
                 {auth.isLoggedIn && auth.role === "student" ? (
-                  <div className={`relative mb-6 ${isRejected ? "group/tooltip" : ""}`}>
+                  <div className={`relative ${isRejected ? "group/tooltip" : ""}`}>
                     <button
                       onClick={() =>
                         enrolled
@@ -822,7 +699,7 @@ const CourseDetails = () => {
                           : !isPending && !isRejected && handleEnrollCourse()
                       }
                       disabled={isEnrolling || isUnenrolling || isPending || isRejected || isCheckingOut}
-                      className={`w-full py-4 font-black text-xs uppercase tracking-[0.2em] rounded-2xl transition-all active:scale-95 ${
+                      className={`w-full py-3.5 font-black text-xs uppercase tracking-[0.2em] rounded-2xl transition-all active:scale-95 ${
                         enrolled
                           ? isUnenrolling
                             ? "bg-red-600/50 text-red-400 cursor-not-allowed"
@@ -867,8 +744,8 @@ const CourseDetails = () => {
                     )} */}
                   </div>
                 ) : auth.isLoggedIn ? (
-                  <div className="text-center py-4 mb-6">
-                    <p className="text-slate-400 text-sm mb-4">
+                  <div className="text-center">
+                    <p className="text-slate-400 text-xs mb-2">
                       Only students can enroll in courses
                     </p>
                     <Button
@@ -881,7 +758,7 @@ const CourseDetails = () => {
                     </Button>
                   </div>
                 ) : (
-                  <div className="mb-6 relative">
+                  <div className="relative">
                     <Button
                       variant="primary"
                       size="lg"
@@ -916,37 +793,123 @@ const CourseDetails = () => {
                   )}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mb-8 w-full inline-flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-emerald-600/10 border border-emerald-500/20 text-emerald-400 font-black text-xs uppercase tracking-[0.15em] hover:bg-emerald-600 hover:text-white hover:border-transparent transition-all active:scale-95"
+                  className="mt-3 w-full inline-flex items-center justify-center gap-2 py-3 rounded-2xl bg-emerald-600/10 border border-emerald-500/20 text-emerald-400 font-black text-xs uppercase tracking-[0.15em] hover:bg-emerald-600 hover:text-white hover:border-transparent transition-all active:scale-95"
                 >
                   <i className="fab fa-whatsapp text-base"></i>
-                  Ask about this course on WhatsApp
+                  Ask on WhatsApp
                 </a>
 
-                {/* At a glance */}
-                <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">At a glance</h3>
-                <dl>
-                  {glance.map((f, i) => (
-                    <div key={f.label} className={`flex justify-between items-start gap-4 py-3 ${i < glance.length - 1 ? "border-b border-slate-700/50" : ""}`}>
-                      <dt className="text-slate-400 text-sm font-medium flex items-center gap-2 shrink-0">
-                        <i className={`fas ${f.icon} text-indigo-400 text-xs w-3.5`}></i>
-                        {f.label}
-                      </dt>
-                      <dd className="text-white font-medium text-sm text-right">
-                        {f.to ? <Link to={f.to} className="hover:text-indigo-300">{f.value}</Link> : f.value}
-                      </dd>
+          </div>
+        </header>
+
+        {/* Phone: the menu as a scrollable strip */}
+        <div className="lg:hidden mt-6 -mx-4 px-4 py-2 border-y border-white/5 bg-[#0f172a]/95">
+          <div className="flex gap-2 overflow-x-auto [scrollbar-width:none]">
+            {menu.flatMap((grp) => grp.items).map((x) => (
+              <a key={x.id} href={`#${x.id}`} className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold border ${active === x.id ? "bg-indigo-500/20 border-indigo-400/50 text-white" : "border-white/10 text-slate-400"}`}>
+                {x.label}
+              </a>
+            ))}
+          </div>
+        </div>
+
+        <div ref={gridRef} className="mt-6 lg:mt-8 lg:grid lg:grid-cols-[260px_1fr] lg:gap-10">
+          {/* Side menu, grouped */}
+          <aside ref={menuSlotRef} className="hidden lg:block">
+            <nav ref={menuBoxRef} aria-label="On this page" className="z-10 rounded-2xl border border-white/10 bg-[#0a1024]/95 backdrop-blur p-3 overflow-y-auto">
+              {menu.map((grp) => (
+                <div key={grp.label} className="mb-3 last:mb-0">
+                  <div className="px-2.5 pt-1 pb-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-500">{grp.label}</div>
+                  <ol className="space-y-0.5">
+                    {grp.items.map((x) => (
+                      <li key={x.id}>
+                        <a href={`#${x.id}`} className={`block px-2.5 py-1.5 rounded-lg text-sm truncate transition ${active === x.id ? "bg-indigo-500/15 text-white border border-indigo-500/30" : "text-slate-400 hover:text-white hover:bg-white/5 border border-transparent"}`}>
+                          {x.label}
+                        </a>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              ))}
+            </nav>
+          </aside>
+
+          <div ref={contentRef} id="course-content" className="min-w-0">
+            <CourseSection id="course-about" icon="fa-info-circle" color="blue" title="About this course">
+              <p className="text-slate-300 leading-relaxed whitespace-pre-wrap">{normalizedCourse.description}</p>
+            </CourseSection>
+
+            {classFacts.length > 0 && (
+              <CourseSection id="course-classes" icon="fa-calendar-alt" color="purple" title="Classes">
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+                  {classFacts.map((f) => (
+                    <div key={f.label} className="rounded-xl p-4 bg-white/[0.03] border border-white/10">
+                      <div className="text-[11px] font-bold uppercase tracking-widest text-slate-500 mb-1">{f.label}</div>
+                      <div className="text-white font-semibold">{f.value}</div>
                     </div>
                   ))}
-                </dl>
-              </div>
-            </div>
+                </div>
+              </CourseSection>
+            )}
 
-            {/* Back Button */}
-            <BackButton
-              to="/courses"
-              label="Back to Courses"
-              variant="ghost"
-              className="w-full"
-            />
+            {details.learning_outcomes?.length > 0 && (
+              <CourseSection id="course-learn" icon="fa-lightbulb" color="amber" title="What you will learn">
+                <ul className="grid md:grid-cols-2 gap-x-6 gap-y-2.5">
+                  {details.learning_outcomes.map((x) => (
+                    <li key={x} className="flex gap-3 text-slate-200"><i className="fas fa-check text-emerald-400 mt-1 text-sm"></i>{x}</li>
+                  ))}
+                </ul>
+              </CourseSection>
+            )}
+
+            {details.who_for && (
+              <CourseSection id="course-who" icon="fa-user-graduate" color="teal" title="Who this course is for">
+                <p className="text-slate-300 leading-relaxed whitespace-pre-wrap">{details.who_for}</p>
+              </CourseSection>
+            )}
+
+            <CourseSection id="course-includes" icon="fa-gift" color="emerald" title="What is included">
+              <ul className="grid sm:grid-cols-2 xl:grid-cols-4 gap-3">
+                {includes.map((x) => (
+                  <li key={x} className="flex gap-3 rounded-xl p-4 bg-white/[0.03] border border-white/10 text-slate-200 text-sm"><i className="fas fa-check-circle text-emerald-400 mt-0.5"></i>{x}</li>
+                ))}
+              </ul>
+            </CourseSection>
+
+            {normalizedCourse.attachment && (
+              <CourseSection id="course-attachment" icon="fa-paperclip" color="amber" title="Course material">
+                <button
+                  onClick={() => setViewerUrl(getStorageUrl(normalizedCourse.attachment))}
+                  className="inline-flex items-center gap-4 px-5 py-3 bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 hover:border-indigo-500/30 rounded-2xl text-white text-sm font-medium transition"
+                >
+                  <i className="fas fa-eye text-indigo-400"></i> Preview course material
+                </button>
+              </CourseSection>
+            )}
+
+            {/* The full Cambridge subject guide for this syllabus */}
+            {guide && (
+              <div className="mt-4 pt-8 border-t border-slate-700/50">
+                <div className="text-xs font-bold uppercase tracking-widest text-indigo-300 mb-2">The subject — Cambridge syllabus guide</div>
+                <h2 className="text-2xl md:text-3xl font-black font-poppins text-white">{guide.title}</h2>
+                <p className="mt-3 inline-flex items-center gap-2 text-xs text-emerald-300/90 bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-3 py-1.5">
+                  <i className="fas fa-check-circle"></i> Checked against the official Cambridge syllabus for exams in {guide.syllabusYears}
+                </p>
+                {guide.notice && (
+                  <p className="mt-3 text-sm text-amber-200 bg-amber-500/10 border border-amber-500/30 rounded-xl px-4 py-3 leading-relaxed">{guide.notice}</p>
+                )}
+                <GuideBody g={guide} sections={guideSecs} />
+              </div>
+            )}
+
+            <div className="mt-12 flex flex-wrap gap-3">
+              <BackButton to="/courses" label="Back to Courses" variant="ghost" />
+              {guide && (
+                <Link to={`/subjects/${guide.slug}`} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-white/10 text-sm font-semibold text-indigo-300 hover:text-white">
+                  Open the subject guide on its own <i className="fas fa-arrow-right text-xs"></i>
+                </Link>
+              )}
+            </div>
           </div>
         </div>
       </div>
