@@ -13,7 +13,7 @@ const SOCIAL = [
 const STATS = [
   { num: "O · AS · A2", lbl: "Cambridge Levels" },
   { num: "Grade 5-12", lbl: "Full Curricula" },
-  { num: "7", lbl: "Countries Served" },
+  { num: "13", lbl: "Countries Served" },
   { num: "Live", lbl: "Interactive Classes" },
 ];
 

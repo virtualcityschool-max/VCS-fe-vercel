@@ -152,7 +152,7 @@ const CourseCard = ({ course, index = 0, mode, onClick, onNavigate, ctaLabel, on
         <div className="mt-auto pt-3 border-t border-white/5 space-y-2">
           {!isTeacher && (
             <p className={`text-sm font-black ${courseData.is_paid ? "text-white" : "text-emerald-400"}`}>
-              {courseData.is_paid ? `$${(courseData.price || 0).toLocaleString("en-US")} USD` : "Free "}
+              {courseData.is_paid ? `$${(courseData.price || 0).toLocaleString("en-US")} USD / month` : "Free "}
             </p>
           )}
           {isTeacher && (

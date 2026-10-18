@@ -280,7 +280,10 @@ const PublicHome = () => {
           <div className="relative group perspective-1000 w-full max-w-md lg:ml-auto animate-fadeInRight" style={{ animationDelay: "0.25s" }}>
             <div className="relative z-10 rounded-[2.5rem] border border-cyan-500/30 overflow-hidden bg-slate-900/40 backdrop-blur-3xl aspect-[1.4/1] shadow-2xl shadow-cyan-500/10 group-hover:border-cyan-400/50 transition-all duration-500">
               <img
-                src="/assets/digital-learning.jpg"
+                src="/assets/digital-learning.webp"
+                width="900"
+                height="599"
+                fetchpriority="high"
                 alt="Student attending a live online Cambridge class with Virtual City School"
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
               />
@@ -457,7 +460,9 @@ const PublicHome = () => {
             <Reveal className="relative group">
               <div className="relative z-10 rounded-[2.5rem] overflow-hidden border border-white/5 shadow-2xl">
                 <img
-                  src="/assets/journey.jpg"
+                  src="/assets/journey.webp"
+                  loading="lazy"
+                  decoding="async"
                   alt="Cambridge-qualified teacher leading a small-group online class with Virtual City School"
                   loading="lazy"
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"

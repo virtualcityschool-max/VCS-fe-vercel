@@ -6,10 +6,11 @@ import { Provider } from "react-redux";
 import { store } from "./store";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { installChunkReloadHandlers } from "./utils/chunkReload";
+import { preloadPublicPage } from "./routes/publicPages";
 
 installChunkReloadHandlers();
 
-createRoot(document.getElementById("root")).render(
+const render = () => createRoot(document.getElementById("root")).render(
   <StrictMode>
     <ErrorBoundary>
       <Provider store={store}>
@@ -18,3 +19,7 @@ createRoot(document.getElementById("root")).render(
     </ErrorBoundary>
   </StrictMode>,
 );
+
+// Load the current public page's code first, so the prerendered page is
+// replaced by the same page, never by a loading spinner. Render regardless.
+preloadPublicPage(window.location.pathname).catch(() => {}).finally(render);

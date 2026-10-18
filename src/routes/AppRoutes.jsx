@@ -8,20 +8,11 @@ import { restoreAdminSession } from "../utils/impersonate";
 
 // Public pages load eagerly - anonymous visitors and prerendering hit these directly.
 import PublicHome from "../pages/public/PublicHome";
-import Marketplace from "../pages/public/Marketplace";
-import CourseDetails from "../pages/public/CourseDetails";
-import Blogs from "../pages/public/Blogs";
-import BlogDetails from "../pages/public/BlogDetails";
-import TeachersDirectory from "../pages/public/TeachersDirectory";
-import TeacherProfile from "../pages/public/TeacherProfile";
-import PrivacyPolicy from "../pages/public/PrivacyPolicy";
-import TermsAndConditions from "../pages/public/TermsAndConditions";
-import AboutPage from "../pages/public/AboutPage";
-import OnlineSchoolHub from "../pages/public/OnlineSchoolHub";
-import CountryLandingPage from "../pages/public/CountryLandingPage";
-import ExamDatesPage from "../pages/public/ExamDatesPage";
-const SubjectGuidePage = React.lazy(() => import("../pages/public/SubjectGuidePage"));
-const SubjectGuidesIndex = React.lazy(() => import("../pages/public/SubjectGuidePage").then((m) => ({ default: m.SubjectGuidesIndex })));
+import {
+  Marketplace, CourseDetails, Blogs, BlogDetails, TeachersDirectory, TeacherProfile, PrivacyPolicy,
+  TermsAndConditions, AboutPage, OnlineSchoolHub, CountryLandingPage, ExamDatesPage, SubjectGuidePage,
+  SubjectGuidesIndex,
+} from "./publicPages";
 
 // Authenticated dashboards are code-split so public visitors never download them.
 const StudentLayout = React.lazy(() => import("../pages/student/StudentLayout"));

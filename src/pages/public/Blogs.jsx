@@ -8,6 +8,7 @@ import BlogCard from "../../components/blogs/BlogCard";
 import VideoEmbed from "../../components/blogs/VideoEmbed";
 import { useSeo } from "../../hooks/useSeo";
 import { getStorageUrl } from "../../utils/storageUrl";
+import { sizedImage, fallbackToOriginal } from "../../utils/imageCdn";
 import { blogVideoId, isVideoBlog } from "../../utils/youtube";
 
 const Blogs = () => {
@@ -281,7 +282,8 @@ const FeaturedBlog = ({ blog }) => {
       >
         {cover ? (
           <img
-            src={cover}
+            src={sizedImage(cover, 960)}
+            onError={fallbackToOriginal(cover)}
             alt={blog.title}
             className="w-full h-full object-cover opacity-85 group-hover:opacity-100 group-hover:scale-105 transition duration-700"
           />

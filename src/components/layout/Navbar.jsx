@@ -85,7 +85,9 @@ const Navbar = ({ variant = "default", hideLogo = false }) => {
                   onClick={() => goTo("/")}
                 >
                   <img
-                    src="/assets/logo.png"
+                    src="/assets/logo.webp"
+                    width="180"
+                    height="68"
                     alt="Virtual City School"
                     className="theme-logo h-12 w-[110px] sm:h-[70px] sm:w-[180px] object-contain transition-transform duration-300 group-hover:scale-[1.03]"
                   />

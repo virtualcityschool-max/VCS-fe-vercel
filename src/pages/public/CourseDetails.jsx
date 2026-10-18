@@ -30,11 +30,13 @@ import FileViewerModal from "../../components/common/FileViewerModal";
 import { studentService } from "../../services/studentService";
 import { getDisplayName } from "../../utils/userDisplay";
 import { useSeo } from "../../hooks/useSeo";
-import { guideForCourse } from "../../data/subjectGuides";
+import { catalogGuideFor } from "../../data/subjectGuides/catalog";
+import { loadGuide } from "../../data/subjectGuides/load";
 import GuideBody from "../../components/subjects/GuideBody";
 import { guideSections } from "../../components/subjects/guideSections";
 import { useActiveSection, useFollowingBox } from "../../hooks/useFollowingBox";
 import { useWhatsappNumber } from "../../hooks/useWhatsappNumber";
+import { sizedImage, fallbackToOriginal } from "../../utils/imageCdn";
 
 // The syllabus essentials shown on a course page. The rest of the guide (why
 // study it, question types, books, study plan, careers, FAQs) stays on its own
@@ -168,7 +170,15 @@ const CourseDetails = () => {
 
   // The Cambridge subject guide for this course: the syllabus code the admin
   // set on the course first, else the code in its title.
-  const guide = normalizedCourse ? guideForCourse({ ...course, details: normalizedCourse.details }) : null;
+  // Which guide (from the small catalogue), then that guide's content only.
+  const guideSlug = normalizedCourse ? catalogGuideFor({ ...course, details: normalizedCourse.details })?.slug || null : null;
+  const [loadedGuide, setLoadedGuide] = useState(null);
+  useEffect(() => {
+    let live = true;
+    loadGuide(guideSlug).then((g) => { if (live) setLoadedGuide(g); });
+    return () => { live = false; };
+  }, [guideSlug]);
+  const guide = loadedGuide && loadedGuide.slug === guideSlug ? loadedGuide : null;
   const guideSecs = React.useMemo(
     () => guideSections(guide, { withVcs: false })
       .filter((x) => COURSE_GUIDE_SECTIONS.includes(x.id))
@@ -208,7 +218,7 @@ const CourseDetails = () => {
           : null,
         guide ? `Syllabus ${guide.code}${seoPapers ? `, ${seoPapers}` : ""} — exam pattern, topics${guide.grades ? " and grade boundaries" : ""} explained.` : (normalizedCourse.syllabusCode ? `Cambridge syllabus ${normalizedCourse.syllabusCode}.` : null),
         Number(normalizedCourse.price) > 0
-          ? `${formatCurrency(Number(normalizedCourse.price))} per course.`
+          ? `${formatCurrency(Number(normalizedCourse.price))} per month.`
           : null,
       ]
         .filter(Boolean)
@@ -655,7 +665,7 @@ const CourseDetails = () => {
             {imageError || !getCourseImage(normalizedCourse) ? (
               <div className="w-full h-full bg-slate-800" />
             ) : (
-              <img src={getCourseImage(normalizedCourse)} alt={normalizedCourse.title || "Course"} className="absolute inset-0 w-full h-full object-contain" onError={handleImageError} />
+              <img src={sizedImage(getCourseImage(normalizedCourse), 960)} alt={normalizedCourse.title || "Course"} className="absolute inset-0 w-full h-full object-contain" onError={(e) => { if (e.currentTarget.dataset.fallback !== "1") fallbackToOriginal(getCourseImage(normalizedCourse))(e); else handleImageError(e); }} />
             )}
           </div>
 
@@ -691,7 +701,7 @@ const CourseDetails = () => {
               <div className="text-3xl font-black bg-linear-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
                 {formatCurrency(parseFloat(normalizedCourse.price) || 0, "USD")}
               </div>
-              <p className="text-slate-400 text-sm mt-1 font-medium">One-time payment</p>
+              <p className="text-slate-400 text-sm mt-1 font-medium">per month</p>
             </div>
                 {/* CTA Button */}
                 {auth.isLoggedIn && auth.role === "student" ? (

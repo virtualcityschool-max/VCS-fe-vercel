@@ -1,6 +1,7 @@
 import React from "react";
 import { getStorageUrl } from "../../utils/storageUrl";
 import { getTeacherTheme } from "../../utils/subjectTheme";
+import { sizedImage, fallbackToOriginal } from "../../utils/imageCdn";
 
 const Star = ({ filled }) => (
   <svg
@@ -35,7 +36,7 @@ const TutorCard = ({ teacher, index = 0, isAuthenticated, onViewProfile, onHire 
           className={`w-14 h-14 rounded-full shrink-0 overflow-hidden bg-gradient-to-br ${theme.avatarGradient} ${theme.ring} flex items-center justify-center text-white font-bold text-lg shadow-md`}
         >
           {teacher.avatar ? (
-            <img src={getStorageUrl(teacher.avatar)} alt={teacher.teacher_name} className="w-full h-full object-cover" />
+            <img src={sizedImage(getStorageUrl(teacher.avatar), 128)} onError={fallbackToOriginal(getStorageUrl(teacher.avatar))} alt={teacher.teacher_name} loading="lazy" decoding="async" width="56" height="56" className="w-full h-full object-cover" />
           ) : (
             teacher.teacher_name?.[0]?.toUpperCase() || "T"
           )}

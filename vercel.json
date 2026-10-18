@@ -2,21 +2,90 @@
   "buildCommand": "node scripts/generate-sitemap.js && npm run build && node scripts/prerender.js",
   "outputDirectory": "dist",
   "rewrites": [
-    { "source": "/signup", "destination": "/shell.html" },
-    { "source": "/courses/:path*", "destination": "/shell.html" },
-    { "source": "/blogs/:path*", "destination": "/shell.html" },
-    { "source": "/teachers/:path*", "destination": "/shell.html" },
-    { "source": "/online-school/:path*", "destination": "/shell.html" },
-    { "source": "/subjects", "destination": "/shell.html" },
-    { "source": "/subjects/:path*", "destination": "/shell.html" },
-    { "source": "/student", "destination": "/shell.html" },
-    { "source": "/student/:path*", "destination": "/shell.html" },
-    { "source": "/teacher", "destination": "/shell.html" },
-    { "source": "/teacher/:path*", "destination": "/shell.html" },
-    { "source": "/parent", "destination": "/shell.html" },
-    { "source": "/parent/:path*", "destination": "/shell.html" },
-    { "source": "/admin", "destination": "/shell.html" },
-    { "source": "/admin/:path*", "destination": "/shell.html" },
-    { "source": "/profile", "destination": "/shell.html" }
-  ]
+    {
+      "source": "/signup",
+      "destination": "/shell.html"
+    },
+    {
+      "source": "/courses/:path*",
+      "destination": "/shell.html"
+    },
+    {
+      "source": "/blogs/:path*",
+      "destination": "/shell.html"
+    },
+    {
+      "source": "/teachers/:path*",
+      "destination": "/shell.html"
+    },
+    {
+      "source": "/online-school/:path*",
+      "destination": "/shell.html"
+    },
+    {
+      "source": "/subjects",
+      "destination": "/shell.html"
+    },
+    {
+      "source": "/subjects/:path*",
+      "destination": "/shell.html"
+    },
+    {
+      "source": "/student",
+      "destination": "/shell.html"
+    },
+    {
+      "source": "/student/:path*",
+      "destination": "/shell.html"
+    },
+    {
+      "source": "/teacher",
+      "destination": "/shell.html"
+    },
+    {
+      "source": "/teacher/:path*",
+      "destination": "/shell.html"
+    },
+    {
+      "source": "/parent",
+      "destination": "/shell.html"
+    },
+    {
+      "source": "/parent/:path*",
+      "destination": "/shell.html"
+    },
+    {
+      "source": "/admin",
+      "destination": "/shell.html"
+    },
+    {
+      "source": "/admin/:path*",
+      "destination": "/shell.html"
+    },
+    {
+      "source": "/profile",
+      "destination": "/shell.html"
+    }
+  ],
+  "images": {
+    "sizes": [
+      128,
+      256,
+      384,
+      640,
+      960,
+      1280
+    ],
+    "formats": [
+      "image/webp"
+    ],
+    "minimumCacheTTL": 2592000,
+    "remotePatterns": [
+      {
+        "protocol": "https",
+        "hostname": "virtual-city-school.s3.us-east-2.amazonaws.com",
+        "pathname": "/**"
+      }
+    ]
+  }
 }

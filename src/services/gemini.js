@@ -1,6 +1,7 @@
-import { GoogleGenAI } from "@google/genai";
 
 export async function askLearningAssistant(prompt, currentView) {
+  // Loaded on first use so the library isn't part of every page's download.
+  const { GoogleGenAI } = await import("@google/genai");
   const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_API_KEY || "" });
 
   try {

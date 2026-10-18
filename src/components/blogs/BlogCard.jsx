@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { getStorageUrl } from "../../utils/storageUrl";
 import { blogVideoId, isVideoBlog } from "../../utils/youtube";
 import VideoEmbed from "./VideoEmbed";
+import { sizedImage, fallbackToOriginal } from "../../utils/imageCdn";
 
 const formatDate = (value) => {
   if (!value) return "";
@@ -76,7 +77,10 @@ const BlogCard = ({ blog, index = 0 }) => {
         <Link to={`/blogs/${blog.slug}`} className="block relative aspect-video overflow-hidden bg-slate-900/50 shrink-0">
           {cover ? (
             <img
-              src={cover}
+              src={sizedImage(cover, 640)}
+              onError={fallbackToOriginal(cover)}
+              loading="lazy"
+              decoding="async"
               alt={blog.title}
               loading="lazy"
               className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition duration-700"

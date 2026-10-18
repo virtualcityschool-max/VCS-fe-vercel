@@ -5,6 +5,7 @@ import { getStorageUrl } from "../../utils/storageUrl";
 import { getDisplayName } from "../../utils/userDisplay";
 import { useWhatsappNumber } from "../../hooks/useWhatsappNumber";
 import { catalogGuideFor } from "../../data/subjectGuides/catalog";
+import { sizedImage, fallbackToOriginal } from "../../utils/imageCdn";
 
 const PublicCourseCard = ({
   course,
@@ -117,10 +118,12 @@ const PublicCourseCard = ({
         <Link to={`/courses/${course.id}`} className="block h-full">
           {getCourseImage(course, index) && !imgFailed ? (
             <img
-              src={getCourseImage(course, index)}
+              src={sizedImage(getCourseImage(course, index), large ? 640 : 384)}
+              loading="lazy"
+              decoding="async"
               className={`w-full h-full object-contain group-hover:scale-105 transition duration-700 ${large ? "opacity-75" : "opacity-70"} group-hover:opacity-100`}
               alt={course.title || "Course"}
-              onError={() => setImgFailed(true)}
+              onError={(e) => { if (e.currentTarget.dataset.fallback !== "1") fallbackToOriginal(getCourseImage(course, index))(e); else setImgFailed(true); }}
             />
           ) : (
             <div className="w-full h-full bg-slate-800 flex items-center justify-center">
@@ -167,7 +170,7 @@ const PublicCourseCard = ({
 
         <div className={`mt-auto ${large ? "pt-3" : "pt-2"} border-t border-white/5 space-y-1.5`}>
           <p className={`${large ? "text-sm" : "text-[13px]"} font-black ${course.is_paid ? "text-white" : "text-emerald-400"}`}>
-            {course.is_paid ? `$${(course.price || 0).toLocaleString("en-US")} USD` : "Free"}
+            {course.is_paid ? `$${(course.price || 0).toLocaleString("en-US")} USD / month` : "Free"}
           </p>
           <div className="flex items-center gap-1.5">
             {renderCTA()}

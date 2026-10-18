@@ -223,7 +223,7 @@ const EnrollmentTypeModal = ({
 
   if (!isOpen) return null;
 
-  const price = course?.price ? `$${Number(course.price).toLocaleString("en-US")} USD` : null;
+  const price = course?.price ? `$${Number(course.price).toLocaleString("en-US")} USD / month` : null;
   const title = course?.title || "this course";
   // Online (Gumroad) checkout only works when the course has a product link configured.
   const gumroadAvailable = Boolean((course?.gumroad_product_permalink || "").trim());
