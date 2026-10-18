@@ -8,8 +8,11 @@ import { fetchPlatformSettings } from "./store/slices/platformSettingsSlice";
 import { toastManager } from "./utils/toastManager";
 
 // Components
-import { AIChat, AuthModals, Navbar, Footer, ScrollToTop } from "./components";
-import Sidebar from "./components/layout/Sidebar";
+import { Navbar, Footer, ScrollToTop } from "./components";
+// Loaded on demand (home page speed): the sign-in/sign-up modals and the
+// portal sidebar aren't needed to show a public page.
+const AuthModals = React.lazy(() => import("./components/forms/AuthModals"));
+const Sidebar = React.lazy(() => import("./components/layout/Sidebar"));
 
 // Routes
 import AppRoutes from "./routes/AppRoutes";
@@ -129,6 +132,7 @@ const AppInner = () => {
     <div className={`min-h-screen selection:bg-indigo-500/30 overflow-x-hidden ${isAdminArea ? "bg-[#0B1020]" : "bg-slate-950"}`}>
       {/* Unified sidebar for teacher / student / parent */}
       {hasSidebar && (
+        <React.Suspense fallback={null}>
         <Sidebar
           role={role}
           isSidebarOpen={isSidebarOpen}
@@ -138,6 +142,7 @@ const AppInner = () => {
           isCollapsed={isSidebarCollapsed}
           onToggleCollapse={toggleSidebar}
         />
+        </React.Suspense>
       )}
 
       {/* Mobile overlay */}
@@ -196,7 +201,7 @@ const AppInner = () => {
 
         {/* Global Overlays */}
         <section className="relative z-[9999]">
-          <AuthModals />
+          <React.Suspense fallback={null}><AuthModals /></React.Suspense>
           <CompleteProfileGate />
           {/* <AIChat /> */}
           <ToastContainer

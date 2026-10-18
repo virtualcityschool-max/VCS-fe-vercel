@@ -1,13 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- Google tag (gtag.js) - Google Ads conversion tracking -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=AW-18418489308"></script>
+<!-- Google tag (gtag.js) - Google Ads conversion tracking. Events queue in
+     dataLayer straight away; the 166 KB library itself loads after the page
+     has finished loading (home page speed), then sends everything queued. -->
 <script>
 window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
 gtag('config', 'AW-18418489308');
+window.addEventListener('load', function () {
+  setTimeout(function () {
+    var s = document.createElement('script');
+    s.async = true;
+    s.src = 'https://www.googletagmanager.com/gtag/js?id=AW-18418489308';
+    document.head.appendChild(s);
+  }, 2500);
+});
 </script>
 <script>
   document.addEventListener('click', function (e) {
