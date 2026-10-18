@@ -201,7 +201,7 @@ export const ApprovalsView: React.FC = () => {
               <div>
                 <div className="text-xs text-slate-400">{k.label}</div>
                 <div className={`text-xl font-bold font-mono mt-1 ${k.color}`}>{k.value}</div>
-                {k.sub && <div className="text-[10px] text-slate-500 mt-0.5">{k.sub}</div>}
+                {k.sub && <div className="text-xs text-slate-500 mt-0.5">{k.sub}</div>}
               </div>
               <div className={`p-2 rounded-xl ${k.tint}`}>
                 <Icon className="w-4 h-4" />
@@ -290,20 +290,20 @@ export const ApprovalsView: React.FC = () => {
                     <td className="py-3 px-4 font-mono text-slate-400 whitespace-nowrap">{fmtDate(d.updated_at)}</td>
                     <td className="py-3 px-4">
                       <div className="font-semibold text-slate-100">{d.summary?.name || '—'}</div>
-                      <div className="text-[11px] text-slate-500">{d.summary?.email}</div>
+                      <div className="text-xs text-slate-500">{d.summary?.email}</div>
                     </td>
                     <td className="py-3 px-4 text-slate-300">
                       <div>{d.summary?.title}</div>
-                      <div className="text-[11px] text-slate-500 max-w-xs truncate">{d.summary?.target}</div>
+                      <div className="text-xs text-slate-500 max-w-xs truncate">{d.summary?.target}</div>
                     </td>
                     <td className="py-3 px-4">
-                      <span className={`px-2 py-0.5 rounded-full border text-[11px] font-semibold ${d.status === 'approved' ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30' : 'bg-rose-500/15 text-rose-300 border-rose-500/30'}`}>
+                      <span className={`px-2 py-0.5 rounded-full border text-xs font-semibold ${d.status === 'approved' ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30' : 'bg-rose-500/15 text-rose-300 border-rose-500/30'}`}>
                         {d.status === 'approved' ? 'Approved' : 'Rejected'}
                       </span>
                     </td>
                     <td className="py-3 px-4 text-slate-300 max-w-sm">
                       {d.reason && <div className="font-medium">{d.reason}</div>}
-                      {d.note && <div className="text-[11px] text-slate-500">{d.note}</div>}
+                      {d.note && <div className="text-xs text-slate-500">{d.note}</div>}
                       {!d.reason && !d.note && <span className="text-slate-600">—</span>}
                     </td>
                     <td className="py-3 px-4 text-slate-400 whitespace-nowrap">{d.reviewer || '—'}</td>
@@ -330,26 +330,26 @@ export const ApprovalsView: React.FC = () => {
                     <div className="min-w-0 space-y-1">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="text-sm font-bold text-slate-100">{item.requesterName}</span>
-                        <span className="text-[11px] text-slate-500">{item.requesterEmail}</span>
-                        <span className="px-2 py-0.5 rounded bg-[#0E1428] border border-[#232D52] text-[10px] font-mono text-slate-300">{item.title}</span>
+                        <span className="text-xs text-slate-500">{item.requesterEmail}</span>
+                        <span className="px-2 py-0.5 rounded bg-[#0E1428] border border-[#232D52] text-xs font-mono text-slate-300">{item.title}</span>
                       </div>
                       <div className="text-xs text-indigo-300 truncate">{item.targetEntityName}</div>
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className={`px-2 py-0.5 rounded-full border text-[10px] font-semibold ${st.pill}`}>{st.label}</span>
-                        <span className={`px-2 py-0.5 rounded-full border text-[10px] font-mono ${ageBadge(item.waitingDays)}`}>
+                        <span className={`px-2 py-0.5 rounded-full border text-xs font-semibold ${st.pill}`}>{st.label}</span>
+                        <span className={`px-2 py-0.5 rounded-full border text-xs font-mono ${ageBadge(item.waitingDays)}`}>
                           {item.waitingDays === 0 ? 'Today' : `Waiting ${item.waitingDays} day${item.waitingDays > 1 ? 's' : ''}`}
                         </span>
                         {isFree(item) && (item.recommendedBy || []).length > 0 && (
-                          <span className="px-2 py-0.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-[10px] text-emerald-300">
+                          <span className="px-2 py-0.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-xs text-emerald-300">
                             Recommended by {item.recommendedBy[item.recommendedBy.length - 1].name}
                           </span>
                         )}
                         {item.review?.reviewer && item.stage !== 'new' && (
-                          <span className="text-[10px] text-slate-500">by {item.review.reviewer} · {fmtDate(item.review.updated_at)}</span>
+                          <span className="text-xs text-slate-500">by {item.review.reviewer} · {fmtDate(item.review.updated_at)}</span>
                         )}
                       </div>
                       {item.review?.note && item.stage !== 'new' && (
-                        <div className="text-[11px] text-slate-400 italic">“{item.review.note}”</div>
+                        <div className="text-xs text-slate-400 italic">“{item.review.note}”</div>
                       )}
                     </div>
                   </div>
@@ -435,7 +435,7 @@ export const ApprovalsView: React.FC = () => {
                       </button>
                     )}
                     {canApprove(item) && (isFree(item) && !recommendedByOther(item) && !canOverride ? (
-                      <span className="px-3 py-1.5 text-[11px] rounded-lg border border-[#232D52] text-slate-400" title="Free access needs two people">
+                      <span className="px-3 py-1.5 text-xs rounded-lg border border-[#232D52] text-slate-400" title="Free access needs two people">
                         Waiting for Admissions to recommend
                       </span>
                     ) : (
@@ -447,7 +447,7 @@ export const ApprovalsView: React.FC = () => {
                       </button>
                     ))}
                     {!canReview && !canApprove(item) && !canReject(item) && (
-                      <span className="text-[11px] text-slate-500">View only</span>
+                      <span className="text-xs text-slate-500">View only</span>
                     )}
                   </div>
                 </div>
@@ -455,7 +455,7 @@ export const ApprovalsView: React.FC = () => {
                 {isOpen && (
                   <div className="border-t border-[#1E2648] px-4 py-4 grid grid-cols-1 lg:grid-cols-3 gap-5 text-xs">
                     <div className="lg:col-span-2 space-y-2.5">
-                      <div className="text-[11px] font-bold uppercase tracking-wider text-[#A99DFF]">Full request</div>
+                      <div className="text-xs font-bold uppercase tracking-wider text-[#A99DFF]">Full request</div>
                       {!item.id.startsWith('free-') && <div className="text-slate-400">{item.details}</div>}
                       {(item.facts || []).map((f: any) => (
                         <div key={f.label} className="grid grid-cols-[120px_1fr] gap-3">
@@ -469,7 +469,7 @@ export const ApprovalsView: React.FC = () => {
                       </div>
                     </div>
                     <div className="space-y-2.5">
-                      <div className="text-[11px] font-bold uppercase tracking-wider text-[#A99DFF]">History</div>
+                      <div className="text-xs font-bold uppercase tracking-wider text-[#A99DFF]">History</div>
                       {(item.review?.history || []).length === 0 ? (
                         <p className="text-slate-500">No steps yet.</p>
                       ) : (
@@ -477,8 +477,8 @@ export const ApprovalsView: React.FC = () => {
                           {[...item.review.history].reverse().map((h: any, i: number) => (
                             <li key={i}>
                               <div className="text-slate-200">{stageInfo(h.status).label}{h.reason ? ` — ${h.reason}` : ''}</div>
-                              <div className="text-[10px] text-slate-500">{h.by} · {fmtDate(h.at)}</div>
-                              {h.note && <div className="text-[11px] text-slate-400 italic">“{h.note}”</div>}
+                              <div className="text-xs text-slate-500">{h.by} · {fmtDate(h.at)}</div>
+                              {h.note && <div className="text-xs text-slate-400 italic">“{h.note}”</div>}
                             </li>
                           ))}
                         </ol>

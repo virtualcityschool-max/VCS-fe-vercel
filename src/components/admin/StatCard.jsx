@@ -19,13 +19,13 @@ const StatCard = ({ label, value, icon, trend, color = "indigo", compact = false
           <div className="w-7 h-7 bg-white/10 rounded-md flex items-center justify-center flex-shrink-0">
             <i className={`${icon} text-sm`}></i>
           </div>
-          <p className="text-[10px] uppercase tracking-wider opacity-80 leading-tight">{label}</p>
+          <p className="text-xs uppercase tracking-wider opacity-80 leading-tight">{label}</p>
         </div>
         <div className="flex items-end justify-between">
           <h3 className="text-2xl font-bold leading-none tabular-nums animate-popIn">{value}</h3>
           {trend && (
-            <div className={`flex items-center gap-0.5 text-[10px] ${trend > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-              <i className={`fas fa-arrow-${trend > 0 ? 'up' : 'down'} text-[8px]`}></i>
+            <div className={`flex items-center gap-0.5 text-xs ${trend > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+              <i className={`fas fa-arrow-${trend > 0 ? 'up' : 'down'} text-xs`}></i>
               <span>{Math.abs(trend)}%</span>
             </div>
           )}

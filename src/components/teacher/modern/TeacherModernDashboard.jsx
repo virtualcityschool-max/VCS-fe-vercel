@@ -132,7 +132,7 @@ export const TeacherDashboard = ({
   const renderCoursesView = () => <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4 bg-[#101424] border border-[#1E2540] rounded-2xl p-5">
         <div>
-          <div className="text-[10px] font-bold tracking-wider uppercase text-indigo-400">
+          <div className="text-xs font-bold tracking-wider uppercase text-indigo-400">
             CURRICULUM MANAGEMENT
           </div>
           <h2 className="text-xl font-extrabold text-white mt-1">My Assigned Courses ({courses.length})</h2>
@@ -155,10 +155,10 @@ export const TeacherDashboard = ({
   >
             <div className={`p-5 bg-gradient-to-br ${course.accentGradient} relative`}>
               <div className="flex items-center justify-between text-xs mb-2">
-                <span className="px-2.5 py-1 rounded-lg bg-black/50 text-[10px] font-mono font-bold text-white uppercase border border-white/10">
+                <span className="px-2.5 py-1 rounded-lg bg-black/50 text-xs font-mono font-bold text-white uppercase border border-white/10">
                   {course.code || "VCS-CRS"}
                 </span>
-                <span className={`px-2.5 py-1 rounded-lg text-[10px] font-extrabold uppercase border ${course.published ? "bg-emerald-500/20 text-emerald-300 border-emerald-400/30" : "bg-slate-800 text-slate-400 border-slate-700"}`}>
+                <span className={`px-2.5 py-1 rounded-lg text-xs font-extrabold uppercase border ${course.published ? "bg-emerald-500/20 text-emerald-300 border-emerald-400/30" : "bg-slate-800 text-slate-400 border-slate-700"}`}>
                   {course.published ? "Published" : "Draft"}
                 </span>
               </div>
@@ -174,13 +174,13 @@ export const TeacherDashboard = ({
 
               <div className="grid grid-cols-2 gap-3 pt-2 border-t border-[#181F36] text-xs">
                 <div>
-                  <span className="text-slate-400 text-[11px]">Enrolled Students</span>
+                  <span className="text-slate-400 text-xs">Enrolled Students</span>
                   <div className="text-white font-bold font-mono text-sm tabular-nums mt-0.5">
                     {course.enrolledCount} Learners
                   </div>
                 </div>
                 <div>
-                  <span className="text-slate-400 text-[11px]">Next Scheduled Class</span>
+                  <span className="text-slate-400 text-xs">Next Scheduled Class</span>
                   <div className="text-indigo-300 font-semibold text-xs mt-0.5 truncate">
                     {course.nextSessionTime}
                   </div>
@@ -221,7 +221,7 @@ export const TeacherDashboard = ({
     }
         <div className="flex flex-wrap items-center justify-between gap-4 bg-[#101424] border border-[#1E2540] rounded-2xl p-5 shadow-lg">
           <div>
-            <div className="text-[10px] font-bold tracking-wider uppercase text-emerald-400 flex items-center gap-1.5">
+            <div className="text-xs font-bold tracking-wider uppercase text-emerald-400 flex items-center gap-1.5">
               <UserCheck className="w-3.5 h-3.5" />
               <span>PER-CLASS STUDENT REGISTER & ROLL CALL</span>
             </div>
@@ -254,7 +254,7 @@ export const TeacherDashboard = ({
         <div className="space-y-2">
           <div className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
             <span>Select Class Roster:</span>
-            <span className="text-[11px] font-normal text-slate-400">(Showing isolated student lists per class)</span>
+            <span className="text-xs font-normal text-slate-400">(Showing isolated student lists per class)</span>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {courses.map((course) => {
@@ -266,15 +266,15 @@ export const TeacherDashboard = ({
         className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between ${isSelected ? "bg-[#151C36] border-emerald-500/60 shadow-lg ring-1 ring-emerald-500/30" : "bg-[#101424] border-[#1E2540] hover:border-slate-700"}`}
       >
                   <div className="flex items-center justify-between gap-2 mb-1.5">
-                    <span className="px-2 py-0.5 rounded bg-black/40 text-[10px] font-mono font-bold text-indigo-300 border border-white/5">
+                    <span className="px-2 py-0.5 rounded bg-black/40 text-xs font-mono font-bold text-indigo-300 border border-white/5">
                       {course.code || "VCS"}
                     </span>
-                    <span className="text-[11px] font-mono font-bold text-emerald-400">
+                    <span className="text-xs font-mono font-bold text-emerald-400">
                       {studentsInCourse.length} Learners
                     </span>
                   </div>
                   <div className="text-xs font-bold text-white leading-snug line-clamp-1">{course.title}</div>
-                  <div className="text-[10px] text-slate-400 mt-1 truncate">{course.nextSessionTime}</div>
+                  <div className="text-xs text-slate-400 mt-1 truncate">{course.nextSessionTime}</div>
                 </button>;
     })}
           </div>
@@ -323,19 +323,19 @@ export const TeacherDashboard = ({
     }
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div className="p-3 rounded-xl bg-[#0B0E1A] border border-[#1A223B]">
-              <span className="text-[10px] text-slate-400 font-semibold uppercase">Total Enrolled</span>
+              <span className="text-xs text-slate-400 font-semibold uppercase">Total Enrolled</span>
               <div className="text-lg font-mono font-bold text-white mt-0.5">{classStudents.length} Students</div>
             </div>
             <div className="p-3 rounded-xl bg-[#0B0E1A] border border-[#1A223B]">
-              <span className="text-[10px] text-emerald-400 font-semibold uppercase">Present Today</span>
+              <span className="text-xs text-emerald-400 font-semibold uppercase">Present Today</span>
               <div className="text-lg font-mono font-bold text-emerald-400 mt-0.5">{presentCount} Learners</div>
             </div>
             <div className="p-3 rounded-xl bg-[#0B0E1A] border border-[#1A223B]">
-              <span className="text-[10px] text-amber-400 font-semibold uppercase">Late Arrivals</span>
+              <span className="text-xs text-amber-400 font-semibold uppercase">Late Arrivals</span>
               <div className="text-lg font-mono font-bold text-amber-400 mt-0.5">{lateCount} Learners</div>
             </div>
             <div className="p-3 rounded-xl bg-[#0B0E1A] border border-[#1A223B]">
-              <span className="text-[10px] text-rose-400 font-semibold uppercase">Absent</span>
+              <span className="text-xs text-rose-400 font-semibold uppercase">Absent</span>
               <div className="text-lg font-mono font-bold text-rose-400 mt-0.5">{absentCount} Learners</div>
             </div>
           </div>
@@ -346,7 +346,7 @@ export const TeacherDashboard = ({
           <div className="overflow-x-auto pt-2">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-[#1C233D] text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                <tr className="border-b border-[#1C233D] text-xs font-semibold text-slate-400 uppercase tracking-wider">
                   <th className="py-3 px-4">Student Name</th>
                   <th className="py-3 px-4">Roll Number</th>
                   <th className="py-3 px-4">Last Activity</th>
@@ -368,7 +368,7 @@ export const TeacherDashboard = ({
                       <span>{rec.name}</span>
                     </td>
                     <td className="py-3.5 px-4 font-mono text-slate-300 tabular-nums">#{rec.rollNo}</td>
-                    <td className="py-3.5 px-4 text-slate-400 font-mono text-[11px]">{rec.lastSeen}</td>
+                    <td className="py-3.5 px-4 text-slate-400 font-mono text-xs">{rec.lastSeen}</td>
                     <td className="py-3.5 px-4 text-center">
                       <span className="font-mono font-bold text-emerald-400 tabular-nums">
                         {rec.attendanceRate != null ? `${rec.attendanceRate}%` : "—"}
@@ -377,7 +377,7 @@ export const TeacherDashboard = ({
                     <td className="py-3.5 px-4 text-right">
                       {rec.statusToday ? (
                         <span
-                          className={`inline-block px-3 py-1 rounded-xl text-[11px] font-bold uppercase ${rec.statusToday === "present" || rec.statusToday === "attended" ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm" : rec.statusToday === "late" ? "bg-amber-500/20 text-amber-300 border border-amber-500/40" : "bg-rose-500/20 text-rose-300 border border-rose-500/40"}`}
+                          className={`inline-block px-3 py-1 rounded-xl text-xs font-bold uppercase ${rec.statusToday === "present" || rec.statusToday === "attended" ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm" : rec.statusToday === "late" ? "bg-amber-500/20 text-amber-300 border border-amber-500/40" : "bg-rose-500/20 text-rose-300 border border-rose-500/40"}`}
                         >
                           {rec.statusToday}
                         </span>
@@ -395,7 +395,7 @@ export const TeacherDashboard = ({
   const renderPlannerView = () => <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4 bg-[#101424] border border-[#1E2540] rounded-2xl p-5">
         <div>
-          <div className="text-[10px] font-bold tracking-wider uppercase text-indigo-400">
+          <div className="text-xs font-bold tracking-wider uppercase text-indigo-400">
             FACULTY TIMETABLE & SCHEDULER
           </div>
           <h2 className="text-xl font-extrabold text-white mt-1">Weekly Academic Planner ({timezone})</h2>
@@ -420,7 +420,7 @@ export const TeacherDashboard = ({
   >
             <div>
               <div className="flex items-center justify-between text-xs mb-1">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-400">
+                <span className="text-xs font-bold uppercase tracking-wider text-indigo-400">
                   {(ses.category || "classes").replace("_", " ")}
                 </span>
                 <span className="font-mono text-slate-300 tabular-nums">{ses.timeAST}</span>
@@ -430,7 +430,7 @@ export const TeacherDashboard = ({
             </div>
 
             <div className="pt-3 border-t border-[#181F36] flex items-center justify-between">
-              <span className="text-[11px] font-medium text-slate-400 flex items-center gap-1.5">
+              <span className="text-xs font-medium text-slate-400 flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                 <span>Live Classroom</span>
               </span>
@@ -450,7 +450,7 @@ export const TeacherDashboard = ({
   const renderSlotsView = () => <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4 bg-[#101424] border border-[#1E2540] rounded-2xl p-5">
         <div>
-          <div className="text-[10px] font-bold tracking-wider uppercase text-indigo-400">
+          <div className="text-xs font-bold tracking-wider uppercase text-indigo-400">
             OFFICE HOURS & CONSULTATION WINDOWS
           </div>
           <h2 className="text-xl font-extrabold text-white mt-1">1-on-1 Tutoring Slots</h2>
@@ -499,7 +499,7 @@ export const TeacherDashboard = ({
     return <div className="space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-4 bg-[#101424] border border-[#1E2540] rounded-2xl p-5 shadow-lg">
           <div>
-            <div className="text-[10px] font-bold tracking-wider uppercase text-indigo-400 flex items-center gap-1.5">
+            <div className="text-xs font-bold tracking-wider uppercase text-indigo-400 flex items-center gap-1.5">
               <FileSpreadsheet className="w-3.5 h-3.5" />
               <span>EVALUATIONS & GRADEBOOK</span>
             </div>
@@ -565,7 +565,7 @@ export const TeacherDashboard = ({
                   <div className="text-sm font-mono font-bold text-white tabular-nums">
                     {task.status === "graded" ? `${task.awardedMarks} / ${task.maxMarks ?? "?"} Marks` : task.maxMarks != null ? `Out of ${task.maxMarks}` : ""}
                   </div>
-                  <div className={`text-[10px] font-bold uppercase ${task.status === "graded" ? "text-emerald-400" : task.status === "overdue" ? "text-amber-400" : "text-indigo-400"}`}>
+                  <div className={`text-xs font-bold uppercase ${task.status === "graded" ? "text-emerald-400" : task.status === "overdue" ? "text-amber-400" : "text-indigo-400"}`}>
                     {task.status === "overdue" ? "late" : task.status}
                   </div>
                 </div>
@@ -597,7 +597,7 @@ export const TeacherDashboard = ({
   const renderAboutView = () => <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4 bg-[#101424] border border-[#1E2540] rounded-2xl p-5">
         <div>
-          <div className="text-[10px] font-bold tracking-wider uppercase text-cyan-400">
+          <div className="text-xs font-bold tracking-wider uppercase text-cyan-400">
             INSTITUTIONAL PROFILE
           </div>
           <h2 className="text-xl font-extrabold text-white mt-1">About Virtual City School</h2>
@@ -697,7 +697,7 @@ export const TeacherDashboard = ({
                 {(user?.first_name ? `${user.first_name[0]}${(user.last_name || "")[0] || ""}` : (user?.username?.slice(0, 2) || "")).toUpperCase()}
               </div>
               <div className="min-w-0 flex-1">
-                <div className="text-[10px] font-bold tracking-[0.14em] text-indigo-400 uppercase">
+                <div className="text-xs font-bold tracking-[0.14em] text-indigo-400 uppercase">
                   FACULTY WORKSPACE
                 </div>
                 <h1 className="text-xl font-extrabold text-white truncate mt-0.5 capitalize">
@@ -708,7 +708,7 @@ export const TeacherDashboard = ({
                 </div>
 
                 <div className="mt-3 flex flex-wrap items-center gap-2">
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#161B30] border border-[#242C4C] text-[11px] text-slate-200">
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#161B30] border border-[#242C4C] text-xs text-slate-200">
                     <Globe className="w-3.5 h-3.5 text-indigo-400" />
                     <span>{tzDetails}</span>
                     <button
@@ -746,12 +746,12 @@ export const TeacherDashboard = ({
                 </div>
                 <div>
                   <h2 className="text-sm font-bold text-white">Live Classes</h2>
-                  <p className="text-[11px] text-slate-400">Google Meet · {timezone}</p>
+                  <p className="text-xs text-slate-400">Google Meet · {timezone}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
                 <IssueInJoiningClassBanner variant="button" userRole="teacher" userEmail={user?.email} />
-                <span className="px-2.5 py-1 rounded-lg bg-[#161C30] border border-[#263052] text-[11px] font-semibold text-emerald-400 tabular-nums">
+                <span className="px-2.5 py-1 rounded-lg bg-[#161C30] border border-[#263052] text-xs font-semibold text-emerald-400 tabular-nums">
                   {liveClasses.length} {liveClasses.length === 1 ? "Class" : "Classes"}
                 </span>
               </div>
@@ -765,7 +765,7 @@ export const TeacherDashboard = ({
                   <Video className="w-5 h-5" />
                 </div>
                 <div className="text-xs font-bold text-white">No live or upcoming classes scheduled</div>
-                <p className="text-[11px] text-slate-400 max-w-xs mx-auto leading-relaxed">
+                <p className="text-xs text-slate-400 max-w-xs mx-auto leading-relaxed">
                   Classes planned by administration will appear here automatically.
                 </p>
                 <div className="pt-2 max-w-md mx-auto text-left">
@@ -793,7 +793,7 @@ export const TeacherDashboard = ({
                           <div className="text-sm font-bold text-white leading-snug">
                             {ses.title}
                           </div>
-                          <div className="text-[11px] text-slate-400 mt-0.5">
+                          <div className="text-xs text-slate-400 mt-0.5">
                             {ses.courseName} · <span className="font-mono tabular-nums text-slate-200">{ses.timeAST}</span> ({ses.duration})
                           </div>
                         </div>
@@ -805,14 +805,14 @@ export const TeacherDashboard = ({
                               variant="card"
                             />
                           )}
-                          <span className="text-[11px] font-mono text-slate-400 tabular-nums">
+                          <span className="text-xs font-mono text-slate-400 tabular-nums">
                             {ses.attendeesCount}/{ses.maxAttendees}
                           </span>
                         </div>
                       </div>
 
                       <div className="flex items-center justify-between gap-2 pt-2.5 border-t border-[#151B30]">
-                        <span className="text-[11px] text-slate-400 flex items-center gap-1.5 font-medium">
+                        <span className="text-xs text-slate-400 flex items-center gap-1.5 font-medium">
                           <span className={`w-2 h-2 rounded-full ${canEnter ? "bg-emerald-400 animate-pulse" : "bg-rose-400"}`} />
                           <span className={canEnter ? "text-emerald-300 font-semibold" : "text-slate-400"}>
                             {canEnter ? "Classroom Open" : "Early Access Locked"}
@@ -824,7 +824,7 @@ export const TeacherDashboard = ({
                             <button
                               type="button"
                               onClick={() => onEndSession(ses)}
-                              className="px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-colors whitespace-nowrap flex items-center gap-1 bg-rose-500/20 text-rose-300 border border-rose-500/40 hover:bg-rose-500/30 cursor-pointer"
+                              className="px-2.5 py-1.5 rounded-lg text-xs font-bold transition-colors whitespace-nowrap flex items-center gap-1 bg-rose-500/20 text-rose-300 border border-rose-500/40 hover:bg-rose-500/30 cursor-pointer"
                             >
                               <Square className="w-2.5 h-2.5 fill-current" />
                               <span>End Class</span>
@@ -846,7 +846,7 @@ export const TeacherDashboard = ({
                                   setLaunchedSessionId(ses.id);
                                 }
                               }}
-                              className={`px-3.5 py-1.5 rounded-lg text-[11px] font-semibold transition-colors whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
+                              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
                                 isLaunched
                                   ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
                                   : "bg-emerald-600 hover:bg-emerald-500 text-white shadow-md shadow-emerald-900/30"
@@ -860,7 +860,7 @@ export const TeacherDashboard = ({
                               type="button"
                               onClick={() => setIsTroubleshootOpen(true)}
                               title="Unlocked 60 minutes before session start"
-                              className="px-3.5 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap flex items-center gap-1.5 bg-rose-500/20 text-rose-300 border border-rose-500/40 hover:bg-rose-500/30 cursor-pointer"
+                              className="px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap flex items-center gap-1.5 bg-rose-500/20 text-rose-300 border border-rose-500/40 hover:bg-rose-500/30 cursor-pointer"
                             >
                               <Lock className="w-3 h-3 text-rose-400" />
                               <span>Opens 60m Prior</span>
@@ -870,7 +870,7 @@ export const TeacherDashboard = ({
                       </div>
 
                       {/* Chrome Sign-in Helper & Troubleshoot Link */}
-                      <div className="pt-2 border-t border-[#151B30]/60 flex flex-wrap items-center justify-between gap-2 text-[10px] text-slate-400">
+                      <div className="pt-2 border-t border-[#151B30]/60 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400">
                         <span className="flex items-center gap-1 truncate">
                           <Info className="w-3 h-3 text-indigo-400 shrink-0" />
                           <span>Signed in Chrome as: <b className="text-slate-200">{user?.email || "Gmail"}</b></span>
@@ -900,10 +900,10 @@ export const TeacherDashboard = ({
                 </div>
                 <div>
                   <h2 className="text-sm font-bold text-white">In-House &amp; Staff Meetings</h2>
-                  <p className="text-[11px] text-slate-400">Academic Administration · {timezone}</p>
+                  <p className="text-xs text-slate-400">Academic Administration · {timezone}</p>
                 </div>
               </div>
-              <span className="px-2.5 py-1 rounded-lg bg-[#161C30] border border-[#263052] text-[11px] font-semibold text-slate-300 tabular-nums">
+              <span className="px-2.5 py-1 rounded-lg bg-[#161C30] border border-[#263052] text-xs font-semibold text-slate-300 tabular-nums">
                 {adminMeetings.length}
               </span>
             </div>
@@ -914,7 +914,7 @@ export const TeacherDashboard = ({
                   <Users className="w-4 h-4" />
                 </div>
                 <div className="text-xs font-bold text-white">No in-house meetings scheduled</div>
-                <p className="text-[11px] text-slate-400 mt-1 max-w-xs mx-auto leading-relaxed">
+                <p className="text-xs text-slate-400 mt-1 max-w-xs mx-auto leading-relaxed">
                   Faculty staff and coordination meetings will appear here when scheduled by administration.
                 </p>
               </div>
@@ -932,7 +932,7 @@ export const TeacherDashboard = ({
                           <div className="text-xs font-bold text-white leading-snug">
                             {ses.title}
                           </div>
-                          <div className="text-[11px] text-slate-400 mt-0.5">
+                          <div className="text-xs text-slate-400 mt-0.5">
                             {ses.courseName} · <span className="font-mono tabular-nums text-slate-200">{ses.timeAST}</span> ({ses.duration})
                           </div>
                         </div>
@@ -944,14 +944,14 @@ export const TeacherDashboard = ({
                               variant="inline"
                             />
                           )}
-                          <span className="text-[11px] font-mono text-slate-400 tabular-nums">
+                          <span className="text-xs font-mono text-slate-400 tabular-nums">
                             {ses.attendeesCount}
                           </span>
                         </div>
                       </div>
 
                       <div className="flex items-center justify-between gap-2 pt-2 border-t border-[#151B30]">
-                        <span className="text-[11px] text-slate-400 flex items-center gap-1.5 font-medium">
+                        <span className="text-xs text-slate-400 flex items-center gap-1.5 font-medium">
                           <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
                           <span>Staff Room</span>
                         </span>
@@ -960,7 +960,7 @@ export const TeacherDashboard = ({
                             <button
                               type="button"
                               onClick={() => onLeaveAdminSession(ses)}
-                              className="px-2.5 py-1 rounded-lg text-[11px] font-bold transition-colors whitespace-nowrap flex items-center gap-1 bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30 cursor-pointer"
+                              className="px-2.5 py-1 rounded-lg text-xs font-bold transition-colors whitespace-nowrap flex items-center gap-1 bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30 cursor-pointer"
                             >
                               <LogOut className="w-2.5 h-2.5" />
                               <span>Leave</span>
@@ -980,7 +980,7 @@ export const TeacherDashboard = ({
                                 setLaunchedSessionId(ses.id);
                               }
                             }}
-                            className={`px-3 py-1 rounded-lg text-[11px] font-semibold transition-colors whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
+                            className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
                               isLaunched ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40" : "bg-indigo-600 hover:bg-indigo-500 text-white"
                             }`}
                           >
@@ -1005,7 +1005,7 @@ export const TeacherDashboard = ({
                 </div>
                 <div>
                   <div className="text-xs font-bold text-white">Invite & Refer</div>
-                  <div className="text-[11px] text-slate-400">
+                  <div className="text-xs text-slate-400">
                     Share your link, anyone who joins through it is credited to you.
                   </div>
                 </div>
@@ -1015,7 +1015,7 @@ export const TeacherDashboard = ({
                   type="text"
                   readOnly
                   value={referralUrl}
-                  className="w-full px-3 py-2 rounded-xl bg-[#0A0D18] border border-[#1E2642] text-[11px] font-mono text-slate-300 focus:outline-none"
+                  className="w-full px-3 py-2 rounded-xl bg-[#0A0D18] border border-[#1E2642] text-xs font-mono text-slate-300 focus:outline-none"
                 />
                 <button
                   onClick={handleCopyReferral}
@@ -1068,7 +1068,7 @@ export const TeacherDashboard = ({
             <div className="bg-[#101424] border border-[#1E2540] rounded-2xl p-5 flex flex-col justify-between">
               <div className="flex items-center justify-between">
                 <h2 className="text-sm font-bold text-white">Teaching Standing</h2>
-                <span className="text-[10px] font-bold tracking-wider uppercase text-slate-400">
+                <span className="text-xs font-bold tracking-wider uppercase text-slate-400">
                   ACTIVE TERM
                 </span>
               </div>
@@ -1100,7 +1100,7 @@ export const TeacherDashboard = ({
                     <span className="text-lg font-extrabold text-white tabular-nums">
                       {pendingCount}
                     </span>
-                    <span className="text-[9px] font-bold tracking-wider text-slate-400 uppercase">
+                    <span className="text-xs font-bold tracking-wider text-slate-400 uppercase">
                       TO MARK
                     </span>
                   </div>
@@ -1112,25 +1112,25 @@ export const TeacherDashboard = ({
     onClick={() => onSelectTab("courses")}
     className="p-2.5 rounded-xl bg-[#0C0F1D] border border-[#1B223B] text-center hover:border-indigo-500/40 cursor-pointer transition-colors"
   >
-                      <div className="text-[10px] font-semibold text-slate-400 uppercase">
+                      <div className="text-xs font-semibold text-slate-400 uppercase">
                         ACTIVE COHORTS
                       </div>
                       <div className="text-base font-extrabold text-white mt-0.5 tabular-nums">
                         {courses.length}
                       </div>
-                      <div className="text-[11px] text-indigo-400">View Courses →</div>
+                      <div className="text-xs text-indigo-400">View Courses →</div>
                     </div>
                     <div
     onClick={() => onSelectTab("attendance")}
     className="p-2.5 rounded-xl bg-[#0C0F1D] border border-[#1B223B] text-center hover:border-emerald-500/40 cursor-pointer transition-colors"
   >
-                      <div className="text-[10px] font-semibold text-slate-400 uppercase">
+                      <div className="text-xs font-semibold text-slate-400 uppercase">
                         ATTENDANCE
                       </div>
                       <div className="text-base font-extrabold text-emerald-400 mt-0.5 tabular-nums">
                         {overallAttendanceRate != null ? `${overallAttendanceRate}%` : "—"}
                       </div>
-                      <div className="text-[11px] text-emerald-400">Roll Call →</div>
+                      <div className="text-xs text-emerald-400">Roll Call →</div>
                     </div>
                   </div>
                 </div>
@@ -1162,7 +1162,7 @@ export const TeacherDashboard = ({
                     {["all", "published", "scheduled", "closed"].map((tab) => <button
     key={tab}
     onClick={() => setQuizFilter(tab)}
-    className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer ${quizFilter === tab ? "bg-[#5B46F8] text-white" : "text-slate-400 hover:text-slate-200"}`}
+    className={`px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer ${quizFilter === tab ? "bg-[#5B46F8] text-white" : "text-slate-400 hover:text-slate-200"}`}
   >
                         {tab}
                       </button>)}
@@ -1183,7 +1183,7 @@ export const TeacherDashboard = ({
                       >
                         <div className="min-w-0">
                           <div className="text-xs font-bold text-white truncate">{qz.title}</div>
-                          <div className="text-[11px] text-slate-400 truncate mt-0.5">
+                          <div className="text-xs text-slate-400 truncate mt-0.5">
                             {qz.courseTitle} · {qz.submissionsCount || 0} submissions
                           </div>
                         </div>
@@ -1192,7 +1192,7 @@ export const TeacherDashboard = ({
                             {qz.marks} Marks
                           </span>
                           <span
-                            className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase ${
+                            className={`px-2 py-0.5 rounded-md text-xs font-bold uppercase ${
                               qz.status === "published"
                                 ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
                                 : "bg-slate-700/40 text-slate-300"
@@ -1208,7 +1208,7 @@ export const TeacherDashboard = ({
               </div>
 
               <div className="pt-3 mt-4 border-t border-[#181F36] flex items-center justify-between">
-                <span className="text-[11px] text-slate-400">
+                <span className="text-xs text-slate-400">
                   Avg Score:{" "}
                   <strong className="text-slate-200 tabular-nums">
                     {(() => {
@@ -1251,7 +1251,7 @@ export const TeacherDashboard = ({
                 {["all", "queued", "overdue", "graded"].map((st) => <button
     key={st}
     onClick={() => setTaskFilter(st)}
-    className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer ${taskFilter === st ? "bg-[#5B46F8] text-white" : "text-slate-400 hover:text-slate-200"}`}
+    className={`px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer ${taskFilter === st ? "bg-[#5B46F8] text-white" : "text-slate-400 hover:text-slate-200"}`}
   >
                     {{ queued: "waiting", overdue: "late", graded: "marked" }[st] || st}
                   </button>)}
@@ -1270,7 +1270,7 @@ export const TeacherDashboard = ({
                     <div className="flex items-center gap-2 text-xs">
                       <span className="font-bold text-white">{task.assignmentTitle}</span>
                     </div>
-                    <div className="text-[11px] text-slate-400 mt-1 flex flex-wrap items-center gap-1.5">
+                    <div className="text-xs text-slate-400 mt-1 flex flex-wrap items-center gap-1.5">
                       <span className="text-slate-200 font-medium">{task.studentName}</span>
                       <span>·</span>
                       <span className="font-mono">{task.studentRoll}</span>
@@ -1287,7 +1287,7 @@ export const TeacherDashboard = ({
                         {task.status === "graded" ? `${task.awardedMarks} / ${task.maxMarks ?? "?"} Marks` : task.maxMarks != null ? `Out of ${task.maxMarks}` : ""}
                       </div>
                       <div
-    className={`text-[10px] font-semibold uppercase ${task.status === "graded" ? "text-emerald-400" : task.status === "overdue" ? "text-amber-400" : "text-indigo-400"}`}
+    className={`text-xs font-semibold uppercase ${task.status === "graded" ? "text-emerald-400" : task.status === "overdue" ? "text-amber-400" : "text-indigo-400"}`}
   >
                         {task.status === "graded" ? "\u2713 Marked" : task.status === "overdue" ? "\u25CF Late" : "\u25CF Waiting"}
                       </div>
@@ -1340,16 +1340,16 @@ export const TeacherDashboard = ({
   >
                   <div className={`h-28 bg-gradient-to-br ${course.accentGradient} p-3.5 flex flex-col justify-between`}>
                     <div className="flex items-center justify-between gap-2">
-                      <span className="text-[10px] font-extrabold uppercase text-emerald-300 bg-black/40 px-2 py-0.5 rounded-md border border-emerald-400/30">
+                      <span className="text-xs font-extrabold uppercase text-emerald-300 bg-black/40 px-2 py-0.5 rounded-md border border-emerald-400/30">
                         {course.published ? "PUBLISHED" : "DRAFT"}
                       </span>
-                      <span className="text-[10px] font-mono font-bold text-white bg-black/50 px-2 py-0.5 rounded-md">
+                      <span className="text-xs font-mono font-bold text-white bg-black/50 px-2 py-0.5 rounded-md">
                         {course.code}
                       </span>
                     </div>
 
                     <div>
-                      <div className="text-[9px] font-bold text-indigo-200/90 uppercase truncate">
+                      <div className="text-xs font-bold text-indigo-200/90 uppercase truncate">
                         {course.category}
                       </div>
                       <div className="text-xs font-extrabold text-white line-clamp-1 mt-0.5">
@@ -1359,7 +1359,7 @@ export const TeacherDashboard = ({
                   </div>
 
                   <div className="p-3.5 space-y-2">
-                    <div className="flex items-center justify-between text-[11px] text-slate-400">
+                    <div className="flex items-center justify-between text-xs text-slate-400">
                       <span>{course.enrolledCount} Enrolled</span>
                       <span>{course.nextSessionTime}</span>
                     </div>

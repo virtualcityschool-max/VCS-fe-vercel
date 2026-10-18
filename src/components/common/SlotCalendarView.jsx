@@ -68,7 +68,7 @@ const SlotPopup = ({ slot, onClose, timezone }) => {
               </div>
               <div>
                 <p className="text-xs font-black text-white">Booked Session</p>
-                <p className="text-[10px] text-slate-500 mt-0.5">
+                <p className="text-xs text-slate-500 mt-0.5">
                   {fmtDate(slot.date)}
                 </p>
               </div>
@@ -115,7 +115,7 @@ const SlotPopup = ({ slot, onClose, timezone }) => {
                 </div>
                 <div>
                   <p className="text-xs font-black text-white">Not yet joinable</p>
-                  <p className="text-[10px] text-slate-500 mt-0.5">You can join 30 minutes before the session starts.</p>
+                  <p className="text-xs text-slate-500 mt-0.5">You can join 30 minutes before the session starts.</p>
                 </div>
               </div>
             )
@@ -126,7 +126,7 @@ const SlotPopup = ({ slot, onClose, timezone }) => {
               </div>
               <div>
                 <p className="text-xs font-black text-white">Meeting link pending</p>
-                <p className="text-[10px] text-slate-500 mt-0.5">The Google Meet link will appear once the booking is confirmed.</p>
+                <p className="text-xs text-slate-500 mt-0.5">The Google Meet link will appear once the booking is confirmed.</p>
               </div>
             </div>
           )}
@@ -168,17 +168,17 @@ const SlotListView = ({ slots, onDelete, onEdit, deletingId, allowDeleteBooked, 
                 <p className="text-sm font-bold text-white tabular-nums">
                   {fmt12(slot.start_time)} – {fmt12(slot.end_time)}{" "}<TimezoneTag tz={timezone} />
                 </p>
-                <p className="text-[10px] text-slate-500 mt-0.5">{fmtDate(slot.date)}</p>
+                <p className="text-xs text-slate-500 mt-0.5">{fmtDate(slot.date)}</p>
               </div>
               {isBooked && slot.booked_by_name && (
                 <div className="hidden sm:block min-w-0">
                   <p className="text-xs font-semibold text-slate-300 truncate max-w-[140px]">{slot.booked_by_name}</p>
                   {slot.booked_by_email && (
-                    <p className="text-[10px] text-slate-500 truncate max-w-[140px]">{slot.booked_by_email}</p>
+                    <p className="text-xs text-slate-500 truncate max-w-[140px]">{slot.booked_by_email}</p>
                   )}
                 </div>
               )}
-              <span className={`shrink-0 text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-full border ${
+              <span className={`shrink-0 text-xs font-black uppercase tracking-widest px-2 py-1 rounded-full border ${
                 isBooked
                   ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
                   : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
@@ -193,7 +193,7 @@ const SlotListView = ({ slots, onDelete, onEdit, deletingId, allowDeleteBooked, 
                       title="Edit slot"
                       className="w-7 h-7 rounded-lg flex items-center justify-center bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/15 text-indigo-400 transition"
                     >
-                      <i className="fas fa-pencil-alt text-[10px]" />
+                      <i className="fas fa-pencil-alt text-xs" />
                     </button>
                   )}
                   {canDelete && (
@@ -204,8 +204,8 @@ const SlotListView = ({ slots, onDelete, onEdit, deletingId, allowDeleteBooked, 
                       className="w-7 h-7 rounded-lg flex items-center justify-center bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/15 text-rose-400 transition disabled:opacity-50"
                     >
                       {isDeleting
-                        ? <i className="fas fa-spinner fa-spin text-[10px]" />
-                        : <i className="fas fa-trash-alt text-[10px]" />}
+                        ? <i className="fas fa-spinner fa-spin text-xs" />
+                        : <i className="fas fa-trash-alt text-xs" />}
                     </button>
                   )}
                 </div>
@@ -341,7 +341,7 @@ const SlotCalendarView = ({ slots = [], loading = false, onDelete, onEdit, delet
             <button
               key={f}
               onClick={() => setStatusFilter(f)}
-              className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition ${
                 statusFilter === f ? "bg-indigo-600 text-white" : "text-slate-500 hover:text-slate-300"
               }`}
             >
@@ -384,7 +384,7 @@ const SlotCalendarView = ({ slots = [], loading = false, onDelete, onEdit, delet
               <button
                 key={f}
                 onClick={() => setStatusFilter(f)}
-                className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition ${
                   statusFilter === f ? "bg-indigo-600 text-white" : "text-slate-500 hover:text-slate-300"
                 }`}
               >
@@ -392,7 +392,7 @@ const SlotCalendarView = ({ slots = [], loading = false, onDelete, onEdit, delet
               </button>
             ))}
           </div>
-          <TimezoneTag tz={timezone} className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1.5 bg-slate-900 border border-slate-800 rounded-xl text-slate-400" />
+          <TimezoneTag tz={timezone} className="text-xs font-black uppercase tracking-widest px-2.5 py-1.5 bg-slate-900 border border-slate-800 rounded-xl text-slate-400" />
         </div>
       </div>
 
@@ -424,7 +424,7 @@ const SlotCalendarView = ({ slots = [], loading = false, onDelete, onEdit, delet
                   {MONTH_NAMES[activeMonthData.month]}
                   <span className="text-indigo-400 ml-1">{activeMonthData.year}</span>
                 </p>
-                <p className="text-[9px] font-bold uppercase tracking-widest text-slate-500 mt-0.5">
+                <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mt-0.5">
                   {activeMonthIdx + 1} / {monthRange.length}
                 </p>
               </div>
@@ -443,7 +443,7 @@ const SlotCalendarView = ({ slots = [], loading = false, onDelete, onEdit, delet
                   <button
                     key={`${m.year}-${m.month}`}
                     onClick={() => setCalendarMonth(m)}
-                    className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all duration-200 shrink-0 ${
+                    className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all duration-200 shrink-0 ${
                       idx === activeMonthIdx
                         ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/20"
                         : "bg-slate-800/60 text-slate-500 hover:bg-slate-700 hover:text-slate-300 border border-slate-700/50"
@@ -473,7 +473,7 @@ const SlotCalendarView = ({ slots = [], loading = false, onDelete, onEdit, delet
           {DAY_LABELS.map((d) => (
             <div
               key={d}
-              className="px-0 py-2 sm:px-4 sm:py-5 text-center text-[8px] sm:text-[10px] font-black uppercase tracking-tight sm:tracking-[0.25em] text-slate-500"
+              className="px-0 py-2 sm:px-4 sm:py-5 text-center text-xs sm:text-xs font-black uppercase tracking-tight sm:tracking-[0.25em] text-slate-500"
             >
               <span className="hidden sm:inline">{d}</span>
               <span className="sm:hidden">{d.slice(0, 2)}</span>
@@ -513,7 +513,7 @@ const SlotCalendarView = ({ slots = [], loading = false, onDelete, onEdit, delet
                     </span>
                   )}
                   <span
-                    className={`text-[9px] sm:text-[10px] font-black w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center rounded-lg ml-auto transition-all duration-300 ${
+                    className={`text-xs sm:text-xs font-black w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center rounded-lg ml-auto transition-all duration-300 ${
                       isToday
                         ? "bg-indigo-500 text-white shadow-lg"
                         : daySlots.length > 0
@@ -549,15 +549,15 @@ const SlotCalendarView = ({ slots = [], loading = false, onDelete, onEdit, delet
                         {/* Name / Open  +  timezone - top row */}
                         <div className="flex items-center justify-between gap-1 mb-0.5">
                           {isBooked && slot.booked_by_name ? (
-                            <p className="text-[8px] font-black text-white truncate leading-tight min-w-0">
+                            <p className="text-xs font-black text-white truncate leading-tight min-w-0">
                               {slot.booked_by_name}
                             </p>
                           ) : !isBooked ? (
-                            <p className="text-[8px] font-black text-indigo-300/80 leading-tight min-w-0">
+                            <p className="text-xs font-black text-indigo-300/80 leading-tight min-w-0">
                               Open
                             </p>
                           ) : <span className="min-w-0" />}
-                          <TimezoneTag tz={timezone} className={`text-[8px] font-black shrink-0 ${isBooked ? "text-amber-400/90" : "text-indigo-400/90"}`} />
+                          <TimezoneTag tz={timezone} className={`text-xs font-black shrink-0 ${isBooked ? "text-amber-400/90" : "text-indigo-400/90"}`} />
                         </div>
 
                         {/* Time + badge row */}

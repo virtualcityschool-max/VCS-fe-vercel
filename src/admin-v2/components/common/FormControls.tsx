@@ -20,7 +20,7 @@ export const Field: React.FC<{
       {required && <span className="text-rose-400"> *</span>}
     </label>
     {children}
-    {hint && <p className="text-[11px] text-slate-500 mt-1">{hint}</p>}
+    {hint && <p className="text-xs text-slate-500 mt-1">{hint}</p>}
   </div>
 );
 
@@ -31,8 +31,8 @@ export const FormSection: React.FC<{ title: string; subtitle?: string; children:
 }) => (
   <div className="space-y-3 pt-1">
     <div className="flex items-baseline gap-2 border-b border-[#1E2648] pb-1.5">
-      <h4 className="text-[11px] font-bold uppercase tracking-wider text-[#A99DFF]">{title}</h4>
-      {subtitle && <span className="text-[11px] text-slate-500">{subtitle}</span>}
+      <h4 className="text-xs font-bold uppercase tracking-wider text-[#A99DFF]">{title}</h4>
+      {subtitle && <span className="text-xs text-slate-500">{subtitle}</span>}
     </div>
     {children}
   </div>
@@ -192,7 +192,7 @@ export const MultiPick: React.FC<{
       {selected.length > 0 && (
         <div className="flex flex-wrap gap-1.5 p-2 border-b border-[#1E2648]">
           {selected.map((v) => (
-            <span key={v} className="flex items-center gap-1 pl-2 pr-1 py-0.5 rounded-md bg-[#6D5BFF]/20 border border-[#6D5BFF]/40 text-[11px] text-indigo-200">
+            <span key={v} className="flex items-center gap-1 pl-2 pr-1 py-0.5 rounded-md bg-[#6D5BFF]/20 border border-[#6D5BFF]/40 text-xs text-indigo-200">
               {byValue.get(v)?.label || v}
               <button type="button" onClick={() => toggle(v)} className="p-0.5 rounded hover:bg-white/10">
                 <X className="w-3 h-3" />
@@ -211,7 +211,7 @@ export const MultiPick: React.FC<{
         />
       </div>
       <div className="max-h-40 overflow-y-auto p-1">
-        {list.length === 0 && <p className="px-2 py-3 text-center text-[11px] text-slate-500">{emptyText}</p>}
+        {list.length === 0 && <p className="px-2 py-3 text-center text-xs text-slate-500">{emptyText}</p>}
         {list.map((o) => {
           const on = selected.includes(o.value);
           return (
@@ -225,7 +225,7 @@ export const MultiPick: React.FC<{
                 {on && <Check className="w-2.5 h-2.5 text-white" />}
               </span>
               <span className="truncate">{o.label}</span>
-              {o.sub && <span className="ml-auto shrink-0 text-[10px] text-slate-500">{o.sub}</span>}
+              {o.sub && <span className="ml-auto shrink-0 text-xs text-slate-500">{o.sub}</span>}
             </button>
           );
         })}

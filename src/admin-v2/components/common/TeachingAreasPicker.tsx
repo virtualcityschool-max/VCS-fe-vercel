@@ -39,7 +39,7 @@ export const TeachingAreasPicker: React.FC<{
         {value.map((a) => (
           <span
             key={a}
-            className={`px-2 py-0.5 rounded-md text-[11px] font-semibold ${suggested ? 'border border-dashed border-sky-400/50 text-sky-300/80' : 'bg-sky-400/15 border border-sky-400/30 text-sky-200'}`}
+            className={`px-2 py-0.5 rounded-md text-xs font-semibold ${suggested ? 'border border-dashed border-sky-400/50 text-sky-300/80' : 'bg-sky-400/15 border border-sky-400/30 text-sky-200'}`}
           >
             {a}
           </span>

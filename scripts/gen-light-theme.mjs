@@ -5,7 +5,7 @@
 // text-white, text-emerald-300 ...). Rather than hand-editing hundreds of
 // classes, this reads the colour classes the public files use and writes a
 // light equivalent for each, active only when <html> has the class
-// `light-public` (set by src/utils/theme.js on public pages in day mode):
+// `theme-light` (set by src/utils/theme.js on public pages in day mode):
 //   - dark solid backgrounds  -> near-white / light shades
 //   - light text              -> dark text (accent text 300 -> 700, so it stays readable)
 //   - faint tints (/5 ... /30) keep their colour (they read fine on white)
@@ -20,13 +20,8 @@ import { fileURLToPath } from "node:url";
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const OUT = join(ROOT, "src/styles/light-theme.generated.css");
 
-// Public-facing source: pages and the parts they use.
-const SCAN = [
-  "src/pages/public", "src/components/public", "src/components/subjects", "src/components/courses",
-  "src/components/blogs", "src/components/teachers", "src/components/layout/Navbar.jsx",
-  "src/components/layout/TopBar.jsx", "src/components/layout/UserProfileDropdown.jsx", "src/components/ui",
-  "src/components/forms", "src/components/common", "src/App.jsx",
-];
+// The whole app: public website, portals and admin.
+const SCAN = ["src"];
 
 const files = [];
 const walk = (p) => {
@@ -46,7 +41,13 @@ const NEUTRAL = new Set(["slate", "gray", "zinc", "neutral", "stone"]);
 const LIGHT_BG = { "#020617": "#f8fafc", "#0f172a": "#f1f5f9", "#0a1024": "#ffffff", "#131c31": "#ffffff", "#1a2235": "#ffffff", "#0b1120": "#eef2ff", "#121831": "#ffffff", "#0e1428": "#ffffff", "#1a2346": "#e2e8f0", "#232d52": "#cbd5e1" };
 
 // Light text colours written as hex (tutor names in gold).
-const TEXT_HEX = { "#e8c48f": "#a16207", "#c7d2fe": "#3730a3" };
+const TEXT_HEX = { "#e8c48f": "#a16207", "#c7d2fe": "#3730a3", "#a99dff": "#5b47fb" };
+
+// Relative luminance of a #rrggbb colour (0 = black, 1 = white).
+const luminance = (hex) => {
+  const c = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
+  return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+};
 
 const withAlpha = (color, a) => (a == null ? color : `color-mix(in oklab, ${color} ${a}%, transparent)`);
 const esc = (cls) => cls.replace(/([^a-zA-Z0-9_-])/g, "\\$1");
@@ -73,9 +74,21 @@ const PROPS = {
 function lightValue(prefix, name, shade, alpha, hex) {
   const isText = prefix === "text" || prefix === "fill" || prefix === "stroke";
   if (hex) {
-    if (isText) return TEXT_HEX[hex.toLowerCase()] ? withAlpha(TEXT_HEX[hex.toLowerCase()], alpha) : null;
-    const l = LIGHT_BG[hex.toLowerCase()];
-    return l ? withAlpha(l, alpha) : null;
+    const h = hex.toLowerCase();
+    if (isText) {
+      if (TEXT_HEX[h]) return withAlpha(TEXT_HEX[h], alpha);
+      // Other light text (pale lilac, pale grey ...) becomes dark slate.
+      return luminance(h) > 0.45 ? withAlpha(palette.slate[700], alpha) : null;
+    }
+    if (prefix === "bg" && LIGHT_BG[h]) return withAlpha(LIGHT_BG[h], alpha);
+    const L = luminance(h);
+    if (L >= 0.12) return null; // brand purples, mid tones: keep
+    if (prefix === "bg" || prefix === "from" || prefix === "via" || prefix === "to") {
+      // darkest = page background, a little lighter = cards, lighter = inputs/hover
+      const light = L < 0.01 ? "#f1f5f9" : L < 0.022 ? "#ffffff" : L < 0.045 ? "#f1f5f9" : "#e2e8f0";
+      return withAlpha(light, alpha);
+    }
+    return withAlpha(L < 0.03 ? "#e2e8f0" : "#cbd5e1", alpha); // borders, rings, dividers
   }
   if (name === "white") {
     if (isText) return withAlpha(palette.slate[900], alpha);
@@ -91,14 +104,25 @@ function lightValue(prefix, name, shade, alpha, hex) {
   // Faint tints keep their hue and shade: they already read as light washes.
   if (!isText && alpha != null && alpha <= 30) return null;
   if (isText) {
-    const t = NEUTRAL.has(name) ? { 50: 950, 100: 900, 200: 800, 300: 700, 400: 600, 500: 500, 600: 600, 700: 700 }[s] : INVERT[s];
+    // Accent text needs a deep shade to read on white (amber-500 is too pale).
+    const t = NEUTRAL.has(name)
+      ? { 50: 950, 100: 900, 200: 800, 300: 700, 400: 600, 500: 500, 600: 600, 700: 700 }[s]
+      : { 50: 950, 100: 900, 200: 800, 300: 700, 400: 700, 500: 700, 600: 700 }[s];
     return t ? withAlpha(palette[name][t], alpha) : null;
   }
-  const t = INVERT[s];
+  // Neutral surfaces invert fully; coloured ones only when very dark (tinted
+  // dark panels) — solid coloured buttons (600, 700) keep their colour.
+  if (NEUTRAL.has(name)) {
+    // Dark grey surfaces become white / near-white panels (not mid-grey).
+    const t = { 950: "50", 900: "white", 800: "100", 700: "200", 600: "200", 500: "300", 400: "400", 300: "700", 200: "800", 100: "900", 50: "950" }[s];
+    if (!t) return null;
+    return withAlpha(t === "white" ? "#ffffff" : palette[name][t], alpha);
+  }
+  const t = { 800: 100, 900: 100, 950: 50 }[s];
   return t ? withAlpha(palette[name][t], alpha) : null;
 }
 
-const RE = /(?<![\w-])((?:hover|group-hover|focus|open):)?(bg|text|border(?:-[tblr])?|divide|ring|from|via|to|fill|stroke)-(?:([a-z]+)-(\d{2,3})|(white|black)|\[(#[0-9a-fA-F]{6})\])(?:\/(\d{1,3}|\[[\d.]+\]))?(?![\w-])/g;
+const RE = /(?<![\w-])((?:sm|md|lg|xl|2xl):)?((?:hover|group-hover|focus|open):)?(bg|text|border(?:-[tblr])?|divide|ring|from|via|to|fill|stroke)-(?:([a-z]+)-(\d{2,3})|(white|black)|\[(#[0-9a-fA-F]{6})\])(?:\/(\d{1,3}|\[[\d.]+\]))?(?![\w-])/g;
 
 // Solid coloured backgrounds (buttons, badges, gradient CTAs): text on them
 // stays as written (white on indigo stays white).
@@ -107,17 +131,26 @@ const SOLID_RE = /(?<![\w-])(?:hover:)?(?:bg|from|via|to)-(?:[a-z]+)-(?:400|500|
 for (const f of files) for (const m of readFileSync(f, "utf8").matchAll(SOLID_RE)) {
   if (!/-(slate|gray|zinc|neutral|stone)-/.test(m[0])) SOLID.add(m[0]);
 }
+// Custom brand colours written as hex (admin purple #6D5BFF ...): saturated and
+// not dark, so they stay as they are and text on them stays white.
+const HEX_SOLID_RE = /(?<![\w-])(?:hover:)?(?:bg|from|via|to)-\[(#[0-9a-fA-F]{6})\](?![\w/-])/g;
+for (const f of files) for (const m of readFileSync(f, "utf8").matchAll(HEX_SOLID_RE)) {
+  const h = m[1].toLowerCase();
+  const rgb = [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+  if (luminance(h) >= 0.08 && Math.max(...rgb) - Math.min(...rgb) >= 60) SOLID.add(m[0]);
+}
 // Plain white text is restored only on always-solid backgrounds; hover white
 // text also on backgrounds that turn solid on hover.
 const solidList = [...SOLID].filter((c) => !c.startsWith("hover:")).sort().map((c) => `.${esc(c)}`).join(", ");
 const solidHoverList = [...SOLID].sort().map((c) => `.${esc(c)}`).join(", ");
 const whiteText = new Set(); // white text classes seen, restored on solid backgrounds
 
+const BREAKPOINTS = { sm: "40rem", md: "48rem", lg: "64rem", xl: "80rem", "2xl": "96rem" };
 const rules = new Map();
 for (const f of files) {
   const src = readFileSync(f, "utf8");
   for (const m of src.matchAll(RE)) {
-    const [cls, variant, prefix, name, shade, bw, hex, alphaRaw] = m;
+    const [cls, bp, variant, prefix, name, shade, bw, hex, alphaRaw] = m;
     const color = bw || name;
     let alpha = alphaRaw == null ? null : Number(String(alphaRaw).replace(/[[\]]/g, ""));
     if (alpha != null && alpha <= 1 && String(alphaRaw).includes(".")) alpha = Math.round(alpha * 100);
@@ -133,8 +166,9 @@ for (const f of files) {
     else if (variant === "group-hover:") sel = `.group:hover ${base}`;
     else sel = `[open]${base}, [open] ${base}`;
     if (prefix === "text" && color === "white") whiteText.add(cls);
-    const full = sel.split(", ").map((s) => `html.light-public ${s}:not(.theme-keep, .theme-keep *)`).join(",\n");
-    rules.set(full, decl);
+    const full = sel.split(", ").map((s) => `html.theme-light ${s}:not(.theme-keep, .theme-keep *)`).join(",\n");
+    const rule = `${full} { ${decl} !important; }`;
+    rules.set(full + (bp || ""), bp ? `@media (min-width: ${BREAKPOINTS[bp.slice(0, -1)]}) { ${rule} }` : rule);
   }
 }
 
@@ -145,18 +179,19 @@ const restore = [...whiteText].sort().map((cls) => {
   const val = m[2] ? `color-mix(in oklab, #fff ${m[2]}%, transparent)` : "#fff";
   const pseudo = m[1] === "hover" ? ":hover" : m[1] === "focus" ? ":focus" : "";
   const list = m[1] ? solidHoverList : solidList;
-  const self = `html.light-public :is(${list}).${esc(cls)}${pseudo}`;
-  const inner = m[1] === "group-hover" ? `html.light-public :is(${list}).group:hover .${esc(cls)}` : `html.light-public :is(${list}) .${esc(cls)}${pseudo}`;
+  const self = `html.theme-light :is(${list}).${esc(cls)}${pseudo}`;
+  const inner = m[1] === "group-hover" ? `html.theme-light :is(${list}).group:hover .${esc(cls)}` : `html.theme-light :is(${list}) .${esc(cls)}${pseudo}`;
   return `${self},\n${inner} { color: ${val} !important; }`;
 }).filter(Boolean);
 
 const out = [
   "/* Generated by scripts/gen-light-theme.mjs — do not edit by hand. */",
-  "html.light-public { color-scheme: light; }",
-  "html.light-public body { background-color: #f8fafc; color: #0f172a; }",
+  "html.theme-light { color-scheme: light; }",
+  "html.theme-light body { background-color: #f8fafc; color: #0f172a; }",
   "/* The logo has white lettering: show it on a navy badge in day mode. */",
-  "html.light-public .theme-logo { background-color: #0f172a; border-radius: 0.75rem; padding: 0.25rem 0.5rem; }",
-  ...[...rules].sort().map(([sel, decl]) => `${sel} { ${decl} !important; }`),
+  "html.theme-light .theme-logo { background-color: #0f172a; border-radius: 0.75rem; padding: 0.25rem 0.5rem; }",
+  // Breakpoint rules last, so they win over the base ones like in Tailwind.
+  ...[...rules].sort(([a], [b]) => (/(sm|md|lg|xl|2xl)$/.test(a) - /(sm|md|lg|xl|2xl)$/.test(b)) || a.localeCompare(b)).map(([, rule]) => rule),
   ...restore,
 ].join("\n");
 writeFileSync(OUT, out + "\n");

@@ -5,11 +5,11 @@ import { Button } from "../ui";
 const InfoChip = ({ label, value, icon, colorClass }) => {
   return (
     <div className="flex items-center gap-1.5 sm:gap-2 px-2 py-1 sm:px-3 sm:py-1.5 bg-white/5 rounded-xl border border-white/5 transition-colors hover:bg-white/10">
-      <i className={`${icon} ${colorClass} text-[9px] sm:text-[10px]`} />
-      <span className="text-[8px] sm:text-[9px] font-bold uppercase tracking-widest text-slate-500">
+      <i className={`${icon} ${colorClass} text-xs sm:text-xs`} />
+      <span className="text-xs sm:text-xs font-bold uppercase tracking-widest text-slate-500">
         {label}:
       </span>
-      <span className="text-[10px] sm:text-[11px] font-bold text-slate-200">
+      <span className="text-xs sm:text-xs font-bold text-slate-200">
         {value}
       </span>
     </div>
@@ -87,7 +87,7 @@ const ParentDashboardHeader = ({ dashboardData, userName, onLinkRequest }) => {
       <div className="flex items-center gap-4 relative z-10">
         <Button
           onClick={onLinkRequest}
-          className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 sm:px-8 sm:py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-indigo-900/40 transition-all hover:scale-[1.02] active:scale-95 group"
+          className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 sm:px-8 sm:py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-indigo-900/40 transition-all hover:scale-[1.02] active:scale-95 group"
         >
           <i className="fas fa-link mr-2 group-hover:rotate-12 transition-transform"></i>
          Request Child Access

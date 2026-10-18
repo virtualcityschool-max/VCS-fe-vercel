@@ -72,7 +72,7 @@ const TimeWindowRow = ({ window, onChange, onRemove, canRemove }) => {
       <div className={`grid gap-2 items-center ${canRemove ? "grid-cols-[1fr_1fr_auto]" : "grid-cols-2"}`}>
         <div className="flex items-center gap-1.5 bg-slate-800/80 border border-slate-700/60 rounded-xl px-2.5 py-2 min-w-0">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
-          <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 shrink-0">From</span>
+          <span className="text-xs font-black uppercase tracking-widest text-slate-500 shrink-0">From</span>
           <input
             type="time"
             value={window.start}
@@ -83,7 +83,7 @@ const TimeWindowRow = ({ window, onChange, onRemove, canRemove }) => {
         </div>
         <div className="flex items-center gap-1.5 bg-slate-800/80 border border-slate-700/60 rounded-xl px-2.5 py-2 min-w-0">
           <span className="w-1.5 h-1.5 rounded-full bg-rose-400 shrink-0" />
-          <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 shrink-0">Until</span>
+          <span className="text-xs font-black uppercase tracking-widest text-slate-500 shrink-0">Until</span>
           <input
             type="time"
             value={window.end}
@@ -97,7 +97,7 @@ const TimeWindowRow = ({ window, onChange, onRemove, canRemove }) => {
             onClick={onRemove}
             className="w-7 h-7 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/10 hover:border-rose-500/30 text-rose-400 transition flex items-center justify-center shrink-0"
           >
-            <i className="fas fa-times text-[10px]" />
+            <i className="fas fa-times text-xs" />
           </button>
         )}
       </div>
@@ -142,7 +142,7 @@ const DateEntryCard = ({ entry, onChange, onRemove, canRemove, index }) => {
             <span className="text-indigo-400 text-xs font-black">{index + 1}</span>
           </div>
           <div>
-            <label className="text-[9px] font-black uppercase tracking-widest text-slate-600 block mb-1">
+            <label className="text-xs font-black uppercase tracking-widest text-slate-600 block mb-1">
               Date
             </label>
             <input
@@ -155,7 +155,7 @@ const DateEntryCard = ({ entry, onChange, onRemove, canRemove, index }) => {
             />
           </div>
           {totalSlots > 0 && (
-            <span className="ml-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-black px-2.5 py-1.5 rounded-lg tabular-nums self-end mb-0.5">
+            <span className="ml-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-black px-2.5 py-1.5 rounded-lg tabular-nums self-end mb-0.5">
               ~{totalSlots} slot{totalSlots !== 1 ? "s" : ""}
             </span>
           )}
@@ -165,17 +165,17 @@ const DateEntryCard = ({ entry, onChange, onRemove, canRemove, index }) => {
         <div className="flex items-center gap-2">
           <button
             onClick={addWindow}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/10 hover:border-indigo-500/30 text-indigo-400 transition text-[11px] font-bold"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/10 hover:border-indigo-500/30 text-indigo-400 transition text-xs font-bold"
           >
-            <i className="fas fa-plus-circle text-[9px]" />
+            <i className="fas fa-plus-circle text-xs" />
             Add time range
           </button>
           {canRemove && (
             <button
               onClick={onRemove}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/10 hover:border-rose-500/30 text-rose-400 transition text-[11px] font-bold"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/10 hover:border-rose-500/30 text-rose-400 transition text-xs font-bold"
             >
-              <i className="fas fa-trash-alt text-[9px]" />
+              <i className="fas fa-trash-alt text-xs" />
               Remove
             </button>
           )}
@@ -185,10 +185,10 @@ const DateEntryCard = ({ entry, onChange, onRemove, canRemove, index }) => {
 
         <div className="space-y-4">
           <div className="flex items-center justify-between flex-wrap gap-2">
-            <p className="text-[9px] font-black uppercase tracking-widest text-slate-600 flex items-center gap-2">
+            <p className="text-xs font-black uppercase tracking-widest text-slate-600 flex items-center gap-2">
               <i className="fas fa-clock" />
               Time Range
-              <TimezoneTag className="text-[9px] text-indigo-400 font-black normal-case tracking-normal" />
+              <TimezoneTag className="text-xs text-indigo-400 font-black normal-case tracking-normal" />
             </p>
             <div className="flex gap-2 flex-wrap items-center">
               {TIME_PRESETS.map((p) => {
@@ -202,7 +202,7 @@ const DateEntryCard = ({ entry, onChange, onRemove, canRemove, index }) => {
                       ...entry,
                       time_windows: [{ id: entry.time_windows[0]?.id || crypto.randomUUID(), start: p.start, end: p.end }]
                     })}
-                    className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest transition border ${
+                    className={`px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-widest transition border ${
                       isActive
                         ? "bg-indigo-500/20 border-indigo-500/40 text-indigo-300"
                         : "border-slate-700/50 text-slate-600 hover:text-slate-300 hover:border-slate-600"
@@ -521,8 +521,8 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
               <p className="text-slate-500 text-xs mt-0.5">
                 Set dates &amp; time ranges - hourly slots are generated automatically
                 {timezoneAbbr && (
-                  <span className="ml-2 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-bold">
-                    <i className="fas fa-globe text-[8px]" />
+                  <span className="ml-2 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-bold">
+                    <i className="fas fa-globe text-xs" />
                     {timezoneAbbr}
                   </span>
                 )}
@@ -545,12 +545,12 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
             <div className="relative flex items-center justify-center mb-4">
               <div className="flex items-center gap-2">
                 <i className="fas fa-calendar-alt text-indigo-400 text-xs" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Add Date Range</span>
+                <span className="text-xs font-black uppercase tracking-widest text-slate-400">Add Date Range</span>
               </div>
               {rangeDates.length > 0 && (
                 <div className="absolute right-0 flex items-center gap-1.5 bg-indigo-500/10 border border-indigo-500/20 rounded-lg px-2.5 py-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
-                  <span className="text-indigo-300 text-[10px] font-black tabular-nums">
+                  <span className="text-indigo-300 text-xs font-black tabular-nums">
                     {rangeDates.length} date{rangeDates.length !== 1 ? "s" : ""}
                   </span>
                 </div>
@@ -558,7 +558,7 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
             </div>
             {/* Pickers row - centered */}
             <div className="flex items-center justify-center gap-3 flex-wrap">
-              <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 shrink-0">From</label>
+              <label className="text-xs font-black uppercase tracking-widest text-slate-500 shrink-0">From</label>
               <input
                 type="date"
                 min={todayInTz(timezone)}
@@ -571,7 +571,7 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
                 style={{ colorScheme: "dark" }}
               />
               <i className="fas fa-arrow-right text-slate-600 text-xs shrink-0" />
-              <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 shrink-0">To</label>
+              <label className="text-xs font-black uppercase tracking-widest text-slate-500 shrink-0">To</label>
               <input
                 type="date"
                 min={rangeFrom || todayInTz(timezone)}
@@ -657,7 +657,7 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
                         className="flex items-center gap-3 px-4 py-3 flex-wrap"
                       >
                         <div className="w-7 h-7 rounded-lg bg-amber-500/15 border border-amber-500/20 flex items-center justify-center shrink-0">
-                          <i className="fas fa-calendar-times text-amber-400 text-[10px]" />
+                          <i className="fas fa-calendar-times text-amber-400 text-xs" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-xs font-bold text-amber-200">
@@ -665,11 +665,11 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
                             <span className="text-amber-500 font-normal mx-1.5">·</span>
                             <span className="tabular-nums">{fmt12(c.start_time)} – {fmt12(c.end_time)}{" "}<TimezoneTag /></span>
                           </p>
-                          <p className="text-[10px] text-amber-500/70 italic mt-0.5 truncate">
+                          <p className="text-xs text-amber-500/70 italic mt-0.5 truncate">
                             Session: &ldquo;{c.session_title}&rdquo;
                           </p>
                         </div>
-                        <span className="shrink-0 text-[9px] font-black uppercase tracking-widest bg-amber-500/10 border border-amber-500/20 text-amber-500 rounded-full px-2 py-0.5">
+                        <span className="shrink-0 text-xs font-black uppercase tracking-widest bg-amber-500/10 border border-amber-500/20 text-amber-500 rounded-full px-2 py-0.5">
                           blocked
                         </span>
                       </div>
@@ -686,13 +686,13 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
               <div className="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-3 space-y-2">
                 {/* Header: label + recurring toggle */}
                 <div className="flex items-center justify-between">
-                  <p className="text-[9px] font-black uppercase tracking-widest text-slate-600 flex items-center gap-2">
+                  <p className="text-xs font-black uppercase tracking-widest text-slate-600 flex items-center gap-2">
                     <i className="fas fa-calendar-week" />
                     Select Days
                   </p>
                   <label className="flex items-center gap-2 cursor-pointer select-none">
                     <span className={`text-[12px] font-bold transition-colors ${recurring ? "text-indigo-400" : "text-slate-500"}`}>
-                      <i className="fas fa-sync text-[8px] mr-1" />
+                      <i className="fas fa-sync text-xs mr-1" />
                       Recurring
                     </span>
                     <button
@@ -735,13 +735,13 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
                       if (!inRange) {
                         return (
                           <div key={date} className="flex flex-col items-center py-1.5 px-0.5 rounded-lg cursor-default select-none opacity-25">
-                            <span className="text-[9px] font-black uppercase tracking-wide leading-none text-slate-500">
+                            <span className="text-xs font-black uppercase tracking-wide leading-none text-slate-500">
                               {dayShort}
                             </span>
                             <span className="text-sm font-black mt-1 leading-none text-slate-600">
                               {dayNum}
                             </span>
-                            <span className="text-[8px] mt-1 leading-none text-transparent">·</span>
+                            <span className="text-xs mt-1 leading-none text-transparent">·</span>
                           </div>
                         );
                       }
@@ -780,7 +780,7 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
                               : "bg-slate-700/30 hover:bg-slate-700/60 cursor-pointer"
                           }`}
                         >
-                          <span className={`text-[9px] font-black uppercase tracking-wide leading-none ${
+                          <span className={`text-xs font-black uppercase tracking-wide leading-none ${
                             isSelected ? "text-indigo-200" : hasEntry ? "text-emerald-500/70" : "text-slate-500"
                           }`}>
                             {dayShort}
@@ -790,7 +790,7 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
                           }`}>
                             {dayNum}
                           </span>
-                          <span className={`text-[8px] font-bold tabular-nums mt-0.5 leading-none ${
+                          <span className={`text-xs font-bold tabular-nums mt-0.5 leading-none ${
                             isSelected ? "text-indigo-200" : hasEntry ? "text-emerald-400" : "text-slate-600"
                           }`}>
                             {hasEntry ? `~${slotCount} slots` : "+"}
@@ -815,7 +815,7 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
                 </div>
 
                 {/* Week range label */}
-                <p className="text-center text-[10px] font-bold text-slate-600 uppercase tracking-widest">
+                <p className="text-center text-xs font-bold text-slate-600 uppercase tracking-widest">
                   {weekLabel}
                 </p>
               </div>
@@ -824,7 +824,7 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
               {entries.length === 0 && !selectedDate && (
                 <div className="flex items-center gap-3 px-4 py-3 bg-slate-800/30 border border-slate-700/30 rounded-xl">
                   <i className="fas fa-hand-pointer text-indigo-400/60 text-sm shrink-0" />
-                  <p className="text-[11px] text-slate-500 font-medium">
+                  <p className="text-xs text-slate-500 font-medium">
                     Click any highlighted day to add it and configure its time range.
                   </p>
                 </div>
@@ -871,13 +871,13 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
                             <div className="flex items-center gap-2">
                               <p className="text-sm font-black text-white">{fmtDate(selectedDate)}</p>
                               {recurring && (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-indigo-500/15 border border-indigo-500/25 text-indigo-400 text-[8px] font-black uppercase tracking-widest">
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-indigo-500/15 border border-indigo-500/25 text-indigo-400 text-xs font-black uppercase tracking-widest">
                                   <i className="fas fa-sync text-[7px]" />
                                   All {dowName}s
                                 </span>
                               )}
                             </div>
-                            <p className={`text-[10px] font-bold mt-0.5 ${slotCount > 0 ? "text-emerald-400" : "text-slate-600"}`}>
+                            <p className={`text-xs font-bold mt-0.5 ${slotCount > 0 ? "text-emerald-400" : "text-slate-600"}`}>
                               {slotCount > 0 ? `~${slotCount} slot${slotCount !== 1 ? "s" : ""}` : "No slots yet"}
                             </p>
                           </div>
@@ -885,16 +885,16 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
                         <div className="flex items-center gap-2">
                           <button
                             onClick={addWindow}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/10 hover:border-indigo-500/30 text-indigo-400 transition text-[11px] font-bold"
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/10 hover:border-indigo-500/30 text-indigo-400 transition text-xs font-bold"
                           >
-                            <i className="fas fa-plus-circle text-[9px]" />
+                            <i className="fas fa-plus-circle text-xs" />
                             Add time range
                           </button>
                           <button
                             onClick={() => { removeEntryRecurring(entry.id); setInlineError(null); }}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/10 hover:border-rose-500/30 text-rose-400 transition text-[11px] font-bold"
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/10 hover:border-rose-500/30 text-rose-400 transition text-xs font-bold"
                           >
-                            <i className="fas fa-trash-alt text-[9px]" />
+                            <i className="fas fa-trash-alt text-xs" />
                             {recurring ? `Remove all ${dowName}s` : "Remove"}
                           </button>
                         </div>
@@ -905,7 +905,7 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
                       {/* Presets + time windows */}
                       <div className="space-y-3">
                         <div className="flex items-center justify-between flex-wrap gap-2">
-                          <p className="text-[9px] font-black uppercase tracking-widest text-slate-600 flex items-center gap-2">
+                          <p className="text-xs font-black uppercase tracking-widest text-slate-600 flex items-center gap-2">
                             <i className="fas fa-clock" />
                             Time range
                           </p>
@@ -925,7 +925,7 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
                                     });
                                     setInlineError(null);
                                   }}
-                                  className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest transition border ${
+                                  className={`px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-widest transition border ${
                                     isActive
                                       ? "bg-indigo-500/20 border-indigo-500/40 text-indigo-300"
                                       : "border-slate-700/50 text-slate-600 hover:text-slate-300 hover:border-slate-600"
@@ -980,7 +980,7 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
                 <i className="fas fa-magic" />
                 Create Hourly Slots
                 {previewCount > 0 && (
-                  <span className="bg-white/15 text-white text-[10px] font-black px-2.5 py-1 rounded-full tabular-nums">
+                  <span className="bg-white/15 text-white text-xs font-black px-2.5 py-1 rounded-full tabular-nums">
                     ~{previewCount}
                   </span>
                 )}
@@ -997,12 +997,12 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
 
 const StatusBadge = ({ status }) =>
   status === "booked" ? (
-    <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-300 text-[9px] font-black uppercase tracking-widest">
+    <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs font-black uppercase tracking-widest">
       <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
       Booked
     </span>
   ) : (
-    <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-[9px] font-black uppercase tracking-widest">
+    <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs font-black uppercase tracking-widest">
       <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
       Open
     </span>
@@ -1059,8 +1059,8 @@ const EditSlotModal = ({ slot, onClose, onSaved }) => {
               <p className="text-slate-500 text-xs mt-0.5">
                 {fmtDate(slot.date)}
                 {timezoneAbbr && (
-                  <span className="ml-2 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-bold">
-                    <i className="fas fa-globe text-[8px]" />
+                  <span className="ml-2 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-bold">
+                    <i className="fas fa-globe text-xs" />
                     {timezoneAbbr}
                   </span>
                 )}
@@ -1084,7 +1084,7 @@ const EditSlotModal = ({ slot, onClose, onSaved }) => {
 
           {/* Date */}
           <div>
-            <label className="text-[9px] font-black uppercase tracking-widest text-slate-600 block mb-1.5">
+            <label className="text-xs font-black uppercase tracking-widest text-slate-600 block mb-1.5">
               Date
             </label>
             <input
@@ -1100,9 +1100,9 @@ const EditSlotModal = ({ slot, onClose, onSaved }) => {
           {/* Time range */}
           <div className="flex items-end gap-3">
             <div className="flex-1">
-              <label className="text-[9px] font-black uppercase tracking-widest text-slate-600 flex items-center gap-1.5 mb-1.5">
+              <label className="text-xs font-black uppercase tracking-widest text-slate-600 flex items-center gap-1.5 mb-1.5">
                 Start
-                <TimezoneTag className="text-[9px] text-indigo-400 font-black normal-case tracking-normal" />
+                <TimezoneTag className="text-xs text-indigo-400 font-black normal-case tracking-normal" />
               </label>
               <input
                 type="time"
@@ -1114,7 +1114,7 @@ const EditSlotModal = ({ slot, onClose, onSaved }) => {
             </div>
             <i className="fas fa-arrow-right text-slate-600 text-xs mb-3 shrink-0" />
             <div className="flex-1">
-              <label className="text-[9px] font-black uppercase tracking-widest text-slate-600 block mb-1.5">
+              <label className="text-xs font-black uppercase tracking-widest text-slate-600 block mb-1.5">
                 End
               </label>
               <input
@@ -1186,7 +1186,7 @@ const SlotCard = ({ slot, onDelete, onEdit, deletingId }) => {
               <span className="text-slate-500 font-normal mx-1">–</span>
               {fmt12(slot.end_time)}{" "}<TimezoneTag />
             </p>
-            <p className="text-[10px] text-slate-600 mt-0.5 font-medium">1 hr slot</p>
+            <p className="text-xs text-slate-600 mt-0.5 font-medium">1 hr slot</p>
           </div>
 
           <div className="flex items-center gap-1.5 shrink-0">
@@ -1201,7 +1201,7 @@ const SlotCard = ({ slot, onDelete, onEdit, deletingId }) => {
                   : "bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/10 hover:border-indigo-500/30 text-indigo-400"
               }`}
             >
-              <i className="fas fa-pencil-alt text-[10px]" />
+              <i className="fas fa-pencil-alt text-xs" />
             </button>
 
             {/* Delete button */}
@@ -1216,9 +1216,9 @@ const SlotCard = ({ slot, onDelete, onEdit, deletingId }) => {
               }`}
             >
               {isDeleting ? (
-                <i className="fas fa-spinner fa-spin text-[10px]" />
+                <i className="fas fa-spinner fa-spin text-xs" />
               ) : (
-                <i className="fas fa-trash-alt text-[10px]" />
+                <i className="fas fa-trash-alt text-xs" />
               )}
             </button>
           </div>
@@ -1234,7 +1234,7 @@ const SlotCard = ({ slot, onDelete, onEdit, deletingId }) => {
             <div className="min-w-0">
               <p className="text-xs font-bold text-slate-200 truncate">{slot.booked_by_name}</p>
               {slot.booked_by_email && (
-                <p className="text-[10px] text-slate-500 truncate">{slot.booked_by_email}</p>
+                <p className="text-xs text-slate-500 truncate">{slot.booked_by_email}</p>
               )}
             </div>
           </div>
@@ -1317,12 +1317,12 @@ const TeacherAvailabilityPage = () => {
               <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                 <span className="text-xs font-bold text-slate-200 tabular-nums">{availableCount}</span>
-                <span className="text-[9px] text-slate-600 uppercase tracking-widest font-bold">open</span>
+                <span className="text-xs text-slate-600 uppercase tracking-widest font-bold">open</span>
               </div>
               <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2">
                 <span className="w-2 h-2 rounded-full bg-amber-400" />
                 <span className="text-xs font-bold text-slate-200 tabular-nums">{bookedCount}</span>
-                <span className="text-[9px] text-slate-600 uppercase tracking-widest font-bold">booked</span>
+                <span className="text-xs text-slate-600 uppercase tracking-widest font-bold">booked</span>
               </div>
             </div>
           )}

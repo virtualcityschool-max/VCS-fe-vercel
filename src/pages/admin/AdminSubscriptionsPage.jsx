@@ -210,7 +210,7 @@ const AdminSubscriptionsPage = () => {
           <Avatar name={r.student?.name || ""} />
           <div className="min-w-0">
             <div className="font-semibold text-slate-100 truncate">{r.student?.name}</div>
-            <div className="text-[11px] text-slate-400 truncate">{r.student?.email}</div>
+            <div className="text-xs text-slate-400 truncate">{r.student?.email}</div>
           </div>
         </div>
       ),
@@ -222,7 +222,7 @@ const AdminSubscriptionsPage = () => {
       cell: (r) => (
         <div className="whitespace-nowrap">
           <div className="text-slate-200 tabular-nums">{formatDate(r.access_expires_at)}</div>
-          {typeof r.days_remaining === "number" && r.has_access && <div className={`text-[11px] ${r.days_remaining <= 7 ? "text-amber-300" : "text-slate-500"}`}>{r.days_remaining} days left</div>}
+          {typeof r.days_remaining === "number" && r.has_access && <div className={`text-xs ${r.days_remaining <= 7 ? "text-amber-300" : "text-slate-500"}`}>{r.days_remaining} days left</div>}
         </div>
       ),
     },
@@ -261,11 +261,11 @@ const AdminSubscriptionsPage = () => {
           </button>
         )}
         {!r.can_extend && r.renewal_due_at && (
-          <span className="text-slate-500 text-[11px] whitespace-nowrap" title={`Renew unlocks on ${formatDate(r.renewal_due_at)}, a week before expiry.`}>
+          <span className="text-slate-500 text-xs whitespace-nowrap" title={`Renew unlocks on ${formatDate(r.renewal_due_at)}, a week before expiry.`}>
             Paid until {formatDate(r.access_expires_at)}
           </span>
         )}
-        {!r.can_extend && !r.renewal_due_at && !r.has_access && <span className="text-slate-500 text-[11px]">Awaiting renewal</span>}
+        {!r.can_extend && !r.renewal_due_at && !r.has_access && <span className="text-slate-500 text-xs">Awaiting renewal</span>}
         {r.has_access && (
           <button type="button" onClick={() => setConfirm({ action: "revoke", row: r })} disabled={busyId === r.enrollment_id} className="px-2.5 h-8 rounded-lg border border-rose-500/30 text-rose-300 hover:bg-rose-500/10 text-xs font-semibold whitespace-nowrap disabled:opacity-50">
             End access

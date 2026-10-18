@@ -76,7 +76,7 @@ const RequestTranscriptModal = ({ onClose }) => {
               >
                 <i className="fas fa-envelope text-sm mb-1 block" />
                 <span className="text-xs font-bold block">Digital PDF (Email)</span>
-                <span className="text-[10px] text-slate-400">Sent within 24h</span>
+                <span className="text-xs text-slate-400">Sent within 24h</span>
               </button>
 
               <button
@@ -90,7 +90,7 @@ const RequestTranscriptModal = ({ onClose }) => {
               >
                 <i className="fas fa-shipping-fast text-sm mb-1 block" />
                 <span className="text-xs font-bold block">Physical Courier</span>
-                <span className="text-[10px] text-slate-400">Postal delivery</span>
+                <span className="text-xs text-slate-400">Postal delivery</span>
               </button>
             </div>
           </div>

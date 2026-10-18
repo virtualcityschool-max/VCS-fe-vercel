@@ -89,7 +89,7 @@ const EnrollmentsTab = ({ enrollments = [], loading, onRefresh }) => {
       <Avatar name={r.studentName} />
       <div className="min-w-0">
         <div className="font-semibold text-slate-100 truncate">{r.studentName}</div>
-        <div className="text-[11px] text-slate-400 truncate">{r.student?.roll_no ? `Roll #${r.student.roll_no} · ` : ""}{r.student?.email}</div>
+        <div className="text-xs text-slate-400 truncate">{r.student?.roll_no ? `Roll #${r.student.roll_no} · ` : ""}{r.student?.email}</div>
       </div>
     </div>
   );
@@ -101,14 +101,14 @@ const EnrollmentsTab = ({ enrollments = [], loading, onRefresh }) => {
       cell: (r) => (
         <div className="min-w-[200px] max-w-[300px]">
           <div className="font-medium text-slate-100 truncate" title={r.title}>{r.title}</div>
-          <div className="text-[11px] text-slate-400">{r.level || "—"}{r.is_private ? " · 1-to-1" : ""}</div>
+          <div className="text-xs text-slate-400">{r.level || "—"}{r.is_private ? " · 1-to-1" : ""}</div>
         </div>
       ),
     },
     { header: "Department", cell: (r) => <DeptPill dept={r.dept} /> },
     { header: "Enrolled", cell: (r) => <span className="text-slate-400 whitespace-nowrap tabular-nums">{fmtDate(r.enrolled_at)}</span> },
     { header: "Fee", align: "right", cell: (r) => <span className="tabular-nums font-semibold text-slate-200 whitespace-nowrap">{r.price ? `$${r.price}/mo` : <span className="text-emerald-400">Free</span>}</span> },
-    { header: "Payment", cell: (r) => <div className="whitespace-nowrap"><StatusPill status={r.fee} /><div className="text-[10px] text-slate-500 mt-1">{sourceLabel(r.enrollment_source)}</div></div> },
+    { header: "Payment", cell: (r) => <div className="whitespace-nowrap"><StatusPill status={r.fee} /><div className="text-xs text-slate-500 mt-1">{sourceLabel(r.enrollment_source)}</div></div> },
     { header: "Status", cell: (r) => <StatusPill status={r.status ? r.status.charAt(0).toUpperCase() + r.status.slice(1) : "—"} /> },
   ];
 
@@ -119,7 +119,7 @@ const EnrollmentsTab = ({ enrollments = [], loading, onRefresh }) => {
       cell: (g) => (
         <div className="flex items-center gap-2">
           <SubjectChips titles={g.items.map((i) => i.title)} max={3} />
-          <button type="button" onClick={(e) => { e.stopPropagation(); setCreateFor(g.id); }} className="px-2 py-0.5 rounded border border-dashed border-indigo-500/50 text-indigo-300 hover:bg-indigo-500/15 text-[11px] whitespace-nowrap">
+          <button type="button" onClick={(e) => { e.stopPropagation(); setCreateFor(g.id); }} className="px-2 py-0.5 rounded border border-dashed border-indigo-500/50 text-indigo-300 hover:bg-indigo-500/15 text-xs whitespace-nowrap">
             + Add subject
           </button>
         </div>

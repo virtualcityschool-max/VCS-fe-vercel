@@ -162,12 +162,12 @@ const StudentTutors = () => {
               <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2">
                 <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse" />
                 <span className="text-xs font-bold text-slate-200 tabular-nums">{upcomingCount}</span>
-                <span className="text-[9px] text-slate-600 uppercase tracking-widest font-bold">upcoming</span>
+                <span className="text-xs text-slate-600 uppercase tracking-widest font-bold">upcoming</span>
               </div>
               <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2">
                 <span className="w-2 h-2 rounded-full bg-slate-600" />
                 <span className="text-xs font-bold text-slate-200 tabular-nums">{pastCount}</span>
-                <span className="text-[9px] text-slate-600 uppercase tracking-widest font-bold">past</span>
+                <span className="text-xs text-slate-600 uppercase tracking-widest font-bold">past</span>
               </div>
             </div>
           )}
@@ -196,7 +196,7 @@ const StudentTutors = () => {
                 <button
                   key={key}
                   onClick={() => setFilter(key)}
-                  className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition flex items-center gap-1.5 ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition flex items-center gap-1.5 ${
                     filter === key
                       ? key === "cancelled" ? "bg-rose-600 text-white" : "bg-indigo-600 text-white"
                       : "text-slate-500 hover:text-slate-300"
@@ -204,7 +204,7 @@ const StudentTutors = () => {
                 >
                   {label}
                   {key === "cancelled" && cancelledSlots.length > 0 && (
-                    <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-full ${filter === "cancelled" ? "bg-white/20 text-white" : "bg-rose-500/20 text-rose-400"}`}>
+                    <span className={`text-xs font-black px-1.5 py-0.5 rounded-full ${filter === "cancelled" ? "bg-white/20 text-white" : "bg-rose-500/20 text-rose-400"}`}>
                       {cancelledSlots.length}
                     </span>
                   )}
@@ -257,7 +257,7 @@ const StudentTutors = () => {
               {hasActiveFilters && (filter !== "all" || searchQuery || dateFilter) && (
                 <button
                   onClick={() => { setFilter("all"); setSearchQuery(""); setDateFilter(""); }}
-                  className="text-[10px] text-slate-600 hover:text-slate-400 font-bold uppercase tracking-wider transition shrink-0"
+                  className="text-xs text-slate-600 hover:text-slate-400 font-bold uppercase tracking-wider transition shrink-0"
                 >
                   Clear all
                 </button>
@@ -300,7 +300,7 @@ const StudentTutors = () => {
                 <div key={req.id} className="flex items-center gap-4 bg-slate-900/50 border border-rose-500/10 rounded-2xl px-5 py-4">
                   {/* Date block */}
                   <div className="w-12 h-12 rounded-xl flex flex-col items-center justify-center shrink-0 border bg-rose-500/10 border-rose-500/20">
-                    <span className="text-[10px] font-black text-rose-400">
+                    <span className="text-xs font-black text-rose-400">
                       {new Date(req.slot_date + "T00:00:00").toLocaleDateString(undefined, { month: "short" }).toUpperCase()}
                     </span>
                     <span className="text-sm font-black leading-tight text-rose-300">
@@ -324,8 +324,8 @@ const StudentTutors = () => {
                   </div>
 
                   {/* Badge */}
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-rose-500/10 border border-rose-500/20 text-rose-300 shrink-0">
-                    <i className="fas fa-ban text-[8px]" />
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-widest bg-rose-500/10 border border-rose-500/20 text-rose-300 shrink-0">
+                    <i className="fas fa-ban text-xs" />
                     Cancelled
                   </span>
                 </div>
@@ -376,7 +376,7 @@ const StudentTutors = () => {
             <div className="h-px flex-1 bg-slate-800" />
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20">
               <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-              <span className="text-[10px] font-black uppercase tracking-widest text-amber-300">Booked Slots</span>
+              <span className="text-xs font-black uppercase tracking-widest text-amber-300">Booked Slots</span>
             </div>
             <div className="h-px flex-1 bg-slate-800" />
           </div>
@@ -422,7 +422,7 @@ const StudentTutors = () => {
                         className="shrink-0 flex items-center gap-2 px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white transition text-xs font-bold shadow shadow-indigo-500/20"
                         title="Book More Sessions"
                       >
-                        <i className="fas fa-calendar-plus text-[10px]" />
+                        <i className="fas fa-calendar-plus text-xs" />
                         <span className="hidden sm:inline">Book More Sessions</span>
                       </Link>
                     )}
@@ -446,7 +446,7 @@ const StudentTutors = () => {
                                   ? "bg-indigo-500/10 border-indigo-500/20"
                                   : "bg-slate-800/60 border-slate-700/40"
                               }`}>
-                                <span className={`text-[10px] font-black ${upcoming ? "text-indigo-400" : "text-slate-600"}`}>
+                                <span className={`text-xs font-black ${upcoming ? "text-indigo-400" : "text-slate-600"}`}>
                                   {new Date(slot.date + "T00:00:00").toLocaleDateString(undefined, { month: "short" }).toUpperCase()}
                                 </span>
                                 <span className={`text-sm font-black leading-tight ${upcoming ? "text-indigo-300" : "text-slate-500"}`}>
@@ -463,7 +463,7 @@ const StudentTutors = () => {
 
                             {/* Right: status badge + join button + cancel */}
                             <div className="flex items-center gap-2 flex-wrap">
-                              <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${
+                              <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-widest border ${
                                 upcoming
                                   ? "bg-indigo-500/10 border-indigo-500/20 text-indigo-300"
                                   : "bg-slate-800/60 border-slate-700/40 text-slate-500"
@@ -480,12 +480,12 @@ const StudentTutors = () => {
                                       if (!joinable) { setTooEarlyOpen(true); return; }
                                       openMeetLink(slot.meeting_link);
                                     }}
-                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black text-[10px] uppercase tracking-widest shadow shadow-blue-900/40 transition-all active:scale-95"
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black text-xs uppercase tracking-widest shadow shadow-blue-900/40 transition-all active:scale-95"
                                   >
-                                    <i className="fas fa-video text-[9px]" />
+                                    <i className="fas fa-video text-xs" />
                                     Join
                                   </button>
-                                  <div className="absolute bottom-full right-0 mb-2 px-3 py-1.5 bg-slate-800 border border-white/10 text-white text-[10px] rounded-xl whitespace-nowrap opacity-0 group-hover/tip:opacity-100 transition-all pointer-events-none z-20 shadow-xl">
+                                  <div className="absolute bottom-full right-0 mb-2 px-3 py-1.5 bg-slate-800 border border-white/10 text-white text-xs rounded-xl whitespace-nowrap opacity-0 group-hover/tip:opacity-100 transition-all pointer-events-none z-20 shadow-xl">
                                     Available 30 min before the session
                                   </div>
                                 </div>
@@ -497,14 +497,14 @@ const StudentTutors = () => {
                                 if (req?.status === "pending") {
                                   return (
                                     <div className="flex items-center gap-1.5">
-                                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-amber-500/10 border border-amber-500/20 text-amber-300">
-                                        <i className="fas fa-hourglass-half text-[8px]" />
+                                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-widest bg-amber-500/10 border border-amber-500/20 text-amber-300">
+                                        <i className="fas fa-hourglass-half text-xs" />
                                         Pending Guardian Approval
                                       </span>
                                       <button
                                         onClick={() => handleWithdraw(req.id)}
                                         disabled={withdrawingId === req.id}
-                                        className="text-[9px] font-black uppercase tracking-widest text-slate-500 hover:text-rose-400 transition px-1.5 py-1 rounded-lg hover:bg-rose-500/10 border border-transparent hover:border-rose-500/20"
+                                        className="text-xs font-black uppercase tracking-widest text-slate-500 hover:text-rose-400 transition px-1.5 py-1 rounded-lg hover:bg-rose-500/10 border border-transparent hover:border-rose-500/20"
                                       >
                                         {withdrawingId === req.id ? <i className="fas fa-spinner fa-spin" /> : "Withdraw"}
                                       </button>
@@ -513,8 +513,8 @@ const StudentTutors = () => {
                                 }
                                 if (req?.status === "rejected") {
                                   return (
-                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-rose-500/10 border border-rose-500/20 text-rose-300">
-                                      <i className="fas fa-times-circle text-[8px]" />
+                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-widest bg-rose-500/10 border border-rose-500/20 text-rose-300">
+                                      <i className="fas fa-times-circle text-xs" />
                                       Cancellation Rejected
                                     </span>
                                   );
@@ -522,9 +522,9 @@ const StudentTutors = () => {
                                 return (
                                   <button
                                     onClick={() => { setCancelModal(slot); setCancelReason(""); }}
-                                    className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border border-slate-700 text-slate-500 hover:border-rose-500/30 hover:text-rose-400 hover:bg-rose-500/5 transition"
+                                    className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-black uppercase tracking-widest border border-slate-700 text-slate-500 hover:border-rose-500/30 hover:text-rose-400 hover:bg-rose-500/5 transition"
                                   >
-                                    <i className="fas fa-ban text-[8px]" />
+                                    <i className="fas fa-ban text-xs" />
                                     Cancel Slot
                                   </button>
                                 );
@@ -586,7 +586,7 @@ const StudentTutors = () => {
               </div>
 
               <div>
-                <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1.5">
+                <label className="block text-xs font-black uppercase tracking-widest text-slate-500 mb-1.5">
                   Reason <span className="text-slate-600">(optional)</span>
                 </label>
                 <textarea

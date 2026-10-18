@@ -3,7 +3,7 @@ import React, { useMemo } from "react";
 // ── Badges ────────────────────────────────────────────────────────────────────
 const PendingBadge = () => (
   <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border bg-slate-700/50 text-slate-400 border-slate-600/30 whitespace-nowrap">
-    <i className="fas fa-clock text-[10px]" />
+    <i className="fas fa-clock text-xs" />
     Pending
   </span>
 );
@@ -98,7 +98,7 @@ const EvaluationMatrix = ({ students = [], courseStatus, gradingScale: gradingSc
       {/* ── Grading scale strip ── */}
       {gradingScale.length > 0 && (
         <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2">
-          <span className="text-[10px] uppercase tracking-widest text-slate-500 font-bold shrink-0">Grading Scale</span>
+          <span className="text-xs uppercase tracking-widest text-slate-500 font-bold shrink-0">Grading Scale</span>
           <div className="flex items-center gap-1.5 flex-wrap">
             {gradingScale.map((s) => (
               <div
@@ -111,7 +111,7 @@ const EvaluationMatrix = ({ students = [], courseStatus, gradingScale: gradingSc
             ))}
           </div>
           {!isGlobalScale && (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-500/10 border border-blue-500/25 rounded-lg text-blue-300 text-[11px] font-semibold whitespace-nowrap shrink-0">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-500/10 border border-blue-500/25 rounded-lg text-blue-300 text-xs font-semibold whitespace-nowrap shrink-0">
               Old grading scale · grades were evaluated under this version
             </span>
           )}
@@ -142,9 +142,9 @@ const EvaluationMatrix = ({ students = [], courseStatus, gradingScale: gradingSc
                   </div>
                   <div className="min-w-0">
                     <p className="text-white text-sm font-semibold truncate">{s.student?.username}</p>
-                    <p className="text-indigo-300 text-[11px] truncate">{s.student?.email}</p>
+                    <p className="text-indigo-300 text-xs truncate">{s.student?.email}</p>
                     {s.student?.roll_no && (
-                      <p className="text-[10px] font-mono mt-0.5">
+                      <p className="text-xs font-mono mt-0.5">
                         <span className="bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded font-bold">Roll# {s.student.roll_no}</span>
                       </p>
                     )}
@@ -158,13 +158,13 @@ const EvaluationMatrix = ({ students = [], courseStatus, gradingScale: gradingSc
               {/* Summary stats */}
               <div className="flex divide-x divide-slate-700/50 border-b border-slate-700/50">
                 <div className="flex-1 px-3 py-2.5 text-center">
-                  <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-0.5">Obtained</p>
+                  <p className="text-xs text-slate-500 uppercase tracking-wider mb-0.5">Obtained</p>
                   <p className="text-white font-bold text-sm tabular-nums">
                     {obtained ?? "-"} <span className="text-slate-600 font-normal text-xs">/{total ?? "-"}</span>
                   </p>
                 </div>
                 <div className="flex-1 px-3 py-2.5 text-center">
-                  <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-0.5">Percentage</p>
+                  <p className="text-xs text-slate-500 uppercase tracking-wider mb-0.5">Percentage</p>
                   <p className={`font-bold text-sm tabular-nums ${pct != null ? (pct >= 75 ? "text-emerald-400" : "text-rose-400") : "text-slate-600"}`}>
                     {pct != null ? `${pct}%` : "-"}
                   </p>
@@ -174,8 +174,8 @@ const EvaluationMatrix = ({ students = [], courseStatus, gradingScale: gradingSc
               {/* Assignments */}
               {allAssignments.length > 0 && (
                 <div className={`px-4 py-3 ${allQuizzes.length > 0 ? "border-b border-slate-700/50" : ""}`}>
-                  <p className="text-[10px] uppercase tracking-widest text-indigo-400 font-bold mb-2.5 flex items-center gap-1.5">
-                    <i className="fas fa-file-alt text-[10px]" /> Assignments
+                  <p className="text-xs uppercase tracking-widest text-indigo-400 font-bold mb-2.5 flex items-center gap-1.5">
+                    <i className="fas fa-file-alt text-xs" /> Assignments
                   </p>
                   <div className="space-y-2">
                     {allAssignments.map((a) => {
@@ -186,7 +186,7 @@ const EvaluationMatrix = ({ students = [], courseStatus, gradingScale: gradingSc
                           <span className={`text-xs font-bold tabular-nums w-8 text-right shrink-0 ${sa?.is_graded ? "text-white" : "text-slate-600"}`}>
                             {sa?.is_graded ? sa.score : "-"}
                           </span>
-                          <span className="text-slate-600 text-[10px] shrink-0">/ {a.max_score}</span>
+                          <span className="text-slate-600 text-xs shrink-0">/ {a.max_score}</span>
                         </div>
                       );
                     })}
@@ -197,8 +197,8 @@ const EvaluationMatrix = ({ students = [], courseStatus, gradingScale: gradingSc
               {/* Quizzes */}
               {allQuizzes.length > 0 && (
                 <div className="px-4 py-3">
-                  <p className="text-[10px] uppercase tracking-widest text-purple-400 font-bold mb-2.5 flex items-center gap-1.5">
-                    <i className="fas fa-question-circle text-[10px]" /> Quizzes
+                  <p className="text-xs uppercase tracking-widest text-purple-400 font-bold mb-2.5 flex items-center gap-1.5">
+                    <i className="fas fa-question-circle text-xs" /> Quizzes
                   </p>
                   <div className="space-y-2">
                     {allQuizzes.map((q) => {
@@ -209,7 +209,7 @@ const EvaluationMatrix = ({ students = [], courseStatus, gradingScale: gradingSc
                           <span className={`text-xs font-bold tabular-nums w-8 text-right shrink-0 ${sq?.is_graded ? "text-white" : "text-slate-600"}`}>
                             {sq?.is_graded ? (sq.obtained_marks ?? sq.score) : "-"}
                           </span>
-                          <span className="text-slate-600 text-[10px] shrink-0">/ {q.max_score}</span>
+                          <span className="text-slate-600 text-xs shrink-0">/ {q.max_score}</span>
                         </div>
                       );
                     })}
@@ -229,7 +229,7 @@ const EvaluationMatrix = ({ students = [], courseStatus, gradingScale: gradingSc
             <thead>
               <tr className="border-b border-slate-800">
                 <th
-                  className="sticky left-0 z-30 bg-slate-900 px-3 py-2 text-center text-[9px] uppercase tracking-[0.2em] text-slate-600 font-black border-r border-slate-800"
+                  className="sticky left-0 z-30 bg-slate-900 px-3 py-2 text-center text-xs uppercase tracking-[0.2em] text-slate-600 font-black border-r border-slate-800"
                   style={{ width: STUDENT_W, minWidth: STUDENT_W, maxWidth: STUDENT_W, ...leftShadow }}
                 >
                   Category
@@ -238,10 +238,10 @@ const EvaluationMatrix = ({ students = [], courseStatus, gradingScale: gradingSc
                 {allAssignments.length > 0 && (
                   <th
                     colSpan={allAssignments.length}
-                    className="px-4 py-2 text-center text-[9px] uppercase tracking-[0.2em] text-indigo-400 font-black bg-indigo-500/5 border-r border-slate-800"
+                    className="px-4 py-2 text-center text-xs uppercase tracking-[0.2em] text-indigo-400 font-black bg-indigo-500/5 border-r border-slate-800"
                   >
                     <div className="flex items-center justify-center gap-2">
-                      <i className="fas fa-file-alt text-[10px]"></i>
+                      <i className="fas fa-file-alt text-xs"></i>
                       Assignments
                     </div>
                   </th>
@@ -250,10 +250,10 @@ const EvaluationMatrix = ({ students = [], courseStatus, gradingScale: gradingSc
                 {allQuizzes.length > 0 && (
                   <th
                     colSpan={allQuizzes.length}
-                    className="px-4 py-2 text-center text-[9px] uppercase tracking-[0.2em] text-purple-400 font-black bg-purple-500/5 border-r border-slate-800"
+                    className="px-4 py-2 text-center text-xs uppercase tracking-[0.2em] text-purple-400 font-black bg-purple-500/5 border-r border-slate-800"
                   >
                     <div className="flex items-center justify-center gap-2">
-                      <i className="fas fa-question-circle text-[10px]"></i>
+                      <i className="fas fa-question-circle text-xs"></i>
                       Quizzes
                     </div>
                   </th>
@@ -261,11 +261,11 @@ const EvaluationMatrix = ({ students = [], courseStatus, gradingScale: gradingSc
 
                 <th
                   colSpan={3}
-                  className="sticky right-0 z-30 bg-slate-900 px-4 py-2 text-center text-[9px] uppercase tracking-[0.2em] text-emerald-400 font-black border-l border-slate-800"
+                  className="sticky right-0 z-30 bg-slate-900 px-4 py-2 text-center text-xs uppercase tracking-[0.2em] text-emerald-400 font-black border-l border-slate-800"
                   style={rightShadow}
                 >
                   <div className="flex items-center justify-center gap-2">
-                    <i className="fas fa-chart-line text-[10px]"></i>
+                    <i className="fas fa-chart-line text-xs"></i>
                     Final Results
                   </div>
                 </th>
@@ -274,7 +274,7 @@ const EvaluationMatrix = ({ students = [], courseStatus, gradingScale: gradingSc
               {/* ── Column headers ── */}
               <tr className="border-b border-slate-800">
                 <th
-                  className="sticky left-0 z-20 bg-slate-900 px-3 py-4 text-center text-[10px] uppercase tracking-wider text-slate-500 font-semibold border-r border-slate-800"
+                  className="sticky left-0 z-20 bg-slate-900 px-3 py-4 text-center text-xs uppercase tracking-wider text-slate-500 font-semibold border-r border-slate-800"
                   style={{ width: STUDENT_W, minWidth: STUDENT_W, maxWidth: STUDENT_W, ...leftShadow }}
                 >
                   Student
@@ -283,12 +283,12 @@ const EvaluationMatrix = ({ students = [], courseStatus, gradingScale: gradingSc
                 {allAssignments.map((a) => (
                   <th
                     key={`a-${a.id}`}
-                    className="px-4 py-4 text-center text-[10px] uppercase tracking-wider text-slate-500 font-semibold min-w-[130px] border-r border-slate-800/30"
+                    className="px-4 py-4 text-center text-xs uppercase tracking-wider text-slate-500 font-semibold min-w-[130px] border-r border-slate-800/30"
                   >
                     <div className="truncate max-w-[200px] mx-auto text-slate-300 normal-case tracking-normal text-[14px]" title={a.title}>
                       {a.title}
                     </div>
-                    <div className="text-slate-600 text-[11px] mt-0.5 tracking-normal normal-case font-normal">
+                    <div className="text-slate-600 text-xs mt-0.5 tracking-normal normal-case font-normal">
                       Total: {a.max_score}
                     </div>
                   </th>
@@ -297,33 +297,33 @@ const EvaluationMatrix = ({ students = [], courseStatus, gradingScale: gradingSc
                 {allQuizzes.map((q) => (
                   <th
                     key={`q-${q.id}`}
-                    className="px-4 py-4 text-center text-[10px] uppercase tracking-wider text-slate-500 font-semibold min-w-[130px] border-r border-slate-800/30"
+                    className="px-4 py-4 text-center text-xs uppercase tracking-wider text-slate-500 font-semibold min-w-[130px] border-r border-slate-800/30"
                   >
                     <div className="truncate max-w-[200px] mx-auto text-slate-300 normal-case tracking-normal" title={q.title}>
                       {q.title}
                     </div>
-                    <div className="text-slate-600 text-[9px] mt-0.5 tracking-normal normal-case font-normal">
+                    <div className="text-slate-600 text-xs mt-0.5 tracking-normal normal-case font-normal">
                       Total: {q.max_score}
                     </div>
                   </th>
                 ))}
 
                 <th
-                  className="sticky z-20 bg-slate-900 px-4 py-4 text-center text-[10px] uppercase tracking-wider text-slate-500 font-semibold border-l border-slate-800"
+                  className="sticky z-20 bg-slate-900 px-4 py-4 text-center text-xs uppercase tracking-wider text-slate-500 font-semibold border-l border-slate-800"
                   style={{ right: GRADE_W + OBTAINED_W, minWidth: PERCENTAGE_W, ...rightShadow }}
                 >
                   Percentage
                 </th>
 
                 <th
-                  className="sticky z-20 bg-slate-900 px-4 py-4 text-center text-[10px] uppercase tracking-wider text-slate-500 font-semibold border-l border-slate-800"
+                  className="sticky z-20 bg-slate-900 px-4 py-4 text-center text-xs uppercase tracking-wider text-slate-500 font-semibold border-l border-slate-800"
                   style={{ right: GRADE_W, minWidth: OBTAINED_W }}
                 >
                   Obtained
                 </th>
 
                 <th
-                  className="sticky right-0 z-20 bg-slate-900 px-4 py-4 text-center text-[10px] uppercase tracking-wider text-slate-500 font-semibold"
+                  className="sticky right-0 z-20 bg-slate-900 px-4 py-4 text-center text-xs uppercase tracking-wider text-slate-500 font-semibold"
                   style={{ minWidth: GRADE_W }}
                 >
                   Grade
@@ -357,15 +357,15 @@ const EvaluationMatrix = ({ students = [], courseStatus, gradingScale: gradingSc
                     >
                       <div className="flex items-center justify-start gap-2">
                         <div className="w-6 h-6 rounded-full bg-indigo-600/20 flex items-center justify-center flex-shrink-0">
-                          <span className="text-indigo-400 text-[10px] font-bold">
+                          <span className="text-indigo-400 text-xs font-bold">
                             {s.student?.username?.charAt(0)?.toUpperCase()}
                           </span>
                         </div>
                         <div className="min-w-0">
-                          <p className="text-white text-[11px] font-semibold truncate">{s.student?.username}</p>
-                          <p className="text-indigo-300 text-[9px] truncate">{s.student?.email}</p>
+                          <p className="text-white text-xs font-semibold truncate">{s.student?.username}</p>
+                          <p className="text-indigo-300 text-xs truncate">{s.student?.email}</p>
                           {s.student?.roll_no && (
-                            <span className="inline-block mt-0.5 bg-indigo-500/20 text-indigo-300 text-[8px] font-bold font-mono px-1.5 py-0.5 rounded">
+                            <span className="inline-block mt-0.5 bg-indigo-500/20 text-indigo-300 text-xs font-bold font-mono px-1.5 py-0.5 rounded">
                               Roll# {s.student.roll_no}
                             </span>
                           )}

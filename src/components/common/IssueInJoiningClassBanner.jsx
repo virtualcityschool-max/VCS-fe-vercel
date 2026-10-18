@@ -60,7 +60,7 @@ export const IssueInJoiningClassBanner = ({
                   <h4 className="text-sm font-black text-white tracking-tight flex items-center gap-2">
                     Issue in Joining Class?
                   </h4>
-                  <span className="animate-pulse px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 text-[10px] font-black uppercase tracking-wider border border-rose-500/30">
+                  <span className="animate-pulse px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 text-xs font-black uppercase tracking-wider border border-rose-500/30">
                     Troubleshoot Guide
                   </span>
                 </div>

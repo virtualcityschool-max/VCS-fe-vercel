@@ -32,7 +32,7 @@ const PreviewButton = ({ url, className = "" }) => {
         onClick={() => setOpen(true)}
         className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-700/40 hover:bg-slate-700 text-slate-400 hover:text-white text-xs font-semibold transition border border-slate-600/30 ${className}`}
       >
-        <i className="fas fa-eye text-[10px]" />
+        <i className="fas fa-eye text-xs" />
         Preview
       </button>
       {open && (
@@ -272,7 +272,7 @@ const TeacherGrading = ({
               <div className="relative z-10 flex justify-between items-start mb-5">
                 <div className="flex flex-col gap-2">
                   <span
-                    className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border w-fit ${
+                    className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest border w-fit ${
                       assignment.is_overdue
                         ? "bg-rose-500/10 text-rose-400 border-rose-500/20"
                         : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
@@ -283,7 +283,7 @@ const TeacherGrading = ({
                     ></span>
                     {assignment.is_overdue ? "Overdue" : "Active"}
                   </span>
-                  <p className="text-[9px] text-indigo-400/80 uppercase tracking-[0.2em] font-black">
+                  <p className="text-xs text-indigo-400/80 uppercase tracking-[0.2em] font-black">
                     {assignment.course_title}
                   </p>
                 </div>
@@ -294,7 +294,7 @@ const TeacherGrading = ({
                     onClick={() => setViewAssignment(assignment)}
                     className="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800/50 hover:bg-indigo-600 text-slate-400 hover:text-white border border-slate-700/50 transition-all duration-300"
                   >
-                    <i className="fas fa-eye text-[10px]" />
+                    <i className="fas fa-eye text-xs" />
                   </button>
                   <button
                     type="button"
@@ -311,14 +311,14 @@ const TeacherGrading = ({
                     }}
                     className="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800/50 hover:bg-amber-600 text-slate-400 hover:text-white border border-slate-700/50 transition-all duration-300"
                   >
-                    <i className="fas fa-pencil text-[10px]" />
+                    <i className="fas fa-pencil text-xs" />
                   </button>
                   <button
                     type="button"
                     onClick={() => setDeleteTarget(assignment)}
                     className="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800/50 hover:bg-rose-600 text-slate-400 hover:text-white border border-slate-700/50 transition-all duration-300"
                   >
-                    <i className="fas fa-trash text-[10px]" />
+                    <i className="fas fa-trash text-xs" />
                   </button>
                 </div>
               </div>
@@ -331,17 +331,17 @@ const TeacherGrading = ({
 
                 <div className="grid grid-cols-2 gap-3 mb-4">
                   <div className="bg-slate-800/30 border border-slate-700/30 rounded-2xl p-3 flex flex-col">
-                    <span className="text-[8px] text-slate-500 uppercase font-black tracking-widest mb-1">Submissions</span>
+                    <span className="text-xs text-slate-500 uppercase font-black tracking-widest mb-1">Submissions</span>
                     <div className="flex items-baseline gap-1.5">
                       <span className="text-lg font-black text-indigo-400">{assignment.submissions_count}</span>
-                      <span className="text-[10px] text-slate-500 font-bold uppercase">Students</span>
+                      <span className="text-xs text-slate-500 font-bold uppercase">Students</span>
                     </div>
                   </div>
                   <div className="bg-slate-800/30 border border-slate-700/30 rounded-2xl p-3 flex flex-col">
-                    <span className="text-[8px] text-slate-500 uppercase font-black tracking-widest mb-1">Total Marks</span>
+                    <span className="text-xs text-slate-500 uppercase font-black tracking-widest mb-1">Total Marks</span>
                     <div className="flex items-baseline gap-1.5">
                       <span className="text-lg font-black text-amber-400">{assignment.max_score}</span>
-                      <span className="text-[10px] text-slate-500 font-bold uppercase">Points</span>
+                      <span className="text-xs text-slate-500 font-bold uppercase">Points</span>
                     </div>
                   </div>
                 </div>
@@ -364,7 +364,7 @@ const TeacherGrading = ({
                       <i className="far fa-calendar-alt text-xs" />
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-[9px] text-slate-500 uppercase font-black tracking-widest leading-none mb-1">Deadline</span>
+                      <span className="text-xs text-slate-500 uppercase font-black tracking-widest leading-none mb-1">Deadline</span>
                       <span className="text-xs text-slate-300 font-bold">
                         {assignment.due_date ? formatDateTime(assignment.due_date) : "No limit"}
                       </span>
@@ -374,7 +374,7 @@ const TeacherGrading = ({
 
                 <button
                   type="button"
-                  className="w-full bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-3.5 rounded-[1.25rem] text-[10px] font-black uppercase tracking-[0.15em] transition-all duration-300 shadow-xl shadow-indigo-600/20 flex items-center justify-center gap-2 group/btn"
+                  className="w-full bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-3.5 rounded-[1.25rem] text-xs font-black uppercase tracking-[0.15em] transition-all duration-300 shadow-xl shadow-indigo-600/20 flex items-center justify-center gap-2 group/btn"
                   onClick={() => {
                     setPendingAssignmentId(assignment.id);
                     setAssignmentTotal(assignment.max_score);
@@ -464,7 +464,7 @@ const TeacherGrading = ({
                       {/* Right: status + action */}
                       <div className="flex flex-col items-end gap-2 shrink-0">
                         <span
-                          className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${subStatusColor(sub.status)}`}
+                          className={`text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${subStatusColor(sub.status)}`}
                         >
                           {subStatusLabel(sub.status)}
                         </span>
@@ -481,7 +481,7 @@ const TeacherGrading = ({
                               : "bg-indigo-600 hover:bg-indigo-500 text-white"
                           }`}
                         >
-                          <i className={`fas ${sub.status === "graded" ? "fa-eye" : "fa-pen"} text-[10px]`} />
+                          <i className={`fas ${sub.status === "graded" ? "fa-eye" : "fa-pen"} text-xs`} />
                           {sub.status === "graded" ? "View" : "Grade"}
                         </button>
                       </div>
@@ -535,7 +535,7 @@ const TeacherGrading = ({
                     </div>
                   </div>
                   <div className="mb-6">
-                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2.5">
+                    <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2.5">
                       Student Attachment
                     </label>
                     {selectedSubmission.file_url ? (
@@ -635,7 +635,7 @@ const TeacherGrading = ({
             <div className="p-6 space-y-5">
               {/* Title */}
               <div>
-                <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">
+                <p className="text-xs uppercase tracking-wider text-slate-500 mb-1">
                   Title
                 </p>
                 <p className="text-white font-semibold">
@@ -645,7 +645,7 @@ const TeacherGrading = ({
 
               {/* Course */}
               <div>
-                <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">
+                <p className="text-xs uppercase tracking-wider text-slate-500 mb-1">
                   Course
                 </p>
                 <p className="text-slate-300 text-sm">
@@ -655,7 +655,7 @@ const TeacherGrading = ({
 
               {/* Description */}
               <div>
-                <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">
+                <p className="text-xs uppercase tracking-wider text-slate-500 mb-1">
                   Description
                 </p>
                 <p className="text-slate-300 text-sm whitespace-pre-wrap">
@@ -666,7 +666,7 @@ const TeacherGrading = ({
               {/* Meta row */}
               <div className="grid grid-cols-3 gap-3">
                 <div className="bg-slate-800/60 rounded-2xl p-3">
-                  <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">
+                  <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">
                     Total
                   </p>
                   <p className="text-white font-bold">
@@ -674,7 +674,7 @@ const TeacherGrading = ({
                   </p>
                 </div>
                 <div className="bg-slate-800/60 rounded-2xl p-3">
-                  <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">
+                  <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">
                     Status
                   </p>
                   <p
@@ -684,7 +684,7 @@ const TeacherGrading = ({
                   </p>
                 </div>
                 <div className="bg-slate-800/60 rounded-2xl p-3">
-                  <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">
+                  <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">
                     Submissions
                   </p>
                   <p className="text-white font-bold">
@@ -695,7 +695,7 @@ const TeacherGrading = ({
 
               {/* Due date */}
               <div>
-                <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">
+                <p className="text-xs uppercase tracking-wider text-slate-500 mb-1">
                   Due Date
                 </p>
                 <p className="text-slate-300 text-sm">
@@ -708,7 +708,7 @@ const TeacherGrading = ({
               {/* File */}
               {viewAssignment.file_url && (
                 <div>
-                  <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-2">
+                  <p className="text-xs uppercase tracking-wider text-slate-500 mb-2">
                     Attachment
                   </p>
                   <PreviewButton url={getStorageUrl(viewAssignment.file_url)} />
@@ -846,7 +846,7 @@ const TeacherGrading = ({
                 <div>
                   <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">
                     Attachment{" "}
-                    <span className="ml-1 text-[10px] normal-case tracking-normal font-medium text-slate-600">
+                    <span className="ml-1 text-xs normal-case tracking-normal font-medium text-slate-600">
                       (Replace existing - Optional)
                     </span>
                   </label>
@@ -1159,7 +1159,7 @@ const TeacherGrading = ({
                             : "bg-slate-800/40 border-slate-700/50 text-slate-500 hover:text-slate-300 hover:border-slate-600"
                         }`}
                       >
-                        <i className={`fas fa-${type === "public" ? "users" : "lock"} mr-2 text-[10px]`} />
+                        <i className={`fas fa-${type === "public" ? "users" : "lock"} mr-2 text-xs`} />
                         {type}
                       </button>
                     ))}
@@ -1236,7 +1236,7 @@ const TeacherGrading = ({
                 <div>
                   <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">
                     Attachment{" "}
-                    <span className="ml-1 text-[10px] normal-case tracking-normal font-medium text-slate-600">
+                    <span className="ml-1 text-xs normal-case tracking-normal font-medium text-slate-600">
                       (PDF, DOC, ZIP - Optional)
                     </span>
                   </label>
@@ -1251,7 +1251,7 @@ const TeacherGrading = ({
                           : "Select a file to attach…"}
                       </span>
                       {!form.file && (
-                        <span className="text-[10px] text-slate-600 uppercase font-bold tracking-tighter">
+                        <span className="text-xs text-slate-600 uppercase font-bold tracking-tighter">
                           Max 10MB
                         </span>
                       )}

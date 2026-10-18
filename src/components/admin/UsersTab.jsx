@@ -163,7 +163,7 @@ const SearchControls = ({
                 <button
                   key={tab.label}
                   onClick={() => handleFilterChange("role", tab.value)}
-                  className={`px-3.5 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all duration-200 whitespace-nowrap ${
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all duration-200 whitespace-nowrap ${
                     isActive
                       ? "bg-indigo-600 text-white shadow-md shadow-indigo-500/20"
                       : "text-slate-400 hover:text-white hover:bg-slate-800"
@@ -186,7 +186,7 @@ const SearchControls = ({
               }`}
               title="Card Hub View"
             >
-              <i className="fas fa-th-large text-[11px]" />
+              <i className="fas fa-th-large text-xs" />
               <span>Cards</span>
             </button>
             <button
@@ -198,7 +198,7 @@ const SearchControls = ({
               }`}
               title="Classic Table View"
             >
-              <i className="fas fa-table text-[11px]" />
+              <i className="fas fa-table text-xs" />
               <span>Table</span>
             </button>
           </div>
@@ -270,9 +270,9 @@ const SearchControls = ({
 
             <button
               onClick={handleCreateUser}
-              className="h-[42px] px-5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-indigo-600/20 active:scale-95 transition-all flex items-center justify-center gap-2 whitespace-nowrap shrink-0"
+              className="h-[42px] px-5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black uppercase tracking-widest shadow-lg shadow-indigo-600/20 active:scale-95 transition-all flex items-center justify-center gap-2 whitespace-nowrap shrink-0"
             >
-              <i className="fas fa-user-plus text-[10px]" />
+              <i className="fas fa-user-plus text-xs" />
               <span>{createUserLabel}</span>
             </button>
             <button
@@ -349,12 +349,12 @@ const StudentCard = ({
           {/* Active / Inactive Status Badge */}
           <div className="shrink-0">
             {isEnrolled ? (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                 Active • {enrollCount} Enrolled
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-rose-500/15 text-rose-300 border border-rose-500/30">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-rose-500/15 text-rose-300 border border-rose-500/30">
                 <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
                 Not Active • 0 Classes
               </span>
@@ -371,8 +371,8 @@ const StudentCard = ({
             {user.email}
           </p>
           {user.phone && (
-            <p className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5">
-              <i className="fas fa-phone text-[9px]" />
+            <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
+              <i className="fas fa-phone text-xs" />
               <span>{user.phone}</span>
             </p>
           )}
@@ -381,19 +381,19 @@ const StudentCard = ({
         {/* Academic Tier & Roll Number Info */}
         <div className="flex flex-wrap items-center gap-2 text-xs pt-1">
           {user.roll_no != null && (
-            <span className="px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 font-mono text-[11px]">
+            <span className="px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 font-mono text-xs">
               Roll #{user.roll_no}
             </span>
           )}
           {user.grade_level && (
-            <span className="px-2.5 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 font-medium text-[11px]">
-              <i className="fas fa-layer-group text-[9px] mr-1" />
+            <span className="px-2.5 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 font-medium text-xs">
+              <i className="fas fa-layer-group text-xs mr-1" />
               {user.grade_level}
             </span>
           )}
           {user.guardian?.name && (
-            <span className="px-2.5 py-1 rounded-lg bg-purple-500/10 border border-purple-500/20 text-purple-300 font-medium text-[11px]">
-              <i className="fas fa-user-shield text-[9px] mr-1" />
+            <span className="px-2.5 py-1 rounded-lg bg-purple-500/10 border border-purple-500/20 text-purple-300 font-medium text-xs">
+              <i className="fas fa-user-shield text-xs mr-1" />
               {user.guardian.name}
             </span>
           )}
@@ -401,10 +401,10 @@ const StudentCard = ({
 
         {/* Enrolled Subjects List or Missing Warning */}
         <div className="space-y-1.5 pt-2 border-t border-slate-800/80">
-          <div className="flex items-center justify-between text-[11px] text-slate-400 font-semibold uppercase tracking-wider">
+          <div className="flex items-center justify-between text-xs text-slate-400 font-semibold uppercase tracking-wider">
             <span>Enrolled Subjects ({enrolledList.length})</span>
             {enrolledList.length > 0 && (
-              <span className="text-emerald-400 text-[10px] lowercase font-normal">all subjects unified</span>
+              <span className="text-emerald-400 text-xs lowercase font-normal">all subjects unified</span>
             )}
           </div>
 
@@ -420,7 +420,7 @@ const StudentCard = ({
                     {course.title}
                   </span>
                   {course.category && (
-                    <span className="text-[10px] text-slate-400 shrink-0">
+                    <span className="text-xs text-slate-400 shrink-0">
                       ({course.category})
                     </span>
                   )}
@@ -437,7 +437,7 @@ const StudentCard = ({
                 onClick={() => navigate("/admin/enrollments")}
                 className="px-2.5 py-1 bg-rose-600 hover:bg-rose-500 text-white rounded-lg text-xs font-bold transition flex items-center gap-1 shrink-0"
               >
-                <i className="fas fa-plus text-[10px]" />
+                <i className="fas fa-plus text-xs" />
                 <span>Enroll</span>
               </button>
             </div>
@@ -568,12 +568,12 @@ const TutorCard = ({
           {/* Engaged vs Standby badge */}
           <div className="shrink-0">
             {engaged ? (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                 Engaged • {courses.length} Active
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/15 text-amber-300 border border-amber-500/30">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-amber-500/15 text-amber-300 border border-amber-500/30">
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
                 Standby • Available
               </span>
@@ -590,8 +590,8 @@ const TutorCard = ({
             {user.email}
           </p>
           {user.phone && (
-            <p className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5">
-              <i className="fas fa-phone text-[9px]" />
+            <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
+              <i className="fas fa-phone text-xs" />
               <span>{user.phone}</span>
             </p>
           )}
@@ -600,14 +600,14 @@ const TutorCard = ({
         {/* Professional Details: Experience & Qualification */}
         <div className="flex flex-wrap items-center gap-2 text-xs">
           {user.experience_years != null && (
-            <span className="px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 text-[11px]">
-              <i className="fas fa-briefcase text-[9px] mr-1 text-slate-400" />
+            <span className="px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 text-xs">
+              <i className="fas fa-briefcase text-xs mr-1 text-slate-400" />
               {user.experience_years} yrs exp
             </span>
           )}
           {user.qualification && (
-            <span className="px-2.5 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-[11px] truncate max-w-[170px]" title={user.qualification}>
-              <i className="fas fa-award text-[9px] mr-1" />
+            <span className="px-2.5 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs truncate max-w-[170px]" title={user.qualification}>
+              <i className="fas fa-award text-xs mr-1" />
               {user.qualification}
             </span>
           )}
@@ -615,16 +615,16 @@ const TutorCard = ({
 
         {/* Assigned Classes vs Standby Notification */}
         <div className="space-y-1.5 pt-2 border-t border-slate-800/80">
-          <div className="text-[11px] text-slate-400 font-semibold uppercase tracking-wider flex items-center justify-between">
+          <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider flex items-center justify-between">
             <span>{engaged ? `Assigned Subjects (${courses.length})` : "Current Status"}</span>
             {onAssignClass && (
               <button
                 type="button"
                 onClick={() => onAssignClass(user)}
-                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 text-[10px] font-semibold hover:bg-indigo-600/30 transition cursor-pointer"
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 text-xs font-semibold hover:bg-indigo-600/30 transition cursor-pointer"
                 title="Assign Cambridge subject to this teacher"
               >
-                <i className="fas fa-plus text-[9px]" />
+                <i className="fas fa-plus text-xs" />
                 <span>Assign Subject</span>
               </button>
             )}
@@ -643,7 +643,7 @@ const TutorCard = ({
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
                     {course.category && (
-                      <span className="text-[10px] text-emerald-400 font-mono">
+                      <span className="text-xs text-emerald-400 font-mono">
                         {course.category}
                       </span>
                     )}
@@ -657,7 +657,7 @@ const TutorCard = ({
                         className="w-5 h-5 flex items-center justify-center rounded text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition opacity-0 group-hover/course:opacity-100"
                         title={`Remove ${course.title} from ${getDisplayName(user)}`}
                       >
-                        <i className="fas fa-times text-[10px]" />
+                        <i className="fas fa-times text-xs" />
                       </button>
                     )}
                   </div>
@@ -676,7 +676,7 @@ const TutorCard = ({
                   onClick={() => onAssignClass(user)}
                   className="px-2.5 py-1 bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold rounded-lg text-xs transition flex items-center gap-1 shrink-0 cursor-pointer"
                 >
-                  <i className="fas fa-plus text-[10px]" />
+                  <i className="fas fa-plus text-xs" />
                   <span>Assign Subject</span>
                 </button>
               )}
@@ -760,7 +760,7 @@ const GuardianCard = ({
           </div>
 
           <span
-            className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border shrink-0 ${
+            className={`px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-wider border shrink-0 ${
               user.is_active
                 ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
                 : "bg-slate-500/15 text-slate-400 border-slate-500/30"
@@ -779,8 +779,8 @@ const GuardianCard = ({
             {user.email}
           </p>
           {user.phone && (
-            <p className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5">
-              <i className="fas fa-phone text-[9px]" />
+            <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
+              <i className="fas fa-phone text-xs" />
               <span>{user.phone}</span>
             </p>
           )}
@@ -788,7 +788,7 @@ const GuardianCard = ({
 
         {/* Linked Children Section */}
         <div className="space-y-1.5 pt-2 border-t border-slate-800/80">
-          <div className="text-[11px] text-slate-400 font-semibold uppercase tracking-wider flex items-center justify-between">
+          <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider flex items-center justify-between">
             <span>Linked Students ({linkedChildren.length})</span>
           </div>
 
@@ -801,14 +801,14 @@ const GuardianCard = ({
                 >
                   <div className="min-w-0">
                     <p className="text-xs font-bold text-white truncate flex items-center gap-1.5">
-                      <i className="fas fa-user-graduate text-indigo-400 text-[10px]" />
+                      <i className="fas fa-user-graduate text-indigo-400 text-xs" />
                       <span>{child.display_name || child.username}</span>
                     </p>
-                    <p className="text-[10px] text-slate-400">
+                    <p className="text-xs text-slate-400">
                       {child.roll_no ? `Roll #${child.roll_no}` : "No roll#"} {child.grade_level ? `• ${child.grade_level}` : ""}
                     </p>
                   </div>
-                  <span className="text-[9px] font-mono uppercase px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 shrink-0">
+                  <span className="text-xs font-mono uppercase px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 shrink-0">
                     Linked
                   </span>
                 </div>
@@ -921,7 +921,7 @@ const AdminCard = ({
           </div>
 
           <span
-            className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border shrink-0 ${
+            className={`px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-wider border shrink-0 ${
               user.is_active
                 ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
                 : "bg-slate-500/15 text-slate-400 border-slate-500/30"
@@ -938,8 +938,8 @@ const AdminCard = ({
               {getDisplayName(user) || "Admin"}
             </h4>
             {user.is_superuser && (
-              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-amber-500/15 border border-amber-500/30 text-amber-400 text-[9px] font-black uppercase tracking-wider">
-                <i className="fas fa-crown text-[8px]" />
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-amber-500/15 border border-amber-500/30 text-amber-400 text-xs font-black uppercase tracking-wider">
+                <i className="fas fa-crown text-xs" />
                 Super Admin
               </span>
             )}
@@ -1137,14 +1137,14 @@ const AssignCourseModal = ({
                         {course.title}
                       </span>
                       {catName && (
-                        <span className="px-1.5 py-0.2 rounded bg-slate-800 text-[10px] text-slate-400 font-medium shrink-0">
+                        <span className="px-1.5 py-0.2 rounded bg-slate-800 text-xs text-slate-400 font-medium shrink-0">
                           {catName}
                         </span>
                       )}
                     </div>
                     {hasOtherInstructor && (
-                      <p className="text-[10px] text-amber-400/90 mt-0.5 flex items-center gap-1">
-                        <i className="fas fa-exchange-alt text-[9px]" />
+                      <p className="text-xs text-amber-400/90 mt-0.5 flex items-center gap-1">
+                        <i className="fas fa-exchange-alt text-xs" />
                         <span>Currently assigned to {otherInstructorName}</span>
                       </p>
                     )}
@@ -1152,15 +1152,15 @@ const AssignCourseModal = ({
 
                   <div className="shrink-0 flex items-center gap-2">
                     {isCurrent ? (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-                        <i className="fas fa-check text-[9px]" /> Assigned
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                        <i className="fas fa-check text-xs" /> Assigned
                       </span>
                     ) : hasOtherInstructor ? (
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                      <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20">
                         Reassign
                       </span>
                     ) : (
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                      <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
                         Available
                       </span>
                     )}
@@ -1172,7 +1172,7 @@ const AssignCourseModal = ({
                           : "border-slate-700 bg-slate-900"
                       }`}
                     >
-                      {isSelected && <i className="fas fa-check text-[8px]" />}
+                      {isSelected && <i className="fas fa-check text-xs" />}
                     </div>
                   </div>
                 </div>
@@ -1714,9 +1714,9 @@ const UsersTab = ({
                       : "text-slate-400 hover:text-white hover:bg-slate-800 border border-slate-800"
                   }`}
                 >
-                  <i className="fas fa-layer-group text-[11px]" />
+                  <i className="fas fa-layer-group text-xs" />
                   <span>All Departments</span>
-                  <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-800/80 text-slate-300 font-mono">
+                  <span className="text-xs px-1.5 py-0.2 rounded-full bg-slate-800/80 text-slate-300 font-mono">
                     {tutorMetrics.total}
                   </span>
                 </button>
@@ -1734,9 +1734,9 @@ const UsersTab = ({
                           : "border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800"
                       }`}
                     >
-                      <i className={`fas ${dept.icon} text-[11px] ${isActive ? dept.color : "text-slate-400"}`} />
+                      <i className={`fas ${dept.icon} text-xs ${isActive ? dept.color : "text-slate-400"}`} />
                       <span>{dept.name}</span>
-                      <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-800/80 text-slate-300 font-mono">
+                      <span className="text-xs px-1.5 py-0.2 rounded-full bg-slate-800/80 text-slate-300 font-mono">
                         {count}
                       </span>
                     </button>
@@ -1794,9 +1794,9 @@ const UsersTab = ({
                       : "text-slate-400 hover:text-white hover:bg-slate-800 border border-slate-800"
                   }`}
                 >
-                  <i className="fas fa-users text-[11px]" />
+                  <i className="fas fa-users text-xs" />
                   <span>All Students</span>
-                  <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-800/80 text-slate-300 font-mono">
+                  <span className="text-xs px-1.5 py-0.2 rounded-full bg-slate-800/80 text-slate-300 font-mono">
                     {studentMetrics.total}
                   </span>
                 </button>
@@ -1810,7 +1810,7 @@ const UsersTab = ({
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                   <span>Active & Enrolled</span>
-                  <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-800/80 text-slate-300 font-mono">
+                  <span className="text-xs px-1.5 py-0.2 rounded-full bg-slate-800/80 text-slate-300 font-mono">
                     {studentMetrics.active}
                   </span>
                 </button>
@@ -1824,7 +1824,7 @@ const UsersTab = ({
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
                   <span>0 Enrollments (Inactive)</span>
-                  <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-800/80 text-slate-300 font-mono">
+                  <span className="text-xs px-1.5 py-0.2 rounded-full bg-slate-800/80 text-slate-300 font-mono">
                     {studentMetrics.inactive}
                   </span>
                 </button>
@@ -2025,7 +2025,7 @@ const UsersTab = ({
                           <div className="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center text-lg">
                             <i className={`fas ${role.icon} ${role.color}`} />
                           </div>
-                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${role.badgeBg}`}>
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-black uppercase tracking-wider ${role.badgeBg}`}>
                             {role.tagline}
                           </span>
                         </div>
@@ -2183,15 +2183,15 @@ const UsersTab = ({
                         {getDisplayName(user) || "Unknown User"}
                       </p>
                       {user.is_superuser && (
-                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-amber-500/15 border border-amber-500/30 text-amber-400 text-[9px] font-black uppercase tracking-wider">
-                          <i className="fas fa-crown text-[8px]" />
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-amber-500/15 border border-amber-500/30 text-amber-400 text-xs font-black uppercase tracking-wider">
+                          <i className="fas fa-crown text-xs" />
                           Super Admin
                         </span>
                       )}
                     </div>
-                    <p className="text-[9px] sm:text-xs text-slate-500 break-all">{user.email}</p>
+                    <p className="text-xs sm:text-xs text-slate-500 break-all">{user.email}</p>
                     {user.role === "student" && user.roll_no != null && (
-                      <p className="text-[9px] sm:text-xs text-slate-500 break-all">
+                      <p className="text-xs sm:text-xs text-slate-500 break-all">
                         Roll #{user.roll_no}
                       </p>
                     )}
@@ -2212,14 +2212,14 @@ const UsersTab = ({
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="flex items-center gap-2">
                     <span
-                      className={`px-2 py-1 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest ${getRoleColor(
+                      className={`px-2 py-1 rounded-full text-xs sm:text-xs font-black uppercase tracking-widest ${getRoleColor(
                         user.role,
                       )}`}
                     >
                       {displayRole(user.role)}
                     </span>
                     <span
-                      className={`px-2 py-1 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest ${getStatusColor(
+                      className={`px-2 py-1 rounded-full text-xs sm:text-xs font-black uppercase tracking-widest ${getStatusColor(
                         user.is_active,
                       )}`}
                     >
@@ -2277,7 +2277,7 @@ const UsersTab = ({
                       <button
                         onClick={() => handleDeleteUser(user)}
                         disabled={!!processing[user.id]}
-                        className={`px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition flex items-center gap-1 justify-center disabled:opacity-50 disabled:cursor-not-allowed ${
+                        className={`px-3 py-1.5 rounded-lg text-xs sm:text-xs font-medium transition flex items-center gap-1 justify-center disabled:opacity-50 disabled:cursor-not-allowed ${
                           user.is_active
                             ? "bg-amber-600/10 text-amber-400 hover:bg-amber-600/20"
                             : "bg-emerald-600/10 text-emerald-400 hover:bg-emerald-600/20"
@@ -2305,7 +2305,7 @@ const UsersTab = ({
           {/* Desktop Table View */}
           <div className="overflow-x-auto hidden lg:block table-scrollbar pb-1">
             <table className="w-full text-left border-collapse">
-              <thead className="bg-slate-950/80 border-b border-slate-800 text-[11px] font-bold text-slate-400 uppercase tracking-wider sticky top-0 z-10 backdrop-blur-md">
+              <thead className="bg-slate-950/80 border-b border-slate-800 text-xs font-bold text-slate-400 uppercase tracking-wider sticky top-0 z-10 backdrop-blur-md">
                 {usersFilters.role === "student" ? (
                   <tr>
                     <th className="px-4 py-3">Student</th>
@@ -2402,7 +2402,7 @@ const UsersTab = ({
                                       <TagChip key={tag.id} tag={tag} onClick={() => handleFilterChange("tags", String(tag.id))} />
                                     ))}
                                     {tagsFor(user).length > 2 && (
-                                      <span className="text-[10px] text-slate-500">+{tagsFor(user).length - 2}</span>
+                                      <span className="text-xs text-slate-500">+{tagsFor(user).length - 2}</span>
                                     )}
                                   </div>
                                 )}
@@ -2413,7 +2413,7 @@ const UsersTab = ({
                           {/* Roll # */}
                           <td className="px-3 py-2.5 whitespace-nowrap">
                             {user.roll_no != null ? (
-                              <span className="px-2 py-0.5 rounded bg-slate-800 border border-slate-700/80 font-mono text-[11px] text-slate-300 font-semibold">
+                              <span className="px-2 py-0.5 rounded bg-slate-800 border border-slate-700/80 font-mono text-xs text-slate-300 font-semibold">
                                 #{user.roll_no}
                               </span>
                             ) : (
@@ -2432,7 +2432,7 @@ const UsersTab = ({
                           <td className="px-3 py-2.5 whitespace-nowrap">
                             {user.grade_level ? (
                               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-medium">
-                                <i className="fas fa-layer-group text-[9px]" />
+                                <i className="fas fa-layer-group text-xs" />
                                 {user.grade_level}
                               </span>
                             ) : (
@@ -2447,7 +2447,7 @@ const UsersTab = ({
                                 {user.enrolled_courses.slice(0, 2).map((course, idx) => (
                                   <span
                                     key={course.id || idx}
-                                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-800/90 border border-slate-700/60 text-slate-200 text-[11px] font-medium whitespace-nowrap"
+                                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-800/90 border border-slate-700/60 text-slate-200 text-xs font-medium whitespace-nowrap"
                                     title={course.title}
                                   >
                                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
@@ -2456,7 +2456,7 @@ const UsersTab = ({
                                 ))}
                                 {user.enrolled_courses.length > 2 && (
                                   <span
-                                    className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 font-semibold"
+                                    className="text-xs px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 font-semibold"
                                     title={user.enrolled_courses.slice(2).map((c) => c.title).join(", ")}
                                   >
                                     +{user.enrolled_courses.length - 2} more
@@ -2464,8 +2464,8 @@ const UsersTab = ({
                                 )}
                               </div>
                             ) : (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-rose-500/10 border border-rose-500/20 text-rose-300 text-[11px] font-medium whitespace-nowrap">
-                                <i className="fas fa-exclamation-circle text-[9px]" />
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs font-medium whitespace-nowrap">
+                                <i className="fas fa-exclamation-circle text-xs" />
                                 0 Courses
                               </span>
                             )}
@@ -2475,7 +2475,7 @@ const UsersTab = ({
                           <td className="px-3 py-2.5 whitespace-nowrap">
                             {user.guardian?.name ? (
                               <span className="inline-flex items-center gap-1.5 text-xs text-slate-300">
-                                <i className="fas fa-user-shield text-purple-400 text-[10px]" />
+                                <i className="fas fa-user-shield text-purple-400 text-xs" />
                                 <span>{user.guardian.name}</span>
                               </span>
                             ) : (
@@ -2486,12 +2486,12 @@ const UsersTab = ({
                           {/* Status */}
                           <td className="px-3 py-2.5 whitespace-nowrap">
                             {user.is_active ? (
-                              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
                                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                                 Active
                               </span>
                             ) : (
-                              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-slate-500/15 text-slate-400 border border-slate-500/30">
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-black uppercase tracking-wider bg-slate-500/15 text-slate-400 border border-slate-500/30">
                                 <span className="w-1.5 h-1.5 rounded-full bg-slate-500" />
                                 Inactive
                               </span>
@@ -2506,21 +2506,21 @@ const UsersTab = ({
                                 className="w-7 h-7 flex items-center justify-center bg-slate-800 text-slate-400 rounded-lg hover:bg-slate-700 hover:text-indigo-300 transition"
                                 title="Manage labels"
                               >
-                                <i className="fas fa-tags text-[11px]" />
+                                <i className="fas fa-tags text-xs" />
                               </button>
                               <button
                                 onClick={() => handleViewUser(user.id)}
                                 className="w-7 h-7 flex items-center justify-center bg-slate-800 text-slate-400 rounded-lg hover:bg-slate-700 hover:text-white transition"
                                 title="View student"
                               >
-                                <i className="fas fa-eye text-[11px]" />
+                                <i className="fas fa-eye text-xs" />
                               </button>
                               <button
                                 onClick={() => handleEditUser(user.id)}
                                 className="w-7 h-7 flex items-center justify-center bg-slate-800 text-slate-400 rounded-lg hover:bg-slate-700 hover:text-white transition"
                                 title="Edit student"
                               >
-                                <i className="fas fa-edit text-[11px]" />
+                                <i className="fas fa-edit text-xs" />
                               </button>
                               <button
                                 onClick={() => handlePurgeUser(user)}
@@ -2528,19 +2528,19 @@ const UsersTab = ({
                                 className="w-7 h-7 flex items-center justify-center bg-red-900/20 text-red-400 rounded-lg hover:bg-red-900/40 transition disabled:opacity-50"
                                 title={processing[user.id] === "purging" ? "Deleting..." : "Permanently delete"}
                               >
-                                <i className={`fas ${processing[user.id] === "purging" ? "fa-spinner fa-spin" : "fa-trash"} text-[11px]`} />
+                                <i className={`fas ${processing[user.id] === "purging" ? "fa-spinner fa-spin" : "fa-trash"} text-xs`} />
                               </button>
                               <button
                                 onClick={() => handleDeleteUser(user)}
                                 disabled={!!processing[user.id]}
-                                className={`px-2 py-1 rounded-lg text-[11px] font-semibold transition shrink-0 ${
+                                className={`px-2 py-1 rounded-lg text-xs font-semibold transition shrink-0 ${
                                   user.is_active
                                     ? "bg-amber-600/10 text-amber-400 hover:bg-amber-600/20"
                                     : "bg-emerald-600/10 text-emerald-400 hover:bg-emerald-600/20"
                                 }`}
                               >
                                 {processing[user.id] === "toggling" ? (
-                                  <i className="fas fa-spinner fa-spin text-[10px]" />
+                                  <i className="fas fa-spinner fa-spin text-xs" />
                                 ) : (
                                   user.is_active ? "Deactivate" : "Activate"
                                 )}
@@ -2585,7 +2585,7 @@ const UsersTab = ({
                           {/* Department */}
                           <td className="px-3 py-2.5 whitespace-nowrap">
                             <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-xs font-semibold ${dept.bg} ${dept.color}`}>
-                              <i className={`fas ${dept.icon} text-[10px]`} />
+                              <i className={`fas ${dept.icon} text-xs`} />
                               <span>{dept.name}</span>
                             </span>
                           </td>
@@ -2598,7 +2598,7 @@ const UsersTab = ({
                                   {assigned.map((course, idx) => (
                                     <span
                                       key={course.id || idx}
-                                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-800/90 border border-slate-700/60 text-slate-200 text-[11px] font-medium whitespace-nowrap group/badge"
+                                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-800/90 border border-slate-700/60 text-slate-200 text-xs font-medium whitespace-nowrap group/badge"
                                       title={course.title}
                                     >
                                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
@@ -2614,7 +2614,7 @@ const UsersTab = ({
                                             teacher: user,
                                           });
                                         }}
-                                        className="text-slate-500 hover:text-red-400 ml-0.5 text-[9px] opacity-70 hover:opacity-100 transition cursor-pointer"
+                                        className="text-slate-500 hover:text-red-400 ml-0.5 text-xs opacity-70 hover:opacity-100 transition cursor-pointer"
                                         title={`Unassign ${course.title} from ${getDisplayName(user)}`}
                                       >
                                         <i className="fas fa-times" />
@@ -2624,10 +2624,10 @@ const UsersTab = ({
                                   <button
                                     type="button"
                                     onClick={() => setAssignClassModalTeacher(user)}
-                                    className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 hover:bg-indigo-500/20 transition cursor-pointer"
+                                    className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 hover:bg-indigo-500/20 transition cursor-pointer"
                                     title="Assign additional subject to this teacher"
                                   >
-                                    <i className="fas fa-plus text-[8px]" />
+                                    <i className="fas fa-plus text-xs" />
                                     <span>Subject</span>
                                   </button>
                                 </>
@@ -2638,7 +2638,7 @@ const UsersTab = ({
                                   className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-semibold hover:bg-amber-500/25 transition cursor-pointer"
                                   title="Allocate Cambridge subject to available teacher"
                                 >
-                                  <i className="fas fa-user-plus text-[10px]" />
+                                  <i className="fas fa-user-plus text-xs" />
                                   <span>Standby • Assign Subject</span>
                                 </button>
                               )}
@@ -2659,7 +2659,7 @@ const UsersTab = ({
                           <td className="px-3 py-2.5 whitespace-nowrap">
                             {user.phone ? (
                               <span className="text-xs text-slate-300 font-mono flex items-center gap-1">
-                                <i className="fas fa-phone text-[9px] text-slate-500" />
+                                <i className="fas fa-phone text-xs text-slate-500" />
                                 <span>{user.phone}</span>
                               </span>
                             ) : (
@@ -2670,17 +2670,17 @@ const UsersTab = ({
                           {/* Status */}
                           <td className="px-3 py-2.5 whitespace-nowrap">
                             {!user.is_active ? (
-                              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-slate-500/15 text-slate-400 border border-slate-500/30">
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-black uppercase tracking-wider bg-slate-500/15 text-slate-400 border border-slate-500/30">
                                 <span className="w-1.5 h-1.5 rounded-full bg-slate-500" />
                                 Inactive
                               </span>
                             ) : isEngaged ? (
-                              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
                                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                                 Engaged
                               </span>
                             ) : (
-                              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-black uppercase tracking-wider bg-amber-500/15 text-amber-300 border border-amber-500/30">
                                 <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
                                 Standby
                               </span>
@@ -2695,21 +2695,21 @@ const UsersTab = ({
                                 className="w-7 h-7 flex items-center justify-center bg-indigo-600/20 text-indigo-300 rounded-lg hover:bg-indigo-600/40 hover:text-white transition"
                                 title="Assign Subject to this Teacher"
                               >
-                                <i className="fas fa-plus text-[11px]" />
+                                <i className="fas fa-plus text-xs" />
                               </button>
                               <button
                                 onClick={() => handleViewUser(user.id)}
                                 className="w-7 h-7 flex items-center justify-center bg-slate-800 text-slate-400 rounded-lg hover:bg-slate-700 hover:text-white transition"
                                 title="View teacher"
                               >
-                                <i className="fas fa-eye text-[11px]" />
+                                <i className="fas fa-eye text-xs" />
                               </button>
                               <button
                                 onClick={() => handleEditUser(user.id)}
                                 className="w-7 h-7 flex items-center justify-center bg-slate-800 text-slate-400 rounded-lg hover:bg-slate-700 hover:text-white transition"
                                 title="Edit teacher"
                               >
-                                <i className="fas fa-edit text-[11px]" />
+                                <i className="fas fa-edit text-xs" />
                               </button>
                               <button
                                 onClick={() => handlePurgeUser(user)}
@@ -2717,19 +2717,19 @@ const UsersTab = ({
                                 className="w-7 h-7 flex items-center justify-center bg-red-900/20 text-red-400 rounded-lg hover:bg-red-900/40 transition disabled:opacity-50"
                                 title={processing[user.id] === "purging" ? "Deleting..." : "Permanently delete"}
                               >
-                                <i className={`fas ${processing[user.id] === "purging" ? "fa-spinner fa-spin" : "fa-trash"} text-[11px]`} />
+                                <i className={`fas ${processing[user.id] === "purging" ? "fa-spinner fa-spin" : "fa-trash"} text-xs`} />
                               </button>
                               <button
                                 onClick={() => handleDeleteUser(user)}
                                 disabled={!!processing[user.id]}
-                                className={`px-2 py-1 rounded-lg text-[11px] font-semibold transition shrink-0 ${
+                                className={`px-2 py-1 rounded-lg text-xs font-semibold transition shrink-0 ${
                                   user.is_active
                                     ? "bg-amber-600/10 text-amber-400 hover:bg-amber-600/20"
                                     : "bg-emerald-600/10 text-emerald-400 hover:bg-emerald-600/20"
                                 }`}
                               >
                                 {processing[user.id] === "toggling" ? (
-                                  <i className="fas fa-spinner fa-spin text-[10px]" />
+                                  <i className="fas fa-spinner fa-spin text-xs" />
                                 ) : (
                                   user.is_active ? "Deactivate" : "Activate"
                                 )}
@@ -2754,7 +2754,7 @@ const UsersTab = ({
                                 />
                               ) : (
                                 <div className="w-7 h-7 rounded-lg bg-purple-500/20 text-purple-400 border border-purple-500/30 flex items-center justify-center font-bold text-xs shrink-0">
-                                  <i className="fas fa-user-friends text-[10px]" />
+                                  <i className="fas fa-user-friends text-xs" />
                                 </div>
                               )}
                               <p className="font-semibold text-white text-xs leading-none">
@@ -2796,9 +2796,9 @@ const UsersTab = ({
                                     key={child.id || idx}
                                     className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs whitespace-nowrap"
                                   >
-                                    <i className="fas fa-user-graduate text-[9px]" />
+                                    <i className="fas fa-user-graduate text-xs" />
                                     <span>{child.display_name || child.username}</span>
-                                    {child.roll_no && <span className="font-mono text-[10px] text-purple-400">#{child.roll_no}</span>}
+                                    {child.roll_no && <span className="font-mono text-xs text-purple-400">#{child.roll_no}</span>}
                                   </span>
                                 ))}
                               </div>
@@ -2809,7 +2809,7 @@ const UsersTab = ({
 
                           {/* Status */}
                           <td className="px-3 py-2.5 whitespace-nowrap">
-                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${
+                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-black uppercase tracking-wider border ${
                               user.is_active
                                 ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
                                 : "bg-slate-500/15 text-slate-400 border-slate-500/30"
@@ -2826,14 +2826,14 @@ const UsersTab = ({
                                 className="w-7 h-7 flex items-center justify-center bg-slate-800 text-slate-400 rounded-lg hover:bg-slate-700 hover:text-white transition"
                                 title="View parent"
                               >
-                                <i className="fas fa-eye text-[11px]" />
+                                <i className="fas fa-eye text-xs" />
                               </button>
                               <button
                                 onClick={() => handleEditUser(user.id)}
                                 className="w-7 h-7 flex items-center justify-center bg-slate-800 text-slate-400 rounded-lg hover:bg-slate-700 hover:text-white transition"
                                 title="Edit parent"
                               >
-                                <i className="fas fa-edit text-[11px]" />
+                                <i className="fas fa-edit text-xs" />
                               </button>
                               <button
                                 onClick={() => handlePurgeUser(user)}
@@ -2841,19 +2841,19 @@ const UsersTab = ({
                                 className="w-7 h-7 flex items-center justify-center bg-red-900/20 text-red-400 rounded-lg hover:bg-red-900/40 transition disabled:opacity-50"
                                 title={processing[user.id] === "purging" ? "Deleting..." : "Permanently delete"}
                               >
-                                <i className={`fas ${processing[user.id] === "purging" ? "fa-spinner fa-spin" : "fa-trash"} text-[11px]`} />
+                                <i className={`fas ${processing[user.id] === "purging" ? "fa-spinner fa-spin" : "fa-trash"} text-xs`} />
                               </button>
                               <button
                                 onClick={() => handleDeleteUser(user)}
                                 disabled={!!processing[user.id]}
-                                className={`px-2 py-1 rounded-lg text-[11px] font-semibold transition shrink-0 ${
+                                className={`px-2 py-1 rounded-lg text-xs font-semibold transition shrink-0 ${
                                   user.is_active
                                     ? "bg-amber-600/10 text-amber-400 hover:bg-amber-600/20"
                                     : "bg-emerald-600/10 text-emerald-400 hover:bg-emerald-600/20"
                                 }`}
                               >
                                 {processing[user.id] === "toggling" ? (
-                                  <i className="fas fa-spinner fa-spin text-[10px]" />
+                                  <i className="fas fa-spinner fa-spin text-xs" />
                                 ) : (
                                   user.is_active ? "Deactivate" : "Activate"
                                 )}
@@ -2882,7 +2882,7 @@ const UsersTab = ({
                                     : "bg-red-500/20 text-red-400 border border-red-500/30"
                                 }`}
                               >
-                                <i className={`fas ${user.is_superuser ? "fa-crown text-[10px]" : "fa-shield-alt text-[10px]"}`} />
+                                <i className={`fas ${user.is_superuser ? "fa-crown text-xs" : "fa-shield-alt text-xs"}`} />
                               </div>
                               <p className="font-semibold text-white text-xs leading-none">
                                 {getDisplayName(user) || "Admin"}
@@ -2901,12 +2901,12 @@ const UsersTab = ({
                           <td className="px-3 py-2.5 whitespace-nowrap">
                             {user.is_superuser ? (
                               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-bold">
-                                <i className="fas fa-crown text-[9px] text-amber-400" />
+                                <i className="fas fa-crown text-xs text-amber-400" />
                                 Super Admin
                               </span>
                             ) : (
                               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 text-xs font-semibold">
-                                <i className="fas fa-shield-alt text-[9px]" />
+                                <i className="fas fa-shield-alt text-xs" />
                                 Platform Admin
                               </span>
                             )}
@@ -2919,7 +2919,7 @@ const UsersTab = ({
 
                           {/* Status */}
                           <td className="px-3 py-2.5 whitespace-nowrap">
-                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${
+                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-black uppercase tracking-wider border ${
                               user.is_active
                                 ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
                                 : "bg-slate-500/15 text-slate-400 border-slate-500/30"
@@ -2932,7 +2932,7 @@ const UsersTab = ({
                           <td className="px-4 py-2.5 whitespace-nowrap text-right">
                             {user.is_superuser ? (
                               <span className="text-amber-500/80 text-xs italic font-medium">
-                                <i className="fas fa-lock text-[10px] mr-1" />
+                                <i className="fas fa-lock text-xs mr-1" />
                                 Protected
                               </span>
                             ) : (
@@ -2942,14 +2942,14 @@ const UsersTab = ({
                                   className="w-7 h-7 flex items-center justify-center bg-slate-800 text-slate-400 rounded-lg hover:bg-slate-700 hover:text-white transition"
                                   title="View admin"
                                 >
-                                  <i className="fas fa-eye text-[11px]" />
+                                  <i className="fas fa-eye text-xs" />
                                 </button>
                                 <button
                                   onClick={() => handleEditUser(user.id)}
                                   className="w-7 h-7 flex items-center justify-center bg-slate-800 text-slate-400 rounded-lg hover:bg-slate-700 hover:text-white transition"
                                   title="Edit admin"
                                 >
-                                  <i className="fas fa-edit text-[11px]" />
+                                  <i className="fas fa-edit text-xs" />
                                 </button>
                                 <button
                                   onClick={() => handlePurgeUser(user)}
@@ -2957,19 +2957,19 @@ const UsersTab = ({
                                   className="w-7 h-7 flex items-center justify-center bg-red-900/20 text-red-400 rounded-lg hover:bg-red-900/40 transition disabled:opacity-50"
                                   title={processing[user.id] === "purging" ? "Deleting..." : "Permanently delete"}
                                 >
-                                  <i className={`fas ${processing[user.id] === "purging" ? "fa-spinner fa-spin" : "fa-trash"} text-[11px]`} />
+                                  <i className={`fas ${processing[user.id] === "purging" ? "fa-spinner fa-spin" : "fa-trash"} text-xs`} />
                                 </button>
                                 <button
                                   onClick={() => handleDeleteUser(user)}
                                   disabled={!!processing[user.id]}
-                                  className={`px-2 py-1 rounded-lg text-[11px] font-semibold transition shrink-0 ${
+                                  className={`px-2 py-1 rounded-lg text-xs font-semibold transition shrink-0 ${
                                     user.is_active
                                       ? "bg-amber-600/10 text-amber-400 hover:bg-amber-600/20"
                                       : "bg-emerald-600/10 text-emerald-400 hover:bg-emerald-600/20"
                                   }`}
                                 >
                                   {processing[user.id] === "toggling" ? (
-                                    <i className="fas fa-spinner fa-spin text-[10px]" />
+                                    <i className="fas fa-spinner fa-spin text-xs" />
                                   ) : (
                                     user.is_active ? "Deactivate" : "Activate"
                                   )}
@@ -3001,7 +3001,7 @@ const UsersTab = ({
                             ) : (
                               <div className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 ${getRoleColor(user.role)}`}>
                                 {user.is_superuser ? (
-                                  <i className="fas fa-crown text-[10px] text-amber-400" />
+                                  <i className="fas fa-crown text-xs text-amber-400" />
                                 ) : (
                                   (getDisplayName(user) || "U")[0].toUpperCase()
                                 )}
@@ -3024,7 +3024,7 @@ const UsersTab = ({
 
                         {/* Role */}
                         <td className="px-3 py-2.5 whitespace-nowrap">
-                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${getRoleColor(user.role)}`}>
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-black uppercase tracking-wider ${getRoleColor(user.role)}`}>
                             {displayRole(user.role)}
                           </span>
                         </td>
@@ -3034,12 +3034,12 @@ const UsersTab = ({
                           {user.role === "student" && (
                             <div className="flex items-center gap-1.5">
                               {user.roll_no != null && (
-                                <span className="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-[11px] text-slate-300 font-semibold">
+                                <span className="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-xs text-slate-300 font-semibold">
                                   #{user.roll_no}
                                 </span>
                               )}
                               {user.grade_level && (
-                                <span className="text-[11px] text-indigo-300">{user.grade_level}</span>
+                                <span className="text-xs text-indigo-300">{user.grade_level}</span>
                               )}
                               {!user.roll_no && !user.grade_level && <span className="text-slate-600 text-xs">—</span>}
                             </div>
@@ -3049,7 +3049,7 @@ const UsersTab = ({
                               const dept = getTeacherDepartment(user);
                               return (
                                 <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-semibold ${dept.bg} ${dept.color}`}>
-                                  <i className={`fas ${dept.icon} text-[9px]`} />
+                                  <i className={`fas ${dept.icon} text-xs`} />
                                   <span>{dept.name}</span>
                                 </span>
                               );
@@ -3065,7 +3065,7 @@ const UsersTab = ({
                           {user.role === "admin" && (
                             user.is_superuser ? (
                               <span className="text-amber-400 text-xs font-bold flex items-center gap-1">
-                                <i className="fas fa-crown text-[9px]" /> Super Admin
+                                <i className="fas fa-crown text-xs" /> Super Admin
                               </span>
                             ) : (
                               <span className="text-indigo-300 text-xs">Platform Admin</span>
@@ -3096,10 +3096,10 @@ const UsersTab = ({
                                   <button
                                     type="button"
                                     onClick={() => setAssignClassModalTeacher(user)}
-                                    className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 hover:bg-indigo-500/20 transition cursor-pointer"
+                                    className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 hover:bg-indigo-500/20 transition cursor-pointer"
                                     title="Assign subject to this teacher"
                                   >
-                                    <i className="fas fa-plus text-[8px]" /> Assign Subject
+                                    <i className="fas fa-plus text-xs" /> Assign Subject
                                   </button>
                                 </>
                               ) : (
@@ -3109,7 +3109,7 @@ const UsersTab = ({
                                   className="inline-flex items-center gap-1 text-xs text-amber-400 hover:text-amber-300 font-medium transition cursor-pointer"
                                   title="Assign subject to this available teacher"
                                 >
-                                  <i className="fas fa-plus text-[9px]" /> Standby • Assign Subject
+                                  <i className="fas fa-plus text-xs" /> Standby • Assign Subject
                                 </button>
                               )}
                             </div>
@@ -3130,7 +3130,7 @@ const UsersTab = ({
 
                         {/* Status */}
                         <td className="px-3 py-2.5 whitespace-nowrap">
-                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${getStatusColor(user.is_active)}`}>
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-black uppercase tracking-wider ${getStatusColor(user.is_active)}`}>
                             {user.is_active ? "Active" : "Inactive"}
                           </span>
                         </td>
@@ -3147,7 +3147,7 @@ const UsersTab = ({
                                   className="w-7 h-7 flex items-center justify-center bg-slate-800 text-slate-400 rounded-lg hover:bg-slate-700 hover:text-indigo-300 transition"
                                   title="Manage labels"
                                 >
-                                  <i className="fas fa-tags text-[11px]" />
+                                  <i className="fas fa-tags text-xs" />
                                 </button>
                               )}
                               <button
@@ -3155,14 +3155,14 @@ const UsersTab = ({
                                 className="w-7 h-7 flex items-center justify-center bg-slate-800 text-slate-400 rounded-lg hover:bg-slate-700 hover:text-white transition"
                                 title="View details"
                               >
-                                <i className="fas fa-eye text-[11px]" />
+                                <i className="fas fa-eye text-xs" />
                               </button>
                               <button
                                 onClick={() => handleEditUser(user.id)}
                                 className="w-7 h-7 flex items-center justify-center bg-slate-800 text-slate-400 rounded-lg hover:bg-slate-700 hover:text-white transition"
                                 title="Edit user"
                               >
-                                <i className="fas fa-edit text-[11px]" />
+                                <i className="fas fa-edit text-xs" />
                               </button>
                               <button
                                 onClick={() => handlePurgeUser(user)}
@@ -3170,19 +3170,19 @@ const UsersTab = ({
                                 className="w-7 h-7 flex items-center justify-center bg-red-900/20 text-red-400 rounded-lg hover:bg-red-900/40 transition disabled:opacity-50"
                                 title={processing[user.id] === "purging" ? "Deleting..." : "Permanently delete"}
                               >
-                                <i className={`fas ${processing[user.id] === "purging" ? "fa-spinner fa-spin" : "fa-trash"} text-[11px]`} />
+                                <i className={`fas ${processing[user.id] === "purging" ? "fa-spinner fa-spin" : "fa-trash"} text-xs`} />
                               </button>
                               <button
                                 onClick={() => handleDeleteUser(user)}
                                 disabled={!!processing[user.id]}
-                                className={`px-2 py-1 rounded-lg text-[11px] font-semibold transition shrink-0 ${
+                                className={`px-2 py-1 rounded-lg text-xs font-semibold transition shrink-0 ${
                                   user.is_active
                                     ? "bg-amber-600/10 text-amber-400 hover:bg-amber-600/20"
                                     : "bg-emerald-600/10 text-emerald-400 hover:bg-emerald-600/20"
                                 }`}
                               >
                                 {processing[user.id] === "toggling" ? (
-                                  <i className="fas fa-spinner fa-spin text-[10px]" />
+                                  <i className="fas fa-spinner fa-spin text-xs" />
                                 ) : (
                                   user.is_active ? "Deactivate" : "Activate"
                                 )}

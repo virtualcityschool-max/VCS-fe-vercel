@@ -102,13 +102,13 @@ const StudentQuizList = ({ hideHeader = false, filterCourse: externalFilterCours
                             <i className="fas fa-question-circle text-lg" />
                           </div>
                           <div className="flex flex-row items-center gap-2">
-                            <span className={`${color} px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest shadow-sm backdrop-blur-md border border-white/5`}>
+                            <span className={`${color} px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest shadow-sm backdrop-blur-md border border-white/5`}>
                               {label}
                             </span>
                           </div>
                         </div>
                         <div className="mb-auto">
-                          <p className="text-[9px] text-indigo-400/80 uppercase tracking-[0.2em] font-black mb-1">
+                          <p className="text-xs text-indigo-400/80 uppercase tracking-[0.2em] font-black mb-1">
                             {quiz.course_title}
                           </p>
                           <h2 className="font-bold text-white text-base leading-snug group-hover:text-indigo-200 transition-colors">
@@ -119,21 +119,21 @@ const StudentQuizList = ({ hideHeader = false, filterCourse: externalFilterCours
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
                               <div className="w-8 h-8 rounded-lg bg-slate-800/50 flex items-center justify-center text-indigo-400/70">
-                                <i className="fas fa-star text-[10px]" />
+                                <i className="fas fa-star text-xs" />
                               </div>
                               <div className="flex flex-col">
-                                <span className="text-[8px] text-slate-500 uppercase font-black leading-none mb-0.5">Marks</span>
-                                <span className="text-[11px] text-slate-300 font-bold">{quiz.total_marks}</span>
+                                <span className="text-xs text-slate-500 uppercase font-black leading-none mb-0.5">Marks</span>
+                                <span className="text-xs text-slate-300 font-bold">{quiz.total_marks}</span>
                               </div>
                             </div>
                             {quiz.duration_minutes && (
                               <div className="flex items-center gap-2">
                                 <div className="w-8 h-8 rounded-lg bg-slate-800/50 flex items-center justify-center text-amber-400/70">
-                                  <i className="fas fa-stopwatch text-[10px]" />
+                                  <i className="fas fa-stopwatch text-xs" />
                                 </div>
                                 <div className="flex flex-col">
-                                  <span className="text-[8px] text-slate-500 uppercase font-black leading-none mb-0.5">Time</span>
-                                  <span className="text-[11px] text-slate-300 font-bold">{quiz.duration_minutes} min</span>
+                                  <span className="text-xs text-slate-500 uppercase font-black leading-none mb-0.5">Time</span>
+                                  <span className="text-xs text-slate-300 font-bold">{quiz.duration_minutes} min</span>
                                 </div>
                               </div>
                             )}
@@ -142,20 +142,20 @@ const StudentQuizList = ({ hideHeader = false, filterCourse: externalFilterCours
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2 text-slate-400">
                                 <div className="w-8 h-8 rounded-lg bg-slate-800/50 flex items-center justify-center text-rose-400/70">
-                                  <i className="far fa-calendar-alt text-[10px]" />
+                                  <i className="far fa-calendar-alt text-xs" />
                                 </div>
                                 <div className="flex flex-col">
-                                  <span className="text-[8px] text-slate-500 uppercase font-black leading-none mb-0.5">Due</span>
-                                  <span className="text-[11px] font-bold">
+                                  <span className="text-xs text-slate-500 uppercase font-black leading-none mb-0.5">Due</span>
+                                  <span className="text-xs font-bold">
                                     {formatDate(quiz.due_date)}
                                   </span>
-                                  <span className="text-[10px] text-slate-500">
+                                  <span className="text-xs text-slate-500">
                                     {formatTime(quiz.due_date)}
                                   </span>
                                 </div>
                               </div>
                               <div className="w-8 h-8 rounded-full bg-slate-800/50 flex items-center justify-center text-slate-500 group-hover:text-white group-hover:bg-indigo-600 transition-all duration-300">
-                                <i className="fas fa-arrow-right text-[10px]" />
+                                <i className="fas fa-arrow-right text-xs" />
                               </div>
                             </div>
                           )}
@@ -208,12 +208,12 @@ const StudentQuizList = ({ hideHeader = false, filterCourse: externalFilterCours
                           <div className="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center text-slate-500 group-hover:bg-indigo-600 group-hover:text-white transition-all duration-500">
                             <i className="fas fa-check text-lg" />
                           </div>
-                          <span className={`${color} px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest shadow-sm backdrop-blur-md border border-white/5`}>
+                          <span className={`${color} px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest shadow-sm backdrop-blur-md border border-white/5`}>
                             {label}
                           </span>
                         </div>
                         <div className="mb-auto">
-                          <p className="text-[9px] text-indigo-400/80 uppercase tracking-[0.2em] font-black mb-1">
+                          <p className="text-xs text-indigo-400/80 uppercase tracking-[0.2em] font-black mb-1">
                             {quiz.course_title}
                           </p>
                           <h2 className="font-bold text-white text-base leading-snug group-hover:text-indigo-200 transition-colors">
@@ -224,18 +224,18 @@ const StudentQuizList = ({ hideHeader = false, filterCourse: externalFilterCours
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
                               <div className="w-8 h-8 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-500">
-                                <i className="fas fa-star text-[10px]" />
+                                <i className="fas fa-star text-xs" />
                               </div>
                               <div className="flex flex-col">
-                                <span className="text-[8px] text-slate-600 uppercase font-black leading-none mb-0.5">Marks</span>
-                                <span className="text-[11px] text-slate-400 font-bold">{quiz.total_marks}</span>
+                                <span className="text-xs text-slate-600 uppercase font-black leading-none mb-0.5">Marks</span>
+                                <span className="text-xs text-slate-400 font-bold">{quiz.total_marks}</span>
                               </div>
                             </div>
                             {hasScore && (
                               <div className="flex items-center gap-2 text-emerald-400">
                                 <div className="flex flex-col items-end">
-                                  <span className="text-[8px] text-emerald-500/70 uppercase font-black leading-none mb-0.5">Score</span>
-                                  <span className="text-[11px] font-black">
+                                  <span className="text-xs text-emerald-500/70 uppercase font-black leading-none mb-0.5">Score</span>
+                                  <span className="text-xs font-black">
                                     {sub.obtained_marks}/{sub.total_marks ?? quiz.total_marks}
                                   </span>
                                 </div>
@@ -244,11 +244,11 @@ const StudentQuizList = ({ hideHeader = false, filterCourse: externalFilterCours
                           </div>
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2 text-slate-500">
-                              <i className="far fa-calendar-check text-[10px]" />
-                              <span className="text-[11px] font-bold">Completed</span>
+                              <i className="far fa-calendar-check text-xs" />
+                              <span className="text-xs font-bold">Completed</span>
                             </div>
                             <div className="w-8 h-8 rounded-full bg-slate-800/50 flex items-center justify-center text-slate-500 group-hover:text-white group-hover:bg-indigo-600 transition-all duration-300">
-                              <i className="fas fa-arrow-right text-[10px]" />
+                              <i className="fas fa-arrow-right text-xs" />
                             </div>
                           </div>
                         </div>
@@ -258,7 +258,7 @@ const StudentQuizList = ({ hideHeader = false, filterCourse: externalFilterCours
                 })
             ) : (
               <div className="col-span-full border border-dashed border-slate-800 p-8 rounded-[2rem] text-center">
-                <p className="text-slate-600 text-[10px] uppercase font-black tracking-widest">No Completed Quizzes</p>
+                <p className="text-slate-600 text-xs uppercase font-black tracking-widest">No Completed Quizzes</p>
               </div>
             )}
           </div>

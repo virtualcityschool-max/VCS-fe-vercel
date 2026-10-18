@@ -97,7 +97,7 @@ const AttendanceCalendar = ({
         {DAY_NAMES.map((d) => (
           <div
             key={d}
-            className="text-center text-[9px] uppercase tracking-widest text-slate-500 font-bold py-0.5"
+            className="text-center text-xs uppercase tracking-widest text-slate-500 font-bold py-0.5"
           >
             {d}
           </div>
@@ -141,7 +141,7 @@ const AttendanceCalendar = ({
                 !inRange || !hasRecords ? "cursor-default" : "cursor-pointer",
               ].join(" ")}
             >
-              <span className="font-semibold leading-none text-[11px]">
+              <span className="font-semibold leading-none text-xs">
                 {Number(dateStr.slice(8))}
               </span>
               {isToday && (
@@ -157,12 +157,12 @@ const AttendanceCalendar = ({
         {Object.entries(STATUS_STYLE).map(([, cfg]) => (
           <div key={cfg.label} className="flex items-center gap-1.5">
             <span className={`w-2 h-2 rounded-full ${cfg.dot}`} />
-            <span className="text-[10px] text-slate-400">{cfg.label}</span>
+            <span className="text-xs text-slate-400">{cfg.label}</span>
           </div>
         ))}
         <div className="flex items-center gap-1.5">
           <span className="w-2 h-2 rounded-full bg-slate-700" />
-          <span className="text-[10px] text-slate-400">No Session</span>
+          <span className="text-xs text-slate-400">No Session</span>
         </div>
       </div>
     </div>

@@ -41,13 +41,13 @@ const StudentWorkspaceNav = ({ activeTab, onSelectTab, counts = {} }) => {
               />
 
               {typeof count === "number" && count > 0 && (
-                <span className="absolute -top-1 -right-1 px-1.5 py-0.2 rounded-full text-[9px] font-black bg-rose-500 text-white shadow">
+                <span className="absolute -top-1 -right-1 px-1.5 py-0.2 rounded-full text-xs font-black bg-rose-500 text-white shadow">
                   {count}
                 </span>
               )}
 
               {/* Instant hover tooltip */}
-              <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-lg bg-slate-900 border border-slate-700 text-white text-[11px] font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-150 z-30 shadow-xl">
+              <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-150 z-30 shadow-xl">
                 {tab.label}
               </span>
             </button>

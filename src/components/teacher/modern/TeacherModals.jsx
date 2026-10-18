@@ -37,7 +37,7 @@ export const PostAnnouncementModal = ({
             </div>
             <div>
               <h3 className="text-sm font-bold text-white">Broadcast Faculty Announcement</h3>
-              <p className="text-[11px] text-slate-400">
+              <p className="text-xs text-slate-400">
                 Pushes live to student sidebar notification bells
               </p>
             </div>
@@ -96,17 +96,17 @@ export const PostAnnouncementModal = ({
           </div>
 
           {announcements.length > 0 && <div className="pt-2 border-t border-[#1A2138]">
-              <div className="text-[11px] font-semibold text-slate-400 mb-2">
+              <div className="text-xs font-semibold text-slate-400 mb-2">
                 Recent Broadcasts ({announcements.length})
               </div>
               <div className="max-h-28 overflow-y-auto space-y-2 pr-1">
                 {announcements.map((a) => <div
     key={a.id}
-    className="p-2.5 rounded-xl bg-[#0B0E1A] border border-[#181F36] text-[11px]"
+    className="p-2.5 rounded-xl bg-[#0B0E1A] border border-[#181F36] text-xs"
   >
                     <div className="font-bold text-slate-200">{a.title}</div>
                     <div className="text-slate-400 mt-0.5 line-clamp-1">{a.content}</div>
-                    <div className="text-[10px] text-indigo-400 mt-1">
+                    <div className="text-xs text-indigo-400 mt-1">
                       {a.audience} · {a.postedAt}
                     </div>
                   </div>)}
@@ -186,7 +186,7 @@ export const ScheduleSessionModal = ({
             </div>
             <div>
               <h3 className="text-sm font-bold text-white">Schedule Live Google Meet</h3>
-              <p className="text-[11px] text-slate-400">Auto-generates classroom link for students</p>
+              <p className="text-xs text-slate-400">Auto-generates classroom link for students</p>
             </div>
           </div>
           <button onClick={onClose} className="text-slate-400 hover:text-white p-1 cursor-pointer">
@@ -351,7 +351,7 @@ export const GradeTaskModal = ({
             </div>
             <div>
               <h3 className="text-sm font-bold text-white">Grade Submission</h3>
-              <p className="text-[11px] text-slate-400">
+              <p className="text-xs text-slate-400">
                 {task.studentName} · {task.studentRoll}
               </p>
             </div>
@@ -364,7 +364,7 @@ export const GradeTaskModal = ({
         <form onSubmit={handleSubmit} className="p-5 space-y-4 max-h-[80vh] overflow-y-auto">
           <div className="p-3 rounded-xl bg-[#0B0E1A] border border-[#1B223B]">
             <div className="text-xs font-bold text-white">{task.assignmentTitle}</div>
-            <div className="text-[11px] text-slate-400 mt-0.5">
+            <div className="text-xs text-slate-400 mt-0.5">
               {task.courseTitle}
               {task.submittedAt ? ` · Submitted ${task.submittedAt}` : ""}
               {detail?.status === "late" ? " · Late" : ""}
@@ -373,7 +373,7 @@ export const GradeTaskModal = ({
 
           {/* Student's work */}
           <div className="space-y-2">
-            <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Student's answer</div>
+            <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Student's answer</div>
             {loadError ? <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-xs text-rose-300">{loadError}</div> : !detail ? <div className="p-3 rounded-xl bg-[#0B0E1A] border border-[#1B223B] text-xs text-slate-500">Loading submission…</div> : <>
                 {detail.text_answer ? <div className="p-3 rounded-xl bg-[#0B0E1A] border border-[#1B223B] text-xs text-slate-100 whitespace-pre-wrap max-h-64 overflow-y-auto">
                     {richTextToPlain(detail.text_answer)}
@@ -470,7 +470,7 @@ export const CreateCourseModal = ({
             </div>
             <div>
               <h3 className="text-sm font-bold text-white">Launch New Academic Course</h3>
-              <p className="text-[11px] text-slate-400">Adds syllabus to your Academic Portfolio</p>
+              <p className="text-xs text-slate-400">Adds syllabus to your Academic Portfolio</p>
             </div>
           </div>
           <button onClick={onClose} className="text-slate-400 hover:text-white p-1 cursor-pointer">

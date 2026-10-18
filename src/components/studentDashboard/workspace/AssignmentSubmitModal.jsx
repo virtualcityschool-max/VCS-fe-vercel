@@ -47,7 +47,7 @@ const AssignmentSubmitModal = ({ assignment, onClose, onSubmitted }) => {
       <div className="relative w-full max-w-xl rounded-2xl bg-slate-900 border border-white/10 p-6 shadow-2xl space-y-5 animate-scaleUp">
         <div className="flex items-start justify-between pb-3 border-b border-white/10">
           <div>
-            <span className="text-[10px] font-black uppercase tracking-widest text-indigo-400">
+            <span className="text-xs font-black uppercase tracking-widest text-indigo-400">
               {assignment.course_title || "Assignment Submission"}
             </span>
             <h3 className="text-lg font-black text-white mt-0.5">
@@ -106,7 +106,7 @@ const AssignmentSubmitModal = ({ assignment, onClose, onSubmitted }) => {
                     <span className="text-xs font-semibold text-white">
                       Click or drag files here to upload
                     </span>
-                    <span className="text-[10px] text-slate-500 mt-1">
+                    <span className="text-xs text-slate-500 mt-1">
                       Max file size: 25MB • PDF, DOCX, Images, ZIP
                     </span>
                   </>

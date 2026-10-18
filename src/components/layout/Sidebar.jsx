@@ -3,6 +3,7 @@ import { useNavigate, NavLink, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchUnreadAnnouncementsCount, fetchMyAnnouncements } from "../../store/slices/announcementsSlice";
 import UserProfileDropdown from "./UserProfileDropdown";
+import ThemeToggle from "../common/ThemeToggle";
 import { getTimezoneAbbr } from "../../utils/validation";
 import TimezoneModal from "../common/TimezoneModal";
 
@@ -33,8 +34,8 @@ const TimezoneIndicator = ({ isCollapsed, onOpenTimezoneModal }) => {
           className="flex flex-col items-center gap-0.5 px-2 py-2 rounded-xl hover:bg-indigo-500/10 border border-transparent hover:border-indigo-500/20 transition-all cursor-pointer"
         >
           <i className="fas fa-globe text-indigo-400 text-xs" />
-          <span className="text-white text-[9px] font-bold tabular-nums leading-none mt-0.5">{time}</span>
-          <span className="text-indigo-400/70 text-[8px] font-bold leading-none">{city}</span>
+          <span className="text-white text-xs font-bold tabular-nums leading-none mt-0.5">{time}</span>
+          <span className="text-indigo-400/70 text-xs font-bold leading-none">{city}</span>
         </button>
 
         {/* Tooltip - slides in from the right, clickable */}
@@ -60,7 +61,7 @@ const TimezoneIndicator = ({ isCollapsed, onOpenTimezoneModal }) => {
         className="w-full flex items-center justify-between gap-2 rounded-xl bg-slate-800/50 border border-slate-700/50 hover:border-indigo-500/40 hover:bg-slate-800/80 transition-all duration-200 px-3 py-2 text-left cursor-pointer"
       >
         <div className="flex items-center gap-2 min-w-0">
-          <i className="fas fa-globe text-indigo-400 text-[10px] flex-shrink-0" />
+          <i className="fas fa-globe text-indigo-400 text-xs flex-shrink-0" />
           <p className="text-white text-xs font-bold truncate">
             {displayTz} <span className="text-slate-500 font-medium">{abbr}</span>
           </p>
@@ -271,7 +272,7 @@ function NavItem({ label, icon, isCollapsed, badge, badgeText, isActive, onClick
         {label}
       </span>
       {badgeText && !isCollapsed && (
-        <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-semibold tabular-nums ml-auto ${
+        <span className={`px-1.5 py-0.5 rounded-md text-xs font-semibold tabular-nums ml-auto ${
           active
             ? "bg-white/20 text-white"
             : "bg-emerald-500/20 text-emerald-300 border border-emerald-400/30"
@@ -282,13 +283,13 @@ function NavItem({ label, icon, isCollapsed, badge, badgeText, isActive, onClick
       {badge !== undefined && badge !== null && badge !== "" && !badgeText && (
         role === "teacher" ? (
           !isCollapsed ? (
-            <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-mono tabular-nums ml-auto ${
+            <span className={`px-1.5 py-0.5 rounded-md text-xs font-mono tabular-nums ml-auto ${
               active ? "bg-white/20 text-white" : "bg-[#181F36] text-slate-400"
             }`}>
               {badge}
             </span>
           ) : (
-            <span className="absolute -top-1 -right-1 w-4 h-4 text-[9px] font-bold rounded-full bg-indigo-500 text-white flex items-center justify-center">
+            <span className="absolute -top-1 -right-1 w-4 h-4 text-xs font-bold rounded-full bg-indigo-500 text-white flex items-center justify-center">
               {badge}
             </span>
           )
@@ -296,7 +297,7 @@ function NavItem({ label, icon, isCollapsed, badge, badgeText, isActive, onClick
           badge > 0 && (
             <span className={`bg-rose-500 text-white font-bold rounded-full flex-shrink-0 transition-all duration-300 ${
               isCollapsed
-                ? "absolute -top-1 -right-1 w-4 h-4 text-[9px] flex items-center justify-center"
+                ? "absolute -top-1 -right-1 w-4 h-4 text-xs flex items-center justify-center"
                 : "ml-auto text-xs px-2 py-0.5"
             }`}>
               {badge > 99 ? "99+" : badge}
@@ -333,10 +334,10 @@ function NavItem({ label, icon, isCollapsed, badge, badgeText, isActive, onClick
             <span className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-slate-700" />
             {label}
             {badge && (
-              <span className="bg-indigo-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">{badge}</span>
+              <span className="bg-indigo-600 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">{badge}</span>
             )}
             {badgeText && (
-              <span className="bg-emerald-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">{badgeText}</span>
+              <span className="bg-emerald-600 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">{badgeText}</span>
             )}
           </div>
         </div>
@@ -416,7 +417,7 @@ const Sidebar = ({
               navigate(dashboardPaths[role] || "/");
             }}
           >
-            <img src="/assets/logo.png" alt="VCS" className="w-full h-full object-contain" />
+            <img src="/assets/logo.webp" alt="VCS" className="theme-logo w-full h-full object-contain" />
           </div>
 
           {/* Collapsed Logo (Mini) */}
@@ -461,7 +462,7 @@ const Sidebar = ({
       {/* ── Nav ── */}
       <div className={`flex-1 py-3 overflow-y-auto overflow-x-hidden ${isCollapsed ? "px-3" : "px-4"}`}>
         {!isCollapsed && (
-          <p className="text-[10px] font-black uppercase tracking-widest text-slate-600 px-3 mb-2">
+          <p className="text-xs font-black uppercase tracking-widest text-slate-600 px-3 mb-2">
             Navigation
           </p>
         )}
@@ -477,7 +478,7 @@ const Sidebar = ({
                     {startsNewSection && (
                       <div className={`pt-3 mt-2 border-t border-slate-800/70 ${isCollapsed ? "px-0" : ""}`}>
                         {!isCollapsed && (
-                          <p className="text-[9px] font-black uppercase tracking-widest text-slate-600 px-3 mb-1.5">
+                          <p className="text-xs font-black uppercase tracking-widest text-slate-600 px-3 mb-1.5">
                             {tab.section}
                           </p>
                         )}
@@ -529,8 +530,8 @@ const Sidebar = ({
                 {unreadCount > 0 && (
                   <span className={`bg-rose-500 text-white font-bold rounded-full transition-all duration-300 ${
                     isCollapsed
-                      ? "absolute -top-2 -right-2 w-4 h-4 text-[9px] flex items-center justify-center"
-                      : "absolute -top-2 -right-2 w-4 h-4 text-[9px] flex items-center justify-center"
+                      ? "absolute -top-2 -right-2 w-4 h-4 text-xs flex items-center justify-center"
+                      : "absolute -top-2 -right-2 w-4 h-4 text-xs flex items-center justify-center"
                   }`}>
                     {unreadCount > 9 ? "9+" : unreadCount}
                   </span>
@@ -551,7 +552,7 @@ const Sidebar = ({
             <div className="absolute bottom-full left-0 right-0 mb-2 mx-2 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden z-50">
               <div className="px-4 py-3 border-b border-slate-800 flex items-center justify-between">
                 <h3 className="text-sm font-bold text-white">Announcements</h3>
-                <span className="text-[10px] uppercase tracking-widest text-slate-500">
+                <span className="text-xs uppercase tracking-widest text-slate-500">
                   {announcements?.length || 0} items
                 </span>
               </div>
@@ -569,10 +570,10 @@ const Sidebar = ({
                         <div className="min-w-0 flex-1">
                           <div className="flex items-start justify-between gap-2">
                             <p className={`text-sm ${item.is_read ? "text-slate-300" : "text-white font-semibold"}`}>{item.title}</p>
-                            <span className="text-[10px] text-slate-500 shrink-0">{new Date(item.created_at).toLocaleDateString()}</span>
+                            <span className="text-xs text-slate-500 shrink-0">{new Date(item.created_at).toLocaleDateString()}</span>
                           </div>
                           <p className="text-xs text-slate-400 mt-1 leading-relaxed">{item.body}</p>
-                          <div className="mt-2 flex flex-wrap gap-2 text-[10px] uppercase tracking-widest text-slate-500">
+                          <div className="mt-2 flex flex-wrap gap-2 text-xs uppercase tracking-widest text-slate-500">
                             <span>{item.course}</span>
                             {item.course && item.posted_by && <span>•</span>}
                             <span>{item.posted_by}</span>
@@ -595,6 +596,12 @@ const Sidebar = ({
         isCollapsed={isCollapsed}
         onOpenTimezoneModal={() => setIsTimezoneModalOpen(true)}
       />
+
+      {/* ── Day / night mode ── */}
+      <div className={`border-t border-slate-800/80 flex-shrink-0 ${isCollapsed ? "px-3 py-2 flex justify-center" : "px-4 py-2 flex items-center justify-between"}`}>
+        {!isCollapsed && <span className="text-sm text-slate-400">Day / night</span>}
+        <ThemeToggle />
+      </div>
 
       {/* ── Footer: UserProfileDropdown ── */}
       <div className="border-t border-slate-800/80 flex-shrink-0 p-3 overflow-visible relative">

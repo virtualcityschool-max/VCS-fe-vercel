@@ -176,7 +176,7 @@ const OverviewTab = ({ onOpenSubmitModal }) => {
                   Live &amp; Upcoming Classes
                 </h3>
                 {upcomingClasses.some((c) => c.status === "live") && (
-                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-black uppercase tracking-wider animate-pulse">
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-black uppercase tracking-wider animate-pulse">
                     Live Now
                   </span>
                 )}
@@ -194,7 +194,7 @@ const OverviewTab = ({ onOpenSubmitModal }) => {
               className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white text-xs font-semibold transition flex items-center gap-1.5 cursor-pointer"
             >
               <span>Full Schedule</span>
-              <i className="fas fa-arrow-right text-[10px]" />
+              <i className="fas fa-arrow-right text-xs" />
             </button>
           </div>
         </div>
@@ -220,11 +220,11 @@ const OverviewTab = ({ onOpenSubmitModal }) => {
                 >
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="text-[11px] font-mono font-bold text-indigo-300 truncate">
+                      <span className="text-xs font-mono font-bold text-indigo-300 truncate">
                         {formatDate(ses.scheduled_at, timezone)} · {formatTime(ses.scheduled_at, timezone)}
                       </span>
                       {isLive ? (
-                        <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[9px] font-black uppercase tracking-wider shrink-0 flex items-center gap-1 animate-pulse">
+                        <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-black uppercase tracking-wider shrink-0 flex items-center gap-1 animate-pulse">
                           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
                           Live Now
                         </span>
@@ -244,7 +244,7 @@ const OverviewTab = ({ onOpenSubmitModal }) => {
                     <p className="text-xs text-slate-400 line-clamp-1">
                       {ses.course_title || ses.title}
                     </p>
-                    <p className="text-[11px] text-slate-400 flex items-center gap-1.5 pt-0.5">
+                    <p className="text-xs text-slate-400 flex items-center gap-1.5 pt-0.5">
                       <i className="fas fa-chalkboard-teacher text-indigo-400 text-xs" />
                       <span>{ses.teacher_name || ses.instructor_name || "Assigned Faculty"}</span>
                     </p>
@@ -306,7 +306,7 @@ const OverviewTab = ({ onOpenSubmitModal }) => {
                 Academic Standing
               </h3>
             </div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 bg-white/5 px-2 py-0.5 rounded-full">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-400 bg-white/5 px-2 py-0.5 rounded-full">
               Active Term
             </span>
           </div>
@@ -336,7 +336,7 @@ const OverviewTab = ({ onOpenSubmitModal }) => {
                 <span className="text-xl font-black text-white font-poppins leading-none">
                   {progressPercent}%
                 </span>
-                <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-0.5">
                   Tasks
                 </span>
               </div>
@@ -360,20 +360,20 @@ const OverviewTab = ({ onOpenSubmitModal }) => {
 
               <div className="grid grid-cols-2 gap-2 pt-1">
                 <div className="p-2 rounded-xl bg-white/[0.02] border border-white/5 text-center">
-                  <p className="text-[9px] uppercase font-bold text-slate-500">Enrolled</p>
+                  <p className="text-xs uppercase font-bold text-slate-500">Enrolled</p>
                   <p className="text-sm font-black text-white mt-0.5">
                     {enrolledCourses.length} Course{enrolledCourses.length === 1 ? "" : "s"}
                   </p>
                 </div>
                 <div className="p-2 rounded-xl bg-white/[0.02] border border-white/5 text-center">
-                  <p className="text-[9px] uppercase font-bold text-slate-500">Membership</p>
+                  <p className="text-xs uppercase font-bold text-slate-500">Membership</p>
                   <p className="text-xs font-black text-emerald-400 mt-1">Good Standing</p>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="pt-3 border-t border-white/5 flex items-center justify-between text-[11px] text-slate-400">
+          <div className="pt-3 border-t border-white/5 flex items-center justify-between text-xs text-slate-400">
             <span>Submissions: <strong className="text-white">{submittedAssignments.length} done</strong></span>
             <span>Quizzes: <strong className="text-white">{completedQuizzes.length} done</strong></span>
           </div>
@@ -388,7 +388,7 @@ const OverviewTab = ({ onOpenSubmitModal }) => {
                 Quizzes &amp; Tests ({filteredQuizzes.length})
               </h3>
             </div>
-            <div className="flex items-center gap-1 bg-white/5 p-0.5 rounded-lg text-[10px] font-bold">
+            <div className="flex items-center gap-1 bg-white/5 p-0.5 rounded-lg text-xs font-bold">
               {["all", "pending", "completed"].map((filter) => (
                 <button
                   key={filter}
@@ -419,7 +419,7 @@ const OverviewTab = ({ onOpenSubmitModal }) => {
                       <h4 className="text-xs font-bold text-white truncate group-hover:text-indigo-300 transition">
                         {q.title}
                       </h4>
-                      <p className="text-[10px] text-slate-400 truncate">
+                      <p className="text-xs text-slate-400 truncate">
                         {q.course_title || "Course Quiz"}
                       </p>
                     </div>
@@ -430,7 +430,7 @@ const OverviewTab = ({ onOpenSubmitModal }) => {
                           <span className="text-xs font-mono font-black text-emerald-400">
                             {st.score} / {st.max}
                           </span>
-                          <span className="block text-[9px] text-slate-400 font-mono">
+                          <span className="block text-xs text-slate-400 font-mono">
                             {st.max ? Math.round((Number(st.score) / Number(st.max)) * 100) : 0}%
                           </span>
                         </div>
@@ -441,7 +441,7 @@ const OverviewTab = ({ onOpenSubmitModal }) => {
                       )}
 
                       <span
-                        className={`px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase ${
+                        className={`px-2 py-0.5 rounded-full text-xs font-extrabold uppercase ${
                           st.state === "graded"
                             ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/20"
                             : st.state === "submitted"
@@ -456,7 +456,7 @@ const OverviewTab = ({ onOpenSubmitModal }) => {
                         {st.badge}
                       </span>
 
-                      <i className="fas fa-chevron-right text-[10px] text-slate-500 group-hover:text-white transition" />
+                      <i className="fas fa-chevron-right text-xs text-slate-500 group-hover:text-white transition" />
                     </div>
                   </div>
                 );
@@ -466,7 +466,7 @@ const OverviewTab = ({ onOpenSubmitModal }) => {
             <div className="text-center py-8 bg-white/[0.02] rounded-xl border border-white/5 my-auto">
               <i className="fas fa-question-circle text-2xl text-slate-600 mb-2" />
               <p className="text-xs font-bold text-white">No Quizzes Found</p>
-              <p className="text-[11px] text-slate-400 mt-0.5">
+              <p className="text-xs text-slate-400 mt-0.5">
                 {quizFilter === "all"
                   ? "Quizzes published by your teachers will appear here with instant results."
                   : `No ${quizFilter} quizzes at this time.`}
@@ -480,7 +480,7 @@ const OverviewTab = ({ onOpenSubmitModal }) => {
               className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold inline-flex items-center gap-1 cursor-pointer"
             >
               <span>View All Quizzes &amp; Solve</span>
-              <i className="fas fa-arrow-right text-[10px]" />
+              <i className="fas fa-arrow-right text-xs" />
             </button>
           </div>
         </div>
@@ -503,7 +503,7 @@ const OverviewTab = ({ onOpenSubmitModal }) => {
               <button
                 key={status}
                 onClick={() => setAssignmentFilter(status)}
-                className={`px-2.5 py-1 rounded-lg uppercase text-[10px] transition cursor-pointer ${
+                className={`px-2.5 py-1 rounded-lg uppercase text-xs transition cursor-pointer ${
                   assignmentFilter === status
                     ? "bg-indigo-600 text-white shadow-sm"
                     : "text-slate-400 hover:text-white"
@@ -519,7 +519,7 @@ const OverviewTab = ({ onOpenSubmitModal }) => {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b border-white/5 text-[10px] uppercase font-bold text-slate-500">
+                <tr className="border-b border-white/5 text-xs uppercase font-bold text-slate-500">
                   <th className="py-2.5 px-3">Assignment Title</th>
                   <th className="py-2.5 px-3">Course</th>
                   <th className="py-2.5 px-3">Due Date</th>
@@ -541,12 +541,12 @@ const OverviewTab = ({ onOpenSubmitModal }) => {
                           <span>{a.title}</span>
                         </div>
                         {hasMark && (
-                          <span className="text-[10px] text-emerald-400 font-bold block mt-0.5 font-mono">
+                          <span className="text-xs text-emerald-400 font-bold block mt-0.5 font-mono">
                             Marking: {a.my_score.score} / {a.my_score.max_score}
                           </span>
                         )}
                         {!hasMark && a.grade && (
-                          <span className="text-[10px] text-emerald-400 font-bold block mt-0.5">
+                          <span className="text-xs text-emerald-400 font-bold block mt-0.5">
                             Grade: {a.grade}
                           </span>
                         )}
@@ -554,12 +554,12 @@ const OverviewTab = ({ onOpenSubmitModal }) => {
                       <td className="py-3 px-3 text-slate-300 font-medium">
                         {a.course_title || a.course?.title || "Enrolled Course"}
                       </td>
-                      <td className="py-3 px-3 text-slate-400 font-mono text-[11px]">
+                      <td className="py-3 px-3 text-slate-400 font-mono text-xs">
                         {a.due_date ? formatDate(a.due_date) : "Open"}
                       </td>
                       <td className="py-3 px-3">
                         <span
-                          className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ${
+                          className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-bold uppercase ${
                             isSubmitted
                               ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/20"
                               : isOverdue
@@ -577,7 +577,7 @@ const OverviewTab = ({ onOpenSubmitModal }) => {
                             className="px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition cursor-pointer inline-flex items-center gap-1.5"
                           >
                             <span>View Feedback</span>
-                            <i className="fas fa-chevron-right text-[9px]" />
+                            <i className="fas fa-chevron-right text-xs" />
                           </button>
                         ) : (
                           <button
@@ -602,7 +602,7 @@ const OverviewTab = ({ onOpenSubmitModal }) => {
           <div className="text-center py-10 bg-white/[0.02] rounded-xl border border-white/5">
             <i className="fas fa-tasks text-2xl text-slate-600 mb-2" />
             <p className="text-xs font-bold text-white">No Assignments Posted Yet</p>
-            <p className="text-[11px] text-slate-400 mt-0.5">
+            <p className="text-xs text-slate-400 mt-0.5">
               Course assignments, rubrics, and deadlines will appear here once published by faculty.
             </p>
           </div>
@@ -626,7 +626,7 @@ const OverviewTab = ({ onOpenSubmitModal }) => {
             className="text-xs font-bold text-indigo-400 hover:text-indigo-300 flex items-center gap-1.5 transition cursor-pointer"
           >
             <span>Explore More</span>
-            <i className="fas fa-arrow-right text-[10px]" />
+            <i className="fas fa-arrow-right text-xs" />
           </button>
         </div>
 
@@ -653,7 +653,7 @@ const OverviewTab = ({ onOpenSubmitModal }) => {
                         <i className="fas fa-book-open text-2xl" />
                       </div>
                     )}
-                    <span className="absolute top-2 right-2 px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-md text-[10px] font-bold text-white">
+                    <span className="absolute top-2 right-2 px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-md text-xs font-bold text-white">
                       Progress: {progress}%
                     </span>
                   </div>
@@ -663,7 +663,7 @@ const OverviewTab = ({ onOpenSubmitModal }) => {
                       <h4 className="font-bold text-xs text-white line-clamp-1 group-hover:text-indigo-300 transition">
                         {c.title}
                       </h4>
-                      <p className="text-[11px] text-slate-400 truncate mt-0.5">
+                      <p className="text-xs text-slate-400 truncate mt-0.5">
                         Tutor: {c.teacher?.username || "Assigned Faculty"}
                       </p>
                     </div>

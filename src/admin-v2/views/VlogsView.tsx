@@ -77,13 +77,13 @@ export const VlogsView: React.FC = () => {
                 </div>
 
                 <div className="absolute top-3 left-3 flex items-center gap-2">
-                  <span className="px-2.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-rose-600 text-white font-mono">
+                  <span className="px-2.5 py-0.5 rounded text-xs font-bold uppercase tracking-wider bg-rose-600 text-white font-mono">
                     Video Vlog
                   </span>
                   <StatusPill status={post.status} />
                 </div>
 
-                <div className="absolute bottom-2.5 right-3 text-[11px] font-mono text-slate-300 bg-black/70 px-2 py-0.5 rounded flex items-center gap-1">
+                <div className="absolute bottom-2.5 right-3 text-xs font-mono text-slate-300 bg-black/70 px-2 py-0.5 rounded flex items-center gap-1">
                   <Clock className="w-3 h-3 text-rose-400" />
                   <span>{post.readTimeOrDuration}</span>
                 </div>

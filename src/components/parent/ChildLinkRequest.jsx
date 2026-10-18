@@ -126,13 +126,13 @@ const ChildLinkRequest = ({ onSuccess }) => {
                 onBlur={() => setTooltipVisible(false)}
                 className="w-5 h-5 flex items-center justify-center rounded-full bg-slate-700 hover:bg-slate-600 text-slate-400 hover:text-white transition"
               >
-                <i className="fas fa-question text-[9px]"></i>
+                <i className="fas fa-question text-xs"></i>
               </button>
               {tooltipVisible && (
                 <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 z-50 w-64 pointer-events-none">
                   <div className="bg-slate-800 border border-slate-600 rounded-xl px-3.5 py-3 shadow-xl text-xs text-slate-300 leading-relaxed">
                     <p className="font-semibold text-white mb-1 flex items-center gap-1.5">
-                      <i className="fas fa-lightbulb text-yellow-400 text-[10px]"></i>
+                      <i className="fas fa-lightbulb text-yellow-400 text-xs"></i>
                       How to find your child's info
                     </p>
                     Ask your child to log into their student account and share their <span className="text-purple-300 font-medium">Roll Number</span> or <span className="text-purple-300 font-medium">registered email address</span>. Both can be used to send a link request.
@@ -166,15 +166,15 @@ const ChildLinkRequest = ({ onSuccess }) => {
 
           {/* Type hint */}
           <div className="flex items-center gap-4 mt-2.5">
-            <span className="flex items-center gap-1.5 text-[11px] text-slate-500">
+            <span className="flex items-center gap-1.5 text-xs text-slate-500">
               <span className="w-4 h-4 rounded bg-purple-600/20 border border-purple-500/30 flex items-center justify-center">
-                <i className="fas fa-hashtag text-purple-400 text-[8px]"></i>
+                <i className="fas fa-hashtag text-purple-400 text-xs"></i>
               </span>
               Numeric → treated as roll number
             </span>
-            <span className="flex items-center gap-1.5 text-[11px] text-slate-500">
+            <span className="flex items-center gap-1.5 text-xs text-slate-500">
               <span className="w-4 h-4 rounded bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center">
-                <i className="fas fa-at text-indigo-400 text-[8px]"></i>
+                <i className="fas fa-at text-indigo-400 text-xs"></i>
               </span>
               Contains @  → treated as email
             </span>
@@ -206,7 +206,7 @@ const ChildLinkRequest = ({ onSuccess }) => {
                     </div>
                     <div>
                       <p className="text-white text-sm font-medium">{entry.value}</p>
-                      <p className={`text-[10px] uppercase tracking-widest font-bold ${
+                      <p className={`text-xs uppercase tracking-widest font-bold ${
                         entry.type === "roll_no" ? "text-purple-500" : "text-indigo-500"
                       }`}>
                         {entry.type === "roll_no" ? "Roll Number" : "Email"}

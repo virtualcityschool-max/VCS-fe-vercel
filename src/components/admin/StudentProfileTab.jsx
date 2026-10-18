@@ -10,20 +10,20 @@ import { getDisplayName } from "../../utils/userDisplay";
 const StatusBadge = ({ status }) => {
   if (status === "approved")
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[9px] font-black uppercase tracking-widest">
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-black uppercase tracking-widest">
         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
         Approved
       </span>
     );
   if (status === "pending")
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[9px] font-black uppercase tracking-widest">
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-black uppercase tracking-widest">
         <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
         Pending
       </span>
     );
   return (
-    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-700 border border-slate-600 text-slate-400 text-[9px] font-black uppercase tracking-widest">
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-700 border border-slate-600 text-slate-400 text-xs font-black uppercase tracking-widest">
       {status}
     </span>
   );
@@ -155,7 +155,7 @@ const StudentProfileTab = ({ profile, userId, rollNo, onUpdate, onCancel, onSave
             <div className="flex items-center gap-3 min-w-0">
               <i className="fas fa-id-badge text-indigo-400 text-sm flex-shrink-0" />
               <div className="min-w-0">
-                <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Student ID</p>
+                <p className="text-xs uppercase tracking-widest text-slate-500 font-bold">Student ID</p>
                 <p className="text-white font-semibold text-sm truncate">#{userId}</p>
               </div>
             </div>
@@ -164,7 +164,7 @@ const StudentProfileTab = ({ profile, userId, rollNo, onUpdate, onCancel, onSave
             <div className="flex items-center gap-3 sm:border-l sm:border-slate-700/50 sm:pl-3 min-w-0">
               <i className="fas fa-hashtag text-indigo-400 text-sm flex-shrink-0" />
               <div className="min-w-0">
-                <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Roll No</p>
+                <p className="text-xs uppercase tracking-widest text-slate-500 font-bold">Roll No</p>
                 <p className="text-white font-semibold text-sm font-mono truncate">{rollNo}</p>
               </div>
             </div>
@@ -260,7 +260,7 @@ const StudentProfileTab = ({ profile, userId, rollNo, onUpdate, onCancel, onSave
           </div>
           <div>
             <h3 className="text-base font-semibold text-white">Linked Guardians</h3>
-            <p className="text-[10px] text-slate-500 mt-0.5">{parents.length} linked</p>
+            <p className="text-xs text-slate-500 mt-0.5">{parents.length} linked</p>
           </div>
         </div>
         <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl overflow-hidden">
@@ -280,7 +280,7 @@ const StudentProfileTab = ({ profile, userId, rollNo, onUpdate, onCancel, onSave
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-white truncate">{getDisplayName(p)}</p>
-                    <p className="text-[11px] text-slate-500 truncate">{p.email}</p>
+                    <p className="text-xs text-slate-500 truncate">{p.email}</p>
                   </div>
                   <StatusBadge status={p.status} />
                 </div>

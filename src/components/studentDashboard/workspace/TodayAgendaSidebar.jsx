@@ -152,14 +152,14 @@ const TodayAgendaSidebar = ({
               <h3 className="text-sm font-bold text-white tracking-tight leading-none">
                 {todaySessions.length > 0 ? "Today's Live Classes" : "Upcoming Classes"}
               </h3>
-              <p className="text-[10px] text-slate-400 mt-0.5">
+              <p className="text-xs text-slate-400 mt-0.5">
                 Google Meet • {timezoneAbbr}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <IssueInJoiningClassBanner variant="button" />
-            <span className="hidden sm:inline-block px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-slate-300 text-[10px] font-bold">
+            <span className="hidden sm:inline-block px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-slate-300 text-xs font-bold">
               {sessions.length} Session{sessions.length === 1 ? "" : "s"}
             </span>
           </div>
@@ -184,14 +184,14 @@ const TodayAgendaSidebar = ({
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5 mb-0.5">
                         <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                        <span className="text-[10px] font-mono font-bold text-indigo-300 truncate">
+                        <span className="text-xs font-mono font-bold text-indigo-300 truncate">
                           {isToday ? "Today" : formatDate(session.scheduled_at, timezone)} · {formatTime(session.scheduled_at, timezone)} ({timezoneAbbr})
                         </span>
                       </div>
                       <h4 className="text-xs font-bold text-white truncate">
                         {session.title || session.course_title}
                       </h4>
-                      <p className="text-[11px] text-slate-400 truncate">
+                      <p className="text-xs text-slate-400 truncate">
                         {session.teacher_name || session.instructor_name || "Assigned Faculty"} • {session.room || "Google Meet"}
                       </p>
                     </div>
@@ -205,7 +205,7 @@ const TodayAgendaSidebar = ({
                         />
                       )}
                       {phase !== "upcoming" && (
-                        <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[9px] font-black uppercase tracking-wider animate-pulse">
+                        <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-black uppercase tracking-wider animate-pulse">
                           {phase === "live" ? "Live Now" : "Join Now"}
                         </span>
                       )}
@@ -215,13 +215,13 @@ const TodayAgendaSidebar = ({
                   <button
                     onClick={() => handleJoinSession(session)}
                     disabled={joiningId === sId || phase === "upcoming"}
-                    className={`w-full py-2 rounded-lg text-[11px] font-bold transition flex items-center justify-center gap-1.5 ${
+                    className={`w-full py-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 ${
                       phase === "upcoming"
                         ? "bg-slate-700/60 text-slate-400 cursor-not-allowed"
                         : "bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white shadow-md shadow-emerald-900/30 cursor-pointer"
                     }`}
                   >
-                    <i className="fas fa-video text-[10px]" />
+                    <i className="fas fa-video text-xs" />
                     <span>
                       {joiningId === sId
                         ? "Entering Room..."
@@ -244,7 +244,7 @@ const TodayAgendaSidebar = ({
               <i className="fas fa-calendar-check text-xs" />
             </div>
             <p className="text-xs font-bold text-white">No Live Classes Scheduled</p>
-            <p className="text-[11px] text-slate-400">
+            <p className="text-xs text-slate-400">
               When faculty initiates a session, your Google Meet link unlocks 60 minutes prior.
             </p>
             <IssueInJoiningClassBanner variant="alert" />
@@ -258,17 +258,17 @@ const TodayAgendaSidebar = ({
               className="text-indigo-400 hover:text-indigo-300 font-semibold transition flex items-center gap-1 cursor-pointer"
             >
               <span>Live Schedule</span>
-              <i className="fas fa-arrow-right text-[10px]" />
+              <i className="fas fa-arrow-right text-xs" />
             </button>
           )}
 
           {onViewAllPlanner && (
             <button
               onClick={onViewAllPlanner}
-              className="text-slate-400 hover:text-white transition flex items-center gap-1 cursor-pointer text-[11px]"
+              className="text-slate-400 hover:text-white transition flex items-center gap-1 cursor-pointer text-xs"
             >
               <span>Weekly Planner</span>
-              <i className="fas fa-calendar-alt text-[10px]" />
+              <i className="fas fa-calendar-alt text-xs" />
             </button>
           )}
         </div>
@@ -285,12 +285,12 @@ const TodayAgendaSidebar = ({
               <h3 className="text-sm font-bold text-white tracking-tight leading-none">
                 Upcoming Deadlines
               </h3>
-              <p className="text-[10px] text-slate-400 mt-0.5">
+              <p className="text-xs text-slate-400 mt-0.5">
                 Pending Submissions
               </p>
             </div>
           </div>
-          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+          <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
             pendingAssignments.length > 0
               ? "bg-amber-500/15 text-amber-300"
               : "bg-emerald-500/15 text-emerald-300"
@@ -310,7 +310,7 @@ const TodayAgendaSidebar = ({
                   <h4 className="text-xs font-bold text-white truncate">
                     {asg.title}
                   </h4>
-                  <p className="text-[10px] text-slate-400 truncate">
+                  <p className="text-xs text-slate-400 truncate">
                     {asg.course_title || "Course"} • {asg.due_date ? `Due ${formatDate(asg.due_date)} · ${formatTime(asg.due_date)}` : "No deadline"}
                   </p>
                 </div>
@@ -318,9 +318,9 @@ const TodayAgendaSidebar = ({
                 {onOpenSubmitModal && (
                   <button
                     onClick={() => onOpenSubmitModal(asg)}
-                    className="shrink-0 px-2.5 py-1 rounded-lg bg-indigo-600/90 hover:bg-indigo-600 text-white text-[11px] font-bold transition flex items-center gap-1 cursor-pointer shadow-md shadow-indigo-600/20"
+                    className="shrink-0 px-2.5 py-1 rounded-lg bg-indigo-600/90 hover:bg-indigo-600 text-white text-xs font-bold transition flex items-center gap-1 cursor-pointer shadow-md shadow-indigo-600/20"
                   >
-                    <i className="fas fa-upload text-[9px]" />
+                    <i className="fas fa-upload text-xs" />
                     <span>Submit</span>
                   </button>
                 )}
@@ -333,7 +333,7 @@ const TodayAgendaSidebar = ({
               <i className="fas fa-check-circle text-xs" />
             </div>
             <p className="text-xs font-bold text-white">All Caught Up!</p>
-            <p className="text-[11px] text-slate-400">
+            <p className="text-xs text-slate-400">
               No pending assignments due this week.
             </p>
           </div>
@@ -359,7 +359,7 @@ const TodayAgendaSidebar = ({
                 <i className="fas fa-calendar-times text-amber-400 text-xs w-4 text-center" />
                 <span>Request Leave / Absence Notice</span>
               </span>
-              <i className="fas fa-chevron-right text-[10px] text-slate-500" />
+              <i className="fas fa-chevron-right text-xs text-slate-500" />
             </button>
           )}
 
@@ -372,7 +372,7 @@ const TodayAgendaSidebar = ({
                 <i className="fas fa-globe text-blue-400 text-xs w-4 text-center" />
                 <span>Switch Regional Timezone ({timezoneAbbr})</span>
               </span>
-              <i className="fas fa-chevron-right text-[10px] text-slate-500" />
+              <i className="fas fa-chevron-right text-xs text-slate-500" />
             </button>
           )}
 
@@ -384,7 +384,7 @@ const TodayAgendaSidebar = ({
               <i className="fas fa-user-gear text-emerald-400 text-xs w-4 text-center" />
               <span>Update Account Profile</span>
             </span>
-            <i className="fas fa-chevron-right text-[10px] text-slate-500" />
+            <i className="fas fa-chevron-right text-xs text-slate-500" />
           </button>
 
           <button
@@ -395,7 +395,7 @@ const TodayAgendaSidebar = ({
               <i className="fas fa-compass text-indigo-400 text-xs w-4 text-center" />
               <span>Browse Course Catalog</span>
             </span>
-            <i className="fas fa-chevron-right text-[10px] text-slate-500" />
+            <i className="fas fa-chevron-right text-xs text-slate-500" />
           </button>
         </div>
       </div>

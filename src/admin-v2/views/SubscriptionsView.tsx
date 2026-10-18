@@ -60,7 +60,7 @@ export const SubscriptionsView: React.FC = () => {
             </div>
             <div>
               <div className="font-semibold text-slate-100">{student?.name || 'Student'}</div>
-              <div className="text-[11px] text-slate-400 font-mono">{student?.rollNo}</div>
+              <div className="text-xs text-slate-400 font-mono">{student?.rollNo}</div>
             </div>
           </div>
         );
@@ -73,7 +73,7 @@ export const SubscriptionsView: React.FC = () => {
         return (
           <div>
             <div className="font-semibold text-slate-200">{subject?.name || 'Curriculum Subject'}</div>
-            <span className="text-[11px] font-mono text-indigo-400">{subject?.code || ''}</span>
+            <span className="text-xs font-mono text-indigo-400">{subject?.code || ''}</span>
           </div>
         );
       },
@@ -83,7 +83,7 @@ export const SubscriptionsView: React.FC = () => {
       cell: (row) => (
         <div className="flex items-center gap-1.5 text-xs">
           <span
-            className={`px-2 py-0.5 rounded font-mono text-[11px] ${
+            className={`px-2 py-0.5 rounded font-mono text-xs ${
               row.source === 'Gumroad'
                 ? 'bg-rose-500/15 text-rose-300 border border-rose-500/30'
                 : 'bg-indigo-500/15 text-indigo-300 border border-indigo-500/30'
@@ -92,7 +92,7 @@ export const SubscriptionsView: React.FC = () => {
             {row.source}
           </span>
           {row.gumroadSubscriptionId && (
-            <span className="text-[10px] text-slate-500 font-mono">
+            <span className="text-xs text-slate-500 font-mono">
               ({row.gumroadSubscriptionId})
             </span>
           )}
@@ -123,7 +123,7 @@ export const SubscriptionsView: React.FC = () => {
     },
     {
       header: 'Actions',
-      cell: (row) => (!canBill ? <span className="text-[11px] text-slate-500">View only</span> :
+      cell: (row) => (!canBill ? <span className="text-xs text-slate-500">View only</span> :
         <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
           <button
             onClick={() => renewSubscription(row.id, 'renew')}
@@ -181,7 +181,7 @@ export const SubscriptionsView: React.FC = () => {
           >
             <span>{tab.label}</span>
             <span
-              className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${
+              className={`px-1.5 py-0.2 rounded-full text-xs font-mono ${
                 activeTab === tab.id ? 'bg-white/20 text-white' : 'bg-slate-800 text-slate-400'
               }`}
             >

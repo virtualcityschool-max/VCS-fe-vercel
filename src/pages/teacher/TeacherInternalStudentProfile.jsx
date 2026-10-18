@@ -19,7 +19,7 @@ const TeacherInternalStudentProfile = () => {
             Back to Tutor Dashboard
           </button>
           <div className="h-6 w-px bg-slate-800"></div>
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
+          <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">
             Internal Profile • Student Risk Assessment
           </p>
         </div>
@@ -27,7 +27,7 @@ const TeacherInternalStudentProfile = () => {
           <span className="text-xs font-bold text-slate-500">
             Priority Level:
           </span>
-          <span className="bg-red-500/20 text-red-500 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-red-500/30">
+          <span className="bg-red-500/20 text-red-500 px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest border border-red-500/30">
             High Attention
           </span>
         </div>
@@ -97,14 +97,14 @@ const TeacherInternalStudentProfile = () => {
                 Risk Assessment
               </h3>
               <div className="flex flex-wrap gap-4">
-                <div className="bg-red-500/10 text-red-500 px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest border border-red-500/20 flex items-center gap-3 shadow-lg">
+                <div className="bg-red-500/10 text-red-500 px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest border border-red-500/20 flex items-center gap-3 shadow-lg">
                   <div className="w-2 h-2 rounded-full bg-red-500 animate-ping"></div>
                   Plagiarism Warning
                 </div>
-                <div className="bg-yellow-500/10 text-yellow-500 px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest border border-yellow-500/20 flex items-center gap-3 shadow-lg">
+                <div className="bg-yellow-500/10 text-yellow-500 px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest border border-yellow-500/20 flex items-center gap-3 shadow-lg">
                   <i className="fas fa-clock"></i> Late Submissions (3)
                 </div>
-                <div className="bg-indigo-500/10 text-indigo-400 px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest border border-indigo-500/20 flex items-center gap-3 shadow-lg">
+                <div className="bg-indigo-500/10 text-indigo-400 px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest border border-indigo-500/20 flex items-center gap-3 shadow-lg">
                   <i className="fas fa-trophy"></i> High Achiever: Mathematics
                 </div>
               </div>
@@ -117,7 +117,7 @@ const TeacherInternalStudentProfile = () => {
                   <i className="fas fa-sticky-note text-yellow-500"></i>{" "}
                   Confidential Tutor Notes
                 </h3>
-                <button className="text-indigo-400 font-black text-[10px] uppercase tracking-widest flex items-center gap-2 hover:text-white transition">
+                <button className="text-indigo-400 font-black text-xs uppercase tracking-widest flex items-center gap-2 hover:text-white transition">
                   <div className="w-6 h-6 rounded-lg bg-indigo-600/20 flex items-center justify-center">
                     <i className="fas fa-plus"></i>
                   </div>
@@ -150,12 +150,12 @@ const TeacherInternalStudentProfile = () => {
                         <div
                           className={`w-1 h-8 rounded-full ${n.color}`}
                         ></div>
-                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                        <span className="text-xs font-black uppercase tracking-widest text-slate-500">
                           {n.date}
                         </span>
                       </div>
                       <span
-                        className={`text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full text-white shadow-lg ${n.color}`}
+                        className={`text-xs font-black uppercase tracking-widest px-3 py-1 rounded-full text-white shadow-lg ${n.color}`}
                       >
                         {n.type}
                       </span>
@@ -165,7 +165,7 @@ const TeacherInternalStudentProfile = () => {
                     </p>
                     <div className="flex items-center gap-3 text-slate-600">
                       <div className="w-6 h-6 rounded-full bg-slate-700"></div>
-                      <p className="text-[10px] font-black uppercase tracking-widest">
+                      <p className="text-xs font-black uppercase tracking-widest">
                         Added by {n.teacher}
                       </p>
                     </div>
@@ -182,10 +182,10 @@ const TeacherInternalStudentProfile = () => {
                   Distribution
                 </h3>
                 <div className="flex gap-2">
-                  <button className="bg-slate-900 px-4 py-1.5 rounded-xl text-[10px] font-black uppercase text-slate-500 border border-slate-700">
+                  <button className="bg-slate-900 px-4 py-1.5 rounded-xl text-xs font-black uppercase text-slate-500 border border-slate-700">
                     MT1
                   </button>
-                  <button className="bg-indigo-600 px-4 py-1.5 rounded-xl text-[10px] font-black uppercase text-white shadow-lg shadow-indigo-900/20">
+                  <button className="bg-indigo-600 px-4 py-1.5 rounded-xl text-xs font-black uppercase text-white shadow-lg shadow-indigo-900/20">
                     Finals
                   </button>
                 </div>
@@ -207,7 +207,7 @@ const TeacherInternalStudentProfile = () => {
                   </div>
                 ))}
               </div>
-              <div className="flex justify-between mt-8 text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] px-4">
+              <div className="flex justify-between mt-8 text-xs text-slate-500 font-black uppercase tracking-[0.2em] px-4">
                 <span>Logic</span>
                 <span>Eng</span>
                 <span>Math</span>

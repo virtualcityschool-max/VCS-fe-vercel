@@ -56,11 +56,11 @@ export const AssignmentsQuizzesView = ({
   }
       <div className="flex flex-wrap items-center justify-between gap-4 bg-[#101424] border border-[#1E2540] rounded-2xl p-5 shadow-lg">
         <div>
-          <div className="text-[10px] font-bold tracking-wider uppercase text-indigo-400 flex items-center gap-1.5">
+          <div className="text-xs font-bold tracking-wider uppercase text-indigo-400 flex items-center gap-1.5">
             <FileText className="w-3.5 h-3.5" />
             <span>EXAMINATION & TASK MANAGEMENT</span>
             {timezone && (
-              <span className="ml-1.5 px-1.5 py-0.5 rounded bg-[#1B223C] text-[9px] text-slate-300 font-mono border border-[#283256]">
+              <span className="ml-1.5 px-1.5 py-0.5 rounded bg-[#1B223C] text-xs text-slate-300 font-mono border border-[#283256]">
                 {timezone}
               </span>
             )}
@@ -122,7 +122,7 @@ export const AssignmentsQuizzesView = ({
   >
             <UserCheck className="w-3.5 h-3.5" />
             <span>Marking Queue ({pendingReviewsCount})</span>
-            {pendingReviewsCount > 0 && <span className="px-1.5 py-0.2 rounded-full bg-amber-400/30 text-amber-200 text-[10px] font-mono font-bold tabular-nums">
+            {pendingReviewsCount > 0 && <span className="px-1.5 py-0.2 rounded-full bg-amber-400/30 text-amber-200 text-xs font-mono font-bold tabular-nums">
                 {pendingReviewsCount} to Mark
               </span>}
           </button>
@@ -170,7 +170,7 @@ export const AssignmentsQuizzesView = ({
   >
                 <div>
                   <div className="flex items-center justify-between text-xs mb-2">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-400">
+                    <span className="text-xs font-bold uppercase tracking-wider text-indigo-400">
                       {asg.courseTitle}
                     </span>
                     <span className="font-mono font-bold text-white text-xs tabular-nums">
@@ -186,7 +186,7 @@ export const AssignmentsQuizzesView = ({
                   {
     /* Submission Method & Allowed Formats */
   }
-                  <div className="mt-3 pt-3 border-t border-[#181F36] space-y-1.5 text-[11px]">
+                  <div className="mt-3 pt-3 border-t border-[#181F36] space-y-1.5 text-xs">
                     <div className="flex items-center justify-between text-slate-400">
                       <span>Worksheet attached:</span>
                       <span className="text-slate-200 font-semibold">{asg.hasAttachment ? "Yes" : "No"}</span>
@@ -211,7 +211,7 @@ export const AssignmentsQuizzesView = ({
                     <strong className="text-white tabular-nums font-mono">{asg.submissionsCount}</strong> submissions
                   </span>
                   <div className="flex items-center gap-2">
-                    <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase border ${asg.isOverdue ? "bg-slate-800 text-slate-400 border-slate-700" : asg.status === "published" ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30" : "bg-amber-500/15 text-amber-300 border-amber-500/30"}`}>
+                    <span className={`px-2.5 py-1 rounded-lg text-xs font-bold uppercase border ${asg.isOverdue ? "bg-slate-800 text-slate-400 border-slate-700" : asg.status === "published" ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30" : "bg-amber-500/15 text-amber-300 border-amber-500/30"}`}>
                       {asg.isOverdue ? "closed" : asg.status}
                     </span>
                     {onEditAssignment && (
@@ -277,7 +277,7 @@ export const AssignmentsQuizzesView = ({
                     <div className="text-base font-extrabold font-mono text-emerald-400 tabular-nums">
                       {quiz.marks} Marks
                     </div>
-                    <div className="text-[10px] text-slate-400 uppercase">
+                    <div className="text-xs text-slate-400 uppercase">
                       {quiz.questionsCount} Questions{quiz.durationMinutes ? ` · ${quiz.durationMinutes} min` : ""}
                     </div>
                   </div>
@@ -325,7 +325,7 @@ export const AssignmentsQuizzesView = ({
     /* Questions Preview Strip */
   }
               <div className="space-y-2">
-                <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">
                   Configured Questions Breakdown:
                 </div>
                 {!(quiz.questions && quiz.questions.length) ? (
@@ -339,7 +339,7 @@ export const AssignmentsQuizzesView = ({
                         key={q.id || qIdx}
                         className="p-3 rounded-xl bg-[#0B0E1A] border border-[#1A223B] space-y-1.5"
                       >
-                        <div className="flex items-center justify-between text-[10px]">
+                        <div className="flex items-center justify-between text-xs">
                           <span className="font-bold text-indigo-400 uppercase">
                             Q{qIdx + 1} · {(q.type || q.question_type || "text").replace("_", " ")}
                           </span>
@@ -351,7 +351,7 @@ export const AssignmentsQuizzesView = ({
                           {q.questionText || q.question_text}
                         </div>
                         {q.options && (
-                          <div className="text-[10px] text-slate-400">
+                          <div className="text-xs text-slate-400">
                             {q.options.length} options provided
                           </div>
                         )}
@@ -390,7 +390,7 @@ export const AssignmentsQuizzesView = ({
                           <div className="text-xs font-bold text-white">
                             {sub.studentName} <span className="text-slate-400 font-mono font-normal">({sub.studentRoll})</span>
                           </div>
-                          <div className="text-[11px] text-slate-400 mt-0.5">
+                          <div className="text-xs text-slate-400 mt-0.5">
                             Turned in {sub.submittedAt}
                           </div>
                         </div>
@@ -401,7 +401,7 @@ export const AssignmentsQuizzesView = ({
                               {sub.status === "reviewed" ? `${sub.totalScore} / ${sub.maxScore} Marks` : "Written answers to mark"}
                             </div>
                             <div
-    className={`text-[10px] font-bold uppercase ${sub.status === "reviewed" ? "text-emerald-400" : "text-amber-400"}`}
+    className={`text-xs font-bold uppercase ${sub.status === "reviewed" ? "text-emerald-400" : "text-amber-400"}`}
   >
                               {sub.status === "reviewed" ? "\u2713 Marked" : "\u25CF Needs Review"}
                             </div>
@@ -455,12 +455,12 @@ export const AssignmentsQuizzesView = ({
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-bold text-white">{item.submission.studentName}</span>
                       <span className="font-mono text-xs text-slate-400">({item.submission.studentRoll})</span>
-                      <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px] font-bold uppercase border border-amber-500/30">
+                      <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 text-xs font-bold uppercase border border-amber-500/30">
                         Needs Marking
                       </span>
                     </div>
                     <div className="text-xs font-semibold text-indigo-400">{item.quiz.title}</div>
-                    <div className="text-[11px] text-slate-400 flex items-center gap-3">
+                    <div className="text-xs text-slate-400 flex items-center gap-3">
                       <span>Course: {item.quiz.courseTitle}</span>
                       <span>·</span>
                       <span>Turned in: {item.submission.submittedAt}</span>
@@ -472,7 +472,7 @@ export const AssignmentsQuizzesView = ({
                       <div className="text-sm font-mono font-bold text-white">
                         Max {item.quiz.marks} Marks
                       </div>
-                      <div className="text-[10px] text-slate-400 uppercase font-mono">
+                      <div className="text-xs text-slate-400 uppercase font-mono">
                         {item.quiz.questionsCount} Questions
                       </div>
                     </div>

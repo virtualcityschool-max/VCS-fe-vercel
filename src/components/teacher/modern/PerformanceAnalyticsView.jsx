@@ -118,10 +118,10 @@ export const PerformanceAnalyticsView = ({
   return <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4 bg-[#101424] border border-[#1E2540] rounded-2xl p-5 shadow-lg">
         <div>
-          <div className="text-[10px] font-bold tracking-wider uppercase text-indigo-400 flex items-center gap-1.5">
+          <div className="text-xs font-bold tracking-wider uppercase text-indigo-400 flex items-center gap-1.5">
             <TrendingUp className="w-3.5 h-3.5" />
             <span>PERFORMANCE ANALYTICS</span>
-            {timezone && <span className="ml-1.5 px-1.5 py-0.5 rounded bg-[#1B223C] text-[9px] text-slate-300 font-mono border border-[#283256]">{timezone}</span>}
+            {timezone && <span className="ml-1.5 px-1.5 py-0.5 rounded bg-[#1B223C] text-xs text-slate-300 font-mono border border-[#283256]">{timezone}</span>}
           </div>
           <h2 className="text-xl font-extrabold text-white mt-1">
             Performance & Attendance
@@ -155,22 +155,22 @@ export const PerformanceAnalyticsView = ({
         <div className="p-4 rounded-2xl bg-[#101424] border border-[#1E2540]">
           <div className="text-xs text-slate-400">Average Attendance</div>
           <div className="text-2xl font-extrabold text-white mt-1 font-mono tabular-nums">{avgAttendance != null ? `${avgAttendance}%` : "—"}</div>
-          <div className="text-[11px] text-slate-400 mt-1">{records.length} student attendance records</div>
+          <div className="text-xs text-slate-400 mt-1">{records.length} student attendance records</div>
         </div>
         <div className="p-4 rounded-2xl bg-[#101424] border border-[#1E2540]">
           <div className="text-xs text-slate-400">Quiz Average</div>
           <div className="text-2xl font-extrabold text-white mt-1 font-mono tabular-nums">{quizAvg != null ? `${quizAvg.toFixed(1)}%` : "—"}</div>
-          <div className="text-[11px] text-slate-400 mt-1">Across {quizData.length} marked {quizData.length === 1 ? "quiz" : "quizzes"}</div>
+          <div className="text-xs text-slate-400 mt-1">Across {quizData.length} marked {quizData.length === 1 ? "quiz" : "quizzes"}</div>
         </div>
         <div className="p-4 rounded-2xl bg-[#101424] border border-[#1E2540]">
           <div className="text-xs text-slate-400">Assignments</div>
           <div className="text-2xl font-extrabold text-white mt-1 font-mono tabular-nums">{cohortAssignments.length}</div>
-          <div className="text-[11px] text-slate-400 mt-1">{assignmentSubs} submissions received</div>
+          <div className="text-xs text-slate-400 mt-1">{assignmentSubs} submissions received</div>
         </div>
         <div className="p-4 rounded-2xl bg-[#101424] border border-[#1E2540]">
           <div className="text-xs text-slate-400 flex items-center gap-1.5"><Users className="w-3.5 h-3.5" /> Enrolled Students</div>
           <div className="text-2xl font-extrabold text-white mt-1 font-mono tabular-nums">{cohortStudents}</div>
-          <div className="text-[11px] text-slate-400 mt-1">In {cohortCourseIds.size} {cohortCourseIds.size === 1 ? "course" : "courses"}</div>
+          <div className="text-xs text-slate-400 mt-1">In {cohortCourseIds.size} {cohortCourseIds.size === 1 ? "course" : "courses"}</div>
         </div>
       </div>
 
@@ -190,8 +190,8 @@ export const PerformanceAnalyticsView = ({
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#1E2642" vertical={false} />
-                <XAxis dataKey="week" stroke="#64748B" tick={{ fill: "#94A3B8", fontSize: 11 }} />
-                <YAxis stroke="#64748B" tick={{ fill: "#94A3B8", fontSize: 11 }} domain={[0, 100]} />
+                <XAxis dataKey="week" stroke="#64748B" tick={{ fill: "#94A3B8", fontSize: 12 }} />
+                <YAxis stroke="#64748B" tick={{ fill: "#94A3B8", fontSize: 12 }} domain={[0, 100]} />
                 <Tooltip content={<CustomTooltip />} />
                 <Area type="monotone" dataKey="attendance" name="Attendance" stroke="#10B981" strokeWidth={2.5} fillOpacity={1} fill="url(#colorAttendance)" />
               </AreaChart>
@@ -219,7 +219,7 @@ export const PerformanceAnalyticsView = ({
                   </ResponsiveContainer>
                   <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                     <span className="text-xl font-extrabold text-white font-mono tabular-nums">{distTotal}</span>
-                    <span className="text-[10px] text-slate-400 uppercase font-semibold">Students</span>
+                    <span className="text-xs text-slate-400 uppercase font-semibold">Students</span>
                   </div>
                 </>}
             </div>
@@ -249,8 +249,8 @@ export const PerformanceAnalyticsView = ({
               {quizData.length === 0 ? <EmptyChart text="No marked quiz submissions yet." /> : <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={quizData} margin={{ top: 10, right: 10, left: -20, bottom: 25 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#1E2642" vertical={false} />
-                    <XAxis dataKey="title" stroke="#64748B" tick={{ fill: "#94A3B8", fontSize: 10 }} interval={0} angle={-15} textAnchor="end" />
-                    <YAxis stroke="#64748B" tick={{ fill: "#94A3B8", fontSize: 11 }} domain={[0, 100]} />
+                    <XAxis dataKey="title" stroke="#64748B" tick={{ fill: "#94A3B8", fontSize: 12 }} interval={0} angle={-15} textAnchor="end" />
+                    <YAxis stroke="#64748B" tick={{ fill: "#94A3B8", fontSize: 12 }} domain={[0, 100]} />
                     <Tooltip content={<CustomTooltip />} />
                     <Bar dataKey="averageScorePct" name="Average Score (%)" fill="#6366F1" radius={[6, 6, 0, 0]} />
                     <Bar dataKey="topScorePct" name="Top Score (%)" fill="#10B981" radius={[6, 6, 0, 0]} />

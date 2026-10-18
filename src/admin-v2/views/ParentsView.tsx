@@ -35,7 +35,7 @@ export const ParentsView: React.FC = () => {
           </div>
           <div className="truncate">
             <div className="font-semibold text-slate-100">{row.name}</div>
-            <div className="text-[11px] text-slate-400 font-mono truncate">{row.email}</div>
+            <div className="text-xs text-slate-400 font-mono truncate">{row.email}</div>
           </div>
         </div>
       ),
@@ -51,7 +51,7 @@ export const ParentsView: React.FC = () => {
               target="_blank"
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
-              className="p-1.5 rounded-lg bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25 transition-colors flex items-center gap-1 text-[11px]"
+              className="p-1.5 rounded-lg bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25 transition-colors flex items-center gap-1 text-xs"
               title="Click to chat on WhatsApp"
             >
               <MessageCircle className="w-3.5 h-3.5" />
@@ -70,15 +70,15 @@ export const ParentsView: React.FC = () => {
             {linked.map((s) => (
               <span
                 key={s.id}
-                className="px-2 py-0.5 rounded text-[11px] font-medium bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 flex items-center gap-1"
+                className="px-2 py-0.5 rounded text-xs font-medium bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 flex items-center gap-1"
               >
                 <GraduationCap className="w-3 h-3" />
                 <span>{s.name}</span>
-                <span className="font-mono text-[10px] text-indigo-400">({s.rollNo})</span>
+                <span className="font-mono text-xs text-indigo-400">({s.rollNo})</span>
               </span>
             ))}
             {linked.length === 0 && (
-              <span className="text-slate-500 text-[11px] italic">No linked children</span>
+              <span className="text-slate-500 text-xs italic">No linked children</span>
             )}
           </div>
         );

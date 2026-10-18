@@ -215,9 +215,9 @@ const AdminBlogEditorPage = () => {
         <div className="max-w-6xl mx-auto px-5 sm:px-8 h-16 flex items-center justify-between gap-4">
           <button
             onClick={handleBack}
-            className="inline-flex items-center gap-2 text-slate-400 hover:text-white text-[11px] font-black uppercase tracking-widest transition"
+            className="inline-flex items-center gap-2 text-slate-400 hover:text-white text-xs font-black uppercase tracking-widest transition"
           >
-            <i className="fas fa-arrow-left text-[10px]" /> Blogs
+            <i className="fas fa-arrow-left text-xs" /> Blogs
           </button>
           <div className="flex items-center gap-2.5">
             <button
@@ -232,7 +232,7 @@ const AdminBlogEditorPage = () => {
               disabled={saving}
               className="btn-glow px-5 sm:px-6 py-2.5 rounded-xl text-white text-[12px] font-black uppercase tracking-wider flex items-center gap-2 disabled:opacity-50"
             >
-              <i className="fas fa-paper-plane text-[10px]" />
+              <i className="fas fa-paper-plane text-xs" />
               {form.status === "published" ? "Update" : "Publish"}
             </button>
           </div>
@@ -241,7 +241,7 @@ const AdminBlogEditorPage = () => {
 
       <div className="max-w-6xl mx-auto px-5 sm:px-8 py-8">
         <div className="mb-8">
-          <p className="text-[10px] font-black uppercase tracking-[0.4em] text-indigo-500 mb-1.5">
+          <p className="text-xs font-black uppercase tracking-[0.4em] text-indigo-500 mb-1.5">
             {isEdit ? "Edit" : "New"} {isVideoPost ? "Video Blog" : "Article"}
           </p>
           <h1 className="text-2xl md:text-3xl font-black font-poppins tracking-tight">
@@ -292,7 +292,7 @@ const AdminBlogEditorPage = () => {
                       <i className="fas fa-check-circle text-indigo-400 text-xs ml-auto" />
                     )}
                   </div>
-                  <p className="text-[11px] text-slate-500 leading-relaxed">
+                  <p className="text-xs text-slate-500 leading-relaxed">
                     {t.blurb}
                   </p>
                 </button>
@@ -340,7 +340,7 @@ const AdminBlogEditorPage = () => {
                     shorts or embed URL.
                   </p>
                 ) : (
-                  <p className="text-[10px] text-slate-600 mt-1.5">
+                  <p className="text-xs text-slate-600 mt-1.5">
                     Works with watch, youtu.be, shorts, live and embed links -
                     extra parameters are fine.
                   </p>
@@ -350,10 +350,10 @@ const AdminBlogEditorPage = () => {
                 {previewVideoId ? (
                   <div className="mt-5">
                     <div className="flex items-center justify-between gap-3 mb-2.5 flex-wrap">
-                      <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.15em] text-emerald-400">
-                        <i className="fas fa-eye text-[10px]" /> Live preview
+                      <span className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.15em] text-emerald-400">
+                        <i className="fas fa-eye text-xs" /> Live preview
                       </span>
-                      <span className="text-[10px] text-slate-600 font-mono">
+                      <span className="text-xs text-slate-600 font-mono">
                         ID: {previewVideoId}
                       </span>
                     </div>
@@ -364,7 +364,7 @@ const AdminBlogEditorPage = () => {
                         rounded="rounded-none"
                       />
                     </div>
-                    <p className="text-[10px] text-slate-600 mt-2">
+                    <p className="text-xs text-slate-600 mt-2">
                       This is exactly how the video appears to visitors - press
                       play to check you pasted the right one.
                     </p>
@@ -375,7 +375,7 @@ const AdminBlogEditorPage = () => {
                     <p className="text-slate-500 text-xs font-semibold">
                       Paste a YouTube link to see the preview
                     </p>
-                    <p className="text-slate-600 text-[10px] mt-1">
+                    <p className="text-slate-600 text-xs mt-1">
                       The player will appear here instantly
                     </p>
                   </div>
@@ -406,7 +406,7 @@ const AdminBlogEditorPage = () => {
                 value={form.excerpt}
                 onChange={(e) => onChange("excerpt", e.target.value)}
               />
-              <p className="text-[10px] text-slate-600 mt-1 text-right">
+              <p className="text-xs text-slate-600 mt-1 text-right">
                 {form.excerpt.length}/300
               </p>
             </div>
@@ -426,7 +426,7 @@ const AdminBlogEditorPage = () => {
                   }
                 />
               </div>
-              <p className="text-[10px] text-slate-600 mt-2">
+              <p className="text-xs text-slate-600 mt-2">
                 <i className="fas fa-shield-halved mr-1" /> Content is sanitized on
                 save - unsafe HTML/scripts are automatically removed.
               </p>
@@ -446,7 +446,7 @@ const AdminBlogEditorPage = () => {
                   }`}
                 />
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-500">
+                  <p className="text-xs font-black uppercase tracking-[0.15em] text-slate-500">
                     Current status
                   </p>
                   <p className="text-sm font-bold text-white capitalize">
@@ -469,7 +469,7 @@ const AdminBlogEditorPage = () => {
                   <>
                     <img src={coverPreview} alt="cover" className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
-                      <span className="text-[11px] font-black uppercase tracking-wider">
+                      <span className="text-xs font-black uppercase tracking-wider">
                         <i className="fas fa-camera mr-1.5" /> Change
                       </span>
                     </div>
@@ -483,10 +483,10 @@ const AdminBlogEditorPage = () => {
                       className="w-full h-full object-cover opacity-70"
                     />
                     <div className="absolute inset-0 bg-[#0B1020]/60 flex flex-col items-center justify-center text-center px-4">
-                      <p className="text-[10px] font-black uppercase tracking-wider text-slate-300">
+                      <p className="text-xs font-black uppercase tracking-wider text-slate-300">
                         Using video thumbnail
                       </p>
-                      <p className="text-[10px] text-slate-500 mt-1">
+                      <p className="text-xs text-slate-500 mt-1">
                         Click to upload your own
                       </p>
                     </div>
@@ -494,13 +494,13 @@ const AdminBlogEditorPage = () => {
                 ) : (
                   <div className="text-center text-slate-500">
                     <i className="fas fa-image text-2xl mb-2" />
-                    <p className="text-[11px] font-semibold">Click to upload</p>
-                    <p className="text-[10px] text-slate-600">JPG/PNG/WEBP · under {MAX_IMAGE_MB}MB</p>
+                    <p className="text-xs font-semibold">Click to upload</p>
+                    <p className="text-xs text-slate-600">JPG/PNG/WEBP · under {MAX_IMAGE_MB}MB</p>
                   </div>
                 )}
               </div>
               {isVideoPost && (
-                <p className="text-[10px] text-slate-600 mt-2 leading-relaxed">
+                <p className="text-xs text-slate-600 mt-2 leading-relaxed">
                   Leave empty to use the video's own thumbnail as the poster.
                 </p>
               )}
@@ -542,8 +542,8 @@ const AdminBlogEditorPage = () => {
                   <label className={`${labelCls} mb-0`}>Author</label>
                   {/* Info tooltip: explains that this value is the public byline. */}
                   <span className="group relative inline-flex">
-                    <i className="fas fa-circle-info text-slate-500 hover:text-indigo-400 text-[11px] cursor-pointer" />
-                    <span className="pointer-events-none absolute left-1/2 bottom-full mb-2 -translate-x-1/2 w-52 rounded-lg bg-[#1A2346] border border-[#232D52] px-3 py-2 text-[11px] font-medium normal-case tracking-normal text-slate-200 leading-snug opacity-0 group-hover:opacity-100 transition z-20 shadow-xl">
+                    <i className="fas fa-circle-info text-slate-500 hover:text-indigo-400 text-xs cursor-pointer" />
+                    <span className="pointer-events-none absolute left-1/2 bottom-full mb-2 -translate-x-1/2 w-52 rounded-lg bg-[#1A2346] border border-[#232D52] px-3 py-2 text-xs font-medium normal-case tracking-normal text-slate-200 leading-snug opacity-0 group-hover:opacity-100 transition z-20 shadow-xl">
                       This name is shown publicly as the article's author. It
                       defaults to your admin name.
                     </span>
@@ -563,7 +563,7 @@ const AdminBlogEditorPage = () => {
                     title={authorLocked ? "Unlock to edit the author" : "Lock the author"}
                     className="absolute right-2.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition"
                   >
-                    <i className={`fas ${authorLocked ? "fa-lock" : "fa-lock-open"} text-[11px]`} />
+                    <i className={`fas ${authorLocked ? "fa-lock" : "fa-lock-open"} text-xs`} />
                   </button>
                 </div>
               </div>
@@ -573,7 +573,7 @@ const AdminBlogEditorPage = () => {
             <div className="bg-[#121831] border border-[#232D52] rounded-2xl p-5 space-y-4">
               <div className="flex items-center gap-2">
                 <i className="fas fa-magnifying-glass text-indigo-400 text-xs" />
-                <span className="text-[11px] font-black uppercase tracking-[0.15em] text-slate-300">
+                <span className="text-xs font-black uppercase tracking-[0.15em] text-slate-300">
                   SEO
                 </span>
               </div>
@@ -597,14 +597,14 @@ const AdminBlogEditorPage = () => {
                   value={form.meta_description}
                   onChange={(e) => onChange("meta_description", e.target.value)}
                 />
-                <p className="text-[10px] text-slate-600 mt-1 text-right">
+                <p className="text-xs text-slate-600 mt-1 text-right">
                   {form.meta_description.length}/320
                 </p>
                 {errors.meta_description && (
                   <p className="text-red-400 text-xs mt-1">{errors.meta_description}</p>
                 )}
               </div>
-              <p className="text-[10px] text-slate-600 leading-relaxed">
+              <p className="text-xs text-slate-600 leading-relaxed">
                 The public URL is generated from the title as a clean, SEO-friendly
                 slug.
               </p>

@@ -52,9 +52,9 @@ const SlotCard = ({ slot, onDelete, deleting, timezone }) => {
               {fmt12(slot.end_time)}
             </p>
             {timezone && (
-              <p className="text-[9px] text-indigo-400/70 mt-0.5 font-bold uppercase tracking-widest">{timezone}</p>
+              <p className="text-xs text-indigo-400/70 mt-0.5 font-bold uppercase tracking-widest">{timezone}</p>
             )}
-            <p className="text-[9px] text-slate-600 mt-0.5 font-medium">1 hr</p>
+            <p className="text-xs text-slate-600 mt-0.5 font-medium">1 hr</p>
           </div>
           <button
             onClick={() => !isBooked && onDelete(slot)}
@@ -67,19 +67,19 @@ const SlotCard = ({ slot, onDelete, deleting, timezone }) => {
             }`}
           >
             {isDel
-              ? <i className="fas fa-spinner fa-spin text-[9px]" />
-              : <i className="fas fa-trash-alt text-[9px]" />}
+              ? <i className="fas fa-spinner fa-spin text-xs" />
+              : <i className="fas fa-trash-alt text-xs" />}
           </button>
         </div>
 
         {/* Status badge */}
         {isBooked ? (
-          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-300 text-[8px] font-black uppercase tracking-widest">
+          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs font-black uppercase tracking-widest">
             <span className="w-1 h-1 rounded-full bg-amber-400 shrink-0" />
             Booked
           </span>
         ) : (
-          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-[8px] font-black uppercase tracking-widest">
+          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs font-black uppercase tracking-widest">
             <span className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse shrink-0" />
             Open
           </span>
@@ -88,13 +88,13 @@ const SlotCard = ({ slot, onDelete, deleting, timezone }) => {
         {/* Booked-by info */}
         {isBooked && slot.booked_by_name && (
           <div className="flex items-center gap-1.5 mt-2 bg-slate-800/80 rounded-lg px-2 py-1.5">
-            <div className="w-5 h-5 rounded-md bg-indigo-500/20 border border-indigo-500/20 flex items-center justify-center text-indigo-300 text-[9px] font-black shrink-0">
+            <div className="w-5 h-5 rounded-md bg-indigo-500/20 border border-indigo-500/20 flex items-center justify-center text-indigo-300 text-xs font-black shrink-0">
               {slot.booked_by_name[0]?.toUpperCase()}
             </div>
             <div className="min-w-0">
-              <p className="text-[10px] font-bold text-slate-200 truncate">{slot.booked_by_name}</p>
+              <p className="text-xs font-bold text-slate-200 truncate">{slot.booked_by_name}</p>
               {slot.booked_by_email && (
-                <p className="text-[9px] text-slate-500 truncate">{slot.booked_by_email}</p>
+                <p className="text-xs text-slate-500 truncate">{slot.booked_by_email}</p>
               )}
             </div>
           </div>
@@ -177,7 +177,7 @@ const TeacherSlotsSection = ({ teacherId }) => {
           <div>
             <h3 className="text-base font-semibold text-white">Availability Slots</h3>
             {!loading && !error && (
-              <p className="text-[10px] text-slate-500 mt-0.5 flex items-center gap-1.5">
+              <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-1.5">
                 {slots.length} total · {availableCount} open · {bookedCount} booked
                 {timezone && (
                   <TimezoneTag tz={timezone} className="text-indigo-400/70 font-black" />
@@ -190,7 +190,7 @@ const TeacherSlotsSection = ({ teacherId }) => {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setFilter(filter === "available" ? "all" : "available")}
-              className={`flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-[10px] font-black uppercase tracking-widest transition cursor-pointer border ${
+              className={`flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-xs font-black uppercase tracking-widest transition cursor-pointer border ${
                 filter === "available"
                   ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-300"
                   : "bg-slate-800 border-slate-700 text-slate-300 hover:border-emerald-500/30 hover:text-emerald-400"
@@ -201,7 +201,7 @@ const TeacherSlotsSection = ({ teacherId }) => {
             </button>
             <button
               onClick={() => setFilter(filter === "booked" ? "all" : "booked")}
-              className={`flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-[10px] font-black uppercase tracking-widest transition cursor-pointer border ${
+              className={`flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-xs font-black uppercase tracking-widest transition cursor-pointer border ${
                 filter === "booked"
                   ? "bg-amber-500/20 border-amber-500/40 text-amber-300"
                   : "bg-slate-800 border-slate-700 text-slate-300 hover:border-amber-500/30 hover:text-amber-400"
@@ -248,21 +248,21 @@ const TeacherSlotsSection = ({ teacherId }) => {
                   <div className="flex items-center gap-4 mb-4">
                     <div className="h-px flex-1 bg-slate-800" />
                     <div className="flex items-center gap-2.5 shrink-0">
-                      <span className={`text-[10px] font-black uppercase tracking-widest ${upcoming ? "text-slate-400" : "text-slate-600"}`}>
+                      <span className={`text-xs font-black uppercase tracking-widest ${upcoming ? "text-slate-400" : "text-slate-600"}`}>
                         {fmtDate(date)}
                       </span>
                       {!upcoming && (
-                        <span className="text-[8px] font-black bg-slate-800 text-slate-600 rounded px-1.5 py-0.5 uppercase tracking-widest border border-slate-700">
+                        <span className="text-xs font-black bg-slate-800 text-slate-600 rounded px-1.5 py-0.5 uppercase tracking-widest border border-slate-700">
                           past
                         </span>
                       )}
                       {dayOpen > 0 && (
-                        <span className="text-[9px] font-black bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 rounded-full px-2 py-0.5">
+                        <span className="text-xs font-black bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 rounded-full px-2 py-0.5">
                           {dayOpen} open
                         </span>
                       )}
                       {dayBooked > 0 && (
-                        <span className="text-[9px] font-black bg-amber-500/10 border border-amber-500/20 text-amber-500 rounded-full px-2 py-0.5">
+                        <span className="text-xs font-black bg-amber-500/10 border border-amber-500/20 text-amber-500 rounded-full px-2 py-0.5">
                           {dayBooked} booked
                         </span>
                       )}

@@ -201,7 +201,7 @@ const ParentChildDetails = () => {
                 </h1>
                 {child.grade_level && (
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="px-3 py-1 bg-indigo-500/10 border border-indigo-500/20 rounded-full text-[10px] font-black uppercase tracking-widest text-indigo-400">
+                  <span className="px-3 py-1 bg-indigo-500/10 border border-indigo-500/20 rounded-full text-xs font-black uppercase tracking-widest text-indigo-400">
                     Grade {child.grade_level}
                   </span>
                 </div>
@@ -214,21 +214,21 @@ const ParentChildDetails = () => {
               <div className="flex items-center gap-2 bg-slate-800/60 border border-emerald-500/20 rounded-xl px-3 py-2">
                 <i className="fas fa-calendar-check text-emerald-400 text-xs"></i>
                 <div>
-                  <p className="text-[8px] font-black uppercase tracking-widest text-slate-500 leading-none">Attendance</p>
+                  <p className="text-xs font-black uppercase tracking-widest text-slate-500 leading-none">Attendance</p>
                   <p className="text-sm font-black text-emerald-400 leading-tight">{Math.round(summary?.overall_attendance?.percentage ?? 0)}%</p>
                 </div>
               </div>
               <div className="flex items-center gap-2 bg-slate-800/60 border border-indigo-500/20 rounded-xl px-3 py-2">
                 <i className="fas fa-check-circle text-indigo-400 text-xs"></i>
                 <div>
-                  <p className="text-[8px] font-black uppercase tracking-widest text-slate-500 leading-none">Completed</p>
+                  <p className="text-xs font-black uppercase tracking-widest text-slate-500 leading-none">Completed</p>
                   <p className="text-sm font-black text-white leading-tight">{completedCount}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2 bg-slate-800/60 border border-amber-500/20 rounded-xl px-3 py-2">
                 <i className="fas fa-spinner text-amber-400 text-xs"></i>
                 <div>
-                  <p className="text-[8px] font-black uppercase tracking-widest text-slate-500 leading-none">In Progress</p>
+                  <p className="text-xs font-black uppercase tracking-widest text-slate-500 leading-none">In Progress</p>
                   <p className="text-sm font-black text-white leading-tight">{inProgressCount}</p>
                 </div>
               </div>
@@ -249,7 +249,7 @@ const ParentChildDetails = () => {
                    <button
                      key={course.id}
                      onClick={() => setActiveCourseId(course.id)}
-                     className={`shrink-0 px-6 py-3.5 rounded-2xl text-[11px] font-black uppercase tracking-[0.15em] transition-all relative flex items-center gap-2 ${
+                     className={`shrink-0 px-6 py-3.5 rounded-2xl text-xs font-black uppercase tracking-[0.15em] transition-all relative flex items-center gap-2 ${
                        activeCourseId === course.id 
                          ? "bg-indigo-600 text-white shadow-lg shadow-indigo-950/50" 
                          : "bg-slate-800/50 text-slate-500 hover:bg-slate-800 hover:text-slate-300 border border-white/5"
@@ -298,13 +298,13 @@ const ParentChildDetails = () => {
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
-                      className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${
+                      className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${
                         activeTab === tab.id
                           ? "bg-indigo-600 text-white shadow-lg"
                           : "text-slate-500 hover:text-white hover:bg-slate-800/50"
                       }`}
                     >
-                      <i className={`fas ${tab.icon} text-[10px]`} />
+                      <i className={`fas ${tab.icon} text-xs`} />
                       {tab.label}
                     </button>
                   ))}
@@ -375,9 +375,9 @@ const ParentChildDetails = () => {
             </div>
             <div>
               <h3 className="text-sm font-black uppercase tracking-widest text-white">Booked Tutoring Slots</h3>
-              <p className="text-[10px] text-slate-500 font-medium mt-0.5">All scheduled sessions with personal tutors</p>
+              <p className="text-xs text-slate-500 font-medium mt-0.5">All scheduled sessions with personal tutors</p>
             </div>
-            <span className="ml-auto text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 rounded-full px-2.5 py-0.5 text-[10px] font-black shrink-0">
+            <span className="ml-auto text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 rounded-full px-2.5 py-0.5 text-xs font-black shrink-0">
               {bookedSlots.length} {bookedSlots.length === 1 ? "slot" : "slots"}
             </span>
           </div>
@@ -404,24 +404,24 @@ const ParentChildDetails = () => {
                   >
                     {/* Date block */}
                     <div className="flex flex-col items-center justify-center w-16 bg-indigo-600/15 border-r border-indigo-500/20 px-2 py-4 shrink-0">
-                      <span className="text-[9px] font-black uppercase tracking-widest text-indigo-400">{mon}</span>
+                      <span className="text-xs font-black uppercase tracking-widest text-indigo-400">{mon}</span>
                       <span className="text-2xl font-black text-white leading-none my-0.5">{day}</span>
-                      <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">{weekday}</span>
+                      <span className="text-xs font-black uppercase tracking-widest text-slate-500">{weekday}</span>
                     </div>
                     {/* Info */}
                     <div className="flex-1 px-4 py-3 min-w-0 flex flex-col justify-between">
                       <div className="flex items-center gap-2 mb-2">
-                        <div className="w-6 h-6 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-300 text-[10px] font-black shrink-0">
+                        <div className="w-6 h-6 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-300 text-xs font-black shrink-0">
                           {slot.teacher_name?.[0]?.toUpperCase()}
                         </div>
                         <p className="text-xs font-bold text-slate-200 truncate">{slot.teacher_name}</p>
                       </div>
                       <div className="flex items-center justify-between gap-2">
-                        <span className="text-[10px] text-slate-400 tabular-nums font-medium">
-                          <i className="fas fa-clock text-[8px] mr-1 text-slate-500" />
+                        <span className="text-xs text-slate-400 tabular-nums font-medium">
+                          <i className="fas fa-clock text-xs mr-1 text-slate-500" />
                           {fmt12(slot.start_time)} – {fmt12(slot.end_time)}{" "}<TimezoneTag />
                         </span>
-                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-wider border shrink-0 ${
+                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-black uppercase tracking-wider border shrink-0 ${
                           isUpcoming
                             ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
                             : "bg-slate-700/50 border-slate-600/30 text-slate-500"
@@ -450,10 +450,10 @@ const ParentChildDetails = () => {
                 </div>
                 <div>
                   <h3 className="text-sm font-black uppercase tracking-widest text-white">Slot Cancellation Requests</h3>
-                  <p className="text-[10px] text-slate-500 mt-0.5">Review and approve or reject cancellation requests from your child.</p>
+                  <p className="text-xs text-slate-500 mt-0.5">Review and approve or reject cancellation requests from your child.</p>
                 </div>
               </div>
-              <span className="text-[10px] font-black px-2 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-300">
+              <span className="text-xs font-black px-2 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-300">
                 {myCancelRequests.filter(r => r.status === "pending").length} pending
               </span>
             </div>
@@ -482,19 +482,19 @@ const ParentChildDetails = () => {
                       <>
                         <button
                           onClick={() => { setResolveModal({ req, action: "approve" }); setResolveNote(""); }}
-                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600 border border-emerald-500/30 text-emerald-300 hover:text-white font-black text-[10px] uppercase tracking-widest transition"
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600 border border-emerald-500/30 text-emerald-300 hover:text-white font-black text-xs uppercase tracking-widest transition"
                         >
-                          <i className="fas fa-check text-[8px]" />Approve
+                          <i className="fas fa-check text-xs" />Approve
                         </button>
                         <button
                           onClick={() => { setResolveModal({ req, action: "reject" }); setResolveNote(""); }}
-                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-600/20 hover:bg-rose-600 border border-rose-500/30 text-rose-300 hover:text-white font-black text-[10px] uppercase tracking-widest transition"
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-600/20 hover:bg-rose-600 border border-rose-500/30 text-rose-300 hover:text-white font-black text-xs uppercase tracking-widest transition"
                         >
-                          <i className="fas fa-times text-[8px]" />Reject
+                          <i className="fas fa-times text-xs" />Reject
                         </button>
                       </>
                     ) : (
-                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${
+                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-widest border ${
                         req.status === "approved"
                           ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-300"
                           : req.status === "rejected"
@@ -531,7 +531,7 @@ const ParentChildDetails = () => {
                   : "The slot will remain booked and the student will be notified that cancellation was rejected."}
               </p>
               <div>
-                <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1.5">
+                <label className="block text-xs font-black uppercase tracking-widest text-slate-500 mb-1.5">
                   Note <span className="text-slate-600">(optional)</span>
                 </label>
                 <textarea
@@ -587,18 +587,18 @@ const AssessmentCard = ({ item }) => {
   return (
     <div className={`flex items-center gap-3 px-4 py-3 rounded-xl border transition-all ${s.cardBg}`}>
       <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${s.bg}`}>
-        <i className={`fas ${s.icon} text-[10px] ${s.iconCls}`} />
+        <i className={`fas ${s.icon} text-xs ${s.iconCls}`} />
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-xs font-bold text-white truncate leading-tight">{item.title}</p>
-        <p className="text-[10px] text-slate-500 font-medium mt-0.5">
+        <p className="text-xs text-slate-500 font-medium mt-0.5">
           {item.due_date ? new Date(item.due_date).toLocaleDateString() : "No due date"}
         </p>
       </div>
       <div className="text-right shrink-0">
-        <div className={`text-[10px] font-black ${s.textCls}`}>{s.label}</div>
+        <div className={`text-xs font-black ${s.textCls}`}>{s.label}</div>
         {obtained != null && (
-          <div className="text-[10px] font-bold text-slate-400 tabular-nums">
+          <div className="text-xs font-bold text-slate-400 tabular-nums">
             {obtained}/{total ?? "-"}
           </div>
         )}

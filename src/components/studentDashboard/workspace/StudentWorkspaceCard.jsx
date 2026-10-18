@@ -92,7 +92,7 @@ const StudentWorkspaceCard = ({ onOpenTimezone }) => {
             ) : (
               <>
                 <i className="fas fa-camera text-white text-xs" />
-                <span className="text-[8px] font-black uppercase tracking-wider text-white">
+                <span className="text-xs font-black uppercase tracking-wider text-white">
                   Photo
                 </span>
               </>
@@ -112,14 +112,14 @@ const StudentWorkspaceCard = ({ onOpenTimezone }) => {
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 mb-0.5">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
               Student Workspace
             </span>
           </div>
           <h2 className="text-base lg:text-lg font-black text-white tracking-tight truncate">
             {displayName}
           </h2>
-          <p className="text-[11px] text-indigo-300/80 font-medium truncate">
+          <p className="text-xs text-indigo-300/80 font-medium truncate">
             {gradeLevel} • Term 2025–26
           </p>
 
@@ -129,12 +129,12 @@ const StudentWorkspaceCard = ({ onOpenTimezone }) => {
               type="button"
               onClick={onOpenTimezone}
               title="Click to switch your timezone"
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/5 hover:bg-indigo-600/20 border border-white/10 hover:border-indigo-500/40 text-slate-300 hover:text-white text-[11px] font-semibold transition cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/5 hover:bg-indigo-600/20 border border-white/10 hover:border-indigo-500/40 text-slate-300 hover:text-white text-xs font-semibold transition cursor-pointer"
             >
               <i className="fas fa-globe text-indigo-400 text-xs" />
               <span>{displayTz}</span>
               <span className="text-indigo-400 font-bold">({timezoneAbbr})</span>
-              <span className="text-slate-400 text-[10px] ml-0.5">Switch</span>
+              <span className="text-slate-400 text-xs ml-0.5">Switch</span>
             </button>
 
             <TuitionPill />
@@ -143,11 +143,11 @@ const StudentWorkspaceCard = ({ onOpenTimezone }) => {
       </div>
 
       {rollNo && (
-        <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-[11px] text-slate-400">
+        <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs text-slate-400">
           <span>
             Roll: <strong className="text-slate-200">{rollNo}</strong>
           </span>
-          <span className="px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 font-semibold text-[10px]">
+          <span className="px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 font-semibold text-xs">
             Active Learner • In Good Standing
           </span>
         </div>

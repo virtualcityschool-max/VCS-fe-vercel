@@ -175,18 +175,18 @@ const ChildLinksTab = ({
                         <p className="font-bold text-white text-sm sm:text-base mb-1">
                           {link.parent} → {link.student}
                         </p>
-                        <p className="text-[9px] sm:text-xs text-slate-500 uppercase break-all">
+                        <p className="text-xs sm:text-xs text-slate-500 uppercase break-all">
                           Guardian ID: {link.parent_id} • Roll #: {link.student_roll_no}
                         </p>
                         {link.parent_email && (
-                          <p className="text-[9px] sm:text-xs text-slate-500 break-all mt-0.5 flex items-center gap-1">
-                            <i className="fas fa-user text-[8px]"></i>
+                          <p className="text-xs sm:text-xs text-slate-500 break-all mt-0.5 flex items-center gap-1">
+                            <i className="fas fa-user text-xs"></i>
                             {link.parent_email}
                           </p>
                         )}
                         {link.student_email && (
-                          <p className="text-[9px] sm:text-xs text-slate-500 break-all mt-0.5 flex items-center gap-1">
-                            <i className="fas fa-user-graduate text-[8px]"></i>
+                          <p className="text-xs sm:text-xs text-slate-500 break-all mt-0.5 flex items-center gap-1">
+                            <i className="fas fa-user-graduate text-xs"></i>
                             {link.student_email}
                           </p>
                         )}
@@ -204,7 +204,7 @@ const ChildLinksTab = ({
                         <button
                           onClick={() => handleApprove(link.link_id, `${link.parent} → ${link.student}`)}
                           disabled={isProcessing[link.link_id] === "approving"}
-                          className="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-indigo-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 sm:gap-2 flex-1 justify-center"
+                          className="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-xs sm:text-xs font-black uppercase tracking-widest hover:bg-indigo-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 sm:gap-2 flex-1 justify-center"
                         >
                           {isProcessing[link.link_id] === "approving" ? (
                             <React.Fragment key="approving">
@@ -223,7 +223,7 @@ const ChildLinksTab = ({
                         <button
                           onClick={() => handleReject(link.link_id, `${link.parent} → ${link.student}`)}
                           disabled={isProcessing[link.link_id] === "rejecting"}
-                          className="bg-red-600 text-white px-3 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-red-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 sm:gap-2 flex-1 justify-center"
+                          className="bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs sm:text-xs font-black uppercase tracking-widest hover:bg-red-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 sm:gap-2 flex-1 justify-center"
                         >
                           {isProcessing[link.link_id] === "rejecting" ? (
                             <React.Fragment key="rejecting">
@@ -249,13 +249,13 @@ const ChildLinksTab = ({
               <table className="hidden lg:table w-full text-left">
                 <thead className="bg-slate-950/60 border-b border-slate-800">
                   <tr key="child-links-header">
-                    <th className="px-8 py-6 text-[10px] font-black uppercase text-slate-500  text-start">
+                    <th className="px-8 py-6 text-xs font-black uppercase text-slate-500  text-start">
                       Link Information
                     </th>
-                    <th className="px-8 py-6 text-[10px] font-black uppercase text-slate-500 text-start">
+                    <th className="px-8 py-6 text-xs font-black uppercase text-slate-500 text-start">
                       Requested At
                     </th>
-                    <th className="px-8 py-6 text-[10px] font-black uppercase text-slate-500 text-center">
+                    <th className="px-8 py-6 text-xs font-black uppercase text-slate-500 text-center">
                       Actions
                     </th>
                   </tr>
@@ -275,18 +275,18 @@ const ChildLinksTab = ({
                             <p className="font-bold text-white group-hover:text-purple-400 transition">
                               {link.parent} → {link.student}
                             </p>
-                            <p className="text-[9px] text-slate-500 uppercase">
+                            <p className="text-xs text-slate-500 uppercase">
                               Guardian ID: {link.parent_id} • Roll #: {link.student_roll_no}
                             </p>
                             {link.parent_email && (
-                              <p className="text-[10px] text-slate-500 mt-0.5 flex items-center gap-1.5">
-                                <i className="fas fa-user text-[9px]"></i>
+                              <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-1.5">
+                                <i className="fas fa-user text-xs"></i>
                                 {link.parent_email}
                               </p>
                             )}
                             {link.student_email && (
-                              <p className="text-[10px] text-slate-500 mt-0.5 flex items-center gap-1.5">
-                                <i className="fas fa-user-graduate text-[9px]"></i>
+                              <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-1.5">
+                                <i className="fas fa-user-graduate text-xs"></i>
                                 {link.student_email}
                               </p>
                             )}
@@ -305,7 +305,7 @@ const ChildLinksTab = ({
                             disabled={
                               isProcessing[link.link_id] === "approving"
                             }
-                            className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                            className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-indigo-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                           >
                             {isProcessing[link.link_id] === "approving" ? (
                               <React.Fragment key="approving">
@@ -324,7 +324,7 @@ const ChildLinksTab = ({
                             disabled={
                               isProcessing[link.link_id] === "rejecting"
                             }
-                            className="bg-red-600 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                            className="bg-red-600 text-white px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-red-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                           >
                             {isProcessing[link.link_id] === "rejecting" ? (
                               <React.Fragment key="rejecting">

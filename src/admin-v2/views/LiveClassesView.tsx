@@ -171,7 +171,7 @@ export const LiveClassesView: React.FC = () => {
       <div className={`grid grid-cols-12 gap-3 items-center px-4 py-3 border-t border-[#1E2648]/60 ${x.phase === 'live' ? 'bg-rose-500/[0.04]' : ''}`}>
         <div className="col-span-4 md:col-span-2">
           <div className="text-sm font-bold text-slate-100 font-mono">{timeOf(x.start)}</div>
-          <div className="text-[11px] text-slate-500">{timing}</div>
+          <div className="text-xs text-slate-500">{timing}</div>
           {!ended && (
             <div className="mt-1">
               <DigitalSessionClock
@@ -184,19 +184,19 @@ export const LiveClassesView: React.FC = () => {
         </div>
         <div className="col-span-8 md:col-span-4 min-w-0">
           <div className="text-sm font-semibold text-slate-100 truncate">{x.course || x.title}</div>
-          <div className="text-[11px] text-slate-400 truncate">
+          <div className="text-xs text-slate-400 truncate">
             {x.batch && <span className="text-sky-300">{x.batch} · </span>}
             {x.title !== x.course ? x.title : ''}
           </div>
           {x.link && (
-            <div className="text-[10px] text-indigo-300/80 font-mono truncate mt-0.5 select-all hover:text-indigo-200">
+            <div className="text-xs text-indigo-300/80 font-mono truncate mt-0.5 select-all hover:text-indigo-200">
               {x.link.replace(/^https?:\/\//, '')}
             </div>
           )}
         </div>
         <div className="col-span-6 md:col-span-2 min-w-0">
           <div className="text-[13px] text-slate-200 truncate">{x.teacher}</div>
-          <div className={`text-[11px] ${x.teacherIn ? 'text-emerald-400' : x.phase === 'late' || x.phase === 'live' ? 'text-amber-300' : 'text-slate-500'}`}>
+          <div className={`text-xs ${x.teacherIn ? 'text-emerald-400' : x.phase === 'late' || x.phase === 'live' ? 'text-amber-300' : 'text-slate-500'}`}>
             {x.teacherIn ? `● Joined ${x.teacherJoinedAt ? timeOf(new Date(x.teacherJoinedAt)) : ''}` : ended ? (x.teacherJoined ? 'Taught the class' : 'Did not join') : x.phase === 'late' || x.phase === 'live' ? 'Not in the class yet' : ''}
           </div>
         </div>
@@ -214,7 +214,7 @@ export const LiveClassesView: React.FC = () => {
           )}
         </div>
         <div className="col-span-12 md:col-span-2 flex items-center justify-end gap-1.5 flex-wrap">
-          <span className={`px-2 py-0.5 rounded-full border text-[10px] font-semibold whitespace-nowrap ${st.pill}`}>
+          <span className={`px-2 py-0.5 rounded-full border text-xs font-semibold whitespace-nowrap ${st.pill}`}>
             {x.phase === 'live' && <span className="inline-block w-1.5 h-1.5 rounded-full bg-rose-400 mr-1 animate-pulse align-middle" />}
             {st.label}
           </span>
@@ -233,12 +233,12 @@ export const LiveClassesView: React.FC = () => {
                 {copiedId === x.id ? (
                   <>
                     <Check className="w-3.5 h-3.5 text-emerald-400" />
-                    <span className="text-[10px] text-emerald-300">Copied</span>
+                    <span className="text-xs text-emerald-300">Copied</span>
                   </>
                 ) : (
                   <>
                     <Copy className="w-3.5 h-3.5 text-indigo-400" />
-                    <span className="text-[10px] text-slate-300">Copy</span>
+                    <span className="text-xs text-slate-300">Copy</span>
                   </>
                 )}
               </button>
@@ -263,7 +263,7 @@ export const LiveClassesView: React.FC = () => {
               <Video className="w-3.5 h-3.5" /> Join
             </a>
           )}
-          {!ended && !x.link && <span className="text-[11px] text-amber-300">No Meet link</span>}
+          {!ended && !x.link && <span className="text-xs text-amber-300">No Meet link</span>}
           {(x.phase === 'live' || x.r?.status === 'live') && canResolve && (
             <button
               type="button"
@@ -279,7 +279,7 @@ export const LiveClassesView: React.FC = () => {
               <button
                 type="button"
                 onClick={() => resolveMissedSession(x.id, 'held')}
-                className="px-2 py-1 rounded-lg text-[11px] font-semibold bg-emerald-600 hover:bg-emerald-500 text-white whitespace-nowrap cursor-pointer transition shadow-xs"
+                className="px-2 py-1 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white whitespace-nowrap cursor-pointer transition shadow-xs"
                 title="Record this class as held / taught"
               >
                 Held
@@ -287,7 +287,7 @@ export const LiveClassesView: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setRescheduling(x.r)}
-                className="px-2 py-1 rounded-lg text-[11px] font-semibold bg-[#6D5BFF] hover:bg-[#5B47FB] text-white whitespace-nowrap cursor-pointer transition shadow-xs"
+                className="px-2 py-1 rounded-lg text-xs font-semibold bg-[#6D5BFF] hover:bg-[#5B47FB] text-white whitespace-nowrap cursor-pointer transition shadow-xs"
                 title="Book a new time for this class"
               >
                 Reschedule
@@ -295,7 +295,7 @@ export const LiveClassesView: React.FC = () => {
               <button
                 type="button"
                 onClick={() => resolveMissedSession(x.id, 'cancelled')}
-                className="px-2 py-1 rounded-lg text-[11px] font-semibold border border-rose-500/40 text-rose-300 hover:bg-rose-500/10 whitespace-nowrap cursor-pointer transition"
+                className="px-2 py-1 rounded-lg text-xs font-semibold border border-rose-500/40 text-rose-300 hover:bg-rose-500/10 whitespace-nowrap cursor-pointer transition"
                 title="Mark this class as cancelled"
               >
                 Cancel
@@ -303,7 +303,7 @@ export const LiveClassesView: React.FC = () => {
               <button
                 type="button"
                 onClick={() => resolveMissedSession(x.id, 'held', 'Dismissed by admin')}
-                className="px-2 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 whitespace-nowrap cursor-pointer transition"
+                className="px-2 py-1 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 whitespace-nowrap cursor-pointer transition"
                 title="Dismiss this alert and mark as resolved"
               >
                 Dismiss
@@ -318,7 +318,7 @@ export const LiveClassesView: React.FC = () => {
   const Section: React.FC<{ title: string; icon: any; tone: string; items: any[]; empty?: string }> = ({ title, icon: Icon, tone, items, empty }) =>
     items.length === 0 && !empty ? null : (
       <div className="rounded-2xl border border-[#232D52] bg-[#121831] overflow-hidden">
-        <div className="flex items-center gap-2 px-4 py-2.5 bg-[#0E1428] text-[11px] font-bold uppercase tracking-wider">
+        <div className="flex items-center gap-2 px-4 py-2.5 bg-[#0E1428] text-xs font-bold uppercase tracking-wider">
           <Icon className={`w-3.5 h-3.5 ${tone}`} />
           <span className={tone}>{title}</span>
           <span className="text-slate-500 font-mono">{items.length}</span>
@@ -408,7 +408,7 @@ export const LiveClassesView: React.FC = () => {
                         {missedRows.length} classes
                       </span>
                     </div>
-                    <p className="text-[11px] text-slate-400 mt-0.5">
+                    <p className="text-xs text-slate-400 mt-0.5">
                       Teacher did not join or start. Mark as held if taught offline, cancel, reschedule, or dismiss.
                     </p>
                   </div>

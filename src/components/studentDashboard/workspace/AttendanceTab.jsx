@@ -67,7 +67,7 @@ const AttendanceTab = ({ onRequestLeave }) => {
               <h3 className="text-sm font-bold text-white tracking-tight">Attendance Standing</h3>
             </div>
             {overall != null && (
-              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${good ? "bg-emerald-500/15 text-emerald-400" : "bg-amber-500/15 text-amber-400"}`}>
+              <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${good ? "bg-emerald-500/15 text-emerald-400" : "bg-amber-500/15 text-amber-400"}`}>
                 {good ? "Good Standing" : "Below 85%"}
               </span>
             )}
@@ -99,17 +99,17 @@ const AttendanceTab = ({ onRequestLeave }) => {
                 <span className="text-4xl font-black text-white font-poppins leading-none">
                   {overall != null ? `${overall}%` : "—"}
                 </span>
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Overall</span>
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Overall</span>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3 w-full mt-6">
               <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5 text-center">
-                <span className="text-[10px] uppercase font-bold text-slate-400">Attended</span>
+                <span className="text-xs uppercase font-bold text-slate-400">Attended</span>
                 <p className="text-lg font-black text-white mt-0.5">{attended} / {total}</p>
               </div>
               <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5 text-center">
-                <span className="text-[10px] uppercase font-bold text-slate-400">On time</span>
+                <span className="text-xs uppercase font-bold text-slate-400">On time</span>
                 <p className="text-lg font-black text-emerald-400 mt-0.5">{punctuality != null ? `${punctuality}%` : "—"}</p>
               </div>
             </div>
@@ -149,7 +149,7 @@ const AttendanceTab = ({ onRequestLeave }) => {
                   <div key={sub.name} className="space-y-1.5">
                     <div className="flex items-center justify-between text-xs gap-3">
                       <span className="font-semibold text-slate-200 truncate">{sub.name}</span>
-                      <span className="text-slate-400 font-mono text-[11px] shrink-0">
+                      <span className="text-slate-400 font-mono text-xs shrink-0">
                         {sub.attended} / {sub.total} classes &nbsp;|&nbsp;{" "}
                         <strong className={sub.percent >= THRESHOLD ? "text-emerald-400" : "text-amber-400"}>{sub.percent}%</strong>
                       </span>
@@ -177,11 +177,11 @@ const AttendanceTab = ({ onRequestLeave }) => {
                   <div key={r.id} className="flex items-center justify-between gap-3 py-2 text-xs">
                     <div className="min-w-0">
                       <p className="text-slate-200 font-semibold truncate">{r.session_title || r.course_title}</p>
-                      <p className="text-slate-500 text-[11px]">
+                      <p className="text-slate-500 text-xs">
                         {r.scheduled_at ? `${formatDate(r.scheduled_at)} · ${formatTime(r.scheduled_at)}` : ""}
                       </p>
                     </div>
-                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase shrink-0 ${STATUS_STYLE[r.status] || "bg-slate-700/40 text-slate-300"}`}>
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-bold uppercase shrink-0 ${STATUS_STYLE[r.status] || "bg-slate-700/40 text-slate-300"}`}>
                       {r.status}
                     </span>
                   </div>

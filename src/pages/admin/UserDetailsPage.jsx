@@ -236,9 +236,9 @@ const UserDetailsPage = () => {
               </div>
               <button
                 onClick={() => navigate(`/admin/users/${id}`, { state: { filters: location.state?.filters } })}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#6D5BFF] hover:bg-[#5B47FB] text-white text-[10px] font-black uppercase tracking-widest transition"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#6D5BFF] hover:bg-[#5B47FB] text-white text-xs font-black uppercase tracking-widest transition"
               >
-                <i className="fas fa-edit text-[9px]" />
+                <i className="fas fa-edit text-xs" />
                 Switch to Edit
               </button>
             </div>

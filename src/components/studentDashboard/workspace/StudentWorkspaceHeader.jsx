@@ -142,7 +142,7 @@ const StudentWorkspaceHeader = ({ onResolveOverdue, onJoinNextClass, onOpenTimez
               ) : (
                 <>
                   <i className="fas fa-camera text-white text-xs" />
-                  <span className="text-[8px] font-black uppercase tracking-wider text-white">
+                  <span className="text-xs font-black uppercase tracking-wider text-white">
                     Photo
                   </span>
                 </>
@@ -162,7 +162,7 @@ const StudentWorkspaceHeader = ({ onResolveOverdue, onJoinNextClass, onOpenTimez
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 mb-0.5">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
                 Student Workspace
               </span>
             </div>
@@ -170,7 +170,7 @@ const StudentWorkspaceHeader = ({ onResolveOverdue, onJoinNextClass, onOpenTimez
               {displayName}
             </h2>
             {gradeLevel && (
-              <p className="text-[11px] text-indigo-300/80 font-medium truncate">{gradeLevel}</p>
+              <p className="text-xs text-indigo-300/80 font-medium truncate">{gradeLevel}</p>
             )}
 
             {/* Timezone pill button & tuition status */}
@@ -179,12 +179,12 @@ const StudentWorkspaceHeader = ({ onResolveOverdue, onJoinNextClass, onOpenTimez
                 type="button"
                 onClick={onOpenTimezone}
                 title="Click to switch your timezone"
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/5 hover:bg-indigo-600/20 border border-white/10 hover:border-indigo-500/40 text-slate-300 hover:text-white text-[11px] font-semibold transition cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/5 hover:bg-indigo-600/20 border border-white/10 hover:border-indigo-500/40 text-slate-300 hover:text-white text-xs font-semibold transition cursor-pointer"
               >
                 <i className="fas fa-globe text-indigo-400 text-xs" />
                 <span>{displayTz}</span>
                 <span className="text-indigo-400 font-bold">({timezoneAbbr})</span>
-                <span className="text-slate-400 text-[10px] ml-0.5">Switch</span>
+                <span className="text-slate-400 text-xs ml-0.5">Switch</span>
               </button>
 
             <TuitionPill />
@@ -193,11 +193,11 @@ const StudentWorkspaceHeader = ({ onResolveOverdue, onJoinNextClass, onOpenTimez
         </div>
 
         {rollNo && (
-          <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-[11px] text-slate-400">
+          <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs text-slate-400">
             <span>
               Roll: <strong className="text-slate-200">{rollNo}</strong>
             </span>
-            <span className="px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 font-semibold text-[10px]">
+            <span className="px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 font-semibold text-xs">
               Active Learner • In Good Standing
             </span>
           </div>
@@ -218,13 +218,13 @@ const StudentWorkspaceHeader = ({ onResolveOverdue, onJoinNextClass, onOpenTimez
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <span className={`text-[10px] font-black uppercase tracking-widest ${
+                  <span className={`text-xs font-black uppercase tracking-widest ${
                     isJoinWindowOpen ? "text-emerald-400" : "text-slate-400"
                   }`}>
                     WHAT IS MY NEXT CLASS?
                   </span>
                   {isJoinWindowOpen && (
-                    <span className="px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 text-[9px] font-black tracking-wider animate-pulse">
+                    <span className="px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 text-xs font-black tracking-wider animate-pulse">
                       JOIN NOW
                     </span>
                   )}
@@ -241,7 +241,7 @@ const StudentWorkspaceHeader = ({ onResolveOverdue, onJoinNextClass, onOpenTimez
                 </p>
 
                 {activeNextSession.scheduled_at && (
-                  <p className="text-[11px] text-slate-300 mt-1 font-mono flex items-center gap-1.5">
+                  <p className="text-xs text-slate-300 mt-1 font-mono flex items-center gap-1.5">
                     <i className="far fa-calendar text-indigo-400" />
                     Starts at {formatTime(activeNextSession.scheduled_at, timezone)} ({timezoneAbbr})
                   </p>
@@ -266,17 +266,17 @@ const StudentWorkspaceHeader = ({ onResolveOverdue, onJoinNextClass, onOpenTimez
                   <i className="fas fa-video text-xs" />
                   <span>{isNextLive ? "Join Google Meet (Live now)" : `Join Google Meet (Starts in ${minsRemaining}m)`}</span>
                 </a>
-                <p className="text-[10px] text-emerald-400 text-center font-medium">
+                <p className="text-xs text-emerald-400 text-center font-medium">
                   Classroom open! (Join window opens 20 mins before start)
                 </p>
               </div>
             ) : (
-              <div className="mt-3 p-2 rounded-xl bg-white/5 border border-white/10 text-[11px] text-slate-400 flex items-center justify-between">
+              <div className="mt-3 p-2 rounded-xl bg-white/5 border border-white/10 text-xs text-slate-400 flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
                   <i className="fas fa-lock text-indigo-400 text-xs" />
                   <span>Google Meet opens 20 min before class</span>
                 </div>
-                <span className="font-mono text-indigo-300 text-[10px] font-bold">
+                <span className="font-mono text-indigo-300 text-xs font-bold">
                   Opens {unlockTime}
                 </span>
               </div>
@@ -289,7 +289,7 @@ const StudentWorkspaceHeader = ({ onResolveOverdue, onJoinNextClass, onOpenTimez
                 <i className="fas fa-calendar-check text-base" />
               </div>
               <div className="min-w-0 flex-1">
-                <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <div className="text-xs font-black uppercase tracking-widest text-slate-400">
                   WHAT IS MY NEXT CLASS?
                 </div>
                 <h3 className="text-base font-black text-white mt-1">
@@ -301,7 +301,7 @@ const StudentWorkspaceHeader = ({ onResolveOverdue, onJoinNextClass, onOpenTimez
               </div>
             </div>
 
-            <div className="p-2 rounded-xl bg-white/5 border border-white/10 text-[11px] text-slate-400 flex items-center gap-2">
+            <div className="p-2 rounded-xl bg-white/5 border border-white/10 text-xs text-slate-400 flex items-center gap-2">
               <i className="fas fa-info-circle text-indigo-400 text-xs shrink-0" />
               <span>Google Meet links unlock 30 min before scheduled start time</span>
             </div>
@@ -317,7 +317,7 @@ const StudentWorkspaceHeader = ({ onResolveOverdue, onJoinNextClass, onOpenTimez
               <i className="fas fa-exclamation-triangle text-base animate-pulse" />
             </div>
             <div className="min-w-0 flex-1">
-              <div className="text-[10px] font-black uppercase tracking-widest text-red-400">
+              <div className="text-xs font-black uppercase tracking-widest text-red-400">
                 ACTION REQUIRED
               </div>
               <h3 className="text-base font-black text-white mt-0.5">
@@ -333,7 +333,7 @@ const StudentWorkspaceHeader = ({ onResolveOverdue, onJoinNextClass, onOpenTimez
             className="mt-3 inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold transition shadow-lg shadow-red-900/30 cursor-pointer"
           >
             View & Resolve
-            <i className="fas fa-arrow-right text-[10px]" />
+            <i className="fas fa-arrow-right text-xs" />
           </button>
         </div>
       ) : pendingCount > 0 ? (
@@ -343,7 +343,7 @@ const StudentWorkspaceHeader = ({ onResolveOverdue, onJoinNextClass, onOpenTimez
               <i className="fas fa-tasks text-base" />
             </div>
             <div className="min-w-0 flex-1">
-              <div className="text-[10px] font-black uppercase tracking-widest text-amber-400">
+              <div className="text-xs font-black uppercase tracking-widest text-amber-400">
                 TASKS IN PROGRESS
               </div>
               <h3 className="text-base font-black text-white mt-0.5">
@@ -359,7 +359,7 @@ const StudentWorkspaceHeader = ({ onResolveOverdue, onJoinNextClass, onOpenTimez
             className="mt-3 inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl bg-amber-600/90 hover:bg-amber-500 text-white text-xs font-bold transition cursor-pointer"
           >
             View Submissions
-            <i className="fas fa-arrow-right text-[10px]" />
+            <i className="fas fa-arrow-right text-xs" />
           </button>
         </div>
       ) : (
@@ -369,7 +369,7 @@ const StudentWorkspaceHeader = ({ onResolveOverdue, onJoinNextClass, onOpenTimez
               <i className="fas fa-check-circle text-base" />
             </div>
             <div className="min-w-0 flex-1">
-              <div className="text-[10px] font-black uppercase tracking-widest text-emerald-400">
+              <div className="text-xs font-black uppercase tracking-widest text-emerald-400">
                 ALL CAUGHT UP
               </div>
               <h3 className="text-base font-black text-white mt-0.5">
@@ -380,7 +380,7 @@ const StudentWorkspaceHeader = ({ onResolveOverdue, onJoinNextClass, onOpenTimez
               </p>
             </div>
           </div>
-          <div className="mt-3 flex items-center gap-2 text-[11px] text-emerald-400 font-semibold">
+          <div className="mt-3 flex items-center gap-2 text-xs text-emerald-400 font-semibold">
             <i className="fas fa-award text-xs" />
             <span>Academic Standing: Exemplary</span>
           </div>

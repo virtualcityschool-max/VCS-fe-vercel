@@ -78,7 +78,7 @@ export const SegmentedTabs = ({ tabs, value, onChange }) => (
       >
         {t.label}
         {t.count !== undefined && (
-          <span className={`px-1.5 rounded-full text-[10px] tabular-nums ${value === t.id ? "bg-white/20 text-white" : "bg-slate-800 text-slate-400"}`}>
+          <span className={`px-1.5 rounded-full text-xs tabular-nums ${value === t.id ? "bg-white/20 text-white" : "bg-slate-800 text-slate-400"}`}>
             {t.count}
           </span>
         )}
@@ -164,13 +164,13 @@ export const FilterBar = ({ search, onSearch, placeholder = "Search…", filters
           {search.trim() && (
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs bg-indigo-500/15 border border-indigo-500/30 text-indigo-300">
               Search: “{search}”
-              <button type="button" aria-label="Remove search" onClick={() => onSearch("")} className="hover:text-white"><i className="fas fa-xmark text-[10px]" aria-hidden="true" /></button>
+              <button type="button" aria-label="Remove search" onClick={() => onSearch("")} className="hover:text-white"><i className="fas fa-xmark text-xs" aria-hidden="true" /></button>
             </span>
           )}
           {active.map((f) => (
             <span key={f.id} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs bg-indigo-500/15 border border-indigo-500/30 text-indigo-300">
               {f.label}: {f.options.find((o) => o.value === f.value)?.label || f.value}
-              <button type="button" aria-label={`Remove ${f.label} filter`} onClick={() => f.onChange("all")} className="hover:text-white"><i className="fas fa-xmark text-[10px]" aria-hidden="true" /></button>
+              <button type="button" aria-label={`Remove ${f.label} filter`} onClick={() => f.onChange("all")} className="hover:text-white"><i className="fas fa-xmark text-xs" aria-hidden="true" /></button>
             </span>
           ))}
           <button type="button" onClick={() => { onSearch(""); filters.forEach((f) => f.onChange("all")); }} className="text-xs text-slate-400 hover:text-slate-200 underline underline-offset-2 ml-1">
@@ -218,15 +218,15 @@ export const SubjectChips = ({ titles = [], max = 2, empty = "None" }) => (
     {titles.slice(0, max).map((t) => {
       const d = departmentOf(t);
       return (
-        <span key={t} title={t} className="px-2 py-0.5 rounded text-[11px] border max-w-[160px] truncate" style={{ color: d.hex, borderColor: `${d.hex}40`, backgroundColor: `${d.hex}12` }}>
+        <span key={t} title={t} className="px-2 py-0.5 rounded text-xs border max-w-[160px] truncate" style={{ color: d.hex, borderColor: `${d.hex}40`, backgroundColor: `${d.hex}12` }}>
           {t}
         </span>
       );
     })}
     {titles.length > max && (
-      <span className="px-1.5 py-0.5 rounded text-[10px] bg-indigo-500/15 text-indigo-300 font-medium">+{titles.length - max} more</span>
+      <span className="px-1.5 py-0.5 rounded text-xs bg-indigo-500/15 text-indigo-300 font-medium">+{titles.length - max} more</span>
     )}
-    {titles.length === 0 && <span className="text-slate-500 text-[11px] italic">{empty}</span>}
+    {titles.length === 0 && <span className="text-slate-500 text-xs italic">{empty}</span>}
   </div>
 );
 
@@ -270,7 +270,7 @@ export const DataTable = ({ columns, rows, rowKey = "id", onRowClick, rowActions
                 onClick={() => { a.onClick(rows.filter((r) => selected.includes(r[rowKey]))); setSelected([]); }}
                 className={`flex items-center gap-1.5 px-3 h-8 rounded-lg text-xs font-semibold ${a.destructive ? "bg-rose-500/20 text-rose-300 hover:bg-rose-500/30" : "bg-indigo-600 text-white hover:bg-indigo-500"}`}
               >
-                {a.icon && <i className={`fas ${a.icon} text-[11px]`} aria-hidden="true" />}
+                {a.icon && <i className={`fas ${a.icon} text-xs`} aria-hidden="true" />}
                 {a.label}
               </button>
             ))}
@@ -281,7 +281,7 @@ export const DataTable = ({ columns, rows, rowKey = "id", onRowClick, rowActions
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="border-b border-[#1E2648] bg-[#0E1428] text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+            <tr className="border-b border-[#1E2648] bg-[#0E1428] text-xs font-semibold text-slate-400 uppercase tracking-wider">
               {bulkActions.length > 0 && (
                 <th className="py-3 px-4 w-10">
                   <input type="checkbox" aria-label="Select all on this page" checked={allOnPage} onChange={toggleAll} className="rounded cursor-pointer accent-[#6D5BFF]" />
@@ -324,11 +324,11 @@ export const DataTable = ({ columns, rows, rowKey = "id", onRowClick, rowActions
         </span>
         <div className="flex items-center gap-1.5">
           <button type="button" aria-label="Previous page" disabled={current === 1} onClick={() => setPage(current - 1)} className="w-8 h-8 rounded-lg border border-[#232D52] hover:bg-slate-800 disabled:opacity-40">
-            <i className="fas fa-chevron-left text-[10px]" aria-hidden="true" />
+            <i className="fas fa-chevron-left text-xs" aria-hidden="true" />
           </button>
           <span className="px-2 text-slate-300 tabular-nums">{current} / {totalPages}</span>
           <button type="button" aria-label="Next page" disabled={current === totalPages} onClick={() => setPage(current + 1)} className="w-8 h-8 rounded-lg border border-[#232D52] hover:bg-slate-800 disabled:opacity-40">
-            <i className="fas fa-chevron-right text-[10px]" aria-hidden="true" />
+            <i className="fas fa-chevron-right text-xs" aria-hidden="true" />
           </button>
         </div>
       </div>
@@ -384,7 +384,7 @@ export const Drawer = ({ open, onClose, title, subtitle, avatarName, status, tab
                 onClick={() => onTab(t.id)}
                 className={`flex items-center gap-2 py-3 px-3 border-b-2 text-xs font-semibold whitespace-nowrap ${tab === t.id ? "border-[#6D5BFF] text-indigo-300" : "border-transparent text-slate-400 hover:text-slate-200"}`}
               >
-                <i className={`fas ${t.icon} text-[11px]`} aria-hidden="true" /> {t.label}
+                <i className={`fas ${t.icon} text-xs`} aria-hidden="true" /> {t.label}
               </button>
             ))}
           </div>

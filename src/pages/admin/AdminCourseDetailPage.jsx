@@ -37,7 +37,7 @@ const MetaTile = ({ icon, label, value, valueClass = "text-white" }) => (
   <div className="bg-[#0E1428]/50 rounded-2xl p-4 border border-[#232D52]/40">
     <div className="flex items-center gap-2 mb-1.5">
       <i className={`fas fa-${icon} text-slate-500 text-xs`}></i>
-      <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">{label}</p>
+      <p className="text-xs uppercase tracking-wider text-slate-500 font-semibold">{label}</p>
     </div>
     <p className={`text-sm font-semibold truncate ${valueClass}`}>{value}</p>
   </div>
@@ -311,14 +311,14 @@ const AdminCourseDetailPage = () => {
                     onClick={() => openEdit()}
                     className="flex items-center gap-2 px-4 py-2 bg-[#6D5BFF] hover:bg-[#5B47FB] text-white text-xs font-bold rounded-xl transition active:scale-95"
                   >
-                    <i className="fas fa-pen text-[10px]"></i>
+                    <i className="fas fa-pen text-xs"></i>
                     Edit
                   </button>
                   <button
                     onClick={() => setDeleteDialog(true)}
                     className="flex items-center gap-2 px-4 py-2 bg-red-600/10 hover:bg-red-600/20 border border-red-500/30 text-red-400 text-xs font-bold rounded-xl transition active:scale-95"
                   >
-                    <i className="fas fa-trash text-[10px]"></i>
+                    <i className="fas fa-trash text-xs"></i>
                     Delete
                   </button>
                 </div>

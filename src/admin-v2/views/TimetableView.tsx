@@ -62,7 +62,7 @@ export const TimetableView: React.FC = () => {
       cell: (row) => (
         <div>
           <div className="font-semibold text-slate-100">{row.title}</div>
-          <div className="text-[11px] text-slate-400 mt-0.5">{row.recurrence} Recurrence</div>
+          <div className="text-xs text-slate-400 mt-0.5">{row.recurrence} Recurrence</div>
         </div>
       ),
     },
@@ -77,7 +77,7 @@ export const TimetableView: React.FC = () => {
               {sub ? `${sub.code} ${sub.name}` : row.department}
             </div>
             <span
-              className="inline-block mt-0.5 px-2 py-0.2 rounded text-[10px] font-medium border"
+              className="inline-block mt-0.5 px-2 py-0.2 rounded text-xs font-medium border"
               style={{
                 backgroundColor: `${dept.hex}15`,
                 color: dept.hex,
@@ -174,7 +174,7 @@ export const TimetableView: React.FC = () => {
           <div className="flex items-center justify-between p-4 rounded-xl border border-[#232D52] bg-[#121831]">
             <div className="flex items-center gap-3">
               <span className="text-sm font-bold text-slate-100">{weekLabel}</span>
-              <span className="px-2 py-0.5 text-[11px] rounded bg-indigo-500/15 text-indigo-300 font-mono">
+              <span className="px-2 py-0.5 text-xs rounded bg-indigo-500/15 text-indigo-300 font-mono">
                 {weekOffset === 0 ? 'This week' : weekOffset < 0 ? `${-weekOffset} week${weekOffset < -1 ? 's' : ''} ago` : `In ${weekOffset} week${weekOffset > 1 ? 's' : ''}`}
                 {' · '}
                 {weekSessions.length} classes
@@ -217,7 +217,7 @@ export const TimetableView: React.FC = () => {
                       {day} <span className="font-normal text-slate-500 font-mono">{fmtDay(weekDays[idx])}</span>
                     </span>
                     {isToday && (
-                      <span className="px-1.5 py-0.2 rounded bg-[#6D5BFF] text-white text-[10px] font-mono font-bold">
+                      <span className="px-1.5 py-0.2 rounded bg-[#6D5BFF] text-white text-xs font-mono font-bold">
                         TODAY
                       </span>
                     )}
@@ -238,7 +238,7 @@ export const TimetableView: React.FC = () => {
                             borderColor: `${dept.hex}40`,
                           }}
                         >
-                          <div className="flex items-center justify-between text-[11px] font-mono">
+                          <div className="flex items-center justify-between text-xs font-mono">
                             <span className="font-bold text-slate-100">{s.startTime}</span>
                             <StatusPill status={s.status} />
                           </div>
@@ -247,7 +247,7 @@ export const TimetableView: React.FC = () => {
                             {s.title}
                           </div>
 
-                          <div className="text-[11px] text-slate-400 flex items-center justify-between pt-1 border-t border-white/5">
+                          <div className="text-xs text-slate-400 flex items-center justify-between pt-1 border-t border-white/5">
                             <span className="truncate">{teacher ? teacher.name : 'No tutor'}</span>
                             {s.meetingLink && (
                               <a
@@ -265,7 +265,7 @@ export const TimetableView: React.FC = () => {
                     })}
 
                     {daySessions.length === 0 && (
-                      <div className="h-full flex items-center justify-center text-slate-600 text-[11px] italic">
+                      <div className="h-full flex items-center justify-center text-slate-600 text-xs italic">
                         No scheduled classes
                       </div>
                     )}

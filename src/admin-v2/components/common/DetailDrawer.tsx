@@ -337,7 +337,7 @@ export const DetailDrawer: React.FC = () => {
                     >
                       <div>
                         <span className="font-medium text-slate-200">{r.session_title}</span>
-                        <div className="text-slate-400 text-[11px] mt-0.5">
+                        <div className="text-slate-400 text-xs mt-0.5">
                           {new Date(r.scheduled_at).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', ...(tzIana ? { timeZone: tzIana } : {}) })}
                         </div>
                       </div>

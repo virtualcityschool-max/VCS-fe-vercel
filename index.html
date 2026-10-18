@@ -67,10 +67,7 @@ gtag('config', 'AW-18418489308');
 (function () {
   try {
     var t = localStorage.getItem("vcs_theme") || (window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
-    var portal = /^\/(admin|teacher|student|parent|profile|feed|classroom)(\/|$)/.test(location.pathname);
-    var u = null; try { u = JSON.parse(localStorage.getItem("vcs_auth_user") || "null"); } catch (e) {}
-    var portalUser = !!(localStorage.getItem("vcs_access_token") && u && ["teacher", "student", "parent"].indexOf(u.role) > -1);
-    document.documentElement.classList.toggle("light-public", t === "light" && !portal && !portalUser);
+    document.documentElement.classList.toggle("theme-light", t === "light");
   } catch (e) {}
 })();
 </script>

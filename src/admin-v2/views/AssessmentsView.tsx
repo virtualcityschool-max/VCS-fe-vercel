@@ -163,7 +163,7 @@ export const AssessmentsView: React.FC = () => {
 
       {/* 1. Level */}
       <div className="space-y-2">
-        <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">1 · Choose a level</div>
+        <div className="text-xs font-semibold uppercase tracking-wider text-slate-400">1 · Choose a level</div>
         <div className="flex gap-2 overflow-x-auto pb-2 [scrollbar-width:thin]">
           {levels.map((l) => (
             <button
@@ -177,7 +177,7 @@ export const AssessmentsView: React.FC = () => {
               }`}
             >
               {l}
-              <span className="ml-1.5 text-[10px] opacity-70">{subjects.filter((s: any) => s.level === l).length}</span>
+              <span className="ml-1.5 text-xs opacity-70">{subjects.filter((s: any) => s.level === l).length}</span>
             </button>
           ))}
           {levels.length === 0 && <div className="text-xs text-slate-500">No subjects yet.</div>}
@@ -188,7 +188,7 @@ export const AssessmentsView: React.FC = () => {
         {/* 2. Subject */}
         <div className="rounded-2xl border border-[#232D52] bg-[#121831] overflow-hidden">
           <div className="p-3 border-b border-[#1E2648] space-y-2">
-            <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">2 · Choose a subject</div>
+            <div className="text-xs font-semibold uppercase tracking-wider text-slate-400">2 · Choose a subject</div>
             <div className="relative">
               <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
               <input
@@ -210,7 +210,7 @@ export const AssessmentsView: React.FC = () => {
                 }`}
               >
                 <div className="text-xs font-semibold text-white truncate">{s.name}</div>
-                <div className="text-[11px] text-slate-400 truncate">
+                <div className="text-xs text-slate-400 truncate">
                   {teacherName(s.teacherId)} · {s.studentCount} student{s.studentCount === 1 ? '' : 's'}
                   {query && s.level ? ` · ${s.level}` : ''}
                 </div>
@@ -229,7 +229,7 @@ export const AssessmentsView: React.FC = () => {
               <div className="p-4 border-b border-[#1E2648] flex flex-wrap items-center justify-between gap-3">
                 <div className="min-w-0">
                   <div className="text-sm font-bold text-white truncate">{subject.name}</div>
-                  <div className="text-[11px] text-slate-400">
+                  <div className="text-xs text-slate-400">
                     {subject.level} · Teacher: {teacherName(subject.teacherId)} · {subject.studentCount} enrolled
                   </div>
                 </div>
@@ -269,9 +269,9 @@ export const AssessmentsView: React.FC = () => {
                       <div className="flex-1 min-w-[200px]">
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-semibold text-white truncate">{item.title}</span>
-                          <span className={`text-[10px] px-1.5 py-0.5 rounded-md border font-semibold ${st.cls}`}>{st.label}</span>
+                          <span className={`text-xs px-1.5 py-0.5 rounded-md border font-semibold ${st.cls}`}>{st.label}</span>
                         </div>
-                        <div className="text-[11px] text-slate-400 mt-0.5 flex flex-wrap gap-x-3">
+                        <div className="text-xs text-slate-400 mt-0.5 flex flex-wrap gap-x-3">
                           <span>{kind === 'quiz' ? 'Quiz' : 'Assignment'} · {marks} marks{kind === 'quiz' && item.duration_minutes ? ` · ${item.duration_minutes} min` : ''}</span>
                           <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{st.label === 'Scheduled' ? `Opens ${fmt(start)} · ` : ''}Due {fmt(due)}</span>
                           <span>Set by {by || '—'}</span>
@@ -280,7 +280,7 @@ export const AssessmentsView: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => openResults(kind, item)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold border border-[#232D52] text-slate-200 hover:bg-[#151D3A] cursor-pointer"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-[#232D52] text-slate-200 hover:bg-[#151D3A] cursor-pointer"
                       >
                         <Users className="w-3.5 h-3.5" /> Results ({count ?? 0})
                       </button>
@@ -317,7 +317,7 @@ export const AssessmentsView: React.FC = () => {
             <div className="flex items-center justify-between px-5 py-4 border-b border-[#1E2648] bg-[#0E1326]">
               <div className="min-w-0">
                 <div className="text-sm font-bold text-white truncate">{results.item.title}</div>
-                <div className="text-[11px] text-slate-400">
+                <div className="text-xs text-slate-400">
                   {results.kind === 'quiz' ? 'Quiz' : 'Assignment'} results · {subject?.name}
                   {results.rows ? ` · ${results.rows.length} of ${subject?.studentCount ?? '?'} submitted` : ''}
                 </div>
@@ -336,7 +336,7 @@ export const AssessmentsView: React.FC = () => {
               {results.rows && results.rows.length === 0 && <div className="p-6 text-xs text-slate-500">No student has submitted yet.</div>}
               {results.rows && results.rows.length > 0 && (
                 <table className="w-full text-xs">
-                  <thead className="text-[11px] text-slate-400 bg-[#0E1428]">
+                  <thead className="text-xs text-slate-400 bg-[#0E1428]">
                     <tr>
                       <th className="text-left font-semibold px-4 py-2">Student</th>
                       <th className="text-left font-semibold px-4 py-2">Submitted</th>

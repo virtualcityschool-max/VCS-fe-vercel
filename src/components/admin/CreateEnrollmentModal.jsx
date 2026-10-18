@@ -155,7 +155,7 @@ const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess, initialStudentId = 
                 <span className={`truncate ${selectedStudent ? "text-white" : "text-slate-500"}`}>
                   {selectedStudent ? getDisplayName(selectedStudent) : "Select a student"}
                 </span>
-                <i className={`fas fa-chevron-down text-slate-500 text-[10px] flex-shrink-0 transition-transform duration-150 ${studentDropdownOpen ? "rotate-180" : ""}`} />
+                <i className={`fas fa-chevron-down text-slate-500 text-xs flex-shrink-0 transition-transform duration-150 ${studentDropdownOpen ? "rotate-180" : ""}`} />
               </button>
 
               {typeof document !== "undefined" && createPortal(
@@ -168,7 +168,7 @@ const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess, initialStudentId = 
                   >
                     <div className="px-2 pt-2 pb-1.5 border-b border-slate-800">
                       <div className="relative">
-                        <i className="fas fa-search absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500 text-[10px] pointer-events-none" />
+                        <i className="fas fa-search absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500 text-xs pointer-events-none" />
                         <input
                           autoFocus
                           type="text"
@@ -196,7 +196,7 @@ const CreateEnrollmentModal = ({ isOpen, onClose, onSuccess, initialStudentId = 
                               }`}
                           >
                             <p className="font-medium">{getDisplayName(s)}</p>
-                            <p className="text-slate-500 text-[11px] mt-0.5 font-normal">
+                            <p className="text-slate-500 text-xs mt-0.5 font-normal">
                               {s.email}
                               {s.roll_no != null && <span className="ml-2 text-slate-600 font-mono">· Roll#: {s.roll_no}</span>}
                             </p>

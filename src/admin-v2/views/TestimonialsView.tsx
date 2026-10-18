@@ -97,7 +97,7 @@ export const TestimonialsView: React.FC = () => {
             <div className="pt-3 border-t border-[#1E2648] flex items-center justify-between">
               <div>
                 <h4 className="text-xs font-bold text-slate-100">{item.authorName}</h4>
-                <p className="text-[11px] text-slate-400">{item.roleDescription}</p>
+                <p className="text-xs text-slate-400">{item.roleDescription}</p>
               </div>
 
               <button

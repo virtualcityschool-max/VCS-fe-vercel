@@ -153,7 +153,7 @@ const CalendarTab = ({ onOpenSubmitModal }) => {
           <p className="text-2xl font-black text-white mt-1">
             {sessions.length}
           </p>
-          <p className="text-[10px] text-slate-500 mt-0.5">Scheduled sessions</p>
+          <p className="text-xs text-slate-500 mt-0.5">Scheduled sessions</p>
         </div>
 
         <div className="p-4 rounded-2xl bg-slate-900/80 border border-white/10 shadow-lg">
@@ -164,7 +164,7 @@ const CalendarTab = ({ onOpenSubmitModal }) => {
           <p className="text-2xl font-black text-white mt-1">
             {pendingAssignmentsThisMonth}
           </p>
-          <p className="text-[10px] text-amber-400 mt-0.5">
+          <p className="text-xs text-amber-400 mt-0.5">
             {pendingAssignmentsThisMonth} pending submission
           </p>
         </div>
@@ -177,7 +177,7 @@ const CalendarTab = ({ onOpenSubmitModal }) => {
           <p className="text-2xl font-black text-white mt-1">
             {assignments.length}
           </p>
-          <p className="text-[10px] text-purple-300 mt-0.5">In course syllabi</p>
+          <p className="text-xs text-purple-300 mt-0.5">In course syllabi</p>
         </div>
 
         <div className="p-4 rounded-2xl bg-slate-900/80 border border-white/10 shadow-lg">
@@ -188,7 +188,7 @@ const CalendarTab = ({ onOpenSubmitModal }) => {
           <p className="text-base font-black text-white mt-1 truncate">
             {monthLabel}
           </p>
-          <p className="text-[10px] text-slate-500 mt-0.5">Full Month Grid</p>
+          <p className="text-xs text-slate-500 mt-0.5">Full Month Grid</p>
         </div>
       </div>
 
@@ -227,7 +227,7 @@ const CalendarTab = ({ onOpenSubmitModal }) => {
                 <button
                   key={f}
                   onClick={() => setEventFilter(f)}
-                  className={`px-3 py-1 rounded-lg uppercase text-[10px] transition cursor-pointer ${
+                  className={`px-3 py-1 rounded-lg uppercase text-xs transition cursor-pointer ${
                     eventFilter === f
                       ? "bg-indigo-600 text-white"
                       : "text-slate-400 hover:text-white"
@@ -252,7 +252,7 @@ const CalendarTab = ({ onOpenSubmitModal }) => {
         </div>
 
         {/* Legend */}
-        <div className="flex flex-wrap items-center gap-4 text-[11px] text-slate-400 pt-1">
+        <div className="flex flex-wrap items-center gap-4 text-xs text-slate-400 pt-1">
           <span className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-indigo-500" />
             Live Class
@@ -265,7 +265,7 @@ const CalendarTab = ({ onOpenSubmitModal }) => {
 
         {/* Calendar Grid */}
         <div className="border border-white/5 rounded-xl overflow-hidden">
-          <div className="grid grid-cols-7 bg-slate-800/50 border-b border-white/5 text-center py-2 text-[10px] font-black uppercase tracking-wider text-slate-400">
+          <div className="grid grid-cols-7 bg-slate-800/50 border-b border-white/5 text-center py-2 text-xs font-black uppercase tracking-wider text-slate-400">
             <span>Sun</span>
             <span>Mon</span>
             <span>Tue</span>
@@ -327,12 +327,12 @@ const CalendarTab = ({ onOpenSubmitModal }) => {
 
                   <div className="space-y-0.5">
                     {hasSession && (
-                      <div className="text-[9px] font-bold text-indigo-300 truncate">
+                      <div className="text-xs font-bold text-indigo-300 truncate">
                         • Live Class
                       </div>
                     )}
                     {hasAssignment && (
-                      <div className="text-[9px] font-bold text-amber-300 truncate">
+                      <div className="text-xs font-bold text-amber-300 truncate">
                         • Due
                       </div>
                     )}
@@ -378,7 +378,7 @@ const CalendarTab = ({ onOpenSubmitModal }) => {
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="px-2 py-0.5 rounded text-[9px] font-extrabold uppercase bg-amber-500/20 text-amber-300">
+                      <span className="px-2 py-0.5 rounded text-xs font-extrabold uppercase bg-amber-500/20 text-amber-300">
                         {asg.status || "Pending"}
                       </span>
                       <span className="text-xs font-bold text-slate-300">
@@ -388,7 +388,7 @@ const CalendarTab = ({ onOpenSubmitModal }) => {
                     <h4 className="text-sm font-bold text-white mt-0.5">
                       {asg.title}
                     </h4>
-                    <p className="text-[11px] text-slate-400 font-mono">
+                    <p className="text-xs text-slate-400 font-mono">
                       Due: {formatDate(asg.due_date, timezone)}
                     </p>
                   </div>
@@ -428,7 +428,7 @@ const CalendarTab = ({ onOpenSubmitModal }) => {
                         <span className="text-xs font-mono font-bold text-indigo-400">
                           {formatTime(session.scheduled_at, timezone)}
                         </span>
-                        <span className="px-2 py-0.5 rounded bg-white/5 text-slate-300 text-[10px] font-bold">
+                        <span className="px-2 py-0.5 rounded bg-white/5 text-slate-300 text-xs font-bold">
                           {session.room || "Google Meet"}
                         </span>
                       </div>
@@ -459,7 +459,7 @@ const CalendarTab = ({ onOpenSubmitModal }) => {
           <div className="p-8 rounded-xl bg-white/[0.02] border border-white/5 text-center space-y-1.5">
             <i className="fas fa-calendar-check text-2xl text-slate-600" />
             <p className="text-xs font-bold text-white">No Scheduled Events on this Day</p>
-            <p className="text-[11px] text-slate-400">
+            <p className="text-xs text-slate-400">
               No live classes or assignment deadlines scheduled for {selectedDateObj.toLocaleDateString("en-US", { month: "long", day: "numeric" })}.
             </p>
           </div>

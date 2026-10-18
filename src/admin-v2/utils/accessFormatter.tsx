@@ -97,7 +97,7 @@ export const AccessValidityCell: React.FC<{
           <InfinityIcon className="w-3.5 h-3.5 text-emerald-400" />
           <span>Unlimited</span>
         </span>
-        <span className="text-[10px] text-slate-500">Permanent access</span>
+        <span className="text-xs text-slate-500">Permanent access</span>
       </div>
     );
   }
@@ -109,7 +109,7 @@ export const AccessValidityCell: React.FC<{
           Expired
         </span>
         {info.subDate && (
-          <span className="text-[10px] text-slate-500 font-mono">
+          <span className="text-xs text-slate-500 font-mono">
             {info.subDate}
           </span>
         )}
@@ -127,7 +127,7 @@ export const AccessValidityCell: React.FC<{
         {info.label}
       </span>
       {info.subDate && (
-        <span className="text-[10px] text-slate-400 font-mono">
+        <span className="text-xs text-slate-400 font-mono">
           Until {info.subDate}
         </span>
       )}

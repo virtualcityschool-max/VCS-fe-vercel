@@ -157,7 +157,7 @@ export const SubjectsView: React.FC = () => {
       />
 
       <div className="rounded-2xl border border-[#232D52] bg-[#121831] shadow-xl overflow-hidden">
-        <div className="hidden md:grid grid-cols-12 gap-3 px-4 py-2.5 border-b border-[#1E2648] bg-[#0E1428] text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+        <div className="hidden md:grid grid-cols-12 gap-3 px-4 py-2.5 border-b border-[#1E2648] bg-[#0E1428] text-xs font-semibold uppercase tracking-wider text-slate-400">
           <span className="col-span-1">Code</span>
           <span className="col-span-4">Subject / batch</span>
           <span className="col-span-2">Teacher</span>
@@ -183,7 +183,7 @@ export const SubjectsView: React.FC = () => {
                   </div>
                   <div className="min-w-0">
                     <div className="text-sm font-semibold text-slate-100 truncate">{s.name}</div>
-                    <div className="text-[11px] text-slate-500 truncate">
+                    <div className="text-xs text-slate-500 truncate">
                       {s.department} · {s.level || 'No level'} · {s.batches.length} batch{s.batches.length === 1 ? '' : 'es'} · {studentsOf(s)} student{studentsOf(s) === 1 ? '' : 's'}
                     </div>
                   </div>
@@ -218,7 +218,7 @@ export const SubjectsView: React.FC = () => {
                       </div>
                     ) : (
                       <div className="flex items-center gap-2 min-w-0">
-                        <span className={`px-2 py-0.5 rounded-md text-[11px] font-semibold border shrink-0 ${b.batchName ? 'bg-sky-400/10 text-sky-300 border-sky-400/30' : 'bg-[#1A2346] text-slate-400 border-[#232D52]'}`}>
+                        <span className={`px-2 py-0.5 rounded-md text-xs font-semibold border shrink-0 ${b.batchName ? 'bg-sky-400/10 text-sky-300 border-sky-400/30' : 'bg-[#1A2346] text-slate-400 border-[#232D52]'}`}>
                           {b.batchName || (multi ? 'Unnamed batch' : 'Only batch')}
                         </span>
                         <button title="Rename batch" onClick={() => { setRenaming(b.id); setRenameValue(b.batchName); }} className="p-1 rounded text-slate-500 hover:text-white hover:bg-[#1A2346] shrink-0">
@@ -304,7 +304,7 @@ export const SubjectsView: React.FC = () => {
               <input type="checkbox" checked={batchForm.publish} onChange={(e) => setBatchForm({ ...batchForm, publish: e.target.checked })} />
               Publish on the website now (needs a teacher)
             </label>
-            <p className="text-[11px] text-slate-500">Then plan its classes in the Timetable as usual: each batch has its own Meet links and attendance.</p>
+            <p className="text-xs text-slate-500">Then plan its classes in the Timetable as usual: each batch has its own Meet links and attendance.</p>
             <div className="flex justify-end gap-3 pt-3 border-t border-[#1E2648]">
               <button type="button" onClick={() => setAdding(null)} className="px-4 py-2 rounded-xl font-semibold text-slate-400 hover:text-white">Cancel</button>
               <button type="submit" disabled={busy || !batchForm.name.trim()} className="px-4 py-2 rounded-xl font-semibold bg-[#6D5BFF] hover:bg-[#5B47FB] text-white disabled:opacity-50">
@@ -338,7 +338,7 @@ export const SubjectsView: React.FC = () => {
                   >
                     <span className="font-mono text-sky-400 w-10 shrink-0">{c.code}</span>
                     <span className="truncate">{c.name}</span>
-                    <span className="ml-auto text-[10px] text-slate-500 shrink-0">{c.level} · {c.batches.length} batch{c.batches.length === 1 ? '' : 'es'}</span>
+                    <span className="ml-auto text-xs text-slate-500 shrink-0">{c.level} · {c.batches.length} batch{c.batches.length === 1 ? '' : 'es'}</span>
                   </button>
                 ))}
                 {moveChoices.length === 0 && <p className="px-2 py-3 text-center text-slate-500">No match.</p>}

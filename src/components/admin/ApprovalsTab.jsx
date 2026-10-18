@@ -24,11 +24,11 @@ const RequestedChildrenBadge = ({ user, onPreview }) => {
       type="button"
       onClick={() => onPreview(user)}
       title="View the students this parent requested"
-      className="mt-2 inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 hover:bg-indigo-500/20 hover:text-indigo-200 transition text-[10px] font-black uppercase tracking-wider"
+      className="mt-2 inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 hover:bg-indigo-500/20 hover:text-indigo-200 transition text-xs font-black uppercase tracking-wider"
     >
-      <i className="fas fa-child text-[10px]"></i>
+      <i className="fas fa-child text-xs"></i>
       Requesting access to {children.length} student{children.length > 1 ? "s" : ""}
-      <i className="fas fa-eye text-[10px] opacity-80"></i>
+      <i className="fas fa-eye text-xs opacity-80"></i>
     </button>
   );
 };
@@ -60,7 +60,7 @@ const RequestedChildrenModal = ({ user, onClose }) => {
               <h3 className="text-sm font-bold text-white truncate">
                 {getDisplayName(user) || "Parent"}
               </h3>
-              <p className="text-[11px] text-slate-500 truncate">{user.email}</p>
+              <p className="text-xs text-slate-500 truncate">{user.email}</p>
             </div>
           </div>
           <button
@@ -74,7 +74,7 @@ const RequestedChildrenModal = ({ user, onClose }) => {
 
         {/* Children */}
         <div className="p-5">
-          <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-3">
+          <p className="text-xs font-black uppercase tracking-widest text-slate-500 mb-3">
             Requested students
             <span className="ml-2 text-slate-600 normal-case tracking-normal font-bold">
               {children.length} total
@@ -94,18 +94,18 @@ const RequestedChildrenModal = ({ user, onClose }) => {
                   <p className="text-sm font-semibold text-white truncate">
                     {child.student_name || child.student}
                   </p>
-                  <p className="text-[11px] text-slate-500 truncate">
+                  <p className="text-xs text-slate-500 truncate">
                     {child.student_email}
                   </p>
                 </div>
                 <div className="flex flex-col items-end gap-1 shrink-0">
                   {child.student_roll_no != null && (
-                    <span className="text-[10px] font-black text-indigo-400">
+                    <span className="text-xs font-black text-indigo-400">
                       Roll #{child.student_roll_no}
                     </span>
                   )}
                   <span
-                    className={`px-1.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider border ${
+                    className={`px-1.5 py-0.5 rounded-full text-xs font-black uppercase tracking-wider border ${
                       CHILD_STATUS_STYLE[child.status] || CHILD_STATUS_STYLE.pending
                     }`}
                   >
@@ -116,7 +116,7 @@ const RequestedChildrenModal = ({ user, onClose }) => {
             ))}
           </div>
 
-          <p className="text-[11px] text-slate-500 mt-4 leading-relaxed">
+          <p className="text-xs text-slate-500 mt-4 leading-relaxed">
             <i className="fas fa-circle-info mr-1.5 text-indigo-400"></i>
             Approving this parent links these students by default. Untick the
             option in the approve dialog to decide them separately.
@@ -127,7 +127,7 @@ const RequestedChildrenModal = ({ user, onClose }) => {
         <div className="px-5 pb-5">
           <button
             onClick={onClose}
-            className="w-full py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-black uppercase tracking-[0.2em] transition"
+            className="w-full py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-black uppercase tracking-[0.2em] transition"
           >
             Close
           </button>
@@ -282,7 +282,7 @@ const ApprovalsTab = ({
           <div className="flex items-center gap-1">
             <button
               onClick={() => setSubTab("pending")}
-              className={`inline-flex items-center gap-1.5 capitalize sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-[10px] sm:text-xs font-bold tracking-wider transition-all duration-200 ${
+              className={`inline-flex items-center gap-1.5 capitalize sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-xs font-bold tracking-wider transition-all duration-200 ${
                 !isRejectedTab
                   ? "bg-indigo-600 text-white shadow-lg"
                   : "text-slate-400 hover:text-white hover:bg-slate-800/50"
@@ -291,14 +291,14 @@ const ApprovalsTab = ({
               <i className="fas fa-hourglass-half"></i>
               Pending
               {pendingApprovals.length > 0 && (
-                <span className="bg-amber-500/80 text-white text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 rounded-full">
+                <span className="bg-amber-500/80 text-white text-xs sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full">
                   {pendingApprovals.length}
                 </span>
               )}
             </button>
             <button
               onClick={() => setSubTab("rejected")}
-              className={`inline-flex items-center gap-1.5 capitalize sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-[10px] sm:text-xs font-bold tracking-wider transition-all duration-200 ${
+              className={`inline-flex items-center gap-1.5 capitalize sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-xs font-bold tracking-wider transition-all duration-200 ${
                 isRejectedTab
                   ? "bg-indigo-600 text-white shadow-lg"
                   : "text-slate-400 hover:text-white hover:bg-slate-800/50"
@@ -307,7 +307,7 @@ const ApprovalsTab = ({
               <i className="fas fa-user-slash"></i>
               Rejected
               {rejectedApprovals.length > 0 && (
-                <span className="bg-rose-500/80 text-white text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 rounded-full">
+                <span className="bg-rose-500/80 text-white text-xs sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full">
                   {rejectedApprovals.length}
                 </span>
               )}
@@ -457,7 +457,7 @@ const ApprovalsTab = ({
                         <p className="font-bold text-white text-sm sm:text-base mb-1">
                           {getDisplayName(user) || "Unknown User"}
                         </p>
-                        <p className="text-[9px] sm:text-xs text-slate-500 break-all">
+                        <p className="text-xs sm:text-xs text-slate-500 break-all">
                           {user.email}
                         </p>
                       </div>
@@ -467,7 +467,7 @@ const ApprovalsTab = ({
 
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                       <div className="flex items-center gap-2">
-                        <span className="bg-slate-700/50 text-slate-300 px-2 sm:px-3 py-1 rounded-full text-[8px] sm:text-xs font-black uppercase border border-slate-600">
+                        <span className="bg-slate-700/50 text-slate-300 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-xs font-black uppercase border border-slate-600">
                           {{ teacher: "Teacher", parent: "Parent" }[user.role] || user.role || "user"}
                         </span>
                       </div>
@@ -527,16 +527,16 @@ const ApprovalsTab = ({
               <table className="hidden lg:table w-full text-left">
                 <thead className="bg-slate-950/60 border-b border-slate-800">
                   <tr key="approvals-header">
-                    <th className="px-8 py-6 text-[10px] font-black uppercase text-slate-500">
+                    <th className="px-8 py-6 text-xs font-black uppercase text-slate-500">
                       User Information
                     </th>
-                    <th className="px-8 py-6 text-[10px] font-black uppercase text-slate-500">
+                    <th className="px-8 py-6 text-xs font-black uppercase text-slate-500">
                       Role
                     </th>
-                    <th className="px-8 py-6 text-[10px] font-black uppercase text-slate-500">
+                    <th className="px-8 py-6 text-xs font-black uppercase text-slate-500">
                       Registration Date
                     </th>
-                    <th className="px-8 py-6 text-[10px] font-black uppercase text-slate-500 text-center">
+                    <th className="px-8 py-6 text-xs font-black uppercase text-slate-500 text-center">
                       Actions
                     </th>
                   </tr>
@@ -566,7 +566,7 @@ const ApprovalsTab = ({
                             <p className="font-bold text-white group-hover:text-indigo-400 transition">
                               {getDisplayName(user) || "Unknown User"}
                             </p>
-                            <p className="text-[11px] text-slate-500">
+                            <p className="text-xs text-slate-500">
                               {user.email}
                             </p>
                             <RequestedChildrenBadge user={user} onPreview={setChildrenPreview} />
@@ -574,7 +574,7 @@ const ApprovalsTab = ({
                         </div>
                       </td>
                       <td className="px-8 py-6">
-                        <span className="bg-slate-700/50 text-slate-300 px-3 py-1 rounded-full text-[8px] font-black uppercase border border-slate-600">
+                        <span className="bg-slate-700/50 text-slate-300 px-3 py-1 rounded-full text-xs font-black uppercase border border-slate-600">
                           {{ teacher: "Teacher", parent: "Parent" }[user.role] || user.role || "user"}
                         </span>
                       </td>
@@ -590,7 +590,7 @@ const ApprovalsTab = ({
                           <button
                             onClick={() => handleApprove(user)}
                             disabled={isProcessing[user.id] === "approving"}
-                            className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                            className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-indigo-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                           >
                             {isProcessing[user.id] === "approving" ? (
                               <React.Fragment key="approving">
@@ -611,7 +611,7 @@ const ApprovalsTab = ({
                                 : handleReject(user)
                             }
                             disabled={isProcessing[user.id] === "rejecting"}
-                            className="bg-red-600 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                            className="bg-red-600 text-white px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-red-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                           >
                             {isProcessing[user.id] === "rejecting" ? (
                               <React.Fragment key="rejecting">

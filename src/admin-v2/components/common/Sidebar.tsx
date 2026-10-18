@@ -210,7 +210,7 @@ export const Sidebar: React.FC = () => {
                 <div className="text-sm font-bold tracking-tight text-white flex items-center gap-1.5">
                   <span>Virtual City School</span>
                 </div>
-                <div className="text-[10px] text-indigo-400/90 font-mono tracking-wider">
+                <div className="text-xs text-indigo-400/90 font-mono tracking-wider">
                   ADMIN COMMAND CENTER
                 </div>
               </div>
@@ -234,7 +234,7 @@ export const Sidebar: React.FC = () => {
             .map((group, gIdx) => (
             <div key={gIdx} className="space-y-1">
               {!sidebarCollapsed && (
-                <div className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                <div className="px-3 pb-1 text-xs font-semibold uppercase tracking-wider text-slate-400">
                   {group.label}
                 </div>
               )}
@@ -265,7 +265,7 @@ export const Sidebar: React.FC = () => {
 
                       {item.badge !== undefined && (
                         <span
-                          className={`flex items-center justify-center text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold shrink-0 ${
+                          className={`flex items-center justify-center text-xs px-1.5 py-0.2 rounded-full font-mono font-bold shrink-0 ${
                             item.badgeColor || 'bg-indigo-500 text-white'
                           } ${sidebarCollapsed ? 'absolute -top-1 -right-1' : 'ml-auto'}`}
                         >
@@ -301,9 +301,9 @@ export const Sidebar: React.FC = () => {
                   {adminName}
                 </div>
                 {profile?.admin_role && (
-                  <div className="text-[10px] text-indigo-300 truncate">{staffRoleLabel(profile.admin_role)}</div>
+                  <div className="text-xs text-indigo-300 truncate">{staffRoleLabel(profile.admin_role)}</div>
                 )}
-                <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-mono mt-0.5">
+                <div className="flex items-center gap-1.5 text-xs text-slate-400 font-mono mt-0.5">
                   <Clock className="w-3 h-3 text-indigo-400" />
                   <span>{currentTimeStr}</span>
                   <span>·</span>

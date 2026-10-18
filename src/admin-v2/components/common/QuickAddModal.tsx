@@ -268,7 +268,7 @@ export const QuickAddModal: React.FC = () => {
         <div className="flex items-center justify-between px-6 py-4 border-b border-[#1E2648] bg-[#0E1428]">
           <div>
             <h3 className="text-base font-bold text-slate-100">Quick add</h3>
-            <p className="text-[11px] text-slate-500">Fields marked * are required. Everything else can be filled in later.</p>
+            <p className="text-xs text-slate-500">Fields marked * are required. Everything else can be filled in later.</p>
           </div>
           <button onClick={closeQuickAdd} className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
             <X className="w-5 h-5" />
@@ -344,7 +344,7 @@ export const QuickAddModal: React.FC = () => {
                     <input type="email" value={guardianEmail} onChange={(e) => setGuardianEmail(e.target.value)} placeholder="parent@gmail.com" className={inputCls} />
                   </Field>
                 </div>
-                <p className="text-[11px] text-slate-500">To give the parent their own login, add them in the Parent tab and tick this student.</p>
+                <p className="text-xs text-slate-500">To give the parent their own login, add them in the Parent tab and tick this student.</p>
               </FormSection>
             </>
           )}
@@ -418,7 +418,7 @@ export const QuickAddModal: React.FC = () => {
                 </Field>
               </div>
               {staffRole === 'super_admin' && (
-                <p className="text-[11px] text-amber-300/80">Super Admins can see and change everything, including staff roles and permanent deletes. Only give this to people you fully trust.</p>
+                <p className="text-xs text-amber-300/80">Super Admins can see and change everything, including staff roles and permanent deletes. Only give this to people you fully trust.</p>
               )}
             </>
           )}

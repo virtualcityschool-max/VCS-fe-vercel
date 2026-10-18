@@ -121,7 +121,7 @@ export const TeacherAllocationsView: React.FC = () => {
           </div>
           <div className="truncate">
             <div className="font-semibold text-slate-100">{row.name}</div>
-            <div className="text-[11px] text-slate-400 font-mono truncate">{row.department}</div>
+            <div className="text-xs text-slate-400 font-mono truncate">{row.department}</div>
           </div>
         </div>
       ),
@@ -138,7 +138,7 @@ export const TeacherAllocationsView: React.FC = () => {
         // One outlined tray per teacher so neighbouring rows' chips never blur together.
         return (
           <div className="max-w-xl rounded-xl border border-indigo-500/25 bg-indigo-500/[0.04] p-2">
-            <div className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-indigo-300/80">
+            <div className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-indigo-300/80">
               {row.name.split(/[\s_]+/)[0]} · {assigned.length} {assigned.length === 1 ? 'course' : 'courses'}
             </div>
             <div className="flex items-center gap-1.5 flex-wrap">

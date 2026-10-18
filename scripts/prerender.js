@@ -163,7 +163,7 @@ async function prerenderRoute(browser, route, timeout = NAV_TIMEOUT_MS) {
     if (rawHtml.includes("We encountered an unexpected error")) throw new Error("page showed the error screen");
     // The visitor's own day/night choice is applied by index.html's inline
     // script; don't bake the renderer's (light) setting into the page.
-    const html = "<!doctype html>\n" + rawHtml.split(ORIGIN).join(SITE_URL).replace(/(<html[^>]*?)\s*\bclass="light-public"/, "$1").replace(/\blight-public\s?(?=[^"]*"[^>]*>\s*<head)/, "")
+    const html = "<!doctype html>\n" + rawHtml.split(ORIGIN).join(SITE_URL).replace(/(<html[^>]*?)\s*\bclass="theme-light"/, "$1").replace(/\btheme-light\s?(?=[^"]*"[^>]*>\s*<head)/, "")
       // The icon stylesheet loads without blocking (media="print" until loaded);
       // the browser has flipped it to "all" by now, so put it back.
       .replace(/media="all"(\s+onload="this\.media='all'")/g, 'media="print"$1');

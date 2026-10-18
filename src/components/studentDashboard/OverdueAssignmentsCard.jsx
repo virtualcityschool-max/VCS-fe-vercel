@@ -42,7 +42,7 @@ const OverdueAssignmentsCard = () => {
               <i className="fas fa-exclamation-triangle text-xl"></i>
             </div>
             <div>
-              <h3 className="text-red-400 font-black uppercase tracking-[0.2em] text-[10px] mb-0.5">
+              <h3 className="text-red-400 font-black uppercase tracking-[0.2em] text-xs mb-0.5">
                 Past Due Action
               </h3>
               <p className="text-white font-black text-2xl tracking-tight leading-none">
@@ -63,18 +63,18 @@ const OverdueAssignmentsCard = () => {
           {overdueAssignments.items?.slice(0, 2).map((assignment) => (
             <div key={assignment.id} className="bg-white/5 rounded-2xl p-3 border border-white/5 flex items-center justify-between gap-4 hover:bg-white/10 transition-colors duration-300">
               <div className="min-w-0 flex-1">
-                <h4 className="font-bold text-white text-[11px] truncate tracking-tight mb-0.5">
+                <h4 className="font-bold text-white text-xs truncate tracking-tight mb-0.5">
                   {assignment.title}
                 </h4>
-                <p className="text-slate-500 text-[8px] uppercase tracking-wider font-black opacity-60">
+                <p className="text-slate-500 text-xs uppercase tracking-wider font-black opacity-60">
                   {assignment.course_title}
                 </p>
               </div>
               <div className="text-right shrink-0">
-                <span className="text-red-400 text-[9px] font-black uppercase tracking-widest block mb-0.5">
+                <span className="text-red-400 text-xs font-black uppercase tracking-widest block mb-0.5">
                   {getOverdueTimeLabel(assignment.due_date)}
                 </span>
-                <span className="text-slate-500 text-[8px] font-bold block opacity-40">
+                <span className="text-slate-500 text-xs font-bold block opacity-40">
                   {formatDate(assignment.due_date)}
                 </span>
               </div>
@@ -97,7 +97,7 @@ const OverdueAssignmentsCard = () => {
               <i className="fas fa-clock text-xl"></i>
             </div>
             <div>
-              <h3 className="text-amber-400 font-black uppercase tracking-[0.2em] text-[10px] mb-0.5">
+              <h3 className="text-amber-400 font-black uppercase tracking-[0.2em] text-xs mb-0.5">
                 Upcoming Deadlines
               </h3>
               <p className="text-white font-black text-2xl tracking-tight leading-none">
@@ -114,7 +114,7 @@ const OverdueAssignmentsCard = () => {
           </button>
         </div>
 
-        <p className="text-slate-400 text-[10px] font-medium leading-relaxed px-1">
+        <p className="text-slate-400 text-xs font-medium leading-relaxed px-1">
           You have {totalPending} assignments waiting for submission. Stay on track!
         </p>
       </div>
@@ -132,7 +132,7 @@ const OverdueAssignmentsCard = () => {
         <h3 className="text-lg font-black text-white mb-0.5 tracking-tight group-hover:text-emerald-400 transition-colors">
           All Caught Up!
         </h3>
-        <p className="text-emerald-500/60 text-[9px] font-black uppercase tracking-[0.2em] leading-none">
+        <p className="text-emerald-500/60 text-xs font-black uppercase tracking-[0.2em] leading-none">
           No pending assignments
         </p>
       </div>

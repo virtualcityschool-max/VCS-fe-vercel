@@ -67,7 +67,7 @@ const AssignmentOverviewList = () => {
     return (
       <div className="bg-slate-900/40 backdrop-blur-xl p-5 rounded-[1.5rem] border border-white/5 shadow-2xl">
         <div className="flex justify-between items-center mb-6">
-          <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
+          <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">
             Assessments
           </h3>
           <i className="fas fa-tasks text-slate-700 text-xs"></i>
@@ -79,7 +79,7 @@ const AssignmentOverviewList = () => {
           <h4 className="text-sm font-black text-white/80 mb-1">
             Workspace Clear
           </h4>
-          <p className="text-slate-500 text-[10px] font-medium uppercase tracking-wider">
+          <p className="text-slate-500 text-xs font-medium uppercase tracking-wider">
             No active assessments
           </p>
         </div>
@@ -91,14 +91,14 @@ const AssignmentOverviewList = () => {
     <div className="bg-slate-900/40 backdrop-blur-xl p-5 rounded-[1.5rem] border border-white/5 shadow-2xl">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
-        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
+        <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">
           Assessments
         </h3>
         <button
           onClick={() => navigate("/student/assessments")}
           className="text-slate-700 hover:text-white transition-colors"
         >
-          <i className="fas fa-external-link-alt text-[10px]"></i>
+          <i className="fas fa-external-link-alt text-xs"></i>
         </button>
       </div>
 
@@ -111,7 +111,7 @@ const AssignmentOverviewList = () => {
               key={status}
               className={`${config.color} p-2.5 rounded-2xl border border-white/5 backdrop-blur-sm flex items-center justify-between px-4 transition-transform hover:scale-[1.02]`}
             >
-              <span className="text-[9px] font-black uppercase tracking-widest opacity-80">
+              <span className="text-xs font-black uppercase tracking-widest opacity-80">
                 {config.label}
               </span>
               <span className="text-sm font-black tracking-tight">{count}</span>
@@ -156,12 +156,12 @@ const AssignmentOverviewList = () => {
                 <span
                   className={`${config.color} px-2 py-0.5 rounded-lg text-[7px] font-black uppercase tracking-widest flex items-center gap-1.5 border border-white/5 shrink-0`}
                 >
-                  <i className={`fas ${config.icon} text-[9px]`}></i>
+                  <i className={`fas ${config.icon} text-xs`}></i>
                   {config.label}
                 </span>
               </div>
               <div className="flex items-center gap-2 mt-1">
-                <span className="text-[8px] text-slate-500 font-bold uppercase tracking-wider">
+                <span className="text-xs text-slate-500 font-bold uppercase tracking-wider">
                   View Detail
                 </span>
                 <i className="fas fa-chevron-right text-[7px] text-slate-700 group-hover:text-white group-hover:translate-x-0.5 transition-all"></i>
@@ -176,7 +176,7 @@ const AssignmentOverviewList = () => {
         <button
           type="button"
           onClick={() => navigate("/student/assessments")}
-          className="w-full mt-6 py-3 bg-white/5 hover:bg-white/10 border border-white/5 rounded-2xl text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-white transition-all active:scale-95 shadow-lg"
+          className="w-full mt-6 py-3 bg-white/5 hover:bg-white/10 border border-white/5 rounded-2xl text-xs font-black uppercase tracking-[0.2em] text-slate-400 hover:text-white transition-all active:scale-95 shadow-lg"
         >
           View All ({allItems.length})
         </button>

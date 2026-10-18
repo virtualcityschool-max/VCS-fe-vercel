@@ -21,7 +21,7 @@ const StatusHeaderTooltip = () => {
     <>
       <i
         ref={ref}
-        className="fas fa-info-circle text-slate-600 text-[10px] cursor-default"
+        className="fas fa-info-circle text-slate-600 text-xs cursor-default"
         onMouseEnter={show}
         onMouseLeave={() => setPos(null)}
       />
@@ -30,7 +30,7 @@ const StatusHeaderTooltip = () => {
           className="fixed z-[9999] w-64 pointer-events-none"
           style={{ top: pos.top, left: pos.left, transform: "translate(-50%, calc(-100% - 10px))" }}
         >
-          <div className="bg-[#0E1428] border border-[#232D52] rounded-xl shadow-2xl px-3 py-2.5 text-[11px] text-slate-300 leading-relaxed">
+          <div className="bg-[#0E1428] border border-[#232D52] rounded-xl shadow-2xl px-3 py-2.5 text-xs text-slate-300 leading-relaxed">
             For recurring sessions, this is the first occurrence's status - not the overall series status.
           </div>
           <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-700 -mt-px" />
@@ -447,7 +447,7 @@ const SessionsTab = ({
                       <div>
                         <p className="font-bold text-white text-sm">{session.title}</p>
                         {session.category == "special" && (
-                          <span className="mt-0.5 inline-block px-1.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-violet-500/20 text-violet-300 border border-violet-500/20">Special Session</span>
+                          <span className="mt-0.5 inline-block px-1.5 py-0.5 rounded-full text-xs font-black uppercase tracking-widest bg-violet-500/20 text-violet-300 border border-violet-500/20">Special Session</span>
                         )}
                         <p className="text-xs text-slate-400 mt-0.5">{session.course?.title || session.course_title || "-"}</p>
                         <p className="text-xs text-slate-500">{session.teacher_name || "-"}</p>
@@ -472,7 +472,7 @@ const SessionsTab = ({
                     {session.meeting_link && (
                       <div className="flex items-center justify-between gap-2 p-2.5 bg-[#0E1428]/80 border border-[#232D52] rounded-xl mb-3">
                         <div className="min-w-0">
-                          <span className="text-[9px] uppercase font-bold text-slate-500 block">Google Meet Link</span>
+                          <span className="text-xs uppercase font-bold text-slate-500 block">Google Meet Link</span>
                           <span className="text-xs font-mono text-indigo-300 truncate block select-all">{session.meeting_link.replace(/^https?:\/\//, '')}</span>
                         </div>
                         <div className="flex items-center gap-1 shrink-0">
@@ -486,7 +486,7 @@ const SessionsTab = ({
                             title="Copy Meet Link"
                             className="px-2 py-1 rounded-lg bg-[#1A2346] hover:bg-indigo-600/30 text-indigo-300 text-xs flex items-center gap-1 transition"
                           >
-                            <i className={`fas ${copiedSessionId === session.id ? 'fa-check text-emerald-400' : 'fa-copy'} text-[10px]`}></i>
+                            <i className={`fas ${copiedSessionId === session.id ? 'fa-check text-emerald-400' : 'fa-copy'} text-xs`}></i>
                             <span>{copiedSessionId === session.id ? "Copied" : "Copy"}</span>
                           </button>
                           <a
@@ -504,7 +504,7 @@ const SessionsTab = ({
                             rel="noreferrer"
                             className="px-2.5 py-1 rounded-lg bg-[#6D5BFF] hover:bg-[#5B47FB] text-white text-xs font-semibold flex items-center gap-1 transition"
                           >
-                            <i className="fas fa-video text-[10px]"></i> Join
+                            <i className="fas fa-video text-xs"></i> Join
                           </a>
                         </div>
                       </div>
@@ -533,20 +533,20 @@ const SessionsTab = ({
               <table className="hidden lg:table w-full text-left">
                 <thead className="bg-[#0B1020]/60 border-b border-[#232D52]">
                   <tr>
-                    <th className="px-4 py-2.5 text-[11px] font-black uppercase text-slate-500 whitespace-nowrap">Session</th>
-                    <th className="px-4 py-2.5 text-[11px] font-black uppercase text-slate-500 whitespace-nowrap">Course</th>
-                    <th className="px-4 py-2.5 text-[11px] font-black uppercase text-slate-500 whitespace-nowrap">Tutor</th>
-                    <th className="px-4 py-2.5 text-[11px] font-black uppercase text-slate-500 whitespace-nowrap">Date & Time</th>
-                    <th className="px-4 py-2.5 text-[11px] font-black uppercase text-slate-500 whitespace-nowrap">End Date</th>
-                    <th className="px-4 py-2.5 text-[11px] font-black uppercase text-slate-500 whitespace-nowrap">Recurrence</th>
-                    <th className="px-4 py-2.5 text-[11px] font-black uppercase text-slate-500 whitespace-nowrap">Meet Link</th>
-                    <th className="px-4 py-2.5 text-[11px] font-black uppercase text-slate-500 whitespace-nowrap">
+                    <th className="px-4 py-2.5 text-xs font-black uppercase text-slate-500 whitespace-nowrap">Session</th>
+                    <th className="px-4 py-2.5 text-xs font-black uppercase text-slate-500 whitespace-nowrap">Course</th>
+                    <th className="px-4 py-2.5 text-xs font-black uppercase text-slate-500 whitespace-nowrap">Tutor</th>
+                    <th className="px-4 py-2.5 text-xs font-black uppercase text-slate-500 whitespace-nowrap">Date & Time</th>
+                    <th className="px-4 py-2.5 text-xs font-black uppercase text-slate-500 whitespace-nowrap">End Date</th>
+                    <th className="px-4 py-2.5 text-xs font-black uppercase text-slate-500 whitespace-nowrap">Recurrence</th>
+                    <th className="px-4 py-2.5 text-xs font-black uppercase text-slate-500 whitespace-nowrap">Meet Link</th>
+                    <th className="px-4 py-2.5 text-xs font-black uppercase text-slate-500 whitespace-nowrap">
                       <div className="flex items-center gap-1">
                         Status
                         <StatusHeaderTooltip />
                       </div>
                     </th>
-                    <th className="px-4 py-2.5 text-[11px] font-black uppercase text-slate-500 whitespace-nowrap text-right">Actions</th>
+                    <th className="px-4 py-2.5 text-xs font-black uppercase text-slate-500 whitespace-nowrap text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#1E2648]/50">
@@ -556,7 +556,7 @@ const SessionsTab = ({
                         <p className="font-semibold text-white text-sm">
                           {session.title}
                           {session.category == "special" && (
-                            <span title="Special session" className="ml-2 align-middle inline-block px-1.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-violet-500/20 text-violet-300 border border-violet-500/20">Special</span>
+                            <span title="Special session" className="ml-2 align-middle inline-block px-1.5 py-0.5 rounded-full text-xs font-black uppercase tracking-widest bg-violet-500/20 text-violet-300 border border-violet-500/20">Special</span>
                           )}
                         </p>
                       </td>
@@ -590,7 +590,7 @@ const SessionsTab = ({
                       <td className="px-4 py-2">
                         {session.meeting_link ? (
                           <div className="flex items-center gap-1.5">
-                            <span className="text-[11px] font-mono text-indigo-300 max-w-[130px] truncate select-all" title={session.meeting_link}>
+                            <span className="text-xs font-mono text-indigo-300 max-w-[130px] truncate select-all" title={session.meeting_link}>
                               {session.meeting_link.replace(/^https?:\/\//, '')}
                             </span>
                             <button
@@ -603,7 +603,7 @@ const SessionsTab = ({
                               title="Copy Google Meet Link"
                               className="w-6 h-6 flex items-center justify-center rounded bg-[#1A2346] hover:bg-indigo-600/30 text-indigo-300 hover:text-white transition"
                             >
-                              <i className={`fas ${copiedSessionId === session.id ? 'fa-check text-emerald-400' : 'fa-copy'} text-[11px]`}></i>
+                              <i className={`fas ${copiedSessionId === session.id ? 'fa-check text-emerald-400' : 'fa-copy'} text-xs`}></i>
                             </button>
                             <a
                               href={`https://wa.me/?text=${encodeURIComponent(`Join Class: ${session.title || session.course?.title || session.course_title}\nGoogle Meet Link: ${session.meeting_link}`)}`}
@@ -612,16 +612,16 @@ const SessionsTab = ({
                               title="Share on WhatsApp"
                               className="w-6 h-6 flex items-center justify-center rounded bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 transition"
                             >
-                              <i className="fab fa-whatsapp text-[11px]"></i>
+                              <i className="fab fa-whatsapp text-xs"></i>
                             </a>
                             <a
                               href={session.meeting_link}
                               target="_blank"
                               rel="noreferrer"
                               title="Join Google Meet"
-                              className="px-2 py-1 rounded bg-[#6D5BFF] hover:bg-[#5B47FB] text-white text-[11px] font-semibold flex items-center gap-1 whitespace-nowrap transition"
+                              className="px-2 py-1 rounded bg-[#6D5BFF] hover:bg-[#5B47FB] text-white text-xs font-semibold flex items-center gap-1 whitespace-nowrap transition"
                             >
-                              <i className="fas fa-video text-[10px]"></i> Join
+                              <i className="fas fa-video text-xs"></i> Join
                             </a>
                           </div>
                         ) : (
@@ -694,13 +694,13 @@ const SessionsTab = ({
                   key={key}
                   type="button"
                   onClick={() => setCreateMode?.(key)}
-                  className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition ${
+                  className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg text-xs font-black uppercase tracking-wider transition ${
                     createMode === key
                       ? "bg-[#6D5BFF] text-white shadow-lg shadow-indigo-900/40"
                       : "text-slate-400 hover:text-slate-300"
                   }`}
                 >
-                  <i className={`fas ${icon} text-[9px]`}></i>
+                  <i className={`fas ${icon} text-xs`}></i>
                   {label}
                 </button>
               ))}
@@ -799,8 +799,8 @@ const SessionsTab = ({
                 <div className="space-y-5">
                   {/* Hourly chip */}
                   <div className="flex items-center gap-2">
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-indigo-500/10 border border-indigo-500/20 text-indigo-300">
-                      <i className="fas fa-clock text-[9px]" /> Hourly · Recurring
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-widest bg-indigo-500/10 border border-indigo-500/20 text-indigo-300">
+                      <i className="fas fa-clock text-xs" /> Hourly · Recurring
                     </span>
                   </div>
 
@@ -825,7 +825,7 @@ const SessionsTab = ({
                         if (sel && sel.upcoming_session === false && sel.next_session_at) {
                           // A one-off class is booked, but no weekly series yet.
                           return (
-                            <p className="text-[10px] text-blue-400 mt-1.5 flex items-center gap-1">
+                            <p className="text-xs text-blue-400 mt-1.5 flex items-center gap-1">
                               <i className="fas fa-info-circle" />
                               Next class {new Date(sel.next_session_at).toLocaleString(undefined, { weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit" })} (one-off). No weekly series yet - you can plan one.
                             </p>
@@ -833,7 +833,7 @@ const SessionsTab = ({
                         }
                         if (sel?.has_session && sel?.upcoming_session === false) {
                           return (
-                            <p className="text-[10px] text-blue-400 mt-1.5 flex items-center gap-1">
+                            <p className="text-xs text-blue-400 mt-1.5 flex items-center gap-1">
                               <i className="fas fa-info-circle" />
                               No upcoming classes - you can plan a new series.
                             </p>
@@ -933,7 +933,7 @@ const SessionsTab = ({
                   ><TimeOptions current={createSessionForm.time} /></select>
                       {createSessionErrors?.time && <p className="text-red-400 text-xs mt-1">{createSessionErrors.time}</p>}
                       <p className="text-slate-500 text-xs mt-1.5 flex items-center gap-1">
-                        <i className="fas fa-globe text-[10px]"></i>
+                        <i className="fas fa-globe text-xs"></i>
                         Sessions will be scheduled in <TimezoneTag className="text-indigo-400 font-semibold" />
                       </p>
                     </div>
@@ -1122,7 +1122,7 @@ const SessionsTab = ({
                   ><TimeOptions current={editSessionForm.time || ""} /></select>
                   {editSessionErrors?.time && <p className="text-red-400 text-xs mt-1">{editSessionErrors.time}</p>}
                   <p className="text-slate-500 text-xs mt-1.5 flex items-center gap-1">
-                    <i className="fas fa-globe text-[10px]"></i>
+                    <i className="fas fa-globe text-xs"></i>
                     Sessions will be scheduled in <TimezoneTag className="text-indigo-400 font-semibold" />
                   </p>
                 </div>

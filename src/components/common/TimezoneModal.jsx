@@ -97,7 +97,7 @@ const TimezoneModal = ({ isOpen, onClose }) => {
         {/* Live Preview Box */}
         <div className="p-4 rounded-xl bg-slate-800/60 border border-slate-700/60 flex items-center justify-between">
           <div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
               Live Preview Time
             </span>
             <p className="text-xl font-black text-white font-mono mt-0.5">

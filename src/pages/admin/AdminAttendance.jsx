@@ -221,7 +221,7 @@ const AdminAttendance = () => {
       {/* Header filters */}
       <div className="flex flex-col sm:flex-row sm:flex-wrap lg:flex-nowrap sm:justify-end gap-3 mb-4 relative z-20">
         <div className="w-full sm:w-48">
-          <label className="text-[10px] uppercase tracking-widest text-slate-500 font-bold px-0.5 mb-1.5 block uppercase tracking-[0.2em]">Date Range</label>
+          <label className="text-xs uppercase tracking-widest text-slate-500 font-bold px-0.5 mb-1.5 block uppercase tracking-[0.2em]">Date Range</label>
           <FilterSelect
             value={dateFilter}
             onChange={(e) => setDateFilter(e.target.value)}
@@ -238,7 +238,7 @@ const AdminAttendance = () => {
 
         {tab !== "admin" && (
           <div className="w-full sm:w-64">
-            <label className="text-[10px] uppercase tracking-widest text-slate-500 font-bold px-0.5 mb-1.5 block uppercase tracking-[0.2em]">Course</label>
+            <label className="text-xs uppercase tracking-widest text-slate-500 font-bold px-0.5 mb-1.5 block uppercase tracking-[0.2em]">Course</label>
             <FilterSelect
               value={activeCourseId}
               onChange={(e) => setCourseId(e.target.value)}
@@ -280,7 +280,7 @@ const AdminAttendance = () => {
           ].map((s) => (
             <div key={s.label} className="bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-center">
               <p className={`text-2xl font-black ${s.color}`}>{s.value}</p>
-              <p className="text-[10px] uppercase tracking-widest text-slate-500 mt-0.5">{s.label}</p>
+              <p className="text-xs uppercase tracking-widest text-slate-500 mt-0.5">{s.label}</p>
             </div>
           ))}
         </div>

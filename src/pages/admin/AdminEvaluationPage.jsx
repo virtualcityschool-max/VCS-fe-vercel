@@ -135,7 +135,7 @@ const AdminEvaluationPage = () => {
           </div>
 
           <div className="w-full sm:w-64">
-            <label className="text-[10px] uppercase tracking-widest text-slate-500 font-bold px-0.5 mb-1.5 block tracking-[0.2em]">Course</label>
+            <label className="text-xs uppercase tracking-widest text-slate-500 font-bold px-0.5 mb-1.5 block tracking-[0.2em]">Course</label>
             {loadingInit ? (
               <div className="h-10 w-full bg-slate-800 rounded-xl animate-pulse" />
             ) : (
@@ -160,7 +160,7 @@ const AdminEvaluationPage = () => {
           <div className="flex items-center gap-2 text-xs text-slate-500 mb-2">
             <span>Course Status: </span>
             {courseStatus && (
-              <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold uppercase ${
+              <span className={`px-1.5 py-0.5 rounded text-xs font-bold uppercase ${
                 courseStatus === "completed"
                   ? "bg-emerald-500/15 text-emerald-400"
                   : courseStatus === "published"
@@ -176,7 +176,7 @@ const AdminEvaluationPage = () => {
         {/* Private student dropdown */}
         {tab === "private" && selectedCourseId && (
           <div className="flex flex-col gap-1 w-full sm:max-w-xs">
-            <span className="text-[10px] uppercase tracking-widest text-slate-500 font-bold px-0.5">Student</span>
+            <span className="text-xs uppercase tracking-widest text-slate-500 font-bold px-0.5">Student</span>
             {loadingPrivateList ? (
               <div className="h-10 bg-slate-800 rounded-xl animate-pulse" />
             ) : (

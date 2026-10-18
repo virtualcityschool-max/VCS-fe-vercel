@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
+import ThemeToggle from '../../../components/common/ThemeToggle';
 import {
   Search,
   Plus,
@@ -88,7 +89,7 @@ export const TopBar: React.FC = () => {
             <span className="text-slate-500 font-normal">·</span>
             <span className="text-xs font-normal text-slate-400">{currentDateStr}</span>
           </div>
-          <div className="text-[11px] text-slate-500 font-mono">
+          <div className="text-xs text-slate-500 font-mono">
             {currentTimeStr} ({timezone})
           </div>
         </div>
@@ -104,7 +105,7 @@ export const TopBar: React.FC = () => {
           <Search className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
           <span className="hidden md:inline truncate">Search student, teacher, subject...</span>
           <span className="md:hidden">Search...</span>
-          <kbd className="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-mono rounded bg-slate-800 text-slate-400 border border-slate-700 ml-2 shrink-0">
+          <kbd className="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 text-xs font-mono rounded bg-slate-800 text-slate-400 border border-slate-700 ml-2 shrink-0">
             ⌘K
           </kbd>
         </button>
@@ -194,13 +195,14 @@ export const TopBar: React.FC = () => {
         >
           <Bell className="w-4 h-4" />
           {pendingCount > 0 && (
-            <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[10px] font-bold text-white font-mono">
+            <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-xs font-bold text-white font-mono">
               {pendingCount}
             </span>
           )}
         </button>
 
-        {/* Theme toggle */}
+        {/* Day / night mode (same switch as the rest of the site) */}
+        <ThemeToggle className="border-[#232D52] bg-[#121831]" />
 
         {/* Reload data from the server */}
         <button

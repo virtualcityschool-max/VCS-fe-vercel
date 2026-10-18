@@ -145,7 +145,7 @@ export const GradingScaleModal = ({ onClose, onUpdated }) => {
                     {grade}
                   </span>
                   <div className="flex-1">
-                    <label className="text-[10px] uppercase tracking-widest text-slate-500 font-bold block mb-1">{label}</label>
+                    <label className="text-xs uppercase tracking-widest text-slate-500 font-bold block mb-1">{label}</label>
                     <div className="flex items-center gap-2">
                       <input
                         type="number"
@@ -173,7 +173,7 @@ export const GradingScaleModal = ({ onClose, onUpdated }) => {
                   F
                 </span>
                 <div className="flex-1">
-                  <label className="text-[10px] uppercase tracking-widest text-slate-500 font-bold block mb-1">F - Below D minimum</label>
+                  <label className="text-xs uppercase tracking-widest text-slate-500 font-bold block mb-1">F - Below D minimum</label>
                   <div className="px-3 py-2 bg-slate-800/40 border border-slate-700/40 rounded-xl text-slate-500 text-sm italic">
                     Below {form.d_min ?? "-"}%
                   </div>

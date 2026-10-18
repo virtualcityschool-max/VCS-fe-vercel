@@ -114,7 +114,7 @@ export const AttendanceView: React.FC = () => {
         </div>
       </div>
       {summary.unmarked > 0 && (
-        <p className="text-[11px] text-slate-500 -mt-3">{summary.unmarked} class record{summary.unmarked === 1 ? '' : 's'} this week {summary.unmarked === 1 ? 'has' : 'have'} no mark (for example the class never started) and {summary.unmarked === 1 ? 'is' : 'are'} not counted.</p>
+        <p className="text-xs text-slate-500 -mt-3">{summary.unmarked} class record{summary.unmarked === 1 ? '' : 's'} this week {summary.unmarked === 1 ? 'has' : 'have'} no mark (for example the class never started) and {summary.unmarked === 1 ? 'is' : 'are'} not counted.</p>
       )}
 
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-4 rounded-xl border border-[#232D52] bg-[#121831]">
@@ -143,7 +143,7 @@ export const AttendanceView: React.FC = () => {
         <div className="flex items-center gap-3 text-xs">
           {(['P', 'L', 'A'] as Code[]).map((c) => (
             <span key={c} className="flex items-center gap-1.5">
-              <span className={`w-5 h-5 rounded border flex items-center justify-center font-mono text-[11px] ${CHIP[c]}`}>{c}</span>
+              <span className={`w-5 h-5 rounded border flex items-center justify-center font-mono text-xs ${CHIP[c]}`}>{c}</span>
               <span className="text-slate-300">{LABEL[c]}</span>
             </span>
           ))}

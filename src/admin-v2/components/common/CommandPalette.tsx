@@ -230,7 +230,7 @@ export const CommandPalette: React.FC = () => {
           )}
           <button
             onClick={() => setCommandPaletteOpen(false)}
-            className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-mono rounded bg-slate-800 text-slate-400 border border-slate-700 hover:text-white"
+            className="hidden sm:inline-block px-1.5 py-0.5 text-xs font-mono rounded bg-slate-800 text-slate-400 border border-slate-700 hover:text-white"
           >
             ESC
           </button>
@@ -270,7 +270,7 @@ export const CommandPalette: React.FC = () => {
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-slate-800/80 text-slate-400">
+                    <span className="text-xs uppercase font-mono px-2 py-0.5 rounded bg-slate-800/80 text-slate-400">
                       {item.category}
                     </span>
                     <ArrowRight className={`w-4 h-4 text-slate-500 transition-opacity ${isSelected ? 'opacity-100 text-indigo-300' : 'opacity-0 group-hover:opacity-100'}`} />
@@ -282,7 +282,7 @@ export const CommandPalette: React.FC = () => {
         </div>
 
         {/* Footer shortcuts */}
-        <div className="px-4 py-2.5 bg-[#0A0F22] border-t border-[#1E2648] flex items-center justify-between text-[11px] text-slate-500 font-mono">
+        <div className="px-4 py-2.5 bg-[#0A0F22] border-t border-[#1E2648] flex items-center justify-between text-xs text-slate-500 font-mono">
           <div className="flex items-center gap-3">
             <span>↑↓ Navigate</span>
             <span>↵ Select</span>

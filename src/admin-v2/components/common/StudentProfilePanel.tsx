@@ -34,7 +34,7 @@ const Row: React.FC<{ label: string; children: React.ReactNode }> = ({ label, ch
 
 const Card: React.FC<{ title: string; icon: any; children: React.ReactNode }> = ({ title, icon: Icon, children }) => (
   <div className="rounded-xl border border-[#232D52] bg-[#0E1428] p-4">
-    <div className="flex items-center gap-2 mb-2 text-[11px] font-bold uppercase tracking-wider text-sky-300">
+    <div className="flex items-center gap-2 mb-2 text-xs font-bold uppercase tracking-wider text-sky-300">
       <Icon className="w-3.5 h-3.5" /> {title}
     </div>
     <div className="divide-y divide-[#1E2648]/60">{children}</div>
@@ -194,7 +194,7 @@ export const StudentProfilePanel: React.FC<{ studentId: string }> = ({ studentId
             placeholder="Leave empty to keep current password"
             hint="Upper & lower case, a number and a symbol. Only fill or generate if you want to reset their password."
           />
-          <p className="text-[11px] text-amber-300/80">Leave empty to keep current password. If changed, the new password is emailed to the student.</p>
+          <p className="text-xs text-amber-300/80">Leave empty to keep current password. If changed, the new password is emailed to the student.</p>
         </FormSection>
 
         <div className="sticky bottom-0 -mx-6 px-6 py-3 bg-[#121831]/95 backdrop-blur border-t border-[#1E2648] flex justify-end gap-2">

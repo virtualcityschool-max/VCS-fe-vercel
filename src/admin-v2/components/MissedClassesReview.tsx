@@ -30,7 +30,7 @@ export const MissedClassesReview: React.FC<{ isOpen: boolean; onClose: () => voi
         <div className="flex items-start justify-between gap-3 p-4 border-b border-[#1E2648]">
           <div>
             <h3 className="text-sm font-bold text-white">Missed classes — {classes.length} to decide</h3>
-            <p className="text-[11px] text-slate-400 mt-0.5">
+            <p className="text-xs text-slate-400 mt-0.5">
               Tick the classes that took place and press Held. Tick the ones that did not happen and press Cancel. Nothing is deleted.
             </p>
           </div>

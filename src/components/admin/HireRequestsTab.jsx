@@ -15,7 +15,7 @@ const DetailRow = ({ icon, label, value }) => (
       <i className={`fas fa-${icon} text-slate-400 text-xs`}></i>
     </div>
     <div className="flex-1 min-w-0">
-      <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">{label}</p>
+      <p className="text-xs font-black uppercase tracking-widest text-slate-500 mb-1">{label}</p>
       <p className="text-sm text-white font-medium break-words whitespace-pre-wrap leading-relaxed">
         {label === "Phone" && value ? formatPhoneDisplay(value) : (value || <span className="text-slate-600 italic font-normal">Not provided</span>)}
       </p>
@@ -123,18 +123,18 @@ const HireRequestsTab = ({
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-3 mb-1">
                       <p className="text-sm font-black text-white truncate">{req.full_name}</p>
-                      <span className={`text-[9px] font-black px-2 py-0.5 rounded-full border uppercase tracking-[0.1em] shrink-0 ${STATUS_BADGE[req.status] || STATUS_BADGE.pending}`}>
+                      <span className={`text-xs font-black px-2 py-0.5 rounded-full border uppercase tracking-[0.1em] shrink-0 ${STATUS_BADGE[req.status] || STATUS_BADGE.pending}`}>
                         {req.status}
                       </span>
                     </div>
-                    <p className="text-[11px] text-slate-400 truncate mb-1">{req.email}</p>
+                    <p className="text-xs text-slate-400 truncate mb-1">{req.email}</p>
                     <div className="flex items-center gap-3">
-                      {req.phone && <p className="text-[10px] text-slate-500 flex items-center gap-1"><i className="fas fa-phone-alt text-[8px]"></i> {formatPhoneDisplay(req.phone)}</p>}
+                      {req.phone && <p className="text-xs text-slate-500 flex items-center gap-1"><i className="fas fa-phone-alt text-xs"></i> {formatPhoneDisplay(req.phone)}</p>}
                     </div>
                     {req.message && (
                       <div className="mt-2 p-2 rounded-lg bg-slate-800/50 border border-slate-700/50">
-                        <p className="text-[10px] text-slate-400 line-clamp-1 italic">
-                          <i className="fas fa-quote-left text-[8px] mr-1.5 opacity-50"></i>
+                        <p className="text-xs text-slate-400 line-clamp-1 italic">
+                          <i className="fas fa-quote-left text-xs mr-1.5 opacity-50"></i>
                           {req.message}
                         </p>
                       </div>
@@ -147,25 +147,25 @@ const HireRequestsTab = ({
                   <div className="flex flex-col gap-1.5">
                     <div className="flex items-center gap-2">
                       <div className="w-6 h-6 rounded-lg bg-indigo-500/10 flex items-center justify-center shrink-0">
-                        <i className="fas fa-chalkboard-teacher text-indigo-400 text-[10px]"></i>
+                        <i className="fas fa-chalkboard-teacher text-indigo-400 text-xs"></i>
                       </div>
                       <div className="min-w-0">
                         <p className="text-sm font-bold text-slate-200 truncate">
                           {getDisplayName(req.teacher) || `Teacher #${req.teacher?.id}`}
                         </p>
                         {req.teacher?.email && (
-                          <p className="text-[10px] text-slate-500 truncate">{req.teacher.email}</p>
+                          <p className="text-xs text-slate-500 truncate">{req.teacher.email}</p>
                         )}
                       </div>
                     </div>
                     <div className="space-y-0.5">
-                      <p className="text-[10px] text-slate-500 flex items-center gap-1.5">
-                        <i className="far fa-clock text-[8px]"></i>
+                      <p className="text-xs text-slate-500 flex items-center gap-1.5">
+                        <i className="far fa-clock text-xs"></i>
                         Submitted: {new Date(req.created_at).toLocaleString()}
                       </p>
                       {req.reviewed_at && (
-                        <p className="text-[10px] text-slate-500 flex items-center gap-1.5">
-                          <i className="fas fa-user-check text-[8px]"></i>
+                        <p className="text-xs text-slate-500 flex items-center gap-1.5">
+                          <i className="fas fa-user-check text-xs"></i>
                           By {req.reviewed_by_name} · {new Date(req.reviewed_at).toLocaleString()}
                         </p>
                       )}
@@ -177,9 +177,9 @@ const HireRequestsTab = ({
                 <div className="lg:col-span-3 flex items-center justify-end gap-2 shrink-0">
                   <button
                     onClick={() => setDetailReq(req)}
-                    className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-[11px] font-black uppercase tracking-widest rounded-xl transition-all"
+                    className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs font-black uppercase tracking-widest rounded-xl transition-all"
                   >
-                    <i className="fas fa-eye text-[10px]"></i>
+                    <i className="fas fa-eye text-xs"></i>
                     View
                   </button>
                   {req.status === "pending" ? (
@@ -187,7 +187,7 @@ const HireRequestsTab = ({
                       <button
                         onClick={() => setConfirm({ open: true, type: "approve", id: req.id, label: req.full_name })}
                         disabled={isProcessing}
-                        className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-[11px] font-black uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-indigo-600/10"
+                        className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-indigo-600/10"
                       >
                         {isProcessing && action === "approve" ? <i className="fas fa-spinner fa-spin"></i> : <i className="fas fa-check"></i>}
                         Approve
@@ -195,20 +195,20 @@ const HireRequestsTab = ({
                       <button
                         onClick={() => setConfirm({ open: true, type: "reject", id: req.id, label: req.full_name })}
                         disabled={isProcessing}
-                        className="flex items-center gap-2 px-4 py-2 bg-rose-600/10 hover:bg-rose-600/20 border border-rose-500/20 hover:border-rose-500/50 disabled:opacity-50 text-rose-400 text-[11px] font-black uppercase tracking-widest rounded-xl transition-all"
+                        className="flex items-center gap-2 px-4 py-2 bg-rose-600/10 hover:bg-rose-600/20 border border-rose-500/20 hover:border-rose-500/50 disabled:opacity-50 text-rose-400 text-xs font-black uppercase tracking-widest rounded-xl transition-all"
                       >
                         {isProcessing && action === "reject" ? <i className="fas fa-spinner fa-spin"></i> : <i className="fas fa-times"></i>}
                         Reject
                       </button>
                     </>
                   ) : req.status === "approved" ? (
-                    <div className="flex items-center gap-2 px-5 py-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-black uppercase tracking-widest rounded-xl">
-                      <i className="fas fa-check-circle text-[10px]"></i>
+                    <div className="flex items-center gap-2 px-5 py-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-black uppercase tracking-widest rounded-xl">
+                      <i className="fas fa-check-circle text-xs"></i>
                       Approved
                     </div>
                   ) : req.status === "rejected" ? (
-                    <div className="flex items-center gap-2 px-5 py-2 bg-rose-500/10 border border-rose-500/20 text-rose-400 text-[11px] font-black uppercase tracking-widest rounded-xl">
-                      <i className="fas fa-times-circle text-[10px]"></i>
+                    <div className="flex items-center gap-2 px-5 py-2 bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-black uppercase tracking-widest rounded-xl">
+                      <i className="fas fa-times-circle text-xs"></i>
                       Rejected
                     </div>
                   ) : null}
@@ -248,7 +248,7 @@ const HireRequestsTab = ({
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <h3 className="text-base font-bold text-white truncate">{detailReq.full_name}</h3>
-                  <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border uppercase tracking-widest shrink-0 ${STATUS_BADGE[detailReq.status] || STATUS_BADGE.pending}`}>
+                  <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full border uppercase tracking-widest shrink-0 ${STATUS_BADGE[detailReq.status] || STATUS_BADGE.pending}`}>
                     {detailReq.status}
                   </span>
                 </div>
@@ -288,7 +288,7 @@ const HireRequestsTab = ({
                     <div className="w-7 h-7 rounded-lg bg-slate-800 flex items-center justify-center shrink-0">
                       <i className="fas fa-comment-alt text-slate-400 text-xs"></i>
                     </div>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Message</p>
+                    <p className="text-xs font-black uppercase tracking-widest text-slate-500">Message</p>
                   </div>
                   <div className="flex-1 bg-slate-800/50 border border-slate-700/50 rounded-xl p-4 min-h-[140px]">
                     {detailReq.message

@@ -147,7 +147,7 @@ const WeeklyPlannerTab = ({ onOpenLiveSchedule }) => {
             <h3 className="text-sm font-bold text-white tracking-tight">
               Weekly Curriculum Planner &amp; Timetable
             </h3>
-            <span className="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-slate-300 text-[10px] font-bold">
+            <span className="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-slate-300 text-xs font-bold">
               Gulf &amp; Global 7-Day Timetable
             </span>
           </div>
@@ -185,7 +185,7 @@ const WeeklyPlannerTab = ({ onOpenLiveSchedule }) => {
             >
               <span>{day}</span>
               {isToday && (
-                <span className="px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 text-[9px] font-extrabold uppercase">
+                <span className="px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 text-xs font-extrabold uppercase">
                   Today
                 </span>
               )}
@@ -203,7 +203,7 @@ const WeeklyPlannerTab = ({ onOpenLiveSchedule }) => {
               {selectedDay === "All Days" ? "Full Week Curriculum Timetable" : `${selectedDay} Timetable`} ({filteredSchedule.length} Periods)
             </h3>
           </div>
-          <span className="text-[11px] font-mono text-indigo-300">
+          <span className="text-xs font-mono text-indigo-300">
             Timezone: {timezoneAbbr}
           </span>
         </div>
@@ -211,7 +211,7 @@ const WeeklyPlannerTab = ({ onOpenLiveSchedule }) => {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="border-b border-white/10 text-[10px] uppercase font-bold text-slate-400">
+              <tr className="border-b border-white/10 text-xs uppercase font-bold text-slate-400">
                 {selectedDay === "All Days" && <th className="py-3 px-3">Day</th>}
                 <th className="py-3 px-3">Time Slot</th>
                 <th className="py-3 px-3">Subject &amp; Syllabus</th>
@@ -229,17 +229,17 @@ const WeeklyPlannerTab = ({ onOpenLiveSchedule }) => {
                         {row.day}
                       </td>
                     )}
-                    <td className="py-3.5 px-3 text-slate-300 font-mono text-[11px] whitespace-nowrap">
+                    <td className="py-3.5 px-3 text-slate-300 font-mono text-xs whitespace-nowrap">
                       {row.time}
                       {row.dateFormatted && (
-                        <span className="block text-[10px] text-slate-500 font-sans mt-0.5">
+                        <span className="block text-xs text-slate-500 font-sans mt-0.5">
                           {row.dateFormatted}
                         </span>
                       )}
                     </td>
                     <td className="py-3.5 px-3">
                       <span className="font-bold text-white block">{row.subject}</span>
-                      <span className="text-[10px] font-mono text-indigo-400">{row.code}</span>
+                      <span className="text-xs font-mono text-indigo-400">{row.code}</span>
                     </td>
                     <td className="py-3.5 px-3 text-slate-300 text-xs max-w-xs">
                       {row.topic}
@@ -253,13 +253,13 @@ const WeeklyPlannerTab = ({ onOpenLiveSchedule }) => {
                         <button
                           onClick={() => handleJoinClass(row.rawSession)}
                           disabled={joiningId === row.id}
-                          className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold text-[11px] inline-flex items-center gap-1.5 shadow-md shadow-emerald-950/20 cursor-pointer"
+                          className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold text-xs inline-flex items-center gap-1.5 shadow-md shadow-emerald-950/20 cursor-pointer"
                         >
-                          <i className="fas fa-video text-[10px]" />
+                          <i className="fas fa-video text-xs" />
                           <span>{joiningId === row.id ? "Entering..." : "Join Now"}</span>
                         </button>
                       ) : (
-                        <span className="px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-[10px] font-mono text-slate-300">
+                        <span className="px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-xs font-mono text-slate-300">
                           {row.room}
                         </span>
                       )}
@@ -300,12 +300,12 @@ const WeeklyPlannerTab = ({ onOpenLiveSchedule }) => {
                 className={`p-4 rounded-xl bg-white/[0.02] border border-white/5 border-l-4 ${d.border} flex flex-col justify-between space-y-2`}
               >
                 <div>
-                  <span className="text-[10px] font-mono font-bold text-slate-400">
+                  <span className="text-xs font-mono font-bold text-slate-400">
                     {formatDate(d.due)} · {formatTime(d.due)}
                   </span>
                   <h4 className="font-bold text-xs text-white mt-1">{d.title}</h4>
                 </div>
-                <p className="text-[11px] text-slate-400">{d.kind}{d.course ? ` · ${d.course}` : ""}</p>
+                <p className="text-xs text-slate-400">{d.kind}{d.course ? ` · ${d.course}` : ""}</p>
               </div>
             ))}
           </div>

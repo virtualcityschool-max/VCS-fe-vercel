@@ -8,7 +8,7 @@ const Row = ({ label, hint, children }) => (
   <div className="flex flex-col sm:flex-row sm:items-center gap-3 py-5 border-b border-slate-800/60 last:border-0">
     <div className="sm:w-72 shrink-0">
       <p className="text-sm font-semibold text-white">{label}</p>
-      {hint && <p className="text-[11px] text-slate-500 mt-0.5">{hint}</p>}
+      {hint && <p className="text-xs text-slate-500 mt-0.5">{hint}</p>}
     </div>
     <div className="flex-1">{children}</div>
   </div>
@@ -83,7 +83,7 @@ const AdminPlatformSettingsPage = () => {
           </div>
           <div>
             <h2 className="text-sm font-black text-white uppercase tracking-widest">Quiz Creation Defaults</h2>
-            <p className="text-[10px] text-slate-500 mt-0.5">Pre-filled values whenever a tutor creates a new quiz.</p>
+            <p className="text-xs text-slate-500 mt-0.5">Pre-filled values whenever a tutor creates a new quiz.</p>
           </div>
         </div>
         <div className="px-6">
@@ -125,7 +125,7 @@ const AdminPlatformSettingsPage = () => {
           </div>
           <div>
             <h2 className="text-sm font-black text-white uppercase tracking-widest">Session Creation Defaults</h2>
-            <p className="text-[10px] text-slate-500 mt-0.5">Pre-filled values whenever a tutor or admin creates a new session.</p>
+            <p className="text-xs text-slate-500 mt-0.5">Pre-filled values whenever a tutor or admin creates a new session.</p>
           </div>
         </div>
         <div className="px-6">
@@ -133,7 +133,7 @@ const AdminPlatformSettingsPage = () => {
             <div className="flex items-center gap-3 px-4 py-2.5 bg-slate-800/50 border border-slate-700 rounded-xl w-fit">
               <i className="fas fa-clock text-indigo-400 text-sm" />
               <span className="text-sm font-semibold text-white">60 minutes</span>
-              <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 bg-slate-800 border border-slate-700 px-2 py-0.5 rounded-full">Locked</span>
+              <span className="text-xs font-black uppercase tracking-widest text-slate-500 bg-slate-800 border border-slate-700 px-2 py-0.5 rounded-full">Locked</span>
             </div>
           </Row>
           <Row label="Default scheduling mode" hint="Which mode is active when the create form opens.">
@@ -147,7 +147,7 @@ const AdminPlatformSettingsPage = () => {
             <div className="flex items-center gap-3 px-4 py-2.5 bg-slate-800/50 border border-slate-700 rounded-xl w-fit">
               <i className="fab fa-google text-blue-400 text-sm" />
               <span className="text-sm font-semibold text-white">Google Meet</span>
-              <span className="text-[9px] font-black uppercase tracking-widest text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">Active</span>
+              <span className="text-xs font-black uppercase tracking-widest text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">Active</span>
             </div>
           </Row>
         </div>

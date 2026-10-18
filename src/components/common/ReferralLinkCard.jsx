@@ -50,7 +50,7 @@ const ReferralLinkCard = ({ className = "" }) => {
           </span>
           <div className="min-w-0">
             <h3 className="text-sm font-bold text-white leading-tight">Invite &amp; Refer</h3>
-            <p className="text-[11px] text-slate-400 leading-tight truncate">
+            <p className="text-xs text-slate-400 leading-tight truncate">
               Share your link, anyone who joins through it is credited to you.
             </p>
           </div>

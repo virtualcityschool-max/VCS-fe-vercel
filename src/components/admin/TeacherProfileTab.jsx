@@ -283,7 +283,7 @@ const TeacherProfileTab = ({ profile, onUpdate, onCancel, onSaved, readOnly = fa
                       <span className="text-xs text-slate-500">
                         {course.enrolled_students} student{course.enrolled_students === 1 ? "" : "s"}
                       </span>
-                      <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border ${
+                      <span className={`text-xs font-black uppercase tracking-widest px-2 py-0.5 rounded-full border ${
                         course.status === "published"
                           ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
                           : "bg-slate-500/10 text-slate-400 border-slate-600/20"
@@ -293,7 +293,7 @@ const TeacherProfileTab = ({ profile, onUpdate, onCancel, onSaved, readOnly = fa
                     </div>
                   </div>
                   <div className="flex-shrink-0 flex flex-col items-end">
-                    <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border ${
+                    <span className={`text-xs font-black uppercase tracking-widest px-2 py-0.5 rounded-full border ${
                       course.is_paid
                         ? "bg-amber-500/10 text-amber-300 border-amber-500/20"
                         : "bg-emerald-500/10 text-emerald-300 border-emerald-500/20"

@@ -108,21 +108,21 @@ const ChildCard = ({ child }) => {
             <div className="flex items-center gap-2 mb-1">
               <h3 className="text-xl font-black text-white truncate leading-tight flex-1">{getDisplayName(child)}</h3>
               {child.grade_level && (
-                <span className="text-[9px] text-indigo-400 font-black uppercase tracking-wider bg-indigo-500/10 border border-indigo-500/20 rounded-lg px-2 py-0.5 shrink-0">
+                <span className="text-xs text-indigo-400 font-black uppercase tracking-wider bg-indigo-500/10 border border-indigo-500/20 rounded-lg px-2 py-0.5 shrink-0">
                   Grade {child.grade_level}
                 </span>
               )}
             </div>
             <div className="flex items-center gap-2">
               <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></div>
-              <p className="text-indigo-400/80 text-[10px] font-black uppercase tracking-[0.2em]">Student</p>
+              <p className="text-indigo-400/80 text-xs font-black uppercase tracking-[0.2em]">Student</p>
             </div>
           </div>
         </div>
         
         <div className="flex items-center gap-3 shrink-0 pt-1">
           {/* {BADGE_CONFIG[child.badge] && (
-            <span className={`inline-flex items-center px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border whitespace-nowrap shadow-lg ${BADGE_CONFIG[child.badge].cls}`}>
+            <span className={`inline-flex items-center px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-widest border whitespace-nowrap shadow-lg ${BADGE_CONFIG[child.badge].cls}`}>
               {BADGE_CONFIG[child.badge].label}
             </span>
           )} */}
@@ -150,7 +150,7 @@ const ChildCard = ({ child }) => {
                     }}
                     className="w-full px-4 py-2 text-left text-xs font-bold text-rose-400 hover:bg-rose-500/10 flex items-center gap-2 transition-colors"
                   >
-                    <i className="fas fa-user-minus text-[10px]"></i>
+                    <i className="fas fa-user-minus text-xs"></i>
                     Unlink Child Profile
                   </button>
                 </div>
@@ -165,14 +165,14 @@ const ChildCard = ({ child }) => {
         <div className="flex items-center justify-between mb-3 px-1 shrink-0">
           <p className="text-[12px] text-white font-black flex items-center gap-1.5">
             Courses
-            <span className="text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 rounded-full px-1.5 py-0.5 text-[9px]">
+            <span className="text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 rounded-full px-1.5 py-0.5 text-xs">
               {child.courses?.length || 0}
             </span>
           </p>
           {child.courses?.length > 0 && (
             <button
               onClick={() => navigate(`/parent/child/${child.id}`)}
-              className="text-[9px] font-black uppercase tracking-widest text-indigo-400 hover:text-indigo-300 transition-colors"
+              className="text-xs font-black uppercase tracking-widest text-indigo-400 hover:text-indigo-300 transition-colors"
             >
               View Detail <i className="fas fa-arrow-right text-[7px] ml-1"></i>
             </button>
@@ -188,7 +188,7 @@ const ChildCard = ({ child }) => {
             >
               {/* Row 1: title + badge + arrow */}
               <div className="flex items-center gap-2 mb-1.5">
-                <p className="text-[11px] font-black text-slate-200 truncate group-hover/course:text-white transition-colors flex-1">
+                <p className="text-xs font-black text-slate-200 truncate group-hover/course:text-white transition-colors flex-1">
                   {course.title}
                 </p>
                 {BADGE_CONFIG[course.badge] && (
@@ -200,7 +200,7 @@ const ChildCard = ({ child }) => {
                     }}
                     onMouseLeave={() => setCourseBadgeTooltip(null)}
                   >
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-widest border ${BADGE_CONFIG[course.badge].cls}`}>
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-black uppercase tracking-widest border ${BADGE_CONFIG[course.badge].cls}`}>
                       {BADGE_CONFIG[course.badge].label}
                     </span>
                   </span>
@@ -209,20 +209,20 @@ const ChildCard = ({ child }) => {
                   onClick={() => navigate(`/parent/child/${child.id}`, { state: { activeCourseId: course.id } })}
                   className="w-5 h-5 flex items-center justify-center rounded-md text-indigo-400 bg-indigo-500/10 transition-all shrink-0"
                 >
-                  <i className="fas fa-chevron-right text-[9px]"></i>
+                  <i className="fas fa-chevron-right text-xs"></i>
                 </button>
               </div>
               {/* Row 2: attendance · assignments · quizzes */}
               <div className="flex items-center gap-3">
-                <span className="text-[11px] text-slate-500 font-black">
+                <span className="text-xs text-slate-500 font-black">
                   Attendance: <span className={`font-black ${getAttendanceColor(course.attendance?.percentage ?? null)}`}>{fmtPct(course.attendance?.percentage ?? null)}</span>
                 </span>
                 <span className="text-slate-700">·</span>
-                <span className="text-[11px] text-slate-500 font-black">
+                <span className="text-xs text-slate-500 font-black">
                   Assignments: <span className="text-slate-300">{course.assignments_submitted || 0}/{course.assignments_total || 0}</span>
                 </span>
                 <span className="text-slate-700">·</span>
-                <span className="text-[11px] text-slate-500 font-black">
+                <span className="text-xs text-slate-500 font-black">
                   Quizzes: <span className="text-slate-300">{course.quizzes_submitted || 0}/{course.quizzes_total || 0}</span>
                 </span>
               </div>
@@ -230,7 +230,7 @@ const ChildCard = ({ child }) => {
           ))}
           
           {(!child.courses || child.courses.length === 0) && (
-            <p className="text-[10px] text-slate-600 font-black uppercase text-center py-4 border border-dashed border-slate-700 rounded-xl">
+            <p className="text-xs text-slate-600 font-black uppercase text-center py-4 border border-dashed border-slate-700 rounded-xl">
               No enrolled courses
             </p>
           )}
@@ -242,14 +242,14 @@ const ChildCard = ({ child }) => {
           <div className="flex items-center justify-between mb-3 px-1">
             <p className="text-[12px] text-white font-black flex items-center gap-1.5">
               Tutor Booking slot(s)
-              <span className="text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 rounded-full px-1.5 py-0.5 text-[9px]">
+              <span className="text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 rounded-full px-1.5 py-0.5 text-xs">
                 {upcomingSlots.length}
               </span>
             </p>
             {upcomingSlots.length > 0 && (
               <button
                 onClick={() => navigate(`/parent/child/${child.id}`)}
-                className="text-[9px] font-black uppercase tracking-widest text-indigo-400 hover:text-indigo-300 transition-colors"
+                className="text-xs font-black uppercase tracking-widest text-indigo-400 hover:text-indigo-300 transition-colors"
               >
                 View Detail <i className="fas fa-arrow-right text-[7px] ml-1"></i>
               </button>
@@ -263,15 +263,15 @@ const ChildCard = ({ child }) => {
               >
                 <div className="flex items-center gap-2.5">
                   <div className="w-7 h-7 rounded-full bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center shrink-0">
-                    <span className="text-indigo-400 text-[10px] font-black">
+                    <span className="text-indigo-400 text-xs font-black">
                       {s.teacher_name?.charAt(0)?.toUpperCase() || "?"}
                     </span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[11px] font-black text-slate-200 truncate group-hover/tutor:text-white transition-colors">
+                    <p className="text-xs font-black text-slate-200 truncate group-hover/tutor:text-white transition-colors">
                       {s.teacher_name}
                     </p>
-                    <p className="text-[9px] text-indigo-400 font-black tabular-nums mt-0.5">
+                    <p className="text-xs text-indigo-400 font-black tabular-nums mt-0.5">
                       {fmtDate(s.date)} · {fmt12(s.start_time)}{" "}<TimezoneTag />
                     </p>
                   </div>
@@ -280,7 +280,7 @@ const ChildCard = ({ child }) => {
               </div>
             ))}
             {upcomingSlots.length === 0 && (
-              <p className="text-[10px] text-slate-600 font-black uppercase text-center py-4 border border-dashed border-slate-700 rounded-xl">
+              <p className="text-xs text-slate-600 font-black uppercase text-center py-4 border border-dashed border-slate-700 rounded-xl">
                 No tutor booking slots
               </p>
             )}
@@ -295,23 +295,23 @@ const ChildCard = ({ child }) => {
             right: window.innerWidth - courseBadgeTooltip.rect.right,
           }}>
           <div className="bg-slate-900 border border-slate-700 rounded-xl shadow-2xl px-3 py-2.5 text-left space-y-1.5">
-            <p className="text-[8px] text-slate-500 uppercase tracking-widest font-black pb-1 border-b border-slate-800">
+            <p className="text-xs text-slate-500 uppercase tracking-widest font-black pb-1 border-b border-slate-800">
               Status based on:
             </p>
-            <p className="text-[10px] text-white flex items-center gap-1.5">
-              <i className="fas fa-calendar-check text-[8px] text-slate-400" />
+            <p className="text-xs text-white flex items-center gap-1.5">
+              <i className="fas fa-calendar-check text-xs text-slate-400" />
               Attendance: {fmtPct(courseBadgeTooltip.course.attendance?.percentage ?? null)}
               {(courseBadgeTooltip.course.attendance?.percentage ?? null) !== null &&
                 courseBadgeTooltip.course.attendance.percentage < 75 && (
-                <span className="text-[8px] text-rose-400 font-black">(below 75%)</span>
+                <span className="text-xs text-rose-400 font-black">(below 75%)</span>
               )}
             </p>
-            <p className="text-[10px] text-white flex items-center gap-1.5">
-              <i className="fas fa-tasks text-[8px] text-slate-400" />
+            <p className="text-xs text-white flex items-center gap-1.5">
+              <i className="fas fa-tasks text-xs text-slate-400" />
               Missed Assignments: {getCourseRiskReasons(courseBadgeTooltip.course).assignMissed}
             </p>
-            <p className="text-[10px] text-white flex items-center gap-1.5">
-              <i className="fas fa-question-circle text-[8px] text-slate-400" />
+            <p className="text-xs text-white flex items-center gap-1.5">
+              <i className="fas fa-question-circle text-xs text-slate-400" />
               Missed Quizzes: {getCourseRiskReasons(courseBadgeTooltip.course).quizMissed}
             </p>
           </div>
@@ -322,10 +322,10 @@ const ChildCard = ({ child }) => {
       <div className="pt-4 mt-auto border-t border-slate-700/50 shrink-0">
         <button
           onClick={() => navigate(`/parent/child/${child.id}`)}
-          className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-[0.98] shadow-lg shadow-indigo-950/20 flex items-center justify-center gap-2"
+          className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-black uppercase tracking-widest transition-all active:scale-[0.98] shadow-lg shadow-indigo-950/20 flex items-center justify-center gap-2"
         >
           View Full Report
-          <i className="fas fa-arrow-right text-[8px]"></i>
+          <i className="fas fa-arrow-right text-xs"></i>
         </button>
       </div>
 

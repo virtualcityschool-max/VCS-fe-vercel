@@ -24,7 +24,7 @@ export const CategoryBar: React.FC<{
         }`}
       >
         <Layers className="w-3.5 h-3.5" /> {allLabel}
-        <span className={`font-mono text-[10px] px-1.5 rounded ${dept === 'all' ? 'bg-white/20' : 'bg-[#1A2346]'}`}>{total}</span>
+        <span className={`font-mono text-xs px-1.5 rounded ${dept === 'all' ? 'bg-white/20' : 'bg-[#1A2346]'}`}>{total}</span>
       </button>
       {(Object.keys(DEPARTMENT_ICONS) as DepartmentName[])
         .filter((d) => (counts[d] || 0) > 0)
@@ -41,7 +41,7 @@ export const CategoryBar: React.FC<{
             >
               <Icon className="w-3.5 h-3.5" style={active ? undefined : { color: hex }} />
               {d === 'General' ? 'General & Other' : d}
-              <span className={`font-mono text-[10px] px-1.5 rounded ${active ? 'bg-white/20' : 'bg-[#1A2346] text-slate-400'}`}>{counts[d]}</span>
+              <span className={`font-mono text-xs px-1.5 rounded ${active ? 'bg-white/20' : 'bg-[#1A2346] text-slate-400'}`}>{counts[d]}</span>
             </button>
           );
         })}
@@ -58,7 +58,7 @@ export const CategoryBar: React.FC<{
           >
             {sg.dot && <span className={`w-1.5 h-1.5 rounded-full ${sg.dot}`} />}
             {sg.label}
-            {sg.count !== undefined && <span className="font-mono text-[10px] opacity-80">({sg.count})</span>}
+            {sg.count !== undefined && <span className="font-mono text-xs opacity-80">({sg.count})</span>}
           </button>
         ))}
       </div>

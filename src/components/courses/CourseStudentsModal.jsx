@@ -132,25 +132,25 @@ const CourseStudentsModal = ({ courseId, courseTitle, onClose, canUnenroll }) =>
                   {/* Meta grid */}
                   <div className="grid grid-cols-2 gap-3">
                     <div className="bg-slate-800/50 rounded-xl p-3 border border-slate-700/40">
-                      <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Tutor</p>
+                      <p className="text-xs uppercase tracking-wider text-slate-500 mb-1">Tutor</p>
                       <p className="text-white text-sm font-medium truncate">
                         {getDisplayName(course.instructor) || "-"}
                       </p>
                     </div>
                     <div className="bg-slate-800/50 rounded-xl p-3 border border-slate-700/40">
-                      <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Level</p>
+                      <p className="text-xs uppercase tracking-wider text-slate-500 mb-1">Level</p>
                       <p className="text-white text-sm font-medium truncate capitalize">
                         {(typeof course.category === "object" ? course.category?.name : course.category)?.replace(/_/g, " ") || "-"}
                       </p>
                     </div>
                     <div className="bg-slate-800/50 rounded-xl p-3 border border-slate-700/40">
-                      <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Price</p>
+                      <p className="text-xs uppercase tracking-wider text-slate-500 mb-1">Price</p>
                       <p className="text-emerald-400 text-sm font-bold">
                         {course.price ? `$${Number(course.price).toLocaleString("en-US")} USD` : "Free"}
                       </p>
                     </div>
                     <div className="bg-slate-800/50 rounded-xl p-3 border border-slate-700/40">
-                      <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Enrolled</p>
+                      <p className="text-xs uppercase tracking-wider text-slate-500 mb-1">Enrolled</p>
                       <p className="text-white text-sm font-bold">
                         {students.length} 
                         {/* <span className="text-slate-400 font-normal text-xs">students</span> */}

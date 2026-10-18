@@ -51,7 +51,7 @@ export const SessionBanner = ({ session }) => {
     <div className="flex items-center gap-3 px-4 py-3 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl">
       <i className="fas fa-calendar-alt text-indigo-400 text-sm" />
       <div>
-        <p className="text-[10px] uppercase tracking-widest text-indigo-400/70 font-bold">Session Start</p>
+        <p className="text-xs uppercase tracking-widest text-indigo-400/70 font-bold">Session Start</p>
         <p className="text-sm font-semibold text-indigo-300">
           {d.toLocaleDateString([], { weekday: "short", month: "short", day: "numeric", year: "numeric" })}
           <span className="text-indigo-400/70 mx-1.5">·</span>

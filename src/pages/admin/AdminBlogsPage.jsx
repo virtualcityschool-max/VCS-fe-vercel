@@ -264,9 +264,9 @@ const AdminBlogsPage = () => {
           {blogs.length === 0 && (
             <button
               onClick={() => navigate("/admin/blogs/new", { state: { post_type: isVlogsRoute ? "video" : "article" } })}
-              className="btn-glow px-5 py-2.5 rounded-xl text-white text-[11px] font-black uppercase tracking-wider inline-flex items-center gap-2"
+              className="btn-glow px-5 py-2.5 rounded-xl text-white text-xs font-black uppercase tracking-wider inline-flex items-center gap-2"
             >
-              <i className="fas fa-plus text-[10px]" /> {isVlogsRoute ? "New Vlog" : "New Blog"}
+              <i className="fas fa-plus text-xs" /> {isVlogsRoute ? "New Vlog" : "New Blog"}
             </button>
           )}
         </div>
@@ -296,7 +296,7 @@ const AdminBlogsPage = () => {
                   {isVideo && cover && (
                     <span className="absolute inset-0 flex items-center justify-center bg-slate-950/40">
                       <span className="w-7 h-7 rounded-full bg-red-600/90 flex items-center justify-center">
-                        <i className="fas fa-play text-white text-[9px] ml-0.5" />
+                        <i className="fas fa-play text-white text-xs ml-0.5" />
                       </span>
                     </span>
                   )}
@@ -306,7 +306,7 @@ const AdminBlogsPage = () => {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <span
-                      className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${
+                      className={`px-2 py-0.5 rounded-full text-xs font-black uppercase tracking-wider ${
                         published
                           ? "bg-emerald-500/15 text-emerald-300 border border-emerald-400/30"
                           : "bg-amber-500/15 text-amber-300 border border-amber-400/30"
@@ -315,12 +315,12 @@ const AdminBlogsPage = () => {
                       {published ? "Published" : "Draft"}
                     </span>
                     {isVideo && (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-red-500/15 text-red-300 border border-red-400/30">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-black uppercase tracking-wider bg-red-500/15 text-red-300 border border-red-400/30">
                         <i className="fas fa-play text-[7px]" /> Video
                       </span>
                     )}
                     {blog.category && (
-                      <span className="text-[10px] text-slate-500 font-semibold uppercase tracking-wide truncate">
+                      <span className="text-xs text-slate-500 font-semibold uppercase tracking-wide truncate">
                         {blog.category}
                       </span>
                     )}
@@ -328,7 +328,7 @@ const AdminBlogsPage = () => {
                   <h3 className="text-white font-bold text-sm truncate">
                     {blog.title}
                   </h3>
-                  <p className="text-slate-500 text-[11px] mt-0.5">
+                  <p className="text-slate-500 text-xs mt-0.5">
                     {blog.author || "Admin"} ·{" "}
                     {published
                       ? formatDate(blog.published_at || blog.created_at)

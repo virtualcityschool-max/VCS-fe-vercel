@@ -94,7 +94,7 @@ const CommunityFeed = () => {
                 </div>
                 <div className="flex-1">
                   <p className="text-xs font-bold">Student Name {i}</p>
-                  <p className="text-[10px] text-slate-500">Studying Math...</p>
+                  <p className="text-xs text-slate-500">Studying Math...</p>
                 </div>
                 <button className="text-indigo-400 text-xs"><i className="far fa-comment-dots"></i></button>
               </div>
@@ -108,11 +108,11 @@ const CommunityFeed = () => {
           <div className="space-y-4">
             <div className="group cursor-pointer">
               <p className="text-xs font-bold group-hover:text-indigo-400"># Python Data Viz</p>
-              <p className="text-[10px] text-slate-500">432 students interested</p>
+              <p className="text-xs text-slate-500">432 students interested</p>
             </div>
             <div className="group cursor-pointer">
               <p className="text-xs font-bold group-hover:text-indigo-400"># AR/VR Design</p>
-              <p className="text-[10px] text-slate-500">1.2k students interested</p>
+              <p className="text-xs text-slate-500">1.2k students interested</p>
             </div>
           </div>
         </div>

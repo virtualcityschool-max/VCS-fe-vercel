@@ -133,7 +133,7 @@ const TeacherEvaluationPage = () => {
           </div>
 
           <div className="w-full sm:w-64">
-            <label className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1.5 block">
+            <label className="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-1.5 block">
               Course
             </label>
             {loadingCourses ? (
@@ -159,7 +159,7 @@ const TeacherEvaluationPage = () => {
           <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-5 space-y-4">
           {/* <div className="flex flex-col sm:flex-row gap-4">
             <div>
-              <label className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1.5 block">
+              <label className="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-1.5 block">
                 Enrollment Type
               </label>
               <div className="flex gap-1 bg-slate-800/60 border border-slate-700 rounded-xl p-1">
@@ -178,7 +178,7 @@ const TeacherEvaluationPage = () => {
           {/* Private student dropdown */}
           {tab === "private" && (
             <div>
-              <label className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1.5 block">
+              <label className="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-1.5 block">
                 Select Private Student
               </label>
               {loadingPrivateList ? (
@@ -207,7 +207,7 @@ const TeacherEvaluationPage = () => {
               <i className="fas fa-graduation-cap text-slate-600" />
               {selectedCourse.title}
               {courseStatus && (
-                <span className={`ml-1 px-1.5 py-0.5 rounded text-[10px] font-bold uppercase ${
+                <span className={`ml-1 px-1.5 py-0.5 rounded text-xs font-bold uppercase ${
                   courseStatus === "completed"
                     ? "bg-emerald-500/15 text-emerald-400"
                     : courseStatus === "published"

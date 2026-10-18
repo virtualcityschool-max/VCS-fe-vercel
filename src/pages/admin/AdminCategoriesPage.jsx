@@ -104,7 +104,7 @@ const AdminCategoriesPage = () => {
                     {saving ? <i className="fas fa-spinner fa-spin text-xs" /> : <i className="fas fa-plus text-xs" />}
                   </button>
                 </div>
-                <p className="text-[10px] text-slate-500 text-center px-4 font-medium leading-relaxed">
+                <p className="text-xs text-slate-500 text-center px-4 font-medium leading-relaxed">
                   Enter a name and press plus to instantly save to the platform.
                 </p>
               </div>
@@ -126,7 +126,7 @@ const AdminCategoriesPage = () => {
                      Course Levels Repository
                    </h3>
                 </div>
-                <div className="px-4 py-1.5 bg-slate-950/50 rounded-full text-[10px] font-black text-slate-500 border border-slate-800 uppercase tracking-widest">
+                <div className="px-4 py-1.5 bg-slate-950/50 rounded-full text-xs font-black text-slate-500 border border-slate-800 uppercase tracking-widest">
                   {categories.length} Items
                 </div>
               </div>
@@ -137,7 +137,7 @@ const AdminCategoriesPage = () => {
                      <div className="relative">
                         <div className="w-12 h-12 border-4 border-indigo-500/10 border-t-indigo-500 rounded-full animate-spin" />
                      </div>
-                     <p className="text-slate-600 font-black text-[10px] uppercase tracking-[0.3em]">Loading Repository...</p>
+                     <p className="text-slate-600 font-black text-xs uppercase tracking-[0.3em]">Loading Repository...</p>
                   </div>
                 ) : categories.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-32 gap-6 text-center px-10">
@@ -200,14 +200,14 @@ const AdminCategoriesPage = () => {
                                 <button
                                   onClick={() => handleDelete(cat.id)}
                                   disabled={saving}
-                                  className="text-[10px] bg-red-600 hover:bg-red-500 text-white px-5 py-2 rounded-xl font-black uppercase tracking-widest transition-all shadow-lg shadow-red-500/20 disabled:opacity-50"
+                                  className="text-xs bg-red-600 hover:bg-red-500 text-white px-5 py-2 rounded-xl font-black uppercase tracking-widest transition-all shadow-lg shadow-red-500/20 disabled:opacity-50"
                                 >
                                   {saving ? "..." : "Delete"}
                                 </button>
                                 <button
                                   onClick={() => setConfirmDeleteId(null)}
                                   disabled={saving}
-                                  className="text-[10px] text-slate-500 hover:text-white font-black uppercase tracking-widest transition-all disabled:opacity-50"
+                                  className="text-xs text-slate-500 hover:text-white font-black uppercase tracking-widest transition-all disabled:opacity-50"
                                 >
                                   Cancel
                                 </button>

@@ -211,7 +211,7 @@ const PersonDrawer = ({ role, person, onClose, onEdit, onView, onToggleActive, o
             <div key={r.id} className="p-3 rounded-xl border border-[#232D52] bg-[#0E1428] flex items-center justify-between gap-3 text-xs">
               <div className="min-w-0">
                 <div className="font-medium text-slate-200 truncate">{r.session_title}</div>
-                <div className="text-slate-400 text-[11px] mt-0.5">{fmt(r.scheduled_at, true)}</div>
+                <div className="text-slate-400 text-xs mt-0.5">{fmt(r.scheduled_at, true)}</div>
               </div>
               <StatusPill status={r.status ? r.status.charAt(0).toUpperCase() + r.status.slice(1) : "—"} />
             </div>

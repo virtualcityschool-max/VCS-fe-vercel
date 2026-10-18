@@ -78,7 +78,7 @@ const CourseCard = ({ course, index = 0, mode, onClick, onNavigate, ctaLabel, on
         {/* Status badge - top right */}
         <div className="absolute top-2 right-2 z-10">
           {isTeacher && (
-            <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border ${
+            <span className={`text-xs font-black uppercase tracking-widest px-2 py-0.5 rounded-full border ${
               courseData.status === "published"
                 ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
                 : "bg-amber-500/20 text-amber-400 border-amber-500/30"
@@ -87,26 +87,26 @@ const CourseCard = ({ course, index = 0, mode, onClick, onNavigate, ctaLabel, on
             </span>
           )}
           {isEnrolled && (
-            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest bg-blue-500/20 text-blue-400 border border-blue-500/30 backdrop-blur-md">
+            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-black uppercase tracking-widest bg-blue-500/20 text-blue-400 border border-blue-500/30 backdrop-blur-md">
               <span className="w-1.5 h-1.5 bg-blue-400 rounded-full" />
               Enrolled
             </span>
           )}
           {isPending && (
-            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest bg-amber-500/10 text-amber-400 border border-amber-500/20 backdrop-blur-md">
+            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-black uppercase tracking-widest bg-amber-500/10 text-amber-400 border border-amber-500/20 backdrop-blur-md">
               <span className="w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse" />
               Pending
             </span>
           )}
           {isRejected && (
-            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest bg-rose-500/10 text-rose-400 border border-rose-500/20 backdrop-blur-md">
-              <i className="fas fa-times-circle text-[9px]" />
+            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-black uppercase tracking-widest bg-rose-500/10 text-rose-400 border border-rose-500/20 backdrop-blur-md">
+              <i className="fas fa-times-circle text-xs" />
               Rejected
             </span>
           )}
           {isExpired && (
-            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest bg-amber-500/10 text-amber-400 border border-amber-500/20 backdrop-blur-md">
-              <i className="fas fa-lock text-[9px]" />
+            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-black uppercase tracking-widest bg-amber-500/10 text-amber-400 border border-amber-500/20 backdrop-blur-md">
+              <i className="fas fa-lock text-xs" />
               Access Ended
             </span>
           )}
@@ -129,13 +129,13 @@ const CourseCard = ({ course, index = 0, mode, onClick, onNavigate, ctaLabel, on
 
         {isTeacher && (
           <div className="flex items-center gap-1.5 text-slate-500 text-xs mb-2">
-            <i className="fas fa-user-graduate text-[10px]" />
+            <i className="fas fa-user-graduate text-xs" />
             <span className="font-bold">{courseData.total_enrolled ?? 0} Enrolled</span>
           </div>
         )}
 
         {isExpired && (
-          <p className="text-[9px] font-black uppercase tracking-widest mb-2 text-amber-400/70">
+          <p className="text-xs font-black uppercase tracking-widest mb-2 text-amber-400/70">
             {course.access_expires_at
               ? `Access ended ${new Date(course.access_expires_at).toLocaleDateString()}`
               : "Access ended"}
@@ -143,7 +143,7 @@ const CourseCard = ({ course, index = 0, mode, onClick, onNavigate, ctaLabel, on
         )}
 
         {(isPending || isRejected) && dateLabel && (
-          <p className={`text-[9px] font-black uppercase tracking-widest mb-2 ${isPending ? "text-amber-400/70" : "text-rose-400/70"}`}>
+          <p className={`text-xs font-black uppercase tracking-widest mb-2 ${isPending ? "text-amber-400/70" : "text-rose-400/70"}`}>
             {dateLabel}
           </p>
         )}
@@ -158,7 +158,7 @@ const CourseCard = ({ course, index = 0, mode, onClick, onNavigate, ctaLabel, on
           {isTeacher && (
             <button
               onClick={onClick}
-              className="w-full py-2.5 text-[10px] font-black uppercase tracking-[0.15em] rounded-xl transition-all active:scale-95 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-lg shadow-blue-900/40"
+              className="w-full py-2.5 text-xs font-black uppercase tracking-[0.15em] rounded-xl transition-all active:scale-95 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-lg shadow-blue-900/40"
             >
               {ctaLabel || "View Students"}
             </button>
@@ -166,7 +166,7 @@ const CourseCard = ({ course, index = 0, mode, onClick, onNavigate, ctaLabel, on
           {isEnrolled && (
             <button
               onClick={() => onNavigate(`/courses/${courseData.id}`)}
-              className="w-full py-2.5 text-[10px] font-black uppercase tracking-[0.15em] rounded-xl transition-all active:scale-95 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-lg shadow-blue-900/40"
+              className="w-full py-2.5 text-xs font-black uppercase tracking-[0.15em] rounded-xl transition-all active:scale-95 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-lg shadow-blue-900/40"
             >
               Continue Learning
             </button>
@@ -174,7 +174,7 @@ const CourseCard = ({ course, index = 0, mode, onClick, onNavigate, ctaLabel, on
           {isPending && (
             <button
               disabled
-              className="w-full py-2.5 text-[10px] font-black uppercase tracking-[0.15em] rounded-xl bg-amber-600/10 border border-amber-500/20 text-amber-400 cursor-not-allowed"
+              className="w-full py-2.5 text-xs font-black uppercase tracking-[0.15em] rounded-xl bg-amber-600/10 border border-amber-500/20 text-amber-400 cursor-not-allowed"
             >
               Awaiting Approval
             </button>
@@ -182,7 +182,7 @@ const CourseCard = ({ course, index = 0, mode, onClick, onNavigate, ctaLabel, on
           {isExpired && (
             <button
               onClick={() => onRenew?.(courseData.id)}
-              className="w-full py-2.5 text-[10px] font-black uppercase tracking-[0.15em] rounded-xl transition-all active:scale-95 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white shadow-lg shadow-amber-900/40"
+              className="w-full py-2.5 text-xs font-black uppercase tracking-[0.15em] rounded-xl transition-all active:scale-95 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white shadow-lg shadow-amber-900/40"
             >
               Renew Access
             </button>
@@ -190,7 +190,7 @@ const CourseCard = ({ course, index = 0, mode, onClick, onNavigate, ctaLabel, on
           {isRejected && (
             <button
               disabled
-              className="w-full py-2.5 text-[10px] font-black uppercase tracking-[0.15em] rounded-xl bg-slate-800 border border-white/5 text-slate-500 cursor-not-allowed opacity-50"
+              className="w-full py-2.5 text-xs font-black uppercase tracking-[0.15em] rounded-xl bg-slate-800 border border-white/5 text-slate-500 cursor-not-allowed opacity-50"
             >
               Enrollment Declined
             </button>

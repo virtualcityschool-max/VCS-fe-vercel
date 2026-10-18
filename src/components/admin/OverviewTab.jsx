@@ -40,7 +40,7 @@ const StatCardTip = ({ label, value, icon, color, items, onClick }) => {
           <div className="w-7 h-7 bg-white/10 rounded-md flex items-center justify-center flex-shrink-0">
             <i className={`${icon} text-sm`} />
           </div>
-          <p className="text-[10px] uppercase tracking-wider opacity-80 leading-tight">
+          <p className="text-xs uppercase tracking-wider opacity-80 leading-tight">
             {label}
           </p>
         </div>
@@ -111,7 +111,7 @@ const OverviewTab = ({
           onClick={() => navigate("/admin/teacher-planner")}
           className="text-xs text-indigo-400 hover:text-indigo-300 transition flex items-center gap-1"
         >
-          View all <i className="fas fa-arrow-right text-[10px]"></i>
+          View all <i className="fas fa-arrow-right text-xs"></i>
         </button>
       </div>
       {sessionsLoading ? (
@@ -374,11 +374,11 @@ const OverviewTab = ({
                     className="flex items-start gap-3 py-2.5 border-b border-slate-800/50 last:border-0"
                   >
                     <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${style.bg}`}>
-                      <i className={`fas ${style.icon} ${style.text} text-[10px]`}></i>
+                      <i className={`fas ${style.icon} ${style.text} text-xs`}></i>
                     </div>
                     <div className="min-w-0">
                       <p className="text-xs text-slate-300 leading-snug">{item.text}</p>
-                      <p className="text-[10px] text-slate-600 mt-0.5">{formatRelativeTime(item.timestamp)}</p>
+                      <p className="text-xs text-slate-600 mt-0.5">{formatRelativeTime(item.timestamp)}</p>
                     </div>
                   </div>
                 );
@@ -397,7 +397,7 @@ const OverviewTab = ({
               Top Courses
             </h3>
             <div className="text-right">
-              <p className="text-[10px] uppercase tracking-wider text-slate-500">
+              <p className="text-xs uppercase tracking-wider text-slate-500">
                 Total Revenue
               </p>
               <p className="text-base font-bold text-amber-400">
@@ -426,7 +426,7 @@ const OverviewTab = ({
                     key={course.name}
                     className="flex items-center gap-3 py-2.5 border-b border-slate-800/50 last:border-0"
                   >
-                    <div className="w-6 h-6 rounded-md bg-slate-800 flex items-center justify-center text-[10px] font-bold text-slate-400 flex-shrink-0">
+                    <div className="w-6 h-6 rounded-md bg-slate-800 flex items-center justify-center text-xs font-bold text-slate-400 flex-shrink-0">
                       {i + 1}
                     </div>
                     <div className="min-w-0 flex-1">
@@ -442,7 +442,7 @@ const OverviewTab = ({
                       <p className="text-xs font-bold text-amber-400">
                         ${course.revenue.toLocaleString("en-US")}
                       </p>
-                      <p className="text-[10px] text-slate-500">
+                      <p className="text-xs text-slate-500">
                         {course.students} student{course.students === 1 ? "" : "s"}
                       </p>
                     </div>

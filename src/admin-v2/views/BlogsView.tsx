@@ -70,7 +70,7 @@ export const BlogsView: React.FC = () => {
             <div>
               <div className="h-40 bg-gradient-to-tr from-[#0F172A] to-[#1E293B] border-b border-[#1E2648] p-5 flex flex-col justify-between relative">
                 <div className="flex items-center justify-between">
-                  <span className="px-2.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-indigo-600 text-white font-mono">
+                  <span className="px-2.5 py-0.5 rounded text-xs font-bold uppercase tracking-wider bg-indigo-600 text-white font-mono">
                     Article
                   </span>
                   <StatusPill status={post.status} />
@@ -80,7 +80,7 @@ export const BlogsView: React.FC = () => {
                   <span>{post.category}</span>
                 </div>
 
-                <div className="absolute bottom-3 right-4 text-[11px] font-mono text-slate-400 bg-black/60 px-2 py-0.5 rounded">
+                <div className="absolute bottom-3 right-4 text-xs font-mono text-slate-400 bg-black/60 px-2 py-0.5 rounded">
                   {post.readTimeOrDuration}
                 </div>
               </div>

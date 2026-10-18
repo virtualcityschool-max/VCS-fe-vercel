@@ -238,7 +238,7 @@ export const DashboardView: React.FC = () => {
               <span>{greeting}, {adminFirstName}</span>
               <Sparkles className="w-5 h-5 text-indigo-400" />
             </h1>
-            <span className="hidden sm:inline-block px-2.5 py-0.5 text-[11px] rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/25 font-mono font-medium">
+            <span className="hidden sm:inline-block px-2.5 py-0.5 text-xs rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/25 font-mono font-medium">
               Live School Ops
             </span>
           </div>
@@ -431,7 +431,7 @@ export const DashboardView: React.FC = () => {
                     <span className="text-xs font-bold text-slate-200">Pending Account Approvals</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] text-amber-300/80 font-mono">New sign-ups</span>
+                    <span className="text-xs text-amber-300/80 font-mono">New sign-ups</span>
                     <button
                       type="button"
                       onClick={() => handleDismissCard('pending_accounts', visiblePendingAccounts.map(a => a.id))}
@@ -477,7 +477,7 @@ export const DashboardView: React.FC = () => {
                     <span className="text-xs font-bold text-slate-200">Enrollment / Access Requests</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] text-indigo-300/80 font-mono">Subjects & scholarships</span>
+                    <span className="text-xs text-indigo-300/80 font-mono">Subjects & scholarships</span>
                     <button
                       type="button"
                       onClick={() => handleDismissCard('pending_enrollments', visiblePendingEnrollments.map(e => e.id))}
@@ -523,7 +523,7 @@ export const DashboardView: React.FC = () => {
                     <span className="text-xs font-bold text-slate-200">Subscriptions Expiring &lt; 7 Days</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] text-rose-300/80 font-mono font-bold">Fees</span>
+                    <span className="text-xs text-rose-300/80 font-mono font-bold">Fees</span>
                     <button
                       type="button"
                       onClick={() => handleDismissCard('expiring_subs', visibleExpiringSubs.map(s => s.id))}
@@ -579,7 +579,7 @@ export const DashboardView: React.FC = () => {
                     <span className="text-xs font-bold text-slate-200">Classes Need Teacher</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] text-amber-300/80 font-mono">Today</span>
+                    <span className="text-xs text-amber-300/80 font-mono">Today</span>
                     <button
                       type="button"
                       onClick={() => handleDismissCard('classes_without_teacher', visibleClassesWithoutTeacher.map(s => s.id))}
@@ -624,7 +624,7 @@ export const DashboardView: React.FC = () => {
                     <span className="text-xs font-bold text-slate-200">Students Absent 2+ Times</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] text-sky-300/80 font-mono">This Week</span>
+                    <span className="text-xs text-sky-300/80 font-mono">This Week</span>
                     <button
                       type="button"
                       onClick={() => handleDismissCard('chronic_absentees', visibleChronicAbsentees.map(s => s.id))}
@@ -670,7 +670,7 @@ export const DashboardView: React.FC = () => {
                     <span className="text-xs font-bold text-slate-200">Missed / Teacher Not Joined</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] text-rose-300/80 font-mono">Resolve</span>
+                    <span className="text-xs text-rose-300/80 font-mono">Resolve</span>
                     <button
                       type="button"
                       onClick={() => handleDismissCard('missed_classes', visibleMissedClasses.map(s => s.id))}
@@ -746,7 +746,7 @@ export const DashboardView: React.FC = () => {
         <div className="p-4 rounded-2xl border border-[#232D52] bg-[#121831] shadow-lg">
           <div className="flex items-center justify-between text-xs text-slate-400">
             <span>Faculty & Teachers</span>
-            <span className="text-[10px] text-indigo-400 font-mono">{departmentCount} Departments</span>
+            <span className="text-xs text-indigo-400 font-mono">{departmentCount} Departments</span>
           </div>
           <div className="mt-2 text-2xl font-bold font-mono tabular-nums text-slate-100">
             {teachers.length}
@@ -762,7 +762,7 @@ export const DashboardView: React.FC = () => {
         <div className={`p-4 rounded-2xl border border-[#232D52] bg-[#121831] shadow-lg ${can('view_billing') ? '' : 'hidden'}`}>
           <div className="flex items-center justify-between text-xs text-slate-400">
             <span>Gumroad Payments</span>
-            <span className="text-[10px] text-emerald-400 font-mono">Last 30 days</span>
+            <span className="text-xs text-emerald-400 font-mono">Last 30 days</span>
           </div>
           <div className="mt-2 text-2xl font-bold font-mono tabular-nums text-slate-100">
             {receivedLast30 === null ? '—' : `$${receivedLast30.toLocaleString()}`}
@@ -778,7 +778,7 @@ export const DashboardView: React.FC = () => {
         <div className="p-4 rounded-2xl border border-[#232D52] bg-[#121831] shadow-lg">
           <div className="flex items-center justify-between text-xs text-slate-400">
             <span>Attendance Rate</span>
-            <span className="text-[10px] text-sky-400 font-mono">This Week</span>
+            <span className="text-xs text-sky-400 font-mono">This Week</span>
           </div>
           <div className="mt-2 text-2xl font-bold font-mono tabular-nums text-slate-100">
             {attendanceRate === null ? '—' : `${attendanceRate}%`}
@@ -843,7 +843,7 @@ export const DashboardView: React.FC = () => {
                 <div className="flex items-center gap-3">
                   <div className="text-center min-w-[70px] py-1 px-2 rounded-lg bg-slate-800/80 font-mono text-xs border border-slate-700">
                     <div className="font-bold text-slate-200">{sess.startTime}</div>
-                    <div className="text-[10px] text-slate-400">{sess.endTime}</div>
+                    <div className="text-xs text-slate-400">{sess.endTime}</div>
                   </div>
 
                   <div>
@@ -851,7 +851,7 @@ export const DashboardView: React.FC = () => {
                       <span className="font-mono text-xs font-bold text-indigo-400">{sub?.code || 'VCS'}</span>
                       <span className="text-xs font-bold text-slate-100">{sess.title}</span>
                     </div>
-                    <div className="flex items-center gap-2 text-[11px] text-slate-400 mt-0.5">
+                    <div className="flex items-center gap-2 text-xs text-slate-400 mt-0.5">
                       <span>{sess.level}</span>
                       <span>·</span>
                       <span className="font-medium text-slate-300">{sess.department}</span>
@@ -953,9 +953,9 @@ export const DashboardView: React.FC = () => {
                   <div key={sub.id} className="space-y-1.5">
                     <div className="flex items-center justify-between text-xs">
                       <div className="flex items-center gap-2">
-                        <span className="font-mono text-slate-500 font-bold text-[11px]">0{idx + 1}.</span>
+                        <span className="font-mono text-slate-500 font-bold text-xs">0{idx + 1}.</span>
                         <span className="font-bold text-slate-200">{sub.name}</span>
-                        {sub.code && <span className="text-[10px] text-slate-400 font-mono">({sub.code})</span>}
+                        {sub.code && <span className="text-xs text-slate-400 font-mono">({sub.code})</span>}
                       </div>
                       <div className="flex items-center gap-3 font-mono">
                         <span className="font-semibold text-slate-300">{sub.studentCount} students</span>
@@ -1063,7 +1063,7 @@ export const DashboardView: React.FC = () => {
                   <span className="text-slate-400">{act.description}</span>
                 </div>
               </div>
-              <div className="text-[11px] text-slate-500 font-mono whitespace-nowrap shrink-0 text-right">
+              <div className="text-xs text-slate-500 font-mono whitespace-nowrap shrink-0 text-right">
                 <div className="text-slate-300 font-sans font-semibold">{act.actorName}</div>
                 {act.timestamp}
               </div>
@@ -1098,7 +1098,7 @@ export const DashboardView: React.FC = () => {
                       <span className="text-slate-400">{act.description}</span>
                     </div>
                   </div>
-                  <span className="text-[11px] text-slate-500 font-mono whitespace-nowrap shrink-0 text-right">
+                  <span className="text-xs text-slate-500 font-mono whitespace-nowrap shrink-0 text-right">
                     <span className="block text-slate-300 font-sans font-semibold">{act.actorName}{act.actorRole ? ` · ${act.actorRole}` : ''}</span>
                     {act.timestamp}
                   </span>

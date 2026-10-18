@@ -41,7 +41,7 @@ export const DigitalSessionClock = ({
   if (phase === "ended") {
     if (variant === "hero") return null;
     return (
-      <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-slate-500/10 border border-slate-500/30 font-mono text-[11px] text-slate-400 font-bold ${className}`}>
+      <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-slate-500/10 border border-slate-500/30 font-mono text-xs text-slate-400 font-bold ${className}`}>
         <span className="w-1.5 h-1.5 rounded-full bg-slate-500" />
         <span>Ended</span>
       </span>
@@ -73,7 +73,7 @@ export const DigitalSessionClock = ({
         >
           <div className="flex items-center gap-2 mb-2">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
-            <span className="text-[10px] font-black uppercase tracking-widest text-emerald-300">
+            <span className="text-xs font-black uppercase tracking-widest text-emerald-300">
               Live Classroom Active
             </span>
           </div>
@@ -93,11 +93,11 @@ export const DigitalSessionClock = ({
           <div className="flex items-center justify-between gap-3 mb-2.5 pb-2 border-b border-emerald-500/20">
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-[10px] font-black uppercase tracking-widest text-emerald-300">
+              <span className="text-xs font-black uppercase tracking-widest text-emerald-300">
                 Join Room Open
               </span>
             </div>
-            <span className="text-[10px] font-bold text-slate-300 font-mono">
+            <span className="text-xs font-bold text-slate-300 font-mono">
               Class begins in
             </span>
           </div>
@@ -109,7 +109,7 @@ export const DigitalSessionClock = ({
                   <span className="text-xl font-black text-white tabular-nums tracking-tight">
                     {pad(hours)}
                   </span>
-                  <span className="text-[8px] font-black uppercase text-emerald-400 tracking-widest mt-0.5">
+                  <span className="text-xs font-black uppercase text-emerald-400 tracking-widest mt-0.5">
                     HRS
                   </span>
                 </div>
@@ -121,7 +121,7 @@ export const DigitalSessionClock = ({
               <span className="text-xl font-black text-emerald-300 tabular-nums tracking-tight">
                 {pad(minutes)}
               </span>
-              <span className="text-[8px] font-black uppercase text-emerald-400 tracking-widest mt-0.5">
+              <span className="text-xs font-black uppercase text-emerald-400 tracking-widest mt-0.5">
                 MIN
               </span>
             </div>
@@ -132,13 +132,13 @@ export const DigitalSessionClock = ({
               <span className="text-xl font-black text-emerald-200 tabular-nums tracking-tight">
                 {pad(seconds)}
               </span>
-              <span className="text-[8px] font-black uppercase text-emerald-400 tracking-widest mt-0.5">
+              <span className="text-xs font-black uppercase text-emerald-400 tracking-widest mt-0.5">
                 SEC
               </span>
             </div>
           </div>
 
-          <div className="mt-2.5 pt-2 border-t border-emerald-500/20 text-[10px] text-emerald-300 flex items-center justify-between">
+          <div className="mt-2.5 pt-2 border-t border-emerald-500/20 text-xs text-emerald-300 flex items-center justify-between">
             <span className="flex items-center gap-1">
               <i className="fas fa-check-circle text-emerald-400" />
               Direct Meet link unlocked
@@ -157,11 +157,11 @@ export const DigitalSessionClock = ({
         <div className="flex items-center justify-between gap-3 mb-2.5 pb-2 border-b border-white/10">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse" />
-            <span className="text-[10px] font-black uppercase tracking-widest text-indigo-300">
+            <span className="text-xs font-black uppercase tracking-widest text-indigo-300">
               Time Until Session
             </span>
           </div>
-          <span className="text-[10px] font-mono font-bold text-cyan-300">
+          <span className="text-xs font-mono font-bold text-cyan-300">
             {days > 0 ? `${days}d ${hours}h ${minutes}m to go` : `${hours}h ${minutes}m to go`}
           </span>
         </div>
@@ -174,7 +174,7 @@ export const DigitalSessionClock = ({
                 <span className="text-xl font-black text-white tabular-nums tracking-tight">
                   {pad(days)}
                 </span>
-                <span className="text-[8px] font-black uppercase text-indigo-400 tracking-widest mt-0.5">
+                <span className="text-xs font-black uppercase text-indigo-400 tracking-widest mt-0.5">
                   DAYS
                 </span>
               </div>
@@ -186,7 +186,7 @@ export const DigitalSessionClock = ({
             <span className="text-xl font-black text-white tabular-nums tracking-tight">
               {pad(hours)}
             </span>
-            <span className="text-[8px] font-black uppercase text-indigo-400 tracking-widest mt-0.5">
+            <span className="text-xs font-black uppercase text-indigo-400 tracking-widest mt-0.5">
               HRS
             </span>
           </div>
@@ -197,7 +197,7 @@ export const DigitalSessionClock = ({
             <span className="text-xl font-black text-cyan-300 tabular-nums tracking-tight">
               {pad(minutes)}
             </span>
-            <span className="text-[8px] font-black uppercase text-cyan-400/80 tracking-widest mt-0.5">
+            <span className="text-xs font-black uppercase text-cyan-400/80 tracking-widest mt-0.5">
               MIN
             </span>
           </div>
@@ -210,7 +210,7 @@ export const DigitalSessionClock = ({
                 <span className="text-xl font-black text-amber-300 tabular-nums tracking-tight">
                   {pad(seconds)}
                 </span>
-                <span className="text-[8px] font-black uppercase text-amber-400/80 tracking-widest mt-0.5">
+                <span className="text-xs font-black uppercase text-amber-400/80 tracking-widest mt-0.5">
                   SEC
                 </span>
               </div>
@@ -219,9 +219,9 @@ export const DigitalSessionClock = ({
         </div>
 
         {/* Room unlock notice */}
-        <div className="mt-2.5 pt-2 border-t border-white/10 flex items-center justify-between text-[10px] text-slate-400">
+        <div className="mt-2.5 pt-2 border-t border-white/10 flex items-center justify-between text-xs text-slate-400">
           <span className="flex items-center gap-1.5">
-            <i className="fas fa-lock text-indigo-400 text-[10px]" />
+            <i className="fas fa-lock text-indigo-400 text-xs" />
             Room unlocks 20m prior
           </span>
           <span className="font-mono text-indigo-300 font-bold">
@@ -242,7 +242,7 @@ export const DigitalSessionClock = ({
       return (
         <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-300 font-mono text-xs font-bold shadow-sm ${className}`}>
           <span className="w-2 h-2 rounded-full bg-rose-400 animate-ping" />
-          <span className="text-[10px] font-black uppercase tracking-wider">Live Now</span>
+          <span className="text-xs font-black uppercase tracking-wider">Live Now</span>
         </div>
       );
     }
@@ -251,7 +251,7 @@ export const DigitalSessionClock = ({
       return (
         <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-950/50 border border-emerald-500/40 text-emerald-300 font-mono text-xs font-bold shadow-md ${className}`}>
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="text-[10px] font-black uppercase text-emerald-400 tracking-wider">Room Open</span>
+          <span className="text-xs font-black uppercase text-emerald-400 tracking-wider">Room Open</span>
           <span className="text-slate-400">·</span>
           <span className="text-white font-black">Starts in {minutes + 1} min</span>
         </div>
@@ -279,7 +279,7 @@ export const DigitalSessionClock = ({
   // ─────────────────────────────────────────────────────────────
   if (isLive) {
     return (
-      <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-rose-500/15 border border-rose-500/30 font-mono text-[11px] text-rose-300 font-bold ${className}`}>
+      <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-rose-500/15 border border-rose-500/30 font-mono text-xs text-rose-300 font-bold ${className}`}>
         <span className="w-1.5 h-1.5 rounded-full bg-rose-400 animate-ping" />
         <span>Live now</span>
       </span>
@@ -288,7 +288,7 @@ export const DigitalSessionClock = ({
 
   if (isUnlockOpen) {
     return (
-      <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-emerald-500/15 border border-emerald-500/30 font-mono text-[11px] text-emerald-300 font-bold ${className}`}>
+      <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-emerald-500/15 border border-emerald-500/30 font-mono text-xs text-emerald-300 font-bold ${className}`}>
         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
         <span>Starts in {minutes + 1} min</span>
       </span>
@@ -296,7 +296,7 @@ export const DigitalSessionClock = ({
   }
 
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-indigo-950/40 border border-indigo-500/30 font-mono text-[11px] text-indigo-300 font-medium ${className}`}>
+    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-indigo-950/40 border border-indigo-500/30 font-mono text-xs text-indigo-300 font-medium ${className}`}>
       <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
       <span className="font-bold text-indigo-200 tabular-nums">
         {days > 0

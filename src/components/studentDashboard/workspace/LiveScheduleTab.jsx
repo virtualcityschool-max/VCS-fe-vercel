@@ -164,7 +164,7 @@ const LiveScheduleTab = ({ onOpenWeeklyPlanner }) => {
               <h3 className="text-sm font-bold text-white">
                 Live Google Meet Class Schedule
               </h3>
-              <span className="px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 text-[10px] font-black uppercase">
+              <span className="px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 text-xs font-black uppercase">
                 Admin Verified
               </span>
             </div>
@@ -200,7 +200,7 @@ const LiveScheduleTab = ({ onOpenWeeklyPlanner }) => {
                 <span className="text-xs font-black uppercase tracking-widest text-indigo-300">
                   {isNextJoinable ? "WHAT IS MY NEXT CLASS? • JOIN ROOM NOW OPEN" : "WHAT IS MY NEXT CLASS?"}
                 </span>
-                <span className="px-2.5 py-0.5 rounded-full bg-white/10 text-slate-300 text-[10px] font-mono font-bold">
+                <span className="px-2.5 py-0.5 rounded-full bg-white/10 text-slate-300 text-xs font-mono font-bold">
                   {nextClass.room || "Google Meet Room"}
                 </span>
               </div>
@@ -263,7 +263,7 @@ const LiveScheduleTab = ({ onOpenWeeklyPlanner }) => {
                     </span>
                   </button>
                   {nextPhase !== "upcoming" && (
-                    <p className="text-[11px] text-emerald-400 text-center lg:text-right font-medium">
+                    <p className="text-xs text-emerald-400 text-center lg:text-right font-medium">
                       <i className="fas fa-check-circle mr-1" />
                       Direct classroom link active
                     </p>
@@ -298,7 +298,7 @@ const LiveScheduleTab = ({ onOpenWeeklyPlanner }) => {
                 className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition flex items-center gap-2 cursor-pointer shadow-lg shadow-indigo-600/30 shrink-0 self-start sm:self-auto"
               >
                 <span>View Weekly Timetable</span>
-                <i className="fas fa-arrow-right text-[10px]" />
+                <i className="fas fa-arrow-right text-xs" />
               </button>
             )}
           </div>
@@ -354,10 +354,10 @@ const LiveScheduleTab = ({ onOpenWeeklyPlanner }) => {
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                       <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                      <span className="text-[10px] font-black uppercase tracking-wider text-indigo-400">
+                      <span className="text-xs font-black uppercase tracking-wider text-indigo-400">
                         {session.course_title || (session.course && session.course.title) || session.title}
                       </span>
-                      <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                      <span className="px-2 py-0.5 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                         {phase === "live"
                           ? "LIVE NOW"
                           : isOver
@@ -376,7 +376,7 @@ const LiveScheduleTab = ({ onOpenWeeklyPlanner }) => {
                       Faculty: <span className="text-slate-200 font-semibold">{session.teacher_name || session.instructor_name || "Assigned Faculty"}</span> • {session.room || "Google Meet"}
                     </p>
 
-                    <p className="text-[11px] text-slate-400 font-mono mt-1 flex items-center gap-1.5">
+                    <p className="text-xs text-slate-400 font-mono mt-1 flex items-center gap-1.5">
                       <i className="far fa-clock text-slate-500" />
                       {session.scheduled_at ? (
                         <>
@@ -444,7 +444,7 @@ const LiveScheduleTab = ({ onOpenWeeklyPlanner }) => {
                 className="mt-2 text-xs text-indigo-400 hover:text-indigo-300 font-semibold inline-flex items-center gap-1 cursor-pointer"
               >
                 <span>View Weekly Curriculum Planner</span>
-                <i className="fas fa-arrow-right text-[10px]" />
+                <i className="fas fa-arrow-right text-xs" />
               </button>
             )}
           </div>

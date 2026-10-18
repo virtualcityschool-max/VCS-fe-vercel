@@ -214,7 +214,7 @@ const TeacherAttendance = () => {
 
         {tab !== "admin" && (
           <div className="w-full sm:w-64">
-            <label className="text-[10px] uppercase tracking-widest text-slate-500 font-bold px-0.5 mb-1.5 block">Course</label>
+            <label className="text-xs uppercase tracking-widest text-slate-500 font-bold px-0.5 mb-1.5 block">Course</label>
             <FilterSelect
               value={activeCourseId}
               onChange={(e) => setCourseId(e.target.value)}
@@ -343,7 +343,7 @@ const TeacherAttendance = () => {
                 <div>
                   <h3 className="text-base font-bold text-white">{hasExisting ? "Edit Attendance" : "Mark Attendance"}</h3>
                   {activeCourse && (
-                    <span className="text-[10px] bg-slate-800 border border-slate-700 text-slate-400 px-2 py-0.5 rounded-lg font-medium mt-1 inline-block">
+                    <span className="text-xs bg-slate-800 border border-slate-700 text-slate-400 px-2 py-0.5 rounded-lg font-medium mt-1 inline-block">
                       <i className="fas fa-book text-slate-600 mr-1" />{activeCourse.title}
                     </span>
                   )}
@@ -355,7 +355,7 @@ const TeacherAttendance = () => {
 
               <div className="px-6 py-4 space-y-4 overflow-y-auto flex-1">
                 <div>
-                  <label className="text-[10px] uppercase tracking-widest text-slate-500 font-bold block mb-1.5">Session</label>
+                  <label className="text-xs uppercase tracking-widest text-slate-500 font-bold block mb-1.5">Session</label>
                   {loadingSessions ? (
                     <div className="h-10 bg-slate-800 rounded-xl animate-pulse" />
                   ) : (
@@ -375,7 +375,7 @@ const TeacherAttendance = () => {
                 </div>
 
                 <div className="bg-slate-800/40 border border-slate-700/50 rounded-xl px-4 py-3 space-y-2">
-                  <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Mark selected as</p>
+                  <p className="text-xs uppercase tracking-widest text-slate-500 font-bold">Mark selected as</p>
                   <div className="flex gap-2">
                     {STATUS_OPTIONS.map((s) => {
                       const cfg = STATUS_CONFIG[s];
@@ -404,7 +404,7 @@ const TeacherAttendance = () => {
                 {markStudents.length > 0 ? (
                   <div>
                     <div className="flex items-center justify-between mb-3">
-                      <label className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">
+                      <label className="text-xs uppercase tracking-widest text-slate-500 font-bold">
                         Students ({selectedStudentIds.size}/{markStudents.length} selected)
                       </label>
                       <button type="button" onClick={toggleAll} className="text-xs text-indigo-400 hover:text-indigo-300 transition font-medium">
@@ -432,19 +432,19 @@ const TeacherAttendance = () => {
                                 className="w-4 h-4 rounded border-slate-600 accent-indigo-500 cursor-pointer shrink-0"
                               />
                               <div className="w-7 h-7 rounded-full bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center shrink-0">
-                                <span className="text-indigo-400 text-[10px] font-bold">{s.username?.charAt(0)?.toUpperCase()}</span>
+                                <span className="text-indigo-400 text-xs font-bold">{s.username?.charAt(0)?.toUpperCase()}</span>
                               </div>
                               <p className="text-sm font-semibold text-white flex-1 truncate">{s.username}</p>
                               {s.hasRecord && (
                                 <div className="flex items-center gap-2 shrink-0 flex-wrap">
                                   {s.joinedAt && (
-                                    <span className="text-[10px] text-slate-500 flex items-center gap-1">
+                                    <span className="text-xs text-slate-500 flex items-center gap-1">
                                       <i className="fas fa-sign-in-alt text-emerald-500/70" />
                                       {formatTime(s.joinedAt)}
                                     </span>
                                   )}
                                   {s.leftAt && (
-                                    <span className="text-[10px] text-slate-500 flex items-center gap-1">
+                                    <span className="text-xs text-slate-500 flex items-center gap-1">
                                       <i className="fas fa-sign-out-alt text-rose-500/70" />
                                       {formatTime(s.leftAt)}
                                     </span>
@@ -453,7 +453,7 @@ const TeacherAttendance = () => {
                               )}
                             </div>
                             <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-                              <span className="text-[10px] text-slate-600 font-medium shrink-0">
+                              <span className="text-xs text-slate-600 font-medium shrink-0">
                                 {s.hasRecord ? "Change to:" : "Mark as:"}
                               </span>
                               <div className="flex gap-1.5">

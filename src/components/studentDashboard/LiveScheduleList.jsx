@@ -160,20 +160,20 @@ const LiveScheduleList = () => {
     if (session.has_joined && session.status.toLowerCase() !== "live") {
       // if teacher does does join and student joins
       return (
-        <span className="bg-red-600/10 text-red-400 px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-[0.15em] border border-red-500/10 animate-pulse">
+        <span className="bg-red-600/10 text-red-400 px-2 py-0.5 rounded-lg text-xs font-black uppercase tracking-[0.15em] border border-red-500/10 animate-pulse">
           Live Now
         </span>
       );
     }
     if (session.left_at || session.status.toLowerCase() == "ended") {
       return (
-        <span className="bg-slate-800/50 text-slate-500 px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-[0.15em] border border-white/5">
+        <span className="bg-slate-800/50 text-slate-500 px-2 py-0.5 rounded-lg text-xs font-black uppercase tracking-[0.15em] border border-white/5">
           Ended
         </span>
       );
     }
     return (
-      <span className="bg-blue-600/10 text-blue-400 px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-[0.15em] border border-blue-500/10">
+      <span className="bg-blue-600/10 text-blue-400 px-2 py-0.5 rounded-lg text-xs font-black uppercase tracking-[0.15em] border border-blue-500/10">
         Scheduled
       </span>
     );
@@ -192,7 +192,7 @@ const LiveScheduleList = () => {
     <section>
       {/* Section header + tabs */}
       <div className="mb-6 border-b border-white/5 pb-4 flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 flex items-center gap-3">
+        <h2 className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 flex items-center gap-3">
           {hasLive && activeTab === "classes"
             ? <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-ping" />
             : <span className="w-1.5 h-1.5 bg-slate-700 rounded-full" />}
@@ -204,7 +204,7 @@ const LiveScheduleList = () => {
           <div className="flex items-center gap-1 bg-slate-900/60 border border-white/5 rounded-xl p-1">
             <button
               onClick={() => setActiveTab("classes")}
-              className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${
                 activeTab === "classes"
                   ? "bg-blue-600 text-white shadow-lg shadow-blue-900/30"
                   : "text-slate-500 hover:text-slate-300"
@@ -215,7 +215,7 @@ const LiveScheduleList = () => {
             </button>
             <button
               onClick={() => setActiveTab("tutors")}
-              className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all flex items-center gap-1.5 ${
                 activeTab === "tutors"
                   ? "bg-indigo-600 text-white shadow-lg shadow-indigo-900/30"
                   : "text-slate-500 hover:text-slate-300"
@@ -224,7 +224,7 @@ const LiveScheduleList = () => {
               <i className="fas fa-user-graduate mr-1.5" />
               Reserved Slots
               {tutorSlots.length > 0 && (
-                <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-full ${
+                <span className={`text-xs font-black px-1.5 py-0.5 rounded-full ${
                   activeTab === "tutors" ? "bg-white/20 text-white" : "bg-indigo-500/20 text-indigo-400"
                 }`}>
                   {tutorSlots.length}
@@ -249,12 +249,12 @@ const LiveScheduleList = () => {
                 <i className="fas fa-chalkboard-teacher text-xl text-slate-600" />
               </div>
               <h3 className="text-sm font-black text-white/80 mb-1">No Upcoming Tutoring Slots</h3>
-              <p className="text-slate-500 text-[10px] font-medium uppercase tracking-wider mb-4">
+              <p className="text-slate-500 text-xs font-medium uppercase tracking-wider mb-4">
                 Book a session with a tutor to get started
               </p>
               <button
                 onClick={() => navigate("/teachers")}
-                className="inline-flex items-center gap-2 px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-black text-[10px] uppercase tracking-widest transition-all"
+                className="inline-flex items-center gap-2 px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-black text-xs uppercase tracking-widest transition-all"
               >
                 <i className="fas fa-search" />
                 Find a Tutor
@@ -293,7 +293,7 @@ const LiveScheduleList = () => {
                         {slot.teacher_email}
                       </p>
                     )}
-                    <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-[11px] text-slate-400 font-bold uppercase tracking-wider">
+                    <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-xs text-slate-400 font-bold uppercase tracking-wider">
                       <div className="flex items-center gap-1.5">
                         <i className="fas fa-calendar text-indigo-400/60" />
                         <span>{fmtDate(slot.date)}</span>
@@ -321,12 +321,12 @@ const LiveScheduleList = () => {
                             if (!isSlotJoinable(slot)) { setTooEarlyOpen(true); return; }
                             openMeetingLink(slot.meeting_link);
                           }}
-                          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black text-[10px] uppercase tracking-widest shadow-lg shadow-blue-900/40 transition-all active:scale-95"
+                          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black text-xs uppercase tracking-widest shadow-lg shadow-blue-900/40 transition-all active:scale-95"
                         >
-                          <i className="fas fa-video text-[9px]" />
+                          <i className="fas fa-video text-xs" />
                           Join Session
                         </button>
-                        <div className="absolute bottom-full right-0 mb-2 px-3 py-1.5 bg-slate-800 border border-white/10 text-white text-[10px] rounded-xl whitespace-nowrap opacity-0 group-hover/tip:opacity-100 transition-all pointer-events-none z-20 shadow-xl">
+                        <div className="absolute bottom-full right-0 mb-2 px-3 py-1.5 bg-slate-800 border border-white/10 text-white text-xs rounded-xl whitespace-nowrap opacity-0 group-hover/tip:opacity-100 transition-all pointer-events-none z-20 shadow-xl">
                           Available 30 min before the session
                         </div>
                       </div>
@@ -334,7 +334,7 @@ const LiveScheduleList = () => {
 
                     {/* <button
                       onClick={() => navigate(`/teachers/${slot.teacher_id}`, { state: { openSlots: true } })}
-                      className="px-5 py-2 rounded-xl bg-indigo-600/10 hover:bg-indigo-600 border border-indigo-500/20 text-indigo-400 hover:text-white font-black text-[10px] uppercase tracking-widest transition-all"
+                      className="px-5 py-2 rounded-xl bg-indigo-600/10 hover:bg-indigo-600 border border-indigo-500/20 text-indigo-400 hover:text-white font-black text-xs uppercase tracking-widest transition-all"
                     >
                       View Tutor
                     </button> */}
@@ -355,7 +355,7 @@ const LiveScheduleList = () => {
           <h3 className="text-sm font-black text-white/80 mb-1">
             No Sessions Scheduled
           </h3>
-          <p className="text-slate-500 text-[10px] font-medium uppercase tracking-wider">
+          <p className="text-slate-500 text-xs font-medium uppercase tracking-wider">
             You have no upcoming sessions scheduled.
           </p>
           <div className="mt-4 max-w-md mx-auto text-left">

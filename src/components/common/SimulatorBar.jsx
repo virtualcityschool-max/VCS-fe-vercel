@@ -105,7 +105,7 @@ const SimulatorBar = () => {
 
   return (
     <div className="fixed bottom-2 sm:bottom-4 left-1/2 -translate-x-1/2 z-60 flex items-center gap-1.5 sm:gap-2 p-2 sm:p-3 bg-black/80 backdrop-blur-md rounded-xl sm:rounded-2xl shadow-2xl border border-white/20 max-w-[95vw] overflow-x-auto no-scrollbar scroll-smooth">
-      <div className="hidden sm:block text-[10px] text-white/50 absolute -top-4 left-4 font-bold uppercase tracking-widest whitespace-nowrap">
+      <div className="hidden sm:block text-xs text-white/50 absolute -top-4 left-4 font-bold uppercase tracking-widest whitespace-nowrap">
         Global Simulator Bar
       </div>
 
@@ -113,7 +113,7 @@ const SimulatorBar = () => {
         <button
           key={btn.id}
           onClick={() => handleNavigation(btn)}
-          className={`shrink-0 flex items-center justify-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-[10px] sm:text-xs font-medium transition-all ${
+          className={`shrink-0 flex items-center justify-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-xs font-medium transition-all ${
             location.pathname === btn.id
               ? "bg-indigo-600 text-white scale-105"
               : "bg-white/10 text-white/70 hover:bg-white/20"

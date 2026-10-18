@@ -219,10 +219,10 @@ export const TeachingResourcesView = ({
   return <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4 bg-[#101424] border border-[#1E2540] rounded-2xl p-5 shadow-lg">
         <div>
-          <div className="text-[10px] font-bold tracking-wider uppercase text-indigo-400 flex items-center gap-1.5">
+          <div className="text-xs font-bold tracking-wider uppercase text-indigo-400 flex items-center gap-1.5">
             <FolderOpen className="w-3.5 h-3.5" />
             <span>TEACHING RESOURCES</span>
-            {timezone && <span className="ml-1.5 px-1.5 py-0.5 rounded bg-[#1B223C] text-[9px] text-slate-300 font-mono border border-[#283256]">{timezone}</span>}
+            {timezone && <span className="ml-1.5 px-1.5 py-0.5 rounded bg-[#1B223C] text-xs text-slate-300 font-mono border border-[#283256]">{timezone}</span>}
           </div>
           <h2 className="text-xl font-extrabold text-white mt-1">Teaching Resources & Desk</h2>
           <p className="text-xs text-slate-400 mt-0.5">
@@ -292,7 +292,7 @@ export const TeachingResourcesView = ({
     const href = res.file_url ? getStorageUrl(res.file_url) : res.link;
     return <div key={res.id} className="p-4 rounded-2xl bg-[#101424] border border-[#1E2540] flex flex-col justify-between gap-3">
                 <div>
-                  <div className="flex items-center justify-between gap-2 text-[10px]">
+                  <div className="flex items-center justify-between gap-2 text-xs">
                     <span className="font-bold uppercase tracking-wider text-indigo-400 truncate">{res.course_title}</span>
                     <span className={`px-2 py-0.5 rounded-md font-bold uppercase border ${res.visibility === "students" ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30" : "bg-slate-800 text-slate-400 border-slate-700"}`}>
                       {res.visibility === "students" ? "Shared" : "Private"}
@@ -300,7 +300,7 @@ export const TeachingResourcesView = ({
                   </div>
                   <h3 className="text-sm font-bold text-white mt-1.5">{res.title}</h3>
                   {res.description && <p className="text-xs text-slate-400 mt-1 line-clamp-2">{res.description}</p>}
-                  <div className="text-[11px] text-slate-500 mt-2 truncate">
+                  <div className="text-xs text-slate-500 mt-2 truncate">
                     {res.file_name || res.link}
                   </div>
                 </div>

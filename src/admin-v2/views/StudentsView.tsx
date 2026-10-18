@@ -164,12 +164,12 @@ export const StudentsView: React.FC = () => {
         row.classYear ? (
           <div>
             <span className="px-2 py-0.5 rounded-md text-xs font-bold bg-sky-400/15 text-sky-300 border border-sky-400/30">{row.classYear}</span>
-            {row.level && <div className="text-[11px] text-slate-500 mt-1 truncate max-w-[140px]">{row.level}</div>}
+            {row.level && <div className="text-xs text-slate-500 mt-1 truncate max-w-[140px]">{row.level}</div>}
           </div>
         ) : (
           <div>
             <span className="text-xs text-slate-500 italic">Not set</span>
-            {row.level && <div className="text-[11px] text-slate-500 mt-0.5 truncate max-w-[140px]">{row.level}</div>}
+            {row.level && <div className="text-xs text-slate-500 mt-0.5 truncate max-w-[140px]">{row.level}</div>}
           </div>
         ),
     }]),

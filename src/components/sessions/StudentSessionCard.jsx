@@ -37,7 +37,7 @@ const StudentSessionCard = ({
             {displayTitle}
           </h4>
           {session.category == "special" && (
-            <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-violet-500/20 text-violet-300 border border-violet-500/20">
+            <span className="px-2 py-0.5 rounded-full text-xs font-black uppercase tracking-widest bg-violet-500/20 text-violet-300 border border-violet-500/20">
               Special Session
             </span>
           )}
@@ -50,7 +50,7 @@ const StudentSessionCard = ({
           </p>
         )}
 
-        <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-[11px] text-slate-400 font-bold uppercase tracking-wider mb-3">
+        <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-xs text-slate-400 font-bold uppercase tracking-wider mb-3">
           <div className="flex items-center gap-1.5">
             <i className="fas fa-calendar text-blue-400/60" />
             <span>{formatDate(scheduledAt)}</span>
@@ -71,7 +71,7 @@ const StudentSessionCard = ({
       {/* Actions */}
       <div className="flex-shrink-0 flex flex-row md:flex-col gap-2 relative z-10">
         {session.status === "ended" || session.left_at ? (
-          <span className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] px-4 py-2 border border-white/5 rounded-xl">
+          <span className="text-slate-500 text-xs font-black uppercase tracking-[0.2em] px-4 py-2 border border-white/5 rounded-xl">
             {session.status}
           </span>
         ) : session.has_joined ? (
@@ -79,7 +79,7 @@ const StudentSessionCard = ({
             <button
               onClick={() => onJoin?.(session)}
               disabled={isLoading}
-              className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-blue-900/40 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-w-[140px]"
+              className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest shadow-lg shadow-blue-900/40 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-w-[140px]"
             >
               {isLoading && loadingAction === "join" ? (
                 <><i className="fas fa-spinner fa-spin" /><span>Joining...</span></>
@@ -90,7 +90,7 @@ const StudentSessionCard = ({
             <button
               onClick={() => onLeave?.(session)}
               disabled={isLoading}
-              className="bg-red-600/10 hover:bg-red-600/20 text-red-400 px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest border border-red-500/10 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-w-[140px]"
+              className="bg-red-600/10 hover:bg-red-600/20 text-red-400 px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest border border-red-500/10 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-w-[140px]"
             >
               {isLoading && loadingAction === "leave" ? (
                 <><i className="fas fa-spinner fa-spin" /><span>Leaving...</span></>
@@ -104,15 +104,15 @@ const StudentSessionCard = ({
             <button
               onClick={() => onJoin?.(session)}
               disabled={isLoading}
-              className="bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-blue-900/40 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-w-[150px]"
+              className="bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-black text-xs uppercase tracking-widest shadow-lg shadow-blue-900/40 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-w-[150px]"
             >
               {isLoading ? (
                 <><i className="fas fa-spinner fa-spin" /><span>Joining...</span></>
               ) : (
-                <><i className="fas fa-play text-[10px]" /><span>Join Session</span></>
+                <><i className="fas fa-play text-xs" /><span>Join Session</span></>
               )}
             </button>
-            <div className="absolute bottom-full right-0 mb-2 px-4 py-2.5 bg-slate-900 border border-white/10 text-white text-[10px] rounded-xl whitespace-nowrap opacity-0 group-hover/tooltip:opacity-100 transition-all pointer-events-none z-[9999] shadow-2xl">
+            <div className="absolute bottom-full right-0 mb-2 px-4 py-2.5 bg-slate-900 border border-white/10 text-white text-xs rounded-xl whitespace-nowrap opacity-0 group-hover/tooltip:opacity-100 transition-all pointer-events-none z-[9999] shadow-2xl">
               <div className="absolute top-full right-4 border-[5px] border-transparent border-t-slate-900" />
               <p className="text-slate-400 font-bold uppercase tracking-widest mb-0.5">Join Window</p>
               <p className="font-black text-white">

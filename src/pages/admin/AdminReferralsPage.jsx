@@ -41,11 +41,11 @@ const SignupCount = ({ total, students, size = "text-lg" }) => {
       </span>
       <span className="h-5 w-px bg-slate-700" />
       <span className="inline-flex items-center gap-1 text-blue-300" title="Students">
-        <i className="fas fa-user-graduate text-[11px]" />
+        <i className="fas fa-user-graduate text-xs" />
         <span className="text-xs font-bold">{students || 0}</span>
       </span>
       <span className="inline-flex items-center gap-1 text-purple-300" title="Teachers">
-        <i className="fas fa-chalkboard-teacher text-[11px]" />
+        <i className="fas fa-chalkboard-teacher text-xs" />
         <span className="text-xs font-bold">{teachers}</span>
       </span>
     </div>
@@ -59,7 +59,7 @@ const CourseChips = ({ courses }) =>
       {courses.map((c) => (
         <span
           key={c.id}
-          className="px-2 py-0.5 rounded-md bg-slate-800 border border-slate-700 text-[11px] text-slate-300"
+          className="px-2 py-0.5 rounded-md bg-slate-800 border border-slate-700 text-xs text-slate-300"
         >
           {c.title}
         </span>
@@ -81,7 +81,7 @@ const ReferredList = ({ list, nameLabel, emptyText }) => {
       {/* Desktop: table */}
       <table className="hidden sm:table w-full text-sm">
         <thead>
-          <tr className="text-left text-[11px] uppercase tracking-wider text-slate-400 border-b border-white/5">
+          <tr className="text-left text-xs uppercase tracking-wider text-slate-400 border-b border-white/5">
             <th className="py-2 pr-3 font-semibold">{nameLabel}</th>
             <th className="py-2 px-3 font-semibold">Signed up</th>
             <th className="py-2 pl-3 font-semibold">Enrolled Courses</th>
@@ -109,12 +109,12 @@ const ReferredList = ({ list, nameLabel, emptyText }) => {
           <div key={u.id} className="rounded-xl border border-white/5 bg-slate-800/40 p-4">
             <div className="font-semibold text-white truncate">{u.referred_user_name}</div>
             <div className="text-xs text-slate-500 truncate">{u.referred_user_email}</div>
-            <div className="mt-2 flex items-center gap-1.5 text-[11px] text-slate-400">
+            <div className="mt-2 flex items-center gap-1.5 text-xs text-slate-400">
               <i className="fas fa-calendar-day text-slate-500" />
               Signed up {fmtDate(u.signed_up_at)}
             </div>
             <div className="mt-2">
-              <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Enrolled Courses</p>
+              <p className="text-xs uppercase tracking-wider text-slate-500 mb-1">Enrolled Courses</p>
               <CourseChips courses={u.enrolled_courses} />
             </div>
           </div>
@@ -204,11 +204,11 @@ const AdminReferralsPage = () => {
                 {t.breakdown && (
                   <span className="flex items-center gap-2">
                     <span className="inline-flex items-center gap-1 text-blue-300" title="Students">
-                      <i className="fas fa-user-graduate text-[11px]" />
+                      <i className="fas fa-user-graduate text-xs" />
                       <span className="text-xs font-bold">{totals.studentSignups}</span>
                     </span>
                     <span className="inline-flex items-center gap-1 text-purple-300" title="Teachers">
-                      <i className="fas fa-chalkboard-teacher text-[11px]" />
+                      <i className="fas fa-chalkboard-teacher text-xs" />
                       <span className="text-xs font-bold">{totals.teacherSignups}</span>
                     </span>
                   </span>
@@ -245,7 +245,7 @@ const AdminReferralsPage = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-[11px] uppercase tracking-wider text-slate-400 border-b border-white/5">
+              <tr className="text-left text-xs uppercase tracking-wider text-slate-400 border-b border-white/5">
                 <th className="px-5 py-3 font-semibold">User</th>
                 <th className="px-5 py-3 font-semibold">Referral code</th>
                 <th className="px-5 py-3 font-semibold text-center">Signups</th>
@@ -283,7 +283,7 @@ const AdminReferralsPage = () => {
                         <code className="px-2 py-1 rounded-md bg-slate-800 border border-slate-700 text-indigo-300 text-xs font-mono">
                           {r.referral_code}
                         </code>
-                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase border ${roleBadge(r.role)}`}>
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-bold uppercase border ${roleBadge(r.role)}`}>
                           {r.role}
                         </span>
                       </span>
@@ -333,7 +333,7 @@ const AdminReferralsPage = () => {
                   <div className="font-semibold text-white truncate">{r.user_name}</div>
                   <div className="text-xs text-slate-500 truncate">{r.email}</div>
                 </div>
-                <span className={`shrink-0 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase border ${roleBadge(r.role)}`}>
+                <span className={`shrink-0 px-2 py-0.5 rounded-full text-xs font-bold uppercase border ${roleBadge(r.role)}`}>
                   {r.role}
                 </span>
               </div>
@@ -342,23 +342,23 @@ const AdminReferralsPage = () => {
                 <code className="px-2 py-1 rounded-md bg-slate-800 border border-slate-700 text-indigo-300 text-xs font-mono">
                   {r.referral_code}
                 </code>
-                <span className="text-[11px] text-slate-500">· {fmtDate(r.created_at)}</span>
+                <span className="text-xs text-slate-500">· {fmtDate(r.created_at)}</span>
               </div>
 
               <div className="mt-3 space-y-2">
                 {/* Signups - prominent, with Student / Teacher breakdown */}
                 <div className="rounded-xl bg-slate-800/50 px-3 py-2.5 flex items-center justify-between gap-2">
-                  <span className="text-[10px] text-slate-500">Signups</span>
+                  <span className="text-xs text-slate-500">Signups</span>
                   <SignupCount total={r.total_signups} students={r.student_signups} size="text-lg" />
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-center">
                   <div className="rounded-xl bg-slate-800/50 py-2">
                     <p className="text-base font-black text-white leading-none">{r.total_enrolled}</p>
-                    <p className="text-[10px] text-slate-500 mt-1">Enrolled</p>
+                    <p className="text-xs text-slate-500 mt-1">Enrolled</p>
                   </div>
                   <div className="rounded-xl bg-slate-800/50 py-2">
                     <p className="text-base font-black text-white leading-none">{r.conversion_rate}%</p>
-                    <p className="text-[10px] text-slate-500 mt-1">Conversion</p>
+                    <p className="text-xs text-slate-500 mt-1">Conversion</p>
                   </div>
                 </div>
               </div>
@@ -408,7 +408,7 @@ const AdminReferralsPage = () => {
                   >
                     <i className={`fas ${t.icon} text-xs`} />
                     {t.label}
-                    <span className="px-1.5 py-0.5 rounded-full bg-slate-700/70 text-[10px] font-semibold text-slate-300">
+                    <span className="px-1.5 py-0.5 rounded-full bg-slate-700/70 text-xs font-semibold text-slate-300">
                       {t.count}
                     </span>
                   </button>

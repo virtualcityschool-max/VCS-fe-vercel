@@ -240,13 +240,13 @@ const StudentQuizDetail = () => {
         <div className="bg-slate-900 rounded-3xl border border-slate-800 p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-bold text-white">Your Result</h2>
-            <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full ${color}`}>
+            <span className={`text-xs font-black uppercase tracking-widest px-3 py-1 rounded-full ${color}`}>
               {label}
             </span>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="bg-slate-800/60 rounded-2xl p-3 text-center">
-              <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Score</p>
+              <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Score</p>
               <p className="text-white font-bold text-lg">
                 {(sub.status === "graded" || sub.status === "auto_graded") && sub.obtained_marks != null
                   ? `${sub.obtained_marks} / ${sub.total_marks_snapshot ?? currentQuiz.total_marks}`
@@ -254,7 +254,7 @@ const StudentQuizDetail = () => {
               </p>
             </div>
             <div className="bg-slate-800/60 rounded-2xl p-3 text-center">
-              <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Submitted</p>
+              <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Submitted</p>
               <p className="text-white text-xs">{sub.submitted_at ? formatDate(sub.submitted_at) : "-"}</p>
             </div>
           </div>
@@ -270,9 +270,9 @@ const StudentQuizDetail = () => {
           <div key={ans.question_id} className="bg-slate-900 p-5 rounded-2xl border border-slate-800">
             <div className="flex items-start justify-between gap-2 mb-2">
               <p className="font-semibold text-white text-sm">{idx + 1}. {ans.question_text}</p>
-              <span className="text-[10px] text-slate-500 flex-shrink-0">{ans.max_marks} marks</span>
+              <span className="text-xs text-slate-500 flex-shrink-0">{ans.max_marks} marks</span>
             </div>
-            <span className="text-[10px] uppercase tracking-wider text-indigo-400 mb-3 block">
+            <span className="text-xs uppercase tracking-wider text-indigo-400 mb-3 block">
               {ans.question_type?.replace("_", " ")}
             </span>
 
@@ -295,7 +295,7 @@ const StudentQuizDetail = () => {
                 <div className="flex flex-wrap gap-1.5 mb-2">
                   {ans.selected_options?.length > 0 ? (
                     ans.selected_options.map((optNum) => (
-                      <span key={optNum} className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/25">
+                      <span key={optNum} className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/25">
                         Option {optNum}
                       </span>
                     ))
@@ -369,9 +369,9 @@ const StudentQuizDetail = () => {
         <div key={q.id} className="bg-slate-900 p-5 rounded-2xl border border-slate-800">
           <div className="flex items-start justify-between gap-2 mb-1">
             <p className="font-semibold text-white text-sm">{idx + 1}. {q.question_text}</p>
-            <span className="text-[10px] text-slate-500 flex-shrink-0">{q.max_marks} marks</span>
+            <span className="text-xs text-slate-500 flex-shrink-0">{q.max_marks} marks</span>
           </div>
-          <span className="text-[10px] uppercase tracking-wider text-indigo-400 mb-4 block">
+          <span className="text-xs uppercase tracking-wider text-indigo-400 mb-4 block">
             {q.question_type === "SINGLE_CHOICE" ? "Single Choice" :
              q.question_type === "MULTIPLE_CHOICE" ? "Multiple Choice" : "Text Answer"}
           </span>
@@ -402,7 +402,7 @@ const StudentQuizDetail = () => {
 
           {q.question_type === "MULTIPLE_CHOICE" && (
             <div className="space-y-2">
-              <p className="text-[10px] text-slate-500 mb-2">Select all that apply</p>
+              <p className="text-xs text-slate-500 mb-2">Select all that apply</p>
               {q.options?.map((opt) => (
                 <label
                   key={opt.id}
@@ -508,12 +508,12 @@ const StudentQuizDetail = () => {
         <div className="flex items-start justify-between gap-3 mb-3">
           <h1 className="text-xl font-black font-poppins text-white">{currentQuiz.title}</h1>
           {mySubmission && (
-            <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full flex-shrink-0 ${statusBadge(status).color}`}>
+            <span className={`text-xs font-black uppercase tracking-widest px-3 py-1 rounded-full flex-shrink-0 ${statusBadge(status).color}`}>
               {statusBadge(status).label}
             </span>
           )}
         </div>
-        <p className="text-[10px] text-slate-500 uppercase tracking-widest mb-3">{currentQuiz.course_title}</p>
+        <p className="text-xs text-slate-500 uppercase tracking-widest mb-3">{currentQuiz.course_title}</p>
         {currentQuiz.description && (
           <p className="text-slate-300 text-sm mb-3">{currentQuiz.description}</p>
         )}

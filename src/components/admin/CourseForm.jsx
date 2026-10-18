@@ -126,7 +126,7 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
         {/* Category + Status + Pricing toggle */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
-            <label className="block text-[11px] uppercase tracking-widest font-black text-slate-500 mb-2">
+            <label className="block text-xs uppercase tracking-widest font-black text-slate-500 mb-2">
               Level <span className="text-red-400">*</span>
             </label>
             <FilterSelect
@@ -142,7 +142,7 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
             <FieldError error={errors.category} />
           </div>
           <div>
-            <label className="block text-[11px] uppercase tracking-widest font-black text-slate-500 mb-2">
+            <label className="block text-xs uppercase tracking-widest font-black text-slate-500 mb-2">
               Status <span className="text-red-400">*</span>
             </label>
             <FilterSelect
@@ -157,7 +157,7 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
             <FieldError error={errors.status} />
           </div>
           <div>
-            <label className="block text-[11px] uppercase tracking-widest font-black text-slate-500 mb-2">
+            <label className="block text-xs uppercase tracking-widest font-black text-slate-500 mb-2">
               Pricing
             </label>
             <div className="flex rounded-lg overflow-hidden border border-slate-700">
@@ -183,7 +183,7 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
         {formData.is_paid && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-[11px] uppercase tracking-widest font-black text-slate-500 mb-2">
+              <label className="block text-xs uppercase tracking-widest font-black text-slate-500 mb-2">
                 Price (USD) <span className="text-red-400">*</span>
               </label>
               <Input
@@ -197,7 +197,7 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
               <FieldError error={errors.price} />
             </div>
             <div>
-              <label className="block text-[11px] uppercase tracking-widest font-black text-slate-500 mb-2">
+              <label className="block text-xs uppercase tracking-widest font-black text-slate-500 mb-2">
                 Gumroad Permalink <span className="text-slate-600 normal-case font-semibold">(optional)</span>
               </label>
               <Input
@@ -208,7 +208,7 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
                 className={fieldClass(errors.gumroad_product_permalink)}
               />
               <FieldError error={errors.gumroad_product_permalink} />
-              <p className="text-[11px] text-slate-500 mt-1.5">
+              <p className="text-xs text-slate-500 mt-1.5">
                 Leave empty to disable online payment - students will see it as unavailable.
               </p>
             </div>
@@ -232,7 +232,7 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
                 disabled
                 className="w-full px-3 py-2 bg-slate-700/40 border border-slate-700/40 rounded-lg text-slate-400 cursor-not-allowed text-sm"
               />
-              <p className="text-[10px] text-slate-500 mt-1">Teacher cannot be changed once a session has been created for this subject.</p>
+              <p className="text-xs text-slate-500 mt-1">Teacher cannot be changed once a session has been created for this subject.</p>
             </>
           ) : (
             <>
@@ -268,7 +268,7 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-2">
               Thumbnail
-              <span className="text-slate-500 text-[10px] uppercase font-black ml-2 opacity-50">JPG, PNG</span>
+              <span className="text-slate-500 text-xs uppercase font-black ml-2 opacity-50">JPG, PNG</span>
             </label>
             {(thumbnailPreview || existingThumbnail) ? (
               <div className="relative group rounded-xl overflow-hidden border border-slate-700 bg-slate-800 h-[100px]">
@@ -282,7 +282,7 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
                   onClick={clearThumbnail}
                   className="absolute top-2 right-2 w-6 h-6 rounded-lg bg-black/60 text-white flex items-center justify-center hover:bg-red-600 transition opacity-0 group-hover:opacity-100"
                 >
-                  <i className="fas fa-times text-[10px]" />
+                  <i className="fas fa-times text-xs" />
                 </button>
               </div>
             ) : (
@@ -292,7 +292,7 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
                 className="w-full h-[100px] flex flex-col items-center justify-center gap-1 border border-dashed border-slate-700 hover:border-indigo-500 rounded-xl text-slate-500 hover:text-indigo-400 transition bg-slate-800/20"
               >
                 <i className="fas fa-image text-lg"></i>
-                <span className="text-[10px] font-black uppercase tracking-widest">Upload</span>
+                <span className="text-xs font-black uppercase tracking-widest">Upload</span>
               </button>
             )}
             <input ref={thumbnailInputRef} type="file" accept=".jpg,.jpeg,.png" className="hidden" onChange={handleThumbnailChange} />
@@ -302,14 +302,14 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-2">
               Attachment
-              <span className="text-slate-500 text-[10px] uppercase font-black ml-2 opacity-50">PDF, ZIP, DOC</span>
+              <span className="text-slate-500 text-xs uppercase font-black ml-2 opacity-50">PDF, ZIP, DOC</span>
             </label>
             
             {(existingUrl || selectedFile) ? (
               <div className="flex flex-col justify-center h-[100px] gap-2 p-3 bg-slate-800/40 border border-slate-700 rounded-xl relative group">
                 <div className="flex items-center gap-2 overflow-hidden">
                   <i className="fas fa-paperclip text-indigo-400 text-xs shrink-0"></i>
-                  <span className="text-slate-300 text-[11px] font-bold truncate">
+                  <span className="text-slate-300 text-xs font-bold truncate">
                     {selectedFile ? selectedFile.name : "Current Attachment"}
                   </span>
                 </div>
@@ -319,7 +319,7 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
                     <button
                       type="button"
                       onClick={() => setViewerUrl(getStorageUrl(existingUrl))}
-                      className="text-[9px] font-black uppercase tracking-widest text-indigo-400 hover:text-indigo-300"
+                      className="text-xs font-black uppercase tracking-widest text-indigo-400 hover:text-indigo-300"
                     >
                       Preview
                     </button>
@@ -327,7 +327,7 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
                   <button 
                     type="button" 
                     onClick={() => fileInputRef.current?.click()} 
-                    className="text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-white"
+                    className="text-xs font-black uppercase tracking-widest text-slate-400 hover:text-white"
                   >
                     Change
                   </button>
@@ -338,7 +338,7 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
                   onClick={clearFile}
                   className="absolute top-2 right-2 w-6 h-6 rounded-lg bg-black/60 text-white flex items-center justify-center hover:bg-red-600 transition opacity-0 group-hover:opacity-100"
                 >
-                  <i className="fas fa-times text-[10px]" />
+                  <i className="fas fa-times text-xs" />
                 </button>
               </div>
             ) : (
@@ -348,16 +348,16 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
                 className="w-full h-[100px] flex flex-col items-center justify-center gap-1 border border-dashed border-slate-700 hover:border-indigo-500 rounded-xl text-slate-500 hover:text-indigo-400 transition bg-slate-800/20"
               >
                 <i className="fas fa-paperclip text-lg"></i>
-                <span className="text-[10px] font-black uppercase tracking-widest">Attach File</span>
+                <span className="text-xs font-black uppercase tracking-widest">Attach File</span>
               </button>
             )}
 
             {fileError ? (
-              <p className="text-red-400 text-[10px] mt-1 flex items-center gap-1">
+              <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
                 <i className="fas fa-exclamation-circle"></i> {fileError}
               </p>
             ) : (
-              <p className="text-slate-600 text-[9px] mt-1">Max 10MB</p>
+              <p className="text-slate-600 text-xs mt-1">Max 10MB</p>
             )}
             
             <input 
@@ -374,7 +374,7 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
         <div>
           <label className="block text-sm font-medium text-slate-300 mb-2">
             Course Outline
-            <span className="text-slate-500 text-[10px] uppercase font-black ml-2 opacity-50">optional</span>
+            <span className="text-slate-500 text-xs uppercase font-black ml-2 opacity-50">optional</span>
           </label>
           <div className="min-h-[280px]">
             <QuillEditor
@@ -395,7 +395,7 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {DETAIL_FIELDS.map((f) => (
             <div key={f.key}>
-              <label className="block text-[11px] uppercase tracking-widest font-black text-slate-500 mb-2">{f.label}</label>
+              <label className="block text-xs uppercase tracking-widest font-black text-slate-500 mb-2">{f.label}</label>
               <Input
                 type="text"
                 maxLength={120}
@@ -404,12 +404,12 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
                 onChange={(e) => setDetail(f.key, e.target.value)}
                 className={fieldClass(errors.details)}
               />
-              {f.hint && <p className="text-[11px] text-slate-500 mt-1">{f.hint}</p>}
+              {f.hint && <p className="text-xs text-slate-500 mt-1">{f.hint}</p>}
             </div>
           ))}
         </div>
         <div className="mt-4">
-          <label className="block text-[11px] uppercase tracking-widest font-black text-slate-500 mb-2">Who this course is for</label>
+          <label className="block text-xs uppercase tracking-widest font-black text-slate-500 mb-2">Who this course is for</label>
           <textarea
             rows={2}
             maxLength={1000}
@@ -422,7 +422,7 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
         <div className="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
           {DETAIL_LISTS.map((f) => (
             <div key={f.key}>
-              <label className="block text-[11px] uppercase tracking-widest font-black text-slate-500 mb-2">{f.label}</label>
+              <label className="block text-xs uppercase tracking-widest font-black text-slate-500 mb-2">{f.label}</label>
               <textarea
                 rows={5}
                 placeholder={f.placeholder}
@@ -430,7 +430,7 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
                 onChange={(e) => setDetail(f.key, e.target.value.split("\n"))}
                 className={fieldClass(errors.details)}
               />
-              <p className="text-[11px] text-slate-500 mt-1">One point per line, up to 20.</p>
+              <p className="text-xs text-slate-500 mt-1">One point per line, up to 20.</p>
             </div>
           ))}
         </div>

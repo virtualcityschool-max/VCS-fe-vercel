@@ -30,7 +30,7 @@ const SessionCountdown = ({ scheduledAt, status, hide_status }) => {
     return (
       <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-rose-500/10 border border-rose-500/20 rounded-xl">
         <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
-        <span className="text-[9px] font-black uppercase tracking-widest text-rose-400">Live Now</span>
+        <span className="text-xs font-black uppercase tracking-widest text-rose-400">Live Now</span>
       </div>
     );
   }
@@ -69,7 +69,7 @@ const SessionCountdown = ({ scheduledAt, status, hide_status }) => {
 
   return (
     <div className="flex items-center gap-1.5">
-      <span className="text-[8px] font-black uppercase tracking-widest text-slate-500 mr-0.5">
+      <span className="text-xs font-black uppercase tracking-widest text-slate-500 mr-0.5">
         Starts in
       </span>
       <div className="flex items-center gap-1">

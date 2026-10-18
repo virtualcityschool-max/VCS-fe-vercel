@@ -323,7 +323,7 @@ export const AdminPlanClassModal: React.FC<{
             </div>
             <div>
               <h3 className="text-base font-bold text-white">{reschedule ? 'Reschedule Class' : 'Create New Class'}</h3>
-              <p className="text-[11px] text-slate-400">
+              <p className="text-xs text-slate-400">
                 {reschedule
                   ? 'Everything is filled in from the missed class. Change the date or time and press the button at the bottom.'
                   : 'Plan a lecture with auto-generated Google Meet & Calendar attendee sync'}
@@ -354,8 +354,8 @@ export const AdminPlanClassModal: React.FC<{
             {createdSession.meeting_link && (
               <div className="p-4 rounded-xl bg-[#0B0F20] border border-[#232D52] space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-400">Google Meet Link</span>
-                  <span className="text-[10px] text-emerald-400 font-semibold">Ready to share on WhatsApp</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-indigo-400">Google Meet Link</span>
+                  <span className="text-xs text-emerald-400 font-semibold">Ready to share on WhatsApp</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <input
@@ -464,25 +464,25 @@ export const AdminPlanClassModal: React.FC<{
                 {selectedCourseId && (
                   <div className="mt-2 animate-in fade-in">
                     {selectedCourseEnrollments.length === 0 ? (
-                      <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[11px] flex items-center gap-2">
+                      <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center gap-2">
                         <AlertCircle className="w-4 h-4 shrink-0 text-amber-400" />
                         <span><strong>Warning:</strong> 0 students enrolled. Planned classes will not appear on any student dashboard.</span>
                       </div>
                     ) : selectedCourseEnrollments.length === 1 ? (
-                      <div className="p-2.5 rounded-xl bg-blue-500/10 border border-blue-500/30 text-blue-300 text-[11px] flex items-center justify-between gap-2">
+                      <div className="p-2.5 rounded-xl bg-blue-500/10 border border-blue-500/30 text-blue-300 text-xs flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2 truncate">
                           <Users className="w-3.5 h-3.5 shrink-0 text-blue-400" />
                           <span className="truncate"><strong>1 enrolled student:</strong> {selectedCourseEnrollments[0]?.studentName || 'Student'}</span>
                         </div>
-                        <span className="text-[10px] bg-blue-500/20 px-2 py-0.5 rounded-full text-blue-300 font-bold shrink-0">1 enrolled</span>
+                        <span className="text-xs bg-blue-500/20 px-2 py-0.5 rounded-full text-blue-300 font-bold shrink-0">1 enrolled</span>
                       </div>
                     ) : (
-                      <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-[11px] flex items-center justify-between gap-2">
+                      <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2 truncate">
                           <Users className="w-3.5 h-3.5 shrink-0 text-emerald-400" />
                           <span className="truncate"><strong>{selectedCourseEnrollments.length} enrolled:</strong> {selectedCourseEnrollments.slice(0, 3).map((e: any) => e.studentName).join(', ')}{selectedCourseEnrollments.length > 3 ? ` +${selectedCourseEnrollments.length - 3} more` : ''}</span>
                         </div>
-                        <span className="text-[10px] bg-emerald-500/20 px-2 py-0.5 rounded-full text-emerald-300 font-bold shrink-0">{selectedCourseEnrollments.length} enrolled</span>
+                        <span className="text-xs bg-emerald-500/20 px-2 py-0.5 rounded-full text-emerald-300 font-bold shrink-0">{selectedCourseEnrollments.length} enrolled</span>
                       </div>
                     )}
                   </div>
@@ -553,8 +553,8 @@ export const AdminPlanClassModal: React.FC<{
                 `}</style>
 
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-400">Schedule Time & Date</span>
-                  <span className="text-[10px] px-2.5 py-0.5 rounded-md bg-indigo-500/15 border border-indigo-500/30 text-indigo-200 font-mono font-bold">
+                  <span className="text-xs font-bold uppercase tracking-wider text-indigo-400">Schedule Time & Date</span>
+                  <span className="text-xs px-2.5 py-0.5 rounded-md bg-indigo-500/15 border border-indigo-500/30 text-indigo-200 font-mono font-bold">
                     Zone: AST (Arabia Standard Time · UTC+3)
                   </span>
                 </div>
@@ -587,7 +587,7 @@ export const AdminPlanClassModal: React.FC<{
                           e.stopPropagation();
                           try { dateInputRef.current?.showPicker?.(); } catch (_) { dateInputRef.current?.focus(); }
                         }}
-                        className="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold shadow-md shadow-indigo-600/30 transition-all shrink-0 cursor-pointer flex items-center gap-1.5 border border-indigo-400/30"
+                        className="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md shadow-indigo-600/30 transition-all shrink-0 cursor-pointer flex items-center gap-1.5 border border-indigo-400/30"
                       >
                         <Calendar className="w-3.5 h-3.5" />
                         <span>Pick Date</span>
@@ -621,7 +621,7 @@ export const AdminPlanClassModal: React.FC<{
                           e.stopPropagation();
                           try { timeInputRef.current?.showPicker?.(); } catch (_) { timeInputRef.current?.focus(); }
                         }}
-                        className="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold shadow-md shadow-indigo-600/30 transition-all shrink-0 cursor-pointer flex items-center gap-1.5 border border-indigo-400/30"
+                        className="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md shadow-indigo-600/30 transition-all shrink-0 cursor-pointer flex items-center gap-1.5 border border-indigo-400/30"
                       >
                         <Clock className="w-3.5 h-3.5" />
                         <span>Pick Time</span>
@@ -633,10 +633,10 @@ export const AdminPlanClassModal: React.FC<{
                 {/* How Many Classes To Generate: Single vs Series */}
                 <div className="space-y-3 pt-2 border-t border-[#1E2648]">
                   <div className="flex items-center justify-between flex-wrap gap-2">
-                    <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider">
+                    <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider">
                       How Many Classes To Plan?
                     </label>
-                    <span className="text-[11px] text-slate-400">
+                    <span className="text-xs text-slate-400">
                       Pick single class or choose weekly series length
                     </span>
                   </div>
@@ -660,8 +660,8 @@ export const AdminPlanClassModal: React.FC<{
                         }`}
                       >
                         <div className="text-xs font-bold leading-tight">{opt.label}</div>
-                        <div className="text-[10px] text-indigo-300 font-semibold mt-0.5 leading-tight">{opt.badge}</div>
-                        <div className="text-[9.5px] opacity-75 mt-0.5 leading-tight">{opt.sub}</div>
+                        <div className="text-xs text-indigo-300 font-semibold mt-0.5 leading-tight">{opt.badge}</div>
+                        <div className="text-xs opacity-75 mt-0.5 leading-tight">{opt.sub}</div>
                       </button>
                     ))}
                   </div>
@@ -695,7 +695,7 @@ export const AdminPlanClassModal: React.FC<{
                               e.stopPropagation();
                               try { customEndDateRef.current?.showPicker?.(); } catch (_) { customEndDateRef.current?.focus(); }
                             }}
-                            className="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold shadow-md shadow-indigo-600/30 transition-all shrink-0 cursor-pointer flex items-center gap-1.5 border border-indigo-400/30"
+                            className="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md shadow-indigo-600/30 transition-all shrink-0 cursor-pointer flex items-center gap-1.5 border border-indigo-400/30"
                           >
                             <Calendar className="w-3.5 h-3.5" />
                             <span>Pick Date</span>
@@ -719,7 +719,7 @@ export const AdminPlanClassModal: React.FC<{
                           </span>
                         </span>
                       </div>
-                      <span className="text-[11px] text-indigo-300 font-semibold font-mono bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20">
+                      <span className="text-xs text-indigo-300 font-semibold font-mono bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20">
                         {classCount === '1' ? 'Single One-Off Class' : `Weekly Series · Every ${dayFullName}`}
                       </span>
                     </div>
@@ -729,19 +729,19 @@ export const AdminPlanClassModal: React.FC<{
                       {scheduledClassesList.map((item) => (
                         <div
                           key={item.index}
-                          className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-[#141C3C] border border-[#233162] text-[11px]"
+                          className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-[#141C3C] border border-[#233162] text-xs"
                         >
-                          <span className="w-5 h-5 rounded-full bg-indigo-600/40 text-indigo-300 flex items-center justify-center font-bold text-[10px] shrink-0 border border-indigo-400/30">
+                          <span className="w-5 h-5 rounded-full bg-indigo-600/40 text-indigo-300 flex items-center justify-center font-bold text-xs shrink-0 border border-indigo-400/30">
                             #{item.index}
                           </span>
                           <span className="font-semibold text-slate-200">{item.dateStr}</span>
-                          <span className="text-[10px] text-slate-400 ml-auto font-mono">{scheduledTime} AST</span>
+                          <span className="text-xs text-slate-400 ml-auto font-mono">{scheduledTime} AST</span>
                         </div>
                       ))}
                     </div>
 
                     {classCount !== '1' && (
-                      <div className="pt-1 flex items-center gap-1.5 text-[10.5px] text-indigo-200/80">
+                      <div className="pt-1 flex items-center gap-1.5 text-xs text-indigo-200/80">
                         <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                         <span>
                           All {scheduledClassesList.length} classes share <b>1 master Google Meet room ID</b>. Google Meet rate limits are never exceeded.
@@ -755,7 +755,7 @@ export const AdminPlanClassModal: React.FC<{
 
             {mode === 'delayed' && (
               <div className="p-4 rounded-xl bg-[#0E1428] border border-[#232D52] space-y-3">
-                <div className="text-[11px] font-bold uppercase tracking-wider text-indigo-400">Start Delay</div>
+                <div className="text-xs font-bold uppercase tracking-wider text-indigo-400">Start Delay</div>
                 <Field label="Delay (Minutes from now)" required>
                   <input
                     type="number"
@@ -766,7 +766,7 @@ export const AdminPlanClassModal: React.FC<{
                     className={inputCls}
                   />
                 </Field>
-                <p className="text-[11px] text-slate-400">
+                <p className="text-xs text-slate-400">
                   Class will open in <b className="text-white">{delayMinutes} minutes</b> from now.
                 </p>
               </div>
@@ -780,7 +780,7 @@ export const AdminPlanClassModal: React.FC<{
             )}
 
             {/* Informative Notice (No manual Google Meet field!) */}
-            <div className="p-3 rounded-xl bg-slate-900/60 border border-white/5 text-[11px] text-slate-400 flex items-center gap-2">
+            <div className="p-3 rounded-xl bg-slate-900/60 border border-white/5 text-xs text-slate-400 flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-indigo-400 shrink-0" />
               <span>Google Meet conference is automatically created and all enrolled students are auto-synced as calendar attendees.</span>
             </div>

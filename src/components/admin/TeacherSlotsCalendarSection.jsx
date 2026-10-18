@@ -93,7 +93,7 @@ const TeacherSlotsCalendarSection = ({ teacherId }) => {
           <div>
             <h3 className="text-base font-semibold text-white">Availability Slots</h3>
             {!loading && !error && (
-              <p className="text-[10px] text-slate-500 mt-0.5 flex items-center gap-1.5">
+              <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-1.5">
                 {slots.length} total · {availableCount} open · {bookedCount} booked
                 {timezone && (
                   <TimezoneTag tz={timezone} className="text-indigo-400/70 font-black" />
@@ -107,7 +107,7 @@ const TeacherSlotsCalendarSection = ({ teacherId }) => {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setFilter(filter === "available" ? "all" : "available")}
-              className={`flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-[10px] font-black uppercase tracking-widest transition cursor-pointer border ${
+              className={`flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-xs font-black uppercase tracking-widest transition cursor-pointer border ${
                 filter === "available"
                   ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-300"
                   : "bg-slate-800 border-slate-700 text-slate-300 hover:border-emerald-500/30 hover:text-emerald-400"
@@ -118,7 +118,7 @@ const TeacherSlotsCalendarSection = ({ teacherId }) => {
             </button>
             <button
               onClick={() => setFilter(filter === "booked" ? "all" : "booked")}
-              className={`flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-[10px] font-black uppercase tracking-widest transition cursor-pointer border ${
+              className={`flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-xs font-black uppercase tracking-widest transition cursor-pointer border ${
                 filter === "booked"
                   ? "bg-amber-500/20 border-amber-500/40 text-amber-300"
                   : "bg-slate-800 border-slate-700 text-slate-300 hover:border-amber-500/30 hover:text-amber-400"

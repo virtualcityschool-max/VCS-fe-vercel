@@ -188,12 +188,12 @@ export const StudentEnrollmentsView: React.FC = () => {
                   </div>
                   <div className="min-w-0">
                     <div className="text-base font-bold text-white group-hover:text-indigo-200 truncate">{student?.name || 'Student'}</div>
-                    <div className="text-[11px] text-slate-400 font-mono truncate">
+                    <div className="text-xs text-slate-400 font-mono truncate">
                       Roll {student?.rollNo ?? '—'}{student?.level ? ` · ${student.level}` : ''}
                     </div>
                   </div>
                 </button>
-                <div className="flex flex-wrap items-center gap-2 text-[11px]">
+                <div className="flex flex-wrap items-center gap-2 text-xs">
                   <span className="px-2 py-0.5 rounded-full bg-[#1A2346] border border-[#232D52] text-slate-200 font-semibold">
                     {active.length} active subject{active.length === 1 ? '' : 's'}
                   </span>
@@ -220,11 +220,11 @@ export const StudentEnrollmentsView: React.FC = () => {
                           {subject?.code && <span className="font-mono font-bold text-indigo-300">{subject.code}</span>}
                           <span className="font-medium text-slate-300 truncate">{subject?.name || 'Subject'}</span>
                         </div>
-                        <div className="text-[11px] text-slate-500 truncate">{[subject?.department, subject?.level].filter(Boolean).join(' · ')}</div>
+                        <div className="text-xs text-slate-500 truncate">{[subject?.department, subject?.level].filter(Boolean).join(' · ')}</div>
                       </div>
                       <div className="col-span-4 md:col-span-2 text-slate-400">
                         <div className="font-mono">{r.enrollmentDate}</div>
-                        <div className="text-[10px] text-slate-500">{(r as any).source}</div>
+                        <div className="text-xs text-slate-500">{(r as any).source}</div>
                       </div>
                       <div className="col-span-3 md:col-span-1 font-mono text-slate-300">
                         {r.monthlyFeeUSD ? `$${r.monthlyFeeUSD}/mo` : 'Free'}
@@ -233,7 +233,7 @@ export const StudentEnrollmentsView: React.FC = () => {
                         <StatusPill status={r.feeStatus} />
                         {r.status !== 'Active' && <StatusPill status={r.status} />}
                         {r.electiveGroup && r.electiveGroup !== 'Group class' && (
-                          <span className="px-2 py-0.5 rounded text-[10px] bg-[#151D3A] text-slate-300 border border-[#232D52]">{r.electiveGroup}</span>
+                          <span className="px-2 py-0.5 rounded text-xs bg-[#151D3A] text-slate-300 border border-[#232D52]">{r.electiveGroup}</span>
                         )}
                       </div>
                       <div className="col-span-12 md:col-span-3 flex items-center justify-end gap-1.5">
@@ -317,7 +317,7 @@ export const StudentEnrollmentsView: React.FC = () => {
                 />
               </Field>
 
-              <p className="text-[11px] text-slate-500">
+              <p className="text-xs text-slate-500">
                 Paid subjects start a one-month access window from today; free subjects never expire.
               </p>
 

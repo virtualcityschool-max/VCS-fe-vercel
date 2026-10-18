@@ -74,7 +74,7 @@ function SessionForm({ form, setForm, errors, clearError, isCreate, courses }) {
             if (sel && sel.upcoming_session === false && sel.next_session_at) {
                           // A one-off class is booked, but no weekly series yet.
                           return (
-                            <p className="text-[10px] text-blue-400 mt-1.5 flex items-center gap-1">
+                            <p className="text-xs text-blue-400 mt-1.5 flex items-center gap-1">
                               <i className="fas fa-info-circle" />
                               Next class {new Date(sel.next_session_at).toLocaleString(undefined, { weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit" })} (one-off). No weekly series yet - you can plan one.
                             </p>
@@ -82,7 +82,7 @@ function SessionForm({ form, setForm, errors, clearError, isCreate, courses }) {
                         }
                         if (sel?.has_session && sel?.upcoming_session === false) {
               return (
-                <p className="text-[10px] text-blue-400 mt-1.5 flex items-center gap-1">
+                <p className="text-xs text-blue-400 mt-1.5 flex items-center gap-1">
                   <i className="fas fa-info-circle" />
                   No upcoming classes - you can plan a new series.
                 </p>
@@ -91,7 +91,7 @@ function SessionForm({ form, setForm, errors, clearError, isCreate, courses }) {
             return null;
           })()}
           {courses.some(c => scheduledCourseReason(c) !== null) && (
-            <p className="text-[10px] text-slate-500 mt-1.5 flex items-center gap-1">
+            <p className="text-xs text-slate-500 mt-1.5 flex items-center gap-1">
               <i className="fas fa-info-circle text-slate-600" />
               Unavailable courses are either not published or already have a recurring session.
             </p>
@@ -223,7 +223,7 @@ function SessionForm({ form, setForm, errors, clearError, isCreate, courses }) {
           />
           {errors.time && <p className="text-red-400 text-xs mt-1">{errors.time}</p>}
           <p className="text-slate-500 text-xs mt-1.5 flex items-center gap-1">
-            <i className="fas fa-globe text-[10px]"></i>
+            <i className="fas fa-globe text-xs"></i>
             Scheduled in <TimezoneTag className="text-indigo-400 font-semibold ml-1" />
           </p>
         </div>
@@ -592,7 +592,7 @@ const TeacherSessionCalendar = () => {
                         <div className="flex items-center gap-2 flex-wrap">
                           <p className="font-bold text-white text-sm">{s.title}</p>
                           {s.category == "special" && (
-                            <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-violet-500/20 text-violet-300 border border-violet-500/20">Special Session</span>
+                            <span className="px-1.5 py-0.5 rounded-full text-xs font-black uppercase tracking-widest bg-violet-500/20 text-violet-300 border border-violet-500/20">Special Session</span>
                           )}
                         </div>
                         <p className="text-xs text-slate-400 mt-0.5">{s.course?.title ?? s.course_title ?? "-"}</p>
@@ -656,7 +656,7 @@ const TeacherSessionCalendar = () => {
                       <td className="px-5 py-4">
                         <p className="font-semibold text-white text-sm">{s.title}</p>
                         {s.category == "special" && (
-                          <span className="mt-1 inline-block px-1.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-violet-500/20 text-violet-300 border border-violet-500/20">Special Session</span>
+                          <span className="mt-1 inline-block px-1.5 py-0.5 rounded-full text-xs font-black uppercase tracking-widest bg-violet-500/20 text-violet-300 border border-violet-500/20">Special Session</span>
                         )}
                       </td>
                       <td className="px-5 py-4 text-slate-300 text-sm">{s.course?.title ?? s.course_title ?? "-"}</td>
@@ -759,13 +759,13 @@ const TeacherSessionCalendar = () => {
                   key={key}
                   type="button"
                   onClick={() => { setCreateMode(key); setCreateErrors({}); }}
-                  className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition ${
+                  className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg text-xs font-black uppercase tracking-wider transition ${
                     createMode === key
                       ? "bg-indigo-600 text-white shadow-lg shadow-indigo-900/40"
                       : "text-slate-400 hover:text-slate-300"
                   }`}
                 >
-                  <i className={`fas ${icon} text-[9px]`}></i>
+                  <i className={`fas ${icon} text-xs`}></i>
                   {label}
                 </button>
               ))}
@@ -870,8 +870,8 @@ const TeacherSessionCalendar = () => {
               {createMode === "scheduled" && (
                 <>
                   <div className="flex items-center gap-2">
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-indigo-500/10 border border-indigo-500/20 text-indigo-300">
-                      <i className="fas fa-clock text-[9px]" /> Hourly · Recurring
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-widest bg-indigo-500/10 border border-indigo-500/20 text-indigo-300">
+                      <i className="fas fa-clock text-xs" /> Hourly · Recurring
                     </span>
                   </div>
                   <SessionForm

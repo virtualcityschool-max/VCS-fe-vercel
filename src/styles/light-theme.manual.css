@@ -1,0 +1,59 @@
+/* Day mode for colours set outside utility classes (custom CSS in index.css
+   and a few inline styles). Utility classes are covered by
+   light-theme.generated.css. Active when <html> has the class `theme-light`. */
+
+html.theme-light {
+  --bg-dark: #f8fafc;
+  --surface-1: rgba(255, 255, 255, 0.9);
+  scrollbar-color: rgba(99, 102, 241, 0.35) #e2e8f0;
+}
+html.theme-light body { background-color: #f8fafc; color: #0f172a; }
+
+/* Frosted cards */
+html.theme-light .glass:not(.theme-keep, .theme-keep *),
+html.theme-light .card-surface:not(.theme-keep, .theme-keep *) {
+  background: rgba(255, 255, 255, 0.92);
+  border-color: rgba(15, 23, 42, 0.1);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+}
+html.theme-light .icon-chip { background: rgba(99, 102, 241, 0.1); color: #4f46e5; }
+html.theme-light .text-gradient { background: linear-gradient(92deg, #4f46e5 0%, #0891b2 100%); -webkit-background-clip: text; background-clip: text; }
+
+/* Scrollbars */
+html.theme-light .custom-scrollbar::-webkit-scrollbar-track,
+html.theme-light .table-scrollbar::-webkit-scrollbar-track { background: #e2e8f0; }
+
+/* Rich text: course outlines, submissions, blog articles, the Quill editor */
+html.theme-light .course-outline-content h3,
+html.theme-light .submission-content h3,
+html.theme-light .blog-content h2,
+html.theme-light .blog-content h3 { color: #0f172a; }
+html.theme-light .course-outline-content p,
+html.theme-light .course-outline-content ul,
+html.theme-light .course-outline-content ol,
+html.theme-light .submission-content p,
+html.theme-light .submission-content ul,
+html.theme-light .submission-content ol,
+html.theme-light .blog-content p,
+html.theme-light .blog-content ol,
+html.theme-light .blog-content ul { color: #334155; }
+html.theme-light .course-outline-content strong,
+html.theme-light .submission-content strong,
+html.theme-light .blog-content strong,
+html.theme-light .blog-content em { color: #0f172a; }
+html.theme-light .course-outline-content a,
+html.theme-light .submission-content a,
+html.theme-light .blog-content a { color: #4f46e5; }
+html.theme-light .ql-snow .ql-editor,
+html.theme-light .ql-viewer-root .ql-editor { color: #1e293b; }
+html.theme-light .ql-toolbar.ql-snow,
+html.theme-light .ql-container.ql-snow { background: #ffffff; border-color: #cbd5e1 !important; }
+html.theme-light .ql-snow .ql-stroke { stroke: #475569; }
+html.theme-light .ql-snow .ql-fill { fill: #475569; }
+html.theme-light .ql-snow .ql-picker { color: #475569 !important; }
+html.theme-light .ql-snow .ql-picker-options { background: #ffffff !important; border-color: #cbd5e1 !important; }
+html.theme-light .ql-editor.ql-blank::before { color: #94a3b8 !important; }
+
+/* Inline-styled chips (admin category bar) */
+html.theme-light [style*="color: rgb(203, 213, 225)"] { color: #334155 !important; }
+html.theme-light [style*="border-color: rgb(35, 45, 82)"] { border-color: #cbd5e1 !important; }

@@ -28,7 +28,7 @@ const DownloadButton = ({ url, label = "Download Attachment", className = "" }) 
     rel="noopener noreferrer"
     className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-400 hover:text-indigo-300 text-xs font-semibold transition border border-indigo-500/30 ${className}`}
   >
-    <i className="fas fa-download text-[10px]"></i>
+    <i className="fas fa-download text-xs"></i>
     {label}
   </a>
 );
@@ -118,9 +118,9 @@ const TeacherSubmissions = () => {
             : "bg-red-500/20 text-red-300 border-red-500/30";
     return (
       <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-sm font-black border ${color}`}>
-        <i className="fas fa-award text-[10px] opacity-80" />
+        <i className="fas fa-award text-xs opacity-80" />
         {score != null ? (max ? `${score}/${max}` : `${score}`) : "Graded"}
-        {pct != null && <span className="text-[10px] font-bold opacity-70">({pct}%)</span>}
+        {pct != null && <span className="text-xs font-bold opacity-70">({pct}%)</span>}
       </span>
     );
   };
@@ -232,7 +232,7 @@ const TeacherSubmissions = () => {
                           {sub.student_name || sub.student?.username || `Student #${sub.student}`}
                         </p>
                         {sub.student_id && (
-                          <span className="text-[10px] text-slate-500 bg-slate-800 border border-slate-700 px-1.5 py-0.5 rounded font-bold">
+                          <span className="text-xs text-slate-500 bg-slate-800 border border-slate-700 px-1.5 py-0.5 rounded font-bold">
                             #{sub.student_id}
                           </span>
                         )}
@@ -291,7 +291,7 @@ const TeacherSubmissions = () => {
                               {sub.student_name || sub.student?.username || `Student #${sub.student}`}
                             </span>
                             {sub.student_id && (
-                              <p className="text-[10px] text-slate-500 mt-0.5">ID #{sub.student_id}</p>
+                              <p className="text-xs text-slate-500 mt-0.5">ID #{sub.student_id}</p>
                             )}
                           </div>
                         </div>
@@ -315,7 +315,7 @@ const TeacherSubmissions = () => {
                               : "bg-indigo-600 hover:bg-indigo-500"
                           }`}
                         >
-                          <i className={`fas ${sub.is_graded ? "fa-eye" : "fa-pen"} text-[10px]`}></i>
+                          <i className={`fas ${sub.is_graded ? "fa-eye" : "fa-pen"} text-xs`}></i>
                           {sub.is_graded ? "View" : "Grade"}
                         </button>
                       </td>
@@ -361,26 +361,26 @@ const TeacherSubmissions = () => {
                       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5">
                         {selectedSubmission.assignment_title && (
                           <span className="text-xs text-slate-400 flex items-center gap-1.5">
-                            <i className="fas fa-file-alt text-indigo-400/70 text-[10px]" />
+                            <i className="fas fa-file-alt text-indigo-400/70 text-xs" />
                             {selectedSubmission.assignment_title}
                           </span>
                         )}
                         {(selectedSubmission.assignment_max_score || selectedSubmission.max_score) && (
                           <span className="text-xs text-slate-500 flex items-center gap-1.5">
-                            <i className="fas fa-star text-yellow-500/60 text-[10px]" />
+                            <i className="fas fa-star text-yellow-500/60 text-xs" />
                             {selectedSubmission.assignment_max_score || selectedSubmission.max_score} pts
                           </span>
                         )}
                         <span className="text-xs text-slate-500 flex items-center gap-1.5">
-                          <i className="fas fa-clock text-[10px]" />
+                          <i className="fas fa-clock text-xs" />
                           {formatDateTime(selectedSubmission.submitted_at)}
                         </span>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       {selectedSubmission.is_graded ? (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-bold rounded-full">
-                          <i className="fas fa-check-circle text-[9px]" />
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold rounded-full">
+                          <i className="fas fa-check-circle text-xs" />
                           {(() => {
                             const score = selectedSubmission.grade?.score ?? selectedSubmission.grade;
                             const max = selectedSubmission.assignment_max_score || selectedSubmission.max_score;
@@ -392,8 +392,8 @@ const TeacherSubmissions = () => {
                           })()}
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 text-[11px] font-bold rounded-full">
-                          <i className="fas fa-hourglass-half text-[9px]" />
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 text-xs font-bold rounded-full">
+                          <i className="fas fa-hourglass-half text-xs" />
                           Pending
                         </span>
                       )}
@@ -418,9 +418,9 @@ const TeacherSubmissions = () => {
                     <div className="w-full rounded-xl overflow-hidden border border-slate-700/50 bg-slate-800/50">
                       <div className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 border-b border-slate-700/50">
                         <div className="w-6 h-6 rounded-md bg-indigo-500/15 flex items-center justify-center">
-                          <i className="fas fa-pencil-alt text-indigo-400 text-[10px]" />
+                          <i className="fas fa-pencil-alt text-indigo-400 text-xs" />
                         </div>
-                        <span className="text-[11px] font-black uppercase tracking-widest text-slate-400">Text Answer</span>
+                        <span className="text-xs font-black uppercase tracking-widest text-slate-400">Text Answer</span>
                       </div>
                       <div className="p-4 min-h-[96px]">
                         {selectedSubmission.text_answer ? (
@@ -438,9 +438,9 @@ const TeacherSubmissions = () => {
                     <div className="w-full rounded-xl overflow-hidden border border-slate-700/50 bg-slate-800/50">
                       <div className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 border-b border-slate-700/50">
                         <div className="w-6 h-6 rounded-md bg-emerald-500/15 flex items-center justify-center">
-                          <i className="fas fa-paperclip text-emerald-400 text-[10px]" />
+                          <i className="fas fa-paperclip text-emerald-400 text-xs" />
                         </div>
-                        <span className="text-[11px] font-black uppercase tracking-widest text-slate-400">Attachment</span>
+                        <span className="text-xs font-black uppercase tracking-widest text-slate-400">Attachment</span>
                       </div>
                       <div className="p-4 min-h-[96px] flex items-center">
                         {selectedSubmission.file_url ? (
@@ -457,7 +457,7 @@ const TeacherSubmissions = () => {
 
                   {/* Grading section */}
                   <div className="border-t border-slate-800/60 pt-5">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-4 flex items-center gap-2">
+                    <p className="text-xs font-black uppercase tracking-widest text-slate-500 mb-4 flex items-center gap-2">
                       <i className="fas fa-graduation-cap text-indigo-400/70" />
                       {selectedSubmission.grade ? "Update Grade" : "Grade This Submission"}
                     </p>

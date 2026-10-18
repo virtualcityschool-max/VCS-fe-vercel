@@ -40,7 +40,7 @@ const TeacherSessionCard = ({
             isLive ? "bg-indigo-600 border-indigo-400/30" : "bg-slate-950 border-white/5"
           }`}
         >
-          <span className={`text-[10px] font-black uppercase tracking-widest ${isLive ? "text-indigo-100" : "text-slate-500"}`}>
+          <span className={`text-xs font-black uppercase tracking-widest ${isLive ? "text-indigo-100" : "text-slate-500"}`}>
             {dayLabel}
           </span>
           <span className={`text-xl font-black ${isLive ? "text-white" : "text-indigo-400"}`}>
@@ -55,7 +55,7 @@ const TeacherSessionCard = ({
               {session.title}
             </h4>
             {session.category === "special" && (
-              <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-violet-500/20 text-violet-300 border border-violet-500/20">
+              <span className="px-2 py-0.5 rounded-full text-xs font-black uppercase tracking-widest bg-violet-500/20 text-violet-300 border border-violet-500/20">
                 Special Session
               </span>
             )}
@@ -85,14 +85,14 @@ const TeacherSessionCard = ({
                   className="flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-black uppercase tracking-widest transition-all bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-600/20 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isLoading ? (
-                    <i className="fas fa-spinner fa-spin text-[10px]" />
+                    <i className="fas fa-spinner fa-spin text-xs" />
                   ) : (
-                    <i className="fas fa-play text-[10px]" />
+                    <i className="fas fa-play text-xs" />
                   )}
                   <span>Start</span>
                 </button>
                 {windowLabel && (
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 px-4 py-2 bg-slate-800 border border-white/10 text-white text-[10px] rounded-xl whitespace-nowrap opacity-0 group-hover/tooltip:opacity-100 transition-all pointer-events-none z-20 shadow-2xl">
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 px-4 py-2 bg-slate-800 border border-white/10 text-white text-xs rounded-xl whitespace-nowrap opacity-0 group-hover/tooltip:opacity-100 transition-all pointer-events-none z-20 shadow-2xl">
                     <p className="text-slate-400 font-bold uppercase mb-0.5">Start Window</p>
                     <p className="font-black text-white">{windowLabel}</p>
                   </div>
@@ -109,7 +109,7 @@ const TeacherSessionCard = ({
                   disabled={isLoading}
                   className="flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-black uppercase tracking-widest transition-all bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/20 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <i className="fas fa-video text-[10px]" />
+                  <i className="fas fa-video text-xs" />
                   <span>Join</span>
                 </button>
               )}
@@ -130,13 +130,13 @@ const TeacherSessionCard = ({
           )}
 
           {session.status === "ended" && (
-            <div className="px-4 py-2 rounded-xl bg-slate-950/50 border border-white/5 text-slate-600 text-[10px] font-black uppercase tracking-widest">
+            <div className="px-4 py-2 rounded-xl bg-slate-950/50 border border-white/5 text-slate-600 text-xs font-black uppercase tracking-widest">
               Session Ended
             </div>
           )}
 
           {session.status === "cancelled" && (
-            <div className="px-4 py-2 rounded-xl bg-rose-500/5 border border-rose-500/10 text-rose-500/50 text-[10px] font-black uppercase tracking-widest">
+            <div className="px-4 py-2 rounded-xl bg-rose-500/5 border border-rose-500/10 text-rose-500/50 text-xs font-black uppercase tracking-widest">
               Cancelled
             </div>
           )}

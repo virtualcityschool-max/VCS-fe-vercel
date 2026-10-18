@@ -79,7 +79,7 @@ export const ClassObserversCard: React.FC = () => {
           <Save className="w-3.5 h-3.5" /> {saving ? 'Saving…' : 'Save'}
         </button>
       </div>
-      <p className="text-[11px] text-slate-500">
+      <p className="text-xs text-slate-500">
         Applies to classes created from now on. Classes already planned get the observers when the switch is done (a one-time update of their calendar events).
       </p>
     </div>

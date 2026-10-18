@@ -16,7 +16,7 @@ export const TagChip = ({ tag, onClick }) => (
   <span
     onClick={onClick}
     title={onClick ? `Filter by "${tag.name}"` : tag.name}
-    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-bold max-w-[140px] ${tagStyleFor(
+    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-xs font-bold max-w-[140px] ${tagStyleFor(
       tag.color,
     )} ${onClick ? "hover:brightness-125 transition" : ""}`}
   >
@@ -78,7 +78,7 @@ export const LabelFilterDropdown = ({
           <span className="truncate">{activeTag ? activeTag.name : "All Labels"}</span>
         </span>
         <i
-          className={`fas fa-chevron-down text-slate-500 text-[10px] flex-shrink-0 transition-transform duration-150 ${
+          className={`fas fa-chevron-down text-slate-500 text-xs flex-shrink-0 transition-transform duration-150 ${
             open ? "rotate-180" : ""
           }`}
         />
@@ -352,7 +352,7 @@ export const StudentTagsModal = ({
                 disabled={creating}
                 className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition disabled:opacity-50"
               >
-                <i className={`fas ${creating ? "fa-spinner fa-spin" : "fa-plus"} text-[10px]`} />
+                <i className={`fas ${creating ? "fa-spinner fa-spin" : "fa-plus"} text-xs`} />
                 Create label "{trimmed}"
               </button>
             </div>
@@ -377,7 +377,7 @@ export const StudentTagsModal = ({
                             : "border-slate-600"
                         }`}
                       >
-                        {checked && <i className="fas fa-check text-white text-[8px]" />}
+                        {checked && <i className="fas fa-check text-white text-xs" />}
                       </span>
                     )}
                     <TagChip tag={tag} />
@@ -461,14 +461,14 @@ export const StudentTagsModal = ({
                       title="Rename or recolour this label"
                       className="w-7 h-7 shrink-0 flex items-center justify-center rounded-lg text-slate-500 hover:text-indigo-300 hover:bg-indigo-500/10 transition"
                     >
-                      <i className="fas fa-pen text-[10px]" />
+                      <i className="fas fa-pen text-xs" />
                     </button>
                     <button
                       onClick={() => setDeleteTarget(tag)}
                       title="Delete this label everywhere"
                       className="w-7 h-7 shrink-0 flex items-center justify-center rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition"
                     >
-                      <i className="fas fa-trash text-[10px]" />
+                      <i className="fas fa-trash text-xs" />
                     </button>
                   </div>
                 );

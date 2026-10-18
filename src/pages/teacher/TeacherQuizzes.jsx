@@ -95,7 +95,7 @@ const QuestionBuilder = ({ questions, onChange, marksPerQuestion = 1 }) => {
         <div key={qIdx} className="bg-slate-800/60 rounded-2xl border border-slate-700 p-4">
           {/* Question header */}
           <div className="flex items-center justify-between mb-3">
-            <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+            <span className="text-xs font-black uppercase tracking-widest text-slate-500">
               Question {qIdx + 1}
             </span>
             {questions.length > 1 && (
@@ -142,7 +142,7 @@ const QuestionBuilder = ({ questions, onChange, marksPerQuestion = 1 }) => {
           {/* Options */}
           {q.question_type === "SINGLE_CHOICE" && (
             <div className="space-y-2">
-              <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Options - select 1 correct</p>
+              <p className="text-xs uppercase tracking-wider text-slate-500 mb-1">Options - select 1 correct</p>
               {q.options.map((opt, oIdx) => (
                 <div key={oIdx} className="flex items-center gap-2">
                   <input
@@ -166,7 +166,7 @@ const QuestionBuilder = ({ questions, onChange, marksPerQuestion = 1 }) => {
 
           {q.question_type === "MULTIPLE_CHOICE" && (
             <div className="space-y-2">
-              <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Options - check all correct</p>
+              <p className="text-xs uppercase tracking-wider text-slate-500 mb-1">Options - check all correct</p>
               {q.options.map((opt, oIdx) => (
                 <div key={oIdx} className="flex items-center gap-2">
                   <input
@@ -636,7 +636,7 @@ const TeacherQuizzes = ({
                 </div>
                 <div>
                   <p className="text-sm font-bold text-slate-300">Publish immediately</p>
-                  <p className="text-[10px] text-slate-500">Quiz goes live ~2 minutes after creation</p>
+                  <p className="text-xs text-slate-500">Quiz goes live ~2 minutes after creation</p>
                 </div>
               </label>
               {!publishImmediately && (
@@ -676,7 +676,7 @@ const TeacherQuizzes = ({
           </div>
           <div>
             <h4 className="text-sm font-bold text-white uppercase tracking-wider">Question Builder</h4>
-            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Construct your quiz questions below</p>
+            <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">Construct your quiz questions below</p>
           </div>
         </div>
         <QuestionBuilder questions={questions} onChange={setQuestions} marksPerQuestion={defaultMarks} />
@@ -729,7 +729,7 @@ const TeacherQuizzes = ({
             {/* Card Header: Badges and Action Icons */}
             <div className="relative z-10 flex justify-between items-start mb-5">
               <div className="flex flex-col gap-2">
-                {/* <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border w-fit ${
+                {/* <span className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest border w-fit ${
                   quiz.is_locked
                     ? "bg-rose-500/10 text-rose-400 border-rose-500/20"
                     : quiz.is_published
@@ -739,7 +739,7 @@ const TeacherQuizzes = ({
                   <span className={`inline-block w-1.5 h-1.5 rounded-full mr-1.5 ${quiz.is_published && !quiz.is_locked ? "bg-emerald-400 animate-pulse" : quiz.is_locked ? "bg-rose-400" : "bg-slate-400"}`}></span>
                   {quiz.is_locked ? "Locked" : quiz.is_published ? "Published" : "Draft"}
                 </span> */}
-                <p className="text-[9px] text-indigo-400/80 uppercase tracking-[0.2em] font-black">
+                <p className="text-xs text-indigo-400/80 uppercase tracking-[0.2em] font-black">
                   {quiz.course_title}
                 </p>
               </div>
@@ -759,7 +759,7 @@ const TeacherQuizzes = ({
                   }}
                   className="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800/50 hover:bg-indigo-600 text-slate-400 hover:text-white border border-slate-700/50 hover:border-indigo-500 transition-all duration-300"
                 >
-                  <i className="fas fa-eye text-[10px]" />
+                  <i className="fas fa-eye text-xs" />
                 </button>
                 <button
                   type="button"
@@ -768,7 +768,7 @@ const TeacherQuizzes = ({
                   disabled={quiz.is_locked}
                   className="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800/50 hover:bg-amber-600 text-slate-400 hover:text-white border border-slate-700/50 hover:border-amber-500 transition-all duration-300 disabled:opacity-40"
                 >
-                  <i className="fas fa-pencil text-[10px]" />
+                  <i className="fas fa-pencil text-xs" />
                 </button>
                 <button
                   type="button"
@@ -777,7 +777,7 @@ const TeacherQuizzes = ({
                   disabled={quiz.is_locked}
                   className="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800/50 hover:bg-rose-600 text-slate-400 hover:text-white border border-slate-700/50 hover:border-rose-500 transition-all duration-300 disabled:opacity-40"
                 >
-                  <i className="fas fa-trash text-[10px]" />
+                  <i className="fas fa-trash text-xs" />
                 </button>
               </div>
             </div>
@@ -790,17 +790,17 @@ const TeacherQuizzes = ({
 
               <div className="grid grid-cols-2 gap-3 mb-4">
                 <div className="bg-slate-800/30 border border-slate-700/30 rounded-2xl p-3 flex flex-col">
-                  <span className="text-[8px] text-slate-500 uppercase font-black tracking-widest mb-1">Submissions</span>
+                  <span className="text-xs text-slate-500 uppercase font-black tracking-widest mb-1">Submissions</span>
                   <div className="flex items-baseline gap-1.5">
                     <span className="text-lg font-black text-indigo-400">{quiz.submissions_count ?? 0}</span>
-                    <span className="text-[10px] text-slate-500 font-bold uppercase">Students</span>
+                    <span className="text-xs text-slate-500 font-bold uppercase">Students</span>
                   </div>
                 </div>
                 <div className="bg-slate-800/30 border border-slate-700/30 rounded-2xl p-3 flex flex-col">
-                  <span className="text-[8px] text-slate-500 uppercase font-black tracking-widest mb-1">Total Marks</span>
+                  <span className="text-xs text-slate-500 uppercase font-black tracking-widest mb-1">Total Marks</span>
                   <div className="flex items-baseline gap-1.5">
                     <span className="text-lg font-black text-amber-400">{quiz.total_marks}</span>
-                    <span className="text-[10px] text-slate-500 font-bold uppercase">Points</span>
+                    <span className="text-xs text-slate-500 font-bold uppercase">Points</span>
                   </div>
                 </div>
               </div>
@@ -814,7 +814,7 @@ const TeacherQuizzes = ({
                     <i className="far fa-calendar-alt text-xs" />
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-[9px] text-slate-500 uppercase font-black tracking-widest leading-none mb-1">Deadline</span>
+                    <span className="text-xs text-slate-500 uppercase font-black tracking-widest leading-none mb-1">Deadline</span>
                     <span className="text-xs text-slate-300 font-bold">
                       {quiz.due_date ? formatDateTime(quiz.due_date) : "No limit"}
                     </span>
@@ -824,7 +824,7 @@ const TeacherQuizzes = ({
 
               <button
                 type="button"
-                className="w-full bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-3.5 rounded-[1.25rem] text-[10px] font-black uppercase tracking-[0.15em] transition-all duration-300 shadow-xl shadow-indigo-600/20 flex items-center justify-center gap-2 group/btn"
+                className="w-full bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-3.5 rounded-[1.25rem] text-xs font-black uppercase tracking-[0.15em] transition-all duration-300 shadow-xl shadow-indigo-600/20 flex items-center justify-center gap-2 group/btn"
                 onClick={() => openSubmissions(quiz)}
               >
                 <i className="fas fa-tasks text-xs transition-transform group-hover/btn:scale-110" />
@@ -915,26 +915,26 @@ const TeacherQuizzes = ({
             </div>
             <div className="p-6 space-y-5">
               <div>
-                <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Title</p>
+                <p className="text-xs uppercase tracking-wider text-slate-500 mb-1">Title</p>
                 <p className="text-white font-semibold">{viewQuiz.title}</p>
               </div>
               {viewQuiz.description && (
                 <div>
-                  <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Description</p>
+                  <p className="text-xs uppercase tracking-wider text-slate-500 mb-1">Description</p>
                   <p className="text-slate-300 text-sm">{viewQuiz.description}</p>
                 </div>
               )}
               <div className="grid grid-cols-3 gap-3">
                 <div className="bg-slate-800/60 rounded-2xl p-3">
-                  <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Total Marks</p>
+                  <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Total Marks</p>
                   <p className="text-white font-bold">{viewQuiz.total_marks}</p>
                 </div>
                 <div className="bg-slate-800/60 rounded-2xl p-3">
-                  <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Submissions</p>
+                  <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Submissions</p>
                   <p className="text-white font-bold">{viewQuiz.submissions_count ?? 0}</p>
                 </div>
                 <div className="bg-slate-800/60 rounded-2xl p-3">
-                  <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Status</p>
+                  <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Status</p>
                   <p className={`text-xs font-bold ${viewQuiz.is_locked ? "text-rose-400" : viewQuiz.is_published ? "text-emerald-400" : "text-slate-400"}`}>
                     {viewQuiz.is_locked ? "Locked" : viewQuiz.is_published ? "Published" : "Draft"}
                   </p>
@@ -942,31 +942,31 @@ const TeacherQuizzes = ({
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Publish Date</p>
+                  <p className="text-xs uppercase tracking-wider text-slate-500 mb-1">Publish Date</p>
                   <p className="text-slate-300 text-sm">{formatDateTime(viewQuiz.published_at)}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Due Date</p>
+                  <p className="text-xs uppercase tracking-wider text-slate-500 mb-1">Due Date</p>
                   <p className="text-slate-300 text-sm">{formatDateTime(viewQuiz.due_date)}</p>
                 </div>
               </div>
               {/* Questions preview */}
               {viewQuiz.questions?.length > 0 && (
                 <div>
-                  <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-3">Questions ({viewQuiz.questions.length})</p>
+                  <p className="text-xs uppercase tracking-wider text-slate-500 mb-3">Questions ({viewQuiz.questions.length})</p>
                   <div className="space-y-3">
                     {viewQuiz.questions.map((q, idx) => (
                       <div key={q.id} className="bg-slate-800/60 rounded-xl p-3">
                         <div className="flex items-start justify-between gap-2 mb-2">
                           <p className="text-sm text-white font-medium">{idx + 1}. {q.question_text}</p>
-                          <span className="text-[10px] text-slate-500 flex-shrink-0">{q.max_marks} marks</span>
+                          <span className="text-xs text-slate-500 flex-shrink-0">{q.max_marks} marks</span>
                         </div>
-                        <span className="text-[10px] uppercase tracking-wider text-indigo-400">{q.question_type.replace("_", " ")}</span>
+                        <span className="text-xs uppercase tracking-wider text-indigo-400">{q.question_type.replace("_", " ")}</span>
                         {q.options?.length > 0 && (
                           <div className="mt-2 space-y-1">
                             {q.options.map((o) => (
                               <div key={o.id} className={`flex items-center gap-2 text-xs ${o.is_correct ? "text-emerald-400" : "text-slate-400"}`}>
-                                <i className={`fas fa-${o.is_correct ? "check-circle" : "circle"} text-[10px]`} />
+                                <i className={`fas fa-${o.is_correct ? "check-circle" : "circle"} text-xs`} />
                                 {o.option_text}
                               </div>
                             ))}
@@ -1047,7 +1047,7 @@ const TeacherQuizzes = ({
                         <div className="flex items-center gap-2">
                           <p className="text-sm font-bold text-white">{sub.student_name}</p>
                           {sub.student_id && (
-                            <span className="text-[10px] text-slate-500 bg-slate-700 border border-slate-600 px-1.5 py-0.5 rounded font-bold">
+                            <span className="text-xs text-slate-500 bg-slate-700 border border-slate-600 px-1.5 py-0.5 rounded font-bold">
                               #{sub.student_id}
                             </span>
                           )}
@@ -1066,7 +1066,7 @@ const TeacherQuizzes = ({
                         <p className="text-xs text-slate-500 mt-1">{formatDateTime(sub.submitted_at)}</p>
                       </div>
                       <div className="flex flex-col items-end gap-2 shrink-0">
-                        <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${statusColor(sub.status)}`}>
+                        <span className={`text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${statusColor(sub.status)}`}>
                           {statusLabel(sub.status)}
                         </span>
                         <button
@@ -1078,7 +1078,7 @@ const TeacherQuizzes = ({
                               : "bg-slate-700 hover:bg-slate-600"
                           }`}
                         >
-                          <i className={`fas ${sub.status === "submitted" ? "fa-pen" : "fa-eye"} text-[10px]`} />
+                          <i className={`fas ${sub.status === "submitted" ? "fa-pen" : "fa-eye"} text-xs`} />
                           {sub.status === "submitted" ? "Grade" : "View"}
                         </button>
                       </div>
@@ -1119,17 +1119,17 @@ const TeacherQuizzes = ({
                   {/* Summary */}
                   <div className="grid grid-cols-3 gap-3">
                     <div className="bg-slate-800/60 rounded-2xl p-3">
-                      <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Score</p>
+                      <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Score</p>
                       <p className="text-white font-bold">
                         {selectedQuizSubmission.obtained_marks != null ? selectedQuizSubmission.obtained_marks : "-"} / {selectedQuizSubmission.total_marks_snapshot}
                       </p>
                     </div>
                     <div className="bg-slate-800/60 rounded-2xl p-3">
-                      <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">%</p>
+                      <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">%</p>
                       <p className="text-white font-bold">{selectedQuizSubmission.percentage != null ? `${selectedQuizSubmission.percentage}%` : "-"}</p>
                     </div>
                     <div className="bg-slate-800/60 rounded-2xl p-3">
-                      <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Status</p>
+                      <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Status</p>
                       <p className={`text-xs font-bold ${statusColor(selectedQuizSubmission.status).split(" ")[0]}`}>
                         {statusLabel(selectedQuizSubmission.status)}
                       </p>
@@ -1141,9 +1141,9 @@ const TeacherQuizzes = ({
                     <div key={ans.question_id} className="bg-slate-800/60 rounded-2xl p-4">
                       <div className="flex items-start justify-between gap-2 mb-2">
                         <p className="text-sm font-semibold text-white">{idx + 1}. {ans.question_text}</p>
-                        <span className="text-[10px] text-slate-500 flex-shrink-0">{ans.max_marks} marks</span>
+                        <span className="text-xs text-slate-500 flex-shrink-0">{ans.max_marks} marks</span>
                       </div>
-                      <span className="text-[10px] uppercase tracking-wider text-indigo-400 mb-3 block">
+                      <span className="text-xs uppercase tracking-wider text-indigo-400 mb-3 block">
                         {ans.question_type?.replace("_", " ")}
                       </span>
 
@@ -1154,7 +1154,7 @@ const TeacherQuizzes = ({
                           </div>
                           {selectedQuizSubmission.status !== "auto_graded" ? (
                             <div>
-                              <label className="text-[10px] uppercase tracking-wider text-slate-500 font-black mb-1.5 block">
+                              <label className="text-xs uppercase tracking-wider text-slate-500 font-black mb-1.5 block">
                                 {selectedQuizSubmission.status === "submitted" ? "Assign Marks" : "Edit Marks"}{" "}
                                 <span className="text-rose-500">*</span>{" "}
                                 <span className="text-slate-600 font-normal">(Total {ans.max_marks})</span>

@@ -11,7 +11,7 @@ const BLANK = {
 
 const Field = ({ label, name, value, onChange, multiline = false, type = "text", hint, inputMode }) => (
   <div>
-    <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1.5">{label}</label>
+    <label className="block text-xs font-black uppercase tracking-widest text-slate-500 mb-1.5">{label}</label>
     {multiline ? (
       <textarea
         name={name} value={value} onChange={onChange} rows={4}
@@ -26,7 +26,7 @@ const Field = ({ label, name, value, onChange, multiline = false, type = "text",
         placeholder={`Enter ${label.toLowerCase()}…`}
       />
     )}
-    {hint && <p className="text-[10px] text-slate-600 mt-1">{hint}</p>}
+    {hint && <p className="text-xs text-slate-600 mt-1">{hint}</p>}
   </div>
 );
 

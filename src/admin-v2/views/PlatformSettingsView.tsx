@@ -92,7 +92,7 @@ export const PlatformSettingsView: React.FC = () => {
                   }
                   className="w-full px-3.5 py-2 text-sm rounded-xl border border-[#232D52] bg-[#0E1428] text-slate-100"
                 />
-                <p className="text-[11px] text-slate-500 mt-1">
+                <p className="text-xs text-slate-500 mt-1">
                   Marks each new quiz question starts with in the teacher's quiz form.
                 </p>
               </div>
@@ -111,7 +111,7 @@ export const PlatformSettingsView: React.FC = () => {
                   }
                   className="w-full px-3.5 py-2 text-sm rounded-xl border border-[#232D52] bg-[#0E1428] text-slate-100"
                 />
-                <p className="text-[11px] text-slate-500 mt-1">
+                <p className="text-xs text-slate-500 mt-1">
                   Default number of days between a quiz opening and its deadline (teachers can change it per quiz).
                 </p>
               </div>
@@ -129,7 +129,7 @@ export const PlatformSettingsView: React.FC = () => {
                 <span className="font-semibold block text-slate-200">
                   Open new quizzes to students straight away
                 </span>
-                <span className="text-slate-500 text-[11px]">
+                <span className="text-slate-500 text-xs">
                   The default in the teacher's quiz form. If off, the teacher picks the opening date. Auto-marked scores always show
                   to the student once they submit; written answers show after the teacher marks them.
                 </span>
@@ -159,7 +159,7 @@ export const PlatformSettingsView: React.FC = () => {
                   <option value="Scheduled">Scheduled (opens by itself at the class time)</option>
                   <option value="Start now">Manual (opens when the teacher presses Start)</option>
                 </select>
-                <p className="text-[11px] text-slate-500 mt-1">
+                <p className="text-xs text-slate-500 mt-1">
                   Scheduled: students can join from the class time even if the teacher is a little late. Checked every 5 minutes.
                   A class nobody taught is flagged as missed either way.
                 </p>
@@ -177,7 +177,7 @@ export const PlatformSettingsView: React.FC = () => {
                   }
                   className="w-full px-3.5 py-2 text-sm rounded-xl border border-[#232D52] bg-[#0E1428] text-slate-100"
                 />
-                <p className="text-[11px] text-slate-500 mt-1">
+                <p className="text-xs text-slate-500 mt-1">
                   Standard block length for timetable slots in minutes.
                 </p>
               </div>
@@ -190,7 +190,7 @@ export const PlatformSettingsView: React.FC = () => {
                 >
                   <option value="google_meet">Google Meet</option>
                 </select>
-                <p className="text-[11px] text-slate-500 mt-1">
+                <p className="text-xs text-slate-500 mt-1">
                   Every class gets a Google Meet link from the school calendar. Other platforms are not connected.
                 </p>
               </div>

@@ -29,7 +29,7 @@ const dayKey = (date, timeZone) =>
 const greetingFor = (hour) => (hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening");
 
 const Count = ({ n, tone }) => (
-  <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full tabular-nums ${tone}`}>{n}</span>
+  <span className={`text-xs font-bold px-2 py-0.5 rounded-full tabular-nums ${tone}`}>{n}</span>
 );
 
 const ActionCard = ({ title, count, tone, children, footer }) => (
@@ -210,21 +210,21 @@ const AdminDashboard = ({ analytics, analyticsError, teacherMeetings, recentActi
               {greetingFor(hour)}, {profile?.first_name || getDisplayName(profile) || "Admin"}
               <i className="fas fa-wand-magic-sparkles text-indigo-400 text-base" aria-hidden="true" />
             </h1>
-            <span className="px-2.5 py-0.5 text-[11px] rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/25 font-medium">
+            <span className="px-2.5 py-0.5 text-xs rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/25 font-medium">
               {liveSessions.length ? `${liveSessions.length} class${liveSessions.length === 1 ? "" : "es"} live` : "Live School Ops"}
             </span>
           </div>
           <p className="flex flex-wrap items-center gap-2 text-xs text-slate-400 mt-1 tabular-nums">
             <span>{now.toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric", year: "numeric", ...(timeZone ? { timeZone } : {}) })}</span>
             <span>·</span>
-            <i className="fas fa-clock text-indigo-400 text-[11px]" aria-hidden="true" />
+            <i className="fas fa-clock text-indigo-400 text-xs" aria-hidden="true" />
             <span>{fmtTime(now)}</span>
             {timeZone && <><span>·</span><span className="text-indigo-300 font-semibold">{timeZone}</span></>}
           </p>
         </div>
         <div className="relative">
           <button type="button" onClick={() => setQuickOpen((o) => !o)} aria-expanded={quickOpen} className="flex items-center gap-2 h-10 px-4 text-xs font-semibold rounded-xl bg-[#6D5BFF] hover:bg-[#5B47FB] text-white shadow-lg shadow-indigo-600/30">
-            <i className="fas fa-plus" aria-hidden="true" /> Quick add <i className="fas fa-chevron-down text-[10px] opacity-80" aria-hidden="true" />
+            <i className="fas fa-plus" aria-hidden="true" /> Quick add <i className="fas fa-chevron-down text-xs opacity-80" aria-hidden="true" />
           </button>
           {quickOpen && (
             <div className="absolute right-0 mt-2 w-52 rounded-xl border border-[#232D52] bg-[#121831] p-1.5 shadow-2xl z-40 text-xs">
@@ -382,7 +382,7 @@ const AdminDashboard = ({ analytics, analyticsError, teacherMeetings, recentActi
                       <i className="fas fa-circle-info" aria-hidden="true" />
                     </button>
                   ) : (
-                    k.badge && <span className="text-[10px] text-indigo-300">{k.badge}</span>
+                    k.badge && <span className="text-xs text-indigo-300">{k.badge}</span>
                   )}
                 </div>
                 <div className="mt-2 text-2xl font-bold tabular-nums text-slate-100">{k.value}</div>
@@ -419,11 +419,11 @@ const AdminDashboard = ({ analytics, analyticsError, teacherMeetings, recentActi
             <div className="flex items-center gap-3 min-w-0">
               <div className="text-center min-w-[70px] py-1 px-2 rounded-lg bg-slate-800/80 text-xs border border-slate-700 tabular-nums">
                 <div className="font-bold text-slate-200">{s.scheduled_at ? fmtTime(s.scheduled_at) : "—"}</div>
-                <div className="text-[10px] text-emerald-300">running</div>
+                <div className="text-xs text-emerald-300">running</div>
               </div>
               <div className="min-w-0">
                 <div className="text-sm font-bold text-slate-100 truncate">{s.course_title || s.title}</div>
-                <div className="text-[11px] text-slate-400 mt-0.5 flex flex-wrap gap-x-2">
+                <div className="text-xs text-slate-400 mt-0.5 flex flex-wrap gap-x-2">
                   <span style={{ color: departmentOf(s.course_title || s.title || "").hex }}>{departmentOf(s.course_title || s.title || "").name}</span>
                   <span>·</span>
                   <span className={s.teacher_name ? "text-slate-300" : "text-amber-400 font-semibold"}>{s.teacher_name || "No teacher"}</span>
@@ -446,11 +446,11 @@ const AdminDashboard = ({ analytics, analyticsError, teacherMeetings, recentActi
             <div className="flex items-center gap-3 min-w-0">
               <div className="text-center min-w-[70px] py-1 px-2 rounded-lg bg-slate-800/80 text-xs border border-slate-700 tabular-nums">
                 <div className="font-bold text-slate-200">{fmtTime(s.at)}</div>
-                <div className="text-[10px] text-slate-400">held</div>
+                <div className="text-xs text-slate-400">held</div>
               </div>
               <div className="min-w-0">
                 <div className="text-sm font-bold text-slate-100 truncate">{s.title}</div>
-                <div className="text-[11px] mt-0.5" style={{ color: departmentOf(s.title || "").hex }}>{departmentOf(s.title || "").name}</div>
+                <div className="text-xs mt-0.5" style={{ color: departmentOf(s.title || "").hex }}>{departmentOf(s.title || "").name}</div>
               </div>
             </div>
             <div className="flex items-center gap-2.5">

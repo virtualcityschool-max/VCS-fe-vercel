@@ -263,13 +263,13 @@ const ParentProfileTab = ({ profile, onUpdate, onRefresh, onCancel, onSaved, rea
                       <div className="flex-1 min-w-0">
                         <p className="font-semibold text-white truncate">{getDisplayName(child)}</p>
                         <div className="space-y-0.5 mt-1">
-                          <p className="text-[11px] text-slate-400 flex items-center gap-1.5">
-                            <i className="fas fa-id-badge text-[9px]"></i>
+                          <p className="text-xs text-slate-400 flex items-center gap-1.5">
+                            <i className="fas fa-id-badge text-xs"></i>
                             ID: {child.id}
                           </p>
                           {child.email && (
-                            <p className="text-[11px] text-slate-500 flex items-center gap-1.5 truncate">
-                              <i className="fas fa-envelope text-[9px]"></i>
+                            <p className="text-xs text-slate-500 flex items-center gap-1.5 truncate">
+                              <i className="fas fa-envelope text-xs"></i>
                               {child.email}
                             </p>
                           )}
@@ -368,7 +368,7 @@ const ParentProfileTab = ({ profile, onUpdate, onRefresh, onCancel, onSaved, rea
                             }`}
                           >
                             {selectedStudentIds.includes(student.id) && (
-                              <i className="fas fa-check text-[10px] text-white"></i>
+                              <i className="fas fa-check text-xs text-white"></i>
                             )}
                           </div>
                           
@@ -381,12 +381,12 @@ const ParentProfileTab = ({ profile, onUpdate, onRefresh, onCancel, onSaved, rea
                               {getDisplayName(student) || student.email.split('@')[0]}
                             </p>
                             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
-                              <span className="flex items-center gap-1.5 text-[11px] text-slate-400">
-                                <i className="fas fa-id-badge text-[9px] text-slate-500"></i>
+                              <span className="flex items-center gap-1.5 text-xs text-slate-400">
+                                <i className="fas fa-id-badge text-xs text-slate-500"></i>
                                 ID: {student.id}
                               </span>
-                              <span className="flex items-center gap-1.5 text-[11px] text-slate-400 truncate">
-                                <i className="fas fa-envelope text-[9px] text-slate-500"></i>
+                              <span className="flex items-center gap-1.5 text-xs text-slate-400 truncate">
+                                <i className="fas fa-envelope text-xs text-slate-500"></i>
                                 {student.email}
                               </span>
                             </div>

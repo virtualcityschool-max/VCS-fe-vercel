@@ -171,7 +171,7 @@ export function DataTable<T extends { id: string }>({
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="border-b border-[#1E2648] bg-[#0E1428] text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+            <tr className="border-b border-[#1E2648] bg-[#0E1428] text-xs font-semibold text-slate-400 uppercase tracking-wider">
               <th className="py-3 px-4 w-10">
                 <input
                   type="checkbox"

@@ -78,7 +78,7 @@ const TeacherAllocationsTab = ({ courses = [], teachers = [], loading, onAssignT
           <Avatar name={r.name} />
           <div className="min-w-0">
             <div className="font-semibold text-slate-100 truncate">{r.name}</div>
-            <div className="text-[11px] text-slate-400 truncate">{r.email}</div>
+            <div className="text-xs text-slate-400 truncate">{r.email}</div>
           </div>
         </div>
       ),
@@ -92,7 +92,7 @@ const TeacherAllocationsTab = ({ courses = [], teachers = [], loading, onAssignT
             {r.taught.map((c) => {
               const d = departmentOf(c.title);
               return (
-                <span key={c.id} className="inline-flex items-center gap-1 pl-2 pr-1 py-0.5 rounded-lg text-[11px] border bg-[#151D3A] border-[#232D52] text-slate-200 max-w-[220px]" title={c.title}>
+                <span key={c.id} className="inline-flex items-center gap-1 pl-2 pr-1 py-0.5 rounded-lg text-xs border bg-[#151D3A] border-[#232D52] text-slate-200 max-w-[220px]" title={c.title}>
                   <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: d.hex }} />
                   <span className="truncate">{c.title}</span>
                   <button
@@ -101,7 +101,7 @@ const TeacherAllocationsTab = ({ courses = [], teachers = [], loading, onAssignT
                     onClick={(e) => { e.stopPropagation(); setConfirm({ course: c, teacher: r }); }}
                     className="w-5 h-5 rounded text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 shrink-0"
                   >
-                    <i className="fas fa-xmark text-[10px]" aria-hidden="true" />
+                    <i className="fas fa-xmark text-xs" aria-hidden="true" />
                   </button>
                 </span>
               );

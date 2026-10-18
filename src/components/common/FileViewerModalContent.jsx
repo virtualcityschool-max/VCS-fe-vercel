@@ -162,7 +162,7 @@ const FileViewerModal = ({ filePath, handleClose }) => {
               onClick={() => triggerDownload(filePath, filename)}
               className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition shadow-lg shadow-indigo-500/20"
             >
-              <i className="fas fa-download text-[10px]" />
+              <i className="fas fa-download text-xs" />
               Download
             </button>
             <button

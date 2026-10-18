@@ -219,13 +219,13 @@ const ResourcesTab = () => {
 
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 mb-1 flex-wrap">
-                      <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                      <span className="px-2 py-0.5 rounded-md text-xs font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                         {doc.subject || "Academics"}
                       </span>
-                      <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-amber-500/10 text-amber-300 border border-amber-500/20">
+                      <span className="px-2 py-0.5 rounded-md text-xs font-black uppercase tracking-wider bg-amber-500/10 text-amber-300 border border-amber-500/20">
                         {doc.badge || "Official Pack"}
                       </span>
-                      <span className="text-[10px] text-slate-500 font-mono">
+                      <span className="text-xs text-slate-500 font-mono">
                         {doc.fileType}
                       </span>
                     </div>
@@ -240,7 +240,7 @@ const ResourcesTab = () => {
                       </p>
                     )}
 
-                    <div className="flex items-center gap-2 text-[10px] text-slate-500 mt-2 font-medium">
+                    <div className="flex items-center gap-2 text-xs text-slate-500 mt-2 font-medium">
                       <span className="text-slate-400">Course: {doc.courseTitle}</span>
                     </div>
                   </div>
@@ -253,7 +253,7 @@ const ResourcesTab = () => {
                       onClick={() => handlePreview(doc)}
                       className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer"
                     >
-                      <i className="fas fa-eye text-[11px]" />
+                      <i className="fas fa-eye text-xs" />
                       <span>Preview</span>
                     </button>
                   )}
@@ -263,7 +263,7 @@ const ResourcesTab = () => {
                     onClick={() => handleDownload(doc)}
                     className="px-4 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5 transition shadow-lg shadow-emerald-600/20 hover:scale-[1.02] cursor-pointer"
                   >
-                    <i className={`fas ${doc.isLink ? "fa-arrow-up-right-from-square" : "fa-download"} text-[11px]`} />
+                    <i className={`fas ${doc.isLink ? "fa-arrow-up-right-from-square" : "fa-download"} text-xs`} />
                     <span>{doc.isLink ? "Open Link" : "Download"}</span>
                   </button>
                 </div>

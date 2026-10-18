@@ -53,7 +53,7 @@ const SessionListView = ({ sessions, formatTime, formatDate, onJoin, joiningId }
             }`} />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-bold text-white truncate">{session.title}</p>
-              <p className="text-[10px] text-slate-500 truncate mt-0.5">
+              <p className="text-xs text-slate-500 truncate mt-0.5">
                 {session.course?.title || session.course_title || "General"}
               </p>
             </div>
@@ -61,7 +61,7 @@ const SessionListView = ({ sessions, formatTime, formatDate, onJoin, joiningId }
               <p className="text-xs font-semibold text-slate-300 tabular-nums">
                 {formatTime(session.scheduled_at)} <TimezoneTag />
               </p>
-              <p className="hidden sm:block text-[10px] text-slate-500 mt-0.5">
+              <p className="hidden sm:block text-xs text-slate-500 mt-0.5">
                 {formatDate(session.scheduled_at)}
               </p>
             </div>
@@ -73,7 +73,7 @@ const SessionListView = ({ sessions, formatTime, formatDate, onJoin, joiningId }
                   variant="inline"
                 />
               )}
-              <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-full border ${
+              <span className={`text-xs font-black uppercase tracking-widest px-2 py-1 rounded-full border ${
                 STATUS_COLORS[session.status] || STATUS_COLORS.scheduled
               }`}>
                 {session.status || "scheduled"}
@@ -84,7 +84,7 @@ const SessionListView = ({ sessions, formatTime, formatDate, onJoin, joiningId }
                   disabled={joiningId === session.id}
                   className="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold text-xs flex items-center gap-1.5 transition shadow-sm cursor-pointer"
                 >
-                  <i className="fas fa-video text-[10px]" />
+                  <i className="fas fa-video text-xs" />
                   <span>{joiningId === session.id ? "Entering..." : "Join"}</span>
                 </button>
               )}

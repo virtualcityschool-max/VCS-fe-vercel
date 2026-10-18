@@ -248,17 +248,17 @@ export const GrantAccessModal: React.FC<GrantAccessModalProps> = ({
                         <div className="flex items-center gap-2">
                           <span className="text-sm font-bold text-white leading-none">{opt.title}</span>
                           {opt.recommended && (
-                            <span className="px-1.5 py-0.2 rounded text-[9px] font-black uppercase tracking-wider bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                            <span className="px-1.5 py-0.2 rounded text-xs font-black uppercase tracking-wider bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
                               Recommended
                             </span>
                           )}
                           {opt.id === 'unlimited' && mode === 'free' && (
-                            <span className="px-1.5 py-0.2 rounded text-[9px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                            <span className="px-1.5 py-0.2 rounded text-xs font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                               Lifetime Free
                             </span>
                           )}
                         </div>
-                        <p className="text-[11px] text-slate-400 mt-1 leading-snug">{opt.subtitle}</p>
+                        <p className="text-xs text-slate-400 mt-1 leading-snug">{opt.subtitle}</p>
                       </div>
                     </div>
 

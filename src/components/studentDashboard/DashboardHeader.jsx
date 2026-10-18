@@ -24,19 +24,19 @@ const InfoChip = ({ label, value, icon, isMono = false }) => {
       title="Click to copy"
     >
       <div className="flex items-center justify-center">
-        <i className={`fas fa-${icon} text-indigo-400/60 text-[10px]`} />
+        <i className={`fas fa-${icon} text-indigo-400/60 text-xs`} />
       </div>
-      <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 font-inter leading-none">
+      <span className="text-xs font-black uppercase tracking-widest text-slate-500 font-inter leading-none">
         {label}:
       </span>
-      <span className={`text-[11px] ${isMono ? "font-mono translate-y-[0.5px]" : "font-inter"} font-semibold text-slate-300 group-hover:text-white transition-colors leading-none`}>
+      <span className={`text-xs ${isMono ? "font-mono translate-y-[0.5px]" : "font-inter"} font-semibold text-slate-300 group-hover:text-white transition-colors leading-none`}>
         {value}
       </span>
       <div className="w-4 flex items-center justify-center">
         {state === "copied" ? (
-          <i className="fas fa-check text-[9px] text-green-400 animate-in fade-in zoom-in" />
+          <i className="fas fa-check text-xs text-green-400 animate-in fade-in zoom-in" />
         ) : (
-          <i className="fas fa-copy text-[9px] text-white/10 group-hover:text-white/30 transition-opacity" />
+          <i className="fas fa-copy text-xs text-white/10 group-hover:text-white/30 transition-opacity" />
         )}
       </div>
     </button>
@@ -87,9 +87,9 @@ const DashboardHeader = () => {
       <div className="flex items-center gap-4 relative z-10">
         <Link 
           to="/courses" 
-          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-[11px] font-bold uppercase tracking-widest transition-all hover:scale-[1.02] active:scale-95 shadow-lg shadow-indigo-500/20"
+          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold uppercase tracking-widest transition-all hover:scale-[1.02] active:scale-95 shadow-lg shadow-indigo-500/20"
         >
-          <i className="fas fa-plus text-[10px]"></i>
+          <i className="fas fa-plus text-xs"></i>
           Explore Courses
         </Link>
       </div>

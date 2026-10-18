@@ -223,7 +223,7 @@ export const CreateAssignmentModal = ({
               {file && <button
     type="button"
     onClick={() => setFile(null)}
-    className="text-[11px] text-slate-400 hover:text-rose-300 cursor-pointer"
+    className="text-xs text-slate-400 hover:text-rose-300 cursor-pointer"
   >
                   Remove
                 </button>}
@@ -955,7 +955,7 @@ multiple_choice,"Which electromagnetic radiation has the highest frequency?",5,"
   }
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 rounded-xl bg-[#0B0E1A] border border-[#1A223B]">
             <div>
-              <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+              <label className="block text-xs font-semibold text-slate-300 mb-1">
                 Launch Date & Time
               </label>
               <input
@@ -967,7 +967,7 @@ multiple_choice,"Which electromagnetic radiation has the highest frequency?",5,"
               />
             </div>
             <div>
-              <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+              <label className="block text-xs font-semibold text-slate-300 mb-1">
                 Solve & Submit Deadline
               </label>
               <input
@@ -978,7 +978,7 @@ multiple_choice,"Which electromagnetic radiation has the highest frequency?",5,"
               />
             </div>
             <div>
-              <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+              <label className="block text-xs font-semibold text-slate-300 mb-1">
                 Time Limit (minutes)
               </label>
               <input
@@ -993,7 +993,7 @@ multiple_choice,"Which electromagnetic radiation has the highest frequency?",5,"
                 className={`w-full px-3 py-1.5 rounded-lg bg-[#121628] border border-[#1E2642] text-xs text-white ${isLocked ? "opacity-60 cursor-not-allowed" : ""}`}
               />
             </div>
-            <p className="sm:col-span-3 text-[11px] text-slate-400">
+            <p className="sm:col-span-3 text-xs text-slate-400">
               Each student's clock starts when they press Start and cannot be paused. The quiz submits itself when the time runs out.
             </p>
           </div>
@@ -1020,7 +1020,7 @@ multiple_choice,"Which electromagnetic radiation has the highest frequency?",5,"
                   <button
                     type="button"
                     onClick={handleLoadSample}
-                    className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-[11px] font-semibold flex items-center gap-1.5 cursor-pointer shadow-sm transition-all"
+                    className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-sm transition-all"
                     title="Load sample physics quiz template"
                   >
                     <span>Load Sample</span>
@@ -1028,7 +1028,7 @@ multiple_choice,"Which electromagnetic radiation has the highest frequency?",5,"
                   <button
                     type="button"
                     onClick={() => setShowBulkImportModal(true)}
-                    className="px-2.5 py-1 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-[11px] font-bold flex items-center gap-1.5 cursor-pointer shadow-sm transition-all"
+                    className="px-2.5 py-1 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-sm transition-all"
                     title="Import questions in bulk from CSV or JSON file"
                   >
                     <FileSpreadsheet className="w-3.5 h-3.5" />
@@ -1047,7 +1047,7 @@ multiple_choice,"Which electromagnetic radiation has the highest frequency?",5,"
                 >
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
-                      <span className="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-300 text-[10px] font-bold flex items-center justify-center font-mono">
+                      <span className="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-300 text-xs font-bold flex items-center justify-center font-mono">
                         {idx + 1}
                       </span>
                       {isLocked ? (
@@ -1063,7 +1063,7 @@ multiple_choice,"Which electromagnetic radiation has the highest frequency?",5,"
                               role="radio"
                               aria-checked={q.type === t.id}
                               onClick={() => changeQuestionType(q.id, t.id)}
-                              className={`px-2 py-0.5 rounded-md text-[11px] font-semibold border cursor-pointer transition-colors ${
+                              className={`px-2 py-0.5 rounded-md text-xs font-semibold border cursor-pointer transition-colors ${
                                 q.type === t.id ? t.on : "bg-transparent border-[#1E2642] text-slate-400 hover:text-white"
                               }`}
                             >
@@ -1114,10 +1114,10 @@ multiple_choice,"Which electromagnetic radiation has the highest frequency?",5,"
                   {/* Multiple Choice Options */}
                   {q.type === "multiple_choice" && q.options && (
                     <div className="space-y-2 pt-1">
-                      <div className="flex items-center justify-between text-[11px]">
+                      <div className="flex items-center justify-between text-xs">
                         <span className="text-slate-400">Options (Select radio for correct answer):</span>
                         {(!isLocked && (!q.correctAnswer || !q.options.some((o) => o && o.trim() === (q.correctAnswer || "").trim()))) && (
-                          <span className="text-amber-400 font-semibold flex items-center gap-1 text-[11px]">
+                          <span className="text-amber-400 font-semibold flex items-center gap-1 text-xs">
                             <AlertCircle className="w-3.5 h-3.5" /> No correct answer selected
                           </span>
                         )}
@@ -1157,7 +1157,7 @@ multiple_choice,"Which electromagnetic radiation has the highest frequency?",5,"
                       <div className="flex items-center justify-between text-xs">
                         <span className="text-slate-400">Correct Proposition Answer:</span>
                         {(!isLocked && (!q.correctAnswer || (q.correctAnswer !== "Yes" && q.correctAnswer !== "No"))) && (
-                          <span className="text-amber-400 font-semibold flex items-center gap-1 text-[11px]">
+                          <span className="text-amber-400 font-semibold flex items-center gap-1 text-xs">
                             <AlertCircle className="w-3.5 h-3.5" /> Select Yes or No
                           </span>
                         )}
@@ -1194,7 +1194,7 @@ multiple_choice,"Which electromagnetic radiation has the highest frequency?",5,"
                   {/* Fill in Blank / Short Answer */}
                   {(q.type === "fill_in_blank" || q.type === "short_answer") && (
                     <div className="space-y-1 pt-1">
-                      <label className="block text-[11px] text-slate-400">
+                      <label className="block text-xs text-slate-400">
                         {q.type === "fill_in_blank"
                           ? "Expected Keyword / Exact Blank Text:"
                           : "Sample Grading Key / Benchmark Answer for Teacher Review:"}
@@ -1330,7 +1330,7 @@ multiple_choice,"Which electromagnetic radiation has the highest frequency?",5,"
                     <button
     type="button"
     onClick={() => handleDownloadSample(bulkImportMode)}
-    className="px-2.5 py-1 rounded-lg bg-[#141A2E] hover:bg-[#1C2542] text-slate-300 border border-[#232D4B] text-[11px] font-semibold flex items-center gap-1.5 cursor-pointer"
+    className="px-2.5 py-1 rounded-lg bg-[#141A2E] hover:bg-[#1C2542] text-slate-300 border border-[#232D4B] text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
   >
                       <Download className="w-3 h-3 text-slate-400" />
                       <span>Download {bulkImportMode.toUpperCase()} Template</span>
@@ -1341,7 +1341,7 @@ multiple_choice,"Which electromagnetic radiation has the highest frequency?",5,"
       setBulkImportText(bulkImportMode === "csv" ? CSV_SAMPLE : JSON_SAMPLE);
       setBulkImportError(null);
     }}
-    className="px-2.5 py-1 rounded-lg bg-[#141A2E] hover:bg-[#1C2542] text-indigo-300 border border-indigo-500/30 text-[11px] font-semibold flex items-center gap-1.5 cursor-pointer"
+    className="px-2.5 py-1 rounded-lg bg-[#141A2E] hover:bg-[#1C2542] text-indigo-300 border border-indigo-500/30 text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
   >
                       <Code className="w-3 h-3" />
                       <span>Load Sample</span>
@@ -1361,7 +1361,7 @@ multiple_choice,"Which electromagnetic radiation has the highest frequency?",5,"
                     <span className="text-xs text-slate-300 font-medium">
                       Click to choose a CSV or JSON file from your computer
                     </span>
-                    <span className="text-[11px] text-slate-500 mt-0.5">
+                    <span className="text-xs text-slate-500 mt-0.5">
                       Accepts standard comma-delimited CSV or JSON array of questions
                     </span>
                     <input
@@ -1381,7 +1381,7 @@ multiple_choice,"Which electromagnetic radiation has the highest frequency?",5,"
                     <label className="text-xs font-semibold text-slate-300">
                       Or Paste {bulkImportMode.toUpperCase()} Data Directly:
                     </label>
-                    <span className="text-[11px] text-slate-500 font-mono">
+                    <span className="text-xs text-slate-500 font-mono">
                       {bulkImportMode === "csv" ? "Headers: type, questionText, marks, options, correctAnswer" : "[{ type, questionText, marks, options, correctAnswer }]"}
                     </span>
                   </div>

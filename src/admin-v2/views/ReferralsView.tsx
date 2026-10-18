@@ -28,7 +28,7 @@ export const ReferralsView: React.FC = () => {
       cell: (row) => (
         <div>
           <div className="font-semibold text-slate-100">{row.userName}</div>
-          <div className="text-[11px] text-slate-400 capitalize">{row.userRole}</div>
+          <div className="text-xs text-slate-400 capitalize">{row.userRole}</div>
         </div>
       ),
     },

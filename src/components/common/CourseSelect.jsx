@@ -141,7 +141,7 @@ const CourseSelect = ({
                     key={lvl}
                     type="button"
                     onClick={() => setSelectedLevel(lvl)}
-                    className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider whitespace-nowrap transition cursor-pointer ${
+                    className={`px-2 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider whitespace-nowrap transition cursor-pointer ${
                       selectedLevel === lvl
                         ? "bg-indigo-600 text-white shadow-sm"
                         : "bg-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-700"
@@ -155,7 +155,7 @@ const CourseSelect = ({
               {/* Search */}
               <div className="px-2 pt-2 pb-1.5 border-b border-slate-800">
                 <div className="relative">
-                  <i className="fas fa-search absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500 text-[10px] pointer-events-none" />
+                  <i className="fas fa-search absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500 text-xs pointer-events-none" />
                   <input
                     autoFocus
                     type="text"
@@ -209,8 +209,8 @@ const CourseSelect = ({
                       </p>
                     )}
                     {disabled && (
-                      <p className="text-[11px] text-amber-400/80 mt-0.5 flex items-center gap-1">
-                        <i className="fas fa-ban text-[9px]" />
+                      <p className="text-xs text-amber-400/80 mt-0.5 flex items-center gap-1">
+                        <i className="fas fa-ban text-xs" />
                         {reason}
                       </p>
                     )}

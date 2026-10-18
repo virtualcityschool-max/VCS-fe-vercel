@@ -96,7 +96,7 @@ const NextSessionCard = () => {
           <h3 className="text-lg font-black text-white/90 mb-0.5 tracking-tight">
             No Upcoming Sessions
           </h3>
-          <p className="text-slate-500 text-[10px] font-bold uppercase tracking-[0.15em]">
+          <p className="text-slate-500 text-xs font-bold uppercase tracking-[0.15em]">
            Check back later for scheduled live sessions
           </p>
         </div>
@@ -115,7 +115,7 @@ const NextSessionCard = () => {
 
       <div className="min-w-0 flex-1 relative z-10">
         <div className="flex items-center gap-2 mb-1">
-          <span className="text-[8px] font-black text-blue-400 uppercase tracking-[0.2em] bg-blue-400/10 px-2 py-0.5 rounded-md border border-blue-400/10">
+          <span className="text-xs font-black text-blue-400 uppercase tracking-[0.2em] bg-blue-400/10 px-2 py-0.5 rounded-md border border-blue-400/10">
             {nextSession.course_title}
           </span>
           {canJoinNow && (
@@ -125,7 +125,7 @@ const NextSessionCard = () => {
         <h3 className="text-base font-black text-white mb-0.5 truncate tracking-tight">
           {nextSession.title}
         </h3>
-        <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">
+        <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">
           with {nextSession.teacher_name}
         </p>
         {scheduledAt && (
@@ -137,7 +137,7 @@ const NextSessionCard = () => {
         <button
           onClick={handleJoinSession}
           disabled={isJoiningSession || !canJoinNow}
-          className={`px-4 py-2.5 rounded-xl font-black text-[9px] uppercase tracking-widest transition-all duration-300 active:scale-95 flex items-center justify-center gap-2 min-w-[120px] ${
+          className={`px-4 py-2.5 rounded-xl font-black text-xs uppercase tracking-widest transition-all duration-300 active:scale-95 flex items-center justify-center gap-2 min-w-[120px] ${
             isJoiningSession || !canJoinNow
               ? "bg-slate-800/50 text-slate-500 cursor-not-allowed border border-white/5"
               : "bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-900/40 border border-blue-400/30 hover:shadow-blue-500/20"
@@ -152,7 +152,7 @@ const NextSessionCard = () => {
             "Session Not Live"
           ) : (
             <>
-              <i className="fas fa-play text-[8px]"></i>
+              <i className="fas fa-play text-xs"></i>
               <span>Join Now</span>
             </>
           )}

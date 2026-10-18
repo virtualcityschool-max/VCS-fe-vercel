@@ -536,7 +536,7 @@ const AdminSessionsPage = () => {
           </div>
 
           <div className="p-4 bg-[#0E1428] border border-[#232D52] rounded-xl space-y-2">
-            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">Google Meet Link</span>
+            <span className="text-xs font-black uppercase tracking-wider text-slate-400 block">Google Meet Link</span>
             <div className="flex items-center justify-between gap-2">
               <span className="text-sm font-mono text-indigo-300 truncate select-all">{newlyCreatedSession.meeting_link}</span>
               <button

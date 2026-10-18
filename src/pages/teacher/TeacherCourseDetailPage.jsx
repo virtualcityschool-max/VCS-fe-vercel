@@ -15,7 +15,7 @@ const Badge = ({ children, color = "slate" }) => {
     indigo: "bg-indigo-500/10 text-indigo-400 border-indigo-500/20",
   };
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${colors[color]}`}>
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider border ${colors[color]}`}>
       {children}
     </span>
   );
@@ -30,9 +30,9 @@ const MetaTile = ({ icon, label, value, valueClass = "text-white", delay = "0s" 
     <div className="relative z-10">
       <div className="flex items-center gap-2 mb-2">
         <div className="w-6 h-6 rounded-lg bg-slate-800/80 flex items-center justify-center border border-white/5 group-hover:scale-110 transition-transform duration-300">
-          <i className={`fas fa-${icon} text-slate-500 text-[10px] group-hover:text-indigo-400 transition-colors`} />
+          <i className={`fas fa-${icon} text-slate-500 text-xs group-hover:text-indigo-400 transition-colors`} />
         </div>
-        <p className="text-[9px] uppercase tracking-[0.15em] text-slate-500 font-bold">{label}</p>
+        <p className="text-xs uppercase tracking-[0.15em] text-slate-500 font-bold">{label}</p>
       </div>
       <p className={`text-sm font-bold truncate tracking-tight ${valueClass}`}>{value}</p>
     </div>
@@ -48,7 +48,7 @@ const SectionHeader = ({ icon, iconBg, title, count, action, noMargin }) => (
       <div>
         <h2 className="text-lg font-black font-poppins text-white tracking-tight">{title}</h2>
         {count != null && (
-          <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">{count} total</p>
+          <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">{count} total</p>
         )}
       </div>
     </div>
@@ -141,10 +141,10 @@ const TeacherCourseDetailPage = () => {
               onClick={() => navigate("/teacher/classes")}
               className="text-slate-500 hover:text-white transition-all flex items-center gap-2 group bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded-full border border-white/5"
             >
-              <i className="fas fa-arrow-left text-[10px] group-hover:-translate-x-1 transition-transform" />
+              <i className="fas fa-arrow-left text-xs group-hover:-translate-x-1 transition-transform" />
               <span className="font-semibold tracking-tight">My Courses</span>
             </button>
-            <i className="fas fa-chevron-right text-slate-700 text-[10px]" />
+            <i className="fas fa-chevron-right text-slate-700 text-xs" />
             <span className="text-white/60 font-medium truncate max-w-xs">{course.title}</span>
           </nav>
         </div>
@@ -167,7 +167,7 @@ const TeacherCourseDetailPage = () => {
             <div className="flex-1 min-w-0 lg:pt-1">
               <div className="flex flex-wrap items-center gap-3 mb-3">
                 <Badge color={course.status === "published" ? "green" : "slate"}>{course.status}</Badge>
-                <span className="px-3 py-1 bg-indigo-500/10 text-indigo-400 rounded-full text-[10px] font-bold uppercase tracking-widest border border-indigo-500/20">
+                <span className="px-3 py-1 bg-indigo-500/10 text-indigo-400 rounded-full text-xs font-bold uppercase tracking-widest border border-indigo-500/20">
                   {formatCategoryLabel(course.category)}
                 </span>
               </div>
@@ -193,7 +193,7 @@ const TeacherCourseDetailPage = () => {
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`flex-shrink-0 flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all capitalize ${
+              className={`flex-shrink-0 flex-1 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all capitalize ${
                 activeTab === tab ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30" : "text-slate-500 hover:text-white"
               }`}
             >
@@ -257,7 +257,7 @@ const TeacherCourseDetailPage = () => {
                   </div>
                   <div>
                     <h2 className="text-base font-black font-poppins text-white tracking-tight">Enrolled Students</h2>
-                    <p className="text-[10px] text-indigo-400 font-bold uppercase tracking-widest">{students.length} Total Enrolled</p>
+                    <p className="text-xs text-indigo-400 font-bold uppercase tracking-widest">{students.length} Total Enrolled</p>
                   </div>
                 </div>
                 <div className="p-4 space-y-3 overflow-y-auto custom-scrollbar flex-1">
@@ -277,7 +277,7 @@ const TeacherCourseDetailPage = () => {
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-white text-sm font-black font-poppins truncate group-hover:text-indigo-400 transition-colors leading-none mb-1">{student.username}</p>
-                          <p className="text-slate-500 text-[11px] font-medium truncate tracking-tight">{student.email}</p>
+                          <p className="text-slate-500 text-xs font-medium truncate tracking-tight">{student.email}</p>
                         </div>
                       </div>
                     ))
@@ -299,9 +299,9 @@ const TeacherCourseDetailPage = () => {
                     action={
                       <button
                         onClick={goToAssignments}
-                        className="flex items-center gap-2 px-3 py-1.5 bg-indigo-600/20 hover:bg-indigo-600 border border-indigo-500/30 text-indigo-400 hover:text-white text-[10px] font-bold uppercase tracking-widest rounded-xl transition-all"
+                        className="flex items-center gap-2 px-3 py-1.5 bg-indigo-600/20 hover:bg-indigo-600 border border-indigo-500/30 text-indigo-400 hover:text-white text-xs font-bold uppercase tracking-widest rounded-xl transition-all"
                       >
-                        <i className="fas fa-plus text-[9px]" /> Add
+                        <i className="fas fa-plus text-xs" /> Add
                       </button>
                     }
                   />
@@ -324,7 +324,7 @@ const TeacherCourseDetailPage = () => {
                           {a.description && (
                             <p className="text-slate-500 text-xs mb-1.5 line-clamp-1">{a.description}</p>
                           )}
-                          <div className="flex flex-wrap items-center gap-3 text-[11px] text-slate-500">
+                          <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500">
                             <span className="flex items-center gap-1">
                               <i className="fas fa-calendar-alt text-slate-600" />
                               Due: {formatDateTime(a.due_date)}
@@ -359,9 +359,9 @@ const TeacherCourseDetailPage = () => {
                     action={
                       <button
                         onClick={goToQuizzes}
-                        className="flex items-center gap-2 px-3 py-1.5 bg-violet-600/20 hover:bg-violet-600 border border-violet-500/30 text-violet-400 hover:text-white text-[10px] font-bold uppercase tracking-widest rounded-xl transition-all"
+                        className="flex items-center gap-2 px-3 py-1.5 bg-violet-600/20 hover:bg-violet-600 border border-violet-500/30 text-violet-400 hover:text-white text-xs font-bold uppercase tracking-widest rounded-xl transition-all"
                       >
-                        <i className="fas fa-plus text-[9px]" /> Add
+                        <i className="fas fa-plus text-xs" /> Add
                       </button>
                     }
                   />
@@ -381,7 +381,7 @@ const TeacherCourseDetailPage = () => {
                             {q.is_overdue && <Badge color="rose">Overdue</Badge>}
                             {q.is_published && !q.is_overdue && <Badge color="green">Published</Badge>}
                           </div>
-                          <div className="flex flex-wrap items-center gap-3 text-[11px] text-slate-500 mt-1">
+                          <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 mt-1">
                             <span className="flex items-center gap-1">
                               <i className="fas fa-calendar-alt text-slate-600" />
                               Due: {formatDateTime(q.due_date)}

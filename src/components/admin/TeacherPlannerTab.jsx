@@ -19,7 +19,7 @@ const StatusHeaderTooltip = () => {
     <>
        <i
         ref={ref}
-        className="fas fa-info-circle text-slate-600 text-[10px] cursor-default"
+        className="fas fa-info-circle text-slate-600 text-xs cursor-default"
         onMouseEnter={show}
         onMouseLeave={() => setPos(null)}
       />
@@ -28,7 +28,7 @@ const StatusHeaderTooltip = () => {
           className="fixed z-[9999] w-64 pointer-events-none"
           style={{ top: pos.top, left: pos.left, transform: "translate(-50%, calc(-100% - 10px))" }}
         >
-          <div className="bg-[#0E1428] border border-[#232D52] rounded-xl shadow-2xl px-3 py-2.5 text-[11px] text-slate-300 leading-relaxed">
+          <div className="bg-[#0E1428] border border-[#232D52] rounded-xl shadow-2xl px-3 py-2.5 text-xs text-slate-300 leading-relaxed">
             For recurring sessions, this is the first occurrence's status - not the overall series status.
           </div>
           <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-700 -mt-px" />
@@ -147,7 +147,7 @@ const TeacherMultiSelect = ({ teachers = [], selectedIds = [], onChange, error }
                   title={`Remove ${getDisplayName(t)}`}
                   className="hover:text-red-300 transition"
                 >
-                  <i className="fas fa-times text-[10px]"></i>
+                  <i className="fas fa-times text-xs"></i>
                 </button>
               </span>
             ))}
@@ -194,13 +194,13 @@ const TeacherMultiSelect = ({ teachers = [], selectedIds = [], onChange, error }
           {/* Selection summary */}
           {selected.length > 0 && (
             <div className="flex items-center justify-between px-3 py-1.5 bg-[#0B1020]/40 border-b border-[#232D52]">
-              <span className="text-[10px] font-black uppercase tracking-wider text-slate-500">
+              <span className="text-xs font-black uppercase tracking-wider text-slate-500">
                 {selected.length} selected
               </span>
               <button
                 type="button"
                 onClick={() => onChange([])}
-                className="text-[10px] font-black uppercase tracking-wider text-slate-400 hover:text-red-400 transition"
+                className="text-xs font-black uppercase tracking-wider text-slate-400 hover:text-red-400 transition"
               >
                 Clear all
               </button>
@@ -512,7 +512,7 @@ const TeacherPlannerTab = ({
                     <td className="px-5 py-4">
                       <p className="font-semibold text-white text-sm">{session.title}</p>
                       {session.is_child && (
-                        <span className="mt-1 inline-block px-1.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-[#1A2346]/60 text-slate-400 border border-[#232D52]/30">
+                        <span className="mt-1 inline-block px-1.5 py-0.5 rounded-full text-xs font-black uppercase tracking-widest bg-[#1A2346]/60 text-slate-400 border border-[#232D52]/30">
                           Child
                         </span>
                       )}

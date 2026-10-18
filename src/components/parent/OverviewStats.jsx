@@ -65,7 +65,7 @@ const OverviewStats = ({ dashboardData }) => {
                 {stat.value}
               </span>
             </div>
-            <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">
+            <p className="text-xs text-slate-400 font-black uppercase tracking-widest">
               {stat.label}
             </p>
           </div>

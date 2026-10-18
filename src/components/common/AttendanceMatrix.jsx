@@ -160,14 +160,14 @@ const AttendanceMatrix = ({
                   </div>
                   <div>
                     <p className="text-white text-sm font-semibold">{p.name}</p>
-                    {p.rollNo && <p className="text-slate-500 text-[10px] font-mono">Roll#: {p.rollNo}</p>}
+                    {p.rollNo && <p className="text-slate-500 text-xs font-mono">Roll#: {p.rollNo}</p>}
                   </div>
                 </div>
                 <div className="text-right">
                   <p className={`text-sm font-bold tabular-nums ${pctColor}`}>
                     {pct != null ? `${pct}%` : "-"}
                   </p>
-                  <p className="text-[11px] text-slate-500">{attended}/{total} sessions</p>
+                  <p className="text-xs text-slate-500">{attended}/{total} sessions</p>
                 </div>
               </div>
 
@@ -179,7 +179,7 @@ const AttendanceMatrix = ({
 
                   return (
                     <div key={group.key}>
-                      <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-2">
+                      <p className="text-xs text-slate-500 font-bold uppercase tracking-widest mb-2">
                         {group.label}
                       </p>
                       <div className="flex flex-wrap gap-1.5">
@@ -209,7 +209,7 @@ const AttendanceMatrix = ({
                                     </span>
                                   </>
                                 ) : (
-                                  <span className="text-[10px]">-</span>
+                                  <span className="text-xs">-</span>
                                 )
                               ) : isNoRecord ? (
                                 <span className="text-[12px] text-slate-600 select-none">-</span>
@@ -227,7 +227,7 @@ const AttendanceMatrix = ({
         })}
 
         {onEditRecord && (
-          <p className="text-[10px] text-slate-600 italic px-1">
+          <p className="text-xs text-slate-600 italic px-1">
             Tap a session chip to edit attendance
           </p>
         )}
@@ -242,7 +242,7 @@ const AttendanceMatrix = ({
               <tr className="border-b border-slate-800/40 bg-slate-900">
                 <th
                   rowSpan={3}
-                  className="sticky left-0 z-20 bg-slate-900 px-3 py-3 text-center text-[10px] uppercase tracking-widest text-slate-500 font-black border-r border-slate-800"
+                  className="sticky left-0 z-20 bg-slate-900 px-3 py-3 text-center text-xs uppercase tracking-widest text-slate-500 font-black border-r border-slate-800"
                   style={{ width: STUDENT_W, minWidth: STUDENT_W, maxWidth: STUDENT_W, ...leftShadow }}
                 >
                   {isStudent ? "Student" : "Tutor"}
@@ -250,14 +250,14 @@ const AttendanceMatrix = ({
 
                 <th
                   colSpan={sortedSessions.length}
-                  className="px-2 py-2 text-center text-[10px] font-black uppercase tracking-[0.3em] text-slate-600 border-r border-slate-800/50"
+                  className="px-2 py-2 text-center text-xs font-black uppercase tracking-[0.3em] text-slate-600 border-r border-slate-800/50"
                 >
                   Sessions
                 </th>
 
                 <th
                   rowSpan={3}
-                  className="sticky right-0 z-20 bg-slate-900 px-2 py-3 text-center text-[10px] uppercase tracking-widest text-slate-500 font-black border-l border-slate-800"
+                  className="sticky right-0 z-20 bg-slate-900 px-2 py-3 text-center text-xs uppercase tracking-widest text-slate-500 font-black border-l border-slate-800"
                   style={{ width: SUMMARY_W, minWidth: SUMMARY_W, maxWidth: SUMMARY_W, ...rightShadow }}
                 >
                   Summary
@@ -270,7 +270,7 @@ const AttendanceMatrix = ({
                   <th
                     key={g.key}
                     colSpan={g.count}
-                    className="px-2 py-2 text-center text-[11px] font-black text-slate-400 border-r border-slate-800/50 last:border-r-0 whitespace-nowrap uppercase tracking-widest bg-slate-800/30"
+                    className="px-2 py-2 text-center text-xs font-black text-slate-400 border-r border-slate-800/50 last:border-r-0 whitespace-nowrap uppercase tracking-widest bg-slate-800/30"
                   >
                     {g.label}
                   </th>
@@ -290,12 +290,12 @@ const AttendanceMatrix = ({
                       {d ? (
                         <>
                           <div className="text-[13px] font-black text-white leading-none">{d.getDate()}</div>
-                          <div className="text-[8px] text-slate-600 font-black uppercase mt-1 tracking-tighter">
+                          <div className="text-xs text-slate-600 font-black uppercase mt-1 tracking-tighter">
                             {d.toLocaleDateString([], { weekday: "short" })}
                           </div>
                         </>
                       ) : (
-                        <span className="text-slate-700 text-[10px]">-</span>
+                        <span className="text-slate-700 text-xs">-</span>
                       )}
                     </th>
                   );
@@ -328,13 +328,13 @@ const AttendanceMatrix = ({
                     >
                       <div className="flex items-center justify-start gap-2">
                         <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${isStudent ? "bg-indigo-600/20" : "bg-violet-600/20"}`}>
-                          <span className={`text-[10px] font-bold ${isStudent ? "text-indigo-400" : "text-violet-400"}`}>
+                          <span className={`text-xs font-bold ${isStudent ? "text-indigo-400" : "text-violet-400"}`}>
                             {(p.name || "?").charAt(0).toUpperCase()}
                           </span>
                         </div>
                         <div className="min-w-0">
-                          <p className="text-white text-[11px] font-semibold truncate">{p.name}</p>
-                          {p.rollNo && <p className="text-slate-500 text-[9px] font-mono">Roll#: {p.rollNo}</p>}
+                          <p className="text-white text-xs font-semibold truncate">{p.name}</p>
+                          {p.rollNo && <p className="text-slate-500 text-xs font-mono">Roll#: {p.rollNo}</p>}
                         </div>
                       </div>
                     </td>
@@ -356,12 +356,12 @@ const AttendanceMatrix = ({
                         >
                           {cfg ? (
                             <div className="relative inline-flex group/cell">
-                              <span className={`inline-flex items-center justify-center w-7 h-7 rounded-lg text-[11px] font-bold border select-none ${cfg.cls} ${editable ? "hover:ring-1 hover:ring-white/20" : ""}`}>
+                              <span className={`inline-flex items-center justify-center w-7 h-7 rounded-lg text-xs font-bold border select-none ${cfg.cls} ${editable ? "hover:ring-1 hover:ring-white/20" : ""}`}>
                                 {cfg.letter}
                               </span>
                               {/* Hover tooltip */}
                               <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-40 opacity-0 group-hover/cell:opacity-100 -translate-y-0.5 group-hover/cell:translate-y-0 transition-all duration-150 whitespace-nowrap">
-                                <div className="bg-slate-800 border border-slate-700 rounded-xl shadow-2xl px-3 py-2 text-center text-[11px] space-y-1 min-w-[200px]">
+                                <div className="bg-slate-800 border border-slate-700 rounded-xl shadow-2xl px-3 py-2 text-center text-xs space-y-1 min-w-[200px]">
                                   <p className="font-bold capitalize text-white">{record?.status}</p>
                                   <p className="text-slate-400 flex items-center gap-1.5">
                                     Joined At: {joinedStr ?? "-"}
@@ -392,7 +392,7 @@ const AttendanceMatrix = ({
                       <div className="text-xs font-bold text-white tabular-nums leading-none">
                         {attended}<span className="text-slate-500 font-normal">/{total}</span>
                       </div>
-                      <div className={`text-[10px] font-semibold tabular-nums mt-1 ${pctColor}`}>
+                      <div className={`text-xs font-semibold tabular-nums mt-1 ${pctColor}`}>
                         {pct != null ? `${pct}%` : "-"}
                       </div>
                     </td>
@@ -404,7 +404,7 @@ const AttendanceMatrix = ({
         </div>
 
         {onEditRecord && (
-          <p className="text-[10px] text-slate-600 italic px-5 py-2.5 border-t border-slate-800/50">
+          <p className="text-xs text-slate-600 italic px-5 py-2.5 border-t border-slate-800/50">
             Click a marked cell to edit attendance
           </p>
         )}

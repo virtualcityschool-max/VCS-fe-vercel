@@ -19,7 +19,7 @@ const PreviewButton = ({ url, className = "" }) => {
         onClick={() => setOpen(true)}
         className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-700/40 hover:bg-slate-700 text-slate-400 hover:text-white text-xs font-semibold transition border border-slate-600/30 ${className}`}
       >
-        <i className="fas fa-eye text-[10px]" />
+        <i className="fas fa-eye text-xs" />
         Preview
       </button>
       {open && <FileViewerModal filePath={url} handleClose={() => setOpen(false)} />}
@@ -154,7 +154,7 @@ const StudentAssignmentDetails = () => {
               className="group flex items-center gap-2 text-sm text-slate-500 hover:text-indigo-400 transition-colors"
             >
               <div className="w-8 h-8 rounded-full bg-slate-800/50 flex items-center justify-center group-hover:bg-indigo-500/10">
-                <i className="fas fa-arrow-left text-[10px]"></i>
+                <i className="fas fa-arrow-left text-xs"></i>
               </div>
               Back to Assignments
             </button>
@@ -173,9 +173,9 @@ const StudentAssignmentDetails = () => {
 
           <div className="flex items-center gap-3">
              <div className="flex flex-col items-end">
-                {/* <span className="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1">Status</span> */}
+                {/* <span className="text-xs text-slate-500 uppercase font-black tracking-widest mb-1">Status</span> */}
                 <span
-                  className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg ${
+                  className={`px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest shadow-lg ${
                     isOverdue
                       ? "bg-red-500/10 text-red-400 border border-red-500/20"
                       : isSubmitted
@@ -211,7 +211,7 @@ const StudentAssignmentDetails = () => {
               
               {assignment.file_url && (
                 <div className="mt-8 pt-6 border-t border-slate-800/50">
-                  <p className="text-[10px] text-slate-500 uppercase font-black mb-3">Attachment</p>
+                  <p className="text-xs text-slate-500 uppercase font-black mb-3">Attachment</p>
                   <PreviewButton 
                     url={getStorageUrl(assignment.file_url)} 
                     className="!bg-indigo-600/10 !text-indigo-400 !border-indigo-500/20 hover:!bg-indigo-600 hover:!text-white"
@@ -246,7 +246,7 @@ const StudentAssignmentDetails = () => {
                     <div className="flex flex-wrap items-center justify-between gap-4">
                       {(assignment.my_submission?.file_url || assignment.my_submission?.file) && (
                         <div className="flex flex-col gap-2">
-                          <span className="text-[10px] text-slate-500 uppercase font-black">Submitted File</span>
+                          <span className="text-xs text-slate-500 uppercase font-black">Submitted File</span>
                           <PreviewButton
                             url={getStorageUrl(assignment.my_submission.file_url ?? assignment.my_submission.file)}
                             className="!bg-emerald-500/10 !text-emerald-400 !border-emerald-500/20"
@@ -258,7 +258,7 @@ const StudentAssignmentDetails = () => {
                         <div className="flex items-center gap-3 bg-slate-800/30 px-4 py-2 rounded-xl border border-slate-800/50">
                           <i className="fas fa-calendar-check text-indigo-400/70 text-xs"></i>
                           <div className="flex flex-col">
-                            <span className="text-[9px] text-slate-500 uppercase font-black">Submitted On</span>
+                            <span className="text-xs text-slate-500 uppercase font-black">Submitted On</span>
                             <span className="text-xs text-slate-300 font-bold">
                               {formatDateTime(assignment.my_submission.submitted_at)}
                             </span>
@@ -337,10 +337,10 @@ const StudentAssignmentDetails = () => {
                         
                         <div className="flex items-center gap-2.5 relative z-10 min-w-0">
                           <div className="w-7 h-7 rounded-lg bg-slate-800 flex items-center justify-center group-hover:bg-indigo-500 group-hover:text-white transition-all duration-300 shadow-lg shrink-0">
-                            <i className="fas fa-cloud-upload-alt text-[10px]"></i>
+                            <i className="fas fa-cloud-upload-alt text-xs"></i>
                           </div>
                           <div className="flex items-center gap-2.5 min-w-0">
-                            <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 group-hover:text-white transition-colors whitespace-nowrap">
+                            <span className="text-xs font-black uppercase tracking-widest text-slate-400 group-hover:text-white transition-colors whitespace-nowrap">
                               {file ? "Change" : "Attach"}
                             </span>
                             <div className="flex items-center gap-1 shrink-0">
@@ -354,7 +354,7 @@ const StudentAssignmentDetails = () => {
                         </div>
                         
                         {file && (
-                          <span className="text-[9px] font-bold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-md border border-indigo-500/20 animate-fadeIn relative z-10 truncate max-w-[120px] ml-auto">
+                          <span className="text-xs font-bold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-md border border-indigo-500/20 animate-fadeIn relative z-10 truncate max-w-[120px] ml-auto">
                             {file.name}
                           </span>
                         )}
@@ -365,12 +365,12 @@ const StudentAssignmentDetails = () => {
                       type="button"
                       onClick={handleSubmit}
                       disabled={isSubmittingAssignment}
-                      className="sm:w-36 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-black transition-all shadow-lg shadow-indigo-600/20 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98] text-[9px] uppercase tracking-[0.2em] flex items-center justify-center gap-2.5 px-6 py-3 shrink-0"
+                      className="sm:w-36 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-black transition-all shadow-lg shadow-indigo-600/20 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98] text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-2.5 px-6 py-3 shrink-0"
                     >
                       {isSubmittingAssignment ? (
-                        <i className="fas fa-spinner animate-spin text-[10px]"></i>
+                        <i className="fas fa-spinner animate-spin text-xs"></i>
                       ) : (
-                        <i className="fas fa-paper-plane text-[9px]"></i>
+                        <i className="fas fa-paper-plane text-xs"></i>
                       )}
                       <span>{isSubmittingAssignment ? "Wait" : "Submit"}</span>
                     </button>
@@ -386,7 +386,7 @@ const StudentAssignmentDetails = () => {
                           <p className="text-sm font-bold text-white truncate">
                             {file.name}
                           </p>
-                          <p className="text-[10px] text-slate-500 font-black uppercase">
+                          <p className="text-xs text-slate-500 font-black uppercase">
                             {(file.size / (1024 * 1024)).toFixed(2)} MB
                           </p>
                         </div>
@@ -416,13 +416,13 @@ const StudentAssignmentDetails = () => {
                   <i className="far fa-calendar-alt text-xl"></i>
                 </div>
                 <div>
-                  <p className="text-[10px] uppercase tracking-widest text-slate-500 font-black mb-1">
+                  <p className="text-xs uppercase tracking-widest text-slate-500 font-black mb-1">
                     Due Date
                   </p>
                   <p className="text-sm text-white font-bold leading-none">
                     {formatDate(assignment.due_date)}
                   </p>
-                  <p className="text-[10px] text-slate-400 mt-1">
+                  <p className="text-xs text-slate-400 mt-1">
                     {formatTime(assignment.due_date)}
                   </p>
                 </div>
@@ -436,7 +436,7 @@ const StudentAssignmentDetails = () => {
                   <i className={`fas ${assignment.my_submission?.is_graded ? "fa-check-double" : "fa-star"} text-xl`}></i>
                 </div>
                 <div>
-                  <p className="text-[10px] uppercase tracking-widest text-slate-500 font-black mb-1">
+                  <p className="text-xs uppercase tracking-widest text-slate-500 font-black mb-1">
                     {assignment.my_submission?.is_graded ? "Marks Obtained" : "Total Marks"}
                   </p>
                   <p className="text-sm text-white font-bold leading-none">
@@ -449,7 +449,7 @@ const StudentAssignmentDetails = () => {
                       `${assignment.max_score} Points`
                     )}
                   </p>
-                  <p className="text-[10px] text-slate-400 mt-1">
+                  <p className="text-xs text-slate-400 mt-1">
                     {assignment.my_submission?.is_graded ? "Evaluation result" : "Maximum grade"}
                   </p>
                 </div>
@@ -461,13 +461,13 @@ const StudentAssignmentDetails = () => {
                   <i className="fas fa-user-tie text-xl"></i>
                 </div>
                 <div>
-                  <p className="text-[10px] uppercase tracking-widest text-slate-500 font-black mb-1">
+                  <p className="text-xs uppercase tracking-widest text-slate-500 font-black mb-1">
                     Posted By
                   </p>
                   <p className="text-sm text-white font-bold leading-none">
                     {assignment.created_by_name}
                   </p>
-                  <p className="text-[10px] text-slate-400 mt-1">Subject Tutor</p>
+                  <p className="text-xs text-slate-400 mt-1">Subject Tutor</p>
                 </div>
               </div>
 
@@ -477,13 +477,13 @@ const StudentAssignmentDetails = () => {
                   <i className="fas fa-book text-xl"></i>
                 </div>
                 <div>
-                  <p className="text-[10px] uppercase tracking-widest text-slate-500 font-black mb-1">
+                  <p className="text-xs uppercase tracking-widest text-slate-500 font-black mb-1">
                     Subject / Course
                   </p>
                   <p className="text-sm text-white font-bold leading-none">
                     {assignment.course_title}
                   </p>
-                  <p className="text-[10px] text-slate-400 mt-1">Enrolled Course</p>
+                  <p className="text-xs text-slate-400 mt-1">Enrolled Course</p>
                 </div>
               </div>
             </div>

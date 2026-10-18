@@ -30,7 +30,7 @@ const splitPhone = (digits) => {
 
 const inputCls =
   "w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm";
-const labelCls = "text-[11px] font-bold uppercase text-slate-400 tracking-wider mb-1.5 block";
+const labelCls = "text-xs font-bold uppercase text-slate-400 tracking-wider mb-1.5 block";
 
 const CompleteProfileGate = () => {
   const dispatch = useDispatch();

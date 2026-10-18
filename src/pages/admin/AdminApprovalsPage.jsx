@@ -372,7 +372,7 @@ const AdminApprovalsPage = () => {
               <i className="fas fa-user-graduate"></i>
               Standard Enrollment
               {pendingEnrollments?.length > 0 && (
-                <span className="bg-slate-700 text-white text-[10px] px-1.5 py-0.5 rounded-full">
+                <span className="bg-slate-700 text-white text-xs px-1.5 py-0.5 rounded-full">
                   {pendingEnrollments.length}
                 </span>
               )}
@@ -388,7 +388,7 @@ const AdminApprovalsPage = () => {
               <i className="fas fa-hand-holding-heart"></i>
               Free Access
               {freeAccessPendingCount > 0 && (
-                <span className="bg-slate-700 text-white text-[10px] px-1.5 py-0.5 rounded-full">
+                <span className="bg-slate-700 text-white text-xs px-1.5 py-0.5 rounded-full">
                   {freeAccessPendingCount}
                 </span>
               )}

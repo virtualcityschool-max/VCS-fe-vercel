@@ -92,7 +92,7 @@ const AdminTestimonialsPage = () => {
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="text-[10px] text-slate-500 hover:text-white font-black uppercase tracking-widest transition-all"
+                  className="text-xs text-slate-500 hover:text-white font-black uppercase tracking-widest transition-all"
                 >
                   Cancel
                 </button>
@@ -100,7 +100,7 @@ const AdminTestimonialsPage = () => {
             </div>
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div>
-                <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">
+                <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">
                   Quote
                 </label>
                 <textarea
@@ -113,7 +113,7 @@ const AdminTestimonialsPage = () => {
                 />
               </div>
               <div>
-                <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">
+                <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">
                   Name
                 </label>
                 <input
@@ -125,7 +125,7 @@ const AdminTestimonialsPage = () => {
                 />
               </div>
               <div>
-                <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">
+                <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">
                   Role
                 </label>
                 <input
@@ -179,7 +179,7 @@ const AdminTestimonialsPage = () => {
                 </div>
                 <h3 className="text-xs font-black text-white uppercase tracking-widest">Testimonials</h3>
               </div>
-              <div className="px-4 py-1.5 bg-slate-950/50 rounded-full text-[10px] font-black text-slate-500 border border-slate-800 uppercase tracking-widest">
+              <div className="px-4 py-1.5 bg-slate-950/50 rounded-full text-xs font-black text-slate-500 border border-slate-800 uppercase tracking-widest">
                 {testimonials.length} Items
               </div>
             </div>
@@ -188,7 +188,7 @@ const AdminTestimonialsPage = () => {
               {isLoading ? (
                 <div className="flex flex-col items-center justify-center py-32 gap-6">
                   <div className="w-12 h-12 border-4 border-indigo-500/10 border-t-indigo-500 rounded-full animate-spin" />
-                  <p className="text-slate-600 font-black text-[10px] uppercase tracking-[0.3em]">Loading...</p>
+                  <p className="text-slate-600 font-black text-xs uppercase tracking-[0.3em]">Loading...</p>
                 </div>
               ) : testimonials.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-32 gap-6 text-center px-10">
@@ -217,13 +217,13 @@ const AdminTestimonialsPage = () => {
                           <div className="flex items-center gap-3 shrink-0">
                             <button
                               onClick={() => handleDelete(t.id)}
-                              className="text-[10px] bg-red-600 hover:bg-red-500 text-white px-5 py-2 rounded-xl font-black uppercase tracking-widest transition-all"
+                              className="text-xs bg-red-600 hover:bg-red-500 text-white px-5 py-2 rounded-xl font-black uppercase tracking-widest transition-all"
                             >
                               Delete
                             </button>
                             <button
                               onClick={() => setConfirmDeleteId(null)}
-                              className="text-[10px] text-slate-500 hover:text-white font-black uppercase tracking-widest transition-all"
+                              className="text-xs text-slate-500 hover:text-white font-black uppercase tracking-widest transition-all"
                             >
                               Cancel
                             </button>
@@ -238,7 +238,7 @@ const AdminTestimonialsPage = () => {
                               <span className="text-slate-500 font-medium">- {t.role}</span>
                             </p>
                             <span
-                              className={`mt-2 inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full ${
+                              className={`mt-2 inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-widest px-2.5 py-1 rounded-full ${
                                 t.published
                                   ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
                                   : "bg-slate-800 text-slate-500 border border-slate-700"

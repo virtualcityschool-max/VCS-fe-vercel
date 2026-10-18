@@ -92,11 +92,11 @@ const CourseProgressGrid = () => {
                   : "bg-slate-800/40 text-slate-400 hover:bg-slate-800 hover:text-white border border-white/5"
               }`}
             >
-              <span className="text-[10px] font-black uppercase tracking-widest whitespace-nowrap">
+              <span className="text-xs font-black uppercase tracking-widest whitespace-nowrap">
                 {tab.label}
               </span>
               {tab.count > 0 && (
-                <span className={`flex items-center justify-center min-w-[18px] h-4.5 px-1 rounded-md text-[9px] font-black ${
+                <span className={`flex items-center justify-center min-w-[18px] h-4.5 px-1 rounded-md text-xs font-black ${
                   activeTab === tab.id ? "bg-white/20 text-white" : "bg-slate-700 text-slate-300"
                 }`}>
                   {tab.count}
@@ -135,10 +135,10 @@ const CourseProgressGrid = () => {
               <div className="w-14 h-14 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:border-blue-500/20 group-hover:bg-blue-500/10 transition-all duration-500 text-slate-500 group-hover:text-blue-400">
                 <i className="fas fa-plus text-xl"></i>
               </div>
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 group-hover:text-blue-400/80 text-center transition-colors">
+              <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 group-hover:text-blue-400/80 text-center transition-colors">
                 Explore Courses
               </p>
-              <p className="text-[10px] text-slate-600 mt-2 text-center opacity-0 group-hover:opacity-100 transition-opacity">
+              <p className="text-xs text-slate-600 mt-2 text-center opacity-0 group-hover:opacity-100 transition-opacity">
                 Discover new learning paths
               </p>
             </div>

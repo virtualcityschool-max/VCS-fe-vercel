@@ -185,7 +185,7 @@ const CourseCategoriesModal = ({ onClose, onCategoriesChanged, initialEditId, in
 
         {/* Add new */}
         <div className="px-6 pt-3 pb-4 border-t border-slate-800">
-          <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-2">
+          <p className="text-xs uppercase tracking-widest text-slate-500 font-bold mb-2">
             Add New Level
           </p>
           <div className="flex gap-2">
@@ -420,7 +420,7 @@ const CoursesTab = ({
       cell: (c) => (
         <div className="min-w-[220px] max-w-[320px]">
           <div className="font-semibold text-slate-100 truncate">{c.title}</div>
-          <div className="text-[11px] text-slate-400 truncate">{(c.description || "").replace(/<[^>]+>/g, "").slice(0, 80)}</div>
+          <div className="text-xs text-slate-400 truncate">{(c.description || "").replace(/<[^>]+>/g, "").slice(0, 80)}</div>
         </div>
       ),
     },
@@ -435,7 +435,7 @@ const CoursesTab = ({
             <span className="text-slate-200 whitespace-nowrap">{getDisplayName(c.instructor)}</span>
           </button>
         ) : (
-          <button type="button" onClick={(e) => { e.stopPropagation(); openAssign(c); }} className="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/30 hover:bg-amber-500/25 whitespace-nowrap">
+          <button type="button" onClick={(e) => { e.stopPropagation(); openAssign(c); }} className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/30 hover:bg-amber-500/25 whitespace-nowrap">
             + Assign teacher
           </button>
         ),
@@ -446,7 +446,7 @@ const CoursesTab = ({
       align: "right",
       cell: (c) => (
         <button type="button" onClick={(e) => { e.stopPropagation(); setSelectedRosterCourse({ id: c.id, title: c.title }); }} className="px-2.5 py-1 rounded-lg bg-indigo-500/15 text-indigo-300 hover:bg-indigo-500/25 tabular-nums text-xs font-semibold" title="See enrolled students">
-          <i className="fas fa-users text-[10px] mr-1" aria-hidden="true" />{c.enrolled_students_count ?? 0}
+          <i className="fas fa-users text-xs mr-1" aria-hidden="true" />{c.enrolled_students_count ?? 0}
         </button>
       ),
     },

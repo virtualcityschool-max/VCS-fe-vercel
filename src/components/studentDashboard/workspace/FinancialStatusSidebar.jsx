@@ -105,9 +105,9 @@ const FinancialStatusSidebar = ({
 
           <div className="min-w-0 flex-1">
             <h4 className="text-sm font-bold text-white truncate">{displayName}</h4>
-            <p className="text-[11px] text-slate-400 truncate">{gradeLevel}</p>
+            <p className="text-xs text-slate-400 truncate">{gradeLevel}</p>
             {rollNo && (
-              <p className="text-[10px] text-indigo-400 font-mono mt-0.5">
+              <p className="text-xs text-indigo-400 font-mono mt-0.5">
                 Roll #{rollNo}
               </p>
             )}
@@ -119,7 +119,7 @@ const FinancialStatusSidebar = ({
           onClick={() => avatarInputRef.current?.click()}
           className="mt-3.5 w-full py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white text-xs font-semibold flex items-center justify-center gap-2 transition cursor-pointer"
         >
-          <i className="fas fa-camera text-[11px] text-indigo-400" />
+          <i className="fas fa-camera text-xs text-indigo-400" />
           <span>{avatarUrl ? "Change Profile Photo" : "Add Student Photo"}</span>
         </button>
       </div>

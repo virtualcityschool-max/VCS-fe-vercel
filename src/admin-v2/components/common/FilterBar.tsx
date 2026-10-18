@@ -89,7 +89,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                   </option>
                 ))}
               </select>
-              <div className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-[10px]">
+              <div className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs">
                 ▼
               </div>
             </div>
@@ -109,7 +109,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                 ))}
               </select>
               <ArrowUpDown className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-              <div className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-[10px]">
+              <div className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs">
                 ▼
               </div>
             </div>

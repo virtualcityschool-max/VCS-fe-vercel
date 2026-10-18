@@ -168,7 +168,7 @@ const PeopleDirectory = ({ role, users, loading, onCreate, onView, onEdit, onTog
       <Avatar name={r.name} />
       <div className="min-w-0">
         <div className="font-semibold text-slate-100 truncate">{r.name}</div>
-        <div className="text-[11px] text-slate-400 truncate">{r.email}</div>
+        <div className="text-xs text-slate-400 truncate">{r.email}</div>
       </div>
     </div>
   );
@@ -194,7 +194,7 @@ const PeopleDirectory = ({ role, users, loading, onCreate, onView, onEdit, onTog
       { header: "Roll #", cell: (r) => <span className="tabular-nums text-slate-300">{r.roll_no || "—"}</span> },
       { header: "Level", cell: (r) => <span className="text-slate-300 whitespace-nowrap">{r.grade_level || "—"}</span> },
       { header: "Enrolled subjects", cell: (r) => <SubjectChips titles={r.subjects} empty="Not enrolled" /> },
-      { header: "Parent", cell: (r) => (r.guardian?.name ? <div className="whitespace-nowrap"><div className="text-slate-200">{r.guardian.name}</div><div className="text-[11px] text-slate-400 tabular-nums">{r.guardian.phone || ""}</div></div> : <span className="text-slate-500">—</span>) },
+      { header: "Parent", cell: (r) => (r.guardian?.name ? <div className="whitespace-nowrap"><div className="text-slate-200">{r.guardian.name}</div><div className="text-xs text-slate-400 tabular-nums">{r.guardian.phone || ""}</div></div> : <span className="text-slate-500">—</span>) },
       { header: "Fees", cell: (r) => <StatusPill status={r.feeLabel} /> },
       { header: "Latest enrollment", cell: (r) => <span className="text-slate-400 whitespace-nowrap tabular-nums">{fmtDate(r.latest)}</span> },
       { header: "Status", cell: (r) => <StatusPill status={r.status} /> },
@@ -203,7 +203,7 @@ const PeopleDirectory = ({ role, users, loading, onCreate, onView, onEdit, onTog
       { header: "Teacher", cell: personCell },
       { header: "Department", cell: (r) => <DeptPill dept={r.dept} /> },
       { header: "Assigned subjects", cell: (r) => <SubjectChips titles={r.subjects} empty="Standby pool" /> },
-      { header: "Experience & qualification", cell: (r) => <div className="min-w-[160px]"><div className="font-semibold text-slate-200">{r.experience_years ? `${r.experience_years} yr${r.experience_years === 1 ? "" : "s"} experience` : "—"}</div><div className="text-[11px] text-slate-400 truncate max-w-[220px]">{r.qualification || r.expertise || ""}</div></div> },
+      { header: "Experience & qualification", cell: (r) => <div className="min-w-[160px]"><div className="font-semibold text-slate-200">{r.experience_years ? `${r.experience_years} yr${r.experience_years === 1 ? "" : "s"} experience` : "—"}</div><div className="text-xs text-slate-400 truncate max-w-[220px]">{r.qualification || r.expertise || ""}</div></div> },
       { header: "Phone", cell: (r) => phoneCell(r.phone) },
       { header: "Status", cell: (r) => <StatusPill status={r.engaged ? "Engaged" : "Standby"} /> },
     ],
@@ -215,12 +215,12 @@ const PeopleDirectory = ({ role, users, loading, onCreate, onView, onEdit, onTog
         cell: (r) => (r.linked_children?.length ? (
           <div className="flex flex-wrap gap-1.5">
             {r.linked_children.map((c) => (
-              <span key={c.id} className="px-2 py-0.5 rounded-lg text-[11px] bg-slate-800 border border-slate-700 text-slate-200 whitespace-nowrap">
+              <span key={c.id} className="px-2 py-0.5 rounded-lg text-xs bg-slate-800 border border-slate-700 text-slate-200 whitespace-nowrap">
                 {c.name}{c.roll_no ? <span className="text-slate-400"> · #{c.roll_no}</span> : null}
               </span>
             ))}
           </div>
-        ) : <span className="text-slate-500 text-[11px] italic">No children linked</span>),
+        ) : <span className="text-slate-500 text-xs italic">No children linked</span>),
       },
       { header: "Joined", cell: (r) => <span className="text-slate-400 whitespace-nowrap">{fmtDate(r.date_joined)}</span> },
       { header: "Status", cell: (r) => <StatusPill status={r.status} /> },

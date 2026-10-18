@@ -112,7 +112,7 @@ export const TeachersView: React.FC = () => {
           </div>
           <div className="truncate">
             <div className="font-semibold text-slate-100">{row.name}</div>
-            <div className="text-[11px] text-slate-400 font-mono truncate">{row.email}</div>
+            <div className="text-xs text-slate-400 font-mono truncate">{row.email}</div>
           </div>
         </div>
       ),
@@ -149,7 +149,7 @@ export const TeachersView: React.FC = () => {
           title={canEdit ? 'Show on the homepage and the subjects they offer' : undefined}
         >
           <div className={`text-xs font-semibold ${row.showOnHomepage ? 'text-violet-300' : 'text-slate-500'}`}>{row.showOnHomepage ? 'Shown' : 'Hidden'}</div>
-          <div className="text-[11px] text-slate-500">{(row.offeredCourseIds || []).length} subject{(row.offeredCourseIds || []).length === 1 ? '' : 's'} offered</div>
+          <div className="text-xs text-slate-500">{(row.offeredCourseIds || []).length} subject{(row.offeredCourseIds || []).length === 1 ? '' : 's'} offered</div>
         </button>
       ),
     },
@@ -163,18 +163,18 @@ export const TeachersView: React.FC = () => {
             {assigned.slice(0, 2).map((s) => (
               <span
                 key={s.id}
-                className="px-2 py-0.5 rounded text-[11px] font-mono bg-slate-800 text-slate-300 border border-slate-700"
+                className="px-2 py-0.5 rounded text-xs font-mono bg-slate-800 text-slate-300 border border-slate-700"
               >
                 {subjectChip(s)}
               </span>
             ))}
             {assigned.length > 2 && (
-              <span className="px-1.5 py-0.5 rounded text-[10px] bg-indigo-500/15 text-indigo-300 font-mono font-medium">
+              <span className="px-1.5 py-0.5 rounded text-xs bg-indigo-500/15 text-indigo-300 font-mono font-medium">
                 +{assigned.length - 2} more
               </span>
             )}
             {assigned.length === 0 && (
-              <span className="text-slate-500 text-[11px] italic">{row.status === 'Showcase' ? 'Showcase only' : 'Not teaching yet'}</span>
+              <span className="text-slate-500 text-xs italic">{row.status === 'Showcase' ? 'Showcase only' : 'Not teaching yet'}</span>
             )}
           </div>
         );
@@ -185,7 +185,7 @@ export const TeachersView: React.FC = () => {
       cell: (row) => (
         <div>
           <div className="font-semibold text-slate-200">{row.experienceYears} Years Exp</div>
-          <div className="text-[11px] text-slate-400 truncate max-w-xs">{row.qualification}</div>
+          <div className="text-xs text-slate-400 truncate max-w-xs">{row.qualification}</div>
         </div>
       ),
     },
@@ -256,7 +256,7 @@ export const TeachersView: React.FC = () => {
           >
             <span>{tab.label}</span>
             <span
-              className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${
+              className={`px-1.5 py-0.2 rounded-full text-xs font-mono ${
                 activeTab === tab.id ? 'bg-white/20 text-white' : 'bg-slate-800 text-slate-400'
               }`}
             >
@@ -388,7 +388,7 @@ export const TeachersView: React.FC = () => {
           <div className="w-full max-w-lg rounded-2xl border border-[#232D52] bg-[#121831] p-5 space-y-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <div>
               <h3 className="text-sm font-bold text-white">Homepage showcase: {showcaseFor.name}</h3>
-              <p className="text-[11px] text-slate-400 mt-1">What the public website shows. This is not an allocation: use Teacher Allocations only when classes actually run.</p>
+              <p className="text-xs text-slate-400 mt-1">What the public website shows. This is not an allocation: use Teacher Allocations only when classes actually run.</p>
             </div>
             <label className="flex items-center gap-2 text-xs text-slate-200 cursor-pointer">
               <input type="checkbox" checked={showcaseOn} onChange={(e) => setShowcaseOn(e.target.checked)} />

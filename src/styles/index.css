@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "./light-theme.generated.css";
+@import "./light-theme.manual.css";
 
 /* Clickable elements should always show the pointer cursor. Tailwind v4's
    preflight leaves buttons as the default arrow, so restore it globally. */

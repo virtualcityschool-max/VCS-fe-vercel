@@ -36,7 +36,7 @@ const GradingForm = ({ selectedSubmission, onSubmit, onCancel, assignmentMaxScor
       <div className="grid grid-cols-1 sm:grid-cols-[auto_1fr] gap-4 items-start">
         {/* Score */}
         <div>
-          <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">
+          <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">
             Score
           </label>
           <div className="flex items-center gap-2.5">
@@ -69,7 +69,7 @@ const GradingForm = ({ selectedSubmission, onSubmit, onCancel, assignmentMaxScor
             )}
           </div>
           {scoreError && (
-            <p className="mt-2 text-[10px] text-red-400 font-bold flex items-center gap-1.5">
+            <p className="mt-2 text-xs text-red-400 font-bold flex items-center gap-1.5">
               <i className="fas fa-exclamation-circle" />
               {scoreError}
             </p>
@@ -78,7 +78,7 @@ const GradingForm = ({ selectedSubmission, onSubmit, onCancel, assignmentMaxScor
 
         {/* Feedback */}
         <div>
-          <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">
+          <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">
             Feedback
           </label>
           <textarea

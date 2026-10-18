@@ -103,14 +103,14 @@ const RecentActivity = ({ activities }) => {
                     </p>
                   </div>
                   {activity.course && (
-                    <p className="text-[10px] text-slate-500 font-medium truncate uppercase tracking-wider">
+                    <p className="text-xs text-slate-500 font-medium truncate uppercase tracking-wider">
                       {activity.course}
                     </p>
                   )}
                 </div>
               </div>
-              <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest flex items-center gap-2">
-                <i className="far fa-clock text-[9px]" />
+              <p className="text-xs text-slate-500 font-black uppercase tracking-widest flex items-center gap-2">
+                <i className="far fa-clock text-xs" />
                 {formatTime(activity.time)}
               </p>
             </div>

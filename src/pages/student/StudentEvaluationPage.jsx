@@ -50,20 +50,20 @@ const StudentEvaluationPage = () => {
                     <button
                       key={c.id}
                       onClick={() => setSelectedCourseId(String(c.id))}
-                      className={`flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.1em] transition-all duration-300 whitespace-nowrap active:scale-95 shrink-0 ${
+                      className={`flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-[0.1em] transition-all duration-300 whitespace-nowrap active:scale-95 shrink-0 ${
                         String(selectedCourseId) === String(c.id)
                           ? "bg-indigo-600 text-white shadow-xl shadow-indigo-600/40"
                           : "text-slate-500 hover:text-slate-300 hover:bg-white/5"
                       }`}
                     >
-                      <i className={`fas fa-graduation-cap text-[11px] transition-opacity ${
+                      <i className={`fas fa-graduation-cap text-xs transition-opacity ${
                         String(selectedCourseId) === String(c.id) ? "opacity-100" : "opacity-40"
                       }`}></i>
                       <span>{c.title}</span>
                     </button>
                   ))
                 ) : (
-                  <div className="px-4 py-2 text-[10px] uppercase tracking-widest text-slate-600 font-bold italic">
+                  <div className="px-4 py-2 text-xs uppercase tracking-widest text-slate-600 font-bold italic">
                     No courses available
                   </div>
                 )}

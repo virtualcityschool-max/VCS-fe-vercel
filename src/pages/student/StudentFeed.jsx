@@ -26,7 +26,7 @@ const StudentFeed = () => {
                 Student • Grade 12
               </p>
 
-              <div className="flex justify-between border-t border-slate-700/50 pt-6 text-[10px] font-black uppercase tracking-widest text-slate-500">
+              <div className="flex justify-between border-t border-slate-700/50 pt-6 text-xs font-black uppercase tracking-widest text-slate-500">
                 <div className="text-center">
                   <p>Connections</p>
                   <p className="text-white text-lg mt-1">1,204</p>
@@ -41,7 +41,7 @@ const StudentFeed = () => {
           </div>
 
           <div className="bg-slate-800/30 rounded-4xl p-8 border border-slate-700">
-            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-6">
+            <h4 className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 mb-6">
               Shortcuts
             </h4>
             <nav className="space-y-4">
@@ -96,11 +96,11 @@ const StudentFeed = () => {
                 <div>
                   <h4 className="font-bold text-sm text-white">
                     VirtualCity Admin{" "}
-                    <span className="text-emerald-500 text-[10px] ml-2 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+                    <span className="text-emerald-500 text-xs ml-2 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
                       Official
                     </span>
                   </h4>
-                  <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest">
+                  <p className="text-xs text-slate-500 font-black uppercase tracking-widest">
                     Campus News • 45m ago
                   </p>
                 </div>
@@ -126,7 +126,7 @@ const StudentFeed = () => {
                     <p className="text-xs font-bold text-slate-200">
                       Exam_Schedule_Winter_2025.pdf
                     </p>
-                    <p className="text-[9px] text-slate-600 uppercase font-black">
+                    <p className="text-xs text-slate-600 uppercase font-black">
                       2.4 MB • PDF Document
                     </p>
                   </div>
@@ -134,7 +134,7 @@ const StudentFeed = () => {
                 <i className="fas fa-download text-slate-600 group-hover:text-emerald-500 transition"></i>
               </div>
             </div>
-            <div className="p-4 border-t border-slate-700/50 flex justify-between text-slate-500 text-[10px] font-black uppercase tracking-widest">
+            <div className="p-4 border-t border-slate-700/50 flex justify-between text-slate-500 text-xs font-black uppercase tracking-widest">
               <button className="hover:text-indigo-400 flex items-center gap-2 px-4 py-2">
                 <i className="far fa-thumbs-up text-sm"></i> 842 Likes
               </button>
@@ -156,11 +156,11 @@ const StudentFeed = () => {
               <div>
                 <h4 className="font-bold text-sm text-white">
                   Dr. Samuel Okoro{" "}
-                  <span className="text-blue-500 text-[10px] ml-1">
+                  <span className="text-blue-500 text-xs ml-1">
                     <i className="fas fa-check-circle"></i>
                   </span>
                 </h4>
-                <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest">
+                <p className="text-xs text-slate-500 font-black uppercase tracking-widest">
                   Physics Faculty • 2h ago
                 </p>
               </div>
@@ -179,7 +179,7 @@ const StudentFeed = () => {
                 />
                 <div className="absolute inset-0 bg-linear-to-t from-slate-950 to-transparent"></div>
                 <div className="absolute bottom-6 left-6 pr-6">
-                  <p className="text-blue-400 text-[10px] font-black uppercase tracking-widest mb-1">
+                  <p className="text-blue-400 text-xs font-black uppercase tracking-widest mb-1">
                     External Resource • Nature.com
                   </p>
                   <h4 className="text-lg font-bold text-white group-hover:text-blue-400 transition">
@@ -188,7 +188,7 @@ const StudentFeed = () => {
                 </div>
               </div>
             </div>
-            <div className="p-4 border-t border-slate-700/50 flex justify-between text-slate-500 text-[10px] font-black uppercase tracking-widest">
+            <div className="p-4 border-t border-slate-700/50 flex justify-between text-slate-500 text-xs font-black uppercase tracking-widest">
               <button className="hover:text-indigo-400 flex items-center gap-2 px-4 py-2">
                 <i className="far fa-thumbs-up text-sm"></i> 124
               </button>
@@ -205,7 +205,7 @@ const StudentFeed = () => {
         {/* Right Sidebar - Trends & Following */}
         <div className="lg:col-span-3 space-y-8">
           <div className="bg-slate-800/30 rounded-4xl p-8 border border-slate-700 shadow-xl">
-            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-8">
+            <h4 className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 mb-8">
               Trending Topics
             </h4>
             <div className="space-y-6">
@@ -220,7 +220,7 @@ const StudentFeed = () => {
                   <p className="text-sm font-bold text-white group-hover:text-indigo-400 transition mb-1">
                     {trend.tag}
                   </p>
-                  <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest">
+                  <p className="text-xs text-slate-500 font-black uppercase tracking-widest">
                     {trend.count} Students
                   </p>
                 </div>
@@ -229,7 +229,7 @@ const StudentFeed = () => {
           </div>
 
           <div className="bg-slate-800/30 rounded-4xl p-8 border border-slate-700 shadow-xl">
-            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-8">
+            <h4 className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 mb-8">
               Who to Follow
             </h4>
             <div className="space-y-6">
@@ -259,18 +259,18 @@ const StudentFeed = () => {
                       <p className="text-xs font-bold text-white group-hover:text-indigo-400 transition">
                         {user.name}
                       </p>
-                      <p className="text-[9px] text-slate-500 uppercase font-black">
+                      <p className="text-xs text-slate-500 uppercase font-black">
                         {user.role}
                       </p>
                     </div>
                   </div>
                   <button className="w-8 h-8 rounded-lg border border-slate-700 flex items-center justify-center text-slate-500 hover:text-white hover:bg-indigo-600 hover:border-indigo-600 transition">
-                    <i className="fas fa-plus text-[10px]"></i>
+                    <i className="fas fa-plus text-xs"></i>
                   </button>
                 </div>
               ))}
             </div>
-            <button className="w-full mt-8 py-3 bg-slate-900 border border-slate-700 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-white transition">
+            <button className="w-full mt-8 py-3 bg-slate-900 border border-slate-700 rounded-xl text-xs font-black uppercase tracking-widest text-slate-400 hover:text-white transition">
               Find Connections
             </button>
           </div>

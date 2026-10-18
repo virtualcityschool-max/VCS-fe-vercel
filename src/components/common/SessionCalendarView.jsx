@@ -223,7 +223,7 @@ const SessionCalendarView = ({ sessions = [], loading = false }) => {
               {MONTH_NAMES[activeMonthData.month]}
               <span className="text-indigo-400 ml-1">{activeMonthData.year}</span>
             </p>
-            <p className="text-[9px] font-bold uppercase tracking-widest text-slate-500 mt-0.5">
+            <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mt-0.5">
               {activeMonthIdx + 1} / {monthRange.length}
             </p>
           </div>
@@ -246,7 +246,7 @@ const SessionCalendarView = ({ sessions = [], loading = false }) => {
               <button
                 key={`${m.year}-${m.month}`}
                 onClick={() => setCalendarMonth(m)}
-                className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all duration-200 shrink-0 ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all duration-200 shrink-0 ${
                   idx === activeMonthIdx
                     ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/20"
                     : "bg-slate-800/60 text-slate-500 hover:bg-slate-700 hover:text-slate-300 border border-slate-700/50"
@@ -258,7 +258,7 @@ const SessionCalendarView = ({ sessions = [], loading = false }) => {
           </div>
         )}
         <div className="w-px self-stretch bg-slate-800 shrink-0" />
-        <TimezoneTag className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1.5 bg-slate-900 border border-slate-800 rounded-xl text-slate-400" />
+        <TimezoneTag className="text-xs font-black uppercase tracking-widest px-2.5 py-1.5 bg-slate-900 border border-slate-800 rounded-xl text-slate-400" />
       </div>
 
       {/* Calendar grid container */}
@@ -266,7 +266,7 @@ const SessionCalendarView = ({ sessions = [], loading = false }) => {
         {/* Day-of-week header */}
         <div className="grid grid-cols-7 border-b border-slate-800/50 bg-slate-950/40">
           {DAY_LABELS.map((d) => (
-            <div key={d} className="px-0 py-2 sm:px-4 sm:py-5 text-center text-[8px] sm:text-[10px] font-black uppercase tracking-tight sm:tracking-[0.25em] text-slate-500">
+            <div key={d} className="px-0 py-2 sm:px-4 sm:py-5 text-center text-xs sm:text-xs font-black uppercase tracking-tight sm:tracking-[0.25em] text-slate-500">
               <span className="hidden sm:inline">{d}</span>
               <span className="sm:hidden">{d.slice(0, 2)}</span>
             </div>
@@ -294,7 +294,7 @@ const SessionCalendarView = ({ sessions = [], loading = false }) => {
                   {isToday && (
                     <span className="text-[7px] font-black uppercase tracking-widest text-indigo-400">Today</span>
                   )}
-                  <span className={`text-[9px] sm:text-[10px] font-black w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center rounded-lg ml-auto transition-all duration-300 ${
+                  <span className={`text-xs sm:text-xs font-black w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center rounded-lg ml-auto transition-all duration-300 ${
                     isToday 
                       ? "bg-indigo-500 text-white shadow-lg" 
                       : daySessions.length > 0 ? "text-white bg-slate-800/50" : "text-slate-600"
@@ -328,7 +328,7 @@ const SessionCalendarView = ({ sessions = [], loading = false }) => {
                       </div>
 
                       {/* Title */}
-                      <p className="text-[8px] font-bold text-slate-100 leading-tight truncate group-hover/session:text-indigo-300 transition-colors mt-0.5">
+                      <p className="text-xs font-bold text-slate-100 leading-tight truncate group-hover/session:text-indigo-300 transition-colors mt-0.5">
                         {session.title}
                       </p>
 

@@ -131,7 +131,7 @@ const EnrollmentRequestsTab = ({
                     <p className="text-sm font-semibold text-white truncate">
                       {enrollment.student_name}
                     </p>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide ${
+                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full uppercase tracking-wide ${
                       enrollment.is_private
                         ? "bg-purple-500/20 text-purple-400 border border-purple-500/30"
                         : "bg-indigo-500/20 text-indigo-400 border border-indigo-500/30"
@@ -141,8 +141,8 @@ const EnrollmentRequestsTab = ({
                   </div>
                   <p className="text-xs text-slate-400 truncate">{enrollment.student_email}</p>
                   {enrollment.student_grade_level && (
-                    <p className="text-[10px] text-slate-500 mt-0.5 flex items-center gap-1">
-                      <i className="fas fa-layer-group text-slate-600 text-[9px]"></i>
+                    <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-1">
+                      <i className="fas fa-layer-group text-slate-600 text-xs"></i>
                       Grade: <span className="text-slate-400 font-semibold">{enrollment.student_grade_level}</span>
                     </p>
                   )}
@@ -156,7 +156,7 @@ const EnrollmentRequestsTab = ({
                     <i className="fas fa-book text-indigo-400 mr-1.5 text-xs"></i>
                     {enrollment.course_title}
                   </p>
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide flex-shrink-0 ${
+                  <span className={`text-xs font-bold px-2 py-0.5 rounded-full uppercase tracking-wide flex-shrink-0 ${
                     enrollment.course_is_paid
                       ? "bg-amber-500/20 text-amber-400 border border-amber-500/30"
                       : "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
@@ -164,12 +164,12 @@ const EnrollmentRequestsTab = ({
                     {enrollment.course_is_paid ? "Paid" : "Free"}
                   </span>
                   {enrollment.course_is_paid && enrollment.course_price != null && (
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/20 flex-shrink-0">
+                    <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/20 flex-shrink-0">
                       ${Number(enrollment.course_price).toLocaleString("en-US")}
                     </span>
                   )}
                   {enrollment.course_category && (
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-700/60 text-slate-400 border border-slate-600/40 flex-shrink-0 capitalize">
+                    <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-slate-700/60 text-slate-400 border border-slate-600/40 flex-shrink-0 capitalize">
                       {enrollment.course_category}
                     </span>
                   )}
@@ -180,7 +180,7 @@ const EnrollmentRequestsTab = ({
                     {enrollment.teacher_name}
                   </p>
                 )}
-                <p className="text-[10px] text-slate-600 mt-1">
+                <p className="text-xs text-slate-600 mt-1">
                   {new Date(enrollment.enrolled_at).toLocaleString("en-US", { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", ...(timezone ? { timeZone: timezone } : {}) })}
                 </p>
               </div>

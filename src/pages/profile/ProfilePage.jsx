@@ -318,7 +318,7 @@ const ProfilePage = () => {
                     {avatarUploading
                       ? <i className="fas fa-spinner fa-spin text-white text-xl" />
                       : <i className="fas fa-camera text-white text-lg" />}
-                    <span className="text-white text-[9px] font-black uppercase tracking-widest">
+                    <span className="text-white text-xs font-black uppercase tracking-widest">
                       {avatarUploading ? "Uploading…" : "Change"}
                     </span>
                   </button>
@@ -330,7 +330,7 @@ const ProfilePage = () => {
                       onClick={() => avatarInputRef.current?.click()}
                       className="absolute -bottom-1.5 -right-1.5 w-6 h-6 rounded-full bg-indigo-600 hover:bg-indigo-500 border-2 border-slate-900 flex items-center justify-center transition-colors shadow-lg"
                     >
-                      <i className="fas fa-pen text-white text-[8px]" />
+                      <i className="fas fa-pen text-white text-xs" />
                     </button>
                   )}
 
@@ -351,7 +351,7 @@ const ProfilePage = () => {
                   <h1 className="text-xl font-black font-poppins text-white truncate">
                     {getDisplayName(profile) || displayName}
                   </h1>
-                  <span className={`text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full border ${ROLE_COLOR[role]}`}>
+                  <span className={`text-xs font-bold uppercase tracking-widest px-2.5 py-1 rounded-full border ${ROLE_COLOR[role]}`}>
                     {ROLE_LABEL[role]}
                   </span>
                 </div>
@@ -414,7 +414,7 @@ const ProfilePage = () => {
                     </div>
                   )}
                   {editing && errors.first_name && (
-                    <p className="mt-1.5 text-[11px] text-red-400 font-medium flex items-center gap-1.5">
+                    <p className="mt-1.5 text-xs text-red-400 font-medium flex items-center gap-1.5">
                       <i className="fas fa-exclamation-circle" />
                       {getFieldError("first_name")}
                     </p>
@@ -441,7 +441,7 @@ const ProfilePage = () => {
                     </div>
                   )}
                   {editing && errors.last_name && (
-                    <p className="mt-1.5 text-[11px] text-red-400 font-medium flex items-center gap-1.5">
+                    <p className="mt-1.5 text-xs text-red-400 font-medium flex items-center gap-1.5">
                       <i className="fas fa-exclamation-circle" />
                       {getFieldError("last_name")}
                     </p>
@@ -512,7 +512,7 @@ const ProfilePage = () => {
                 </div>
               )}
               {editing && errors[key] && type !== "tel" && (
-                <p className="mt-1.5 text-[11px] text-red-400 font-medium flex items-center gap-1.5">
+                <p className="mt-1.5 text-xs text-red-400 font-medium flex items-center gap-1.5">
                   <i className="fas fa-exclamation-circle" />
                   {getFieldError(key)}
                 </p>
@@ -624,7 +624,7 @@ const ProfilePage = () => {
                         <p className="text-xs text-slate-500">
                           {course.enrolled_students} student{course.enrolled_students === 1 ? "" : "s"}
                         </p>
-                        <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border ${
+                        <span className={`text-xs font-black uppercase tracking-widest px-2 py-0.5 rounded-full border ${
                           course.status === "published"
                             ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
                             : course.status === "completed"
@@ -636,7 +636,7 @@ const ProfilePage = () => {
                       </div>
                     </div>
                     <div className="flex-shrink-0 flex flex-col items-end">
-                      <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border ${
+                      <span className={`text-xs font-black uppercase tracking-widest px-2 py-0.5 rounded-full border ${
                         course.is_paid
                           ? "bg-amber-500/10 text-amber-300 border-amber-500/20"
                           : "bg-emerald-500/10 text-emerald-300 border-emerald-500/20"

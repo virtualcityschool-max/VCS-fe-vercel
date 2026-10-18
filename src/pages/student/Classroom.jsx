@@ -20,7 +20,7 @@ const Classroom = () => {
             <h1 className="font-bold text-sm">
               Advanced Physics: Quantum Dynamics
             </h1>
-            <p className="text-[10px] text-slate-500 flex items-center gap-2">
+            <p className="text-xs text-slate-500 flex items-center gap-2">
               <span className="flex items-center gap-1 text-red-500 font-black">
                 <i className="fas fa-circle text-[6px]"></i> LIVE SESSION
               </span>
@@ -38,13 +38,13 @@ const Classroom = () => {
                 className="w-6 h-6 sm:w-8 sm:h-8 rounded-full border-2 border-slate-900 shadow-md"
               />
             ))}
-            <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-slate-800 border-2 border-slate-900 flex items-center justify-center text-[8px] sm:text-[10px] font-bold">
+            <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-slate-800 border-2 border-slate-900 flex items-center justify-center text-xs sm:text-xs font-bold">
               +240
             </div>
           </div>
           <button
             onClick={() => navigate("/student")}
-            className="bg-red-600 hover:bg-red-700 text-white px-4 sm:px-6 py-2 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition shadow-lg shadow-red-900/40 active:scale-95"
+            className="bg-red-600 hover:bg-red-700 text-white px-4 sm:px-6 py-2 rounded-lg sm:rounded-xl text-xs sm:text-xs font-black uppercase tracking-widest transition shadow-lg shadow-red-900/40 active:scale-95"
           >
             Leave
           </button>
@@ -81,7 +81,7 @@ const Classroom = () => {
                     <p className="font-bold text-sm text-white">
                       Dr. Samuel Okoro
                     </p>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+                    <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">
                       Tutor • Sharing Screen
                     </p>
                   </div>
@@ -125,7 +125,7 @@ const Classroom = () => {
                   className="w-full h-full object-cover opacity-40 group-hover:opacity-60 transition"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-                <div className="absolute bottom-3 left-3 text-[9px] font-black uppercase text-white tracking-widest flex items-center gap-2">
+                <div className="absolute bottom-3 left-3 text-xs font-black uppercase text-white tracking-widest flex items-center gap-2">
                   <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
                   Student #{i}
                 </div>
@@ -139,13 +139,13 @@ const Classroom = () => {
           className={`fixed inset-0 lg:relative lg:inset-auto lg:w-96 border-l border-slate-800 flex flex-col bg-slate-900/95 lg:bg-slate-900/30 backdrop-blur-xl z-100 transition-transform duration-300 ${showChat ? "translate-x-0" : "translate-x-full lg:translate-x-0"} ${showChat ? "" : "hidden lg:flex"}`}
         >
           <div className="flex p-4 border-b border-slate-800">
-            <button className="flex-1 pb-4 border-b-2 border-indigo-500 font-black text-[10px] uppercase tracking-widest text-white">
+            <button className="flex-1 pb-4 border-b-2 border-indigo-500 font-black text-xs uppercase tracking-widest text-white">
               Live Chat
             </button>
-            <button className="flex-1 pb-4 text-slate-500 font-black text-[10px] uppercase tracking-widest hover:text-slate-300">
+            <button className="flex-1 pb-4 text-slate-500 font-black text-xs uppercase tracking-widest hover:text-slate-300">
               Roster
             </button>
-            <button className="flex-1 pb-4 text-slate-500 font-black text-[10px] uppercase tracking-widest hover:text-slate-300">
+            <button className="flex-1 pb-4 text-slate-500 font-black text-xs uppercase tracking-widest hover:text-slate-300">
               Handouts
             </button>
           </div>
@@ -159,10 +159,10 @@ const Classroom = () => {
                 />
                 <div className="flex-1">
                   <div className="flex justify-between items-center mb-1">
-                    <p className="text-[10px] font-black uppercase text-indigo-400">
+                    <p className="text-xs font-black uppercase text-indigo-400">
                       User #{i}
                     </p>
-                    <span className="text-[9px] text-slate-600 font-bold">
+                    <span className="text-xs text-slate-600 font-bold">
                       10:4{i} AM
                     </span>
                   </div>

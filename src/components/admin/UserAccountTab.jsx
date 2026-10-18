@@ -213,7 +213,7 @@ const UserAccountTab = ({ user, onUpdate, onCancel, onSaved, onAvatarUpdated, re
               className="absolute inset-0 rounded-full bg-black/60 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center gap-0.5 transition-opacity cursor-pointer"
             >
               <i className="fas fa-camera text-white text-sm" />
-              <span className="text-white text-[8px] font-black uppercase tracking-widest">Change</span>
+              <span className="text-white text-xs font-black uppercase tracking-widest">Change</span>
             </button>
           )}
 
@@ -235,13 +235,13 @@ const UserAccountTab = ({ user, onUpdate, onCancel, onSaved, onAvatarUpdated, re
               type="button"
               onClick={() => avatarInputRef.current?.click()}
               disabled={avatarUploading}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/30 text-indigo-300 text-[10px] font-black uppercase tracking-widest transition disabled:opacity-50"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/30 text-indigo-300 text-xs font-black uppercase tracking-widest transition disabled:opacity-50"
             >
-              <i className="fas fa-upload text-[9px]" />
+              <i className="fas fa-upload text-xs" />
               {avatarUploading ? "Uploading…" : "Upload Photo"}
             </button>
           )}
-          <p className="text-[9px] text-slate-600 mt-1.5 leading-relaxed">JPG or PNG · Max 2 MB · 200×200px</p>
+          <p className="text-xs text-slate-600 mt-1.5 leading-relaxed">JPG or PNG · Max 2 MB · 200×200px</p>
         </div>
       </div>
 
@@ -285,7 +285,7 @@ const UserAccountTab = ({ user, onUpdate, onCancel, onSaved, onAvatarUpdated, re
                 className="w-full bg-slate-800/50 border-slate-700 text-slate-400"
                 placeholder="Username"
               />
-              <p className="text-[9px] text-slate-600 mt-1.5">
+              <p className="text-xs text-slate-600 mt-1.5">
                 Auto-generated from first and last name.
               </p>
             </div>
