@@ -70,6 +70,12 @@ const FIELDS = {
     { key: "expertise",        label: "Expertise",         icon: "star",          type: "text",      placeholder: "e.g. Mathematics, Physics" },
     { key: "experience_years", label: "Years of Experience", icon: "briefcase",   type: "number",    placeholder: "0", required: true },
     { key: "linkedin",         label: "LinkedIn URL",      icon: "linkedin",      type: "url",       placeholder: "https://linkedin.com/in/…" },
+    // Shown on the public tutor page (/teachers/<id>).
+    { key: "subjects",          label: "Subjects you teach", icon: "book",       type: "list",     placeholder: "e.g. Chemistry, Biology" },
+    { key: "class_levels",      label: "Levels you teach",  icon: "layer-group",  type: "list",     placeholder: "e.g. O Level, AS Level, A2 Level" },
+    { key: "languages",         label: "Teaching languages", icon: "language",   type: "list",     placeholder: "e.g. English, Urdu" },
+    { key: "teaching_approach", label: "Teaching approach", icon: "chalkboard-teacher", type: "textarea", placeholder: "How your lessons run: concepts first, past papers every week, marked homework with feedback…" },
+    { key: "highlights",        label: "Highlights (one per line)", icon: "check-circle", type: "lines", placeholder: "e.g.\n12 years teaching O & A Level Chemistry\nStudents with A* in May/June 2026" },
     { key: "phone",            label: "Phone",             icon: "phone",         type: "tel",       placeholder: "+1-800-5551234" },
   ],
   student: [
@@ -143,7 +149,9 @@ const ProfilePage = () => {
     };
     fields.forEach(({ key, type }) => {
       const val = rp[key] ?? "";
-      initial[key] = type === "tel" && val ? normalizePhone(val) : val;
+      if (type === "list") initial[key] = (Array.isArray(val) ? val : []).join(", ");
+      else if (type === "lines") initial[key] = (Array.isArray(val) ? val : []).join("\n");
+      else initial[key] = type === "tel" && val ? normalizePhone(val) : val;
     });
     if (role === "teacher") {
       initial.distinctions = rp.distinctions ?? [];
@@ -196,6 +204,10 @@ const ProfilePage = () => {
         const payload = {};
         (FIELDS[role] || []).forEach(({ key, type }) => {
           let val = form[key];
+          if (type === "list" || type === "lines") {
+            payload[key] = String(val || "").split(type === "list" ? "," : "\n").map((x) => x.trim()).filter(Boolean);
+            return;
+          }
           if (type === "tel" && val) val = normalizePhone(val);
           if (val === "" || val === null || val === undefined) {
             payload[key] = "";
@@ -455,7 +467,7 @@ const ProfilePage = () => {
             <Field key={key} label={label} icon={icon}>
               <div required={required}>
               {editing ? (
-                type === "textarea" ? (
+                type === "textarea" || type === "lines" ? (
                   <textarea
                     rows={4}
                     placeholder={placeholder}
@@ -491,7 +503,7 @@ const ProfilePage = () => {
                   </FilterSelect>
                 ) : (
                   <input
-                    type={type}
+                    type={type === "list" ? "text" : type}
                     placeholder={placeholder}
                     value={form[key] || ""}
                     max={type === "date" ? new Date().toISOString().split("T")[0] : undefined}
@@ -508,7 +520,11 @@ const ProfilePage = () => {
                     ? formatPhoneDisplay(roleProfile[key])
                     : type === "select" && key === "grade_level"
                     ? (gradeLevelName ?? <span className="text-slate-600 italic">Not set</span>)
-                    : (roleProfile[key] ?? <span className="text-slate-600 italic">Not set</span>)}
+                    : type === "list"
+                    ? ((roleProfile[key] || []).join(", ") || <span className="text-slate-600 italic">Not set</span>)
+                    : type === "lines"
+                    ? ((roleProfile[key] || []).length ? <ul className="list-disc pl-5 space-y-1">{roleProfile[key].map((x) => <li key={x}>{x}</li>)}</ul> : <span className="text-slate-600 italic">Not set</span>)
+                    : (roleProfile[key] || <span className="text-slate-600 italic">Not set</span>)}
                 </div>
               )}
               {editing && errors[key] && type !== "tel" && (
@@ -605,6 +621,22 @@ const ProfilePage = () => {
             </div>
           )}
         </div>
+
+        {/* Teachers: what students and parents see */}
+        {role === "teacher" && profile?.id && (
+          <a
+            href={`/teachers/${profile.id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-between gap-4 rounded-2xl border border-indigo-500/30 bg-indigo-500/10 px-5 py-4 text-indigo-200 hover:bg-indigo-500/20 transition"
+          >
+            <span>
+              <span className="block font-semibold text-white">Your public tutor page</span>
+              <span className="block text-sm text-slate-300">Bio, subjects, levels, teaching approach and highlights appear here for students and parents.</span>
+            </span>
+            <i className="fas fa-external-link-alt" />
+          </a>
+        )}
 
         {/* Assigned courses - teachers only */}
         {role === "teacher" && (
