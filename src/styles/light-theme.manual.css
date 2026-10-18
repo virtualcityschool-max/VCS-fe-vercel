@@ -57,3 +57,16 @@ html.theme-light .ql-editor.ql-blank::before { color: #94a3b8 !important; }
 /* Inline-styled chips (admin category bar) */
 html.theme-light [style*="color: rgb(203, 213, 225)"] { color: #334155 !important; }
 html.theme-light [style*="border-color: rgb(35, 45, 82)"] { border-color: #cbd5e1 !important; }
+
+/* Night mode readability: the dimmest grey labels (slate-500/600, and
+   slate-700 used as text) were hard to read on the dark background. Lift them
+   to slate-400. In the utilities layer, so hover colours still win. */
+@layer utilities {
+  :where(html:not(.theme-light)) .text-slate-500,
+  :where(html:not(.theme-light)) .text-slate-600,
+  :where(html:not(.theme-light)) .text-slate-700,
+  :where(html:not(.theme-light)) .text-gray-500,
+  :where(html:not(.theme-light)) .text-gray-600 {
+    color: oklch(70.4% 0.04 256.788);
+  }
+}
