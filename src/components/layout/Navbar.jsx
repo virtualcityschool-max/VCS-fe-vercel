@@ -1,19 +1,23 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { useSearchParams, useLocation } from "react-router-dom";
+import { useSearchParams, useLocation, Link } from "react-router-dom";
 import { setAuthModal } from "../../store/slices/uiSlice";
 import { useAuth, useNavigation } from "../../hooks";
 import Button from "../ui/Button";
 import UserProfileDropdown from "./UserProfileDropdown";
 import TopBar from "./TopBar";
+import { GUIDE_CATALOG } from "../../data/subjectGuides/catalog";
 
 const PUBLIC_LINKS = [
   { label: "Home", path: "/" },
   { label: "Explore Courses", path: "/courses" },
+  { label: "Subject Guides", path: "/subjects", guides: true },
   { label: "Meet Our Tutors", path: "/teachers" },
   { label: "Blog", path: "/blogs" },
   { label: "About Us", path: "/about" },
 ];
+
+const GUIDE_LEVELS = ["O Level", "AS & A Level"];
 
 const Navbar = ({ variant = "default", hideLogo = false }) => {
   const dispatch = useDispatch();
@@ -78,19 +82,50 @@ const Navbar = ({ variant = "default", hideLogo = false }) => {
               )}
               {!hideLogo && (
                 <div className="hidden lg:flex items-center gap-8">
-                  {PUBLIC_LINKS.map((link) => (
-                    <button
-                      key={link.path}
-                      onClick={() => goTo(link.path)}
-                      className={`nav-link font-medium text-xs sm:text-sm transition cursor-pointer ${
-                        isActivePath(link.path)
-                          ? "text-white nav-link-active"
-                          : "text-slate-400 hover:text-white"
-                      }`}
-                    >
-                      {link.label}
-                    </button>
-                  ))}
+                  {/* Real links (not buttons) so search engines can follow them. */}
+                  {PUBLIC_LINKS.map((link) => {
+                    const active = link.guides ? location.pathname.startsWith("/subjects") : isActivePath(link.path);
+                    const a = (
+                      <Link
+                        key={link.path}
+                        to={link.path}
+                        className={`nav-link font-medium text-xs sm:text-sm transition ${
+                          active ? "text-white nav-link-active" : "text-slate-400 hover:text-white"
+                        }`}
+                      >
+                        {link.label}
+                        {link.guides && <i className="fas fa-chevron-down text-[9px] ml-1.5 opacity-70" />}
+                      </Link>
+                    );
+                    if (!link.guides) return a;
+                    return (
+                      <div key={link.path} className="relative group">
+                        {a}
+                        {/* Every guide, by level, on hover or keyboard focus */}
+                        <div className="invisible opacity-0 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100 transition absolute left-1/2 -translate-x-1/2 top-full pt-4 z-50">
+                          <div className="w-[560px] rounded-2xl border border-white/10 bg-slate-950 shadow-2xl shadow-black/40 p-5 grid grid-cols-2 gap-6">
+                            {GUIDE_LEVELS.map((lvl) => (
+                              <div key={lvl}>
+                                <div className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">{lvl}</div>
+                                <ul className="space-y-0.5">
+                                  {GUIDE_CATALOG.filter((g) => g.level === lvl).map((g) => (
+                                    <li key={g.slug}>
+                                      <Link to={`/subjects/${g.slug}`} className="flex items-center justify-between gap-3 px-2 py-1.5 rounded-lg text-sm text-slate-300 hover:text-white hover:bg-white/5">
+                                        <span>{g.subject}</span><span className="font-mono text-xs text-slate-500">{g.code}</span>
+                                      </Link>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            ))}
+                            <Link to="/subjects" className="col-span-2 text-center text-sm font-semibold text-indigo-300 hover:text-white border-t border-white/10 pt-3">
+                              All subject guides
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -135,17 +170,18 @@ const Navbar = ({ variant = "default", hideLogo = false }) => {
             <div className="lg:hidden border-t border-white/5 bg-slate-950/95 backdrop-blur-2xl animate-slideDown">
               <div className="px-4 py-4 space-y-1">
                 {PUBLIC_LINKS.map((link) => (
-                  <button
+                  <Link
                     key={link.path}
-                    onClick={() => goTo(link.path)}
-                    className={`w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition-all ${
-                      isActivePath(link.path)
+                    to={link.path}
+                    onClick={() => setMobileOpen(false)}
+                    className={`block w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition-all ${
+                      (link.guides ? location.pathname.startsWith("/subjects") : isActivePath(link.path))
                         ? "bg-indigo-500/15 text-indigo-300 border border-indigo-500/20"
                         : "text-slate-300 hover:text-white hover:bg-white/5 border border-transparent"
                     }`}
                   >
                     {link.label}
-                  </button>
+                  </Link>
                 ))}
               </div>
             </div>

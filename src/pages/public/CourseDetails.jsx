@@ -30,19 +30,16 @@ import FileViewerModal from "../../components/common/FileViewerModal";
 import { studentService } from "../../services/studentService";
 import { getDisplayName } from "../../utils/userDisplay";
 import { useSeo } from "../../hooks/useSeo";
-import { guideForCourseTitle } from "../../data/subjectGuides";
+import { guideForCourse } from "../../data/subjectGuides";
 import GuideBody from "../../components/subjects/GuideBody";
 import { guideSections } from "../../components/subjects/guideSections";
 import { useActiveSection, useFollowingBox } from "../../hooks/useFollowingBox";
 import { useWhatsappNumber } from "../../hooks/useWhatsappNumber";
 
-// The subject guide's sections, grouped for the side menu.
-const GUIDE_GROUPS = [
-  ["The subject", ["facts", "why", "stories", "topics", "compare"]],
-  ["The exam", ["exam", "questions", "command", "aos", "grades", "practical"]],
-  ["Doing well", ["books", "mistakes", "plan"]],
-  ["Going further", ["careers", "real", "faq", "sources"]],
-];
+// The syllabus essentials shown on a course page. The rest of the guide (why
+// study it, question types, books, study plan, careers, FAQs) stays on its own
+// /subjects page, so Google doesn't see the same long text on several pages.
+const COURSE_GUIDE_SECTIONS = ["facts", "topics", "exam", "grades"];
 
 // Static class names so Tailwind keeps them.
 const SECTION_COLORS = {
@@ -171,11 +168,11 @@ const CourseDetails = () => {
 
   // The Cambridge subject guide for this course: the syllabus code the admin
   // set on the course first, else the code in its title.
-  const guide = normalizedCourse
-    ? guideForCourseTitle(normalizedCourse.details.syllabus_code) || guideForCourseTitle(normalizedCourse.title)
-    : null;
+  const guide = normalizedCourse ? guideForCourse({ ...course, details: normalizedCourse.details }) : null;
   const guideSecs = React.useMemo(
-    () => guideSections(guide, { withVcs: false }).map((x) => ({ ...x, n: null })),
+    () => guideSections(guide, { withVcs: false })
+      .filter((x) => COURSE_GUIDE_SECTIONS.includes(x.id))
+      .map((x) => ({ ...x, n: null })),
     [guide],
   );
 
@@ -197,10 +194,19 @@ const CourseDetails = () => {
   // API carries no such field (Cambridge exam sessions live only on the
   // general /exam-dates page), and inventing one here would be exactly the
   // kind of unverified claim flagged elsewhere on this site.
+  // Per-course search snippet from real fields only (teacher, class times set
+  // by the admin, the Cambridge syllabus facts), so no two course pages read
+  // the same. Never invents a date or a claim the data doesn't carry.
+  const seoDetails = normalizedCourse?.details || {};
+  const seoTeacher = normalizedCourse ? getDisplayName(normalizedCourse.instructor) : null;
+  const seoPapers = guide?.quickFacts?.find((f) => f.label === "Exams you sit")?.value;
   const metaDescription = normalizedCourse
     ? [
-        `${normalizedCourse.title} — a live, teacher-led ${normalizedCourse.category} course at Virtual City School.`,
-        normalizedCourse.syllabusCode ? `Cambridge syllabus ${normalizedCourse.syllabusCode}.` : null,
+        `${normalizedCourse.title}: live online ${guide ? `Cambridge ${guide.level} ` : ""}classes${seoTeacher ? ` with ${seoTeacher}` : ""} at Virtual City School.`,
+        seoDetails.class_days || seoDetails.class_time
+          ? `Classes ${[seoDetails.class_days, seoDetails.class_time].filter(Boolean).join(", ")}.`
+          : null,
+        guide ? `Syllabus ${guide.code}${seoPapers ? `, ${seoPapers}` : ""} — exam pattern, topics${guide.grades ? " and grade boundaries" : ""} explained.` : (normalizedCourse.syllabusCode ? `Cambridge syllabus ${normalizedCourse.syllabusCode}.` : null),
         Number(normalizedCourse.price) > 0
           ? `${formatCurrency(Number(normalizedCourse.price))} per course.`
           : null,
@@ -210,7 +216,7 @@ const CourseDetails = () => {
     : undefined;
 
   useSeo({
-      title: normalizedCourse ? `${normalizedCourse.title} | Virtual City School` : undefined,
+      title: normalizedCourse ? `${normalizedCourse.title} — Live Online Classes | Virtual City School` : undefined,
       description: metaDescription,
       url: courseUrl,
       jsonLd: normalizedCourse
@@ -611,10 +617,7 @@ const CourseDetails = () => {
         normalizedCourse.attachment && { id: "course-attachment", label: "Course material" },
       ].filter(Boolean),
     },
-    ...GUIDE_GROUPS.map(([label, ids]) => ({
-      label,
-      items: guideSecs.filter((x) => ids.includes(x.id)).map((x) => ({ id: x.id, label: x.title })),
-    })),
+    { label: "The syllabus", items: guideSecs.map((x) => ({ id: x.id, label: x.title })) },
   ].filter((grp) => grp.items.length);
 
   const enrolled = isCourseEnrolled(normalizedCourse);
@@ -831,6 +834,11 @@ const CourseDetails = () => {
                   </ol>
                 </div>
               ))}
+              {guide && (
+                <Link to={`/subjects/${guide.slug}`} className="mt-2 flex items-center justify-between gap-2 rounded-xl border border-indigo-500/30 bg-indigo-500/10 px-3 py-2.5 text-sm font-semibold text-indigo-200 hover:text-white">
+                  Full subject guide <i className="fas fa-arrow-right text-xs"></i>
+                </Link>
+              )}
             </nav>
           </aside>
 
@@ -890,7 +898,7 @@ const CourseDetails = () => {
             {/* The full Cambridge subject guide for this syllabus */}
             {guide && (
               <div className="mt-4 pt-8 border-t border-slate-700/50">
-                <div className="text-xs font-bold uppercase tracking-widest text-indigo-300 mb-2">The subject — Cambridge syllabus guide</div>
+                <div className="text-xs font-bold uppercase tracking-widest text-indigo-300 mb-2">The syllabus</div>
                 <h2 className="text-2xl md:text-3xl font-black font-poppins text-white">{guide.title}</h2>
                 <p className="mt-3 inline-flex items-center gap-2 text-xs text-emerald-300/90 bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-3 py-1.5">
                   <i className="fas fa-check-circle"></i> Checked against the official Cambridge syllabus for exams in {guide.syllabusYears}
@@ -899,16 +907,17 @@ const CourseDetails = () => {
                   <p className="mt-3 text-sm text-amber-200 bg-amber-500/10 border border-amber-500/30 rounded-xl px-4 py-3 leading-relaxed">{guide.notice}</p>
                 )}
                 <GuideBody g={guide} sections={guideSecs} />
+                <Link to={`/subjects/${guide.slug}`} className="mt-10 block rounded-2xl border border-indigo-500/30 bg-gradient-to-br from-indigo-600/20 to-violet-600/10 p-6 hover:border-indigo-400/60 transition">
+                  <div className="text-xs font-bold uppercase tracking-widest text-indigo-300 mb-2">Full subject guide</div>
+                  <div className="text-lg font-bold text-white">Everything about {guide.title}</div>
+                  <p className="text-sm text-slate-300 mt-2">Why study it, types of questions, command words, what examiners reward, books, common mistakes, a study plan, careers and FAQs.</p>
+                  <span className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-indigo-200">Read the guide <i className="fas fa-arrow-right text-xs"></i></span>
+                </Link>
               </div>
             )}
 
             <div className="mt-12 flex flex-wrap gap-3">
               <BackButton to="/courses" label="Back to Courses" variant="ghost" />
-              {guide && (
-                <Link to={`/subjects/${guide.slug}`} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-white/10 text-sm font-semibold text-indigo-300 hover:text-white">
-                  Open the subject guide on its own <i className="fas fa-arrow-right text-xs"></i>
-                </Link>
-              )}
             </div>
           </div>
         </div>

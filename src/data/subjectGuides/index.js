@@ -33,3 +33,12 @@ export const guideForCourseTitle = (title = "") => {
   const code = (String(title).match(/\b(\d{4})\b/) || [])[1];
   return code ? SUBJECT_GUIDES.find((g) => g.code === code || g.aliases?.includes(code)) || null : null;
 };
+
+// The guide for a course record: the syllabus code the admin set on the course,
+// else its catalogue subject's code, else the code in its title.
+export const guideForCourse = (course) =>
+  course
+    ? guideForCourseTitle(course.details?.syllabus_code) ||
+      guideForCourseTitle(course.subject_code) ||
+      guideForCourseTitle(course.title)
+    : null;

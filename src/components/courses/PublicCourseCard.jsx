@@ -4,6 +4,7 @@ import { getCourseImage } from "../../utils/courseImageUtils";
 import { getStorageUrl } from "../../utils/storageUrl";
 import { getDisplayName } from "../../utils/userDisplay";
 import { useWhatsappNumber } from "../../hooks/useWhatsappNumber";
+import { catalogGuideFor } from "../../data/subjectGuides/catalog";
 
 const PublicCourseCard = ({
   course,
@@ -22,6 +23,7 @@ const PublicCourseCard = ({
   const isRejected = course.enrollment_status === "rejected";
   const noSessions = !course.has_session;
   const [imgFailed, setImgFailed] = useState(false);
+  const guide = catalogGuideFor(course);
   const whatsappNumber = useWhatsappNumber();
   const whatsappHref = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
     `Hi! I'd like to ask about "${course.title || "this course"}" at Virtual City School.`,
@@ -126,6 +128,16 @@ const PublicCourseCard = ({
             </div>
           )}
         </Link>
+        {guide && (
+          <Link
+            to={`/subjects/${guide.slug}`}
+            onClick={(e) => e.stopPropagation()}
+            title={`Cambridge ${guide.level} ${guide.subject} (${guide.code}) — subject guide`}
+            className="absolute bottom-1.5 left-1.5 z-10 inline-flex items-center gap-1 rounded-md bg-slate-950/80 border border-indigo-400/40 px-1.5 py-0.5 text-[10px] font-bold text-indigo-200 hover:bg-indigo-600 hover:text-white transition"
+          >
+            <i className="fas fa-book-open text-[9px]" aria-hidden="true"></i> Guide
+          </Link>
+        )}
         {course.status === "published" && (
           <div className={`absolute ${large ? "top-2 right-2 w-2 h-2" : "top-1.5 right-1.5 w-1.5 h-1.5"} z-10 bg-green-500 rounded-full shadow-[0_0_6px_rgba(34,197,94,0.8)] animate-pulse`} />
         )}

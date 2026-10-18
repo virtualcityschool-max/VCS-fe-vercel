@@ -1,10 +1,12 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ChevronRight, CheckCircle2 } from "lucide-react";
 import { useSeo } from "../../hooks/useSeo";
 import { useActiveSection, useFollowingBox } from "../../hooks/useFollowingBox";
 import { SITE_URL } from "../../data/examDates";
-import { guideBySlug, SUBJECT_GUIDES } from "../../data/subjectGuides";
+import { guideBySlug, guideForCourse, SUBJECT_GUIDES } from "../../data/subjectGuides";
+import { coursesService } from "../../services/coursesService";
+import { getDisplayName } from "../../utils/userDisplay";
 import GuideBody from "../../components/subjects/GuideBody";
 import { ACCENT, guideSections } from "../../components/subjects/guideSections";
 
@@ -29,7 +31,7 @@ export const SubjectGuidesIndex = () => {
           Everything a student should know before and during a Cambridge subject — exam pattern, topics, question types, grades and why the subject is worth loving. Built from Cambridge's official syllabus.
         </p>
         {["O Level", "AS & A Level"].map((lvl) => (
-          <section key={lvl} className="mb-10">
+          <section key={lvl} id={lvl === "O Level" ? "o-level" : "as-a-level"} className="mb-10 scroll-mt-24">
             <h2 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-4">{lvl}</h2>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {SUBJECT_GUIDES.filter((g) => g.level === lvl).map((g) => (
@@ -55,6 +57,32 @@ const SubjectGuidePage = () => {
 
   const sections = useMemo(() => guideSections(g), [g]);
 
+  // This school's published courses for this syllabus (e.g. 9702 → the AS and
+  // A2 Physics courses), shown in "Study it with us".
+  const [courses, setCourses] = useState([]);
+  useEffect(() => {
+    if (!g) return undefined;
+    let live = true;
+    coursesService.getAllCourses()
+      .then((data) => {
+        const list = Array.isArray(data) ? data : data?.results || [];
+        if (!live) return;
+        setCourses(
+          list
+            .filter((c) => c.status === "published" && guideForCourse(c)?.slug === g.slug)
+            .map((c) => ({
+              id: c.id,
+              title: (c.title || "").replace(/\s+/g, " ").trim(),
+              level: c.category?.name || "",
+              teacher: getDisplayName(c.instructor),
+              price: c.is_paid && Number(c.price) > 0 ? `$${Number(c.price)}` : "",
+            })),
+        );
+      })
+      .catch(() => {});
+    return () => { live = false; };
+  }, [g]);
+
   // Highlight the section being read; keep the table of contents in view.
   const [active, setActive] = useState("facts");
   useActiveSection("main section[id]", sections, setActive);
@@ -63,11 +91,42 @@ const SubjectGuidePage = () => {
   const gridRef = useRef(null);
   useFollowingBox(tocSlotRef, tocBoxRef, gridRef, g);
 
-  useSeo({
-    title: g ? `${g.title} — Student Guide | Virtual City School` : "Subject guide | Virtual City School",
-    description: g ? `${g.title}: exam pattern, topics, question types, grades and study tips — from the official Cambridge syllabus for ${g.syllabusYears}.` : "",
-    url: g ? `${SITE_URL}/subjects/${g.slug}` : `${SITE_URL}/subjects`,
-  });
+  // Titles phrased the way students search ("O Level Chemistry 5070 syllabus"),
+  // plus breadcrumb and article data for Google.
+  const seo = useMemo(() => {
+    if (!g) return { title: "Subject guide | Virtual City School", description: "", url: `${SITE_URL}/subjects` };
+    const lvl = g.level === "O Level" ? "O Level" : "A Level";
+    const url = `${SITE_URL}/subjects/${g.slug}`;
+    const [d, m, y] = (g.verifiedOn || "").split(" ");
+    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    const iso = y ? `${y}-${String(months.indexOf(m) + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}` : undefined;
+    return {
+      title: `${lvl} ${g.subject} ${g.code}: Syllabus, Exam Pattern${g.grades ? " & Grade Boundaries" : ""} | Virtual City School`,
+      description: `${g.title} explained: ${g.papers?.length ? `${g.papers.length} papers, ` : ""}topics, question types, command words${g.grades ? `, ${g.grades.thresholds.series} grade boundaries` : ""}, books and a study plan — from the official Cambridge syllabus for ${g.syllabusYears}.`,
+      url,
+      jsonLd: [
+        {
+          "@type": "Article",
+          headline: `${g.title} — student guide`,
+          description: g.tagline,
+          url,
+          ...(iso ? { dateModified: iso } : {}),
+          author: { "@type": "Organization", name: "Virtual City School", url: SITE_URL },
+          publisher: { "@type": "EducationalOrganization", name: "Virtual City School", url: SITE_URL },
+          about: { "@type": "Thing", name: `Cambridge ${g.level} ${g.subject} (${g.code})` },
+        },
+        {
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+            { "@type": "ListItem", position: 2, name: "Subject Guides", item: `${SITE_URL}/subjects` },
+            { "@type": "ListItem", position: 3, name: `${g.subject} ${g.code}`, item: url },
+          ],
+        },
+      ],
+    };
+  }, [g]);
+  useSeo(seo);
 
   if (!g) {
     return (
@@ -142,7 +201,7 @@ const SubjectGuidePage = () => {
           </aside>
 
           <div className="min-w-0">
-            <GuideBody g={g} sections={sections} />
+            <GuideBody g={g} sections={sections} courses={courses} />
           </div>
         </div>
       </div>

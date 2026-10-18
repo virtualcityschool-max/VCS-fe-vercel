@@ -1,3 +1,4 @@
+/* global process */
 // Prerenders public marketing pages into real static HTML after `vite build`,
 // so crawlers that don't execute JavaScript see actual content instead of an
 // empty <div id="root"></div>.
@@ -26,7 +27,7 @@
 // client-only shell, same as before this script existed.
 
 import { createServer } from "node:http";
-import { existsSync, copyFileSync, mkdirSync, writeFileSync, readFileSync, statSync } from "node:fs";
+import { existsSync, mkdirSync, writeFileSync, readFileSync, statSync } from "node:fs";
 import { dirname, join, extname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -148,16 +149,18 @@ function routeToOutputFile(route) {
   return join(DIST, route.replace(/^\//, ""), "index.html");
 }
 
-async function prerenderRoute(browser, route) {
+async function prerenderRoute(browser, route, timeout = NAV_TIMEOUT_MS) {
   const page = await browser.newPage();
   try {
-    await page.goto(`${ORIGIN}${route}`, { waitUntil: "networkidle0", timeout: NAV_TIMEOUT_MS });
+    await page.goto(`${ORIGIN}${route}`, { waitUntil: "networkidle0", timeout });
     await new Promise((r) => setTimeout(r, SETTLE_MS));
     // useSeo() reads window.location.href for canonical/OG URLs, which during
     // this crawl is the local server - rewrite it to the real production
     // origin before writing the file, or every prerendered page's canonical
     // and og:url would point at an unreachable localhost address.
     const rawHtml = await page.content();
+    // Never publish the error screen as the page's content.
+    if (rawHtml.includes("We encountered an unexpected error")) throw new Error("page showed the error screen");
     const html = "<!doctype html>\n" + rawHtml.split(ORIGIN).join(SITE_URL);
     const outFile = routeToOutputFile(route);
     mkdirSync(dirname(outFile), { recursive: true });
@@ -190,12 +193,22 @@ async function main() {
   }
 
   // Preserve the original, never-rendered shell for routes we don't prerender.
+  // The served fallback must not claim to be the home page: index.html's static
+  // canonical/og:url point at "/", which told Google every page that wasn't
+  // prerendered (e.g. /courses when it timed out) was a copy of the home page.
+  // useSeo() sets the right canonical once the app runs.
   const shellPath = join(DIST, "shell.html");
-  copyFileSync(join(DIST, "index.html"), shellPath);
-  const shellHtml = readFileSync(shellPath, "utf-8");
+  const shellHtml = readFileSync(join(DIST, "index.html"), "utf-8");
+  writeFileSync(
+    shellPath,
+    shellHtml
+      .replace(/<link rel="canonical"[^>]*>\s*/g, "")
+      .replace(/<meta property="og:url"[^>]*>\s*/g, ""),
+  );
 
   console.log("Discovering routes to prerender...");
-  const routes = await buildRouteList();
+  // PRERENDER_ONLY=/courses,/teachers renders just those (for checking locally).
+  const routes = process.env.PRERENDER_ONLY ? process.env.PRERENDER_ONLY.split(",") : await buildRouteList();
   console.log(`Prerendering ${routes.length} routes...`);
 
   const server = await startServer(shellHtml);
@@ -205,9 +218,19 @@ async function main() {
         args: chromium.args,
         executablePath: await chromium.executablePath(),
       })
-    : await puppeteer.launch({ headless: true, args: ["--no-sandbox", "--disable-setuid-sandbox"] });
+    // --disable-web-security matches @sparticuz/chromium's args on Vercel, so the
+    // page's API calls from localhost:4321 aren't blocked by CORS here either.
+    : await puppeteer.launch({ headless: true, args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-web-security"] });
 
   const results = await runPool(routes, (route) => prerenderRoute(browser, route), CONCURRENCY);
+
+  // Big pages (/courses, /teachers load 100+ images) can time out while four
+  // pages render at once. Retry failures one at a time with more time.
+  for (const [idx, r] of results.entries()) {
+    if (r.ok) continue;
+    console.log(`  retrying ${r.route} (${r.error})`);
+    results[idx] = await prerenderRoute(browser, r.route, NAV_TIMEOUT_MS * 3);
+  }
 
   await browser.close();
   await new Promise((resolve) => server.close(resolve));

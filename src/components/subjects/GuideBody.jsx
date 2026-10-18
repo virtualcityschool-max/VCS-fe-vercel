@@ -29,7 +29,9 @@ const Card = ({ className = "", children }) => (
 
 const Note = ({ children }) => <p className="mt-3 text-xs text-slate-500 leading-relaxed">{children}</p>;
 
-const GuideBody = ({ g, sections }) => {
+// `courses`: this school's published courses for the syllabus, listed in
+// "Study it with us" so a reader can go straight to one and enrol.
+const GuideBody = ({ g, sections, courses = [] }) => {
   const accent = ACCENT[g.accent] || ACCENT.violet;
   // Props for each <Section>: its id, number, icon and title.
   const has = (id) => sections.some((v) => v.id === id);
@@ -307,8 +309,20 @@ const GuideBody = ({ g, sections }) => {
           <p className="text-slate-200 mb-4">
             Live online classes with experienced Cambridge teachers, weekly quizzes and assignments in your portal, past-paper practice, and progress reports your parents can see.
           </p>
+          {courses.length > 0 && (
+            <div className="grid sm:grid-cols-2 gap-3 mb-4">
+              {courses.map((c) => (
+                <Link key={c.id} to={`/courses/${c.id}`} className="group rounded-xl border border-white/10 bg-black/20 hover:border-indigo-400/50 hover:bg-indigo-500/10 p-4 transition">
+                  <div className="text-[10px] font-bold uppercase tracking-widest text-indigo-300">{c.level}</div>
+                  <div className="font-bold text-white mt-1">{c.title}</div>
+                  <div className="text-xs text-slate-400 mt-1">{[c.teacher && `with ${c.teacher}`, c.price].filter(Boolean).join(" · ")}</div>
+                  <span className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-indigo-200 group-hover:text-white">See classes and enrol <ChevronRight className="w-4 h-4" /></span>
+                </Link>
+              ))}
+            </div>
+          )}
           <div className="flex flex-wrap gap-3">
-            <Link to="/courses" className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-sm font-bold text-white">Explore {g.subject} classes</Link>
+            <Link to="/courses" className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-sm font-bold text-white">{courses.length ? "All courses" : `Explore ${g.subject} classes`}</Link>
             <Link to="/exam-dates" className="px-4 py-2.5 rounded-xl border border-white/15 hover:border-white/30 text-sm font-semibold text-slate-200">Cambridge exam dates</Link>
           </div>
         </Card>

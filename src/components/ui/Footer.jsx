@@ -1,6 +1,7 @@
 import React from "react";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { GUIDE_CATALOG } from "../../data/subjectGuides/catalog";
 
 const Footer = ({ variant = "full" }) => {
   const navigate = useNavigate();
@@ -33,7 +34,7 @@ const Footer = ({ variant = "full" }) => {
       <div className="absolute bottom-[-40%] left-[10%] w-[40%] h-[80%] bg-indigo-600/5 blur-[100px] rounded-full pointer-events-none" />
 
       <div className="relative max-w-[1440px] mx-auto px-6 sm:px-8 py-8">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-12">
+        <div className="flex flex-col md:flex-row md:items-start justify-between gap-12">
 
           {/* Brand - left */}
           <div className="max-w-sm">
@@ -78,8 +79,8 @@ const Footer = ({ variant = "full" }) => {
             </div>
           </div>
 
-          {/* Quick Links + Support - grouped on the right, side by side */}
-          <div className="flex gap-16 shrink-0 items-start md:items-end">
+          {/* Links (real <a> links so search engines can follow them) */}
+          <div className="flex flex-wrap gap-x-16 gap-y-10 items-start">
             {/* Quick Links */}
             <div>
               <h3 className="text-white text-xs font-black uppercase tracking-[0.2em] mb-4">
@@ -87,51 +88,47 @@ const Footer = ({ variant = "full" }) => {
               </h3>
               <ul className="space-y-2.5">
                 <li>
-                  <button
-                    onClick={() => handleNavigation("/courses")}
-                    className={footerLink}
-                  >
-                    Explore Courses
-                  </button>
+                  <Link to="/courses" onClick={() => window.scrollTo(0, 0)} className={footerLink}>Explore Courses</Link>
                 </li>
                 <li>
-                  <button
-                    onClick={() => handleNavigation("/teachers")}
-                    className={footerLink}
-                  >
-                    Meet Our Tutors
-                  </button>
+                  <Link to="/subjects" onClick={() => window.scrollTo(0, 0)} className={footerLink}>Subject Guides</Link>
                 </li>
                 <li>
-                  <button
-                    onClick={() => handleNavigation("/exam-dates")}
-                    className={footerLink}
-                  >
-                    Exam Dates & Deadlines
-                  </button>
+                  <Link to="/teachers" onClick={() => window.scrollTo(0, 0)} className={footerLink}>Meet Our Tutors</Link>
+                </li>
+                <li>
+                  <Link to="/exam-dates" onClick={() => window.scrollTo(0, 0)} className={footerLink}>Exam Dates & Deadlines</Link>
                 </li>
                 {isLoggedIn && (
                   <>
                     <li>
-                      <button
-                        onClick={() => handleNavigation("/feed")}
-                        className={footerLink}
-                      >
-                        Student Feed
-                      </button>
+                      <Link to="/feed" onClick={() => window.scrollTo(0, 0)} className={footerLink}>Student Feed</Link>
                     </li>
                     <li>
-                      <button
-                        onClick={() => handleNavigation("/classroom")}
-                        className={footerLink}
-                      >
-                        Classroom
-                      </button>
+                      <Link to="/classroom" onClick={() => window.scrollTo(0, 0)} className={footerLink}>Classroom</Link>
                     </li>
                   </>
                 )}
               </ul>
             </div>
+
+            {/* Subject guides, by level */}
+            {["O Level", "AS & A Level"].map((lvl) => (
+              <div key={lvl}>
+                <h3 className="text-white text-xs font-black uppercase tracking-[0.2em] mb-4">
+                  {lvl} guides
+                </h3>
+                <ul className="space-y-2.5">
+                  {GUIDE_CATALOG.filter((g) => g.level === lvl).map((g) => (
+                    <li key={g.slug}>
+                      <Link to={`/subjects/${g.slug}`} onClick={() => window.scrollTo(0, 0)} className={footerLink}>
+                        {g.subject} {g.code}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
 
             {/* Support */}
             <div>
@@ -140,20 +137,10 @@ const Footer = ({ variant = "full" }) => {
               </h3>
               <ul className="space-y-2.5">
                 <li>
-                  <button
-                    onClick={() => handleNavigation("/privacy-policy")}
-                    className={footerLink}
-                  >
-                    Privacy Policy
-                  </button>
+                  <Link to="/privacy-policy" onClick={() => window.scrollTo(0, 0)} className={footerLink}>Privacy Policy</Link>
                 </li>
                 <li>
-                  <button
-                    onClick={() => handleNavigation("/terms")}
-                    className={footerLink}
-                  >
-                    Terms of Service
-                  </button>
+                  <Link to="/terms" onClick={() => window.scrollTo(0, 0)} className={footerLink}>Terms of Service</Link>
                 </li>
               </ul>
             </div>
@@ -166,24 +153,9 @@ const Footer = ({ variant = "full" }) => {
               © {new Date().getFullYear()} Virtual City School. All rights reserved.
             </p>
             <div className="flex gap-6">
-              <button
-                onClick={() => handleNavigation("/about")}
-                className="text-slate-400 hover:text-white cursor-pointer transition text-sm"
-              >
-                About
-              </button>
-              <button
-                onClick={() => handleNavigation("/privacy-policy")}
-                className="text-slate-400 hover:text-white cursor-pointer transition text-sm"
-              >
-                Privacy
-              </button>
-              <button
-                onClick={() => handleNavigation("/terms")}
-                className="text-slate-400 hover:text-white cursor-pointer transition text-sm"
-              >
-                Terms
-              </button>
+              <Link to="/about" onClick={() => window.scrollTo(0, 0)} className="text-slate-400 hover:text-white cursor-pointer transition text-sm">About</Link>
+              <Link to="/privacy-policy" onClick={() => window.scrollTo(0, 0)} className="text-slate-400 hover:text-white cursor-pointer transition text-sm">Privacy</Link>
+              <Link to="/terms" onClick={() => window.scrollTo(0, 0)} className="text-slate-400 hover:text-white cursor-pointer transition text-sm">Terms</Link>
             </div>
           </div>
         </div>

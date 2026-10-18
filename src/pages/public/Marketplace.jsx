@@ -25,6 +25,20 @@ import ApplyFreeAccessModal from "../../components/public/ApplyFreeAccessModal";
 import PublicCourseCard from "../../components/courses/PublicCourseCard";
 import { studentService } from "../../services/studentService";
 import { useSeo } from "../../hooks/useSeo";
+import { catalogGuideFor } from "../../data/subjectGuides/catalog";
+
+// "Subject guides" link for a row of courses: shown when the row's courses have
+// Cambridge guides, pointing at that level's part of /subjects.
+const GuidesLink = ({ courses }) => {
+  const guide = courses.map(catalogGuideFor).find(Boolean);
+  if (!guide) return null;
+  const anchor = guide.level === "O Level" ? "o-level" : "as-a-level";
+  return (
+    <Link to={`/subjects#${anchor}`} className="ml-auto inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-300 hover:text-white">
+      <i className="fas fa-book-open text-[10px]" aria-hidden="true"></i> {guide.level} subject guides
+    </Link>
+  );
+};
 
 const getCategoryName = (course) =>
   typeof course.category === "object" ? course.category?.name : course.category;
@@ -601,6 +615,7 @@ const Marketplace = () => {
                       <span className="text-[11px] font-bold text-indigo-300 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-full">
                         {catCourses.length}
                       </span>
+                      <GuidesLink courses={catCourses} />
                     </div>
                     <CourseRow
                       courses={catCourses}
@@ -638,6 +653,7 @@ const Marketplace = () => {
                   <span className="text-[11px] font-bold text-indigo-300 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-full">
                     {visibleCourses.length}
                   </span>
+                  <GuidesLink courses={visibleCourses} />
                 </h2>
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
                   {visibleCourses.map((course, idx) => (
