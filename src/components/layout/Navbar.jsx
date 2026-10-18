@@ -7,6 +7,7 @@ import Button from "../ui/Button";
 import UserProfileDropdown from "./UserProfileDropdown";
 import TopBar from "./TopBar";
 import { GUIDE_CATALOG } from "../../data/subjectGuides/catalog";
+import { currentTheme, setTheme, themeApplies } from "../../utils/theme";
 
 const PUBLIC_LINKS = [
   { label: "Home", path: "/" },
@@ -29,6 +30,16 @@ const Navbar = ({ variant = "default", hideLogo = false }) => {
     () => typeof window !== "undefined" && window.scrollY > 12,
   );
   const [mobileOpen, setMobileOpen] = useState(false);
+  // Day/night switch (public pages only).
+  const [theme, setThemeState] = useState(() => (typeof window !== "undefined" ? currentTheme() : "dark"));
+  useEffect(() => {
+    const sync = () => setThemeState(currentTheme());
+    window.addEventListener("vcs-theme", sync);
+    const mq = window.matchMedia?.("(prefers-color-scheme: light)");
+    mq?.addEventListener?.("change", sync);
+    return () => { window.removeEventListener("vcs-theme", sync); mq?.removeEventListener?.("change", sync); };
+  }, []);
+  const showThemeSwitch = typeof window !== "undefined" && themeApplies(location.pathname);
   const isAdminLoginMode =
     searchParams.get("adminLogin") === "true" ||
     location.pathname.startsWith("/admin");
@@ -76,7 +87,7 @@ const Navbar = ({ variant = "default", hideLogo = false }) => {
                   <img
                     src="/assets/logo.png"
                     alt="Virtual City School"
-                    className="h-12 w-[110px] sm:h-[70px] sm:w-[180px] object-contain transition-transform duration-300 group-hover:scale-[1.03]"
+                    className="theme-logo h-12 w-[110px] sm:h-[70px] sm:w-[180px] object-contain transition-transform duration-300 group-hover:scale-[1.03]"
                   />
                 </div>
               )}
@@ -131,6 +142,17 @@ const Navbar = ({ variant = "default", hideLogo = false }) => {
             </div>
 
             <div className="flex items-center gap-1.5 sm:gap-4 shrink-0 ml-auto">
+              {showThemeSwitch && (
+                <button
+                  type="button"
+                  onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+                  className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-xl border border-white/10 text-slate-300 hover:text-white hover:bg-white/5 transition"
+                  aria-label={theme === "light" ? "Switch to night mode" : "Switch to day mode"}
+                  title={theme === "light" ? "Night mode" : "Day mode"}
+                >
+                  <i className={`fas ${theme === "light" ? "fa-moon" : "fa-sun"} text-base`} />
+                </button>
+              )}
               {!isLoggedIn ? (
                 <div id="nav-guest" className="flex items-center gap-1.5 sm:gap-5">
                   <Button variant="outline" size="sm" onClick={handleLoginClick}>

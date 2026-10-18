@@ -16,6 +16,7 @@ import AppRoutes from "./routes/AppRoutes";
 import CompleteProfileGate from "./components/common/CompleteProfileGate";
 import { useOutsideCloseModals } from "./hooks/useOutsideCloseModals";
 import { isImpersonating, restoreAdminSession } from "./utils/impersonate";
+import { applyTheme } from "./utils/theme";
 
 // Inner app - inside BrowserRouter so useLocation works
 const AppInner = () => {
@@ -43,6 +44,18 @@ const AppInner = () => {
       window.location.reload();
     }
   }, [location.pathname]);
+
+  // Day/night mode: re-check on every page change and login change, and
+  // follow the device setting live when the visitor hasn't chosen.
+  useEffect(() => {
+    applyTheme(location.pathname);
+  }, [location.pathname, isLoggedIn, role]);
+  useEffect(() => {
+    const mq = window.matchMedia?.("(prefers-color-scheme: light)");
+    const onChange = () => applyTheme();
+    mq?.addEventListener?.("change", onChange);
+    return () => mq?.removeEventListener?.("change", onChange);
+  }, []);
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {

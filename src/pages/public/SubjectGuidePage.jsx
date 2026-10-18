@@ -172,7 +172,7 @@ const SubjectGuidePage = () => {
           </div>
           <figure className="relative">
             <img src={guidePhoto(g.slug)} alt={`${g.subject} — Cambridge ${g.level}`} width="1600" height="640" className="w-full aspect-[5/2] lg:aspect-[16/9] object-cover rounded-3xl border border-white/10 shadow-2xl shadow-black/40" />
-            <figcaption className="absolute bottom-2 right-3 text-xs text-white/70">Photo: Unsplash</figcaption>
+            <figcaption className="theme-keep absolute bottom-2 right-3 text-xs text-white/70">Photo: Unsplash</figcaption>
           </figure>
         </header>
 

@@ -91,7 +91,7 @@ const AboutPage = () => {
               height="1000"
               className="w-full aspect-[7/5] object-cover rounded-3xl border border-white/10 shadow-2xl shadow-indigo-950/50"
             />
-            <figcaption className="absolute bottom-3 right-4 text-xs text-white/70">Photo: Unsplash</figcaption>
+            <figcaption className="theme-keep absolute bottom-3 right-4 text-xs text-white/70">Photo: Unsplash</figcaption>
           </figure>
         </div>
       </section>
@@ -124,7 +124,7 @@ const AboutPage = () => {
               loading="lazy"
               className="w-full aspect-[7/5] object-cover rounded-3xl border border-white/10"
             />
-            <figcaption className="absolute bottom-3 right-4 text-xs text-white/70">Photo: Unsplash</figcaption>
+            <figcaption className="theme-keep absolute bottom-3 right-4 text-xs text-white/70">Photo: Unsplash</figcaption>
           </figure>
           <div className="order-1 lg:order-2">
             <span className="inline-flex items-center gap-2 text-emerald-300 text-xs font-bold uppercase tracking-widest mb-3">

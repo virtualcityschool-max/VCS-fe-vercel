@@ -161,7 +161,9 @@ async function prerenderRoute(browser, route, timeout = NAV_TIMEOUT_MS) {
     const rawHtml = await page.content();
     // Never publish the error screen as the page's content.
     if (rawHtml.includes("We encountered an unexpected error")) throw new Error("page showed the error screen");
-    const html = "<!doctype html>\n" + rawHtml.split(ORIGIN).join(SITE_URL);
+    // The visitor's own day/night choice is applied by index.html's inline
+    // script; don't bake the renderer's (light) setting into the page.
+    const html = "<!doctype html>\n" + rawHtml.split(ORIGIN).join(SITE_URL).replace(/(<html[^>]*?)\s*\bclass="light-public"/, "$1").replace(/\blight-public\s?(?=[^"]*"[^>]*>\s*<head)/, "");
     const outFile = routeToOutputFile(route);
     mkdirSync(dirname(outFile), { recursive: true });
     writeFileSync(outFile, html);

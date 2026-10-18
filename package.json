@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "check:names": "node scripts/check-names.mjs",
-    "build": "node scripts/check-names.mjs && node scripts/check-guide-catalog.mjs && vite build",
+    "build": "node scripts/check-names.mjs && node scripts/check-guide-catalog.mjs && node scripts/gen-light-theme.mjs && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },

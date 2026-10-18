@@ -41,7 +41,7 @@ const Footer = ({ variant = "full" }) => {
             <img
               src="/assets/logo1.png"
               alt="Virtual City School"
-              className="w-40 h-28 object-contain cursor-pointer -ml-2 mb-1 hover:opacity-90 transition-opacity"
+              className="theme-logo w-40 h-28 object-contain cursor-pointer -ml-2 mb-1 hover:opacity-90 transition-opacity"
               onClick={() => handleNavigation("/")}
             />
             <p className="text-slate-400 text-sm leading-relaxed">
