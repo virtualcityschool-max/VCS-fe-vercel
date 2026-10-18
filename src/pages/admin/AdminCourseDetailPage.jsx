@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { coursesService } from "../../services/coursesService";
 import {
@@ -73,6 +73,8 @@ const ConfirmUnenroll = ({ student, onConfirm, onCancel, loading }) => (
 
 const AdminCourseDetailPage = () => {
   const { courseId } = useParams();
+  // ?edit=1 (set right after a course is created) opens the edit form on load.
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -107,6 +109,10 @@ const AdminCourseDetailPage = () => {
       const data = await coursesService.getCourseById(courseId);
       setCourse(data);
       setStudents(data.enrolled_students || []);
+      if (searchParams.get("edit")) {
+        openEdit(data);
+        setSearchParams({}, { replace: true });
+      }
     } catch {
       toastManager.error("Failed to load course details");
     } finally {
@@ -126,8 +132,9 @@ const AdminCourseDetailPage = () => {
       .catch(() => {});
   }, [courseId]);
 
-  const openEdit = () => {
-    if (!course) return;
+  const openEdit = (c = course) => {
+    if (!c) return;
+    const course = c;
     clearAllEditErrors();
     setEditForm({
       title: course.title || "",
@@ -146,6 +153,7 @@ const AdminCourseDetailPage = () => {
       thumbnail: null,
       thumbnail_url: course.thumbnail || null,
       gumroad_product_permalink: course.gumroad_product_permalink || "",
+      details: course.details || {},
     });
     setEditModalOpen(true);
   };
@@ -184,6 +192,7 @@ const AdminCourseDetailPage = () => {
     if (formData.attachment instanceof File) fd.append("attachment", formData.attachment);
     if (formData.thumbnail instanceof File) fd.append("thumbnail", formData.thumbnail);
     fd.append("gumroad_product_permalink", formData.is_paid ? (formData.gumroad_product_permalink || "") : "");
+    fd.append("details", JSON.stringify(formData.details || {}));
     return fd;
   };
 
@@ -299,7 +308,7 @@ const AdminCourseDetailPage = () => {
                 {/* Edit / Delete actions */}
                 <div className="flex items-center gap-2 flex-shrink-0">
                   <button
-                    onClick={openEdit}
+                    onClick={() => openEdit()}
                     className="flex items-center gap-2 px-4 py-2 bg-[#6D5BFF] hover:bg-[#5B47FB] text-white text-xs font-bold rounded-xl transition active:scale-95"
                   >
                     <i className="fas fa-pen text-[10px]"></i>

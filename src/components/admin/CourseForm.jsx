@@ -13,6 +13,23 @@ const fieldClass = (error) =>
 const FieldError = ({ error }) =>
   error ? <p className="text-red-400 text-xs mt-1">{error}</p> : null;
 
+// Facts shown on the public course page ("details" on the course).
+const DETAIL_FIELDS = [
+  { key: "syllabus_code", label: "Syllabus code", placeholder: "e.g. 5070", hint: "Links the course to its Cambridge subject guide" },
+  { key: "exam_board", label: "Exam board", placeholder: "Cambridge International", hint: "Leave empty for Cambridge subjects" },
+  { key: "class_days", label: "Class days", placeholder: "e.g. Monday & Wednesday" },
+  { key: "class_time", label: "Class time", placeholder: "e.g. 8:00–9:00 pm PKT (7:00 pm Gulf)" },
+  { key: "class_length", label: "Each class", placeholder: "e.g. 60 minutes" },
+  { key: "classes_per_week", label: "Classes per week", placeholder: "e.g. 2" },
+  { key: "start_date", label: "Starts", placeholder: "e.g. 1 September 2026" },
+  { key: "duration", label: "Course length", placeholder: "e.g. 2 years (Sept 2026 – May 2028)" },
+  { key: "exam_session", label: "Exam session", placeholder: "e.g. May/June 2028" },
+];
+const DETAIL_LISTS = [
+  { key: "learning_outcomes", label: "What students will learn", placeholder: "One point per line, e.g.\nBalance equations and calculate moles\nPlan and carry out experiments safely" },
+  { key: "includes", label: "What is included", placeholder: "One point per line. Leave empty to show the standard list:\nLive online classes with your teacher\nQuizzes and assignments in your student portal\nMarks and feedback from your teacher\nProgress your parents can follow" },
+];
+
 const ALLOWED_EXTENSIONS = [".pdf", ".doc", ".docx", ".txt", ".png", ".jpg", ".jpeg", ".zip"];
 const MAX_FILE_SIZE_MB = 10;
 
@@ -63,6 +80,9 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
     setThumbnailPreview(null);
     if (thumbnailInputRef.current) thumbnailInputRef.current.value = "";
   };
+
+  const details = formData.details || {};
+  const setDetail = (key, value) => onChange("details", { ...details, [key]: value });
 
   const existingUrl = formData.attachment_url;
   const selectedFile = formData.attachment instanceof File ? formData.attachment : null;
@@ -364,6 +384,57 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
             />
           </div>
         </div>
+      </div>
+
+      {/* Course page details: what visitors see when they open the course */}
+      <div className="lg:col-span-2 rounded-2xl border border-slate-700 bg-slate-800/20 p-5">
+        <h4 className="text-sm font-bold text-white">Course page details</h4>
+        <p className="text-xs text-slate-400 mt-1 mb-5">
+          Shown to students and parents on the course page. Fill what you know and leave the rest empty; empty fields are hidden. For a Cambridge subject, its syllabus guide (exam papers, topics, grades, books) is added automatically.
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {DETAIL_FIELDS.map((f) => (
+            <div key={f.key}>
+              <label className="block text-[11px] uppercase tracking-widest font-black text-slate-500 mb-2">{f.label}</label>
+              <Input
+                type="text"
+                maxLength={120}
+                placeholder={f.placeholder}
+                value={details[f.key] || ""}
+                onChange={(e) => setDetail(f.key, e.target.value)}
+                className={fieldClass(errors.details)}
+              />
+              {f.hint && <p className="text-[11px] text-slate-500 mt-1">{f.hint}</p>}
+            </div>
+          ))}
+        </div>
+        <div className="mt-4">
+          <label className="block text-[11px] uppercase tracking-widest font-black text-slate-500 mb-2">Who this course is for</label>
+          <textarea
+            rows={2}
+            maxLength={1000}
+            placeholder="e.g. Students starting O Level Chemistry in Grade 9 or 10. No earlier chemistry needed."
+            value={details.who_for || ""}
+            onChange={(e) => setDetail("who_for", e.target.value)}
+            className={fieldClass(errors.details)}
+          />
+        </div>
+        <div className="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {DETAIL_LISTS.map((f) => (
+            <div key={f.key}>
+              <label className="block text-[11px] uppercase tracking-widest font-black text-slate-500 mb-2">{f.label}</label>
+              <textarea
+                rows={5}
+                placeholder={f.placeholder}
+                value={(details[f.key] || []).join("\n")}
+                onChange={(e) => setDetail(f.key, e.target.value.split("\n"))}
+                className={fieldClass(errors.details)}
+              />
+              <p className="text-[11px] text-slate-500 mt-1">One point per line, up to 20.</p>
+            </div>
+          ))}
+        </div>
+        <FieldError error={errors.details} />
       </div>
 
       {viewerUrl && (

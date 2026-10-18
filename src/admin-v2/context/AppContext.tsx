@@ -995,13 +995,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
   const toggleTeacherStatus = () => setCurrentView('teacher-allocations');
 
-  const addSubject = (s: any) => {
+  const addSubject = async (s: any) => {
     const cat = raw.categories.find((c: any) => c.name === s.level);
-    return run(() => coursesService.createCourse({
-      title: s.name, description: s.description || s.name, ...(cat ? { category: cat.id } : {}), price: s.priceUSD || 0, is_paid: (s.priceUSD || 0) > 0,
-      status: s.status === 'Published' ? 'published' : 'draft', ...(s.teacherId ? { instructor_id: Number(s.teacherId) } : {}),
-      ...(s.batchName ? { batch_name: s.batchName } : {}),
-    }), `Subject created: ${s.name}`, ['courses', 'catalog']);
+    let created: any = null;
+    const ok = await run(async () => {
+      created = await coursesService.createCourse({
+        title: s.name, description: s.description || s.name, ...(cat ? { category: cat.id } : {}), price: s.priceUSD || 0, is_paid: (s.priceUSD || 0) > 0,
+        status: s.status === 'Published' ? 'published' : 'draft', ...(s.teacherId ? { instructor_id: Number(s.teacherId) } : {}),
+        ...(s.batchName ? { batch_name: s.batchName } : {}),
+        ...(s.code && s.code.length <= 20 ? { details: { syllabus_code: s.code } } : {}),
+      });
+    }, `Subject created: ${s.name}`, ['courses', 'catalog']);
+    // Straight on to the full form, to fill in the course page details.
+    if (ok && created?.id) navigate(`/admin/courses/${created.id}?edit=1`);
+    return ok;
   };
   const updateSubject = (id: string) => navigate(`/admin/courses/${id}`);
   const toggleSubjectStatus = async (id: string) => {

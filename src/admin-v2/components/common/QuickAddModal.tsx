@@ -227,7 +227,7 @@ export const QuickAddModal: React.FC = () => {
       const code = subCode.trim();
       const title = code && !subName.includes(code) ? `${subName.trim()} (${code})` : subName.trim();
       ok = await addSubject({
-        name: title, level: subLevel, teacherId: subTeacherId, priceUSD: fee, description: subDescription, batchName: subBatch.trim(),
+        name: title, level: subLevel, teacherId: subTeacherId, priceUSD: fee, description: subDescription, batchName: subBatch.trim(), code,
         status: subTeacherId ? 'Published' : 'Draft',
       });
     }
@@ -484,6 +484,7 @@ export const QuickAddModal: React.FC = () => {
                 <Field label="Short description" hint="Shown on the subject page. Optional.">
                   <textarea rows={2} value={subDescription} onChange={(e) => setSubDescription(e.target.value)} placeholder="What students will learn" className={inputCls} />
                 </Field>
+                <p className="text-xs text-slate-400">After you save, the full course form opens so you can add class days and times, start date, what students will learn and the rest of the course page.</p>
               </FormSection>
             </>
           )}

@@ -19,11 +19,7 @@ import BackButton from "../../components/ui/BackButton";
 import { toastManager } from "../../utils/toastManager";
 import { showApiError } from "../../utils/apiErrorHandler";
 import { useSubmissionGuard } from "../../utils/requestDeduplicator";
-import {
-  useDateFormat,
-  useNumberFormat,
-  useTextFormat,
-} from "../../hooks/useFormat";
+import { useNumberFormat, useTextFormat } from "../../hooks/useFormat";
 import { getCourseImage } from "../../utils/courseImageUtils";
 import { setAuthModal, setEnrollmentIntent } from "../../store/slices/uiSlice";
 import EnrollmentTypeModal from "../../components/courses/EnrollmentTypeModal";
@@ -36,7 +32,31 @@ import QuillViewer from "../../components/common/QuillViewer";
 import { getDisplayName } from "../../utils/userDisplay";
 import { useSeo } from "../../hooks/useSeo";
 import { guideForCourseTitle } from "../../data/subjectGuides";
+import GuideBody from "../../components/subjects/GuideBody";
+import { guideSections } from "../../components/subjects/guideSections";
 import { useWhatsappNumber } from "../../hooks/useWhatsappNumber";
+
+// Static class names so Tailwind keeps them.
+const SECTION_COLORS = {
+  blue: "bg-blue-500/20 text-blue-400",
+  purple: "bg-purple-500/20 text-purple-400",
+  amber: "bg-amber-500/20 text-amber-400",
+  teal: "bg-teal-500/20 text-teal-400",
+  emerald: "bg-emerald-500/20 text-emerald-400",
+  indigo: "bg-indigo-500/20 text-indigo-400",
+};
+
+const CourseSection = ({ id, icon, color, title, children }) => (
+  <section id={id} className="scroll-mt-24 mb-8">
+    <h2 className="text-2xl font-bold font-poppins mb-6 flex items-center gap-3">
+      <span className={`w-8 h-8 rounded-lg flex items-center justify-center ${SECTION_COLORS[color]}`}>
+        <i className={`fas ${icon} text-sm`}></i>
+      </span>
+      {title}
+    </h2>
+    {children}
+  </section>
+);
 
 const CourseDetails = () => {
   const { courseId } = useParams();
@@ -66,7 +86,6 @@ const CourseDetails = () => {
   const { enrollmentIntent } = useSelector((state) => state.ui);
 
   // Formatting hooks
-  const { formatDate } = useDateFormat();
   const { formatCurrency } = useNumberFormat();
   const { capitalize, truncate } = useTextFormat();
   const whatsappNumber = useWhatsappNumber();
@@ -138,8 +157,16 @@ const CourseDetails = () => {
       enrollment_status: course.enrollment_status,
       is_paid: course.is_paid ?? false,
       gumroad_product_permalink: course.gumroad_product_permalink || null,
+      details: course.details && typeof course.details === "object" ? course.details : {},
     };
   }, [course, courseId]);
+
+  // The Cambridge subject guide for this course: the syllabus code the admin
+  // set on the course first, else the code in its title.
+  const guide = normalizedCourse
+    ? guideForCourseTitle(normalizedCourse.details.syllabus_code) || guideForCourseTitle(normalizedCourse.title)
+    : null;
+  const guideSecs = React.useMemo(() => guideSections(guide, { withVcs: false }), [guide]);
 
   const courseUrl = typeof window !== "undefined" ? window.location.href : undefined;
 
@@ -509,6 +536,60 @@ const CourseDetails = () => {
     );
   }
 
+  const details = normalizedCourse.details;
+  const quickFact = (...labels) => guide?.quickFacts?.find((f) => labels.includes(f.label))?.value || null;
+  const syllabusCode = details.syllabus_code || guide?.code || normalizedCourse.syllabusCode;
+  const examBoard = details.exam_board || (guide ? "Cambridge International" : null);
+  const examSession = details.exam_session || quickFact("Exam sessions", "Exam session");
+  const teacherId = normalizedCourse.instructor?.id || normalizedCourse.instructor_id;
+  const teacherName = getDisplayName(normalizedCourse.instructor);
+  const hasOutline = !!normalizedCourse.outline && normalizedCourse.outline.replace(/<[^>]*>/g, "").trim().length > 0;
+
+  // Facts about the classes themselves, all set by the admin on the course.
+  const classFacts = [
+    { label: "Class days", value: details.class_days },
+    { label: "Class time", value: details.class_time },
+    { label: "Each class", value: details.class_length },
+    { label: "Classes per week", value: details.classes_per_week },
+    { label: "Starts", value: details.start_date },
+    { label: "Course length", value: details.duration },
+    { label: "Exam session", value: details.exam_session },
+  ].filter((f) => f.value);
+
+  const includes = details.includes?.length
+    ? details.includes
+    : [
+        "Live online classes with your teacher",
+        "Quizzes and assignments in your student portal",
+        "Marks and feedback from your teacher",
+        "Progress your parents can follow",
+      ];
+
+  const glance = [
+    { icon: "fa-layer-group", label: "Level", value: normalizedCourse.category },
+    { icon: "fa-book", label: "Syllabus", value: [examBoard, syllabusCode].filter(Boolean).join(" · ") || null },
+    { icon: "fa-chalkboard-teacher", label: "Teacher", value: teacherName, to: teacherId ? `/teachers/${teacherId}` : null },
+    { icon: "fa-calendar-alt", label: "Class days", value: details.class_days },
+    { icon: "fa-clock", label: "Class time", value: details.class_time },
+    { icon: "fa-hourglass-half", label: "Each class", value: details.class_length },
+    { icon: "fa-play-circle", label: "Starts", value: details.start_date },
+    { icon: "fa-pen-nib", label: "Exam session", value: examSession },
+    { icon: "fa-file-alt", label: "Exam papers", value: quickFact("Exams you sit") },
+    { icon: "fa-award", label: "Grades", value: quickFact("Grades") },
+    { icon: "fa-video", label: "Format", value: "Live online classes" },
+  ].filter((f) => f.value);
+
+  const pageSections = [
+    { id: "course-about", label: "About" },
+    classFacts.length > 0 && { id: "course-classes", label: "Classes" },
+    details.learning_outcomes?.length > 0 && { id: "course-learn", label: "What you will learn" },
+    details.who_for && { id: "course-who", label: "Who it is for" },
+    { id: "course-includes", label: "What is included" },
+    hasOutline && { id: "course-outline", label: "Outline" },
+    normalizedCourse.attachment && { id: "course-attachment", label: "Material" },
+    ...(guide ? guideSecs.map((x) => ({ id: x.id, label: x.title })) : []),
+  ].filter(Boolean);
+
   const enrolled = isCourseEnrolled(normalizedCourse);
   const isEnrolling = enrollingCourseIds.includes(normalizedCourse.id);
   const isUnenrolling = unenrollingCourseIds.includes(normalizedCourse.id);
@@ -558,20 +639,15 @@ const CourseDetails = () => {
                 {/* Gradient overlay */}
                 <div className="absolute inset-0 bg-linear-to-t from-slate-900/60 via-transparent to-transparent pointer-events-none"></div>
 
-                {/* Status Badge */}
-                <div className="absolute top-6 right-6">
-                  {normalizedCourse.status === "published" ? (
-                    <span className="bg-green-500/20 backdrop-blur-sm text-green-400 px-4 py-2 rounded-full text-xs font-bold border border-green-500/30 flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                      Published
-                    </span>
-                  ) : (
-                    <span className="bg-slate-600/20 backdrop-blur-sm text-slate-400 px-4 py-2 rounded-full text-xs font-bold border border-slate-500/30 flex items-center gap-2">
+                {/* Only staff can open an unpublished course; tell them it isn't public. */}
+                {normalizedCourse.status !== "published" && (
+                  <div className="absolute top-6 right-6">
+                    <span className="bg-slate-600/20 backdrop-blur-sm text-slate-300 px-4 py-2 rounded-full text-xs font-bold border border-slate-500/30 flex items-center gap-2">
                       <div className="w-2 h-2 bg-slate-400 rounded-full"></div>
-                      Draft
+                      {capitalize(normalizedCourse.status)} · not on the website
                     </span>
-                  )}
-                </div>
+                  </div>
+                )}
 
                 {/* Floating action buttons */}
                 {/* <div className="absolute bottom-6 left-6 flex gap-3">
@@ -597,7 +673,7 @@ const CourseDetails = () => {
                       <div className="flex items-center gap-2 bg-blue-500/10 backdrop-blur-sm px-4 py-2 rounded-full border border-blue-500/20">
                         <i className="fas fa-tag text-blue-400 text-xs"></i>
                         <span className="text-blue-300 font-medium">
-                          {capitalize(normalizedCourse.category)}
+                          {normalizedCourse.category}
                         </span>
                       </div>
                     )}
@@ -616,62 +692,68 @@ const CourseDetails = () => {
                   </div>
                 </div>
 
-                {/* Subject guide (Cambridge syllabus explained), when we have one */}
-                {guideForCourseTitle(normalizedCourse.title) && (
-                  <Link
-                    to={`/subjects/${guideForCourseTitle(normalizedCourse.title).slug}`}
-                    className="mb-8 flex items-center justify-between gap-4 rounded-2xl border border-indigo-500/30 bg-indigo-500/10 hover:bg-indigo-500/15 px-5 py-4 transition-colors"
-                  >
-                    <div>
-                      <div className="text-xs font-bold uppercase tracking-widest text-indigo-300 mb-1">Subject guide</div>
-                      <div className="text-white font-semibold">
-                        Why study {guideForCourseTitle(normalizedCourse.title).subject}? Exam pattern, topics, question types and grades
-                      </div>
+                {/* Jump links to every part of the page */}
+                <nav aria-label="On this page" className="mb-8 flex flex-wrap gap-2">
+                  {pageSections.map((x) => (
+                    <a key={x.id} href={`#${x.id}`} className="px-3 py-1.5 rounded-full text-xs font-semibold border border-white/10 text-slate-300 hover:text-white hover:border-indigo-400/50 hover:bg-indigo-500/10 transition-colors">
+                      {x.label}
+                    </a>
+                  ))}
+                </nav>
+
+                <CourseSection id="course-about" icon="fa-info-circle" color="blue" title="About this course">
+                  <p className="text-slate-300 leading-relaxed text-lg whitespace-pre-wrap bg-slate-800/30 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50">
+                    {normalizedCourse.description}
+                  </p>
+                </CourseSection>
+
+                {classFacts.length > 0 && (
+                  <CourseSection id="course-classes" icon="fa-calendar-alt" color="purple" title="Classes">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {classFacts.map((f) => (
+                        <div key={f.label} className="rounded-xl p-4 bg-slate-800/30 border border-slate-700/50">
+                          <div className="text-[11px] font-bold uppercase tracking-widest text-slate-500 mb-1">{f.label}</div>
+                          <div className="text-white font-semibold">{f.value}</div>
+                        </div>
+                      ))}
                     </div>
-                    <i className="fas fa-arrow-right text-indigo-300"></i>
-                  </Link>
+                  </CourseSection>
                 )}
 
-                {/* Course Description */}
-                <div className="mb-8">
-                  <h2 className="text-2xl font-bold font-poppins mb-6 flex items-center gap-3">
-                    <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                      <i className="fas fa-info-circle text-blue-400 text-sm"></i>
-                    </div>
-                    About this course
-                  </h2>
-                  <div className="prose prose-invert max-w-none">
-                    <p className="text-slate-300 leading-relaxed text-lg whitespace-pre-wrap bg-slate-800/30 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50">
-                      {normalizedCourse.description}
-                    </p>
-                  </div>
-                </div>
+                {details.learning_outcomes?.length > 0 && (
+                  <CourseSection id="course-learn" icon="fa-lightbulb" color="amber" title="What you will learn">
+                    <ul className="space-y-2.5 bg-slate-800/30 rounded-xl p-6 border border-slate-700/50">
+                      {details.learning_outcomes.map((x) => (
+                        <li key={x} className="flex gap-3 text-slate-200"><i className="fas fa-check text-emerald-400 mt-1 text-sm"></i>{x}</li>
+                      ))}
+                    </ul>
+                  </CourseSection>
+                )}
 
-                {/* Course Outline */}
-                {normalizedCourse.outline &&
-                  normalizedCourse.outline.replace(/<[^>]*>/g, "").trim() && (
-                  <div className="mb-8">
-                    <h2 className="text-2xl font-bold font-poppins mb-6 flex items-center gap-3">
-                      <div className="w-8 h-8 bg-indigo-500/20 rounded-lg flex items-center justify-center">
-                        <i className="fas fa-list-alt text-indigo-400 text-sm"></i>
-                      </div>
-                      Course Outline
-                    </h2>
+                {details.who_for && (
+                  <CourseSection id="course-who" icon="fa-user-graduate" color="teal" title="Who this course is for">
+                    <p className="text-slate-300 leading-relaxed whitespace-pre-wrap bg-slate-800/30 rounded-xl p-6 border border-slate-700/50">{details.who_for}</p>
+                  </CourseSection>
+                )}
+
+                <CourseSection id="course-includes" icon="fa-gift" color="emerald" title="What is included">
+                  <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {includes.map((x) => (
+                      <li key={x} className="flex gap-3 rounded-xl p-4 bg-slate-800/30 border border-slate-700/50 text-slate-200"><i className="fas fa-check-circle text-emerald-400 mt-1 text-sm"></i>{x}</li>
+                    ))}
+                  </ul>
+                </CourseSection>
+
+                {hasOutline && (
+                  <CourseSection id="course-outline" icon="fa-list-alt" color="indigo" title="Course outline">
                     <div className="bg-slate-800/30 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50">
                       <QuillViewer value={normalizedCourse.outline} />
                     </div>
-                  </div>
+                  </CourseSection>
                 )}
 
-                {/* Attachment */}
                 {normalizedCourse.attachment && (
-                  <div className="mb-8">
-                    <h2 className="text-2xl font-bold font-poppins mb-6 flex items-center gap-3">
-                      <div className="w-8 h-8 bg-amber-500/20 rounded-lg flex items-center justify-center">
-                        <i className="fas fa-paperclip text-amber-400 text-sm"></i>
-                      </div>
-                      Course Attachment
-                    </h2>
+                  <CourseSection id="course-attachment" icon="fa-paperclip" color="amber" title="Course material">
                     <button
                       onClick={() => setViewerUrl(getStorageUrl(normalizedCourse.attachment))}
                       className="inline-flex items-center gap-4 px-6 py-4 bg-slate-800/40 hover:bg-slate-700/50 backdrop-blur-sm border border-slate-700/50 hover:border-indigo-500/30 rounded-2xl text-white font-medium transition-all duration-200 group"
@@ -684,32 +766,25 @@ const CourseDetails = () => {
                       </div>
                       <i className="fas fa-arrow-right text-slate-500 group-hover:text-indigo-400 group-hover:translate-x-1 transition-all ml-auto"></i>
                     </button>
-                  </div>
+                  </CourseSection>
                 )}
 
-                {/* Course Schedule */}
-                {normalizedCourse.schedule && (
-                  <div className="mb-8">
-                    <h2 className="text-2xl font-bold font-poppins mb-6 flex items-center gap-3">
-                      <div className="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center">
-                        <i className="fas fa-calendar-alt text-purple-400 text-sm"></i>
-                      </div>
-                      Schedule
-                    </h2>
-                    <div className="bg-linear-to-br from-purple-600/10 to-pink-600/10 backdrop-blur-sm rounded-xl p-6 border border-purple-500/20">
-                      <div className="flex items-start gap-4">
-                        <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center shrink-0">
-                          <i className="fas fa-clock text-purple-400"></i>
-                        </div>
-                        <div>
-                          <p className="text-slate-300 leading-relaxed">
-                            {typeof normalizedCourse.schedule === "string"
-                              ? normalizedCourse.schedule
-                              : JSON.stringify(normalizedCourse.schedule)}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
+                {/* The full Cambridge subject guide for this syllabus */}
+                {guide && (
+                  <div id="course-syllabus" className="scroll-mt-24 mt-12 pt-8 border-t border-slate-700/50">
+                    <div className="text-xs font-bold uppercase tracking-widest text-indigo-300 mb-2">Cambridge syllabus guide</div>
+                    <h2 className="text-2xl md:text-3xl font-black font-poppins text-white mb-3">{guide.title}</h2>
+                    <p className="text-slate-300 leading-relaxed">{guide.tagline}</p>
+                    <p className="mt-4 inline-flex items-center gap-2 text-xs text-emerald-300/90 bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-3 py-1.5">
+                      <i className="fas fa-check-circle"></i> Checked against the official Cambridge syllabus for exams in {guide.syllabusYears}
+                    </p>
+                    {guide.notice && (
+                      <p className="mt-3 text-sm text-amber-200 bg-amber-500/10 border border-amber-500/30 rounded-xl px-4 py-3 leading-relaxed">{guide.notice}</p>
+                    )}
+                    <GuideBody g={guide} sections={guideSecs} />
+                    <Link to={`/subjects/${guide.slug}`} className="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-indigo-300 hover:text-white">
+                      Open this guide as its own page <i className="fas fa-arrow-right text-xs"></i>
+                    </Link>
                   </div>
                 )}
               </div>
@@ -847,80 +922,21 @@ const CourseDetails = () => {
                   Ask about this course on WhatsApp
                 </a>
 
-                {/* Trust indicators */}
-                <div className="flex items-center justify-center gap-6 mb-8 text-xs text-slate-400">
-                  <div className="flex items-center gap-2">
-                    <i className="fas fa-shield-alt text-green-400"></i>
-                    <span>Secure</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <i className="fas fa-certificate text-blue-400"></i>
-                    <span>Certificate</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <i className="fas fa-infinity text-purple-400"></i>
-                    <span>Lifetime</span>
-                  </div>
-                </div>
-
-                {/* Course Info */}
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center py-4 border-b border-slate-700/50">
-                    <span className="text-slate-400 text-sm font-medium flex items-center gap-2">
-                      <i className="fas fa-tag text-blue-400 text-xs"></i>
-                      Level
-                    </span>
-                    <span className="text-white font-medium">
-                      {capitalize(normalizedCourse.category)}
-                    </span>
-                  </div>
-
-                  <div className="flex justify-between items-center py-4 border-b border-slate-700/50">
-                    <span className="text-slate-400 text-sm font-medium flex items-center gap-2">
-                      <i className="fas fa-toggle-on text-green-400 text-xs"></i>
-                      Status
-                    </span>
-                    <span className="text-white font-medium">
-                      {capitalize(normalizedCourse.status)}
-                    </span>
-                  </div>
-
-                  {normalizedCourse.instructor_id && (
-                    <div className="flex justify-between items-center py-4 border-b border-slate-700/50">
-                      <span className="text-slate-400 text-sm font-medium flex items-center gap-2">
-                        <i className="fas fa-user-tie text-purple-400 text-xs"></i>
-                        Tutor
-                      </span>
-                      <span className="text-white font-medium">
-                        #{normalizedCourse.instructor_id}
-                      </span>
+                {/* At a glance */}
+                <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">At a glance</h3>
+                <dl>
+                  {glance.map((f, i) => (
+                    <div key={f.label} className={`flex justify-between items-start gap-4 py-3 ${i < glance.length - 1 ? "border-b border-slate-700/50" : ""}`}>
+                      <dt className="text-slate-400 text-sm font-medium flex items-center gap-2 shrink-0">
+                        <i className={`fas ${f.icon} text-indigo-400 text-xs w-3.5`}></i>
+                        {f.label}
+                      </dt>
+                      <dd className="text-white font-medium text-sm text-right">
+                        {f.to ? <Link to={f.to} className="hover:text-indigo-300">{f.value}</Link> : f.value}
+                      </dd>
                     </div>
-                  )}
-
-                  {normalizedCourse.created_at && (
-                    <div className="flex justify-between items-center py-4 border-b border-slate-700/50">
-                      <span className="text-slate-400 text-sm font-medium flex items-center gap-2">
-                        <i className="fas fa-calendar text-teal-400 text-xs"></i>
-                        Created
-                      </span>
-                      <span className="text-white font-medium">
-                        {formatDate(normalizedCourse.created_at)}
-                      </span>
-                    </div>
-                  )}
-
-                  <div className="flex justify-between items-center py-4">
-                    <span className="text-slate-400 text-sm font-medium flex items-center gap-2">
-                      <i className="fas fa-clock text-orange-400 text-xs"></i>
-                      Schedule
-                    </span>
-                    <span className="text-white font-medium">
-                      {normalizedCourse.schedule
-                        ? "Available"
-                        : "Not specified"}
-                    </span>
-                  </div>
-                </div>
+                  ))}
+                </dl>
               </div>
             </div>
 
