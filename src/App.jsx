@@ -58,7 +58,8 @@ const AppInner = () => {
   };
 
   const isAdminArea = location.pathname.startsWith("/admin");
-  const isTeacherArea = location.pathname.startsWith("/teacher");
+  // The teacher portal (/teacher, /teacher/...), not the public tutor pages (/teachers...).
+  const isTeacherArea = location.pathname === "/teacher" || location.pathname.startsWith("/teacher/");
   const hasSidebar = isLoggedIn && !isAdminArea && (role === "teacher" || role === "student" || role === "parent");
 
   // Close mobile sidebar on route change
