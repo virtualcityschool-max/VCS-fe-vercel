@@ -6,6 +6,11 @@ import { validatePhone, normalizePhone } from "../../utils/validation";
 import DistinctionsEditor from "./DistinctionsEditor";
 import { showApiError } from "../../utils/apiErrorHandler";
 
+// "a, b ,c" -> ["a", "b", "c"]
+const splitList = (text, sep) => (text || "").split(sep).map((x) => x.trim()).filter(Boolean);
+
+const fieldCls = "w-full bg-slate-800 border border-slate-700 hover:border-slate-600 focus:border-indigo-500/60 rounded-lg px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none transition disabled:opacity-60 disabled:cursor-default";
+
 const TeacherProfileTab = ({ profile, onUpdate, onCancel, onSaved, readOnly = false }) => {
   const [formData, setFormData] = useState({
     bio: "",
@@ -16,6 +21,12 @@ const TeacherProfileTab = ({ profile, onUpdate, onCancel, onSaved, readOnly = fa
     linkedin: "",
     phone: "",
     distinctions: [],
+    // Shown on the public tutor page. Lists are edited as text.
+    subjects: "",
+    class_levels: "",
+    languages: "",
+    teaching_approach: "",
+    highlights: "",
   });
 
   const [isSaving, setIsSaving] = useState(false);
@@ -34,6 +45,11 @@ const TeacherProfileTab = ({ profile, onUpdate, onCancel, onSaved, readOnly = fa
         linkedin: profile.linkedin ?? "",
         phone: normalizePhone(profile.phone ?? ""),
         distinctions: profile.distinctions ?? [],
+        subjects: (profile.subjects || []).join(", "),
+        class_levels: (profile.class_levels || []).join(", "),
+        languages: (profile.languages || []).join(", "),
+        teaching_approach: profile.teaching_approach ?? "",
+        highlights: (profile.highlights || []).join("\n"),
       });
     }
   }, [profile]);
@@ -74,6 +90,11 @@ const TeacherProfileTab = ({ profile, onUpdate, onCancel, onSaved, readOnly = fa
         experience_years: formData.experience_years ? parseInt(formData.experience_years) : "",
         rating: formData.rating ? parseFloat(formData.rating) : "",
         phone: normalizePhone(formData.phone),
+        subjects: splitList(formData.subjects, ","),
+        class_levels: splitList(formData.class_levels, ","),
+        languages: splitList(formData.languages, ","),
+        teaching_approach: formData.teaching_approach.trim(),
+        highlights: splitList(formData.highlights, "\n"),
       });
       clearAllErrors();
       if (onSaved) onSaved();
@@ -94,6 +115,11 @@ const TeacherProfileTab = ({ profile, onUpdate, onCancel, onSaved, readOnly = fa
       linkedin: profile?.linkedin ?? "",
       phone: profile?.phone ?? "",
       distinctions: profile?.distinctions ?? [],
+      subjects: (profile?.subjects || []).join(", "),
+      class_levels: (profile?.class_levels || []).join(", "),
+      languages: (profile?.languages || []).join(", "),
+      teaching_approach: profile?.teaching_approach ?? "",
+      highlights: (profile?.highlights || []).join("\n"),
     });
     clearAllErrors();
     if (onCancel) onCancel();
@@ -197,6 +223,36 @@ const TeacherProfileTab = ({ profile, onUpdate, onCancel, onSaved, readOnly = fa
               className="w-full bg-slate-800 text-white"
               disabled={readOnly}
             />
+          </div>
+        </div>
+
+        {/* Public tutor page details */}
+        <div className="rounded-xl border border-indigo-500/20 bg-indigo-500/5 p-4 space-y-4">
+          <div>
+            <p className="text-sm font-semibold text-white">Shown on the public tutor page</p>
+            <p className="text-xs text-slate-400 mt-1">Optional. Empty fields are hidden. Subjects and levels are also worked out from the tutor's courses.</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Subjects</label>
+              <input value={formData.subjects} onChange={(e) => handleInputChange("subjects", e.target.value)} placeholder="e.g. Chemistry, Biology" disabled={readOnly} className={fieldCls} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Levels taught</label>
+              <input value={formData.class_levels} onChange={(e) => handleInputChange("class_levels", e.target.value)} placeholder="e.g. O Level, AS Level, A2 Level" disabled={readOnly} className={fieldCls} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Teaches in</label>
+              <input value={formData.languages} onChange={(e) => handleInputChange("languages", e.target.value)} placeholder="e.g. English, Urdu" disabled={readOnly} className={fieldCls} />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">Teaching approach</label>
+            <textarea rows={3} maxLength={1500} value={formData.teaching_approach} onChange={(e) => handleInputChange("teaching_approach", e.target.value)} placeholder="How lessons run: concepts first, then past papers every week; short quizzes; marked homework with feedback…" disabled={readOnly} className={`${fieldCls} resize-none`} />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">Highlights <span className="text-slate-500 font-normal">(one per line, up to 8)</span></label>
+            <textarea rows={3} value={formData.highlights} onChange={(e) => handleInputChange("highlights", e.target.value)} placeholder={"e.g.\n12 years teaching O & A Level Chemistry\nStudents with A* in May/June 2026"} disabled={readOnly} className={`${fieldCls} resize-none`} />
           </div>
         </div>
 

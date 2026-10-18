@@ -20,6 +20,7 @@ import Reveal from "../../components/ui/Reveal";
 import { toastManager } from "../../utils/toastManager";
 import { showApiError } from "../../utils/apiErrorHandler";
 import { getStorageUrl } from "../../utils/storageUrl";
+import { catalogGuideFor } from "../../data/subjectGuides/catalog";
 import { useSeo } from "../../hooks/useSeo";
 
 // O Level / IGCSE / AS Level / A2 Level are VCS's core Cambridge programmes -
@@ -186,9 +187,10 @@ const PublicHome = () => {
   // O/A Level courses are shown first since they're VCS's core programmes.
   const featuredCourses = useMemo(() => {
     const withThumbnail = availableCourses.filter((course) => course.thumbnail);
-    const oaLevel = withThumbnail.filter(isOALevelCourse);
-    const rest = withThumbnail.filter((course) => !isOALevelCourse(course));
-    return [...oaLevel, ...rest].slice(0, 4);
+    // Cambridge O Level / AS / A Level courses (the ones with subject guides)
+    // first, then other O/A Level and IGCSE courses, then the rest.
+    const rank = (c) => (catalogGuideFor(c) ? 0 : isOALevelCourse(c) ? 1 : 2);
+    return [...withThumbnail].sort((a, b) => rank(a) - rank(b)).slice(0, 4);
   }, [availableCourses]);
 
   useSeo({
@@ -294,13 +296,13 @@ const PublicHome = () => {
         </div>
       </section>
 
-      <section className="relative z-10 max-w-[1440px] mx-auto px-6 py-20 md:py-32">
+      <section className="relative z-10 max-w-[1440px] mx-auto px-6 py-12 md:py-16">
         <FivePillarsSection />
         {/* Enrolled Courses Section - Only for logged-in students */}
         {auth.isLoggedIn &&
           auth.role === "student" &&
           enrolledList.length > 0 && (
-            <div className="mb-24">
+            <div className="mb-16">
               <Reveal className="flex justify-between items-end mb-10">
                 <div>
                   <p className="text-sm font-black uppercase tracking-[0.4em] text-green-500 mb-2">
@@ -454,7 +456,7 @@ const PublicHome = () => {
         </Reveal>
 
         {/* How Virtual City School Works Section */}
-        <div className="mt-32 md:mt-48">
+        <div className="mt-16 md:mt-24">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center">
             {/* Left: Journey Image */}
             <Reveal className="relative group">
@@ -527,7 +529,7 @@ const PublicHome = () => {
         </div>
 
         {/* Expert Tutors Section */}
-        <div className="mt-32 md:mt-48 pb-20">
+        <div className="mt-16 md:mt-24 pb-20">
           <Reveal className="flex justify-between items-end mb-16">
             <div className="text-left">
               <p className="text-sm font-black uppercase tracking-[0.4em] text-cyan-500 mb-2">
@@ -576,7 +578,7 @@ const PublicHome = () => {
         {/* From the Blog Section - articles and vlogs kept separate so a "Latest
             from Our Blog" reader isn't surprised by a video, and vice versa */}
         {(blogsLoading || articleBlogs.length > 0) && (
-          <div className="mt-32 md:mt-48 pb-4">
+          <div className="mt-16 md:mt-24 pb-4">
             <Reveal className="flex justify-between items-end mb-16">
               <div className="text-left">
                 <p className="text-sm font-black uppercase tracking-[0.4em] text-indigo-500 mb-2">
@@ -617,7 +619,7 @@ const PublicHome = () => {
 
         {/* Latest Vlogs - only appears once a video post actually exists */}
         {(blogsLoading || videoBlogs.length > 0) && (
-          <div className="mt-32 md:mt-48 pb-4">
+          <div className="mt-16 md:mt-24 pb-4">
             <Reveal className="flex justify-between items-end mb-16">
               <div className="text-left">
                 <p className="text-sm font-black uppercase tracking-[0.4em] text-rose-400 mb-2">
@@ -659,7 +661,7 @@ const PublicHome = () => {
             is published (Admin -> Testimonials); no placeholder content
             shown in the meantime. */}
         {testimonials.length > 0 && (
-        <div className="mt-32 md:mt-48 pb-20">
+        <div className="mt-16 md:mt-24 pb-20">
           <Reveal className="text-center mb-16 max-w-2xl mx-auto">
             <p className="text-sm font-black uppercase tracking-[0.4em] text-blue-400 mb-2">
               Real Voices
