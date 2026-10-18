@@ -140,9 +140,9 @@ const TeachersDirectory = () => {
       )}
       <div className="relative overflow-hidden border-b border-slate-800/50 animate-fadeIn">
         <div className="absolute top-[-60%] left-1/2 -translate-x-1/2 w-[70%] h-[160%] bg-cyan-600/8 blur-[100px] rounded-full pointer-events-none" />
-        <div className="max-w-7xl mx-auto px-6 py-6 relative z-10">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 py-6 relative z-10">
           <div className="text-center mb-5">
-            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-cyan-400 mb-2 animate-fadeInUp">
+            <p className="text-sm font-black uppercase tracking-[0.4em] text-cyan-400 mb-2 animate-fadeInUp">
               Mentorship
             </p>
             <h1 className="text-2xl md:text-4xl font-black font-poppins leading-tight tracking-tight animate-fadeInUp" style={{ animationDelay: "0.08s" }}>
@@ -154,15 +154,15 @@ const TeachersDirectory = () => {
             <div className="flex justify-center gap-8 sm:gap-14 mb-5 animate-fadeInUp" style={{ animationDelay: "0.09s" }}>
               <div className="text-center">
                 <p className="text-xl sm:text-2xl font-black font-poppins text-indigo-300 tabular-nums">{stats.tutorCount}</p>
-                <p className="text-[10px] uppercase tracking-widest text-slate-500 font-semibold mt-0.5">Tutors</p>
+                <p className="text-sm uppercase tracking-widest text-slate-500 font-semibold mt-0.5">Tutors</p>
               </div>
               <div className="text-center">
                 <p className="text-xl sm:text-2xl font-black font-poppins text-purple-300 tabular-nums">{stats.subjectCount}</p>
-                <p className="text-[10px] uppercase tracking-widest text-slate-500 font-semibold mt-0.5">Subjects</p>
+                <p className="text-sm uppercase tracking-widest text-slate-500 font-semibold mt-0.5">Subjects</p>
               </div>
               <div className="text-center">
                 <p className="text-xl sm:text-2xl font-black font-poppins text-amber-300 tabular-nums">{stats.avgExperience}</p>
-                <p className="text-[10px] uppercase tracking-widest text-slate-500 font-semibold mt-0.5">Avg. yrs experience</p>
+                <p className="text-sm uppercase tracking-widest text-slate-500 font-semibold mt-0.5">Avg. yrs experience</p>
               </div>
             </div>
           )}
@@ -211,7 +211,7 @@ const TeachersDirectory = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 pt-6 pb-16">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 pt-6 pb-16">
         <div>
           {loading ? (
             // Loader

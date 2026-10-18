@@ -812,10 +812,10 @@ const AuthModals = () => {
   // normal sign-up form and the Google sign-up step. `r` is the chosen role.
   const renderContactDetails = (r) => (
             <div className="md:col-span-2 bg-slate-950/60 border border-white/5 rounded-2xl p-5 space-y-4">
-              <p className="text-[10px] font-black uppercase text-indigo-400 tracking-widest">Contact details</p>
+              <p className="text-xs font-black uppercase text-indigo-400 tracking-widest">Contact details</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block">Country {r === "student" && <span className="text-red-500">*</span>}</label>
+                  <label className="text-xs font-black uppercase text-slate-500 tracking-widest mb-2 block">Country {r === "student" && <span className="text-red-500">*</span>}</label>
                   <select
                     value={country}
                     onChange={(e) => {
@@ -831,7 +831,7 @@ const AuthModals = () => {
                   {registrationErrors.country && (<p className="text-red-500 text-xs mt-2 animate-shake">{Array.isArray(registrationErrors.country) ? registrationErrors.country[0] : registrationErrors.country}</p>)}
                 </div>
                 <div>
-                  <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block">{r === "student" ? "Student" : "Your"} WhatsApp number <span className="text-red-500">*</span></label>
+                  <label className="text-xs font-black uppercase text-slate-500 tracking-widest mb-2 block">{r === "student" ? "Student" : "Your"} WhatsApp number <span className="text-red-500">*</span></label>
                   <div className="flex gap-2">
                     <select value={phoneDial} onChange={(e) => setPhoneDial(e.target.value)} className="bg-slate-950 border border-white/5 rounded-2xl px-3 py-4 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm w-[110px] shrink-0">
                     {DIAL_CODES.map((c) => (<option key={c.dial} value={c.dial}>+{c.dial}</option>))}
@@ -844,12 +844,12 @@ const AuthModals = () => {
               {r === "student" && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-white/5">
                   <div>
-                    <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block">Guardian name <span className="text-red-500">*</span></label>
+                    <label className="text-xs font-black uppercase text-slate-500 tracking-widest mb-2 block">Guardian name <span className="text-red-500">*</span></label>
                     <input type="text" value={guardianName} onChange={(e) => { setGuardianName(e.target.value); clearRegistrationFieldError("guardian_name"); }} placeholder="Parent or guardian full name" className="w-full bg-slate-950 border border-white/5 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm" />
                     {registrationErrors.guardian_name && (<p className="text-red-500 text-xs mt-2 animate-shake">{Array.isArray(registrationErrors.guardian_name) ? registrationErrors.guardian_name[0] : registrationErrors.guardian_name}</p>)}
                   </div>
                   <div>
-                    <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block">Relationship</label>
+                    <label className="text-xs font-black uppercase text-slate-500 tracking-widest mb-2 block">Relationship</label>
                     <select value={guardianRelationship} onChange={(e) => setGuardianRelationship(e.target.value)} className="w-full bg-slate-950 border border-white/5 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm">
                       <option value="parent">Parent</option>
                       <option value="sibling">Sibling</option>
@@ -858,7 +858,7 @@ const AuthModals = () => {
                     </select>
                   </div>
                   <div className="sm:col-span-2">
-                    <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block">Guardian WhatsApp number <span className="text-red-500">*</span></label>
+                    <label className="text-xs font-black uppercase text-slate-500 tracking-widest mb-2 block">Guardian WhatsApp number <span className="text-red-500">*</span></label>
                     <div className="flex gap-2">
                       <select value={guardianDial} onChange={(e) => setGuardianDial(e.target.value)} className="bg-slate-950 border border-white/5 rounded-2xl px-3 py-4 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm w-[110px] shrink-0">
                     {DIAL_CODES.map((c) => (<option key={c.dial} value={c.dial}>+{c.dial}</option>))}
@@ -866,7 +866,7 @@ const AuthModals = () => {
                       <input type="tel" inputMode="numeric" value={guardianPhone} onChange={(e) => { setGuardianPhone(e.target.value); clearRegistrationFieldError("guardian_phone"); }} placeholder="50 123 4567" className="w-full bg-slate-950 border border-white/5 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-indigo-500 outline-none text-white text-sm" />
                     </div>
                     {registrationErrors.guardian_phone && (<p className="text-red-500 text-xs mt-2 animate-shake">{Array.isArray(registrationErrors.guardian_phone) ? registrationErrors.guardian_phone[0] : registrationErrors.guardian_phone}</p>)}
-                    <p className="text-slate-500 text-[11px] mt-2">Used only for class reminders and progress updates.</p>
+                    <p className="text-slate-500 text-xs mt-2">Used only for class reminders and progress updates.</p>
                   </div>
                 </div>
               )}
@@ -890,7 +890,7 @@ const AuthModals = () => {
               <h2 className="text-xl sm:text-2xl font-black font-poppins text-white text-center uppercase tracking-[0.15em]">
                 {adminMode ? "Admin Login" : "Secure Login"}
               </h2>
-              <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-1.5">
+              <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mt-1.5">
                 {adminMode ? "Admin portal access only" : "Access your learning terminal"}
               </p>
             </div>
@@ -917,7 +917,7 @@ const AuthModals = () => {
                         return prev;
                       });
                     }}
-                    className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                    className={`flex-1 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
                       activeRoleTab === roleOption
                         ? "bg-indigo-600 text-white shadow-lg"
                         : "text-slate-500 hover:text-slate-300"
@@ -937,13 +937,13 @@ const AuthModals = () => {
                   onError={handleGoogleLoginError}
                   width={340}
                 />
-                <p className="text-[11px] text-slate-400 text-center mt-2 max-w-xs">
+                <p className="text-xs text-slate-400 text-center mt-2 max-w-xs">
                   Instant sign-in with your Gmail account. Connects directly to Google Meet classes.
                 </p>
 
                 <div className="w-full flex items-center my-4">
                   <div className="flex-1 border-t border-white/10" />
-                  <span className="px-3 text-[10px] uppercase font-bold text-slate-500 tracking-widest">
+                  <span className="px-3 text-xs uppercase font-bold text-slate-500 tracking-widest">
                     or sign in with password
                   </span>
                   <div className="flex-1 border-t border-white/10" />
@@ -955,7 +955,7 @@ const AuthModals = () => {
               <div>
                 <label
                   htmlFor="login-email"
-                  className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block"
+                  className="text-xs font-black uppercase text-slate-500 tracking-widest mb-2 block"
                 >
                   Email
                 </label>
@@ -985,14 +985,14 @@ const AuthModals = () => {
                 <div className="flex justify-between items-center mb-2">
                   <label
                     htmlFor="login-password"
-                    className="text-[10px] font-black uppercase text-slate-500 tracking-widest block"
+                    className="text-xs font-black uppercase text-slate-500 tracking-widest block"
                   >
                     Password
                   </label>
                   <button
                     type="button"
                     onClick={() => { setFpStep("request"); setFpEmail(email); setFpError(""); }}
-                    className="text-[10px] font-black uppercase text-indigo-400 hover:text-indigo-300 transition tracking-widest"
+                    className="text-xs font-black uppercase text-indigo-400 hover:text-indigo-300 transition tracking-widest"
                   >
                     Forgot Password?
                   </button>
@@ -1079,7 +1079,7 @@ const AuthModals = () => {
                   onClick={() => { setFpStep("idle"); setFpError(""); setFpOtp(""); setFpNewPassword(""); setFpConfirmPassword(""); }}
                   className="flex items-center gap-2 text-slate-400 hover:text-white text-xs mb-6 transition"
                 >
-                  <i className="fas fa-arrow-left text-[10px]" />
+                  <i className="fas fa-arrow-left text-xs" />
                   Back to Login
                 </button>
 
@@ -1091,7 +1091,7 @@ const AuthModals = () => {
                       <p className="text-slate-400 text-xs">Enter your email to receive a reset code</p>
                     </div>
                     <div>
-                      <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block">Email</label>
+                      <label className="text-xs font-black uppercase text-slate-500 tracking-widest mb-2 block">Email</label>
                       <input
                         type="email"
                         value={fpEmail}
@@ -1120,7 +1120,7 @@ const AuthModals = () => {
                       <p className="text-slate-400 text-xs">Enter the 6-digit code sent to <strong className="text-slate-300">{fpEmail}</strong></p>
                     </div>
                     <div>
-                      <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block text-center">Reset Code</label>
+                      <label className="text-xs font-black uppercase text-slate-500 tracking-widest mb-2 block text-center">Reset Code</label>
                       <input
                         type="text"
                         value={fpOtp}
@@ -1171,7 +1171,7 @@ const AuthModals = () => {
                       <p className="text-slate-400 text-xs">Choose a strong password for your account</p>
                     </div>
                     <div>
-                      <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block">New Password</label>
+                      <label className="text-xs font-black uppercase text-slate-500 tracking-widest mb-2 block">New Password</label>
                       <div className="relative">
                         <input
                           type={showNewPassword ? "text" : "password"}
@@ -1186,7 +1186,7 @@ const AuthModals = () => {
                       </div>
                     </div>
                     <div>
-                      <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block">Confirm Password</label>
+                      <label className="text-xs font-black uppercase text-slate-500 tracking-widest mb-2 block">Confirm Password</label>
                       <div className="relative">
                         <input
                           type={showConfirmNewPassword ? "text" : "password"}
@@ -1241,7 +1241,7 @@ const AuthModals = () => {
                 <h2 className="text-xl sm:text-2xl font-black font-poppins text-white text-center uppercase tracking-[0.15em]">
                   Create Account
                 </h2>
-                <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-1 mb-6 text-center">
+                <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mt-1 mb-6 text-center">
                   Select your role to get started
                 </p>
 
@@ -1259,7 +1259,7 @@ const AuthModals = () => {
                         setActiveRoleTab(roleOption);
                         setRole(roleOption);
                       }}
-                      className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                      className={`flex-1 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
                         (role || activeRoleTab) === roleOption
                           ? "bg-indigo-600 text-white shadow-lg"
                           : "text-slate-500 hover:text-slate-300"
@@ -1302,7 +1302,7 @@ const AuthModals = () => {
                       Sign In
                     </button>
                   </p>
-                  <p className="text-[11px] text-slate-500">
+                  <p className="text-xs text-slate-500">
                     Need to register with password instead?{" "}
                     <button
                       type="button"
@@ -1324,7 +1324,7 @@ const AuthModals = () => {
                   <h2 className="text-xl sm:text-2xl font-black font-poppins text-white text-center uppercase tracking-[0.15em]">
                     Complete Your Profile
                   </h2>
-                  <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-1">
+                  <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mt-1">
                     Step 2 of 2 • Pre-filled from Google
                   </p>
                 </div>
@@ -1346,7 +1346,7 @@ const AuthModals = () => {
                       <p className="text-slate-400 text-xs truncate">{email}</p>
                     </div>
                   </div>
-                  <span className="shrink-0 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center gap-1.5">
+                  <span className="shrink-0 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1.5">
                     <i className="fas fa-check-circle text-emerald-400 text-xs" />
                     Verified Google
                   </span>
@@ -1366,7 +1366,7 @@ const AuthModals = () => {
                         setRole(roleOption);
                         clearRegistrationFieldError("role");
                       }}
-                      className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                      className={`flex-1 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
                         (role || activeRoleTab) === roleOption
                           ? "bg-indigo-600 text-white shadow-lg"
                           : "text-slate-500 hover:text-slate-300"
@@ -1381,7 +1381,7 @@ const AuthModals = () => {
                   {/* Name Fields (pre-filled from Google) */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-1.5 block">
+                      <label className="text-xs font-black uppercase text-slate-500 tracking-widest mb-1.5 block">
                         First Name
                       </label>
                       <input
@@ -1393,7 +1393,7 @@ const AuthModals = () => {
                       />
                     </div>
                     <div>
-                      <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-1.5 block">
+                      <label className="text-xs font-black uppercase text-slate-500 tracking-widest mb-1.5 block">
                         Last Name
                       </label>
                       <input
@@ -1409,7 +1409,7 @@ const AuthModals = () => {
                   {(role || activeRoleTab) === "student" && (
                     <>
                       <div>
-                        <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-1.5 block">
+                        <label className="text-xs font-black uppercase text-slate-500 tracking-widest mb-1.5 block">
                           Course Level / Grade <span className="text-red-400">*</span>
                         </label>
                         <FilterSelect
@@ -1439,7 +1439,7 @@ const AuthModals = () => {
                       </div>
 
                       <div>
-                        <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-1.5 block">
+                        <label className="text-xs font-black uppercase text-slate-500 tracking-widest mb-1.5 block">
                           Current School / College (Optional)
                         </label>
                         <input
@@ -1457,7 +1457,7 @@ const AuthModals = () => {
                   {(role || activeRoleTab) === "parent" && (
                     <>
                       <div>
-                        <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-1.5 block">
+                        <label className="text-xs font-black uppercase text-slate-500 tracking-widest mb-1.5 block">
                           Child's Roll Number or Registered Email <span className="text-red-400">*</span>
                         </label>
                         <div className="flex gap-2">
@@ -1510,7 +1510,7 @@ const AuthModals = () => {
                     <>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                          <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-1.5 block">
+                          <label className="text-xs font-black uppercase text-slate-500 tracking-widest mb-1.5 block">
                             Subjects Taught (comma separated)
                           </label>
                           <input
@@ -1522,7 +1522,7 @@ const AuthModals = () => {
                           />
                         </div>
                         <div>
-                          <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-1.5 block">
+                          <label className="text-xs font-black uppercase text-slate-500 tracking-widest mb-1.5 block">
                             Years of Experience
                           </label>
                           <input
@@ -1537,7 +1537,7 @@ const AuthModals = () => {
                       </div>
 
                       <div>
-                        <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-1.5 block">
+                        <label className="text-xs font-black uppercase text-slate-500 tracking-widest mb-1.5 block">
                           Highest Qualification
                         </label>
                         <input
@@ -1628,7 +1628,7 @@ const AuthModals = () => {
                   <h2 className="text-xl sm:text-2xl font-black font-poppins text-white text-center uppercase tracking-[0.15em]">
                     Create Account
                   </h2>
-                  <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-2">
+                  <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mt-2">
                     Join the Virtual City School terminal
                   </p>
                   {GOOGLE_AUTH_ENABLED && (
@@ -1647,7 +1647,7 @@ const AuthModals = () => {
                 <div>
                   <label
                     htmlFor="register-first-name"
-                    className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block"
+                    className="text-xs font-black uppercase text-slate-500 tracking-widest mb-2 block"
                   >
                     First Name
                   </label>
@@ -1678,7 +1678,7 @@ const AuthModals = () => {
                 <div>
                   <label
                     htmlFor="register-last-name"
-                    className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block"
+                    className="text-xs font-black uppercase text-slate-500 tracking-widest mb-2 block"
                   >
                     Last Name
                   </label>
@@ -1709,7 +1709,7 @@ const AuthModals = () => {
                 <div>
                   <label
                     htmlFor="register-email"
-                    className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block"
+                    className="text-xs font-black uppercase text-slate-500 tracking-widest mb-2 block"
                   >
                     Email
                   </label>
@@ -1740,7 +1740,7 @@ const AuthModals = () => {
                 <div>
                   <label
                     htmlFor="register-role"
-                    className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block"
+                    className="text-xs font-black uppercase text-slate-500 tracking-widest mb-2 block"
                   >
                     Role
                   </label>
@@ -1779,7 +1779,7 @@ const AuthModals = () => {
                 <div>
                   <label
                     htmlFor="register-password"
-                    className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block"
+                    className="text-xs font-black uppercase text-slate-500 tracking-widest mb-2 block"
                   >
                     Password
                   </label>
@@ -1825,7 +1825,7 @@ const AuthModals = () => {
                 <div>
                   <label
                     htmlFor="register-confirm-password"
-                    className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block"
+                    className="text-xs font-black uppercase text-slate-500 tracking-widest mb-2 block"
                   >
                     Confirm Password
                   </label>
@@ -1878,7 +1878,7 @@ const AuthModals = () => {
                         className={`flex items-center gap-2 text-xs ${password.length >= 8 ? "text-green-400" : "text-slate-500"}`}
                       >
                         <i
-                          className={`fas ${password.length >= 8 ? "fa-check-circle" : "fa-circle"} text-[8px]`}
+                          className={`fas ${password.length >= 8 ? "fa-check-circle" : "fa-circle"} text-xs`}
                         ></i>
                         At least 8 characters
                       </div>
@@ -1886,7 +1886,7 @@ const AuthModals = () => {
                         className={`flex items-center gap-2 text-xs ${/[A-Z]/.test(password) ? "text-green-400" : "text-slate-500"}`}
                       >
                         <i
-                          className={`fas ${/[A-Z]/.test(password) ? "fa-check-circle" : "fa-circle"} text-[8px]`}
+                          className={`fas ${/[A-Z]/.test(password) ? "fa-check-circle" : "fa-circle"} text-xs`}
                         ></i>
                         One uppercase letter
                       </div>
@@ -1894,7 +1894,7 @@ const AuthModals = () => {
                         className={`flex items-center gap-2 text-xs ${/[a-z]/.test(password) ? "text-green-400" : "text-slate-500"}`}
                       >
                         <i
-                          className={`fas ${/[a-z]/.test(password) ? "fa-check-circle" : "fa-circle"} text-[8px]`}
+                          className={`fas ${/[a-z]/.test(password) ? "fa-check-circle" : "fa-circle"} text-xs`}
                         ></i>
                         One lowercase letter
                       </div>
@@ -1902,7 +1902,7 @@ const AuthModals = () => {
                         className={`flex items-center gap-2 text-xs ${/[0-9]/.test(password) ? "text-green-400" : "text-slate-500"}`}
                       >
                         <i
-                          className={`fas ${/[0-9]/.test(password) ? "fa-check-circle" : "fa-circle"} text-[8px]`}
+                          className={`fas ${/[0-9]/.test(password) ? "fa-check-circle" : "fa-circle"} text-xs`}
                         ></i>
                         One number
                       </div>
@@ -1910,7 +1910,7 @@ const AuthModals = () => {
                         className={`flex items-center gap-2 text-xs ${/[!@#$%^&*()_+=[\]{};':"|,.<>/?]/.test(password) ? "text-green-400" : "text-slate-500"}`}
                       >
                         <i
-                          className={`fas ${/[!@#$%^&*()_+=[\]{};':"|,.<>/?]/.test(password) ? "fa-check-circle" : "fa-circle"} text-[8px]`}
+                          className={`fas ${/[!@#$%^&*()_+=[\]{};':"|,.<>/?]/.test(password) ? "fa-check-circle" : "fa-circle"} text-xs`}
                         ></i>
                         One special character
                       </div>
@@ -1920,7 +1920,7 @@ const AuthModals = () => {
 
                 {role === "student" && (
                   <div>
-                    <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block">
+                    <label className="text-xs font-black uppercase text-slate-500 tracking-widest mb-2 block">
                       Grade Level <span className="text-red-500">*</span>
                     </label>
                     <FilterSelect
@@ -1948,11 +1948,11 @@ const AuthModals = () => {
                   <div className="md:col-span-2 bg-slate-950/60 border border-white/5 rounded-2xl p-5">
                     <label
                       htmlFor="register-child"
-                      className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block"
+                      className="text-xs font-black uppercase text-slate-500 tracking-widest mb-2 block"
                     >
                       Your Child's Roll Number or Email <span className="text-red-500">*</span>
                     </label>
-                    <p className="text-slate-500 text-[11px] mb-3 leading-relaxed">
+                    <p className="text-slate-500 text-xs mb-3 leading-relaxed">
                       Add each child you want access to. Ask your child for the
                       roll number or the email they registered with. The
                       administrator reviews these before approving your account.
@@ -1984,23 +1984,23 @@ const AuthModals = () => {
                       <button
                         type="button"
                         onClick={() => addChildEntry()}
-                        className="px-5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-black uppercase tracking-widest transition flex items-center gap-2 shrink-0"
+                        className="px-5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black uppercase tracking-widest transition flex items-center gap-2 shrink-0"
                       >
-                        <i className="fas fa-plus text-[10px]"></i>
+                        <i className="fas fa-plus text-xs"></i>
                         Add
                       </button>
                     </div>
 
                     <div className="flex items-center gap-4 mt-2.5 flex-wrap">
-                      <span className="flex items-center gap-1.5 text-[10px] text-slate-500">
+                      <span className="flex items-center gap-1.5 text-xs text-slate-500">
                         <span className="w-4 h-4 rounded bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center">
-                          <i className="fas fa-hashtag text-indigo-400 text-[8px]"></i>
+                          <i className="fas fa-hashtag text-indigo-400 text-xs"></i>
                         </span>
                         Numbers are read as a roll number
                       </span>
-                      <span className="flex items-center gap-1.5 text-[10px] text-slate-500">
+                      <span className="flex items-center gap-1.5 text-xs text-slate-500">
                         <span className="w-4 h-4 rounded bg-emerald-600/20 border border-emerald-500/30 flex items-center justify-center">
-                          <i className="fas fa-at text-emerald-400 text-[8px]"></i>
+                          <i className="fas fa-at text-emerald-400 text-xs"></i>
                         </span>
                         Anything with @ is read as an email
                       </span>
@@ -2008,7 +2008,7 @@ const AuthModals = () => {
 
                     {childEntries.length > 0 && (
                       <div className="mt-4 space-y-2">
-                        <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest">
+                        <p className="text-xs font-black uppercase text-slate-500 tracking-widest">
                           Children to link
                           <span className="ml-2 text-slate-600 font-bold normal-case tracking-normal">
                             {childEntries.length} added
@@ -2028,7 +2028,7 @@ const AuthModals = () => {
                                 }`}
                               >
                                 <i
-                                  className={`fas text-[10px] ${
+                                  className={`fas text-xs ${
                                     entry.type === "roll_no"
                                       ? "fa-hashtag text-indigo-400"
                                       : "fa-at text-emerald-400"
@@ -2040,7 +2040,7 @@ const AuthModals = () => {
                                   {entry.value}
                                 </p>
                                 <p
-                                  className={`text-[9px] uppercase tracking-widest font-black ${
+                                  className={`text-xs uppercase tracking-widest font-black ${
                                     entry.type === "roll_no"
                                       ? "text-indigo-500"
                                       : "text-emerald-500"
@@ -2139,7 +2139,7 @@ const AuthModals = () => {
                 <div>
                   <label
                     htmlFor="otp-input"
-                    className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-2 block text-center"
+                    className="text-xs font-black uppercase text-slate-500 tracking-widest mb-2 block text-center"
                   >
                     Enter OTP Code
                   </label>

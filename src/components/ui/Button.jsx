@@ -25,7 +25,7 @@ const Button = ({
     success:
       "bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/25 focus-visible:ring-emerald-500",
     ghost:
-      "text-[10px] sm:text-xs font-black uppercase tracking-widest text-slate-500 hover:text-white transition whitespace-nowrap",
+      "text-xs sm:text-xs font-black uppercase tracking-widest text-slate-500 hover:text-white transition whitespace-nowrap",
   };
 
   const sizes = {

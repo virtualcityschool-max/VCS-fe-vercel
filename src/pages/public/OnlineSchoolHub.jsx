@@ -40,15 +40,15 @@ const OnlineSchoolHub = () => {
         <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-purple-600/10 blur-[150px] rounded-full animate-aurora" style={{ animationDelay: "-6s" }} />
       </div>
 
-      <article className="relative z-10 max-w-4xl mx-auto px-6 pt-12 md:pt-16 pb-24">
-        <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-slate-500 mb-8">
+      <article className="relative z-10 max-w-[1440px] mx-auto px-4 sm:px-6 pt-12 md:pt-16 pb-24">
+        <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-500 mb-8">
           <Link to="/" className="hover:text-white transition">Home</Link>
           <span>/</span>
           <span className="text-slate-300">Online School</span>
         </nav>
 
         <header className="mb-12">
-          <span className="inline-flex items-center px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-[10px] font-black uppercase tracking-[0.2em] mb-5">
+          <span className="inline-flex items-center px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-black uppercase tracking-[0.2em] mb-5">
             Gulf's Premier Online School
           </span>
           <h1 className="text-3xl md:text-5xl font-black font-poppins tracking-tight leading-[1.1] text-white mb-6">
@@ -79,8 +79,8 @@ const OnlineSchoolHub = () => {
                 <p className="text-slate-400 text-sm leading-relaxed flex-1">
                   {HOOK_LINES[c.slug]}
                 </p>
-                <span className="mt-4 inline-flex items-center gap-2 text-indigo-400 group-hover:text-white text-[11px] font-black uppercase tracking-widest transition">
-                  Read the {c.countryName} guide <i className="fas fa-arrow-right text-[10px]" aria-hidden="true" />
+                <span className="mt-4 inline-flex items-center gap-2 text-indigo-400 group-hover:text-white text-xs font-black uppercase tracking-widest transition">
+                  Read the {c.countryName} guide <i className="fas fa-arrow-right text-xs" aria-hidden="true" />
                 </span>
               </Link>
             </Reveal>

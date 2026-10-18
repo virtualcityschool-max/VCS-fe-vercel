@@ -168,7 +168,7 @@ const PaymentMethodCard = ({
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-0.5">
           <p className="text-white text-sm font-bold">{title}</p>
-          <span className={`text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full ${badgeColor}`}>
+          <span className={`text-xs font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full ${badgeColor}`}>
             {badge}
           </span>
         </div>
@@ -179,7 +179,7 @@ const PaymentMethodCard = ({
       <i className="fas fa-chevron-right text-slate-600 group-hover:text-slate-400 text-xs transition-colors shrink-0" />
     </button>
     {tooltip && (
-      <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-slate-800 border border-white/10 rounded-lg text-[11px] font-semibold text-slate-200 whitespace-nowrap shadow-xl opacity-0 group-hover/pm:opacity-100 transition-opacity pointer-events-none z-10">
+      <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-slate-800 border border-white/10 rounded-lg text-xs font-semibold text-slate-200 whitespace-nowrap shadow-xl opacity-0 group-hover/pm:opacity-100 transition-opacity pointer-events-none z-10">
         {tooltip}
         <span className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-800" />
       </div>
@@ -248,7 +248,7 @@ const EnrollmentTypeModal = ({
                 onClick={() => setView("choose")}
                 className="flex items-center gap-1.5 text-slate-500 hover:text-white text-xs font-semibold mb-4 transition-colors"
               >
-                <i className="fas fa-arrow-left text-[10px]" /> Back
+                <i className="fas fa-arrow-left text-xs" /> Back
               </button>
 
               <div className="text-center mb-5">

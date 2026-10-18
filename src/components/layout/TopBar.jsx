@@ -5,18 +5,18 @@ const TopBar = () => {
           <div className="w-full bg-slate-950 border-b border-white/5">
                 <div className="max-w-[1440px] mx-auto px-4 sm:px-6 h-9 flex items-center justify-between gap-4">
                         <div className="flex-1 min-w-0 overflow-hidden">
-                                  <div className="ticker-track flex items-center gap-16 whitespace-nowrap text-[11px] font-bold uppercase tracking-widest text-slate-300">
+                                  <div className="ticker-track flex items-center gap-16 whitespace-nowrap text-xs font-bold uppercase tracking-widest text-slate-300">
                                               <span className="flex items-center gap-2 shrink-0">
-                                                            <i className="fas fa-bullhorn text-cyan-400 text-[10px]" />
+                                                            <i className="fas fa-bullhorn text-cyan-400 text-xs" />
                                                 {ANNOUNCEMENT}
                                               </span>
                                               <span className="flex items-center gap-2 shrink-0">
-                                                            <i className="fas fa-bullhorn text-cyan-400 text-[10px]" />
+                                                            <i className="fas fa-bullhorn text-cyan-400 text-xs" />
                                                 {ANNOUNCEMENT}
                                               </span>
                                   </div>
                         </div>
-                        <div className="hidden sm:flex items-center gap-5 shrink-0 text-[11px] font-semibold text-slate-300">
+                        <div className="hidden sm:flex items-center gap-5 shrink-0 text-xs font-semibold text-slate-300">
                                   <a
                                                 href="https://wa.me/966556687417"
                                                 target="_blank"

@@ -43,10 +43,10 @@ const PrivacyPolicy = () => {
     <div className="min-h-screen bg-[#020617] text-slate-300 font-sans pb-20">
       {/* Hero Section */}
       <div className="relative pt-20 pb-20 px-6 border-b border-white/5">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-[1440px] mx-auto">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 mb-6">
             <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></div>
-            <span className="text-[10px] font-bold tracking-[0.2em] text-indigo-400 uppercase">Compliance & Trust</span>
+            <span className="text-xs font-bold tracking-[0.2em] text-indigo-400 uppercase">Compliance & Trust</span>
           </div>
           <h1 className="text-5xl md:text-6xl font-black text-white mb-6 tracking-tight">
             Privacy Policy
@@ -68,12 +68,12 @@ const PrivacyPolicy = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 mt-12">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 mt-12">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
           
           {/* Sidebar Navigation */}
           <div className="lg:col-span-3 lg:sticky lg:top-32 h-fit overflow-x-auto lg:overflow-visible no-scrollbar">
-            <p className="text-[10px] font-bold tracking-[0.2em] text-slate-500 uppercase mb-6 hidden lg:block">Contents</p>
+            <p className="text-sm font-bold tracking-[0.2em] text-slate-500 uppercase mb-6 hidden lg:block">Contents</p>
             <nav className="flex lg:flex-col gap-2 pb-4 lg:pb-0 min-w-max lg:min-w-0">
               {sections.map((section) => (
                 <button
@@ -181,7 +181,7 @@ const PrivacyPolicy = () => {
                       <i className={`${item.icon} text-${item.color}-500 text-xl`}></i>
                     </div>
                     <h3 className="text-lg font-bold text-white mb-3">{item.title}</h3>
-                    <p className="text-xs text-slate-500 leading-relaxed">{item.desc}</p>
+                    <p className="text-sm text-slate-500 leading-relaxed">{item.desc}</p>
                   </div>
                 ))}
               </div>
@@ -194,7 +194,7 @@ const PrivacyPolicy = () => {
                   {/* Badge */}
                   {/* <div className="absolute top-12 right-12 px-4 py-1.5 rounded-full bg-green-500/10 border border-green-500/20 hidden md:flex items-center gap-2">
                     <div className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div>
-                    <span className="text-[10px] font-black tracking-widest text-green-500 uppercase">Military Grade Encryption</span>
+                    <span className="text-xs font-black tracking-widest text-green-500 uppercase">Military Grade Encryption</span>
                   </div> */}
 
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -212,7 +212,7 @@ const PrivacyPolicy = () => {
                         </div>
                         <div>
                           <h4 className="text-base font-bold text-white mb-1">Hardware-Level Security</h4>
-                          <p className="text-xs text-slate-500 leading-tight">Encrypted TPM modules for all institution-issued devices.</p>
+                          <p className="text-sm text-slate-500 leading-tight">Encrypted TPM modules for all institution-issued devices.</p>
                         </div>
                       </div>
                     </div>

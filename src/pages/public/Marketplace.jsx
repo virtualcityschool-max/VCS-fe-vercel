@@ -35,7 +35,7 @@ const GuidesLink = ({ courses }) => {
   const anchor = guide.level === "O Level" ? "o-level" : "as-a-level";
   return (
     <Link to={`/subjects#${anchor}`} className="ml-auto inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-300 hover:text-white">
-      <i className="fas fa-book-open text-[10px]" aria-hidden="true"></i> {guide.level} subject guides
+      <i className="fas fa-book-open text-xs" aria-hidden="true"></i> {guide.level} subject guides
     </Link>
   );
 };
@@ -445,7 +445,7 @@ const Marketplace = () => {
   if (isLoading) {
     return (
       <section className="min-h-screen bg-[#0f172a] text-white font-inter">
-        <div className="max-w-[1600px] mx-auto px-6 py-10">
+        <div className="max-w-[1440px] mx-auto px-6 py-10">
           <div className="max-w-4xl mx-auto mb-10 space-y-3">
             <div className="skeleton h-9 w-72 mx-auto rounded-xl" />
             <div className="skeleton h-11 w-full rounded-xl" />
@@ -464,7 +464,7 @@ const Marketplace = () => {
   if (!isLoading && courses.length === 0) {
     return (
       <section className="min-h-screen bg-[#0f172a] text-white font-inter">
-        <div className="max-w-[1600px] mx-auto px-6 py-20">
+        <div className="max-w-[1440px] mx-auto px-6 py-20">
           <div className="flex items-center justify-center min-h-[60vh]">
             <div className="text-center animate-scaleIn">
               <div className="w-20 h-20 icon-chip rounded-3xl mx-auto mb-6">
@@ -490,9 +490,9 @@ const Marketplace = () => {
       <div className="relative overflow-hidden border-b border-slate-800/50 animate-fadeIn">
         {/* Ambient glow behind the header */}
         <div className="absolute top-[-60%] left-1/2 -translate-x-1/2 w-[70%] h-[160%] bg-indigo-600/8 blur-[100px] rounded-full pointer-events-none" />
-        <div className="max-w-[1600px] mx-auto px-6 py-6 relative z-10">
+        <div className="max-w-[1440px] mx-auto px-6 py-6 relative z-10">
           <div className="text-center mb-5">
-            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-indigo-400 mb-2 animate-fadeInUp">
+            <p className="text-sm font-black uppercase tracking-[0.4em] text-indigo-400 mb-2 animate-fadeInUp">
               Course Catalog
             </p>
             <h1 className="text-2xl md:text-4xl font-black font-poppins leading-tight tracking-tight animate-fadeInUp" style={{ animationDelay: "0.08s" }}>
@@ -546,7 +546,7 @@ const Marketplace = () => {
 
       {/* Category tabs */}
       <div className="border-b border-slate-800/50 sticky top-0 z-30 bg-[#0f172a]/95 backdrop-blur-sm">
-        <div className="max-w-[1600px] mx-auto px-6">
+        <div className="max-w-[1440px] mx-auto px-6">
           <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-blue py-2">
             <button
               onClick={() => setActiveCategory("all")}
@@ -580,7 +580,7 @@ const Marketplace = () => {
         </div>
       </div>
 
-      <div className="max-w-[1600px] mx-auto px-6 pt-4 pb-16">
+      <div className="max-w-[1440px] mx-auto px-6 pt-4 pb-16">
         <main>
 
           {/* No results */}
@@ -612,7 +612,7 @@ const Marketplace = () => {
                       <h2 className="text-lg font-black text-white tracking-tight">
                         {formatCategoryLabel(cat.name)}
                       </h2>
-                      <span className="text-[11px] font-bold text-indigo-300 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-full">
+                      <span className="text-xs font-bold text-indigo-300 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-full">
                         {catCourses.length}
                       </span>
                       <GuidesLink courses={catCourses} />
@@ -650,7 +650,7 @@ const Marketplace = () => {
                 <h2 className="text-lg font-black text-white tracking-tight mb-6 flex items-center gap-2.5">
                   <span className="w-1 h-5 rounded-full bg-gradient-to-b from-indigo-500 to-blue-500 inline-block" />
                   {formatCategoryLabel(cat?.name || "")}
-                  <span className="text-[11px] font-bold text-indigo-300 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-full">
+                  <span className="text-xs font-bold text-indigo-300 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-full">
                     {visibleCourses.length}
                   </span>
                   <GuidesLink courses={visibleCourses} />
@@ -742,7 +742,7 @@ const Marketplace = () => {
       {/* Fixed category tooltip - escapes overflow-x-auto boundary */}
       {tooltip.visible && (
         <div
-          className="fixed z-[9999] pointer-events-none px-2.5 py-1.5 bg-slate-800 border border-slate-700 text-white text-[11px] font-medium rounded-lg whitespace-nowrap shadow-xl -translate-x-1/2 -translate-y-full"
+          className="fixed z-[9999] pointer-events-none px-2.5 py-1.5 bg-slate-800 border border-slate-700 text-white text-xs font-medium rounded-lg whitespace-nowrap shadow-xl -translate-x-1/2 -translate-y-full"
           style={{ left: tooltip.x, top: tooltip.y }}
         >
           {tooltip.text}

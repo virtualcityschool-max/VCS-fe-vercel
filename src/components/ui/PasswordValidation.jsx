@@ -36,7 +36,7 @@ const PasswordValidation = ({ password }) => {
           <i
             className={`fas ${
               validation.test ? "fa-check-circle" : "fa-circle"
-            } text-[8px]`}
+            } text-xs`}
           ></i>
           {validation.label}
         </div>

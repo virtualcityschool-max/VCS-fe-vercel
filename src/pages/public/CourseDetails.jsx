@@ -472,7 +472,7 @@ const CourseDetails = () => {
           <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-purple-600/10 blur-[150px] rounded-full animate-pulse delay-1000"></div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-6 py-20 relative z-10">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 py-20 relative z-10">
           <div className="flex items-center justify-center min-h-[60vh]">
             <div className="text-center">
               <div className="relative">
@@ -502,7 +502,7 @@ const CourseDetails = () => {
           <div className="absolute top-[-20%] left-[-10%] w-[40%] h-[40%] bg-red-600/10 blur-[120px] rounded-full animate-pulse"></div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-6 py-20 relative z-10">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 py-20 relative z-10">
           <div className="flex items-center justify-center min-h-[60vh]">
             <div className="text-center max-w-md">
               <div className="w-20 h-20 bg-red-600/20 rounded-full flex items-center justify-center mx-auto mb-6 backdrop-blur-sm border border-red-500/20">
@@ -537,7 +537,7 @@ const CourseDetails = () => {
           <div className="absolute top-[-20%] left-[-10%] w-[40%] h-[40%] bg-slate-600/10 blur-[120px] rounded-full animate-pulse"></div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-6 py-20 relative z-10">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 py-20 relative z-10">
           <div className="flex items-center justify-center min-h-[60vh]">
             <div className="text-center max-w-md">
               <div className="w-20 h-20 bg-slate-700/20 rounded-full flex items-center justify-center mx-auto mb-6 backdrop-blur-sm border border-slate-500/20">
@@ -637,7 +637,7 @@ const CourseDetails = () => {
       </div>
 
       {/* Breadcrumb Navigation */}
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 pt-6 pb-5 relative z-10">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 pt-6 pb-5 relative z-10">
         <BreadcrumbNavigation
           items={[
             { label: "Home", to: "/", icon: "fas fa-home" },
@@ -647,14 +647,15 @@ const CourseDetails = () => {
         />
       </div>
 
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 pb-20 relative z-10">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 pb-20 relative z-10">
         {/* Header: picture, title, key facts, price and enrol */}
         <header className="rounded-[1.5rem] border border-slate-700/50 bg-slate-800/40 backdrop-blur-xl p-5 md:p-6 flex flex-col lg:flex-row gap-6">
-          <div className="relative w-full lg:w-72 h-44 lg:h-auto lg:min-h-[180px] shrink-0 rounded-2xl overflow-hidden bg-slate-900/50">
+          {/* Thumbnails are designed artwork (2400×1260) with words on them: show them whole. */}
+          <div className="relative w-full lg:w-[380px] aspect-[40/21] self-start shrink-0 rounded-2xl overflow-hidden bg-slate-900">
             {imageError || !getCourseImage(normalizedCourse) ? (
               <div className="w-full h-full bg-slate-800" />
             ) : (
-              <img src={getCourseImage(normalizedCourse)} alt={normalizedCourse.title || "Course"} className="absolute inset-0 w-full h-full object-cover" onError={handleImageError} />
+              <img src={getCourseImage(normalizedCourse)} alt={normalizedCourse.title || "Course"} className="absolute inset-0 w-full h-full object-contain" onError={handleImageError} />
             )}
           </div>
 
@@ -674,7 +675,7 @@ const CourseDetails = () => {
             <dl className="mt-5 flex flex-wrap gap-x-7 gap-y-3">
               {glance.map((f) => (
                 <div key={f.label} className="min-w-0">
-                  <dt className="text-[11px] font-bold uppercase tracking-widest text-slate-500 flex items-center gap-1.5">
+                  <dt className="text-xs font-bold uppercase tracking-widest text-slate-500 flex items-center gap-1.5">
                     <i className={`fas ${f.icon} text-indigo-400`}></i>{f.label}
                   </dt>
                   <dd className="text-sm font-semibold text-white mt-0.5">
@@ -690,7 +691,7 @@ const CourseDetails = () => {
               <div className="text-3xl font-black bg-linear-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
                 {formatCurrency(parseFloat(normalizedCourse.price) || 0, "USD")}
               </div>
-              <p className="text-slate-400 text-xs mt-1 font-medium">One-time payment</p>
+              <p className="text-slate-400 text-sm mt-1 font-medium">One-time payment</p>
             </div>
                 {/* CTA Button */}
                 {auth.isLoggedIn && auth.role === "student" ? (
@@ -733,14 +734,14 @@ const CourseDetails = () => {
                                   : "Enroll Now"}
                     </button>
                     {isRejected && (
-                      <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 px-3 py-2 bg-slate-800 border border-rose-500/30 text-white text-[11px] font-medium rounded-lg text-center max-w-[220px] opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-150 shadow-xl z-10">
+                      <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 px-3 py-2 bg-slate-800 border border-rose-500/30 text-white text-xs font-medium rounded-lg text-center max-w-[220px] opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-150 shadow-xl z-10">
                         <i className="fas fa-lock text-rose-400 mr-1.5"></i>
                         Your enrollment request was rejected. Please contact school administration.
                         <div className="absolute top-full left-1/2 -translate-x-1/2 border-[5px] border-transparent border-t-slate-800"></div>
                       </div>
                     )}
                     {/* {noSessions && !enrolled && !isRejected && (
-                      <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 px-3 py-1.5 bg-slate-800 border border-slate-700 text-white text-[11px] font-medium rounded-lg whitespace-nowrap opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-150 shadow-xl z-10">
+                      <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 px-3 py-1.5 bg-slate-800 border border-slate-700 text-white text-xs font-medium rounded-lg whitespace-nowrap opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-150 shadow-xl z-10">
                         No sessions available for this course
                         <div className="absolute top-full left-1/2 -translate-x-1/2 border-[5px] border-transparent border-t-slate-700"></div>
                       </div>
@@ -748,7 +749,7 @@ const CourseDetails = () => {
                   </div>
                 ) : auth.isLoggedIn ? (
                   <div className="text-center">
-                    <p className="text-slate-400 text-xs mb-2">
+                    <p className="text-slate-400 text-sm mb-2">
                       Only students can enroll in courses
                     </p>
                     <Button
@@ -778,7 +779,7 @@ const CourseDetails = () => {
                       Login to Enroll
                     </Button>
                     {/* {noSessions && (
-                      <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 px-3 py-1.5 bg-slate-800 border border-slate-700 text-white text-[11px] font-medium rounded-lg whitespace-nowrap opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-150 shadow-xl z-10">
+                      <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 px-3 py-1.5 bg-slate-800 border border-slate-700 text-white text-xs font-medium rounded-lg whitespace-nowrap opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-150 shadow-xl z-10">
                         No sessions available for this course
                         <div className="absolute top-full left-1/2 -translate-x-1/2 border-[5px] border-transparent border-t-slate-700"></div>
                       </div>
@@ -801,6 +802,15 @@ const CourseDetails = () => {
                   <i className="fab fa-whatsapp text-base"></i>
                   Ask on WhatsApp
                 </a>
+                {guide && (
+                  <Link
+                    to={`/subjects/${guide.slug}`}
+                    className="mt-3 w-full inline-flex items-center justify-center gap-2 py-3 rounded-2xl bg-indigo-500/10 border border-indigo-400/30 text-indigo-200 font-bold text-sm hover:bg-indigo-600 hover:text-white hover:border-transparent transition-all"
+                  >
+                    <i className="fas fa-book-open"></i>
+                    {guide.subject} subject guide
+                  </Link>
+                )}
 
           </div>
         </header>
@@ -822,7 +832,7 @@ const CourseDetails = () => {
             <nav ref={menuBoxRef} aria-label="On this page" className="z-10 rounded-2xl border border-white/10 bg-[#0a1024]/95 backdrop-blur p-3 overflow-y-auto">
               {menu.map((grp) => (
                 <div key={grp.label} className="mb-3 last:mb-0">
-                  <div className="px-2.5 pt-1 pb-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-500">{grp.label}</div>
+                  <div className="px-2.5 pt-1 pb-1.5 text-xs font-bold uppercase tracking-widest text-slate-500">{grp.label}</div>
                   <ol className="space-y-0.5">
                     {grp.items.map((x) => (
                       <li key={x.id}>
@@ -852,7 +862,7 @@ const CourseDetails = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
                   {classFacts.map((f) => (
                     <div key={f.label} className="rounded-xl p-4 bg-white/[0.03] border border-white/10">
-                      <div className="text-[11px] font-bold uppercase tracking-widest text-slate-500 mb-1">{f.label}</div>
+                      <div className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-1">{f.label}</div>
                       <div className="text-white font-semibold">{f.value}</div>
                     </div>
                   ))}
@@ -900,7 +910,7 @@ const CourseDetails = () => {
               <div className="mt-4 pt-8 border-t border-slate-700/50">
                 <div className="text-xs font-bold uppercase tracking-widest text-indigo-300 mb-2">The syllabus</div>
                 <h2 className="text-2xl md:text-3xl font-black font-poppins text-white">{guide.title}</h2>
-                <p className="mt-3 inline-flex items-center gap-2 text-xs text-emerald-300/90 bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-3 py-1.5">
+                <p className="mt-3 inline-flex items-center gap-2 text-sm text-emerald-300/90 bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-3 py-1.5">
                   <i className="fas fa-check-circle"></i> Checked against the official Cambridge syllabus for exams in {guide.syllabusYears}
                 </p>
                 {guide.notice && (

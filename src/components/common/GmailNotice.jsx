@@ -8,7 +8,7 @@ import React from "react";
 const GmailNotice = ({ compact = false }) => {
   if (compact) {
     return (
-      <p className="flex items-start gap-1.5 text-[10px] text-slate-400 leading-relaxed">
+      <p className="flex items-start gap-1.5 text-xs text-slate-400 leading-relaxed">
         <i className="fab fa-google text-amber-400 mt-0.5 shrink-0" />
         Google Meet requires a <strong className="text-amber-300 font-bold">Gmail account</strong>.
         Please sign in to Gmail before clicking Join.

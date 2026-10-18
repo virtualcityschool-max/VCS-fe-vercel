@@ -107,7 +107,7 @@ const UserProfileDropdown = ({ dropUp = false, isCollapsed = false }) => {
                 className="w-full h-full object-cover"
               />
             ) : (
-              <span className="text-white font-bold text-[10px]">
+              <span className="text-white font-bold text-xs">
                 {getInitials()}
               </span>
             )}

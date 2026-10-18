@@ -110,25 +110,25 @@ const seoImage = found
         <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-purple-600/10 blur-[150px] rounded-full animate-aurora" style={{ animationDelay: "-6s" }} />
       </div>
 
-      <article className="relative z-10 max-w-4xl mx-auto px-6 pt-12 md:pt-16 pb-24">
+      <article className="relative z-10 max-w-[1440px] mx-auto px-4 sm:px-6 pt-12 md:pt-16 pb-24">
         {/* Breadcrumb / back */}
         <Link
           to="/blogs"
-          className="inline-flex items-center gap-2 text-slate-400 hover:text-white text-[11px] font-black uppercase tracking-widest transition mb-8"
+          className="inline-flex items-center gap-2 text-slate-400 hover:text-white text-xs font-black uppercase tracking-widest transition mb-8"
         >
-          <i className="fas fa-arrow-left text-[9px]" /> Blog
+          <i className="fas fa-arrow-left text-xs" /> Blog
         </Link>
 
         {/* Header */}
         <header className="mb-8">
           <div className="flex items-center gap-2.5 mb-5 flex-wrap">
             {isVideo && (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-600/90 text-white text-[10px] font-black uppercase tracking-[0.2em]">
-                <i className="fas fa-play text-[8px]" /> Video
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-600/90 text-white text-xs font-black uppercase tracking-[0.2em]">
+                <i className="fas fa-play text-xs" /> Video
               </span>
             )}
             {blog.category && (
-              <span className="inline-block px-3 py-1 rounded-full bg-indigo-500/15 border border-indigo-400/30 text-indigo-300 text-[10px] font-black uppercase tracking-[0.2em]">
+              <span className="inline-block px-3 py-1 rounded-full bg-indigo-500/15 border border-indigo-400/30 text-indigo-300 text-xs font-black uppercase tracking-[0.2em]">
                 {blog.category}
               </span>
             )}
@@ -159,7 +159,7 @@ const seoImage = found
                 href={watchUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-3 inline-flex items-center gap-2 text-slate-400 hover:text-white text-[11px] font-black uppercase tracking-widest transition"
+                className="mt-3 inline-flex items-center gap-2 text-slate-400 hover:text-white text-xs font-black uppercase tracking-widest transition"
               >
                 <i className="fab fa-youtube text-red-500 text-sm" /> Watch on YouTube
               </a>
@@ -183,11 +183,11 @@ const seoImage = found
         {/* Article metadata - kept at the end so it never interrupts reading. */}
         <div className="mt-12 pt-8 border-t border-white/5 flex items-center flex-wrap gap-x-5 gap-y-2 text-[12px] text-slate-500">
           <span className="flex items-center gap-2">
-            <span className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-cyan-500 flex items-center justify-center text-[11px] font-black text-white">
+            <span className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-cyan-500 flex items-center justify-center text-xs font-black text-white">
               {(blog.author || "A").charAt(0).toUpperCase()}
             </span>
             <span className="flex flex-col leading-tight">
-              <span className="text-[10px] uppercase tracking-widest text-slate-600">
+              <span className="text-xs uppercase tracking-widest text-slate-600">
                 Posted by
               </span>
               <span className="font-semibold text-slate-300">{blog.author || "Admin"}</span>
@@ -195,17 +195,17 @@ const seoImage = found
           </span>
           {(blog.published_at || blog.created_at) && (
             <span className="flex items-center gap-1.5">
-              <i className="fas fa-calendar-day text-[9px]" />
+              <i className="fas fa-calendar-day text-xs" />
               {formatDate(blog.published_at || blog.created_at)}
             </span>
           )}
           {isVideo ? (
             <span className="flex items-center gap-1.5 text-red-400 font-semibold">
-              <i className="fas fa-circle-play text-[10px]" /> Video
+              <i className="fas fa-circle-play text-xs" /> Video
             </span>
           ) : (
             <span className="flex items-center gap-1.5">
-              <i className="fas fa-clock text-[9px]" /> {blog.read_time || 1} min read
+              <i className="fas fa-clock text-xs" /> {blog.read_time || 1} min read
             </span>
           )}
         </div>
@@ -221,15 +221,15 @@ const seoImage = found
                 sessionStorage.removeItem("blogs_return_filter");
               } catch { /* storage unavailable */ }
             }}
-            className="inline-flex items-center gap-2 text-indigo-400 hover:text-white text-[11px] font-black uppercase tracking-widest transition"
+            className="inline-flex items-center gap-2 text-indigo-400 hover:text-white text-xs font-black uppercase tracking-widest transition"
           >
-            <i className="fas fa-arrow-left text-[9px]" /> All Articles
+            <i className="fas fa-arrow-left text-xs" /> All Articles
           </Link>
           <div className="flex items-center gap-2">
             {/* Info tooltip clarifying what the Share button does. */}
             <span className="group relative inline-flex">
               <i className="fas fa-circle-info text-slate-500 hover:text-indigo-400 text-xs cursor-pointer" />
-              <span className="pointer-events-none absolute right-0 bottom-full mb-2 w-56 rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-[11px] font-medium normal-case tracking-normal text-slate-200 leading-snug opacity-0 group-hover:opacity-100 transition z-20 shadow-xl">
+              <span className="pointer-events-none absolute right-0 bottom-full mb-2 w-56 rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-xs font-medium normal-case tracking-normal text-slate-200 leading-snug opacity-0 group-hover:opacity-100 transition z-20 shadow-xl">
                 Shares this article using your device's share menu, or copies the
                 link to your clipboard.
               </span>
@@ -245,9 +245,9 @@ const seoImage = found
                   toastManager.success("Link copied to clipboard");
                 }
               }}
-              className="inline-flex items-center gap-2 text-slate-400 hover:text-white text-[11px] font-black uppercase tracking-widest transition"
+              className="inline-flex items-center gap-2 text-slate-400 hover:text-white text-xs font-black uppercase tracking-widest transition"
             >
-              <i className="fas fa-share-nodes text-[10px]" /> Share
+              <i className="fas fa-share-nodes text-xs" /> Share
             </button>
           </div>
         </div>
@@ -255,9 +255,9 @@ const seoImage = found
 
       {/* Related */}
       {related.length > 0 && (
-        <section className="relative z-10 max-w-7xl mx-auto px-6 pb-24">
+        <section className="relative z-10 max-w-[1440px] mx-auto px-4 sm:px-6 pb-24">
           <Reveal className="mb-8">
-            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-indigo-500 mb-2">
+            <p className="text-sm font-black uppercase tracking-[0.4em] text-indigo-500 mb-2">
               Keep Reading
             </p>
             <h2 className="text-2xl md:text-3xl font-black font-poppins tracking-tight">

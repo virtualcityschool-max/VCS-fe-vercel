@@ -30,7 +30,7 @@ const PublicCourseCard = ({
   )}`;
 
   const renderCTA = () => {
-    let cls = `flex-1 ${large ? "py-2.5 text-[12px]" : "py-2 text-[11px]"} font-black uppercase tracking-[0.1em] rounded-xl transition-all active:scale-95 inline-flex items-center justify-center gap-1.5 `;
+    let cls = `flex-1 ${large ? "py-2.5 text-[12px]" : "py-2 text-xs"} font-black uppercase tracking-[0.1em] rounded-xl transition-all active:scale-95 inline-flex items-center justify-center gap-1.5 `;
     let label = "";
     let icon = "";
     let disabled = false;
@@ -96,7 +96,7 @@ const PublicCourseCard = ({
       return (
         <div className="relative group/tooltip flex-1">
           {btn}
-          <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 px-3 py-2 bg-slate-800 border border-slate-700 text-white text-[11px] font-medium rounded-lg text-center max-w-[200px] opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-150 shadow-xl z-10">
+          <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 px-3 py-2 bg-slate-800 border border-slate-700 text-white text-xs font-medium rounded-lg text-center max-w-[200px] opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-150 shadow-xl z-10">
             {tooltip}
             <div className="absolute top-full left-1/2 -translate-x-1/2 border-[5px] border-transparent border-t-slate-700"></div>
           </div>
@@ -133,9 +133,9 @@ const PublicCourseCard = ({
             to={`/subjects/${guide.slug}`}
             onClick={(e) => e.stopPropagation()}
             title={`Cambridge ${guide.level} ${guide.subject} (${guide.code}) — subject guide`}
-            className="absolute bottom-1.5 left-1.5 z-10 inline-flex items-center gap-1 rounded-md bg-slate-950/80 border border-indigo-400/40 px-1.5 py-0.5 text-[10px] font-bold text-indigo-200 hover:bg-indigo-600 hover:text-white transition"
+            className="absolute bottom-1.5 left-1.5 z-10 inline-flex items-center gap-1 rounded-md bg-slate-950/80 border border-indigo-400/40 px-1.5 py-0.5 text-xs font-bold text-indigo-200 hover:bg-indigo-600 hover:text-white transition"
           >
-            <i className="fas fa-book-open text-[9px]" aria-hidden="true"></i> Guide
+            <i className="fas fa-book-open text-xs" aria-hidden="true"></i> Guide
           </Link>
         )}
         {course.status === "published" && (

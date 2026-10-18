@@ -23,6 +23,9 @@ if (process.argv.includes("--print")) {
 const { GUIDE_CATALOG } = await import(pathToFileURL(join(DIR, "catalog.js")).href);
 const problems = [];
 if (JSON.stringify(GUIDE_CATALOG) !== JSON.stringify(rows)) problems.push("src/data/subjectGuides/catalog.js is out of step with index.js (run: node scripts/check-guide-catalog.mjs --print)");
+for (const r of rows) {
+  try { readFileSync(join(ROOT, "public/images/subjects", `${r.slug}.webp`)); } catch { problems.push(`public/images/subjects/${r.slug}.webp (guide photo) is missing`); }
+}
 for (const f of ["scripts/prerender.js", "scripts/generate-sitemap.js"]) {
   const src = readFileSync(join(ROOT, f), "utf8");
   for (const r of rows) if (!src.includes(`${r.slug}"`)) problems.push(`${f} is missing ${r.slug}`);

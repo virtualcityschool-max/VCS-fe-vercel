@@ -136,7 +136,7 @@ const GoogleSignInButton = ({
           </svg>
           <span>Continue with Google</span>
         </button>
-        <span className="text-[10px] text-slate-500">Google accounts connection required</span>
+        <span className="text-xs text-slate-500">Google accounts connection required</span>
       </div>
     );
   }

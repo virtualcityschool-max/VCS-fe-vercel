@@ -35,17 +35,17 @@ const BlogCard = ({ blog, index = 0 }) => {
   const badges = (
     <>
       {blog.category && (
-        <span className="absolute top-3 left-3 z-10 px-2.5 py-1 rounded-full bg-indigo-500/20 border border-indigo-400/30 text-indigo-200 text-[9px] font-black uppercase tracking-[0.15em] backdrop-blur-sm pointer-events-none">
+        <span className="absolute top-3 left-3 z-10 px-2.5 py-1 rounded-full bg-indigo-500/20 border border-indigo-400/30 text-indigo-200 text-xs font-black uppercase tracking-[0.15em] backdrop-blur-sm pointer-events-none">
           {blog.category}
         </span>
       )}
       {isVideo && (
-        <span className="absolute bottom-3 left-3 z-10 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-600/90 text-white text-[9px] font-black uppercase tracking-[0.15em] shadow-lg pointer-events-none">
+        <span className="absolute bottom-3 left-3 z-10 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-600/90 text-white text-xs font-black uppercase tracking-[0.15em] shadow-lg pointer-events-none">
           <i className="fas fa-play text-[7px]" /> Video
         </span>
       )}
       {isDraft && (
-        <span className="absolute top-3 right-3 z-10 px-2.5 py-1 rounded-full bg-amber-500/20 border border-amber-400/30 text-amber-200 text-[9px] font-black uppercase tracking-[0.15em] backdrop-blur-sm pointer-events-none">
+        <span className="absolute top-3 right-3 z-10 px-2.5 py-1 rounded-full bg-amber-500/20 border border-amber-400/30 text-amber-200 text-xs font-black uppercase tracking-[0.15em] backdrop-blur-sm pointer-events-none">
           Draft
         </span>
       )}
@@ -104,7 +104,7 @@ const BlogCard = ({ blog, index = 0 }) => {
           </p>
         )}
 
-        <div className="mt-auto pt-3 border-t border-white/5 flex items-center justify-between text-[10px] text-slate-500">
+        <div className="mt-auto pt-3 border-t border-white/5 flex items-center justify-between text-xs text-slate-500">
           <span className="font-semibold text-slate-400 truncate max-w-[55%]">
             {blog.author || "Admin"}
           </span>
@@ -118,11 +118,11 @@ const BlogCard = ({ blog, index = 0 }) => {
                 onClick={() => setWatchNow(true)}
                 className="flex items-center gap-1 text-red-400 hover:text-red-300 font-bold transition"
               >
-                <i className="fas fa-circle-play text-[9px]" /> Watch
+                <i className="fas fa-circle-play text-xs" /> Watch
               </button>
             ) : (
               <span className="flex items-center gap-1">
-                <i className="fas fa-clock text-[8px]" /> {blog.read_time || 1} min
+                <i className="fas fa-clock text-xs" /> {blog.read_time || 1} min
               </span>
             )}
           </span>

@@ -135,7 +135,7 @@ const ApplyFreeAccessModal = ({ onClose, preselectedCourseIds = [] }) => {
             <div className="flex items-start justify-between p-6 pb-3 sticky top-0 bg-slate-900 z-10 border-b border-slate-800">
               <div>
                 <h3 className="text-base font-bold text-white">Apply for Free Access</h3>
-                <p className="text-xs text-slate-400 mt-0.5 max-w-sm">
+                <p className="text-sm text-slate-400 mt-0.5 max-w-sm">
                   Learners who need financial assistance can request free access. Tell us a
                   little about yourself and the courses you'd like to study.
                 </p>
@@ -164,7 +164,7 @@ const ApplyFreeAccessModal = ({ onClose, preselectedCourseIds = [] }) => {
                     className={`${inputBase} ${border("full_name")}`}
                   />
                   {errors.full_name && (
-                    <p className="text-xs text-rose-400 mt-1">{errors.full_name}</p>
+                    <p className="text-sm text-rose-400 mt-1">{errors.full_name}</p>
                   )}
                 </div>
 
@@ -184,12 +184,12 @@ const ApplyFreeAccessModal = ({ onClose, preselectedCourseIds = [] }) => {
                     }`}
                   />
                   {lockEmail && (
-                    <p className="text-[11px] text-slate-500 mt-1">
+                    <p className="text-sm text-slate-500 mt-1">
                       Using your account email.
                     </p>
                   )}
                   {errors.email && (
-                    <p className="text-xs text-rose-400 mt-1">{errors.email}</p>
+                    <p className="text-sm text-rose-400 mt-1">{errors.email}</p>
                   )}
                 </div>
 
@@ -214,7 +214,7 @@ const ApplyFreeAccessModal = ({ onClose, preselectedCourseIds = [] }) => {
                     ))}
                   </FilterSelect>
                   {errors.country && (
-                    <p className="text-xs text-rose-400 mt-1">{errors.country}</p>
+                    <p className="text-sm text-rose-400 mt-1">{errors.country}</p>
                   )}
                 </div>
               </div>
@@ -270,7 +270,7 @@ const ApplyFreeAccessModal = ({ onClose, preselectedCourseIds = [] }) => {
                     className={`${inputBase} ${border("eligibility_statement")} resize-none`}
                   />
                   {errors.eligibility_statement && (
-                    <p className="text-xs text-rose-400 mt-1">
+                    <p className="text-sm text-rose-400 mt-1">
                       {errors.eligibility_statement}
                     </p>
                   )}
@@ -290,7 +290,7 @@ const ApplyFreeAccessModal = ({ onClose, preselectedCourseIds = [] }) => {
                     className={`${inputBase} ${border("goals_statement")} resize-none`}
                   />
                   {errors.goals_statement && (
-                    <p className="text-xs text-rose-400 mt-1">{errors.goals_statement}</p>
+                    <p className="text-sm text-rose-400 mt-1">{errors.goals_statement}</p>
                   )}
                 </div>
               </div>

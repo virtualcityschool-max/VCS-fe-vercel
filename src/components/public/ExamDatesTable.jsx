@@ -10,7 +10,7 @@ const PHASE_ORDER = ["registration", "exam", "results"];
 // Kuwait (all UTC+3); the UAE is called out separately since it's UTC+4.
 function GulfTimeNote({ point }) {
   if (!point.time) {
-    return point.timeSourceNote ? <p className="text-xs text-slate-500 mt-1">{point.timeSourceNote}</p> : null;
+    return point.timeSourceNote ? <p className="text-sm text-slate-500 mt-1">{point.timeSourceNote}</p> : null;
   }
   const iso = `${point.date}T${point.time}:00Z`;
   const gulf = formatTime(iso, "Asia/Riyadh");
@@ -19,7 +19,7 @@ function GulfTimeNote({ point }) {
   const ukAbbr = getTimezoneAbbr("Europe/London");
 
   return (
-    <p className="text-xs text-slate-500 mt-1">
+    <p className="text-sm text-slate-500 mt-1">
       {point.time} {point.timeZoneName} &middot; {gulf} {gulfAbbr} in Saudi Arabia/Qatar/Kuwait (UAE is one hour ahead) &middot; {uk} {ukAbbr} in the UK
     </p>
   );
@@ -54,7 +54,7 @@ function DateCell({ point, phaseKey }) {
   return (
     <>
       <p className="text-white font-semibold text-sm">{pointDisplayLabel(point)}</p>
-      {point.familyNote && <p className="text-xs text-slate-500 mt-1">{point.familyNote}</p>}
+      {point.familyNote && <p className="text-sm text-slate-500 mt-1">{point.familyNote}</p>}
       {phaseKey === "results" && <GulfTimeNote point={point} />}
     </>
   );

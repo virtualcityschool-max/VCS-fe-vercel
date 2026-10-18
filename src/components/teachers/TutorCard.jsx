@@ -54,8 +54,8 @@ const TutorCard = ({ teacher, index = 0, isAuthenticated, onViewProfile, onHire 
       {(isExpert || hasRating) && (
         <div className="flex items-center gap-2 flex-wrap -mt-1">
           {isExpert && (
-            <span className="inline-flex items-center gap-1 text-[10px] font-black tracking-wide px-2 py-1 rounded-full bg-amber-500/15 border border-amber-500/40 text-amber-300">
-              <i className="fas fa-bolt text-[9px]" />
+            <span className="inline-flex items-center gap-1 text-xs font-black tracking-wide px-2 py-1 rounded-full bg-amber-500/15 border border-amber-500/40 text-amber-300">
+              <i className="fas fa-bolt text-xs" />
               Expert
             </span>
           )}
@@ -64,14 +64,14 @@ const TutorCard = ({ teacher, index = 0, isAuthenticated, onViewProfile, onHire 
               {[1, 2, 3, 4, 5].map((n) => (
                 <Star key={n} filled={n <= Math.round(rating)} />
               ))}
-              <span className="text-[11px] text-slate-500 font-semibold ml-1">{rating.toFixed(1)}</span>
+              <span className="text-xs text-slate-500 font-semibold ml-1">{rating.toFixed(1)}</span>
             </span>
           )}
         </div>
       )}
 
-      <p className="text-[11px] text-slate-500 -mt-2 flex items-center gap-1">
-        <i className="fas fa-briefcase text-[9px]" />
+      <p className="text-xs text-slate-500 -mt-2 flex items-center gap-1">
+        <i className="fas fa-briefcase text-xs" />
         {experience} yrs experience
       </p>
 
@@ -80,20 +80,20 @@ const TutorCard = ({ teacher, index = 0, isAuthenticated, onViewProfile, onHire 
 
       {/* Courses */}
       <div className="flex-1">
-        <p className="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-2">Courses</p>
+        <p className="text-xs font-black uppercase tracking-widest text-slate-500 mb-2">Courses</p>
         <div className="flex flex-wrap gap-1.5">
           {teacher.courses?.length ? (
             <>
               {teacher.courses.slice(0, 2).map((course) => (
                 <span
                   key={course.id}
-                  className={`text-[10px] px-2.5 py-1 rounded-lg border font-medium truncate max-w-full ${theme.tagBg} ${theme.tagText} ${theme.tagBorder}`}
+                  className={`text-xs px-2.5 py-1 rounded-lg border font-medium truncate max-w-full ${theme.tagBg} ${theme.tagText} ${theme.tagBorder}`}
                 >
                   {course.course_name}
                 </span>
               ))}
               {teacher.courses.length > 2 && (
-                <span className="text-[10px] px-2 py-1 rounded-lg bg-slate-800 text-slate-500 border border-slate-700 font-medium">
+                <span className="text-xs px-2 py-1 rounded-lg bg-slate-800 text-slate-500 border border-slate-700 font-medium">
                   +{teacher.courses.length - 2} more
                 </span>
               )}

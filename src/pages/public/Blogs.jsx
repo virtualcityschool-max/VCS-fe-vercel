@@ -123,10 +123,10 @@ const Blogs = () => {
       </div>
       <div className="absolute inset-x-0 top-0 h-[420px] bg-grid pointer-events-none z-0" />
 
-      <section className="relative z-10 max-w-7xl mx-auto px-6 pt-16 md:pt-24 pb-24">
+      <section className="relative z-10 max-w-[1440px] mx-auto px-4 sm:px-6 pt-16 md:pt-24 pb-24">
         {/* Header */}
         <div className="max-w-3xl mb-12">
-          <p className="text-[10px] font-black uppercase tracking-[0.4em] text-indigo-500 mb-3 animate-fadeInUp">
+          <p className="text-sm font-black uppercase tracking-[0.4em] text-indigo-500 mb-3 animate-fadeInUp">
             The VCS Journal
           </p>
           <h1 className="text-4xl md:text-6xl font-black font-poppins tracking-tight leading-[1.05] animate-fadeInUp" style={{ animationDelay: "0.1s" }}>
@@ -152,17 +152,17 @@ const Blogs = () => {
                   <button
                     key={t.id}
                     onClick={() => setActiveType(t.id)}
-                    className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[11px] font-bold tracking-wide whitespace-nowrap transition-all ${
+                    className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold tracking-wide whitespace-nowrap transition-all ${
                       active
                         ? "bg-white text-slate-900 shadow-md"
                         : "text-slate-400 hover:text-white"
                     }`}
                   >
-                    <i className={`fas ${t.icon} text-[10px]`} />
+                    <i className={`fas ${t.icon} text-xs`} />
                     {t.label}
                     {t.id === "video" && (
                       <span
-                        className={`text-[9px] font-black px-1.5 py-0.5 rounded-full ${
+                        className={`text-xs font-black px-1.5 py-0.5 rounded-full ${
                           active ? "bg-slate-900/10 text-slate-700" : "bg-white/10 text-slate-400"
                         }`}
                       >
@@ -188,7 +188,7 @@ const Blogs = () => {
                     <button
                       key={cat}
                       onClick={() => setActiveCategory(cat)}
-                      className={`relative px-4 py-1.5 rounded-full text-[11px] font-bold tracking-wide whitespace-nowrap transition-all ${
+                      className={`relative px-4 py-1.5 rounded-full text-xs font-bold tracking-wide whitespace-nowrap transition-all ${
                         active
                           ? "bg-indigo-500 text-white shadow-md shadow-indigo-900/30"
                           : "text-slate-400 hover:text-white"
@@ -298,16 +298,16 @@ const FeaturedBlog = ({ blog }) => {
       {media}
       <div className="p-8 lg:p-12 flex flex-col justify-center">
         <div className="flex items-center gap-3 mb-4 flex-wrap">
-          <span className="px-3 py-1 rounded-full bg-indigo-500/15 border border-indigo-400/30 text-indigo-300 text-[9px] font-black uppercase tracking-[0.2em]">
+          <span className="px-3 py-1 rounded-full bg-indigo-500/15 border border-indigo-400/30 text-indigo-300 text-xs font-black uppercase tracking-[0.2em]">
             Featured
           </span>
           {isVideo && (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-600/90 text-white text-[9px] font-black uppercase tracking-[0.2em]">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-600/90 text-white text-xs font-black uppercase tracking-[0.2em]">
               <i className="fas fa-play text-[7px]" /> Video
             </span>
           )}
           {blog.category && (
-            <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+            <span className="text-xs font-black uppercase tracking-widest text-slate-500">
               {blog.category}
             </span>
           )}
@@ -322,7 +322,7 @@ const FeaturedBlog = ({ blog }) => {
             {blog.excerpt}
           </p>
         )}
-        <div className="mt-6 flex items-center gap-4 text-[11px] text-slate-500">
+        <div className="mt-6 flex items-center gap-4 text-xs text-slate-500">
           <span className="font-semibold text-slate-400">{blog.author || "Admin"}</span>
           {isVideo ? (
             <button
@@ -330,11 +330,11 @@ const FeaturedBlog = ({ blog }) => {
               onClick={() => setWatchNow(true)}
               className="flex items-center gap-1 text-red-400 hover:text-red-300 font-bold transition"
             >
-              <i className="fas fa-circle-play text-[9px]" /> Watch now
+              <i className="fas fa-circle-play text-xs" /> Watch now
             </button>
           ) : (
             <span className="flex items-center gap-1">
-              <i className="fas fa-clock text-[8px]" /> {blog.read_time || 1} min read
+              <i className="fas fa-clock text-xs" /> {blog.read_time || 1} min read
             </span>
           )}
           <Link
@@ -342,7 +342,7 @@ const FeaturedBlog = ({ blog }) => {
             className="text-indigo-400 hover:text-white font-black uppercase tracking-widest ml-auto flex items-center gap-2 transition"
           >
             {isVideo ? "Details" : "Read"}{" "}
-            <i className="fas fa-arrow-right text-[8px] group-hover:translate-x-1 transition" />
+            <i className="fas fa-arrow-right text-xs group-hover:translate-x-1 transition" />
           </Link>
         </div>
       </div>

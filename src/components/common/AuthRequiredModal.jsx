@@ -58,7 +58,7 @@ const AuthRequiredModal = ({ isOpen, onClose, title = "Authentication Required",
               <>
                 <div className="flex items-center gap-3 my-1">
                   <span className="h-px flex-1 bg-white/10" />
-                  <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">
+                  <span className="text-xs font-black uppercase tracking-widest text-slate-500">
                     or
                   </span>
                   <span className="h-px flex-1 bg-white/10" />
@@ -78,7 +78,7 @@ const AuthRequiredModal = ({ isOpen, onClose, title = "Authentication Required",
 
             <button
               onClick={onClose}
-              className="mt-2 text-slate-500 hover:text-white text-[10px] font-black uppercase tracking-widest transition"
+              className="mt-2 text-slate-500 hover:text-white text-xs font-black uppercase tracking-widest transition"
             >
               Maybe Later
             </button>

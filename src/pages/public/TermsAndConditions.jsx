@@ -42,7 +42,7 @@ const TermsAndConditions = () => {
       {/* Header Space for Navbar */}
       <div className="h-20"></div>
 
-      <div className="max-w-7xl mx-auto px-6 mt-5">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 mt-5">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
           
           {/* Sidebar Navigation */}
@@ -69,7 +69,7 @@ const TermsAndConditions = () => {
 
             {/* Last Updated Box */}
             <div className="mt-8 p-6 rounded-2xl bg-white/[0.02] border border-white/5 hidden lg:block">
-              <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-2">Last Updated</p>
+              <p className="text-sm font-bold text-indigo-400 uppercase tracking-widest mb-2">Last Updated</p>
               <p className="text-sm text-slate-400 font-medium">January 31, {new Date().getFullYear()}</p>
             </div>
           </div>

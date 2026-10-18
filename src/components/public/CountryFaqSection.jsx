@@ -10,7 +10,7 @@ const CountryFaqSection = ({ items, kicker = "FAQ", heading = "Common Questions"
   return (
     <div className="mt-20 md:mt-28">
       <Reveal className="text-center mb-16 max-w-2xl mx-auto">
-        <p className="text-[10px] font-black uppercase tracking-[0.4em] text-amber-400 mb-2">
+        <p className="text-sm font-black uppercase tracking-[0.4em] text-amber-400 mb-2">
           {kicker}
         </p>
         <h2 className="text-3xl md:text-5xl font-black font-poppins tracking-tight text-white">
@@ -18,7 +18,7 @@ const CountryFaqSection = ({ items, kicker = "FAQ", heading = "Common Questions"
         </h2>
       </Reveal>
 
-      <div className="max-w-3xl mx-auto space-y-4">
+      <div className="max-w-[1440px] mx-auto space-y-4">
         {items.map((item, i) => {
           const open = openIndex === i;
           return (

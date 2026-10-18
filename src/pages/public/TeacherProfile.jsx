@@ -82,7 +82,7 @@ const BookingModal = ({ teacherName, slots, onClose, onBooked }) => {
               <h2 className="text-base font-semibold text-white">
                 {step === 1 ? "Book a Session" : "Add a Message"}
               </h2>
-              <p className="text-slate-500 text-xs mt-0.5">
+              <p className="text-slate-500 text-sm mt-0.5">
                 {step === 1
                   ? `with ${teacherName}`
                   : "Optional - sent to the teacher with your booking"}
@@ -134,7 +134,7 @@ const BookingModal = ({ teacherName, slots, onClose, onBooked }) => {
                               }`}
                             >
                               {fmt12(slot.start_time)}
-                              <span className="text-[10px] font-normal opacity-70 block">
+                              <span className="text-xs font-normal opacity-70 block">
                                 – {fmt12(slot.end_time)}
                               </span>
                             </button>
@@ -178,11 +178,11 @@ const BookingModal = ({ teacherName, slots, onClose, onBooked }) => {
                     <p className="text-sm font-bold text-white">
                       {fmt12(selectedSlot.start_time)} – {fmt12(selectedSlot.end_time)}
                     </p>
-                    <p className="text-xs text-indigo-300 mt-0.5">
+                    <p className="text-sm text-indigo-300 mt-0.5">
                       {fmtDate(selectedSlot.date)}
                     </p>
                   </div>
-                  <p className="ml-auto text-xs text-indigo-400 font-bold shrink-0">
+                  <p className="ml-auto text-sm text-indigo-400 font-bold shrink-0">
                     1 hr session
                   </p>
                 </div>
@@ -193,7 +193,7 @@ const BookingModal = ({ teacherName, slots, onClose, onBooked }) => {
 
               {/* Note textarea */}
               <div>
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 block mb-2">
+                <label className="text-xs font-black uppercase tracking-widest text-slate-500 block mb-2">
                   Message to Tutor{" "}
                   <span className="text-slate-700 font-normal normal-case tracking-normal">
                     (optional)
@@ -207,7 +207,7 @@ const BookingModal = ({ teacherName, slots, onClose, onBooked }) => {
                   maxLength={500}
                   className="w-full bg-slate-800 border border-slate-700 focus:border-indigo-500/60 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 outline-none resize-none transition"
                 />
-                <p className="text-[10px] text-slate-700 text-right mt-1">
+                <p className="text-sm text-slate-700 text-right mt-1">
                   {note.length}/500
                 </p>
               </div>
@@ -344,7 +344,7 @@ const TeacherProfile = () => {
   if (loading && !teacherDetails) {
     return (
       <section className="min-h-screen bg-slate-950 text-white">
-        <div className="max-w-7xl mx-auto px-6 py-12 sm:py-20 space-y-8 animate-pulse">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 py-12 sm:py-20 space-y-8 animate-pulse">
           {/* Header Skeleton */}
           <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 sm:p-10">
             <div className="flex flex-col lg:flex-row gap-8 lg:items-center">
@@ -422,8 +422,11 @@ const TeacherProfile = () => {
           <div className="w-14 h-14 rounded-2xl bg-red-500/10 text-red-400 flex items-center justify-center mx-auto mb-4 text-2xl">
             <i className="fas fa-exclamation-triangle"></i>
           </div>
-          <h2 className="text-xl font-semibold mb-2">Unable to load teacher</h2>
-          <p className="text-slate-400 text-sm mb-6">{error}</p>
+          <h2 className="text-xl font-semibold mb-2">This tutor's profile isn't available</h2>
+          {/* `error` can be an object from the API; never render it directly. */}
+          <p className="text-slate-300 text-base mb-6">
+            The tutor may no longer be teaching with us. Browse our current tutors instead.
+          </p>
           <BackButton
             to="/teachers"
             label="Back to Tutors"
@@ -488,7 +491,7 @@ const TeacherProfile = () => {
       className="min-h-screen bg-slate-950 text-white"
     >
       {/* Breadcrumb Navigation */}
-      <div className="max-w-7xl mx-auto px-6 py-6">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 py-6">
         <BreadcrumbNavigation
           items={[
             { label: "Home", to: "/", icon: "fas fa-home" },
@@ -502,7 +505,7 @@ const TeacherProfile = () => {
         />
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 pb-6 space-y-8">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 pb-6 space-y-8">
         {/* Header */}
         <div className="rounded-3xl border border-slate-800 bg-slate-900 p-8 sm:p-10 shadow-xl">
           <div className="flex flex-col lg:flex-row gap-8 lg:items-center">
@@ -528,7 +531,7 @@ const TeacherProfile = () => {
                 <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight">
                   {teacherDetails.teacher_name || "Unnamed Tutor"}
                 </h1>
-                <span className="inline-flex items-center justify-center gap-2 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-4 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-indigo-300">
+                <span className="inline-flex items-center justify-center gap-2 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-4 py-1 text-xs font-bold uppercase tracking-[0.2em] text-indigo-300">
                   <i className="fas fa-check-circle" />
                   Verified Tutor
                 </span>
@@ -545,7 +548,7 @@ const TeacherProfile = () => {
                 <div className="flex items-center gap-2 bg-slate-800/60 border border-slate-700/60 rounded-2xl px-4 py-2.5">
                   <i className="fas fa-briefcase text-indigo-400 text-xs" />
                   <div>
-                    <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold leading-none mb-0.5">Experience</p>
+                    <p className="text-sm uppercase tracking-widest text-slate-500 font-bold leading-none mb-0.5">Experience</p>
                     <p className="text-sm font-semibold text-white leading-none">{teacherDetails.experience_years ?? 0} year{(teacherDetails.experience_years ?? 0) === 1 ? "" : "s"}</p>
                   </div>
                 </div>
@@ -554,7 +557,7 @@ const TeacherProfile = () => {
                   <div className="flex items-center gap-2 bg-slate-800/60 border border-slate-700/60 rounded-2xl px-4 py-2.5">
                     <i className="fas fa-graduation-cap text-indigo-400 text-xs" />
                     <div>
-                      <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold leading-none mb-0.5">Qualification</p>
+                      <p className="text-sm uppercase tracking-widest text-slate-500 font-bold leading-none mb-0.5">Qualification</p>
                       <p className="text-sm font-semibold text-white leading-none">{teacherDetails.qualification}</p>
                     </div>
                   </div>
@@ -564,7 +567,7 @@ const TeacherProfile = () => {
                   <div className="flex items-center gap-2 bg-slate-800/60 border border-slate-700/60 rounded-2xl px-4 py-2.5">
                     <i className="fas fa-star text-indigo-400 text-xs" />
                     <div>
-                      <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold leading-none mb-0.5">Expertise</p>
+                      <p className="text-sm uppercase tracking-widest text-slate-500 font-bold leading-none mb-0.5">Expertise</p>
                       <p className="text-sm font-semibold text-white leading-none">{expertiseList.join(", ")}</p>
                     </div>
                   </div>
@@ -586,7 +589,7 @@ const TeacherProfile = () => {
                     <i className="fas fa-calendar-check" />
                     Book a Session
                     {slotsLoaded && availableSlots.length > 0 && (
-                      <span className="bg-white/20 text-white text-[10px] font-black px-2 py-0.5 rounded-full">
+                      <span className="bg-white/20 text-white text-xs font-black px-2 py-0.5 rounded-full">
                         {availableSlots.length}
                       </span>
                     )}
@@ -638,7 +641,7 @@ const TeacherProfile = () => {
                     <div className="flex items-start justify-between gap-3">
                       <p className="text-sm font-semibold text-white truncate">{course.course_name}</p>
                       <div className="flex-shrink-0 flex flex-col items-end">
-                        <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider border ${
+                        <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-bold uppercase tracking-wider border ${
                           course.is_paid
                             ? "border-amber-500/20 bg-amber-500/10 text-amber-300"
                             : "border-emerald-500/20 bg-emerald-500/10 text-emerald-300"
@@ -653,10 +656,10 @@ const TeacherProfile = () => {
                       </div>
                     </div>
                     <div className="flex items-center gap-2 mt-1">
-                      <p className="text-xs text-slate-500">
+                      <p className="text-sm text-slate-500">
                         {course.enrolled_students} student{course.enrolled_students === 1 ? "" : "s"}
                       </p>
-                      <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider border ${
+                      <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-bold uppercase tracking-wider border ${
                         course.status === "published"
                           ? "border-green-500/20 bg-green-500/10 text-green-300"
                           : "border-slate-700 bg-slate-800 text-slate-400"
@@ -695,8 +698,8 @@ const TeacherProfile = () => {
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-semibold text-white leading-snug">{cert.title}</p>
-                        <span className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-bold uppercase tracking-wider">
-                          <i className="fas fa-building text-[8px]" />
+                        <span className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-bold uppercase tracking-wider">
+                          <i className="fas fa-building text-xs" />
                           {cert.org}
                         </span>
                       </div>
@@ -740,7 +743,7 @@ const TeacherProfile = () => {
               .slice(0, 5)
               .map(([date, daySlots]) => (
                 <div key={date} className="mb-6">
-                  <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">
+                  <p className="text-sm font-bold uppercase tracking-widest text-slate-500 mb-3">
                     {fmtDate(date)}
                   </p>
                   <div className="flex flex-wrap gap-2">

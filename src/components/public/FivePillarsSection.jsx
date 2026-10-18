@@ -90,9 +90,9 @@ const PillarColumn = ({ pillar, delay = 0 }) => (
     <div className="w-[46%] h-4 relative bg-gradient-to-b from-white/5 via-indigo-400/5 to-white/4 border-x border-white/8" />
     <div className="w-[84%] h-2.5 rounded-b-sm bg-white/8 shadow-[0_-1px_0_rgba(255,255,255,0.1)_inset] mb-4" />
     <div className="text-center px-2">
-      <p className="text-[9.5px] font-black tracking-[0.22em] uppercase text-cyan-400 mb-1.5">{pillar.label}</p>
+      <p className="text-sm font-black tracking-[0.22em] uppercase text-cyan-400 mb-1.5">{pillar.label}</p>
       <h4 className="font-poppins text-[15px] font-black text-white mb-1.5 leading-snug">{pillar.headline}</h4>
-      <p className="text-[11.5px] text-slate-400 leading-relaxed">{pillar.body}</p>
+      <p className="text-sm text-slate-400 leading-relaxed">{pillar.body}</p>
     </div>
   </Reveal>
 );
@@ -109,9 +109,9 @@ const FivePillarsSection = () => {
     <div className="mb-20 md:mb-28">
       {/* No extra top margin here - the parent <section> in PublicHome
           already provides py-20 md:py-32, so this sits right after that. */}
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-[1440px] mx-auto">
         <Reveal className="text-center rounded-t-2xl rounded-b-sm px-8 py-8 sm:py-9 bg-gradient-to-b from-indigo-400/15 to-indigo-400/5 border border-indigo-400/25 border-b-[3px] border-b-indigo-400/40">
-          <p className="text-[10px] font-black tracking-[0.32em] uppercase text-cyan-400 mb-2.5">
+          <p className="text-sm font-black tracking-[0.32em] uppercase text-cyan-400 mb-2.5">
             Our Promise
           </p>
           <h2 className="font-poppins text-2xl sm:text-3xl md:text-4xl font-black tracking-tight text-white mb-2.5 text-balance">

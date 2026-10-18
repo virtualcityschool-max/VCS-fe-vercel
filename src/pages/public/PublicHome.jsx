@@ -227,7 +227,7 @@ const PublicHome = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center mb-14">
           {/* Left: Badge + Heading */}
           <div className="text-left">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-[10px] font-black uppercase tracking-[0.2em] text-cyan-400 mb-8 animate-fadeInUp">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-xs font-black uppercase tracking-[0.2em] text-cyan-400 mb-8 animate-fadeInUp">
               <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
               Gulf's Premier Online School
             </div>
@@ -300,7 +300,7 @@ const PublicHome = () => {
             <div className="mb-24">
               <Reveal className="flex justify-between items-end mb-10">
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-[0.4em] text-green-500 mb-2">
+                  <p className="text-sm font-black uppercase tracking-[0.4em] text-green-500 mb-2">
                     Continuity
                   </p>
                   <h2 className="text-3xl md:text-4xl font-black font-poppins tracking-tight">
@@ -309,9 +309,9 @@ const PublicHome = () => {
                 </div>
                 <button
                   onClick={() => navigate("/student")}
-                  className="text-green-400 font-black text-[10px] uppercase tracking-widest hover:text-white transition flex items-center gap-3 border-b border-green-500/20 pb-1"
+                  className="text-green-400 font-black text-xs uppercase tracking-widest hover:text-white transition flex items-center gap-3 border-b border-green-500/20 pb-1"
                 >
-                  Dashboard <i className="fas fa-arrow-right text-[8px]"></i>
+                  Dashboard <i className="fas fa-arrow-right text-xs"></i>
                 </button>
               </Reveal>
 
@@ -334,7 +334,7 @@ const PublicHome = () => {
         {/* Available Courses Section */}
         <Reveal className="flex justify-between items-end mb-10">
           <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-indigo-500 mb-2">
+            <p className="text-sm font-black uppercase tracking-[0.4em] text-indigo-500 mb-2">
               Discovery
             </p>
             <h2 className="text-3xl md:text-5xl font-black font-poppins tracking-tight">
@@ -345,9 +345,9 @@ const PublicHome = () => {
           </div>
           <button
             onClick={() => navigate("/courses")}
-            className="hidden md:flex text-indigo-400 font-black text-[10px] uppercase tracking-widest hover:text-white transition items-center gap-3 border-b border-indigo-500/20 pb-1"
+            className="hidden md:flex text-indigo-400 font-black text-xs uppercase tracking-widest hover:text-white transition items-center gap-3 border-b border-indigo-500/20 pb-1"
           >
-            View All Courses <i className="fas fa-arrow-right text-[8px]"></i>
+            View All Courses <i className="fas fa-arrow-right text-xs"></i>
           </button>
         </Reveal>
 
@@ -384,13 +384,13 @@ const PublicHome = () => {
                   <i className="fas fa-hand-holding-heart text-indigo-400"></i>
                 </span>
                 <div className="min-w-0">
-                  <p className="text-[10px] font-black uppercase tracking-[0.35em] text-indigo-400 mb-1.5">
+                  <p className="text-sm font-black uppercase tracking-[0.35em] text-indigo-400 mb-1.5">
                     Financial Aid
                   </p>
                   <h3 className="text-lg sm:text-xl font-black font-poppins tracking-tight text-white">
                     Apply for Free Access to a course
                   </h3>
-                  <p className="text-slate-400 text-xs sm:text-sm mt-1 max-w-md leading-relaxed">
+                  <p className="text-slate-400 text-sm sm:text-sm mt-1 max-w-md leading-relaxed">
                     Request free access, our team reviews your request and approved
                     courses are added to your account at no cost.
                   </p>
@@ -420,13 +420,13 @@ const PublicHome = () => {
                   <i className="fas fa-share-nodes text-emerald-400"></i>
                 </span>
                 <div className="min-w-0">
-                  <p className="text-[10px] font-black uppercase tracking-[0.35em] text-emerald-400 mb-1.5">
+                  <p className="text-sm font-black uppercase tracking-[0.35em] text-emerald-400 mb-1.5">
                     Refer &amp; Earn
                   </p>
                   <h3 className="text-lg sm:text-xl font-black font-poppins tracking-tight text-white">
                     Refer a family, earn for as long as they stay
                   </h3>
-                  <p className="text-slate-400 text-xs sm:text-sm mt-1 max-w-md leading-relaxed">
+                  <p className="text-slate-400 text-sm sm:text-sm mt-1 max-w-md leading-relaxed">
                     Every VCS student and teacher has a personal referral link. When a
                     family enrolls through yours, you earn 10% of what they pay - for
                     as long as they remain enrolled, not just once.
@@ -525,7 +525,7 @@ const PublicHome = () => {
         <div className="mt-32 md:mt-48 pb-20">
           <Reveal className="flex justify-between items-end mb-16">
             <div className="text-left">
-              <p className="text-[10px] font-black uppercase tracking-[0.4em] text-cyan-500 mb-2">
+              <p className="text-sm font-black uppercase tracking-[0.4em] text-cyan-500 mb-2">
                 Mentorship
               </p>
               <h2 className="text-3xl md:text-5xl font-black font-poppins tracking-tight text-white">
@@ -534,9 +534,9 @@ const PublicHome = () => {
             </div>
             <button
               onClick={() => navigate("/teachers")}
-              className="hidden md:flex text-cyan-400 font-black text-[10px] uppercase tracking-widest hover:text-white transition items-center gap-3 border-b border-cyan-500/20 pb-1"
+              className="hidden md:flex text-cyan-400 font-black text-xs uppercase tracking-widest hover:text-white transition items-center gap-3 border-b border-cyan-500/20 pb-1"
             >
-              View All Tutors <i className="fas fa-arrow-right text-[8px]"></i>
+              View All Tutors <i className="fas fa-arrow-right text-xs"></i>
             </button>
           </Reveal>
 
@@ -574,7 +574,7 @@ const PublicHome = () => {
           <div className="mt-32 md:mt-48 pb-4">
             <Reveal className="flex justify-between items-end mb-16">
               <div className="text-left">
-                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-indigo-500 mb-2">
+                <p className="text-sm font-black uppercase tracking-[0.4em] text-indigo-500 mb-2">
                   The Journal
                 </p>
                 <h2 className="text-3xl md:text-5xl font-black font-poppins tracking-tight text-white">
@@ -583,9 +583,9 @@ const PublicHome = () => {
               </div>
               <button
                 onClick={() => navigate("/blogs?type=article")}
-                className="hidden md:flex text-indigo-400 font-black text-[10px] uppercase tracking-widest hover:text-white transition items-center gap-3 border-b border-indigo-500/20 pb-1"
+                className="hidden md:flex text-indigo-400 font-black text-xs uppercase tracking-widest hover:text-white transition items-center gap-3 border-b border-indigo-500/20 pb-1"
               >
-                View All Articles <i className="fas fa-arrow-right text-[8px]"></i>
+                View All Articles <i className="fas fa-arrow-right text-xs"></i>
               </button>
             </Reveal>
 
@@ -615,7 +615,7 @@ const PublicHome = () => {
           <div className="mt-32 md:mt-48 pb-4">
             <Reveal className="flex justify-between items-end mb-16">
               <div className="text-left">
-                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-rose-400 mb-2">
+                <p className="text-sm font-black uppercase tracking-[0.4em] text-rose-400 mb-2">
                   Watch &amp; Learn
                 </p>
                 <h2 className="text-3xl md:text-5xl font-black font-poppins tracking-tight text-white">
@@ -624,9 +624,9 @@ const PublicHome = () => {
               </div>
               <button
                 onClick={() => navigate("/blogs?type=video")}
-                className="hidden md:flex text-rose-400 font-black text-[10px] uppercase tracking-widest hover:text-white transition items-center gap-3 border-b border-rose-400/20 pb-1"
+                className="hidden md:flex text-rose-400 font-black text-xs uppercase tracking-widest hover:text-white transition items-center gap-3 border-b border-rose-400/20 pb-1"
               >
-                View All Vlogs <i className="fas fa-arrow-right text-[8px]"></i>
+                View All Vlogs <i className="fas fa-arrow-right text-xs"></i>
               </button>
             </Reveal>
 
@@ -656,7 +656,7 @@ const PublicHome = () => {
         {testimonials.length > 0 && (
         <div className="mt-32 md:mt-48 pb-20">
           <Reveal className="text-center mb-16 max-w-2xl mx-auto">
-            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-blue-400 mb-2">
+            <p className="text-sm font-black uppercase tracking-[0.4em] text-blue-400 mb-2">
               Real Voices
             </p>
             <h2 className="text-3xl md:text-5xl font-black font-poppins tracking-tight text-white">
@@ -676,7 +676,7 @@ const PublicHome = () => {
                 </p>
                 <div className="mt-6 pt-5 border-t border-white/5">
                   <p className="text-white font-bold text-sm">{t.name}</p>
-                  <p className="text-slate-500 text-xs mt-0.5">{t.role}</p>
+                  <p className="text-slate-500 text-sm mt-0.5">{t.role}</p>
                 </div>
               </div>
             ))}

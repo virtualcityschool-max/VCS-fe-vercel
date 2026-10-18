@@ -120,7 +120,7 @@ const FilterSelect = ({
       {/* Search */}
       <div className="px-2 pt-2 pb-1.5 border-b border-slate-800">
         <div className="relative">
-          <i className="fas fa-search absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500 text-[10px] pointer-events-none" />
+          <i className="fas fa-search absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500 text-xs pointer-events-none" />
           <input
             ref={searchRef}
             type="text"
@@ -148,7 +148,7 @@ const FilterSelect = ({
           filtered.map((opt) =>
             opt.isGroup ? (
               <li key={opt.value}
-                className="px-3 py-1.5 text-[9px] font-black uppercase tracking-widest text-slate-500 bg-slate-950/60 select-none pointer-events-none">
+                className="px-3 py-1.5 text-xs font-black uppercase tracking-widest text-slate-500 bg-slate-950/60 select-none pointer-events-none">
                 {opt.label.replace(/─+\s*/g, "")}
               </li>
             ) : (
@@ -195,7 +195,7 @@ const FilterSelect = ({
         <span className={`truncate ${selected ? "text-white" : "text-slate-500"}`}>
           {selected ? selected.label : placeholder}
         </span>
-        <i className={`fas fa-chevron-down text-slate-500 text-[10px] flex-shrink-0 transition-transform duration-150 ${open ? "rotate-180" : ""}`} />
+        <i className={`fas fa-chevron-down text-slate-500 text-xs flex-shrink-0 transition-transform duration-150 ${open ? "rotate-180" : ""}`} />
       </button>
 
       {typeof document !== "undefined" && createPortal(dropdown, document.body)}

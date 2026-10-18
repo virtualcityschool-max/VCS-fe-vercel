@@ -91,7 +91,7 @@ const ConfirmDialog = ({
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
-                <span className="text-[11px] text-slate-300 select-none font-black uppercase tracking-widest leading-snug">
+                <span className="text-xs text-slate-300 select-none font-black uppercase tracking-widest leading-snug">
                   {checkboxLabel}
                 </span>
               </label>
@@ -104,7 +104,7 @@ const ConfirmDialog = ({
                 onClick={onCancel}
                 data-modal-close
                 disabled={loading}
-                className="flex-1 px-6 py-3.5 bg-white/5 hover:bg-white/10 border border-white/5 text-slate-400 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all active:scale-95 disabled:opacity-50"
+                className="flex-1 px-6 py-3.5 bg-white/5 hover:bg-white/10 border border-white/5 text-slate-400 rounded-2xl text-xs font-black uppercase tracking-[0.2em] transition-all active:scale-95 disabled:opacity-50"
               >
                 {cancelLabel}
               </button>
@@ -112,7 +112,7 @@ const ConfirmDialog = ({
             <button
               onClick={onConfirm}
               disabled={isConfirmDisabled}
-              className={`flex-1 px-6 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2 ${v.confirmCls}`}
+              className={`flex-1 px-6 py-3.5 rounded-2xl text-xs font-black uppercase tracking-[0.2em] transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2 ${v.confirmCls}`}
             >
               {loading && <i className="fas fa-spinner fa-spin text-xs"></i>}
               {confirmLabel}

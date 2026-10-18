@@ -8,7 +8,7 @@ import { guideBySlug, guideForCourse, SUBJECT_GUIDES } from "../../data/subjectG
 import { coursesService } from "../../services/coursesService";
 import { getDisplayName } from "../../utils/userDisplay";
 import GuideBody from "../../components/subjects/GuideBody";
-import { ACCENT, guideSections } from "../../components/subjects/guideSections";
+import { ACCENT, guidePhoto, guideSections } from "../../components/subjects/guideSections";
 
 // One Cambridge subject explained for students: what it is, why it is taught,
 // how it is examined and graded, and how to do well. Content lives in
@@ -35,11 +35,19 @@ export const SubjectGuidesIndex = () => {
             <h2 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-4">{lvl}</h2>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {SUBJECT_GUIDES.filter((g) => g.level === lvl).map((g) => (
-                <Link key={g.slug} to={`/subjects/${g.slug}`} className="group rounded-2xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.06] hover:border-indigo-500/40 p-5 transition">
-                  <div className="text-xs font-bold uppercase tracking-widest text-indigo-300 mb-2">{g.level} · {g.code}</div>
-                  <div className="text-lg font-bold text-white mb-2">{g.subject}</div>
-                  <p className="text-sm text-slate-400 line-clamp-3">{g.tagline}</p>
-                  <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-indigo-300 group-hover:text-white">Read the guide <ChevronRight className="w-4 h-4" /></span>
+                <Link key={g.slug} to={`/subjects/${g.slug}`} className="group flex flex-col rounded-2xl border border-white/10 bg-white/[0.04] hover:bg-white/[0.07] hover:border-indigo-400/50 overflow-hidden transition">
+                  <div className="relative aspect-[5/2] overflow-hidden bg-slate-900">
+                    <img src={guidePhoto(g.slug)} alt="" loading="lazy" width="1600" height="640" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#020617]/90 via-transparent to-transparent" />
+                    <span className={`absolute left-4 bottom-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-bold uppercase tracking-widest bg-slate-950/70 ${(ACCENT[g.accent] || ACCENT.violet).soft} ${(ACCENT[g.accent] || ACCENT.violet).text}`}>
+                      {g.level} · {g.code}
+                    </span>
+                  </div>
+                  <div className="p-5 flex flex-col flex-1">
+                    <div className="text-xl font-bold text-white mb-2">{g.subject}</div>
+                    <p className="text-base text-slate-300 line-clamp-3 leading-relaxed">{g.tagline}</p>
+                    <span className="mt-auto pt-4 inline-flex items-center gap-1 text-base font-semibold text-indigo-300 group-hover:text-white">Read the guide <ChevronRight className="w-4 h-4" /></span>
+                  </div>
                 </Link>
               ))}
             </div>
@@ -148,18 +156,24 @@ const SubjectGuidePage = () => {
           <span className="text-slate-300">{g.subject} {g.code}</span>
         </nav>
 
-        <header className="mb-8 max-w-4xl">
+        <header className="mb-8 grid lg:grid-cols-[1.15fr_0.85fr] gap-8 items-center">
+          <div>
           <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs font-black uppercase tracking-[0.2em] mb-4 ${accent.soft} ${accent.text}`}>
             <span className={`w-1.5 h-1.5 rounded-full ${accent.dot}`} /> Cambridge {g.level} · {g.code}
           </span>
           <h1 className="text-3xl md:text-5xl font-black tracking-tight leading-[1.1] mb-4">{g.title}</h1>
-          <p className="text-slate-300 text-base md:text-lg leading-relaxed">{g.tagline}</p>
-          <p className="mt-4 inline-flex items-center gap-2 text-xs text-emerald-300/90 bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-3 py-1.5">
+          <p className="text-slate-200 text-lg md:text-xl leading-relaxed">{g.tagline}</p>
+          <p className="mt-4 inline-flex items-center gap-2 text-sm text-emerald-300/90 bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-3 py-1.5">
             <CheckCircle2 className="w-3.5 h-3.5" /> Checked against the official Cambridge syllabus for exams in {g.syllabusYears} · {g.verifiedOn}
           </p>
           {g.notice && (
-            <p className="mt-3 text-sm text-amber-200 bg-amber-500/10 border border-amber-500/30 rounded-xl px-4 py-3 leading-relaxed">{g.notice}</p>
+            <p className="mt-3 text-base text-amber-100 bg-amber-500/10 border border-amber-500/30 rounded-xl px-4 py-3 leading-relaxed">{g.notice}</p>
           )}
+          </div>
+          <figure className="relative">
+            <img src={guidePhoto(g.slug)} alt={`${g.subject} — Cambridge ${g.level}`} width="1600" height="640" className="w-full aspect-[5/2] lg:aspect-[16/9] object-cover rounded-3xl border border-white/10 shadow-2xl shadow-black/40" />
+            <figcaption className="absolute bottom-2 right-3 text-xs text-white/70">Photo: Unsplash</figcaption>
+          </figure>
         </header>
 
         {/* Phone: table of contents as a scrollable strip */}
@@ -178,7 +192,7 @@ const SubjectGuidePage = () => {
             <div ref={tocBoxRef} className="z-10 rounded-2xl border border-white/10 bg-[#0a1024]/95 backdrop-blur p-4 overflow-y-auto">
               <div className="flex items-center justify-between mb-3 px-2">
                 <span className="text-xs font-bold uppercase tracking-widest text-slate-400">Table of contents</span>
-                <span className="text-[10px] font-mono text-indigo-300">{sections.length} sections</span>
+                <span className="text-xs font-mono text-indigo-300">{sections.length} sections</span>
               </div>
               <ol className="space-y-0.5">
                 {sections.map((s) => {

@@ -94,7 +94,7 @@ const Navbar = ({ variant = "default", hideLogo = false }) => {
                         }`}
                       >
                         {link.label}
-                        {link.guides && <i className="fas fa-chevron-down text-[9px] ml-1.5 opacity-70" />}
+                        {link.guides && <i className="fas fa-chevron-down text-xs ml-1.5 opacity-70" />}
                       </Link>
                     );
                     if (!link.guides) return a;
@@ -106,7 +106,7 @@ const Navbar = ({ variant = "default", hideLogo = false }) => {
                           <div className="w-[560px] rounded-2xl border border-white/10 bg-slate-950 shadow-2xl shadow-black/40 p-5 grid grid-cols-2 gap-6">
                             {GUIDE_LEVELS.map((lvl) => (
                               <div key={lvl}>
-                                <div className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">{lvl}</div>
+                                <div className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">{lvl}</div>
                                 <ul className="space-y-0.5">
                                   {GUIDE_CATALOG.filter((g) => g.level === lvl).map((g) => (
                                     <li key={g.slug}>
@@ -140,7 +140,7 @@ const Navbar = ({ variant = "default", hideLogo = false }) => {
                     variant="primary"
                     size="sm"
                     onClick={() => handleSetAuthModal("register")}
-                    className="bg-cyan-400 hover:bg-cyan-300 text-slate-950 shadow-none px-3 sm:px-7 py-2 sm:py-3 rounded-xl font-bold text-[11px] sm:text-sm whitespace-nowrap border-0"
+                    className="bg-cyan-400 hover:bg-cyan-300 text-slate-950 shadow-none px-3 sm:px-7 py-2 sm:py-3 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap border-0"
                   >
                     Get started
                   </Button>

@@ -34,7 +34,7 @@ const FaqSection = () => {
     return (
           <div className="mt-32 md:mt-48 pb-20">
                 <Reveal className="text-center mb-16 max-w-2xl mx-auto">
-                        <p className="text-[10px] font-black uppercase tracking-[0.4em] text-amber-400 mb-2">
+                        <p className="text-sm font-black uppercase tracking-[0.4em] text-amber-400 mb-2">
                                   FAQ
                         </p>
                         <h2 className="text-3xl md:text-5xl font-black font-poppins tracking-tight text-white">
@@ -42,7 +42,7 @@ const FaqSection = () => {
                         </h2>
                 </Reveal>
           
-                <div className="max-w-3xl mx-auto space-y-4">
+                <div className="max-w-[1440px] mx-auto space-y-4">
                   {FAQ_ITEMS.map((item, i) => {
                       const open = openIndex === i;
                       return (

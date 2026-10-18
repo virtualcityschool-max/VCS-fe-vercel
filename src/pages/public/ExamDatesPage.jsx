@@ -57,7 +57,7 @@ const ExamDatesPage = () => {
         <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-purple-600/10 blur-[150px] rounded-full animate-aurora" style={{ animationDelay: "-6s" }} />
       </div>
 
-      <article className="relative z-10 max-w-4xl mx-auto px-6 pt-12 md:pt-16 pb-24">
+      <article className="relative z-10 max-w-[1440px] mx-auto px-4 sm:px-6 pt-12 md:pt-16 pb-24">
         <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-500 mb-8">
           <Link to="/" className="hover:text-white transition">Home</Link>
           <span>/</span>
@@ -130,7 +130,7 @@ const ExamDatesPage = () => {
                   <h3 className="text-base font-black font-poppins text-white group-hover:text-indigo-300 transition">
                     {c.countryName}
                   </h3>
-                  <p className="text-slate-400 text-xs leading-relaxed mt-1">
+                  <p className="text-slate-400 text-sm leading-relaxed mt-1">
                     {COUNTRY_DESCRIPTORS[c.slug]}
                   </p>
                 </div>
@@ -152,7 +152,7 @@ const ExamDatesPage = () => {
           <ExamDatesTable allSeries={EXAM_SERIES} today={today} />
         </Reveal>
 
-        <p className="text-slate-600 text-xs mt-10 pt-6 border-t border-white/5">
+        <p className="text-slate-600 text-sm mt-10 pt-6 border-t border-white/5">
           Last verified against cambridgeinternational.org on {LAST_VERIFIED}. Registration deadlines shown are Cambridge's cutoff for your school to submit entries, not necessarily your own school's internal deadline - always confirm with your exams officer.
         </p>
       </article>

@@ -50,7 +50,7 @@ const HireTutorModal = ({ teacher, onClose }) => {
         <div className="flex items-center justify-between mb-5">
           <div>
             <h3 className="text-base font-bold text-white">Hire Tutor</h3>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-sm text-slate-400 mt-0.5">
               {teacher.teacher_name || "Unnamed Tutor"}
             </p>
           </div>
@@ -75,7 +75,7 @@ const HireTutorModal = ({ teacher, onClose }) => {
               }`}
             />
             {errors.full_name && (
-              <p className="text-xs text-rose-400 mt-1">{errors.full_name}</p>
+              <p className="text-sm text-rose-400 mt-1">{errors.full_name}</p>
             )}
           </div>
 
@@ -94,7 +94,7 @@ const HireTutorModal = ({ teacher, onClose }) => {
               }`}
             />
             {errors.email && (
-              <p className="text-xs text-rose-400 mt-1">{errors.email}</p>
+              <p className="text-sm text-rose-400 mt-1">{errors.email}</p>
             )}
           </div>
 

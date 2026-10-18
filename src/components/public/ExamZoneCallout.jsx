@@ -20,7 +20,7 @@ const ExamZoneCallout = () => (
         <p className="text-slate-300 text-sm leading-relaxed mb-3">
           This is exactly where things go wrong for families in our audience: a Pakistani student sitting exams at a centre in the Gulf can be in a different zone, with a different paper timetable, than a cousin sitting the same subject at a centre in Pakistan - because the zone follows the centre's location, not the family's nationality. Always confirm your centre's zone and paper timetable with your school's exams officer before relying on any date beyond what's on this page.
         </p>
-        <p className="text-slate-400 text-xs leading-relaxed mb-4 italic">
+        <p className="text-slate-400 text-sm leading-relaxed mb-4 italic">
           "{ZONE_INFO.quote}"
         </p>
         <a

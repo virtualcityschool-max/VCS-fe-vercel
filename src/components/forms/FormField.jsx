@@ -46,7 +46,7 @@ export const FormField = ({
       {label && (
         <label
           htmlFor={name}
-          className="text-[10px] font-black uppercase text-slate-500 tracking-widest block"
+          className="text-xs font-black uppercase text-slate-500 tracking-widest block"
         >
           {label}
           {required && <span className="text-red-500 ml-1">*</span>}
@@ -183,7 +183,7 @@ export const SelectField = ({
       {label && (
         <label
           htmlFor={name}
-          className="text-[10px] font-black uppercase text-slate-500 tracking-widest block"
+          className="text-xs font-black uppercase text-slate-500 tracking-widest block"
         >
           {label}
           {required && <span className="text-red-500 ml-1">*</span>}
@@ -210,7 +210,7 @@ export const SelectField = ({
             </option>
           ))}
         </select>
-        <i className="fas fa-chevron-down absolute right-5 top-1/2 -translate-y-1/2 text-slate-500 text-[10px] pointer-events-none" />
+        <i className="fas fa-chevron-down absolute right-5 top-1/2 -translate-y-1/2 text-slate-500 text-xs pointer-events-none" />
       </div>
 
       {error && (

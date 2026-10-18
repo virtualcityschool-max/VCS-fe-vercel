@@ -84,9 +84,9 @@ const CountryLandingPage = () => {
         <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-purple-600/10 blur-[150px] rounded-full animate-aurora" style={{ animationDelay: "-6s" }} />
       </div>
 
-      <article className="relative z-10 max-w-4xl mx-auto px-6 pt-12 md:pt-16 pb-24">
+      <article className="relative z-10 max-w-[1440px] mx-auto px-4 sm:px-6 pt-12 md:pt-16 pb-24">
         {/* Breadcrumb - mirrors the BreadcrumbList JSON-LD above */}
-        <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-slate-500 mb-8 flex-wrap">
+        <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-500 mb-8 flex-wrap">
           <Link to="/" className="hover:text-white transition">Home</Link>
           <span>/</span>
           <Link to="/online-school" className="hover:text-white transition">Online School</Link>
@@ -102,7 +102,7 @@ const CountryLandingPage = () => {
               alt={`${country.countryName} flag`}
               className="w-8 h-6 rounded-sm object-cover border border-white/10"
             />
-            <span className="inline-flex items-center px-3 py-1 rounded-full bg-indigo-500/15 border border-indigo-400/30 text-indigo-300 text-[10px] font-black uppercase tracking-[0.2em]">
+            <span className="inline-flex items-center px-3 py-1 rounded-full bg-indigo-500/15 border border-indigo-400/30 text-indigo-300 text-xs font-black uppercase tracking-[0.2em]">
               {country.heroKicker}
             </span>
           </div>
@@ -168,7 +168,7 @@ const CountryLandingPage = () => {
               const iso = pktAnchorIso(hhmm);
               return (
                 <div key={hhmm} className="bg-linear-to-br from-purple-600/10 to-pink-600/10 backdrop-blur-sm rounded-xl p-5 border border-purple-500/20">
-                  <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">
+                  <p className="text-slate-500 text-sm font-black uppercase tracking-widest mb-1">
                     {formatTime(iso, "Asia/Karachi")} PKT batch
                   </p>
                   <p className="text-2xl font-black font-poppins text-white">
@@ -179,7 +179,7 @@ const CountryLandingPage = () => {
               );
             })}
           </div>
-          <p className="mt-4 text-slate-500 text-xs leading-relaxed">
+          <p className="mt-4 text-slate-500 text-sm leading-relaxed">
             Exact timing depends on the specific course and grade - message us on WhatsApp to confirm a schedule for your child's subjects.
           </p>
         </Reveal>
@@ -195,7 +195,7 @@ const CountryLandingPage = () => {
             Course fees are billed in USD through Gumroad - the same price every family pays regardless of country. As a rough sense of scale in local currency, 1 USD is approximately{" "}
             <span className="text-white font-bold">{fx.rate} {country.currency}</span>.
           </p>
-          <p className="text-amber-400/80 text-xs bg-amber-500/5 border border-amber-500/20 rounded-lg px-4 py-3 leading-relaxed mb-3">
+          <p className="text-amber-400/80 text-sm bg-amber-500/5 border border-amber-500/20 rounded-lg px-4 py-3 leading-relaxed mb-3">
             <i className="fas fa-triangle-exclamation mr-2" aria-hidden="true" />
             This is an approximate, illustrative exchange rate, not a live feed - please check the current rate for an exact figure. Actual per-course fees also vary by grade and subject.
           </p>
@@ -203,7 +203,7 @@ const CountryLandingPage = () => {
             to="/courses"
             className="inline-flex items-center gap-2 text-indigo-400 hover:text-white text-xs font-black uppercase tracking-widest transition"
           >
-            See current course fees <i className="fas fa-arrow-right text-[10px]" aria-hidden="true" />
+            See current course fees <i className="fas fa-arrow-right text-xs" aria-hidden="true" />
           </Link>
         </Reveal>
         )}
@@ -227,7 +227,7 @@ const CountryLandingPage = () => {
 
         {/* Sibling + hub links */}
         <Reveal className="mt-16 pt-10 border-t border-white/5">
-          <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-500 mb-5">
+          <p className="text-sm font-black uppercase tracking-[0.4em] text-slate-500 mb-5">
             Also Serving
           </p>
           <div className="flex flex-wrap gap-3">
@@ -245,13 +245,13 @@ const CountryLandingPage = () => {
               to="/exam-dates"
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 hover:border-indigo-400/40 hover:bg-indigo-500/10 transition text-sm font-semibold text-slate-300"
             >
-              <i className="fas fa-calendar-days text-[11px]" aria-hidden="true" /> Exam Dates & Deadlines
+              <i className="fas fa-calendar-days text-xs" aria-hidden="true" /> Exam Dates & Deadlines
             </Link>
             <Link
               to="/online-school"
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 hover:border-indigo-400/40 hover:bg-indigo-500/10 transition text-sm font-semibold text-slate-300"
             >
-              All Countries <i className="fas fa-arrow-right text-[10px]" aria-hidden="true" />
+              All Countries <i className="fas fa-arrow-right text-xs" aria-hidden="true" />
             </Link>
           </div>
         </Reveal>

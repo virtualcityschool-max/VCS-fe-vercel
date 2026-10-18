@@ -24,7 +24,7 @@ const COUNTRIES = [
 const GlobalReachSection = () => (
   <div className="pb-20 md:pb-28">
     <Reveal className="text-center max-w-2xl mx-auto mb-12">
-      <p className="text-[10px] font-black uppercase tracking-[0.4em] text-blue-400 mb-2">
+      <p className="text-sm font-black uppercase tracking-[0.4em] text-blue-400 mb-2">
         Global Community
       </p>
       <h2 className="text-3xl md:text-5xl font-black font-poppins tracking-tight text-white text-balance">
@@ -49,7 +49,7 @@ const GlobalReachSection = () => (
                   className="w-full h-full object-cover block"
                 />
               </div>
-              <p className={`mt-1.5 text-[9px] lg:text-[9.5px] font-bold font-poppins leading-tight ${country.to ? "text-slate-300 group-hover:text-indigo-300" : "text-slate-400"} transition`}>
+              <p className={`mt-1.5 text-sm lg:text-sm font-bold font-poppins leading-tight ${country.to ? "text-slate-300 group-hover:text-indigo-300" : "text-slate-400"} transition`}>
                 {country.name}
               </p>
             </Tag>

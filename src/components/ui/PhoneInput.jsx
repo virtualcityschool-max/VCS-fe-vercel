@@ -87,7 +87,7 @@ const PhoneInput = ({ value, onChange, error, className = "", disabled = false, 
         >
           <span className="text-base leading-none">{selectedCountry.flag}</span>
           <span className="text-xs font-bold text-slate-300">{selectedCountry.dialCode}</span>
-          <i className={`fas fa-chevron-down text-[9px] text-slate-500 transition-transform duration-150 ${dropdownOpen ? "rotate-180" : ""}`}></i>
+          <i className={`fas fa-chevron-down text-xs text-slate-500 transition-transform duration-150 ${dropdownOpen ? "rotate-180" : ""}`}></i>
         </button>
 
         {/* Number input */}
@@ -129,7 +129,7 @@ const PhoneInput = ({ value, onChange, error, className = "", disabled = false, 
 
       {error && (
         <p className="mt-1.5 flex items-center gap-1.5 text-xs text-red-400">
-          <i className="fas fa-exclamation-circle text-[10px]"></i>
+          <i className="fas fa-exclamation-circle text-xs"></i>
           {error}
         </p>
       )}

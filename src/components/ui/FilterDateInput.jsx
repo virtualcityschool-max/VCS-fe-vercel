@@ -7,7 +7,7 @@ import React from "react";
 const FilterDateInput = ({ label, className = "", ...props }) => (
   <div className="flex flex-col gap-1">
     {label && (
-      <span className="text-[10px] uppercase tracking-widest text-slate-500 font-bold px-0.5">
+      <span className="text-xs uppercase tracking-widest text-slate-500 font-bold px-0.5">
         {label}
       </span>
     )}

@@ -562,14 +562,14 @@ export const COUNTRY_PAGES = [
         src: "muttrah-corniche-muscat.webp",
         width: 1000,
         height: 667,
-        alt: "Muttrah Corniche in Muscat, Oman, with traditional dhows moored along the waterfront and mountains behind",
+        alt: "The Muttrah waterfront in Muscat, Oman, with a mosque and minaret below the mountains",
         caption: "Muttrah Corniche, Muscat.",
       },
       study1: {
         src: "nizwa-fort-oman.webp",
         width: 1000,
-        height: 1334,
-        alt: "The round tower of Nizwa Fort rising against a clear sky in Oman's interior",
+        height: 667,
+        alt: "The sand-coloured walls and battlements of Nizwa Fort against a clear sky in Oman's interior",
         caption: "Nizwa Fort, one of Oman's best-known landmarks outside the capital.",
       },
       study2: {

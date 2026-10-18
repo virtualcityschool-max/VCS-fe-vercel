@@ -149,7 +149,7 @@ const ExamTimeline = ({ seriesByType }) => {
                 {SERIES_TYPE_LABELS[type]}
               </h3>
               {entry.series && (
-                <p className="text-xs text-slate-500 mt-1 leading-snug">
+                <p className="text-sm text-slate-500 mt-1 leading-snug">
                   {entry.mode === "completed" ? (
                     <>
                       <span className="text-slate-400 font-semibold">{entry.series.seriesLabel} (completed)</span>
@@ -216,7 +216,7 @@ const ExamTimeline = ({ seriesByType }) => {
         })}
       </svg>
 
-      <p className="text-xs text-slate-500 mt-3">
+      <p className="text-sm text-slate-500 mt-3">
         <span className="text-indigo-300 font-bold">Jan '{String(referenceYear + 1).slice(-2)}</span> (highlighted row) is
         the following calendar year - Oct/Nov results always arrive after the year turns over.
       </p>
