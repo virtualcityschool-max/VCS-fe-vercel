@@ -114,14 +114,16 @@ const PublicCourseCard = ({
       className="bg-[#1a2235]/60 backdrop-blur-xl rounded-2xl overflow-hidden border border-white/5 shadow-lg group flex flex-col animate-springyReveal opacity-0 glass-shine hover-lift"
     >
       {/* Image */}
-      <div className={`relative ${large ? "h-36" : "h-24"} overflow-hidden bg-slate-900/50 shrink-0`}>
+      {/* Course artwork is 2400×1260 with words on it: the box has the same
+          shape, so the picture fills it edge to edge and nothing is cut. */}
+      <div className="relative aspect-[40/21] overflow-hidden bg-slate-900/50 shrink-0">
         <Link to={`/courses/${course.id}`} className="block h-full">
           {getCourseImage(course, index) && !imgFailed ? (
             <img
               src={sizedImage(getCourseImage(course, index), large ? 640 : 384)}
               loading="lazy"
               decoding="async"
-              className={`w-full h-full object-contain group-hover:scale-105 transition duration-700 ${large ? "opacity-75" : "opacity-70"} group-hover:opacity-100`}
+              className="w-full h-full object-cover"
               alt={course.title || "Course"}
               onError={(e) => { if (e.currentTarget.dataset.fallback !== "1") fallbackToOriginal(getCourseImage(course, index))(e); else setImgFailed(true); }}
             />
@@ -131,16 +133,6 @@ const PublicCourseCard = ({
             </div>
           )}
         </Link>
-        {guide && (
-          <Link
-            to={`/subjects/${guide.slug}`}
-            onClick={(e) => e.stopPropagation()}
-            title={`Cambridge ${guide.level} ${guide.subject} (${guide.code}) — subject guide`}
-            className="absolute bottom-1.5 left-1.5 z-10 inline-flex items-center gap-1 rounded-md bg-slate-950/80 border border-indigo-400/40 px-1.5 py-0.5 text-xs font-bold text-indigo-200 hover:bg-indigo-600 hover:text-white transition"
-          >
-            <i className="fas fa-book-open text-xs" aria-hidden="true"></i> Guide
-          </Link>
-        )}
         {course.status === "published" && (
           <div className={`absolute ${large ? "top-2 right-2 w-2 h-2" : "top-1.5 right-1.5 w-1.5 h-1.5"} z-10 bg-green-500 rounded-full shadow-[0_0_6px_rgba(34,197,94,0.8)] animate-pulse`} />
         )}
@@ -153,6 +145,16 @@ const PublicCourseCard = ({
             {course.title || "Untitled Course"}
           </h3>
         </Link>
+        {guide && (
+          <Link
+            to={`/subjects/${guide.slug}`}
+            onClick={(e) => e.stopPropagation()}
+            title={`Cambridge ${guide.level} ${guide.subject} (${guide.code}) — subject guide`}
+            className="self-start inline-flex items-center gap-1.5 rounded-md border border-indigo-400/30 bg-indigo-500/10 px-2 py-0.5 text-xs font-bold text-indigo-200 hover:bg-indigo-600 hover:text-white hover:border-transparent transition"
+          >
+            <i className="fas fa-book-open text-xs" aria-hidden="true"></i> Subject guide
+          </Link>
+        )}
 
         {course.instructor?.id ? (
           <Link
