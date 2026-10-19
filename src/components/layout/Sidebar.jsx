@@ -130,6 +130,7 @@ const NAV_CONFIG = {
     { label: "Evaluations & Gradebook", to: "/teacher?tab=evaluations", icon: "fas fa-chart-bar" },
     { label: "Performance Analytics", to: "/teacher?tab=analytics", icon: "fas fa-chart-line" },
     { label: "Planner", to: "/teacher?tab=planner", icon: "fas fa-calendar-alt" },
+    { label: "Subject Guides", to: "/subjects", icon: "fas fa-book-reader" },
     { label: "Blogs", to: "/blogs", icon: "fas fa-newspaper" },
     { label: "About Us", to: "/about", icon: "fas fa-info-circle" },
   ],
@@ -142,6 +143,7 @@ const NAV_CONFIG = {
     { label: "Attendance",      to: "/student?tab=attendance", icon: "fas fa-user-check" },
     { label: "Resources",       to: "/student?tab=resources",  icon: "fas fa-folder-open" },
     { label: "Assignments & Quizzes", to: "/student?tab=assessments", icon: "fas fa-clipboard-check" },
+    { label: "Subject Guides",  to: "/subjects",               icon: "fas fa-book-reader" },
     { label: "Explore Courses", to: "/courses",                icon: "fas fa-compass" },
     { label: "Blogs",           to: "/blogs",                  icon: "fas fa-newspaper" },
     { label: "About Us",        to: "/about",                  icon: "fas fa-info-circle" },
@@ -150,6 +152,7 @@ const NAV_CONFIG = {
     { label: "Dashboard",        to: "/parent",              icon: "fas fa-table-columns", end: true },
     { label: "Child Attendance", to: "/parent/attendance",   icon: "fas fa-user-check" },
     { label: "Evaluations",      to: "/parent/evaluations",  icon: "fas fa-chart-bar" },
+    { label: "Subject Guides",   to: "/subjects",            icon: "fas fa-book-reader" },
     { label: "About Us",         to: "/about",               icon: "fas fa-info-circle" },
   ],
 };
