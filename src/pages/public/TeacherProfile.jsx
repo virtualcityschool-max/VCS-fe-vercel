@@ -353,8 +353,14 @@ const TeacherProfile = () => {
     const courses = (t.courses || []).filter((c) => c.status !== "draft");
     const guides = courses.map((c) => catalogGuideFor({ title: c.course_name, subject_code: c.subject_code, details: c.details })).filter(Boolean);
     const uniq = (xs) => [...new Set(xs.map((x) => String(x).trim()).filter(Boolean))];
-    const expertise = typeof t.expertise === "string" ? t.expertise.split(",") : [];
-    const subjects = uniq(t.subjects?.length ? t.subjects.filter((x) => x !== "Others") : [...guides.map((g) => g.subject), ...expertise]);
+    // Free-text expertise ("Urdu • Islamiat", "Lecturer urdu (BPS-17)"): keep
+    // only short subject-like items, so job titles don't end up in the page title.
+    const expertise = typeof t.expertise === "string"
+      ? t.expertise.split(/[,•|/;]+/).map((x) => x.replace(/\s+/g, " ").trim()).filter((x) => x && x.length <= 30 && !/[\d()]/.test(x) && x.split(" ").length <= 3)
+      : [];
+    const guideSubjects = guides.map((g) => g.subject);
+    const extra = expertise.filter((x) => !guideSubjects.some((g) => x.toLowerCase().includes(g.toLowerCase())));
+    const subjects = uniq(t.subjects?.length ? t.subjects.filter((x) => x !== "Others") : [...guideSubjects, ...extra]);
     const levels = uniq(t.class_levels?.length ? t.class_levels : courses.map((c) => c.level));
     const guideLinks = [...new Map(guides.map((g) => [g.slug, g])).values()];
     return { courses, subjects, levels, guideLinks };
@@ -373,6 +379,9 @@ const TeacherProfile = () => {
               ].filter(Boolean).join(" ")
             : undefined,
       url: typeof window !== "undefined" ? window.location.href : undefined,
+      // Tutors without a class yet (display-only profiles) and unavailable
+      // profiles stay out of Google until they teach a course.
+      noindex: Boolean(error) || (Boolean(teacherDetails) && teach.courses.length === 0),
   });
   
   if (loading && !teacherDetails) {
@@ -506,6 +515,18 @@ const TeacherProfile = () => {
   const distinctions = teacherDetails.distinctions || [];
   const reviews = teacherDetails.recent_reviews || [];
   const isStudent = isLoggedIn && role === "student";
+
+  // No bio yet: say what we know for certain (their courses, levels, experience).
+  const courseTitles = teach.courses.map((c) => String(c.course_name || "").replace(/\s+/g, " ").trim()).filter(Boolean);
+  const listOf = (xs) => (xs.length < 2 ? xs.join("") : `${xs.slice(0, -1).join(", ")} and ${xs[xs.length - 1]}`);
+  const aboutFallback = [
+    courseTitles.length
+      ? `${name} teaches ${listOf(courseTitles)} at Virtual City School, in live online classes.`
+      : `${name} teaches live online classes at Virtual City School.`,
+    years > 0 ? `${name.split(" ")[0]} has ${years} year${years === 1 ? "" : "s"} of teaching experience.` : null,
+    teacherDetails.qualification ? `Qualification: ${teacherDetails.qualification}.` : null,
+    teach.levels.length ? `Level${teach.levels.length === 1 ? "" : "s"} taught: ${teach.levels.join(", ")}.` : null,
+  ].filter(Boolean).join(" ");
 
   const facts = [
     years > 0 && { icon: "fa-briefcase", label: "Experience", value: `${years} year${years === 1 ? "" : "s"}` },
@@ -660,7 +681,7 @@ const TeacherProfile = () => {
             <section id="tutor-about" className="scroll-mt-24">
               <H2 icon="fa-user" tone="bg-indigo-500/20 text-indigo-200">About {name.split(" ")[0]}</H2>
               <p className="text-lg text-slate-200 leading-relaxed max-w-4xl whitespace-pre-line">
-                {teacherDetails.bio || `${name} teaches live online classes at Virtual City School.`}
+                {teacherDetails.bio || aboutFallback}
               </p>
               {highlights.length > 0 && (
                 <ul className="mt-6 grid sm:grid-cols-2 xl:grid-cols-3 gap-3">

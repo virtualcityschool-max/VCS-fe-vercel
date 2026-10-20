@@ -28,7 +28,11 @@ import ConfirmDialog from "../../components/common/ConfirmDialog";
 import { getStorageUrl } from "../../utils/storageUrl";
 import FileViewerModal from "../../components/common/FileViewerModal";
 import { studentService } from "../../services/studentService";
-import { getDisplayName } from "../../utils/userDisplay";
+import { getDisplayName, plainText } from "../../utils/userDisplay";
+import { courseStage, isThinCourse, stageGuide } from "../../data/courseRules";
+import COURSE_INDEX from "../../data/courseIndex.json";
+import CourseOutline from "../../components/courses/CourseOutline";
+import { outlineBlocks } from "../../utils/outlineBlocks";
 import { useSeo } from "../../hooks/useSeo";
 import { catalogGuideFor } from "../../data/subjectGuides/catalog";
 import { loadGuide } from "../../data/subjectGuides/load";
@@ -64,6 +68,49 @@ const CourseSection = ({ id, icon, color, title, children }) => (
     {children}
   </section>
 );
+
+// Questions parents ask, answered from this course's own data only. A question
+// is left out when we don't hold the answer.
+const syllabusAnswer = ({ title, guide, stage, level }) => {
+  if (guide) {
+    const base = `It follows the Cambridge International ${guide.level} ${guide.subject} syllabus (${guide.code}).`;
+    if (stage === "AS") return `${base} This course is the AS Level year, the first half of the full A Level.`;
+    if (stage === "A2") return `${base} This course is the A2 year, the second half of the full A Level.`;
+    return base;
+  }
+  const grade = (title.match(/\b(?:grade|class)\s*(\d{1,2})\b/i) || title.match(/\b(\d{1,2})(?:st|nd|rd|th)?\s*grade\b/i) || [])[1];
+  const forGrade = grade ? ` for Grade ${grade}` : "";
+  if (/federal board/i.test(title)) return `It follows the Federal Board (FBISE) syllabus${forGrade}.`;
+  if (/oxford/i.test(title)) return `It follows the Oxford curriculum${forGrade}.`;
+  if (/cambridge/i.test(title)) return `It follows the Cambridge curriculum${forGrade}.`;
+  if (/igcse/i.test(title) || /igcse/i.test(level || "")) {
+    const code = (title.match(/\b(0\d{3})\b/) || [])[1];
+    if (code) return `It follows the Cambridge IGCSE syllabus ${code}.`;
+  }
+  return null;
+};
+
+const courseFaqs = ({ title, teacher, price, details, guide, stage, level }) => {
+  const when = [details.class_days, details.class_time].filter(Boolean).join(", ");
+  return [
+    teacher && {
+      q: `Who teaches ${title}?`,
+      a: `${teacher} teaches this course. Their tutor page shows their experience and the other courses they teach.`,
+    },
+    price && { q: `How much does ${title} cost?`, a: `The fee is ${price}.` },
+    {
+      q: "When are the classes?",
+      a: when
+        ? `Classes are on ${when}${details.class_length ? `, and each class lasts ${details.class_length}` : ""}.`
+        : "Class days and times are set for each group of students. Message us on WhatsApp and we will tell you the current timetable.",
+    },
+    syllabusAnswer({ title, guide, stage, level }) && { q: "Which syllabus does it follow?", a: syllabusAnswer({ title, guide, stage, level }) },
+    {
+      q: "How do I join?",
+      a: `Create a free account, open this page and press Enrol${price ? ", then pay the monthly fee" : ""}. If you have a question first, message us on WhatsApp.`,
+    },
+  ].filter(Boolean);
+};
 
 const CourseDetails = () => {
   const { courseId } = useParams();
@@ -178,13 +225,36 @@ const CourseDetails = () => {
     loadGuide(guideSlug).then((g) => { if (live) setLoadedGuide(g); });
     return () => { live = false; };
   }, [guideSlug]);
-  const guide = loadedGuide && loadedGuide.slug === guideSlug ? loadedGuide : null;
+  const fullGuide = loadedGuide && loadedGuide.slug === guideSlug ? loadedGuide : null;
+  // AS and A2 courses of one subject show their own year's topics and papers.
+  const stage = normalizedCourse ? courseStage(course) : null;
+  const guide = React.useMemo(() => stageGuide(fullGuide, stage), [fullGuide, stage]);
   const guideSecs = React.useMemo(
     () => guideSections(guide, { withVcs: false })
       .filter((x) => COURSE_GUIDE_SECTIONS.includes(x.id))
-      .map((x) => ({ ...x, n: null })),
-    [guide],
+      .map((x) => ({
+        ...x,
+        n: null,
+        title: stage && x.id === "topics" ? `${stage} topics` : stage && x.id === "exam" ? `${stage} exam papers` : x.title,
+      })),
+    [guide, stage],
   );
+
+  // Other published courses (list made at build time by generate-sitemap.js).
+  const thisId = Number(normalizedCourse?.id);
+  const indexRow = COURSE_INDEX.find((x) => x.id === thisId) || null;
+  const canonicalId = indexRow?.canonical || null;
+  const stageSibling = indexRow?.stage && indexRow.code
+    ? COURSE_INDEX.find((x) => x.code === indexRow.code && x.stage && x.stage !== indexRow.stage && !x.canonical) || null
+    : null;
+  const teacherOther = indexRow?.teacher
+    ? COURSE_INDEX.filter((x) => x.teacher === indexRow.teacher && x.id !== thisId && !x.canonical).slice(0, 6)
+    : [];
+  const related = indexRow
+    ? COURSE_INDEX.filter((x) => x.level === indexRow.level && x.id !== thisId && x.id !== canonicalId && !x.canonical && !teacherOther.some((t) => t.id === x.id)).slice(0, 8)
+    : [];
+  const outlineHtml = guideSlug ? null : normalizedCourse?.outline || null;
+  const outline = React.useMemo(() => outlineBlocks(outlineHtml), [outlineHtml]);
 
   // Side menu: follows the page down and highlights the section being read.
   const [active, setActive] = useState("course-about");
@@ -225,10 +295,24 @@ const CourseDetails = () => {
         .join(" ")
     : undefined;
 
+  const faqs = normalizedCourse ? courseFaqs({
+    title: normalizedCourse.title,
+    teacher: seoTeacher,
+    price: Number(normalizedCourse.price) > 0 ? `${formatCurrency(Number(normalizedCourse.price))} per month` : null,
+    details: seoDetails,
+    guide,
+    stage,
+    level: normalizedCourse.category,
+  }) : [];
+
   useSeo({
       title: normalizedCourse ? `${normalizedCourse.title} — Live Online Classes | Virtual City School` : undefined,
       description: metaDescription,
       url: courseUrl,
+      canonical: canonicalId ? `https://virtualcityschool.com/courses/${canonicalId}` : undefined,
+      // Under ~50 words of its own and no subject guide: kept out of Google
+      // until the admin writes a description or outline (courseRules.js).
+      noindex: Boolean(normalizedCourse) && normalizedCourse.status === "published" && isThinCourse(course, Boolean(guideSlug)),
       jsonLd: normalizedCourse
         ? [
             {
@@ -261,6 +345,12 @@ const CourseDetails = () => {
                 url: courseUrl,
               },
             },
+            ...(faqs.length
+              ? [{
+                  "@type": "FAQPage",
+                  mainEntity: faqs.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })),
+                }]
+              : []),
             {
               "@type": "BreadcrumbList",
               itemListElement: [
@@ -614,17 +704,31 @@ const CourseDetails = () => {
     { icon: "fa-video", label: "Format", value: "Live online classes" },
   ].filter((f) => f.value);
 
+  const feeText = Number(normalizedCourse.price) > 0 ? `${formatCurrency(Number(normalizedCourse.price), "USD")} per month` : null;
+  const feeFacts = [
+    feeText && { label: "Fee", value: feeText },
+    { label: "Format", value: "Live online classes" },
+    ...classFacts,
+  ].filter(Boolean);
+  const instructor = normalizedCourse.instructor;
+  const teacherExpertise = plainText(instructor?.expertise || "").replace(/\s+/g, " ").trim();
+  const firstGuidePapers = guide?.papers?.map((p) => String(p.name || "").split(" — ")[0]).filter(Boolean) || [];
+
   // The side menu: this course first, then the subject guide in four groups.
   const menu = [
     {
       label: "This course",
       items: [
         { id: "course-about", label: "About" },
-        classFacts.length > 0 && { id: "course-classes", label: "Classes" },
+        outline.length > 0 && { id: "course-topics", label: "Topics covered" },
+        { id: "course-classes", label: "Fees and classes" },
+        teacherName && { id: "course-teacher", label: "Your teacher" },
         details.learning_outcomes?.length > 0 && { id: "course-learn", label: "What you will learn" },
         details.who_for && { id: "course-who", label: "Who it is for" },
         { id: "course-includes", label: "What is included" },
         normalizedCourse.attachment && { id: "course-attachment", label: "Course material" },
+        faqs.length > 0 && { id: "course-faq", label: "Questions" },
+        (related.length > 0 || stageSibling) && { id: "course-more", label: "Related courses" },
       ].filter(Boolean),
     },
     { label: "The syllabus", items: guideSecs.map((x) => ({ id: x.id, label: x.title })) },
@@ -865,17 +969,84 @@ const CourseDetails = () => {
           <div ref={contentRef} id="course-content" className="min-w-0">
             <CourseSection id="course-about" icon="fa-info-circle" color="blue" title="About this course">
               <p className="text-slate-300 leading-relaxed whitespace-pre-wrap">{normalizedCourse.description}</p>
+              {guide && stage && (
+                <p className="mt-4 max-w-3xl text-base text-slate-200 leading-relaxed rounded-xl border-l-4 border-l-indigo-400 bg-indigo-500/10 px-4 py-3">
+                  This is the <strong className="text-indigo-200 font-semibold">{stage === "AS" ? "AS Level year" : "A2 year"}</strong> of Cambridge {guide.subject} {guide.code}
+                  {stage === "AS" ? ", the first half of the full A Level" : ", the second half of the full A Level"}
+                  {firstGuidePapers.length > 0 ? `: ${firstGuidePapers.join(", ")}` : ""}.
+                  {stageSibling && (
+                    <> {stage === "AS" ? "The next year is taught in " : "The AS Level year is taught in "}
+                      <Link to={`/courses/${stageSibling.id}`} className="text-indigo-300 font-semibold hover:text-white underline underline-offset-2">{stageSibling.title}</Link>.
+                    </>
+                  )}
+                </p>
+              )}
             </CourseSection>
 
-            {classFacts.length > 0 && (
-              <CourseSection id="course-classes" icon="fa-calendar-alt" color="purple" title="Classes">
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
-                  {classFacts.map((f) => (
-                    <div key={f.label} className="rounded-xl p-4 bg-white/[0.03] border border-white/10">
-                      <div className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-1">{f.label}</div>
-                      <div className="text-white font-semibold">{f.value}</div>
-                    </div>
-                  ))}
+            {outline.length > 0 && (
+              <CourseSection id="course-topics" icon="fa-list-alt" color="indigo" title="Topics covered">
+                <CourseOutline blocks={outline} />
+              </CourseSection>
+            )}
+
+            <CourseSection id="course-classes" icon="fa-calendar-alt" color="purple" title="Fees and classes">
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+                {feeFacts.map((f, i) => (
+                  <div key={f.label} className={`rounded-xl p-4 border border-white/10 border-t-4 bg-white/[0.03] ${["border-t-cyan-400", "border-t-emerald-400", "border-t-violet-400", "border-t-amber-400"][i % 4]}`}>
+                    <div className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-1">{f.label}</div>
+                    <div className="text-white font-semibold">{f.value}</div>
+                  </div>
+                ))}
+              </div>
+              {classFacts.length === 0 && (
+                <p className="mt-4 text-base text-slate-300 max-w-3xl">
+                  Class days and times are set for each group of students.{" "}
+                  <a href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(`Hi! What is the timetable for "${normalizedCourse.title}"?`)}`} target="_blank" rel="noopener noreferrer" className="text-emerald-300 font-semibold hover:text-white">Ask us on WhatsApp</a> for the current timetable.
+                </p>
+              )}
+            </CourseSection>
+
+            {teacherName && (
+              <CourseSection id="course-teacher" icon="fa-chalkboard-teacher" color="teal" title="Your teacher">
+                <div className="rounded-2xl border border-teal-400/25 bg-teal-500/10 p-5 flex flex-col sm:flex-row gap-5 sm:items-center">
+                  <div className="relative w-16 h-16 rounded-2xl overflow-hidden bg-slate-800 shrink-0 flex items-center justify-center text-2xl font-bold text-teal-200">
+                    {teacherName.charAt(0)}
+                    {instructor?.avatar && (
+                      <img
+                        src={sizedImage(getStorageUrl(instructor.avatar), 128)}
+                        onError={(e) => {
+                          // Resized copy failed → try the original; that failed too → show the initial.
+                          const img = e.currentTarget;
+                          if (!img.dataset.tried) {
+                            img.dataset.tried = "1";
+                            const before = img.src;
+                            fallbackToOriginal(getStorageUrl(instructor.avatar))(e);
+                            if (img.src !== before) return;
+                          }
+                          img.style.display = "none";
+                        }}
+                        alt={teacherName} width="64" height="64" loading="lazy"
+                        className="absolute inset-0 w-full h-full object-cover"
+                      />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-lg font-bold text-white">{teacherName}</div>
+                    {teacherExpertise && <p className="text-base text-slate-200 mt-1">Teaches {teacherExpertise}</p>}
+                    {teacherOther.length > 0 && (
+                      <p className="text-sm text-slate-300 mt-2">
+                        Also teaches:{" "}
+                        {teacherOther.map((x, i) => (
+                          <React.Fragment key={x.id}>{i > 0 && ", "}<Link to={`/courses/${x.id}`} className="text-teal-200 hover:text-white">{x.title}</Link></React.Fragment>
+                        ))}
+                      </p>
+                    )}
+                  </div>
+                  {teacherId && (
+                    <Link to={`/teachers/${teacherId}`} className="shrink-0 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-teal-400/40 text-teal-100 text-sm font-semibold hover:bg-teal-600 hover:text-white hover:border-transparent transition">
+                      Tutor profile <i className="fas fa-arrow-right text-xs" />
+                    </Link>
+                  )}
                 </div>
               </CourseSection>
             )}
@@ -912,6 +1083,31 @@ const CourseDetails = () => {
                 >
                   <i className="fas fa-eye text-indigo-400"></i> Preview course material
                 </button>
+              </CourseSection>
+            )}
+
+            {faqs.length > 0 && (
+              <CourseSection id="course-faq" icon="fa-question-circle" color="amber" title="Questions parents ask">
+                <div className="grid md:grid-cols-2 gap-3">
+                  {faqs.map((f) => (
+                    <div key={f.q} className="rounded-xl p-5 bg-amber-500/[0.06] border border-amber-400/20">
+                      <h3 className="text-base font-bold text-amber-100 mb-1.5">{f.q}</h3>
+                      <p className="text-base text-slate-200 leading-relaxed">{f.a}</p>
+                    </div>
+                  ))}
+                </div>
+              </CourseSection>
+            )}
+
+            {(related.length > 0 || stageSibling) && (
+              <CourseSection id="course-more" icon="fa-th-large" color="blue" title={`More ${normalizedCourse.category} courses`}>
+                <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-3">
+                  {[...(stageSibling && !related.some((r) => r.id === stageSibling.id) ? [stageSibling] : []), ...related].slice(0, 8).map((x) => (
+                    <Link key={x.id} to={`/courses/${x.id}`} className="rounded-xl p-4 bg-white/[0.03] border border-white/10 hover:border-indigo-400/50 hover:bg-white/[0.06] transition text-base font-semibold text-slate-100 hover:text-white">
+                      {x.title}
+                    </Link>
+                  ))}
+                </div>
               </CourseSection>
             )}
 

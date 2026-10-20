@@ -1,4 +1,18 @@
 import axiosInstance from "../utils/axiosInstance";
+import { personName, plainText } from "../utils/userDisplay";
+
+// Public tutor data, tidied once for every page that shows it: names without
+// underscores or odd capitals, and plain letters instead of decorative ones.
+const tidyTeacher = (t) =>
+  t && typeof t === "object"
+    ? {
+        ...t,
+        teacher_name: personName(t.teacher_name),
+        ...(typeof t.expertise === "string" ? { expertise: plainText(t.expertise) } : {}),
+        ...(typeof t.bio === "string" ? { bio: plainText(t.bio) } : {}),
+        ...(typeof t.qualification === "string" ? { qualification: plainText(t.qualification) } : {}),
+      }
+    : t;
 
 const getTeachers = async (params = {}) => {
   const query = {};
@@ -15,7 +29,10 @@ const getTeachers = async (params = {}) => {
     params: query,
   });
 
-  return response.data;
+  const data = response.data;
+  if (Array.isArray(data)) return data.map(tidyTeacher);
+  if (Array.isArray(data?.results)) return { ...data, results: data.results.map(tidyTeacher) };
+  return data;
 };
 
 const getTeacherById = async (id) => {
@@ -25,7 +42,7 @@ const getTeacherById = async (id) => {
   const response = await axiosInstance.get(
     `/courses/teachers/${encodeURIComponent(id.trim())}`,
   );
-  return response.data;
+  return tidyTeacher(response.data);
 };
 
 const getTeacherDashboard = async () => {

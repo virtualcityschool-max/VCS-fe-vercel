@@ -3,6 +3,8 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { LAST_VERIFIED as EXAM_DATES_LAST_VERIFIED } from "../src/data/examDates.js";
 import { pageDates } from "./page-dates.mjs";
+import { buildCourseIndex, isThinCourse } from "../src/data/courseRules.js";
+import { catalogGuideFor } from "../src/data/subjectGuides/catalog.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -105,11 +107,24 @@ async function main() {
     },
   );
 
+  // Thin courses (noindex) and second class batches (canonical → the main
+  // batch) stay out of the sitemap: src/data/courseRules.js.
+  const courseRows = await fetchEntries("courses", `${API_BASE_URL}/courses/`, { filter: () => true, toEntry: (c) => c });
+  const courseIndex = buildCourseIndex(courseRows);
+  const batchCopy = new Set(courseIndex.filter((x) => x.canonical).map((x) => x.id));
+  if (courseIndex.length) {
+    // The course page reads this list for its links (same level, AS ↔ A2,
+    // the teacher's other courses) and the batch canonical. Kept in git so a
+    // local build without the API still works; refreshed on every deploy.
+    const slim = courseIndex.map((x) => { const row = { ...x }; delete row.words; return row; });
+    writeFileSync(join(__dirname, "..", "src", "data", "courseIndex.json"), JSON.stringify(slim, null, 0).replace(/\},\{/g, "},\n{") + "\n");
+  }
+
   const courseEntries = await fetchEntries(
     "courses",
     `${API_BASE_URL}/courses/`,
     {
-      filter: (c) => c.id != null,
+      filter: (c) => c.id != null && !batchCopy.has(c.id) && !isThinCourse(c, Boolean(catalogGuideFor(c))),
       // Newer of: the course's last edit (created_at as fallback) and the
       // last change to the course page layout (scripts/page-dates.mjs).
       toEntry: (c) => ({ loc: `/courses/${c.id}`, changefreq: "weekly", lastmod: later(day(c.updated_at || c.created_at), pageDate("/courses/:id")) }),
@@ -120,7 +135,8 @@ async function main() {
     "teachers",
     `${API_BASE_URL}/courses/teachers/`,
     {
-      filter: (t) => t.id != null,
+      // Tutors with no published course are noindex (TeacherProfile.jsx).
+      filter: (t) => t.id != null && (t.courses || []).length > 0,
       // updated_at = newest of: joined, last profile edit, last edit of a
       // subject shown on the tutor page (worked out by the backend), or the
       // last change to the tutor page layout, whichever is newer.

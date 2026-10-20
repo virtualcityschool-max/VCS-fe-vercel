@@ -12,12 +12,12 @@
     "date": "2026-05-14"
   },
   "/teachers/:id": {
-    "hash": "f6bb4d933a9c9495",
-    "date": "2026-10-18"
+    "hash": "bba988c65a7ce047",
+    "date": "2026-10-20"
   },
   "/courses/:id": {
-    "hash": "46003b75634575af",
-    "date": "2026-10-18"
+    "hash": "1a9d58e39cd211b0",
+    "date": "2026-10-20"
   },
   "/subjects/mathematics-4024": {
     "hash": "67a3cb16fd5992d4",

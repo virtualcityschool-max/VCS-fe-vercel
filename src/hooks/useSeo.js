@@ -17,6 +17,11 @@ import { useEffect } from "react";
  *     url: window.location.href,
  *     type: "article",
  *   });
+ *
+ * `noindex: true` adds <meta name="robots" content="noindex, follow"> (thin or
+ * unavailable pages: Google leaves them out of search but follows their links).
+ * `canonical` overrides the canonical URL (defaults to `url`), e.g. a second
+ * class batch pointing at the main page for that course.
  */
 const SITE_NAME = "Virtual City School";
 const DEFAULT_TITLE = "VirtualCitySchool | Advanced Learning Ecosystem";
@@ -98,6 +103,8 @@ export const useSeo = ({
   type = "website",
     jsonLd,
     hreflangAlternates,
+  noindex = false,
+  canonical,
 } = {}) => {
   useEffect(() => {
     if (typeof document === "undefined") return;
@@ -128,8 +135,11 @@ export const useSeo = ({
       track(setMeta("name", "twitter:image", image));
     }
     if (url) {
-      track(setMeta("property", "og:url", url));
-      track(setLink("canonical", url));
+      track(setMeta("property", "og:url", canonical || url));
+      track(setLink("canonical", canonical || url));
+    }
+    if (noindex) {
+      track(setMeta("name", "robots", "noindex, follow"));
     }
   if (jsonLd) {
         track(setJsonLd(jsonLd));
@@ -154,7 +164,7 @@ export const useSeo = ({
       });
       hreflangHandle?.els.forEach((el) => el.remove());
     };
-  }, [title, description, image, url, type, jsonLd, hreflangAlternates]);
+  }, [title, description, image, url, type, jsonLd, hreflangAlternates, noindex, canonical]);
 };
 
 export default useSeo;
