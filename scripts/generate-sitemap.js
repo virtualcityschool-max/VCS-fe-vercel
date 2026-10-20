@@ -2,74 +2,65 @@ import { writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { LAST_VERIFIED as EXAM_DATES_LAST_VERIFIED } from "../src/data/examDates.js";
+import { pageDates } from "./page-dates.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const SITE_URL = "https://virtualcityschool.com";
 const API_BASE_URL = process.env.VITE_API_BASE_URL || "https://virtualschool.grayphite.com/api/v1";
 
-// Bump this when the country landing page content is meaningfully edited -
-// it's the lastmod value Google uses to gauge freshness for these pages,
-// since (unlike blogs/courses) they have no API-side updated_at to read.
-const COUNTRY_PAGES_LAST_UPDATED = "2026-08-30";
-
-// Bahrain and Oman pages were added separately from the original four -
-// tracked with their own lastmod so adding them doesn't imply the
-// unchanged Saudi/UAE/Qatar/Kuwait pages were also edited on this date.
-const NEW_COUNTRY_PAGES_ADDED = "2026-09-16";
-
-// Today's build date, in UTC. Used only for pages whose content is a live
-// aggregate of everything else (the homepage's course list, /courses,
-// /teachers, /blogs) - it's honest to say those changed "today" because the
-// build did just regenerate them from current data. NOT used for /about,
-// /privacy-policy, /terms below: those have no genuine tracked edit date,
-// and stamping every deploy's date on a page that didn't actually change
-// is exactly the kind of inaccurate lastmod that makes Google start
-// ignoring a sitemap's lastmod signal site-wide - better to omit it than
-// fake it.
-const BUILD_DATE = new Date().toISOString().slice(0, 10);
+// Last-changed dates of pages whose content lives in this repo (guides,
+// countries, About, Privacy, Terms): see scripts/page-dates.mjs.
+const { dates: PAGE_DATES, changed: CHANGED_PAGES } = await pageDates();
+if (CHANGED_PAGES.length) {
+  console.warn(`page-dates.json is out of date for ${CHANGED_PAGES.join(", ")} - using today's date; run npm run build and commit scripts/page-dates.json`);
+}
+const pageDate = (loc) => {
+  if (!PAGE_DATES[loc]) throw new Error(`No page date for ${loc} (add it to scripts/page-dates.mjs)`);
+  return PAGE_DATES[loc];
+};
 
 const STATIC_PAGES = [
-  { loc: "/", changefreq: "weekly", priority: "1.0", lastmod: BUILD_DATE },
-  { loc: "/about", changefreq: "monthly" },
-  { loc: "/courses", changefreq: "weekly", lastmod: BUILD_DATE },
-  { loc: "/teachers", changefreq: "weekly", lastmod: BUILD_DATE },
-  { loc: "/blogs", changefreq: "daily", lastmod: BUILD_DATE },
-  { loc: "/privacy-policy", changefreq: "yearly" },
-  { loc: "/terms", changefreq: "yearly" },
-  { loc: "/online-school", changefreq: "monthly", lastmod: COUNTRY_PAGES_LAST_UPDATED },
+  { loc: "/", changefreq: "weekly", priority: "1.0" }, // lastmod: newest of everything, set in main()
+  { loc: "/about", changefreq: "monthly", lastmod: pageDate("/about") },
+  { loc: "/courses", changefreq: "weekly" }, // lastmod: newest course, set in main()
+  { loc: "/teachers", changefreq: "weekly" }, // lastmod: newest tutor page, set in main()
+  { loc: "/blogs", changefreq: "daily" }, // lastmod: newest post, set in main()
+  { loc: "/privacy-policy", changefreq: "yearly", lastmod: pageDate("/privacy-policy") },
+  { loc: "/terms", changefreq: "yearly", lastmod: pageDate("/terms") },
+  { loc: "/online-school", changefreq: "monthly", lastmod: pageDate("/online-school") },
   { loc: "/exam-dates", changefreq: "weekly", lastmod: EXAM_DATES_LAST_VERIFIED },
   // Subject guides — keep in step with src/data/subjectGuides and scripts/prerender.js
-  { loc: "/subjects", changefreq: "monthly", lastmod: "2026-10-18" },
-  { loc: "/subjects/mathematics-4024", changefreq: "monthly", lastmod: "2026-10-18" },
-  { loc: "/subjects/additional-mathematics-4037", changefreq: "monthly", lastmod: "2026-10-18" },
-  { loc: "/subjects/physics-5054", changefreq: "monthly", lastmod: "2026-10-18" },
-  { loc: "/subjects/chemistry-5070", changefreq: "monthly", lastmod: "2026-10-18" },
-  { loc: "/subjects/biology-5090", changefreq: "monthly", lastmod: "2026-10-18" },
-  { loc: "/subjects/mathematics-9709", changefreq: "monthly", lastmod: "2026-10-18" },
-  { loc: "/subjects/physics-9702", changefreq: "monthly", lastmod: "2026-10-18" },
-  { loc: "/subjects/chemistry-9701", changefreq: "monthly", lastmod: "2026-10-18" },
-  { loc: "/subjects/biology-9700", changefreq: "monthly", lastmod: "2026-10-18" },
-  { loc: "/subjects/english-1123", changefreq: "monthly", lastmod: "2026-10-18" },
-  { loc: "/subjects/english-9093", changefreq: "monthly", lastmod: "2026-10-18" },
-  { loc: "/subjects/computer-science-2210", changefreq: "monthly", lastmod: "2026-10-18" },
-  { loc: "/subjects/computer-science-9618", changefreq: "monthly", lastmod: "2026-10-18" },
-  { loc: "/subjects/islamiyat-2058", changefreq: "monthly", lastmod: "2026-10-18" },
-  { loc: "/subjects/pakistan-studies-2059", changefreq: "monthly", lastmod: "2026-10-18" },
-  { loc: "/subjects/urdu-3248", changefreq: "monthly", lastmod: "2026-10-18" },
-  { loc: "/subjects/urdu-3247", changefreq: "monthly", lastmod: "2026-10-18" },
-  { loc: "/subjects/urdu-9866", changefreq: "monthly", lastmod: "2026-10-18" },
-  { loc: "/online-school/saudi-arabia", changefreq: "monthly", lastmod: COUNTRY_PAGES_LAST_UPDATED },
-  { loc: "/online-school/uae", changefreq: "monthly", lastmod: COUNTRY_PAGES_LAST_UPDATED },
-  { loc: "/online-school/qatar", changefreq: "monthly", lastmod: COUNTRY_PAGES_LAST_UPDATED },
-  { loc: "/online-school/kuwait", changefreq: "monthly", lastmod: COUNTRY_PAGES_LAST_UPDATED },
-  { loc: "/online-school/bahrain", changefreq: "monthly", lastmod: NEW_COUNTRY_PAGES_ADDED },
-  { loc: "/online-school/oman", changefreq: "monthly", lastmod: NEW_COUNTRY_PAGES_ADDED },
-  { loc: "/online-school/uk", changefreq: "monthly", lastmod: NEW_COUNTRY_PAGES_ADDED },
-  { loc: "/online-school/us", changefreq: "monthly", lastmod: NEW_COUNTRY_PAGES_ADDED },
-  { loc: "/online-school/canada", changefreq: "monthly", lastmod: NEW_COUNTRY_PAGES_ADDED },
-  { loc: "/online-school/australia", changefreq: "monthly", lastmod: NEW_COUNTRY_PAGES_ADDED },
-  { loc: "/online-school/pakistan", changefreq: "monthly", lastmod: NEW_COUNTRY_PAGES_ADDED },
+  { loc: "/subjects", changefreq: "monthly", lastmod: pageDate("/subjects") },
+  { loc: "/subjects/mathematics-4024", changefreq: "monthly", lastmod: pageDate("/subjects/mathematics-4024") },
+  { loc: "/subjects/additional-mathematics-4037", changefreq: "monthly", lastmod: pageDate("/subjects/additional-mathematics-4037") },
+  { loc: "/subjects/physics-5054", changefreq: "monthly", lastmod: pageDate("/subjects/physics-5054") },
+  { loc: "/subjects/chemistry-5070", changefreq: "monthly", lastmod: pageDate("/subjects/chemistry-5070") },
+  { loc: "/subjects/biology-5090", changefreq: "monthly", lastmod: pageDate("/subjects/biology-5090") },
+  { loc: "/subjects/mathematics-9709", changefreq: "monthly", lastmod: pageDate("/subjects/mathematics-9709") },
+  { loc: "/subjects/physics-9702", changefreq: "monthly", lastmod: pageDate("/subjects/physics-9702") },
+  { loc: "/subjects/chemistry-9701", changefreq: "monthly", lastmod: pageDate("/subjects/chemistry-9701") },
+  { loc: "/subjects/biology-9700", changefreq: "monthly", lastmod: pageDate("/subjects/biology-9700") },
+  { loc: "/subjects/english-1123", changefreq: "monthly", lastmod: pageDate("/subjects/english-1123") },
+  { loc: "/subjects/english-9093", changefreq: "monthly", lastmod: pageDate("/subjects/english-9093") },
+  { loc: "/subjects/computer-science-2210", changefreq: "monthly", lastmod: pageDate("/subjects/computer-science-2210") },
+  { loc: "/subjects/computer-science-9618", changefreq: "monthly", lastmod: pageDate("/subjects/computer-science-9618") },
+  { loc: "/subjects/islamiyat-2058", changefreq: "monthly", lastmod: pageDate("/subjects/islamiyat-2058") },
+  { loc: "/subjects/pakistan-studies-2059", changefreq: "monthly", lastmod: pageDate("/subjects/pakistan-studies-2059") },
+  { loc: "/subjects/urdu-3248", changefreq: "monthly", lastmod: pageDate("/subjects/urdu-3248") },
+  { loc: "/subjects/urdu-3247", changefreq: "monthly", lastmod: pageDate("/subjects/urdu-3247") },
+  { loc: "/subjects/urdu-9866", changefreq: "monthly", lastmod: pageDate("/subjects/urdu-9866") },
+  { loc: "/online-school/saudi-arabia", changefreq: "monthly", lastmod: pageDate("/online-school/saudi-arabia") },
+  { loc: "/online-school/uae", changefreq: "monthly", lastmod: pageDate("/online-school/uae") },
+  { loc: "/online-school/qatar", changefreq: "monthly", lastmod: pageDate("/online-school/qatar") },
+  { loc: "/online-school/kuwait", changefreq: "monthly", lastmod: pageDate("/online-school/kuwait") },
+  { loc: "/online-school/bahrain", changefreq: "monthly", lastmod: pageDate("/online-school/bahrain") },
+  { loc: "/online-school/oman", changefreq: "monthly", lastmod: pageDate("/online-school/oman") },
+  { loc: "/online-school/uk", changefreq: "monthly", lastmod: pageDate("/online-school/uk") },
+  { loc: "/online-school/us", changefreq: "monthly", lastmod: pageDate("/online-school/us") },
+  { loc: "/online-school/canada", changefreq: "monthly", lastmod: pageDate("/online-school/canada") },
+  { loc: "/online-school/australia", changefreq: "monthly", lastmod: pageDate("/online-school/australia") },
+  { loc: "/online-school/pakistan", changefreq: "monthly", lastmod: pageDate("/online-school/pakistan") },
 ];
 
 function urlEntry({ loc, changefreq, priority, lastmod }) {
@@ -87,16 +78,21 @@ async function fetchEntries(label, url, mapper) {
     if (!res.ok) throw new Error(`${label} API returned ${res.status}`);
     const data = await res.json();
     const items = Array.isArray(data) ? data : data.results || [];
-    return items.filter(mapper.filter).map(mapper.toEntry).map(urlEntry);
+    return items.filter(mapper.filter).map(mapper.toEntry);
   } catch (err) {
     console.error(`Failed to fetch ${label} for sitemap, skipping:`, err.message);
     return [];
   }
 }
 
-async function main() {
-  const staticEntries = STATIC_PAGES.map(urlEntry);
+const day = (iso) => (iso || "").slice(0, 10) || undefined;
+const newest = (entries) => entries.map((e) => e.lastmod).filter(Boolean).sort().pop();
+const setLastmod = (loc, lastmod) => {
+  const page = STATIC_PAGES.find((p) => p.loc === loc);
+  if (lastmod) page.lastmod = lastmod;
+};
 
+async function main() {
   const blogEntries = await fetchEntries(
     "blogs",
     `${API_BASE_URL}/blogs/?ordering=-published_at`,
@@ -104,11 +100,7 @@ async function main() {
       filter: (b) => b.status === "published" && b.slug,
       // updated_at is the real "last modified" signal when present; fall
       // back to published_at for posts that have never been edited since.
-      toEntry: (b) => ({
-        loc: `/blogs/${b.slug}`,
-        changefreq: "monthly",
-        lastmod: (b.updated_at || b.published_at || "").slice(0, 10) || undefined,
-      }),
+      toEntry: (b) => ({ loc: `/blogs/${b.slug}`, changefreq: "monthly", lastmod: day(b.updated_at || b.published_at) }),
     },
   );
 
@@ -117,15 +109,8 @@ async function main() {
     `${API_BASE_URL}/courses/`,
     {
       filter: (c) => c.id != null,
-      // The courses API only exposes created_at, not updated_at, so this is
-      // "when the course was added," not "when it last changed" - the best
-      // real signal available today. Worth asking the backend to add
-      // updated_at if course details get edited after creation.
-      toEntry: (c) => ({
-        loc: `/courses/${c.id}`,
-        changefreq: "weekly",
-        lastmod: (c.created_at || "").slice(0, 10) || undefined,
-      }),
+      // updated_at = last time the course was edited (created_at as fallback).
+      toEntry: (c) => ({ loc: `/courses/${c.id}`, changefreq: "weekly", lastmod: day(c.updated_at || c.created_at) }),
     },
   );
 
@@ -134,15 +119,21 @@ async function main() {
     `${API_BASE_URL}/courses/teachers/`,
     {
       filter: (t) => t.id != null,
-      // No date field at all comes back from this endpoint (checked live:
-      // id, teacher_name, avatar, experience, expertise, courses, rating -
-      // nothing else), so there's no honest lastmod to set here. Flagging
-      // for the backend team rather than fabricating one.
-      toEntry: (t) => ({ loc: `/teachers/${t.id}`, changefreq: "monthly" }),
+      // updated_at = newest of: joined, last profile edit, last edit of a
+      // subject shown on the tutor page (worked out by the backend).
+      toEntry: (t) => ({ loc: `/teachers/${t.id}`, changefreq: "monthly", lastmod: day(t.updated_at) }),
     },
   );
 
-  const allEntries = [...staticEntries, ...courseEntries, ...teacherEntries, ...blogEntries];
+  // List pages changed when the newest thing on them did; the home page
+  // shows a bit of everything.
+  setLastmod("/courses", newest(courseEntries));
+  setLastmod("/teachers", newest(teacherEntries));
+  setLastmod("/blogs", newest(blogEntries));
+  setLastmod("/", newest([...STATIC_PAGES.filter((p) => p.loc !== "/"), ...courseEntries, ...teacherEntries, ...blogEntries]));
+
+  const staticEntries = STATIC_PAGES.map(urlEntry);
+  const allEntries = [...staticEntries, ...[...courseEntries, ...teacherEntries, ...blogEntries].map(urlEntry)];
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
