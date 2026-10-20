@@ -1,5 +1,6 @@
 // When each page whose content lives in this repo last changed — the sitemap's
-// <lastmod> for subject guides, country pages, About, Privacy and Terms.
+// <lastmod> for subject guides, country pages, About, Privacy and Terms, and
+// the shared layout of tutor and course pages.
 //
 // scripts/page-dates.json stores a fingerprint of each page's content and the
 // date it last changed. `npm run build` runs this file: if a page's content is
@@ -23,6 +24,11 @@ async function pageContents() {
     "/about": file("src/pages/public/AboutPage.jsx"),
     "/privacy-policy": file("src/pages/public/PrivacyPolicy.jsx"),
     "/terms": file("src/pages/public/TermsAndConditions.jsx"),
+    // The layout every tutor / course page shares: when it changes, every
+    // one of those pages changed (the sitemap takes the newer of this and
+    // the backend's updated_at for each page).
+    "/teachers/:id": file("src/pages/public/TeacherProfile.jsx"),
+    "/courses/:id": file("src/pages/public/CourseDetails.jsx"),
   };
   const { GUIDE_CATALOG } = await import(pathToFileURL(join(ROOT, "src/data/subjectGuides/catalog.js")).href);
   for (const g of GUIDE_CATALOG) pages[`/subjects/${g.slug}`] = file(`src/data/subjectGuides/${g.slug}.js`);

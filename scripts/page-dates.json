@@ -11,6 +11,14 @@
     "hash": "ab2fad34c88d1cb6",
     "date": "2026-05-14"
   },
+  "/teachers/:id": {
+    "hash": "f6bb4d933a9c9495",
+    "date": "2026-10-18"
+  },
+  "/courses/:id": {
+    "hash": "46003b75634575af",
+    "date": "2026-10-18"
+  },
   "/subjects/mathematics-4024": {
     "hash": "67a3cb16fd5992d4",
     "date": "2026-10-18"

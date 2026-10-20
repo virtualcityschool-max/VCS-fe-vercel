@@ -86,6 +86,7 @@ async function fetchEntries(label, url, mapper) {
 }
 
 const day = (iso) => (iso || "").slice(0, 10) || undefined;
+const later = (a, b) => [a, b].filter(Boolean).sort().pop();
 const newest = (entries) => entries.map((e) => e.lastmod).filter(Boolean).sort().pop();
 const setLastmod = (loc, lastmod) => {
   const page = STATIC_PAGES.find((p) => p.loc === loc);
@@ -109,8 +110,9 @@ async function main() {
     `${API_BASE_URL}/courses/`,
     {
       filter: (c) => c.id != null,
-      // updated_at = last time the course was edited (created_at as fallback).
-      toEntry: (c) => ({ loc: `/courses/${c.id}`, changefreq: "weekly", lastmod: day(c.updated_at || c.created_at) }),
+      // Newer of: the course's last edit (created_at as fallback) and the
+      // last change to the course page layout (scripts/page-dates.mjs).
+      toEntry: (c) => ({ loc: `/courses/${c.id}`, changefreq: "weekly", lastmod: later(day(c.updated_at || c.created_at), pageDate("/courses/:id")) }),
     },
   );
 
@@ -120,8 +122,9 @@ async function main() {
     {
       filter: (t) => t.id != null,
       // updated_at = newest of: joined, last profile edit, last edit of a
-      // subject shown on the tutor page (worked out by the backend).
-      toEntry: (t) => ({ loc: `/teachers/${t.id}`, changefreq: "monthly", lastmod: day(t.updated_at) }),
+      // subject shown on the tutor page (worked out by the backend), or the
+      // last change to the tutor page layout, whichever is newer.
+      toEntry: (t) => ({ loc: `/teachers/${t.id}`, changefreq: "monthly", lastmod: later(day(t.updated_at), pageDate("/teachers/:id")) }),
     },
   );
 
