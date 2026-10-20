@@ -113,6 +113,11 @@ export const authService = {
       if (userData.referral_code) {
         requestData.referral_code = userData.referral_code;
       }
+      // Contact details the backend requires (require_contact_fields): own
+      // WhatsApp for everyone; country and guardian for students.
+      for (const key of ["phone", "country", "guardian_name", "guardian_relationship", "guardian_phone"]) {
+        if (userData[key]) requestData[key] = userData[key];
+      }
       // Guardian signup: the children the guardian is asking to be linked to.
       // The backend verifies each one exists before the request reaches admin.
       if (userData.student_roll_nos?.length) {
