@@ -5,6 +5,7 @@ import {
   Globe2, Lightbulb, Clock, FileText,
 } from "lucide-react";
 import { ACCENT, TONES } from "./guideSections";
+import { COUNTRY_LIST } from "../../data/countryList";
 
 // The body of a subject guide (see src/data/subjectGuides), shared by the
 // guide page and the course page. Visual by design (DESIGN.md): coloured tiles,
@@ -483,6 +484,20 @@ const GuideBody = ({ g, sections, courses = [] }) => {
           <div className="flex flex-wrap gap-3">
             <Link to="/courses" className="px-5 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-base font-bold text-white">{courses.length ? "All courses" : `Explore ${g.subject} classes`}</Link>
             <Link to="/exam-dates" className="px-5 py-3 rounded-xl border border-white/20 hover:border-white/40 text-base font-semibold text-slate-100">Cambridge exam dates</Link>
+          </div>
+        </div>
+        <div className="mt-6 rounded-3xl border border-cyan-400/20 bg-cyan-500/[0.06] p-6 md:p-8">
+          <h3 className="flex items-center gap-2 text-xl font-bold text-white mb-2"><Globe2 className="w-5 h-5 text-cyan-300" /> Taking {g.subject} where you live</h3>
+          <p className="text-base text-slate-200 mb-5 max-w-4xl leading-relaxed">
+            Families in 13 countries study {g.subject} {g.code} with us live online, at class times that suit their time zone. See how it works in your country:
+          </p>
+          <div className="flex flex-wrap gap-2.5">
+            {COUNTRY_LIST.map((c) => (
+              <Link key={c.slug} to={`/online-school/${c.slug}`} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 hover:border-cyan-400/50 hover:bg-cyan-500/10 text-sm font-semibold text-slate-200 hover:text-white transition">
+                <img src={`/assets/flags/${c.flagCode}.svg`} alt="" width="16" height="12" loading="lazy" className="w-4 h-3 rounded-sm object-cover" />{c.name}
+              </Link>
+            ))}
+            <Link to="/online-school" className="inline-flex items-center gap-1 px-4 py-2 rounded-full text-sm font-semibold text-cyan-200 hover:text-white">All countries <ChevronRight className="w-4 h-4" /></Link>
           </div>
         </div>
       </Section>

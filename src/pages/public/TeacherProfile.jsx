@@ -15,6 +15,7 @@ import { useActiveSection, useFollowingBox } from "../../hooks/useFollowingBox";
 import { catalogGuideFor } from "../../data/subjectGuides/catalog";
 import { sizedImage, fallbackToOriginal } from "../../utils/imageCdn";
 import { useWhatsappNumber } from "../../hooks/useWhatsappNumber";
+import { isNotFound } from "../../utils/isNotFound";
 
 const HIRE_INTENT_KEY = "vcs_hire_intent";
 
@@ -366,8 +367,10 @@ const TeacherProfile = () => {
     return { courses, subjects, levels, guideLinks };
   })();
 
+  const notFound = isNotFound(error);
+
   useSeo({
-      title: teacherDetails
+      title: notFound ? "Tutor not found | Virtual City School" : teacherDetails
         ? `${teacherDetails.teacher_name || "Tutor"}${teach.subjects.length ? ` — ${teach.subjects.slice(0, 3).join(", ")} Tutor` : " — Cambridge Tutor"} | Virtual City School`
         : undefined,
       description: teacherDetails
@@ -379,9 +382,10 @@ const TeacherProfile = () => {
               ].filter(Boolean).join(" ")
             : undefined,
       url: typeof window !== "undefined" ? window.location.href : undefined,
-      // Tutors without a class yet (display-only profiles) and unavailable
-      // profiles stay out of Google until they teach a course.
-      noindex: Boolean(error) || (Boolean(teacherDetails) && teach.courses.length === 0),
+      // Tutors without a class yet (display-only profiles) and tutors that
+      // don't exist or were removed (404) stay out of Google. Not on other
+      // errors: a temporary failure must not drop a real tutor page.
+      noindex: notFound || (Boolean(teacherDetails) && teach.courses.length === 0),
   });
   
   if (loading && !teacherDetails) {
@@ -465,11 +469,22 @@ const TeacherProfile = () => {
           <div className="w-14 h-14 rounded-2xl bg-red-500/10 text-red-400 flex items-center justify-center mx-auto mb-4 text-2xl">
             <i className="fas fa-exclamation-triangle"></i>
           </div>
-          <h2 className="text-xl font-semibold mb-2">This tutor's profile isn't available</h2>
           {/* `error` can be an object from the API; never render it directly. */}
-          <p className="text-slate-300 text-base mb-6">
-            The tutor may no longer be teaching with us. Browse our current tutors instead.
-          </p>
+          {notFound ? (
+            <>
+              <h1 className="text-xl font-semibold mb-2">This tutor's profile isn't available</h1>
+              <p className="text-slate-300 text-base mb-6">
+                The tutor may no longer be teaching with us. Browse our current tutors instead.
+              </p>
+            </>
+          ) : (
+            <>
+              <h1 className="text-xl font-semibold mb-2">We couldn't load this tutor's profile</h1>
+              <p className="text-slate-300 text-base mb-6">
+                Please check your connection and refresh the page in a moment.
+              </p>
+            </>
+          )}
           <BackButton
             to="/teachers"
             label="Back to Tutors"

@@ -30,10 +30,14 @@ async function pageContents() {
     "/teachers/:id": file("src/pages/public/TeacherProfile.jsx"),
     "/courses/:id": file("src/pages/public/CourseDetails.jsx"),
   };
+  // A guide or country page is its own content plus the layout every page of
+  // that kind shares (so a new section on all guides dates all of them).
+  const guideLayout = ["src/pages/public/SubjectGuidePage.jsx", "src/components/subjects/GuideBody.jsx"].map(file).join("");
+  const countryLayout = ["src/pages/public/CountryLandingPage.jsx", "src/components/public/CountrySubjects.jsx"].map(file).join("");
   const { GUIDE_CATALOG } = await import(pathToFileURL(join(ROOT, "src/data/subjectGuides/catalog.js")).href);
-  for (const g of GUIDE_CATALOG) pages[`/subjects/${g.slug}`] = file(`src/data/subjectGuides/${g.slug}.js`);
+  for (const g of GUIDE_CATALOG) pages[`/subjects/${g.slug}`] = file(`src/data/subjectGuides/${g.slug}.js`) + guideLayout;
   const { COUNTRY_PAGES } = await import(pathToFileURL(join(ROOT, "src/data/countryLandingPages.js")).href);
-  for (const c of COUNTRY_PAGES) pages[`/online-school/${c.slug}`] = JSON.stringify(c);
+  for (const c of COUNTRY_PAGES) pages[`/online-school/${c.slug}`] = JSON.stringify(c) + countryLayout;
   return pages;
 }
 

@@ -1,6 +1,7 @@
 // Fails the build if src/data/subjectGuides/catalog.js (the small list used by
 // the menu and footer) doesn't match the guides in src/data/subjectGuides/index.js,
-// or if scripts/prerender.js / generate-sitemap.js miss a guide.
+// or if scripts/prerender.js / generate-sitemap.js miss a guide, or if
+// src/data/countryList.js doesn't match the country pages.
 // `--print` writes a fresh catalog.js body to stdout instead.
 import { readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
@@ -30,6 +31,12 @@ for (const f of ["scripts/prerender.js", "scripts/generate-sitemap.js"]) {
   const src = readFileSync(join(ROOT, f), "utf8");
   for (const r of rows) if (!src.includes(`${r.slug}"`)) problems.push(`${f} is missing ${r.slug}`);
 }
+// The light country list (guides, home page) must match the country pages.
+const { COUNTRY_PAGES } = await import(pathToFileURL(join(ROOT, "src/data/countryLandingPages.js")).href);
+const { COUNTRY_LIST } = await import(pathToFileURL(join(ROOT, "src/data/countryList.js")).href);
+const fullCountries = COUNTRY_PAGES.map((c) => ({ slug: c.slug, name: c.countryName, flagCode: c.flagCode }));
+if (JSON.stringify(fullCountries) !== JSON.stringify(COUNTRY_LIST)) problems.push("src/data/countryList.js is out of step with COUNTRY_PAGES in src/data/countryLandingPages.js");
+
 if (problems.length) {
   console.error("Subject guide lists don't match:\n  " + problems.join("\n  "));
   process.exit(1);

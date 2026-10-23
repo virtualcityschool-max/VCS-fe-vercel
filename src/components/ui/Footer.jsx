@@ -99,6 +99,9 @@ const Footer = ({ variant = "full" }) => {
                 <li>
                   <Link to="/exam-dates" onClick={() => window.scrollTo(0, 0)} className={footerLink}>Exam Dates & Deadlines</Link>
                 </li>
+                <li>
+                  <Link to="/online-school" onClick={() => window.scrollTo(0, 0)} className={footerLink}>Online School by Country</Link>
+                </li>
                 {isLoggedIn && (
                   <>
                     <li>

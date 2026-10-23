@@ -56,6 +56,11 @@ const GlobalReachSection = () => (
           );
         })}
       </div>
+      <p className="mt-8 text-center">
+        <Link to="/online-school" className="inline-flex items-center gap-2 text-indigo-300 hover:text-white text-sm font-black uppercase tracking-widest transition">
+          Online school by country <i className="fas fa-arrow-right text-xs" aria-hidden="true" />
+        </Link>
+      </p>
     </Reveal>
   </div>
 );

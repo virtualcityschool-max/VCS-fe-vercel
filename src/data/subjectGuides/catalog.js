@@ -25,6 +25,8 @@ export const GUIDE_CATALOG = [
 
 const byCode = (code) =>
   code ? GUIDE_CATALOG.find((g) => g.code === code || g.aliases?.includes(code)) || null : null;
+// The guide for a 4-digit syllabus code (old codes included), or null.
+export const guideForCode = (code) => byCode(code);
 const codeIn = (text) => (String(text || "").match(/\b(\d{4})\b/) || [])[1];
 
 // The guide for a course record (same rule as guideForCourse in ./index.js):

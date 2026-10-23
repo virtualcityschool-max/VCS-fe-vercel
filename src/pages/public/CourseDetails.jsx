@@ -41,6 +41,7 @@ import { guideSections } from "../../components/subjects/guideSections";
 import { useActiveSection, useFollowingBox } from "../../hooks/useFollowingBox";
 import { useWhatsappNumber } from "../../hooks/useWhatsappNumber";
 import { sizedImage, fallbackToOriginal } from "../../utils/imageCdn";
+import { isNotFound } from "../../utils/isNotFound";
 
 // The syllabus essentials shown on a course page. The rest of the guide (why
 // study it, question types, books, study plan, careers, FAQs) stays on its own
@@ -305,14 +306,18 @@ const CourseDetails = () => {
     level: normalizedCourse.category,
   }) : [];
 
+  const notFound = isNotFound(error);
+
   useSeo({
-      title: normalizedCourse ? `${normalizedCourse.title} — Live Online Classes | Virtual City School` : undefined,
+      title: notFound ? "Course not found | Virtual City School" : normalizedCourse ? `${normalizedCourse.title} — Live Online Classes | Virtual City School` : undefined,
       description: metaDescription,
       url: courseUrl,
       canonical: canonicalId ? `https://virtualcityschool.com/courses/${canonicalId}` : undefined,
       // Under ~50 words of its own and no subject guide: kept out of Google
       // until the admin writes a description or outline (courseRules.js).
-      noindex: Boolean(normalizedCourse) && normalizedCourse.status === "published" && isThinCourse(course, Boolean(guideSlug)),
+      // A course that doesn't exist or was removed (404) too; never on other
+      // errors, so a temporary failure can't drop a real course page.
+      noindex: notFound || (Boolean(normalizedCourse) && normalizedCourse.status === "published" && isThinCourse(course, Boolean(guideSlug))),
       jsonLd: normalizedCourse
         ? [
             {
@@ -608,13 +613,15 @@ const CourseDetails = () => {
               <div className="w-20 h-20 bg-red-600/20 rounded-full flex items-center justify-center mx-auto mb-6 backdrop-blur-sm border border-red-500/20">
                 <i className="fas fa-exclamation-triangle text-red-400 text-3xl"></i>
               </div>
-              <h2 className="text-white text-2xl font-bold mb-4">
-                Unable to load course
-              </h2>
-              <p className="text-slate-400 text-sm mb-8">
-                {typeof error === "string"
-                  ? error
-                  : "Failed to load course details"}
+              <h1 className="text-white text-2xl font-bold mb-4">
+                {notFound ? "Course not found" : "Unable to load course"}
+              </h1>
+              <p className="text-slate-300 text-base mb-8">
+                {notFound
+                  ? "This course doesn't exist or is no longer offered. Browse our current courses or the subject guides."
+                  : typeof error === "string"
+                    ? error
+                    : "Please check your connection and refresh the page in a moment."}
               </p>
               <Link to="/courses">
                 <Button variant="outline" size="lg" className="group">
@@ -622,6 +629,11 @@ const CourseDetails = () => {
                   Back to Courses
                 </Button>
               </Link>
+              {notFound && (
+                <p className="mt-5">
+                  <Link to="/subjects" className="text-indigo-300 hover:text-white text-base font-semibold">See the Cambridge subject guides →</Link>
+                </p>
+              )}
             </div>
           </div>
         </div>

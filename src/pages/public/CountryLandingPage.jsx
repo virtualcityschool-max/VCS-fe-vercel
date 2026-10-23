@@ -10,6 +10,7 @@ import {
 import Reveal from "../../components/ui/Reveal";
 import CountryFaqSection from "../../components/public/CountryFaqSection";
 import CountryInlineImage from "../../components/public/CountryInlineImage";
+import CountrySubjects from "../../components/public/CountrySubjects";
 
 // Two representative evening batch times, expressed as fixed-offset Pakistan
 // Standard Time (+05:00, no DST) instants, then converted per-country via
@@ -217,6 +218,8 @@ const CountryLandingPage = () => {
           <p className="text-slate-400 leading-relaxed">{country.diaspora}</p>
           <div className="clear-both" />
         </Reveal>
+
+        <CountrySubjects countryName={country.countryName} />
 
         {/* FAQ */}
         <CountryFaqSection
