@@ -27,10 +27,13 @@ export const AdminPlanClassModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: (createdSession: any) => void;
-  // A missed class to move: the form opens filled in with its course, teacher,
-  // title and time. It is only marked "rescheduled" once the new class is booked.
+  // A class to move (missed, or upcoming and not started): the form opens filled
+  // in with its course, teacher, title and time. The old class is only taken off
+  // once the new one is booked.
   reschedule?: any;
 }> = ({ isOpen, onClose, onSuccess, reschedule }) => {
+  // An upcoming class keeps its own date; a missed one moves to the next free day.
+  const isUpcoming = !!reschedule && reschedule.status === 'scheduled' && new Date(reschedule.scheduled_at).getTime() > Date.now();
   const { subjects = [], teachers = [], rawCourses = [], enrollments = [], levelOptions = [], reload, tzIana, addToast } = useApp() as any;
 
   // Active scheduling mode: 'scheduled' | 'now' | 'delayed'
@@ -68,7 +71,9 @@ export const AdminPlanClassModal: React.FC<{
     const time = reschedule.scheduled_at ? ast(new Date(reschedule.scheduled_at).getTime()).slice(11, 16) : '16:00';
     const nowAst = ast(Date.now());
     // Today if that time is still ahead, otherwise tomorrow.
-    const date = nowAst.slice(11, 16) < time ? nowAst.slice(0, 10) : ast(Date.now() + 86400000).slice(0, 10);
+    const date = isUpcoming
+      ? ast(new Date(reschedule.scheduled_at).getTime()).slice(0, 10)
+      : nowAst.slice(11, 16) < time ? nowAst.slice(0, 10) : ast(Date.now() + 86400000).slice(0, 10);
     setMode('scheduled');
     setSelectedLevel('all');
     setSelectedCourseId(reschedule.course ? String(reschedule.course) : '');
@@ -248,7 +253,7 @@ export const AdminPlanClassModal: React.FC<{
         isoDateTime = dt.toISOString();
       }
 
-      const isRecurringSeries = mode === 'scheduled' && classCount !== '1';
+      const isRecurringSeries = !reschedule && mode === 'scheduled' && classCount !== '1';
 
       const payload: any = {
         course: Number(selectedCourseId),
@@ -266,10 +271,15 @@ export const AdminPlanClassModal: React.FC<{
         payload.instructor_id = Number(selectedTeacherId);
       }
 
+      // The backend cancels the upcoming class once the new one is booked.
+      if (isUpcoming) {
+        payload.replaces = reschedule.id;
+      }
+
       // Backend auto-creates the Google Meet link through Google Calendar
       const result = await adminSessionService.createSession(payload);
       
-      if (reschedule?.id) {
+      if (reschedule?.id && !isUpcoming) {
         // The new class is booked; now take the missed one off the list.
         try {
           await axiosInstance.post(`/classroom/sessions/${reschedule.id}/resolve/`, {
@@ -325,7 +335,7 @@ export const AdminPlanClassModal: React.FC<{
               <h3 className="text-base font-bold text-white">{reschedule ? 'Reschedule Class' : 'Create New Class'}</h3>
               <p className="text-xs text-slate-400">
                 {reschedule
-                  ? 'Everything is filled in from the missed class. Change the date or time and press the button at the bottom.'
+                  ? `Everything is filled in from the ${isUpcoming ? 'planned' : 'missed'} class. Change the date or time and press the button at the bottom.${isUpcoming ? ' The old time is cancelled once the new one is booked.' : ''}`
                   : 'Plan a lecture with auto-generated Google Meet & Calendar attendee sync'}
               </p>
             </div>
@@ -632,6 +642,8 @@ export const AdminPlanClassModal: React.FC<{
 
                 {/* How Many Classes To Generate: Single vs Series */}
                 <div className="space-y-3 pt-2 border-t border-[#1E2648]">
+                  {/* A rescheduled class is always one class, so there is nothing to pick. */}
+                  {!reschedule && (<>
                   <div className="flex items-center justify-between flex-wrap gap-2">
                     <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider">
                       How Many Classes To Plan?
@@ -665,6 +677,7 @@ export const AdminPlanClassModal: React.FC<{
                       </button>
                     ))}
                   </div>
+                  </>)}
 
                   {classCount === 'custom' && (
                     <div className="pt-1">

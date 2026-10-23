@@ -1068,6 +1068,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return done;
   };
 
+  // An upcoming class that is not needed any more. The record is kept as cancelled.
+  const cancelUpcomingSession = async (id: string) => {
+    const s0: any = raw.sessions.find((x: any) => sid(x.id) === sid(id));
+    const ok = await confirmAction({
+      title: 'Cancel this class?',
+      message: `${s0?.title || 'This class'} is marked cancelled. The record is kept. To change its time instead, use Reschedule.`,
+      confirmLabel: 'Cancel class', isDestructive: true,
+    });
+    if (!ok) return false;
+    return await run(() => axiosInstance.patch(`/classroom/sessions/${id}/cancel/`), 'Class cancelled', ['sessions', 'audit']);
+  };
+
   const batchResolveMissedSessions = async (ids: string[], resolution: 'held' | 'cancelled', note = '') => {
     if (!ids || !ids.length) return false;
     const words = { held: 'Mark as held', cancelled: 'Cancel' };
@@ -1207,7 +1219,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     enrollments, addEnrollment, addEnrollments, removeEnrollment,
     teachers, addTeacher, updateTeacher, toggleTeacherStatus, bulkAssignSubject, allocateTeacherSubject, deallocateTeacherSubject,
     levelOptions: raw.categories, parents, addParent, addAdmin, allUsers, updateStaffRole, toggleUserStatus,
-    can, canView, isSuperAdmin, recommendFreeAccess, resolveMissedSession, batchResolveMissedSessions, setAttendanceStatus, attendanceSummary,
+    can, canView, isSuperAdmin, recommendFreeAccess, resolveMissedSession, cancelUpcomingSession, batchResolveMissedSessions, setAttendanceStatus, attendanceSummary,
     liveNowCount, setTeacherAreas, setTeacherShowcase, subjects, catalog, addBatch, renameBatch, moveBatch, updateCatalogSubject, addSubject, updateSubject, toggleSubjectStatus, levels, addLevel, removeLevel,
     sessions, addSession, updateSession, deleteSession, endSession, meetings, addMeeting,
     subscriptions, renewSubscription, cancelSubscription, referrals,
