@@ -6,6 +6,7 @@ html.theme-light .theme-logo { background-color: #0f172a; border-radius: 0.75rem
 html.theme-light .bg-\[\#020617\]:not(.theme-keep, .theme-keep *) { background-color: #f8fafc !important; }
 html.theme-light .bg-\[\#020617\]\/95:not(.theme-keep, .theme-keep *) { background-color: color-mix(in oklab, #f8fafc 95%, transparent) !important; }
 html.theme-light .bg-\[\#070913\]:not(.theme-keep, .theme-keep *) { background-color: #f1f5f9 !important; }
+html.theme-light .bg-\[\#070913\]\/95:not(.theme-keep, .theme-keep *) { background-color: color-mix(in oklab, #f1f5f9 95%, transparent) !important; }
 html.theme-light .bg-\[\#080B18\]:not(.theme-keep, .theme-keep *) { background-color: #f1f5f9 !important; }
 html.theme-light .bg-\[\#090B14\]\/95:not(.theme-keep, .theme-keep *) { background-color: color-mix(in oklab, #f1f5f9 95%, transparent) !important; }
 html.theme-light .bg-\[\#090D1A\]:not(.theme-keep, .theme-keep *) { background-color: #f1f5f9 !important; }
@@ -530,6 +531,8 @@ html.theme-light .to-slate-400:not(.theme-keep, .theme-keep *) { --tw-gradient-t
 html.theme-light .to-slate-500:not(.theme-keep, .theme-keep *) { --tw-gradient-to: oklch(86.9% 0.022 252.894) !important; }
 html.theme-light .to-slate-800\/60:not(.theme-keep, .theme-keep *) { --tw-gradient-to: color-mix(in oklab, oklch(96.8% 0.007 247.896) 60%, transparent) !important; }
 html.theme-light .to-slate-900:not(.theme-keep, .theme-keep *) { --tw-gradient-to: #ffffff !important; }
+html.theme-light .to-slate-900\/40:not(.theme-keep, .theme-keep *) { --tw-gradient-to: color-mix(in oklab, #ffffff 40%, transparent) !important; }
+html.theme-light .to-slate-900\/50:not(.theme-keep, .theme-keep *) { --tw-gradient-to: color-mix(in oklab, #ffffff 50%, transparent) !important; }
 html.theme-light .to-slate-900\/80:not(.theme-keep, .theme-keep *) { --tw-gradient-to: color-mix(in oklab, #ffffff 80%, transparent) !important; }
 html.theme-light .to-slate-900\/95:not(.theme-keep, .theme-keep *) { --tw-gradient-to: color-mix(in oklab, #ffffff 95%, transparent) !important; }
 html.theme-light .to-slate-950:not(.theme-keep, .theme-keep *) { --tw-gradient-to: oklch(98.4% 0.003 247.858) !important; }
@@ -540,6 +543,7 @@ html.theme-light .via-indigo-950\/40:not(.theme-keep, .theme-keep *) { --tw-grad
 html.theme-light .via-indigo-950\/60:not(.theme-keep, .theme-keep *) { --tw-gradient-via: color-mix(in oklab, oklch(96.2% 0.018 272.314) 60%, transparent) !important; }
 html.theme-light .via-slate-700:not(.theme-keep, .theme-keep *) { --tw-gradient-via: oklch(92.9% 0.013 255.508) !important; }
 html.theme-light .via-slate-900:not(.theme-keep, .theme-keep *) { --tw-gradient-via: #ffffff !important; }
+html.theme-light .via-slate-900\/60:not(.theme-keep, .theme-keep *) { --tw-gradient-via: color-mix(in oklab, #ffffff 60%, transparent) !important; }
 html.theme-light .via-slate-900\/90:not(.theme-keep, .theme-keep *) { --tw-gradient-via: color-mix(in oklab, #ffffff 90%, transparent) !important; }
 html.theme-light .via-slate-950:not(.theme-keep, .theme-keep *) { --tw-gradient-via: oklch(98.4% 0.003 247.858) !important; }
 html.theme-light .via-white\/5:not(.theme-keep, .theme-keep *) { --tw-gradient-via: color-mix(in oklab, oklch(20.8% 0.042 265.755) 8%, transparent) !important; }
