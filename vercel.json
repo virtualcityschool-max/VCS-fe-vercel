@@ -3,6 +3,14 @@
   "outputDirectory": "dist",
   "rewrites": [
     {
+      "source": "/mocks",
+      "destination": "https://vcs-mock-exams.vercel.app/mocks"
+    },
+    {
+      "source": "/mocks/:path*",
+      "destination": "https://vcs-mock-exams.vercel.app/mocks/:path*"
+    },
+    {
       "source": "/signup",
       "destination": "/shell.html"
     },

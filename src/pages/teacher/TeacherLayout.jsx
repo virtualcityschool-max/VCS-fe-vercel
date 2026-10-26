@@ -25,6 +25,7 @@ const SUBPATH_TITLES = {
   "/teacher/submissions": "Submissions",
   "/teacher/evaluations": "Evaluations & Gradebook",
   "/teacher/availability": "Availability & Slots",
+  "/teacher/mocks": "Mock Marking",
 };
 
 const TeacherLayout = () => {
@@ -32,7 +33,7 @@ const TeacherLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const activeTab = searchParams.get("tab") || "dashboard";
-  const viewTitle = SUBPATH_TITLES[location.pathname] || TAB_TITLES[activeTab] || "Faculty Portal";
+  const viewTitle = SUBPATH_TITLES[location.pathname] || (location.pathname.startsWith("/teacher/mocks/") ? "Mock Marking" : null) || TAB_TITLES[activeTab] || "Faculty Portal";
 
   return (
     <div className="min-h-screen bg-[#070913] text-white flex flex-col">
