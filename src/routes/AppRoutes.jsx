@@ -42,6 +42,7 @@ const TeacherAvailabilityPage = React.lazy(() => import("../pages/teacher/Teache
 // VCS Mock Exams marking: no menu link yet (founder 2026-10-26) — opened by typing /teacher/mocks.
 const TeacherMockMarking = React.lazy(() => import("../pages/teacher/TeacherMockMarking"));
 const TeacherMockScript = React.lazy(() => import("../pages/teacher/TeacherMockScript"));
+const TeacherPaperReview = React.lazy(() => import("../pages/teacher/TeacherPaperReview"));
 const StudentMocks = React.lazy(() => import("../pages/student/StudentMocks"));
 
 const AdminV2Layout = React.lazy(() => import("../admin-v2/AdminV2Layout"));
@@ -254,6 +255,7 @@ const AppRoutes = () => {
           <Route path="hire-leads" element={<TeacherHireLeads />} />
           <Route path="availability" element={<TeacherAvailabilityPage />} />
           <Route path="mocks" element={<TeacherMockMarking />} />
+          <Route path="mocks/review/:reviewId" element={<TeacherPaperReview />} />
           <Route path="mocks/:jobId" element={<TeacherMockScript />} />
         </Route>
         <Route

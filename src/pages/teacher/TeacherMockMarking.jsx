@@ -25,6 +25,8 @@ const STATUS = {
 const TeacherMockMarking = () => {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
+  // Past papers Mock Admin asked me to review (feedback, or changes when allowed).
+  const [reviews, setReviews] = useState(null);
 
   const load = useCallback(async () => {
     setError(null);
@@ -34,6 +36,13 @@ const TeacherMockMarking = () => {
     } catch (e) {
       setError(e?.message || "Could not load your scripts.");
     }
+  }, []);
+
+  useEffect(() => {
+    mocksService
+      .listReviews()
+      .then((res) => setReviews(res?.reviews ?? []))
+      .catch(() => setReviews([]));
   }, []);
 
   useEffect(() => {
@@ -80,6 +89,31 @@ const TeacherMockMarking = () => {
           </div>
         ))}
       </div>
+
+      {reviews && reviews.length > 0 && (
+        <section className="mt-6 rounded-2xl border border-cyan-500/30 bg-cyan-500/5 p-5">
+          <h2 className="text-lg font-semibold text-white"><i className="fas fa-clipboard-check mr-2 text-cyan-300" aria-hidden="true" />Papers to review</h2>
+          <p className="mt-1 text-sm text-slate-300">Mock Admin asked you to check these past papers: the question marks and the mark scheme. Add a note where something is wrong.</p>
+          <ul className="mt-3 divide-y divide-slate-800/60">
+            {reviews.map((r) => (
+              <li key={r.id} className="flex flex-col gap-2 py-3 md:flex-row md:items-center">
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className={`rounded-md border px-2 py-0.5 text-xs font-bold ${r.status === "done" ? "border-emerald-500/30 bg-emerald-500/15 text-emerald-300" : "border-amber-500/30 bg-amber-500/15 text-amber-300"}`}>{r.status === "done" ? "Sent back" : r.role === "hod" ? "To finalise (HOD)" : "To review"}</span>
+                    <span className="rounded-md border border-slate-700 px-2 py-0.5 text-xs text-slate-300">{r.canEdit ? "You can edit marks" : "Feedback only"}</span>
+                    <p className="text-base font-semibold text-white">{r.paper}</p>
+                  </div>
+                  {r.note && <p className="mt-1 text-sm text-slate-300">“{r.note}”</p>}
+                  <p className="mt-1 text-xs text-slate-400">Sent {fmt(r.sentAt)}</p>
+                </div>
+                <Link to={`/teacher/mocks/review/${r.id}`} className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-lg bg-cyan-700 px-4 text-sm font-bold text-white hover:bg-cyan-600">
+                  <i className={`fas ${r.status === "done" ? "fa-eye" : "fa-magnifying-glass"}`} aria-hidden="true" />{r.status === "done" ? "View" : "Review paper"}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <div className="mt-6 overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/50">
         {error ? (

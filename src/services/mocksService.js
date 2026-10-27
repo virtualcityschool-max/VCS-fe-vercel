@@ -57,6 +57,13 @@ export const mocksService = {
   /** Teacher: send the marked script to the student. */
   returnScript: (id) => call(`/marking/scripts/${encodeURIComponent(id)}/return`, { method: "POST" }),
 
+  /** Teacher: past papers Mock Admin asked me to review. */
+  listReviews: () => call("/marking/reviews"),
+  /** Teacher: one paper to review (questions, marks, mark scheme, my notes; the HOD also sees every review). */
+  getReview: (id) => call(`/marking/reviews/${encodeURIComponent(id)}`),
+  /** Teacher: save my review notes; { submit: true } sends them to Mock Admin. */
+  saveReview: (id, payload) => call(`/marking/reviews/${encodeURIComponent(id)}`, { method: "PUT", body: payload }),
+
   /** Student: open Mock Exams signed in with this VCS account (sets the Mocks session cookie). */
   async openSession() {
     const token = authStorage.getAccessToken();
