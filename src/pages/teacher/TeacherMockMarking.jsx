@@ -28,24 +28,35 @@ const TeacherMockMarking = () => {
   // Past papers Mock Admin asked me to review (feedback, or changes when allowed).
   const [reviews, setReviews] = useState(null);
 
+  const [reviewsError, setReviewsError] = useState(null);
+
+  const loadReviews = useCallback(async () => {
+    setReviewsError(null);
+    try {
+      const res = await mocksService.listReviews();
+      setReviews(res?.reviews ?? []);
+    } catch (e) {
+      setReviewsError(e?.message || "Could not load the papers Mock Admin asked you to review.");
+    }
+  }, []);
+
+  // Refresh reloads both the scripts and the papers to review.
   const load = useCallback(async () => {
     setError(null);
+    loadReviews();
     try {
       const res = await mocksService.listScripts();
       setData({ ...res, at: Date.now() });
     } catch (e) {
       setError(e?.message || "Could not load your scripts.");
     }
-  }, []);
+  }, [loadReviews]);
 
   useEffect(() => {
     mocksService
       .listReviews()
       .then((res) => setReviews(res?.reviews ?? []))
-      .catch(() => setReviews([]));
-  }, []);
-
-  useEffect(() => {
+      .catch((e) => setReviewsError(e?.message || "Could not load the papers Mock Admin asked you to review."));
     mocksService
       .listScripts()
       .then((res) => setData({ ...res, at: Date.now() }))
@@ -89,6 +100,13 @@ const TeacherMockMarking = () => {
           </div>
         ))}
       </div>
+
+      {reviewsError && (
+        <p role="alert" className="mt-6 rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
+          {reviewsError}{" "}
+          <button type="button" onClick={loadReviews} className="font-semibold underline">Try again</button>
+        </p>
+      )}
 
       {reviews && reviews.length > 0 && (
         <section className="mt-6 rounded-2xl border border-cyan-500/30 bg-cyan-500/5 p-5">
