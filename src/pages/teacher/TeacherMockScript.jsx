@@ -84,9 +84,20 @@ const TeacherMockScript = () => {
   }, [load]);
 
   const readOnly = script?.status === "returned";
-  const total = useMemo(() => Object.values(marks).reduce((a, b) => a + (b ?? 0), 0), [marks]);
-  const markedCount = useMemo(() => Object.values(marks).filter((m) => m != null).length, [marks]);
-  const qCount = script?.questions.length ?? 0;
+  // Papers with a choice ("Question 1 and any two others"): required questions + the best answers of the rest count,
+  // as in Cambridge marking. Same rule as the Mocks app (src/lib/answer-rule.ts), which computes the returned total.
+  const total = useMemo(() => {
+    if (!script) return 0;
+    const vals = script.questions.map((q) => ({ n: q.n, m: marks[q.id] }));
+    const rule = script.rule;
+    if (!rule) return vals.reduce((a, v) => a + (v.m ?? 0), 0);
+    const req = vals.filter((v) => rule.required.includes(v.n)).reduce((a, v) => a + (v.m ?? 0), 0);
+    const best = vals.filter((v) => !rule.required.includes(v.n) && v.m != null).map((v) => v.m).sort((a, b) => b - a).slice(0, rule.choose);
+    return req + best.reduce((a, b) => a + b, 0);
+  }, [script, marks]);
+  const toMark = useMemo(() => (script?.questions ?? []).filter((q) => q.required !== false), [script]);
+  const markedCount = useMemo(() => toMark.filter((q) => marks[q.id] != null).length, [toMark, marks]);
+  const qCount = toMark.length;
 
   const persist = useCallback(async () => {
     if (!script || readOnly) return true;
@@ -171,6 +182,7 @@ const TeacherMockScript = () => {
               {!readOnly && script.dueAt && <> · <span className={script.overdue ? "font-semibold text-rose-300" : "text-amber-300"}>due {fmt(script.dueAt)}</span></>}
               {readOnly && <> · <span className="font-semibold text-emerald-300">returned {fmt(script.returnedAt)}</span></>}
             </p>
+            {script.rule && <p className="mt-2 text-sm text-cyan-200"><i className="fas fa-list-check mr-1.5" aria-hidden="true" />{script.rule.text} The total counts the required questions and the best {script.rule.choose === 1 ? "answer" : `${script.rule.choose} answers`} of the rest.</p>}
             {script.labTest && <p className="mt-2 text-sm text-amber-200"><i className="fas fa-flask mr-1.5" aria-hidden="true" />Lab test: the student describes the procedure. Credit points that show they would carry it out correctly.</p>}
           </div>
           <div className="flex items-center gap-4">
@@ -193,14 +205,49 @@ const TeacherMockScript = () => {
         </p>
       </div>
 
+      {script.insertPages?.length > 0 && (
+        <details className="group mt-4 rounded-2xl border border-slate-800 bg-slate-900/50">
+          <summary className="cursor-pointer list-none px-5 py-3 text-base font-semibold text-white">
+            <i className="fas fa-book-open mr-2 text-cyan-300" aria-hidden="true" />
+            <span className="group-open:hidden">Show the Insert</span><span className="hidden group-open:inline">Hide the Insert</span>
+            <span className="ml-2 text-sm font-normal text-slate-400">texts and sources the questions refer to · {script.insertPages.length} page{script.insertPages.length === 1 ? "" : "s"}</span>
+          </summary>
+          <div className="grid gap-3 border-t border-slate-800 bg-white p-2 lg:grid-cols-2">
+            {script.insertPages.map((src, k) => (
+              <a key={src} href={src} target="_blank" rel="noreferrer" aria-label={`Open Insert page ${k + 1} full size`}>
+                <img src={src} alt={`Insert page ${k + 1}`} className="block w-full" loading="lazy" />
+              </a>
+            ))}
+          </div>
+        </details>
+      )}
+
+      {script.levelGuide?.length > 0 && (
+        <details className="group mt-4 rounded-2xl border border-emerald-500/30 bg-slate-900/50" open>
+          <summary className="cursor-pointer list-none px-5 py-3 text-base font-semibold text-white">
+            <i className="fas fa-layer-group mr-2 text-emerald-300" aria-hidden="true" />
+            <span className="group-open:hidden">Show the levels of response</span><span className="hidden group-open:inline">Hide the levels of response</span>
+            <span className="ml-2 text-sm font-normal text-slate-400">the scheme&apos;s level tables for essay answers · {script.levelGuide.length} page{script.levelGuide.length === 1 ? "" : "s"}</span>
+          </summary>
+          <div className="grid gap-3 border-t border-slate-800 bg-white p-2 lg:grid-cols-2">
+            {script.levelGuide.map((src, k) => (
+              <a key={src} href={src} target="_blank" rel="noreferrer" aria-label={`Open levels page ${k + 1} full size`}>
+                <img src={src} alt={`Levels of response, page ${k + 1}`} className="block w-full" loading="lazy" />
+              </a>
+            ))}
+          </div>
+        </details>
+      )}
+
       {/* Question jump list */}
       <nav aria-label="Questions" className="sticky top-14 z-20 -mx-4 mt-4 border-b border-slate-800 bg-[#070913]/95 px-4 py-2 backdrop-blur md:-mx-6 md:px-6 lg:-mx-8 lg:px-8">
         <ol className="flex gap-1.5 overflow-x-auto [scrollbar-width:none]">
           {script.questions.map((q) => {
             const m = marks[q.id];
+            const skip = q.required === false;
             return (
               <li key={q.id}>
-                <a href={`#q${q.n}`} className={`flex h-9 min-w-9 items-center justify-center rounded-lg border px-2 text-sm font-semibold transition ${m != null ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-200" : "border-slate-700 text-slate-300 hover:border-indigo-500"}`} aria-label={`Question ${q.n}${m != null ? `, ${m} of ${q.maxMarks}` : ", not marked"}`}>
+                <a href={`#q${q.n}`} className={`flex h-9 min-w-9 items-center justify-center rounded-lg border px-2 text-sm font-semibold transition ${skip ? "border-slate-800 text-slate-500" : m != null ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-200" : "border-slate-700 text-slate-300 hover:border-indigo-500"}`} aria-label={`Question ${q.n}${skip ? ", not chosen by the student" : m != null ? `, ${m} of ${q.maxMarks}` : ", not marked"}`}>
                   {q.n}
                 </a>
               </li>
@@ -214,7 +261,10 @@ const TeacherMockScript = () => {
           <li key={q.id} id={`q${q.n}`} className="scroll-mt-32 rounded-2xl border border-slate-800 bg-slate-900/50 p-5">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <h2 className="text-lg font-semibold text-white">Question {q.n}</h2>
-              <span className="rounded-full bg-slate-800 px-3 py-1 text-sm font-semibold text-slate-200">{q.maxMarks} marks</span>
+              <div className="flex flex-wrap items-center gap-2">
+                {q.required === false && <span className="rounded-full border border-slate-700 px-3 py-1 text-sm font-semibold text-slate-300">Not chosen by the student</span>}
+                <span className="rounded-full bg-slate-800 px-3 py-1 text-sm font-semibold text-slate-200">{q.maxMarks} marks</span>
+              </div>
             </div>
 
             <div className="mt-4 grid gap-5 xl:grid-cols-2">
@@ -261,6 +311,9 @@ const TeacherMockScript = () => {
                   )) : <p className="px-2 py-3 text-sm text-slate-700">No mark scheme image for this question.</p>}
                 </div>
 
+                {q.required === false ? (
+                  <p className="mt-4 rounded-xl border border-dashed border-slate-700 px-4 py-3 text-sm text-slate-300">The student did not choose this question, so there is nothing to mark.</p>
+                ) : (
                 <div className="mt-4 rounded-xl border border-slate-800 bg-slate-950/50 p-4">
                   <p className="text-sm font-semibold text-white">Mark</p>
                   <div className="mt-2">
@@ -278,6 +331,7 @@ const TeacherMockScript = () => {
                     className="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-base text-white placeholder:text-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 disabled:opacity-70"
                   />
                 </div>
+                )}
               </div>
             </div>
           </li>
