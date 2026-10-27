@@ -4,11 +4,11 @@
   "rewrites": [
     {
       "source": "/mocks",
-      "destination": "https://vcs-mock-exams.vercel.app/mocks"
+      "destination": "https://vcs-mocks.vercel.app/mocks"
     },
     {
       "source": "/mocks/:path*",
-      "destination": "https://vcs-mock-exams.vercel.app/mocks/:path*"
+      "destination": "https://vcs-mocks.vercel.app/mocks/:path*"
     },
     {
       "source": "/signup",
