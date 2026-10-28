@@ -92,8 +92,11 @@ const TeacherMockScript = () => {
     const rule = script.rule;
     if (!rule) return vals.reduce((a, v) => a + (v.m ?? 0), 0);
     const req = vals.filter((v) => rule.required.includes(v.n)).reduce((a, v) => a + (v.m ?? 0), 0);
-    const best = vals.filter((v) => !rule.required.includes(v.n) && v.m != null).map((v) => v.m).sort((a, b) => b - a).slice(0, rule.choose);
-    return req + best.reduce((a, b) => a + b, 0);
+    const rest = vals.filter((v) => !rule.required.includes(v.n) && v.m != null);
+    const bestOf = (vs, k) => vs.map((v) => v.m).sort((a, b) => b - a).slice(0, k).reduce((a, b) => a + b, 0);
+    // Papers in parts (rule.groups, e.g. [[2, 3], [4, 5]]): the best answer of each part counts.
+    if (Array.isArray(rule.groups) && rule.groups.length) return req + rule.groups.reduce((a, g) => a + bestOf(rest.filter((v) => g.includes(v.n)), 1), 0);
+    return req + bestOf(rest, rule.choose);
   }, [script, marks]);
   const toMark = useMemo(() => (script?.questions ?? []).filter((q) => q.required !== false), [script]);
   const markedCount = useMemo(() => toMark.filter((q) => marks[q.id] != null).length, [toMark, marks]);
@@ -182,7 +185,7 @@ const TeacherMockScript = () => {
               {!readOnly && script.dueAt && <> · <span className={script.overdue ? "font-semibold text-rose-300" : "text-amber-300"}>due {fmt(script.dueAt)}</span></>}
               {readOnly && <> · <span className="font-semibold text-emerald-300">returned {fmt(script.returnedAt)}</span></>}
             </p>
-            {script.rule && <p className="mt-2 text-sm text-cyan-200"><i className="fas fa-list-check mr-1.5" aria-hidden="true" />{script.rule.text} The total counts the required questions and the best {script.rule.choose === 1 ? "answer" : `${script.rule.choose} answers`} of the rest.</p>}
+            {script.rule && <p className="mt-2 text-sm text-cyan-200"><i className="fas fa-list-check mr-1.5" aria-hidden="true" />{script.rule.text} The total counts the required questions and {script.rule.groups?.length ? "the best answer of each part" : `the best ${script.rule.choose === 1 ? "answer" : `${script.rule.choose} answers`} of the rest`}.</p>}
             {script.labTest && <p className="mt-2 text-sm text-amber-200"><i className="fas fa-flask mr-1.5" aria-hidden="true" />Lab test: the student describes the procedure. Credit points that show they would carry it out correctly.</p>}
           </div>
           <div className="flex items-center gap-4">
