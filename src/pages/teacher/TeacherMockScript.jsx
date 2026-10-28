@@ -8,11 +8,28 @@ import { mocksService } from "../../services/mocksService";
 const fmt = (iso) =>
   iso ? new Date(iso).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "—";
 
+// Click marking (founder, 2026-10-28): every mark is a button, so a teacher can mark with the mouse alone.
+// Typing a mark is still possible for half marks.
 function MarkPicker({ max, value, onChange, disabled, label }) {
-  const chips = max <= 12 ? Array.from({ length: max + 1 }, (_, i) => i) : null;
+  const chips = Array.from({ length: max + 1 }, (_, i) => i);
   return (
     <div>
-      <div className="flex items-center gap-2">
+      {!disabled && (
+        <div className="flex flex-wrap gap-1.5" role="group" aria-label={`Marks for ${label}`}>
+          {chips.map((c) => (
+            <button
+              key={c}
+              type="button"
+              onClick={() => onChange(c)}
+              aria-pressed={value === c}
+              className={`h-10 min-w-10 rounded-lg border px-2 text-base font-semibold transition ${value === c ? "border-indigo-500 bg-indigo-600 text-white" : "border-slate-700 text-slate-200 hover:border-indigo-500"}`}
+            >
+              {c}
+            </button>
+          ))}
+        </div>
+      )}
+      <div className={`flex items-center gap-2 ${disabled ? "" : "mt-3"}`}>
         <label className="sr-only" htmlFor={label}>{label}</label>
         <input
           id={label}
@@ -29,26 +46,78 @@ function MarkPicker({ max, value, onChange, disabled, label }) {
             const n = Math.round(Number(raw) * 2) / 2;
             if (Number.isFinite(n)) onChange(Math.max(0, Math.min(max, n)));
           }}
-          className="h-12 w-24 rounded-xl border border-slate-700 bg-slate-950 px-3 text-center text-xl font-bold text-white tabular-nums focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 disabled:opacity-60"
+          className="h-10 w-20 rounded-lg border border-slate-700 bg-slate-950 px-2 text-center text-lg font-bold text-white tabular-nums focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 disabled:opacity-60"
         />
-        <span className="text-lg font-semibold text-slate-300">/ {max}</span>
+        <span className="text-base font-semibold text-slate-300">/ {max}</span>
+        {!disabled && <span className="text-sm text-slate-400">or type a half mark</span>}
       </div>
-      {chips && !disabled && (
-        <div className="mt-3 flex flex-wrap gap-1.5" role="group" aria-label={`Quick marks for ${label}`}>
-          {chips.map((c) => (
-            <button
-              key={c}
-              type="button"
-              onClick={() => onChange(c)}
-              aria-pressed={value === c}
-              className={`h-9 min-w-9 rounded-lg border px-2 text-sm font-semibold transition ${value === c ? "border-indigo-500 bg-indigo-600 text-white" : "border-slate-700 text-slate-200 hover:border-indigo-500"}`}
-            >
-              {c}
-            </button>
-          ))}
-        </div>
-      )}
     </div>
+  );
+}
+
+// Quick comments for one question: the subject's own list (Mocks app src/lib/marking-rubrics.ts).
+function ChipPicker({ chips, value, onToggle, disabled, label }) {
+  if (!chips?.length) return null;
+  return (
+    <div className="flex flex-wrap gap-1.5" role="group" aria-label={`Quick comments for ${label}`}>
+      {chips.map((c) => {
+        const on = value.includes(c.key);
+        const good = c.key === "correct" || c.key === "good";
+        return (
+          <button
+            key={c.key}
+            type="button"
+            disabled={disabled}
+            onClick={() => onToggle(c.key)}
+            aria-pressed={on}
+            className={`min-h-9 rounded-full border px-3 text-sm font-semibold transition disabled:cursor-default ${on ? (good ? "border-emerald-500 bg-emerald-600 text-white" : "border-amber-500 bg-amber-500 text-slate-950") : "border-slate-700 text-slate-200 hover:border-indigo-500"} ${disabled && !on ? "hidden" : ""}`}
+          >
+            {on && <i className="fas fa-check mr-1.5" aria-hidden="true" />}{c.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+const LEVEL_TONE = (lv) => (lv <= 2 ? "border-rose-500 bg-rose-600 text-white" : lv <= 4 ? "border-amber-500 bg-amber-500 text-slate-950" : "border-emerald-500 bg-emerald-600 text-white");
+
+// The subject's 10 standard areas, each rated on 7 levels (or "Not in this paper"). The student sees only the
+// remark sentence, never the level name — shown here under each row so the teacher knows what will be sent.
+function AreaRatings({ rubric, value, onChange, disabled }) {
+  if (!rubric) return null;
+  const rated = rubric.areas.filter((a) => value[a.key] != null).length;
+  return (
+    <section className="mt-5 rounded-2xl border border-indigo-500/30 bg-slate-900/50 p-5">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 className="text-lg font-semibold text-white"><i className="fas fa-table-list mr-2 text-cyan-300" aria-hidden="true" />{rubric.subject}: rate {rubric.areas.length} areas</h2>
+        <span className={`rounded-full px-3 py-1 text-sm font-semibold ${rated === rubric.areas.length ? "bg-emerald-500/15 text-emerald-200" : "bg-amber-500/15 text-amber-200"}`}>{rated} of {rubric.areas.length} rated</span>
+      </div>
+      <p className="mt-1 text-sm text-slate-300">One click per area. The student gets the standard remark shown under each area, not the rating name. Choose &quot;Not in this paper&quot; where an area doesn&apos;t apply.</p>
+      <ol className="mt-4 space-y-4">
+        {rubric.areas.map((a) => {
+          const lv = value[a.key];
+          return (
+            <li key={a.key} className="rounded-xl border border-slate-800 bg-slate-950/50 p-4">
+              <p className="text-base font-semibold text-white">{a.label}</p>
+              {!disabled && (
+                <div className="mt-2 flex flex-wrap gap-1.5" role="group" aria-label={`Rating for ${a.label}`}>
+                  <button type="button" onClick={() => onChange(a.key, 0)} aria-pressed={lv === 0} className={`min-h-9 rounded-lg border px-3 text-sm font-semibold transition ${lv === 0 ? "border-slate-400 bg-slate-600 text-white" : "border-slate-700 text-slate-300 hover:border-indigo-500"}`}>Not in this paper</button>
+                  {rubric.levels.map((name, i) => (
+                    <button key={name} type="button" onClick={() => onChange(a.key, i + 1)} aria-pressed={lv === i + 1} className={`min-h-9 rounded-lg border px-3 text-sm font-semibold transition ${lv === i + 1 ? LEVEL_TONE(i + 1) : "border-slate-700 text-slate-200 hover:border-indigo-500"}`}>{name}</button>
+                  ))}
+                </div>
+              )}
+              {lv > 0 ? (
+                <p className="mt-2 text-sm text-slate-300"><span className="font-semibold text-cyan-300">{disabled ? `${rubric.levels[lv - 1]}: ` : "Student reads: "}</span>{a.remarks[lv - 1]}</p>
+              ) : lv === 0 ? (
+                <p className="mt-2 text-sm text-slate-400">Not in this paper — no remark sent.</p>
+              ) : null}
+            </li>
+          );
+        })}
+      </ol>
+    </section>
   );
 }
 
@@ -58,6 +127,8 @@ const TeacherMockScript = () => {
   const [error, setError] = useState(null);
   const [marks, setMarks] = useState({});
   const [comments, setComments] = useState({});
+  const [chips, setChips] = useState({});
+  const [areas, setAreas] = useState({});
   const [overall, setOverall] = useState("");
   const [save, setSave] = useState("idle");
   const [confirming, setConfirming] = useState(false);
@@ -73,6 +144,8 @@ const TeacherMockScript = () => {
       setScript(s);
       setMarks(Object.fromEntries(s.questions.map((q) => [q.id, q.marks])));
       setComments(Object.fromEntries(s.questions.map((q) => [q.id, q.comment || ""])));
+      setChips(Object.fromEntries(s.questions.map((q) => [q.id, Array.isArray(q.chips) ? q.chips : []])));
+      setAreas(s.areaRatings && typeof s.areaRatings === "object" ? s.areaRatings : {});
       setOverall(s.teacherComment || "");
     } catch (e) {
       setError(e?.message || "Could not open this script.");
@@ -101,6 +174,9 @@ const TeacherMockScript = () => {
   const toMark = useMemo(() => (script?.questions ?? []).filter((q) => q.required !== false), [script]);
   const markedCount = useMemo(() => toMark.filter((q) => marks[q.id] != null).length, [toMark, marks]);
   const qCount = toMark.length;
+  const areaCount = script?.rubric?.areas?.length ?? 0;
+  const areasRated = (script?.rubric?.areas ?? []).filter((a) => areas[a.key] != null).length;
+  const ready = markedCount >= qCount && areasRated >= areaCount;
 
   const persist = useCallback(async () => {
     if (!script || readOnly) return true;
@@ -109,7 +185,8 @@ const TeacherMockScript = () => {
     try {
       await mocksService.saveMarks(jobId, {
         comment: overall,
-        marks: script.questions.map((q) => ({ questionId: q.id, marks: marks[q.id] ?? null, comment: comments[q.id] ?? "" })),
+        marks: script.questions.map((q) => ({ questionId: q.id, marks: marks[q.id] ?? null, comment: comments[q.id] ?? "", chips: chips[q.id] ?? [] })),
+        areas: Object.entries(areas).map(([key, level]) => ({ key, level })),
       });
       setSave(dirty.current ? "saving" : "saved");
       return true;
@@ -118,7 +195,7 @@ const TeacherMockScript = () => {
       setReturnError(e?.message || null);
       return false;
     }
-  }, [script, readOnly, jobId, overall, marks, comments]);
+  }, [script, readOnly, jobId, overall, marks, comments, chips, areas]);
 
   // Save a moment after each change.
   useEffect(() => {
@@ -126,7 +203,7 @@ const TeacherMockScript = () => {
     clearTimeout(timer.current);
     timer.current = setTimeout(persist, 1200);
     return () => clearTimeout(timer.current);
-  }, [marks, comments, overall, script, readOnly, persist]);
+  }, [marks, comments, chips, areas, overall, script, readOnly, persist]);
 
   const change = (fn) => {
     dirty.current = true;
@@ -191,7 +268,7 @@ const TeacherMockScript = () => {
           <div className="flex items-center gap-4">
             <div className="text-right">
               <p className="text-3xl font-bold text-white tabular-nums">{total}<span className="text-xl text-slate-400">/{script.maxMarks}</span></p>
-              <p className="text-xs text-slate-300">{markedCount} of {qCount} questions marked</p>
+              <p className="text-xs text-slate-300">{markedCount} of {qCount} questions marked{areaCount ? ` · ${areasRated} of ${areaCount} areas rated` : ""}</p>
             </div>
             {!readOnly && (
               <button type="button" onClick={() => { setReturnError(null); setConfirming(true); }} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-emerald-600 px-5 text-sm font-bold text-white hover:bg-emerald-500 transition">
@@ -322,7 +399,21 @@ const TeacherMockScript = () => {
                   <div className="mt-2">
                     <MarkPicker max={q.maxMarks} value={marks[q.id]} disabled={readOnly} label={`Question ${q.n} mark`} onChange={(v) => change(() => setMarks((m) => ({ ...m, [q.id]: v })))} />
                   </div>
-                  <label className="mt-4 block text-sm font-semibold text-white" htmlFor={`c-${q.id}`}>Comment for the student <span className="font-normal text-slate-400">(optional)</span></label>
+                  {script.rubric?.chips?.length > 0 && (
+                    <>
+                      <p className="mt-4 text-sm font-semibold text-white">Quick comments <span className="font-normal text-slate-400">(click any that apply)</span></p>
+                      <div className="mt-2">
+                        <ChipPicker
+                          chips={script.rubric.chips}
+                          value={chips[q.id] ?? []}
+                          disabled={readOnly}
+                          label={`question ${q.n}`}
+                          onToggle={(k) => change(() => setChips((c) => { const cur = c[q.id] ?? []; return { ...c, [q.id]: cur.includes(k) ? cur.filter((x) => x !== k) : [...cur, k] }; }))}
+                        />
+                      </div>
+                    </>
+                  )}
+                  <label className="mt-4 block text-sm font-semibold text-white" htmlFor={`c-${q.id}`}>Add a note <span className="font-normal text-slate-400">(optional)</span></label>
                   <textarea
                     id={`c-${q.id}`}
                     rows={2}
@@ -341,8 +432,10 @@ const TeacherMockScript = () => {
         ))}
       </ol>
 
+      <AreaRatings rubric={script.rubric} value={areas} disabled={readOnly} onChange={(key, level) => change(() => setAreas((a) => ({ ...a, [key]: level })))} />
+
       <section className="mt-5 rounded-2xl border border-slate-800 bg-slate-900/50 p-5">
-        <label htmlFor="overall" className="text-lg font-semibold text-white">Overall comment</label>
+        <label htmlFor="overall" className="text-lg font-semibold text-white">Overall comment <span className="text-base font-normal text-slate-400">(optional)</span></label>
         <p className="mt-1 text-sm text-slate-300">What should the student work on next? Shown at the top of their result.</p>
         <textarea
           id="overall"
@@ -366,11 +459,11 @@ const TeacherMockScript = () => {
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 p-4 sm:items-center" onClick={() => !returning && setConfirming(false)}>
           <div role="dialog" aria-modal="true" aria-labelledby="ret-h" className="w-full max-w-md rounded-2xl border border-slate-700 bg-slate-900 p-6" onClick={(e) => e.stopPropagation()}>
             <h2 id="ret-h" className="text-xl font-bold text-white">Return to {script.student}?</h2>
-            <p className="mt-2 text-base text-slate-200">Total <strong className="text-emerald-300 font-semibold">{total}/{script.maxMarks}</strong>. {markedCount < qCount ? `${qCount - markedCount} question${qCount - markedCount === 1 ? " has" : "s have"} no mark yet — give 0 where nothing earns a mark.` : "The student will see every mark and comment."}</p>
+            <p className="mt-2 text-base text-slate-200">Total <strong className="text-emerald-300 font-semibold">{total}/{script.maxMarks}</strong>. {markedCount < qCount ? `${qCount - markedCount} question${qCount - markedCount === 1 ? " has" : "s have"} no mark yet — give 0 where nothing earns a mark.` : areasRated < areaCount ? `${areaCount - areasRated} of the ${areaCount} areas ${areaCount - areasRated === 1 ? "has" : "have"} no rating yet.` : "The student will see every mark, comment and remark."}</p>
             {returnError && <p role="alert" className="mt-3 rounded-lg bg-rose-500/10 px-3 py-2 text-sm text-rose-200">{returnError}</p>}
             <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
               <button type="button" disabled={returning} onClick={() => setConfirming(false)} className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-700 px-4 text-sm font-semibold text-slate-200 hover:border-indigo-500">Keep marking</button>
-              <button type="button" disabled={returning || markedCount < qCount} onClick={doReturn} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 text-sm font-bold text-white hover:bg-emerald-500 disabled:opacity-50">
+              <button type="button" disabled={returning || !ready} onClick={doReturn} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 text-sm font-bold text-white hover:bg-emerald-500 disabled:opacity-50">
                 {returning ? "Returning…" : <><i className="fas fa-paper-plane" aria-hidden="true" /> Return now</>}
               </button>
             </div>
