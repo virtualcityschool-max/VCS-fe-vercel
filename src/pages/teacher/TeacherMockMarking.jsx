@@ -9,7 +9,8 @@ const fmt = (iso) =>
 
 /** `now` = when the list was loaded (render stays pure). */
 function dueText(s, now) {
-  if (s.status === "returned") return `Returned ${fmt(s.returnedAt)}`;
+  if (s.status === "returned") return `Finished ${fmt(s.returnedAt)}`;
+  if (s.status === "in_review") return `Sent to Mock Admin ${fmt(s.sentAt)}`;
   if (!s.dueAt) return "No deadline";
   const h = Math.round((new Date(s.dueAt).getTime() - now) / 3_600_000);
   if (h < 0) return `Overdue by ${Math.abs(h) < 24 ? `${Math.abs(h)} h` : `${Math.round(Math.abs(h) / 24)} days`}`;
@@ -19,8 +20,11 @@ function dueText(s, now) {
 const STATUS = {
   assigned: { label: "To mark", cls: "bg-amber-500/15 text-amber-300 border-amber-500/30" },
   marked: { label: "Draft saved", cls: "bg-indigo-500/15 text-indigo-300 border-indigo-500/30" },
-  returned: { label: "Returned", cls: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30" },
+  in_review: { label: "With Mock Admin", cls: "bg-sky-500/15 text-sky-300 border-sky-500/30" },
+  returned: { label: "Released", cls: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30" },
 };
+// Read-only once sent: Mock Admin checks it, then releases it to the student (or sends it back with a note).
+const isDone = (s) => s.status === "returned" || s.status === "in_review";
 
 const TeacherMockMarking = () => {
   const [data, setData] = useState(null);
@@ -64,7 +68,7 @@ const TeacherMockMarking = () => {
   }, []);
 
   const scripts = data?.scripts ?? [];
-  const open = scripts.filter((s) => s.status !== "returned");
+  const open = scripts.filter((s) => !isDone(s));
   const overdue = open.filter((s) => s.overdue).length;
   const soon = open.filter((s) => !s.overdue && s.dueAt && new Date(s.dueAt).getTime() - data.at < 86_400_000).length;
   const returned = scripts.length - open.length;
@@ -72,7 +76,7 @@ const TeacherMockMarking = () => {
     { label: "To mark", value: open.length, icon: "fa-pen-to-square", tone: "text-indigo-300 bg-indigo-500/15" },
     { label: "Due within 24 h", value: soon, icon: "fa-hourglass-half", tone: "text-amber-300 bg-amber-500/15" },
     { label: "Overdue", value: overdue, icon: "fa-triangle-exclamation", tone: "text-rose-300 bg-rose-500/15" },
-    { label: "Returned (30 days)", value: returned, icon: "fa-circle-check", tone: "text-emerald-300 bg-emerald-500/15" },
+    { label: "Sent (30 days)", value: returned, icon: "fa-circle-check", tone: "text-emerald-300 bg-emerald-500/15" },
   ];
 
   return (
@@ -162,21 +166,23 @@ const TeacherMockMarking = () => {
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className={`rounded-md border px-2 py-0.5 text-xs font-bold ${st.cls}`}>{st.label}</span>
+                      {s.secondMarking && <span className="rounded-md border border-violet-500/30 bg-violet-500/15 px-2 py-0.5 text-xs font-bold text-violet-300">Second marking</span>}
+                      {s.adminNote && !isDone(s) && <span className="rounded-md border border-rose-500/30 bg-rose-500/15 px-2 py-0.5 text-xs font-bold text-rose-300">Sent back</span>}
                       <p className="text-base font-semibold text-white">{s.paper}</p>
                     </div>
                     <p className="mt-1 text-sm text-slate-300">{s.mock}</p>
                     <p className="mt-1 text-sm text-slate-400">
                       <i className="fas fa-user-graduate mr-1.5" aria-hidden="true" />{s.student} · handed in {fmt(s.handedInAt)} ·{" "}
                       <span className={s.overdue ? "font-semibold text-rose-300" : ""}>{dueText(s, data.at)}</span>
-                      {s.status === "returned" && s.total != null && <> · <span className="font-semibold text-emerald-300">{s.total}/{s.maxMarks}</span></>}
+                      {isDone(s) && s.total != null && <> · <span className="font-semibold text-emerald-300">{s.total}/{s.maxMarks}</span></>}
                     </p>
                   </div>
                   <Link
                     to={`/teacher/mocks/${s.id}`}
-                    className={`inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-lg px-4 text-sm font-bold text-white transition ${s.status === "returned" ? "bg-emerald-700 hover:bg-emerald-600" : "bg-indigo-600 hover:bg-indigo-500"}`}
+                    className={`inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-lg px-4 text-sm font-bold text-white transition ${isDone(s) ? "bg-emerald-700 hover:bg-emerald-600" : "bg-indigo-600 hover:bg-indigo-500"}`}
                   >
-                    <i className={`fas ${s.status === "returned" ? "fa-eye" : "fa-pen"}`} aria-hidden="true" />
-                    {s.status === "returned" ? "View" : s.status === "marked" ? "Continue marking" : "Mark script"}
+                    <i className={`fas ${isDone(s) ? "fa-eye" : "fa-pen"}`} aria-hidden="true" />
+                    {isDone(s) ? "View" : s.adminNote ? "Fix and resend" : s.status === "marked" ? "Continue marking" : "Mark script"}
                   </Link>
                 </li>
               );

@@ -1,6 +1,7 @@
 // /teacher/mocks/:jobId — mark one written mock script: the student's answer beside the official mark scheme,
 // a mark (never above the question's printed marks; half marks allowed) and a short comment per question.
-// Saves itself; "Return to student" sends it once every question has a mark.
+// Saves itself; "Send to Mock Admin" sends it once every question has a mark and every area is rated. Mock Admin
+// checks the marking and releases it to the student, or sends it back with a note (shown at the top).
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { mocksService } from "../../services/mocksService";
@@ -156,7 +157,9 @@ const TeacherMockScript = () => {
     load();
   }, [load]);
 
-  const readOnly = script?.status === "returned";
+  // Sent to Mock Admin (in_review) or released: marks are locked.
+  const readOnly = script?.status === "returned" || script?.status === "in_review";
+  const sentBack = !readOnly && !!script?.adminNote;
   // Papers with a choice ("Question 1 and any two others"): required questions + the best answers of the rest count,
   // as in Cambridge marking. Same rule as the Mocks app (src/lib/answer-rule.ts), which computes the returned total.
   const total = useMemo(() => {
@@ -222,7 +225,7 @@ const TeacherMockScript = () => {
       setConfirming(false);
       await load();
     } catch (e) {
-      setReturnError(e?.message || "Could not return the script.");
+      setReturnError(e?.message || "Could not send the script.");
     } finally {
       setReturning(false);
     }
@@ -260,8 +263,10 @@ const TeacherMockScript = () => {
             <p className="mt-1 text-sm text-slate-300">
               <i className="fas fa-user-graduate mr-1.5" aria-hidden="true" />{script.student} · handed in {fmt(script.handedInAt)}
               {!readOnly && script.dueAt && <> · <span className={script.overdue ? "font-semibold text-rose-300" : "text-amber-300"}>due {fmt(script.dueAt)}</span></>}
-              {readOnly && <> · <span className="font-semibold text-emerald-300">returned {fmt(script.returnedAt)}</span></>}
+              {script.status === "in_review" && <> · <span className="font-semibold text-sky-300">sent to Mock Admin {fmt(script.sentAt)}</span></>}
+              {script.status === "returned" && <> · <span className="font-semibold text-emerald-300">finished {fmt(script.returnedAt)}</span></>}
             </p>
+            {script.secondMarking && <p className="mt-2 text-sm text-violet-200"><i className="fas fa-user-group mr-1.5" aria-hidden="true" />Second marking: mark it on your own. Mock Admin compares it with the first teacher&apos;s marking and chooses which one the student gets.</p>}
             {script.rule && <p className="mt-2 text-sm text-cyan-200"><i className="fas fa-list-check mr-1.5" aria-hidden="true" />{script.rule.text} The total counts the required questions and {script.rule.groups?.length ? "the best answer of each part" : `the best ${script.rule.choose === 1 ? "answer" : `${script.rule.choose} answers`} of the rest`}.</p>}
             {script.labTest && <p className="mt-2 text-sm text-amber-200"><i className="fas fa-flask mr-1.5" aria-hidden="true" />Lab test: the student describes the procedure. Credit points that show they would carry it out correctly.</p>}
           </div>
@@ -272,7 +277,7 @@ const TeacherMockScript = () => {
             </div>
             {!readOnly && (
               <button type="button" onClick={() => { setReturnError(null); setConfirming(true); }} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-emerald-600 px-5 text-sm font-bold text-white hover:bg-emerald-500 transition">
-                <i className="fas fa-paper-plane" aria-hidden="true" /> Return to student
+                <i className="fas fa-paper-plane" aria-hidden="true" /> {sentBack ? "Send again" : "Send to Mock Admin"}
               </button>
             )}
           </div>
@@ -281,9 +286,17 @@ const TeacherMockScript = () => {
           <div className="h-full rounded-full bg-emerald-500 transition-all" style={{ width: `${qCount ? (markedCount / qCount) * 100 : 0}%` }} />
         </div>
         <p className="mt-2 text-xs text-slate-300" aria-live="polite">
-          {readOnly ? "Returned: marks can no longer be changed." : save === "saving" ? "Saving…" : save === "saved" ? "All changes saved." : save === "error" ? <span className="text-rose-300">Not saved — check your connection.</span> : "Changes save automatically."}
+          {script.status === "in_review" ? "With Mock Admin: they check the marking, then release it to the student." : readOnly ? "Finished: marks can no longer be changed." : save === "saving" ? "Saving…" : save === "saved" ? "All changes saved." : save === "error" ? <span className="text-rose-300">Not saved — check your connection.</span> : "Changes save automatically."}
         </p>
       </div>
+
+      {sentBack && (
+        <div role="status" className="mt-4 rounded-2xl border border-rose-500/40 bg-rose-500/10 p-5">
+          <p className="text-sm font-bold uppercase tracking-wide text-rose-200"><i className="fas fa-rotate-left mr-2" aria-hidden="true" />Mock Admin sent this back</p>
+          <p className="mt-2 whitespace-pre-wrap text-base text-white">{script.adminNote}</p>
+          <p className="mt-2 text-sm text-rose-100/80">Make the changes, then send it again.</p>
+        </div>
+      )}
 
       {script.insertPages?.length > 0 && (
         <details className="group mt-4 rounded-2xl border border-slate-800 bg-slate-900/50">
@@ -449,7 +462,7 @@ const TeacherMockScript = () => {
         {!readOnly && (
           <div className="mt-4 flex justify-end">
             <button type="button" onClick={() => { setReturnError(null); setConfirming(true); }} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-emerald-600 px-5 text-sm font-bold text-white hover:bg-emerald-500 transition">
-              <i className="fas fa-paper-plane" aria-hidden="true" /> Return to student
+              <i className="fas fa-paper-plane" aria-hidden="true" /> {sentBack ? "Send again" : "Send to Mock Admin"}
             </button>
           </div>
         )}
@@ -458,13 +471,13 @@ const TeacherMockScript = () => {
       {confirming && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 p-4 sm:items-center" onClick={() => !returning && setConfirming(false)}>
           <div role="dialog" aria-modal="true" aria-labelledby="ret-h" className="w-full max-w-md rounded-2xl border border-slate-700 bg-slate-900 p-6" onClick={(e) => e.stopPropagation()}>
-            <h2 id="ret-h" className="text-xl font-bold text-white">Return to {script.student}?</h2>
-            <p className="mt-2 text-base text-slate-200">Total <strong className="text-emerald-300 font-semibold">{total}/{script.maxMarks}</strong>. {markedCount < qCount ? `${qCount - markedCount} question${qCount - markedCount === 1 ? " has" : "s have"} no mark yet — give 0 where nothing earns a mark.` : areasRated < areaCount ? `${areaCount - areasRated} of the ${areaCount} areas ${areaCount - areasRated === 1 ? "has" : "have"} no rating yet.` : "The student will see every mark, comment and remark."}</p>
+            <h2 id="ret-h" className="text-xl font-bold text-white">Send {script.student}&apos;s script to Mock Admin?</h2>
+            <p className="mt-2 text-base text-slate-200">Total <strong className="text-emerald-300 font-semibold">{total}/{script.maxMarks}</strong>. {markedCount < qCount ? `${qCount - markedCount} question${qCount - markedCount === 1 ? " has" : "s have"} no mark yet — give 0 where nothing earns a mark.` : areasRated < areaCount ? `${areaCount - areasRated} of the ${areaCount} areas ${areaCount - areasRated === 1 ? "has" : "have"} no rating yet.` : "Mock Admin checks the marking, then releases it to the student. You can't change marks after sending."}</p>
             {returnError && <p role="alert" className="mt-3 rounded-lg bg-rose-500/10 px-3 py-2 text-sm text-rose-200">{returnError}</p>}
             <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
               <button type="button" disabled={returning} onClick={() => setConfirming(false)} className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-700 px-4 text-sm font-semibold text-slate-200 hover:border-indigo-500">Keep marking</button>
               <button type="button" disabled={returning || !ready} onClick={doReturn} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 text-sm font-bold text-white hover:bg-emerald-500 disabled:opacity-50">
-                {returning ? "Returning…" : <><i className="fas fa-paper-plane" aria-hidden="true" /> Return now</>}
+                {returning ? "Sending…" : <><i className="fas fa-paper-plane" aria-hidden="true" /> Send now</>}
               </button>
             </div>
           </div>
