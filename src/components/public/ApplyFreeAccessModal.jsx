@@ -208,8 +208,8 @@ const ApplyFreeAccessModal = ({ onClose, preselectedCourseIds = [] }) => {
                     className={errors.country ? "!border-rose-500" : ""}
                   >
                     {COUNTRIES.map((c) => (
-                      <option key={c} value={c}>
-                        {c}
+                      <option key={c.name} value={c.name}>
+                        {c.name}
                       </option>
                     ))}
                   </FilterSelect>
