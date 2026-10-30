@@ -36,6 +36,7 @@ const STATIC_PAGES = [
   { loc: "/play-area/personality-test", changefreq: "monthly", lastmod: pageDate("/play-area/personality-test") },
   { loc: "/play-area/workplace-assessment", changefreq: "monthly", lastmod: pageDate("/play-area/workplace-assessment") },
   { loc: "/play-area/star-signs", changefreq: "monthly", lastmod: pageDate("/play-area/star-signs") },
+  { loc: "/play-area/memory-challenge", changefreq: "monthly", lastmod: pageDate("/play-area/memory-challenge") },
   // Subject guides — keep in step with src/data/subjectGuides and scripts/prerender.js
   { loc: "/subjects", changefreq: "monthly", lastmod: pageDate("/subjects") },
   { loc: "/subjects/mathematics-4024", changefreq: "monthly", lastmod: pageDate("/subjects/mathematics-4024") },

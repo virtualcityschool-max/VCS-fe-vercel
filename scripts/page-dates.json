@@ -12,7 +12,7 @@
     "date": "2026-05-14"
   },
   "/play-area": {
-    "hash": "fe570b120deb47f9",
+    "hash": "93e53f30400dd390",
     "date": "2026-10-30"
   },
   "/play-area/personality-test": {
@@ -25,6 +25,10 @@
   },
   "/play-area/star-signs": {
     "hash": "cd7bdef2c03aca43",
+    "date": "2026-10-30"
+  },
+  "/play-area/memory-challenge": {
+    "hash": "d19cf68d8dfd20e3",
     "date": "2026-10-30"
   },
   "/teachers/:id": {

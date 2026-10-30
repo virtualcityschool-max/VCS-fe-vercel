@@ -35,11 +35,12 @@ export const PLAY_AREA_GAMES = [
   {
     slug: "memory-challenge",
     group: "students",
+    path: "/play-area/memory-challenge",
     title: "Memory Challenge",
-    blurb: "Remember patterns, numbers and words — and watch your memory grow stronger every round.",
+    blurb: "Five memory games for numbers, pictures and words. Beat your best, earn badges and get your Memory Profile with study tips.",
     icon: "fas fa-brain",
-    accent: "cyan",
-    meta: ["Coming soon"],
+    accent: "emerald",
+    meta: ["5 games", "Badges", "Memory Profile"],
   },
   {
     slug: "brain-teasers",

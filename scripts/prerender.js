@@ -84,7 +84,7 @@ async function buildRouteList() {
     "/online-school",
     ...COUNTRY_LANDING_SLUGS.map((slug) => `/online-school/${slug}`),
     "/exam-dates",
-    "/play-area", "/play-area/personality-test", "/play-area/workplace-assessment", "/play-area/star-signs",
+    "/play-area", "/play-area/personality-test", "/play-area/workplace-assessment", "/play-area/star-signs", "/play-area/memory-challenge",
     "/subjects",
     ...SUBJECT_GUIDE_SLUGS.map((slug) => `/subjects/${slug}`),
   ];

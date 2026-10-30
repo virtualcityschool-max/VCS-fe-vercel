@@ -17,7 +17,7 @@ const PlayArea = () => {
   useSeo({
     title: "Play Area — Free Personality Test, Puzzles & Brain Games for Students",
     description:
-      "Free tests and puzzles from Virtual City School: a 100-question personality test for students, a research-based workplace personality assessment for job seekers and teachers, and memory games and brain teasers coming soon.",
+      "Free tests and puzzles from Virtual City School: a 100-question personality test for students, a research-based workplace personality assessment for job seekers and teachers, five memory games with a Memory Profile, and brain teasers coming soon.",
     url: PAGE_URL,
     jsonLd: [
       {
