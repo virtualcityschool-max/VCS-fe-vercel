@@ -11,7 +11,7 @@ import PublicHome from "../pages/public/PublicHome";
 import {
   Marketplace, CourseDetails, Blogs, BlogDetails, TeachersDirectory, TeacherProfile, PrivacyPolicy,
   TermsAndConditions, AboutPage, OnlineSchoolHub, CountryLandingPage, ExamDatesPage, SubjectGuidePage,
-  SubjectGuidesIndex, PlayArea, PersonalityTest,
+  SubjectGuidesIndex, PlayArea, PersonalityTest, WorkplaceAssessment,
 } from "./publicPages";
 
 // Authenticated dashboards are code-split so public visitors never download them.
@@ -225,6 +225,7 @@ const AppRoutes = () => {
       <Route path="/subjects/:slug" element={<SubjectGuidePage />} />
       <Route path="/play-area" element={<PlayArea />} />
       <Route path="/play-area/personality-test" element={<PersonalityTest />} />
+      <Route path="/play-area/workplace-assessment" element={<WorkplaceAssessment />} />
 
       {/* Student-Only Routes */}
       <Route element={<ProtectedRoute allowedRoles={["student"]} />}>

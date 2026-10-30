@@ -365,6 +365,7 @@ html.theme-light .hover\:border-slate-600:hover:not(.theme-keep, .theme-keep *) 
 html.theme-light .hover\:border-slate-600\/70:hover:not(.theme-keep, .theme-keep *) { border-color: color-mix(in oklab, oklch(92.9% 0.013 255.508) 70%, transparent) !important; }
 html.theme-light .hover\:border-slate-700:hover:not(.theme-keep, .theme-keep *) { border-color: oklch(92.9% 0.013 255.508) !important; }
 html.theme-light .hover\:border-white\/10:hover:not(.theme-keep, .theme-keep *) { border-color: color-mix(in oklab, oklch(20.8% 0.042 265.755) 16%, transparent) !important; }
+html.theme-light .hover\:border-white\/30:hover:not(.theme-keep, .theme-keep *) { border-color: color-mix(in oklab, oklch(20.8% 0.042 265.755) 30%, transparent) !important; }
 html.theme-light .hover\:border-white\/40:hover:not(.theme-keep, .theme-keep *) { border-color: color-mix(in oklab, oklch(20.8% 0.042 265.755) 30%, transparent) !important; }
 html.theme-light .hover\:border-white\/5:hover:not(.theme-keep, .theme-keep *) { border-color: color-mix(in oklab, oklch(20.8% 0.042 265.755) 8%, transparent) !important; }
 html.theme-light .hover\:border-white\/50:hover:not(.theme-keep, .theme-keep *) { border-color: color-mix(in oklab, oklch(20.8% 0.042 265.755) 30%, transparent) !important; }

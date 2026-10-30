@@ -1,8 +1,10 @@
-// Play Area catalogue. Add a new test or puzzle here: `path` set = live card,
+// Play Area catalogue. `group`: "students" (learn about yourself) or "jobs"
+// (for qualified students applying for jobs). Add a new test or puzzle here: `path` set = live card,
 // no `path` = "Coming soon" card.
 export const PLAY_AREA_GAMES = [
   {
     slug: "personality-test",
+    group: "students",
     path: "/play-area/personality-test",
     title: "Personality Test",
     blurb: "100 quick statements reveal your personality profile, your study style, and the subjects and careers that may suit you.",
@@ -11,7 +13,18 @@ export const PLAY_AREA_GAMES = [
     meta: ["100 questions", "About 12 minutes", "Free report"],
   },
   {
+    slug: "workplace-assessment",
+    group: "jobs",
+    path: "/play-area/workplace-assessment",
+    title: "Workplace Personality Assessment",
+    blurb: "A pre-interview assessment built on research-tested IPIP questions. Professional report on your work style, strengths and interview questions — with a teacher-candidate version.",
+    icon: "fas fa-user-tie",
+    accent: "indigo",
+    meta: ["100 statements", "About 15 minutes", "For job seekers & teachers"],
+  },
+  {
     slug: "memory-challenge",
+    group: "students",
     title: "Memory Challenge",
     blurb: "Remember patterns, numbers and words — and watch your memory grow stronger every round.",
     icon: "fas fa-brain",
@@ -20,6 +33,7 @@ export const PLAY_AREA_GAMES = [
   },
   {
     slug: "brain-teasers",
+    group: "students",
     title: "Brain Teasers",
     blurb: "Logic puzzles and riddles to stretch your thinking and sharpen problem solving.",
     icon: "fas fa-puzzle-piece",
@@ -28,6 +42,7 @@ export const PLAY_AREA_GAMES = [
   },
   {
     slug: "career-interests",
+    group: "students",
     title: "Career Interest Finder",
     blurb: "Find out which kinds of work excite you most and which A Level subjects lead there.",
     icon: "fas fa-compass",

@@ -17,7 +17,7 @@ const PlayArea = () => {
   useSeo({
     title: "Play Area — Free Personality Test, Puzzles & Brain Games for Students",
     description:
-      "Free tests and puzzles from Virtual City School: take the 100-question personality test to discover your strengths, study style and career paths, with memory games and brain teasers coming soon.",
+      "Free tests and puzzles from Virtual City School: a 100-question personality test for students, a research-based workplace personality assessment for job seekers and teachers, and memory games and brain teasers coming soon.",
     url: PAGE_URL,
     jsonLd: [
       {
@@ -74,45 +74,49 @@ const PlayArea = () => {
           </figure>
         </header>
 
-        <section aria-labelledby="games-heading" className="mb-16">
-          <h2 id="games-heading" className="text-2xl md:text-3xl font-black font-poppins text-white mb-6">
-            Choose a challenge
-          </h2>
-          <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-5">
-            {PLAY_AREA_GAMES.map((g, i) => {
-              const a = ACCENT_CLASSES[g.accent];
-              const body = (
-                <>
-                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl mb-5 ${a.icon}`}>
-                    <i className={g.icon} aria-hidden="true" />
-                  </div>
-                  <h3 className="text-lg font-bold text-white mb-2">{g.title}</h3>
-                  <p className="text-sm text-slate-300 leading-relaxed mb-5">{g.blurb}</p>
-                  <div className="flex flex-wrap gap-2 mt-auto">
-                    {g.meta.map((m) => (
-                      <span key={m} className={`px-2.5 py-1 rounded-full text-xs font-bold ${a.bg} ${a.text}`}>{m}</span>
-                    ))}
-                  </div>
-                  {g.path && (
-                    <span className={`mt-5 inline-flex items-center gap-2 text-sm font-bold ${a.text}`}>
-                      Play now <i className="fas fa-arrow-right" aria-hidden="true" />
-                    </span>
-                  )}
-                </>
-              );
-              const cls = `h-full flex flex-col p-6 rounded-3xl border-t-4 border ${a.ring} bg-white/[0.03]`;
-              return (
-                <Reveal key={g.slug} delay={i * 80}>
-                  {g.path ? (
-                    <Link to={g.path} className={`${cls} hover:bg-white/[0.06] hover:-translate-y-1 transition`}>{body}</Link>
-                  ) : (
-                    <div className={`${cls} opacity-80`} aria-label={`${g.title} (coming soon)`}>{body}</div>
-                  )}
-                </Reveal>
-              );
-            })}
-          </div>
-        </section>
+        {[
+          ["students", "games-heading", "For students: discover yourself", "Know yourself, find your path and sharpen your mind."],
+          ["jobs", "jobs-heading", "For job seekers", "Preparing for interviews? Take the assessment many employers ask for, and print your report."],
+        ].map(([group, id, heading, sub]) => (
+          <section key={group} aria-labelledby={id} className="mb-16">
+            <h2 id={id} className="text-2xl md:text-3xl font-black font-poppins text-white mb-2">{heading}</h2>
+            <p className="text-base text-slate-300 mb-6">{sub}</p>
+            <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-5">
+              {PLAY_AREA_GAMES.filter((g) => g.group === group).map((g, i) => {
+                const a = ACCENT_CLASSES[g.accent];
+                const body = (
+                  <>
+                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl mb-5 ${a.icon}`}>
+                      <i className={g.icon} aria-hidden="true" />
+                    </div>
+                    <h3 className="text-lg font-bold text-white mb-2">{g.title}</h3>
+                    <p className="text-sm text-slate-300 leading-relaxed mb-5">{g.blurb}</p>
+                    <div className="flex flex-wrap gap-2 mt-auto">
+                      {g.meta.map((m) => (
+                        <span key={m} className={`px-2.5 py-1 rounded-full text-xs font-bold ${a.bg} ${a.text}`}>{m}</span>
+                      ))}
+                    </div>
+                    {g.path && (
+                      <span className={`mt-5 inline-flex items-center gap-2 text-sm font-bold ${a.text}`}>
+                        Start now <i className="fas fa-arrow-right" aria-hidden="true" />
+                      </span>
+                    )}
+                  </>
+                );
+                const cls = `h-full flex flex-col p-6 rounded-3xl border-t-4 border ${a.ring} bg-white/[0.03]`;
+                return (
+                  <Reveal key={g.slug} delay={i * 80}>
+                    {g.path ? (
+                      <Link to={g.path} className={`${cls} hover:bg-white/[0.06] hover:-translate-y-1 transition`}>{body}</Link>
+                    ) : (
+                      <div className={`${cls} opacity-80`} aria-label={`${g.title} (coming soon)`}>{body}</div>
+                    )}
+                  </Reveal>
+                );
+              })}
+            </div>
+          </section>
+        ))}
 
         <section aria-labelledby="why-heading">
           <h2 id="why-heading" className="text-2xl md:text-3xl font-black font-poppins text-white mb-6">

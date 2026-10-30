@@ -12,11 +12,15 @@
     "date": "2026-05-14"
   },
   "/play-area": {
-    "hash": "88221d6be31cf454",
+    "hash": "70f7442834ea36ae",
     "date": "2026-10-30"
   },
   "/play-area/personality-test": {
     "hash": "4ce7d3c952587175",
+    "date": "2026-10-30"
+  },
+  "/play-area/workplace-assessment": {
+    "hash": "bc3647a0a26b7ec9",
     "date": "2026-10-30"
   },
   "/teachers/:id": {
