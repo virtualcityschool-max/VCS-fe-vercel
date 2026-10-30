@@ -19,6 +19,7 @@ export const SubjectGuidesIndex = lazyPage(() => import("../pages/public/Subject
 export const PlayArea = lazyPage(() => import("../pages/public/PlayArea"));
 export const PersonalityTest = lazyPage(() => import("../pages/public/PersonalityTest"));
 export const WorkplaceAssessment = lazyPage(() => import("../pages/public/WorkplaceAssessment"));
+export const StarSigns = lazyPage(() => import("../pages/public/StarSigns"));
 
 // For src/main.jsx: the page component for a public path, to preload.
 export const PUBLIC_PAGES = [
@@ -39,6 +40,7 @@ export const PUBLIC_PAGES = [
   [/^\/play-area\/?$/, PlayArea],
   [/^\/play-area\/personality-test\/?$/, PersonalityTest],
   [/^\/play-area\/workplace-assessment\/?$/, WorkplaceAssessment],
+  [/^\/play-area\/star-signs\/?$/, StarSigns],
 ];
 
 // The page for a path, preloaded by src/main.jsx before the first render.

@@ -27,6 +27,7 @@ async function pageContents() {
     "/play-area": file("src/pages/public/PlayArea.jsx") + file("src/data/playArea/games.js"),
     "/play-area/personality-test": file("src/pages/public/PersonalityTest.jsx") + file("src/data/playArea/personality.js"),
     "/play-area/workplace-assessment": file("src/pages/public/WorkplaceAssessment.jsx") + file("src/data/playArea/workplace.js"),
+    "/play-area/star-signs": file("src/pages/public/StarSigns.jsx") + file("src/data/playArea/zodiac.js"),
     // The layout every tutor / course page shares: when it changes, every
     // one of those pages changed (the sitemap takes the newer of this and
     // the backend's updated_at for each page).

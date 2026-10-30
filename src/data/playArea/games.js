@@ -23,6 +23,16 @@ export const PLAY_AREA_GAMES = [
     meta: ["100 statements", "About 15 minutes", "For job seekers & teachers"],
   },
   {
+    slug: "star-signs",
+    group: "students",
+    path: "/play-area/star-signs",
+    title: "Star Signs & the Real Sky",
+    blurb: "Enter your birthday to see your Western sign, your Vedic Rashi, and the real constellation the Sun was in — with star facts and history.",
+    icon: "fas fa-star",
+    accent: "cyan",
+    meta: ["Western · Vedic · Astronomy", "1 minute"],
+  },
+  {
     slug: "memory-challenge",
     group: "students",
     title: "Memory Challenge",

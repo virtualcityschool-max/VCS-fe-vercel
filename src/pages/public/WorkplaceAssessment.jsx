@@ -308,12 +308,12 @@ const FactorBar = ({ f, pct }) => {
         <span className={`px-2.5 py-0.5 rounded-full border text-xs font-black ${LEVEL_STYLE[lv]}`}>{LEVEL_LABEL[lv]} · {pct}</span>
       </div>
       <div className="relative h-3 rounded-full bg-white/10 overflow-hidden">
-        <div className="absolute inset-y-0 left-[35%] w-px bg-white/30" aria-hidden="true" />
-        <div className="absolute inset-y-0 left-[65%] w-px bg-white/30" aria-hidden="true" />
         <div className={`absolute inset-y-0 left-0 ${a.bar} rounded-full`} style={{ width: `${Math.max(pct, 2)}%` }} />
+        <div className="absolute inset-y-0 left-[35%] w-0.5 bg-slate-950/70" aria-hidden="true" />
+        <div className="absolute inset-y-0 left-[65%] w-0.5 bg-slate-950/70" aria-hidden="true" />
       </div>
-      <div className="flex justify-between mt-1 text-xs text-slate-400">
-        <span>Low</span><span>Moderate</span><span>High</span>
+      <div className="grid grid-cols-[35fr_30fr_35fr] mt-1 text-xs text-slate-400">
+        <span>Low</span><span className="text-center">Moderate</span><span className="text-right">High</span>
       </div>
     </div>
   );

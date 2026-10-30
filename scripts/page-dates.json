@@ -12,7 +12,7 @@
     "date": "2026-05-14"
   },
   "/play-area": {
-    "hash": "70f7442834ea36ae",
+    "hash": "3308f51cbc31ade0",
     "date": "2026-10-30"
   },
   "/play-area/personality-test": {
@@ -20,7 +20,11 @@
     "date": "2026-10-30"
   },
   "/play-area/workplace-assessment": {
-    "hash": "bc3647a0a26b7ec9",
+    "hash": "b3a246587f20e336",
+    "date": "2026-10-30"
+  },
+  "/play-area/star-signs": {
+    "hash": "1e1468003c4a0f07",
     "date": "2026-10-30"
   },
   "/teachers/:id": {
