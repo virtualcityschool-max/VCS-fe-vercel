@@ -144,6 +144,7 @@ const NAV_CONFIG = {
     { label: "Resources",       to: "/student?tab=resources",  icon: "fas fa-folder-open" },
     { label: "Assignments & Quizzes", to: "/student?tab=assessments", icon: "fas fa-clipboard-check" },
     { label: "Subject Guides",  to: "/subjects",               icon: "fas fa-book-reader" },
+    { label: "Play Area",       to: "/play-area",              icon: "fas fa-puzzle-piece" },
     { label: "Explore Courses", to: "/courses",                icon: "fas fa-compass" },
     { label: "Blogs",           to: "/blogs",                  icon: "fas fa-newspaper" },
     { label: "About Us",        to: "/about",                  icon: "fas fa-info-circle" },

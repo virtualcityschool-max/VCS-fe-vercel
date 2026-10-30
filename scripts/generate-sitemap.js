@@ -32,6 +32,8 @@ const STATIC_PAGES = [
   { loc: "/terms", changefreq: "yearly", lastmod: pageDate("/terms") },
   { loc: "/online-school", changefreq: "monthly", lastmod: pageDate("/online-school") },
   { loc: "/exam-dates", changefreq: "weekly", lastmod: EXAM_DATES_LAST_VERIFIED },
+  { loc: "/play-area", changefreq: "monthly", lastmod: pageDate("/play-area") },
+  { loc: "/play-area/personality-test", changefreq: "monthly", lastmod: pageDate("/play-area/personality-test") },
   // Subject guides — keep in step with src/data/subjectGuides and scripts/prerender.js
   { loc: "/subjects", changefreq: "monthly", lastmod: pageDate("/subjects") },
   { loc: "/subjects/mathematics-4024", changefreq: "monthly", lastmod: pageDate("/subjects/mathematics-4024") },

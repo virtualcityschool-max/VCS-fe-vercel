@@ -14,6 +14,7 @@ const PUBLIC_LINKS = [
   { label: "Explore Courses", path: "/courses" },
   { label: "Subject Guides", path: "/subjects", guides: true },
   { label: "Meet Our Tutors", path: "/teachers" },
+  { label: "Play Area", path: "/play-area" },
   { label: "Blog", path: "/blogs" },
   { label: "About Us", path: "/about" },
 ];
@@ -84,7 +85,7 @@ const Navbar = ({ variant = "default", hideLogo = false }) => {
                 </div>
               )}
               {!hideLogo && (
-                <div className="hidden lg:flex items-center gap-8">
+                <div className="hidden xl:flex items-center gap-8">
                   {/* Real links (not buttons) so search engines can follow them. */}
                   {PUBLIC_LINKS.map((link) => {
                     const active = link.guides ? location.pathname.startsWith("/subjects") : isActivePath(link.path);
@@ -92,7 +93,7 @@ const Navbar = ({ variant = "default", hideLogo = false }) => {
                       <Link
                         key={link.path}
                         to={link.path}
-                        className={`nav-link font-medium text-xs sm:text-sm transition ${
+                        className={`nav-link font-medium text-xs sm:text-sm whitespace-nowrap transition ${
                           active ? "text-white nav-link-active" : "text-slate-400 hover:text-white"
                         }`}
                       >
@@ -159,7 +160,7 @@ const Navbar = ({ variant = "default", hideLogo = false }) => {
               {!hideLogo && (
                 <button
                   onClick={() => setMobileOpen((v) => !v)}
-                  className="lg:hidden flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 shrink-0 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 border border-white/5 transition-all"
+                  className="xl:hidden flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 shrink-0 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 border border-white/5 transition-all"
                   aria-label="Toggle navigation menu"
                   aria-expanded={mobileOpen}
                 >
@@ -171,7 +172,7 @@ const Navbar = ({ variant = "default", hideLogo = false }) => {
 
           {/* Mobile menu panel for public navigation */}
           {!hideLogo && mobileOpen && (
-            <div className="lg:hidden border-t border-white/5 bg-slate-950/95 backdrop-blur-2xl animate-slideDown">
+            <div className="xl:hidden border-t border-white/5 bg-slate-950/95 backdrop-blur-2xl animate-slideDown">
               <div className="px-4 py-4 space-y-1">
                 {PUBLIC_LINKS.map((link) => (
                   <Link

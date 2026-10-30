@@ -11,6 +11,14 @@
     "hash": "ab2fad34c88d1cb6",
     "date": "2026-05-14"
   },
+  "/play-area": {
+    "hash": "88221d6be31cf454",
+    "date": "2026-10-30"
+  },
+  "/play-area/personality-test": {
+    "hash": "4ce7d3c952587175",
+    "date": "2026-10-30"
+  },
   "/teachers/:id": {
     "hash": "83ac169d455cad63",
     "date": "2026-10-20"

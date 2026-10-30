@@ -778,3 +778,16 @@ h3,
             animation: none;
      }
 }
+
+/* ── Printing a Play Area report (html.vcs-print is set while printing) ── */
+@media print {
+     html.vcs-print header,
+     html.vcs-print footer,
+     html.vcs-print a[href^="https://wa.me"],
+     html.vcs-print .print-hide {
+            display: none !important;
+     }
+     html.vcs-print .print-break-avoid {
+            break-inside: avoid;
+     }
+}
