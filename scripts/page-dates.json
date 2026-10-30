@@ -12,7 +12,7 @@
     "date": "2026-05-14"
   },
   "/play-area": {
-    "hash": "3308f51cbc31ade0",
+    "hash": "fe570b120deb47f9",
     "date": "2026-10-30"
   },
   "/play-area/personality-test": {
@@ -24,7 +24,7 @@
     "date": "2026-10-30"
   },
   "/play-area/star-signs": {
-    "hash": "1e1468003c4a0f07",
+    "hash": "cd7bdef2c03aca43",
     "date": "2026-10-30"
   },
   "/teachers/:id": {

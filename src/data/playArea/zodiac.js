@@ -110,3 +110,122 @@ export const SOURCES = [
   ["Vedic signs", "Jyotisha sidereal zodiac, Lahiri ayanamsa (recommended by India's Calendar Reform Committee, 1955)"],
   ["Astrology test", "Carlson, S. (1985). A double-blind test of astrology. Nature, 318, 419–425"],
 ];
+
+// ---- What tradition says about personality (for fun) -----------------------
+// VCS's own summaries of the character each sign is traditionally given in
+// Western astrology, and each Rashi in Jyotisha. Folklore, not science.
+
+export const SIGN_TRAITS = {
+  aries: {
+    keywords: ["Bold", "Energetic", "Pioneering", "Competitive"],
+    portrait: "The first sign of the zodiac is the one that charges in first. Aries is pictured as a natural starter: brave, direct and full of energy, happiest when there is a challenge to win or a new path to open.",
+    strengths: ["Courage to try new things", "Takes the lead without being asked", "Honest and straightforward", "Bounces back quickly"],
+    challenges: ["Impatient when things move slowly", "Can start more than they finish", "Quick temper that cools just as fast"],
+    study: "Short, intense sprints and friendly competition — race a friend through a past paper.",
+    careers: ["Entrepreneur", "Surgeon", "Armed forces officer", "Sports coach"],
+  },
+  taurus: {
+    keywords: ["Steady", "Patient", "Reliable", "Practical"],
+    portrait: "Taurus, the Bull, is the picture of calm strength. Tradition sees Taurus as patient, loyal and down-to-earth — slow to start but almost impossible to stop, with a love of comfort, good food and beautiful things.",
+    strengths: ["Patience and staying power", "Loyal and dependable", "Practical, common-sense thinking", "Eye for beauty and quality"],
+    challenges: ["Stubborn once their mind is made up", "Dislikes sudden change", "Can get too comfortable"],
+    study: "A fixed routine in the same quiet spot, building up knowledge brick by brick.",
+    careers: ["Banker or accountant", "Architect", "Chef", "Interior designer"],
+  },
+  gemini: {
+    keywords: ["Curious", "Witty", "Talkative", "Adaptable"],
+    portrait: "Gemini, the Twins, is said to have two minds working at once. Quick, playful and endlessly curious, Gemini loves conversation, new ideas and variety — and can talk to almost anyone about almost anything.",
+    strengths: ["Learns new things very fast", "Great communicator and storyteller", "Adapts easily to change", "Sense of humour"],
+    challenges: ["Gets bored with routine", "Attention can jump around", "May say yes to too many things"],
+    study: "Switch topics every 30 minutes and explain ideas out loud — teaching is learning.",
+    careers: ["Journalist", "Teacher", "Marketing specialist", "Translator"],
+  },
+  cancer: {
+    keywords: ["Caring", "Loyal", "Intuitive", "Protective"],
+    portrait: "Cancer, the Crab, has a tough shell and a soft heart. Tradition paints Cancer as deeply caring and protective of family and friends, with strong feelings, a good memory and a talent for making people feel at home.",
+    strengths: ["Kind and nurturing", "Reads people's feelings well", "Fiercely loyal", "Excellent memory"],
+    challenges: ["Takes criticism to heart", "Moods can change like the tides", "Holds on to the past"],
+    study: "A calm, cosy study space and a study buddy you trust.",
+    careers: ["Doctor or nurse", "Psychologist", "Teacher", "Social worker"],
+  },
+  leo: {
+    keywords: ["Confident", "Generous", "Warm", "Creative"],
+    portrait: "Leo, the Lion, is ruled by the Sun itself — so tradition gives Leo a sunny, larger-than-life personality. Leo is pictured as a warm, generous leader who loves to shine, create and lift others up.",
+    strengths: ["Natural confidence and presence", "Generous and big-hearted", "Inspires and motivates others", "Creative flair"],
+    challenges: ["Needs praise and recognition", "Can be proud", "Finds it hard to admit mistakes"],
+    study: "Set big goals, present what you learn, and reward yourself when you hit them.",
+    careers: ["Business leader", "Actor or presenter", "Lawyer", "Event manager"],
+  },
+  virgo: {
+    keywords: ["Careful", "Analytical", "Helpful", "Organised"],
+    portrait: "Virgo, the Maiden holding an ear of wheat, is linked with harvest and hard work. Tradition sees Virgo as precise, thoughtful and modest — the person who notices the small details everyone else missed and quietly fixes them.",
+    strengths: ["Attention to detail", "Organised and hard-working", "Logical problem solver", "Always ready to help"],
+    challenges: ["Perfectionism and over-worrying", "Can be too self-critical", "Finds it hard to relax"],
+    study: "Neat notes, checklists and a revision timetable — then trust your preparation.",
+    careers: ["Doctor or pharmacist", "Data analyst", "Editor", "Engineer"],
+  },
+  libra: {
+    keywords: ["Fair", "Diplomatic", "Sociable", "Artistic"],
+    portrait: "Libra, the Scales, is all about balance. Tradition pictures Libra as charming, fair-minded and peace-loving — the friend who sees both sides of an argument and has a natural sense of style and harmony.",
+    strengths: ["Strong sense of fairness", "Brings people together", "Charming and easy to talk to", "Good taste and design sense"],
+    challenges: ["Struggles to make decisions", "Avoids conflict even when needed", "May try too hard to please everyone"],
+    study: "Study with a partner, compare views, and use colour and good design in your notes.",
+    careers: ["Lawyer or judge", "Diplomat", "Designer", "Human-resources manager"],
+  },
+  scorpio: {
+    keywords: ["Intense", "Determined", "Loyal", "Perceptive"],
+    portrait: "Scorpio, the Scorpion, is the sign of depth and determination. Tradition sees Scorpio as passionate, private and powerful — someone who never does anything halfway and can see straight through to the truth.",
+    strengths: ["Fierce focus and willpower", "Sees what others hide", "Deeply loyal", "Brave in a crisis"],
+    challenges: ["Can be secretive", "Finds it hard to forgive", "All-or-nothing feelings"],
+    study: "Deep dives — master one topic completely before moving on.",
+    careers: ["Detective or investigator", "Surgeon", "Researcher", "Psychologist"],
+  },
+  sagittarius: {
+    keywords: ["Adventurous", "Optimistic", "Honest", "Free-spirited"],
+    portrait: "Sagittarius, the Archer, aims its arrow at far horizons. Tradition pictures Sagittarius as cheerful, honest and adventurous — a lover of travel, big ideas and big questions about life.",
+    strengths: ["Optimism that lifts others", "Love of learning and exploring", "Honest and open", "Sense of humour"],
+    challenges: ["Can be blunt", "Restless with routine", "Promises more than time allows"],
+    study: "Link lessons to the real world — documentaries, trips and big-picture questions.",
+    careers: ["Pilot", "Professor", "Travel writer", "International business"],
+  },
+  capricorn: {
+    keywords: ["Ambitious", "Disciplined", "Responsible", "Patient"],
+    portrait: "Capricorn, the Sea-Goat, climbs mountains one careful step at a time. Tradition sees Capricorn as serious, hard-working and ambitious — someone who plans for the long term and reaches the top through steady effort.",
+    strengths: ["Self-discipline", "Long-term planning", "Responsible and trustworthy", "Practical wisdom"],
+    challenges: ["Works too hard and forgets to rest", "Can seem too serious", "Hard on themselves"],
+    study: "A long-term revision plan with clear milestones — and scheduled breaks.",
+    careers: ["Chartered accountant", "Civil servant (CSS)", "Engineer", "Company director"],
+  },
+  aquarius: {
+    keywords: ["Original", "Independent", "Inventive", "Humanitarian"],
+    portrait: "Aquarius, the Water-Bearer, pours out new ideas for everyone. Tradition pictures Aquarius as original, independent and forward-thinking — a free spirit who wants to make the world fairer and better.",
+    strengths: ["Original, inventive thinking", "Cares about big causes", "Independent mind", "Friendly with everyone"],
+    challenges: ["Can seem distant", "Rebels against rules", "Stubborn about their ideas"],
+    study: "Freedom to explore — projects, inventions and your own way of solving problems.",
+    careers: ["Scientist or inventor", "Software developer", "Social entrepreneur", "Astronomer"],
+  },
+  pisces: {
+    keywords: ["Imaginative", "Compassionate", "Gentle", "Artistic"],
+    portrait: "Pisces, the two Fishes, swims in a sea of imagination. Tradition sees Pisces as gentle, kind and dreamy — deeply sensitive to others' feelings, with a rich inner world of art, music and ideas.",
+    strengths: ["Deep empathy", "Rich imagination", "Artistic and musical talent", "Kind and forgiving"],
+    challenges: ["Daydreams when work is due", "Takes on others' worries", "Avoids hard realities"],
+    study: "Use stories, music and drawings to remember facts — and a timer to stay on track.",
+    careers: ["Artist or musician", "Doctor or nurse", "Counsellor", "Film-maker"],
+  },
+};
+
+// Traditional qualities of each Rashi in Jyotisha (Vedic astrology).
+export const RASHI_TRAITS = {
+  aries: "Mesha is fiery and courageous — quick to act, independent and full of drive.",
+  taurus: "Vrishabha is steady and patient — loves beauty, comfort and security, and is loyal to the end.",
+  gemini: "Mithuna is clever and communicative — curious, witty and quick with words.",
+  cancer: "Karka is emotional and nurturing — devoted to home, family and those it loves.",
+  leo: "Simha is royal and generous — proud, warm-hearted and born to lead.",
+  virgo: "Kanya is analytical and service-minded — careful, modest and practical.",
+  libra: "Tula is just and diplomatic — seeks balance, harmony and fair dealing.",
+  scorpio: "Vrishchika is intense and secretive — determined, deep and transformative.",
+  sagittarius: "Dhanu is righteous and philosophical — generous, optimistic and wise.",
+  capricorn: "Makara is disciplined and hard-working — patient, practical and ambitious.",
+  aquarius: "Kumbha is humanitarian and independent — thoughtful, unconventional and principled.",
+  pisces: "Meena is spiritual and compassionate — imaginative, gentle and selfless.",
+};

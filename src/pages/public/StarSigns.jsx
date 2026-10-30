@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useSeo } from "../../hooks/useSeo";
 import {
-  readSky, SIGNS, CONSTELLATIONS, IAU_BOUNDARIES, PTOLEMY_KIND, SOURCES,
+  readSky, SIGNS, CONSTELLATIONS, IAU_BOUNDARIES, PTOLEMY_KIND, SOURCES, SIGN_TRAITS, RASHI_TRAITS,
 } from "../../data/playArea/zodiac";
 
 const SITE_URL = "https://virtualcityschool.com";
@@ -110,9 +110,9 @@ const Card = ({ tone, label, title, sub, children }) => {
 
 const StarSigns = () => {
   useSeo({
-    title: "Star Signs: Western, Vedic and the Real Sky — Free Zodiac Explorer",
+    title: "Star Sign Personality — Western, Vedic and the Real Sky",
     description:
-      "Enter your birthday to see your Western star sign (Ptolemy's Tetrabiblos), your Vedic Rashi, and the real IAU constellation the Sun was in — with star facts, history and the science behind the zodiac.",
+      "Enter your birthday to discover your star-sign personality — strengths, challenges, study style and careers — plus your Vedic Rashi and the real IAU constellation the Sun was in, with star facts and history.",
     url: PAGE_URL,
     jsonLd: [
       {
@@ -134,6 +134,7 @@ const StarSigns = () => {
   const w = sky && SIGNS[sky.western];
   const v = sky && SIGNS[sky.vedic];
   const c = sky && CONSTELLATIONS[sky.iau];
+  const t = sky && SIGN_TRAITS[sky.western];
 
   const submit = (e) => {
     e.preventDefault();
@@ -167,7 +168,7 @@ const StarSigns = () => {
               What were the stars doing <span className="text-gradient">on your birthday?</span>
             </h1>
             <p className="text-slate-200 text-base md:text-lg leading-relaxed max-w-3xl mb-8">
-              One birthday, three answers. See your sign in the <strong className="text-violet-300 font-semibold">Western tradition</strong> (from Ptolemy, 2nd century AD), in the <strong className="text-amber-300 font-semibold">Vedic tradition</strong> of South Asia, and in the <strong className="text-cyan-300 font-semibold">real sky</strong> as astronomers map it today — and find out why they disagree.
+              One birthday, three answers. Discover what your star sign says about your <strong className="text-violet-300 font-semibold">personality</strong>, and see your sign in the Western tradition (from Ptolemy, 2nd century AD), in the Vedic tradition of South Asia, and in the <strong className="text-cyan-300 font-semibold">real sky</strong> as astronomers map it today — and find out why they disagree.
             </p>
             <form onSubmit={submit} className="flex flex-col sm:flex-row gap-3 sm:items-end max-w-xl">
               <label className="block flex-1">
@@ -223,6 +224,62 @@ const StarSigns = () => {
                 {sky.cusp.iau && <span className="block mt-2 text-amber-300 font-semibold">The Sun was right on a constellation border that day.</span>}
               </Card>
             </div>
+
+            {/* Personality, as tradition describes it */}
+            <article className="mb-10 rounded-3xl border border-violet-500/30 bg-gradient-to-br from-violet-600/15 via-indigo-600/10 to-amber-500/10 p-6 md:p-10">
+              <div className="flex flex-wrap items-center gap-3 mb-4">
+                <span className="inline-flex items-center px-3 py-1 rounded-full bg-violet-500/15 border border-violet-500/30 text-violet-300 text-xs font-black uppercase tracking-[0.2em]">
+                  Your star-sign personality
+                </span>
+                <span className="inline-flex items-center px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-bold">
+                  <i className="fas fa-wand-magic-sparkles mr-1.5" aria-hidden="true" />What tradition says · just for fun
+                </span>
+              </div>
+              <h3 className="text-3xl md:text-4xl font-black text-white mb-2">
+                <span style={GLYPH_FONT}>{w.symbol}</span> The {w.name} personality
+              </h3>
+              <div className="flex flex-wrap gap-2 mb-5">
+                {t.keywords.map((k) => (
+                  <span key={k} className="px-3 py-1.5 rounded-full text-sm font-bold bg-violet-500/15 border border-violet-500/30 text-violet-200">{k}</span>
+                ))}
+              </div>
+              <p className="text-base md:text-lg text-slate-200 leading-relaxed max-w-4xl mb-8">{t.portrait}</p>
+
+              <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+                <div className="p-5 rounded-2xl border-t-4 border border-emerald-500/30 bg-emerald-500/[0.06]">
+                  <p className="text-sm font-bold text-emerald-300 mb-3"><i className="fas fa-star mr-2" aria-hidden="true" />Strengths</p>
+                  <ul className="space-y-1.5">{t.strengths.map((x) => <li key={x} className="text-sm text-slate-200">• {x}</li>)}</ul>
+                </div>
+                <div className="p-5 rounded-2xl border-t-4 border border-amber-500/30 bg-amber-500/[0.06]">
+                  <p className="text-sm font-bold text-amber-300 mb-3"><i className="fas fa-triangle-exclamation mr-2" aria-hidden="true" />Challenges</p>
+                  <ul className="space-y-1.5">{t.challenges.map((x) => <li key={x} className="text-sm text-slate-200">• {x}</li>)}</ul>
+                </div>
+                <div className="p-5 rounded-2xl border-t-4 border border-cyan-500/30 bg-cyan-500/[0.06]">
+                  <p className="text-sm font-bold text-cyan-300 mb-3"><i className="fas fa-graduation-cap mr-2" aria-hidden="true" />Study style</p>
+                  <p className="text-sm text-slate-200 leading-relaxed">{t.study}</p>
+                </div>
+                <div className="p-5 rounded-2xl border-t-4 border border-indigo-500/30 bg-indigo-500/[0.06]">
+                  <p className="text-sm font-bold text-indigo-300 mb-3"><i className="fas fa-briefcase mr-2" aria-hidden="true" />Careers linked to {w.name}</p>
+                  <ul className="space-y-1.5">{t.careers.map((x) => <li key={x} className="text-sm text-slate-200">• {x}</li>)}</ul>
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-[1fr_auto] gap-5 items-center p-5 rounded-2xl border border-amber-500/30 bg-amber-500/[0.06] mb-6">
+                <p className="text-base text-slate-200 leading-relaxed">
+                  <strong className="text-amber-300 font-semibold">In the Vedic tradition</strong>, your Rashi is <strong className="text-white font-semibold">{v.rashi}</strong>. {RASHI_TRAITS[sky.vedic]}
+                </p>
+                <span className="text-4xl text-amber-300 justify-self-center" style={GLYPH_FONT} aria-hidden="true">{v.symbol}</span>
+              </div>
+
+              <div className="flex flex-col md:flex-row md:items-center gap-4 justify-between p-5 rounded-2xl border border-white/10 bg-white/[0.04]">
+                <p className="text-base text-slate-200">
+                  <strong className="text-white font-semibold">Does it sound like you?</strong> Millions of people share your star sign. Find out what your <em>answers</em> say about your real personality.
+                </p>
+                <Link to="/play-area/personality-test" className="shrink-0 px-5 py-3 rounded-full bg-violet-600 hover:bg-violet-500 text-white text-sm font-bold text-center transition">
+                  Take the Personality Test <i className="fas fa-arrow-right ml-1" aria-hidden="true" />
+                </Link>
+              </div>
+            </article>
 
             <div className="grid lg:grid-cols-[1fr_1.2fr] gap-8 items-center mb-10 p-6 md:p-8 rounded-3xl border border-white/10 bg-white/[0.03]">
               <div>
