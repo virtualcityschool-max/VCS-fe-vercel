@@ -1,5 +1,5 @@
 // /student/mocks — opens VCS Mock Exams signed in with this VCS account (no second password).
-// No menu link yet (founder, 2026-10-26): students reach it by typing the address.
+// "Mock Exams" in the student menu.
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { mocksService } from "../../services/mocksService";

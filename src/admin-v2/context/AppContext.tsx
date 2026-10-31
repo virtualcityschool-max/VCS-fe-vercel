@@ -86,6 +86,7 @@ export const VIEW_TO_PATH: Record<string, string> = {
   defaults: '/admin/settings',
   timezone: '/admin/settings',
   revenue: '/admin/subscriptions',
+  'mocks-admin': '/admin/mocks',
 };
 
 export const viewFromLocation = (pathname: string, search: string): NavigationId => {

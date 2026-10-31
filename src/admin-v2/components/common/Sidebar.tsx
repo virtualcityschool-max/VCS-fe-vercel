@@ -30,7 +30,7 @@ import {
   School,
   GitFork,
   CalendarClock,
-  UserCheck, Radio, FileCheck } from 'lucide-react';
+  UserCheck, Radio, FileCheck, FileSignature } from 'lucide-react';
 import { NavigationId } from '../../types';
 import { staffRoleLabel } from '../../data/staffRoles';
 
@@ -170,6 +170,13 @@ export const Sidebar: React.FC = () => {
         { id: 'admin-users', label: 'Staff & Roles', icon: ShieldCheck },
         { id: 'levels', label: 'Levels', icon: Layers },
         { id: 'settings', label: 'Platform Settings', icon: Sliders },
+      ],
+    },
+    {
+      // VCS Mock Exams: opens its admin signed in (src/pages/admin/AdminMocks.jsx).
+      label: 'MOCK EXAMS',
+      items: [
+        { id: 'mocks-admin', label: 'Mocks Admin', icon: FileSignature },
       ],
     },
   ];

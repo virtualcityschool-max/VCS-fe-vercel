@@ -1,5 +1,5 @@
 // /teacher/mocks — written mock scripts Mock Admin assigned to this teacher (VCS Mock Exams).
-// No menu link yet (founder, 2026-10-26): teachers reach it by typing the address.
+// "Mock Exams" in the teacher menu (red number = scripts and papers waiting).
 import React, { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { mocksService } from "../../services/mocksService";
@@ -154,8 +154,8 @@ const TeacherMockMarking = () => {
         ) : scripts.length === 0 ? (
           <div className="p-14 text-center">
             <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-indigo-500/15 text-indigo-300 text-xl"><i className="fas fa-inbox" aria-hidden="true" /></span>
-            <p className="mt-4 text-lg font-semibold text-white">No scripts yet</p>
-            <p className="mt-1 text-sm text-slate-300">When Mock Admin gives you a script to mark, it appears here.</p>
+            <p className="mt-4 text-lg font-semibold text-white">Currently there are no mocks for you to check</p>
+            <p className="mt-1 text-base text-slate-300">When Mock Admin sends you a script to mark, it appears here and a red number shows on <strong className="text-cyan-300 font-semibold">Mock Exams</strong> in your menu.</p>
           </div>
         ) : (
           <ul className="divide-y divide-slate-800/60">

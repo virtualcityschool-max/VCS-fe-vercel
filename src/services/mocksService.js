@@ -47,27 +47,38 @@ async function call(path, { method = "GET", body, retry = true, credentials = "o
   return data;
 }
 
+// Tells the teacher menu badge (hooks/useMocksInbox.js) to recount after a script or review changes.
+const changed = (data) => {
+  try {
+    window.dispatchEvent(new Event("vcs:mocks-changed"));
+  } catch {
+    /* no window (tests) */
+  }
+  return data;
+};
+
 export const mocksService = {
   /** Teacher: scripts Mock Admin assigned to me. */
   listScripts: () => call("/marking/scripts"),
   /** Teacher: one script with question pages, the student's answers and photos, and the mark scheme. */
   getScript: (id) => call(`/marking/scripts/${encodeURIComponent(id)}`),
   /** Teacher: save marks and comments (a draft until returned). */
-  saveMarks: (id, payload) => call(`/marking/scripts/${encodeURIComponent(id)}`, { method: "PUT", body: payload }),
+  saveMarks: (id, payload) => call(`/marking/scripts/${encodeURIComponent(id)}`, { method: "PUT", body: payload }).then(changed),
   /** Teacher: send the marked script to the student. */
-  returnScript: (id) => call(`/marking/scripts/${encodeURIComponent(id)}/return`, { method: "POST" }),
+  returnScript: (id) => call(`/marking/scripts/${encodeURIComponent(id)}/return`, { method: "POST" }).then(changed),
 
   /** Teacher: past papers Mock Admin asked me to review. */
   listReviews: () => call("/marking/reviews"),
   /** Teacher: one paper to review (questions, marks, mark scheme, my notes; the HOD also sees every review). */
   getReview: (id) => call(`/marking/reviews/${encodeURIComponent(id)}`),
   /** Teacher: save my review notes; { submit: true } sends them to Mock Admin. */
-  saveReview: (id, payload) => call(`/marking/reviews/${encodeURIComponent(id)}`, { method: "PUT", body: payload }),
+  saveReview: (id, payload) => call(`/marking/reviews/${encodeURIComponent(id)}`, { method: "PUT", body: payload }).then(changed),
 
-  /** Student: open Mock Exams signed in with this VCS account (sets the Mocks session cookie). */
-  async openSession() {
+  /** Open Mock Exams signed in with this VCS account (sets the Mocks session cookie).
+   *  to = "admin": a VCS admin opens Mocks Admin (Super Admin -> full admin, Finance -> payment approvals). */
+  async openSession(to) {
     const token = authStorage.getAccessToken();
-    const data = await call("/vcs/session", { method: "POST", body: { token }, credentials: "include" });
+    const data = await call("/vcs/session", { method: "POST", body: to ? { token, to } : { token }, credentials: "include" });
     return `${MOCKS_ORIGIN}${data?.redirect || "/mocks/dashboard"}`;
   },
 };

@@ -36,7 +36,9 @@ export type NavigationId =
   | 'revenue'
   | 'blog'
   | 'defaults'
-  | 'timezone';
+  | 'timezone'
+  // MOCK EXAMS
+  | 'mocks-admin';
 
 export type UserRole = 'admin' | 'teacher' | 'student' | 'parent';
 

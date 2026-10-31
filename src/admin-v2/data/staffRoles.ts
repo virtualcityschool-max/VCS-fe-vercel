@@ -46,4 +46,6 @@ export const NAV_CAP: Record<string, Cap> = {
   about: 'manage_content',
   'admin-users': 'manage_staff',
   settings: 'manage_settings',
+  // Mock Exams admin: Super Admin (full) and Finance (payment approvals); the Mocks app checks the role again.
+  'mocks-admin': 'manage_billing',
 };

@@ -6,6 +6,7 @@ import UserProfileDropdown from "./UserProfileDropdown";
 import ThemeToggle from "../common/ThemeToggle";
 import { getTimezoneAbbr } from "../../utils/validation";
 import TimezoneModal from "../common/TimezoneModal";
+import { useMocksInbox } from "../../hooks/useMocksInbox";
 
 const MOBILE_BREAKPOINT = 1024;
 
@@ -128,6 +129,8 @@ const NAV_CONFIG = {
     { label: "Assignments & Quizzes", to: "/teacher?tab=assignments_quizzes", icon: "fas fa-clipboard-check" },
     { label: "Teaching Resources & Desk", to: "/teacher?tab=teaching_resources", icon: "fas fa-folder-open" },
     { label: "Evaluations & Gradebook", to: "/teacher?tab=evaluations", icon: "fas fa-chart-bar" },
+    // VCS Mock Exams: scripts and papers Mock Admin sent me; the badge counts the ones waiting (like an inbox).
+    { label: "Mock Exams", to: "/teacher/mocks", icon: "fas fa-file-signature", badgeKey: "mocks" },
     { label: "Performance Analytics", to: "/teacher?tab=analytics", icon: "fas fa-chart-line" },
     { label: "Planner", to: "/teacher?tab=planner", icon: "fas fa-calendar-alt" },
     { label: "Subject Guides", to: "/subjects", icon: "fas fa-book-reader" },
@@ -143,6 +146,7 @@ const NAV_CONFIG = {
     { label: "Attendance",      to: "/student?tab=attendance", icon: "fas fa-user-check" },
     { label: "Resources",       to: "/student?tab=resources",  icon: "fas fa-folder-open" },
     { label: "Assignments & Quizzes", to: "/student?tab=assessments", icon: "fas fa-clipboard-check" },
+    { label: "Mock Exams",      to: "/student/mocks",          icon: "fas fa-file-signature" },
     { label: "Subject Guides",  to: "/subjects",               icon: "fas fa-book-reader" },
     { label: "Mind Lab",       to: "/mind-lab",              icon: "fas fa-flask" },
     { label: "Explore Courses", to: "/courses",                icon: "fas fa-compass" },
@@ -167,7 +171,7 @@ const PORTAL_LABEL = {
 
 // ── Unified nav item - works for all roles ────────────────────────────────────
 // Pass `to` for NavLink-based (teacher/student), omit for button-based (admin).
-function NavItem({ label, icon, isCollapsed, badge, badgeText, isActive, onClick, to, end, role }) {
+function NavItem({ label, icon, isCollapsed, badge, badgeText, isActive, onClick, to, end, role, alert }) {
   const location = useLocation();
 
   // If `to` includes query parameter like `?tab=schedule` or `?role=teacher`, compute active matching
@@ -285,7 +289,7 @@ function NavItem({ label, icon, isCollapsed, badge, badgeText, isActive, onClick
         </span>
       )}
       {badge !== undefined && badge !== null && badge !== "" && !badgeText && (
-        role === "teacher" ? (
+        role === "teacher" && !alert ? (
           !isCollapsed ? (
             <span className={`px-1.5 py-0.5 rounded-md text-xs font-mono tabular-nums ml-auto ${
               active ? "bg-white/20 text-white" : "bg-[#181F36] text-slate-400"
@@ -366,6 +370,8 @@ const Sidebar = ({
   const dispatch = useDispatch();
 
   const [isTimezoneModalOpen, setIsTimezoneModalOpen] = useState(false);
+  // Teacher: Mock Exams scripts and papers waiting for me (the red number on "Mock Exams").
+  const mocksWaiting = useMocksInbox(role === "teacher");
 
   // Student announcements (the backend bell endpoints are students-only)
   const { unreadCount, items: announcements, loadingItems } = useSelector(
@@ -510,8 +516,9 @@ const Sidebar = ({
                   end={item.end}
                   onClick={onMobileClose}
                   role={role}
-                  badge={item.badge}
+                  badge={item.badgeKey === "mocks" ? mocksWaiting : item.badge}
                   badgeText={item.badgeText}
+                  alert={item.badgeKey === "mocks"}
                 />
               ))
           }

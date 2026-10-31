@@ -39,7 +39,7 @@ const TeacherInternalStudentProfile = React.lazy(() => import("../pages/teacher/
 const TeacherEvaluationPage = React.lazy(() => import("../pages/teacher/TeacherEvaluationPage"));
 const TeacherHireLeads = React.lazy(() => import("../pages/teacher/TeacherHireLeads"));
 const TeacherAvailabilityPage = React.lazy(() => import("../pages/teacher/TeacherAvailabilityPage"));
-// VCS Mock Exams marking: no menu link yet (founder 2026-10-26) — opened by typing /teacher/mocks.
+// VCS Mock Exams: student, teacher and admin menus link here ("Mock Exams", "Mocks Admin").
 const TeacherMockMarking = React.lazy(() => import("../pages/teacher/TeacherMockMarking"));
 const TeacherMockScript = React.lazy(() => import("../pages/teacher/TeacherMockScript"));
 const TeacherPaperReview = React.lazy(() => import("../pages/teacher/TeacherPaperReview"));
@@ -71,6 +71,7 @@ const V2 = {
 };
 const AdminCourseDetailPage = React.lazy(() => import("../pages/admin/AdminCourseDetailPage"));
 const AdminSessionsPage = React.lazy(() => import("../pages/admin/AdminSessionsPage"));
+const AdminMocks = React.lazy(() => import("../pages/admin/AdminMocks"));
 const UserDetailsPage = React.lazy(() => import("../pages/admin/UserDetailsPage"));
 const AdminTeacherPlannerPage = React.lazy(() => import("../pages/admin/AdminTeacherPlannerPage"));
 const AdminBlogEditorPage = React.lazy(() => import("../pages/admin/AdminBlogEditorPage"));
@@ -317,6 +318,7 @@ const AppRoutes = () => {
           <Route path="course-levels" element={<V2.Levels />} />
           <Route path="about" element={<V2.About />} />
           <Route path="settings" element={<V2.Settings />} />
+          <Route path="mocks" element={<AdminMocks />} />
           <Route path="sessions/plan" element={<AdminSessionsPage />} />
           <Route path="staff-meetings/plan" element={<AdminTeacherPlannerPage />} />
           <Route path="teacher-planner/plan" element={<Navigate to="/admin/staff-meetings/plan" replace />} />
