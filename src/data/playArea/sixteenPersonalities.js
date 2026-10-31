@@ -79,91 +79,83 @@ export const DIMENSIONS = {
   },
 };
 
-// 60 questions organized into 10 steps of 6 questions each
+// 60 questions organized into 6 steps of 10 questions each
 export const QUESTIONS = [
-  // Step 1
+  // Step 1 (Questions 1–10)
   { id: 1, step: 1, text: "You regularly make new friends.", dim: "EI", key: 1 },
   { id: 2, step: 1, text: "You enjoy exploring unfamiliar ideas and viewpoints.", dim: "SN", key: 1 },
   { id: 3, step: 1, text: "You are not easily swayed by emotional arguments.", dim: "TF", key: 1 },
   { id: 4, step: 1, text: "You struggle with deadlines.", dim: "JP", key: -1 },
   { id: 5, step: 1, text: "You rarely feel insecure.", dim: "AT", key: 1 },
   { id: 6, step: 1, text: "You avoid making phone calls.", dim: "EI", key: -1 },
+  { id: 7, step: 1, text: "You enjoy debating ethical dilemmas.", dim: "SN", key: 1 },
+  { id: 8, step: 1, text: "You prioritize being sensitive over being completely honest.", dim: "TF", key: -1 },
+  { id: 9, step: 1, text: "Your living and working spaces are clean and organized.", dim: "JP", key: 1 },
+  { id: 10, step: 1, text: "You often feel overwhelmed.", dim: "AT", key: -1 },
 
-  // Step 2
-  { id: 7, step: 2, text: "You enjoy debating ethical dilemmas.", dim: "SN", key: 1 },
-  { id: 8, step: 2, text: "You prioritize being sensitive over being completely honest.", dim: "TF", key: -1 },
-  { id: 9, step: 2, text: "Your living and working spaces are clean and organized.", dim: "JP", key: 1 },
-  { id: 10, step: 2, text: "You often feel overwhelmed.", dim: "AT", key: -1 },
+  // Step 2 (Questions 11–20)
   { id: 11, step: 2, text: "You enjoy participating in team-based activities.", dim: "EI", key: 1 },
   { id: 12, step: 2, text: "You enjoy experimenting with new and untested approaches.", dim: "SN", key: 1 },
+  { id: 13, step: 2, text: "You prioritize facts over people’s feelings when determining a course of action.", dim: "TF", key: 1 },
+  { id: 14, step: 2, text: "You often allow the day to unfold without any schedule at all.", dim: "JP", key: -1 },
+  { id: 15, step: 2, text: "You rarely worry about whether you make a good impression on people you meet.", dim: "AT", key: 1 },
+  { id: 16, step: 2, text: "You feel comfortable just walking up to someone you find interesting and striking up a conversation.", dim: "EI", key: 1 },
+  { id: 17, step: 2, text: "You are not too interested in discussions about various interpretations of creative works.", dim: "SN", key: -1 },
+  { id: 18, step: 2, text: "People’s stories and emotions speak louder to you than numbers or data.", dim: "TF", key: -1 },
+  { id: 19, step: 2, text: "You actively seek out new experiences and knowledge areas to explore.", dim: "SN", key: 1 },
+  { id: 20, step: 2, text: "You are prone to worrying that things will take a turn for the worse.", dim: "AT", key: -1 },
 
-  // Step 3
-  { id: 13, step: 3, text: "You prioritize facts over people’s feelings when determining a course of action.", dim: "TF", key: 1 },
-  { id: 14, step: 3, text: "You often allow the day to unfold without any schedule at all.", dim: "JP", key: -1 },
-  { id: 15, step: 3, text: "You rarely worry about whether you make a good impression on people you meet.", dim: "AT", key: 1 },
-  { id: 16, step: 3, text: "You feel comfortable just walking up to someone you find interesting and striking up a conversation.", dim: "EI", key: 1 },
-  { id: 17, step: 3, text: "You are not too interested in discussions about various interpretations of creative works.", dim: "SN", key: -1 },
-  { id: 18, step: 3, text: "People’s stories and emotions speak louder to you than numbers or data.", dim: "TF", key: -1 },
+  // Step 3 (Questions 21–30)
+  { id: 21, step: 3, text: "You enjoy solitary hobbies or activities more than group ones.", dim: "EI", key: -1 },
+  { id: 22, step: 3, text: "You cannot imagine yourself writing fictional stories for a living.", dim: "SN", key: -1 },
+  { id: 23, step: 3, text: "You favor efficiency in decisions, even if it means disregarding some emotional aspects.", dim: "TF", key: 1 },
+  { id: 24, step: 3, text: "You prefer to do your chores before allowing yourself to relax.", dim: "JP", key: 1 },
+  { id: 25, step: 3, text: "In disagreements, you prioritize proving your point over preserving the feelings of others.", dim: "TF", key: 1 },
+  { id: 26, step: 3, text: "You usually wait for others to introduce themselves first at social gatherings.", dim: "EI", key: -1 },
+  { id: 27, step: 3, text: "Your mood can change very quickly.", dim: "AT", key: -1 },
+  { id: 28, step: 3, text: "You usually feel more persuaded by what resonates emotionally with you than by factual arguments.", dim: "TF", key: -1 },
+  { id: 29, step: 3, text: "You often end up doing things at the last possible moment.", dim: "JP", key: -1 },
+  { id: 30, step: 3, text: "You prioritize and plan tasks effectively, often completing them well before the deadline.", dim: "JP", key: 1 },
 
-  // Step 4
-  { id: 19, step: 4, text: "You actively seek out new experiences and knowledge areas to explore.", dim: "SN", key: 1 },
-  { id: 20, step: 4, text: "You are prone to worrying that things will take a turn for the worse.", dim: "AT", key: -1 },
-  { id: 21, step: 4, text: "You enjoy solitary hobbies or activities more than group ones.", dim: "EI", key: -1 },
-  { id: 22, step: 4, text: "You cannot imagine yourself writing fictional stories for a living.", dim: "SN", key: -1 },
-  { id: 23, step: 4, text: "You favor efficiency in decisions, even if it means disregarding some emotional aspects.", dim: "TF", key: 1 },
-  { id: 24, step: 4, text: "You prefer to do your chores before allowing yourself to relax.", dim: "JP", key: 1 },
+  // Step 4 (Questions 31–40)
+  { id: 31, step: 4, text: "You usually prefer to be around others rather than on your own.", dim: "EI", key: 1 },
+  { id: 32, step: 4, text: "You become bored or lose interest when the discussion gets highly theoretical.", dim: "SN", key: -1 },
+  { id: 33, step: 4, text: "When facts and feelings conflict, you usually find yourself following your heart.", dim: "TF", key: -1 },
+  { id: 34, step: 4, text: "You find it challenging to maintain a consistent work or study schedule.", dim: "JP", key: -1 },
+  { id: 35, step: 4, text: "You rarely second-guess the choices that you have made.", dim: "AT", key: 1 },
+  { id: 36, step: 4, text: "Your friends would describe you as lively and outgoing.", dim: "EI", key: 1 },
+  { id: 37, step: 4, text: "You are drawn to various forms of creative expression, such as writing.", dim: "SN", key: 1 },
+  { id: 38, step: 4, text: "You usually base your choices on objective facts rather than emotional impressions.", dim: "TF", key: 1 },
+  { id: 39, step: 4, text: "You like to have a to-do list for each day.", dim: "JP", key: 1 },
+  { id: 40, step: 4, text: "You usually stay calm, even under a lot of pressure.", dim: "AT", key: 1 },
 
-  // Step 5
-  { id: 25, step: 5, text: "In disagreements, you prioritize proving your point over preserving the feelings of others.", dim: "TF", key: 1 },
-  { id: 26, step: 5, text: "You usually wait for others to introduce themselves first at social gatherings.", dim: "EI", key: -1 },
-  { id: 27, step: 5, text: "Your mood can change very quickly.", dim: "AT", key: -1 },
-  { id: 28, step: 5, text: "You usually feel more persuaded by what resonates emotionally with you than by factual arguments.", dim: "TF", key: -1 },
-  { id: 29, step: 5, text: "You often end up doing things at the last possible moment.", dim: "JP", key: -1 },
-  { id: 30, step: 5, text: "You prioritize and plan tasks effectively, often completing them well before the deadline.", dim: "JP", key: 1 },
+  // Step 5 (Questions 41–50)
+  { id: 41, step: 5, text: "You find the idea of networking or promoting yourself to strangers very daunting.", dim: "EI", key: -1 },
+  { id: 42, step: 5, text: "Complex and novel ideas excite you more than simple and straightforward ones.", dim: "SN", key: 1 },
+  { id: 43, step: 5, text: "You can easily connect with people you have just met.", dim: "EI", key: 1 },
+  { id: 44, step: 5, text: "If your plans are interrupted, your top priority is to get back on track as soon as possible.", dim: "JP", key: 1 },
+  { id: 45, step: 5, text: "You are still bothered by mistakes that you made a long time ago.", dim: "AT", key: -1 },
+  { id: 46, step: 5, text: "You are not too interested in discussing theories on what the world could look like in the future.", dim: "SN", key: -1 },
+  { id: 47, step: 5, text: "Your emotions control you more than you control them.", dim: "AT", key: -1 },
+  { id: 48, step: 5, text: "When making decisions, you focus more on how the affected people might feel than on what is most logical or efficient.", dim: "TF", key: -1 },
+  { id: 49, step: 5, text: "Your personal work style is closer to spontaneous bursts of energy than organized and consistent efforts.", dim: "JP", key: -1 },
+  { id: 50, step: 5, text: "When someone thinks highly of you, you wonder how long it will take them to feel disappointed in you.", dim: "AT", key: -1 },
 
-  // Step 6
-  { id: 31, step: 6, text: "You usually prefer to be around others rather than on your own.", dim: "EI", key: 1 },
-  { id: 32, step: 6, text: "You become bored or lose interest when the discussion gets highly theoretical.", dim: "SN", key: -1 },
-  { id: 33, step: 6, text: "When facts and feelings conflict, you usually find yourself following your heart.", dim: "TF", key: -1 },
-  { id: 34, step: 6, text: "You find it challenging to maintain a consistent work or study schedule.", dim: "JP", key: -1 },
-  { id: 35, step: 6, text: "You rarely second-guess the choices that you have made.", dim: "AT", key: 1 },
-  { id: 36, step: 6, text: "Your friends would describe you as lively and outgoing.", dim: "EI", key: 1 },
-
-  // Step 7
-  { id: 37, step: 7, text: "You are drawn to various forms of creative expression, such as writing.", dim: "SN", key: 1 },
-  { id: 38, step: 7, text: "You usually base your choices on objective facts rather than emotional impressions.", dim: "TF", key: 1 },
-  { id: 39, step: 7, text: "You like to have a to-do list for each day.", dim: "JP", key: 1 },
-  { id: 40, step: 7, text: "You usually stay calm, even under a lot of pressure.", dim: "AT", key: 1 },
-  { id: 41, step: 7, text: "You find the idea of networking or promoting yourself to strangers very daunting.", dim: "EI", key: -1 },
-  { id: 42, step: 7, text: "Complex and novel ideas excite you more than simple and straightforward ones.", dim: "SN", key: 1 },
-
-  // Step 8
-  { id: 43, step: 8, text: "You can easily connect with people you have just met.", dim: "EI", key: 1 },
-  { id: 44, step: 8, text: "If your plans are interrupted, your top priority is to get back on track as soon as possible.", dim: "JP", key: 1 },
-  { id: 45, step: 8, text: "You are still bothered by mistakes that you made a long time ago.", dim: "AT", key: -1 },
-  { id: 46, step: 8, text: "You are not too interested in discussing theories on what the world could look like in the future.", dim: "SN", key: -1 },
-  { id: 47, step: 8, text: "Your emotions control you more than you control them.", dim: "AT", key: -1 },
-  { id: 48, step: 8, text: "When making decisions, you focus more on how the affected people might feel than on what is most logical or efficient.", dim: "TF", key: -1 },
-
-  // Step 9
-  { id: 49, step: 9, text: "Your personal work style is closer to spontaneous bursts of energy than organized and consistent efforts.", dim: "JP", key: -1 },
-  { id: 50, step: 9, text: "When someone thinks highly of you, you wonder how long it will take them to feel disappointed in you.", dim: "AT", key: -1 },
-  { id: 51, step: 9, text: "You would love a job that requires you to work alone most of the time.", dim: "EI", key: -1 },
-  { id: 52, step: 9, text: "You believe that pondering abstract philosophical questions is a waste of time.", dim: "SN", key: -1 },
-  { id: 53, step: 9, text: "You feel more drawn to busy, bustling atmospheres than to quiet, intimate places.", dim: "EI", key: 1 },
-  { id: 54, step: 9, text: "If a decision feels right to you, you often act on it without needing further proof.", dim: "TF", key: -1 },
-
-  // Step 10
-  { id: 55, step: 10, text: "Even a small mistake can cause you to doubt your overall abilities and knowledge.", dim: "AT", key: -1 },
-  { id: 56, step: 10, text: "You complete things methodically without skipping over any steps.", dim: "JP", key: 1 },
-  { id: 57, step: 10, text: "You prefer tasks that require you to come up with creative solutions rather than follow concrete steps.", dim: "SN", key: 1 },
-  { id: 58, step: 10, text: "You are more likely to rely on emotional intuition than logical reasoning when making a choice.", dim: "TF", key: -1 },
-  { id: 59, step: 10, text: "You like to use organizing tools like schedules and lists.", dim: "JP", key: 1 },
-  { id: 60, step: 10, text: "You feel confident that things will work out for you.", dim: "AT", key: 1 },
+  // Step 6 (Questions 51–60)
+  { id: 51, step: 6, text: "You would love a job that requires you to work alone most of the time.", dim: "EI", key: -1 },
+  { id: 52, step: 6, text: "You believe that pondering abstract philosophical questions is a waste of time.", dim: "SN", key: -1 },
+  { id: 53, step: 6, text: "You feel more drawn to busy, bustling atmospheres than to quiet, intimate places.", dim: "EI", key: 1 },
+  { id: 54, step: 6, text: "If a decision feels right to you, you often act on it without needing further proof.", dim: "TF", key: -1 },
+  { id: 55, step: 6, text: "Even a small mistake can cause you to doubt your overall abilities and knowledge.", dim: "AT", key: -1 },
+  { id: 56, step: 6, text: "You complete things methodically without skipping over any steps.", dim: "JP", key: 1 },
+  { id: 57, step: 6, text: "You prefer tasks that require you to come up with creative solutions rather than follow concrete steps.", dim: "SN", key: 1 },
+  { id: 58, step: 6, text: "You are more likely to rely on emotional intuition than logical reasoning when making a choice.", dim: "TF", key: -1 },
+  { id: 59, step: 6, text: "You like to use organizing tools like schedules and lists.", dim: "JP", key: 1 },
+  { id: 60, step: 6, text: "You feel confident that things will work out for you.", dim: "AT", key: 1 },
 ];
 
-export const PER_STEP = 6;
-export const STEPS = 10;
+export const PER_STEP = 10;
+export const STEPS = 6;
 
 // All 16 Personalities with concise, student-friendly one-pager content
 export const PROFILES = {

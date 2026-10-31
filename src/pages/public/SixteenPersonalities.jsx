@@ -305,7 +305,7 @@ const Test = ({ answers, step, setStep, onAnswer, onFinish, onExit }) => {
 
         {missing && firstOpen && (
           <p className="text-sm font-semibold text-rose-300 animate-pulse" role="alert">
-            Please answer all 6 statements on this step to proceed.
+            Please answer all statements on this step to proceed.
           </p>
         )}
       </div>
@@ -613,7 +613,7 @@ const SixteenPersonalities = () => {
 
   const [saved, setSaved] = useState(load);
   const [phase, setPhase] = useState(() => (saved?.done ? "report" : "intro"));
-  const [step, setStep] = useState(() => saved?.step || 0);
+  const [step, setStep] = useState(() => Math.min(Math.max(0, saved?.step || 0), STEPS - 1));
   const [answers, setAnswers] = useState(() => saved?.answers || {});
   const topRef = useRef(null);
 
