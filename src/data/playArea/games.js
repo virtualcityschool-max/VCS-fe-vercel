@@ -4,7 +4,7 @@
 export const PLAY_AREA_GAMES = [
   {
     slug: "personality-test",
-    group: "students",
+    group: "self",
     path: "/mind-lab/personality-test",
     title: "Personality Test",
     blurb: "100 quick statements reveal your personality profile, your study style, and the subjects and careers that may suit you.",
@@ -24,7 +24,7 @@ export const PLAY_AREA_GAMES = [
   },
   {
     slug: "star-signs",
-    group: "students",
+    group: "self",
     path: "/mind-lab/star-signs",
     title: "Star Sign Personality",
     blurb: "Enter your birthday to discover your star-sign personality, your Vedic Rashi, and the real constellation the Sun was in — with star facts and history.",
@@ -34,7 +34,7 @@ export const PLAY_AREA_GAMES = [
   },
   {
     slug: "memory-challenge",
-    group: "students",
+    group: "brain",
     path: "/mind-lab/memory-challenge",
     title: "Memory Challenge",
     blurb: "Five memory games for numbers, pictures and words. Beat your best, earn badges and get your Memory Profile with study tips.",
@@ -44,7 +44,7 @@ export const PLAY_AREA_GAMES = [
   },
   {
     slug: "brain-teasers",
-    group: "students",
+    group: "brain",
     path: "/mind-lab/brain-teasers",
     title: "Brain Teasers",
     blurb: "5 new puzzles every day: patterns, logic, riddles, quick maths and famous puzzles from history. Plus Maths Sprint and Tower of Hanoi.",
@@ -54,7 +54,7 @@ export const PLAY_AREA_GAMES = [
   },
   {
     slug: "smart-revision",
-    group: "students",
+    group: "study",
     path: "/mind-lab/smart-revision",
     title: "Smart Revision",
     blurb: "See the forgetting curve, get a revision plan for every topic (1, 3, 7, 14, 30 days) and find out when you've truly mastered a skill.",
@@ -64,7 +64,7 @@ export const PLAY_AREA_GAMES = [
   },
   {
     slug: "smart-notes",
-    group: "students",
+    group: "study",
     path: "/mind-lab/smart-notes",
     title: "Smart Notes",
     blurb: "Five note-taking methods with O and A Level examples, a quiz to find yours, and a Cornell notebook that turns your notes into a quiz.",
@@ -74,12 +74,43 @@ export const PLAY_AREA_GAMES = [
   },
   {
     slug: "career-interests",
-    group: "students",
+    group: "self",
+    path: "/mind-lab/career-interests",
     title: "Career Interest Finder",
-    blurb: "Find out which kinds of work excite you most and which A Level subjects lead there.",
+    blurb: "60 work activities reveal your interest code, careers to explore, the A Level subjects that help and degrees to look at.",
     icon: "fas fa-compass",
     accent: "emerald",
-    meta: ["Coming soon"],
+    meta: ["O*NET Interest Profiler", "8 minutes", "Careers + subjects"],
+  },
+  {
+    slug: "reasoning-test",
+    group: "brain",
+    path: "/mind-lab/reasoning-test",
+    title: "Reasoning Test (IQ-style)",
+    blurb: "24 puzzles in 20 minutes: number series, pattern matrices, verbal logic and spatial rotation. Your reasoning level, every answer explained.",
+    icon: "fas fa-lightbulb",
+    accent: "cyan",
+    meta: ["24 puzzles", "20 minutes", "Honest about IQ"],
+  },
+  {
+    slug: "eq-check",
+    group: "self",
+    path: "/mind-lab/eq-check",
+    title: "EQ Self-Check",
+    blurb: "How well do you notice, show and understand emotions? Five areas of emotional intelligence with tips to grow each one.",
+    icon: "fas fa-hand-holding-heart",
+    accent: "rose",
+    meta: ["46 statements", "6 minutes", "IPIP research scales"],
+  },
+  {
+    slug: "aptitude-practice",
+    group: "jobs",
+    path: "/mind-lab/aptitude-practice",
+    title: "Aptitude Test Practice",
+    blurb: "Timed numerical, verbal and abstract reasoning practice like employer and university tests — new questions every time, answers explained.",
+    icon: "fas fa-stopwatch",
+    accent: "amber",
+    meta: ["3 sections", "Timed", "Unlimited practice"],
   },
 ];
 

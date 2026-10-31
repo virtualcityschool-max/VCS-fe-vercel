@@ -40,6 +40,10 @@ const STATIC_PAGES = [
   { loc: "/mind-lab/brain-teasers", changefreq: "monthly", lastmod: pageDate("/mind-lab/brain-teasers") },
   { loc: "/mind-lab/smart-revision", changefreq: "monthly", lastmod: pageDate("/mind-lab/smart-revision") },
   { loc: "/mind-lab/smart-notes", changefreq: "monthly", lastmod: pageDate("/mind-lab/smart-notes") },
+  { loc: "/mind-lab/career-interests", changefreq: "monthly", lastmod: pageDate("/mind-lab/career-interests") },
+  { loc: "/mind-lab/eq-check", changefreq: "monthly", lastmod: pageDate("/mind-lab/eq-check") },
+  { loc: "/mind-lab/reasoning-test", changefreq: "monthly", lastmod: pageDate("/mind-lab/reasoning-test") },
+  { loc: "/mind-lab/aptitude-practice", changefreq: "monthly", lastmod: pageDate("/mind-lab/aptitude-practice") },
   // Subject guides — keep in step with src/data/subjectGuides and scripts/prerender.js
   { loc: "/subjects", changefreq: "monthly", lastmod: pageDate("/subjects") },
   { loc: "/subjects/mathematics-4024", changefreq: "monthly", lastmod: pageDate("/subjects/mathematics-4024") },

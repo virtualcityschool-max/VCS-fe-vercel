@@ -26,6 +26,8 @@ html.theme-light .bg-\[\#0B1020\]\/60:not(.theme-keep, .theme-keep *) { backgrou
 html.theme-light .bg-\[\#0B1020\]\/85:not(.theme-keep, .theme-keep *) { background-color: color-mix(in oklab, #f1f5f9 85%, transparent) !important; }
 html.theme-light .bg-\[\#0B1124\]:not(.theme-keep, .theme-keep *) { background-color: #f1f5f9 !important; }
 html.theme-light .bg-\[\#0b1220\]:not(.theme-keep, .theme-keep *) { background-color: #f1f5f9 !important; }
+html.theme-light .bg-\[\#0b1224\]:not(.theme-keep, .theme-keep *) { background-color: #f1f5f9 !important; }
+html.theme-light .bg-\[\#0b1224\]\/60:not(.theme-keep, .theme-keep *) { background-color: color-mix(in oklab, #f1f5f9 60%, transparent) !important; }
 html.theme-light .bg-\[\#0b1224\]\/70:not(.theme-keep, .theme-keep *) { background-color: color-mix(in oklab, #f1f5f9 70%, transparent) !important; }
 html.theme-light .bg-\[\#0b1224\]\/80:not(.theme-keep, .theme-keep *) { background-color: color-mix(in oklab, #f1f5f9 80%, transparent) !important; }
 html.theme-light .bg-\[\#0b1224\]\/90:not(.theme-keep, .theme-keep *) { background-color: color-mix(in oklab, #f1f5f9 90%, transparent) !important; }
@@ -145,6 +147,7 @@ html.theme-light .bg-white\/\[0\.06\]:not(.theme-keep, .theme-keep *) { backgrou
 html.theme-light .bg-white\/10:not(.theme-keep, .theme-keep *) { background-color: color-mix(in oklab, oklch(20.8% 0.042 265.755) 9%, transparent) !important; }
 html.theme-light .bg-white\/15:not(.theme-keep, .theme-keep *) { background-color: color-mix(in oklab, oklch(20.8% 0.042 265.755) 14%, transparent) !important; }
 html.theme-light .bg-white\/20:not(.theme-keep, .theme-keep *) { background-color: color-mix(in oklab, oklch(20.8% 0.042 265.755) 18%, transparent) !important; }
+html.theme-light .bg-white\/25:not(.theme-keep, .theme-keep *) { background-color: color-mix(in oklab, oklch(20.8% 0.042 265.755) 23%, transparent) !important; }
 html.theme-light .bg-white\/30:not(.theme-keep, .theme-keep *) { background-color: color-mix(in oklab, oklch(20.8% 0.042 265.755) 27%, transparent) !important; }
 html.theme-light .bg-white\/40:not(.theme-keep, .theme-keep *) { background-color: color-mix(in oklab, oklch(20.8% 0.042 265.755) 36%, transparent) !important; }
 html.theme-light .bg-white\/5:not(.theme-keep, .theme-keep *) { background-color: color-mix(in oklab, oklch(20.8% 0.042 265.755) 5%, transparent) !important; }
@@ -202,6 +205,7 @@ html.theme-light .border-sky-800\/60:not(.theme-keep, .theme-keep *) { border-co
 html.theme-light .border-slate-200:not(.theme-keep, .theme-keep *) { border-color: oklch(27.9% 0.041 260.031) !important; }
 html.theme-light .border-slate-300:not(.theme-keep, .theme-keep *) { border-color: oklch(37.2% 0.044 257.287) !important; }
 html.theme-light .border-slate-400:not(.theme-keep, .theme-keep *) { border-color: oklch(70.4% 0.04 256.788) !important; }
+html.theme-light .border-slate-400\/50:not(.theme-keep, .theme-keep *) { border-color: color-mix(in oklab, oklch(70.4% 0.04 256.788) 50%, transparent) !important; }
 html.theme-light .border-slate-500:not(.theme-keep, .theme-keep *) { border-color: oklch(86.9% 0.022 252.894) !important; }
 html.theme-light .border-slate-600:not(.theme-keep, .theme-keep *) { border-color: oklch(92.9% 0.013 255.508) !important; }
 html.theme-light .border-slate-600\/40:not(.theme-keep, .theme-keep *) { border-color: color-mix(in oklab, oklch(92.9% 0.013 255.508) 40%, transparent) !important; }
@@ -429,6 +433,7 @@ html.theme-light .ring-slate-500:not(.theme-keep, .theme-keep *) { --tw-ring-col
 html.theme-light .ring-slate-700:not(.theme-keep, .theme-keep *) { --tw-ring-color: oklch(92.9% 0.013 255.508) !important; }
 html.theme-light .ring-slate-800:not(.theme-keep, .theme-keep *) { --tw-ring-color: oklch(96.8% 0.007 247.896) !important; }
 html.theme-light .ring-white:not(.theme-keep, .theme-keep *) { --tw-ring-color: color-mix(in oklab, oklch(20.8% 0.042 265.755) 15%, transparent) !important; }
+html.theme-light .ring-white\/80:not(.theme-keep, .theme-keep *) { --tw-ring-color: color-mix(in oklab, oklch(20.8% 0.042 265.755) 30%, transparent) !important; }
 @media (min-width: 40rem) { html.theme-light .sm\:border-slate-700\/50:not(.theme-keep, .theme-keep *) { border-color: color-mix(in oklab, oklch(92.9% 0.013 255.508) 50%, transparent) !important; } }
 @media (min-width: 40rem) { html.theme-light .sm\:border-slate-800:not(.theme-keep, .theme-keep *) { border-color: oklch(96.8% 0.007 247.896) !important; } }
 html.theme-light .stroke-amber-100:not(.theme-keep, .theme-keep *) { stroke: oklch(41.4% 0.112 45.904) !important; }

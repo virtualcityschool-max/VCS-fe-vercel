@@ -444,6 +444,7 @@ const Report = ({ answers, onRetake }) => {
           Personality is only one part of choosing your path — your interests, your grades and your goals matter too. Share this report with your parents and teachers, and read our subject guides to see what each subject really involves.
         </p>
         <div className="print-hide flex flex-wrap gap-3 mb-6">
+          <Link to="/mind-lab/career-interests" className="px-5 py-3 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold transition">Find your career interests <i className="fas fa-arrow-right ml-1.5" aria-hidden="true" /></Link>
           <Link to="/subjects" className="px-5 py-3 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold transition">Read the subject guides</Link>
           <Link to="/courses" className="px-5 py-3 rounded-full border border-white/20 hover:border-white/40 text-slate-100 text-sm font-bold transition">Explore VCS courses</Link>
         </div>

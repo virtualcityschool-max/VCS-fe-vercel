@@ -17,7 +17,7 @@ const PlayArea = () => {
   useSeo({
     title: "Mind Lab — Free Personality Test, Brain Games & Smart Revision for Students",
     description:
-      "Free tests and puzzles from Virtual City School: a 100-question personality test for students, a research-based workplace personality assessment for job seekers and teachers, five memory games with a Memory Profile, daily brain teasers, a smart revision planner based on the forgetting curve, and Smart Notes with a Cornell notebook.",
+      "Free tests and puzzles from Virtual City School: a 100-question personality test for students, a research-based workplace personality assessment for job seekers and teachers, five memory games with a Memory Profile, daily brain teasers, a smart revision planner based on the forgetting curve, Smart Notes with a Cornell notebook, a career interest finder, an IQ-style reasoning test, an EQ self-check and aptitude test practice.",
     url: PAGE_URL,
     jsonLd: [
       {
@@ -75,8 +75,10 @@ const PlayArea = () => {
         </header>
 
         {[
-          ["students", "games-heading", "For students: discover yourself", "Know yourself, find your path and sharpen your mind."],
-          ["jobs", "jobs-heading", "For job seekers", "Preparing for interviews? Take the assessment many employers ask for, and print your report."],
+          ["self", "self-heading", "Discover yourself", "Your personality, interests and emotions — and the careers that fit them."],
+          ["brain", "brain-heading", "Train your brain", "Reasoning, memory and puzzles that sharpen how you think."],
+          ["study", "study-heading", "Study smarter", "Science-based tools to remember more and get better marks."],
+          ["jobs", "jobs-heading", "For job seekers", "Preparing for interviews? Take the assessments many employers ask for."],
         ].map(([group, id, heading, sub]) => (
           <section key={group} aria-labelledby={id} className="mb-16">
             <h2 id={id} className="text-2xl md:text-3xl font-black font-poppins text-white mb-2">{heading}</h2>

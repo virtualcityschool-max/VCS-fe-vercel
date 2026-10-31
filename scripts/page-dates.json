@@ -12,11 +12,11 @@
     "date": "2026-05-14"
   },
   "/mind-lab": {
-    "hash": "87dfb348699b3e60",
+    "hash": "fd6ea6e953ab8e69",
     "date": "2026-10-31"
   },
   "/mind-lab/personality-test": {
-    "hash": "6ad7f1af6ab063d4",
+    "hash": "bfb5b6704b59b86f",
     "date": "2026-10-31"
   },
   "/mind-lab/workplace-assessment": {
@@ -41,6 +41,22 @@
   },
   "/mind-lab/smart-notes": {
     "hash": "3e9da2d7fd6abf98",
+    "date": "2026-10-31"
+  },
+  "/mind-lab/career-interests": {
+    "hash": "65ea35760a0e57d4",
+    "date": "2026-10-31"
+  },
+  "/mind-lab/eq-check": {
+    "hash": "b36bddea505ecd44",
+    "date": "2026-10-31"
+  },
+  "/mind-lab/reasoning-test": {
+    "hash": "a8fa33c30f503576",
+    "date": "2026-10-31"
+  },
+  "/mind-lab/aptitude-practice": {
+    "hash": "b2aa04cf4c9ab9e3",
     "date": "2026-10-31"
   },
   "/teachers/:id": {

@@ -24,6 +24,10 @@ export const MemoryChallenge = lazyPage(() => import("../pages/public/MemoryChal
 export const BrainTeasers = lazyPage(() => import("../pages/public/BrainTeasers"));
 export const SmartRevision = lazyPage(() => import("../pages/public/SmartRevision"));
 export const SmartNotes = lazyPage(() => import("../pages/public/SmartNotes"));
+export const CareerInterests = lazyPage(() => import("../pages/public/CareerInterests"));
+export const EQSelfCheck = lazyPage(() => import("../pages/public/EQSelfCheck"));
+export const ReasoningTest = lazyPage(() => import("../pages/public/ReasoningTest"));
+export const AptitudePractice = lazyPage(() => import("../pages/public/AptitudePractice"));
 
 // For src/main.jsx: the page component for a public path, to preload.
 export const PUBLIC_PAGES = [
@@ -49,6 +53,10 @@ export const PUBLIC_PAGES = [
   [/^\/mind-lab\/brain-teasers\/?$/, BrainTeasers],
   [/^\/mind-lab\/smart-revision\/?$/, SmartRevision],
   [/^\/mind-lab\/smart-notes\/?$/, SmartNotes],
+  [/^\/mind-lab\/career-interests\/?$/, CareerInterests],
+  [/^\/mind-lab\/eq-check\/?$/, EQSelfCheck],
+  [/^\/mind-lab\/reasoning-test\/?$/, ReasoningTest],
+  [/^\/mind-lab\/aptitude-practice\/?$/, AptitudePractice],
 ];
 
 // The page for a path, preloaded by src/main.jsx before the first render.
