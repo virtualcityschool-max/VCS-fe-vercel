@@ -63,6 +63,16 @@ export const PLAY_AREA_GAMES = [
     meta: ["Revision planner", "Memory curves", "Knowledge tracing"],
   },
   {
+    slug: "smart-notes",
+    group: "students",
+    path: "/mind-lab/smart-notes",
+    title: "Smart Notes",
+    blurb: "Five note-taking methods with O and A Level examples, a quiz to find yours, and a Cornell notebook that turns your notes into a quiz.",
+    icon: "fas fa-pen-to-square",
+    accent: "indigo",
+    meta: ["Cornell notebook", "5 methods", "Test me"],
+  },
+  {
     slug: "career-interests",
     group: "students",
     title: "Career Interest Finder",

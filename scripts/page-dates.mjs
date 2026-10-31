@@ -31,6 +31,7 @@ async function pageContents() {
     "/mind-lab/memory-challenge": file("src/pages/public/MemoryChallenge.jsx") + file("src/data/playArea/memory.js"),
     "/mind-lab/brain-teasers": file("src/pages/public/BrainTeasers.jsx") + file("src/data/playArea/teasers.js"),
     "/mind-lab/smart-revision": file("src/pages/public/SmartRevision.jsx") + file("src/data/playArea/revision.js"),
+    "/mind-lab/smart-notes": file("src/pages/public/SmartNotes.jsx") + file("src/data/playArea/notes.js"),
     // The layout every tutor / course page shares: when it changes, every
     // one of those pages changed (the sitemap takes the newer of this and
     // the backend's updated_at for each page).

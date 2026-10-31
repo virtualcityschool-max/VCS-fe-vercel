@@ -17,7 +17,7 @@ const PlayArea = () => {
   useSeo({
     title: "Mind Lab — Free Personality Test, Brain Games & Smart Revision for Students",
     description:
-      "Free tests and puzzles from Virtual City School: a 100-question personality test for students, a research-based workplace personality assessment for job seekers and teachers, five memory games with a Memory Profile, daily brain teasers, and a smart revision planner based on the forgetting curve.",
+      "Free tests and puzzles from Virtual City School: a 100-question personality test for students, a research-based workplace personality assessment for job seekers and teachers, five memory games with a Memory Profile, daily brain teasers, a smart revision planner based on the forgetting curve, and Smart Notes with a Cornell notebook.",
     url: PAGE_URL,
     jsonLd: [
       {

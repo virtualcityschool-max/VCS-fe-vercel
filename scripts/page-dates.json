@@ -12,7 +12,7 @@
     "date": "2026-05-14"
   },
   "/mind-lab": {
-    "hash": "5f8570a020be55b2",
+    "hash": "87dfb348699b3e60",
     "date": "2026-10-31"
   },
   "/mind-lab/personality-test": {
@@ -36,7 +36,11 @@
     "date": "2026-10-31"
   },
   "/mind-lab/smart-revision": {
-    "hash": "bd65fedd74f72e8c",
+    "hash": "2b650529e5ca1443",
+    "date": "2026-10-31"
+  },
+  "/mind-lab/smart-notes": {
+    "hash": "3e9da2d7fd6abf98",
     "date": "2026-10-31"
   },
   "/teachers/:id": {

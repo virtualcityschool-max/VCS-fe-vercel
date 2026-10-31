@@ -1,4 +1,5 @@
-import { Link } from "react-router-dom";
+import { useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { useSeo } from "../../hooks/useSeo";
 import { ACCENT_CLASSES } from "../../data/playArea/games";
 import { LINE, EXAM_DAY, RECIPE, SOURCES, retention } from "../../data/playArea/revision";
@@ -38,6 +39,14 @@ const SmartRevision = () => {
       },
     ],
   });
+
+  // Opened from another page with #planner etc.: scroll to that section.
+  const { hash } = useLocation();
+  useEffect(() => {
+    if (!hash) return undefined;
+    const t = setTimeout(() => document.getElementById(hash.slice(1))?.scrollIntoView({ behavior: "smooth" }), 300);
+    return () => clearTimeout(t);
+  }, [hash]);
 
   const examDay = ["none", "cram", "spaced"].map((k) => ({ k, v: Math.round(retention(k, EXAM_DAY)) }));
 
