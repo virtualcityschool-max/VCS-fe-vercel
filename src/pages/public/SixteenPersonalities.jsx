@@ -160,6 +160,11 @@ const QuestionItem = ({ q, value, onAnswer, missing, innerRef }) => (
       missing ? "rounded-2xl ring-2 ring-rose-500/70 bg-rose-500/5 px-4 -mx-4" : ""
     }`}
   >
+    <div className="text-center mb-2">
+      <span className="inline-block text-[11px] font-extrabold uppercase tracking-widest text-indigo-400 bg-indigo-500/10 px-2.5 py-0.5 rounded-full border border-indigo-500/20">
+        Question {q.id} of {QUESTIONS.length}
+      </span>
+    </div>
     <p id={`q-${q.id}`} className="text-lg sm:text-xl font-bold text-white mb-6 text-center max-w-2xl mx-auto leading-snug">
       {q.text}
     </p>
@@ -271,7 +276,7 @@ const Test = ({ answers, step, setStep, onAnswer, onFinish, onExit }) => {
             />
           </div>
           <span className="text-xs sm:text-sm font-bold text-slate-300 whitespace-nowrap">
-            Step {step + 1} of {STEPS}
+            Step {step + 1} of {STEPS} <span className="text-indigo-400 font-semibold">({step * PER_STEP + 1}–{Math.min((step + 1) * PER_STEP, QUESTIONS.length)} of {QUESTIONS.length})</span>
           </span>
         </div>
       </div>
