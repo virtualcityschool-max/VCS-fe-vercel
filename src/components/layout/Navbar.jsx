@@ -8,12 +8,13 @@ import UserProfileDropdown from "./UserProfileDropdown";
 import TopBar from "./TopBar";
 import { GUIDE_CATALOG } from "../../data/subjectGuides/catalog";
 import ThemeToggle from "../common/ThemeToggle";
+import { useMocksCatalog } from "../../hooks/useMocksCatalog";
 
 const PUBLIC_LINKS = [
   { label: "Home", path: "/" },
   { label: "Explore Courses", path: "/courses" },
   // A separate app behind the /mocks rewrite: a full page load, not a router link.
-  { label: "Mock Exams", path: "/mocks", external: true },
+  { label: "Mock Exams", path: "/mocks", external: true, mocks: true },
   { label: "Subject Guides", path: "/subjects", guides: true },
   { label: "Meet Our Tutors", path: "/teachers" },
   { label: "Mind Lab", path: "/mind-lab" },
@@ -33,6 +34,7 @@ const Navbar = ({ variant = "default", hideLogo = false }) => {
     () => typeof window !== "undefined" && window.scrollY > 12,
   );
   const [mobileOpen, setMobileOpen] = useState(false);
+  const mocksMenu = useMocksCatalog();
   const isAdminLoginMode =
     searchParams.get("adminLogin") === "true" ||
     location.pathname.startsWith("/admin");
@@ -68,7 +70,7 @@ const Navbar = ({ variant = "default", hideLogo = false }) => {
               : "border-white/5 bg-slate-950/50 backdrop-blur-xl"
           }`}
         >
-          <div className={`max-w-[1440px] mx-auto px-4 sm:px-6 flex justify-between items-center ${
+          <div className={`relative max-w-[1440px] mx-auto px-4 sm:px-6 flex justify-between items-center ${
             hideLogo ? "h-14 sm:h-16" : "h-20"
           }`}>
             <div className="flex items-center gap-4 sm:gap-12">
@@ -94,6 +96,7 @@ const Navbar = ({ variant = "default", hideLogo = false }) => {
                     const navClass = `nav-link font-medium text-xs sm:text-sm whitespace-nowrap transition ${
                       active ? "text-white nav-link-active" : "text-slate-400 hover:text-white"
                     }`;
+                    if (link.mocks) return <MocksMenu key={link.path} link={link} navClass={navClass} menu={mocksMenu} />;
                     if (link.external) return <a key={link.path} href={link.path} className={navClass}>{link.label}</a>;
                     const a = (
                       <Link
@@ -252,5 +255,55 @@ const Navbar = ({ variant = "default", hideLogo = false }) => {
     </nav>
   );
 };
+
+// "Mock Exams" with its subject dropdown (like Subject Guides): every subject, which papers are live, read from the
+// Mock Exams app. The panel spans the menu's full width; the item fills the bar's height so the pointer can reach it.
+function MocksMenu({ link, navClass, menu }) {
+  const groups = menu.data?.groups ?? [];
+  return (
+    <div className="group/mocks h-20 flex items-center" onMouseEnter={menu.load} onFocus={menu.load}>
+      <a href={link.path} className={`${navClass} inline-flex items-center`}>
+        {link.label}
+        <i className="fas fa-chevron-down text-xs ml-1.5 opacity-70" aria-hidden="true" />
+      </a>
+      <div className="invisible opacity-0 group-hover/mocks:visible group-hover/mocks:opacity-100 group-focus-within/mocks:visible group-focus-within/mocks:opacity-100 transition absolute inset-x-4 sm:inset-x-6 top-full z-50">
+        <div className="rounded-2xl border border-white/10 bg-slate-950 shadow-2xl shadow-black/40 overflow-hidden">
+          {groups.length === 0 ? (
+            <p className="p-6 text-sm text-slate-300">Loading subjects…</p>
+          ) : (
+            <div className="grid grid-cols-5 gap-6 p-6">
+              {groups.map((g) => (
+                <div key={g.label} className="min-w-0">
+                  <div className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">{g.label}</div>
+                  <ul className="space-y-0.5">
+                    {g.exams.map((e) => (
+                      <li key={e.href}>
+                        <a href={e.href} className="block px-2 py-1.5 rounded-lg hover:bg-white/5 group/item">
+                          <span className="flex items-start justify-between gap-2">
+                            <span className="text-sm font-semibold text-slate-200 group-hover/item:text-white">{e.name}</span>
+                            {e.live ? (
+                              <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 text-xs font-bold text-emerald-300"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400" aria-hidden="true" />Live</span>
+                            ) : (
+                              <span className="shrink-0 rounded-full bg-white/5 px-2 py-0.5 text-xs font-semibold text-slate-400">Soon</span>
+                            )}
+                          </span>
+                          <span className="block text-xs text-slate-400 mt-0.5">{e.body}</span>
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          )}
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 bg-white/[0.03] px-6 py-3">
+            <p className="text-sm text-slate-300">Official Cambridge past papers as timed mocks, <strong className="text-emerald-300 font-semibold">marked by VCS teachers</strong>. VCS students pay half.</p>
+            <a href={menu.data?.allHref || "/mocks/exams"} className="text-sm font-semibold text-indigo-300 hover:text-white">All subjects →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default Navbar;
