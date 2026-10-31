@@ -33,6 +33,7 @@ async function pageContents() {
     "/mind-lab/smart-revision": file("src/pages/public/SmartRevision.jsx") + file("src/data/playArea/revision.js"),
     "/mind-lab/smart-notes": file("src/pages/public/SmartNotes.jsx") + file("src/data/playArea/notes.js"),
     "/mind-lab/learning-domains": file("src/pages/public/LearningDomains.jsx") + file("src/data/playArea/domains.js"),
+    "/mind-lab/smart-learning": file("src/pages/public/SmartLearning.jsx") + file("src/data/playArea/smartLearning.js"),
     "/mind-lab/career-interests": file("src/pages/public/CareerInterests.jsx") + file("src/data/playArea/career.js"),
     "/mind-lab/eq-check": file("src/pages/public/EQSelfCheck.jsx") + file("src/data/playArea/eq.js"),
     "/mind-lab/reasoning-test": file("src/pages/public/ReasoningTest.jsx") + file("src/data/playArea/reasoning.js"),

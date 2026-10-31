@@ -79,6 +79,7 @@ const PlayArea = () => {
           ["brain", "brain-heading", "Train your brain", "Reasoning, memory and puzzles that sharpen how you think."],
           ["study", "study-heading", "Study smarter", "Science-based tools to remember more, think deeper and get better marks."],
           ["jobs", "jobs-heading", "For job seekers", "Preparing for interviews? Take the assessments many employers ask for."],
+          ["parents", "parents-heading", "For parents", "How children learn best, and what to look for in your child's school."],
         ].map(([group, id, heading, sub]) => (
           <section key={group} aria-labelledby={id} className="mb-16">
             <h2 id={id} className="text-2xl md:text-3xl font-black font-poppins text-white mb-2">{heading}</h2>

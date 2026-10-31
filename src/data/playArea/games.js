@@ -122,6 +122,16 @@ export const PLAY_AREA_GAMES = [
     accent: "amber",
     meta: ["3 sections", "Timed", "Unlimited practice"],
   },
+  {
+    slug: "smart-learning",
+    group: "parents",
+    path: "/mind-lab/smart-learning",
+    title: "Smart Learning",
+    blurb: "Blackboard or laptop? What research says about online vs classroom learning, plus a checklist to see how smart your child's learning is.",
+    icon: "fas fa-house-laptop",
+    accent: "emerald",
+    meta: ["6 proven methods", "Parent checklist", "Myths checked"],
+  },
 ];
 
 // Tailwind needs full class names in source, so accents map to fixed classes.

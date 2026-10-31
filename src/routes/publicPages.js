@@ -25,6 +25,7 @@ export const BrainTeasers = lazyPage(() => import("../pages/public/BrainTeasers"
 export const SmartRevision = lazyPage(() => import("../pages/public/SmartRevision"));
 export const SmartNotes = lazyPage(() => import("../pages/public/SmartNotes"));
 export const LearningDomains = lazyPage(() => import("../pages/public/LearningDomains"));
+export const SmartLearning = lazyPage(() => import("../pages/public/SmartLearning"));
 export const CareerInterests = lazyPage(() => import("../pages/public/CareerInterests"));
 export const EQSelfCheck = lazyPage(() => import("../pages/public/EQSelfCheck"));
 export const ReasoningTest = lazyPage(() => import("../pages/public/ReasoningTest"));
@@ -55,6 +56,7 @@ export const PUBLIC_PAGES = [
   [/^\/mind-lab\/smart-revision\/?$/, SmartRevision],
   [/^\/mind-lab\/smart-notes\/?$/, SmartNotes],
   [/^\/mind-lab\/learning-domains\/?$/, LearningDomains],
+  [/^\/mind-lab\/smart-learning\/?$/, SmartLearning],
   [/^\/mind-lab\/career-interests\/?$/, CareerInterests],
   [/^\/mind-lab\/eq-check\/?$/, EQSelfCheck],
   [/^\/mind-lab\/reasoning-test\/?$/, ReasoningTest],

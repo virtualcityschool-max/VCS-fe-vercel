@@ -41,6 +41,7 @@ const STATIC_PAGES = [
   { loc: "/mind-lab/smart-revision", changefreq: "monthly", lastmod: pageDate("/mind-lab/smart-revision") },
   { loc: "/mind-lab/smart-notes", changefreq: "monthly", lastmod: pageDate("/mind-lab/smart-notes") },
   { loc: "/mind-lab/learning-domains", changefreq: "monthly", lastmod: pageDate("/mind-lab/learning-domains") },
+  { loc: "/mind-lab/smart-learning", changefreq: "monthly", lastmod: pageDate("/mind-lab/smart-learning") },
   { loc: "/mind-lab/career-interests", changefreq: "monthly", lastmod: pageDate("/mind-lab/career-interests") },
   { loc: "/mind-lab/eq-check", changefreq: "monthly", lastmod: pageDate("/mind-lab/eq-check") },
   { loc: "/mind-lab/reasoning-test", changefreq: "monthly", lastmod: pageDate("/mind-lab/reasoning-test") },

@@ -11,7 +11,7 @@ import PublicHome from "../pages/public/PublicHome";
 import {
   Marketplace, CourseDetails, Blogs, BlogDetails, TeachersDirectory, TeacherProfile, PrivacyPolicy,
   TermsAndConditions, AboutPage, OnlineSchoolHub, CountryLandingPage, ExamDatesPage, SubjectGuidePage,
-  SubjectGuidesIndex, PlayArea, PersonalityTest, WorkplaceAssessment, StarSigns, MemoryChallenge, BrainTeasers, SmartRevision, SmartNotes, LearningDomains, CareerInterests, EQSelfCheck, ReasoningTest, AptitudePractice,
+  SubjectGuidesIndex, PlayArea, PersonalityTest, WorkplaceAssessment, StarSigns, MemoryChallenge, BrainTeasers, SmartRevision, SmartNotes, LearningDomains, SmartLearning, CareerInterests, EQSelfCheck, ReasoningTest, AptitudePractice,
 } from "./publicPages";
 
 // Authenticated dashboards are code-split so public visitors never download them.
@@ -232,6 +232,7 @@ const AppRoutes = () => {
       <Route path="/mind-lab/smart-revision" element={<SmartRevision />} />
       <Route path="/mind-lab/smart-notes" element={<SmartNotes />} />
       <Route path="/mind-lab/learning-domains" element={<LearningDomains />} />
+      <Route path="/mind-lab/smart-learning" element={<SmartLearning />} />
       <Route path="/mind-lab/career-interests" element={<CareerInterests />} />
       <Route path="/mind-lab/eq-check" element={<EQSelfCheck />} />
       <Route path="/mind-lab/reasoning-test" element={<ReasoningTest />} />
