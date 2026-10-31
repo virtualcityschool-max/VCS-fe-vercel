@@ -18,6 +18,7 @@ export const SubjectGuidePage = lazyPage(() => import("../pages/public/SubjectGu
 export const SubjectGuidesIndex = lazyPage(() => import("../pages/public/SubjectGuidePage"), "SubjectGuidesIndex");
 export const PlayArea = lazyPage(() => import("../pages/public/PlayArea"));
 export const PersonalityTest = lazyPage(() => import("../pages/public/PersonalityTest"));
+export const SixteenPersonalities = lazyPage(() => import("../pages/public/SixteenPersonalities"));
 export const WorkplaceAssessment = lazyPage(() => import("../pages/public/WorkplaceAssessment"));
 export const StarSigns = lazyPage(() => import("../pages/public/StarSigns"));
 export const MemoryChallenge = lazyPage(() => import("../pages/public/MemoryChallenge"));
@@ -49,6 +50,7 @@ export const PUBLIC_PAGES = [
   [/^\/subjects\/[^/]+\/?$/, SubjectGuidePage],
   [/^\/mind-lab\/?$/, PlayArea],
   [/^\/mind-lab\/personality-test\/?$/, PersonalityTest],
+  [/^\/mind-lab\/16-personalities\/?$/, SixteenPersonalities],
   [/^\/mind-lab\/workplace-assessment\/?$/, WorkplaceAssessment],
   [/^\/mind-lab\/star-signs\/?$/, StarSigns],
   [/^\/mind-lab\/memory-challenge\/?$/, MemoryChallenge],

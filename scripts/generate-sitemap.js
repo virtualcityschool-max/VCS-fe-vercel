@@ -34,6 +34,7 @@ const STATIC_PAGES = [
   { loc: "/exam-dates", changefreq: "weekly", lastmod: EXAM_DATES_LAST_VERIFIED },
   { loc: "/mind-lab", changefreq: "monthly", lastmod: pageDate("/mind-lab") },
   { loc: "/mind-lab/personality-test", changefreq: "monthly", lastmod: pageDate("/mind-lab/personality-test") },
+  { loc: "/mind-lab/16-personalities", changefreq: "monthly", lastmod: pageDate("/mind-lab/16-personalities") },
   { loc: "/mind-lab/workplace-assessment", changefreq: "monthly", lastmod: pageDate("/mind-lab/workplace-assessment") },
   { loc: "/mind-lab/star-signs", changefreq: "monthly", lastmod: pageDate("/mind-lab/star-signs") },
   { loc: "/mind-lab/memory-challenge", changefreq: "monthly", lastmod: pageDate("/mind-lab/memory-challenge") },

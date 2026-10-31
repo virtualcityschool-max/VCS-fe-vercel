@@ -12,11 +12,15 @@
     "date": "2026-05-14"
   },
   "/mind-lab": {
-    "hash": "c14b3f8b6ab24ea5",
+    "hash": "eb919931ca163a33",
     "date": "2026-10-31"
   },
   "/mind-lab/personality-test": {
-    "hash": "130ec58aeb451d8e",
+    "hash": "b877d863d5cf6273",
+    "date": "2026-10-31"
+  },
+  "/mind-lab/16-personalities": {
+    "hash": "4497c6998d408107",
     "date": "2026-10-31"
   },
   "/mind-lab/workplace-assessment": {

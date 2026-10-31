@@ -26,6 +26,7 @@ async function pageContents() {
     "/terms": file("src/pages/public/TermsAndConditions.jsx"),
     "/mind-lab": file("src/pages/public/PlayArea.jsx") + file("src/data/playArea/games.js"),
     "/mind-lab/personality-test": file("src/pages/public/PersonalityTest.jsx") + file("src/data/playArea/personality.js"),
+    "/mind-lab/16-personalities": file("src/pages/public/SixteenPersonalities.jsx") + file("src/data/playArea/sixteenPersonalities.js"),
     "/mind-lab/workplace-assessment": file("src/pages/public/WorkplaceAssessment.jsx") + file("src/data/playArea/workplace.js"),
     "/mind-lab/star-signs": file("src/pages/public/StarSigns.jsx") + file("src/data/playArea/zodiac.js"),
     "/mind-lab/memory-challenge": file("src/pages/public/MemoryChallenge.jsx") + file("src/data/playArea/memory.js"),
