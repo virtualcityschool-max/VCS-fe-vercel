@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { NORMS } from "../../../data/playArea/memory";
-import { useTimers, rand } from "./utils";
-import { GameOver, GhostButton, PrimaryButton, Stat, Status } from "./shared";
+import { useTimers, rand } from "../utils";
+import { GameOver, GhostButton, PrimaryButton, Stat, Status } from "../shared";
 
 const ON_MS = 800;
 const GAP_MS = 250;

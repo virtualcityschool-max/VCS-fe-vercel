@@ -45,11 +45,12 @@ export const PLAY_AREA_GAMES = [
   {
     slug: "brain-teasers",
     group: "students",
+    path: "/play-area/brain-teasers",
     title: "Brain Teasers",
-    blurb: "Logic puzzles and riddles to stretch your thinking and sharpen problem solving.",
+    blurb: "5 new puzzles every day: patterns, logic, riddles, quick maths and famous puzzles from history. Plus Maths Sprint and Tower of Hanoi.",
     icon: "fas fa-puzzle-piece",
     accent: "amber",
-    meta: ["Coming soon"],
+    meta: ["Daily puzzles", "Hints + answers", "Badges"],
   },
   {
     slug: "career-interests",

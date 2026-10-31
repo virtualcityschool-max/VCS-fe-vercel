@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { NORMS } from "../../../data/playArea/memory";
-import { useTimers, rand } from "./utils";
-import { GameOver, PrimaryButton, Stat, Status } from "./shared";
+import { useTimers, rand } from "../utils";
+import { GameOver, PrimaryButton, Stat, Status } from "../shared";
 
 const TILES = [
   ["bg-violet-500/20 border-violet-400/40", "bg-violet-400 border-violet-200 shadow-[0_0_40px_rgba(167,139,250,0.9)]"],

@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useTimers, shuffle } from "./utils";
-import { GameOver, PrimaryButton, Stat, Status } from "./shared";
+import { useTimers, shuffle } from "../utils";
+import { GameOver, PrimaryButton, Stat, Status } from "../shared";
 
 const START = 3;
 const LIVES = 3;

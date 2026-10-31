@@ -12,8 +12,8 @@
     "date": "2026-05-14"
   },
   "/play-area": {
-    "hash": "93e53f30400dd390",
-    "date": "2026-10-30"
+    "hash": "c1b2851b201e55ea",
+    "date": "2026-10-31"
   },
   "/play-area/personality-test": {
     "hash": "4ce7d3c952587175",
@@ -30,6 +30,10 @@
   "/play-area/memory-challenge": {
     "hash": "d19cf68d8dfd20e3",
     "date": "2026-10-30"
+  },
+  "/play-area/brain-teasers": {
+    "hash": "5c4ea8e6ea6981ee",
+    "date": "2026-10-31"
   },
   "/teachers/:id": {
     "hash": "83ac169d455cad63",

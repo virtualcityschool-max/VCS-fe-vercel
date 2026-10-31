@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { PAIR_DECKS, PAIRS_PER_GAME } from "../../../data/playArea/memory";
-import { useTimers, shuffle, nowMs } from "./utils";
-import { GameOver, GhostButton, Stat, Status } from "./shared";
+import { useTimers, shuffle, nowMs } from "../utils";
+import { GameOver, GhostButton, Stat, Status } from "../shared";
 
 const deal = (deckId) => {
   const pairs = shuffle(PAIR_DECKS[deckId].pairs).slice(0, PAIRS_PER_GAME);

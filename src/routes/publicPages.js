@@ -21,6 +21,7 @@ export const PersonalityTest = lazyPage(() => import("../pages/public/Personalit
 export const WorkplaceAssessment = lazyPage(() => import("../pages/public/WorkplaceAssessment"));
 export const StarSigns = lazyPage(() => import("../pages/public/StarSigns"));
 export const MemoryChallenge = lazyPage(() => import("../pages/public/MemoryChallenge"));
+export const BrainTeasers = lazyPage(() => import("../pages/public/BrainTeasers"));
 
 // For src/main.jsx: the page component for a public path, to preload.
 export const PUBLIC_PAGES = [
@@ -43,6 +44,7 @@ export const PUBLIC_PAGES = [
   [/^\/play-area\/workplace-assessment\/?$/, WorkplaceAssessment],
   [/^\/play-area\/star-signs\/?$/, StarSigns],
   [/^\/play-area\/memory-challenge\/?$/, MemoryChallenge],
+  [/^\/play-area\/brain-teasers\/?$/, BrainTeasers],
 ];
 
 // The page for a path, preloaded by src/main.jsx before the first render.

@@ -1,4 +1,4 @@
-import { shareLink } from "../../../data/playArea/memory";
+import { shareLink as memoryShare } from "../../data/playArea/memory";
 
 export const Stat = ({ label, value, color = "text-white" }) => (
   <div className="px-3 sm:px-4 py-2.5 rounded-2xl border border-white/10 bg-white/[0.04] text-center min-w-[84px] sm:min-w-[96px]">
@@ -29,7 +29,7 @@ export const GhostButton = ({ children, onClick }) => (
 );
 
 // Shown when a game ends: score, personal best, what most people score, share.
-export const GameOver = ({ title, score, unit, best, isNewBest, note, shareText, onAgain, onExit, children }) => (
+export const GameOver = ({ title, score, unit, best, isNewBest, note, shareText, shareLink = memoryShare, onAgain, onExit, children }) => (
   <div className="text-center py-6 md:py-10">
     {isNewBest && (
       <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-sm font-black uppercase tracking-widest mb-4 animate-bounce">

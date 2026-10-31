@@ -2,8 +2,8 @@ import { useRef, useState } from "react";
 import {
   WORD_LISTS, PALACE_ROUTE, PALACE_EXAMPLES, WORD_SECONDS, scoreRecall,
 } from "../../../data/playArea/memory";
-import { useTimers, shuffle } from "./utils";
-import { GameOver, PrimaryButton, Stat, Status } from "./shared";
+import { useTimers, shuffle } from "../utils";
+import { GameOver, PrimaryButton, Stat, Status } from "../shared";
 
 // Free recall: type words one by one, then press "I'm done".
 const RecallBox = ({ onDone, cues }) => {
