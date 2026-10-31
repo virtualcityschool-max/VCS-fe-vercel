@@ -201,6 +201,7 @@ function NavItem({ label, icon, isCollapsed, badge, badgeText, isActive, onClick
           const isAssessmentsPath =
             location.pathname.startsWith("/teacher/assessments") ||
             location.pathname.startsWith("/teacher/submissions") ||
+            location.pathname.startsWith("/teacher/assignments/") ||
             location.pathname.startsWith("/teacher/grading");
           return (location.pathname === toPath && isAssessmentsTab) || isAssessmentsPath;
         }

@@ -176,14 +176,16 @@ const StudentAssignmentDetails = () => {
                 {/* <span className="text-xs text-slate-500 uppercase font-black tracking-widest mb-1">Status</span> */}
                 <span
                   className={`px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest shadow-lg ${
-                    isOverdue
-                      ? "bg-red-500/10 text-red-400 border border-red-500/20"
+                    assignment.my_submission?.is_graded
+                      ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
                       : isSubmitted
                         ? "bg-blue-500/10 text-blue-400 border border-blue-500/20"
-                        : "bg-yellow-500/10 text-yellow-400 border border-yellow-500/20"
+                        : isOverdue
+                          ? "bg-red-500/10 text-red-400 border border-red-500/20"
+                          : "bg-yellow-500/10 text-yellow-400 border border-yellow-500/20"
                   }`}
                 >
-                  {isOverdue ? "Overdue" : isSubmitted ? "Submitted" : "Pending"}
+                  {assignment.my_submission?.is_graded ? "Marked" : isSubmitted ? "Submitted" : isOverdue ? "Overdue" : "Pending"}
                 </span>
              </div>
           </div>
@@ -277,16 +279,28 @@ const StudentAssignmentDetails = () => {
                             <i className="fas fa-award text-2xl"></i>
                           </div>
                           <div>
-                            <h3 className="text-lg font-black text-emerald-400 leading-none mb-1">Evaluation Complete</h3>
-                            <p className="text-xs text-emerald-500/60 font-bold uppercase tracking-widest">Well done!</p>
+                            <h3 className="text-lg font-black text-emerald-400 leading-none mb-1">Marked by your teacher</h3>
+                            <p className="text-xs text-emerald-300 font-bold uppercase tracking-widest">Your marks and remarks</p>
                           </div>
                         </div>
-                      </div>
-                      
-                      {assignment.my_submission.feedback && (
-                        <div className="bg-slate-950/30 border border-emerald-500/10 rounded-xl p-4 text-slate-300 text-sm leading-relaxed font-medium">
-                          {assignment.my_submission.feedback}
+                        <div className="text-right">
+                          <p className="text-3xl font-black text-white tabular-nums leading-none">
+                            {assignment.my_submission.score}
+                            <span className="text-lg text-slate-300 font-bold"> / {assignment.max_score}</span>
+                          </p>
+                          {assignment.max_score > 0 && assignment.my_submission.score != null && (
+                            <p className="mt-1 text-sm font-semibold text-emerald-300">{Math.round((assignment.my_submission.score / assignment.max_score) * 100)}%</p>
+                          )}
                         </div>
+                      </div>
+
+                      {assignment.my_submission.feedback ? (
+                        <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-4">
+                          <p className="text-xs font-bold uppercase tracking-widest text-emerald-300 mb-2">Teacher&apos;s remarks</p>
+                          <p className="text-base text-slate-200 leading-relaxed whitespace-pre-wrap">{assignment.my_submission.feedback}</p>
+                        </div>
+                      ) : (
+                        <p className="text-sm text-slate-300">Your teacher gave marks without remarks.</p>
                       )}
                     </div>
                   ) : (

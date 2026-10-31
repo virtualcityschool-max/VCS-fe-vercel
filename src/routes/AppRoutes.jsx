@@ -34,6 +34,7 @@ const TeacherAttendance = React.lazy(() => import("../pages/teacher/TeacherAtten
 const TeacherGrading = React.lazy(() => import("../pages/teacher/TeacherGrading"));
 const TeacherAssessments = React.lazy(() => import("../pages/teacher/TeacherAssessments"));
 const TeacherSubmissions = React.lazy(() => import("../pages/teacher/TeacherSubmissions"));
+const TeacherAssignmentMarking = React.lazy(() => import("../pages/teacher/TeacherAssignmentMarking"));
 const TeacherSessionCalendar = React.lazy(() => import("../pages/teacher/TeacherSessionCalendar"));
 const TeacherInternalStudentProfile = React.lazy(() => import("../pages/teacher/TeacherInternalStudentProfile"));
 const TeacherEvaluationPage = React.lazy(() => import("../pages/teacher/TeacherEvaluationPage"));
@@ -267,6 +268,7 @@ const AppRoutes = () => {
           <Route path="grading" element={<TeacherGrading />} />
           <Route path="sessions" element={<TeacherSessionCalendar />} />
           <Route path="submissions" element={<TeacherSubmissions />} />
+          <Route path="assignments/:assignmentId/mark" element={<TeacherAssignmentMarking />} />
           <Route path="evaluations" element={<TeacherEvaluationPage />} />
           <Route path="hire-leads" element={<TeacherHireLeads />} />
           <Route path="availability" element={<TeacherAvailabilityPage />} />

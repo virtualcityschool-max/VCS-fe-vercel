@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
+import { teacherService } from "../../../services/teacherService";
 import {
   FileText,
   Award,
@@ -41,6 +42,22 @@ export const AssignmentsQuizzesView = ({
       );
     return matchCourse && matchSearch;
   });
+  // Assignment hand-ins not marked yet (founder, 2026-11-01): they belong in the Marking Queue too.
+  const [pendingHandIns, setPendingHandIns] = useState([]);
+  useEffect(() => {
+    let live = true;
+    teacherService
+      .getAllSubmissions()
+      .then((d) => {
+        const list = Array.isArray(d) ? d : Array.isArray(d?.results) ? d.results : [];
+        if (live) setPendingHandIns(list.filter((x) => !x.is_graded));
+      })
+      .catch(() => {});
+    return () => {
+      live = false;
+    };
+  }, []);
+  const toMarkByAssignment = pendingHandIns.reduce((m, x) => ({ ...m, [String(x.assignment)]: (m[String(x.assignment)] || 0) + 1 }), {});
   const allPendingQuizReviews = [];
   quizzes.forEach((q) => {
     (q.submissions || []).forEach((sub) => {
@@ -49,7 +66,7 @@ export const AssignmentsQuizzesView = ({
       }
     });
   });
-  const pendingReviewsCount = allPendingQuizReviews.length;
+  const pendingReviewsCount = allPendingQuizReviews.length + pendingHandIns.length;
   return <div className="space-y-6">
       {
     /* Top Banner & Primary Action Suite */
@@ -207,9 +224,17 @@ export const AssignmentsQuizzesView = ({
                 </div>
 
                 <div className="pt-3 border-t border-[#181F36] flex items-center justify-between">
-                  <span className="text-xs text-slate-400">
-                    <strong className="text-white tabular-nums font-mono">{asg.submissionsCount}</strong> submissions
-                  </span>
+                  {asg.submissionsCount > 0 ? (
+                    <Link
+                      to={`/teacher/assignments/${asg.id}/mark`}
+                      className="inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-emerald-600 px-3 text-xs font-bold text-white shadow-md transition-colors hover:bg-emerald-500"
+                    >
+                      <Award className="w-3.5 h-3.5" />
+                      {toMarkByAssignment[asg.id] ? `Mark (${toMarkByAssignment[asg.id]} to mark)` : `View marks (${asg.submissionsCount})`}
+                    </Link>
+                  ) : (
+                    <span className="text-xs text-slate-400">No submissions yet</span>
+                  )}
                   <div className="flex items-center gap-2">
                     <span className={`px-2.5 py-1 rounded-lg text-xs font-bold uppercase border ${asg.isOverdue ? "bg-slate-800 text-slate-400 border-slate-700" : asg.status === "published" ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30" : "bg-amber-500/15 text-amber-300 border-amber-500/30"}`}>
                       {asg.isOverdue ? "closed" : asg.status}
@@ -428,6 +453,46 @@ export const AssignmentsQuizzesView = ({
     /* ================= SECTION C: PENDING SUBMISSIONS MARKING QUEUE ================= */
   }
       {activeSection === "pending_reviews" && <div className="space-y-4">
+          <div className="p-4 rounded-2xl bg-[#101424] border border-[#1E2540] flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-bold text-white">Assignments handed in</h3>
+              <p className="text-xs text-slate-400">Give marks and remarks, then return them to the student.</p>
+            </div>
+            <span className="font-mono text-xs font-bold text-amber-300 bg-amber-500/10 px-3 py-1 rounded-xl border border-amber-500/30">
+              {pendingHandIns.length} to mark
+            </span>
+          </div>
+          {pendingHandIns.length === 0 ? (
+            <p className="px-2 text-sm text-slate-400">No assignments waiting for marks.</p>
+          ) : (
+            <div className="space-y-3">
+              {pendingHandIns.map((x) => (
+                <div key={x.id} className="p-5 rounded-2xl bg-[#101424] border border-[#1E2540] hover:border-amber-500/40 transition-all flex flex-wrap items-center justify-between gap-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-bold text-white">{x.student_name || "Student"}</span>
+                      <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 text-xs font-bold uppercase border border-amber-500/30">
+                        {x.status === "late" ? "Late · to mark" : "To mark"}
+                      </span>
+                    </div>
+                    <div className="text-xs font-semibold text-indigo-400">{x.assignment_title}</div>
+                    <div className="text-xs text-slate-400">{x.course_title}{x.submitted_at ? ` · handed in ${new Date(x.submitted_at).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}` : ""}</div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    {x.assignment_max_score != null && <span className="text-sm font-mono font-bold text-white">Out of {x.assignment_max_score}</span>}
+                    <Link
+                      to={`/teacher/assignments/${x.assignment}/mark?s=${x.id}`}
+                      className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all shadow-md inline-flex items-center gap-1.5"
+                    >
+                      <Award className="w-3.5 h-3.5" />
+                      <span>Mark and return</span>
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
           <div className="p-4 rounded-2xl bg-[#101424] border border-[#1E2540] flex items-center justify-between">
             <div>
               <h3 className="text-sm font-bold text-white">Submitted Quizzes & Diagnostic Papers</h3>
