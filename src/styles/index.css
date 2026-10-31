@@ -87,6 +87,9 @@ body {
 
 html {
   scroll-behavior: smooth;
+  /* Keep room for the scrollbar on every page, so the menu never moves between short and long pages
+     (and lines up with Mock Exams, which does the same). */
+  scrollbar-gutter: stable;
 }
 
 :root {

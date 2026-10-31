@@ -1,7 +1,7 @@
 // /teacher/mocks — written mock scripts Mock Admin assigned to this teacher (VCS Mock Exams).
 // "Mock Exams" in the teacher menu (red number = scripts and papers waiting).
 import React, { useCallback, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { mocksService } from "../../services/mocksService";
 
 const fmt = (iso) =>
@@ -67,7 +67,11 @@ const TeacherMockMarking = () => {
       .catch((e) => setError(e?.message || "Could not load your scripts."));
   }, []);
 
+  // Two things only (founder, 2026-10-31): scripts to mark and send back, and papers Mock Admin sent to review.
+  const [params, setParams] = useSearchParams();
+  const tab = params.get("tab") === "reviews" ? "reviews" : "scripts";
   const scripts = data?.scripts ?? [];
+  const reviewsOpen = (reviews ?? []).filter((r) => r.status !== "done").length;
   const open = scripts.filter((s) => !isDone(s));
   const overdue = open.filter((s) => s.overdue).length;
   const soon = open.filter((s) => !s.overdue && s.dueAt && new Date(s.dueAt).getTime() - data.at < 86_400_000).length;
@@ -83,9 +87,11 @@ const TeacherMockMarking = () => {
     <div className="max-w-[1440px] mx-auto">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-3xl md:text-4xl font-bold text-white">Mock Marking</h1>
+          <h1 className="text-3xl md:text-4xl font-bold text-white">Mock Exams</h1>
           <p className="mt-2 max-w-3xl text-base text-slate-300">
-            Written mock papers from <strong className="text-cyan-300 font-semibold">VCS Mock Exams</strong>. Mark each question against the official mark scheme, add a short comment, and return it to the student within 72 hours.
+            {tab === "scripts"
+              ? <>Papers students have sat and submitted. Mark each question against the official mark scheme, add your observations, and send it back within 72 hours.</>
+              : <>Past papers Mock Admin asked you to check. Do what Mock Admin allowed: edit the marks, or add remarks only.</>}
           </p>
         </div>
         <button type="button" onClick={load} className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-slate-700 px-4 text-sm font-semibold text-slate-200 hover:border-indigo-500 transition">
@@ -93,6 +99,26 @@ const TeacherMockMarking = () => {
         </button>
       </div>
 
+      <div role="tablist" aria-label="Mock Exams" className="mt-6 flex gap-2 border-b border-slate-800">
+        {[
+          { id: "scripts", label: "Scripts to mark", icon: "fa-pen-to-square", n: data ? open.length : null },
+          { id: "reviews", label: "Papers to review", icon: "fa-clipboard-check", n: reviews ? reviewsOpen : null },
+        ].map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            role="tab"
+            aria-selected={tab === t.id}
+            onClick={() => setParams(t.id === "scripts" ? {} : { tab: t.id })}
+            className={`-mb-px inline-flex min-h-11 items-center gap-2 border-b-2 px-4 text-sm font-semibold transition ${tab === t.id ? "border-indigo-400 text-white" : "border-transparent text-slate-400 hover:text-white"}`}
+          >
+            <i className={`fas ${t.icon}`} aria-hidden="true" />{t.label}
+            {t.n > 0 && <span className="rounded-full bg-rose-500 px-2 py-0.5 text-xs font-bold text-white">{t.n}</span>}
+          </button>
+        ))}
+      </div>
+
+      {tab === "scripts" && <>
       <div className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
         {tiles.map((t) => (
           <div key={t.label} className="flex items-center gap-3 rounded-2xl border border-slate-800 bg-slate-900/50 p-4">
@@ -104,38 +130,6 @@ const TeacherMockMarking = () => {
           </div>
         ))}
       </div>
-
-      {reviewsError && (
-        <p role="alert" className="mt-6 rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
-          {reviewsError}{" "}
-          <button type="button" onClick={loadReviews} className="font-semibold underline">Try again</button>
-        </p>
-      )}
-
-      {reviews && reviews.length > 0 && (
-        <section className="mt-6 rounded-2xl border border-cyan-500/30 bg-cyan-500/5 p-5">
-          <h2 className="text-lg font-semibold text-white"><i className="fas fa-clipboard-check mr-2 text-cyan-300" aria-hidden="true" />Papers to review</h2>
-          <p className="mt-1 text-sm text-slate-300">Mock Admin asked you to check these past papers: the question marks and the mark scheme. Add a note where something is wrong.</p>
-          <ul className="mt-3 divide-y divide-slate-800/60">
-            {reviews.map((r) => (
-              <li key={r.id} className="flex flex-col gap-2 py-3 md:flex-row md:items-center">
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className={`rounded-md border px-2 py-0.5 text-xs font-bold ${r.status === "done" ? "border-emerald-500/30 bg-emerald-500/15 text-emerald-300" : "border-amber-500/30 bg-amber-500/15 text-amber-300"}`}>{r.status === "done" ? "Sent back" : r.role === "hod" ? "To finalise (HOD)" : "To review"}</span>
-                    <span className="rounded-md border border-slate-700 px-2 py-0.5 text-xs text-slate-300">{r.canEdit ? "You can edit marks" : "Feedback only"}</span>
-                    <p className="text-base font-semibold text-white">{r.paper}</p>
-                  </div>
-                  {r.note && <p className="mt-1 text-sm text-slate-300">“{r.note}”</p>}
-                  <p className="mt-1 text-xs text-slate-400">Sent {fmt(r.sentAt)}</p>
-                </div>
-                <Link to={`/teacher/mocks/review/${r.id}`} className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-lg bg-cyan-700 px-4 text-sm font-bold text-white hover:bg-cyan-600">
-                  <i className={`fas ${r.status === "done" ? "fa-eye" : "fa-magnifying-glass"}`} aria-hidden="true" />{r.status === "done" ? "View" : "Review paper"}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
 
       <div className="mt-6 overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/50">
         {error ? (
@@ -190,6 +184,50 @@ const TeacherMockMarking = () => {
           </ul>
         )}
       </div>
+      </>}
+
+      {tab === "reviews" && <>
+      {reviewsError && (
+        <p role="alert" className="mt-6 rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
+          {reviewsError}{" "}
+          <button type="button" onClick={loadReviews} className="font-semibold underline">Try again</button>
+        </p>
+      )}
+
+      {!reviews && !reviewsError && <p className="mt-6 text-sm text-slate-400" aria-busy="true">Loading…</p>}
+      {reviews && reviews.length === 0 && (
+        <div className="mt-6 rounded-2xl border border-slate-800 bg-slate-900/50 p-14 text-center">
+          <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-cyan-500/15 text-cyan-300 text-xl"><i className="fas fa-clipboard-check" aria-hidden="true" /></span>
+          <p className="mt-4 text-lg font-semibold text-white">Currently there are no papers for you to review</p>
+          <p className="mt-1 text-base text-slate-300">When Mock Admin sends you a paper to check, it appears here with a red number.</p>
+        </div>
+      )}
+      {reviews && reviews.length > 0 && (
+        <section className="mt-6 rounded-2xl border border-cyan-500/30 bg-cyan-500/5 p-5">
+          <h2 className="text-lg font-semibold text-white"><i className="fas fa-clipboard-check mr-2 text-cyan-300" aria-hidden="true" />Papers to review</h2>
+          <p className="mt-1 text-sm text-slate-300">Mock Admin asked you to check these past papers: the question marks and the mark scheme. Add a note where something is wrong.</p>
+          <ul className="mt-3 divide-y divide-slate-800/60">
+            {reviews.map((r) => (
+              <li key={r.id} className="flex flex-col gap-2 py-3 md:flex-row md:items-center">
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className={`rounded-md border px-2 py-0.5 text-xs font-bold ${r.status === "done" ? "border-emerald-500/30 bg-emerald-500/15 text-emerald-300" : "border-amber-500/30 bg-amber-500/15 text-amber-300"}`}>{r.status === "done" ? "Sent back" : r.role === "hod" ? "To finalise (HOD)" : "To review"}</span>
+                    <span className="rounded-md border border-slate-700 px-2 py-0.5 text-xs text-slate-300">{r.canEdit ? "You can edit marks" : "Feedback only"}</span>
+                    <p className="text-base font-semibold text-white">{r.paper}</p>
+                  </div>
+                  {r.note && <p className="mt-1 text-sm text-slate-300">“{r.note}”</p>}
+                  <p className="mt-1 text-xs text-slate-400">Sent {fmt(r.sentAt)}</p>
+                </div>
+                <Link to={`/teacher/mocks/review/${r.id}`} className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-lg bg-cyan-700 px-4 text-sm font-bold text-white hover:bg-cyan-600">
+                  <i className={`fas ${r.status === "done" ? "fa-eye" : "fa-magnifying-glass"}`} aria-hidden="true" />{r.status === "done" ? "View" : "Review paper"}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      </>}
     </div>
   );
 };

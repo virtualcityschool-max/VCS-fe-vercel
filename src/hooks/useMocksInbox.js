@@ -1,5 +1,5 @@
-// How many Mock Exams items are waiting for this teacher: scripts to mark (or fix and resend) plus past papers
-// to review. Shown as a red number on "Mock Exams" in the teacher menu, like unread mail.
+// How many Mock Exams items are waiting for this teacher: { scripts, reviews, total } — scripts to mark (or fix
+// and resend) and past papers to review. Shown as a red number on "Mock Exams" in the teacher menu, like unread mail.
 // Refreshes on every page change, every 2 minutes, when the tab comes back into view, and when the marking
 // pages announce a change (window event "vcs:mocks-changed"). A failed call keeps the last number.
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -10,12 +10,15 @@ const EVERY_MS = 2 * 60 * 1000;
 const MIN_GAP_MS = 20 * 1000;
 export const MOCKS_CHANGED = "vcs:mocks-changed";
 
-const waiting = (scripts, reviews) =>
-  (scripts ?? []).filter((s) => s.status === "assigned" || s.status === "marked").length +
-  (reviews ?? []).filter((r) => r.status !== "done").length;
+const ZERO = { scripts: 0, reviews: 0, total: 0 };
+const waiting = (scripts, reviews) => {
+  const s = (scripts ?? []).filter((x) => x.status === "assigned" || x.status === "marked").length;
+  const r = (reviews ?? []).filter((x) => x.status !== "done").length;
+  return { scripts: s, reviews: r, total: s + r };
+};
 
 export function useMocksInbox(enabled) {
-  const [count, setCount] = useState(0);
+  const [count, setCount] = useState(ZERO);
   const lastAt = useRef(0);
   const { pathname } = useLocation();
 
@@ -26,7 +29,15 @@ export function useMocksInbox(enabled) {
       lastAt.current = Date.now();
       const [s, r] = await Promise.allSettled([mocksService.listScripts(), mocksService.listReviews()]);
       if (s.status !== "fulfilled" && r.status !== "fulfilled") return;
-      setCount(waiting(s.value?.scripts, r.value?.reviews));
+      // A failed half keeps its last number.
+      setCount((prev) => {
+        const next = waiting(s.value?.scripts, r.value?.reviews);
+        return {
+          scripts: s.status === "fulfilled" ? next.scripts : prev.scripts,
+          reviews: r.status === "fulfilled" ? next.reviews : prev.reviews,
+          total: (s.status === "fulfilled" ? next.scripts : prev.scripts) + (r.status === "fulfilled" ? next.reviews : prev.reviews),
+        };
+      });
     },
     [enabled],
   );
@@ -50,5 +61,5 @@ export function useMocksInbox(enabled) {
     };
   }, [enabled, refresh]);
 
-  return enabled ? count : 0;
+  return enabled ? count : ZERO;
 }

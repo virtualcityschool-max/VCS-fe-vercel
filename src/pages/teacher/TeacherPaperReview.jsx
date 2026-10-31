@@ -81,7 +81,7 @@ const TeacherPaperReview = () => {
     return (
       <div className="max-w-[1440px] mx-auto p-10 text-center">
         <p role="alert" className="text-rose-200">{error}</p>
-        <Link to="/teacher/mocks" className="mt-4 inline-block text-cyan-300 underline">Back to Mock Marking</Link>
+        <Link to="/teacher/mocks?tab=reviews" className="mt-4 inline-block text-cyan-300 underline">Back to papers to review</Link>
       </div>
     );
   }
@@ -92,7 +92,7 @@ const TeacherPaperReview = () => {
 
   return (
     <div className="max-w-[1440px] mx-auto">
-      <Link to="/teacher/mocks" className="text-sm font-semibold text-slate-300 hover:text-white"><i className="fas fa-arrow-left mr-2" aria-hidden="true" />Mock Marking</Link>
+      <Link to="/teacher/mocks?tab=reviews" className="text-sm font-semibold text-slate-300 hover:text-white"><i className="fas fa-arrow-left mr-2" aria-hidden="true" />Papers to review</Link>
       <section className="mt-4 rounded-2xl border border-slate-800 bg-slate-900/50 p-6">
         <p className="text-xs font-bold uppercase tracking-widest text-cyan-300">{hod ? "Final decision (HOD)" : "Paper review"} · {review.canEdit ? "you can edit marks" : "feedback only"}</p>
         <h1 className="mt-2 text-3xl md:text-5xl font-bold text-white">{review.paper}</h1>

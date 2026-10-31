@@ -235,7 +235,7 @@ const TeacherMockScript = () => {
     return (
       <div className="max-w-[1440px] mx-auto py-10 text-center">
         <p role="alert" className="text-base text-rose-200"><i className="fas fa-triangle-exclamation mr-2" aria-hidden="true" />{error}</p>
-        <Link to="/teacher/mocks" className="mt-4 inline-flex min-h-10 items-center gap-2 rounded-lg border border-slate-700 px-4 text-sm font-semibold text-slate-200 hover:border-indigo-500">Back to Mock Marking</Link>
+        <Link to="/teacher/mocks" className="mt-4 inline-flex min-h-10 items-center gap-2 rounded-lg border border-slate-700 px-4 text-sm font-semibold text-slate-200 hover:border-indigo-500">Back to scripts to mark</Link>
       </div>
     );
   }
@@ -251,7 +251,7 @@ const TeacherMockScript = () => {
   return (
     <div className="max-w-[1440px] mx-auto">
       <Link to="/teacher/mocks" className="inline-flex items-center gap-2 text-sm font-semibold text-slate-300 hover:text-white">
-        <i className="fas fa-arrow-left" aria-hidden="true" /> Mock Marking
+        <i className="fas fa-arrow-left" aria-hidden="true" /> Scripts to mark
       </Link>
 
       {/* Script header */}

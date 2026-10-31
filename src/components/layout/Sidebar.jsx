@@ -130,7 +130,11 @@ const NAV_CONFIG = {
     { label: "Teaching Resources & Desk", to: "/teacher?tab=teaching_resources", icon: "fas fa-folder-open" },
     { label: "Evaluations & Gradebook", to: "/teacher?tab=evaluations", icon: "fas fa-chart-bar" },
     // VCS Mock Exams: scripts and papers Mock Admin sent me; the badge counts the ones waiting (like an inbox).
-    { label: "Mock Exams", to: "/teacher/mocks", icon: "fas fa-file-signature", badgeKey: "mocks" },
+    // Teachers see two things only (founder, 2026-10-31): scripts to mark and send back, and papers Mock Admin sent to review.
+    { label: "Mock Exams", to: "/teacher/mocks", icon: "fas fa-file-signature", badgeKey: "mocks", children: [
+      { label: "Scripts to mark", to: "/teacher/mocks?tab=scripts", icon: "fas fa-pen-to-square", badgeKey: "scripts" },
+      { label: "Papers to review", to: "/teacher/mocks?tab=reviews", icon: "fas fa-clipboard-check", badgeKey: "reviews" },
+    ] },
     { label: "Performance Analytics", to: "/teacher?tab=analytics", icon: "fas fa-chart-line" },
     { label: "Planner", to: "/teacher?tab=planner", icon: "fas fa-calendar-alt" },
     { label: "Subject Guides", to: "/subjects", icon: "fas fa-book-reader" },
@@ -368,6 +372,7 @@ const Sidebar = ({
 }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const location = useLocation();
 
   const [isTimezoneModalOpen, setIsTimezoneModalOpen] = useState(false);
   // Teacher: Mock Exams scripts and papers waiting for me (the red number on "Mock Exams").
@@ -507,19 +512,40 @@ const Sidebar = ({
                 );
               })
             : NAV_CONFIG[role]?.map((item) => (
-                <NavItem
-                  key={item.label}
-                  label={item.label}
-                  icon={item.icon}
-                  isCollapsed={isCollapsed}
-                  to={item.to}
-                  end={item.end}
-                  onClick={onMobileClose}
-                  role={role}
-                  badge={item.badgeKey === "mocks" ? mocksWaiting : item.badge}
-                  badgeText={item.badgeText}
-                  alert={item.badgeKey === "mocks"}
-                />
+                <React.Fragment key={item.label}>
+                  <NavItem
+                    label={item.label}
+                    icon={item.icon}
+                    isCollapsed={isCollapsed}
+                    to={item.to}
+                    end={item.end}
+                    onClick={onMobileClose}
+                    role={role}
+                    isActive={item.children ? location.pathname.startsWith(item.to) : undefined}
+                    badge={item.badgeKey === "mocks" ? mocksWaiting.total : item.badge}
+                    badgeText={item.badgeText}
+                    alert={item.badgeKey === "mocks"}
+                  />
+                  {/* Sub-items open while you are inside the item (Mock Exams: scripts / reviews). */}
+                  {item.children && !isCollapsed && location.pathname.startsWith(item.to) && (
+                    <div className="ml-5 mt-1 mb-1 space-y-1 border-l border-slate-800 pl-2">
+                      {item.children.map((c) => (
+                        <NavItem
+                          key={c.label}
+                          label={c.label}
+                          icon={c.icon}
+                          isCollapsed={false}
+                          to={c.to}
+                          onClick={onMobileClose}
+                          role={role}
+                          isActive={(location.pathname.startsWith(`${item.to}/review`) ? "reviews" : location.pathname === item.to ? new URLSearchParams(location.search).get("tab") || "scripts" : "scripts") === new URLSearchParams(c.to.split("?")[1]).get("tab")}
+                          badge={mocksWaiting[c.badgeKey]}
+                          alert
+                        />
+                      ))}
+                    </div>
+                  )}
+                </React.Fragment>
               ))
           }
         </nav>
