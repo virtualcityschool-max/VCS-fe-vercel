@@ -12,11 +12,11 @@
     "date": "2026-05-14"
   },
   "/mind-lab": {
-    "hash": "fd6ea6e953ab8e69",
+    "hash": "c01ae43b94c894d5",
     "date": "2026-10-31"
   },
   "/mind-lab/personality-test": {
-    "hash": "bfb5b6704b59b86f",
+    "hash": "130ec58aeb451d8e",
     "date": "2026-10-31"
   },
   "/mind-lab/workplace-assessment": {
@@ -41,6 +41,10 @@
   },
   "/mind-lab/smart-notes": {
     "hash": "3e9da2d7fd6abf98",
+    "date": "2026-10-31"
+  },
+  "/mind-lab/learning-domains": {
+    "hash": "d61a0dc31de5a5ea",
     "date": "2026-10-31"
   },
   "/mind-lab/career-interests": {
