@@ -13,7 +13,7 @@ import MatchPairs from "../../components/playArea/memory/MatchPairs";
 import MemoryPalace from "../../components/playArea/memory/MemoryPalace";
 
 const SITE_URL = "https://virtualcityschool.com";
-const PAGE_URL = `${SITE_URL}/play-area/memory-challenge`;
+const PAGE_URL = `${SITE_URL}/mind-lab/memory-challenge`;
 
 // Records live only in this browser (no login needed).
 const load = () => {
@@ -143,7 +143,7 @@ const MemoryChallenge = () => {
         "@type": "BreadcrumbList",
         itemListElement: [
           { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
-          { "@type": "ListItem", position: 2, name: "Play Area", item: `${SITE_URL}/play-area` },
+          { "@type": "ListItem", position: 2, name: "Mind Lab", item: `${SITE_URL}/mind-lab` },
           { "@type": "ListItem", position: 3, name: "Memory Challenge", item: PAGE_URL },
         ],
       },
@@ -245,7 +245,7 @@ const MemoryChallenge = () => {
         <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-400 mb-8">
           <Link to="/" className="hover:text-white transition">Home</Link>
           <span>/</span>
-          <Link to="/play-area" className="hover:text-white transition">Play Area</Link>
+          <Link to="/mind-lab" className="hover:text-white transition">Mind Lab</Link>
           <span>/</span>
           <span className="text-slate-200">Memory Challenge</span>
         </nav>
@@ -253,7 +253,7 @@ const MemoryChallenge = () => {
         <header className="grid lg:grid-cols-2 gap-10 items-center mb-14">
           <div>
             <span className="inline-flex items-center px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 text-xs font-black uppercase tracking-[0.2em] mb-5">
-              Play Area · Memory Challenge
+              Mind Lab · Memory Challenge
             </span>
             <h1 className="text-3xl md:text-5xl font-black font-poppins tracking-tight leading-[1.1] text-white mb-6">
               How strong is your <span className="text-gradient">memory?</span>
@@ -408,15 +408,15 @@ const MemoryChallenge = () => {
         </section>
 
         <section aria-labelledby="next-heading" className="mb-16 grid md:grid-cols-2 gap-5">
-          <h2 id="next-heading" className="sr-only">More in the Play Area</h2>
-          <Link to="/play-area/personality-test" className="p-6 rounded-3xl border border-violet-500/30 bg-violet-500/10 hover:bg-violet-500/20 transition">
+          <h2 id="next-heading" className="sr-only">More in the Mind Lab</h2>
+          <Link to="/mind-lab/personality-test" className="p-6 rounded-3xl border border-violet-500/30 bg-violet-500/10 hover:bg-violet-500/20 transition">
             <p className="text-xs font-black uppercase tracking-[0.2em] text-violet-300 mb-2">Next</p>
             <p className="text-lg font-bold text-white mb-1">Personality Test</p>
             <p className="text-sm text-slate-300">Find your study style and the subjects and careers that may suit you.</p>
           </Link>
-          <Link to="/play-area" className="p-6 rounded-3xl border border-cyan-500/30 bg-cyan-500/10 hover:bg-cyan-500/20 transition">
+          <Link to="/mind-lab" className="p-6 rounded-3xl border border-cyan-500/30 bg-cyan-500/10 hover:bg-cyan-500/20 transition">
             <p className="text-xs font-black uppercase tracking-[0.2em] text-cyan-300 mb-2">Explore</p>
-            <p className="text-lg font-bold text-white mb-1">All Play Area tests and puzzles</p>
+            <p className="text-lg font-bold text-white mb-1">All Mind Lab tests and puzzles</p>
             <p className="text-sm text-slate-300">Star signs, workplace assessment and more.</p>
           </Link>
         </section>

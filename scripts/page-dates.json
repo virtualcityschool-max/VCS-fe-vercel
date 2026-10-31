@@ -11,28 +11,32 @@
     "hash": "ab2fad34c88d1cb6",
     "date": "2026-05-14"
   },
-  "/play-area": {
-    "hash": "c1b2851b201e55ea",
+  "/mind-lab": {
+    "hash": "5f8570a020be55b2",
     "date": "2026-10-31"
   },
-  "/play-area/personality-test": {
-    "hash": "4ce7d3c952587175",
-    "date": "2026-10-30"
+  "/mind-lab/personality-test": {
+    "hash": "6ad7f1af6ab063d4",
+    "date": "2026-10-31"
   },
-  "/play-area/workplace-assessment": {
-    "hash": "b3a246587f20e336",
-    "date": "2026-10-30"
+  "/mind-lab/workplace-assessment": {
+    "hash": "bc592aea397735ca",
+    "date": "2026-10-31"
   },
-  "/play-area/star-signs": {
-    "hash": "cd7bdef2c03aca43",
-    "date": "2026-10-30"
+  "/mind-lab/star-signs": {
+    "hash": "5a5bec2896720936",
+    "date": "2026-10-31"
   },
-  "/play-area/memory-challenge": {
-    "hash": "d19cf68d8dfd20e3",
-    "date": "2026-10-30"
+  "/mind-lab/memory-challenge": {
+    "hash": "df5d01befc44f62e",
+    "date": "2026-10-31"
   },
-  "/play-area/brain-teasers": {
-    "hash": "5c4ea8e6ea6981ee",
+  "/mind-lab/brain-teasers": {
+    "hash": "f17f5ff8bd26bf01",
+    "date": "2026-10-31"
+  },
+  "/mind-lab/smart-revision": {
+    "hash": "bd65fedd74f72e8c",
     "date": "2026-10-31"
   },
   "/teachers/:id": {

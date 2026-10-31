@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 // setTimeout that is cancelled when the game closes.
 export function useTimers() {
@@ -33,3 +33,17 @@ export const shuffle = (xs) => {
 
 // Wall-clock time in ms (for event handlers and timers, not render).
 export const nowMs = () => Date.now();
+
+// Width of an element in px (charts draw at real size so text never shrinks on phones).
+export function useWidth(initial = 800) {
+  const ref = useRef(null);
+  const [width, setWidth] = useState(initial);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || typeof ResizeObserver === "undefined") return undefined;
+    const ro = new ResizeObserver(([entry]) => setWidth(Math.max(280, Math.round(entry.contentRect.width))));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  return [ref, width];
+}

@@ -8,7 +8,7 @@ import {
 import { ACCENT_CLASSES } from "../../data/playArea/games";
 
 const SITE_URL = "https://virtualcityschool.com";
-const PAGE_URL = `${SITE_URL}/play-area/workplace-assessment`;
+const PAGE_URL = `${SITE_URL}/mind-lab/workplace-assessment`;
 const STORE_KEY = "vcs_play_workplace_v1";
 
 const MODES = {
@@ -51,7 +51,7 @@ const Intro = ({ saved, form, setForm, onStart, onResume, onReport }) => {
     <div className="grid lg:grid-cols-[3fr_2fr] gap-10">
       <div>
         <span className="inline-flex items-center px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-black uppercase tracking-[0.2em] mb-5">
-          Play Area · For job seekers
+          Mind Lab · For job seekers
         </span>
         <h1 className="text-3xl md:text-5xl font-black font-poppins tracking-tight leading-[1.1] text-white mb-6">
           VCS Workplace <span className="text-gradient">Personality Assessment</span>
@@ -371,7 +371,7 @@ const Report = ({ state, onRetake }) => {
           <button type="button" onClick={onRetake} className="px-5 py-3 rounded-full border border-white/20 hover:border-white/40 text-slate-100 text-sm font-bold transition">
             <i className="fas fa-rotate-left mr-2" aria-hidden="true" /> Take it again
           </button>
-          <Link to="/play-area" className="px-5 py-3 rounded-full border border-white/20 hover:border-white/40 text-slate-100 text-sm font-bold transition">Play Area</Link>
+          <Link to="/mind-lab" className="px-5 py-3 rounded-full border border-white/20 hover:border-white/40 text-slate-100 text-sm font-bold transition">Mind Lab</Link>
         </div>
       </section>
 
@@ -476,7 +476,7 @@ const WorkplaceAssessment = () => {
         "@type": "BreadcrumbList",
         itemListElement: [
           { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
-          { "@type": "ListItem", position: 2, name: "Play Area", item: `${SITE_URL}/play-area` },
+          { "@type": "ListItem", position: 2, name: "Mind Lab", item: `${SITE_URL}/mind-lab` },
           { "@type": "ListItem", position: 3, name: "Workplace Personality Assessment", item: PAGE_URL },
         ],
       },
@@ -535,7 +535,7 @@ const WorkplaceAssessment = () => {
         <nav aria-label="Breadcrumb" className="print-hide flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-400 mb-8">
           <Link to="/" className="hover:text-white transition">Home</Link>
           <span>/</span>
-          <Link to="/play-area" className="hover:text-white transition">Play Area</Link>
+          <Link to="/mind-lab" className="hover:text-white transition">Mind Lab</Link>
           <span>/</span>
           <span className="text-slate-200">Workplace Assessment</span>
         </nav>

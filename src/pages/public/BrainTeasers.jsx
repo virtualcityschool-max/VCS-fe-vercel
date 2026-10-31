@@ -13,7 +13,7 @@ import RiverCrossing from "../../components/playArea/teasers/RiverCrossing";
 import { shuffle } from "../../components/playArea/utils";
 
 const SITE_URL = "https://virtualcityschool.com";
-const PAGE_URL = `${SITE_URL}/play-area/brain-teasers`;
+const PAGE_URL = `${SITE_URL}/mind-lab/brain-teasers`;
 
 // Records live only in this browser (no login needed).
 const load = () => {
@@ -200,7 +200,7 @@ const BrainTeasers = () => {
         "@type": "BreadcrumbList",
         itemListElement: [
           { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
-          { "@type": "ListItem", position: 2, name: "Play Area", item: `${SITE_URL}/play-area` },
+          { "@type": "ListItem", position: 2, name: "Mind Lab", item: `${SITE_URL}/mind-lab` },
           { "@type": "ListItem", position: 3, name: "Brain Teasers", item: PAGE_URL },
         ],
       },
@@ -357,7 +357,7 @@ const BrainTeasers = () => {
         <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-400 mb-8">
           <Link to="/" className="hover:text-white transition">Home</Link>
           <span>/</span>
-          <Link to="/play-area" className="hover:text-white transition">Play Area</Link>
+          <Link to="/mind-lab" className="hover:text-white transition">Mind Lab</Link>
           <span>/</span>
           <span className="text-slate-200">Brain Teasers</span>
         </nav>
@@ -365,7 +365,7 @@ const BrainTeasers = () => {
         <header className="grid lg:grid-cols-2 gap-10 items-center mb-14">
           <div>
             <span className="inline-flex items-center px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs font-black uppercase tracking-[0.2em] mb-5">
-              Play Area · Brain Teasers
+              Mind Lab · Brain Teasers
             </span>
             <h1 className="text-3xl md:text-5xl font-black font-poppins tracking-tight leading-[1.1] text-white mb-6">
               Five puzzles a day to <span className="text-gradient">sharpen your mind</span>
@@ -568,15 +568,15 @@ const BrainTeasers = () => {
         </section>
 
         <section aria-labelledby="next-heading" className="mb-16 grid md:grid-cols-2 gap-5">
-          <h2 id="next-heading" className="sr-only">More in the Play Area</h2>
-          <Link to="/play-area/memory-challenge" className="p-6 rounded-3xl border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 transition">
+          <h2 id="next-heading" className="sr-only">More in the Mind Lab</h2>
+          <Link to="/mind-lab/memory-challenge" className="p-6 rounded-3xl border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 transition">
             <p className="text-xs font-black uppercase tracking-[0.2em] text-emerald-300 mb-2">Next</p>
             <p className="text-lg font-bold text-white mb-1">Memory Challenge</p>
             <p className="text-sm text-slate-300">Five memory games and your Memory Profile.</p>
           </Link>
-          <Link to="/play-area" className="p-6 rounded-3xl border border-cyan-500/30 bg-cyan-500/10 hover:bg-cyan-500/20 transition">
+          <Link to="/mind-lab" className="p-6 rounded-3xl border border-cyan-500/30 bg-cyan-500/10 hover:bg-cyan-500/20 transition">
             <p className="text-xs font-black uppercase tracking-[0.2em] text-cyan-300 mb-2">Explore</p>
-            <p className="text-lg font-bold text-white mb-1">All Play Area tests and puzzles</p>
+            <p className="text-lg font-bold text-white mb-1">All Mind Lab tests and puzzles</p>
             <p className="text-sm text-slate-300">Personality test, star signs, workplace assessment and more.</p>
           </Link>
         </section>

@@ -6,7 +6,7 @@ import {
 } from "../../data/playArea/zodiac";
 
 const SITE_URL = "https://virtualcityschool.com";
-const PAGE_URL = `${SITE_URL}/play-area/star-signs`;
+const PAGE_URL = `${SITE_URL}/mind-lab/star-signs`;
 const SIGN_ORDER = Object.keys(SIGNS);
 
 // ---------------------------------------------------------------- Wheel ----
@@ -119,7 +119,7 @@ const StarSigns = () => {
         "@type": "BreadcrumbList",
         itemListElement: [
           { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
-          { "@type": "ListItem", position: 2, name: "Play Area", item: `${SITE_URL}/play-area` },
+          { "@type": "ListItem", position: 2, name: "Mind Lab", item: `${SITE_URL}/mind-lab` },
           { "@type": "ListItem", position: 3, name: "Star Signs", item: PAGE_URL },
         ],
       },
@@ -154,7 +154,7 @@ const StarSigns = () => {
         <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-400 mb-8">
           <Link to="/" className="hover:text-white transition">Home</Link>
           <span>/</span>
-          <Link to="/play-area" className="hover:text-white transition">Play Area</Link>
+          <Link to="/mind-lab" className="hover:text-white transition">Mind Lab</Link>
           <span>/</span>
           <span className="text-slate-200">Star Signs</span>
         </nav>
@@ -162,7 +162,7 @@ const StarSigns = () => {
         <div className="grid lg:grid-cols-2 gap-10 items-center mb-14">
           <div>
             <span className="inline-flex items-center px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 text-xs font-black uppercase tracking-[0.2em] mb-5">
-              Play Area · Star Signs
+              Mind Lab · Star Signs
             </span>
             <h1 className="text-3xl md:text-5xl font-black font-poppins tracking-tight leading-[1.1] text-white mb-6">
               What were the stars doing <span className="text-gradient">on your birthday?</span>
@@ -275,7 +275,7 @@ const StarSigns = () => {
                 <p className="text-base text-slate-200">
                   <strong className="text-white font-semibold">Does it sound like you?</strong> Millions of people share your star sign. Find out what your <em>answers</em> say about your real personality.
                 </p>
-                <Link to="/play-area/personality-test" className="shrink-0 px-5 py-3 rounded-full bg-violet-600 hover:bg-violet-500 text-white text-sm font-bold text-center transition">
+                <Link to="/mind-lab/personality-test" className="shrink-0 px-5 py-3 rounded-full bg-violet-600 hover:bg-violet-500 text-white text-sm font-bold text-center transition">
                   Take the Personality Test <i className="fas fa-arrow-right ml-1" aria-hidden="true" />
                 </Link>
               </div>
@@ -380,7 +380,7 @@ const StarSigns = () => {
               <strong className="text-indigo-300 font-semibold">Astronomy</strong> is the science of stars and planets — it predicts eclipses to the second and lands spacecraft on Mars. <strong className="text-indigo-300 font-semibold">Astrology</strong> is the belief that their positions shape our lives and personalities.
             </p>
             <p className="text-base text-slate-200 leading-relaxed">
-              Scientists have tested astrology. In a famous double-blind study published in <em>Nature</em> in 1985, astrologers could not match birth charts to people's personality profiles any better than chance. Many faiths, including Islam, also discourage fortune-telling. So enjoy this page for its <strong className="text-indigo-300 font-semibold">history, culture and science</strong> — and use the Play Area's personality tests to learn about yourself.
+              Scientists have tested astrology. In a famous double-blind study published in <em>Nature</em> in 1985, astrologers could not match birth charts to people's personality profiles any better than chance. Many faiths, including Islam, also discourage fortune-telling. So enjoy this page for its <strong className="text-indigo-300 font-semibold">history, culture and science</strong> — and use the Mind Lab's personality tests to learn about yourself.
             </p>
           </article>
         </section>
@@ -392,8 +392,8 @@ const StarSigns = () => {
           </ul>
           <p className="text-sm text-slate-300 mt-4">The Sun's position is calculated for midday on your birthday and checked against professional astronomy software for every day from 1950 to 2030.</p>
           <div className="mt-6 flex flex-wrap gap-3">
-            <Link to="/play-area" className="px-5 py-3 rounded-full border border-white/20 hover:border-white/40 text-slate-100 text-sm font-bold transition">More tests and puzzles</Link>
-            <Link to="/play-area/personality-test" className="px-5 py-3 rounded-full bg-violet-600 hover:bg-violet-500 text-white text-sm font-bold transition">Take the Personality Test</Link>
+            <Link to="/mind-lab" className="px-5 py-3 rounded-full border border-white/20 hover:border-white/40 text-slate-100 text-sm font-bold transition">More tests and puzzles</Link>
+            <Link to="/mind-lab/personality-test" className="px-5 py-3 rounded-full bg-violet-600 hover:bg-violet-500 text-white text-sm font-bold transition">Take the Personality Test</Link>
           </div>
         </section>
       </div>

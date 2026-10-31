@@ -24,12 +24,13 @@ async function pageContents() {
     "/about": file("src/pages/public/AboutPage.jsx"),
     "/privacy-policy": file("src/pages/public/PrivacyPolicy.jsx"),
     "/terms": file("src/pages/public/TermsAndConditions.jsx"),
-    "/play-area": file("src/pages/public/PlayArea.jsx") + file("src/data/playArea/games.js"),
-    "/play-area/personality-test": file("src/pages/public/PersonalityTest.jsx") + file("src/data/playArea/personality.js"),
-    "/play-area/workplace-assessment": file("src/pages/public/WorkplaceAssessment.jsx") + file("src/data/playArea/workplace.js"),
-    "/play-area/star-signs": file("src/pages/public/StarSigns.jsx") + file("src/data/playArea/zodiac.js"),
-    "/play-area/memory-challenge": file("src/pages/public/MemoryChallenge.jsx") + file("src/data/playArea/memory.js"),
-    "/play-area/brain-teasers": file("src/pages/public/BrainTeasers.jsx") + file("src/data/playArea/teasers.js"),
+    "/mind-lab": file("src/pages/public/PlayArea.jsx") + file("src/data/playArea/games.js"),
+    "/mind-lab/personality-test": file("src/pages/public/PersonalityTest.jsx") + file("src/data/playArea/personality.js"),
+    "/mind-lab/workplace-assessment": file("src/pages/public/WorkplaceAssessment.jsx") + file("src/data/playArea/workplace.js"),
+    "/mind-lab/star-signs": file("src/pages/public/StarSigns.jsx") + file("src/data/playArea/zodiac.js"),
+    "/mind-lab/memory-challenge": file("src/pages/public/MemoryChallenge.jsx") + file("src/data/playArea/memory.js"),
+    "/mind-lab/brain-teasers": file("src/pages/public/BrainTeasers.jsx") + file("src/data/playArea/teasers.js"),
+    "/mind-lab/smart-revision": file("src/pages/public/SmartRevision.jsx") + file("src/data/playArea/revision.js"),
     // The layout every tutor / course page shares: when it changes, every
     // one of those pages changed (the sitemap takes the newer of this and
     // the backend's updated_at for each page).

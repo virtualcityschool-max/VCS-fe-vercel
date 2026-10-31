@@ -84,7 +84,7 @@ async function buildRouteList() {
     "/online-school",
     ...COUNTRY_LANDING_SLUGS.map((slug) => `/online-school/${slug}`),
     "/exam-dates",
-    "/play-area", "/play-area/personality-test", "/play-area/workplace-assessment", "/play-area/star-signs", "/play-area/memory-challenge", "/play-area/brain-teasers",
+    "/mind-lab", "/mind-lab/personality-test", "/mind-lab/workplace-assessment", "/mind-lab/star-signs", "/mind-lab/memory-challenge", "/mind-lab/brain-teasers", "/mind-lab/smart-revision",
     "/subjects",
     ...SUBJECT_GUIDE_SLUGS.map((slug) => `/subjects/${slug}`),
   ];

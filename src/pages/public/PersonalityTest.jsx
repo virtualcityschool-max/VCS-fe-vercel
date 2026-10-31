@@ -8,7 +8,7 @@ import {
 import { ACCENT_CLASSES } from "../../data/playArea/games";
 
 const SITE_URL = "https://virtualcityschool.com";
-const PAGE_URL = `${SITE_URL}/play-area/personality-test`;
+const PAGE_URL = `${SITE_URL}/mind-lab/personality-test`;
 const STORE_KEY = "vcs_play_personality_v1";
 
 // Saved progress lives only in this browser (no login needed).
@@ -50,7 +50,7 @@ const Intro = ({ saved, onStart, onResume, onReport }) => {
     <div className="grid lg:grid-cols-2 gap-10 items-center">
       <div>
         <span className="inline-flex items-center px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-300 text-xs font-black uppercase tracking-[0.2em] mb-5">
-          Play Area · Personality Test
+          Mind Lab · Personality Test
         </span>
         <h1 className="text-3xl md:text-5xl font-black font-poppins tracking-tight leading-[1.1] text-white mb-6">
           Who are you, <span className="text-gradient">really?</span>
@@ -329,7 +329,7 @@ const Report = ({ answers, onRetake }) => {
           <button type="button" onClick={onRetake} className="px-5 py-3 rounded-full border border-white/20 hover:border-white/40 text-slate-100 text-sm font-bold transition">
             <i className="fas fa-rotate-left mr-2" aria-hidden="true" /> Take the test again
           </button>
-          <Link to="/play-area" className="px-5 py-3 rounded-full border border-white/20 hover:border-white/40 text-slate-100 text-sm font-bold transition">
+          <Link to="/mind-lab" className="px-5 py-3 rounded-full border border-white/20 hover:border-white/40 text-slate-100 text-sm font-bold transition">
             More tests and puzzles
           </Link>
         </div>
@@ -469,7 +469,7 @@ const PersonalityTest = () => {
         "@type": "BreadcrumbList",
         itemListElement: [
           { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
-          { "@type": "ListItem", position: 2, name: "Play Area", item: `${SITE_URL}/play-area` },
+          { "@type": "ListItem", position: 2, name: "Mind Lab", item: `${SITE_URL}/mind-lab` },
           { "@type": "ListItem", position: 3, name: "Personality Test", item: PAGE_URL },
         ],
       },
@@ -531,7 +531,7 @@ const PersonalityTest = () => {
         <nav aria-label="Breadcrumb" className="print-hide flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-400 mb-8">
           <Link to="/" className="hover:text-white transition">Home</Link>
           <span>/</span>
-          <Link to="/play-area" className="hover:text-white transition">Play Area</Link>
+          <Link to="/mind-lab" className="hover:text-white transition">Mind Lab</Link>
           <span>/</span>
           <span className="text-slate-200">Personality Test</span>
         </nav>

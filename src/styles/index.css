@@ -779,7 +779,7 @@ h3,
      }
 }
 
-/* ── Printing a Play Area report (html.vcs-print is set while printing) ── */
+/* ── Printing a Mind Lab report (html.vcs-print is set while printing) ── */
 @media print {
      html.vcs-print header,
      html.vcs-print footer,

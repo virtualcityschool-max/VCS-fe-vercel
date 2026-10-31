@@ -22,6 +22,7 @@ export const WorkplaceAssessment = lazyPage(() => import("../pages/public/Workpl
 export const StarSigns = lazyPage(() => import("../pages/public/StarSigns"));
 export const MemoryChallenge = lazyPage(() => import("../pages/public/MemoryChallenge"));
 export const BrainTeasers = lazyPage(() => import("../pages/public/BrainTeasers"));
+export const SmartRevision = lazyPage(() => import("../pages/public/SmartRevision"));
 
 // For src/main.jsx: the page component for a public path, to preload.
 export const PUBLIC_PAGES = [
@@ -39,12 +40,13 @@ export const PUBLIC_PAGES = [
   [/^\/exam-dates\/?$/, ExamDatesPage],
   [/^\/subjects\/?$/, SubjectGuidesIndex],
   [/^\/subjects\/[^/]+\/?$/, SubjectGuidePage],
-  [/^\/play-area\/?$/, PlayArea],
-  [/^\/play-area\/personality-test\/?$/, PersonalityTest],
-  [/^\/play-area\/workplace-assessment\/?$/, WorkplaceAssessment],
-  [/^\/play-area\/star-signs\/?$/, StarSigns],
-  [/^\/play-area\/memory-challenge\/?$/, MemoryChallenge],
-  [/^\/play-area\/brain-teasers\/?$/, BrainTeasers],
+  [/^\/mind-lab\/?$/, PlayArea],
+  [/^\/mind-lab\/personality-test\/?$/, PersonalityTest],
+  [/^\/mind-lab\/workplace-assessment\/?$/, WorkplaceAssessment],
+  [/^\/mind-lab\/star-signs\/?$/, StarSigns],
+  [/^\/mind-lab\/memory-challenge\/?$/, MemoryChallenge],
+  [/^\/mind-lab\/brain-teasers\/?$/, BrainTeasers],
+  [/^\/mind-lab\/smart-revision\/?$/, SmartRevision],
 ];
 
 // The page for a path, preloaded by src/main.jsx before the first render.

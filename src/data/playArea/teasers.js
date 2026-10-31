@@ -208,4 +208,4 @@ export const SOURCES = [
 ];
 
 export const shareLink = (text) =>
-  `https://wa.me/?text=${encodeURIComponent(`${text} Can you beat me? https://virtualcityschool.com/play-area/brain-teasers`)}`;
+  `https://wa.me/?text=${encodeURIComponent(`${text} Can you beat me? https://virtualcityschool.com/mind-lab/brain-teasers`)}`;

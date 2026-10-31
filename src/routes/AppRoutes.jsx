@@ -11,7 +11,7 @@ import PublicHome from "../pages/public/PublicHome";
 import {
   Marketplace, CourseDetails, Blogs, BlogDetails, TeachersDirectory, TeacherProfile, PrivacyPolicy,
   TermsAndConditions, AboutPage, OnlineSchoolHub, CountryLandingPage, ExamDatesPage, SubjectGuidePage,
-  SubjectGuidesIndex, PlayArea, PersonalityTest, WorkplaceAssessment, StarSigns, MemoryChallenge, BrainTeasers,
+  SubjectGuidesIndex, PlayArea, PersonalityTest, WorkplaceAssessment, StarSigns, MemoryChallenge, BrainTeasers, SmartRevision,
 } from "./publicPages";
 
 // Authenticated dashboards are code-split so public visitors never download them.
@@ -223,12 +223,13 @@ const AppRoutes = () => {
       <Route path="/exam-dates" element={<ExamDatesPage />} />
       <Route path="/subjects" element={<SubjectGuidesIndex />} />
       <Route path="/subjects/:slug" element={<SubjectGuidePage />} />
-      <Route path="/play-area" element={<PlayArea />} />
-      <Route path="/play-area/personality-test" element={<PersonalityTest />} />
-      <Route path="/play-area/workplace-assessment" element={<WorkplaceAssessment />} />
-      <Route path="/play-area/star-signs" element={<StarSigns />} />
-      <Route path="/play-area/memory-challenge" element={<MemoryChallenge />} />
-      <Route path="/play-area/brain-teasers" element={<BrainTeasers />} />
+      <Route path="/mind-lab" element={<PlayArea />} />
+      <Route path="/mind-lab/personality-test" element={<PersonalityTest />} />
+      <Route path="/mind-lab/workplace-assessment" element={<WorkplaceAssessment />} />
+      <Route path="/mind-lab/star-signs" element={<StarSigns />} />
+      <Route path="/mind-lab/memory-challenge" element={<MemoryChallenge />} />
+      <Route path="/mind-lab/brain-teasers" element={<BrainTeasers />} />
+      <Route path="/mind-lab/smart-revision" element={<SmartRevision />} />
 
       {/* Student-Only Routes */}
       <Route element={<ProtectedRoute allowedRoles={["student"]} />}>

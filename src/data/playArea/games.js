@@ -1,11 +1,11 @@
-// Play Area catalogue. `group`: "students" (learn about yourself) or "jobs"
+// Mind Lab catalogue. `group`: "students" (learn about yourself) or "jobs"
 // (for qualified students applying for jobs). Add a new test or puzzle here: `path` set = live card,
 // no `path` = "Coming soon" card.
 export const PLAY_AREA_GAMES = [
   {
     slug: "personality-test",
     group: "students",
-    path: "/play-area/personality-test",
+    path: "/mind-lab/personality-test",
     title: "Personality Test",
     blurb: "100 quick statements reveal your personality profile, your study style, and the subjects and careers that may suit you.",
     icon: "fas fa-user-astronaut",
@@ -15,7 +15,7 @@ export const PLAY_AREA_GAMES = [
   {
     slug: "workplace-assessment",
     group: "jobs",
-    path: "/play-area/workplace-assessment",
+    path: "/mind-lab/workplace-assessment",
     title: "Workplace Personality Assessment",
     blurb: "A pre-interview assessment built on research-tested IPIP questions. Professional report on your work style, strengths and interview questions — with a teacher-candidate version.",
     icon: "fas fa-user-tie",
@@ -25,7 +25,7 @@ export const PLAY_AREA_GAMES = [
   {
     slug: "star-signs",
     group: "students",
-    path: "/play-area/star-signs",
+    path: "/mind-lab/star-signs",
     title: "Star Sign Personality",
     blurb: "Enter your birthday to discover your star-sign personality, your Vedic Rashi, and the real constellation the Sun was in — with star facts and history.",
     icon: "fas fa-star",
@@ -35,7 +35,7 @@ export const PLAY_AREA_GAMES = [
   {
     slug: "memory-challenge",
     group: "students",
-    path: "/play-area/memory-challenge",
+    path: "/mind-lab/memory-challenge",
     title: "Memory Challenge",
     blurb: "Five memory games for numbers, pictures and words. Beat your best, earn badges and get your Memory Profile with study tips.",
     icon: "fas fa-brain",
@@ -45,12 +45,22 @@ export const PLAY_AREA_GAMES = [
   {
     slug: "brain-teasers",
     group: "students",
-    path: "/play-area/brain-teasers",
+    path: "/mind-lab/brain-teasers",
     title: "Brain Teasers",
     blurb: "5 new puzzles every day: patterns, logic, riddles, quick maths and famous puzzles from history. Plus Maths Sprint and Tower of Hanoi.",
     icon: "fas fa-puzzle-piece",
     accent: "amber",
     meta: ["Daily puzzles", "Hints + answers", "Badges"],
+  },
+  {
+    slug: "smart-revision",
+    group: "students",
+    path: "/mind-lab/smart-revision",
+    title: "Smart Revision",
+    blurb: "See the forgetting curve, get a revision plan for every topic (1, 3, 7, 14, 30 days) and find out when you've truly mastered a skill.",
+    icon: "fas fa-calendar-check",
+    accent: "rose",
+    meta: ["Revision planner", "Memory curves", "Knowledge tracing"],
   },
   {
     slug: "career-interests",

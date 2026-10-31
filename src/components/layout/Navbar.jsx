@@ -14,7 +14,7 @@ const PUBLIC_LINKS = [
   { label: "Explore Courses", path: "/courses" },
   { label: "Subject Guides", path: "/subjects", guides: true },
   { label: "Meet Our Tutors", path: "/teachers" },
-  { label: "Play Area", path: "/play-area" },
+  { label: "Mind Lab", path: "/mind-lab" },
   { label: "Blog", path: "/blogs" },
   { label: "About Us", path: "/about" },
 ];
