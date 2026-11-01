@@ -509,9 +509,11 @@ export const authService = {
   },
 
   // Forgot Password - Step 3: reset password
-  forgotPasswordReset: async (email, newPassword, confirmPassword) => {
+  // The code from the email is sent again: the server only resets for whoever holds it.
+  forgotPasswordReset: async (email, otp, newPassword, confirmPassword) => {
     const response = await axiosInstance.post("/auth/forgot-password/reset/", {
       email,
+      otp,
       new_password: newPassword,
       confirm_password: confirmPassword,
     });

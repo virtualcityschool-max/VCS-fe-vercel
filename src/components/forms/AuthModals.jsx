@@ -797,11 +797,12 @@ const AuthModals = () => {
     setFpError("");
     setFpLoading(true);
     try {
-      await authService.forgotPasswordReset(fpEmail.trim(), fpNewPassword, fpConfirmPassword);
+      await authService.forgotPasswordReset(fpEmail.trim(), fpOtp.trim(), fpNewPassword, fpConfirmPassword);
       setFpStep("success");
     } catch (err) {
       const data = err?.response?.data;
-      const msg = data?.detail || typeof data?.new_password === 'string' ? data.new_password : data?.new_password?.[0] || data?.confirm_password?.[0] || err?.message || "Failed to reset password";
+      const pick = (v) => (Array.isArray(v) ? v[0] : v);
+      const msg = data?.detail || data?.error || pick(data?.new_password) || pick(data?.confirm_password) || pick(data?.otp) || err?.message || "Failed to reset password";
       setFpError(msg);
     } finally {
       setFpLoading(false);
