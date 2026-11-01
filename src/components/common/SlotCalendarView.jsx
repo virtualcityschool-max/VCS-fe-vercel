@@ -41,12 +41,12 @@ const isSlotJoinable = (slot) => {
 
 const openMeetLink = (link) => {
   if (!link || !link.startsWith("http")) return;
-  try { new URL(link); window.open(link, "_blank", "noopener,noreferrer"); } catch {}
+  try { new URL(link); window.open(link, "_blank", "noopener,noreferrer"); } catch { /* not a valid link: do nothing */ }
 };
 
 // Popup shown when clicking a booked slot on the calendar
 const SlotPopup = ({ slot, onClose, timezone }) => {
-  const { timezoneAbbr } = useDateFormatters();
+  const { timezoneAbbr: _timezoneAbbr } = useDateFormatters();
   const joinable = isSlotJoinable(slot);
   const hasMeet = !!slot.meeting_link;
 
@@ -223,7 +223,7 @@ const SlotListView = ({ slots, onDelete, onEdit, deletingId, allowDeleteBooked, 
 const STATUS_FILTER_LABELS = { all: "All", available: "Available", booked: "Booked" };
 
 const SlotCalendarView = ({ slots = [], loading = false, onDelete, onEdit, deletingId, allowDeleteBooked = false, timezone }) => {
-  const { formatTime, timezoneAbbr } = useDateFormatters();
+  const { formatTime: _formatTime, timezoneAbbr: _timezoneAbbr } = useDateFormatters();
   const [calendarMonth, setCalendarMonth] = useState(null);
   const [popupSlot, setPopupSlot] = useState(null);
   const [view, setView] = useState("table");

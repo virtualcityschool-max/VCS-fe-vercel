@@ -45,7 +45,7 @@ const InfoChip = ({ label, value, icon, isMono = false }) => {
 
 const DashboardHeader = () => {
   const student = useSelector(selectStudent);
-  const stats = useSelector(selectDashboardStats);
+  const _stats = useSelector(selectDashboardStats);
   const authProfile = useSelector((s) => s.auth.profile);
   const studentId = student?.id ?? authProfile?.id;
   const rollNo = authProfile?.student_profile?.roll_no;

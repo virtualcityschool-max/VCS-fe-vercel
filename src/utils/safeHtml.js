@@ -1,3 +1,5 @@
+import DOMPurify from "dompurify";
+
 // A student's typed answer is stored as HTML (rich text editor). Before a teacher's browser shows it, keep only
 // plain formatting tags and drop every attribute, so nothing in it can run code, load files or link away.
 const KEEP = new Set([
@@ -23,4 +25,11 @@ export function safeHtml(html) {
   };
   clean(doc.body);
   return doc.body.innerHTML;
+}
+
+// Course outlines and blog posts need links and images, so they use DOMPurify:
+// it keeps normal formatting, links and pictures but removes scripts, event
+// handlers and javascript: links.
+export function safeRichHtml(html) {
+  return DOMPurify.sanitize(html || "", { USE_PROFILES: { html: true } });
 }

@@ -163,6 +163,11 @@ axiosInstance.interceptors.response.use(
 
         const newAccessToken = response.data.access;
         authStorage.setAccessToken(newAccessToken);
+        // The server rotates refresh tokens and blocks the old one, so the new
+        // one must be kept or the next refresh logs the user out.
+        if (response.data.refresh) {
+          localStorage.setItem("vcs_refresh_token", response.data.refresh);
+        }
 
         // Dispatch token update event instead of direct store access
         window.dispatchEvent(

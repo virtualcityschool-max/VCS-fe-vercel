@@ -14,6 +14,7 @@ import { toastManager } from "../../utils/toastManager";
 import { showApiError } from "../../utils/apiErrorHandler";
 import { getStorageUrl } from "../../utils/storageUrl";
 import { useDateFormatters } from "../../hooks";
+import { safeHtml } from "../../utils/safeHtml";
 
 const getFilename = (url) => {
   if (!url) return "attachment";
@@ -426,7 +427,7 @@ const TeacherSubmissions = () => {
                         {selectedSubmission.text_answer ? (
                           <div
                             className="submission-content text-sm leading-relaxed"
-                            dangerouslySetInnerHTML={{ __html: selectedSubmission.text_answer }}
+                            dangerouslySetInnerHTML={{ __html: safeHtml(selectedSubmission.text_answer) }}
                           />
                         ) : (
                           <span className="text-slate-500 italic text-sm">No text submitted</span>

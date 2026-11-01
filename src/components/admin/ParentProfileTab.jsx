@@ -47,7 +47,7 @@ const ParentProfileTab = ({ profile, onUpdate, onRefresh, onCancel, onSaved, rea
     setErrors,
     clearFieldError,
     clearAllErrors,
-    handleApiError,
+    handleApiError: _handleApiError,
     getFieldError,
   } = useFieldErrors({});
 

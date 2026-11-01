@@ -31,7 +31,7 @@ const SUBPATH_TITLES = {
 const TeacherLayout = () => {
   const [searchParams] = useSearchParams();
   const location = useLocation();
-  const navigate = useNavigate();
+  const _navigate = useNavigate();
   const activeTab = searchParams.get("tab") || "dashboard";
   const viewTitle = SUBPATH_TITLES[location.pathname] || (location.pathname.startsWith("/teacher/mocks/") ? "Mock Exams" : null) || (location.pathname.startsWith("/teacher/assignments/") ? "Mark assignment" : null) || TAB_TITLES[activeTab] || "Faculty Portal";
 

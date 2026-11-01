@@ -14,10 +14,8 @@ import {
   fetchAvailableStudents,
   selectAvailableStudents,
 } from "../../store/slices/adminSlice";
-import { adminSessionService } from "../../services/adminSessionService";
 import { Button, Input, Card } from "../../components/ui";
 import { useFieldErrors } from "../../hooks";
-import { normalizeApiError } from "../../utils/errorHandler";
 import { toastManager } from "../../utils/toastManager";
 import ConfirmDialog from "../../components/common/ConfirmDialog";
 import SessionsTab from "../../components/admin/SessionsTab";
@@ -29,7 +27,7 @@ const AdminSessionsPage = () => {
   const { can } = useApp();
   const canDelete = can("delete");
   const dispatch = useDispatch();
-  const { timezone, toPayloadISO, toDatetimeInput } = useDateFormatters();
+  const { timezone: _timezone, toPayloadISO, toDatetimeInput } = useDateFormatters();
 
   // Read platform settings first - used as initial values for state below
   const ps = useSelector(selectPlatformSettings);
@@ -48,9 +46,9 @@ const AdminSessionsPage = () => {
   const [delayMins,  setDelayMins]  = useState(30);
 
   // Private students state for course-specific dropdown
-  const [privateStudents, setPrivateStudents] = useState([]);
-  const [privateStudentsLoading, setPrivateStudentsLoading] = useState(false);
-  const [privateStudentsError, setPrivateStudentsError] = useState(null);
+  const [privateStudents, _setPrivateStudents] = useState([]);
+  const [privateStudentsLoading, _setPrivateStudentsLoading] = useState(false);
+  const [privateStudentsError, _setPrivateStudentsError] = useState(null);
 
   // Session form states
   const [createSessionForm, setCreateSessionForm] = useState({
@@ -88,7 +86,7 @@ const AdminSessionsPage = () => {
   const {
     errors: createSessionErrors,
     setErrors: setCreateSessionErrors,
-    handleApiError: handleCreateSessionApiError,
+    handleApiError: _handleCreateSessionApiError,
     clearFieldError: clearCreateSessionFieldError,
     clearAllErrors: clearAllCreateSessionErrors,
   } = useFieldErrors({});
@@ -96,7 +94,7 @@ const AdminSessionsPage = () => {
   const {
     errors: editSessionErrors,
     setErrors: setEditSessionErrors,
-    handleApiError: handleEditSessionApiError,
+    handleApiError: _handleEditSessionApiError,
     clearFieldError: clearEditSessionFieldError,
     clearAllErrors: clearAllEditSessionErrors,
   } = useFieldErrors({});
@@ -266,7 +264,7 @@ const AdminSessionsPage = () => {
     }
 
     const pad = (n) => String(n).padStart(2, "0");
-    const localNow = (offsetMs = 0) => {
+    const _localNow = (offsetMs = 0) => {
       const d = new Date(Date.now() + offsetMs);
       return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
     };

@@ -26,7 +26,7 @@ const OverviewTab = ({ onOpenSubmitModal }) => {
   const quizzes = useSelector(selectDashboardQuizzes) || [];
   const liveSchedule = useSelector(selectLiveSchedule) || [];
   const allSessions = useSelector(selectSessions) || [];
-  const nextSession = useSelector(selectNextSession);
+  const _nextSession = useSelector(selectNextSession);
 
   const [joiningId, setJoiningId] = useState(null);
   const [currentTime, setCurrentTime] = useState(() => Date.now());

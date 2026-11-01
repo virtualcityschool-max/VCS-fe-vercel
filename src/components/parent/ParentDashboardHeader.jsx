@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import { useSelector } from "react-redux";
+import React, {  } from "react";
 import { Button } from "../ui";
 
 const InfoChip = ({ label, value, icon, colorClass }) => {

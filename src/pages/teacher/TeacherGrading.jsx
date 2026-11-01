@@ -22,6 +22,7 @@ import { coursesService } from "../../services/coursesService";
 import { getStorageUrl } from "../../utils/storageUrl";
 import FileViewerModal from "../../components/common/FileViewerModal";
 import { useDateFormatters } from "../../hooks";
+import { safeHtml } from "../../utils/safeHtml";
 
 const PreviewButton = ({ url, className = "" }) => {
   const [open, setOpen] = React.useState(false);
@@ -60,7 +61,7 @@ const TeacherGrading = ({
   onFiltersChange,
   controlsContainerId,
 }) => {
-  const { formatDate, formatTime, formatDateTime, toDatetimeInput, toPayloadISO } = useDateFormatters();
+  const { formatDate: _formatDate, formatTime: _formatTime, formatDateTime, toDatetimeInput, toPayloadISO } = useDateFormatters();
   const [selectedAssignment, setSelectedAssignment] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [internalFilters, setInternalFilters] = useState({
@@ -245,7 +246,7 @@ const TeacherGrading = ({
     return null;
   };
 
-  const isFormInvalid =
+  const _isFormInvalid =
     !form.course ||
     !form.title ||
     !form.description ||
@@ -527,7 +528,7 @@ const TeacherGrading = ({
                       {selectedSubmission.text_answer ? (
                         <div
                           className="submission-content text-sm leading-relaxed"
-                          dangerouslySetInnerHTML={{ __html: selectedSubmission.text_answer }}
+                          dangerouslySetInnerHTML={{ __html: safeHtml(selectedSubmission.text_answer) }}
                         />
                       ) : (
                         <span className="text-slate-500 italic text-sm">No text submitted</span>

@@ -5,6 +5,7 @@ import { toastManager } from "../../utils/toastManager";
 import { formatCategoryLabel } from "../../constants";
 import { getCourseImage } from "../../utils/courseImageUtils";
 import { useDateFormatters } from "../../hooks/useDateFormatters";
+import { safeRichHtml } from "../../utils/safeHtml";
 
 const Badge = ({ children, color = "slate" }) => {
   const colors = {
@@ -211,7 +212,7 @@ const TeacherCourseDetailPage = () => {
               {hasOutline && (
                 <div className="glass rounded-[2rem] p-8 border border-white/5 animate-springyReveal" style={{ animationDelay: "0.2s" }}>
                   <SectionHeader icon="fas fa-list-alt text-indigo-400" iconBg="bg-indigo-600/20" title="Course Outline" />
-                  <div className="course-outline-content premium-outline" dangerouslySetInnerHTML={{ __html: course.outline }} />
+                  <div className="course-outline-content premium-outline" dangerouslySetInnerHTML={{ __html: safeRichHtml(course.outline) }} />
                 </div>
               )}
               {hasAttachment && (

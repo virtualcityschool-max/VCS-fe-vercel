@@ -31,8 +31,8 @@ const HireRequestsTab = ({
   onApprove,
   onReject,
   onRefresh,
-  statusFilter,
-  onStatusFilterChange,
+  statusFilter: _statusFilter,
+  onStatusFilterChange: _onStatusFilterChange,
 }) => {
   const [confirm, setConfirm] = useState({ open: false, type: null, id: null, label: "" });
   const [detailReq, setDetailReq] = useState(null);

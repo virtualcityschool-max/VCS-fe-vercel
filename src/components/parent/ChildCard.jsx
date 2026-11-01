@@ -28,7 +28,7 @@ const fmtDate = (d) => {
 const isUpcoming = (date) => new Date(date + "T23:59:59") >= new Date();
 
 const ChildCard = ({ child }) => {
-  const { formatTime, timezone, timezoneAbbr } = useDateFormatters();
+  const { formatTime: _formatTime, timezone: _timezone, timezoneAbbr: _timezoneAbbr } = useDateFormatters();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [confirmUnlink, setConfirmUnlink] = useState(false);

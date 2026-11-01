@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
@@ -11,7 +11,7 @@ import {
 } from "../../store/slices/studentDashboardSlice";
 import { toastManager } from "../../utils/toastManager";
 import { useDateFormatters } from "../../hooks/useDateFormatters";
-import { getWindowLabel, isWithinSessionWindow, isSessionExpired } from "../../utils/helper/StartSession";
+import {  isWithinSessionWindow, isSessionExpired } from "../../utils/helper/StartSession";
 import { extractApiErrorMessage, showApiError } from "../../utils/apiErrorHandler";
 import { getStorageUrl } from "../../utils/storageUrl";
 import ConfirmDialog from "../common/ConfirmDialog";
@@ -52,7 +52,7 @@ const LiveScheduleList = () => {
   const liveSchedule = useSelector(selectLiveSchedule);
   const rawUpcomingSlots = useSelector(selectUpcomingSlots);
   const dashboardLoading = useSelector(selectDashboardLoading);
-  const { formatDate, formatTime, timezone, timezoneAbbr } = useDateFormatters();
+  const { formatDate: _formatDate, formatTime: _formatTime, timezone, timezoneAbbr: _timezoneAbbr } = useDateFormatters();
   const isJoiningSession = useSelector(
     (state) => state.studentDashboard.isJoiningSession,
   );
@@ -156,7 +156,7 @@ const LiveScheduleList = () => {
     }
   };
 
-  const getStatusBadge = (session) => {
+  const _getStatusBadge = (session) => {
     if (session.has_joined && session.status.toLowerCase() !== "live") {
       // if teacher does does join and student joins
       return (
@@ -179,7 +179,7 @@ const LiveScheduleList = () => {
     );
   };
 
-  const getAttendanceColor = (rate) => {
+  const _getAttendanceColor = (rate) => {
     if (rate >= 90) return "text-emerald-400";
     if (rate >= 75) return "text-amber-400";
     if (rate >= 60) return "text-orange-400";

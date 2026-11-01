@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { toastManager } from "../../utils/toastManager";
 import {
   fetchStudentSessions,
-  fetchStudentDashboard,
+  
   joinLiveSession,
 } from "../../store/slices/studentDashboardSlice";
 import SessionCalendarView from "../../components/common/SessionCalendarView";
@@ -98,7 +98,7 @@ const SessionListView = ({ sessions, formatTime, formatDate, onJoin, joiningId }
 
 const StudentClasses = () => {
   const dispatch = useDispatch();
-  const { sessions, isFetchingSessions, enrolledCourses } = useSelector(
+  const { sessions, isFetchingSessions, enrolledCourses: _enrolledCourses } = useSelector(
     (state) => state.studentDashboard,
   );
   const { formatTime, formatDate } = useDateFormatters();

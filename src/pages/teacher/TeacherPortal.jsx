@@ -21,7 +21,7 @@ import { formatDate, formatTime, formatTimezoneISO } from "../../utils/validatio
 import { toastManager } from "../../utils/toastManager";
 import { showApiError, extractApiErrorMessage } from "../../utils/apiErrorHandler";
 import ConfirmDialog from "../../components/common/ConfirmDialog";
-import { isWithinSessionWindow, isSessionExpired } from "../../utils/helper/StartSession";
+import {  isSessionExpired } from "../../utils/helper/StartSession";
 
 // Modernized AI Studio Teacher Components
 import { TeacherDashboard as TeacherModernDashboard } from "../../components/teacher/modern/TeacherModernDashboard";
@@ -115,7 +115,7 @@ const TeacherPortal = () => {
 
   // Modals state
   const [announcementModalOpen, setAnnouncementModalOpen] = useState(false);
-  const [newSessionModalOpen, setNewSessionModalOpen] = useState(false);
+  const [_newSessionModalOpen, setNewSessionModalOpen] = useState(false);
   const [createAssignmentModalOpen, setCreateAssignmentModalOpen] = useState(false);
   const [advancedQuizBuilderModalOpen, setAdvancedQuizBuilderModalOpen] = useState(false);
   const [editingAssignment, setEditingAssignment] = useState(null);
@@ -798,7 +798,7 @@ const TeacherPortal = () => {
   };
 
   // Schedule Session Handler (Findings R2-4, R3-2, R3-3, R3-5, R4-2)
-  const handleScheduleSession = async (sessionData) => {
+  const _handleScheduleSession = async (sessionData) => {
     try {
       const title = sessionData?.title?.trim() || "";
       if (!title) {

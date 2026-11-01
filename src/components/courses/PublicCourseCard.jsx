@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { getCourseImage } from "../../utils/courseImageUtils";
-import { getStorageUrl } from "../../utils/storageUrl";
 import { getDisplayName } from "../../utils/userDisplay";
 import { useWhatsappNumber } from "../../hooks/useWhatsappNumber";
 import { catalogGuideFor } from "../../data/subjectGuides/catalog";
@@ -22,7 +21,7 @@ const PublicCourseCard = ({
   const large = variant === "large";
   const isPending = course.enrollment_status === "pending";
   const isRejected = course.enrollment_status === "rejected";
-  const noSessions = !course.has_session;
+  const _noSessions = !course.has_session;
   const [imgFailed, setImgFailed] = useState(false);
   const guide = catalogGuideFor(course);
   const whatsappNumber = useWhatsappNumber();

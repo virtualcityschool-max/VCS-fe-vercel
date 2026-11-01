@@ -68,7 +68,7 @@ const StudentAssignments = ({ hideHeader = false, filterCourse: externalFilterCo
     );
   }
 
-  const filterRow = (
+  const _filterRow = (
     <div className="flex flex-wrap items-center gap-2 shrink-0">
       <FilterSelect value={filterCourse} onChange={(e) => setFilterCourse(e.target.value)} style={{ minWidth: 160 }}>
         <option value="">All Courses</option>

@@ -4,16 +4,16 @@ const Input = ({
   label,
   error,
   showErrorMessage = true,
-  variant = "default",
-  size = "md",
+  variant: _variant = "default",
+  size: _size = "md",
   className = "",
   containerClassName = "",
   ...props
 }) => {
-  const baseClasses =
+  const _baseClasses =
     "block w-full rounded-lg border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2";
 
-  const variants = {
+  const _variants = {
     default: error
       ? "border-red-500 focus:border-red-500 focus:ring-red-500"
       : "border-slate-300 focus:border-indigo-500 focus:ring-indigo-500",
@@ -25,7 +25,7 @@ const Input = ({
       : "border-slate-300 bg-slate-50 focus:border-indigo-500 focus:ring-indigo-500 pl-10",
   };
 
-  const sizes = {
+  const _sizes = {
     sm: "px-3 py-1.5 text-sm",
     md: "px-4 py-2 text-sm",
     lg: "px-6 py-3 text-base",

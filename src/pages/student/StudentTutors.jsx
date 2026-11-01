@@ -52,7 +52,7 @@ const openMeetLink = (link) => {
 };
 
 const StudentTutors = () => {
-  const { timezone, formatDate, formatTime, timezoneAbbr } = useDateFormatters();
+  const { timezone, formatDate: _formatDate, formatTime: _formatTime, timezoneAbbr: _timezoneAbbr } = useDateFormatters();
   const [slots, setSlots] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -383,7 +383,7 @@ const StudentTutors = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {Object.entries(grouped).map(([teacherName, { teacherId, teacherAvatar, slots: teacherSlots }]) => {
               const upcoming = teacherSlots.filter((s) => isUpcoming(s.date, timezone));
-              const past = teacherSlots.filter((s) => !isUpcoming(s.date, timezone));
+              const _past = teacherSlots.filter((s) => !isUpcoming(s.date, timezone));
               const initial = teacherName[0]?.toUpperCase() || "T";
               const avatarUrl = getStorageUrl(teacherAvatar);
 

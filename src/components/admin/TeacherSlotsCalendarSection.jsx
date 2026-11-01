@@ -22,7 +22,7 @@ const fmtDate = (d) =>
   });
 
 const TeacherSlotsCalendarSection = ({ teacherId }) => {
-  const { timezoneAbbr } = useDateFormatters();
+  const { timezoneAbbr: _timezoneAbbr } = useDateFormatters();
   const [slots, setSlots] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

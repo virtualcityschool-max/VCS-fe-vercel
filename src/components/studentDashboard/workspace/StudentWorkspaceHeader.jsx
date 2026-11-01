@@ -17,7 +17,7 @@ import { getStorageUrl } from "../../../utils/storageUrl";
 import { getTimezoneAbbr, formatTime } from "../../../utils/validation";
 import { canStudentJoin, getSessionPhase, isSessionOver } from "../../../utils/helper/StartSession";
 
-const StudentWorkspaceHeader = ({ onResolveOverdue, onJoinNextClass, onOpenTimezone }) => {
+const StudentWorkspaceHeader = ({ onResolveOverdue, onJoinNextClass: _onJoinNextClass, onOpenTimezone }) => {
   const dispatch = useDispatch();
   const student = useSelector(selectStudent);
   const authProfile = useSelector((s) => s.auth.profile);

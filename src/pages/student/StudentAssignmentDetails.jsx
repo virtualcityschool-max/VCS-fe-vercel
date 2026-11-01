@@ -10,6 +10,7 @@ import FileViewerModal from "../../components/common/FileViewerModal";
 import QuillEditor from "../../components/common/QuillEditor";
 import MarkingReport from "../../components/common/MarkingReport";
 import { useDateFormatters } from "../../hooks/useDateFormatters";
+import { safeHtml } from "../../utils/safeHtml";
 
 const PreviewButton = ({ url, className = "" }) => {
   const [open, setOpen] = React.useState(false);
@@ -237,7 +238,7 @@ const StudentAssignmentDetails = () => {
                     {assignment.my_submission?.text_answer ? (
                       <div
                         className="submission-content bg-slate-950/50 border border-slate-800/50 rounded-2xl p-6 text-sm leading-relaxed"
-                        dangerouslySetInnerHTML={{ __html: assignment.my_submission.text_answer }}
+                        dangerouslySetInnerHTML={{ __html: safeHtml(assignment.my_submission.text_answer) }}
                       />
                     ) : (
                       <div className="flex flex-col items-center justify-center py-8 text-slate-500 border-2 border-dashed border-slate-800 rounded-2xl bg-slate-900/20">

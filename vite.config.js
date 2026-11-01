@@ -10,6 +10,9 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react(), tailwindcss()],
+    // Leftover console.log debugging is removed from the live build (it can
+    // print personal data and slows pages). console.warn/error stay.
+    esbuild: mode === "production" ? { pure: ["console.log", "console.debug"] } : undefined,
     server: {
       proxy: {
         "/api": {

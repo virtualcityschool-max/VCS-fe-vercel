@@ -65,7 +65,7 @@ const newEntry = () => ({
 // ── Time window row ───────────────────────────────────────────────────────────
 
 const TimeWindowRow = ({ window, onChange, onRemove, canRemove }) => {
-  const slotCount = calcWindowSlots(window.start, window.end);
+  const _slotCount = calcWindowSlots(window.start, window.end);
 
   return (
     <div className="bg-slate-900/40 border border-slate-700/40 rounded-xl p-3">
@@ -355,12 +355,12 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
     }
   }, [rangeDates]);
 
-  const addEntry = () => setEntries((prev) => [...prev, newEntry()]);
+  const _addEntry = () => setEntries((prev) => [...prev, newEntry()]);
 
-  const updateEntry = (id, updated) =>
+  const _updateEntry = (id, updated) =>
     setEntries((prev) => prev.map((e) => (e.id === id ? updated : e)));
 
-  const removeEntry = (id) =>
+  const _removeEntry = (id) =>
     setEntries((prev) => prev.filter((e) => e.id !== id));
 
   // Recurring-aware update: when recurring ON, propagate time_windows to all same-weekday entries
@@ -836,7 +836,7 @@ const CreateAvailabilityModal = ({ onClose, onCreated }) => {
                 if (!entry) return null;
                 const slotCount = calcEntrySlots(entry);
 
-                const dow = new Date(entry.date + "T00:00:00").getDay();
+                const _dow = new Date(entry.date + "T00:00:00").getDay();
                 const dowName = new Date(entry.date + "T00:00:00").toLocaleDateString("en-US", { weekday: "long" });
 
                 const addWindow = () =>
@@ -1157,7 +1157,7 @@ const EditSlotModal = ({ slot, onClose, onSaved }) => {
 // ── Slot card ─────────────────────────────────────────────────────────────────
 
 const SlotCard = ({ slot, onDelete, onEdit, deletingId }) => {
-  const { timezoneAbbr } = useDateFormatters();
+  const { timezoneAbbr: _timezoneAbbr } = useDateFormatters();
   const isBooked = slot.status === "booked";
   const isDeleting = deletingId === slot.id;
 

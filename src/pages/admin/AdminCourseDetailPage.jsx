@@ -8,7 +8,6 @@ import {
   deleteCourse,
   fetchUsers,
 } from "../../store/slices/adminSlice";
-import { fetchCourses } from "../../store/slices/adminSlice";
 import { toastManager } from "../../utils/toastManager";
 import { formatCategoryLabel } from "../../constants";
 import { getStorageUrl } from "../../utils/storageUrl";

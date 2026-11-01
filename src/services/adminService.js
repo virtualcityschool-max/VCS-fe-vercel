@@ -1,5 +1,4 @@
 import { axiosInstance } from "../utils";
-import { handleApiError } from "../utils/errorHandler";
 
 // Base admin service configuration
 const ADMIN_ENDPOINTS = {
@@ -46,34 +45,28 @@ const ADMIN_ENDPOINTS = {
 // User Management endpoints
 export const adminService = {
   getUsers: async (params = {}) => {
-    try {
+    {
       const response = await axiosInstance.get(ADMIN_ENDPOINTS.USERS, {
         params,
       });
       return response.data;
-    } catch (error) {
-      throw error;
     }
   },
   getTeacherPrivateSlots: async (teacherId, params = {}) => {
-    try {
+    {
       const response = await axiosInstance.get(
         ADMIN_ENDPOINTS.PRIVATE_TEACHER_SLOTS(teacherId),
         { params },
       );
       return response.data;
-    } catch (error) {
-      throw error;
     }
   },
   getUserById: async (userId) => {
-    try {
+    {
       const response = await axiosInstance.get(
         ADMIN_ENDPOINTS.USER_DETAIL(userId),
       );
       return response.data;
-    } catch (error) {
-      throw error;
     }
   },
 
@@ -94,7 +87,7 @@ export const adminService = {
   },
 
   updateUserAvatar: async (userId, file) => {
-    try {
+    {
       const fd = new FormData();
       fd.append("avatar", file);
       const response = await axiosInstance.patch(
@@ -102,8 +95,6 @@ export const adminService = {
         fd,
       );
       return response.data;
-    } catch (error) {
-      throw error
     }
   },
 
@@ -150,72 +141,60 @@ export const adminService = {
   },
 
   deleteUser: async (userId) => {
-    try {
+    {
       const response = await axiosInstance.delete(
         ADMIN_ENDPOINTS.USER_DELETE(userId),
       );
       return response.data;
-    } catch (error) {
-      throw error
     }
   },
 
   purgeUser: async (userId) => {
-    try {
+    {
       const response = await axiosInstance.delete(
         ADMIN_ENDPOINTS.USER_DELETE(userId),
         { params: { permanent: true } },
       );
       return response.data;
-    } catch (error) {
-        throw error    
     }
   },
 
   // User Profile Management
   getUserProfile: async (userId) => {
-    try {
+    {
       const response = await axiosInstance.get(
         ADMIN_ENDPOINTS.USER_PROFILE(userId),
       );
       return response.data;
-    } catch (error) {
-     throw error
     }
   },
 
   updateUserProfile: async (userId, profileData) => {
-    try {
+    {
       const response = await axiosInstance.patch(
         ADMIN_ENDPOINTS.USER_PROFILE(userId),
         profileData,
       );
       return response.data;
-    } catch (error) {
-      throw error
     }
   },
 
   getDashboardAnalytics: async () => {
-    try {
+    {
       const response = await axiosInstance.get(ADMIN_ENDPOINTS.ADMIN_DASHBOARD);
       return response.data;
-    } catch (error) {
-      throw error
     }
   },
 
   getAdminSessionsDashboard: async () => {
-    try {
+    {
       const response = await axiosInstance.get(ADMIN_ENDPOINTS.ADMIN_SESSIONS_DASHBOARD);
       return response.data;
-    } catch (error) {
-      throw error
     }
   },
   
   getEnrollmentAnalytics: async (params = {}) => {
-    try {
+    {
       const response = await axiosInstance.get(
         ADMIN_ENDPOINTS.ALL_ENROLLMENTS,
         {
@@ -332,8 +311,6 @@ export const adminService = {
       };
 
       return result;
-    } catch (error) {
-      throw error
     }
   },
 
@@ -349,30 +326,26 @@ export const adminService = {
   },
 
   deleteCourse: async (courseId) => {
-    try {
+    {
       const response = await axiosInstance.delete(`/courses/${courseId}/`);
       return response.data;
-    } catch (error) {
-      throw error
     }
   },
 
   // Enrollment Management
   createEnrollment: async (enrollmentData) => {
-    try {
+    {
       const response = await axiosInstance.post(
         ADMIN_ENDPOINTS.ADMIN_ENROLL,
         enrollmentData,
       );
       return response.data;
-    } catch (error) {
-      throw error
     }
   },
 
   // Unenroll student from course (Admin only)
   unenrollStudent: async (courseId, studentId) => {
-    try {
+    {
       const response = await axiosInstance.delete(
         `/courses/${courseId}/unenroll/`,
         {
@@ -382,50 +355,42 @@ export const adminService = {
         },
       );
       return response.data;
-    } catch (error) {
-      throw error
     }
   },
 
   // Child Link Requests
   getPendingChildLinks: async () => {
-    try {
+    {
       const response = await axiosInstance.get(
         ADMIN_ENDPOINTS.CHILD_LINKS_PENDING,
       );
       return response.data;
-    } catch (error) {
-      throw error
     }
   },
 
   approveChildLink: async (linkId) => {
-    try {
+    {
       const response = await axiosInstance.patch(
         ADMIN_ENDPOINTS.CHILD_LINK_ACTION(linkId),
         { action: "approve" },
       );
       return response.data;
-    } catch (error) {
-      throw error
     }
   },
 
   rejectChildLink: async (linkId) => {
-    try {
+    {
       const response = await axiosInstance.patch(
         ADMIN_ENDPOINTS.CHILD_LINK_ACTION(linkId),
         { action: "reject" },
       );
       return response.data;
-    } catch (error) {
-      throw error
     }
   },
 
   unlinkChildrenAdmin: async (parentId, studentIds) => {
     console.log("firstparentId", parentId);
-    try {
+    {
       const response = await axiosInstance.delete("/child-links/unlink/", {
         data: {
           parent_id: parentId,
@@ -433,69 +398,55 @@ export const adminService = {
         },
       });
       return response.data;
-    } catch (error) {
-      throw error
     }
   },
 
   getAvailableStudents: async () => {
-    try {
+    {
       const response = await axiosInstance.get("/admin/students/available/");
       return response.data;
-    } catch (error) {
-      throw error
     }
   },
 
   linkChildrenAdmin: async (parentId, studentIds) => {
     console.log("first parent Id: ", parentId);
-    try {
+    {
       const response = await axiosInstance.post("/auth/me/link-child/", {
         student_ids: studentIds,
         parent_id: parentId,
       });
       return response.data;
-    } catch (error) {
-      throw error
     }
   },
 
   getPendingEnrollments: async () => {
-    try {
+    {
       const response = await axiosInstance.get(ADMIN_ENDPOINTS.PENDING_ENROLLMENTS);
       return response.data;
-    } catch (error) {
-      throw error
     }
   },
 
   actionEnrollment: async (enrollmentId, action) => {
-    try {
+    {
       const response = await axiosInstance.patch(
         ADMIN_ENDPOINTS.ENROLLMENT_ACTION(enrollmentId),
         { action },
       );
       return response.data;
-    } catch (error) {
-      throw error
     }
   },
 
   getTeacherSlots: async (teacherId) => {
-    try {
+    {
       const response = await axiosInstance.get(ADMIN_ENDPOINTS.ADMIN_TEACHER_SLOTS(teacherId));
       return response.data;
-    } catch (error) {
-      throw error
     }
   },
 
   adminDeleteSlot: async (slotId) => {
-    try {
+    {
       const response = await axiosInstance.delete(ADMIN_ENDPOINTS.ADMIN_DELETE_SLOT(slotId));
       return response.data;
-    } catch (error) {
-      throw error
     }
   },
 

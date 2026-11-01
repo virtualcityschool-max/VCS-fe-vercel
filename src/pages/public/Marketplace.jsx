@@ -13,13 +13,11 @@ import { Button, Input, FilterSelect, SearchInput } from "../../components/ui";
 import { toastManager } from "../../utils/toastManager";
 import { formatCategoryLabel } from "../../constants";
 import { useSubmissionGuard } from "../../utils/requestDeduplicator";
-import { getCourseImage } from "../../utils/courseImageUtils";
 import { setAuthModal, setEnrollmentIntent } from "../../store/slices/uiSlice";
 import EnrollmentTypeModal from "../../components/courses/EnrollmentTypeModal";
 import ConfirmDialog from "../../components/common/ConfirmDialog";
 import { showApiError } from "../../utils/apiErrorHandler";
 import { getDisplayName } from "../../utils/userDisplay";
-import { getStorageUrl } from "../../utils/storageUrl";
 import AuthRequiredModal from "../../components/common/AuthRequiredModal";
 import ApplyFreeAccessModal from "../../components/public/ApplyFreeAccessModal";
 import PublicCourseCard from "../../components/courses/PublicCourseCard";
@@ -114,7 +112,7 @@ const Marketplace = () => {
     instructor: "",
   });
   const [enrollmentModalOpen, setEnrollmentModalOpen] = useState(false);
-  const [paymentSubmitted, setPaymentSubmitted] = useState(false);
+  const [_paymentSubmitted, setPaymentSubmitted] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [freeAccessOpen, setFreeAccessOpen] = useState(false);
   const [freeAccessPreselect, setFreeAccessPreselect] = useState([]);
@@ -135,7 +133,7 @@ const Marketplace = () => {
   const auth = useSelector((state) => state.auth);
 
   // Get courses data from Redux store
-  const { courses, isLoading, error, categories } = useSelector((state) => state.courses);
+  const { courses, isLoading, error: _error, categories } = useSelector((state) => state.courses);
 
   // Get student dashboard state for enrollment tracking
   const { enrollingCourseIds, unenrollingCourseIds, withdrawingCourseIds, enrolledCourses } =
@@ -314,7 +312,7 @@ const Marketplace = () => {
     if (type !== "normal" || !selectedCourse) return;
 
     const courseId = selectedCourse.id;
-    const courseTitle = selectedCourse.title;
+    const _courseTitle = selectedCourse.title;
 
     await submissionGuard.guard(async () => {
       try {
@@ -337,7 +335,7 @@ const Marketplace = () => {
   };
 
   // Handle private enrollment after a slot is selected in the modal
-  const callPrivateEnrollmentCall = async (slot) => {
+  const _callPrivateEnrollmentCall = async (slot) => {
     if (!slot || !selectedCourse) return;
 
     const courseId = selectedCourse.id;

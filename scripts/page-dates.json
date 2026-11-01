@@ -8,7 +8,7 @@
     "date": "2026-06-15"
   },
   "/terms": {
-    "hash": "ab2fad34c88d1cb6",
+    "hash": "c080fb648ee8b7e3",
     "date": "2026-05-14"
   },
   "/mind-lab": {
@@ -72,11 +72,11 @@
     "date": "2026-10-31"
   },
   "/teachers/:id": {
-    "hash": "83ac169d455cad63",
+    "hash": "be70f002c12630b1",
     "date": "2026-10-20"
   },
   "/courses/:id": {
-    "hash": "d0db97813465a787",
+    "hash": "0fcb83fbc09ecb95",
     "date": "2026-10-20"
   },
   "/subjects/mathematics-4024": {

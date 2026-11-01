@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import ReactDOM from "react-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { selectPlatformSettings } from "../../store/slices/platformSettingsSlice";
@@ -310,7 +310,7 @@ const quizToQuestions = (quiz) =>
 const TeacherQuizzes = ({ 
   externalFilters, 
   onFiltersChange, 
-  hideHeader = false,
+  hideHeader: _hideHeader = false,
   controlsContainerId 
 }) => {
   const dispatch = useDispatch();
@@ -525,7 +525,8 @@ const TeacherQuizzes = ({
       
       setGradingSubId(null);
     } catch (e) {
-      
+      // Previously swallowed: the teacher saw nothing when marks failed to save.
+      toastManager.error(typeof e === "string" ? e : e?.message || "Marks could not be saved. Please try again.");
     } finally {
       if (submissionsQuiz) dispatch(fetchQuizSubmissions(submissionsQuiz.id));
       setSaving(false);

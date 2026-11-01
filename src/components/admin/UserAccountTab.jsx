@@ -68,7 +68,7 @@ const UserAccountTab = ({ user, onUpdate, onCancel, onSaved, onAvatarUpdated, re
     setErrors,
     clearFieldError,
     clearAllErrors,
-    handleApiError,
+    handleApiError: _handleApiError,
     getFieldError,
   } = useFieldErrors({});
 

@@ -87,7 +87,7 @@ const CourseForm = ({ formData = {}, onChange, errors = {}, users = [], categori
   const existingUrl = formData.attachment_url;
   const selectedFile = formData.attachment instanceof File ? formData.attachment : null;
   const existingThumbnail = formData.thumbnail_url;
-  const selectedThumbnail = formData.thumbnail instanceof File ? formData.thumbnail : null;
+  const _selectedThumbnail = formData.thumbnail instanceof File ? formData.thumbnail : null;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">

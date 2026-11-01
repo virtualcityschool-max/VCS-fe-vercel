@@ -11,7 +11,7 @@ import { toastManager } from "../../../utils/toastManager";
 const FinancialStatusSidebar = ({
   onRequestTranscript,
   onApplyFreeAccess,
-  onOpenReferral,
+  onOpenReferral: _onOpenReferral,
   onOpenTimezone,
 }) => {
   const navigate = useNavigate();

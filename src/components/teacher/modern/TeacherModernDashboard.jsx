@@ -54,7 +54,7 @@ export const TeacherDashboard = ({
   timezone,
   onCycleTimezone,
   onOpenAnnouncementModal,
-  onOpenNewSessionModal,
+  onOpenNewSessionModal: _onOpenNewSessionModal,
   onOpenGradeModal,
   onOpenCreateAssignmentModal,
   onOpenAdvancedQuizBuilderModal,
@@ -68,7 +68,7 @@ export const TeacherDashboard = ({
   onLeaveAdminSession,
   referralCode,
 }) => {
-  const [sessionCategory, setSessionCategory] = useState("classes");
+  const [_sessionCategory, _setSessionCategory] = useState("classes");
   const [isTroubleshootOpen, setIsTroubleshootOpen] = useState(false);
   const [taskFilter, setTaskFilter] = useState("all");
   const [quizFilter, setQuizFilter] = useState("all");
@@ -90,7 +90,7 @@ export const TeacherDashboard = ({
   };
   const liveClasses = sessions.filter((s) => s.category !== "admin_session" && s.category !== "reserved_slots");
   const adminMeetings = sessions.filter((s) => s.category === "admin_session");
-  const filteredSessions = liveClasses;
+  const _filteredSessions = liveClasses;
   const filteredTasks = tasks.filter((t) => {
     if (taskFilter === "all") return true;
     return t.status === taskFilter;

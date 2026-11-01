@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useRef, useEffect } from "react";
+import React, { useMemo, useState, useRef } from "react";
 import { createPortal } from "react-dom";
 import { Button, FilterSelect, Input, TimezoneTag } from "../../components/ui";
 import SessionCalendarView from "../common/SessionCalendarView";
@@ -108,8 +108,8 @@ const SessionsTab = ({
   onSessionEdit,
   activeModal,
   setActiveModal,
-  showSessionFilters,
-  setShowSessionFilters,
+  showSessionFilters: _showSessionFilters,
+  setShowSessionFilters: _setShowSessionFilters,
   sessionFilters,
   setSessionFilters,
   createMode = "scheduled",
@@ -119,9 +119,9 @@ const SessionsTab = ({
   delayMins = 30,
   setDelayMins,
 }) => {
-  const { formatDate, formatTime, timezoneAbbr } = useDateFormatters();
+  const { formatDate, formatTime, timezoneAbbr: _timezoneAbbr } = useDateFormatters();
   const [view, setView] = useState("table");
-  const [calendarMonth, setCalendarMonth] = useState(null); // { year, month } - null = auto from data
+  const [calendarMonth, _setCalendarMonth] = useState(null); // { year, month } - null = auto from data
   const [copiedSessionId, setCopiedSessionId] = useState(null);
 
   // ── filtered sessions (search only; teacher filtering is done server-side) ──
@@ -195,7 +195,7 @@ const SessionsTab = ({
   const activeMonthData = monthRange[activeMonthIdx] || null;
 
   // build a dateKey → sessions[] map for quick lookup
-  const sessionsByDate = useMemo(() => {
+  const _sessionsByDate = useMemo(() => {
     const map = {};
     filteredSessions.forEach((session) => {
       if (!session.scheduled_at) return;
@@ -208,7 +208,7 @@ const SessionsTab = ({
   }, [filteredSessions]);
 
   // build calendar grid for the active month
-  const calendarGrid = useMemo(() => {
+  const _calendarGrid = useMemo(() => {
     if (!activeMonthData) return [];
     const { year, month } = activeMonthData;
     const firstDay = new Date(year, month, 1).getDay(); // 0=Sun
@@ -219,7 +219,7 @@ const SessionsTab = ({
     return cells;
   }, [activeMonthData]);
 
-  const hasActiveSessionFilters = useMemo(
+  const _hasActiveSessionFilters = useMemo(
     () => !!sessionFilters.search,
     [sessionFilters.search],
   );
@@ -282,7 +282,7 @@ const SessionsTab = ({
   };
 
   // today key for highlighting
-  const todayKey = (() => {
+  const _todayKey = (() => {
     const t = new Date();
     return `${t.getFullYear()}-${t.getMonth()}-${t.getDate()}`;
   })();

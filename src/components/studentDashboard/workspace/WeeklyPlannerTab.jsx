@@ -89,7 +89,7 @@ const WeeklyPlannerTab = ({ onOpenLiveSchedule }) => {
           weekday: "long",
           timeZone: timezone || undefined,
         }).format(dateObj);
-      } catch (e) {
+      } catch (_e) {
         dayName = DAY_NAMES[dateObj.getDay()] || "Sunday";
       }
 

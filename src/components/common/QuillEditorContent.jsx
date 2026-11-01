@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import Quill from "quill";
 import "quill/dist/quill.snow.css";
+import { safeRichHtml } from "../../utils/safeHtml";
 
 const TOOLBAR = [
   [{ header: [2, 3, false] }],
@@ -52,7 +53,7 @@ const QuillEditor = ({ value = "", onChange, placeholder = "Write something..." 
       },
     });
 
-    quill.root.innerHTML = value || "";
+    quill.root.innerHTML = safeRichHtml(value);
 
     quill.on("text-change", () => {
       const html = quill.root.innerHTML;
@@ -68,7 +69,7 @@ const QuillEditor = ({ value = "", onChange, placeholder = "Write something..." 
     const current = quillRef.current.root.innerHTML;
     const normalized = current === "<p><br></p>" ? "" : current;
     if ((value || "") !== normalized) {
-      quillRef.current.root.innerHTML = value || "";
+      quillRef.current.root.innerHTML = safeRichHtml(value);
     }
   }, [value]);
 

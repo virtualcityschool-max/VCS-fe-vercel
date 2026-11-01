@@ -288,7 +288,7 @@ const TeacherSessionCalendar = () => {
   const recordStart = (s) => {
     dispatch(startLiveSession(s.id));
   };
-  const { formatDate, formatTime, timezoneAbbr, toPayloadISO, toDatetimeInput } = useDateFormatters();
+  const { formatDate, formatTime, timezoneAbbr: _timezoneAbbr, toPayloadISO, toDatetimeInput } = useDateFormatters();
 
   const {
     sessions,

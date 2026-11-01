@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import {
   selectNextSession,
   joinLiveSession,
-  fetchStudentDashboard,
+  
 } from "../../store/slices/studentDashboardSlice";
 import { toastManager } from "../../utils/toastManager";
 import { extractApiErrorMessage } from "../../utils/apiErrorHandler";
@@ -47,7 +47,7 @@ const NextSessionCard = () => {
           new URL(meetingLink);
           if (meetWin) meetWin.location.href = meetingLink;
           else window.open(meetingLink, "_blank", "noopener,noreferrer");
-        } catch (urlError) {
+        } catch (_urlError) {
           meetWin?.close();
           toastManager.error("Invalid meeting link format");
         }

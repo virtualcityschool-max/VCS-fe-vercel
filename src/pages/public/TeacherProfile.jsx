@@ -2,7 +2,6 @@ import { useParams, Link, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { fetchTeacherById } from "../../store/slices/teacherSlice";
-import { setAuthModal } from "../../store/slices/uiSlice";
 import BreadcrumbNavigation from "../../components/ui/BreadcrumbNavigation";
 import BackButton from "../../components/ui/BackButton";
 import { availabilityService } from "../../services/availabilityService";

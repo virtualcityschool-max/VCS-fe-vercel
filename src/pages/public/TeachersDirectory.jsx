@@ -2,7 +2,6 @@ import { useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchTeachers } from "../../store/slices/teacherSlice";
-import { setAuthModal } from "../../store/slices/uiSlice";
 import { SearchInput } from "../../components/ui";
 import { useAuth } from "../../hooks/useAuth";
 import HireTutorModal from "../../components/public/HireTutorModal";
@@ -14,7 +13,7 @@ import { SUBJECT_THEMES, SUBJECT_CATEGORY_LIST, getTeacherCategory } from "../..
 const HIRE_INTENT_KEY = "vcs_hire_intent";
 
 const TeachersDirectory = () => {
-  const [hasFetched, setHasFetched] = useState(false);
+  const [_hasFetched, setHasFetched] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
   const [hireModal, setHireModal] = useState(null);

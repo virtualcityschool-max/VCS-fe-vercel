@@ -11,8 +11,8 @@ const ChildLinkRequest = ({ onSuccess }) => {
   const dispatch = useDispatch();
   const [input, setInput] = useState("");
   const [entries, setEntries] = useState([]); // { type: "roll_no"|"email", value: string }
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [successData, setSuccessData] = useState(null);
+  const [_showSuccess, setShowSuccess] = useState(false);
+  const [_successData, setSuccessData] = useState(null);
   const [tooltipVisible, setTooltipVisible] = useState(false);
   const tooltipRef = useRef(null);
 

@@ -31,7 +31,7 @@ const TeacherProfileTab = ({ profile, onUpdate, onCancel, onSaved, readOnly = fa
 
   const [isSaving, setIsSaving] = useState(false);
 
-  const { errors, setErrors, clearFieldError, clearAllErrors, handleApiError, getFieldError } =
+  const { errors, setErrors, clearFieldError, clearAllErrors, handleApiError: _handleApiError, getFieldError } =
     useFieldErrors({});
 
   useEffect(() => {

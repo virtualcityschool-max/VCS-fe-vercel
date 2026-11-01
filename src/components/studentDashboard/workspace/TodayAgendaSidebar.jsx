@@ -49,7 +49,7 @@ const TodayAgendaSidebar = ({
   const todayStr = dayKey(currentTime);
 
   // Merge sessions from /classroom/sessions/ and live_schedule
-  const { todaySessions, upcomingPlannedSessions, allActiveSessions } = useMemo(() => {
+  const { todaySessions, upcomingPlannedSessions: _upcomingPlannedSessions, allActiveSessions } = useMemo(() => {
     const map = new Map();
     (allSessions || []).forEach((s) => {
       const id = s.id || s.session_id;

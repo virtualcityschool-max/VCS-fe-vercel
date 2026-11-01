@@ -135,7 +135,7 @@ const LiveScheduleTab = ({ onOpenWeeklyPlanner }) => {
           day: "2-digit",
         }).format(new Date(s.scheduled_at));
         return todayStr === sessionDateStr && !isSessionOver(s);
-      } catch (e) {
+      } catch (_e) {
         const date = new Date(s.scheduled_at);
         const today = new Date();
         return (

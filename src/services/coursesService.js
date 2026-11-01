@@ -18,11 +18,9 @@ export const coursesService = {
 
   // Get all courses for enrollment dropdown
   getCoursesWithSessions: async () => {
-    try {
+    {
       const response = await axiosInstance.get(`/courses/`);
       return response.data;
-    } catch (error) {
-      throw error;
     }
   },
 
@@ -119,81 +117,65 @@ export const coursesService = {
 
   // ── Course Categories ──────────────────────────────────────────
   getCategories: async () => {
-    try {
+    {
       const response = await axiosInstance.get("/courses/categories/");
       return response.data;
-    } catch (error) {
-      throw error;
     }
   },
 
   // send full desired list; backend creates/updates/deletes to match
   syncCategories: async (list) => {
-    try {
+    {
       const response = await axiosInstance.post("/courses/categories/sync/", list);
       return response.data;
-    } catch (error) {
-      throw error;
     }
   },
 
   // Get grading scale (public, no auth)
   getGradingScale: async () => {
-    try {
+    {
       const response = await axiosInstance.get("/courses/grading-scale/");
       return response.data;
-    } catch (error) {
-      throw error;
     }
   },
 
   // Update grading scale (admin only, send only changed fields)
   updateGradingScale: async (data) => {
-    try {
+    {
       const response = await axiosInstance.patch("/courses/grading-scale/", data);
       return response.data;
-    } catch (error) {
-      throw error;
     }
   },
 
   // Get evaluations (teacher/admin)
   getEvaluations: async (params = {}) => {
-    try {
+    {
       const response = await axiosInstance.get("/courses/evaluations/", { params });
       return response.data;
-    } catch (error) {
-      throw error;
     }
   },
 
   // Get evaluations for the current user (student sees own; parent sees linked children)
   getMyEvaluations: async (params = {}) => {
-    try {
+    {
       const response = await axiosInstance.get("/courses/my-evaluation/", { params });
       return response.data;
-    } catch (error) {
-      throw error;
     }
   },
 
   // Get privately enrolled students for a course
   getPrivateStudents: async (courseId) => {
-    try {
+    {
       const response = await axiosInstance.get(`/courses/${courseId}/private-students/`);
       return response.data;
-    } catch (error) {
-      throw error;
     }
   },
 
   // Get enrolled students for a specific course
   getCourseEnrollments: async (courseId) => {
-    try {
+    {
       const response = await axiosInstance.get(`/courses/${courseId}/enrollments/`);
       return response.data;
-    } catch (error) {
-      throw error;
     }
   },
 

@@ -19,7 +19,6 @@ import GlobalReachSection from "../../components/public/GlobalReachSection"; imp
 import Reveal from "../../components/ui/Reveal";
 import { toastManager } from "../../utils/toastManager";
 import { showApiError } from "../../utils/apiErrorHandler";
-import { getStorageUrl } from "../../utils/storageUrl";
 import { catalogGuideFor } from "../../data/subjectGuides/catalog";
 import { useSeo } from "../../hooks/useSeo";
 
@@ -41,7 +40,7 @@ const PublicHome = () => {
   const auth = useSelector((state) => state.auth);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, _setSearchTerm] = useState("");
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [hireModal, setHireModal] = useState(null);
   const [freeAccessOpen, setFreeAccessOpen] = useState(false);
@@ -57,7 +56,7 @@ const PublicHome = () => {
 
   const { courses, isLoading: coursesLoading } = useSelector((state) => state.courses);
   const { enrolledCourses, enrollingCourseIds, withdrawingCourseIds, unenrollingCourseIds } = useSelector((state) => state.studentDashboard);
-  const { enrollmentIntent } = useSelector((state) => state.ui);
+  const { enrollmentIntent: _enrollmentIntent } = useSelector((state) => state.ui);
   const { teachers, loading: teachersLoading } = useSelector((state) => state.teachers);
   // Same reasoning as featuredCourses below: this homepage grid is only ever
   // a 4-tutor preview (full directory is one click away via "View All

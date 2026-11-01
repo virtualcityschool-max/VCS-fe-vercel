@@ -48,7 +48,7 @@ const StudentProfileTab = ({ profile, userId, rollNo, onUpdate, onCancel, onSave
     setErrors,
     clearFieldError,
     clearAllErrors,
-    handleApiError,
+    handleApiError: _handleApiError,
     getFieldError,
   } = useFieldErrors({});
 

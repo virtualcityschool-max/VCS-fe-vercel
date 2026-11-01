@@ -9,7 +9,7 @@ import { FilterSelect } from "../../components/ui";
 const TeacherEvaluationPage = () => {
   const [courses, setCourses]               = useState([]);
   const [selectedCourseId, setSelectedCourseId] = useState("");
-  const [tab, setTab]                       = useState("public");
+  const [tab, _setTab]                       = useState("public");
 
   const [publicStudents, setPublicStudents] = useState([]);
   const [gradingScale, setGradingScale]     = useState(null);

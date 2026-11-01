@@ -203,7 +203,6 @@ const AppInner = () => {
         <section className="relative z-[9999]">
           <React.Suspense fallback={null}><AuthModals /></React.Suspense>
           <CompleteProfileGate />
-          {/* <AIChat /> */}
           <ToastContainer
             position="top-right"
             autoClose={4000}

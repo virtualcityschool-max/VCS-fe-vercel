@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 const TermsAndConditions = () => {
   const [activeSection, setActiveSection] = useState("eligibility");
-  const navigate = useNavigate();
+  const _navigate = useNavigate();
 
   const sections = [
     { id: "eligibility", label: "User Eligibility", icon: "fas fa-user-check" },

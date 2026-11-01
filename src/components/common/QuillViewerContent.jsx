@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import Quill from "quill";
 import "quill/dist/quill.snow.css";
+import { safeRichHtml } from "../../utils/safeHtml";
 
 // The admin editor's toolbar only offers H2/H3 (see QuillEditor.jsx), but
 // older posts and pasted-in content can still carry a literal <h1> - which
@@ -23,13 +24,13 @@ const QuillViewer = ({ value = "" }) => {
       modules: { toolbar: false },
     });
 
-    quill.root.innerHTML = demoteH1s(value);
+    quill.root.innerHTML = safeRichHtml(demoteH1s(value));
     quillRef.current = quill;
   }, []);
 
   useEffect(() => {
     if (!quillRef.current) return;
-    quillRef.current.root.innerHTML = demoteH1s(value);
+    quillRef.current.root.innerHTML = safeRichHtml(demoteH1s(value));
   }, [value]);
 
   return <div className="ql-viewer-root" ref={containerRef} />;

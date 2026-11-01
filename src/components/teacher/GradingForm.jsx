@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-const GradingForm = ({ selectedSubmission, onSubmit, onCancel, assignmentMaxScore, extraRowContent }) => {
+const GradingForm = ({ selectedSubmission, onSubmit, onCancel, assignmentMaxScore, extraRowContent: _extraRowContent }) => {
   // Use the selectedSubmission.id as key to force component reset
   const [score, setScore] = useState(
     () => selectedSubmission?.grade?.score?.toString() || "",

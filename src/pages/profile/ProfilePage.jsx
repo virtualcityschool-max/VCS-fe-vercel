@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { fetchUserProfile, profileUpdated } from "../../store/slices/authSlice";
+import {  profileUpdated } from "../../store/slices/authSlice";
 import { fetchCategories } from "../../store/slices/coursesSlice";
 import { authService } from "../../services/authService";
 import { toastManager } from "../../utils/toastManager";

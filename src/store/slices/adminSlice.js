@@ -3,7 +3,6 @@ import { adminService } from "../../services/adminService";
 import { coursesService } from "../../services/coursesService";
 import { adminSessionService } from "../../services/adminSessionService";
 import { adminTeacherSessionService } from "../../services/adminTeacherSessionService";
-import { handleApiError } from "../../utils/errorHandler";
 import { axiosInstance } from "../../utils";
 
 // Initial state
@@ -791,7 +790,7 @@ const adminSlice = createSlice({
         state.enrollments.loading = false;
         state.enrollments.error = action.payload;
       })
-      .addCase(createEnrollment.pending, (state) => {
+      .addCase(createEnrollment.pending, (_state) => {
         // intentionally left blank - modal handles its own loading state
       })
       .addCase(createEnrollment.fulfilled, (state, action) => {

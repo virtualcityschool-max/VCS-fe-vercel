@@ -14,41 +14,35 @@ const PARENT_ENDPOINTS = {
 export const parentService = {
   // Get parent dashboard data
   getDashboard: async () => {
-    try {
+    {
       const response = await axiosInstance.get(PARENT_ENDPOINTS.DASHBOARD);
       return response.data;
-    } catch (error) {
-      throw error;
     }
   },
 
   // Get detailed information for a specific child
   getChildDetail: async (childId) => {
-    try {
+    {
       const response = await axiosInstance.get(PARENT_ENDPOINTS.PARENT_CHILD_DETAIL, {
         params: { child_id: childId },
       });
       return response.data;
-    } catch (error) {
-      throw error;
     }
   },
 
   // Get child grades
   getChildGrades: async (childId) => {
-    try {
+    {
       const response = await axiosInstance.get(PARENT_ENDPOINTS.CHILD_GRADES, {
         params: { child_id: childId },
       });
       return response.data;
-    } catch (error) {
-      throw error;
     }
   },
 
   // Get child attendance
   getChildAttendance: async (childId) => {
-    try {
+    {
       const response = await axiosInstance.get(
         PARENT_ENDPOINTS.CHILD_ATTENDANCE,
         {
@@ -56,40 +50,34 @@ export const parentService = {
         },
       );
       return response.data;
-    } catch (error) {
-      throw error;
     }
   },
 
   // Get child's enrolled courses
   getChildCourses: async (childId) => {
-    try {
+    {
       const response = await axiosInstance.get(PARENT_ENDPOINTS.CHILD_COURSES, {
         params: { student: childId },
       });
       return response.data?.results ?? response.data;
-    } catch (error) {
-      throw error;
     }
   },
 
   // Get filtered attendance records for a child (calendar view)
   getChildAttendanceRecords: async ({ childId, courseId, from, to }) => {
-    try {
+    {
       const params = { student: childId, participant_role: "student" };
       if (courseId) params.course = courseId;
       if (from) params.from = from;
       if (to) params.to = to;
       const response = await axiosInstance.get(PARENT_ENDPOINTS.ATTENDANCE, { params });
       return response.data?.results ?? response.data;
-    } catch (error) {
-      throw error;
     }
   },
 
   // Unlink children from parent
   unlinkChildren: async (studentIds) => {
-    try {
+    {
       const response = await axiosInstance.delete(
         PARENT_ENDPOINTS.UNLINK_CHILDREN,
         {
@@ -99,8 +87,6 @@ export const parentService = {
         },
       );
       return response.data;
-    } catch (error) {
-      throw error;
     }
   },
 };

@@ -471,7 +471,7 @@ const studentDashboardSlice = createSlice({
         state.isJoiningSession = false;
         state.error = null;
       })
-      .addCase(joinLiveSession.rejected, (state, action) => {
+      .addCase(joinLiveSession.rejected, (state, _action) => {
         state.isJoiningSession = false;
         // Don't set global error, let component handle it via toast
       })
@@ -483,7 +483,7 @@ const studentDashboardSlice = createSlice({
       .addCase(startStudentSession.fulfilled, (state) => {
         state.isJoiningSession = false;
       })
-      .addCase(startStudentSession.rejected, (state, action) => {
+      .addCase(startStudentSession.rejected, (state, _action) => {
         state.isJoiningSession = false;
         // Handled via toast in component
       })
@@ -495,7 +495,7 @@ const studentDashboardSlice = createSlice({
       .addCase(endStudentSession.fulfilled, (state) => {
         state.isJoiningSession = false;
       })
-      .addCase(endStudentSession.rejected, (state, action) => {
+      .addCase(endStudentSession.rejected, (state, _action) => {
         state.isJoiningSession = false;
         // Handled via toast in component
       })

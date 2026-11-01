@@ -49,19 +49,19 @@ const UserProfileDropdown = ({ dropUp = false, isCollapsed = false }) => {
     // const toastId = toastManager.loading("Signing out...");
 
     try {
-      const result = await dispatch(logoutUser()).unwrap();
+      const _result = await dispatch(logoutUser()).unwrap();
       // toastManager.dismiss(toastId);
 
       // Always navigate to home regardless of backend success
       navigate("/");
-    } catch (error) {
+    } catch (_error) {
       // Even if dispatch fails, try to navigate to home
       toastManager.error("Error signing out. Redirecting to home...");
       setTimeout(() => navigate("/"), 1000);
     }
   };
 
-  const handleDashboard = () => {
+  const _handleDashboard = () => {
     setIsDropdownOpen(false);
     if (auth.role === ROLES.STUDENT) navigate(ROUTES.PROTECTED.STUDENT);
     if (auth.role === ROLES.TEACHER) navigate(ROUTES.PROTECTED.TEACHER);

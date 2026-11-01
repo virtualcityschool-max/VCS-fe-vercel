@@ -96,7 +96,7 @@ const OverviewTab = ({
   recentActivity = [],
 }) => {
   const navigate = useNavigate();
-  const { formatDate } = useDateFormatters();
+  const { formatDate: _formatDate } = useDateFormatters();
   const { formatRelativeTime } = useDateFormat();
   const SessionsSection = (
     <div>
@@ -140,7 +140,7 @@ const OverviewTab = ({
               key={session.id}
               session={session}
               isLoading={actionLoadingIds.has(session.id)}
-              onStart={(s) => onStartSession?.(session)}
+              onStart={(_s) => onStartSession?.(session)}
               onJoin={(s) => handleJoinSession(s.id, s.meeting_link, s.scheduled_at || s.scheduled_at)}
               onEnd={(s) => onEndSession?.(s.id)}
               subtitle={

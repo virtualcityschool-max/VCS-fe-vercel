@@ -24,7 +24,7 @@ const CourseCard = ({ course, index = 0, mode, onClick, onNavigate, ctaLabel, on
 
   const thumbnail = getCourseImage(courseData, index);
 
-  const categoryName = typeof courseData.category === "object"
+  const _categoryName = typeof courseData.category === "object"
     ? courseData.category?.name
     : courseData.category;
 

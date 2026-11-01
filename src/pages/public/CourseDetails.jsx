@@ -119,7 +119,7 @@ const CourseDetails = () => {
   const [imageError, setImageError] = useState(false);
   const [enrollmentModalOpen, setEnrollmentModalOpen] = useState(false);
   const [freeAccessOpen, setFreeAccessOpen] = useState(false);
-  const [paymentSubmitted, setPaymentSubmitted] = useState(false);
+  const [_paymentSubmitted, setPaymentSubmitted] = useState(false);
   const [viewerUrl, setViewerUrl] = useState(null);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [unenrollConfirm, setUnenrollConfirm] = useState({ open: false });
@@ -474,7 +474,7 @@ const CourseDetails = () => {
       }
     });
   };
-  const callPrivateEnrollmentCall = async (slot) => {
+  const _callPrivateEnrollmentCall = async (slot) => {
     if (!slot || !normalizedCourse) return;
 
     const courseId = normalizedCourse.id;
@@ -751,7 +751,7 @@ const CourseDetails = () => {
   const isUnenrolling = unenrollingCourseIds.includes(normalizedCourse.id);
   const isPending = normalizedCourse.enrollment_status === "pending";
   const isRejected = normalizedCourse.enrollment_status === "rejected";
-  const noSessions = !normalizedCourse.has_session;
+  const _noSessions = !normalizedCourse.has_session;
 
   return (
     <section className="min-h-screen bg-[#0f172a] text-white font-inter relative overflow-hidden animate-fadeIn">

@@ -14,7 +14,7 @@ const todayKey = (() => {
   return `${t.getFullYear()}-${t.getMonth()}-${t.getDate()}`;
 })();
 
-const getStatusCls = (status) => {
+const _getStatusCls = (status) => {
   const m = {
     scheduled: "bg-blue-100 text-blue-700 border-blue-200",
     live:      "bg-emerald-100 text-emerald-700 border-emerald-200",
@@ -25,7 +25,7 @@ const getStatusCls = (status) => {
 };
 
 const SessionCalendarView = ({ sessions = [], loading = false }) => {
-  const { formatTime, timezoneAbbr } = useDateFormatters();
+  const { formatTime, timezoneAbbr: _timezoneAbbr } = useDateFormatters();
   const [calendarMonth, setCalendarMonth] = useState(null);
 
   // Parent sessions (is_child === false) drive the date range when present
