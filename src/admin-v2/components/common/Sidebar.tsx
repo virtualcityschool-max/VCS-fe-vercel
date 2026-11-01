@@ -10,7 +10,6 @@ import {
   HeartHandshake,
   ShieldCheck,
   BookOpen,
-  Layers,
   Calendar,
   Video,
   ClipboardCheck,
@@ -20,7 +19,6 @@ import {
   Share2,
   FileText,
   MessageSquare,
-  Globe,
   Sliders,
   Clock,
   ChevronLeft,
@@ -33,6 +31,7 @@ import {
   UserCheck, Radio, FileCheck, FileSignature } from 'lucide-react';
 import { NavigationId } from '../../types';
 import { staffTitle } from '../../data/staffRoles';
+import { SETTINGS_PAGES } from './SettingsTabs';
 
 interface NavGroup {
   label: string;
@@ -159,14 +158,12 @@ export const Sidebar: React.FC = () => {
         { id: 'blogs', label: 'Blogs', icon: FileText },
         { id: 'vlogs', label: 'Vlogs', icon: Video },
         { id: 'testimonials', label: 'Testimonials', icon: MessageSquare },
-        { id: 'about', label: 'About Us', icon: Globe },
       ],
     },
     {
       label: 'SETTINGS',
       items: [
         { id: 'admin-users', label: 'Staff & Roles', icon: ShieldCheck },
-        { id: 'levels', label: 'Levels', icon: Layers },
         { id: 'settings', label: 'Platform Settings', icon: Sliders },
       ],
     },
@@ -227,7 +224,7 @@ export const Sidebar: React.FC = () => {
         {/* Navigation: spacing follows the screen height so every link fits without scrolling; scrolls only on very short screens */}
         <div className="flex-1 min-h-0 overflow-y-auto px-3 py-1 flex flex-col gap-1 [@media(max-height:780px)]:gap-2">
           {navGroups
-            .map((g) => ({ ...g, items: g.items.filter((it) => !canView || canView(it.id)) }))
+            .map((g) => ({ ...g, items: g.items.filter((it) => !canView || (it.id === 'settings' ? SETTINGS_PAGES.some((t) => canView(t.id)) : canView(it.id))) }))
             .filter((g) => g.items.length > 0)
             .map((group, gIdx) => (
             // Each group takes a share of the free height in proportion to its links; each link is 22–34 px tall.
@@ -241,12 +238,12 @@ export const Sidebar: React.FC = () => {
               <div className="flex flex-1 flex-col">
                 {group.items.map((item) => {
                   const Icon = item.icon;
-                  const isActive = currentView === item.id;
+                  const isActive = currentView === item.id || (item.id === 'settings' && SETTINGS_PAGES.some((t) => t.id === currentView));
 
                   return (
                     <button
                       key={item.id}
-                      onClick={() => handleNavClick(item.id)}
+                      onClick={() => handleNavClick(item.id === 'settings' && canView ? ((SETTINGS_PAGES.find((t) => canView(t.id))?.id || 'settings') as NavigationId) : item.id)}
                       title={sidebarCollapsed ? item.label : undefined}
                       className={`relative flex items-center gap-3 w-full px-3 flex-1 min-h-[22px] max-h-[34px] rounded-lg text-xs font-medium transition-all group cursor-pointer outline-none focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
                         isActive

@@ -3,6 +3,7 @@ import { useApp } from '../context/AppContext';
 import { PageHeader } from '../components/common/PageHeader';
 import { Layers, Plus, Trash2, Edit3, Check, BookOpen } from 'lucide-react';
 import { AcademicLevel } from '../types';
+import { SettingsTabs } from '../components/common/SettingsTabs';
 
 export const LevelsView: React.FC = () => {
   const { levels, addLevel, removeLevel, subjects, students, addToast } = useApp();
@@ -19,6 +20,7 @@ export const LevelsView: React.FC = () => {
 
   return (
     <div className="space-y-6 w-full animate-in fade-in duration-150">
+      <SettingsTabs />
       <PageHeader
         title="Curriculum Levels"
         subtitle="Manage academic stages and certification tiers across Cambridge International and National tracks."

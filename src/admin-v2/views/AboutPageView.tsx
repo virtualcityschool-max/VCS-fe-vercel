@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { PageHeader } from '../components/common/PageHeader';
 import { Globe, Save, Eye, Check, ExternalLink, X } from 'lucide-react';
+import { SettingsTabs } from '../components/common/SettingsTabs';
 
 export const AboutPageView: React.FC = () => {
   const { aboutPage, updateAboutPage, addToast } = useApp();
@@ -17,6 +18,7 @@ export const AboutPageView: React.FC = () => {
 
   return (
     <div className="space-y-6 max-w-[1240px] mx-auto animate-in fade-in duration-150 pb-20">
+      <SettingsTabs />
       <PageHeader
         title="About Page Content CMS"
         subtitle="Manage the public school identity, vision statement, international mission, and contact information."

@@ -4,6 +4,7 @@ import { PageHeader } from '../components/common/PageHeader';
 import { ClassObserversCard } from '../components/common/ClassObserversCard';
 import { StorageUsageCard } from '../components/common/StorageUsageCard';
 import { Sliders, Clock, User, Save, Check } from 'lucide-react';
+import { SettingsTabs } from '../components/common/SettingsTabs';
 
 export const PlatformSettingsView: React.FC = () => {
   const { settings, updateSettings, setTimezone, tzIana, profile } = useApp() as any;
@@ -39,6 +40,7 @@ export const PlatformSettingsView: React.FC = () => {
 
   return (
     <div className="space-y-6 max-w-[1240px] mx-auto animate-in fade-in duration-150 pb-12">
+      <SettingsTabs />
       <PageHeader
         title="Platform Settings & Regional Timezone"
         subtitle="Configure system-wide academic automation rules, quiz parameters, and master timezone clock."
